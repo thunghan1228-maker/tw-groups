@@ -70,7 +70,9 @@ async function fetchQuotes(codes) {
       if (!code || !(code in quotes)) continue;
       const price = parseFloat(item.z);
       const prevClose = parseFloat(item.y);
-      const fallbackPrice = parseFloat(item.o) || parseFloat(item.h) || parseFloat(item.l);
+      // 開盤前 z/o/h/l 都還沒有值（TWSE 回傳 "-"）時，退回昨收價：讓開盤前畫面顯示
+      // 最近一個交易日的收盤價（漲跌 0%），而不是整檔空白「目前無資料」。
+      const fallbackPrice = parseFloat(item.o) || parseFloat(item.h) || parseFloat(item.l) || prevClose;
       const finalPrice = Number.isFinite(price) ? price : fallbackPrice;
       if (Number.isFinite(finalPrice) && Number.isFinite(prevClose) && prevClose > 0) {
         quotes[code] = {
