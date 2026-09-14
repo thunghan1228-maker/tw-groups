@@ -1456,7 +1456,7 @@ function mapLargeOrderSignal(s){
   return {
     tabs: ['now', 'groupBigOrder', isBuy ? 'bigBuy' : 'bigSell'],
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
-    code: s.ticker, name: s.name, group: s.groupName, label: s.label,
+    code: s.ticker, name: lookupStockName(s.ticker), group: s.groupName, label: s.label,
   };
 }
 
