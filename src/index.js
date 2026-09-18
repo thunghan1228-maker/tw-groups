@@ -221,6 +221,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .ms-badge.up{color:var(--up);}
   .ms-badge.down{color:var(--down);}
   .ms-lines{font-size:11px;color:var(--muted);line-height:1.6;}
+  .ms-line.up{color:var(--up);}
+  .ms-line.down{color:var(--down);}
   .ms-updated{color:var(--muted);opacity:.8;}
 
   /* 股票搜尋 */
@@ -1354,17 +1356,18 @@ function buildOtcStrengthDemo(){
   const otcPrice = Math.round((basePrice + jitter) * 100) / 100;
   const ma20 = Math.round((basePrice + (dayRnd() - 0.5) * 3) * 100) / 100;
   const barLow = Math.round((basePrice + (dayRnd() - 0.5) * 4) * 100) / 100;
-  const below20 = otcPrice < ma20;
-  const belowBar = otcPrice < barLow;
-  let label, cls;
-  if (below20 && belowBar){ label = '強空'; cls = 'down'; }
-  else if (!below20 && !belowBar){ label = '強多'; cls = 'up'; }
-  else if (below20){ label = '偏空'; cls = 'down'; }
-  else { label = '偏多'; cls = 'up'; }
+  const aboveMa20 = otcPrice > ma20;
+  const aboveRefLow = otcPrice > barLow;
+  let label, badgeCls;
+  if (aboveMa20 && aboveRefLow){ label = '強多'; badgeCls = 'up'; }
+  else if (!aboveMa20 && !aboveRefLow){ label = '強空'; badgeCls = 'down'; }
+  else { label = '個股震盪'; badgeCls = ''; }
   return {
-    label, cls,
-    line1: (below20 ? '↓' : '↑') + ' 5K 20MA　即時 ' + otcPrice.toFixed(2) + '，在20MA ' + ma20.toFixed(2) + ' 之' + (below20 ? '下' : '上'),
-    line2: (belowBar ? '↓' : '↑') + ' 第三根5K　即時 ' + otcPrice.toFixed(2) + '，在第3根' + (belowBar ? '低點' : '高點') + ' ' + barLow.toFixed(2) + ' 之' + (belowBar ? '下' : '上'),
+    label, badgeCls,
+    line1: (aboveMa20 ? '↑' : '↓') + ' 5K 20MA　即時 ' + otcPrice.toFixed(2) + '，在20MA ' + ma20.toFixed(2) + ' 之' + (aboveMa20 ? '上' : '下'),
+    line1Cls: aboveMa20 ? 'up' : 'down',
+    line2: (aboveRefLow ? '↑' : '↓') + ' 第三根5K低點　即時 ' + otcPrice.toFixed(2) + '，在第3根低點 ' + barLow.toFixed(2) + ' 之' + (aboveRefLow ? '上' : '下'),
+    line2Cls: aboveRefLow ? 'up' : 'down',
   };
 }
 async function renderOtcStrengthWidget(){
@@ -1382,20 +1385,19 @@ async function renderOtcStrengthWidget(){
         '<div class="ms-updated">開盤後約1小時40分（20根5分K）才會有第一個訊號，不是示範資料。</div></div>';
       return;
     }
-    const cls = data.belowMa20 ? 'down' : 'up';
-    const refText = data.refState === 'inside'
-      ? '，在第3根區間內'
-      : ('，在第3根' + (data.refState === 'below' ? '低點' : '高點') + ' ' + data.refValue.toFixed(2) + ' 之' + (data.refState === 'below' ? '下' : '上'));
+    const badgeCls = data.label === '強多' ? 'up' : data.label === '強空' ? 'down' : '';
+    const line1Cls = data.aboveMa20 ? 'up' : 'down';
+    const line2Cls = data.aboveRefLow ? 'up' : 'down';
     el.innerHTML =
-      '<div class="ms-badge ' + cls + '">' + data.label + '</div>' +
-      '<div class="ms-lines"><div>' + (data.belowMa20 ? '↓' : '↑') + ' 5K 20MA　即時 ' + data.price.toFixed(2) + '，在20MA ' + data.ma20.toFixed(2) + ' 之' + (data.belowMa20 ? '下' : '上') + '</div>' +
-      '<div>' + (data.refState === 'below' ? '↓' : data.refState === 'above' ? '↑' : '－') + ' 第三根5K　即時 ' + data.price.toFixed(2) + refText + '</div>' +
+      '<div class="ms-badge' + (badgeCls ? ' ' + badgeCls : '') + '">' + data.label + '</div>' +
+      '<div class="ms-lines"><div class="ms-line ' + line1Cls + '">' + (data.aboveMa20 ? '↑' : '↓') + ' 5K 20MA　即時 ' + data.price.toFixed(2) + '，在20MA ' + data.ma20.toFixed(2) + ' 之' + (data.aboveMa20 ? '上' : '下') + '</div>' +
+      '<div class="ms-line ' + line2Cls + '">' + (data.aboveRefLow ? '↑' : '↓') + ' 第三根5K低點　即時 ' + data.price.toFixed(2) + '，在第3根低點 ' + data.refLow.toFixed(2) + ' 之' + (data.aboveRefLow ? '上' : '下') + '</div>' +
       '<div class="ms-updated">最新更新 ' + new Date(data.updatedAt).toLocaleTimeString('zh-TW') + '</div></div>';
   } catch (e) {
     const s = buildOtcStrengthDemo();
     el.innerHTML =
-      '<div class="ms-badge ' + s.cls + '">' + s.label + '</div>' +
-      '<div class="ms-lines"><div>' + s.line1 + '</div><div>' + s.line2 + '</div>' +
+      '<div class="ms-badge' + (s.badgeCls ? ' ' + s.badgeCls : '') + '">' + s.label + '</div>' +
+      '<div class="ms-lines"><div class="ms-line ' + s.line1Cls + '">' + s.line1 + '</div><div class="ms-line ' + s.line2Cls + '">' + s.line2 + '</div>' +
       '<div class="ms-updated">最新更新 ' + new Date().toLocaleTimeString('zh-TW') + '（示範資料，尚無真實回報）</div></div>';
   }
 }
