@@ -237,6 +237,7 @@
   .signal-modal-inner > *{zoom:1.3;}
   .signal-empty{padding:30px 10px;text-align:center;color:var(--muted);}
   .signal-note{padding:10px 12px;font-size:12px;color:var(--muted);background:var(--panel-2);border-bottom:1px solid var(--line);}
+  .signal-section-title{padding:10px 12px 6px;font-size:12px;font-weight:700;color:var(--muted);}
   .se-title{font-size:13px;font-weight:700;margin-bottom:6px;}
   .se-sub{font-size:11px;}
 
@@ -1584,7 +1585,6 @@ function mapLargeOrderSignal(s){
   return {
     tabs: isFourGate ? ['now', 'fourGate'] : ['now', 'groupBigOrder', isBuy ? 'bigBuy' : 'bigSell'],
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
-    ts: s.barTs,
     code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label, isBuy,
   };
 }
@@ -1713,12 +1713,17 @@ function rankingRowsHtml(rows){
 }
 function nowTabRowsHtml(events, rankingRows){
   if (!events.length && !rankingRows.length) return signalRowsHtml([]);
-  const items = [
-    ...events.map((ev) => ({ ts: ev.ts || 0, html: signalEventRowHtml(ev) })),
-    ...rankingRows.map((r) => ({ ts: r.lastTs || 0, html: rankingRowHtml(r) })),
-  ];
-  items.sort((a, b) => b.ts - a.ts);
-  return '<div class="signal-list">' + items.map((it) => it.html).join('') + '</div>';
+  // 兩種資料本質不同：events是有明確發生時刻的訊號（時間固定不變），
+  // rankingRows是持續累計的排行（時間欄位是資料更新到的時間，不是事件發生
+  // 時間，每次都會往前跳）。混在一起依時間排序，會讓排行榜（幾乎永遠是
+  // 「現在」）長期霸佔最前面，蓋掉真正的新訊號，看起來像「訊號都不更新」。
+  // 所以分成兩段各自呈現，不互相排序。
+  const eventsHtml = events.length ? '<div class="signal-list">' + events.map(signalEventRowHtml).join('') + '</div>' : '';
+  const rankingHtml = rankingRows.length
+    ? '<div class="signal-section-title">盤中大戶力累計排行（時間為資料更新時間，非個別訊號發生時間）</div>' +
+      '<div class="signal-list">' + rankingRows.map(rankingRowHtml).join('') + '</div>'
+    : '';
+  return eventsHtml + rankingHtml;
 }
 
 function renderSignalCenter(){
