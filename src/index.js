@@ -201,6 +201,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chart-modal.fullscreen .chart-canvas-wrap.kd-wrap{height:130px;}
   #klineCanvas,#volumeCanvas,#forceCanvas,#macdCanvas,#kdCanvas{display:block;width:100%;height:100%;touch-action:none;}
   .chart-tooltip{position:absolute;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text);pointer-events:none;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .chart-tooltip.has-signals{white-space:normal;max-width:300px;}
+  .chart-tooltip .ct-signal{margin-top:5px;padding-top:5px;border-top:1px solid var(--line);font-size:13px;line-height:1.5;}
+  .chart-tooltip .ct-signal b{font-size:15px;}
 
   .ind-panel-block{margin-top:10px;}
   .ind-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
@@ -649,6 +652,29 @@ let currentChart = {
   code: null, name: null, tf: 'daily', bars: null, force: null, macd: null, kd: null,
   maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, hoverIndex: null,
   viewStart: 0, viewCount: null, isRealBars: false, requestToken: 0,
+  klineSignalsByBarTs: null,
+};
+
+// 五分鐘K盤中訊號符號／顏色／白話解釋；規格來源見HANSTOCK策略定義備份文件。
+// side='bull'畫在K棒上方，side='bear'畫在下方；顏色比照文件原本的符號顏色。
+const KLINE_SIGNAL_INFO = {
+  crossUp905: { symbol: '【5】', color: '#ef4444', side: 'bull', desc: '站上5MA過905高：905收盤上漲且漲幅<6%，之後突破905高且收盤站上5MA，可重複觸發。' },
+  firstCross905High: { symbol: '⑨', color: '#ef4444', side: 'bull', desc: '首次過905高：當天第一次收盤突破早盤第一根K棒（905）高點，一天一次。' },
+  crossUpPrevHigh: { symbol: '㊇', color: '#ef4444', side: 'bull', desc: '站上昨日高：收盤突破前一交易日最高價，可重複觸發。' },
+  combo12Bull: { symbol: '1+2', color: '#ef4444', side: 'bull', desc: '1+2多：5分K收盤同時站上905高跟昨日高，一天一次。' },
+  crossUp20ma: { symbol: '⑳↑', color: '#ef4444', side: 'bull', desc: '站上20MA：股價由20MA下方重新站回上方，可重複觸發。' },
+  firstCrossUp20ma: { symbol: '⑳↑★', color: '#ef4444', side: 'bull', desc: '首次站上20MA：當日第一次站上20MA。' },
+  ma520Up: { symbol: '520↑', color: '#ef4444', side: 'bull', desc: '五二零上：收盤同時站上5MA與20MA，形成多方均線確認。' },
+  ma20turnUp: { symbol: '↑', color: '#dc2626', side: 'bull', desc: '20MA轉上彎：20MA方向由走平或下彎轉為上彎。' },
+  a8short: { symbol: 'Ⓐ', color: '#047857', side: 'bear', desc: 'A8空：10:30前第一次跌破早盤第一根K棒的中間價(A8)，盤勢開始轉弱，一天一次。' },
+  break905d: { symbol: 'Ⓓ', color: '#047857', side: 'bear', desc: '破905D：10:30前第一次跌破開盤第一根五分鐘K最低點，早盤結構遭破壞，一天一次。' },
+  watch12short: { symbol: '㊟', color: '#22c55e', side: 'bear', desc: '注意12空：股價第一次進入前高下方5檔內，等2根5分K仍未突破前高即成立。' },
+  short12: { symbol: '⑫', color: '#3b82f6', side: 'bear', desc: '12空：注意12空後離開區域，再次回到前高下方5檔內等2根K仍未突破，10:30前一天一次。' },
+  enhanced12short: { symbol: '⑫', color: '#c084fc', side: 'bear', desc: '加強12空：注意12空成立後，5分K收盤由20MA上方跌到下方，全天可重複觸發。' },
+  crossDown20ma: { symbol: '⑳↓', color: '#22c55e', side: 'bear', desc: '跌破20MA：股價由20MA上方跌到下方，可重複觸發。' },
+  firstCrossDown20ma: { symbol: '⑳↓★', color: '#22c55e', side: 'bear', desc: '首次跌破20MA：當日第一次跌破20MA。' },
+  ma520Down: { symbol: '520↓', color: '#22c55e', side: 'bear', desc: '五二零下：收盤同時跌到5MA與20MA下方，形成均線空方確認。' },
+  ma20turnDown: { symbol: '↓', color: '#22c55e', side: 'bear', desc: '20MA轉下彎：20MA方向由上彎或走平轉為下彎。' },
 };
 
 function setupCanvas(canvas, cssW, cssH){
@@ -771,6 +797,7 @@ function drawChart(){
   const ctx = setupCanvas(canvas, cssW, cssH);
 
   const allBars = currentChart.bars;
+  if (!allBars) return; // 圖表還沒開過時ResizeObserver可能提早觸發，這時還沒有bars資料
   const { start: vStart, count: vCount } = visibleRange(allBars.length);
   const bars = allBars.slice(vStart, vStart + vCount);
   const cfg = TF_CONFIG[currentChart.tf];
@@ -931,6 +958,35 @@ function drawChart(){
     ctx.font = '10px -apple-system, sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(tagPrice.toFixed(2), cssW - tagW / 2, ty + tagH / 2);
+    ctx.restore();
+  }
+
+  // 五分鐘K盤中訊號符號：多方疊在K棒上方、空方疊在下方；同一根K棒多個
+  // 訊號時往外堆疊，避免重疊。字體特意調大，避免符號太小看不清楚。
+  if (currentChart.tf === 'm5' && currentChart.klineSignalsByBarTs && currentChart.klineSignalsByBarTs.size){
+    ctx.save();
+    ctx.font = 'bold 14px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    bars.forEach((b, i) => {
+      const list = currentChart.klineSignalsByBarTs.get(b.ts);
+      if (!list || !list.length) return;
+      const x = xAt(i);
+      let bullOffset = 0, bearOffset = 0;
+      list.forEach((s) => {
+        const info = KLINE_SIGNAL_INFO[s.kind];
+        if (!info) return;
+        ctx.fillStyle = info.color;
+        if (info.side === 'bear'){
+          ctx.textBaseline = 'top';
+          ctx.fillText(info.symbol, x, yAt(b.low) + 4 + bearOffset);
+          bearOffset += 17;
+        } else {
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(info.symbol, x, yAt(b.high) - 4 - bullOffset);
+          bullOffset += 17;
+        }
+      });
+    });
     ctx.restore();
   }
 
@@ -1128,6 +1184,9 @@ function drawKdPanel(){
 
 function redrawAll(){
   if (document.getElementById('chartModal').hidden) return;
+  // 視窗剛顯示、還在等非同步bars資料回來時，ResizeObserver可能已經先觸發一次；
+  // 這時currentChart.bars還是null，所有draw*函式都還不能執行。
+  if (!currentChart.bars) return;
   drawChart();
   drawVolumePanel();
   drawForcePanel();
@@ -1166,9 +1225,18 @@ function updateChartTooltipAt(clientX){
   currentChart.hoverIndex = i;
   const b = bars[i];
   tooltip.hidden = false;
-  tooltip.style.left = Math.min(rect.width - 190, Math.max(0, x + 8)) + 'px';
+  const signalsHere = currentChart.klineSignalsByBarTs ? currentChart.klineSignalsByBarTs.get(b.ts) : null;
+  tooltip.classList.toggle('has-signals', !!(signalsHere && signalsHere.length));
+  tooltip.style.left = Math.min(rect.width - (signalsHere && signalsHere.length ? 310 : 190), Math.max(0, x + 8)) + 'px';
   tooltip.style.top = '8px';
-  tooltip.innerHTML = b.fullLabel + '　開' + b.open.toFixed(2) + ' 高' + b.high.toFixed(2) + ' 低' + b.low.toFixed(2) + ' 收' + b.close.toFixed(2) + ' 量' + b.volume;
+  let html = b.fullLabel + '　開' + b.open.toFixed(2) + ' 高' + b.high.toFixed(2) + ' 低' + b.low.toFixed(2) + ' 收' + b.close.toFixed(2) + ' 量' + b.volume;
+  if (signalsHere && signalsHere.length){
+    html += signalsHere.map((s) => {
+      const info = KLINE_SIGNAL_INFO[s.kind] || { symbol: '', color: '#c9a98c', desc: s.label };
+      return '<div class="ct-signal"><b style="color:' + info.color + '">' + info.symbol + ' ' + s.label + '</b><br>' + info.desc + '</div>';
+    }).join('');
+  }
+  tooltip.innerHTML = html;
   updateMaLegend(vStart + i);
   drawChart();
 }
@@ -1344,8 +1412,10 @@ async function switchTimeframe(tf){
 
   let bars = null;
   let isReal = false;
+  let klineSignalsByBarTs = null;
   if (tf === 'm5'){
     try { bars = await fetchRealBars5Range(currentChart.code); isReal = true; } catch (e) { bars = null; }
+    try { klineSignalsByBarTs = await fetchKlineSignalsByBarTs(currentChart.code); } catch (e) { klineSignalsByBarTs = null; }
   } else if (tf === 'm1'){
     try { bars = await fetchRealBars(currentChart.code, tf); isReal = true; } catch (e) { bars = null; }
   } else if (tf === 'daily'){
@@ -1355,6 +1425,7 @@ async function switchTimeframe(tf){
   if (!bars) bars = generateOHLC(currentChart.code, tf);
   currentChart.bars = bars;
   currentChart.isRealBars = isReal;
+  currentChart.klineSignalsByBarTs = klineSignalsByBarTs;
   document.getElementById('cmDataBadge').hidden = isReal;
 
   if (isReal){
@@ -1665,6 +1736,24 @@ async function fetchAfterHoursFixedPrice(){
   const data = await res.json();
   if (!data || !Array.isArray(data.entries)) throw new Error('bad payload');
   return data.entries;
+}
+
+const FIVE_MIN_MS = 5 * 60 * 1000;
+async function fetchKlineSignalsByBarTs(code){
+  // 訊號只在偵測當天累積，只查今天即可；barTs是訊號成立時的「收盤時間」
+  // （bar起始時間+5分），K線圖的bar.ts是「起始時間」，這裡減掉5分鐘
+  // 讓訊號對應到真正觸發它的那根K棒，不是時間上的下一根。
+  const res = await fetch('/api/kline-signals/' + code);
+  if (!res.ok) throw new Error('kline-signals http ' + res.status);
+  const data = await res.json();
+  if (!data || !Array.isArray(data.signals)) throw new Error('bad payload');
+  const byBarTs = new Map();
+  data.signals.forEach((s) => {
+    const barStartTs = s.barTs - FIVE_MIN_MS;
+    if (!byBarTs.has(barStartTs)) byBarTs.set(barStartTs, []);
+    byBarTs.get(barStartTs).push(s);
+  });
+  return byBarTs;
 }
 
 function taipeiNowParts(){
@@ -2311,6 +2400,17 @@ export default {
         return await proxyHanstockBars("/api/hub/intraday-signals/dates" + url.search);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), dates: [] }, { status: 502 });
+      }
+    }
+    if (url.pathname.indexOf("/api/kline-signals/") === 0) {
+      const code = url.pathname.slice("/api/kline-signals/".length);
+      if (codePattern.test(code)) {
+        try {
+          const upstreamPath = "/api/hub/intraday-signals/stock/" + encodeURIComponent(code) + url.search;
+          return await proxyHanstockBars(upstreamPath);
+        } catch (err) {
+          return Response.json({ status: "error", error: String(err), signals: [] }, { status: 502 });
+        }
       }
     }
     if (url.pathname === "/api/otc-strength") {

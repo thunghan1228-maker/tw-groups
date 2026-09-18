@@ -166,6 +166,17 @@ export default {
         return Response.json({ status: "error", error: String(err), dates: [] }, { status: 502 });
       }
     }
+    if (url.pathname.indexOf("/api/kline-signals/") === 0) {
+      const code = url.pathname.slice("/api/kline-signals/".length);
+      if (codePattern.test(code)) {
+        try {
+          const upstreamPath = "/api/hub/intraday-signals/stock/" + encodeURIComponent(code) + url.search;
+          return await proxyHanstockBars(upstreamPath);
+        } catch (err) {
+          return Response.json({ status: "error", error: String(err), signals: [] }, { status: 502 });
+        }
+      }
+    }
     if (url.pathname === "/api/otc-strength") {
       try {
         return await proxyHanstockBars("/api/hub/index/otc/strength");
