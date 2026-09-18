@@ -247,7 +247,7 @@
   </div>
   <div class="market-strength-bar" id="otcStrengthBox"></div>
 </header>
-<div class="draft-badge"><span class="dot"></span>族群報價／櫃買盤勢／盤中訊號中心（含四項精選）為後端真實資料，連不上時自動退回示範資料；K線圖／主力買賣力／日線目前仍為示範資料</div>
+<div class="draft-badge"><span class="dot"></span>族群報價／櫃買盤勢／盤中訊號中心（含兩項精選）為後端真實資料，連不上時自動退回示範資料；K線圖／主力買賣力／日線目前仍為示範資料</div>
 <div class="stock-search-bar">
   <input type="text" id="stockSearchInput" placeholder="輸入代號或名稱，按 Enter 開啟五分鐘K線圖">
   <span class="ssb-hint" id="stockSearchHint" hidden>查無此股票</span>
@@ -347,7 +347,7 @@
       <div>今日即時：彙整下列各類訊號的即時清單。</div>
       <div>族群瞬間大單：同族群內短時間出現的大額單筆成交。</div>
       <div>主力累計：個股主力（大戶）今日累計買超／賣超達門檻。</div>
-      <div>四項精選（強多/強空）：主力淨額比、價格位置兩項條件同時成立才會出現。強多＝當分鐘主力淨買超≥50%且前一分鐘同方向，且價格同時站上VWAP、突破開盤前5分鐘（09:00-09:04）K棒高點；強空＝主力淨賣超≥50%且前一分鐘同方向，且價格同時跌破VWAP、跌破開盤前5分鐘K棒低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</div>
+      <div>兩項精選（強多/強空）：主力淨額比、價格位置兩項條件同時成立才會出現。強多＝當分鐘主力淨買超≥50%且前一分鐘同方向，且價格同時站上VWAP、突破開盤前5分鐘（09:00-09:04）K棒高點；強空＝主力淨賣超≥50%且前一分鐘同方向，且價格同時跌破VWAP、跌破開盤前5分鐘K棒低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</div>
       <div>盤中特大買單／賣單：單筆超大額買進／賣出成交。</div>
       <div>盤中大戶力：個股大戶買賣力道明顯轉強或轉弱。</div>
       <div>歷史查詢：選擇日期查看當天的訊號紀錄。</div>
@@ -1350,7 +1350,7 @@ const SIGNAL_KINDS = [
   { key: 'now', label: '今日即時' },
   { key: 'groupBigOrder', label: '族群瞬間大單' },
   { key: 'mainForceCum', label: '主力累計' },
-  { key: 'fourGate', label: '四項精選' },
+  { key: 'fourGate', label: '兩項精選' },
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
