@@ -417,6 +417,15 @@ function getBasePrice(code){
   return priceCache[code];
 }
 
+function getStockQuote(code){
+  if (!lastData) return null;
+  for (const g of lastData.groups){
+    const s = g.stocks.find((x) => x.code === code);
+    if (s && s.price != null) return { price: s.price, changePercent: s.changePercent };
+  }
+  return null;
+}
+
 const DEFAULT_MA_COLORS = ['#7fb3e0', '#c9a98c', '#b48ee0', '#e0c458', '#6fd0c4'];
 const VWAP_COLOR = '#f2c94c';
 const PAD = { left: 8, right: 54 };
@@ -1568,7 +1577,7 @@ function mapLargeOrderSignal(s){
   return {
     tabs: isFourGate ? ['now', 'fourGate'] : ['now', 'groupBigOrder', isBuy ? 'bigBuy' : 'bigSell'],
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
-    code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label,
+    code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label, isBuy,
   };
 }
 
@@ -1612,7 +1621,9 @@ function signalRowsHtml(events){
       '<div class="se-sub">' + (signalDataIsReal ? '全市場掃描中，符合條件才會出現。' : '後端暫時連不上，先用示範資料展示介面。') + '</div></div>';
   }
   return '<div class="signal-list">' + events.map((ev) => {
-    const labelCls = ev.label.indexOf('強多') !== -1 ? ' sig-bull' : ev.label.indexOf('強空') !== -1 ? ' sig-bear' : '';
+    const labelCls = ev.isBuy != null
+      ? (ev.isBuy ? ' sig-bull' : ' sig-bear')
+      : (/[買多]/.test(ev.label) ? ' sig-bull' : /[賣空]/.test(ev.label) ? ' sig-bear' : '');
     return '<div class="signal-row" data-code="' + ev.code + '" data-name="' + ev.name + '">' +
       '<span class="sig-time">' + ev.time + '</span>' +
       '<span class="sig-code">' + ev.code + '</span>' +
@@ -1628,15 +1639,19 @@ function rankingRowsHtml(rows){
       '<div class="se-sub">' + (signalDataIsReal ? '今日主力資料尚未累積或尚無達門檻個股。' : '後端暫時連不上，稍後再試。') + '</div></div>';
   }
   return '<div class="signal-list">' + rows.map((r) => {
-    const name = lookupStockName(r.code);
+    const backendName = r.name && r.name !== r.code ? r.name : null;
+    const name = backendName || lookupStockName(r.code);
     const total = (r.buyVolume || 0) + (r.sellVolume || 0);
     const pct = total > 0 ? Math.abs(r.netVolume) / total * 100 : 0;
     const timeLabel = r.lastTs ? new Date(r.lastTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
+    const quote = getStockQuote(r.code);
+    const priceCols = quote ? stockValueColsHtml(quote.price, quote.price - quote.price / (1 + quote.changePercent / 100), quote.changePercent) : '';
     return '<div class="signal-row" data-code="' + r.code + '" data-name="' + name + '">' +
         '<span class="sig-time">' + timeLabel + '</span>' +
         '<span class="sig-code">' + r.code + '</span>' +
         '<span class="sig-name">' + name + '</span>' +
-        '<span class="sig-label ' + (r.side === 'buy' ? 'up' : 'down') + '">' + (r.side === 'buy' ? '買超' : '賣超') + ' ' + pct.toFixed(0) + '%</span>' +
+        '<span class="sig-label ' + (r.side === 'buy' ? 'sig-bull' : 'sig-bear') + '">' + (r.side === 'buy' ? '買超' : '賣超') + ' ' + pct.toFixed(0) + '%</span>' +
+        priceCols +
       '</div>';
   }).join('') + '</div>';
 }
