@@ -372,7 +372,6 @@
     <div class="signal-help" id="signalHelp" hidden>
       <div>今日即時：彙整下列各類訊號的即時清單。</div>
       <div>族群瞬間大單：同族群內短時間出現的大額單筆成交。</div>
-      <div>主力累計：個股主力（大戶）今日累計買超／賣超達門檻。</div>
       <div>兩項精選（強多/強空）：主力淨額比、價格位置兩項條件同時成立才會出現。強多＝當分鐘主力淨買超≥50%且前一分鐘同方向，且價格同時站上VWAP、突破開盤前5分鐘（09:00-09:04）K棒高點；強空＝主力淨賣超≥50%且前一分鐘同方向，且價格同時跌破VWAP、跌破開盤前5分鐘K棒低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</div>
       <div>盤中特大買單／賣單：單筆超大額買進／賣出成交。</div>
       <div>盤中大戶力：個股大戶買賣力道明顯轉強或轉弱。</div>
@@ -1508,7 +1507,6 @@ async function renderOtcStrengthWidget(){
 const SIGNAL_KINDS = [
   { key: 'now', label: '今日即時' },
   { key: 'groupBigOrder', label: '族群瞬間大單' },
-  { key: 'mainForceCum', label: '主力累計' },
   { key: 'fourGate', label: '兩項精選' },
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
@@ -1530,7 +1528,7 @@ function pickDemoStocks(n, seedExtra){
 function buildDemoSignalsForDate(dateStr){
   const rnd = mulberry32(hashCode('signals-' + dateStr));
   const stockPool = pickDemoStocks(20, dateStr);
-  const counts = { groupBigOrder: 3, mainForceCum: 2, fourGate: 1, bigBuy: 2, bigSell: 2, bigHolderForce: 2 };
+  const counts = { groupBigOrder: 3, fourGate: 1, bigBuy: 2, bigSell: 2, bigHolderForce: 2 };
   const events = [];
   let si = 0;
   Object.keys(counts).forEach((kind) => {
@@ -1542,7 +1540,6 @@ function buildDemoSignalsForDate(dateStr){
       const qty = Math.round(500 + rnd() * 2500);
       let label = '';
       if (kind === 'groupBigOrder') label = s.group + '．單筆 ' + qty + ' 張大單';
-      else if (kind === 'mainForceCum') label = '主力累計' + (rnd() > 0.5 ? '買超 ' : '賣超 ') + qty + ' 張';
       else if (kind === 'fourGate') label = '四項條件同時成立';
       else if (kind === 'bigBuy') label = '單筆買進 ' + qty + ' 張';
       else if (kind === 'bigSell') label = '單筆賣出 ' + qty + ' 張';
@@ -1590,7 +1587,7 @@ async function fetchRealSignals(dateStr){
 }
 
 async function fetchMainForceRanking(){
-  const res = await fetch('/api/main-force-ranking?limit=30');
+  const res = await fetch('/api/main-force-ranking?limit=200');
   if (!res.ok) throw new Error('main-force-ranking http ' + res.status);
   const data = await res.json();
   if (!data || !Array.isArray(data.ranking)) throw new Error('bad payload');
@@ -1662,7 +1659,6 @@ function renderSignalCenter(){
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length;
     if (key === 'history') return null;
-    if (key === 'mainForceCum') return mainForceRanking.length;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
@@ -1692,8 +1688,6 @@ function renderSignalCenter(){
       const el = document.getElementById('signalHistoryBody');
       if (el) el.innerHTML = '<div class="signal-empty"><div class="se-title">讀取失敗</div><div class="se-sub">後端暫時連不上，稍後再試。</div></div>';
     });
-  } else if (active === 'mainForceCum'){
-    body.innerHTML = rankingRowsHtml(mainForceRanking);
   } else if (active === 'bigHolderForce'){
     body.innerHTML = rankingRowsHtml(bigHolderRows);
   } else {
