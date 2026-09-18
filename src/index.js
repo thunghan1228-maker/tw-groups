@@ -1532,10 +1532,14 @@ function rankingRowsHtml(rows){
   }
   return '<div class="signal-list">' + rows.map((r) => {
     const name = lookupStockName(r.code);
+    const total = (r.buyVolume || 0) + (r.sellVolume || 0);
+    const pct = total > 0 ? Math.abs(r.netVolume) / total * 100 : 0;
+    const timeLabel = r.lastTs ? new Date(r.lastTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
     return '<div class="signal-row" data-code="' + r.code + '" data-name="' + name + '">' +
+        '<span class="sig-time">' + timeLabel + '</span>' +
         '<span class="sig-code">' + r.code + '</span>' +
         '<span class="sig-name">' + name + '</span>' +
-        '<span class="sig-label ' + (r.side === 'buy' ? 'up' : 'down') + '">' + (r.side === 'buy' ? '買超' : '賣超') + ' ' + Math.abs(r.netVolume).toLocaleString('zh-TW') + ' 張</span>' +
+        '<span class="sig-label ' + (r.side === 'buy' ? 'up' : 'down') + '">' + (r.side === 'buy' ? '買超' : '賣超') + ' ' + pct.toFixed(0) + '%</span>' +
       '</div>';
   }).join('') + '</div>';
 }
