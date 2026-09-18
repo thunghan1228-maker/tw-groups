@@ -108,12 +108,16 @@
   .cm-code{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;margin-right:8px;}
   .cm-name{font-weight:800;font-size:17px;}
   .cm-data-badge{margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;vertical-align:middle;}
-  .cm-actions{display:flex;gap:6px;}
+  .cm-actions{display:flex;gap:6px;align-items:center;}
+  .cm-quick-search{width:120px;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;}
+  .cm-quick-search:focus{outline:2px solid var(--accent);outline-offset:1px;}
   .cm-icon-btn{background:var(--panel);border:1px solid var(--line);color:var(--text);width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;line-height:1;}
   .cm-icon-btn:hover{background:var(--panel-2);}
   .cm-icon-btn.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
   .cm-icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
-  .chart-tabs{display:flex;gap:6px;margin-bottom:10px;}
+  .chart-tabs{display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap;}
+  .ma-legend{display:flex;gap:10px;flex-wrap:wrap;margin-left:6px;font-size:11px;font-variant-numeric:tabular-nums;}
+  .ma-legend-item{font-weight:700;white-space:nowrap;}
   .chart-tab{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:700;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;transition:background .12s ease,color .12s ease;}
   .chart-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
   .chart-tab.active{color:var(--bg);background:var(--accent);border-color:var(--accent);}
@@ -136,11 +140,13 @@
   .chart-canvas-wrap.volume-wrap{height:80px;}
   .chart-canvas-wrap.force-wrap{height:110px;}
   .chart-canvas-wrap.macd-wrap{height:100px;}
+  .chart-canvas-wrap.kd-wrap{height:100px;}
   .chart-modal.fullscreen .chart-canvas-wrap.price-wrap{height:56vh;}
   .chart-modal.fullscreen .chart-canvas-wrap.volume-wrap{height:110px;}
   .chart-modal.fullscreen .chart-canvas-wrap.force-wrap{height:140px;}
   .chart-modal.fullscreen .chart-canvas-wrap.macd-wrap{height:130px;}
-  #klineCanvas,#volumeCanvas,#forceCanvas,#macdCanvas{display:block;width:100%;height:100%;touch-action:none;}
+  .chart-modal.fullscreen .chart-canvas-wrap.kd-wrap{height:130px;}
+  #klineCanvas,#volumeCanvas,#forceCanvas,#macdCanvas,#kdCanvas{display:block;width:100%;height:100%;touch-action:none;}
   .chart-tooltip{position:absolute;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text);pointer-events:none;white-space:nowrap;font-variant-numeric:tabular-nums;}
 
   .ind-panel-block{margin-top:10px;}
@@ -182,6 +188,8 @@
   .stock-search-bar input{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;}
   .stock-search-bar input:focus{outline:2px solid var(--accent);outline-offset:1px;}
   .ssb-hint{color:var(--down);font-size:12px;flex-shrink:0;}
+  .ssb-go-btn{flex-shrink:0;background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:8px;width:36px;height:36px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .ssb-go-btn:hover{background:var(--accent);color:var(--bg);}
 
   /* 底部工具列 */
   body{padding-bottom:56px;}
@@ -258,7 +266,8 @@
 </header>
 <div class="draft-badge"><span class="dot"></span>全部項目（含K線圖／主力買賣力／日線）皆為後端真實資料，連不上或該股尚無資料時自動退回示範資料</div>
 <div class="stock-search-bar">
-  <input type="text" id="stockSearchInput" placeholder="輸入代號或名稱，按 Enter 開啟五分鐘K線圖">
+  <input type="text" id="stockSearchInput" placeholder="輸入代號或名稱，按 Enter 或點右邊圖示開啟五分鐘K線圖">
+  <button class="ssb-go-btn" id="stockSearchGoBtn" aria-label="開啟K線圖">🔍</button>
   <span class="ssb-hint" id="stockSearchHint" hidden>查無此股票</span>
 </div>
 <div class="tabs">
@@ -283,6 +292,7 @@
     <div class="chart-modal-head" id="chartModalHead">
       <div><span class="cm-code" id="cmCode"></span><span class="cm-name" id="cmName"></span><span class="cm-data-badge" id="cmDataBadge" hidden>示範資料</span></div>
       <div class="cm-actions">
+        <input type="text" class="cm-quick-search" id="cmQuickSearch" placeholder="輸入代號切換">
         <button class="cm-icon-btn" id="cmSettingsToggle" aria-label="指標設定" aria-pressed="false">⚙</button>
         <button class="cm-icon-btn" id="cmMax" aria-label="放大／還原視窗" aria-pressed="false">⛶</button>
         <button class="cm-icon-btn" id="cmClose" aria-label="關閉">✕</button>
@@ -292,6 +302,7 @@
       <button class="chart-tab" data-tf="daily">日線</button>
       <button class="chart-tab active" data-tf="m5">5分鐘</button>
       <button class="chart-tab" data-tf="m1">1分鐘</button>
+      <span class="ma-legend" id="maLegend"></span>
     </div>
     <div class="ind-settings" id="maControls" hidden></div>
     <div class="chart-canvas-wrap price-wrap">
@@ -319,6 +330,12 @@
       </div>
       <div class="chart-canvas-wrap macd-wrap" id="macdPanelWrap" hidden>
         <canvas id="macdCanvas"></canvas>
+      </div>
+    </div>
+    <div class="ind-panel-block">
+      <div class="ind-panel-head"><span class="force-title">KD (9,3,3)．用5分K計算</span></div>
+      <div class="chart-canvas-wrap kd-wrap" id="kdPanelWrap" hidden>
+        <canvas id="kdCanvas"></canvas>
       </div>
     </div>
   </div>
@@ -404,7 +421,7 @@ const DEFAULT_MA_COLORS = ['#7fb3e0', '#c9a98c', '#b48ee0', '#e0c458', '#6fd0c4'
 const VWAP_COLOR = '#f2c94c';
 const PAD = { left: 8, right: 54 };
 const TF_CONFIG = {
-  daily: { label: '日線', maPeriods: [5, 20, 60, 120, 240], bars: 180, vwap: false, force: false },
+  daily: { label: '日線', maPeriods: [5, 20, 60, 120, 240], bars: 180, vwap: false, force: true },
   m5:    { label: '5分鐘', maPeriods: [5, 20], bars: 120, vwap: true, force: true },
   m1:    { label: '1分鐘', maPeriods: [5, 25, 100], bars: 150, vwap: true, force: true },
 };
@@ -499,6 +516,47 @@ function computeEMA(values, period){
   }
   return out;
 }
+function aggregateTo5mBuckets(bars1m){
+  const buckets = [];
+  let current = null;
+  bars1m.forEach((b) => {
+    const bucketTs = Math.floor(b.ts / 300000) * 300000;
+    if (!current || current.bucketTs !== bucketTs){
+      current = { bucketTs, high: b.high, low: b.low, close: b.close };
+      buckets.push(current);
+    } else {
+      current.high = Math.max(current.high, b.high);
+      current.low = Math.min(current.low, b.low);
+      current.close = b.close;
+    }
+  });
+  return buckets;
+}
+function computeKDSeries(buckets, period, smoothing){
+  period = period || 9;
+  const alpha = smoothing || (1 / 3);
+  let prevK = 50, prevD = 50;
+  return buckets.map((bar, i) => {
+    const start = Math.max(0, i - period + 1);
+    let hh = -Infinity, ll = Infinity;
+    for (let j = start; j <= i; j++){ hh = Math.max(hh, buckets[j].high); ll = Math.min(ll, buckets[j].low); }
+    const rsv = hh > ll ? (bar.close - ll) / (hh - ll) * 100 : 50;
+    const k = prevK * (1 - alpha) + rsv * alpha;
+    const d = prevD * (1 - alpha) + k * alpha;
+    prevK = k; prevD = d;
+    return { k, d };
+  });
+}
+function computeKdFor1m(bars1m){
+  if (!bars1m || !bars1m.length) return null;
+  const buckets = aggregateTo5mBuckets(bars1m);
+  const kdByBucket = computeKDSeries(buckets, 9, 1 / 3);
+  const kdIndexByTs = new Map(buckets.map((b, i) => [b.bucketTs, i]));
+  return bars1m.map((b) => {
+    const idx = kdIndexByTs.get(Math.floor(b.ts / 300000) * 300000);
+    return idx != null ? kdByBucket[idx] : { k: null, d: null };
+  });
+}
 function computeMACD(bars){
   const closes = bars.map((b) => b.close);
   const ema12 = computeEMA(closes, 12);
@@ -522,7 +580,7 @@ function generateForceFlow(code, tf, bars){
 }
 
 let currentChart = {
-  code: null, name: null, tf: 'daily', bars: null, force: null, macd: null,
+  code: null, name: null, tf: 'daily', bars: null, force: null, macd: null, kd: null,
   maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, hoverIndex: null,
   viewStart: 0, viewCount: null, isRealBars: false, requestToken: 0,
 };
@@ -953,14 +1011,80 @@ function drawMacdPanel(){
   ctx.fillText('DIF/DEA', PAD.left, 2);
 }
 
+function drawKdPanel(){
+  const wrap = document.getElementById('kdPanelWrap');
+  if (currentChart.tf !== 'm1' || !currentChart.kd){ if (wrap) wrap.hidden = true; return; }
+  wrap.hidden = false;
+  const canvas = document.getElementById('kdCanvas');
+  const cssW = canvas.parentElement.clientWidth, cssH = canvas.parentElement.clientHeight;
+  const ctx = setupCanvas(canvas, cssW, cssH);
+
+  const { start: vStart, count: vCount } = visibleRange(currentChart.kd.length);
+  const kd = currentChart.kd.slice(vStart, vStart + vCount);
+  const padTop = 8, padBottom = 6;
+  const plotW = cssW - PAD.left - PAD.right, plotH = cssH - padTop - padBottom;
+  const xAt = (i) => PAD.left + plotW * (i + 0.5) / kd.length;
+  const yAt = (v) => padTop + plotH * (1 - v / 100);
+
+  ctx.strokeStyle = 'rgba(168,156,143,0.2)'; ctx.lineWidth = 1;
+  [20, 50, 80].forEach((v) => {
+    ctx.beginPath(); ctx.moveTo(PAD.left, yAt(v)); ctx.lineTo(cssW - PAD.right, yAt(v)); ctx.stroke();
+  });
+
+  function drawLine(key, color){
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.beginPath();
+    let started = false;
+    kd.forEach((v, i) => {
+      if (v[key] == null) return;
+      const x = xAt(i), y = yAt(v[key]);
+      if (!started){ ctx.moveTo(x, y); started = true; } else { ctx.lineTo(x, y); }
+    });
+    ctx.stroke();
+  }
+  drawLine('k', '#7fb3e0');
+  drawLine('d', '#e0c458');
+
+  // K/D交叉點：黃金交叉(K由下往上穿越D)標紅點、死亡交叉(K由上往下穿越D)標綠點
+  for (let i = 1; i < kd.length; i++){
+    const prev = kd[i - 1], cur = kd[i];
+    if (prev.k == null || prev.d == null || cur.k == null || cur.d == null) continue;
+    if (prev.k <= prev.d && cur.k > cur.d){
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath(); ctx.arc(xAt(i), yAt(cur.k), 3, 0, Math.PI * 2); ctx.fill();
+    } else if (prev.k >= prev.d && cur.k < cur.d){
+      ctx.fillStyle = '#5fae6f';
+      ctx.beginPath(); ctx.arc(xAt(i), yAt(cur.k), 3, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  ctx.fillStyle = '#a89c8f'; ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillText('K/D', PAD.left, 2);
+}
+
 function redrawAll(){
   if (document.getElementById('chartModal').hidden) return;
   drawChart();
   drawVolumePanel();
   drawForcePanel();
   drawMacdPanel();
+  drawKdPanel();
+  const allBars = currentChart.bars;
+  if (allBars && allBars.length){
+    const { start: vStart } = visibleRange(allBars.length);
+    updateMaLegend(currentChart.hoverIndex != null ? vStart + currentChart.hoverIndex : allBars.length - 1);
+  }
 }
 
+function updateMaLegend(absIndex){
+  const el = document.getElementById('maLegend');
+  if (!el) return;
+  const allBars = currentChart.bars;
+  if (!allBars || !allBars.length){ el.innerHTML = ''; return; }
+  const idx = Math.max(0, Math.min(allBars.length - 1, absIndex != null ? absIndex : allBars.length - 1));
+  el.innerHTML = currentChart.maLines.filter((ma) => ma.on).map((ma) => {
+    const v = computeMA(allBars, ma.period)[idx];
+    return '<span class="ma-legend-item" style="color:' + ma.color + '">MA' + ma.period + (v != null ? ' ' + v.toFixed(2) : '') + '</span>';
+  }).join('');
+}
 function updateChartTooltipAt(clientX){
   const canvas = document.getElementById('klineCanvas');
   const tooltip = document.getElementById('chartTooltip');
@@ -979,6 +1103,7 @@ function updateChartTooltipAt(clientX){
   tooltip.style.left = Math.min(rect.width - 190, Math.max(0, x + 8)) + 'px';
   tooltip.style.top = '8px';
   tooltip.innerHTML = b.fullLabel + '　開' + b.open.toFixed(2) + ' 高' + b.high.toFixed(2) + ' 低' + b.low.toFixed(2) + ' 收' + b.close.toFixed(2) + ' 量' + b.volume;
+  updateMaLegend(vStart + i);
   drawChart();
 }
 
@@ -995,7 +1120,7 @@ function attachChartInteraction(){
     if (isDragging) return;
     tooltip.hidden = true;
     currentChart.hoverIndex = null;
-    drawChart();
+    redrawAll();
   };
 
   // 滑鼠左鍵按住橫拉＝拖曳平移可視範圍（不改變縮放比例，只左右移動）
@@ -1124,7 +1249,7 @@ function dailyBarToBar(b){
   const fullLabel = d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate();
   return {
     ts: b.ts, open: b.open, high: b.high, low: b.low, close: b.close,
-    volume: b.volume ?? 0, label, fullLabel, mainNet: null,
+    volume: b.volume ?? 0, label, fullLabel, mainNet: b.mainNet ?? null,
   };
 }
 
@@ -1173,6 +1298,7 @@ async function switchTimeframe(tf){
     currentChart.force = cfg.force ? generateForceFlow(currentChart.code, tf, bars) : null;
   }
   currentChart.macd = computeMACD(bars);
+  currentChart.kd = tf === 'm1' ? computeKdFor1m(bars) : null;
   currentChart.macdOn = false;
   const macdBtn = document.getElementById('macdToggle');
   macdBtn.textContent = '開啟'; macdBtn.classList.remove('on'); macdBtn.setAttribute('aria-pressed', 'false');
@@ -1180,23 +1306,26 @@ async function switchTimeframe(tf){
   redrawAll();
 }
 
-function openStockChart(code, name){
+function openStockChart(code, name, tf){
+  const overlay = document.getElementById('chartModal');
+  const wasHidden = overlay.hidden;
   currentChart.code = code;
   currentChart.name = name;
   document.getElementById('cmCode').textContent = code;
   document.getElementById('cmName').textContent = name;
-  const overlay = document.getElementById('chartModal');
-  const panel = document.getElementById('chartModalInner');
-  overlay.hidden = false;
-  overlay.classList.remove('fullscreen');
-  document.body.style.overflow = 'hidden';
-  const w = Math.min(1180, window.innerWidth * 0.94);
-  const h = Math.min(800, window.innerHeight * 0.88);
-  panel.style.width = w + 'px'; panel.style.height = h + 'px';
-  panel.style.left = Math.max(0, (window.innerWidth - w) / 2) + 'px';
-  panel.style.top = Math.max(10, (window.innerHeight - h) / 2) + 'px';
-  switchTimeframe('m5');
-  attachChartInteraction();
+  if (wasHidden){
+    const panel = document.getElementById('chartModalInner');
+    overlay.hidden = false;
+    overlay.classList.remove('fullscreen');
+    document.body.style.overflow = 'hidden';
+    const w = Math.min(1180, window.innerWidth * 0.94);
+    const h = Math.min(800, window.innerHeight * 0.88);
+    panel.style.width = w + 'px'; panel.style.height = h + 'px';
+    panel.style.left = Math.max(0, (window.innerWidth - w) / 2) + 'px';
+    panel.style.top = Math.max(10, (window.innerHeight - h) / 2) + 'px';
+    attachChartInteraction();
+  }
+  switchTimeframe(tf || 'm5');
 }
 function closeStockChart(){
   document.getElementById('chartModal').hidden = true;
@@ -1252,7 +1381,7 @@ function initWindowChrome(){
   const head = document.getElementById('chartModalHead');
   let dragging = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
   head.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.cm-icon-btn')) return;
+    if (e.target.closest('.cm-icon-btn') || e.target.closest('.cm-quick-search')) return;
     if (document.getElementById('chartModal').classList.contains('fullscreen')) return;
     dragging = true;
     startX = e.clientX; startY = e.clientY;
@@ -1807,15 +1936,29 @@ document.getElementById('chartTabs').addEventListener('click', (e) => {
 window.addEventListener('resize', redrawAll);
 initWindowChrome();
 
-document.getElementById('stockSearchInput').addEventListener('keydown', (e) => {
-  if (e.key !== 'Enter') return;
+function triggerHomeStockSearch(){
+  const input = document.getElementById('stockSearchInput');
   const hint = document.getElementById('stockSearchHint');
-  const s = findStockByQuery(e.target.value);
+  const s = findStockByQuery(input.value);
   if (s){
     hint.hidden = true;
     openStockChart(s.code, s.name);
   } else {
     hint.hidden = false;
+  }
+}
+document.getElementById('stockSearchInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') triggerHomeStockSearch();
+});
+document.getElementById('stockSearchGoBtn').addEventListener('click', triggerHomeStockSearch);
+document.getElementById('cmQuickSearch').addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  const s = findStockByQuery(e.target.value);
+  if (s){
+    e.target.value = '';
+    openStockChart(s.code, s.name, currentChart.tf);
+  } else {
+    showToast('查無此股票');
   }
 });
 
