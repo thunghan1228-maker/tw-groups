@@ -735,8 +735,9 @@ function drawChart(){
     ctx.fillText(v.toFixed(1), cssW - PAD.right + 6, y);
   }
 
-  // 五分鐘線：每天開盤第一根畫細的紅色虛線，10:30那根畫粗的紅色實線；整段已載入的多日範圍都畫，不隨縮放/平移消失
-  if (currentChart.tf === 'm5'){
+  // 每天開盤第一根畫細的紅色虛線，10:30那根畫粗的紫色實線；整段已載入的多日範圍都畫，不隨縮放/平移消失
+  // 5分線／1分線都適用；「今天第一根K高低點」只在5分線畫（1分線的第一根意義不大）
+  if (currentChart.tf === 'm5' || currentChart.tf === 'm1'){
     const dayKey = (ts) => { const d = new Date(ts); return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); };
     bars.forEach((b, i) => {
       const globalIdx = vStart + i;
@@ -776,9 +777,11 @@ function drawChart(){
         const d = new Date(allBars[i].ts);
         if (d.getHours() === 10 && d.getMinutes() === 30){ today1030Index = i; break; }
       }
-      const todayFirstBar = allBars[todayStart];
-      drawHRangeLine(todayStart, today1030Index, todayFirstBar.high, '#ef4444', 1.5, []);
-      drawHRangeLine(todayStart, today1030Index, todayFirstBar.low, '#6366f1', 1.5, []);
+      if (currentChart.tf === 'm5'){
+        const todayFirstBar = allBars[todayStart];
+        drawHRangeLine(todayStart, today1030Index, todayFirstBar.high, '#ef4444', 1.5, []);
+        drawHRangeLine(todayStart, today1030Index, todayFirstBar.low, '#6366f1', 1.5, []);
+      }
 
       const prevEnd = todayStart - 1;
       if (prevEnd >= 0){
