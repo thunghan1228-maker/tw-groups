@@ -86,9 +86,13 @@
   .srow-left{display:flex;align-items:baseline;gap:6px;min-width:0;}
   .srow-left .scode{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums;flex-shrink:0;}
   .srow-left .sname{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .srow-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex-shrink:0;}
-  .srow-right .sprice{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
-  .srow-right .schg{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .srow-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .srow-right span{font-variant-numeric:tabular-nums;text-align:right;}
+  .srow-right .spct{width:52px;font-size:13px;font-weight:800;}
+  .srow-right .schg{width:50px;font-size:12px;font-weight:700;}
+  .srow-right .sprice{width:54px;font-size:12px;font-weight:700;color:var(--text);}
+  .stock-col-labels{display:flex;justify-content:space-between;align-items:center;padding:4px 12px 0;}
+  .stock-col-labels .srow-right span{color:var(--muted);font-size:10px;font-weight:600;}
 
   /* K 線圖彈窗 */
   .chart-modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;}
@@ -1201,14 +1205,13 @@ function openGroupDetail(groupName){
   openGroupName = groupName;
   document.getElementById('gmTitle').textContent = groupName + '（' + g.stocks.length + ' 檔）';
   const sorted = g.stocks.slice().sort((a, b) => b.changePercent - a.changePercent);
-  document.getElementById('gmList').innerHTML = sorted.map((s) => {
+  document.getElementById('gmList').innerHTML = STOCK_COL_LABELS_HTML + sorted.map((s) => {
     const price = getBasePrice(s.code);
     const prevClose = price / (1 + s.changePercent / 100);
     const changeAmt = price - prevClose;
     return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
       '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span></div>' +
-      '<div class="srow-right"><span class="sprice">' + price.toFixed(2) + '</span>' +
-      '<span class="schg ' + dirClass(s.changePercent) + '">' + (changeAmt > 0 ? '+' : '') + changeAmt.toFixed(2) + ' (' + fmt(s.changePercent) + '%)</span></div>' +
+      stockValueColsHtml(price, changeAmt, s.changePercent) +
     '</div>';
   }).join('');
   document.getElementById('groupModal').hidden = false;
@@ -1267,6 +1270,16 @@ function initWindowChrome(){
 }
 
 function fmt(n){ return (n>0?'+':'') + n.toFixed(2); }
+const STOCK_COL_LABELS_HTML = '<div class="stock-col-labels"><span></span><span class="srow-right">' +
+  '<span class="spct">漲跌幅</span><span class="schg">漲跌</span><span class="sprice">成交價</span></span></div>';
+function stockValueColsHtml(price, changeAmt, changePercent){
+  const cls = dirClass(changePercent);
+  return '<div class="srow-right">' +
+    '<span class="spct ' + cls + '">' + fmt(changePercent) + '%</span>' +
+    '<span class="schg ' + cls + '">' + (changeAmt > 0 ? '+' : '') + changeAmt.toFixed(2) + '</span>' +
+    '<span class="sprice">' + price.toFixed(2) + '</span>' +
+  '</div>';
+}
 function dirClass(n){ return n>0?'up':(n<0?'down':'flat'); }
 
 function generateMockQuotes(){
@@ -1663,14 +1676,13 @@ function render(){
       .sort((a,b) => isStrong ? (b.changePercent - a.changePercent) : (a.changePercent - b.changePercent));
     const topStocks = sortedStocks.slice(0, 3);
     const stocksHtml = topStocks.length
-      ? topStocks.map(s => {
+      ? STOCK_COL_LABELS_HTML + topStocks.map(s => {
           const price = getBasePrice(s.code);
           const prevClose = price / (1 + s.changePercent / 100);
           const changeAmt = price - prevClose;
           return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
             '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span></div>' +
-            '<div class="srow-right"><span class="sprice">' + price.toFixed(2) + '</span>' +
-            '<span class="schg ' + dirClass(s.changePercent) + '">' + (changeAmt > 0 ? '+' : '') + changeAmt.toFixed(2) + ' (' + fmt(s.changePercent) + '%)</span></div>' +
+            stockValueColsHtml(price, changeAmt, s.changePercent) +
           '</div>';
         }).join('')
       : '<div class="stock-row"><span class="flat">目前無資料</span></div>';
