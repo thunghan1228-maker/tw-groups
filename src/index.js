@@ -671,6 +671,7 @@ const KLINE_SIGNAL_INFO = {
   watch12short: { symbol: '㊟', color: '#22c55e', side: 'bear', desc: '注意12空：股價第一次進入前高下方5檔內，等2根5分K仍未突破前高即成立。' },
   short12: { symbol: '⑫', color: '#3b82f6', side: 'bear', desc: '12空：注意12空後離開區域，再次回到前高下方5檔內等2根K仍未突破，10:30前一天一次。' },
   enhanced12short: { symbol: '⑫', color: '#c084fc', side: 'bear', desc: '加強12空：注意12空成立後，5分K收盤由20MA上方跌到下方，全天可重複觸發。' },
+  oneTwoShort: { symbol: '1-2', color: '#f97316', side: 'bear', desc: '12空(五分K)／一二空：破905低→反彈形成1高(不能碰到或超過905高)→跌破20MA且20MA下彎(破位)→反彈形成2高(不能碰到或超過1高)→再轉弱(同一根收盤與最低都比前一根更低)正式觸發，一天一次。跟「注意12空/12空/加強12空」是完全獨立的另一套機制。' },
   crossDown20ma: { symbol: '⑳↓', color: '#22c55e', side: 'bear', desc: '跌破20MA：股價由20MA上方跌到下方，可重複觸發。' },
   firstCrossDown20ma: { symbol: '⑳↓★', color: '#22c55e', side: 'bear', desc: '首次跌破20MA：當日第一次跌破20MA。' },
   ma520Down: { symbol: '520↓', color: '#22c55e', side: 'bear', desc: '五二零下：收盤同時跌到5MA與20MA下方，形成均線空方確認。' },
