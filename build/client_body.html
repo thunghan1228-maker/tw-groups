@@ -1358,10 +1358,8 @@ async function switchTimeframe(tf){
 
   let bars = null;
   let isReal = false;
-  let klineSignalsByBarTs = null;
   if (tf === 'm5'){
     try { bars = await fetchRealBars5Range(currentChart.code); isReal = true; } catch (e) { bars = null; }
-    try { klineSignalsByBarTs = await fetchKlineSignalsByBarTs(currentChart.code); } catch (e) { klineSignalsByBarTs = null; }
   } else if (tf === 'm1'){
     try { bars = await fetchRealBars(currentChart.code, tf); isReal = true; } catch (e) { bars = null; }
   } else if (tf === 'daily'){
@@ -1371,6 +1369,17 @@ async function switchTimeframe(tf){
   if (!bars) bars = generateOHLC(currentChart.code, tf);
   currentChart.bars = bars;
   currentChart.isRealBars = isReal;
+
+  let klineSignalsByBarTs = null;
+  if (tf === 'm5' && isReal && bars.length){
+    // 用圖表實際顯示的最後一根K棒推算交易日，不能讓後端預設成伺服器的
+    // 「今天」——現在如果已經跨到非交易日，伺服器的「今天」查不到任何
+    // 訊號，即使圖表上最後一個交易日明明有資料。
+    const lastTradeDateStr = taipeiDateStr(bars[bars.length - 1].ts);
+    try { klineSignalsByBarTs = await fetchKlineSignalsByBarTs(currentChart.code, lastTradeDateStr); }
+    catch (e) { klineSignalsByBarTs = null; }
+  }
+  if (requestToken !== currentChart.requestToken) return;
   currentChart.klineSignalsByBarTs = klineSignalsByBarTs;
   document.getElementById('cmDataBadge').hidden = isReal;
 
@@ -1685,11 +1694,25 @@ async function fetchAfterHoursFixedPrice(){
 }
 
 const FIVE_MIN_MS = 5 * 60 * 1000;
-async function fetchKlineSignalsByBarTs(code){
-  // 訊號只在偵測當天累積，只查今天即可；barTs是訊號成立時的「收盤時間」
-  // （bar起始時間+5分），K線圖的bar.ts是「起始時間」，這裡減掉5分鐘
-  // 讓訊號對應到真正觸發它的那根K棒，不是時間上的下一根。
-  const res = await fetch('/api/kline-signals/' + code);
+function taipeiDateStr(ts){
+  // 不依賴瀏覽器本身的時區設定，直接位移UTC+8再用UTC存取子，確保跟後端
+  // 的trade_date（一律以台北時間為準）算出來是同一天，不管使用者電腦
+  // 設的是哪個時區。
+  const shifted = new Date(ts + 8 * 60 * 60 * 1000);
+  const y = shifted.getUTCFullYear();
+  const m = String(shifted.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(shifted.getUTCDate()).padStart(2, '0');
+  return y + '-' + m + '-' + d;
+}
+async function fetchKlineSignalsByBarTs(code, tradeDateStr){
+  // 訊號只在偵測當天累積；tradeDateStr要用「圖表目前顯示的最後一根K棒」的
+  // 交易日，不能讓後端預設成伺服器的「今天」——如果現在已經跨到週末或
+  // 假日，伺服器的「今天」會是非交易日、查不到任何訊號，即使圖表上顯示
+  // 的最後一個交易日（例如週五）明明有資料。barTs是訊號成立時的「收盤
+  // 時間」（bar起始時間+5分），K線圖的bar.ts是「起始時間」，這裡減掉
+  // 5分鐘讓訊號對應到真正觸發它的那根K棒，不是時間上的下一根。
+  const qs = tradeDateStr ? ('?trade_date=' + tradeDateStr) : '';
+  const res = await fetch('/api/kline-signals/' + code + qs);
   if (!res.ok) throw new Error('kline-signals http ' + res.status);
   const data = await res.json();
   if (!data || !Array.isArray(data.signals)) throw new Error('bad payload');
