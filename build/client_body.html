@@ -195,7 +195,7 @@
 
   /* 盤中訊號中心：常駐浮動視窗，不擋住底下頁面（不是點開才出現的彈窗） */
   .signal-modal{position:fixed;inset:0;z-index:101;pointer-events:none;}
-  .signal-modal-inner{position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(560px,94vw);height:min(640px,86vh);min-width:280px;min-height:320px;max-width:98vw;max-height:96vh;overflow:auto;resize:both;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);pointer-events:auto;}
+  .signal-modal-inner{position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(672px,94vw);height:min(768px,86vh);min-width:280px;min-height:320px;max-width:98vw;max-height:96vh;overflow:auto;resize:both;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);pointer-events:auto;}
   .signal-modal-inner.collapsed{height:auto!important;min-height:0;overflow:hidden;resize:none;padding:10px 14px;}
   .signal-modal-inner.collapsed .signal-help,
   .signal-modal-inner.collapsed .signal-tabs-bar,
@@ -222,6 +222,9 @@
   .signal-row .sig-code{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0;}
   .signal-row .sig-name{font-weight:700;flex-shrink:0;}
   .signal-row .sig-label{color:var(--text);opacity:.85;}
+  .signal-row .sig-label.sig-bull{background:var(--up);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
+  .signal-row .sig-label.sig-bear{background:var(--down);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
+  .signal-modal-inner > *{zoom:1.3;}
   .signal-empty{padding:30px 10px;text-align:center;color:var(--muted);}
   .se-title{font-size:13px;font-weight:700;margin-bottom:6px;}
   .se-sub{font-size:11px;}
@@ -1476,14 +1479,15 @@ function signalRowsHtml(events){
     return '<div class="signal-empty"><div class="se-title">目前沒有符合條件的訊號' + (signalDataIsReal ? '' : '（示範資料）') + '</div>' +
       '<div class="se-sub">' + (signalDataIsReal ? '全市場掃描中，符合條件才會出現。' : '後端暫時連不上，先用示範資料展示介面。') + '</div></div>';
   }
-  return '<div class="signal-list">' + events.map((ev) =>
-    '<div class="signal-row" data-code="' + ev.code + '" data-name="' + ev.name + '">' +
+  return '<div class="signal-list">' + events.map((ev) => {
+    const labelCls = ev.label.indexOf('強多') !== -1 ? ' sig-bull' : ev.label.indexOf('強空') !== -1 ? ' sig-bear' : '';
+    return '<div class="signal-row" data-code="' + ev.code + '" data-name="' + ev.name + '">' +
       '<span class="sig-time">' + ev.time + '</span>' +
       '<span class="sig-code">' + ev.code + '</span>' +
       '<span class="sig-name">' + ev.name + '</span>' +
-      '<span class="sig-label">' + ev.label + '</span>' +
-    '</div>'
-  ).join('') + '</div>';
+      '<span class="sig-label' + labelCls + '">' + ev.label + '</span>' +
+    '</div>';
+  }).join('') + '</div>';
 }
 
 function rankingRowsHtml(rows){
@@ -1553,8 +1557,8 @@ function renderSignalCenter(){
 function positionSignalModal(){
   if (document.body.classList.contains('signal-window-mode')) return;
   const panel = document.getElementById('signalModalInner');
-  const w = Math.min(560, window.innerWidth * 0.94);
-  const h = Math.min(640, window.innerHeight * 0.86);
+  const w = Math.min(672, window.innerWidth * 0.94);
+  const h = Math.min(768, window.innerHeight * 0.86);
   panel.style.width = w + 'px'; panel.style.height = h + 'px';
   panel.style.left = Math.max(0, (window.innerWidth - w) / 2) + 'px';
   panel.style.top = Math.max(10, (window.innerHeight - h) / 2) + 'px';
