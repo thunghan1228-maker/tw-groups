@@ -187,9 +187,14 @@
   .toast{position:fixed;left:50%;bottom:72px;transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  /* 盤中訊號中心 */
-  .signal-modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:101;}
-  .signal-modal-inner{position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(560px,94vw);height:min(640px,86vh);min-width:320px;min-height:320px;max-width:98vw;max-height:96vh;overflow:auto;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);}
+  /* 盤中訊號中心：常駐浮動視窗，不擋住底下頁面（不是點開才出現的彈窗） */
+  .signal-modal{position:fixed;inset:0;z-index:101;pointer-events:none;}
+  .signal-modal-inner{position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(560px,94vw);height:min(640px,86vh);min-width:280px;min-height:320px;max-width:98vw;max-height:96vh;overflow:auto;resize:both;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);pointer-events:auto;}
+  .signal-modal-inner.collapsed{height:auto!important;min-height:0;overflow:hidden;resize:none;padding:10px 14px;}
+  .signal-modal-inner.collapsed .signal-help,
+  .signal-modal-inner.collapsed .signal-tabs-bar,
+  .signal-modal-inner.collapsed .signal-body,
+  .signal-modal-inner.collapsed .sm-sub{display:none;}
   .signal-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:move;touch-action:none;flex-wrap:wrap;}
   .sm-title{font-weight:800;font-size:16px;}
   .sm-sub{color:var(--muted);font-size:11px;margin-top:2px;max-width:320px;}
@@ -242,7 +247,7 @@
   </div>
   <div class="market-strength-bar" id="otcStrengthBox"></div>
 </header>
-<div class="draft-badge"><span class="dot"></span>族群報價／櫃買盤勢／盤中訊號中心（除四項精選外）為後端真實資料，連不上時自動退回示範資料；K線圖／主力買賣力／日線、四項精選目前仍為示範資料</div>
+<div class="draft-badge"><span class="dot"></span>族群報價／櫃買盤勢／盤中訊號中心（含四項精選）為後端真實資料，連不上時自動退回示範資料；K線圖／主力買賣力／日線目前仍為示範資料</div>
 <div class="stock-search-bar">
   <input type="text" id="stockSearchInput" placeholder="輸入代號或名稱，按 Enter 開啟五分鐘K線圖">
   <span class="ssb-hint" id="stockSearchHint" hidden>查無此股票</span>
@@ -334,14 +339,15 @@
         <button class="sm-btn" id="smMoveWindow">⧉ 移到另一螢幕</button>
         <button class="sm-btn" id="smRecenter">回到中央</button>
         <button class="sm-btn" id="smPin">訂閱</button>
-        <button class="cm-icon-btn" id="smClose" aria-label="關閉">✕</button>
+        <button class="cm-icon-btn" id="smCollapse" aria-label="收合">－</button>
+        <button class="cm-icon-btn" id="smClose" aria-label="隱藏">✕</button>
       </div>
     </div>
     <div class="signal-help" id="signalHelp" hidden>
       <div>今日即時：彙整下列各類訊號的即時清單。</div>
       <div>族群瞬間大單：同族群內短時間出現的大額單筆成交。</div>
       <div>主力累計：個股主力（大戶）今日累計買超／賣超達門檻。</div>
-      <div>四項精選：同時符合多項篩選條件的精選個股。</div>
+      <div>四項精選（強多/強空）：主力淨額比、價格位置兩項條件同時成立才會出現。強多＝當分鐘主力淨買超≥50%且前一分鐘同方向，且價格同時站上VWAP、突破開盤前5分鐘（09:00-09:04）K棒高點；強空＝主力淨賣超≥50%且前一分鐘同方向，且價格同時跌破VWAP、跌破開盤前5分鐘K棒低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</div>
       <div>盤中特大買單／賣單：單筆超大額買進／賣出成交。</div>
       <div>盤中大戶力：個股大戶買賣力道明顯轉強或轉弱。</div>
       <div>歷史查詢：選擇日期查看當天的訊號紀錄。</div>
@@ -1314,7 +1320,14 @@ async function renderOtcStrengthWidget(){
     const res = await fetch('/api/otc-strength');
     if (!res.ok) throw new Error('otc-strength http ' + res.status);
     const data = await res.json();
-    if (!data || !data.ready) throw new Error('otc-strength not ready');
+    if (!data || data.status !== 'ok') throw new Error('otc-strength bad payload');
+    if (!data.ready){
+      el.innerHTML =
+        '<div class="ms-badge">資料蒐集中</div>' +
+        '<div class="ms-lines"><div>' + (data.reason || '尚未累積足夠的5分K資料') + '</div>' +
+        '<div class="ms-updated">開盤後約1小時40分（20根5分K）才會有第一個訊號，不是示範資料。</div></div>';
+      return;
+    }
     const cls = data.belowMa20 ? 'down' : 'up';
     const refText = data.refState === 'inside'
       ? '，在第3根區間內'
@@ -1398,11 +1411,14 @@ function lookupStockName(code){
 }
 
 function mapLargeOrderSignal(s){
-  const isBuy = s.kind === 'instantLargeBuy';
+  const kind = s.kind;
+  const isFourGate = kind === 'fourGateBuy' || kind === 'fourGateSell';
+  const isBuy = kind === 'instantLargeBuy' || kind === 'fourGateBuy';
+  const backendName = s.name && s.name !== s.ticker ? s.name : null;
   return {
-    tabs: ['now', 'groupBigOrder', isBuy ? 'bigBuy' : 'bigSell'],
+    tabs: isFourGate ? ['now', 'fourGate'] : ['now', 'groupBigOrder', isBuy ? 'bigBuy' : 'bigSell'],
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
-    code: s.ticker, name: lookupStockName(s.ticker), group: s.groupName, label: s.label,
+    code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label,
   };
 }
 
@@ -1431,7 +1447,6 @@ async function refreshSignalData(){
     signalDataIsReal = true;
   } catch (e) {
     todaySignalEvents = buildDemoSignalsForDate(today)
-      .filter((ev) => ev.kind !== 'fourGate')
       .map((ev) => ({ ...ev, tabs: ['now', ev.kind] }));
     mainForceRanking = [];
     signalDataIsReal = false;
@@ -1476,7 +1491,7 @@ function renderSignalCenter(){
   const bigHolderRows = mainForceRanking.filter((r) => Math.abs(r.netVolume) >= BIG_HOLDER_THRESHOLD);
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length;
-    if (key === 'history' || key === 'fourGate') return null;
+    if (key === 'history') return null;
     if (key === 'mainForceCum') return mainForceRanking.length;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
@@ -1511,9 +1526,6 @@ function renderSignalCenter(){
     body.innerHTML = rankingRowsHtml(mainForceRanking);
   } else if (active === 'bigHolderForce'){
     body.innerHTML = rankingRowsHtml(bigHolderRows);
-  } else if (active === 'fourGate'){
-    body.innerHTML = '<div class="signal-empty"><div class="se-title">四項精選規則待確認</div>' +
-      '<div class="se-sub">這個分類要同時符合哪4項條件還在確認，先保留頁籤位置，之後補上。</div></div>';
   } else {
     const events = active === 'now' ? todaySignalEvents : todaySignalEvents.filter((e) => e.tabs.includes(active));
     body.innerHTML = signalRowsHtml(events);
@@ -1535,12 +1547,16 @@ function openSignalCenter(){
   const overlay = document.getElementById('signalModal');
   overlay.hidden = false;
   positionSignalModal();
-  if (!document.body.classList.contains('signal-window-mode')) document.body.style.overflow = 'hidden';
   renderSignalCenter();
 }
 function hideSignalModalPanel(){
   document.getElementById('signalModal').hidden = true;
-  if (!document.body.classList.contains('signal-window-mode')) document.body.style.overflow = '';
+}
+function toggleSignalCollapse(){
+  const panel = document.getElementById('signalModalInner');
+  const collapsed = panel.classList.toggle('collapsed');
+  const btn = document.getElementById('smCollapse');
+  if (btn){ btn.textContent = collapsed ? '▢' : '－'; btn.setAttribute('aria-label', collapsed ? '展開' : '收合'); }
 }
 function closeSignalCenter(){
   if (document.body.classList.contains('signal-window-mode')){ window.close(); return; }
@@ -1802,6 +1818,7 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
   openStockChart(row.dataset.code, row.dataset.name);
 });
 document.getElementById('smClose').addEventListener('click', closeSignalCenter);
+document.getElementById('smCollapse').addEventListener('click', toggleSignalCollapse);
 document.getElementById('smRecenter').addEventListener('click', recenterSignalModal);
 document.getElementById('smMoveWindow').addEventListener('click', openSignalWindow);
 document.getElementById('smPin').addEventListener('click', () => {
@@ -1824,7 +1841,7 @@ if (location.hash === '#signal-center'){
   document.body.classList.add('signal-window-mode');
 }
 initSignalWindowChrome();
-if (document.body.classList.contains('signal-window-mode')) openSignalCenter();
+openSignalCenter(); // 盤中訊號中心預設常駐顯示，不用點才出現；要隱藏就按✕，要收合成小條就按－
 
 refresh();
 setInterval(refresh, 15000);
