@@ -965,7 +965,7 @@ function drawChart(){
   // 訊號時往外堆疊，避免重疊。字體特意調大，避免符號太小看不清楚。
   if (currentChart.tf === 'm5' && currentChart.klineSignalsByBarTs && currentChart.klineSignalsByBarTs.size){
     ctx.save();
-    ctx.font = 'bold 14px -apple-system, sans-serif';
+    ctx.font = 'bold 21px -apple-system, sans-serif';
     ctx.textAlign = 'center';
     bars.forEach((b, i) => {
       const list = currentChart.klineSignalsByBarTs.get(b.ts);
@@ -979,11 +979,11 @@ function drawChart(){
         if (info.side === 'bear'){
           ctx.textBaseline = 'top';
           ctx.fillText(info.symbol, x, yAt(b.low) + 4 + bearOffset);
-          bearOffset += 17;
+          bearOffset += 26;
         } else {
           ctx.textBaseline = 'bottom';
           ctx.fillText(info.symbol, x, yAt(b.high) - 4 - bullOffset);
-          bullOffset += 17;
+          bullOffset += 26;
         }
       });
     });
