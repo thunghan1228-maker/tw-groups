@@ -1883,6 +1883,10 @@ function findStockByQuery(query){
       if (s.code.toLowerCase().includes(ql) || s.name.includes(q)) return s;
     }
   }
+  // 族群清單只收「概念股題材」，像台積電、中華電這類權值股本來就故意不收進
+  // 任何族群（收了會蓋掉整個族群的漲跌幅比較），不代表這支股票不存在。只要
+  // 格式像股票代號，一樣讓它能開圖；股票名稱交給K線圖那邊用真實資料補上。
+  if (/^[0-9]{4,6}[A-Z]?$/i.test(q)) return { code: q.toUpperCase(), name: q.toUpperCase() };
   return null;
 }
 
