@@ -1648,12 +1648,18 @@ const SIGNAL_KINDS = [
   { key: 'now', label: '今日即時' },
   { key: 'groupBigOrder', label: '族群瞬間大單' },
   { key: 'fourGate', label: '四項精選' },
+  { key: 'oneTwoShort', label: '12空' },
+  { key: 'combo12Bull', label: '1+2多' },
+  { key: 'blackDragon', label: '創高黑龍' },
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
   { key: 'afterHoursFixedPrice', label: '盤後定價' },
   { key: 'history', label: '歷史查詢' },
 ];
+// 5分鐘K策略訊號家族(MA交叉/520/A8空等)只在K線圖上用符號呈現，不進盤中
+// 訊號中心；但這三個是獨立的「結構性」訊號，使用者要求另外開專屬分頁。
+const DEDICATED_KLINE_TABS = new Set(['oneTwoShort', 'combo12Bull', 'blackDragon']);
 function pickDemoStocks(n, seedExtra){
   const rnd = mulberry32(hashCode('signal-pool-' + seedExtra));
   const pool = GROUPS.flatMap((g) => g.stocks.map((s) => ({ code: s.code, name: s.name, group: g.name })));
@@ -1716,15 +1722,16 @@ function lookupStockGroup(code){
 function mapLargeOrderSignal(s){
   const kind = s.kind;
   const isFourGate = kind === 'fourGateBuy' || kind === 'fourGateSell';
-  // 5分鐘K策略訊號(12空/905/520/1+2多/20MA系列)跟瞬間大單共用同一張表、
-  // 同一個API，但不是大單事件：多空判斷要看KLINE_SIGNAL_INFO裡的side，
-  // 不能套用大單的instantLargeBuy/fourGateBuy判斷，也不能歸進族群瞬間
-  // 大單/特大買賣單分頁(那樣兩個分頁會被這批訊號污染成一樣的數字)。
+  // 一般5分鐘K策略訊號(905/520/20MA系列等)跟瞬間大單共用同一張表、同一個
+  // API，但不是大單事件，已經在fetchRealSignals先過濾掉，這裡只會看到
+  // DEDICATED_KLINE_TABS這三個「結構性」訊號：多空判斷看KLINE_SIGNAL_INFO
+  // 裡的side，歸進各自專屬分頁，不能套用大單的isBuy判斷、也不能歸進族群
+  // 瞬間大單/特大買賣單分頁(那樣分頁會被污染成跟大單一樣的數字)。
   const klineInfo = KLINE_SIGNAL_INFO[kind];
   const isBuy = klineInfo ? klineInfo.side === 'bull' : (kind === 'instantLargeBuy' || kind === 'fourGateBuy');
   const backendName = s.name && s.name !== s.ticker ? s.name : null;
   return {
-    tabs: isFourGate ? ['now', 'fourGate'] : (klineInfo ? ['now'] : ['now', 'groupBigOrder', isBuy ? 'bigBuy' : 'bigSell']),
+    tabs: isFourGate ? ['now', 'fourGate'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : ['now', 'groupBigOrder', isBuy ? 'bigBuy' : 'bigSell']),
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
     code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label, isBuy,
   };
@@ -1735,7 +1742,11 @@ async function fetchRealSignals(dateStr){
   if (!res.ok) throw new Error('intraday-signals http ' + res.status);
   const data = await res.json();
   if (!data || !Array.isArray(data.signals)) throw new Error('bad payload');
-  return data.signals.map(mapLargeOrderSignal);
+  // 一般5分鐘K策略訊號(MA交叉/520/A8空等)只在K線圖上用符號呈現；只留下
+  // 不是這個家族的訊號、以及三個獨立的「結構性」訊號(12空/1+2多/創高黑龍)。
+  return data.signals
+    .filter((s) => !KLINE_SIGNAL_INFO[s.kind] || DEDICATED_KLINE_TABS.has(s.kind))
+    .map(mapLargeOrderSignal);
 }
 
 async function fetchMainForceRanking(){
