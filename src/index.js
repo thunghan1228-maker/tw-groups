@@ -143,6 +143,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .srow-right .spct{width:52px;font-size:13px;font-weight:800;}
   .srow-right .schg{width:50px;font-size:12px;font-weight:700;}
   .srow-right .sprice{width:54px;font-size:12px;font-weight:700;color:var(--text);}
+  .srow-right .svol{width:64px;font-size:12px;font-weight:700;color:var(--muted);}
   .stock-col-labels{display:flex;justify-content:space-between;align-items:center;padding:4px 12px 0;}
   .stock-col-labels .srow-right span{color:var(--muted);font-size:10px;font-weight:600;}
 
@@ -287,6 +288,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .signal-row .sig-label.sig-bear{background:var(--down);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
   .signal-modal-inner > *{zoom:1.3;}
   .signal-empty{padding:30px 10px;text-align:center;color:var(--muted);}
+  .signal-note{padding:10px 12px;font-size:12px;color:var(--muted);background:var(--panel-2);border-bottom:1px solid var(--line);}
   .se-title{font-size:13px;font-weight:700;margin-bottom:6px;}
   .se-sub{font-size:11px;}
 
@@ -1566,6 +1568,7 @@ const SIGNAL_KINDS = [
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
+  { key: 'afterHoursFixedPrice', label: '盤後定價' },
   { key: 'history', label: '歷史查詢' },
 ];
 function pickDemoStocks(n, seedExtra){
@@ -1635,6 +1638,7 @@ function mapLargeOrderSignal(s){
   return {
     tabs: isFourGate ? ['now', 'fourGate'] : ['now', 'groupBigOrder', isBuy ? 'bigBuy' : 'bigSell'],
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
+    ts: s.barTs,
     code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label, isBuy,
   };
 }
@@ -1655,6 +1659,45 @@ async function fetchMainForceRanking(){
   return data.ranking;
 }
 
+async function fetchAfterHoursFixedPrice(){
+  const res = await fetch('/api/after-hours-fixed-price?limit=200');
+  if (!res.ok) throw new Error('after-hours-fixed-price http ' + res.status);
+  const data = await res.json();
+  if (!data || !Array.isArray(data.entries)) throw new Error('bad payload');
+  return data.entries;
+}
+
+function taipeiNowParts(){
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Taipei', hour12: false, hour: '2-digit', minute: '2-digit',
+  }).formatToParts(new Date());
+  const get = (t) => Number((parts.find((p) => p.type === t) || {}).value || 0);
+  return { hour: get('hour'), minute: get('minute') };
+}
+function isAfterHoursFixedPriceWindow(){
+  const { hour, minute } = taipeiNowParts();
+  return hour > 14 || (hour === 14 && minute >= 30);
+}
+function afterHoursRowsHtml(entries){
+  if (!entries.length){
+    return '<div class="signal-empty"><div class="se-title">盤後定價交易尚無資料</div>' +
+      '<div class="se-sub">14:30撮合公布後才會有資料，請稍後再查看。</div></div>';
+  }
+  return '<div class="signal-list">' + entries.map((e) => {
+    const name = e.name && e.name !== e.code ? e.name : lookupStockName(e.code);
+    const group = lookupStockGroup(e.code);
+    const lots = Math.round(e.volume / 1000);
+    return '<div class="signal-row" data-code="' + e.code + '" data-name="' + name + '">' +
+        '<span class="sig-time">14:30</span>' +
+        '<span class="sig-code">' + e.code + '</span>' +
+        '<span class="sig-name">' + name + '</span>' +
+        (group ? '<span class="sig-group">' + group + '</span>' : '') +
+        '<span class="sig-label">盤後定價成交</span>' +
+        '<div class="srow-right"><span class="svol">' + lots.toLocaleString('zh-TW') + ' 張</span><span class="sprice">' + e.price.toFixed(2) + '</span></div>' +
+      '</div>';
+  }).join('') + '</div>';
+}
+
 async function refreshSignalData(){
   const today = new Date().toISOString().slice(0, 10);
   try {
@@ -1673,60 +1716,71 @@ async function refreshSignalData(){
   if (!document.getElementById('signalModal').hidden) renderSignalCenter();
 }
 
+function signalEventRowHtml(ev){
+  const labelCls = ev.isBuy != null
+    ? (ev.isBuy ? ' sig-bull' : ' sig-bear')
+    : (/[買多]/.test(ev.label) ? ' sig-bull' : /[賣空]/.test(ev.label) ? ' sig-bear' : '');
+  const group = lookupStockGroup(ev.code);
+  const quote = getStockQuote(ev.code);
+  const priceCols = quote ? stockValueColsHtml(quote.price, quote.price - quote.price / (1 + quote.changePercent / 100), quote.changePercent) : '';
+  return '<div class="signal-row" data-code="' + ev.code + '" data-name="' + ev.name + '">' +
+    '<span class="sig-time">' + ev.time + '</span>' +
+    '<span class="sig-code">' + ev.code + '</span>' +
+    '<span class="sig-name">' + ev.name + '</span>' +
+    (group ? '<span class="sig-group">' + group + '</span>' : '') +
+    '<span class="sig-label' + labelCls + '">' + ev.label + '</span>' +
+    priceCols +
+  '</div>';
+}
 function signalRowsHtml(events){
   if (!events.length){
     return '<div class="signal-empty"><div class="se-title">目前沒有符合條件的訊號' + (signalDataIsReal ? '' : '（示範資料）') + '</div>' +
       '<div class="se-sub">' + (signalDataIsReal ? '全市場掃描中，符合條件才會出現。' : '後端暫時連不上，先用示範資料展示介面。') + '</div></div>';
   }
-  return '<div class="signal-list">' + events.map((ev) => {
-    const labelCls = ev.isBuy != null
-      ? (ev.isBuy ? ' sig-bull' : ' sig-bear')
-      : (/[買多]/.test(ev.label) ? ' sig-bull' : /[賣空]/.test(ev.label) ? ' sig-bear' : '');
-    const group = lookupStockGroup(ev.code);
-    const quote = getStockQuote(ev.code);
-    const priceCols = quote ? stockValueColsHtml(quote.price, quote.price - quote.price / (1 + quote.changePercent / 100), quote.changePercent) : '';
-    return '<div class="signal-row" data-code="' + ev.code + '" data-name="' + ev.name + '">' +
-      '<span class="sig-time">' + ev.time + '</span>' +
-      '<span class="sig-code">' + ev.code + '</span>' +
-      '<span class="sig-name">' + ev.name + '</span>' +
-      (group ? '<span class="sig-group">' + group + '</span>' : '') +
-      '<span class="sig-label' + labelCls + '">' + ev.label + '</span>' +
-      priceCols +
-    '</div>';
-  }).join('') + '</div>';
+  return '<div class="signal-list">' + events.map(signalEventRowHtml).join('') + '</div>';
 }
 
+function rankingRowHtml(r){
+  const backendName = r.name && r.name !== r.code ? r.name : null;
+  const name = backendName || lookupStockName(r.code);
+  const total = (r.buyVolume || 0) + (r.sellVolume || 0);
+  const pct = total > 0 ? Math.abs(r.netVolume) / total * 100 : 0;
+  const timeLabel = r.lastTs ? new Date(r.lastTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
+  const group = lookupStockGroup(r.code);
+  const quote = getStockQuote(r.code);
+  const priceCols = quote ? stockValueColsHtml(quote.price, quote.price - quote.price / (1 + quote.changePercent / 100), quote.changePercent) : '';
+  return '<div class="signal-row" data-code="' + r.code + '" data-name="' + name + '">' +
+      '<span class="sig-time">' + timeLabel + '</span>' +
+      '<span class="sig-code">' + r.code + '</span>' +
+      '<span class="sig-name">' + name + '</span>' +
+      (group ? '<span class="sig-group">' + group + '</span>' : '') +
+      '<span class="sig-label ' + (r.side === 'buy' ? 'sig-bull' : 'sig-bear') + '">' + (r.side === 'buy' ? '買超' : '賣超') + ' ' + pct.toFixed(0) + '%</span>' +
+      priceCols +
+    '</div>';
+}
 function rankingRowsHtml(rows){
   if (!rows.length){
     return '<div class="signal-empty"><div class="se-title">目前沒有符合條件的排行資料</div>' +
       '<div class="se-sub">' + (signalDataIsReal ? '今日主力資料尚未累積或尚無達門檻個股。' : '後端暫時連不上，稍後再試。') + '</div></div>';
   }
-  return '<div class="signal-list">' + rows.map((r) => {
-    const backendName = r.name && r.name !== r.code ? r.name : null;
-    const name = backendName || lookupStockName(r.code);
-    const total = (r.buyVolume || 0) + (r.sellVolume || 0);
-    const pct = total > 0 ? Math.abs(r.netVolume) / total * 100 : 0;
-    const timeLabel = r.lastTs ? new Date(r.lastTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
-    const group = lookupStockGroup(r.code);
-    const quote = getStockQuote(r.code);
-    const priceCols = quote ? stockValueColsHtml(quote.price, quote.price - quote.price / (1 + quote.changePercent / 100), quote.changePercent) : '';
-    return '<div class="signal-row" data-code="' + r.code + '" data-name="' + name + '">' +
-        '<span class="sig-time">' + timeLabel + '</span>' +
-        '<span class="sig-code">' + r.code + '</span>' +
-        '<span class="sig-name">' + name + '</span>' +
-        (group ? '<span class="sig-group">' + group + '</span>' : '') +
-        '<span class="sig-label ' + (r.side === 'buy' ? 'sig-bull' : 'sig-bear') + '">' + (r.side === 'buy' ? '買超' : '賣超') + ' ' + pct.toFixed(0) + '%</span>' +
-        priceCols +
-      '</div>';
-  }).join('') + '</div>';
+  return '<div class="signal-list">' + rows.map(rankingRowHtml).join('') + '</div>';
+}
+function nowTabRowsHtml(events, rankingRows){
+  if (!events.length && !rankingRows.length) return signalRowsHtml([]);
+  const items = [
+    ...events.map((ev) => ({ ts: ev.ts || 0, html: signalEventRowHtml(ev) })),
+    ...rankingRows.map((r) => ({ ts: r.lastTs || 0, html: rankingRowHtml(r) })),
+  ];
+  items.sort((a, b) => b.ts - a.ts);
+  return '<div class="signal-list">' + items.map((it) => it.html).join('') + '</div>';
 }
 
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
   const bigHolderRows = mainForceRanking.filter((r) => Math.abs(r.netVolume) >= BIG_HOLDER_THRESHOLD);
   const countFor = (key) => {
-    if (key === 'now') return todaySignalEvents.length;
-    if (key === 'history') return null;
+    if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
+    if (key === 'history' || key === 'afterHoursFixedPrice') return null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
@@ -1758,8 +1812,25 @@ function renderSignalCenter(){
     });
   } else if (active === 'bigHolderForce'){
     body.innerHTML = rankingRowsHtml(bigHolderRows);
+  } else if (active === 'now'){
+    body.innerHTML = nowTabRowsHtml(todaySignalEvents, bigHolderRows);
+  } else if (active === 'afterHoursFixedPrice'){
+    if (!isAfterHoursFixedPriceWindow()){
+      body.innerHTML = '<div class="signal-note">尚未到14:30盤後定價公布時間，先顯示盤中大戶力排行；14:30後自動切換為盤後定價成交價/成交量。</div>' + rankingRowsHtml(bigHolderRows);
+    } else {
+      body.innerHTML = '<div class="signal-empty"><div class="se-title">讀取中…</div></div>';
+      fetchAfterHoursFixedPrice().then((entries) => {
+        const el = document.getElementById('signalBody');
+        if (el && signalCenterState.activeTab === 'afterHoursFixedPrice') el.innerHTML = afterHoursRowsHtml(entries);
+      }).catch(() => {
+        const el = document.getElementById('signalBody');
+        if (el && signalCenterState.activeTab === 'afterHoursFixedPrice'){
+          el.innerHTML = '<div class="signal-note">盤後定價資料讀取失敗，暫時顯示盤中大戶力排行。</div>' + rankingRowsHtml(bigHolderRows);
+        }
+      });
+    }
   } else {
-    const events = active === 'now' ? todaySignalEvents : todaySignalEvents.filter((e) => e.tabs.includes(active));
+    const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
     body.innerHTML = signalRowsHtml(events);
   }
 }
@@ -2229,6 +2300,13 @@ export default {
         return await proxyHanstockBars("/api/hub/index/otc/strength");
       } catch (err) {
         return Response.json({ status: "error", error: String(err), ready: false }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/after-hours-fixed-price") {
+      try {
+        return await proxyHanstockBars("/api/hub/after-hours-fixed-price" + url.search);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), entries: [] }, { status: 502 });
       }
     }
     if (url.pathname === "/api/groups") {

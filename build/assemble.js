@@ -173,6 +173,13 @@ export default {
         return Response.json({ status: "error", error: String(err), ready: false }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/after-hours-fixed-price") {
+      try {
+        return await proxyHanstockBars("/api/hub/after-hours-fixed-price" + url.search);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), entries: [] }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/groups") {
       try {
         const quotes = await fetchQuotes(ALL_CODES);
