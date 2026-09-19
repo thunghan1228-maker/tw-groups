@@ -1224,6 +1224,7 @@ function updateChartTooltipAt(clientX){
   const plotW = rect.width - PAD.left - PAD.right;
   let i = Math.floor((x - PAD.left) / plotW * bars.length);
   i = Math.max(0, Math.min(bars.length - 1, i));
+  const indexChanged = currentChart.hoverIndex !== i;
   currentChart.hoverIndex = i;
   const b = bars[i];
   tooltip.hidden = false;
@@ -1239,6 +1240,12 @@ function updateChartTooltipAt(clientX){
     }).join('');
   }
   tooltip.innerHTML = html;
+  // 十字線/高亮K棒畫的位置是xAt(hoverIndex)，量化到bar索引，游標還在同一根
+  // K棒範圍內移動時，重畫canvas只會畫出像素完全一樣的結果。滑鼠在畫面上
+  // 移動時mousemove觸發頻率很高，每次都整個canvas重繪（現在還疊了不少
+  // 5分K訊號符號）會讓主執行緒忙不過來，連打字這種其他互動都跟著變遲鈍；
+  // 只有真的換到不同K棒時才需要重繪。
+  if (!indexChanged) return;
   updateMaLegend(vStart + i);
   drawChart();
 }
