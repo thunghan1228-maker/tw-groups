@@ -286,7 +286,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .signal-row .sig-code{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0;}
   .signal-row .sig-group{color:var(--muted);font-size:11px;background:var(--panel-2);border-radius:6px;padding:1px 8px;flex-shrink:0;white-space:nowrap;}
   .signal-row .sig-name{font-weight:700;flex-shrink:0;}
-  .signal-row .sig-label{color:var(--text);opacity:.85;}
+  .signal-row .sig-label{color:var(--text);opacity:.85;white-space:nowrap;flex-shrink:0;}
   .signal-row .sig-label.sig-bull{background:var(--up);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
   .signal-row .sig-label.sig-bear{background:var(--down);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
   .signal-modal-inner > *{zoom:1.3;}
