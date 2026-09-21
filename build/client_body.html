@@ -1852,6 +1852,15 @@ async function refreshSignalData(){
   if (!document.getElementById('signalModal').hidden) renderSignalCenter();
 }
 
+// 瞬間大單/特大買賣單標籤的hover提示文字：門檻定義要跟後端
+// intraday_large_order.py的MIN_BURST_LOTS/AMOUNT、EXTRA_BURST_LOTS/AMOUNT
+// 一致(1秒內同方向成交量或金額任一達標即觸發，兩個門檻用OR不是AND)。
+const LARGE_ORDER_TOOLTIPS = {
+  '瞬間大單連續敲進': '1秒內同方向成交量 ≥ 100張 或 ≥ 3,000萬元',
+  '瞬間大單連續倒出': '1秒內同方向成交量 ≥ 100張 或 ≥ 3,000萬元',
+  '瞬間特大買單敲進': '1秒內同方向成交量 ≥ 300張 或 ≥ 5,000萬元',
+  '瞬間特大賣單倒出': '1秒內同方向成交量 ≥ 300張 或 ≥ 5,000萬元',
+};
 function signalEventRowHtml(ev){
   const labelCls = ev.isBuy != null
     ? (ev.isBuy ? ' sig-bull' : ' sig-bear')
@@ -1859,12 +1868,13 @@ function signalEventRowHtml(ev){
   const group = lookupStockGroup(ev.code);
   const quote = getStockQuote(ev.code);
   const priceCols = quote ? stockValueColsHtml(quote.price, quote.price - quote.price / (1 + quote.changePercent / 100), quote.changePercent) : '';
+  const labelTitle = LARGE_ORDER_TOOLTIPS[ev.label] || '';
   return '<div class="signal-row" data-code="' + ev.code + '" data-name="' + ev.name + '">' +
     '<span class="sig-time">' + ev.time + '</span>' +
     '<span class="sig-code">' + ev.code + '</span>' +
     '<span class="sig-name">' + ev.name + '</span>' +
     (group ? '<span class="sig-group">' + group + '</span>' : '') +
-    '<span class="sig-label' + labelCls + '">' + ev.label + '</span>' +
+    '<span class="sig-label' + labelCls + '"' + (labelTitle ? ' title="' + labelTitle + '"' : '') + '>' + ev.label + '</span>' +
     priceCols +
   '</div>';
 }
