@@ -917,9 +917,27 @@ function drawChart(){
 
   ctx.fillStyle = '#a89c8f';
   ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  // 分K圖(m5/m1)常常一次帶出好幾個交易日的資料(例如bars5range)，X軸如果
+  // 只顯示「時:分」，同一排標籤在跨日的地方時間會看起來像跳來跳去(例如
+  // 13:20接著跳回09:00)，容易誤以為是資料錯亂甚至看到「未來」的時間。
+  // 只有在這次的bars真的橫跨不只一天時才啟用「跨日改顯示日期」，單日
+  // 資料(含demo回退)維持原樣、不無端在第一個標籤加上日期；日線圖每根
+  // 本來就是不同天，也維持原本只顯示月/日不受影響。
+  const sameCalendarDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const spansMultipleDays = currentChart.tf !== 'daily' && bars.length > 1 &&
+    !sameCalendarDay(new Date(bars[0].ts), new Date(bars[bars.length - 1].ts));
+  let prevAxisLabelDay = null;
   for (let k = 0; k <= 5; k++){
     const i = Math.round((bars.length - 1) * k / 5);
-    ctx.fillText(bars[i].label, xAt(i), cssH - padBottom + 4);
+    const bar = bars[i];
+    let text = bar.label;
+    if (spansMultipleDays){
+      const d = new Date(bar.ts);
+      const dayKey = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+      if (dayKey !== prevAxisLabelDay) text = bar.fullLabel;
+      prevAxisLabelDay = dayKey;
+    }
+    ctx.fillText(text, xAt(i), cssH - padBottom + 4);
   }
 
   // 右側價位標籤：滑鼠/手指移到哪一根就跟著顯示那一根的收盤價，沒有移動時預設顯示最後一根的收盤價
