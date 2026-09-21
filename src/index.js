@@ -1061,6 +1061,20 @@ function drawVolumePanel(){
   });
   ctx.fillStyle = '#a89c8f'; ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
   ctx.fillText('量 上限' + Math.round(maxVol) + '張', PAD.left, 2);
+
+  if (currentChart.hoverIndex != null){
+    const hi = Math.max(0, Math.min(bars.length - 1, currentChart.hoverIndex));
+    const hx = xAt(hi);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(241,236,230,0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(hx, padTop); ctx.lineTo(hx, cssH - padBottom); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#f1ece6'; ctx.font = '9px -apple-system, sans-serif';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText('量 ' + Math.round(bars[hi].volume) + '張', cssW - PAD.right, 2);
+  }
 }
 
 function drawForcePanel(){
@@ -1110,6 +1124,22 @@ function drawForcePanel(){
   ctx.fillText('+' + Math.round(maxAbsCum) + '張', cssW - PAD.right + 6, padTop + 6);
   ctx.fillText('0', cssW - PAD.right + 6, zeroY);
   ctx.fillText('-' + Math.round(maxAbsCum) + '張', cssW - PAD.right + 6, cssH - padBottom - 6);
+
+  if (currentChart.hoverIndex != null){
+    const hi = Math.max(0, Math.min(flow.length - 1, currentChart.hoverIndex));
+    const hx = xAt(hi);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(241,236,230,0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(hx, padTop); ctx.lineTo(hx, cssH - padBottom); ctx.stroke();
+    ctx.restore();
+    const netHere = flow[hi].net;
+    ctx.fillStyle = netHere >= 0 ? '#e6675f' : '#5fae6f';
+    ctx.font = '9px -apple-system, sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText((netHere >= 0 ? '+' : '') + Math.round(netHere) + '張', PAD.left, padTop - 6);
+  }
 }
 
 function drawMacdPanel(){
@@ -1291,7 +1321,7 @@ function updateChartTooltipAt(clientX, clientY){
   // 只有真的換到不同K棒時才需要重繪。
   if (!indexChanged) return;
   updateMaLegend(vStart + i);
-  drawChart();
+  redrawAll();
 }
 
 function attachChartInteraction(){
@@ -1413,10 +1443,30 @@ async function fetchRealBars(code, tf){
   return data.bars.map(tsToBar);
 }
 
+async function fetchMainForceRange(path){
+  // 永久保存的主力進出副圖(多日)；抓不到或格式不對就當作沒有歷史主力資料，
+  // 不影響K線本身的OHLC，只是mainNet保持null。
+  try {
+    const res = await fetch(path);
+    if (!res.ok) return new Map();
+    const data = await res.json();
+    if (!data || !Array.isArray(data.bars)) return new Map();
+    return new Map(
+      data.bars
+        .filter((b) => b && Number.isFinite(b.ts) && b.main_force_available !== false && Number.isFinite(b.main_net_volume))
+        .map((b) => [b.ts, b.main_net_volume])
+    );
+  } catch (e) {
+    return new Map();
+  }
+}
+
 async function fetchRealBars5Range(code){
-  // 5分K 補多天歷史（今日以外的天沒有主力逐筆資料，mainNet 會是 null）
-  const [rangeRes, todayBars] = await Promise.all([
+  // 5分K 補多天歷史：OHLC來自Shioaji kbars回補；主力淨量分兩層合併——
+  // 永久保存的歷史逐日資料先墊底，今日即時Hub資料較新，覆蓋在最上層。
+  const [rangeRes, historyForceByTs, todayBars] = await Promise.all([
     fetch('/api/bars5range/' + code),
+    fetchMainForceRange('/api/force5range/' + code),
     fetchRealBars(code, 'm5').catch(() => []),
   ]);
   if (!rangeRes.ok) throw new Error('bars5range http ' + rangeRes.status);
@@ -1425,6 +1475,26 @@ async function fetchRealBars5Range(code){
   const todayByTs = new Map(todayBars.map((b) => [b.ts, b.mainNet]));
   return rangeData.bars.map((b) => {
     const bar = tsToBar(b);
+    if (historyForceByTs.has(bar.ts)) bar.mainNet = historyForceByTs.get(bar.ts);
+    if (todayByTs.has(bar.ts)) bar.mainNet = todayByTs.get(bar.ts);
+    return bar;
+  });
+}
+
+async function fetchRealBars1Range(code){
+  // 1分K 補多天歷史（至少3天，含今天），主力淨量合併邏輯跟5分K相同。
+  const [rangeRes, historyForceByTs, todayBars] = await Promise.all([
+    fetch('/api/bars1mrange/' + code),
+    fetchMainForceRange('/api/force1range/' + code),
+    fetchRealBars(code, 'm1').catch(() => []),
+  ]);
+  if (!rangeRes.ok) throw new Error('bars1mrange http ' + rangeRes.status);
+  const rangeData = await rangeRes.json();
+  if (!rangeData || !Array.isArray(rangeData.bars) || !rangeData.bars.length) throw new Error('bars1mrange empty');
+  const todayByTs = new Map(todayBars.map((b) => [b.ts, b.mainNet]));
+  return rangeData.bars.map((b) => {
+    const bar = tsToBar(b);
+    if (historyForceByTs.has(bar.ts)) bar.mainNet = historyForceByTs.get(bar.ts);
     if (todayByTs.has(bar.ts)) bar.mainNet = todayByTs.get(bar.ts);
     return bar;
   });
@@ -1468,7 +1538,7 @@ async function switchTimeframe(tf){
   if (tf === 'm5'){
     try { bars = await fetchRealBars5Range(currentChart.code); isReal = true; } catch (e) { bars = null; }
   } else if (tf === 'm1'){
-    try { bars = await fetchRealBars(currentChart.code, tf); isReal = true; } catch (e) { bars = null; }
+    try { bars = await fetchRealBars1Range(currentChart.code); isReal = true; } catch (e) { bars = null; }
   } else if (tf === 'daily'){
     try { bars = await fetchRealDailyBars(currentChart.code); isReal = true; } catch (e) { bars = null; }
   }
@@ -2566,11 +2636,47 @@ export default {
         }
       }
     }
+    if (url.pathname.indexOf("/api/bars1mrange/") === 0) {
+      const code = url.pathname.slice("/api/bars1mrange/".length);
+      if (codePattern.test(code)) {
+        try {
+          // 1分K 多日歷史（至少3天，含今天）。
+          const upstreamPath = "/api/hub/history1m/" + encodeURIComponent(code) + "?calendar_days=5";
+          return await proxyHanstockBars(upstreamPath);
+        } catch (err) {
+          return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
+        }
+      }
+    }
     if (url.pathname.indexOf("/api/bars1d/") === 0) {
       const code = url.pathname.slice("/api/bars1d/".length);
       if (codePattern.test(code)) {
         try {
           const upstreamPath = "/api/hub/bars1d/" + encodeURIComponent(code) + "?limit=260";
+          return await proxyHanstockBars(upstreamPath);
+        } catch (err) {
+          return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
+        }
+      }
+    }
+    if (url.pathname.indexOf("/api/force5range/") === 0) {
+      const code = url.pathname.slice("/api/force5range/".length);
+      if (codePattern.test(code)) {
+        try {
+          // 永久保存的5分K主力進出副圖，多日歷史（不是只有今天）。
+          const upstreamPath = "/api/hub/force/bars/" + encodeURIComponent(code) + "?interval=5m&days=10&backfill=false";
+          return await proxyHanstockBars(upstreamPath);
+        } catch (err) {
+          return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
+        }
+      }
+    }
+    if (url.pathname.indexOf("/api/force1range/") === 0) {
+      const code = url.pathname.slice("/api/force1range/".length);
+      if (codePattern.test(code)) {
+        try {
+          // 永久保存的1分K主力進出副圖，多日歷史（不是只有今天）。
+          const upstreamPath = "/api/hub/force/bars/" + encodeURIComponent(code) + "?interval=1m&days=10&backfill=false";
           return await proxyHanstockBars(upstreamPath);
         } catch (err) {
           return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });

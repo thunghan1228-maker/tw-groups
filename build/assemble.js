@@ -186,11 +186,47 @@ export default {
         }
       }
     }
+    if (url.pathname.indexOf("/api/bars1mrange/") === 0) {
+      const code = url.pathname.slice("/api/bars1mrange/".length);
+      if (codePattern.test(code)) {
+        try {
+          // 1分K 多日歷史（至少3天，含今天）。
+          const upstreamPath = "/api/hub/history1m/" + encodeURIComponent(code) + "?calendar_days=5";
+          return await proxyHanstockBars(upstreamPath);
+        } catch (err) {
+          return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
+        }
+      }
+    }
     if (url.pathname.indexOf("/api/bars1d/") === 0) {
       const code = url.pathname.slice("/api/bars1d/".length);
       if (codePattern.test(code)) {
         try {
           const upstreamPath = "/api/hub/bars1d/" + encodeURIComponent(code) + "?limit=260";
+          return await proxyHanstockBars(upstreamPath);
+        } catch (err) {
+          return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
+        }
+      }
+    }
+    if (url.pathname.indexOf("/api/force5range/") === 0) {
+      const code = url.pathname.slice("/api/force5range/".length);
+      if (codePattern.test(code)) {
+        try {
+          // 永久保存的5分K主力進出副圖，多日歷史（不是只有今天）。
+          const upstreamPath = "/api/hub/force/bars/" + encodeURIComponent(code) + "?interval=5m&days=10&backfill=false";
+          return await proxyHanstockBars(upstreamPath);
+        } catch (err) {
+          return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
+        }
+      }
+    }
+    if (url.pathname.indexOf("/api/force1range/") === 0) {
+      const code = url.pathname.slice("/api/force1range/".length);
+      if (codePattern.test(code)) {
+        try {
+          // 永久保存的1分K主力進出副圖，多日歷史（不是只有今天）。
+          const upstreamPath = "/api/hub/force/bars/" + encodeURIComponent(code) + "?interval=1m&days=10&backfill=false";
           return await proxyHanstockBars(upstreamPath);
         } catch (err) {
           return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
