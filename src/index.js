@@ -1751,6 +1751,7 @@ function mapLargeOrderSignal(s){
   return {
     tabs: isFourGate ? ['now', 'fourGate'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : ['now', 'groupBigOrder', isBuy ? 'bigBuy' : 'bigSell']),
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
+    ts: s.barTs,
     code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label, isBuy,
   };
 }
@@ -1934,19 +1935,16 @@ function rankingRowsHtml(rows){
 }
 function nowTabRowsHtml(events, rankingRows){
   if (!events.length && !rankingRows.length) return signalRowsHtml([]);
-  // 兩種資料本質不同：events是有明確發生時刻的訊號（時間固定不變），
-  // rankingRows是持續累計的排行（時間欄位是資料更新到的時間，不是事件發生
-  // 時間，每次都會往前跳）。混在一起依時間排序，會讓排行榜（幾乎永遠是
-  // 「現在」）長期霸佔最前面，蓋掉真正的新訊號，看起來像「訊號都不更新」。
-  // 所以分成兩段各自呈現，不互相排序。排行榜放在事件訊號「之前」：
-  // 事件訊號一天可能累積到幾百筆，排行榜放在後面等於要滑到底才看得到，
-  // 使用者反應在「今日即時」裡根本看不到盤中大戶力。
-  const eventsHtml = events.length ? '<div class="signal-list">' + events.map(signalEventRowHtml).join('') + '</div>' : '';
-  const rankingHtml = rankingRows.length
-    ? '<div class="signal-section-title">盤中大戶力累計排行（時間為資料更新時間，非個別訊號發生時間）</div>' +
-      '<div class="signal-list">' + rankingRows.map(rankingRowHtml).join('') + '</div>'
-    : '';
-  return rankingHtml + eventsHtml;
+  // 使用者要求：全部訊號依實際發生時間新到舊排序，不要再分事件/排行
+  // 兩段各自呈現。rankingRows的時間(lastTs)是那檔股票主力副圖最後一根
+  // bar的時間，個股之間本來就不一樣，不是統一的「現在」，可以跟事件
+  // 訊號的barTs放在同一個時間軸上比較、排序。
+  const merged = [
+    ...events.map((ev) => ({ sortTs: ev.ts || 0, html: signalEventRowHtml(ev) })),
+    ...rankingRows.map((r) => ({ sortTs: r.lastTs || 0, html: rankingRowHtml(r) })),
+  ];
+  merged.sort((a, b) => b.sortTs - a.sortTs);
+  return '<div class="signal-list">' + merged.map((m) => m.html).join('') + '</div>';
 }
 
 function renderSignalCenter(){
