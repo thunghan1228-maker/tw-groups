@@ -1755,6 +1755,9 @@ let todaySignalEvents = [];
 let mainForceRanking = [];
 let signalDataIsReal = false;
 const BIG_HOLDER_THRESHOLD = 500; // 累計買賣超達 500 張視為大戶力，跟K線圖大戶定義一致
+function bigHolderRowsFrom(ranking){
+  return ranking.filter((r) => Math.abs(r.netVolume) >= BIG_HOLDER_THRESHOLD);
+}
 
 function lookupStockName(code){
   for (const g of GROUPS){
@@ -1897,7 +1900,9 @@ async function refreshSignalData(){
     signalDataIsReal = false;
   }
   const countEl = document.getElementById('signalBadgeCount');
-  if (countEl) countEl.textContent = String(todaySignalEvents.length);
+  // 跟「今日即時」分頁的數量算法要一致(事件訊號+盤中大戶力)，不然這裡
+  // 少算大戶力筆數，右上角徽章數字就會比今日即時分頁裡的數字還小。
+  if (countEl) countEl.textContent = String(todaySignalEvents.length + bigHolderRowsFrom(mainForceRanking).length);
   if (!document.getElementById('signalModal').hidden) renderSignalCenter();
 }
 
@@ -1982,7 +1987,7 @@ function nowTabRowsHtml(events, rankingRows){
 
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
-  const bigHolderRows = mainForceRanking.filter((r) => Math.abs(r.netVolume) >= BIG_HOLDER_THRESHOLD);
+  const bigHolderRows = bigHolderRowsFrom(mainForceRanking);
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
     if (key === 'history' || key === 'afterHoursFixedPrice') return null;
