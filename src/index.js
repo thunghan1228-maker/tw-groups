@@ -1938,13 +1938,15 @@ function nowTabRowsHtml(events, rankingRows){
   // rankingRows是持續累計的排行（時間欄位是資料更新到的時間，不是事件發生
   // 時間，每次都會往前跳）。混在一起依時間排序，會讓排行榜（幾乎永遠是
   // 「現在」）長期霸佔最前面，蓋掉真正的新訊號，看起來像「訊號都不更新」。
-  // 所以分成兩段各自呈現，不互相排序。
+  // 所以分成兩段各自呈現，不互相排序。排行榜放在事件訊號「之前」：
+  // 事件訊號一天可能累積到幾百筆，排行榜放在後面等於要滑到底才看得到，
+  // 使用者反應在「今日即時」裡根本看不到盤中大戶力。
   const eventsHtml = events.length ? '<div class="signal-list">' + events.map(signalEventRowHtml).join('') + '</div>' : '';
   const rankingHtml = rankingRows.length
     ? '<div class="signal-section-title">盤中大戶力累計排行（時間為資料更新時間，非個別訊號發生時間）</div>' +
       '<div class="signal-list">' + rankingRows.map(rankingRowHtml).join('') + '</div>'
     : '';
-  return eventsHtml + rankingHtml;
+  return rankingHtml + eventsHtml;
 }
 
 function renderSignalCenter(){
