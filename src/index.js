@@ -912,8 +912,8 @@ function drawChart(){
       }
       if (currentChart.tf === 'm5'){
         const todayFirstBar = allBars[todayStart];
-        drawHRangeLine(todayStart, today1030Index, todayFirstBar.high, '#ef4444', 1.5, []);
-        drawHRangeLine(todayStart, today1030Index, todayFirstBar.low, '#6366f1', 1.5, []);
+        drawHRangeLine(todayStart, today1030Index, todayFirstBar.high, '#ef4444', 4.5, []);
+        drawHRangeLine(todayStart, today1030Index, todayFirstBar.low, '#6366f1', 4.5, []);
       }
 
       const prevEnd = todayStart - 1;
@@ -1012,35 +1012,6 @@ function drawChart(){
     ctx.font = '10px -apple-system, sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(tagPrice.toFixed(2), cssW - tagW / 2, ty + tagH / 2);
-    ctx.restore();
-  }
-
-  // 五分鐘K盤中訊號符號：多方疊在K棒上方、空方疊在下方；同一根K棒多個
-  // 訊號時往外堆疊，避免重疊。字體特意調大，避免符號太小看不清楚。
-  if (currentChart.tf === 'm5' && currentChart.klineSignalsByBarTs && currentChart.klineSignalsByBarTs.size){
-    ctx.save();
-    ctx.font = 'bold 21px -apple-system, sans-serif';
-    ctx.textAlign = 'center';
-    bars.forEach((b, i) => {
-      const list = currentChart.klineSignalsByBarTs.get(b.ts);
-      if (!list || !list.length) return;
-      const x = xAt(i);
-      let bullOffset = 0, bearOffset = 0;
-      list.forEach((s) => {
-        const info = KLINE_SIGNAL_INFO[s.kind];
-        if (!info) return;
-        ctx.fillStyle = info.color;
-        if (info.side === 'bear'){
-          ctx.textBaseline = 'top';
-          ctx.fillText(info.symbol, x, yAt(b.low) + 4 + bearOffset);
-          bearOffset += 26;
-        } else {
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(info.symbol, x, yAt(b.high) - 4 - bullOffset);
-          bullOffset += 26;
-        }
-      });
-    });
     ctx.restore();
   }
 
