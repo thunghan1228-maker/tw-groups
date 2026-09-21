@@ -233,6 +233,23 @@ export default {
         }
       }
     }
+    if (url.pathname.indexOf("/api/force-backfill/") === 0) {
+      const code = url.pathname.slice("/api/force-backfill/".length);
+      if (codePattern.test(code)) {
+        try {
+          // 觸發指定交易日的主力副圖背景回補(用Shioaji api.ticks()重建)；
+          // limit=1是因為呼叫端只要側效果，不需要真的把K棒資料拉回來。
+          const interval = url.searchParams.get("interval") === "1m" ? "1m" : "5m";
+          const tradeDate = url.searchParams.get("trade_date") || "";
+          const upstreamPath = "/api/hub/force/bars/" + encodeURIComponent(code) +
+            "?interval=" + interval + "&trade_date=" + encodeURIComponent(tradeDate) +
+            "&backfill=true&limit=1";
+          return await proxyHanstockBars(upstreamPath);
+        } catch (err) {
+          return Response.json({ status: "error", error: String(err) }, { status: 502 });
+        }
+      }
+    }
     if (url.pathname === "/api/main-force-ranking") {
       try {
         return await proxyHanstockBars("/api/hub/main-force/ranking" + url.search);

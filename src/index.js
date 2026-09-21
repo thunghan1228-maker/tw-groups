@@ -1441,6 +1441,34 @@ async function fetchMainForceRange(path){
   }
 }
 
+function taipeiDateStr(ts){
+  // 不依賴瀏覽器本身的時區設定，直接位移UTC+8再用UTC存取子，確保跟後端
+  // 判斷交易日的方式一致，不管使用者電腦設的是哪個時區。
+  const shifted = new Date(ts + 8 * 60 * 60 * 1000);
+  const y = shifted.getUTCFullYear();
+  const m = String(shifted.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(shifted.getUTCDate()).padStart(2, '0');
+  return y + '-' + m + '-' + d;
+}
+
+function triggerMainForceBackfill(code, interval, bars){
+  // 主力副圖的歷史資料只在那個交易日「當時有被即時追蹤」才會被收集器存下來；
+  // 沒追蹤到的交易日要靠後端既有的背景回補機制(用Shioaji api.ticks()重建
+  // 逐筆大單，每15秒處理一個交易日)補回來。這裡只負責把缺的交易日排進
+  // 回補佇列，fire-and-forget不等結果，不拖慢K線圖顯示；補到的資料通常要
+  // 等個一兩分鐘、重新開一次圖表才看得到。
+  if (!bars || !bars.length) return;
+  const today = taipeiDateStr(Date.now());
+  const dates = new Set();
+  bars.forEach((b) => {
+    const d = taipeiDateStr(b.ts);
+    if (d !== today) dates.add(d);
+  });
+  dates.forEach((d) => {
+    fetch('/api/force-backfill/' + code + '?interval=' + interval + '&trade_date=' + d).catch(() => {});
+  });
+}
+
 async function fetchRealBars5Range(code){
   // 5分K 補多天歷史：OHLC來自Shioaji kbars回補；主力淨量分兩層合併——
   // 永久保存的歷史逐日資料先墊底，今日即時Hub資料較新，覆蓋在最上層。
@@ -1452,6 +1480,7 @@ async function fetchRealBars5Range(code){
   if (!rangeRes.ok) throw new Error('bars5range http ' + rangeRes.status);
   const rangeData = await rangeRes.json();
   if (!rangeData || !Array.isArray(rangeData.bars) || !rangeData.bars.length) throw new Error('bars5range empty');
+  triggerMainForceBackfill(code, '5m', rangeData.bars);
   const todayByTs = new Map(todayBars.map((b) => [b.ts, b.mainNet]));
   return rangeData.bars.map((b) => {
     const bar = tsToBar(b);
@@ -1471,6 +1500,7 @@ async function fetchRealBars1Range(code){
   if (!rangeRes.ok) throw new Error('bars1mrange http ' + rangeRes.status);
   const rangeData = await rangeRes.json();
   if (!rangeData || !Array.isArray(rangeData.bars) || !rangeData.bars.length) throw new Error('bars1mrange empty');
+  triggerMainForceBackfill(code, '1m', rangeData.bars);
   const todayByTs = new Map(todayBars.map((b) => [b.ts, b.mainNet]));
   return rangeData.bars.map((b) => {
     const bar = tsToBar(b);
@@ -2617,6 +2647,23 @@ export default {
           return await proxyHanstockBars(upstreamPath);
         } catch (err) {
           return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
+        }
+      }
+    }
+    if (url.pathname.indexOf("/api/force-backfill/") === 0) {
+      const code = url.pathname.slice("/api/force-backfill/".length);
+      if (codePattern.test(code)) {
+        try {
+          // 觸發指定交易日的主力副圖背景回補(用Shioaji api.ticks()重建)；
+          // limit=1是因為呼叫端只要側效果，不需要真的把K棒資料拉回來。
+          const interval = url.searchParams.get("interval") === "1m" ? "1m" : "5m";
+          const tradeDate = url.searchParams.get("trade_date") || "";
+          const upstreamPath = "/api/hub/force/bars/" + encodeURIComponent(code) +
+            "?interval=" + interval + "&trade_date=" + encodeURIComponent(tradeDate) +
+            "&backfill=true&limit=1";
+          return await proxyHanstockBars(upstreamPath);
+        } catch (err) {
+          return Response.json({ status: "error", error: String(err) }, { status: 502 });
         }
       }
     }
