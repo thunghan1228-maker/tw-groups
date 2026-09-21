@@ -205,10 +205,6 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chart-modal.fullscreen .chart-canvas-wrap.macd-wrap{height:130px;}
   .chart-modal.fullscreen .chart-canvas-wrap.kd-wrap{height:130px;}
   #klineCanvas,#volumeCanvas,#forceCanvas,#macdCanvas,#kdCanvas{display:block;width:100%;height:100%;touch-action:none;}
-  .chart-tooltip{position:absolute;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text);pointer-events:none;white-space:nowrap;font-variant-numeric:tabular-nums;}
-  .chart-tooltip.has-signals{white-space:normal;max-width:300px;}
-  .chart-tooltip .ct-signal{margin-top:5px;padding-top:5px;border-top:1px solid var(--line);font-size:13px;line-height:1.5;}
-  .chart-tooltip .ct-signal b{font-size:15px;}
 
   .ind-panel-block{margin-top:10px;}
   .ind-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
@@ -405,7 +401,6 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="ind-settings" id="maControls" hidden></div>
     <div class="chart-canvas-wrap price-wrap">
       <canvas id="klineCanvas"></canvas>
-      <div class="chart-tooltip" id="chartTooltip" hidden></div>
     </div>
     <div class="force-panel" id="forcePanelWrap" hidden>
       <div class="force-panel-head">
@@ -688,7 +683,6 @@ let currentChart = {
   code: null, name: null, tf: 'daily', bars: null, force: null, macd: null, kd: null,
   maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, hoverIndex: null,
   viewStart: 0, viewCount: null, isRealBars: false, requestToken: 0,
-  klineSignalsByBarTs: null,
 };
 
 // 五分鐘K盤中訊號符號／顏色／白話解釋；規格來源見HANSTOCK策略定義備份文件。
@@ -1293,7 +1287,6 @@ function updateMaLegend(absIndex){
 }
 function updateChartTooltipAt(clientX, clientY){
   const canvas = document.getElementById('klineCanvas');
-  const tooltip = document.getElementById('chartTooltip');
   const allBars = currentChart.bars;
   if (!allBars) return;
   const { start: vStart, count: vCount } = visibleRange(allBars.length);
@@ -1305,46 +1298,10 @@ function updateChartTooltipAt(clientX, clientY){
   i = Math.max(0, Math.min(bars.length - 1, i));
   const indexChanged = currentChart.hoverIndex !== i;
   currentChart.hoverIndex = i;
-  const b = bars[i];
-  tooltip.hidden = false;
-  const signalsHere = currentChart.klineSignalsByBarTs ? currentChart.klineSignalsByBarTs.get(b.ts) : null;
-  const hasSignals = !!(signalsHere && signalsHere.length);
-  tooltip.classList.toggle('has-signals', hasSignals);
-  if (hasSignals){
-    // 疊了好幾個訊號說明時，提示框又高又寬（最寬300px），跟著游標走的話
-    // 一定會蓋到游標正在看的那根K棒，游標在下半部時甚至會整個往下溢出
-    // 蓋到主力買賣力副圖。改成固定貼在左下角、不跟著游標移動：從下往上
-    // 長，寬度也不會跟著右側K棒一起被蓋住，K線圖跟主力副圖都留得出來。
-    tooltip.style.left = '8px';
-    tooltip.style.top = 'auto';
-    tooltip.style.bottom = '8px';
-  } else {
-    tooltip.style.left = Math.min(rect.width - 190, Math.max(0, x + 8)) + 'px';
-    // 沒有訊號的簡單提示框只有一行、範圍小，維持原本跟著游標垂直位置
-    // 錯開顯示：游標在畫布上半部時提示框貼底，下半部則貼頂，確保游標
-    // 所在那一帶一定露出來。
-    const y = (clientY != null ? clientY : rect.top) - rect.top;
-    if (y < rect.height / 2){
-      tooltip.style.top = 'auto';
-      tooltip.style.bottom = '8px';
-    } else {
-      tooltip.style.top = '8px';
-      tooltip.style.bottom = 'auto';
-    }
-  }
-  let html = b.fullLabel + '　開' + b.open.toFixed(2) + ' 高' + b.high.toFixed(2) + ' 低' + b.low.toFixed(2) + ' 收' + b.close.toFixed(2) + ' 量' + b.volume;
-  if (signalsHere && signalsHere.length){
-    html += signalsHere.map((s) => {
-      const info = KLINE_SIGNAL_INFO[s.kind] || { symbol: '', color: '#c9a98c', desc: s.label };
-      return '<div class="ct-signal"><b style="color:' + info.color + '">' + info.symbol + ' ' + s.label + '</b><br>' + info.desc + '</div>';
-    }).join('');
-  }
-  tooltip.innerHTML = html;
-  // 十字線/高亮K棒畫的位置是xAt(hoverIndex)，量化到bar索引，游標還在同一根
+  // 十字線/資訊框畫的位置是xAt(hoverIndex)，量化到bar索引，游標還在同一根
   // K棒範圍內移動時，重畫canvas只會畫出像素完全一樣的結果。滑鼠在畫面上
-  // 移動時mousemove觸發頻率很高，每次都整個canvas重繪（現在還疊了不少
-  // 5分K訊號符號）會讓主執行緒忙不過來，連打字這種其他互動都跟著變遲鈍；
-  // 只有真的換到不同K棒時才需要重繪。
+  // 移動時mousemove觸發頻率很高，每次都整個canvas重繪會讓主執行緒忙不過來，
+  // 連打字這種其他互動都跟著變遲鈍；只有真的換到不同K棒時才需要重繪。
   if (!indexChanged) return;
   updateMaLegend(vStart + i);
   redrawAll();
@@ -1352,7 +1309,6 @@ function updateChartTooltipAt(clientX, clientY){
 
 function attachChartInteraction(){
   const canvas = document.getElementById('klineCanvas');
-  const tooltip = document.getElementById('chartTooltip');
   let isDragging = false, dragStartX = 0, dragViewStart = 0, dragViewCount = 0, dragTotal = 0;
 
   canvas.onmousemove = (e) => {
@@ -1361,7 +1317,6 @@ function attachChartInteraction(){
   };
   canvas.onmouseleave = () => {
     if (isDragging) return;
-    tooltip.hidden = true;
     currentChart.hoverIndex = null;
     redrawAll();
   };
@@ -1377,7 +1332,6 @@ function attachChartInteraction(){
     dragViewStart = start;
     dragViewCount = count;
     dragTotal = allBars.length;
-    tooltip.hidden = true;
     canvas.style.cursor = 'grabbing';
     e.preventDefault();
   };
@@ -1573,17 +1527,6 @@ async function switchTimeframe(tf){
   currentChart.bars = bars;
   currentChart.isRealBars = isReal;
 
-  let klineSignalsByBarTs = null;
-  if (tf === 'm5' && isReal && bars.length){
-    // 用圖表實際顯示的最後一根K棒推算交易日，不能讓後端預設成伺服器的
-    // 「今天」——現在如果已經跨到非交易日，伺服器的「今天」查不到任何
-    // 訊號，即使圖表上最後一個交易日明明有資料。
-    const lastTradeDateStr = taipeiDateStr(bars[bars.length - 1].ts);
-    try { klineSignalsByBarTs = await fetchKlineSignalsByBarTs(currentChart.code, lastTradeDateStr); }
-    catch (e) { klineSignalsByBarTs = null; }
-  }
-  if (requestToken !== currentChart.requestToken) return;
-  currentChart.klineSignalsByBarTs = klineSignalsByBarTs;
   document.getElementById('cmDataBadge').hidden = isReal;
 
   if (isReal){
@@ -1915,38 +1858,6 @@ async function fetchAfterHoursFixedPrice(){
   const data = await res.json();
   if (!data || !Array.isArray(data.entries)) throw new Error('bad payload');
   return data.entries;
-}
-
-const FIVE_MIN_MS = 5 * 60 * 1000;
-function taipeiDateStr(ts){
-  // 不依賴瀏覽器本身的時區設定，直接位移UTC+8再用UTC存取子，確保跟後端
-  // 的trade_date（一律以台北時間為準）算出來是同一天，不管使用者電腦
-  // 設的是哪個時區。
-  const shifted = new Date(ts + 8 * 60 * 60 * 1000);
-  const y = shifted.getUTCFullYear();
-  const m = String(shifted.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(shifted.getUTCDate()).padStart(2, '0');
-  return y + '-' + m + '-' + d;
-}
-async function fetchKlineSignalsByBarTs(code, tradeDateStr){
-  // 訊號只在偵測當天累積；tradeDateStr要用「圖表目前顯示的最後一根K棒」的
-  // 交易日，不能讓後端預設成伺服器的「今天」——如果現在已經跨到週末或
-  // 假日，伺服器的「今天」會是非交易日、查不到任何訊號，即使圖表上顯示
-  // 的最後一個交易日（例如週五）明明有資料。barTs是訊號成立時的「收盤
-  // 時間」（bar起始時間+5分），K線圖的bar.ts是「起始時間」，這裡減掉
-  // 5分鐘讓訊號對應到真正觸發它的那根K棒，不是時間上的下一根。
-  const qs = tradeDateStr ? ('?trade_date=' + tradeDateStr) : '';
-  const res = await fetch('/api/kline-signals/' + code + qs);
-  if (!res.ok) throw new Error('kline-signals http ' + res.status);
-  const data = await res.json();
-  if (!data || !Array.isArray(data.signals)) throw new Error('bad payload');
-  const byBarTs = new Map();
-  data.signals.forEach((s) => {
-    const barStartTs = s.barTs - FIVE_MIN_MS;
-    if (!byBarTs.has(barStartTs)) byBarTs.set(barStartTs, []);
-    byBarTs.get(barStartTs).push(s);
-  });
-  return byBarTs;
 }
 
 function taipeiNowParts(){
