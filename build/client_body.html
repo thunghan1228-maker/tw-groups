@@ -112,6 +112,8 @@
   .cm-actions{display:flex;gap:6px;align-items:center;}
   .cm-quick-search{width:120px;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;}
   .cm-quick-search:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .cm-go-btn{flex-shrink:0;background:var(--accent);color:var(--bg);border:1px solid var(--accent);border-radius:8px;height:32px;padding:0 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .cm-go-btn:hover{opacity:0.88;}
   .cm-icon-btn{background:var(--panel);border:1px solid var(--line);color:var(--text);width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;line-height:1;}
   .cm-icon-btn:hover{background:var(--panel-2);}
   .cm-icon-btn.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
@@ -254,6 +256,10 @@
   @media (max-width: 640px){
     .toolbar-bottom{justify-content:flex-start;}
     .tb-btn{min-width:72px;}
+    /* 手機版K線圖視窗：標題列跟快速切換搜尋列擠不下，改成換行成兩列，
+       避免搜尋框、進入分K按鈕被壓縮到點不到。 */
+    .chart-modal-head{flex-wrap:wrap;row-gap:8px;}
+    .cm-actions{width:100%;justify-content:flex-end;}
   }
 
   /* 平板(iPad)以上：盤中訊號中心視窗跟裡面文字放大約1.3倍，方便閱讀。
@@ -326,6 +332,7 @@
       <div><span class="cm-code" id="cmCode"></span><span class="cm-name" id="cmName"></span><span class="cm-data-badge" id="cmDataBadge" hidden>示範資料</span></div>
       <div class="cm-actions">
         <input type="text" class="cm-quick-search" id="cmQuickSearch" placeholder="輸入代號切換">
+        <button class="cm-go-btn" id="cmQuickSearchGoBtn" aria-label="進入分K">進入分K</button>
         <button class="cm-icon-btn" id="cmSettingsToggle" aria-label="指標設定" aria-pressed="false">⚙</button>
         <button class="cm-icon-btn" id="cmMax" aria-label="放大／還原視窗" aria-pressed="false">⛶</button>
         <button class="cm-icon-btn" id="cmClose" aria-label="關閉">✕</button>
@@ -1519,7 +1526,7 @@ function initWindowChrome(){
   const head = document.getElementById('chartModalHead');
   let dragging = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
   head.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.cm-icon-btn') || e.target.closest('.cm-quick-search')) return;
+    if (e.target.closest('.cm-icon-btn') || e.target.closest('.cm-quick-search') || e.target.closest('.cm-go-btn')) return;
     if (document.getElementById('chartModal').classList.contains('fullscreen')) return;
     dragging = true;
     startX = e.clientX; startY = e.clientY;
@@ -2272,16 +2279,20 @@ document.getElementById('stockSearchInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') triggerHomeStockSearch();
 });
 document.getElementById('stockSearchGoBtn').addEventListener('click', triggerHomeStockSearch);
-document.getElementById('cmQuickSearch').addEventListener('keydown', (e) => {
-  if (e.key !== 'Enter') return;
-  const s = findStockByQuery(e.target.value);
+function triggerChartQuickSearch(){
+  const input = document.getElementById('cmQuickSearch');
+  const s = findStockByQuery(input.value);
   if (s){
-    e.target.value = '';
+    input.value = '';
     openStockChart(s.code, s.name, currentChart.tf);
   } else {
     showToast('查無此股票');
   }
+}
+document.getElementById('cmQuickSearch').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') triggerChartQuickSearch();
 });
+document.getElementById('cmQuickSearchGoBtn').addEventListener('click', triggerChartQuickSearch);
 
 document.getElementById('signalBadgeBtn').addEventListener('click', openSignalCenter);
 document.getElementById('alertToggle').addEventListener('click', () => {
