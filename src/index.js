@@ -1281,19 +1281,29 @@ function updateChartTooltipAt(clientX, clientY){
   const b = bars[i];
   tooltip.hidden = false;
   const signalsHere = currentChart.klineSignalsByBarTs ? currentChart.klineSignalsByBarTs.get(b.ts) : null;
-  tooltip.classList.toggle('has-signals', !!(signalsHere && signalsHere.length));
-  tooltip.style.left = Math.min(rect.width - (signalsHere && signalsHere.length ? 310 : 190), Math.max(0, x + 8)) + 'px';
-  // 提示框固定貼頂的話，疊了好幾個訊號說明、整個框拉得很高時，會把游標
-  // 正在查看那一帶的K棒完全蓋住，沒辦法對照指標數字。改成跟游標的垂直
-  // 位置錯開：游標在畫布上半部時提示框貼底顯示，下半部則貼頂顯示，
-  // 確保游標所在那一帶一定露出來。
-  const y = (clientY != null ? clientY : rect.top) - rect.top;
-  if (y < rect.height / 2){
+  const hasSignals = !!(signalsHere && signalsHere.length);
+  tooltip.classList.toggle('has-signals', hasSignals);
+  if (hasSignals){
+    // 疊了好幾個訊號說明時，提示框又高又寬（最寬300px），跟著游標走的話
+    // 一定會蓋到游標正在看的那根K棒，游標在下半部時甚至會整個往下溢出
+    // 蓋到主力買賣力副圖。改成固定貼在左下角、不跟著游標移動：從下往上
+    // 長，寬度也不會跟著右側K棒一起被蓋住，K線圖跟主力副圖都留得出來。
+    tooltip.style.left = '8px';
     tooltip.style.top = 'auto';
     tooltip.style.bottom = '8px';
   } else {
-    tooltip.style.top = '8px';
-    tooltip.style.bottom = 'auto';
+    tooltip.style.left = Math.min(rect.width - 190, Math.max(0, x + 8)) + 'px';
+    // 沒有訊號的簡單提示框只有一行、範圍小，維持原本跟著游標垂直位置
+    // 錯開顯示：游標在畫布上半部時提示框貼底，下半部則貼頂，確保游標
+    // 所在那一帶一定露出來。
+    const y = (clientY != null ? clientY : rect.top) - rect.top;
+    if (y < rect.height / 2){
+      tooltip.style.top = 'auto';
+      tooltip.style.bottom = '8px';
+    } else {
+      tooltip.style.top = '8px';
+      tooltip.style.bottom = 'auto';
+    }
   }
   let html = b.fullLabel + '　開' + b.open.toFixed(2) + ' 高' + b.high.toFixed(2) + ' 低' + b.low.toFixed(2) + ' 收' + b.close.toFixed(2) + ' 量' + b.volume;
   if (signalsHere && signalsHere.length){
