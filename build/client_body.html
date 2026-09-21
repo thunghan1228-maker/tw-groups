@@ -693,7 +693,7 @@ function attachPinchZoom(canvasIds){
         const { start, count } = visibleRange(allBars.length);
         dragStartX = e.touches[0].clientX;
         dragViewStart = start; dragViewCount = count; dragTotal = allBars.length;
-        if (id === 'klineCanvas') updateChartTooltipAt(e.touches[0].clientX);
+        if (id === 'klineCanvas') updateChartTooltipAt(e.touches[0].clientX, e.touches[0].clientY);
       }
     };
 
@@ -727,7 +727,7 @@ function attachPinchZoom(canvasIds){
           currentChart.viewStart = newStart;
           redrawAll();
         }
-        if (id === 'klineCanvas') updateChartTooltipAt(e.touches[0].clientX);
+        if (id === 'klineCanvas') updateChartTooltipAt(e.touches[0].clientX, e.touches[0].clientY);
       }
     };
 
@@ -1158,7 +1158,7 @@ function updateMaLegend(absIndex){
     return '<span class="ma-legend-item" style="color:' + ma.color + '">MA' + ma.period + (v != null ? ' ' + v.toFixed(2) : '') + '</span>';
   }).join('');
 }
-function updateChartTooltipAt(clientX){
+function updateChartTooltipAt(clientX, clientY){
   const canvas = document.getElementById('klineCanvas');
   const tooltip = document.getElementById('chartTooltip');
   const allBars = currentChart.bars;
@@ -1177,7 +1177,18 @@ function updateChartTooltipAt(clientX){
   const signalsHere = currentChart.klineSignalsByBarTs ? currentChart.klineSignalsByBarTs.get(b.ts) : null;
   tooltip.classList.toggle('has-signals', !!(signalsHere && signalsHere.length));
   tooltip.style.left = Math.min(rect.width - (signalsHere && signalsHere.length ? 310 : 190), Math.max(0, x + 8)) + 'px';
-  tooltip.style.top = '8px';
+  // 提示框固定貼頂的話，疊了好幾個訊號說明、整個框拉得很高時，會把游標
+  // 正在查看那一帶的K棒完全蓋住，沒辦法對照指標數字。改成跟游標的垂直
+  // 位置錯開：游標在畫布上半部時提示框貼底顯示，下半部則貼頂顯示，
+  // 確保游標所在那一帶一定露出來。
+  const y = (clientY != null ? clientY : rect.top) - rect.top;
+  if (y < rect.height / 2){
+    tooltip.style.top = 'auto';
+    tooltip.style.bottom = '8px';
+  } else {
+    tooltip.style.top = '8px';
+    tooltip.style.bottom = 'auto';
+  }
   let html = b.fullLabel + '　開' + b.open.toFixed(2) + ' 高' + b.high.toFixed(2) + ' 低' + b.low.toFixed(2) + ' 收' + b.close.toFixed(2) + ' 量' + b.volume;
   if (signalsHere && signalsHere.length){
     html += signalsHere.map((s) => {
@@ -1203,7 +1214,7 @@ function attachChartInteraction(){
 
   canvas.onmousemove = (e) => {
     if (isDragging) return;
-    updateChartTooltipAt(e.clientX);
+    updateChartTooltipAt(e.clientX, e.clientY);
   };
   canvas.onmouseleave = () => {
     if (isDragging) return;
@@ -1691,7 +1702,10 @@ function mapLargeOrderSignal(s){
 }
 
 async function fetchRealSignals(dateStr){
-  const res = await fetch('/api/intraday-signals?trade_date=' + dateStr + '&limit=500');
+  // limit要跟後端load_latest_signals()真正的上限(5000)看齊：活躍盤勢
+  // 一天全部kind種類加總很容易超過500，之前卡在500時只是把早盤訊號被
+  // 砍掉的門檻往後推遲(09:55→09:35)，沒有真正解決。
+  const res = await fetch('/api/intraday-signals?trade_date=' + dateStr + '&limit=5000');
   if (!res.ok) throw new Error('intraday-signals http ' + res.status);
   const data = await res.json();
   if (!data || !Array.isArray(data.signals)) throw new Error('bad payload');
