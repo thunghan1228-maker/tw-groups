@@ -1058,10 +1058,19 @@ function drawForcePanel(){
   const zeroY = padTop + plotH / 2;
   const xAt = (i) => PAD.left + plotW * (i + 0.5) / flow.length;
 
-  const maxAbsNet = Math.max(1, ...flow.map((f) => Math.abs(f.net)));
-  const barScale = (plotH / 2 * 0.85) / maxAbsNet;
-  const maxAbsCum = Math.max(1, ...flow.map((f) => Math.abs(f.cum)));
-  const lineScale = (plotH / 2 * 0.85) / maxAbsCum;
+  // 多日一起顯示時，同一把尺會被單一天的極端量能(例如漲停爆量)撐開，
+  // 蓋掉其他天原本存在的真實變化。改成每天各自用當天自己的最大值算
+  // 尺度：每天都能看到自己完整的漲跌形狀。跨天的絕對量能比較已經有
+  // 日線圖專屬的每日累積副圖可以看，這裡是看單日走勢用的。
+  const dayScale = new Map();
+  flow.forEach((f) => {
+    const key = f.date ?? '__all__';
+    const prev = dayScale.get(key) || { maxNet: 1, maxCum: 1 };
+    if (Math.abs(f.net) > prev.maxNet) prev.maxNet = Math.abs(f.net);
+    if (Math.abs(f.cum) > prev.maxCum) prev.maxCum = Math.abs(f.cum);
+    dayScale.set(key, prev);
+  });
+  const scaleOf = (f) => dayScale.get(f.date ?? '__all__');
 
   ctx.strokeStyle = 'rgba(168,156,143,0.25)';
   ctx.lineWidth = 1;
@@ -1070,6 +1079,7 @@ function drawForcePanel(){
   const barW = Math.max(2, plotW / flow.length * 0.62);
   flow.forEach((f, i) => {
     const x = xAt(i);
+    const barScale = (plotH / 2 * 0.85) / scaleOf(f).maxNet;
     const h = Math.abs(f.net) * barScale;
     ctx.fillStyle = f.net >= 0 ? '#e6675f' : '#5fae6f';
     if (f.net >= 0) ctx.fillRect(x - barW / 2, zeroY - h, barW, h);
@@ -1080,6 +1090,7 @@ function drawForcePanel(){
   ctx.lineWidth = 2;
   ctx.beginPath();
   flow.forEach((f, i) => {
+    const lineScale = (plotH / 2 * 0.85) / scaleOf(f).maxCum;
     const x = xAt(i), y = zeroY - f.cum * lineScale;
     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   });
@@ -1087,9 +1098,7 @@ function drawForcePanel(){
 
   ctx.fillStyle = '#a89c8f'; ctx.font = '9px -apple-system, sans-serif';
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.fillText('+' + Math.round(maxAbsCum) + '張', cssW - PAD.right + 6, padTop + 6);
   ctx.fillText('0', cssW - PAD.right + 6, zeroY);
-  ctx.fillText('-' + Math.round(maxAbsCum) + '張', cssW - PAD.right + 6, cssH - padBottom - 6);
 
   if (currentChart.hoverIndex != null){
     const hi = Math.max(0, Math.min(flow.length - 1, currentChart.hoverIndex));
@@ -1100,11 +1109,14 @@ function drawForcePanel(){
     ctx.setLineDash([3, 3]);
     ctx.beginPath(); ctx.moveTo(hx, padTop); ctx.lineTo(hx, cssH - padBottom); ctx.stroke();
     ctx.restore();
-    const netHere = flow[hi].net;
+    const netHere = flow[hi].net, cumHere = flow[hi].cum;
     ctx.fillStyle = netHere >= 0 ? '#e6675f' : '#5fae6f';
     ctx.font = '9px -apple-system, sans-serif';
     ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-    ctx.fillText((netHere >= 0 ? '+' : '') + Math.round(netHere) + '張', PAD.left, padTop - 6);
+    ctx.fillText(
+      (netHere >= 0 ? '+' : '') + Math.round(netHere) + '張／累積' + (cumHere >= 0 ? '+' : '') + Math.round(cumHere) + '張',
+      PAD.left, padTop - 6,
+    );
   }
 }
 
@@ -1515,7 +1527,7 @@ async function switchTimeframe(tf){
       const d = taipeiDateStr(b.ts);
       if (d !== cumDate) { cum = 0; cumDate = d; }
       cum += net;
-      return { net, cum };
+      return { net, cum, date: d };
     }) : null;
   } else {
     currentChart.force = cfg.force ? generateForceFlow(currentChart.code, tf, bars) : null;
