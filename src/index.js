@@ -1880,13 +1880,20 @@ function signalRowsHtml(events){
 function holderStrengthLabelHtml(r){
   // strengthPct/holderLabel 是官方大戶力公式（大單淨額÷累計成交額×100%）；
   // total_amount資料剛接上，尚未累積的舊bar會是null，不是0%。
-  if (r.strengthPct == null) return '<span class="sig-label">大戶力資料累積中</span>';
+  if (r.strengthPct == null) {
+    return '<span class="sig-label" title="累計成交額尚未達最低門檻(1億元)，資料還在累積中">大戶力資料累積中</span>';
+  }
   const pctText = (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%';
   if (r.holderLabel){
     const cls = r.holderLabel.indexOf('買') >= 0 || r.holderLabel === '強多' ? 'sig-bull' : 'sig-bear';
-    return '<span class="sig-label ' + cls + '">' + r.holderLabel + ' ' + pctText + '</span>';
+    const tierTitle = r.holderLabel === '強力買進' ? '大戶力 ≥ +28%'
+      : r.holderLabel === '強多' ? '大戶力介於 +12%（含）~ +28%'
+      : r.holderLabel === '強力賣出' ? '大戶力 ≤ -28%'
+      : r.holderLabel === '強空' ? '大戶力介於 -28% ~ -12%（含）'
+      : '';
+    return '<span class="sig-label ' + cls + '" title="' + tierTitle + '">' + r.holderLabel + ' ' + pctText + '</span>';
   }
-  return '<span class="sig-label">大戶力 ' + pctText + '</span>';
+  return '<span class="sig-label" title="已符合大戶力資格門檻(累計成交額≥1億、淨額絕對值≥3,000萬)，但百分比未達正式訊號門檻±12%">大戶力 ' + pctText + '</span>';
 }
 function rankingRowHtml(r){
   const backendName = r.name && r.name !== r.code ? r.name : null;
