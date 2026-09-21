@@ -1560,8 +1560,17 @@ async function switchTimeframe(tf){
   document.getElementById('cmDataBadge').hidden = isReal;
 
   if (isReal){
-    let cum = 0;
-    currentChart.force = cfg.force ? bars.map((b) => { const net = b.mainNet ?? 0; cum += net; return { net, cum }; }) : null;
+    // 累積線必須按交易日歸零：多日回補後bars橫跨好幾天，若不reset，
+    // 只要有一天量能特別大(例如漲停爆量)，y軸尺度會被那天撐開，
+    // 其他天原本存在的真實數字就會被壓成視覺上的一條平線。
+    let cum = 0, cumDate = null;
+    currentChart.force = cfg.force ? bars.map((b) => {
+      const net = b.mainNet ?? 0;
+      const d = taipeiDateStr(b.ts);
+      if (d !== cumDate) { cum = 0; cumDate = d; }
+      cum += net;
+      return { net, cum };
+    }) : null;
   } else {
     currentChart.force = cfg.force ? generateForceFlow(currentChart.code, tf, bars) : null;
   }
