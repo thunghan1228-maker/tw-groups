@@ -2102,9 +2102,18 @@ function render(){
         '<div class="top-groups-row">' + sideGroupsHtml + '</div>' +
       '</div>' +
     '</div>';
-
-  document.getElementById('updatedAt').textContent = '更新於 ' + new Date().toLocaleTimeString('zh-TW') + '（模擬資料）';
+  // #updatedAt文字由refresh()統一負責(要能反映抓資料成功/失敗、是否過期)，
+  // 這裡不再重複覆蓋——舊版這裡不管資料是真的還是demo都硬寫死「模擬資料」，
+  // 本身就是誤導。
 }
+
+let lastDataFetchedAt = null;
+// 之前抓失敗時只要lastData還有舊資料就整個靜默吞掉，畫面看起來像正常
+// 在動、其實股價/漲跌早就凍結在上一次成功抓到的那筆——使用者根本沒有
+// 辦法從畫面上分辨「現在真的沒變」跟「其實已經抓不到新資料」。改成
+// 不論成功失敗都更新#updatedAt，抓失敗且已經超過~2個輪詢週期沒成功時
+// 明確標示資料可能過期、以及最後一次真的成功更新是什麼時候。
+const STALE_WARNING_MS = 40000;
 
 async function refresh(){
   try {
@@ -2112,8 +2121,19 @@ async function refresh(){
     const data = await res.json();
     if (!data || !Array.isArray(data.groups)) throw new Error('bad payload');
     lastData = data;
+    lastDataFetchedAt = new Date();
   } catch (e) {
     if (!lastData) lastData = buildMockData();
+  }
+  const updatedEl = document.getElementById('updatedAt');
+  if (updatedEl){
+    if (!lastDataFetchedAt){
+      updatedEl.textContent = '⚠ 尚未成功取得即時報價';
+    } else if (Date.now() - lastDataFetchedAt.getTime() > STALE_WARNING_MS){
+      updatedEl.textContent = '⚠ 報價可能已過期（最後成功更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + '）';
+    } else {
+      updatedEl.textContent = '報價更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW');
+    }
   }
   render();
   await Promise.all([renderOtcStrengthWidget(), refreshSignalData()]);
