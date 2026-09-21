@@ -91,6 +91,8 @@
   .srow-right .spct{width:52px;font-size:13px;font-weight:800;}
   .srow-right .schg{width:50px;font-size:12px;font-weight:700;}
   .srow-right .sprice{width:54px;font-size:12px;font-weight:700;color:var(--text);}
+  .srow-right .sprice.up{color:var(--up);}
+  .srow-right .sprice.down{color:var(--down);}
   .srow-right .svol{width:64px;font-size:12px;font-weight:700;color:var(--muted);}
   .stock-col-labels{display:flex;justify-content:space-between;align-items:center;padding:4px 12px 0;}
   .stock-col-labels .srow-right span{color:var(--muted);font-size:10px;font-weight:600;}
@@ -411,7 +413,6 @@
     </div>
     <div class="signal-help" id="signalHelp" hidden>
       <div>今日即時：彙整下列各類訊號的即時清單。</div>
-      <div>族群瞬間大單：同族群內短時間出現的大額單筆成交。</div>
       <div>四項精選（強多/強空）：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</div>
       <div>盤中特大買單／賣單：單筆超大額買進／賣出成交。</div>
       <div>盤中大戶力：個股大戶買賣力道明顯轉強或轉弱。</div>
@@ -1575,7 +1576,7 @@ function stockValueColsHtml(price, changeAmt, changePercent){
   return '<div class="srow-right">' +
     '<span class="spct ' + cls + '">' + fmt(changePercent) + '%</span>' +
     '<span class="schg ' + cls + '">' + (changeAmt > 0 ? '+' : '') + changeAmt.toFixed(2) + '</span>' +
-    '<span class="sprice">' + price.toFixed(2) + '</span>' +
+    '<span class="sprice ' + cls + '">' + price.toFixed(2) + '</span>' +
   '</div>';
 }
 function dirClass(n){ return n>0?'up':(n<0?'down':'flat'); }
@@ -1661,7 +1662,6 @@ async function renderOtcStrengthWidget(){
 
 const SIGNAL_KINDS = [
   { key: 'now', label: '今日即時' },
-  { key: 'groupBigOrder', label: '族群瞬間大單' },
   { key: 'fourGate', label: '四項精選' },
   { key: 'oneTwoShort', label: '12空' },
   { key: 'combo12Bull', label: '1+2多' },
@@ -1690,7 +1690,7 @@ function pickDemoStocks(n, seedExtra){
 function buildDemoSignalsForDate(dateStr){
   const rnd = mulberry32(hashCode('signals-' + dateStr));
   const stockPool = pickDemoStocks(20, dateStr);
-  const counts = { groupBigOrder: 3, fourGate: 1, bigBuy: 2, bigSell: 2, bigHolderForce: 2 };
+  const counts = { fourGate: 1, bigBuy: 2, bigSell: 2, bigHolderForce: 2 };
   const events = [];
   let si = 0;
   Object.keys(counts).forEach((kind) => {
@@ -1701,8 +1701,7 @@ function buildDemoSignalsForDate(dateStr){
       const timeLabel = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
       const qty = Math.round(500 + rnd() * 2500);
       let label = '';
-      if (kind === 'groupBigOrder') label = s.group + '．單筆 ' + qty + ' 張大單';
-      else if (kind === 'fourGate') label = '四項條件同時成立';
+      if (kind === 'fourGate') label = '四項條件同時成立';
       else if (kind === 'bigBuy') label = '單筆買進 ' + qty + ' 張';
       else if (kind === 'bigSell') label = '單筆賣出 ' + qty + ' 張';
       else if (kind === 'bigHolderForce') label = '大戶買賣力' + (rnd() > 0.5 ? '轉強' : '轉弱');
@@ -1749,7 +1748,7 @@ function mapLargeOrderSignal(s){
   const isBuy = klineInfo ? klineInfo.side === 'bull' : (kind === 'instantLargeBuy' || kind === 'fourGateBuy');
   const backendName = s.name && s.name !== s.ticker ? s.name : null;
   return {
-    tabs: isFourGate ? ['now', 'fourGate'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : ['now', 'groupBigOrder', isBuy ? 'bigBuy' : 'bigSell']),
+    tabs: isFourGate ? ['now', 'fourGate'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : ['now', isBuy ? 'bigBuy' : 'bigSell']),
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
     ts: s.barTs,
     code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label, isBuy,
