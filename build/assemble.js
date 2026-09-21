@@ -102,8 +102,60 @@ async function proxyHanstockBars(pathname) {
   });
 }
 
+const USAGE_SAMPLE_RATE = 0.05; // 每20個請求抽樣寫入1次KV，避免超過KV免費方案每天1000次寫入上限
+const USAGE_BUCKET_MINUTES = 15;
+const DEFAULT_USAGE_ANOMALY_THRESHOLD = 5000; // 每15分鐘估計請求數超過這個值才發警報；可用環境變數USAGE_ANOMALY_THRESHOLD覆蓋
+
+function usageBucketKey(date) {
+  const d = new Date(date);
+  const minute = d.getUTCMinutes() - (d.getUTCMinutes() % USAGE_BUCKET_MINUTES);
+  const bucketStart = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), minute));
+  return "reqcount:" + bucketStart.toISOString().slice(0, 16);
+}
+
+function recordSampledRequest(env, ctx) {
+  // KV沒有原子遞增、抽樣寫入本身也有競態，估計值本來就是概算，用來抓
+  // 「暴增好幾倍」這種明顯異常已經足夠，不追求精確計數。
+  if (!env || !env.USAGE_KV || !ctx || Math.random() >= USAGE_SAMPLE_RATE) return;
+  ctx.waitUntil((async () => {
+    try {
+      const key = usageBucketKey(new Date());
+      const current = parseInt((await env.USAGE_KV.get(key)) || "0", 10) || 0;
+      const increment = Math.round(1 / USAGE_SAMPLE_RATE);
+      await env.USAGE_KV.put(key, String(current + increment), { expirationTtl: 172800 });
+    } catch (err) {
+      // 計數失敗不影響正常請求處理，靜默略過。
+    }
+  })());
+}
+
+async function checkUsageAnomaly(env) {
+  if (!env.USAGE_KV) return null;
+  // Cron觸發當下「現在」已經跨進下一個bucket，往前退幾分鐘才會落在剛結束
+  // 的那個完整bucket裡，不會查到還沒收滿的當前bucket。
+  const key = usageBucketKey(new Date(Date.now() - 5 * 60 * 1000));
+  const raw = await env.USAGE_KV.get(key);
+  const estimatedRequests = parseInt(raw || "0", 10) || 0;
+  const threshold = parseInt(env.USAGE_ANOMALY_THRESHOLD, 10) || DEFAULT_USAGE_ANOMALY_THRESHOLD;
+  return { key: key, estimatedRequests: estimatedRequests, threshold: threshold, anomalous: estimatedRequests > threshold };
+}
+
+async function notifyDiscordUsageAnomaly(env, result) {
+  if (!env.DISCORD_WEBHOOK_URL) return;
+  const windowLabel = result.key.replace("reqcount:", "");
+  const message = "⚠️ tw-groups 請求量異常｜時段 " + windowLabel +
+    "｜估計請求數 " + result.estimatedRequests + "（抽樣估算，非精確值）" +
+    "｜門檻 " + result.threshold;
+  await fetch(env.DISCORD_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ content: message })
+  });
+}
+
 export default {
-  async fetch(request) {
+  async fetch(request, env, ctx) {
+    recordSampledRequest(env, ctx);
     const url = new URL(request.url);
     let barsRequest = null;
     if (url.pathname.indexOf("/api/bars1m/") === 0) {
@@ -213,6 +265,16 @@ export default {
     return new Response(HTML_PAGE, {
       headers: { "content-type": "text/html; charset=UTF-8", "cache-control": "no-store, must-revalidate" }
     });
+  },
+  async scheduled(event, env, ctx) {
+    try {
+      const result = await checkUsageAnomaly(env);
+      if (result && result.anomalous) {
+        await notifyDiscordUsageAnomaly(env, result);
+      }
+    } catch (err) {
+      // 排程檢查本身失敗時不重試；靠Cloudflare自己的Cron執行記錄追蹤即可。
+    }
   }
 };
 `;

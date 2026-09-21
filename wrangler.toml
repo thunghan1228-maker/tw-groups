@@ -4,3 +4,10 @@ compatibility_date = "2024-09-23"
 
 [observability]
 enabled = true
+
+[[kv_namespaces]]
+binding = "USAGE_KV"
+id = "d1563f4cd9344a00a60b386c7ce82778"
+
+[triggers]
+crons = ["*/15 * * * *"]
