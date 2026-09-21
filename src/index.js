@@ -1015,6 +1015,42 @@ function drawChart(){
     ctx.restore();
   }
 
+  // 右上角資訊框：游標移到K棒上顯示該根的開高低收／成交量／主力買賣力／
+  // 振幅，沒有游標時預設顯示最後一根。振幅用「這根自己的開盤價」當基準
+  // （不是前一天收盤價），分K圖沒有現成的「前一交易日收盤」可以逐根對照。
+  {
+    const infoIndex = currentChart.hoverIndex != null
+      ? Math.max(0, Math.min(bars.length - 1, currentChart.hoverIndex))
+      : bars.length - 1;
+    const ib = bars[infoIndex];
+    const amplitude = ib.open ? (ib.high - ib.low) / ib.open * 100 : 0;
+    const lines = [
+      ib.fullLabel,
+      '開' + ib.open.toFixed(2) + ' 高' + ib.high.toFixed(2) + ' 低' + ib.low.toFixed(2) + ' 收' + ib.close.toFixed(2),
+      '量' + Math.round(ib.volume) + '張　振幅' + amplitude.toFixed(2) + '%',
+    ];
+    if (Number.isFinite(ib.mainNet)){
+      lines.push((ib.mainNet >= 0 ? '主力+' : '主力') + Math.round(ib.mainNet) + '張');
+    }
+    ctx.save();
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    const lineH = 13;
+    let boxW = 0;
+    lines.forEach((t) => { boxW = Math.max(boxW, ctx.measureText(t).width); });
+    boxW += 10;
+    const boxH = lines.length * lineH + 6;
+    const boxX = cssW - PAD.right - boxW - 2;
+    const boxY = padTop + 2;
+    ctx.fillStyle = 'rgba(18,16,15,0.72)';
+    ctx.fillRect(boxX, boxY, boxW, boxH);
+    ctx.fillStyle = '#e8ddd0';
+    lines.forEach((t, idx) => {
+      ctx.fillText(t, boxX + boxW - 5, boxY + 3 + idx * lineH);
+    });
+    ctx.restore();
+  }
+
   if (currentChart.hoverIndex != null){
     const hi = Math.max(0, Math.min(bars.length - 1, currentChart.hoverIndex));
     const hb = bars[hi];
