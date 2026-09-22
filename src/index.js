@@ -263,6 +263,26 @@ const HTML_PAGE = `<!DOCTYPE html>
   .signal-modal{position:fixed;inset:0;z-index:101;pointer-events:none;}
   /* 從訊號中心點進 K 線圖：視窗不關、退到 K 線圖後面，關掉 K 線圖就原地回來（分頁、捲動位置都不變）。 */
   .signal-modal.behind-chart{z-index:98;}
+  /* 多視窗 K 線圖（桌機）：每個 K 線圖是獨立的浮動視窗（內嵌同一頁的圖表模式），可同時開很多個、
+     互不影響，主畫面照樣能點；手機仍用原本的單一全螢幕視窗。 */
+  #chartWindows{position:fixed;inset:0;z-index:102;pointer-events:none;}
+  .chart-float{position:absolute;pointer-events:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.55);display:flex;flex-direction:column;min-width:360px;min-height:320px;max-width:98vw;max-height:96vh;overflow:hidden;resize:both;padding-bottom:12px;}
+  .chart-float.front{box-shadow:0 16px 48px rgba(0,0,0,0.75);border-color:var(--accent);}
+  .chart-float-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px 6px 12px;background:var(--panel);border-bottom:1px solid var(--line);cursor:move;touch-action:none;user-select:none;flex-shrink:0;}
+  .chart-float-title{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chart-float-title .cf-name{color:var(--muted);font-weight:600;margin-left:6px;}
+  .chart-float-actions{display:flex;gap:4px;flex-shrink:0;}
+  .chart-float-actions button{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:6px;font-size:12px;padding:3px 8px;cursor:pointer;font-family:inherit;}
+  .chart-float-actions button:hover{background:var(--accent);color:var(--bg);}
+  .chart-float iframe{flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg);}
+  .chart-float.dragging iframe{pointer-events:none;}
+  /* 內嵌／獨立視窗的圖表模式：只顯示 K 線圖、填滿整個視窗 */
+  body.chart-window-mode{padding-bottom:0;overflow:hidden;}
+  body.chart-window-mode > *:not(.chart-modal){display:none!important;}
+  body.chart-window-mode .chart-modal{background:none;}
+  body.chart-window-mode .chart-modal-inner{left:0!important;top:0!important;width:100vw!important;height:100vh!important;max-width:100vw;max-height:100vh;border-radius:0;border:0;resize:none;}
+  body.chart-window-mode .chart-modal-head{cursor:default;}
+  body.chart-window-mode #cmMax{display:none;}
   .signal-modal-inner{position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(672px,94vw);height:min(768px,86vh);min-width:280px;min-height:320px;max-width:98vw;max-height:96vh;overflow:auto;resize:both;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);pointer-events:auto;}
   .signal-modal-inner.collapsed{height:auto!important;min-height:0;overflow:hidden;resize:none;padding:10px 14px;}
   .signal-modal-inner.collapsed .signal-help,
@@ -388,6 +408,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   </div>
 </div>
 
+<div id="chartWindows"></div>
 <div class="chart-modal" id="chartModal" hidden>
   <div class="chart-modal-inner" id="chartModalInner">
     <div class="chart-modal-head" id="chartModalHead">
@@ -1605,7 +1626,102 @@ async function switchTimeframe(tf){
   redrawAll();
 }
 
+// ---- 多視窗 K 線圖（桌機） ----
+// 使用者要求：畫面上任何個股點下去就開 K 線圖，而且可以同時開很多個、沒有上限，開著的時候
+// 其他地方照樣能點。原本的 K 線圖是全螢幕蓋住的單一視窗，所以只能開一個。
+// 做法：每個 K 線圖是一個可拖曳、可縮放的浮動視窗，裡面內嵌同一頁的「圖表模式」
+// （?embed=chart&code=…，只顯示 K 線圖），每個視窗有自己獨立的狀態，互不影響。
+const CHART_WINDOW_MODE = new URLSearchParams(location.search).get('embed') === 'chart';
+const chartWindows = new Map();
+let chartWindowSeq = 0;
+let chartWindowZ = 0;
+function useFloatingCharts(){
+  return !CHART_WINDOW_MODE && !document.body.classList.contains('signal-window-mode') && window.innerWidth >= 768;
+}
+function chartEmbedUrl(code, name, tf){
+  const params = new URLSearchParams({ embed: 'chart', code: code, name: name || '' });
+  if (tf) params.set('tf', tf);
+  return location.pathname + '?' + params.toString();
+}
+function bringChartWindowToFront(win){
+  chartWindowZ += 1;
+  win.el.style.zIndex = String(chartWindowZ);
+  chartWindows.forEach((w) => w.el.classList.toggle('front', w === win));
+}
+function closeChartWindow(id){
+  const win = chartWindows.get(id);
+  if (!win) return;
+  win.el.remove();
+  chartWindows.delete(id);
+}
+function closeTopChartWindow(){
+  let top = null;
+  chartWindows.forEach((w) => { if (!top || Number(w.el.style.zIndex) > Number(top.el.style.zIndex)) top = w; });
+  if (!top) return false;
+  closeChartWindow(top.id);
+  return true;
+}
+function openChartWindow(code, name, tf){
+  for (const win of chartWindows.values()){
+    if (win.code === code){ bringChartWindowToFront(win); return win; }  // 同一檔已開著就拉到最前面
+  }
+  const layer = document.getElementById('chartWindows');
+  const id = ++chartWindowSeq;
+  const n = chartWindows.size;
+  const w = Math.min(1000, Math.round(window.innerWidth * 0.7));
+  const h = Math.min(720, Math.round(window.innerHeight * 0.82));
+  const left = Math.max(0, Math.min(window.innerWidth - w - 8, 40 + (n % 8) * 36));
+  const top = Math.max(0, Math.min(window.innerHeight - h - 8, 40 + (n % 8) * 28));
+  const el = document.createElement('div');
+  el.className = 'chart-float';
+  el.style.cssText = 'left:' + left + 'px;top:' + top + 'px;width:' + w + 'px;height:' + h + 'px;';
+  el.innerHTML = '<div class="chart-float-head">' +
+      '<div class="chart-float-title">' + code + '<span class="cf-name">' + (name || '') + '</span></div>' +
+      '<div class="chart-float-actions">' +
+        '<button type="button" data-act="popout" title="移到另一螢幕">⧉ 另開視窗</button>' +
+        '<button type="button" data-act="close" aria-label="關閉">✕</button>' +
+      '</div></div>' +
+    '<iframe title="' + code + ' K線圖" src="' + chartEmbedUrl(code, name, tf) + '"></iframe>';
+  layer.appendChild(el);
+  const win = { id: id, el: el, code: code, name: name, iframe: el.querySelector('iframe') };
+  chartWindows.set(id, win);
+  bringChartWindowToFront(win);
+  el.addEventListener('pointerdown', () => bringChartWindowToFront(win), true);
+  el.querySelector('[data-act="close"]').addEventListener('click', () => closeChartWindow(id));
+  el.querySelector('[data-act="popout"]').addEventListener('click', () => {
+    const popup = window.open(chartEmbedUrl(code, name, tf), 'hanstockChart_' + code, 'width=1100,height=760');
+    if (popup){ popup.focus(); closeChartWindow(id); }
+  });
+  const head = el.querySelector('.chart-float-head');
+  let dragging = false, offX = 0, offY = 0;
+  head.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('button')) return;
+    dragging = true; offX = e.clientX - el.offsetLeft; offY = e.clientY - el.offsetTop;
+    el.classList.add('dragging');
+    head.setPointerCapture(e.pointerId);
+  });
+  head.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    el.style.left = Math.min(window.innerWidth - 80, Math.max(120 - el.offsetWidth, e.clientX - offX)) + 'px';
+    el.style.top = Math.min(window.innerHeight - 40, Math.max(0, e.clientY - offY)) + 'px';
+  });
+  const stopDrag = () => { dragging = false; el.classList.remove('dragging'); };
+  head.addEventListener('pointerup', stopDrag);
+  head.addEventListener('pointercancel', stopDrag);
+  return win;
+}
+// 內嵌圖表模式裡按 ✕ 或 Esc，會通知父頁關掉對應的浮動視窗。
+window.addEventListener('message', (e) => {
+  if (e.origin !== location.origin || !e.data) return;
+  if (e.data.type === 'hanstockChartClose'){
+    chartWindows.forEach((w) => { if (w.iframe.contentWindow === e.source) closeChartWindow(w.id); });
+  } else if (e.data.type === 'hanstockChartFocus'){
+    chartWindows.forEach((w) => { if (w.iframe.contentWindow === e.source) bringChartWindowToFront(w); });
+  }
+});
+
 function openStockChart(code, name, tf){
+  if (useFloatingCharts()){ openChartWindow(code, name, tf); return; }
   const overlay = document.getElementById('chartModal');
   const wasHidden = overlay.hidden;
   currentChart.code = code;
@@ -1627,6 +1743,11 @@ function openStockChart(code, name, tf){
   switchTimeframe(tf || 'm5');
 }
 function closeStockChart(){
+  if (CHART_WINDOW_MODE){
+    if (window.parent !== window){ window.parent.postMessage({ type: 'hanstockChartClose' }, location.origin); return; }
+    window.close();
+    return;
+  }
   document.getElementById('chartModal').hidden = true;
   document.body.style.overflow = '';
   // 若是從訊號中心點進來的，關圖後讓訊號中心回到最上層。
@@ -2404,6 +2525,7 @@ document.getElementById('chartModal').addEventListener('click', (e) => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
+  if (chartWindows.size && closeTopChartWindow()) return;
   if (!document.getElementById('chartModal').hidden) closeStockChart();
   else if (!document.getElementById('groupModal').hidden) closeGroupDetail();
   else if (!document.getElementById('signalModal').hidden) closeSignalCenter();
@@ -2467,7 +2589,7 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
   if (!row) return;
   // 使用者要求：K 線圖關掉之後訊號中心要還在，不用再去右上角重開。
   // 所以不關視窗，只讓它退到 K 線圖後面；closeStockChart 會把它拉回來。
-  document.getElementById('signalModal').classList.add('behind-chart');
+  if (!useFloatingCharts()) document.getElementById('signalModal').classList.add('behind-chart');
   openStockChart(row.dataset.code, row.dataset.name);
 });
 document.getElementById('smClose').addEventListener('click', closeSignalCenter);
@@ -2488,18 +2610,33 @@ document.getElementById('signalModal').addEventListener('click', (e) => {
   if (e.target.id === 'signalModal') closeSignalCenter();
 });
 
-refreshSignalData();
-renderOtcStrengthWidget();
-if (location.hash === '#signal-center'){
-  document.body.classList.add('signal-window-mode');
-}
-initSignalWindowChrome();
-openSignalCenter(); // 盤中訊號中心預設常駐顯示，不用點才出現；要隱藏就按✕，要收合成小條就按－
+if (CHART_WINDOW_MODE){
+  // 內嵌在浮動視窗裡、或「另開視窗」的圖表模式：只顯示這一檔的 K 線圖，不跑儀表板與訊號輪詢。
+  const chartParams = new URLSearchParams(location.search);
+  const embedCode = (chartParams.get('code') || '').trim().toUpperCase();
+  const embedName = chartParams.get('name') || lookupStockName(embedCode) || embedCode;
+  document.body.classList.add('chart-window-mode');
+  document.title = embedCode + ' ' + embedName + ' K線圖';
+  refresh(); // 抓一次報價給圖表用，不設輪詢
+  openStockChart(embedCode, embedName, chartParams.get('tf') || undefined);
+  document.getElementById('chartModal').classList.add('fullscreen');
+  if (window.parent !== window){
+    document.addEventListener('pointerdown', () => window.parent.postMessage({ type: 'hanstockChartFocus' }, location.origin), true);
+  }
+} else {
+  refreshSignalData();
+  renderOtcStrengthWidget();
+  if (location.hash === '#signal-center'){
+    document.body.classList.add('signal-window-mode');
+  }
+  initSignalWindowChrome();
+  openSignalCenter(); // 盤中訊號中心預設常駐顯示，不用點才出現；要隱藏就按✕，要收合成小條就按－
 
-refresh();
-setInterval(refresh, 15000);
-// 訊號要快：每5秒獨立輪詢(Worker端這幾個API也不快取)，不跟/api/groups綁在一起等。
-setInterval(refreshSignalData, 5000);
+  refresh();
+  setInterval(refresh, 15000);
+  // 訊號要快：每5秒獨立輪詢(Worker端這幾個API也不快取)，不跟/api/groups綁在一起等。
+  setInterval(refreshSignalData, 5000);
+}
 </script>
 
 </body>
