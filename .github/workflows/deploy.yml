@@ -23,18 +23,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 貼金鑰時常會多帶到換行或空白（2026-09-22 就是這樣，wrangler 報 "invalid header value"），
-      # 這裡先把所有空白字元去掉再交給 wrangler。
-      - name: 整理金鑰（去掉貼上時多出來的空白／換行）
+      # 貼金鑰時常會多帶到換行、空白，甚至整段 curl 指令（2026-09-22 就是這樣，wrangler 報
+      # "invalid header value" / "Invalid format for Authorization header"）。這裡從貼進來的內容裡
+      # 抓出那一串 40 個字的權杖，先跟 Cloudflare 驗證一次，不對就用看得懂的話說明怎麼修。
+      - name: 整理並驗證金鑰
         run: |
-          token="$(printf '%s' "$RAW_CLOUDFLARE_API_TOKEN" | tr -d '[:space:]')"
-          account="$(printf '%s' "$RAW_CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
-          if [ -n "$token" ]; then echo "::add-mask::$token"; fi
-          echo "CLOUDFLARE_API_TOKEN=$token" >> "$GITHUB_ENV"
-          echo "CLOUDFLARE_ACCOUNT_ID=$account" >> "$GITHUB_ENV"
-          if [ -z "$token" ]; then
+          raw="$RAW_CLOUDFLARE_API_TOKEN"
+          if [ -z "$(printf '%s' "$raw" | tr -d '[:space:]')" ]; then
             echo "::notice::尚未設定 CLOUDFLARE_API_TOKEN secret，這次不部署。到 Settings → Secrets and variables → Actions 新增後，重新執行這個 workflow 即可。"
+            echo "CLOUDFLARE_API_TOKEN=" >> "$GITHUB_ENV"
+            exit 0
           fi
+          token="$(printf '%s' "$raw" | grep -oE '[A-Za-z0-9_-]{40}' | tail -n 1 || true)"
+          if [ -z "$token" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN 的內容不像 Cloudflare API 權杖（應該是一串 40 個英數字元）。請到 Cloudflare → 我的設定檔 → API 權杖重新建立一個，只複製那一串權杖，再到 GitHub 的 secret 按鉛筆圖示重新貼上。"
+            exit 1
+          fi
+          echo "::add-mask::$token"
+          verify="$(curl -sS "https://api.cloudflare.com/client/v4/user/tokens/verify" -H "Authorization: Bearer $token" || true)"
+          if printf '%s' "$verify" | grep -q '"status":"active"'; then
+            echo "金鑰驗證成功。"
+          else
+            echo "::error::Cloudflare 不接受這個金鑰：$verify 。請重新建立一個「編輯 Cloudflare Workers」範本的權杖，只複製那一串權杖，再到 GitHub 的 secret 按鉛筆圖示重新貼上。"
+            exit 1
+          fi
+          echo "CLOUDFLARE_API_TOKEN=$token" >> "$GITHUB_ENV"
+          echo "CLOUDFLARE_ACCOUNT_ID=$(printf '%s' "$RAW_CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')" >> "$GITHUB_ENV"
 
       - uses: actions/setup-node@v4
         if: env.CLOUDFLARE_API_TOKEN != ''
