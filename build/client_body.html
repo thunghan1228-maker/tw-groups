@@ -101,12 +101,15 @@
   /* K 線圖彈窗 */
   .chart-modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;}
   .chart-modal-inner{
+    /* 拖曳圖表平移時不要把標題、說明文字反白成白底黑字（使用者 2026-09-22 回報看不到字） */
+    user-select:none;-webkit-user-select:none;
     position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;
     width:min(1180px,94vw);height:min(800px,88vh);min-width:340px;min-height:400px;
     max-width:98vw;max-height:96vh;overflow:auto;resize:both;padding:14px 14px 24px;
     box-shadow:0 12px 40px rgba(0,0,0,0.5);
   }
-  .chart-modal.fullscreen .chart-modal-inner{left:0!important;top:0!important;width:100vw!important;height:100vh!important;max-width:100vw;max-height:100vh;border-radius:0;resize:none;}
+  .chart-modal-inner input,.chart-modal-inner textarea{user-select:text;-webkit-user-select:text;}
+  .chart-modal.fullscreen .chart-modal-inner{left:0!important;top:0!important;right:0;bottom:0;width:auto!important;height:auto!important;max-width:none;max-height:none;border-radius:0;resize:none;}
   .chart-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;cursor:move;touch-action:none;}
   .chart-modal-head .cm-actions{cursor:default;}
   .cm-code{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;margin-right:8px;}
@@ -163,14 +166,14 @@
   /* 主力買賣力子面板 */
   .force-panel{margin-top:10px;}
   .force-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px;}
-  .force-title{font-size:12px;font-weight:800;color:var(--text);}
-  .force-legend{display:flex;align-items:center;font-size:10px;color:var(--muted);}
+  .force-title{font-size:13px;font-weight:800;color:#fff;}
+  .force-legend{display:flex;align-items:center;font-size:11px;color:#f1ece6;}
   .fl-dot{width:7px;height:7px;border-radius:2px;display:inline-block;margin-left:8px;margin-right:3px;}
   .fl-dot:first-child{margin-left:0;}
   .fl-buy{background:var(--up);}
   .fl-sell{background:var(--down);}
   .fl-cum{background:var(--accent);border-radius:50%;}
-  .force-note{font-size:10px;color:var(--muted);margin-bottom:6px;}
+  .force-note{font-size:11px;color:#f1ece6;margin-bottom:6px;}
 
   /* 頂部：櫃買盤勢／盤中訊號 */
   .header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
@@ -224,7 +227,10 @@
   .chart-float-actions button:hover{background:var(--accent);color:var(--bg);}
   .chart-float iframe{flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg);}
   .chart-float.dragging iframe{pointer-events:none;}
-  .chart-float.maximized{left:0!important;top:0!important;width:100vw!important;height:100vh!important;max-width:100vw;max-height:100vh;border-radius:0;resize:none;}
+  /* 最大化：貼齊版面四邊（不含主頁的捲軸）。之前用 100vw／100vh 會把視窗右邊那 15px 蓋到主頁捲軸
+     底下，畫面上看得到的捲軸是主頁的、拉了只會捲後面的儀表板，K 線視窗自己的捲軸被壓在下面拉不到。 */
+  .chart-float.maximized{left:0!important;top:0!important;right:0;bottom:0;width:auto!important;height:auto!important;max-width:none;max-height:none;border-radius:0;resize:none;}
+  body.chart-maximized{overflow:hidden;}
   .chart-float.minimized{display:none;}
   /* 最小化的 K 線視窗縮成底部托盤的小標籤，點一下復原 */
   #chartTray{position:fixed;left:8px;right:8px;bottom:62px;z-index:103;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none;}
@@ -240,7 +246,7 @@
   body.chart-window-mode{padding-bottom:0;overflow:hidden;}
   body.chart-window-mode > *:not(.chart-modal){display:none!important;}
   body.chart-window-mode .chart-modal{background:none;}
-  body.chart-window-mode .chart-modal-inner{left:0!important;top:0!important;width:100vw!important;height:100vh!important;max-width:100vw;max-height:100vh;border-radius:0;border:0;resize:none;}
+  body.chart-window-mode .chart-modal-inner{left:0!important;top:0!important;right:0;bottom:0;width:auto!important;height:auto!important;max-width:none;max-height:none;border-radius:0;border:0;resize:none;}
   body.chart-window-mode .chart-modal-head{cursor:default;}
   body.chart-window-mode #cmMax{display:none;}
   .signal-modal-inner{position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(672px,94vw);height:min(768px,86vh);min-width:280px;min-height:320px;max-width:98vw;max-height:96vh;overflow:auto;resize:both;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);pointer-events:auto;}
@@ -1076,7 +1082,7 @@ function drawVolumePanel(){
     ctx.fillStyle = b.close >= b.open ? 'rgba(230,103,95,0.55)' : 'rgba(95,174,111,0.55)';
     ctx.fillRect(x - barW / 2, cssH - padBottom - h, barW, h);
   });
-  ctx.fillStyle = '#a89c8f'; ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillStyle = '#f1ece6'; ctx.font = '10px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
   ctx.fillText('量 上限' + Math.round(maxVol) + '張', PAD.left, 2);
 
   if (currentChart.hoverIndex != null){
@@ -1213,7 +1219,7 @@ function drawMacdPanel(){
   }
   drawLine(macdLine, '#7fb3e0');
   drawLine(signalLine, '#e0c458');
-  ctx.fillStyle = '#a89c8f'; ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillStyle = '#f1ece6'; ctx.font = '10px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
   ctx.fillText('DIF/DEA', PAD.left, 2);
 }
 
@@ -1614,12 +1620,19 @@ function bringChartWindowToFront(win){
   win.el.style.zIndex = String(chartWindowZ);
   chartWindows.forEach((w) => w.el.classList.toggle('front', w === win));
 }
+// 有任何一個最大化（且沒縮到托盤）的 K 線視窗時鎖住主頁捲動：主頁的捲軸消失，右邊只剩視窗自己的捲軸。
+function syncMaximizedBodyLock(){
+  let any = false;
+  chartWindows.forEach((w) => { if (!w.tray && w.el.classList.contains('maximized')) any = true; });
+  document.body.classList.toggle('chart-maximized', any);
+}
 function closeChartWindow(id){
   const win = chartWindows.get(id);
   if (!win) return;
   if (win.tray) win.tray.remove();
   win.el.remove();
   chartWindows.delete(id);
+  syncMaximizedBodyLock();
 }
 function minimizeChartWindow(id){
   const win = chartWindows.get(id);
@@ -1632,6 +1645,7 @@ function minimizeChartWindow(id){
   pill.addEventListener('click', () => restoreChartWindow(id));
   document.getElementById('chartTray').appendChild(pill);
   win.tray = pill;
+  syncMaximizedBodyLock();
 }
 function restoreChartWindow(id){
   const win = chartWindows.get(id);
@@ -1639,6 +1653,7 @@ function restoreChartWindow(id){
   if (win.tray){ win.tray.remove(); win.tray = null; }
   win.el.classList.remove('minimized');
   bringChartWindowToFront(win);
+  syncMaximizedBodyLock();
 }
 function toggleMaximizeChartWindow(id){
   const win = chartWindows.get(id);
@@ -1647,6 +1662,7 @@ function toggleMaximizeChartWindow(id){
   const btn = win.el.querySelector('[data-act="max"]');
   if (btn){ btn.textContent = maximized ? '❐' : '▢'; btn.title = maximized ? '還原' : '最大化／還原'; }
   bringChartWindowToFront(win);
+  syncMaximizedBodyLock();
 }
 function closeTopChartWindow(){
   let top = null;
