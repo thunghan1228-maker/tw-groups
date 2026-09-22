@@ -409,7 +409,7 @@
         <span class="force-title">主力買賣力（大戶）</span>
         <span class="force-legend"><span class="fl-dot fl-buy"></span>買超<span class="fl-dot fl-sell"></span>賣超<span class="fl-dot fl-cum"></span>累計</span>
       </div>
-      <div class="force-note">大戶定義：單筆成交量 ≥ 500 張（示範資料，門檻可調整）</div>
+      <div class="force-note" id="forceNote">大戶定義：單筆大單逐筆統計</div>
       <div class="chart-canvas-wrap force-wrap">
         <canvas id="forceCanvas"></canvas>
       </div>
@@ -1438,6 +1438,13 @@ async function fetchRealBars(code, tf){
   return data.bars.map(tsToBar);
 }
 
+// 後端主力大單的真正門檻（單筆成交 ≥ 幾張），從主力副圖 API 帶回來，副圖說明照這個寫，不再寫死示範文字。
+let mainForceMinLots = null;
+function forceNoteText(isReal){
+  if (!isReal) return '示範資料：後端連不上或這檔還沒有主力資料，先用模擬數字展示介面';
+  if (Number.isFinite(mainForceMinLots) && mainForceMinLots > 0) return '大戶定義：單筆成交 ≥ ' + mainForceMinLots + ' 張（永豐逐筆成交即時統計，買進為正、賣出為負）';
+  return '大戶定義：單筆大單逐筆統計（永豐逐筆成交即時資料，門檻由後端設定）';
+}
 async function fetchMainForceRange(path){
   // 永久保存的主力進出副圖(多日)；抓不到或格式不對就當作沒有歷史主力資料，
   // 不影響K線本身的OHLC，只是mainNet保持null。
@@ -1445,6 +1452,7 @@ async function fetchMainForceRange(path){
     const res = await fetch(path);
     if (!res.ok) return new Map();
     const data = await res.json();
+    if (data && Number.isFinite(Number(data.mainForceMinLots)) && Number(data.mainForceMinLots) > 0) mainForceMinLots = Number(data.mainForceMinLots);
     if (!data || !Array.isArray(data.bars)) return new Map();
     return new Map(
       data.bars
@@ -1573,6 +1581,7 @@ async function switchTimeframe(tf){
   currentChart.isRealBars = isReal;
 
   document.getElementById('cmDataBadge').hidden = isReal;
+  document.getElementById('forceNote').textContent = forceNoteText(isReal);
 
   if (isReal){
     // 累積線必須按交易日歸零：多日回補後bars橫跨好幾天，若不reset，
