@@ -266,6 +266,12 @@
   .signal-row .sig-eligibility{display:inline-flex;gap:4px;flex-shrink:0;}
   .signal-row .sig-eligibility span{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;}
   .signal-row .sig-eligibility span.sig-futures{color:#93c5fd;border-color:#93c5fd66;}
+  /* 處置股：黃底白字；族群名次：漲幅前10紅底白字、跌幅前10綠底白字，其餘灰色 */
+  .signal-row .sig-eligibility span.pill-disposition{background:#d4a017;color:#fff;border-color:#d4a017;font-weight:700;}
+  .signal-row .sig-note .sig-eligibility{margin-left:4px;vertical-align:middle;}
+  .rank-pill{display:inline-block;font-size:10px;border-radius:10px;padding:1px 7px;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);white-space:nowrap;vertical-align:middle;}
+  .rank-pill.top-up{background:var(--up);color:#fff;border-color:var(--up);font-weight:700;}
+  .rank-pill.top-down{background:var(--down);color:#fff;border-color:var(--down);font-weight:700;}
   .signal-empty{padding:30px 10px;text-align:center;color:var(--muted);}
   .signal-note{padding:10px 12px;font-size:12px;color:var(--muted);background:var(--panel-2);border-bottom:1px solid var(--line);}
   .signal-section-title{padding:10px 12px 6px;font-size:12px;font-weight:700;color:var(--muted);}
@@ -2039,7 +2045,7 @@ function signalEventRowHtml(ev){
     (group ? '<span class="sig-group">' + group + '</span>' : '') +
     '<span class="sig-label' + labelCls + '"' + (labelTitle ? ' title="' + labelTitle + '"' : '') + '>' + ev.label + '</span>' +
     priceCols +
-    (ev.note ? '<span class="sig-note">' + ev.note + '</span>' : '') +
+    signalNoteHtml(ev.code, ev.note) +
   '</div>';
 }
 function signalRowsHtml(events){
@@ -2068,6 +2074,59 @@ function holderStrengthLabelHtml(r){
   }
   return '<span class="sig-label" title="已符合大戶力資格門檻(累計成交額≥1億、淨額絕對值≥3,000萬)，但百分比未達正式訊號門檻±12%">大戶力 ' + pctText + '</span>';
 }
+// 全族群個股旗標（可融資／可融券／可現股當沖／有股期／處置股）：後端一次回全部，幾分鐘抓一次，
+// 訊號中心每一列、大戶力排行都用同一份標。
+let stockFlags = {};
+async function refreshStockFlags(){
+  try {
+    const res = await fetch('/api/stock-flags');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.stocks && typeof data.stocks === 'object'){
+      stockFlags = data.stocks;
+      if (!document.getElementById('signalModal').hidden) renderSignalCenter();
+    }
+  } catch (e) { /* 抓不到就先不標，下一輪再試 */ }
+}
+function flagPillsHtml(code, opts){
+  const f = stockFlags[code];
+  if (!f) return '';
+  const pills = [];
+  if (!(opts && opts.dispositionOnly)){
+    if (f.marginable) pills.push('<span>可融資</span>');
+    if (f.shortable) pills.push('<span>可融券</span>');
+    if (f.dayTradeEligible) pills.push('<span>可現股當沖</span>');
+    if (f.hasStockFutures) pills.push('<span class="sig-futures">有股期</span>');
+  }
+  if (f.disposition){
+    const title = '處置股' + (f.dispositionUntil ? '，處置至 ' + f.dispositionUntil : '') + (f.dispositionReason ? '：' + f.dispositionReason : '');
+    pills.push('<span class="pill-disposition" title="' + title + '">處置股</span>');
+  }
+  return pills.length ? '<span class="sig-eligibility">' + pills.join('') + '</span>' : '';
+}
+const NOTE_RANK_RE = /^族群同步\s*(\S+)\s*(漲幅|跌幅)第\s*(\d+)\s*名$/;
+const NOTE_ELIGIBILITY_RE = /^(可融資|可融券|可現股當沖|有股期)(\s+(可融資|可融券|可現股當沖|有股期))*$/;
+function signalNoteHtml(code, note){
+  // 後端註記是純文字、用「｜」分段：族群名次那段做成小標籤（漲幅前10紅底白字、跌幅前10綠底白字），
+  // 融資券那段改由全市場旗標統一標（後端沒登入時註記裡可能沒有），其餘照原樣顯示。
+  const parts = String(note || '').split(/｜|\s\|\s/).map((s) => s.trim()).filter(Boolean);
+  const hasFlags = !!stockFlags[code];
+  const out = [];
+  for (const part of parts){
+    const m = NOTE_RANK_RE.exec(part);
+    if (m){
+      const rank = Number(m[3]);
+      const cls = rank <= 10 ? (m[2] === '漲幅' ? ' top-up' : ' top-down') : '';
+      out.push('<span class="rank-pill' + cls + '">' + m[1] + '・' + m[2] + '第 ' + rank + ' 名</span>');
+      continue;
+    }
+    if (hasFlags && NOTE_ELIGIBILITY_RE.test(part)) continue;
+    out.push(part);
+  }
+  const pills = flagPillsHtml(code);
+  if (!out.length && !pills) return '';
+  return '<span class="sig-note">' + out.join('｜') + (pills ? ' ' + pills : '') + '</span>';
+}
 function tradingEligibilityTagsHtml(r){
   // 融資/融券/可現股當沖/有股期抓不到(Shioaji未登入等)時後端回null，
   // 這裡就不顯示那個標籤，不是顯示「否」——避免看起來像確定不可以，
@@ -2094,6 +2153,7 @@ function rankingRowHtml(r){
       (group ? '<span class="sig-group">' + group + '</span>' : '') +
       holderStrengthLabelHtml(r) +
       tradingEligibilityTagsHtml(r) +
+      flagPillsHtml(r.code, { dispositionOnly: true }) +
       priceCols +
     '</div>';
 }
@@ -2571,6 +2631,8 @@ if (CHART_WINDOW_MODE){
   }
 } else {
   refreshSignalData();
+  refreshStockFlags();
+  setInterval(refreshStockFlags, 300000);
   renderOtcStrengthWidget();
   if (location.hash === '#signal-center'){
     document.body.classList.add('signal-window-mode');

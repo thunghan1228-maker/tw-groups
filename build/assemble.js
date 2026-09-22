@@ -263,6 +263,13 @@ export default {
         return Response.json({ status: "error", error: String(err), ranking: [] }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/stock-flags") {
+      try {
+        return await proxyHanstockBars("/api/hub/stock-flags", 120);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), stocks: {} }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/intraday-signals") {
       try {
         return await proxyHanstockBars("/api/hub/intraday-signals" + url.search, 0);
