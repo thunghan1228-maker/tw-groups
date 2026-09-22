@@ -290,6 +290,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .signal-row .sig-label{color:var(--text);opacity:.85;white-space:nowrap;flex-shrink:0;}
   .signal-row .sig-label.sig-bull{background:var(--up);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
   .signal-row .sig-label.sig-bear{background:var(--down);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
+  .signal-row .sig-eligibility{display:inline-flex;gap:4px;flex-shrink:0;}
+  .signal-row .sig-eligibility span{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;}
+  .signal-row .sig-eligibility span.sig-futures{color:#93c5fd;border-color:#93c5fd66;}
   .signal-empty{padding:30px 10px;text-align:center;color:var(--muted);}
   .signal-note{padding:10px 12px;font-size:12px;color:var(--muted);background:var(--panel-2);border-bottom:1px solid var(--line);}
   .signal-section-title{padding:10px 12px 6px;font-size:12px;font-weight:700;color:var(--muted);}
@@ -1967,7 +1970,7 @@ async function refreshSignalData(){
 // 一致(1秒內同方向成交量或金額任一達標即觸發，兩個門檻用OR不是AND)。
 const LARGE_ORDER_TOOLTIPS = {
   '瞬間大單連續敲進': '1秒內同方向成交量 ≥ 100張 或 ≥ 3,000萬元',
-  '瞬間大單連續倒出': '1秒內同方向成交量 ≥ 100張 或 ≥ 3,000萬元',
+  '瞬間大單連續賣出': '1秒內同方向成交量 ≥ 100張 或 ≥ 3,000萬元',
   '瞬間特大買單敲進': '1秒內同方向成交量 ≥ 300張 或 ≥ 5,000萬元',
   '瞬間特大賣單倒出': '1秒內同方向成交量 ≥ 300張 或 ≥ 5,000萬元',
 };
@@ -2004,15 +2007,27 @@ function holderStrengthLabelHtml(r){
   }
   const pctText = (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%';
   if (r.holderLabel){
-    const cls = r.holderLabel.indexOf('買') >= 0 || r.holderLabel === '強多' ? 'sig-bull' : 'sig-bear';
-    const tierTitle = r.holderLabel === '強力買進' ? '大戶力 ≥ +28%'
-      : r.holderLabel === '強多' ? '大戶力介於 +12%（含）~ +28%'
-      : r.holderLabel === '強力賣出' ? '大戶力 ≤ -28%'
-      : r.holderLabel === '強空' ? '大戶力介於 -28% ~ -12%（含）'
+    const cls = r.holderLabel.indexOf('買') >= 0 ? 'sig-bull' : 'sig-bear';
+    const tierTitle = r.holderLabel === '盤中大戶強力買進' ? '大戶力 ≥ +28%'
+      : r.holderLabel === '盤中大戶偏買' ? '大戶力介於 +12%（含）~ +28%'
+      : r.holderLabel === '盤中大戶強力賣出' ? '大戶力 ≤ -28%'
+      : r.holderLabel === '盤中大戶偏賣' ? '大戶力介於 -28% ~ -12%（含）'
       : '';
     return '<span class="sig-label ' + cls + '" title="' + tierTitle + '">' + r.holderLabel + ' ' + pctText + '</span>';
   }
   return '<span class="sig-label" title="已符合大戶力資格門檻(累計成交額≥1億、淨額絕對值≥3,000萬)，但百分比未達正式訊號門檻±12%">大戶力 ' + pctText + '</span>';
+}
+function tradingEligibilityTagsHtml(r){
+  // 融資/融券/可現股當沖/有股期抓不到(Shioaji未登入等)時後端回null，
+  // 這裡就不顯示那個標籤，不是顯示「否」——避免看起來像確定不可以，
+  // 其實只是還沒查到。
+  const tags = [];
+  if (r.marginable) tags.push('可融資');
+  if (r.shortable) tags.push('可融券');
+  if (r.dayTradeEligible) tags.push('可現股當沖');
+  if (r.hasStockFutures) tags.push('<span class="sig-futures">有股期</span>');
+  if (!tags.length) return '';
+  return '<span class="sig-eligibility">' + tags.map((t) => t.startsWith('<span') ? t : '<span>' + t + '</span>').join('') + '</span>';
 }
 function rankingRowHtml(r){
   const backendName = r.name && r.name !== r.code ? r.name : null;
@@ -2027,6 +2042,7 @@ function rankingRowHtml(r){
       '<span class="sig-name">' + name + '</span>' +
       (group ? '<span class="sig-group">' + group + '</span>' : '') +
       holderStrengthLabelHtml(r) +
+      tradingEligibilityTagsHtml(r) +
       priceCols +
     '</div>';
 }
