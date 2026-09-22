@@ -34,19 +34,33 @@ jobs:
             echo "CLOUDFLARE_API_TOKEN=" >> "$GITHUB_ENV"
             exit 0
           fi
-          token="$(printf '%s' "$raw" | grep -oE '[A-Za-z0-9_-]{40}' | tail -n 1 || true)"
-          if [ -z "$token" ]; then
+          # 權杖是 40 個英數字元。貼進來的內容可能前後黏著別的字（例如 Bearer、引號、指令），
+          # 所以把每一段夠長的英數字串裡所有 40 字的視窗都拿去 Cloudflare 驗證，找到 active 的就用。
+          token=""
+          last_verify=""
+          candidates="$(printf '%s' "$raw" | grep -oE '[A-Za-z0-9_-]{40,}' || true)"
+          if [ -z "$candidates" ]; then
             echo "::error::CLOUDFLARE_API_TOKEN 的內容不像 Cloudflare API 權杖（應該是一串 40 個英數字元）。請到 Cloudflare → 我的設定檔 → API 權杖重新建立一個，只複製那一串權杖，再到 GitHub 的 secret 按鉛筆圖示重新貼上。"
             exit 1
           fi
-          echo "::add-mask::$token"
-          verify="$(curl -sS "https://api.cloudflare.com/client/v4/user/tokens/verify" -H "Authorization: Bearer $token" || true)"
-          if printf '%s' "$verify" | grep -q '"status":"active"'; then
-            echo "金鑰驗證成功。"
-          else
-            echo "::error::Cloudflare 不接受這個金鑰：$verify 。請重新建立一個「編輯 Cloudflare Workers」範本的權杖，只複製那一串權杖，再到 GitHub 的 secret 按鉛筆圖示重新貼上。"
+          while IFS= read -r run; do
+            len=${#run}
+            i=0
+            while [ $((i + 40)) -le "$len" ] && [ -z "$token" ]; do
+              cand="${run:$i:40}"
+              verify="$(curl -sS "https://api.cloudflare.com/client/v4/user/tokens/verify" -H "Authorization: Bearer $cand" || true)"
+              last_verify="$verify"
+              if printf '%s' "$verify" | grep -q '"status":"active"'; then token="$cand"; fi
+              i=$((i + 1))
+            done
+            [ -n "$token" ] && break
+          done <<< "$candidates"
+          if [ -z "$token" ]; then
+            echo "::error::Cloudflare 不接受這個金鑰：$last_verify 。請重新建立一個「編輯 Cloudflare Workers」範本的權杖，只複製那一串權杖，再到 GitHub 的 secret 按鉛筆圖示重新貼上。"
             exit 1
           fi
+          echo "::add-mask::$token"
+          echo "金鑰驗證成功。"
           echo "CLOUDFLARE_API_TOKEN=$token" >> "$GITHUB_ENV"
           echo "CLOUDFLARE_ACCOUNT_ID=$(printf '%s' "$RAW_CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')" >> "$GITHUB_ENV"
 
