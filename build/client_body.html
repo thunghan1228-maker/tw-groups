@@ -224,6 +224,18 @@
   .chart-float-actions button:hover{background:var(--accent);color:var(--bg);}
   .chart-float iframe{flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg);}
   .chart-float.dragging iframe{pointer-events:none;}
+  .chart-float.maximized{left:0!important;top:0!important;width:100vw!important;height:100vh!important;max-width:100vw;max-height:100vh;border-radius:0;resize:none;}
+  .chart-float.minimized{display:none;}
+  /* 最小化的 K 線視窗縮成底部托盤的小標籤，點一下復原 */
+  #chartTray{position:fixed;left:8px;right:8px;bottom:62px;z-index:103;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none;}
+  #chartTray button{pointer-events:auto;background:var(--panel);border:1px solid var(--accent);color:var(--text);border-radius:8px;font-size:12px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,0.5);}
+  #chartTray button:hover{background:var(--accent);color:var(--bg);}
+  /* K 線圖標題列下方：這檔的可交易條件與處置狀態 */
+  .cm-flags{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 8px;}
+  .flag-pill{font-size:11px;border-radius:10px;padding:2px 9px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);white-space:nowrap;}
+  .flag-pill.off{color:var(--muted);opacity:.7;}
+  .flag-pill.futures{color:#93c5fd;border-color:#93c5fd66;}
+  .flag-pill.disposition{background:#d4a017;border-color:#d4a017;color:#fff;font-weight:700;}
   /* 內嵌／獨立視窗的圖表模式：只顯示 K 線圖、填滿整個視窗 */
   body.chart-window-mode{padding-bottom:0;overflow:hidden;}
   body.chart-window-mode > *:not(.chart-modal){display:none!important;}
@@ -361,6 +373,7 @@
 </div>
 
 <div id="chartWindows"></div>
+<div id="chartTray"></div>
 <div class="chart-modal" id="chartModal" hidden>
   <div class="chart-modal-inner" id="chartModalInner">
     <div class="chart-modal-head" id="chartModalHead">
@@ -374,6 +387,7 @@
         <button class="cm-icon-btn" id="cmClose" aria-label="關閉">✕</button>
       </div>
     </div>
+    <div class="cm-flags" id="cmFlags" hidden></div>
     <div class="chart-tabs" id="chartTabs">
       <button class="chart-tab" data-tf="daily">日線</button>
       <button class="chart-tab active" data-tf="m5">5分鐘</button>
@@ -1603,12 +1617,40 @@ function bringChartWindowToFront(win){
 function closeChartWindow(id){
   const win = chartWindows.get(id);
   if (!win) return;
+  if (win.tray) win.tray.remove();
   win.el.remove();
   chartWindows.delete(id);
 }
+function minimizeChartWindow(id){
+  const win = chartWindows.get(id);
+  if (!win || win.tray) return;
+  win.el.classList.add('minimized');
+  const pill = document.createElement('button');
+  pill.type = 'button';
+  pill.title = '還原 ' + win.code + ' K線圖';
+  pill.textContent = '▲ ' + win.code + ' ' + (win.name || '');
+  pill.addEventListener('click', () => restoreChartWindow(id));
+  document.getElementById('chartTray').appendChild(pill);
+  win.tray = pill;
+}
+function restoreChartWindow(id){
+  const win = chartWindows.get(id);
+  if (!win) return;
+  if (win.tray){ win.tray.remove(); win.tray = null; }
+  win.el.classList.remove('minimized');
+  bringChartWindowToFront(win);
+}
+function toggleMaximizeChartWindow(id){
+  const win = chartWindows.get(id);
+  if (!win) return;
+  const maximized = win.el.classList.toggle('maximized');
+  const btn = win.el.querySelector('[data-act="max"]');
+  if (btn){ btn.textContent = maximized ? '❐' : '▢'; btn.title = maximized ? '還原' : '最大化／還原'; }
+  bringChartWindowToFront(win);
+}
 function closeTopChartWindow(){
   let top = null;
-  chartWindows.forEach((w) => { if (!top || Number(w.el.style.zIndex) > Number(top.el.style.zIndex)) top = w; });
+  chartWindows.forEach((w) => { if (!w.tray && (!top || Number(w.el.style.zIndex) > Number(top.el.style.zIndex))) top = w; });
   if (!top) return false;
   closeChartWindow(top.id);
   return true;
@@ -1631,6 +1673,8 @@ function openChartWindow(code, name, tf){
       '<div class="chart-float-title">' + code + '<span class="cf-name">' + (name || '') + '</span></div>' +
       '<div class="chart-float-actions">' +
         '<button type="button" data-act="popout" title="移到另一螢幕">⧉ 另開視窗</button>' +
+        '<button type="button" data-act="min" title="最小化" aria-label="最小化">－</button>' +
+        '<button type="button" data-act="max" title="最大化／還原" aria-label="最大化／還原">▢</button>' +
         '<button type="button" data-act="close" aria-label="關閉">✕</button>' +
       '</div></div>' +
     '<iframe title="' + code + ' K線圖" src="' + chartEmbedUrl(code, name, tf) + '"></iframe>';
@@ -1640,14 +1684,17 @@ function openChartWindow(code, name, tf){
   bringChartWindowToFront(win);
   el.addEventListener('pointerdown', () => bringChartWindowToFront(win), true);
   el.querySelector('[data-act="close"]').addEventListener('click', () => closeChartWindow(id));
+  el.querySelector('[data-act="min"]').addEventListener('click', () => minimizeChartWindow(id));
+  el.querySelector('[data-act="max"]').addEventListener('click', () => toggleMaximizeChartWindow(id));
   el.querySelector('[data-act="popout"]').addEventListener('click', () => {
     const popup = window.open(chartEmbedUrl(code, name, tf), 'hanstockChart_' + code, 'width=1100,height=760');
     if (popup){ popup.focus(); closeChartWindow(id); }
   });
   const head = el.querySelector('.chart-float-head');
   let dragging = false, offX = 0, offY = 0;
+  head.addEventListener('dblclick', (e) => { if (!e.target.closest('button')) toggleMaximizeChartWindow(id); });
   head.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('button')) return;
+    if (e.target.closest('button') || el.classList.contains('maximized')) return;
     dragging = true; offX = e.clientX - el.offsetLeft; offY = e.clientY - el.offsetTop;
     el.classList.add('dragging');
     head.setPointerCapture(e.pointerId);
@@ -1680,6 +1727,7 @@ function openStockChart(code, name, tf){
   currentChart.name = name;
   document.getElementById('cmCode').textContent = code;
   document.getElementById('cmName').textContent = name;
+  renderChartFlags(code);
   if (wasHidden){
     const panel = document.getElementById('chartModalInner');
     overlay.hidden = false;
@@ -2085,8 +2133,28 @@ async function refreshStockFlags(){
     if (data && data.stocks && typeof data.stocks === 'object'){
       stockFlags = data.stocks;
       if (!document.getElementById('signalModal').hidden) renderSignalCenter();
+      if (!document.getElementById('chartModal').hidden) renderChartFlags(currentChart.code);
     }
   } catch (e) { /* 抓不到就先不標，下一輪再試 */ }
+}
+function renderChartFlags(code){
+  // K 線圖標題列下方：這檔的可交易條件與處置狀態（資料同訊號中心的全族群旗標）。
+  const el = document.getElementById('cmFlags');
+  if (!el) return;
+  const f = code ? stockFlags[code] : null;
+  if (!f){ el.innerHTML = ''; el.hidden = true; return; }
+  const yesNo = (value, yes, no) => value == null ? '' : '<span class="flag-pill' + (value ? '' : ' off') + '">' + (value ? yes : no) + '</span>';
+  const pills = [
+    yesNo(f.marginable, '可融資', '不可融資'),
+    yesNo(f.shortable, '可融券', '不可融券'),
+    yesNo(f.dayTradeEligible, '可現股當沖', '不可現股當沖'),
+    '<span class="flag-pill' + (f.hasStockFutures ? ' futures' : ' off') + '">' + (f.hasStockFutures ? '有股期' : '無股期') + '</span>',
+    f.disposition
+      ? '<span class="flag-pill disposition" title="' + (f.dispositionReason || '處置股') + '">處置股' + (f.dispositionUntil ? '（至 ' + f.dispositionUntil + '）' : '') + '</span>'
+      : '<span class="flag-pill off">非處置</span>',
+  ].filter(Boolean);
+  el.innerHTML = pills.join('');
+  el.hidden = false;
 }
 function flagPillsHtml(code, opts){
   const f = stockFlags[code];
@@ -2624,6 +2692,7 @@ if (CHART_WINDOW_MODE){
   document.body.classList.add('chart-window-mode');
   document.title = embedCode + ' ' + embedName + ' K線圖';
   refresh(); // 抓一次報價給圖表用，不設輪詢
+  refreshStockFlags(); // 可融資／可融券／當沖／股期／處置 那一排
   openStockChart(embedCode, embedName, chartParams.get('tf') || undefined);
   document.getElementById('chartModal').classList.add('fullscreen');
   if (window.parent !== window){
