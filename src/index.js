@@ -261,6 +261,8 @@ const HTML_PAGE = `<!DOCTYPE html>
 
   /* 盤中訊號中心：常駐浮動視窗，不擋住底下頁面（不是點開才出現的彈窗） */
   .signal-modal{position:fixed;inset:0;z-index:101;pointer-events:none;}
+  /* 從訊號中心點進 K 線圖：視窗不關、退到 K 線圖後面，關掉 K 線圖就原地回來（分頁、捲動位置都不變）。 */
+  .signal-modal.behind-chart{z-index:98;}
   .signal-modal-inner{position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(672px,94vw);height:min(768px,86vh);min-width:280px;min-height:320px;max-width:98vw;max-height:96vh;overflow:auto;resize:both;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);pointer-events:auto;}
   .signal-modal-inner.collapsed{height:auto!important;min-height:0;overflow:hidden;resize:none;padding:10px 14px;}
   .signal-modal-inner.collapsed .signal-help,
@@ -1627,6 +1629,8 @@ function openStockChart(code, name, tf){
 function closeStockChart(){
   document.getElementById('chartModal').hidden = true;
   document.body.style.overflow = '';
+  // 若是從訊號中心點進來的，關圖後讓訊號中心回到最上層。
+  document.getElementById('signalModal').classList.remove('behind-chart');
 }
 
 let openGroupName = null;
@@ -2461,7 +2465,9 @@ document.getElementById('signalTabsBar').addEventListener('click', (e) => {
 document.getElementById('signalBody').addEventListener('click', (e) => {
   const row = e.target.closest('.signal-row[data-code]');
   if (!row) return;
-  hideSignalModalPanel();
+  // 使用者要求：K 線圖關掉之後訊號中心要還在，不用再去右上角重開。
+  // 所以不關視窗，只讓它退到 K 線圖後面；closeStockChart 會把它拉回來。
+  document.getElementById('signalModal').classList.add('behind-chart');
   openStockChart(row.dataset.code, row.dataset.name);
 });
 document.getElementById('smClose').addEventListener('click', closeSignalCenter);
