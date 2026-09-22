@@ -1803,7 +1803,6 @@ const SIGNAL_KINDS = [
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
-  { key: 'afterHoursFixedPrice', label: '盤後定價' },
   { key: 'history', label: '歷史查詢' },
 ];
 // 5分鐘K策略訊號家族(MA交叉/520/A8空等)只在K線圖上用符號呈現，不進盤中
@@ -1912,43 +1911,6 @@ async function fetchMainForceRanking(){
   const data = await res.json();
   if (!data || !Array.isArray(data.ranking)) throw new Error('bad payload');
   return data.ranking;
-}
-
-async function fetchAfterHoursFixedPrice(){
-  const res = await fetch('/api/after-hours-fixed-price?limit=200&latest=true');
-  if (!res.ok) throw new Error('after-hours-fixed-price http ' + res.status);
-  const data = await res.json();
-  if (!data || !Array.isArray(data.entries)) throw new Error('bad payload');
-  return { tradeDate: data.tradeDate || '', isToday: data.isToday !== false, entries: data.entries };
-}
-
-function afterHoursDateLabel(tradeDate){
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(tradeDate || '');
-  return m ? Number(m[2]) + '/' + Number(m[3]) : '';
-}
-function afterHoursRowsHtml(result){
-  const entries = result.entries || [];
-  if (!entries.length){
-    return '<div class="signal-empty" data-after-hours><div class="se-title">盤後定價交易尚無資料</div>' +
-      '<div class="se-sub">14:30撮合公布後才會有資料，請稍後再查看。</div></div>';
-  }
-  const dateLabel = afterHoursDateLabel(result.tradeDate);
-  const note = '<div class="signal-note">' + (dateLabel ? dateLabel + ' ' : '') +
-    '盤後定價交易（14:00–14:30撮合、14:30公布）成交價／成交量' +
-    (result.isToday ? '' : '｜今天的資料14:30公布後會自動換上') + '</div>';
-  return '<div data-after-hours>' + note + '<div class="signal-list">' + entries.map((e) => {
-    const name = e.name && e.name !== e.code ? e.name : lookupStockName(e.code);
-    const group = lookupStockGroup(e.code);
-    const lots = Math.round(e.volume / 1000);
-    return '<div class="signal-row" data-code="' + e.code + '" data-name="' + name + '">' +
-        '<span class="sig-time">14:30</span>' +
-        '<span class="sig-code">' + e.code + '</span>' +
-        '<span class="sig-name">' + name + '</span>' +
-        (group ? '<span class="sig-group">' + group + '</span>' : '') +
-        '<span class="sig-label">盤後定價成交</span>' +
-        '<div class="srow-right"><span class="svol">' + lots.toLocaleString('zh-TW') + ' 張</span><span class="sprice">' + e.price.toFixed(2) + '</span></div>' +
-      '</div>';
-  }).join('') + '</div></div>';
 }
 
 let signalRefreshInFlight = false;
@@ -2117,7 +2079,7 @@ function renderSignalCenter(){
   const bigHolderRows = bigHolderRowsFrom(mainForceRanking);
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
-    if (key === 'history' || key === 'afterHoursFixedPrice') return null;
+    if (key === 'history') return null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
@@ -2164,18 +2126,6 @@ function renderSignalCenter(){
     replaceSignalHtml(body, 'bigHolderForce', rankingRowsHtml(bigHolderRows));
   } else if (active === 'now'){
     replaceSignalHtml(body, 'now', nowTabRowsHtml(todaySignalEvents, bigHolderRows));
-  } else if (active === 'afterHoursFixedPrice'){
-    // 只放14:30盤後定價；重新整理時保留舊內容，不要每15秒閃一次「讀取中」。
-    if (!body.querySelector('[data-after-hours]')) replaceSignalHtml(body, 'afterHours:loading', '<div class="signal-empty" data-after-hours><div class="se-title">讀取中…</div></div>');
-    fetchAfterHoursFixedPrice().then((result) => {
-      const el = document.getElementById('signalBody');
-      if (el && signalCenterState.activeTab === 'afterHoursFixedPrice') replaceSignalHtml(el, 'afterHours:' + (result.tradeDate || ''), afterHoursRowsHtml(result));
-    }).catch(() => {
-      const el = document.getElementById('signalBody');
-      if (el && signalCenterState.activeTab === 'afterHoursFixedPrice' && !el.querySelector('.signal-list')){
-        el.innerHTML = '<div class="signal-empty" data-after-hours><div class="se-title">盤後定價資料讀取失敗</div><div class="se-sub">後端暫時連不上，稍後再試。</div></div>';
-      }
-    });
   } else {
     const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
     replaceSignalHtml(body, active, signalRowsHtml(events));
