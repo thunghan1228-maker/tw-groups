@@ -50,15 +50,21 @@ jobs:
             echo "::error::CLOUDFLARE_API_TOKEN 的內容不像 Cloudflare API 權杖（應該是一串 40 個英數字元）。請到 Cloudflare → 我的設定檔 → API 權杖重新建立一個，只複製那一串權杖，再到 GitHub 的 secret 按鉛筆圖示重新貼上。"
             exit 1
           fi
+          # 2026 的權杖不一定是 40 字（實際看到 53 字、前面有 4 個字母加底線的前綴），所以先拿整段試，
+          # 整段不行再試 40 字的視窗（舊格式權杖前後黏了別的字的情況）。
+          try_token() {
+            verify="$(curl -sS "https://api.cloudflare.com/client/v4/user/tokens/verify" -H "Authorization: Bearer $1" || true)"
+            last_verify="$verify"
+            echo "  候選（長度 ${#1}）→ $verify"
+            printf '%s' "$verify" | grep -q '"status":"active"'
+          }
           while IFS= read -r run; do
+            if try_token "$run"; then token="$run"; break; fi
             len=${#run}
             i=0
-            while [ $((i + 40)) -le "$len" ] && [ -z "$token" ]; do
+            while [ $((i + 40)) -lt "$len" ] && [ -z "$token" ]; do
               cand="${run:$i:40}"
-              verify="$(curl -sS "https://api.cloudflare.com/client/v4/user/tokens/verify" -H "Authorization: Bearer $cand" || true)"
-              last_verify="$verify"
-              echo "  候選（長度 ${#run}，位移 $i）→ $verify"
-              if printf '%s' "$verify" | grep -q '"status":"active"'; then token="$cand"; fi
+              if try_token "$cand"; then token="$cand"; fi
               i=$((i + 1))
             done
             [ -n "$token" ] && break
