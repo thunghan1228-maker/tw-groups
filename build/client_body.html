@@ -2031,6 +2031,33 @@ function nowTabRowsHtml(events, rankingRows){
   return '<div class="signal-list">' + merged.map((m) => m.html).join('') + '</div>';
 }
 
+// 每5秒的自動更新不要把訊號列表整個砍掉重畫：歷史查詢原本先變成「讀取中…」再填回去，
+// 內容一縮短，捲動位置就被夾回最上面——往上看早盤資料會一直跳回 14:30 那幾筆，而且
+// 最上面幾筆每5秒閃一次。改成：內容沒變就完全不動 DOM；有變才換，而且把捲動位置固定
+// 在原本看的那幾筆上（新訊號插在最上面時不會把畫面往下推）。
+let signalBodyRendered = { key: null, html: null };
+let signalTabsRenderedHtml = null;
+let signalHistoryFetchedAt = 0;
+function signalScroller(){
+  const body = document.getElementById('signalBody');
+  if (body && body.scrollHeight > body.clientHeight && /auto|scroll/.test(getComputedStyle(body).overflowY)) return body;
+  return document.getElementById('signalModalInner') || body;
+}
+function replaceSignalHtml(el, key, html){
+  if (!el) return;
+  if (signalBodyRendered.key === key && signalBodyRendered.html === html) return;
+  const scroller = signalScroller();
+  const sameView = signalBodyRendered.key === key;
+  const prevTop = scroller ? scroller.scrollTop : 0;
+  const prevHeight = scroller ? scroller.scrollHeight : 0;
+  el.innerHTML = html;
+  if (scroller){
+    if (sameView && prevTop > 0) scroller.scrollTop = prevTop + (scroller.scrollHeight - prevHeight);
+    else if (!sameView) scroller.scrollTop = 0;
+  }
+  signalBodyRendered = { key: key, html: html };
+}
+
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
   const bigHolderRows = bigHolderRowsFrom(mainForceRanking);
@@ -2040,42 +2067,55 @@ function renderSignalCenter(){
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
-  tabsEl.innerHTML = SIGNAL_KINDS.map((k) => {
+  const tabsHtml = SIGNAL_KINDS.map((k) => {
     const count = countFor(k.key);
     return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + '" data-kind="' + k.key + '">' +
       k.label + (count === null ? '' : ' <span class="sig-count">' + count + '</span>') +
     '</button>';
   }).join('');
+  // 分頁列也只在數字或選取狀態有變時才重畫，免得使用者正要點的按鈕被換掉。
+  if (tabsHtml !== signalTabsRenderedHtml){
+    tabsEl.innerHTML = tabsHtml;
+    signalTabsRenderedHtml = tabsHtml;
+  }
 
   const body = document.getElementById('signalBody');
   const active = signalCenterState.activeTab;
   if (active === 'history'){
-    const d = signalCenterState.historyDate || new Date().toISOString().slice(0, 10);
-    body.innerHTML =
-      '<div class="signal-history-bar">交易日期 <input type="date" id="signalHistoryDate" value="' + d + '"></div>' +
-      '<div id="signalHistoryBody"><div class="signal-empty"><div class="se-title">讀取中…</div></div></div>';
-    document.getElementById('signalHistoryDate').addEventListener('change', (e) => {
-      signalCenterState.historyDate = e.target.value;
-      renderSignalCenter();
-    });
+    const today = new Date().toISOString().slice(0, 10);
+    const d = signalCenterState.historyDate || today;
+    const key = 'history:' + d;
+    if (signalBodyRendered.key !== key || !document.getElementById('signalHistoryBody')){
+      // 剛切到這個分頁或換了日期才整個重畫、顯示讀取中；同一天的自動更新只換列表內容。
+      replaceSignalHtml(body, key + ':loading',
+        '<div class="signal-history-bar">交易日期 <input type="date" id="signalHistoryDate" value="' + d + '"></div>' +
+        '<div id="signalHistoryBody"><div class="signal-empty"><div class="se-title">讀取中…</div></div></div>');
+      document.getElementById('signalHistoryDate').addEventListener('change', (e) => {
+        signalCenterState.historyDate = e.target.value;
+        renderSignalCenter();
+      });
+      signalBodyRendered = { key: key, html: null };
+    } else if (d !== today && signalBodyRendered.html !== null && Date.now() - signalHistoryFetchedAt < 60000){
+      return; // 過去日期的紀錄幾乎不會變，一分鐘看一次就夠，不用每5秒重抓
+    }
+    signalHistoryFetchedAt = Date.now();
     fetchRealSignals(d).then((events) => {
-      const stillOnSameDate = active === signalCenterState.activeTab && (signalCenterState.historyDate || new Date().toISOString().slice(0, 10)) === d;
-      const el = document.getElementById('signalHistoryBody');
-      if (stillOnSameDate && el) el.innerHTML = signalRowsHtml(events);
+      const stillOnSameDate = signalCenterState.activeTab === 'history' && (signalCenterState.historyDate || today) === d;
+      if (stillOnSameDate) replaceSignalHtml(document.getElementById('signalHistoryBody'), key, signalRowsHtml(events));
     }).catch(() => {
       const el = document.getElementById('signalHistoryBody');
-      if (el) el.innerHTML = '<div class="signal-empty"><div class="se-title">讀取失敗</div><div class="se-sub">後端暫時連不上，稍後再試。</div></div>';
+      if (el && !el.querySelector('.signal-list')) el.innerHTML = '<div class="signal-empty"><div class="se-title">讀取失敗</div><div class="se-sub">後端暫時連不上，稍後再試。</div></div>';
     });
   } else if (active === 'bigHolderForce'){
-    body.innerHTML = rankingRowsHtml(bigHolderRows);
+    replaceSignalHtml(body, 'bigHolderForce', rankingRowsHtml(bigHolderRows));
   } else if (active === 'now'){
-    body.innerHTML = nowTabRowsHtml(todaySignalEvents, bigHolderRows);
+    replaceSignalHtml(body, 'now', nowTabRowsHtml(todaySignalEvents, bigHolderRows));
   } else if (active === 'afterHoursFixedPrice'){
     // 只放14:30盤後定價；重新整理時保留舊內容，不要每15秒閃一次「讀取中」。
-    if (!body.querySelector('[data-after-hours]')) body.innerHTML = '<div class="signal-empty" data-after-hours><div class="se-title">讀取中…</div></div>';
+    if (!body.querySelector('[data-after-hours]')) replaceSignalHtml(body, 'afterHours:loading', '<div class="signal-empty" data-after-hours><div class="se-title">讀取中…</div></div>');
     fetchAfterHoursFixedPrice().then((result) => {
       const el = document.getElementById('signalBody');
-      if (el && signalCenterState.activeTab === 'afterHoursFixedPrice') el.innerHTML = afterHoursRowsHtml(result);
+      if (el && signalCenterState.activeTab === 'afterHoursFixedPrice') replaceSignalHtml(el, 'afterHours:' + (result.tradeDate || ''), afterHoursRowsHtml(result));
     }).catch(() => {
       const el = document.getElementById('signalBody');
       if (el && signalCenterState.activeTab === 'afterHoursFixedPrice' && !el.querySelector('.signal-list')){
@@ -2084,7 +2124,7 @@ function renderSignalCenter(){
     });
   } else {
     const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
-    body.innerHTML = signalRowsHtml(events);
+    replaceSignalHtml(body, active, signalRowsHtml(events));
   }
 }
 function positionSignalModal(){
