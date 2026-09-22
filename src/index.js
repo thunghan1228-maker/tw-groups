@@ -67,10 +67,14 @@ const HTML_PAGE = `<!DOCTYPE html>
   .updated{color:var(--muted);font-size:11px;text-align:center;padding:8px 0 28px;}
   .loading{color:var(--muted);text-align:center;padding:40px 0;}
 
-  .layout{display:flex;gap:12px;padding:8px 16px 32px;align-items:flex-start;flex-wrap:wrap;}
-  .col-left{flex:1 1 320px;min-width:280px;}
-  .col-right{flex:3 1 620px;min-width:320px;}
-  .section-title{font-size:15px;font-weight:800;margin:2px 0 8px;color:var(--text);}
+  .layout{display:flex;gap:14px;padding:8px 16px 32px;align-items:flex-start;flex-wrap:wrap;}
+  /* 右欄固定寬度、不再撐滿：兩張個股卡各約 430px，名稱跟數字之間不留大片空白；
+     剩下的寬度全部給左欄的六大族群卡。 */
+  .col-left{flex:1 1 360px;min-width:300px;}
+  .col-right{flex:0 1 860px;min-width:320px;max-width:100%;}
+  .section-title{font-size:16px;font-weight:800;margin:2px 0 8px;color:var(--text);}
+  .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 8px;}
+  .section-head .section-title{margin:0;}
 
   /* 強勢／弱勢 分頁與統計 */
   .tabs{display:flex;gap:24px;padding:16px 16px 0;}
@@ -79,20 +83,20 @@ const HTML_PAGE = `<!DOCTYPE html>
   .tab-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px;}
   .tab-btn.active.strong{color:var(--up);border-bottom-color:var(--up);}
   .tab-btn.active.weak{color:var(--down);border-bottom-color:var(--down);}
-  .stat-bar{display:flex;gap:16px;padding:10px 12px;margin:0 0 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;}
-  .stat-item{display:flex;flex-direction:column;align-items:center;flex:1;}
-  .stat-num{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;}
-  .stat-label{font-size:12px;color:var(--muted);margin-top:2px;}
+  .stat-bar{display:flex;gap:18px;padding:6px 14px;margin:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;}
+  .stat-item{display:flex;align-items:baseline;gap:6px;}
+  .stat-num{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .stat-label{font-size:12px;color:var(--muted);}
 
   /* 左側：前六大族群 */
-  .top6-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .top6-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;transition:background .12s ease;}
+  .top6-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .top6-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;transition:background .12s ease;}
   .top6-card:hover{background:var(--panel-2);}
   .top6-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
-  .top6-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
-  .badge{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#241f1a;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .top6-name{font-weight:800;font-size:17px;}
-  .top6-chg{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .top6-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .badge{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#241f1a;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .top6-name{font-weight:800;font-size:22px;}
+  .top6-chg{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
 
   /* 右側：各族群前三強／前三弱個股。兩欄、由上往下排：第1~3在左欄、第4~6在右欄。 */
   .top-groups-row{display:grid;grid-template-columns:repeat(2, 1fr);grid-template-rows:repeat(3, auto);grid-auto-flow:column;gap:8px;}
@@ -133,13 +137,13 @@ const HTML_PAGE = `<!DOCTYPE html>
   .stock-row:hover{background:rgba(201,169,140,0.08);}
   .stock-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
   .srow-left{display:flex;align-items:baseline;gap:6px;min-width:0;}
-  .srow-left .scode{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums;flex-shrink:0;}
-  .srow-left .sname{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .srow-left .scode{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums;flex-shrink:0;}
+  .srow-left .sname{font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .srow-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
   .srow-right span{font-variant-numeric:tabular-nums;text-align:right;}
-  .srow-right .spct{width:52px;font-size:13px;font-weight:800;}
-  .srow-right .schg{width:50px;font-size:12px;font-weight:700;}
-  .srow-right .sprice{width:54px;font-size:12px;font-weight:700;color:var(--text);}
+  .srow-right .spct{width:60px;font-size:14px;font-weight:800;}
+  .srow-right .schg{width:56px;font-size:13px;font-weight:700;}
+  .srow-right .sprice{width:64px;font-size:13px;font-weight:700;color:var(--text);}
   .srow-right .sprice.up{color:var(--up);}
   .srow-right .sprice.down{color:var(--down);}
   .srow-right .svol{width:64px;font-size:12px;font-weight:700;color:var(--muted);}
@@ -2279,18 +2283,19 @@ function render(){
     '</div>';
   }).join('');
 
+  const statBarHtml =
+    '<div class="stat-bar">' +
+      '<div class="stat-item"><div class="stat-num up">' + strongCount + ' / ' + total + '</div><div class="stat-label">強勢族群</div></div>' +
+      '<div class="stat-item"><div class="stat-num down">' + weakCount + ' / ' + total + '</div><div class="stat-label">弱勢族群</div></div>' +
+    '</div>';
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-left">' +
-        '<div class="stat-bar">' +
-          '<div class="stat-item"><div class="stat-num up">' + strongCount + ' / ' + total + '</div><div class="stat-label">強勢族群</div></div>' +
-          '<div class="stat-item"><div class="stat-num down">' + weakCount + ' / ' + total + '</div><div class="stat-label">弱勢族群</div></div>' +
-        '</div>' +
         '<div class="section-title">' + leftTitle + '</div>' +
         '<div class="top6-grid">' + side6Html + '</div>' +
       '</div>' +
       '<div class="col-right">' +
-        '<div class="section-title">各族群前三' + rankLabel + '個股</div>' +
+        '<div class="section-head"><div class="section-title">各族群前三' + rankLabel + '個股</div>' + statBarHtml + '</div>' +
         '<div class="top-groups-row">' + sideGroupsHtml + '</div>' +
       '</div>' +
     '</div>';
