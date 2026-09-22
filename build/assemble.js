@@ -86,19 +86,25 @@ async function fetchQuotes(codes) {
   return quotes;
 }
 
-async function proxyHanstockBars(pathname) {
+async function proxyHanstockBars(pathname, cacheSeconds = 20) {
   // 代理到 Railway 上 HanStock 主要服務自己的 Hub API（用 Railway 專屬網址，
   // 不依賴 hanstock.xyz 這個要續約的自訂網域，到期也不受影響）。
-  // 這裡做短暫快取，避免 tw-groups 流量直接反映成後端服務的負載。
+  // 歷史/K棒類做短暫快取，避免 tw-groups 流量直接反映成後端服務的負載；
+  // 盤中訊號類傳 cacheSeconds=0：Cloudflare 跟瀏覽器各快取 20 秒，加上頁面
+  // 15 秒輪詢，使用者實際看到訊號會比另一台直接推播的電腦慢將近 30 秒。
   const upstream = "https://hanstock-production-b872.up.railway.app" + pathname;
+  const live = !(cacheSeconds > 0);
   const resp = await fetch(upstream, {
     headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
-    cf: { cacheTtl: 20, cacheEverything: true }
+    cf: live ? { cacheTtl: 0, cacheEverything: false } : { cacheTtl: cacheSeconds, cacheEverything: true }
   });
   const body = await resp.text();
   return new Response(body, {
     status: resp.status,
-    headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=20" }
+    headers: {
+      "content-type": "application/json; charset=UTF-8",
+      "cache-control": live ? "no-store" : "public, max-age=" + cacheSeconds
+    }
   });
 }
 
@@ -252,14 +258,14 @@ export default {
     }
     if (url.pathname === "/api/main-force-ranking") {
       try {
-        return await proxyHanstockBars("/api/hub/main-force/ranking" + url.search);
+        return await proxyHanstockBars("/api/hub/main-force/ranking" + url.search, 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), ranking: [] }, { status: 502 });
       }
     }
     if (url.pathname === "/api/intraday-signals") {
       try {
-        return await proxyHanstockBars("/api/hub/intraday-signals" + url.search);
+        return await proxyHanstockBars("/api/hub/intraday-signals" + url.search, 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), signals: [] }, { status: 502 });
       }
@@ -284,7 +290,7 @@ export default {
     }
     if (url.pathname === "/api/otc-strength") {
       try {
-        return await proxyHanstockBars("/api/hub/index/otc/strength");
+        return await proxyHanstockBars("/api/hub/index/otc/strength", 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), ready: false }, { status: 502 });
       }

@@ -1711,7 +1711,7 @@ async function renderOtcStrengthWidget(){
       el.innerHTML =
         '<div class="ms-badge">資料蒐集中</div>' +
         '<div class="ms-lines"><div>' + (data.reason || '尚未累積足夠的5分K資料') + '</div>' +
-        '<div class="ms-updated">開盤後約1小時40分（20根5分K）才會有第一個訊號，不是示範資料。</div></div>';
+        '<div class="ms-updated">歷史5分K會自動補齊，通常一兩分鐘內就會有訊號；不是示範資料。</div></div>';
       return;
     }
     const badgeCls = data.label === '強多' ? 'up' : data.label === '強空' ? 'down' : '';
@@ -1886,24 +1886,31 @@ function afterHoursRowsHtml(result){
   }).join('') + '</div></div>';
 }
 
+let signalRefreshInFlight = false;
 async function refreshSignalData(){
+  if (signalRefreshInFlight) return;
+  signalRefreshInFlight = true;
   const today = new Date().toISOString().slice(0, 10);
   try {
-    const [signals, ranking] = await Promise.all([fetchRealSignals(today), fetchMainForceRanking()]);
-    todaySignalEvents = signals;
-    mainForceRanking = ranking;
-    signalDataIsReal = true;
-  } catch (e) {
-    todaySignalEvents = buildDemoSignalsForDate(today)
-      .map((ev) => ({ ...ev, tabs: ['now', ev.kind] }));
-    mainForceRanking = [];
-    signalDataIsReal = false;
+    try {
+      const [signals, ranking] = await Promise.all([fetchRealSignals(today), fetchMainForceRanking()]);
+      todaySignalEvents = signals;
+      mainForceRanking = ranking;
+      signalDataIsReal = true;
+    } catch (e) {
+      todaySignalEvents = buildDemoSignalsForDate(today)
+        .map((ev) => ({ ...ev, tabs: ['now', ev.kind] }));
+      mainForceRanking = [];
+      signalDataIsReal = false;
+    }
+    const countEl = document.getElementById('signalBadgeCount');
+    // 跟「今日即時」分頁的數量算法要一致(事件訊號+盤中大戶力)，不然這裡
+    // 少算大戶力筆數，右上角徽章數字就會比今日即時分頁裡的數字還小。
+    if (countEl) countEl.textContent = String(todaySignalEvents.length + bigHolderRowsFrom(mainForceRanking).length);
+    if (!document.getElementById('signalModal').hidden) renderSignalCenter();
+  } finally {
+    signalRefreshInFlight = false;
   }
-  const countEl = document.getElementById('signalBadgeCount');
-  // 跟「今日即時」分頁的數量算法要一致(事件訊號+盤中大戶力)，不然這裡
-  // 少算大戶力筆數，右上角徽章數字就會比今日即時分頁裡的數字還小。
-  if (countEl) countEl.textContent = String(todaySignalEvents.length + bigHolderRowsFrom(mainForceRanking).length);
-  if (!document.getElementById('signalModal').hidden) renderSignalCenter();
 }
 
 // 瞬間大單/特大買賣單標籤的hover提示文字：門檻定義要跟後端
@@ -2267,7 +2274,7 @@ async function refresh(){
     }
   }
   render();
-  await Promise.all([renderOtcStrengthWidget(), refreshSignalData()]);
+  await renderOtcStrengthWidget();
   if (openGroupName && !document.getElementById('groupModal').hidden) openGroupDetail(openGroupName);
 }
 
@@ -2424,4 +2431,6 @@ openSignalCenter(); // 盤中訊號中心預設常駐顯示，不用點才出現
 
 refresh();
 setInterval(refresh, 15000);
+// 訊號要快：每5秒獨立輪詢(Worker端這幾個API也不快取)，不跟/api/groups綁在一起等。
+setInterval(refreshSignalData, 5000);
 </script>

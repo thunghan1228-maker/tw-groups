@@ -1765,7 +1765,7 @@ async function renderOtcStrengthWidget(){
       el.innerHTML =
         '<div class="ms-badge">資料蒐集中</div>' +
         '<div class="ms-lines"><div>' + (data.reason || '尚未累積足夠的5分K資料') + '</div>' +
-        '<div class="ms-updated">開盤後約1小時40分（20根5分K）才會有第一個訊號，不是示範資料。</div></div>';
+        '<div class="ms-updated">歷史5分K會自動補齊，通常一兩分鐘內就會有訊號；不是示範資料。</div></div>';
       return;
     }
     const badgeCls = data.label === '強多' ? 'up' : data.label === '強空' ? 'down' : '';
@@ -1940,24 +1940,31 @@ function afterHoursRowsHtml(result){
   }).join('') + '</div></div>';
 }
 
+let signalRefreshInFlight = false;
 async function refreshSignalData(){
+  if (signalRefreshInFlight) return;
+  signalRefreshInFlight = true;
   const today = new Date().toISOString().slice(0, 10);
   try {
-    const [signals, ranking] = await Promise.all([fetchRealSignals(today), fetchMainForceRanking()]);
-    todaySignalEvents = signals;
-    mainForceRanking = ranking;
-    signalDataIsReal = true;
-  } catch (e) {
-    todaySignalEvents = buildDemoSignalsForDate(today)
-      .map((ev) => ({ ...ev, tabs: ['now', ev.kind] }));
-    mainForceRanking = [];
-    signalDataIsReal = false;
+    try {
+      const [signals, ranking] = await Promise.all([fetchRealSignals(today), fetchMainForceRanking()]);
+      todaySignalEvents = signals;
+      mainForceRanking = ranking;
+      signalDataIsReal = true;
+    } catch (e) {
+      todaySignalEvents = buildDemoSignalsForDate(today)
+        .map((ev) => ({ ...ev, tabs: ['now', ev.kind] }));
+      mainForceRanking = [];
+      signalDataIsReal = false;
+    }
+    const countEl = document.getElementById('signalBadgeCount');
+    // 跟「今日即時」分頁的數量算法要一致(事件訊號+盤中大戶力)，不然這裡
+    // 少算大戶力筆數，右上角徽章數字就會比今日即時分頁裡的數字還小。
+    if (countEl) countEl.textContent = String(todaySignalEvents.length + bigHolderRowsFrom(mainForceRanking).length);
+    if (!document.getElementById('signalModal').hidden) renderSignalCenter();
+  } finally {
+    signalRefreshInFlight = false;
   }
-  const countEl = document.getElementById('signalBadgeCount');
-  // 跟「今日即時」分頁的數量算法要一致(事件訊號+盤中大戶力)，不然這裡
-  // 少算大戶力筆數，右上角徽章數字就會比今日即時分頁裡的數字還小。
-  if (countEl) countEl.textContent = String(todaySignalEvents.length + bigHolderRowsFrom(mainForceRanking).length);
-  if (!document.getElementById('signalModal').hidden) renderSignalCenter();
 }
 
 // 瞬間大單/特大買賣單標籤的hover提示文字：門檻定義要跟後端
@@ -2321,7 +2328,7 @@ async function refresh(){
     }
   }
   render();
-  await Promise.all([renderOtcStrengthWidget(), refreshSignalData()]);
+  await renderOtcStrengthWidget();
   if (openGroupName && !document.getElementById('groupModal').hidden) openGroupDetail(openGroupName);
 }
 
@@ -2478,6 +2485,8 @@ openSignalCenter(); // 盤中訊號中心預設常駐顯示，不用點才出現
 
 refresh();
 setInterval(refresh, 15000);
+// 訊號要快：每5秒獨立輪詢(Worker端這幾個API也不快取)，不跟/api/groups綁在一起等。
+setInterval(refreshSignalData, 5000);
 </script>
 
 </body>
@@ -2532,19 +2541,25 @@ async function fetchQuotes(codes) {
   return quotes;
 }
 
-async function proxyHanstockBars(pathname) {
+async function proxyHanstockBars(pathname, cacheSeconds = 20) {
   // 代理到 Railway 上 HanStock 主要服務自己的 Hub API（用 Railway 專屬網址，
   // 不依賴 hanstock.xyz 這個要續約的自訂網域，到期也不受影響）。
-  // 這裡做短暫快取，避免 tw-groups 流量直接反映成後端服務的負載。
+  // 歷史/K棒類做短暫快取，避免 tw-groups 流量直接反映成後端服務的負載；
+  // 盤中訊號類傳 cacheSeconds=0：Cloudflare 跟瀏覽器各快取 20 秒，加上頁面
+  // 15 秒輪詢，使用者實際看到訊號會比另一台直接推播的電腦慢將近 30 秒。
   const upstream = "https://hanstock-production-b872.up.railway.app" + pathname;
+  const live = !(cacheSeconds > 0);
   const resp = await fetch(upstream, {
     headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
-    cf: { cacheTtl: 20, cacheEverything: true }
+    cf: live ? { cacheTtl: 0, cacheEverything: false } : { cacheTtl: cacheSeconds, cacheEverything: true }
   });
   const body = await resp.text();
   return new Response(body, {
     status: resp.status,
-    headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=20" }
+    headers: {
+      "content-type": "application/json; charset=UTF-8",
+      "cache-control": live ? "no-store" : "public, max-age=" + cacheSeconds
+    }
   });
 }
 
@@ -2698,14 +2713,14 @@ export default {
     }
     if (url.pathname === "/api/main-force-ranking") {
       try {
-        return await proxyHanstockBars("/api/hub/main-force/ranking" + url.search);
+        return await proxyHanstockBars("/api/hub/main-force/ranking" + url.search, 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), ranking: [] }, { status: 502 });
       }
     }
     if (url.pathname === "/api/intraday-signals") {
       try {
-        return await proxyHanstockBars("/api/hub/intraday-signals" + url.search);
+        return await proxyHanstockBars("/api/hub/intraday-signals" + url.search, 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), signals: [] }, { status: 502 });
       }
@@ -2730,7 +2745,7 @@ export default {
     }
     if (url.pathname === "/api/otc-strength") {
       try {
-        return await proxyHanstockBars("/api/hub/index/otc/strength");
+        return await proxyHanstockBars("/api/hub/index/otc/strength", 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), ready: false }, { status: 502 });
       }
