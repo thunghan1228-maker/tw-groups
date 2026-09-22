@@ -67,10 +67,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .updated{color:var(--muted);font-size:11px;text-align:center;padding:8px 0 28px;}
   .loading{color:var(--muted);text-align:center;padding:40px 0;}
 
-  .layout{display:flex;gap:16px;padding:12px 16px 40px;align-items:flex-start;flex-wrap:wrap;}
+  .layout{display:flex;gap:12px;padding:8px 16px 32px;align-items:flex-start;flex-wrap:wrap;}
   .col-left{flex:1 1 320px;min-width:280px;}
   .col-right{flex:3 1 620px;min-width:320px;}
-  .section-title{font-size:14px;font-weight:800;margin:4px 0 10px;color:var(--text);}
+  .section-title{font-size:15px;font-weight:800;margin:2px 0 8px;color:var(--text);}
 
   /* 強勢／弱勢 分頁與統計 */
   .tabs{display:flex;gap:24px;padding:16px 16px 0;}
@@ -79,25 +79,25 @@ const HTML_PAGE = `<!DOCTYPE html>
   .tab-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px;}
   .tab-btn.active.strong{color:var(--up);border-bottom-color:var(--up);}
   .tab-btn.active.weak{color:var(--down);border-bottom-color:var(--down);}
-  .stat-bar{display:flex;gap:28px;padding:14px 16px;margin:14px 16px 4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;}
+  .stat-bar{display:flex;gap:16px;padding:10px 12px;margin:0 0 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;}
   .stat-item{display:flex;flex-direction:column;align-items:center;flex:1;}
-  .stat-num{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .stat-num{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;}
   .stat-label{font-size:12px;color:var(--muted);margin-top:2px;}
 
   /* 左側：前六大族群 */
-  .top6-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .top6-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;transition:background .12s ease;}
+  .top6-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .top6-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;transition:background .12s ease;}
   .top6-card:hover{background:var(--panel-2);}
   .top6-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
-  .top6-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-  .badge{width:20px;height:20px;border-radius:50%;background:var(--accent);color:#241f1a;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .top6-name{font-weight:800;font-size:14px;}
-  .top6-chg{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .top6-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .badge{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#241f1a;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .top6-name{font-weight:800;font-size:17px;}
+  .top6-chg{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;}
 
-  /* 右側：各族群前三強／前三弱個股 */
-  .top-groups-row{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;}
+  /* 右側：各族群前三強／前三弱個股。兩欄、由上往下排：第1~3在左欄、第4~6在右欄。 */
+  .top-groups-row{display:grid;grid-template-columns:repeat(2, 1fr);grid-template-rows:repeat(3, auto);grid-auto-flow:column;gap:8px;}
   .top-group-col{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
-  .top-group-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#4a3d34;cursor:pointer;transition:background .12s ease;}
+  .top-group-head{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#4a3d34;cursor:pointer;transition:background .12s ease;}
   .top-group-head:hover{background:#57483d;}
   .top-group-head:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
 
@@ -108,10 +108,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .gm-title{font-weight:800;font-size:16px;}
   .gm-list{display:flex;flex-direction:column;border-top:1px solid var(--line);}
   .gm-list .stock-row{padding:11px 4px;}
-  .top-group-rank{font-size:12px;font-weight:800;color:#241f1a;background:var(--accent);border-radius:6px;padding:2px 6px;margin-right:6px;}
-  .top-group-name{font-weight:800;font-size:14px;color:var(--text);}
-  .top-group-chg{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;}
-  .stock-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-top:1px solid var(--line);}
+  .top-group-rank{font-size:17px;font-weight:800;color:#241f1a;background:var(--accent);border-radius:6px;padding:3px 9px;margin-right:8px;}
+  .top-group-name{font-weight:800;font-size:17px;color:var(--text);}
+  .top-group-chg{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .stock-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-top:1px solid var(--line);}
   .stock-row .sname{font-weight:700;font-size:13px;}
   .stock-row .scode{color:var(--muted);font-size:11px;margin-left:4px;font-variant-numeric:tabular-nums;}
   .stock-row .schg{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
@@ -120,11 +120,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .down{color:var(--down);}
   .flat{color:var(--muted);}
 
-  @media (max-width: 900px){
-    .top-groups-row{grid-template-columns:repeat(2, 1fr);}
-  }
   @media (max-width: 640px){
-    .top-groups-row{grid-template-columns:1fr;}
+    .top-groups-row{grid-template-columns:1fr;grid-template-rows:none;grid-auto-flow:row;}
     .stat-bar{gap:12px;}
   }
   @media (prefers-reduced-motion: reduce){
@@ -132,7 +129,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   }
 
   /* 個股列（代號在前、名稱在後，含成交價／漲跌） */
-  .stock-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-top:1px solid var(--line);cursor:pointer;transition:background .12s ease;}
+  .stock-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-top:1px solid var(--line);cursor:pointer;transition:background .12s ease;}
   .stock-row:hover{background:rgba(201,169,140,0.08);}
   .stock-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
   .srow-left{display:flex;align-items:baseline;gap:6px;min-width:0;}
@@ -1907,30 +1904,28 @@ async function fetchMainForceRanking(){
 }
 
 async function fetchAfterHoursFixedPrice(){
-  const res = await fetch('/api/after-hours-fixed-price?limit=200');
+  const res = await fetch('/api/after-hours-fixed-price?limit=200&latest=true');
   if (!res.ok) throw new Error('after-hours-fixed-price http ' + res.status);
   const data = await res.json();
   if (!data || !Array.isArray(data.entries)) throw new Error('bad payload');
-  return data.entries;
+  return { tradeDate: data.tradeDate || '', isToday: data.isToday !== false, entries: data.entries };
 }
 
-function taipeiNowParts(){
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Taipei', hour12: false, hour: '2-digit', minute: '2-digit',
-  }).formatToParts(new Date());
-  const get = (t) => Number((parts.find((p) => p.type === t) || {}).value || 0);
-  return { hour: get('hour'), minute: get('minute') };
+function afterHoursDateLabel(tradeDate){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(tradeDate || '');
+  return m ? Number(m[2]) + '/' + Number(m[3]) : '';
 }
-function isAfterHoursFixedPriceWindow(){
-  const { hour, minute } = taipeiNowParts();
-  return hour > 14 || (hour === 14 && minute >= 30);
-}
-function afterHoursRowsHtml(entries){
+function afterHoursRowsHtml(result){
+  const entries = result.entries || [];
   if (!entries.length){
-    return '<div class="signal-empty"><div class="se-title">盤後定價交易尚無資料</div>' +
+    return '<div class="signal-empty" data-after-hours><div class="se-title">盤後定價交易尚無資料</div>' +
       '<div class="se-sub">14:30撮合公布後才會有資料，請稍後再查看。</div></div>';
   }
-  return '<div class="signal-list">' + entries.map((e) => {
+  const dateLabel = afterHoursDateLabel(result.tradeDate);
+  const note = '<div class="signal-note">' + (dateLabel ? dateLabel + ' ' : '') +
+    '盤後定價交易（14:00–14:30撮合、14:30公布）成交價／成交量' +
+    (result.isToday ? '' : '｜今天的資料14:30公布後會自動換上') + '</div>';
+  return '<div data-after-hours>' + note + '<div class="signal-list">' + entries.map((e) => {
     const name = e.name && e.name !== e.code ? e.name : lookupStockName(e.code);
     const group = lookupStockGroup(e.code);
     const lots = Math.round(e.volume / 1000);
@@ -1942,7 +1937,7 @@ function afterHoursRowsHtml(entries){
         '<span class="sig-label">盤後定價成交</span>' +
         '<div class="srow-right"><span class="svol">' + lots.toLocaleString('zh-TW') + ' 張</span><span class="sprice">' + e.price.toFixed(2) + '</span></div>' +
       '</div>';
-  }).join('') + '</div>';
+  }).join('') + '</div></div>';
 }
 
 async function refreshSignalData(){
@@ -2107,20 +2102,17 @@ function renderSignalCenter(){
   } else if (active === 'now'){
     body.innerHTML = nowTabRowsHtml(todaySignalEvents, bigHolderRows);
   } else if (active === 'afterHoursFixedPrice'){
-    if (!isAfterHoursFixedPriceWindow()){
-      body.innerHTML = '<div class="signal-note">尚未到14:30盤後定價公布時間，先顯示盤中大戶力排行；14:30後自動切換為盤後定價成交價/成交量。</div>' + rankingRowsHtml(bigHolderRows);
-    } else {
-      body.innerHTML = '<div class="signal-empty"><div class="se-title">讀取中…</div></div>';
-      fetchAfterHoursFixedPrice().then((entries) => {
-        const el = document.getElementById('signalBody');
-        if (el && signalCenterState.activeTab === 'afterHoursFixedPrice') el.innerHTML = afterHoursRowsHtml(entries);
-      }).catch(() => {
-        const el = document.getElementById('signalBody');
-        if (el && signalCenterState.activeTab === 'afterHoursFixedPrice'){
-          el.innerHTML = '<div class="signal-note">盤後定價資料讀取失敗，暫時顯示盤中大戶力排行。</div>' + rankingRowsHtml(bigHolderRows);
-        }
-      });
-    }
+    // 只放14:30盤後定價；重新整理時保留舊內容，不要每15秒閃一次「讀取中」。
+    if (!body.querySelector('[data-after-hours]')) body.innerHTML = '<div class="signal-empty" data-after-hours><div class="se-title">讀取中…</div></div>';
+    fetchAfterHoursFixedPrice().then((result) => {
+      const el = document.getElementById('signalBody');
+      if (el && signalCenterState.activeTab === 'afterHoursFixedPrice') el.innerHTML = afterHoursRowsHtml(result);
+    }).catch(() => {
+      const el = document.getElementById('signalBody');
+      if (el && signalCenterState.activeTab === 'afterHoursFixedPrice' && !el.querySelector('.signal-list')){
+        el.innerHTML = '<div class="signal-empty" data-after-hours><div class="se-title">盤後定價資料讀取失敗</div><div class="se-sub">後端暫時連不上，稍後再試。</div></div>';
+      }
+    });
   } else {
     const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
     body.innerHTML = signalRowsHtml(events);
@@ -2281,12 +2273,12 @@ function render(){
   }).join('');
 
   app.innerHTML =
-    '<div class="stat-bar">' +
-      '<div class="stat-item"><div class="stat-num up">' + strongCount + ' / ' + total + '</div><div class="stat-label">強勢族群</div></div>' +
-      '<div class="stat-item"><div class="stat-num down">' + weakCount + ' / ' + total + '</div><div class="stat-label">弱勢族群</div></div>' +
-    '</div>' +
     '<div class="layout">' +
       '<div class="col-left">' +
+        '<div class="stat-bar">' +
+          '<div class="stat-item"><div class="stat-num up">' + strongCount + ' / ' + total + '</div><div class="stat-label">強勢族群</div></div>' +
+          '<div class="stat-item"><div class="stat-num down">' + weakCount + ' / ' + total + '</div><div class="stat-label">弱勢族群</div></div>' +
+        '</div>' +
         '<div class="section-title">' + leftTitle + '</div>' +
         '<div class="top6-grid">' + side6Html + '</div>' +
       '</div>' +
