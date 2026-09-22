@@ -282,7 +282,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .signal-history-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:8px;}
   .signal-history-bar input{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:4px 8px;font-family:inherit;}
   .signal-list{display:flex;flex-direction:column;border-top:1px solid var(--line);}
-  .signal-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:12px;cursor:pointer;transition:background .12s ease;}
+  .signal-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:12px;cursor:pointer;transition:background .12s ease;}
+  /* 訊號條件明細（同秒幾筆/合計張數、A～D同步濾網各項數值等）另起一行，跟另一台工具一樣把條件寫出來。 */
+  .signal-row .sig-note{flex-basis:100%;color:var(--muted);font-size:11px;line-height:1.4;padding-left:50px;white-space:normal;}
   .signal-row:hover{background:rgba(201,169,140,0.08);}
   .signal-row .sig-time{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0;width:40px;}
   .signal-row .sig-code{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0;}
@@ -336,6 +338,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     #signalModalInner .signal-row{font-size:16px;gap:13px;padding:12px 5px;}
     #signalModalInner .signal-row .sig-time{width:52px;}
     #signalModalInner .signal-row .sig-group{font-size:14px;}
+    #signalModalInner .signal-row .sig-note{font-size:13px;padding-left:65px;}
     #signalModalInner .signal-row .sig-label.sig-bull,
     #signalModalInner .signal-row .sig-label.sig-bear{padding:3px 10px;}
     #signalModalInner .signal-note{font-size:16px;}
@@ -469,6 +472,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="signal-help" id="signalHelp" hidden>
       <div>今日即時：彙整下列各類訊號的即時清單。</div>
       <div>四項精選（強多/強空）：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</div>
+      <div>主力翻多空（主力累計翻多／翻空）：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</div>
       <div>盤中特大買單／賣單：單筆超大額買進／賣出成交。</div>
       <div>盤中大戶力：個股大戶買賣力道明顯轉強或轉弱。</div>
       <div>歷史查詢：選擇日期查看當天的訊號紀錄。</div>
@@ -1795,6 +1799,7 @@ const SIGNAL_KINDS = [
   { key: 'oneTwoShort', label: '12空' },
   { key: 'combo12Bull', label: '1+2多' },
   { key: 'blackDragon', label: '創高黑龍' },
+  { key: 'mainForceFlip', label: '主力翻多空' },
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
@@ -1874,13 +1879,15 @@ function mapLargeOrderSignal(s){
   // 裡的side，歸進各自專屬分頁，不能套用大單的isBuy判斷、也不能歸進族群
   // 瞬間大單/特大買賣單分頁(那樣分頁會被污染成跟大單一樣的數字)。
   const klineInfo = KLINE_SIGNAL_INFO[kind];
-  const isBuy = klineInfo ? klineInfo.side === 'bull' : (kind === 'instantLargeBuy' || kind === 'fourGateBuy');
+  const isFlip = kind === 'mainForceFlipBull' || kind === 'mainForceFlipBear';
+  const isBuy = klineInfo ? klineInfo.side === 'bull' : (kind === 'instantLargeBuy' || kind === 'fourGateBuy' || kind === 'mainForceFlipBull');
   const backendName = s.name && s.name !== s.ticker ? s.name : null;
   return {
-    tabs: isFourGate ? ['now', 'fourGate'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : ['now', isBuy ? 'bigBuy' : 'bigSell']),
+    tabs: isFourGate ? ['now', 'fourGate'] : isFlip ? ['now', 'mainForceFlip'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : ['now', isBuy ? 'bigBuy' : 'bigSell']),
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
     ts: s.barTs,
     code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label, isBuy,
+    note: s.note || '',
   };
 }
 
@@ -1979,6 +1986,10 @@ const LARGE_ORDER_TOOLTIPS = {
   '瞬間大單連續賣出': '1秒內同方向成交量 ≥ 100張 或 ≥ 3,000萬元',
   '瞬間特大買單敲進': '1秒內同方向成交量 ≥ 300張 或 ≥ 5,000萬元',
   '瞬間特大賣單倒出': '1秒內同方向成交量 ≥ 300張 或 ≥ 5,000萬元',
+  '主力累計翻多': 'A～D同步：主力累計淨額由負翻正(零軸)、1分K收盤站上VWAP，兩者5分鐘內發生；主力淨額率 ≥ +20%、量比 ≥ 1.5×',
+  '主力累計強勢翻多': 'A～D同步：主力累計淨額由負翻正(零軸)、1分K收盤站上VWAP，兩者5分鐘內發生；主力淨額率 ≥ +40%、量比 ≥ 3×',
+  '主力累計翻空': 'A～D同步：主力累計淨額由正翻負(零軸)、1分K收盤跌破VWAP，兩者5分鐘內發生；主力淨額率 ≤ -20%、量比 ≥ 1.5×',
+  '主力累計強勢翻空': 'A～D同步：主力累計淨額由正翻負(零軸)、1分K收盤跌破VWAP，兩者5分鐘內發生；主力淨額率 ≤ -40%、量比 ≥ 3×',
 };
 function signalEventRowHtml(ev){
   const labelCls = ev.isBuy != null
@@ -1995,6 +2006,7 @@ function signalEventRowHtml(ev){
     (group ? '<span class="sig-group">' + group + '</span>' : '') +
     '<span class="sig-label' + labelCls + '"' + (labelTitle ? ' title="' + labelTitle + '"' : '') + '>' + ev.label + '</span>' +
     priceCols +
+    (ev.note ? '<span class="sig-note">' + ev.note + '</span>' : '') +
   '</div>';
 }
 function signalRowsHtml(events){
