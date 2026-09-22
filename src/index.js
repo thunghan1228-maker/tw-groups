@@ -2158,12 +2158,12 @@ function flagPillsHtml(code, opts){
   }
   return pills.length ? '<span class="sig-eligibility">' + pills.join('') + '</span>' : '';
 }
-const NOTE_RANK_RE = /^族群同步\s*(\S+)\s*(漲幅|跌幅)第\s*(\d+)\s*名$/;
-const NOTE_ELIGIBILITY_RE = /^(可融資|可融券|可現股當沖|有股期)(\s+(可融資|可融券|可現股當沖|有股期))*$/;
+const NOTE_RANK_RE = /^族群同步\\s*(\\S+)\\s*(漲幅|跌幅)第\\s*(\\d+)\\s*名$/;
+const NOTE_ELIGIBILITY_RE = /^(可融資|可融券|可現股當沖|有股期)(\\s+(可融資|可融券|可現股當沖|有股期))*$/;
 function signalNoteHtml(code, note){
   // 後端註記是純文字、用「｜」分段：族群名次那段做成小標籤（漲幅前10紅底白字、跌幅前10綠底白字），
   // 融資券那段改由全市場旗標統一標（後端沒登入時註記裡可能沒有），其餘照原樣顯示。
-  const parts = String(note || '').split(/｜|\s\|\s/).map((s) => s.trim()).filter(Boolean);
+  const parts = String(note || '').split(/｜|\\s\\|\\s/).map((s) => s.trim()).filter(Boolean);
   const hasFlags = !!stockFlags[code];
   const out = [];
   for (const part of parts){

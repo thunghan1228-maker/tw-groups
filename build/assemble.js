@@ -30,8 +30,9 @@ const fullHtml =
 const PLACEHOLDER = '@@GROUPS_JSON@@';
 const protectedHtml = fullHtml.split('${JSON.stringify(GROUPS)}').join(PLACEHOLDER);
 
-// 模板字面值本體不含反引號或 ${，前面已驗證過，這裡只需把 PLACEHOLDER 換回插值語法字串
-const templateBody = protectedHtml.split(PLACEHOLDER).join('${JSON.stringify(GROUPS)}');
+// 模板字面值本體不含反引號或 ${，前面已驗證過；反斜線要跳脫，不然前端程式碼裡的正規表達式
+// （\s、\d）放進模板字面值後會被當成跳脫序列吃掉，到了瀏覽器變成 s、d。
+const templateBody = protectedHtml.replace(/\\/g, '\\\\').split(PLACEHOLDER).join('${JSON.stringify(GROUPS)}');
 
 const serverPrelude = 'const GROUPS = ' + groupsLiteral + ';\n' +
   'const ALL_CODES = [...new Set(GROUPS.flatMap((g) => g.stocks.map((s) => s.code)))];\n\n' +
