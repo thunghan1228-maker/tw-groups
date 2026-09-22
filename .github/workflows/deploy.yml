@@ -38,7 +38,14 @@ jobs:
           # 所以把每一段夠長的英數字串裡所有 40 字的視窗都拿去 Cloudflare 驗證，找到 active 的就用。
           token=""
           last_verify=""
+          # 診斷（不會印出金鑰本身）：貼進來的內容有幾行、每行長度與字元樣式（英文→a、數字→0，其他照印）
+          echo "秘密內容共 $(printf '%s\n' "$raw" | wc -l) 行："
+          printf '%s\n' "$raw" | while IFS= read -r line; do
+            shape="$(printf '%s' "$line" | sed -E 's/[A-Za-z]/a/g; s/[0-9]/0/g')"
+            echo "  長度 ${#line}：$shape"
+          done
           candidates="$(printf '%s' "$raw" | grep -oE '[A-Za-z0-9_-]{40,}' || true)"
+          echo "找到 $(printf '%s\n' "$candidates" | grep -c . || true) 段長度 ≥ 40 的英數字串"
           if [ -z "$candidates" ]; then
             echo "::error::CLOUDFLARE_API_TOKEN 的內容不像 Cloudflare API 權杖（應該是一串 40 個英數字元）。請到 Cloudflare → 我的設定檔 → API 權杖重新建立一個，只複製那一串權杖，再到 GitHub 的 secret 按鉛筆圖示重新貼上。"
             exit 1
@@ -50,6 +57,7 @@ jobs:
               cand="${run:$i:40}"
               verify="$(curl -sS "https://api.cloudflare.com/client/v4/user/tokens/verify" -H "Authorization: Bearer $cand" || true)"
               last_verify="$verify"
+              echo "  候選（長度 ${#run}，位移 $i）→ $verify"
               if printf '%s' "$verify" | grep -q '"status":"active"'; then token="$cand"; fi
               i=$((i + 1))
             done
