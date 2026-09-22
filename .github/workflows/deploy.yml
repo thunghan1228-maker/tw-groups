@@ -1,0 +1,41 @@
+# 推到 main 就自動部署到 Cloudflare Workers，不用再在電腦上手動 git pull + npx wrangler deploy。
+# 需要先在 GitHub 這個 repo 的 Settings → Secrets and variables → Actions 新增：
+#   CLOUDFLARE_API_TOKEN   （Cloudflare 儀表板 → My Profile → API Tokens → Create Token → 用「Edit Cloudflare Workers」範本）
+#   CLOUDFLARE_ACCOUNT_ID  （Workers & Pages 頁面右側的 Account ID；帳號只有一個時可以不設）
+# 沒設 token 時這個工作只會印一行提示、不會失敗。
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-tw-groups
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 尚未設定 CLOUDFLARE_API_TOKEN，略過部署
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: echo "::notice::尚未設定 CLOUDFLARE_API_TOKEN secret，這次不部署。到 Settings → Secrets and variables → Actions 新增後，重新執行這個 workflow 即可。"
+
+      - uses: actions/setup-node@v4
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        with:
+          node-version: 22
+
+      - name: 檢查打包結果
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        run: node --check src/index.js
+
+      - name: 部署
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npx --yes wrangler@4 deploy
