@@ -2384,8 +2384,10 @@ function replaceSignalHtml(el, key, html){
 //   門檻（2026-09-23 使用者：名單太長看不完、漲停也買不到）：今天漲 FIRE_MIN_PCT%～FIRE_MAX_PCT%、不含漲停
 //   鎖死、族群排名前 1/3、成交量 ≥ FIRE_MIN_VOLUME 張、最多 FIRE_MAX_ROWS 檔；漲停／接近漲停的另列一行。
 // 32 刀劍空：馬火多的鏡像。今天下跌、不比櫃買強、族內後 1/3；⚔️＝現價低於昨收、🔪＝現價低於前天收盤（數字＝低幾 %），
-//   都沒有就 〰️。分三段：多方打少（族群排名前半，強族群裡逆勢走弱，空得保守）、強空積極（族群排名後半，方向一致）、
-//   收割區域（已經跌 5% 以上，不追空）；每檔前面的數字是族群排名。
+//   都沒有就 〰️。門檻跟馬火多對稱（2026-09-23 使用者：名單太長）：今天跌 BLADE_MIN_PCT%～BLADE_MAX_PCT%、不含跌停
+//   鎖死、族內後 1/3、成交量 ≥ BLADE_MIN_VOLUME 張、而且要 🔪（現價低於前天收盤，兩天都弱才算）。
+//   正式名單＝強空積極（族群排名後半，方向一致），最多 BLADE_MAX_ROWS 檔、跌幅深的在前；多方打少（族群排名前半，
+//   強族群裡逆勢走弱，空得保守）和收割區域（已經跌 BLADE_HARVEST_PCT% 以上，不追空）只用一行列名字。
 // 族群昨天／前天的平均漲跌幅來自後端日K（/api/group-daily-changes），其餘都是首頁已經有的即時資料。
 let otcStrengthLatest = null;
 let groupDailyChanges = null;
@@ -2402,6 +2404,10 @@ async function refreshGroupDailyChanges(force){
 }
 const RACE_NUM = ['', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 const BLADE_HARVEST_PCT = 5;  // 刀劍空：跌到這裡以上就算收割區
+const BLADE_MIN_PCT = 2;      // 刀劍空：今天至少跌這麼多才算弱
+const BLADE_MAX_PCT = 9.5;    // 刀劍空：跌到這裡以上（或跌停鎖死）放不到空，只在收割區那行列
+const BLADE_MIN_VOLUME = 500; // 刀劍空：成交量（張）低於這個太冷門
+const BLADE_MAX_ROWS = 10;    // 刀劍空：正式名單最多列這麼多檔
 const FIRE_MIN_PCT = 2;       // 馬火多：今天至少漲這麼多才算有力道
 const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停鎖死）買不到，另列
 const FIRE_MIN_VOLUME = 500;  // 馬火多：成交量（張）低於這個太冷門
@@ -2479,12 +2485,15 @@ function race333Model(){
     && (r.horse || r.rocket !== null) && (r.volume === null || r.volume >= FIRE_MIN_VOLUME)).sort((a, b) => b.pct - a.pct);
   const fireLocked = fireBase.filter((r) => r.limitUp || r.pct >= FIRE_MAX_PCT);
   const fires = fireBase.filter((r) => !(r.limitUp || r.pct >= FIRE_MAX_PCT)).slice(0, FIRE_MAX_ROWS);
-  // 32 刀劍空：今天下跌、沒比櫃買強、族內後 1/3；依族群排名由前到後（同族群弱的在前）
+  // 32 刀劍空：今天跌 BLADE_MIN_PCT% 以上（且 ≤ 櫃買%）、族內後 1/3、成交量夠、現價低於前天收盤（🔪）；
+  // 跌停鎖死或跌到 BLADE_MAX_PCT% 以上放不到空，跟已跌 BLADE_HARVEST_PCT% 以上的一起放收割區那一行。
   const belowOtc = (r) => otcPct === null || r.pct <= otcPct;
-  const blades = rows.filter((r) => r.pct < 0 && belowOtc(r) && r.inBottomThird).sort((a, b) => a.groupRank - b.groupRank || a.pct - b.pct);
-  const bladeHarvest = blades.filter((r) => r.pct <= -BLADE_HARVEST_PCT);
-  const bladeUpper = blades.filter((r) => r.pct > -BLADE_HARVEST_PCT && r.groupRank <= half);
-  const bladeLower = blades.filter((r) => r.pct > -BLADE_HARVEST_PCT && r.groupRank > half);
+  const bladeBase = rows.filter((r) => r.pct <= -BLADE_MIN_PCT && belowOtc(r) && r.inBottomThird
+    && (r.volume === null || r.volume >= BLADE_MIN_VOLUME)).sort((a, b) => a.pct - b.pct || a.groupRank - b.groupRank);
+  const bladeHarvest = bladeBase.filter((r) => r.pct <= -BLADE_HARVEST_PCT || r.pct <= -BLADE_MAX_PCT || r.limitDown);
+  const bladeLive = bladeBase.filter((r) => !bladeHarvest.includes(r) && r.knife !== null);
+  const bladeUpper = bladeLive.filter((r) => r.groupRank <= half);                       // 多方打少：只列名字
+  const bladeLower = bladeLive.filter((r) => r.groupRank > half).slice(0, BLADE_MAX_ROWS);  // 強空積極：正式名單
   // 33 加 34：兩邊都有的才列（使用者 2026-09-23：只看交集）。
   const riverCodes = new Set(riverAll.filter((r) => r.pct <= 7).map((r) => r.code));
   const both = horses.filter((r) => riverCodes.has(r.code));
@@ -2554,10 +2563,11 @@ function raceStockListHtml(list, opts){
   return html;
 }
 function raceBladeListHtml(m){
-  const section = (label, list, zone) => '<div class="race-sep">' + label + '</div>' +
-    (list.length ? list.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone, dates: m.dates })).join('') : '<div class="race-note">目前沒有</div>');
-  return section('----↑(多方打少)↑----', m.bladeUpper, '🔽') + section('----↓(強空積極)↓----', m.bladeLower, '🔰') +
-    section('----↓(收割區域)↓----', m.bladeHarvest, '♣');
+  const names = (list) => list.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%' + (r.limitDown ? '🔒' : '')).join('、');
+  return '<div class="race-sep">----↓(強空積極)↓----</div>' +
+    (m.bladeLower.length ? m.bladeLower.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone: '🔰', dates: m.dates })).join('') : '<div class="race-note">目前沒有符合條件的股票</div>') +
+    (m.bladeUpper.length ? '<div class="race-note">多方打少（強族群裡逆勢走弱，空得保守）' + m.bladeUpper.length + ' 檔：' + names(m.bladeUpper) + '</div>' : '') +
+    (m.bladeHarvest.length ? '<div class="race-note">收割區域（已跌 ' + BLADE_HARVEST_PCT + '% 以上或跌停，不追空）' + m.bladeHarvest.length + ' 檔：' + names(m.bladeHarvest) + '</div>' : '');
 }
 function race333Html(){
   const m = race333Model();
@@ -2576,7 +2586,7 @@ function race333Html(){
       (m.fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + m.fireLocked.length + ' 檔：' + m.fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
       raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
-      '<div class="race-sub">今天下跌且 ≤ 櫃買%・族內後 1/3・⚔️ 現價低於昨收、🔪 現價低於前天收盤（數字＝低於前天收盤幾 %）・前面數字＝族群排名：🔽前半＝多方打少（強族群裡逆勢走弱，空得保守）、🔰後半＝強空積極、♣跌 ' + BLADE_HARVEST_PCT + '% 以上＝收割區不追空・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
+      '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要有 🔪（現價低於前天收盤，數字＝低幾 %；⚔️＝低於昨收）・最多 ' + BLADE_MAX_ROWS + ' 檔，跌幅深的在前・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
       raceBladeListHtml(m) + raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">⚠️符合條件>7%有 ' + over7 + ' 檔　做多族群(188) ' + stamp + '</div>' +
       '<div class="race-sub">「符合條件>7%」＝賽馬多裡漲超過 7% 的（續抱不追），列在下面；再下面是昨天跌最多的前 1/3 族群（今天可以買）・' + dailyNote + '</div>' +
