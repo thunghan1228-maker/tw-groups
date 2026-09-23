@@ -2035,6 +2035,31 @@ const SIGNAL_KINDS = [
 // 5分鐘K策略訊號家族(MA交叉/520/A8空等)只在K線圖上用符號呈現，不進盤中
 // 訊號中心；但這三個是獨立的「結構性」訊號，使用者要求另外開專屬分頁。
 const DEDICATED_KLINE_TABS = new Set(['oneTwoShort', 'combo12Bull', 'blackDragon']);
+// 收盤後校正狀態（2026-09-23 使用者：12空整天是 0，看不出是真的沒有還是校正沒跑）
+let klineBackfillStatus = null;
+let klineBackfillFetchedAt = 0;
+async function refreshKlineBackfillStatus(){
+  if (Date.now() - klineBackfillFetchedAt < 30000) return;
+  klineBackfillFetchedAt = Date.now();
+  try {
+    const res = await fetch('/api/kline-backfill-status');
+    if (!res.ok) throw new Error('http ' + res.status);
+    klineBackfillStatus = await res.json();
+    if (!document.getElementById('signalModal').hidden) renderSignalCenter();
+  } catch (e) { /* 讀不到就沿用上一次 */ }
+}
+function klineBackfillNoteHtml(){
+  const s = klineBackfillStatus;
+  const now = new Date();
+  const minute = now.getHours() * 60 + now.getMinutes();
+  let text;
+  if (!s) text = '收盤後校正：狀態讀取中';
+  else if (s.running) text = '收盤後校正：進行中（用歷史K棒重算今天全部股票，約 20 分鐘，跑完名單會更新）';
+  else if (!s.result) text = minute < 13 * 60 + 35 ? '收盤後校正：13:35 收盤後才會跑，盤中只有即時偵測' : '收盤後校正：這次啟動後還沒跑（背景每 10 分鐘檢查一次）';
+  else if (s.result.error) text = '收盤後校正：失敗 ' + s.result.error;
+  else text = '收盤後校正：完成 ' + s.result.tradeDate + '，重算 ' + s.result.codesProcessed + '／' + s.result.codeCount + ' 檔、' + s.result.barsReplayed + ' 根K、發出 ' + s.result.signalsEmitted + ' 個訊號' + (s.result.failures && s.result.failures.length ? '、失敗 ' + s.result.failures.length + ' 檔' : '');
+  return '<div class="race-note">' + text + '</div>';
+}
 function pickDemoStocks(n, seedExtra){
   const rnd = mulberry32(hashCode('signal-pool-' + seedExtra));
   const pool = GROUPS.flatMap((g) => g.stocks.map((s) => ({ code: s.code, name: s.name, group: g.name })));
@@ -2664,6 +2689,10 @@ function renderSignalCenter(){
     replaceSignalHtml(body, 'race333', race333Html());
   } else if (active === 'now'){
     replaceSignalHtml(body, 'now', nowTabRowsHtml(todaySignalEvents, bigHolderRows));
+  } else if (DEDICATED_KLINE_TABS.has(active)){
+    refreshKlineBackfillStatus();
+    const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
+    replaceSignalHtml(body, active, klineBackfillNoteHtml() + signalRowsHtml(events));
   } else {
     const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
     replaceSignalHtml(body, active, signalRowsHtml(events));
@@ -3301,6 +3330,14 @@ export default {
         return await proxyHanstockBars("/api/hub/main-force/ranking" + url.search, 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), ranking: [] }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/kline-backfill-status") {
+      // 收盤後校正（用歷史K棒重算今天的12空／1+2多／創高黑龍）的狀態，給訊號中心那三個分頁顯示。
+      try {
+        return await proxyHanstockBars("/api/hub/kline-signals/backfill-today/status", 0);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
     if (url.pathname === "/api/group-daily-changes") {

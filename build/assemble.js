@@ -280,6 +280,14 @@ export default {
         return Response.json({ status: "error", error: String(err), ranking: [] }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/kline-backfill-status") {
+      // 收盤後校正（用歷史K棒重算今天的12空／1+2多／創高黑龍）的狀態，給訊號中心那三個分頁顯示。
+      try {
+        return await proxyHanstockBars("/api/hub/kline-signals/backfill-today/status", 0);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/group-daily-changes") {
       try {
         // 族群昨天／前天的平均漲跌幅（盤中打 333 用）：來自日K，收盤後才會變，快取 10 分鐘。
