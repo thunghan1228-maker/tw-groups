@@ -313,6 +313,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-sep{text-align:center;color:var(--muted);font-size:12px;padding:4px 0;letter-spacing:1px;}
   .race-note{font-size:12px;color:var(--muted);padding:6px 8px;}
   .race-trailer{padding:6px 8px;font-weight:700;}
+  .race-otc{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:2px 0 12px;font-weight:700;background:var(--panel-2);}
+  .race-otc.up{color:var(--up);} .race-otc.down{color:var(--down);}
   /* 內嵌／獨立視窗的圖表模式：只顯示 K 線圖、填滿整個視窗 */
   body.chart-window-mode{padding-bottom:0;overflow:hidden;}
   body.chart-window-mode > *:not(.chart-modal){display:none!important;}
@@ -2551,11 +2553,13 @@ function raceGroupListHtml(list, half, sepLabel){
   html += lower.map(raceGroupRowHtml).join('');
   return html;
 }
-function raceTrailerHtml(m){
-  if (!m.otcLabel) return '<div class="race-sep">------↓(櫃買)↓------</div><div class="race-note">櫃買盤勢資料尚未就緒</div>';
+function raceOtcBoxHtml(m){
+  // 櫃買指數狀況只在最上面放一次（使用者 2026-09-23），不再每個區塊下面重複。
+  if (!m.otcLabel) return '<div class="race-otc">櫃買指數狀況：資料尚未就緒</div>';
   const icon = m.otcLabel === '強空' ? '⚔️⚔️' : m.otcLabel === '強多' ? '👑👑' : '〰️';
+  const label = m.otcLabel === '個股震盪' ? '個股震盪盤' : m.otcLabel;
   const pct = m.otcPct === null ? '' : '(' + fmt(m.otcPct) + '%)';
-  return '<div class="race-sep">------↓(櫃買)↓------</div><div class="race-trailer ' + (m.otcLabel === '強空' ? 'down' : m.otcLabel === '強多' ? 'up' : '') + '">⚠️' + m.otcLabel + icon + pct + '</div>';
+  return '<div class="race-otc ' + (m.otcLabel === '強空' ? 'down' : m.otcLabel === '強多' ? 'up' : '') + '">櫃買指數狀況：' + label + icon + pct + '</div>';
 }
 function raceStockListHtml(list, opts){
   if (!list.length) return '<div class="race-note">目前沒有符合條件的股票</div>';
@@ -2581,27 +2585,28 @@ function race333Html(){
   const dailyNote = m.hasDaily
     ? '昨天＝' + (m.dates[0] || '') + (m.dates[1] ? '，前天＝' + m.dates[1] : '')
     : '還沒拿到族群昨天的資料，188／199 暫時無法判定，33／34 先不用「族群要在 188／199 裡」這條';
-  return '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
+  return raceOtcBoxHtml(m) +
+    '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
+      '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、族群在 188／199 裡、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・漲幅高的在前</div>' +
+      raceStockListHtml(m.triple, { fire: true, dates: m.dates }) + '</div>' +
+    '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
       '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・族群在 188／199 裡</div>' +
-      raceStockListHtml(m.both, { dates: m.dates }) + raceTrailerHtml(m) + '</div>' +
+      raceStockListHtml(m.both, { dates: m.dates }) + '</div>' +
     '<div class="race-block"><div class="race-head">🐎🚀馬火多(30) ' + stamp + '</div>' +
       '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔，漲幅高的在前・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
       raceStockListHtml(m.fires, { fire: true, dates: m.dates }) +
       (m.fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + m.fireLocked.length + ' 檔：' + m.fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
-      raceTrailerHtml(m) + '</div>' +
-    '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
-      '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、族群在 188／199 裡、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・漲幅高的在前</div>' +
-      raceStockListHtml(m.triple, { fire: true, dates: m.dates }) + raceTrailerHtml(m) + '</div>' +
+      '</div>' +
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
       '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要有 🔪（現價低於前天收盤，數字＝低幾 %；⚔️＝低於昨收）・最多 ' + BLADE_MAX_ROWS + ' 檔，跌幅深的在前・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
-      raceBladeListHtml(m) + raceTrailerHtml(m) + '</div>' +
+      raceBladeListHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">⚠️符合條件>7%有 ' + over7 + ' 檔　做多族群(188) ' + stamp + '</div>' +
       '<div class="race-sub">「符合條件>7%」＝賽馬多裡漲超過 7% 的（續抱不追），列在下面；再下面是昨天跌最多的前 1/3 族群（今天可以買）・' + dailyNote + '</div>' +
       (over7 ? raceStockListHtml(m.horses.filter((r) => r.pct > 7), { dates: m.dates }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '') +
-      raceGroupListHtml(m.longGroups, m.half, '------↑(多方)↑------') + raceTrailerHtml(m) + '</div>' +
+      raceGroupListHtml(m.longGroups, m.half, '------↑(多方)↑------') + '</div>' +
     '<div class="race-block"><div class="race-head">⚔️⚔️做空族群(199) ' + stamp + '</div>' +
       '<div class="race-sub">昨天漲最多的前 1/3 族群（今天可以空）・⚔️ 族群平均低於昨收、🔪 平均低於前天收盤、數字＝族內下跌檔數比例</div>' +
-      raceGroupListHtml(m.shortGroups, m.half, '------↓(空方)↓------') + raceTrailerHtml(m) + '</div>';
+      raceGroupListHtml(m.shortGroups, m.half, '------↓(空方)↓------') + '</div>';
 }
 
 function renderSignalCenter(){
