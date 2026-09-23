@@ -2580,7 +2580,7 @@ function race333Html(){
       raceBladeListHtml(m) + raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">⚠️符合條件>7%有 ' + over7 + ' 檔　做多族群(188) ' + stamp + '</div>' +
       '<div class="race-sub">「符合條件>7%」＝賽馬多裡漲超過 7% 的（續抱不追），列在下面；再下面是昨天跌最多的前 1/3 族群（今天可以買）・' + dailyNote + '</div>' +
-      (over7 ? raceStockListHtml(m.horses.filter((r) => r.pct > 7), { dates: m.dates }) + '<div class="race-sep">------↓(做多族群)↓------</div>' : '') +
+      (over7 ? raceStockListHtml(m.horses.filter((r) => r.pct > 7), { dates: m.dates }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '') +
       raceGroupListHtml(m.longGroups, m.half, '------↑(多方)↑------') + raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">⚔️⚔️做空族群(199) ' + stamp + '</div>' +
       '<div class="race-sub">昨天漲最多的前 1/3 族群（今天可以空）・⚔️ 族群平均低於昨收、🔪 平均低於前天收盤、數字＝族內下跌檔數比例</div>' +
