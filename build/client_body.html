@@ -258,7 +258,9 @@
   .race-row .race-chg.up,.race-row .race-price.up{color:var(--up);} .race-row .race-chg.down,.race-row .race-price.down{color:var(--down);}
   .race-row .race-warn-slot{flex:0 0 4.2em;text-align:right;}
   .race-col-labels{display:flex;justify-content:flex-end;gap:8px;padding:0 8px 2px;}
-  .race-col-labels span{flex:0 0 5.2em;text-align:right;color:var(--muted);font-size:10px;font-weight:600;}
+  /* 外層格子不設字級：flex 的 5.2em 才會跟資料列的 5.2em 用同一個字級算、欄寬一致；只縮小裡面的字 */
+  .race-col-labels span{flex:0 0 5.2em;text-align:right;}
+  .race-col-labels span b{color:var(--muted);font-size:10px;font-weight:600;}
   .race-col-labels .race-warn-slot{flex:0 0 4.2em;}
   .race-row .race-pct.up{color:var(--up);} .race-row .race-pct.down{color:var(--down);}
   .race-row .race-badge{font-size:14px;min-width:22px;text-align:right;}
@@ -2699,7 +2701,7 @@ function groupHolderForceStockRowHtml(r, idx){
 function groupHolderForceCardHtml(card, mode){
   const icon = mode === 'up' ? '📈' : '📉';
   return '<div class="race-block"><div class="race-head">' + icon + ' ' + card.name + '（' + card.groupTotal + ' 檔） 族排第 ' + card.rank + ' 名・今天平均 ' + fmt(card.avgChange) + '%・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
-    '<div class="race-col-labels"><span>漲跌幅</span><span>漲跌</span><span>成交價</span><span class="race-warn-slot"></span></div>' +
+    '<div class="race-col-labels"><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-warn-slot"></span></div>' +
     (card.rows.length ? card.rows.map((r, i) => groupHolderForceStockRowHtml(r, i)).join('')
       : '<div class="race-note">目前沒有符合條件的個股（大戶力資料還在累積中，或沒有' + (mode === 'up' ? '偏買' : '偏賣') + '方向的大戶力）</div>') +
     '</div>';
