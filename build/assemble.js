@@ -76,10 +76,18 @@ async function fetchQuotes(codes) {
       const fallbackPrice = parseFloat(item.o) || parseFloat(item.h) || parseFloat(item.l) || prevClose;
       const finalPrice = Number.isFinite(price) ? price : fallbackPrice;
       if (Number.isFinite(finalPrice) && Number.isFinite(prevClose) && prevClose > 0) {
+        // u／w＝當天漲停價／跌停價、v＝累積成交量（張）：盤中333 用來排除已經漲停買不到的股票、
+        // 跌停放不到空的股票，以及成交量太小的冷門股。
+        const limitUpPrice = parseFloat(item.u);
+        const limitDownPrice = parseFloat(item.w);
+        const volume = parseInt(item.v, 10);
         quotes[code] = {
           price: finalPrice,
           change: finalPrice - prevClose,
-          changePercent: (finalPrice - prevClose) / prevClose * 100
+          changePercent: (finalPrice - prevClose) / prevClose * 100,
+          limitUp: Number.isFinite(limitUpPrice) && finalPrice >= limitUpPrice - 1e-6,
+          limitDown: Number.isFinite(limitDownPrice) && finalPrice <= limitDownPrice + 1e-6,
+          volume: Number.isFinite(volume) ? volume : null
         };
       }
     }
@@ -326,7 +334,10 @@ export default {
             code: s.code,
             name: s.name,
             price: quotes[s.code]?.price ?? null,
-            changePercent: quotes[s.code]?.changePercent ?? 0
+            changePercent: quotes[s.code]?.changePercent ?? 0,
+            limitUp: quotes[s.code]?.limitUp ?? false,
+            limitDown: quotes[s.code]?.limitDown ?? false,
+            volume: quotes[s.code]?.volume ?? null
           }));
           const valid = stocks.filter((s) => s.price !== null);
           const avgChange = valid.length ? valid.reduce((sum, s) => sum + s.changePercent, 0) / valid.length : 0;

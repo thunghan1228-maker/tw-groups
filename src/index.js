@@ -2379,6 +2379,8 @@ function replaceSignalHtml(el, key, html){
 // 觀念：188 做多＝昨天跌最多的族群（今天可以買）、199 做空＝昨天漲最多的族群（今天可以空）；
 // 族群：⚔️＝今天比昨天弱、🔪＝今天比前天弱（兩個各自比，都成立就都顯示）。
 // 30 馬火多：🐎＝個股今天比昨天強、🚀＝今天比前天強，後面的數字是強幾個百分點；👑＝該族群今天第 1 名。
+//   門檻（2026-09-23 使用者：名單太長看不完、漲停也買不到）：今天漲 FIRE_MIN_PCT%～FIRE_MAX_PCT%、不含漲停
+//   鎖死、族群排名前 1/3、成交量 ≥ FIRE_MIN_VOLUME 張、最多 FIRE_MAX_ROWS 檔；漲停／接近漲停的另列一行。
 // 32 刀劍空：馬火多的鏡像。今天下跌、不比櫃買強、族內後 1/3；⚔️＝比昨天弱、🔪＝比前天弱（數字＝弱幾個百分點），
 //   都沒有就 〰️。分三段：多方打少（族群排名前半，強族群裡逆勢走弱，空得保守）、強空積極（族群排名後半，方向一致）、
 //   收割區域（已經跌 5% 以上，不追空）；每檔前面的數字是族群排名。
@@ -2398,6 +2400,10 @@ async function refreshGroupDailyChanges(force){
 }
 const RACE_NUM = ['', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 const BLADE_HARVEST_PCT = 5;  // 刀劍空：跌到這裡以上就算收割區
+const FIRE_MIN_PCT = 2;       // 馬火多：今天至少漲這麼多才算有力道
+const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停鎖死）買不到，另列
+const FIRE_MIN_VOLUME = 500;  // 馬火多：成交量（張）低於這個太冷門
+const FIRE_MAX_ROWS = 10;     // 馬火多：最多列這麼多檔
 function race333Model(){
   if (!lastData || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
   const groups = lastData.groups.filter((g) => g.name !== '股期標的');
@@ -2438,7 +2444,8 @@ function race333Model(){
       const y = Number.isFinite(sd[0]) ? sd[0] : null, y2 = Number.isFinite(sd[1]) ? sd[1] : null;
       const row = {
         code: s.code, name: s.name, pct: s.changePercent, groupName: g.name, groupRank: rankOf.get(g.name), inGroupRank: i + 1, inTopThird: i < cut,
-        inBottomThird: i >= valid.length - cut, dailyKnown: y !== null || y2 !== null,
+        inBottomThird: i >= valid.length - cut, dailyKnown: y !== null || y2 !== null, yesterday: y, dayBefore: y2,
+        limitUp: !!s.limitUp, limitDown: !!s.limitDown, volume: Number.isFinite(s.volume) ? s.volume : null,
         horse: y !== null && s.changePercent > y ? Math.round(s.changePercent - y) : null,      // 🐎 比昨天強幾個百分點
         rocket: y2 !== null && s.changePercent > y2 ? Math.round(s.changePercent - y2) : null,  // 🚀 比前天強幾個百分點
         sword: y !== null && s.changePercent < y ? Math.round(y - s.changePercent) : null,      // ⚔️ 比昨天弱幾個百分點
@@ -2455,16 +2462,24 @@ function race333Model(){
   const riverLimit = half;                                       // 前 1/2
   const horses = rows.filter((r) => r.groupRank <= horseLimit && r.inTopThird && aboveOtc(r) && inLists(r)).sort((a, b) => b.pct - a.pct);
   const riverAll = rows.filter((r) => r.groupRank <= riverLimit && r.inTopThird && r.pct >= 0 && aboveOtc(r) && inLists(r)).sort((a, b) => b.pct - a.pct);
-  // 30 馬火多：今天有漲（≥ 櫃買%）、族內前 1/3，而且比昨天或比前天強
-  const fires = rows.filter((r) => r.pct > 0 && aboveOtc(r) && r.inTopThird && (r.horse !== null || r.rocket !== null)).sort((a, b) => b.pct - a.pct);
+  // 30 馬火多：族群排名前 1/3、族內前 1/3、比昨天或比前天強、今天漲 FIRE_MIN_PCT% 以上（≥ 櫃買%）、
+  // 成交量夠；漲停鎖死或漲到 FIRE_MAX_PCT% 以上的買不到，另列；最多 FIRE_MAX_ROWS 檔，漲幅高的在前。
+  const fireGroupTop = Math.max(1, Math.ceil(total / 3));
+  const fireBase = rows.filter((r) => r.pct >= FIRE_MIN_PCT && aboveOtc(r) && r.inTopThird && r.groupRank <= fireGroupTop
+    && (r.horse !== null || r.rocket !== null) && (r.volume === null || r.volume >= FIRE_MIN_VOLUME)).sort((a, b) => b.pct - a.pct);
+  const fireLocked = fireBase.filter((r) => r.limitUp || r.pct >= FIRE_MAX_PCT);
+  const fires = fireBase.filter((r) => !(r.limitUp || r.pct >= FIRE_MAX_PCT)).slice(0, FIRE_MAX_ROWS);
   // 32 刀劍空：今天下跌、沒比櫃買強、族內後 1/3；依族群排名由前到後（同族群弱的在前）
   const belowOtc = (r) => otcPct === null || r.pct <= otcPct;
   const blades = rows.filter((r) => r.pct < 0 && belowOtc(r) && r.inBottomThird).sort((a, b) => a.groupRank - b.groupRank || a.pct - b.pct);
   const bladeHarvest = blades.filter((r) => r.pct <= -BLADE_HARVEST_PCT);
   const bladeUpper = blades.filter((r) => r.pct > -BLADE_HARVEST_PCT && r.groupRank <= half);
   const bladeLower = blades.filter((r) => r.pct > -BLADE_HARVEST_PCT && r.groupRank > half);
+  // 33 加 34：兩邊都有的才列（使用者 2026-09-23：只看交集）。
+  const riverCodes = new Set(riverAll.filter((r) => r.pct <= 7).map((r) => r.code));
+  const both = horses.filter((r) => riverCodes.has(r.code));
   return {
-    fires, bladeUpper, bladeLower, bladeHarvest,
+    fires, fireLocked, fireGroupTop, bladeUpper, bladeLower, bladeHarvest, both,
     total, half, otcPct, otcLabel: otcStrengthLatest ? otcStrengthLatest.label : null, hasDaily,
     dates: groupDailyChanges && groupDailyChanges.dates ? groupDailyChanges.dates : [],
     horseLimit, riverLimit, horses,
@@ -2478,16 +2493,21 @@ function bladeBadge(r){
   return marks || (r.dailyKnown ? '〰️' : '');  // 有昨天資料但沒更弱＝〰️；沒資料就空白
 }
 function raceStockRowHtml(r, idx, opts){
-  const badge = opts && opts.fire
+  const lock = r.limitUp ? '🔒漲停' : r.limitDown ? '🔒跌停' : '';
+  const badge = (opts && opts.fire
     ? (r.inGroupRank === 1 ? '👑' : '') + (r.horse !== null ? '🐎' + r.horse : '') + (r.rocket !== null ? '🚀' + r.rocket : '')
     : opts && opts.blade ? bladeBadge(r)
-    : idx === 0 ? '👑' : idx <= 10 ? RACE_NUM[idx] : '';
+    : idx === 0 ? '👑' : idx <= 10 ? RACE_NUM[idx] : '') + lock;
   const rank = opts && opts.blade ? '<span class="race-rank" title="族群第 ' + r.groupRank + ' 名">' + r.groupRank + (opts.zone || '') + '</span>' : '';
+  const dates = (opts && opts.dates) || [];
+  const dailyTitle = '今天 ' + fmt(r.pct) + '%'
+    + (r.yesterday !== null && r.yesterday !== undefined ? '，昨天' + (dates[0] ? '(' + dates[0].slice(5) + ')' : '') + ' ' + fmt(r.yesterday) + '%' : '，昨天：沒有日K資料')
+    + (r.dayBefore !== null && r.dayBefore !== undefined ? '，前天' + (dates[1] ? '(' + dates[1].slice(5) + ')' : '') + ' ' + fmt(r.dayBefore) + '%' : '，前天：沒有日K資料');
   const star = stockFlags[r.code] && stockFlags[r.code].disposition ? '*' : '';
   return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' + rank +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + r.name + star + '</span>' +
     '<span class="sig-group" title="族群第 ' + r.groupRank + ' 名，族內第 ' + r.inGroupRank + ' 名">' + r.groupName + '</span>' +
-    '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span><span class="race-badge">' + badge + '</span></div>';
+    '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span><span class="race-badge" title="' + dailyTitle + '">' + badge + '</span></div>';
 }
 function raceGroupRowHtml(g){
   const diff = g.prevRank !== null ? g.prevRank - g.rank : null;
@@ -2524,7 +2544,7 @@ function raceStockListHtml(list, opts){
 }
 function raceBladeListHtml(m){
   const section = (label, list, zone) => '<div class="race-sep">' + label + '</div>' +
-    (list.length ? list.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone })).join('') : '<div class="race-note">目前沒有</div>');
+    (list.length ? list.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone, dates: m.dates })).join('') : '<div class="race-note">目前沒有</div>');
   return section('----↑(多方打少)↑----', m.bladeUpper, '🔽') + section('----↓(強空積極)↓----', m.bladeLower, '🔰') +
     section('----↓(收割區域)↓----', m.bladeHarvest, '♣');
 }
@@ -2536,22 +2556,20 @@ function race333Html(){
   const dailyNote = m.hasDaily
     ? '昨天＝' + (m.dates[0] || '') + (m.dates[1] ? '，前天＝' + m.dates[1] : '')
     : '還沒拿到族群昨天的資料，188／199 暫時無法判定，33／34 先不用「族群要在 188／199 裡」這條';
-  return '<div class="race-block"><div class="race-head">👑👑賽馬多(33) ' + stamp + '</div>' +
-      '<div class="race-sub">族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 ≥ 櫃買%・族群在 188／199 裡；7% 以上續抱不追</div>' +
-      raceStockListHtml(m.horses, { holdLineAt7: true }) + raceTrailerHtml(m) + '</div>' +
-    '<div class="race-block"><div class="race-head">🌊🌊河流多(34) ' + stamp + '</div>' +
-      '<div class="race-sub">族群排名前 ' + m.riverLimit + '・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・族群在 188／199 裡</div>' +
-      raceStockListHtml(m.rivers) +
-      (m.riverOver.length ? '<div class="race-note">超過 7% 另計：' + m.riverOver.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
-      raceTrailerHtml(m) + '</div>' +
+  return '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
+      '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・族群在 188／199 裡</div>' +
+      raceStockListHtml(m.both, { dates: m.dates }) + raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">🐎🚀馬火多(30) ' + stamp + '</div>' +
-      '<div class="race-sub">今天有漲且 ≥ 櫃買%・族內前 1/3・🐎 比昨天強、🚀 比前天強（數字＝強幾個百分點）・👑 該族群第 1 名</div>' +
-      raceStockListHtml(m.fires, { fire: true }) + raceTrailerHtml(m) + '</div>' +
+      '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 比昨天強、🚀 比前天強至少一個（數字＝強幾個百分點）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔，漲幅高的在前・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
+      raceStockListHtml(m.fires, { fire: true, dates: m.dates }) +
+      (m.fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + m.fireLocked.length + ' 檔：' + m.fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
+      raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
-      '<div class="race-sub">今天下跌且 ≤ 櫃買%・族內後 1/3・⚔️ 比昨天弱、🔪 比前天弱（數字＝弱幾個百分點）、〰️ 沒更弱・前面數字＝族群排名：🔽前半＝多方打少（強族群裡逆勢走弱，空得保守）、🔰後半＝強空積極、♣跌 ' + BLADE_HARVEST_PCT + '% 以上＝收割區不追空</div>' +
+      '<div class="race-sub">今天下跌且 ≤ 櫃買%・族內後 1/3・⚔️ 比昨天弱、🔪 比前天弱（數字＝弱幾個百分點）、〰️ 沒更弱・前面數字＝族群排名：🔽前半＝多方打少（強族群裡逆勢走弱，空得保守）、🔰後半＝強空積極、♣跌 ' + BLADE_HARVEST_PCT + '% 以上＝收割區不追空・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
       raceBladeListHtml(m) + raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">⚠️符合條件>7%有 ' + over7 + ' 檔　做多族群(188) ' + stamp + '</div>' +
-      '<div class="race-sub">昨天跌最多的前 1/3 族群（今天可以買）・' + dailyNote + '</div>' +
+      '<div class="race-sub">「符合條件>7%」＝賽馬多裡漲超過 7% 的（續抱不追），列在下面；再下面是昨天跌最多的前 1/3 族群（今天可以買）・' + dailyNote + '</div>' +
+      (over7 ? raceStockListHtml(m.horses.filter((r) => r.pct > 7), { dates: m.dates }) + '<div class="race-sep">------↓(做多族群)↓------</div>' : '') +
       raceGroupListHtml(m.longGroups, m.half, '------↑(多方)↑------') + raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">⚔️⚔️做空族群(199) ' + stamp + '</div>' +
       '<div class="race-sub">昨天漲最多的前 1/3 族群（今天可以空）・⚔️ 比昨天弱、🔪 比前天弱、數字＝族內下跌檔數比例</div>' +
@@ -3048,10 +3066,18 @@ async function fetchQuotes(codes) {
       const fallbackPrice = parseFloat(item.o) || parseFloat(item.h) || parseFloat(item.l) || prevClose;
       const finalPrice = Number.isFinite(price) ? price : fallbackPrice;
       if (Number.isFinite(finalPrice) && Number.isFinite(prevClose) && prevClose > 0) {
+        // u／w＝當天漲停價／跌停價、v＝累積成交量（張）：盤中333 用來排除已經漲停買不到的股票、
+        // 跌停放不到空的股票，以及成交量太小的冷門股。
+        const limitUpPrice = parseFloat(item.u);
+        const limitDownPrice = parseFloat(item.w);
+        const volume = parseInt(item.v, 10);
         quotes[code] = {
           price: finalPrice,
           change: finalPrice - prevClose,
-          changePercent: (finalPrice - prevClose) / prevClose * 100
+          changePercent: (finalPrice - prevClose) / prevClose * 100,
+          limitUp: Number.isFinite(limitUpPrice) && finalPrice >= limitUpPrice - 1e-6,
+          limitDown: Number.isFinite(limitDownPrice) && finalPrice <= limitDownPrice + 1e-6,
+          volume: Number.isFinite(volume) ? volume : null
         };
       }
     }
@@ -3298,7 +3324,10 @@ export default {
             code: s.code,
             name: s.name,
             price: quotes[s.code]?.price ?? null,
-            changePercent: quotes[s.code]?.changePercent ?? 0
+            changePercent: quotes[s.code]?.changePercent ?? 0,
+            limitUp: quotes[s.code]?.limitUp ?? false,
+            limitDown: quotes[s.code]?.limitDown ?? false,
+            volume: quotes[s.code]?.volume ?? null
           }));
           const valid = stocks.filter((s) => s.price !== null);
           const avgChange = valid.length ? valid.reduce((sum, s) => sum + s.changePercent, 0) / valid.length : 0;
