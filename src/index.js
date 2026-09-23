@@ -506,7 +506,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="signal-modal-head" id="signalModalHead">
       <div class="sm-title-wrap">
         <div class="sm-title">盤中訊號中心</div>
-        <div class="sm-sub">拉住標題可在頁面內移動；訊號資料來源逐步替換為真實偵測，尚未完成的分類會標明示範資料。</div>
+        <div class="sm-sub">拉住標題可在頁面內移動；各分類都是後端即時偵測的真實資料，只有連不上後端時才會標示示範資料。</div>
       </div>
       <div class="sm-actions">
         <span class="sm-date-pill" id="smDatePill"></span>
