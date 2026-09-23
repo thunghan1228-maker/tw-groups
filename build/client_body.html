@@ -267,6 +267,23 @@
   .race-row .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;flex-shrink:0;}
   .race-row .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   .race-row .pill-live{background:#16a34a;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
+  /* 族群綜合表：大戶力+處置/注意狀態合併成表格，欄位對齊，不是條列式一排排pill */
+  .combo-table-wrap{overflow-x:auto;margin-bottom:4px;-webkit-overflow-scrolling:touch;}
+  .combo-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px;}
+  .combo-table th{text-align:left;color:var(--muted);font-weight:600;font-size:10px;padding:3px 6px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .combo-table td{padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .combo-table tr.stock-row{cursor:pointer;}
+  .combo-table tr.stock-row:hover{background:var(--panel-2);}
+  .combo-table .combo-code{color:var(--muted);}
+  .combo-table .combo-name{font-weight:700;max-width:7em;overflow:hidden;text-overflow:ellipsis;}
+  .combo-table .combo-pct{font-weight:700;}
+  .combo-table .combo-pct.up{color:var(--up);} .combo-table .combo-pct.down{color:var(--down);}
+  .combo-table .combo-disp{white-space:normal;min-width:9em;}
+  .combo-table .sig-bull{background:var(--up);color:#fff;padding:2px 6px;border-radius:6px;font-weight:700;white-space:nowrap;}
+  .combo-table .sig-bear{background:var(--down);color:#fff;padding:2px 6px;border-radius:6px;font-weight:700;white-space:nowrap;}
+  .combo-table .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;white-space:nowrap;display:inline-block;}
+  .combo-table .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;display:inline-block;}
+  .combo-table .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;white-space:nowrap;display:inline-block;}
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -1993,6 +2010,7 @@ const SIGNAL_KINDS = [
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
   { key: 'groupHolderForce', label: '族群大戶力' },
+  { key: 'groupCombinedBoard', label: '族群綜合表' },
   { key: 'dispositionRisk', label: '處置股預測' },
   { key: 'race333', label: '盤中333' },
   { key: 'history', label: '歷史查詢' },
@@ -2676,6 +2694,104 @@ function groupHolderForceHtml(){
     m.fallingGroups.map((c) => groupHolderForceCardHtml(c, 'down')).join('');
 }
 
+// ---- 族群綜合表：把大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併成一個表格，
+// 一個族群一個 block，只列出有大戶力資料或有處置/注意資料的股票 ----
+function groupCombinedBoardDispositionCell(code){
+  const f = stockFlags[code];
+  if (f && f.disposition){
+    const until = f.dispositionUntil ? ' 至' + String(f.dispositionUntil).slice(5).replace('-', '/') : '';
+    return '<span class="pill-warn" title="' + (f.dispositionReason || '') + '">處置中' + until + '</span>';
+  }
+  const d = dispositionRiskData;
+  const row = d && Array.isArray(d.results) ? d.results.find((r) => r.code === code) : null;
+  if (row && row.accumulation){
+    const a = row.accumulation;
+    const title = a.triggerPath + (a.durationCaveat ? '\n' + a.durationCaveat : '');
+    return '<span class="pill-warn" title="' + title + '">預計處置' + a.predictedDurationBusinessDays + '天</span>';
+  }
+  if (row && row.firedToday && row.firedToday.length){
+    const clauseText = row.firedToday.map((c) => c.clause).join('・');
+    const title = row.firedToday.map((c) => '第' + c.clause + '款：' + c.detail).join('\n');
+    return '<span class="disp-clauses" title="' + title + '">今天中' + clauseText + '款</span>';
+  }
+  if (row && row.gapPrediction){
+    const g = row.gapPrediction;
+    const title = '明天收盤價門檻約' + g.thresholdClose + '元；觸發只代表公布注意，不是處置';
+    return '<span class="pill-gap" title="' + title + '">🔮' + g.detail + '</span>';
+  }
+  const vw = dispositionVolumeWatchData;
+  const vrow = vw && Array.isArray(vw.results) ? vw.results.find((r) => r.code === code) : null;
+  if (vrow){
+    return '<span class="pill-gap" title="第' + vrow.clause + '款；觸發只代表公布注意，不是處置">🔮' + vrow.detail + '</span>';
+  }
+  const pw = d && Array.isArray(d.priceExtremeWatch) ? d.priceExtremeWatch.find((r) => r.code === code) : null;
+  if (pw){
+    return '<span class="pill-gap" title="明天收盤價門檻約' + pw.thresholdClose + '元；觸發只代表公布注意，不是處置">🔮' + pw.detail + '</span>';
+  }
+  return '';
+}
+function groupCombinedBoardModel(){
+  if (!lastData || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
+  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+  if (!groups.length) return null;
+  const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
+  const holderByCode = new Map((mainForceRanking || []).map((r) => [r.code, r]));
+  const d = dispositionRiskData;
+  const dispByCode = new Set();
+  if (d && Array.isArray(d.results)) d.results.forEach((r) => { if (r.firedToday.length || r.accumulation || r.gapPrediction) dispByCode.add(r.code); });
+  if (d && Array.isArray(d.priceExtremeWatch)) d.priceExtremeWatch.forEach((r) => dispByCode.add(r.code));
+  const vw = dispositionVolumeWatchData;
+  if (vw && Array.isArray(vw.results)) vw.results.forEach((r) => dispByCode.add(r.code));
+  Object.keys(stockFlags).forEach((code) => { if (stockFlags[code] && stockFlags[code].disposition) dispByCode.add(code); });
+
+  const blocks = ranked.map((g) => {
+    const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined);
+    const rows = valid.map((s) => {
+      const h = holderByCode.get(s.code);
+      const hasDisp = dispByCode.has(s.code);
+      if (!h && !hasDisp) return null;
+      return {
+        code: s.code, name: s.name, pct: s.changePercent,
+        strengthPct: h ? h.strengthPct : null, netAmount: h ? h.netAmount : null, holderLabel: h ? h.holderLabel : null,
+        limitUp: !!s.limitUp, limitDown: !!s.limitDown,
+      };
+    }).filter(Boolean);
+    rows.sort((a, b) => {
+      const av = a.strengthPct === null || a.strengthPct === undefined ? -Infinity : Math.abs(a.strengthPct);
+      const bv = b.strengthPct === null || b.strengthPct === undefined ? -Infinity : Math.abs(b.strengthPct);
+      return bv - av;
+    });
+    return { name: g.name, avgChange: g.avgChange, groupTotal: valid.length, rows };
+  }).filter((b) => b.rows.length);
+  return { blocks, total: blocks.reduce((sum, b) => sum + b.rows.length, 0) };
+}
+function groupCombinedBoardRowHtml(r){
+  const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
+  const holderText = (r.strengthPct === null || r.strengthPct === undefined) ? '—'
+    : '<span class="' + (r.strengthPct > 0 ? 'sig-bull' : 'sig-bear') + '">' + (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%' + (fmtAmountWan(r.netAmount) ? '・' + fmtAmountWan(r.netAmount) : '') + '</span>';
+  const lock = r.limitUp ? '🔒漲停' : r.limitDown ? '🔒跌停' : '';
+  return '<tr class="combo-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
+    '<td class="combo-code">' + r.code + '</td>' +
+    '<td class="combo-name">' + backendName + '</td>' +
+    '<td class="combo-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%' + lock + '</td>' +
+    '<td class="combo-holder">' + holderText + '</td>' +
+    '<td class="combo-disp">' + groupCombinedBoardDispositionCell(r.code) + '</td>' +
+    '</tr>';
+}
+function groupCombinedBoardBlockHtml(block){
+  return '<div class="race-block"><div class="race-head">' + block.name + '（' + block.groupTotal + ' 檔） 今天平均 ' + fmt(block.avgChange) + '%・有大戶力或處置/注意資料 ' + block.rows.length + ' 檔</div>' +
+    '<div class="combo-table-wrap"><table class="combo-table"><thead><tr>' +
+    '<th>代號</th><th>名稱</th><th>漲跌%</th><th>大戶力</th><th>處置／注意</th>' +
+    '</tr></thead><tbody>' + block.rows.map(groupCombinedBoardRowHtml).join('') + '</tbody></table></div></div>';
+}
+function groupCombinedBoardHtml(){
+  const m = groupCombinedBoardModel();
+  if (!m || !m.blocks.length) return '<div class="signal-empty"><div class="se-title">目前沒有族群有大戶力或處置/注意資料</div><div class="se-sub">首頁資料或大戶力資料還在載入。</div></div>';
+  const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出有大戶力資料或有處置/注意資料的股票。族群依今天平均漲跌幅排序，共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
+    m.blocks.map(groupCombinedBoardBlockHtml).join('');
+}
+
 // ---- 處置股預測：43個官方族群股票，依證交所14款異常標準判定今天觸發哪些款、
 // 以及依第六條累積規則是不是已經累積到會被處置（含5/7天處置期間預測）----
 let dispositionRiskData = null;
@@ -2791,7 +2907,7 @@ function renderSignalCenter(){
   const bigHolderRows = bigHolderRowsFrom(mainForceRanking);
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
-    if (key === 'history' || key === 'race333' || key === 'groupHolderForce') return null;
+    if (key === 'history' || key === 'race333' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
     if (key === 'dispositionRisk') return dispositionRiskData ? dispositionRiskData.results.length + (dispositionVolumeWatchData ? dispositionVolumeWatchData.results.length : 0) + (Array.isArray(dispositionRiskData.priceExtremeWatch) ? dispositionRiskData.priceExtremeWatch.length : 0) : null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
@@ -2842,6 +2958,10 @@ function renderSignalCenter(){
     replaceSignalHtml(body, 'race333', race333Html());
   } else if (active === 'groupHolderForce'){
     replaceSignalHtml(body, 'groupHolderForce', groupHolderForceHtml());
+  } else if (active === 'groupCombinedBoard'){
+    refreshDispositionRisk(false);
+    refreshDispositionVolumeWatch(false);
+    replaceSignalHtml(body, 'groupCombinedBoard', groupCombinedBoardHtml());
   } else if (active === 'dispositionRisk'){
     refreshDispositionRisk(false);
     refreshDispositionVolumeWatch(false);
