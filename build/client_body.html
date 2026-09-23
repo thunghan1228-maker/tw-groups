@@ -2165,6 +2165,13 @@ async function fetchRealSignals(dateStr){
     .map(mapLargeOrderSignal);
 }
 
+// 後端排行回的資料日期：過午夜到下一個交易日 08:45 之前今天還沒資料時，後端會沿用上一個交易日
+// 的最終排行（heldFrom＝替哪一天暫留），三個大戶力分頁要讓使用者知道看的是哪一天的資料。
+let mainForceRankingInfo = { tradeDate: null, heldFrom: null };
+function holderDataHeldNoteHtml(){
+  if (!mainForceRankingInfo.heldFrom) return '';
+  return '<div class="race-sub">目前顯示 ' + mainForceRankingInfo.tradeDate + ' 收盤時的最終大戶力資料（今天還沒開盤），保留到下一個交易日開盤前 15 分鐘（08:45）才清空重算。</div>';
+}
 async function fetchMainForceRanking(){
   // limit拉到1000(後端上限)：族群大戶力要從43個官方族群裡各挑前5名，
   // 只抓前200名很容易讓某些族群完全沒有股票入選，跟真正的全市場排行對不起來。
@@ -2172,6 +2179,7 @@ async function fetchMainForceRanking(){
   if (!res.ok) throw new Error('main-force-ranking http ' + res.status);
   const data = await res.json();
   if (!data || !Array.isArray(data.ranking)) throw new Error('bad payload');
+  mainForceRankingInfo = { tradeDate: data.tradeDate || null, heldFrom: data.heldFrom || null };
   return data.ranking;
 }
 
@@ -2761,7 +2769,7 @@ function groupHolderForceHtml(){
   const falling = f === 'up' ? [] : m.fallingGroups.filter((c) => !f || c.rows.length);
   const note = f === 'up' ? '目前只看大戶力≥+10%（偏買）的個股，只列漲幅前10大族群；' : f === 'down' ? '目前只看大戶力≤-10%（偏賣）的個股，只列跌幅前10大族群；' : '';
   const emptyNote = '<div class="race-note">這一段目前沒有符合篩選條件的個股（再點一次按鈕取消篩選）</div>';
-  return filterBar +
+  return filterBar + holderDataHeldNoteHtml() +
     '<div class="race-sub">' + note + '今天漲幅前10大族群，各取大戶力（大單淨額÷累計成交額）最強的前5名個股；跌幅前10大族群，各取大戶力最負(賣超)的前5名個股。族群依今天平均漲跌幅排名，共 ' + m.total + ' 個族群。' + stamp + '</div>' +
     (f === 'down' ? '' : '<div class="race-sep">------↑(漲幅前10大族群・大戶力Top5)↑------</div>' +
       (rising.length ? rising.map((c) => groupHolderForceCardHtml(c, 'up')).join('') : emptyNote)) +
@@ -2895,7 +2903,7 @@ function groupCombinedBoardHtml(){
     return filterBar + '<div class="signal-empty"><div class="se-title">' + reason + '</div><div class="se-sub">首頁資料或大戶力資料還在載入，或再點一次篩選按鈕取消篩選。</div></div>';
   }
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
-  return filterBar +
+  return filterBar + holderDataHeldNoteHtml() +
     '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。族群標題依今天平均漲跌幅正負分紅/綠，並依漲跌幅排序（偏賣篩選時跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
     m.blocks.map(groupCombinedBoardBlockHtml).join('');
 }
@@ -3060,7 +3068,7 @@ function renderSignalCenter(){
       if (el && !el.querySelector('.signal-list')) el.innerHTML = '<div class="signal-empty"><div class="se-title">讀取失敗</div><div class="se-sub">後端暫時連不上，稍後再試。</div></div>';
     });
   } else if (active === 'bigHolderForce'){
-    replaceSignalHtml(body, 'bigHolderForce', rankingRowsHtml(bigHolderRows));
+    replaceSignalHtml(body, 'bigHolderForce', holderDataHeldNoteHtml() + rankingRowsHtml(bigHolderRows));
   } else if (active === 'race333'){
     refreshGroupDailyChanges(false);
     replaceSignalHtml(body, 'race333', race333Html());
