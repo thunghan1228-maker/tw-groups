@@ -2430,7 +2430,8 @@ function race333Model(){
   const fireBase = rows.filter((r) => r.pct >= FIRE_MIN_PCT && aboveOtc(r) && r.inTopThird && r.groupRank <= fireGroupTop
     && (r.horse || r.rocket !== null) && (r.volume === null || r.volume >= FIRE_MIN_VOLUME)).sort((a, b) => b.pct - a.pct);
   const fireLocked = fireBase.filter((r) => r.limitUp || r.pct >= FIRE_MAX_PCT);
-  const fires = fireBase.filter((r) => !(r.limitUp || r.pct >= FIRE_MAX_PCT)).slice(0, FIRE_MAX_ROWS);
+  const fireOpen = fireBase.filter((r) => !(r.limitUp || r.pct >= FIRE_MAX_PCT));  // 符合馬火多全部門檻、買得到的（不限檔數）
+  const fires = fireOpen.slice(0, FIRE_MAX_ROWS);
   // 32 刀劍空：今天跌 BLADE_MIN_PCT% 以上（且 ≤ 櫃買%）、族內後 1/3、成交量夠、現價低於前天收盤（🔪）；
   // 跌停鎖死或跌到 BLADE_MAX_PCT% 以上放不到空，跟已跌 BLADE_HARVEST_PCT% 以上的一起放收割區那一行。
   const belowOtc = (r) => otcPct === null || r.pct <= otcPct;
@@ -2443,8 +2444,11 @@ function race333Model(){
   // 33 加 34：兩邊都有的才列（使用者 2026-09-23：只看交集）。
   const riverCodes = new Set(riverAll.filter((r) => r.pct <= 7).map((r) => r.code));
   const both = horses.filter((r) => riverCodes.has(r.code));
+  // 30 加 33 加 34：三邊都有的才列（使用者 2026-09-23）。馬火多這邊用「符合全部門檻」的，不受最多 10 檔限制。
+  const fireCodes = new Set(fireOpen.map((r) => r.code));
+  const triple = both.filter((r) => fireCodes.has(r.code)).sort((a, b) => b.pct - a.pct);
   return {
-    fires, fireLocked, fireGroupTop, bladeUpper, bladeLower, bladeHarvest, both,
+    fires, fireLocked, fireGroupTop, bladeUpper, bladeLower, bladeHarvest, both, triple,
     total, half, otcPct, otcLabel: otcStrengthLatest ? otcStrengthLatest.label : null, hasDaily,
     dates: groupDailyChanges && groupDailyChanges.dates ? groupDailyChanges.dates : [],
     horseLimit, riverLimit, horses,
@@ -2531,6 +2535,9 @@ function race333Html(){
       raceStockListHtml(m.fires, { fire: true, dates: m.dates }) +
       (m.fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + m.fireLocked.length + ' 檔：' + m.fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
       raceTrailerHtml(m) + '</div>' +
+    '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
+      '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、族群在 188／199 裡、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・漲幅高的在前</div>' +
+      raceStockListHtml(m.triple, { fire: true, dates: m.dates }) + raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
       '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要有 🔪（現價低於前天收盤，數字＝低幾 %；⚔️＝低於昨收）・最多 ' + BLADE_MAX_ROWS + ' 檔，跌幅深的在前・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
       raceBladeListHtml(m) + raceTrailerHtml(m) + '</div>' +
