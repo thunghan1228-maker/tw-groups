@@ -2640,6 +2640,9 @@ function race333Html(){
 // 族群排名跟333一樣用今天平均漲跌幅(g.avgChange)；大戶力用主力累計排行(mainForceRanking)的
 // strengthPct(官方大戶力%公式)，正的挑最大的前5名、負的挑最小(最負)的前5名，
 // strengthPct為null(大戶力資料還在累積中)的不列入候選。
+// 族群大戶力的篩選：null=照舊（漲幅前10族群取大戶力>0前5名、跌幅前10取<0前5名）；
+// 'up'=只看漲幅那一段、且大戶力>=+10%；'down'=只看跌幅那一段、且大戶力<=-10%。再點一次取消。
+let groupHolderForceFilter = null;
 function groupHolderForceModel(){
   if (!lastData || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
   const groups = lastData.groups.filter((g) => g.name !== '股期標的');
@@ -2653,7 +2656,8 @@ function groupHolderForceModel(){
     const rows = valid.map((s) => {
       const h = holderByCode.get(s.code);
       if (!h || h.strengthPct === null || h.strengthPct === undefined) return null;
-      if (mode === 'up' ? !(h.strengthPct > 0) : !(h.strengthPct < 0)) return null;
+      const minAbs = groupHolderForceFilter ? 10 : 0;
+      if (mode === 'up' ? !(h.strengthPct > 0 && h.strengthPct >= minAbs) : !(h.strengthPct < 0 && h.strengthPct <= -minAbs)) return null;
       return Object.assign({}, h, {
         pct: s.changePercent, price: s.price, groupName: g.name, groupRank: rankOf.get(g.name),
         limitUp: !!s.limitUp, limitDown: !!s.limitDown,
@@ -2706,15 +2710,29 @@ function groupHolderForceCardHtml(card, mode){
       : '<div class="race-note">目前沒有符合條件的個股（大戶力資料還在累積中，或沒有' + (mode === 'up' ? '偏買' : '偏賣') + '方向的大戶力）</div>') +
     '</div>';
 }
+function groupHolderForceFilterBarHtml(){
+  return '<div class="combo-filter-bar">' +
+    '<button class="chart-tab hf-filter-btn' + (groupHolderForceFilter === 'up' ? ' active' : '') + '" data-filter="up">大戶力≥10%</button>' +
+    '<button class="chart-tab hf-filter-btn' + (groupHolderForceFilter === 'down' ? ' active' : '') + '" data-filter="down">大戶力≤-10%</button>' +
+    '</div>';
+}
 function groupHolderForceHtml(){
   const m = groupHolderForceModel();
-  if (!m) return '<div class="signal-empty"><div class="se-title">族群行情還沒載入</div><div class="se-sub">首頁資料抓到後就會出現。</div></div>';
+  const filterBar = groupHolderForceFilterBarHtml();
+  if (!m) return filterBar + '<div class="signal-empty"><div class="se-title">族群行情還沒載入</div><div class="se-sub">首頁資料抓到後就會出現。</div></div>';
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
-  return '<div class="race-sub">今天漲幅前10大族群，各取大戶力（大單淨額÷累計成交額）最強的前5名個股；跌幅前10大族群，各取大戶力最負(賣超)的前5名個股。族群依今天平均漲跌幅排名，共 ' + m.total + ' 個族群。' + stamp + '</div>' +
-    '<div class="race-sep">------↑(漲幅前10大族群・大戶力Top5)↑------</div>' +
-    m.risingGroups.map((c) => groupHolderForceCardHtml(c, 'up')).join('') +
-    '<div class="race-sep">------↓(跌幅前10大族群・大戶力Top5)↓------</div>' +
-    m.fallingGroups.map((c) => groupHolderForceCardHtml(c, 'down')).join('');
+  const f = groupHolderForceFilter;
+  // 有篩選時只留有符合個股的族群卡片；沒篩選時照舊全部列出（含「目前沒有符合條件的個股」的卡片）。
+  const rising = f === 'down' ? [] : m.risingGroups.filter((c) => !f || c.rows.length);
+  const falling = f === 'up' ? [] : m.fallingGroups.filter((c) => !f || c.rows.length);
+  const note = f === 'up' ? '目前只看大戶力≥+10%（偏買）的個股，只列漲幅前10大族群；' : f === 'down' ? '目前只看大戶力≤-10%（偏賣）的個股，只列跌幅前10大族群；' : '';
+  const emptyNote = '<div class="race-note">這一段目前沒有符合篩選條件的個股（再點一次按鈕取消篩選）</div>';
+  return filterBar +
+    '<div class="race-sub">' + note + '今天漲幅前10大族群，各取大戶力（大單淨額÷累計成交額）最強的前5名個股；跌幅前10大族群，各取大戶力最負(賣超)的前5名個股。族群依今天平均漲跌幅排名，共 ' + m.total + ' 個族群。' + stamp + '</div>' +
+    (f === 'down' ? '' : '<div class="race-sep">------↑(漲幅前10大族群・大戶力Top5)↑------</div>' +
+      (rising.length ? rising.map((c) => groupHolderForceCardHtml(c, 'up')).join('') : emptyNote)) +
+    (f === 'up' ? '' : '<div class="race-sep">------↓(跌幅前10大族群・大戶力Top5)↓------</div>' +
+      (falling.length ? falling.map((c) => groupHolderForceCardHtml(c, 'down')).join('') : emptyNote));
 }
 
 // ---- 族群綜合表：把大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併成一個表格，
@@ -3366,6 +3384,13 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
   if (filterBtn){
     const f = filterBtn.dataset.filter;
     groupCombinedBoardFilter = groupCombinedBoardFilter === f ? null : f;
+    renderSignalCenter();
+    return;
+  }
+  const hfBtn = e.target.closest('.hf-filter-btn');
+  if (hfBtn){
+    const f = hfBtn.dataset.filter;
+    groupHolderForceFilter = groupHolderForceFilter === f ? null : f;
     renderSignalCenter();
     return;
   }
