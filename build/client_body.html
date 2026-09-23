@@ -725,7 +725,6 @@ const KLINE_SIGNAL_INFO = {
   watch12short: { symbol: '㊟', color: '#22c55e', side: 'bear', desc: '注意12空：股價第一次進入前高下方5檔內，等2根5分K仍未突破前高即成立。' },
   short12: { symbol: '⑫', color: '#3b82f6', side: 'bear', desc: '12空：注意12空後離開區域，再次回到前高下方5檔內等2根K仍未突破，10:30前一天一次。' },
   enhanced12short: { symbol: '⑫', color: '#c084fc', side: 'bear', desc: '加強12空：注意12空成立後，5分K收盤由20MA上方跌到下方，全天可重複觸發。' },
-  oneTwoShort: { symbol: '1-2', color: '#f97316', side: 'bear', desc: '12空(五分K)／一二空：破905低→反彈形成1高(不能碰到或超過905高)→跌破20MA且20MA下彎(破位)→反彈形成2高(不能碰到或超過1高)→再轉弱(同一根收盤與最低都比前一根更低)正式觸發，一天一次。跟「注意12空/12空/加強12空」是完全獨立的另一套機制。' },
   blackDragon: { symbol: '黑龍', color: '#374151', side: 'bear', desc: '創高黑龍(盤中版)：11:00~13:30限定，同一根5分K自己的最高價突破前5個完整交易日最高價(平高不算)，但收盤反而低於今日09:00開盤價，且六均線(5/10/20/60/120/240)排列分數≥10(滿分15)，一天一次。' },
   crossDown20ma: { symbol: '⑳↓', color: '#22c55e', side: 'bear', desc: '跌破20MA：股價由20MA上方跌到下方，可重複觸發。' },
   firstCrossDown20ma: { symbol: '⑳↓★', color: '#22c55e', side: 'bear', desc: '首次跌破20MA：當日第一次跌破20MA。' },
@@ -1968,7 +1967,6 @@ async function renderOtcStrengthWidget(){
 const SIGNAL_KINDS = [
   { key: 'now', label: '今日即時' },
   { key: 'fourGate', label: '四項精選' },
-  { key: 'oneTwoShort', label: '12空' },
   { key: 'combo12Bull', label: '1+2多' },
   { key: 'blackDragon', label: '創高黑龍' },
   { key: 'mainForceFlip', label: '主力翻多空' },
@@ -1979,9 +1977,9 @@ const SIGNAL_KINDS = [
   { key: 'history', label: '歷史查詢' },
 ];
 // 5分鐘K策略訊號家族(MA交叉/520/A8空等)只在K線圖上用符號呈現，不進盤中
-// 訊號中心；但這三個是獨立的「結構性」訊號，使用者要求另外開專屬分頁。
-const DEDICATED_KLINE_TABS = new Set(['oneTwoShort', 'combo12Bull', 'blackDragon']);
-// 收盤後校正狀態（2026-09-23 使用者：12空整天是 0，看不出是真的沒有還是校正沒跑）
+// 訊號中心；但這兩個是獨立的「結構性」訊號，使用者要求另外開專屬分頁。
+const DEDICATED_KLINE_TABS = new Set(['combo12Bull', 'blackDragon']);
+// 收盤後校正狀態（提供給下面兩個獨立結構性訊號分頁用，確認收盤後校正有沒有跑完）
 let klineBackfillStatus = null;
 let klineBackfillFetchedAt = 0;
 async function refreshKlineBackfillStatus(){
@@ -2097,7 +2095,7 @@ async function fetchRealSignals(dateStr){
   const data = await res.json();
   if (!data || !Array.isArray(data.signals)) throw new Error('bad payload');
   // 一般5分鐘K策略訊號(MA交叉/520/A8空等)只在K線圖上用符號呈現；只留下
-  // 不是這個家族的訊號、以及三個獨立的「結構性」訊號(12空/1+2多/創高黑龍)。
+  // 不是這個家族的訊號、以及兩個獨立的「結構性」訊號(1+2多/創高黑龍)。
   return data.signals
     .filter((s) => !KLINE_SIGNAL_INFO[s.kind] || DEDICATED_KLINE_TABS.has(s.kind))
     .map(mapLargeOrderSignal);
