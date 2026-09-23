@@ -255,6 +255,15 @@
   .race-row .race-pct{margin-left:auto;font-weight:700;}
   .race-row .race-pct.up{color:var(--up);} .race-row .race-pct.down{color:var(--down);}
   .race-row .race-badge{font-size:14px;min-width:22px;text-align:right;}
+  .race-row .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
+  /* 族群大戶力卡片複用signal-row的大戶力顏色膠囊／資格標籤樣式，但外層是race-row */
+  .race-row .sig-label{color:var(--text);opacity:.85;white-space:nowrap;flex-shrink:0;font-size:12px;}
+  .race-row .sig-label.sig-bull{background:var(--up);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
+  .race-row .sig-label.sig-bear{background:var(--down);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
+  .race-row .sig-eligibility{display:inline-flex;gap:4px;flex-shrink:0;}
+  .race-row .sig-eligibility span{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;}
+  .race-row .sig-eligibility span.sig-futures{color:#93c5fd;border-color:#93c5fd66;}
+  .race-row .sig-eligibility span.pill-disposition{background:#d4a017;color:#fff;border-color:#d4a017;font-weight:700;}
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -1872,6 +1881,13 @@ function initWindowChrome(){
 }
 
 function fmt(n){ return (n>0?'+':'') + n.toFixed(2); }
+function fmtAmountWan(n){
+  // 大戶買賣超金額(元)換算成萬/億顯示，跟台股新聞慣例一致：不到1億用萬、達1億用億(2位小數)。
+  if (n === null || n === undefined || !Number.isFinite(n)) return '';
+  const sign = n >= 0 ? '+' : '-';
+  const abs = Math.abs(n);
+  return sign + (abs >= 100000000 ? (abs / 100000000).toFixed(2) + '億' : Math.round(abs / 10000).toLocaleString('zh-TW') + '萬');
+}
 const STOCK_COL_LABELS_HTML = '<div class="stock-col-labels"><span></span><span class="srow-right">' +
   '<span class="spct">漲跌幅</span><span class="schg">漲跌</span><span class="sprice">成交價</span></span></div>';
 function stockValueColsHtml(price, changeAmt, changePercent){
@@ -1973,6 +1989,7 @@ const SIGNAL_KINDS = [
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
+  { key: 'groupHolderForce', label: '族群大戶力' },
   { key: 'race333', label: '盤中333' },
   { key: 'history', label: '歷史查詢' },
 ];
@@ -2102,7 +2119,9 @@ async function fetchRealSignals(dateStr){
 }
 
 async function fetchMainForceRanking(){
-  const res = await fetch('/api/main-force-ranking?limit=200');
+  // limit拉到1000(後端上限)：族群大戶力要從43個官方族群裡各挑前5名，
+  // 只抓前200名很容易讓某些族群完全沒有股票入選，跟真正的全市場排行對不起來。
+  const res = await fetch('/api/main-force-ranking?limit=1000');
   if (!res.ok) throw new Error('main-force-ranking http ' + res.status);
   const data = await res.json();
   if (!data || !Array.isArray(data.ranking)) throw new Error('bad payload');
@@ -2578,12 +2597,87 @@ function race333Html(){
       raceGroupListHtml(m.shortGroups, m.half, '------↓(空方)↓------') + '</div>';
 }
 
+// ---- 族群大戶力：漲幅前10大族群各取大戶力最強前5名、跌幅前10大族群各取大戶力最負前5名 ----
+// 族群排名跟333一樣用今天平均漲跌幅(g.avgChange)；大戶力用主力累計排行(mainForceRanking)的
+// strengthPct(官方大戶力%公式)，正的挑最大的前5名、負的挑最小(最負)的前5名，
+// strengthPct為null(大戶力資料還在累積中)的不列入候選。
+function groupHolderForceModel(){
+  if (!lastData || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
+  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+  if (!groups.length) return null;
+  const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
+  const total = ranked.length;
+  const rankOf = new Map(ranked.map((g, i) => [g.name, i + 1]));
+  const holderByCode = new Map((mainForceRanking || []).map((r) => [r.code, r]));
+  const cardFor = (g, mode) => {
+    const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined);
+    const rows = valid.map((s) => {
+      const h = holderByCode.get(s.code);
+      if (!h || h.strengthPct === null || h.strengthPct === undefined) return null;
+      if (mode === 'up' ? !(h.strengthPct > 0) : !(h.strengthPct < 0)) return null;
+      return Object.assign({}, h, {
+        pct: s.changePercent, groupName: g.name, groupRank: rankOf.get(g.name),
+        limitUp: !!s.limitUp, limitDown: !!s.limitDown,
+      });
+    }).filter(Boolean);
+    rows.sort((a, b) => mode === 'up' ? b.strengthPct - a.strengthPct : a.strengthPct - b.strengthPct);
+    return { name: g.name, rank: rankOf.get(g.name), avgChange: g.avgChange, groupTotal: valid.length, qualified: rows.length, rows: rows.slice(0, 5) };
+  };
+  const risingGroups = ranked.slice(0, 10).map((g) => cardFor(g, 'up'));
+  const fallingGroups = ranked.slice(Math.max(0, total - 10)).reverse().map((g) => cardFor(g, 'down'));
+  return { risingGroups, fallingGroups, total };
+}
+function groupHolderForceWarnPillHtml(r){
+  // 使用者要求：超過漲跌幅鎖死(漲停/跌停)、或會被處置(關)的個股，紅底白字寫在該列最後面。
+  const parts = [];
+  if (r.limitUp) parts.push('漲停');
+  if (r.limitDown) parts.push('跌停');
+  const f = stockFlags[r.code];
+  if (f && f.disposition){
+    const until = f.dispositionUntil ? ' 至' + String(f.dispositionUntil).slice(5).replace('-', '/') : '';
+    parts.push('處置股' + until);
+  }
+  if (!parts.length) return '';
+  const title = f && f.disposition && f.dispositionReason ? f.dispositionReason : '';
+  return '<span class="pill-warn"' + (title ? ' title="' + title + '"' : '') + '>' + parts.join('・') + '</span>';
+}
+function groupHolderForceStockRowHtml(r, idx){
+  const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
+  const cls = r.strengthPct > 0 ? 'sig-bull' : 'sig-bear';
+  const pctText = (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%';
+  const amtText = fmtAmountWan(r.netAmount);
+  return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
+    '<span class="race-badge">' + (RACE_NUM[idx + 1] || String(idx + 1)) + '</span>' +
+    '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
+    tradingEligibilityTagsHtml(r) + flagPillsHtml(r.code, { dispositionOnly: true }) +
+    '<span class="sig-label ' + cls + '" title="' + (r.holderLabel || '大戶力（大單淨額÷累計成交額）') + '">' + pctText + (amtText ? '・' + amtText : '') + '</span>' +
+    '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' +
+    groupHolderForceWarnPillHtml(r) + '</div>';
+}
+function groupHolderForceCardHtml(card, mode){
+  const icon = mode === 'up' ? '📈' : '📉';
+  return '<div class="race-block"><div class="race-head">' + icon + ' ' + card.name + '（' + card.groupTotal + ' 檔） 族排第 ' + card.rank + ' 名・今天平均 ' + fmt(card.avgChange) + '%・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
+    (card.rows.length ? card.rows.map((r, i) => groupHolderForceStockRowHtml(r, i)).join('')
+      : '<div class="race-note">目前沒有符合條件的個股（大戶力資料還在累積中，或沒有' + (mode === 'up' ? '偏買' : '偏賣') + '方向的大戶力）</div>') +
+    '</div>';
+}
+function groupHolderForceHtml(){
+  const m = groupHolderForceModel();
+  if (!m) return '<div class="signal-empty"><div class="se-title">族群行情還沒載入</div><div class="se-sub">首頁資料抓到後就會出現。</div></div>';
+  const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return '<div class="race-sub">今天漲幅前10大族群，各取大戶力（大單淨額÷累計成交額）最強的前5名個股；跌幅前10大族群，各取大戶力最負(賣超)的前5名個股。族群依今天平均漲跌幅排名，共 ' + m.total + ' 個族群。' + stamp + '</div>' +
+    '<div class="race-sep">------↑(漲幅前10大族群・大戶力Top5)↑------</div>' +
+    m.risingGroups.map((c) => groupHolderForceCardHtml(c, 'up')).join('') +
+    '<div class="race-sep">------↓(跌幅前10大族群・大戶力Top5)↓------</div>' +
+    m.fallingGroups.map((c) => groupHolderForceCardHtml(c, 'down')).join('');
+}
+
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
   const bigHolderRows = bigHolderRowsFrom(mainForceRanking);
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
-    if (key === 'history' || key === 'race333') return null;
+    if (key === 'history' || key === 'race333' || key === 'groupHolderForce') return null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
@@ -2631,6 +2725,8 @@ function renderSignalCenter(){
   } else if (active === 'race333'){
     refreshGroupDailyChanges(false);
     replaceSignalHtml(body, 'race333', race333Html());
+  } else if (active === 'groupHolderForce'){
+    replaceSignalHtml(body, 'groupHolderForce', groupHolderForceHtml());
   } else if (active === 'now'){
     replaceSignalHtml(body, 'now', nowTabRowsHtml(todaySignalEvents, bigHolderRows));
   } else if (DEDICATED_KLINE_TABS.has(active)){
