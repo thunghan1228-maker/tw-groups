@@ -302,7 +302,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row:hover{background:var(--panel-2);}
   .race-row .race-code{color:var(--muted);font-size:12px;min-width:44px;}
   .race-row .race-rank{color:var(--muted);font-size:12px;min-width:40px;}
-  .race-row .race-name{font-weight:700;}
+  .race-row .race-name{font-weight:700;flex:0 0 8em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .race-row .sig-group{background:#d4a017;color:#fff;font-weight:700;font-size:12px;border-radius:6px;padding:1px 8px;flex-shrink:0;white-space:nowrap;}
   .race-row .race-pct{margin-left:auto;font-weight:700;}
   .race-row .race-pct.up{color:var(--up);} .race-row .race-pct.down{color:var(--down);}
   .race-row .race-badge{font-size:14px;min-width:22px;text-align:right;}
