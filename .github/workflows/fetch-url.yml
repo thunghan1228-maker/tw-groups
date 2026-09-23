@@ -1,0 +1,74 @@
+name: Fetch external URL
+
+# 沙盒環境的對外連線政策擋掉一般網站(包括zhuang.tw)，用這個工作流程從GitHub
+# runner(一般網路環境)去抓，再把結果印在log裡讓沙盒讀回來。render=false只是
+# plain curl(快，但SPA網站可能只拿到JS殼)；render=true用Playwright實際渲染頁面、
+# 擷取可見文字＋存全頁截圖(當artifact上傳，較慢但看得到JS渲染後的真實內容)。
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "要抓取的完整URL，例如 https://zhuang.tw/prison"
+        required: true
+      render:
+        description: "true=用Playwright渲染後擷取可見文字＋全頁截圖；false=只curl抓原始HTML"
+        required: false
+        default: "false"
+
+jobs:
+  plain-fetch:
+    if: ${{ inputs.render != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: curl
+        env:
+          TARGET_URL: ${{ inputs.url }}
+        run: |
+          curl -sS --max-time 60 -L "$TARGET_URL" -o out.html -w "\nHTTP %{http_code}\n"
+          echo "----- body (first 60000 bytes) -----"
+          head -c 60000 out.html; echo
+
+  rendered-fetch:
+    if: ${{ inputs.render == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Render page and dump visible text
+        env:
+          TARGET_URL: ${{ inputs.url }}
+        run: |
+          node -e "
+            const { chromium } = require('playwright');
+            (async () => {
+              const browser = await chromium.launch();
+              const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
+              await page.goto(process.env.TARGET_URL, { waitUntil: 'networkidle', timeout: 45000 });
+              await page.waitForTimeout(3000);
+              const text = await page.innerText('body').catch(() => '(innerText failed)');
+              require('fs').writeFileSync('rendered_text.txt', text);
+              const html = await page.content();
+              require('fs').writeFileSync('rendered.html', html);
+              await page.screenshot({ path: 'screenshot.png', fullPage: true });
+              await browser.close();
+            })().catch((e) => { console.error(e); process.exit(1); });
+          "
+      - name: Show visible text
+        run: |
+          echo "----- visible text (first 60000 bytes) -----"
+          head -c 60000 rendered_text.txt; echo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fetch-result
+          path: |
+            screenshot.png
+            rendered.html
+          retention-days: 3
