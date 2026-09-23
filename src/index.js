@@ -2787,6 +2787,24 @@ function dispositionRiskStockRowHtml(r){
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
     clausesHtml + warnHtml + gapHtml + '</div>';
 }
+function dispositionPriceExtremeWatchRowHtml(r){
+  const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
+  const title = '明天收盤價門檻約' + r.thresholdClose + '元（' + (r.direction === 'up' ? '漲幅' : '跌幅') +
+    (r.changePctFromToday > 0 ? '+' : '') + r.changePctFromToday.toFixed(2) +
+    '%）；收盤後用官方定案資料反推，不是盤中即時值；觸發只代表公布注意，不計入處置累積路徑';
+  return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
+    '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
+    '<span class="disp-clauses">第十一款</span>' +
+    '<span class="pill-gap" title="' + title + '">🔮 明天' + r.detail + '</span></div>';
+}
+function dispositionPriceExtremeWatchSectionHtml(){
+  const data = dispositionRiskData;
+  const list = data && Array.isArray(data.priceExtremeWatch) ? data.priceExtremeWatch : [];
+  if (!list.length) return '';
+  return '<div class="race-sep">------↓(收盤價接近第十一款門檻，創6日新高/新低觀察中)↓------</div>' +
+    '<div class="race-sub">【注意】這裡達標只代表會觸發一次公布「注意交易資訊」，第十一款不計入處置累積路徑，跟是否會被處置無關。反推明天收盤價要達到多少才會創6日新高或新低，收盤後用官方定案資料算，不是盤中即時值；超過台股單日漲跌幅限制(±10%)的不會列出。</div>' +
+    list.map(dispositionPriceExtremeWatchRowHtml).join('');
+}
 function dispositionVolumeWatchRowHtml(r){
   const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
   const liveHtml = r.liveData
@@ -2809,8 +2827,9 @@ function dispositionVolumeWatchSectionHtml(){
 function dispositionRiskHtml(){
   const data = dispositionRiskData;
   const volumeSection = dispositionVolumeWatchSectionHtml();
+  const priceSection = dispositionPriceExtremeWatchSectionHtml();
   if (!data) return '<div class="signal-empty"><div class="se-title">讀取中…</div><div class="se-sub">處置股預測資料還沒載入。</div></div>';
-  if (!data.results.length && !volumeSection) return '<div class="signal-empty"><div class="se-title">今天沒有股票觸發任何處置股款別</div><div class="se-sub">交易日 ' + data.tradeDate + '</div></div>';
+  if (!data.results.length && !volumeSection && !priceSection) return '<div class="signal-empty"><div class="se-title">今天沒有股票觸發任何處置股款別</div><div class="se-sub">交易日 ' + data.tradeDate + '</div></div>';
   const accumulating = data.results.filter((r) => r.accumulation);
   const firedOnly = data.results.filter((r) => !r.accumulation);
   return '<div class="race-sub">依證交所公布或通知注意交易資訊暨處置作業要點第四條14款異常標準，只算43個官方族群524檔（第五款需要券商分點資料、第八款限台灣存託憑證，這兩款沒有列入判定）；今天觸發款別的股票，以及依第六條累積規則已經累積到會被處置的股票。🔮 標籤是「連續2天中第一款、還差1次就觸發」的股票，收盤後用官方定案資料反推明天收盤價門檻（不是盤中即時值）。交易日 ' + data.tradeDate + '</div>' +
@@ -2818,7 +2837,7 @@ function dispositionRiskHtml(){
       accumulating.map(dispositionRiskStockRowHtml).join('') : '') +
     (firedOnly.length ? '<div class="race-sep">------↓(今天觸發款別，尚未累積到處置門檻)↓------</div>' +
       firedOnly.map(dispositionRiskStockRowHtml).join('') : '') +
-    volumeSection;
+    volumeSection + priceSection;
 }
 
 function renderSignalCenter(){
@@ -2827,7 +2846,7 @@ function renderSignalCenter(){
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
     if (key === 'history' || key === 'race333' || key === 'groupHolderForce') return null;
-    if (key === 'dispositionRisk') return dispositionRiskData ? dispositionRiskData.results.length + (dispositionVolumeWatchData ? dispositionVolumeWatchData.results.length : 0) : null;
+    if (key === 'dispositionRisk') return dispositionRiskData ? dispositionRiskData.results.length + (dispositionVolumeWatchData ? dispositionVolumeWatchData.results.length : 0) + (Array.isArray(dispositionRiskData.priceExtremeWatch) ? dispositionRiskData.priceExtremeWatch.length : 0) : null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
