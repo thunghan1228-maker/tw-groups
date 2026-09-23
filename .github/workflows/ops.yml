@@ -1,0 +1,25 @@
+name: HanStock ops
+
+# 手動查 HanStock 後端（Railway）的公開 GET 端點：例如收盤後校正狀態、持久化狀態、
+# 或觸發一次回補。沙盒連不到 Railway，用 GitHub 的 runner 代替。
+on:
+  workflow_dispatch:
+    inputs:
+      path:
+        description: "HanStock API path（GET），例如 /api/hub/kline-signals/backfill-today/status"
+        required: true
+        default: "/api/hub/persistence/status"
+
+jobs:
+  call:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: GET
+        env:
+          API_PATH: ${{ inputs.path }}
+        run: |
+          echo "GET $API_PATH"
+          curl -sS --max-time 150 "https://hanstock-production-b872.up.railway.app${API_PATH}" -o out.json -w "\nHTTP %{http_code}\n"
+          echo "----- body (first 30000 bytes) -----"
+          head -c 30000 out.json; echo
