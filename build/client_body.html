@@ -263,7 +263,15 @@
   .race-col-labels span b{color:var(--muted);font-size:10px;font-weight:600;}
   .race-col-labels .race-warn-slot{flex:0 0 3.6em;}
   .race-row .race-pct.up{color:var(--up);} .race-row .race-pct.down{color:var(--down);}
-  .race-row .race-badge{font-size:14px;min-width:22px;text-align:right;}
+  /* 盤中333：族群標籤是列裡可縮的部分；盤中大戶力／漲跌幅／漲跌／成交價／符號都是固定寬、貼齊右邊，跟欄位標籤對齊 */
+  .race-row .race-badge{font-size:14px;flex:0 0 6.5em;text-align:right;white-space:nowrap;}
+  .race-row .sig-group{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .race-row .race-holder{margin-left:auto;flex:0 0 8.5em;text-align:right;white-space:nowrap;overflow:hidden;}
+  .race-row .race-holder ~ .race-pct{margin-left:0;}
+  .race-row .race-holder .sig-label{font-size:11px;padding:2px 6px;}
+  .race-row .race-holder-none{color:var(--muted);}
+  .race-col-labels .race-holder{flex:0 0 8.5em;}
+  .race-col-labels .race-badge-slot{flex:0 0 6.5em;}
   .race-row .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   /* 族群大戶力卡片複用signal-row的大戶力顏色膠囊／資格標籤樣式，但外層是race-row */
   .race-row .sig-label{color:var(--text);opacity:.85;white-space:nowrap;flex-shrink:0;font-size:12px;}
@@ -2451,6 +2459,7 @@ function race333Model(){
   const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
   const otcPct = otcStrengthLatest && Number.isFinite(otcStrengthLatest.changePct) ? otcStrengthLatest.changePct : null;
   const stockDaily = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
+  const holderByCode = new Map((mainForceRanking || []).map((r) => [r.code, r]));
   const info = ranked.map((g) => {
     const d = daily[g.name] || {};
     const pct = Array.isArray(d.pct) ? d.pct : [];
@@ -2486,10 +2495,13 @@ function race333Model(){
       const sd = stockDaily[s.code] && Array.isArray(stockDaily[s.code].pct) ? stockDaily[s.code].pct : [];
       const y = Number.isFinite(sd[0]) ? sd[0] : null, y2 = Number.isFinite(sd[1]) ? sd[1] : null;
       const twoDay = y !== null ? ((1 + s.changePercent / 100) * (1 + y / 100) - 1) * 100 : null;
+      const holderRow = holderByCode.get(s.code);
       const row = {
         code: s.code, name: s.name, pct: s.changePercent, groupName: g.name, groupRank: rankOf.get(g.name), inGroupRank: i + 1, inTopThird: i < cut,
         inBottomThird: i >= valid.length - cut, dailyKnown: y !== null || y2 !== null, yesterday: y, dayBefore: y2,
         limitUp: !!s.limitUp, limitDown: !!s.limitDown, volume: Number.isFinite(s.volume) ? s.volume : null,
+        price: s.price,
+        strengthPct: holderRow ? holderRow.strengthPct : null, netAmount: holderRow ? holderRow.netAmount : null, holderLabel: holderRow ? holderRow.holderLabel : null,
         twoDay,                                                   // 現價對前天收盤的 %
         horse: s.changePercent > 0,                               // 🐎 現價高於昨收
         rocket: twoDay !== null && twoDay > 0 ? twoDay : null,    // 🚀 現價高於前天收盤，數字＝高出幾 %
@@ -2544,6 +2556,15 @@ function bladeBadge(r){
   const marks = (r.sword ? '⚔️' : '') + (r.knife !== null ? '🔪' + r.knife.toFixed(1) : '');
   return marks || (r.dailyKnown ? '〰️' : '');  // 有昨天資料但沒更弱＝〰️；沒資料就空白
 }
+// 盤中333 每個名單最上面的欄位標籤：跟每一列右邊那幾個固定寬的格子一一對齊（外層格子不設字級，
+// flex 的 em 才會跟資料列用同一個字級算）。
+const RACE_COL_LABELS_HTML = '<div class="race-col-labels"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"></span></div>';
+function raceHolderCellHtml(r){
+  if (r.strengthPct === null || r.strengthPct === undefined) return '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>';
+  const amt = fmtAmountWan(r.netAmount);
+  return '<span class="sig-label ' + (r.strengthPct > 0 ? 'sig-bull' : 'sig-bear') + '" title="' + (r.holderLabel || '大戶力（大單淨額÷累計成交額）') + '">' +
+    (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%' + (amt ? '・' + amt : '') + '</span>';
+}
 function raceStockRowHtml(r, idx, opts){
   const lock = r.limitUp ? '🔒漲停' : r.limitDown ? '🔒跌停' : '';
   const badge = (opts && opts.fire
@@ -2557,10 +2578,18 @@ function raceStockRowHtml(r, idx, opts){
     + (r.yesterday !== null && r.yesterday !== undefined ? '，昨天' + (dates[0] ? '(' + dates[0].slice(5) + ')' : '') + ' ' + fmt(r.yesterday) + '%' : '')
     + (r.dayBefore !== null && r.dayBefore !== undefined ? '，前天' + (dates[1] ? '(' + dates[1].slice(5) + ')' : '') + ' ' + fmt(r.dayBefore) + '%' : '');
   const star = stockFlags[r.code] && stockFlags[r.code].disposition ? '*' : '';
+  const cls = dirClass(r.pct);
+  const price = Number(r.price);
+  const hasPrice = Number.isFinite(price);
+  const chg = hasPrice ? price - price / (1 + r.pct / 100) : 0;
   return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' + rank +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + r.name + star + '</span>' +
     '<span class="sig-group" title="族群第 ' + r.groupRank + ' 名，族內第 ' + r.inGroupRank + ' 名">' + r.groupName + '</span>' +
-    '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span><span class="race-badge" title="' + dailyTitle + '">' + badge + '</span></div>';
+    '<span class="race-holder">' + raceHolderCellHtml(r) + '</span>' +
+    '<span class="race-pct ' + cls + '">' + fmt(r.pct) + '%</span>' +
+    '<span class="race-chg ' + cls + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
+    '<span class="race-price ' + cls + '">' + (hasPrice ? price.toFixed(2) : '—') + '</span>' +
+    '<span class="race-badge" title="' + dailyTitle + '">' + badge + '</span></div>';
 }
 function raceGroupRowHtml(g){
   const diff = g.prevRank !== null ? g.prevRank - g.rank : null;
@@ -2590,7 +2619,7 @@ function raceOtcBoxHtml(m){
 }
 function raceStockListHtml(list, opts){
   if (!list.length) return '<div class="race-note">目前沒有符合條件的股票</div>';
-  let html = '';
+  let html = RACE_COL_LABELS_HTML;
   list.forEach((r, i) => {
     if (opts && opts.holdLineAt7 && i > 0 && list[i - 1].pct >= 7 && r.pct < 7) html += '<div class="race-sep">----↑(續抱不追)↑----</div>';
     html += raceStockRowHtml(r, i, opts);
