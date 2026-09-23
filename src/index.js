@@ -2803,7 +2803,7 @@ function dispositionVolumeWatchSectionHtml(){
   if (!data || !data.results.length) return '';
   const liveNote = data.liveCount > 0 ? '目前 ' + data.liveCount + ' / ' + data.count + ' 檔有即時成交量。' : '目前沒有股票在即時追蹤範圍內，全部用收盤量估計。';
   return '<div class="race-sep">------↓(成交量接近第九/十款門檻，盤中觀察中)↓------</div>' +
-    '<div class="race-sub">第九款(單日爆量)／第十款(週轉率)差距預測：門檻收盤後用官方定案資料算好，對整個下一個交易日都有效；' + liveNote + (data.liveSubscriptionCapNote || '') + '</div>' +
+    '<div class="race-sub">【注意】這裡達標只代表會觸發一次公布「注意交易資訊」，第九／十款不計入證交所第六條的處置累積路徑，跟是否會被處置無關——不會因為這裡達標就被限制交易。第九款(單日爆量)／第十款(週轉率)差距預測：門檻收盤後用官方定案資料算好，對整個下一個交易日都有效；' + liveNote + (data.liveSubscriptionCapNote || '') + '</div>' +
     data.results.map(dispositionVolumeWatchRowHtml).join('');
 }
 function dispositionRiskHtml(){
