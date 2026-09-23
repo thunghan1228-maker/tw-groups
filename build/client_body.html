@@ -284,6 +284,7 @@
   .combo-table .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;white-space:nowrap;display:inline-block;}
   .combo-table .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;display:inline-block;}
   .combo-table .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;white-space:nowrap;display:inline-block;}
+  .combo-head.up{color:var(--up);} .combo-head.down{color:var(--down);}
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -2749,7 +2750,10 @@ function groupCombinedBoardModel(){
     const rows = valid.map((s) => {
       const h = holderByCode.get(s.code);
       const hasDisp = dispByCode.has(s.code);
-      if (!h && !hasDisp) return null;
+      // 使用者要求：大戶力要 |strengthPct| >= 10 才單獨夠格上榜；沒到10%的大戶力
+      // 資料只在有處置/注意觸發時當附加資訊一起顯示，不能單獨讓那一列出現。
+      const qualifiesHolder = h && h.strengthPct !== null && h.strengthPct !== undefined && Math.abs(h.strengthPct) >= 10;
+      if (!qualifiesHolder && !hasDisp) return null;
       return {
         code: s.code, name: s.name, pct: s.changePercent,
         strengthPct: h ? h.strengthPct : null, netAmount: h ? h.netAmount : null, holderLabel: h ? h.holderLabel : null,
@@ -2779,7 +2783,7 @@ function groupCombinedBoardRowHtml(r){
     '</tr>';
 }
 function groupCombinedBoardBlockHtml(block){
-  return '<div class="race-block"><div class="race-head">' + block.name + '（' + block.groupTotal + ' 檔） 今天平均 ' + fmt(block.avgChange) + '%・有大戶力或處置/注意資料 ' + block.rows.length + ' 檔</div>' +
+  return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + block.name + '（' + block.groupTotal + ' 檔） 今天平均 ' + fmt(block.avgChange) + '%・有大戶力或處置/注意資料 ' + block.rows.length + ' 檔</div>' +
     '<div class="combo-table-wrap"><table class="combo-table"><thead><tr>' +
     '<th>代號</th><th>名稱</th><th>漲跌%</th><th>大戶力</th><th>處置／注意</th>' +
     '</tr></thead><tbody>' + block.rows.map(groupCombinedBoardRowHtml).join('') + '</tbody></table></div></div>';
@@ -2788,7 +2792,7 @@ function groupCombinedBoardHtml(){
   const m = groupCombinedBoardModel();
   if (!m || !m.blocks.length) return '<div class="signal-empty"><div class="se-title">目前沒有族群有大戶力或處置/注意資料</div><div class="se-sub">首頁資料或大戶力資料還在載入。</div></div>';
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
-  return '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出有大戶力資料或有處置/注意資料的股票。族群依今天平均漲跌幅排序，共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
+  return '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。族群標題依今天平均漲跌幅正負分紅/綠，並依漲跌幅排序，共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
     m.blocks.map(groupCombinedBoardBlockHtml).join('');
 }
 
