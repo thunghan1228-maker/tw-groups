@@ -14,6 +14,10 @@ on:
         description: "true=用Playwright渲染後擷取可見文字＋全頁截圖；false=只curl抓原始HTML"
         required: false
         default: "false"
+      offset:
+        description: "從第幾個bytes開始印(0-based)，內容太長被截斷時用這個接續上次沒印到的部分"
+        required: false
+        default: "0"
 
 jobs:
   plain-fetch:
@@ -24,10 +28,13 @@ jobs:
       - name: curl
         env:
           TARGET_URL: ${{ inputs.url }}
+          OFFSET: ${{ inputs.offset }}
         run: |
           curl -sS --max-time 60 -L "$TARGET_URL" -o out.html -w "\nHTTP %{http_code}\n"
-          echo "----- body (first 60000 bytes) -----"
-          head -c 60000 out.html; echo
+          TOTAL=$(wc -c < out.html)
+          echo "total body bytes: $TOTAL"
+          echo "----- body (bytes $OFFSET..$((OFFSET+150000)), of $TOTAL total) -----"
+          tail -c +$((OFFSET+1)) out.html | head -c 150000; echo
 
   rendered-fetch:
     if: ${{ inputs.render == 'true' }}
