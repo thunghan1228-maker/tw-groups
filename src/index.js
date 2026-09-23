@@ -316,6 +316,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .sig-eligibility span{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;}
   .race-row .sig-eligibility span.sig-futures{color:#93c5fd;border-color:#93c5fd66;}
   .race-row .sig-eligibility span.pill-disposition{background:#d4a017;color:#fff;border-color:#d4a017;font-weight:700;}
+  .race-row .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;flex-shrink:0;}
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -2044,6 +2045,7 @@ const SIGNAL_KINDS = [
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
   { key: 'groupHolderForce', label: '族群大戶力' },
+  { key: 'dispositionRisk', label: '處置股預測' },
   { key: 'race333', label: '盤中333' },
   { key: 'history', label: '歷史查詢' },
 ];
@@ -2726,12 +2728,59 @@ function groupHolderForceHtml(){
     m.fallingGroups.map((c) => groupHolderForceCardHtml(c, 'down')).join('');
 }
 
+// ---- 處置股預測：43個官方族群股票，依證交所14款異常標準判定今天觸發哪些款、
+// 以及依第六條累積規則是不是已經累積到會被處置（含5/7天處置期間預測）----
+let dispositionRiskData = null;
+let dispositionRiskFetchedAt = 0;
+async function fetchDispositionRisk(){
+  const res = await fetch('/api/disposition-risk');
+  if (!res.ok) throw new Error('disposition-risk http ' + res.status);
+  const data = await res.json();
+  if (!data || !Array.isArray(data.results)) throw new Error('bad payload');
+  return data;
+}
+async function refreshDispositionRisk(force){
+  if (!force && Date.now() - dispositionRiskFetchedAt < 600000) return;
+  dispositionRiskFetchedAt = Date.now();
+  try {
+    dispositionRiskData = await fetchDispositionRisk();
+    if (!document.getElementById('signalModal').hidden) renderSignalCenter();
+  } catch (e) { /* 抓不到就沿用上一次 */ }
+}
+function dispositionRiskStockRowHtml(r){
+  const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
+  const clauseText = r.firedToday.map((c) => c.clause).join('・');
+  const clauseTitle = r.firedToday.map((c) => '第' + c.clause + '款：' + c.detail).join('\\n');
+  const clausesHtml = r.firedToday.length
+    ? '<span class="disp-clauses" title="' + clauseTitle + '">今天中：' + clauseText + '款</span>' : '';
+  const accum = r.accumulation;
+  const warnTitle = accum ? accum.triggerPath + (accum.durationCaveat ? '\\n' + accum.durationCaveat : '') : '';
+  const warnHtml = accum
+    ? '<span class="pill-warn" title="' + warnTitle + '">預計處置' + accum.predictedDurationBusinessDays + '個營業日</span>' : '';
+  return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
+    '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
+    clausesHtml + warnHtml + '</div>';
+}
+function dispositionRiskHtml(){
+  const data = dispositionRiskData;
+  if (!data) return '<div class="signal-empty"><div class="se-title">讀取中…</div><div class="se-sub">處置股預測資料還沒載入。</div></div>';
+  if (!data.results.length) return '<div class="signal-empty"><div class="se-title">今天沒有股票觸發任何處置股款別</div><div class="se-sub">交易日 ' + data.tradeDate + '</div></div>';
+  const accumulating = data.results.filter((r) => r.accumulation);
+  const firedOnly = data.results.filter((r) => !r.accumulation);
+  return '<div class="race-sub">依證交所公布或通知注意交易資訊暨處置作業要點第四條14款異常標準，只算43個官方族群524檔（第五款需要券商分點資料、第八款限台灣存託憑證，這兩款沒有列入判定）；今天觸發款別的股票，以及依第六條累積規則已經累積到會被處置的股票。交易日 ' + data.tradeDate + '</div>' +
+    (accumulating.length ? '<div class="race-sep">------↓(已進入處置累積路徑，預計會被處置)↓------</div>' +
+      accumulating.map(dispositionRiskStockRowHtml).join('') : '') +
+    (firedOnly.length ? '<div class="race-sep">------↓(今天觸發款別，尚未累積到處置門檻)↓------</div>' +
+      firedOnly.map(dispositionRiskStockRowHtml).join('') : '');
+}
+
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
   const bigHolderRows = bigHolderRowsFrom(mainForceRanking);
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
     if (key === 'history' || key === 'race333' || key === 'groupHolderForce') return null;
+    if (key === 'dispositionRisk') return dispositionRiskData ? dispositionRiskData.results.length : null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
@@ -2781,6 +2830,9 @@ function renderSignalCenter(){
     replaceSignalHtml(body, 'race333', race333Html());
   } else if (active === 'groupHolderForce'){
     replaceSignalHtml(body, 'groupHolderForce', groupHolderForceHtml());
+  } else if (active === 'dispositionRisk'){
+    refreshDispositionRisk(false);
+    replaceSignalHtml(body, 'dispositionRisk', dispositionRiskHtml());
   } else if (active === 'now'){
     replaceSignalHtml(body, 'now', nowTabRowsHtml(todaySignalEvents, bigHolderRows));
   } else if (DEDICATED_KLINE_TABS.has(active)){
@@ -3440,6 +3492,14 @@ export default {
         return await proxyHanstockBars("/api/hub/group-daily-changes", 600);
       } catch (err) {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/disposition-risk") {
+      try {
+        // 處置股預測：收盤後背景收集器算好才會變，快取 10 分鐘。
+        return await proxyHanstockBars("/api/hub/disposition-risk" + url.search, 600);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), results: [] }, { status: 502 });
       }
     }
     if (url.pathname === "/api/stock-flags") {

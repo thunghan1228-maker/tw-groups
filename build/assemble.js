@@ -296,6 +296,14 @@ export default {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/disposition-risk") {
+      try {
+        // 處置股預測：收盤後背景收集器算好才會變，快取 10 分鐘。
+        return await proxyHanstockBars("/api/hub/disposition-risk" + url.search, 600);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), results: [] }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/stock-flags") {
       try {
         return await proxyHanstockBars("/api/hub/stock-flags", 120);
