@@ -365,7 +365,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .combo-table .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;display:inline-block;}
   .combo-table .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;display:inline-block;}
   .combo-head.up{color:var(--up);} .combo-head.down{color:var(--down);}
-  .combo-head .combo-rank{color:#d946ef;}  /* 族排名次用紫紅色（2026-09-24 使用者） */
+  /* 族排名次：白底紫紅字的小標籤（2026-09-24 使用者），族群綜合表、族群大戶力共用；漲的、跌的族群都一樣 */
+  .race-head .combo-rank{color:#d946ef;background:#fff;border-radius:6px;padding:1px 7px;font-weight:700;display:inline-block;line-height:1.35;}
+  .race-head .hf-gname.up{color:var(--up);} .race-head .hf-gname.down{color:var(--down);}  /* 族群大戶力：漲的族群紅字、跌的綠字 */
   .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
   .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn{padding:4px 10px;font-size:12px;}
   .combo-filter-bar .hf-day-btn[disabled]{opacity:.45;cursor:default;}
@@ -2917,7 +2919,8 @@ function groupHolderForceStockRowHtml(r, idx){
 }
 function groupHolderForceCardHtml(card, mode){
   const icon = mode === 'up' ? '📈' : '📉';
-  return '<div class="race-block"><div class="race-head">' + icon + ' ' + card.name + '（' + card.groupTotal + ' 檔） 族排第 ' + card.rank + ' 名・' + (card.dayWord || '今天') + '平均 ' + fmt(card.avgChange) + '%・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
+  // 使用者 2026-09-24：族排名次搬到最前面（紫紅色），再來是族群名稱——漲的族群紅字、跌的族群綠字，其餘照舊白字。
+  return '<div class="race-block"><div class="race-head">' + icon + ' <span class="combo-rank">族排第 ' + card.rank + ' 名</span> <span class="hf-gname ' + dirClass(card.avgChange) + '">' + card.name + '（' + card.groupTotal + ' 檔）</span>・' + (card.dayWord || '今天') + '平均 ' + fmt(card.avgChange) + '%・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
     '<div class="race-col-labels"><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-warn-slot"></span></div>' +
     (card.rows.length ? card.rows.map((r, i) => groupHolderForceStockRowHtml(r, i)).join('')
       : '<div class="race-note">目前沒有符合條件的個股（大戶力資料還在累積中，或沒有' + (mode === 'up' ? '偏買' : '偏賣') + '方向的大戶力）</div>') +
