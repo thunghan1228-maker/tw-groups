@@ -2375,7 +2375,8 @@ function replaceSignalHtml(el, key, html){
 
 // ---- 盤中打 333：33 賽馬多／34 河流多／188 做多族群／199 做空族群 ----
 // 觀念：188 做多＝昨天跌最多的族群（今天可以買）、199 做空＝昨天漲最多的族群（今天可以空）；
-// ⚔️＝族群今天比昨天弱、🔪＝比昨天弱而且比前天更弱（資料裡 🔪 一定跟 ⚔️ 一起出現）。
+// 族群：⚔️＝今天比昨天弱、🔪＝今天比前天弱（兩個各自比，都成立就都顯示）。
+// 30 馬火多：🐎＝個股今天比昨天強、🚀＝今天比前天強，後面的數字是強幾個百分點；👑＝該族群今天第 1 名。
 // 族群昨天／前天的平均漲跌幅來自後端日K（/api/group-daily-changes），其餘都是首頁已經有的即時資料。
 let otcStrengthLatest = null;
 let groupDailyChanges = null;
@@ -2409,7 +2410,7 @@ function race333Model(){
     const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined);
     const down = valid.filter((s) => s.changePercent < 0).length;
     const weakerThanYesterday = yesterday !== null && g.avgChange < yesterday;
-    const weakerThanDayBefore = weakerThanYesterday && dayBefore !== null && g.avgChange < dayBefore;
+    const weakerThanDayBefore = dayBefore !== null && g.avgChange < dayBefore;
     return {
       name: g.name, avgChange: g.avgChange, rank: rankOf.get(g.name), prevRank, yesterday, dayBefore,
       weakerThanYesterday, weakerThanDayBefore, downRatio: valid.length ? down / valid.length : null,
@@ -2421,12 +2422,19 @@ function race333Model(){
   const shortGroups = withDaily.filter((g) => g.yesterday > 0).sort((a, b) => b.yesterday - a.yesterday).slice(0, third);  // 昨天漲最多
   const listed = new Set([...longGroups, ...shortGroups].map((g) => g.name));
   const hasDaily = withDaily.length > 0;
+  const stockDaily = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
   const stockRows = new Map(); // 同一檔在好幾個族群時，用族群名次最好的那個
   groups.forEach((g) => {
     const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined).slice().sort((a, b) => b.changePercent - a.changePercent);
     const cut = Math.ceil(valid.length / 3);
     valid.forEach((s, i) => {
-      const row = { code: s.code, name: s.name, pct: s.changePercent, groupName: g.name, groupRank: rankOf.get(g.name), inGroupRank: i + 1, inTopThird: i < cut };
+      const sd = stockDaily[s.code] && Array.isArray(stockDaily[s.code].pct) ? stockDaily[s.code].pct : [];
+      const y = Number.isFinite(sd[0]) ? sd[0] : null, y2 = Number.isFinite(sd[1]) ? sd[1] : null;
+      const row = {
+        code: s.code, name: s.name, pct: s.changePercent, groupName: g.name, groupRank: rankOf.get(g.name), inGroupRank: i + 1, inTopThird: i < cut,
+        horse: y !== null && s.changePercent > y ? Math.round(s.changePercent - y) : null,      // 🐎 比昨天強幾個百分點
+        rocket: y2 !== null && s.changePercent > y2 ? Math.round(s.changePercent - y2) : null,  // 🚀 比前天強幾個百分點
+      };
       const prev = stockRows.get(s.code);
       if (!prev || row.groupRank < prev.groupRank) stockRows.set(s.code, row);
     });
@@ -2438,7 +2446,10 @@ function race333Model(){
   const riverLimit = half;                                       // 前 1/2
   const horses = rows.filter((r) => r.groupRank <= horseLimit && r.inTopThird && aboveOtc(r) && inLists(r)).sort((a, b) => b.pct - a.pct);
   const riverAll = rows.filter((r) => r.groupRank <= riverLimit && r.inTopThird && r.pct >= 0 && aboveOtc(r) && inLists(r)).sort((a, b) => b.pct - a.pct);
+  // 30 馬火多：今天有漲（≥ 櫃買%）、族內前 1/3，而且比昨天或比前天強
+  const fires = rows.filter((r) => r.pct > 0 && aboveOtc(r) && r.inTopThird && (r.horse !== null || r.rocket !== null)).sort((a, b) => b.pct - a.pct);
   return {
+    fires,
     total, half, otcPct, otcLabel: otcStrengthLatest ? otcStrengthLatest.label : null, hasDaily,
     dates: groupDailyChanges && groupDailyChanges.dates ? groupDailyChanges.dates : [],
     horseLimit, riverLimit, horses,
@@ -2447,8 +2458,10 @@ function race333Model(){
     shortGroups: shortGroups.slice().sort((a, b) => a.rank - b.rank),
   };
 }
-function raceStockRowHtml(r, idx){
-  const badge = idx === 0 ? '👑' : idx <= 10 ? RACE_NUM[idx] : '';
+function raceStockRowHtml(r, idx, opts){
+  const badge = opts && opts.fire
+    ? (r.inGroupRank === 1 ? '👑' : '') + (r.horse !== null ? '🐎' + r.horse : '') + (r.rocket !== null ? '🚀' + r.rocket : '')
+    : idx === 0 ? '👑' : idx <= 10 ? RACE_NUM[idx] : '';
   const star = stockFlags[r.code] && stockFlags[r.code].disposition ? '*' : '';
   return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + r.name + star + '</span>' +
@@ -2459,7 +2472,7 @@ function raceGroupRowHtml(g){
   const diff = g.prevRank !== null ? g.prevRank - g.rank : null;
   const move = diff === null ? '' : diff > 0 ? '🔺' + diff : diff < 0 ? '🔽' + (-diff) : '0';
   const marks = (g.weakerThanDayBefore ? '🔪' : '') + (g.weakerThanYesterday ? '⚔️' : '');
-  const ratio = g.weakerThanYesterday && g.downRatio !== null ? (g.downRatio >= 0.999 ? 'all' : g.downRatio.toFixed(1)) : '';
+  const ratio = (g.weakerThanYesterday || g.weakerThanDayBefore) && g.downRatio !== null ? (g.downRatio >= 0.999 ? 'all' : g.downRatio.toFixed(1)) : '';
   const title = '今天 ' + fmt(g.avgChange) + '%' + (g.yesterday !== null ? '，昨天 ' + fmt(g.yesterday) + '%' : '') + (g.dayBefore !== null ? '，前天 ' + fmt(g.dayBefore) + '%' : '');
   return '<div class="race-group" data-group="' + g.name + '" title="' + title + '"><span class="race-gname">' + g.name + '-(' + g.rank + ')</span>' +
     '<span>' + move + '</span><span>' + marks + (ratio ? ' ' + ratio : '') + '</span><span class="race-gpct">' + fmt(g.avgChange) + '%</span></div>';
@@ -2484,7 +2497,7 @@ function raceStockListHtml(list, opts){
   let html = '';
   list.forEach((r, i) => {
     if (opts && opts.holdLineAt7 && i > 0 && list[i - 1].pct >= 7 && r.pct < 7) html += '<div class="race-sep">----↑(續抱不追)↑----</div>';
-    html += raceStockRowHtml(r, i);
+    html += raceStockRowHtml(r, i, opts);
   });
   return html;
 }
@@ -2504,11 +2517,14 @@ function race333Html(){
       raceStockListHtml(m.rivers) +
       (m.riverOver.length ? '<div class="race-note">超過 7% 另計：' + m.riverOver.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
       raceTrailerHtml(m) + '</div>' +
+    '<div class="race-block"><div class="race-head">🐎🚀馬火多(30) ' + stamp + '</div>' +
+      '<div class="race-sub">今天有漲且 ≥ 櫃買%・族內前 1/3・🐎 比昨天強、🚀 比前天強（數字＝強幾個百分點）・👑 該族群第 1 名</div>' +
+      raceStockListHtml(m.fires, { fire: true }) + raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">⚠️符合條件>7%有 ' + over7 + ' 檔　做多族群(188) ' + stamp + '</div>' +
       '<div class="race-sub">昨天跌最多的前 1/3 族群（今天可以買）・' + dailyNote + '</div>' +
       raceGroupListHtml(m.longGroups, m.half, '------↑(多方)↑------') + raceTrailerHtml(m) + '</div>' +
     '<div class="race-block"><div class="race-head">⚔️⚔️做空族群(199) ' + stamp + '</div>' +
-      '<div class="race-sub">昨天漲最多的前 1/3 族群（今天可以空）・⚔️ 比昨天弱、🔪 還比前天更弱、數字＝族內下跌檔數比例</div>' +
+      '<div class="race-sub">昨天漲最多的前 1/3 族群（今天可以空）・⚔️ 比昨天弱、🔪 比前天弱、數字＝族內下跌檔數比例</div>' +
       raceGroupListHtml(m.shortGroups, m.half, '------↓(空方)↓------') + raceTrailerHtml(m) + '</div>';
 }
 
