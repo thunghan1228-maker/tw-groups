@@ -3072,10 +3072,18 @@ async function fetchQuotes(codes) {
       if (!code || !(code in quotes)) continue;
       const price = parseFloat(item.z);
       const prevClose = parseFloat(item.y);
-      // 開盤前 z/o/h/l 都還沒有值（TWSE 回傳 "-"）時，退回昨收價：讓開盤前畫面顯示
-      // 最近一個交易日的收盤價（漲跌 0%），而不是整檔空白「目前無資料」。
+      // z 是「這一盤」的成交價，這一盤沒成交就是 "-"；漲停鎖死的股票常常好幾盤沒成交，
+      // 以前退回開盤價會讓漲停的股票一直顯示開盤那個漲幅（2026-09-23 尼克森漲停卻顯示 +4.79%）。
+      // 沒成交時改用委買／委賣推算：漲停鎖死只剩委買（＝漲停價）、跌停鎖死只剩委賣（＝跌停價）、
+      // 兩邊都有就取中價；開盤前 b/a 也都是 "-" 時才退回開盤價／昨收。
+      const bids = String(item.b || "").split("_").map((v) => parseFloat(v)).filter(Number.isFinite);
+      const asks = String(item.a || "").split("_").map((v) => parseFloat(v)).filter(Number.isFinite);
+      const quotePrice = bids.length && !asks.length ? bids[0]
+        : asks.length && !bids.length ? asks[0]
+        : bids.length && asks.length ? (bids[0] + asks[0]) / 2
+        : NaN;
       const fallbackPrice = parseFloat(item.o) || parseFloat(item.h) || parseFloat(item.l) || prevClose;
-      const finalPrice = Number.isFinite(price) ? price : fallbackPrice;
+      const finalPrice = Number.isFinite(price) ? price : Number.isFinite(quotePrice) ? quotePrice : fallbackPrice;
       if (Number.isFinite(finalPrice) && Number.isFinite(prevClose) && prevClose > 0) {
         // u／w＝當天漲停價／跌停價、v＝累積成交量（張）：盤中333 用來排除已經漲停買不到的股票、
         // 跌停放不到空的股票，以及成交量太小的冷門股。
