@@ -318,6 +318,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .sig-eligibility span.pill-disposition{background:#d4a017;color:#fff;border-color:#d4a017;font-weight:700;}
   .race-row .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;flex-shrink:0;}
   .race-row .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
+  .race-row .pill-live{background:#16a34a;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -2748,6 +2749,27 @@ async function refreshDispositionRisk(force){
     if (!document.getElementById('signalModal').hidden) renderSignalCenter();
   } catch (e) { /* 抓不到就沿用上一次 */ }
 }
+// 第九/十款(成交量類)差距預測即時觀察版：門檻收盤後算好，比對用的成交量盡量即時。
+// 門檻本身不太會變，但目前成交量會一直動，所以用比dispositionRisk(10分鐘)短很多的
+// 過期時間(20秒)，靠renderSignalCenter()既有的5秒心跳(見refreshSignalData)自然帶動
+// 重抓，不用另外開一個setInterval一直跑。
+let dispositionVolumeWatchData = null;
+let dispositionVolumeWatchFetchedAt = 0;
+async function fetchDispositionVolumeWatch(){
+  const res = await fetch('/api/disposition-volume-watch');
+  if (!res.ok) throw new Error('disposition-volume-watch http ' + res.status);
+  const data = await res.json();
+  if (!data || !Array.isArray(data.results)) throw new Error('bad payload');
+  return data;
+}
+async function refreshDispositionVolumeWatch(force){
+  if (!force && Date.now() - dispositionVolumeWatchFetchedAt < 20000) return;
+  dispositionVolumeWatchFetchedAt = Date.now();
+  try {
+    dispositionVolumeWatchData = await fetchDispositionVolumeWatch();
+    if (!document.getElementById('signalModal').hidden) renderSignalCenter();
+  } catch (e) { /* 抓不到就沿用上一次 */ }
+}
 function dispositionRiskStockRowHtml(r){
   const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
   const clauseText = r.firedToday.map((c) => c.clause).join('・');
@@ -2765,17 +2787,38 @@ function dispositionRiskStockRowHtml(r){
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
     clausesHtml + warnHtml + gapHtml + '</div>';
 }
+function dispositionVolumeWatchRowHtml(r){
+  const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
+  const liveHtml = r.liveData
+    ? '<span class="pill-live" title="即時成交量（市場數據中樞，Shioaji逐筆餵入）">直播</span>'
+    : '<span class="disp-clauses" title="這檔目前不在即時追蹤範圍內，用門檻計算那天(' + dispositionVolumeWatchData.tradeDate + ')收盤量估計">估計</span>';
+  const volTitle = '門檻' + r.thresholdVolume.toFixed(0) + '張／目前' + r.currentVolume.toFixed(0) + '張';
+  return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
+    '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
+    '<span class="disp-clauses">第' + r.clause + '款</span>' + liveHtml +
+    '<span class="pill-gap" title="' + volTitle + '">' + r.detail + '</span></div>';
+}
+function dispositionVolumeWatchSectionHtml(){
+  const data = dispositionVolumeWatchData;
+  if (!data || !data.results.length) return '';
+  const liveNote = data.liveCount > 0 ? '目前 ' + data.liveCount + ' / ' + data.count + ' 檔有即時成交量。' : '目前沒有股票在即時追蹤範圍內，全部用收盤量估計。';
+  return '<div class="race-sep">------↓(成交量接近第九/十款門檻，盤中觀察中)↓------</div>' +
+    '<div class="race-sub">第九款(單日爆量)／第十款(週轉率)差距預測：門檻收盤後用官方定案資料算好，對整個下一個交易日都有效；' + liveNote + (data.liveSubscriptionCapNote || '') + '</div>' +
+    data.results.map(dispositionVolumeWatchRowHtml).join('');
+}
 function dispositionRiskHtml(){
   const data = dispositionRiskData;
+  const volumeSection = dispositionVolumeWatchSectionHtml();
   if (!data) return '<div class="signal-empty"><div class="se-title">讀取中…</div><div class="se-sub">處置股預測資料還沒載入。</div></div>';
-  if (!data.results.length) return '<div class="signal-empty"><div class="se-title">今天沒有股票觸發任何處置股款別</div><div class="se-sub">交易日 ' + data.tradeDate + '</div></div>';
+  if (!data.results.length && !volumeSection) return '<div class="signal-empty"><div class="se-title">今天沒有股票觸發任何處置股款別</div><div class="se-sub">交易日 ' + data.tradeDate + '</div></div>';
   const accumulating = data.results.filter((r) => r.accumulation);
   const firedOnly = data.results.filter((r) => !r.accumulation);
   return '<div class="race-sub">依證交所公布或通知注意交易資訊暨處置作業要點第四條14款異常標準，只算43個官方族群524檔（第五款需要券商分點資料、第八款限台灣存託憑證，這兩款沒有列入判定）；今天觸發款別的股票，以及依第六條累積規則已經累積到會被處置的股票。🔮 標籤是「連續2天中第一款、還差1次就觸發」的股票，收盤後用官方定案資料反推明天收盤價門檻（不是盤中即時值）。交易日 ' + data.tradeDate + '</div>' +
     (accumulating.length ? '<div class="race-sep">------↓(已進入處置累積路徑，預計會被處置)↓------</div>' +
       accumulating.map(dispositionRiskStockRowHtml).join('') : '') +
     (firedOnly.length ? '<div class="race-sep">------↓(今天觸發款別，尚未累積到處置門檻)↓------</div>' +
-      firedOnly.map(dispositionRiskStockRowHtml).join('') : '');
+      firedOnly.map(dispositionRiskStockRowHtml).join('') : '') +
+    volumeSection;
 }
 
 function renderSignalCenter(){
@@ -2784,7 +2827,7 @@ function renderSignalCenter(){
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
     if (key === 'history' || key === 'race333' || key === 'groupHolderForce') return null;
-    if (key === 'dispositionRisk') return dispositionRiskData ? dispositionRiskData.results.length : null;
+    if (key === 'dispositionRisk') return dispositionRiskData ? dispositionRiskData.results.length + (dispositionVolumeWatchData ? dispositionVolumeWatchData.results.length : 0) : null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
@@ -2836,6 +2879,7 @@ function renderSignalCenter(){
     replaceSignalHtml(body, 'groupHolderForce', groupHolderForceHtml());
   } else if (active === 'dispositionRisk'){
     refreshDispositionRisk(false);
+    refreshDispositionVolumeWatch(false);
     replaceSignalHtml(body, 'dispositionRisk', dispositionRiskHtml());
   } else if (active === 'now'){
     replaceSignalHtml(body, 'now', nowTabRowsHtml(todaySignalEvents, bigHolderRows));
@@ -3502,6 +3546,14 @@ export default {
       try {
         // 處置股預測：收盤後背景收集器算好才會變，快取 10 分鐘。
         return await proxyHanstockBars("/api/hub/disposition-risk" + url.search, 600);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), results: [] }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/disposition-volume-watch") {
+      try {
+        // 第九/十款差距預測即時觀察版：門檻收盤後算好，但比對用的成交量盡量即時，不快取。
+        return await proxyHanstockBars("/api/hub/disposition-risk/volume-watch" + url.search, 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), results: [] }, { status: 502 });
       }

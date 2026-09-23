@@ -304,6 +304,14 @@ export default {
         return Response.json({ status: "error", error: String(err), results: [] }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/disposition-volume-watch") {
+      try {
+        // 第九/十款差距預測即時觀察版：門檻收盤後算好，但比對用的成交量盡量即時，不快取。
+        return await proxyHanstockBars("/api/hub/disposition-risk/volume-watch" + url.search, 0);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), results: [] }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/stock-flags") {
       try {
         return await proxyHanstockBars("/api/hub/stock-flags", 120);
