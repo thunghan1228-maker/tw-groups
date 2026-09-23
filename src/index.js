@@ -363,7 +363,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .combo-table .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;display:inline-block;}
   .combo-head.up{color:var(--up);} .combo-head.down{color:var(--down);}
   .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
-  .combo-filter-bar .combo-filter-btn{padding:4px 10px;font-size:12px;}
+  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn{padding:4px 10px;font-size:12px;}
+  .combo-filter-bar .hf-day-btn[disabled]{opacity:.45;cursor:default;}
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -2226,6 +2227,110 @@ function holderDataHeldNoteHtml(){
   if (!mainForceRankingInfo.heldFrom) return '';
   return '<div class="race-sub">目前顯示 ' + mainForceRankingInfo.tradeDate + ' 收盤時的最終大戶力資料（今天還沒開盤），保留到下一個交易日開盤前 15 分鐘（08:45）才清空重算。</div>';
 }
+// ---- 三個大戶力分頁（盤中大戶力／族群大戶力／族群綜合表）的「今天／昨天／前天」切換 ----
+// 使用者 2026-09-24：資料要留著才能比較族群今天跟昨天、前天的強弱。昨天／前天＝那一天收盤時的
+// 最終大戶力排行（後端 main_force_bars 依 trade_date 查），漲跌幅／漲跌／成交價則用後端日K
+// （/api/group-daily-changes 的 stocks[code].pct/close/change）那一天的收盤值；處置／注意狀態只有
+// 今天的資料，看過去的日子時不併入。offset 0＝今天（或後端暫留的最新一個交易日）、1＝昨天、2＝前天。
+let holderDayOffset = 0;
+const holderHistoryRanking = {};   // date -> ranking[]（抓過就留著，不重抓）
+const holderHistoryLoading = {};   // date -> true（抓取中）
+const holderHistoryFailedAt = {};  // date -> 最近一次抓失敗的時間，30 秒內不重試
+function holderCurrentDate(){
+  return mainForceRankingInfo.tradeDate || new Date().toISOString().slice(0, 10);
+}
+function holderPastDates(){
+  const dates = groupDailyChanges && Array.isArray(groupDailyChanges.dates) ? groupDailyChanges.dates : [];
+  const cur = holderCurrentDate();
+  return dates.filter((d) => d < cur);
+}
+function holderViewDate(){
+  if (holderDayOffset === 0) return holderCurrentDate();
+  return holderPastDates()[holderDayOffset - 1] || null;
+}
+async function ensureHolderHistory(date){
+  if (holderHistoryRanking[date] || holderHistoryLoading[date]) return;
+  if (holderHistoryFailedAt[date] && Date.now() - holderHistoryFailedAt[date] < 30000) return;
+  holderHistoryLoading[date] = true;
+  try {
+    const res = await fetch('/api/main-force-ranking?limit=1000&trade_date=' + encodeURIComponent(date));
+    if (!res.ok) throw new Error('main-force-ranking http ' + res.status);
+    const data = await res.json();
+    if (!data || !Array.isArray(data.ranking)) throw new Error('bad payload');
+    holderHistoryRanking[date] = data.ranking;
+  } catch (e) {
+    holderHistoryFailedAt[date] = Date.now();
+  } finally {
+    delete holderHistoryLoading[date];
+  }
+  if (!document.getElementById('signalModal').hidden) renderSignalCenter();
+}
+function holderPastQuote(code, date){
+  if (!groupDailyChanges || !Array.isArray(groupDailyChanges.dates)) return null;
+  const idx = groupDailyChanges.dates.indexOf(date);
+  const d = idx >= 0 && groupDailyChanges.stocks ? groupDailyChanges.stocks[code] : null;
+  if (!d) return null;
+  const num = (arr) => (Array.isArray(arr) && arr[idx] !== null && arr[idx] !== undefined ? Number(arr[idx]) : NaN);
+  const close = num(d.close);
+  const pct = num(d.pct);
+  if (!Number.isFinite(close) || !Number.isFinite(pct)) return null;
+  const change = num(d.change);
+  return { price: close, changePercent: pct, changeAmt: Number.isFinite(change) ? change : close - close / (1 + pct / 100) };
+}
+// 把首頁的族群結構套上那一天的日K收盤，做成跟 lastData.groups 一樣形狀的資料給族群模型用。
+function holderSnapshotGroups(date){
+  if (!lastData || !Array.isArray(lastData.groups) || !groupDailyChanges || !Array.isArray(groupDailyChanges.dates)) return null;
+  const idx = groupDailyChanges.dates.indexOf(date);
+  if (idx < 0) return null;
+  const groupsDaily = groupDailyChanges.groups || {};
+  return lastData.groups.map((g) => {
+    const stocks = g.stocks.map((s) => {
+      const q = holderPastQuote(s.code, date);
+      return { code: s.code, name: s.name, price: q ? q.price : null, changePercent: q ? q.changePercent : null,
+        changeAmt: q ? q.changeAmt : null, limitUp: false, limitDown: false, volume: null };
+    });
+    const gd = groupsDaily[g.name];
+    let avg = gd && Array.isArray(gd.pct) && Number.isFinite(gd.pct[idx]) ? gd.pct[idx] : null;
+    if (avg === null){
+      const pcts = stocks.filter((s) => s.price !== null).map((s) => s.changePercent);
+      if (!pcts.length) return null;
+      avg = pcts.reduce((a, b) => a + b, 0) / pcts.length;
+    }
+    return { name: g.name, avgChange: avg, stocks };
+  }).filter(Boolean);
+}
+function holderView(){
+  if (holderDayOffset === 0){
+    return { offset: 0, date: holderCurrentDate(), ranking: mainForceRanking || [], groups: lastData ? lastData.groups : null, loading: false, isPast: false, unavailable: false };
+  }
+  const date = holderViewDate();
+  if (!date) return { offset: holderDayOffset, date: null, ranking: [], groups: null, loading: false, isPast: true, unavailable: true };
+  ensureHolderHistory(date);
+  const ranking = holderHistoryRanking[date];
+  return { offset: holderDayOffset, date, ranking: ranking || [], groups: holderSnapshotGroups(date), loading: !ranking, isPast: true, unavailable: false };
+}
+function holderDayBarHtml(){
+  const past = holderPastDates();
+  const mmdd = (d) => (d ? String(d).slice(5).replace('-', '/') : '');
+  const cur = holderCurrentDate();
+  const todayLabel = mainForceRankingInfo.heldFrom ? '今天（' + mmdd(cur) + ' 收盤）' : '今天';
+  const btn = (offset, label, date) => '<button class="chart-tab hf-day-btn' + (holderDayOffset === offset ? ' active' : '') + '" data-offset="' + offset + '"' + (date ? '' : ' disabled') + '>' + label + '</button>';
+  return '<div class="combo-filter-bar hf-day-bar">' +
+    btn(0, todayLabel, cur) +
+    btn(1, '昨天' + (past[0] ? ' ' + mmdd(past[0]) : ''), past[0]) +
+    btn(2, '前天' + (past[1] ? ' ' + mmdd(past[1]) : ''), past[1]) +
+    '</div>';
+}
+function holderPastNoteHtml(view){
+  if (!view || !view.isPast) return holderDataHeldNoteHtml();
+  if (view.unavailable) return '<div class="race-sub">後端日K還沒有那一天的資料，暫時沒辦法顯示。</div>';
+  return '<div class="race-sub">目前顯示 ' + view.date + ' 收盤時的最終大戶力資料；漲跌幅／漲跌／成交價是那一天的日K收盤值，處置／注意狀態只在今天的頁面顯示。' + (view.loading ? '大戶力排行讀取中…' : '') + '</div>';
+}
+function holderEmptyHtml(view, title, sub){
+  if (view && view.loading){ title = '讀取中…'; sub = '正在抓 ' + view.date + ' 收盤時的大戶力排行。'; }
+  else if (view && view.unavailable){ title = '還沒有那一天的資料'; sub = '後端日K累積到那一天之後就會出現。'; }
+  return '<div class="signal-empty"><div class="se-title">' + title + '</div><div class="se-sub">' + sub + '</div></div>';
+}
 async function fetchMainForceRanking(){
   // limit拉到1000(後端上限)：族群大戶力要從43個官方族群裡各挑前5名，
   // 只抓前200名很容易讓某些族群完全沒有股票入選，跟真正的全市場排行對不起來。
@@ -2408,13 +2513,16 @@ function tradingEligibilityTagsHtml(r){
   if (!tags.length) return '';
   return '<span class="sig-eligibility">' + tags.map((t) => t.startsWith('<span') ? t : '<span>' + t + '</span>').join('') + '</span>';
 }
-function rankingRowHtml(r){
+function rankingRowHtml(r, view){
+  const past = !!(view && view.isPast);
   const backendName = r.name && r.name !== r.code ? r.name : null;
   const name = backendName || lookupStockName(r.code);
   const timeLabel = r.lastTs ? new Date(r.lastTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
   const group = lookupStockGroup(r.code);
-  const quote = getStockQuote(r.code);
-  const priceCols = quote ? stockValueColsHtml(quote.price, quote.price - quote.price / (1 + quote.changePercent / 100), quote.changePercent) : '';
+  // 看昨天／前天時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價。
+  const quote = past ? holderPastQuote(r.code, view.date) : getStockQuote(r.code);
+  const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
+  const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '';
   return '<div class="signal-row" data-code="' + r.code + '" data-name="' + name + '">' +
       '<span class="sig-time">' + timeLabel + '</span>' +
       '<span class="sig-code">' + r.code + '</span>' +
@@ -2422,16 +2530,17 @@ function rankingRowHtml(r){
       (group ? '<span class="sig-group">' + group + '</span>' : '') +
       holderStrengthLabelHtml(r) +
       tradingEligibilityTagsHtml(r) +
-      flagPillsHtml(r.code, { dispositionOnly: true }) +
+      (past ? '' : flagPillsHtml(r.code, { dispositionOnly: true })) +
       priceCols +
     '</div>';
 }
-function rankingRowsHtml(rows){
+function rankingRowsHtml(rows, view){
+  const past = !!(view && view.isPast);
   if (!rows.length){
     return '<div class="signal-empty"><div class="se-title">目前沒有符合條件的排行資料</div>' +
-      '<div class="se-sub">' + (signalDataIsReal ? '今日主力資料尚未累積或尚無達門檻個股。' : '後端暫時連不上，稍後再試。') + '</div></div>';
+      '<div class="se-sub">' + (past ? '那一天沒有主力資料，或沒有達門檻的個股。' : signalDataIsReal ? '今日主力資料尚未累積或尚無達門檻個股。' : '後端暫時連不上，稍後再試。') + '</div></div>';
   }
-  return '<div class="signal-list">' + rows.map(rankingRowHtml).join('') + '</div>';
+  return '<div class="signal-list">' + rows.map((r) => rankingRowHtml(r, view)).join('') + '</div>';
 }
 function nowTabRowsHtml(events, rankingRows){
   if (!events.length && !rankingRows.length) return signalRowsHtml([]);
@@ -2739,14 +2848,18 @@ function race333Html(){
 // 族群大戶力的篩選：null=照舊（漲幅前10族群取大戶力>0前5名、跌幅前10取<0前5名）；
 // 'up'=只看漲幅那一段、且大戶力>=+10%；'down'=只看跌幅那一段、且大戶力<=-10%。再點一次取消。
 let groupHolderForceFilter = null;
-function groupHolderForceModel(){
-  if (!lastData || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
-  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+function groupHolderForceModel(view){
+  // view 來自 holderView()：今天＝首頁即時行情＋目前排行；昨天／前天＝那一天的日K收盤＋那一天的最終排行。
+  const sourceGroups = view && Array.isArray(view.groups) ? view.groups : null;
+  if (!sourceGroups || !sourceGroups.length) return null;
+  const groups = sourceGroups.filter((g) => g.name !== '股期標的');
   if (!groups.length) return null;
+  const isPast = !!view.isPast;
+  const dayWord = isPast ? view.date + ' ' : '今天';
   const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
   const total = ranked.length;
   const rankOf = new Map(ranked.map((g, i) => [g.name, i + 1]));
-  const holderByCode = new Map((mainForceRanking || []).map((r) => [r.code, r]));
+  const holderByCode = new Map((view.ranking || []).map((r) => [r.code, r]));
   const cardFor = (g, mode) => {
     const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined);
     const rows = valid.map((s) => {
@@ -2755,12 +2868,12 @@ function groupHolderForceModel(){
       const minAbs = groupHolderForceFilter ? 10 : 0;
       if (mode === 'up' ? !(h.strengthPct > 0 && h.strengthPct >= minAbs) : !(h.strengthPct < 0 && h.strengthPct <= -minAbs)) return null;
       return Object.assign({}, h, {
-        pct: s.changePercent, price: s.price, groupName: g.name, groupRank: rankOf.get(g.name),
-        limitUp: !!s.limitUp, limitDown: !!s.limitDown,
+        pct: s.changePercent, price: s.price, changeAmt: s.changeAmt, groupName: g.name, groupRank: rankOf.get(g.name),
+        limitUp: !!s.limitUp, limitDown: !!s.limitDown, isPast,
       });
     }).filter(Boolean);
     rows.sort((a, b) => mode === 'up' ? b.strengthPct - a.strengthPct : a.strengthPct - b.strengthPct);
-    return { name: g.name, rank: rankOf.get(g.name), avgChange: g.avgChange, groupTotal: valid.length, qualified: rows.length, rows: rows.slice(0, 5) };
+    return { name: g.name, rank: rankOf.get(g.name), avgChange: g.avgChange, groupTotal: valid.length, qualified: rows.length, rows: rows.slice(0, 5), dayWord };
   };
   const risingGroups = ranked.slice(0, 10).map((g) => cardFor(g, 'up'));
   const fallingGroups = ranked.slice(Math.max(0, total - 10)).reverse().map((g) => cardFor(g, 'down'));
@@ -2787,20 +2900,20 @@ function groupHolderForceStockRowHtml(r, idx){
   const amtText = fmtAmountWan(r.netAmount);
   const price = Number(r.price);
   const hasPrice = Number.isFinite(price);
-  const chg = hasPrice ? price - price / (1 + r.pct / 100) : 0;
+  const chg = Number.isFinite(r.changeAmt) ? r.changeAmt : hasPrice ? price - price / (1 + r.pct / 100) : 0;
   return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
     '<span class="race-badge">' + (RACE_NUM[idx + 1] || String(idx + 1)) + '</span>' +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
-    tradingEligibilityTagsHtml(r) + flagPillsHtml(r.code, { dispositionOnly: true }) +
+    tradingEligibilityTagsHtml(r) + (r.isPast ? '' : flagPillsHtml(r.code, { dispositionOnly: true })) +
     '<span class="sig-label ' + cls + '" title="' + (r.holderLabel || '大戶力（大單淨額÷累計成交額）') + '">' + pctText + (amtText ? '・' + amtText : '') + '</span>' +
     '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' +
     '<span class="race-chg ' + dirClass(r.pct) + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
     '<span class="race-price ' + dirClass(r.pct) + '">' + (hasPrice ? price.toFixed(2) : '—') + '</span>' +
-    '<span class="race-warn-slot">' + groupHolderForceWarnPillHtml(r) + '</span></div>';
+    '<span class="race-warn-slot">' + (r.isPast ? '' : groupHolderForceWarnPillHtml(r)) + '</span></div>';
 }
 function groupHolderForceCardHtml(card, mode){
   const icon = mode === 'up' ? '📈' : '📉';
-  return '<div class="race-block"><div class="race-head">' + icon + ' ' + card.name + '（' + card.groupTotal + ' 檔） 族排第 ' + card.rank + ' 名・今天平均 ' + fmt(card.avgChange) + '%・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
+  return '<div class="race-block"><div class="race-head">' + icon + ' ' + card.name + '（' + card.groupTotal + ' 檔） 族排第 ' + card.rank + ' 名・' + (card.dayWord || '今天') + '平均 ' + fmt(card.avgChange) + '%・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
     '<div class="race-col-labels"><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-warn-slot"></span></div>' +
     (card.rows.length ? card.rows.map((r, i) => groupHolderForceStockRowHtml(r, i)).join('')
       : '<div class="race-note">目前沒有符合條件的個股（大戶力資料還在累積中，或沒有' + (mode === 'up' ? '偏買' : '偏賣') + '方向的大戶力）</div>') +
@@ -2813,9 +2926,11 @@ function groupHolderForceFilterBarHtml(){
     '</div>';
 }
 function groupHolderForceHtml(){
-  const m = groupHolderForceModel();
-  const filterBar = groupHolderForceFilterBarHtml();
-  if (!m) return filterBar + '<div class="signal-empty"><div class="se-title">族群行情還沒載入</div><div class="se-sub">首頁資料抓到後就會出現。</div></div>';
+  const view = holderView();
+  const m = view.loading ? null : groupHolderForceModel(view);
+  const filterBar = holderDayBarHtml() + groupHolderForceFilterBarHtml();
+  if (!m) return filterBar + holderPastNoteHtml(view) + holderEmptyHtml(view, view.isPast ? view.date + ' 沒有可以顯示的資料' : '族群行情還沒載入', view.isPast ? '那一天的日K或大戶力排行還沒進資料庫。' : '首頁資料抓到後就會出現。');
+  const dayWord = view.isPast ? view.date + ' ' : '今天';
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
   const f = groupHolderForceFilter;
   // 有篩選時只留有符合個股的族群卡片；沒篩選時照舊全部列出（含「目前沒有符合條件的個股」的卡片）。
@@ -2823,8 +2938,8 @@ function groupHolderForceHtml(){
   const falling = f === 'up' ? [] : m.fallingGroups.filter((c) => !f || c.rows.length);
   const note = f === 'up' ? '目前只看大戶力≥+10%（偏買）的個股，只列漲幅前10大族群；' : f === 'down' ? '目前只看大戶力≤-10%（偏賣）的個股，只列跌幅前10大族群；' : '';
   const emptyNote = '<div class="race-note">這一段目前沒有符合篩選條件的個股（再點一次按鈕取消篩選）</div>';
-  return filterBar + holderDataHeldNoteHtml() +
-    '<div class="race-sub">' + note + '今天漲幅前10大族群，各取大戶力（大單淨額÷累計成交額）最強的前5名個股；跌幅前10大族群，各取大戶力最負(賣超)的前5名個股。族群依今天平均漲跌幅排名，共 ' + m.total + ' 個族群。' + stamp + '</div>' +
+  return filterBar + holderPastNoteHtml(view) +
+    '<div class="race-sub">' + note + dayWord + '漲幅前10大族群，各取大戶力（大單淨額÷累計成交額）最強的前5名個股；跌幅前10大族群，各取大戶力最負(賣超)的前5名個股。族群依' + dayWord + '平均漲跌幅排名，共 ' + m.total + ' 個族群。' + stamp + '</div>' +
     (f === 'down' ? '' : '<div class="race-sep">------↑(漲幅前10大族群・大戶力Top5)↑------</div>' +
       (rising.length ? rising.map((c) => groupHolderForceCardHtml(c, 'up')).join('') : emptyNote)) +
     (f === 'up' ? '' : '<div class="race-sep">------↓(跌幅前10大族群・大戶力Top5)↓------</div>' +
@@ -2870,21 +2985,26 @@ function groupCombinedBoardDispositionCell(code){
   }
   return '';
 }
-function groupCombinedBoardModel(){
-  if (!lastData || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
-  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+function groupCombinedBoardModel(view){
+  // view 來自 holderView()：今天＝首頁即時行情＋目前排行；昨天／前天＝那一天的日K收盤＋那一天的最終排行。
+  const sourceGroups = view && Array.isArray(view.groups) ? view.groups : null;
+  if (!sourceGroups || !sourceGroups.length) return null;
+  const groups = sourceGroups.filter((g) => g.name !== '股期標的');
   if (!groups.length) return null;
+  const isPast = !!view.isPast;
+  const dayWord = isPast ? view.date + ' ' : '今天';
   // 偏賣篩選（大戶力<=-10%）時跌幅大的族群排前面（-5% 在 -4% 前面、負越多越上面）；
   // 沒篩選或偏買篩選時照舊漲幅大的在前。
   const ranked = groups.slice().sort((a, b) => groupCombinedBoardFilter === 'down' ? a.avgChange - b.avgChange : b.avgChange - a.avgChange);
-  const holderByCode = new Map((mainForceRanking || []).map((r) => [r.code, r]));
-  const d = dispositionRiskData;
+  const holderByCode = new Map((view.ranking || []).map((r) => [r.code, r]));
+  // 處置／注意資料只有今天的：看昨天／前天時不併入，只列大戶力夠格（|大戶力| >= 10%）的股票。
+  const d = isPast ? null : dispositionRiskData;
   const dispByCode = new Set();
   if (d && Array.isArray(d.results)) d.results.forEach((r) => { if (r.firedToday.length || r.accumulation || r.gapPrediction) dispByCode.add(r.code); });
   if (d && Array.isArray(d.priceExtremeWatch)) d.priceExtremeWatch.forEach((r) => dispByCode.add(r.code));
-  const vw = dispositionVolumeWatchData;
+  const vw = isPast ? null : dispositionVolumeWatchData;
   if (vw && Array.isArray(vw.results)) vw.results.forEach((r) => dispByCode.add(r.code));
-  Object.keys(stockFlags).forEach((code) => { if (stockFlags[code] && stockFlags[code].disposition) dispByCode.add(code); });
+  if (!isPast) Object.keys(stockFlags).forEach((code) => { if (stockFlags[code] && stockFlags[code].disposition) dispByCode.add(code); });
 
   const blocks = ranked.map((g) => {
     const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined);
@@ -2896,7 +3016,7 @@ function groupCombinedBoardModel(){
       const qualifiesHolder = h && h.strengthPct !== null && h.strengthPct !== undefined && Math.abs(h.strengthPct) >= 10;
       if (!qualifiesHolder && !hasDisp) return null;
       return {
-        code: s.code, name: s.name, pct: s.changePercent, price: s.price,
+        code: s.code, name: s.name, pct: s.changePercent, price: s.price, changeAmt: s.changeAmt, isPast,
         strengthPct: h ? h.strengthPct : null, netAmount: h ? h.netAmount : null, holderLabel: h ? h.holderLabel : null,
         limitUp: !!s.limitUp, limitDown: !!s.limitDown,
       };
@@ -2912,7 +3032,7 @@ function groupCombinedBoardModel(){
       const bv = b.strengthPct === null || b.strengthPct === undefined ? -Infinity : Math.abs(b.strengthPct);
       return bv - av;
     });
-    return { name: g.name, avgChange: g.avgChange, groupTotal: valid.length, rows };
+    return { name: g.name, avgChange: g.avgChange, groupTotal: valid.length, rows, dayWord, isPast };
   }).filter((b) => b.rows.length);
   return { blocks, total: blocks.reduce((sum, b) => sum + b.rows.length, 0) };
 }
@@ -2924,7 +3044,7 @@ function groupCombinedBoardRowHtml(r){
   const cls = dirClass(r.pct);
   const price = Number(r.price);
   const hasPrice = Number.isFinite(price);
-  const changeAmt = hasPrice ? price - price / (1 + r.pct / 100) : 0;
+  const changeAmt = Number.isFinite(r.changeAmt) ? r.changeAmt : hasPrice ? price - price / (1 + r.pct / 100) : 0;
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
     '<td class="combo-code">' + r.code + '</td>' +
     '<td class="combo-name">' + backendName + '</td>' +
@@ -2932,11 +3052,11 @@ function groupCombinedBoardRowHtml(r){
     '<td class="combo-chg ' + cls + '">' + (hasPrice ? (changeAmt > 0 ? '+' : '') + changeAmt.toFixed(2) : '—') + '</td>' +
     '<td class="combo-price ' + cls + '">' + (hasPrice ? price.toFixed(2) : '—') + '</td>' +
     '<td class="combo-holder">' + holderText + '</td>' +
-    '<td class="combo-disp">' + groupCombinedBoardDispositionCell(r.code) + '</td>' +
+    '<td class="combo-disp">' + (r.isPast ? '—' : groupCombinedBoardDispositionCell(r.code)) + '</td>' +
     '</tr>';
 }
 function groupCombinedBoardBlockHtml(block){
-  return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + block.name + '（' + block.groupTotal + ' 檔） 今天平均 ' + fmt(block.avgChange) + '%・有大戶力或處置/注意資料 ' + block.rows.length + ' 檔</div>' +
+  return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + block.name + '（' + block.groupTotal + ' 檔） ' + (block.dayWord || '今天') + '平均 ' + fmt(block.avgChange) + (block.isPast ? '%・大戶力≥+10%或≤-10% ' : '%・有大戶力或處置/注意資料 ') + block.rows.length + ' 檔</div>' +
     '<div class="combo-table-wrap"><table class="combo-table">' +
     '<colgroup><col class="c-code"><col class="c-name"><col class="c-pct"><col class="c-chg"><col class="c-price"><col class="c-holder"><col class="c-disp"></colgroup>' +
     '<thead><tr>' +
@@ -2950,15 +3070,19 @@ function groupCombinedBoardFilterBarHtml(){
     '</div>';
 }
 function groupCombinedBoardHtml(){
-  const m = groupCombinedBoardModel();
-  const filterBar = groupCombinedBoardFilterBarHtml();
+  const view = holderView();
+  const m = view.loading ? null : groupCombinedBoardModel(view);
+  const filterBar = holderDayBarHtml() + groupCombinedBoardFilterBarHtml();
   if (!m || !m.blocks.length){
-    const reason = groupCombinedBoardFilter ? '目前沒有股票符合這個篩選條件' : '目前沒有族群有大戶力或處置/注意資料';
-    return filterBar + '<div class="signal-empty"><div class="se-title">' + reason + '</div><div class="se-sub">首頁資料或大戶力資料還在載入，或再點一次篩選按鈕取消篩選。</div></div>';
+    const reason = groupCombinedBoardFilter ? '目前沒有股票符合這個篩選條件' : (view.isPast ? view.date + ' 沒有大戶力≥+10%或≤-10%的股票' : '目前沒有族群有大戶力或處置/注意資料');
+    const sub = view.isPast ? '那一天的日K或大戶力排行還沒進資料庫，或再點一次篩選按鈕取消篩選。' : '首頁資料或大戶力資料還在載入，或再點一次篩選按鈕取消篩選。';
+    return filterBar + holderPastNoteHtml(view) + holderEmptyHtml(view, reason, sub);
   }
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
-  return filterBar + holderDataHeldNoteHtml() +
-    '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。族群標題依今天平均漲跌幅正負分紅/綠，並依漲跌幅排序（偏賣篩選時跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
+  const dayWord = view.isPast ? view.date + ' ' : '今天';
+  const scopeNote = view.isPast ? '只列出那一天大戶力≥+10%或≤-10%的股票（處置/注意只有今天的資料）' : '只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票';
+  return filterBar + holderPastNoteHtml(view) +
+    '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題依' + dayWord + '平均漲跌幅正負分紅/綠，並依漲跌幅排序（偏賣篩選時跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
     m.blocks.map(groupCombinedBoardBlockHtml).join('');
 }
 
@@ -3122,13 +3246,20 @@ function renderSignalCenter(){
       if (el && !el.querySelector('.signal-list')) el.innerHTML = '<div class="signal-empty"><div class="se-title">讀取失敗</div><div class="se-sub">後端暫時連不上，稍後再試。</div></div>';
     });
   } else if (active === 'bigHolderForce'){
-    replaceSignalHtml(body, 'bigHolderForce', holderDataHeldNoteHtml() + rankingRowsHtml(bigHolderRows));
+    // 昨天／前天的日期清單來自 group-daily-changes，三個大戶力分頁都要確保它有抓。
+    refreshGroupDailyChanges(false);
+    const view = holderView();
+    const rows = view.offset === 0 ? bigHolderRows : bigHolderRowsFrom(view.ranking);
+    replaceSignalHtml(body, 'bigHolderForce', holderDayBarHtml() + holderPastNoteHtml(view) +
+      (view.loading || view.unavailable ? holderEmptyHtml(view, '', '') : rankingRowsHtml(rows, view)));
   } else if (active === 'race333'){
     refreshGroupDailyChanges(false);
     replaceSignalHtml(body, 'race333', race333Html());
   } else if (active === 'groupHolderForce'){
+    refreshGroupDailyChanges(false);
     replaceSignalHtml(body, 'groupHolderForce', groupHolderForceHtml());
   } else if (active === 'groupCombinedBoard'){
+    refreshGroupDailyChanges(false);
     refreshDispositionRisk(false);
     refreshDispositionVolumeWatch(false);
     replaceSignalHtml(body, 'groupCombinedBoard', groupCombinedBoardHtml());
@@ -3480,6 +3611,13 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
   if (filterBtn){
     const f = filterBtn.dataset.filter;
     groupCombinedBoardFilter = groupCombinedBoardFilter === f ? null : f;
+    renderSignalCenter();
+    return;
+  }
+  const dayBtn = e.target.closest('.hf-day-btn');
+  if (dayBtn){
+    if (dayBtn.disabled) return;
+    holderDayOffset = Number(dayBtn.dataset.offset) || 0;
     renderSignalCenter();
     return;
   }
