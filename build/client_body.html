@@ -276,8 +276,9 @@
   .combo-table col.c-holder{width:21%;} .combo-table col.c-disp{width:32%;}
   .combo-table th{text-align:left;color:var(--muted);font-weight:600;font-size:10px;padding:3px 6px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .combo-table td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:normal;overflow-wrap:anywhere;}
-  .combo-table tr.stock-row{cursor:pointer;}
-  .combo-table tr.stock-row:hover{background:var(--panel-2);}
+  /* 表格列不掛 .stock-row：首頁那條 .stock-row{display:flex} 會把 <tr> 變 flex 容器、每格壓成一個字一行直排 */
+  .combo-table tr.combo-row{display:table-row;cursor:pointer;}
+  .combo-table tr.combo-row:hover{background:var(--panel-2);}
   .combo-table .combo-code{color:var(--muted);white-space:nowrap;}
   .combo-table .combo-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .combo-table .combo-pct{font-weight:700;}
@@ -2788,7 +2789,7 @@ function groupCombinedBoardRowHtml(r){
   const holderText = (r.strengthPct === null || r.strengthPct === undefined) ? '—'
     : '<span class="' + (r.strengthPct > 0 ? 'sig-bull' : 'sig-bear') + '">' + (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%' + (fmtAmountWan(r.netAmount) ? '・' + fmtAmountWan(r.netAmount) : '') + '</span>';
   const lock = r.limitUp ? '🔒漲停' : r.limitDown ? '🔒跌停' : '';
-  return '<tr class="combo-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
+  return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
     '<td class="combo-code">' + r.code + '</td>' +
     '<td class="combo-name">' + backendName + '</td>' +
     '<td class="combo-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%' + lock + '</td>' +
