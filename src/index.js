@@ -305,6 +305,13 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .race-name{font-weight:700;flex:0 0 8em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .race-row .sig-group{background:#d4a017;color:#fff;font-weight:700;font-size:12px;border-radius:6px;padding:1px 8px;flex-shrink:0;white-space:nowrap;}
   .race-row .race-pct{margin-left:auto;font-weight:700;}
+  /* 族群大戶力：漲跌幅／漲跌／成交價三欄固定寬、靠右，跟卡片頂端的欄位標籤對齊；漲停／處置警示留固定寬的格子在最後面 */
+  .race-row .race-pct,.race-row .race-chg,.race-row .race-price{font-weight:700;flex:0 0 5.2em;text-align:right;white-space:nowrap;}
+  .race-row .race-chg.up,.race-row .race-price.up{color:var(--up);} .race-row .race-chg.down,.race-row .race-price.down{color:var(--down);}
+  .race-row .race-warn-slot{flex:0 0 4.2em;text-align:right;}
+  .race-col-labels{display:flex;justify-content:flex-end;gap:8px;padding:0 8px 2px;}
+  .race-col-labels span{flex:0 0 5.2em;text-align:right;color:var(--muted);font-size:10px;font-weight:600;}
+  .race-col-labels .race-warn-slot{flex:0 0 4.2em;}
   .race-row .race-pct.up{color:var(--up);} .race-row .race-pct.down{color:var(--down);}
   .race-row .race-badge{font-size:14px;min-width:22px;text-align:right;}
   .race-row .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
@@ -324,8 +331,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* table-layout:fixed + 明確欄寬：欄寬由百分比決定、不被最長的那顆標籤撐開，表頭跟每一列的欄位才會對齊；
      太長的標籤文字在自己的格子裡換行，不會把整張表撐到超出視窗。 */
   .combo-table{width:100%;table-layout:fixed;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px;}
-  .combo-table col.c-code{width:13%;} .combo-table col.c-name{width:17%;} .combo-table col.c-pct{width:17%;}
-  .combo-table col.c-holder{width:21%;} .combo-table col.c-disp{width:32%;}
+  .combo-table col.c-code{width:10%;} .combo-table col.c-name{width:14%;} .combo-table col.c-pct{width:12%;}
+  .combo-table col.c-chg{width:10%;} .combo-table col.c-price{width:11%;}
+  .combo-table col.c-holder{width:19%;} .combo-table col.c-disp{width:24%;}
   /* 表頭：白字、字放大到 12px（原 10px 的 1.2 倍）、底色淺灰帶一點紫，跟資料列分開 */
   .combo-table th{text-align:left;color:#fff;background:#645a72;font-weight:600;font-size:12px;padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .combo-table td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:normal;overflow-wrap:anywhere;}
@@ -336,6 +344,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .combo-table .combo-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .combo-table .combo-pct{font-weight:700;}
   .combo-table .combo-pct.up{color:var(--up);} .combo-table .combo-pct.down{color:var(--down);}
+  .combo-table .combo-chg,.combo-table .combo-price{font-weight:700;white-space:nowrap;}
+  .combo-table .combo-chg.up,.combo-table .combo-price.up{color:var(--up);} .combo-table .combo-chg.down,.combo-table .combo-price.down{color:var(--down);}
   .combo-table .sig-bull{background:var(--up);color:#fff;padding:2px 6px;border-radius:6px;font-weight:700;display:inline-block;}
   .combo-table .sig-bear{background:var(--down);color:#fff;padding:2px 6px;border-radius:6px;font-weight:700;display:inline-block;}
   .combo-table .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;display:inline-block;}
@@ -2697,7 +2707,7 @@ function groupHolderForceModel(){
       if (!h || h.strengthPct === null || h.strengthPct === undefined) return null;
       if (mode === 'up' ? !(h.strengthPct > 0) : !(h.strengthPct < 0)) return null;
       return Object.assign({}, h, {
-        pct: s.changePercent, groupName: g.name, groupRank: rankOf.get(g.name),
+        pct: s.changePercent, price: s.price, groupName: g.name, groupRank: rankOf.get(g.name),
         limitUp: !!s.limitUp, limitDown: !!s.limitDown,
       });
     }).filter(Boolean);
@@ -2727,17 +2737,23 @@ function groupHolderForceStockRowHtml(r, idx){
   const cls = r.strengthPct > 0 ? 'sig-bull' : 'sig-bear';
   const pctText = (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%';
   const amtText = fmtAmountWan(r.netAmount);
+  const price = Number(r.price);
+  const hasPrice = Number.isFinite(price);
+  const chg = hasPrice ? price - price / (1 + r.pct / 100) : 0;
   return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
     '<span class="race-badge">' + (RACE_NUM[idx + 1] || String(idx + 1)) + '</span>' +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
     tradingEligibilityTagsHtml(r) + flagPillsHtml(r.code, { dispositionOnly: true }) +
     '<span class="sig-label ' + cls + '" title="' + (r.holderLabel || '大戶力（大單淨額÷累計成交額）') + '">' + pctText + (amtText ? '・' + amtText : '') + '</span>' +
     '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' +
-    groupHolderForceWarnPillHtml(r) + '</div>';
+    '<span class="race-chg ' + dirClass(r.pct) + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
+    '<span class="race-price ' + dirClass(r.pct) + '">' + (hasPrice ? price.toFixed(2) : '—') + '</span>' +
+    '<span class="race-warn-slot">' + groupHolderForceWarnPillHtml(r) + '</span></div>';
 }
 function groupHolderForceCardHtml(card, mode){
   const icon = mode === 'up' ? '📈' : '📉';
   return '<div class="race-block"><div class="race-head">' + icon + ' ' + card.name + '（' + card.groupTotal + ' 檔） 族排第 ' + card.rank + ' 名・今天平均 ' + fmt(card.avgChange) + '%・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
+    '<div class="race-col-labels"><span>漲跌幅</span><span>漲跌</span><span>成交價</span><span class="race-warn-slot"></span></div>' +
     (card.rows.length ? card.rows.map((r, i) => groupHolderForceStockRowHtml(r, i)).join('')
       : '<div class="race-note">目前沒有符合條件的個股（大戶力資料還在累積中，或沒有' + (mode === 'up' ? '偏買' : '偏賣') + '方向的大戶力）</div>') +
     '</div>';
@@ -2818,7 +2834,7 @@ function groupCombinedBoardModel(){
       const qualifiesHolder = h && h.strengthPct !== null && h.strengthPct !== undefined && Math.abs(h.strengthPct) >= 10;
       if (!qualifiesHolder && !hasDisp) return null;
       return {
-        code: s.code, name: s.name, pct: s.changePercent,
+        code: s.code, name: s.name, pct: s.changePercent, price: s.price,
         strengthPct: h ? h.strengthPct : null, netAmount: h ? h.netAmount : null, holderLabel: h ? h.holderLabel : null,
         limitUp: !!s.limitUp, limitDown: !!s.limitDown,
       };
@@ -2843,10 +2859,16 @@ function groupCombinedBoardRowHtml(r){
   const holderText = (r.strengthPct === null || r.strengthPct === undefined) ? '—'
     : '<span class="' + (r.strengthPct > 0 ? 'sig-bull' : 'sig-bear') + '">' + (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%' + (fmtAmountWan(r.netAmount) ? '・' + fmtAmountWan(r.netAmount) : '') + '</span>';
   const lock = r.limitUp ? '🔒漲停' : r.limitDown ? '🔒跌停' : '';
+  const cls = dirClass(r.pct);
+  const price = Number(r.price);
+  const hasPrice = Number.isFinite(price);
+  const changeAmt = hasPrice ? price - price / (1 + r.pct / 100) : 0;
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
     '<td class="combo-code">' + r.code + '</td>' +
     '<td class="combo-name">' + backendName + '</td>' +
-    '<td class="combo-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%' + lock + '</td>' +
+    '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%' + lock + '</td>' +
+    '<td class="combo-chg ' + cls + '">' + (hasPrice ? (changeAmt > 0 ? '+' : '') + changeAmt.toFixed(2) : '—') + '</td>' +
+    '<td class="combo-price ' + cls + '">' + (hasPrice ? price.toFixed(2) : '—') + '</td>' +
     '<td class="combo-holder">' + holderText + '</td>' +
     '<td class="combo-disp">' + groupCombinedBoardDispositionCell(r.code) + '</td>' +
     '</tr>';
@@ -2854,9 +2876,9 @@ function groupCombinedBoardRowHtml(r){
 function groupCombinedBoardBlockHtml(block){
   return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + block.name + '（' + block.groupTotal + ' 檔） 今天平均 ' + fmt(block.avgChange) + '%・有大戶力或處置/注意資料 ' + block.rows.length + ' 檔</div>' +
     '<div class="combo-table-wrap"><table class="combo-table">' +
-    '<colgroup><col class="c-code"><col class="c-name"><col class="c-pct"><col class="c-holder"><col class="c-disp"></colgroup>' +
+    '<colgroup><col class="c-code"><col class="c-name"><col class="c-pct"><col class="c-chg"><col class="c-price"><col class="c-holder"><col class="c-disp"></colgroup>' +
     '<thead><tr>' +
-    '<th>代號</th><th>名稱</th><th>漲跌%</th><th>大戶力</th><th>處置／注意</th>' +
+    '<th>代號</th><th>名稱</th><th>漲跌幅</th><th>漲跌</th><th>成交價</th><th>大戶力</th><th>處置／注意</th>' +
     '</tr></thead><tbody>' + block.rows.map(groupCombinedBoardRowHtml).join('') + '</tbody></table></div></div>';
 }
 function groupCombinedBoardFilterBarHtml(){
