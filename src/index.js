@@ -2247,7 +2247,9 @@ function flagPillsHtml(code, opts){
   }
   if (f.disposition){
     const title = '處置股' + (f.dispositionUntil ? '，處置至 ' + f.dispositionUntil : '') + (f.dispositionReason ? '：' + f.dispositionReason : '');
-    pills.push('<span class="pill-disposition" title="' + title + '">處置股</span>');
+    // 訊號列直接寫出處置到幾號（月/日），不用滑鼠移上去才看得到
+    const until = f.dispositionUntil ? ' 至' + String(f.dispositionUntil).slice(5).replace('-', '/') : '';
+    pills.push('<span class="pill-disposition" title="' + title + '">處置股' + until + '</span>');
   }
   return pills.length ? '<span class="sig-eligibility">' + pills.join('') + '</span>' : '';
 }
