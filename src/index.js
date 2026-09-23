@@ -323,7 +323,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .race-holder .sig-label{font-size:11px;padding:2px 6px;}
   .race-row .race-holder-none{color:var(--muted);}
   .race-col-labels .race-holder{flex:0 0 8.5em;}
-  .race-col-labels .race-badge-slot{flex:0 0 6.5em;}
+  .race-col-labels .race-badge-slot{flex:0 0 6.5em;white-space:nowrap;overflow:visible;}
   .race-row .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   /* 族群大戶力卡片複用signal-row的大戶力顏色膠囊／資格標籤樣式，但外層是race-row */
   .race-row .sig-label{color:var(--text);opacity:.85;white-space:nowrap;flex-shrink:0;font-size:12px;}
@@ -2612,7 +2612,12 @@ function bladeBadge(r){
 }
 // 盤中333 每個名單最上面的欄位標籤：跟每一列右邊那幾個固定寬的格子一一對齊（外層格子不設字級，
 // flex 的 em 才會跟資料列用同一個字級算）。
-const RACE_COL_LABELS_HTML = '<div class="race-col-labels"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"></span></div>';
+// 最後那一格的符號依名單不同：馬火多系列 🚀 後面的數字＝現價高於前天收盤幾 %（🐎＝高於昨收）；
+// 刀劍空 🔪 後面的數字＝現價低於前天收盤幾 %（⚔️＝低於昨收）；其他名單是名次（👑＝第 1）。
+function raceColLabelsHtml(opts){
+  const badgeLabel = opts && opts.fire ? '🚀高於前天收盤%' : opts && opts.blade ? '🔪低於前天收盤%' : '名次';
+  return '<div class="race-col-labels"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"><b>' + badgeLabel + '</b></span></div>';
+}
 function raceHolderCellHtml(r){
   if (r.strengthPct === null || r.strengthPct === undefined) return '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>';
   const amt = fmtAmountWan(r.netAmount);
@@ -2673,7 +2678,7 @@ function raceOtcBoxHtml(m){
 }
 function raceStockListHtml(list, opts){
   if (!list.length) return '<div class="race-note">目前沒有符合條件的股票</div>';
-  let html = RACE_COL_LABELS_HTML;
+  let html = raceColLabelsHtml(opts);
   list.forEach((r, i) => {
     if (opts && opts.holdLineAt7 && i > 0 && list[i - 1].pct >= 7 && r.pct < 7) html += '<div class="race-sep">----↑(續抱不追)↑----</div>';
     html += raceStockRowHtml(r, i, opts);
@@ -2683,7 +2688,7 @@ function raceStockListHtml(list, opts){
 function raceBladeListHtml(m){
   const names = (list) => list.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%' + (r.limitDown ? '🔒' : '')).join('、');
   return '<div class="race-sep">----↓(強空積極)↓----</div>' +
-    (m.bladeLower.length ? m.bladeLower.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone: '🔰', dates: m.dates })).join('') : '<div class="race-note">目前沒有符合條件的股票</div>') +
+    (m.bladeLower.length ? raceColLabelsHtml({ blade: true }) + m.bladeLower.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone: '🔰', dates: m.dates })).join('') : '<div class="race-note">目前沒有符合條件的股票</div>') +
     (m.bladeUpper.length ? '<div class="race-note">多方打少（強族群裡逆勢走弱，空得保守）' + m.bladeUpper.length + ' 檔：' + names(m.bladeUpper) + '</div>' : '') +
     (m.bladeHarvest.length ? '<div class="race-note">收割區域（已跌 ' + BLADE_HARVEST_PCT + '% 以上或跌停，不追空）' + m.bladeHarvest.length + ' 檔：' + names(m.bladeHarvest) + '</div>' : '');
 }
