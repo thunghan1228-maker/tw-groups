@@ -313,6 +313,7 @@
   .combo-table .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;display:inline-block;}
   .combo-table .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;display:inline-block;}
   .combo-head.up{color:var(--up);} .combo-head.down{color:var(--down);}
+  .combo-head .combo-rank{color:#d946ef;}  /* 族排名次用紫紅色（2026-09-24 使用者） */
   .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
   .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn{padding:4px 10px;font-size:12px;}
   .combo-filter-bar .hf-day-btn[disabled]{opacity:.45;cursor:default;}
@@ -2945,6 +2946,9 @@ function groupCombinedBoardModel(view){
   // 偏賣篩選（大戶力<=-10%）時跌幅大的族群排前面（-5% 在 -4% 前面、負越多越上面）；
   // 沒篩選或偏買篩選時照舊漲幅大的在前。
   const ranked = groups.slice().sort((a, b) => groupCombinedBoardFilter === 'down' ? a.avgChange - b.avgChange : b.avgChange - a.avgChange);
+  // 族排名次：那一天平均漲跌幅在全部族群裡的名次（第 1 名最強），跟族群大戶力分頁的「族排第 N 名」同一套；
+  // 不受篩選影響——偏賣篩選只列出部分族群時名次照樣是全體的名次，所以數字可能跳號。
+  const rankOf = new Map(groups.slice().sort((a, b) => b.avgChange - a.avgChange).map((g, i) => [g.name, i + 1]));
   const holderByCode = new Map((view.ranking || []).map((r) => [r.code, r]));
   // 處置／注意資料只有今天的：看昨天／前天時不併入，只列大戶力夠格（|大戶力| >= 10%）的股票。
   const d = isPast ? null : dispositionRiskData;
@@ -2981,7 +2985,7 @@ function groupCombinedBoardModel(view){
       const bv = b.strengthPct === null || b.strengthPct === undefined ? -Infinity : Math.abs(b.strengthPct);
       return bv - av;
     });
-    return { name: g.name, avgChange: g.avgChange, groupTotal: valid.length, rows, dayWord, isPast };
+    return { name: g.name, rank: rankOf.get(g.name), avgChange: g.avgChange, groupTotal: valid.length, rows, dayWord, isPast };
   }).filter((b) => b.rows.length);
   return { blocks, total: blocks.reduce((sum, b) => sum + b.rows.length, 0) };
 }
@@ -3005,7 +3009,7 @@ function groupCombinedBoardRowHtml(r){
     '</tr>';
 }
 function groupCombinedBoardBlockHtml(block){
-  return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + block.name + '（' + block.groupTotal + ' 檔） ' + (block.dayWord || '今天') + '平均 ' + fmt(block.avgChange) + (block.isPast ? '%・大戶力≥+10%或≤-10% ' : '%・有大戶力或處置/注意資料 ') + block.rows.length + ' 檔</div>' +
+  return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + (block.rank ? '<span class="combo-rank">族排第 ' + block.rank + ' 名</span> ' : '') + block.name + '（' + block.groupTotal + ' 檔） ' + (block.dayWord || '今天') + '平均 ' + fmt(block.avgChange) + (block.isPast ? '%・大戶力≥+10%或≤-10% ' : '%・有大戶力或處置/注意資料 ') + block.rows.length + ' 檔</div>' +
     '<div class="combo-table-wrap"><table class="combo-table">' +
     '<colgroup><col class="c-code"><col class="c-name"><col class="c-pct"><col class="c-chg"><col class="c-price"><col class="c-holder"><col class="c-disp"></colgroup>' +
     '<thead><tr>' +
@@ -3031,7 +3035,7 @@ function groupCombinedBoardHtml(){
   const dayWord = view.isPast ? view.date + ' ' : '今天';
   const scopeNote = view.isPast ? '只列出那一天大戶力≥+10%或≤-10%的股票（處置/注意只有今天的資料）' : '只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票';
   return filterBar + holderPastNoteHtml(view) +
-    '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題依' + dayWord + '平均漲跌幅正負分紅/綠，並依漲跌幅排序（偏賣篩選時跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
+    '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題前的「族排第 N 名」是' + dayWord + '平均漲跌幅在全部族群裡的名次（第 1 名最強，篩選後可能跳號），標題依平均漲跌幅正負分紅/綠，並依漲跌幅排序（偏賣篩選時跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
     m.blocks.map(groupCombinedBoardBlockHtml).join('');
 }
 
