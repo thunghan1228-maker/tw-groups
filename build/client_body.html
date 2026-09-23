@@ -242,6 +242,23 @@
   .flag-pill.off{color:var(--muted);opacity:.7;}
   .flag-pill.futures{color:#93c5fd;border-color:#93c5fd66;}
   .flag-pill.disposition{background:#d4a017;border-color:#d4a017;color:#fff;font-weight:700;}
+  /* 盤中打 333：33 賽馬多／34 河流多／188 做多族群／199 做空族群 */
+  .race-block{margin:0 0 14px;}
+  .race-head{font-weight:800;font-size:14px;color:#fff;margin:6px 0 4px;}
+  .race-sub{font-size:11px;color:var(--muted);margin-bottom:6px;}
+  .race-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;cursor:pointer;}
+  .race-row:hover{background:var(--panel-2);}
+  .race-row .race-code{color:var(--muted);font-size:12px;min-width:44px;}
+  .race-row .race-name{font-weight:700;}
+  .race-row .race-pct{margin-left:auto;font-weight:700;}
+  .race-row .race-pct.up{color:var(--up);} .race-row .race-pct.down{color:var(--down);}
+  .race-row .race-badge{font-size:14px;min-width:22px;text-align:right;}
+  .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
+  .race-group .race-gname{font-weight:700;}
+  .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
+  .race-sep{text-align:center;color:var(--muted);font-size:12px;padding:4px 0;letter-spacing:1px;}
+  .race-note{font-size:12px;color:var(--muted);padding:6px 8px;}
+  .race-trailer{padding:6px 8px;font-weight:700;}
   /* 內嵌／獨立視窗的圖表模式：只顯示 K 線圖、填滿整個視窗 */
   body.chart-window-mode{padding-bottom:0;overflow:hidden;}
   body.chart-window-mode > *:not(.chart-modal){display:none!important;}
@@ -1919,6 +1936,7 @@ async function renderOtcStrengthWidget(){
     if (!res.ok) throw new Error('otc-strength http ' + res.status);
     const data = await res.json();
     if (!data || data.status !== 'ok') throw new Error('otc-strength bad payload');
+    otcStrengthLatest = data; // 盤中打 333 要用櫃買的漲跌幅與強多／強空
     if (!data.ready){
       el.innerHTML =
         '<div class="ms-badge">資料蒐集中</div>' +
@@ -1953,6 +1971,7 @@ const SIGNAL_KINDS = [
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
+  { key: 'race333', label: '盤中333' },
   { key: 'history', label: '歷史查詢' },
 ];
 // 5分鐘K策略訊號家族(MA交叉/520/A8空等)只在K線圖上用符號呈現，不進盤中
@@ -2300,12 +2319,151 @@ function replaceSignalHtml(el, key, html){
   signalBodyRendered = { key: key, html: html };
 }
 
+// ---- 盤中打 333：33 賽馬多／34 河流多／188 做多族群／199 做空族群 ----
+// 觀念：188 做多＝昨天跌最多的族群（今天可以買）、199 做空＝昨天漲最多的族群（今天可以空）；
+// ⚔️＝族群今天比昨天弱、🔪＝比昨天弱而且比前天更弱（資料裡 🔪 一定跟 ⚔️ 一起出現）。
+// 族群昨天／前天的平均漲跌幅來自後端日K（/api/group-daily-changes），其餘都是首頁已經有的即時資料。
+let otcStrengthLatest = null;
+let groupDailyChanges = null;
+let groupDailyFetchedAt = 0;
+async function refreshGroupDailyChanges(force){
+  if (!force && Date.now() - groupDailyFetchedAt < 600000) return;
+  groupDailyFetchedAt = Date.now();
+  try {
+    const res = await fetch('/api/group-daily-changes');
+    if (!res.ok) throw new Error('group-daily-changes http ' + res.status);
+    const data = await res.json();
+    if (data && data.status === 'ok' && data.groups) groupDailyChanges = data;
+  } catch (e) { /* 抓不到就沿用上一次的 */ }
+}
+const RACE_NUM = ['', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+function race333Model(){
+  if (!lastData || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
+  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+  const total = groups.length;
+  const half = Math.ceil(total / 2);
+  const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
+  const rankOf = new Map(ranked.map((g, i) => [g.name, i + 1]));
+  const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
+  const otcPct = otcStrengthLatest && Number.isFinite(otcStrengthLatest.changePct) ? otcStrengthLatest.changePct : null;
+  const info = ranked.map((g) => {
+    const d = daily[g.name] || {};
+    const pct = Array.isArray(d.pct) ? d.pct : [];
+    const yesterday = Number.isFinite(pct[0]) ? pct[0] : null;
+    const dayBefore = Number.isFinite(pct[1]) ? pct[1] : null;
+    const prevRank = Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
+    const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined);
+    const down = valid.filter((s) => s.changePercent < 0).length;
+    const weakerThanYesterday = yesterday !== null && g.avgChange < yesterday;
+    const weakerThanDayBefore = weakerThanYesterday && dayBefore !== null && g.avgChange < dayBefore;
+    return {
+      name: g.name, avgChange: g.avgChange, rank: rankOf.get(g.name), prevRank, yesterday, dayBefore,
+      weakerThanYesterday, weakerThanDayBefore, downRatio: valid.length ? down / valid.length : null,
+    };
+  });
+  const withDaily = info.filter((g) => g.yesterday !== null);
+  const third = Math.max(1, Math.ceil(withDaily.length / 3));
+  const longGroups = withDaily.filter((g) => g.yesterday < 0).sort((a, b) => a.yesterday - b.yesterday).slice(0, third);   // 昨天跌最多
+  const shortGroups = withDaily.filter((g) => g.yesterday > 0).sort((a, b) => b.yesterday - a.yesterday).slice(0, third);  // 昨天漲最多
+  const listed = new Set([...longGroups, ...shortGroups].map((g) => g.name));
+  const hasDaily = withDaily.length > 0;
+  const stockRows = new Map(); // 同一檔在好幾個族群時，用族群名次最好的那個
+  groups.forEach((g) => {
+    const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined).slice().sort((a, b) => b.changePercent - a.changePercent);
+    const cut = Math.ceil(valid.length / 3);
+    valid.forEach((s, i) => {
+      const row = { code: s.code, name: s.name, pct: s.changePercent, groupName: g.name, groupRank: rankOf.get(g.name), inGroupRank: i + 1, inTopThird: i < cut };
+      const prev = stockRows.get(s.code);
+      if (!prev || row.groupRank < prev.groupRank) stockRows.set(s.code, row);
+    });
+  });
+  const rows = Array.from(stockRows.values());
+  const inLists = (r) => !hasDaily || listed.has(r.groupName);  // 還沒拿到昨天的資料時先不拿這條擋
+  const aboveOtc = (r) => otcPct === null || r.pct >= otcPct;
+  const horseLimit = Math.max(1, Math.round(total * 20 / 67));  // 原本 67 個族群取前 20（約三成），43 個就是前 13
+  const riverLimit = half;                                       // 前 1/2
+  const horses = rows.filter((r) => r.groupRank <= horseLimit && r.inTopThird && aboveOtc(r) && inLists(r)).sort((a, b) => b.pct - a.pct);
+  const riverAll = rows.filter((r) => r.groupRank <= riverLimit && r.inTopThird && r.pct >= 0 && aboveOtc(r) && inLists(r)).sort((a, b) => b.pct - a.pct);
+  return {
+    total, half, otcPct, otcLabel: otcStrengthLatest ? otcStrengthLatest.label : null, hasDaily,
+    dates: groupDailyChanges && groupDailyChanges.dates ? groupDailyChanges.dates : [],
+    horseLimit, riverLimit, horses,
+    rivers: riverAll.filter((r) => r.pct <= 7), riverOver: riverAll.filter((r) => r.pct > 7),
+    longGroups: longGroups.slice().sort((a, b) => a.rank - b.rank),
+    shortGroups: shortGroups.slice().sort((a, b) => a.rank - b.rank),
+  };
+}
+function raceStockRowHtml(r, idx){
+  const badge = idx === 0 ? '👑' : idx <= 10 ? RACE_NUM[idx] : '';
+  const star = stockFlags[r.code] && stockFlags[r.code].disposition ? '*' : '';
+  return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
+    '<span class="race-code">' + r.code + '</span><span class="race-name">' + r.name + star + '</span>' +
+    '<span class="sig-group" title="族群第 ' + r.groupRank + ' 名，族內第 ' + r.inGroupRank + ' 名">' + r.groupName + '</span>' +
+    '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span><span class="race-badge">' + badge + '</span></div>';
+}
+function raceGroupRowHtml(g){
+  const diff = g.prevRank !== null ? g.prevRank - g.rank : null;
+  const move = diff === null ? '' : diff > 0 ? '🔺' + diff : diff < 0 ? '🔽' + (-diff) : '0';
+  const marks = (g.weakerThanDayBefore ? '🔪' : '') + (g.weakerThanYesterday ? '⚔️' : '');
+  const ratio = g.weakerThanYesterday && g.downRatio !== null ? (g.downRatio >= 0.999 ? 'all' : g.downRatio.toFixed(1)) : '';
+  const title = '今天 ' + fmt(g.avgChange) + '%' + (g.yesterday !== null ? '，昨天 ' + fmt(g.yesterday) + '%' : '') + (g.dayBefore !== null ? '，前天 ' + fmt(g.dayBefore) + '%' : '');
+  return '<div class="race-group" data-group="' + g.name + '" title="' + title + '"><span class="race-gname">' + g.name + '-(' + g.rank + ')</span>' +
+    '<span>' + move + '</span><span>' + marks + (ratio ? ' ' + ratio : '') + '</span><span class="race-gpct">' + fmt(g.avgChange) + '%</span></div>';
+}
+function raceGroupListHtml(list, half, sepLabel){
+  if (!list.length) return '<div class="race-note">沒有符合的族群</div>';
+  const upper = list.filter((g) => g.rank <= half), lower = list.filter((g) => g.rank > half);
+  let html = upper.map(raceGroupRowHtml).join('');
+  if (upper.length && lower.length) html += '<div class="race-sep">' + sepLabel + '</div>';
+  else if (!upper.length) html += '<div class="race-sep">' + sepLabel + '</div>';
+  html += lower.map(raceGroupRowHtml).join('');
+  return html;
+}
+function raceTrailerHtml(m){
+  if (!m.otcLabel) return '<div class="race-sep">------↓(櫃買)↓------</div><div class="race-note">櫃買盤勢資料尚未就緒</div>';
+  const icon = m.otcLabel === '強空' ? '⚔️⚔️' : m.otcLabel === '強多' ? '👑👑' : '〰️';
+  const pct = m.otcPct === null ? '' : '(' + fmt(m.otcPct) + '%)';
+  return '<div class="race-sep">------↓(櫃買)↓------</div><div class="race-trailer ' + (m.otcLabel === '強空' ? 'down' : m.otcLabel === '強多' ? 'up' : '') + '">⚠️' + m.otcLabel + icon + pct + '</div>';
+}
+function raceStockListHtml(list, opts){
+  if (!list.length) return '<div class="race-note">目前沒有符合條件的股票</div>';
+  let html = '';
+  list.forEach((r, i) => {
+    if (opts && opts.holdLineAt7 && i > 0 && list[i - 1].pct >= 7 && r.pct < 7) html += '<div class="race-sep">----↑(續抱不追)↑----</div>';
+    html += raceStockRowHtml(r, i);
+  });
+  return html;
+}
+function race333Html(){
+  const m = race333Model();
+  if (!m) return '<div class="signal-empty"><div class="se-title">族群行情還沒載入</div><div class="se-sub">首頁資料抓到後就會出現。</div></div>';
+  const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const over7 = m.horses.filter((r) => r.pct > 7).length;
+  const dailyNote = m.hasDaily
+    ? '昨天＝' + (m.dates[0] || '') + (m.dates[1] ? '，前天＝' + m.dates[1] : '')
+    : '還沒拿到族群昨天的資料，188／199 暫時無法判定，33／34 先不用「族群要在 188／199 裡」這條';
+  return '<div class="race-block"><div class="race-head">👑👑賽馬多(33) ' + stamp + '</div>' +
+      '<div class="race-sub">族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 ≥ 櫃買%・族群在 188／199 裡；7% 以上續抱不追</div>' +
+      raceStockListHtml(m.horses, { holdLineAt7: true }) + raceTrailerHtml(m) + '</div>' +
+    '<div class="race-block"><div class="race-head">🌊🌊河流多(34) ' + stamp + '</div>' +
+      '<div class="race-sub">族群排名前 ' + m.riverLimit + '・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・族群在 188／199 裡</div>' +
+      raceStockListHtml(m.rivers) +
+      (m.riverOver.length ? '<div class="race-note">超過 7% 另計：' + m.riverOver.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
+      raceTrailerHtml(m) + '</div>' +
+    '<div class="race-block"><div class="race-head">⚠️符合條件>7%有 ' + over7 + ' 檔　做多族群(188) ' + stamp + '</div>' +
+      '<div class="race-sub">昨天跌最多的前 1/3 族群（今天可以買）・' + dailyNote + '</div>' +
+      raceGroupListHtml(m.longGroups, m.half, '------↑(多方)↑------') + raceTrailerHtml(m) + '</div>' +
+    '<div class="race-block"><div class="race-head">⚔️⚔️做空族群(199) ' + stamp + '</div>' +
+      '<div class="race-sub">昨天漲最多的前 1/3 族群（今天可以空）・⚔️ 比昨天弱、🔪 還比前天更弱、數字＝族內下跌檔數比例</div>' +
+      raceGroupListHtml(m.shortGroups, m.half, '------↓(空方)↓------') + raceTrailerHtml(m) + '</div>';
+}
+
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
   const bigHolderRows = bigHolderRowsFrom(mainForceRanking);
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
-    if (key === 'history') return null;
+    if (key === 'history' || key === 'race333') return null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
@@ -2350,6 +2508,9 @@ function renderSignalCenter(){
     });
   } else if (active === 'bigHolderForce'){
     replaceSignalHtml(body, 'bigHolderForce', rankingRowsHtml(bigHolderRows));
+  } else if (active === 'race333'){
+    refreshGroupDailyChanges(false);
+    replaceSignalHtml(body, 'race333', race333Html());
   } else if (active === 'now'){
     replaceSignalHtml(body, 'now', nowTabRowsHtml(todaySignalEvents, bigHolderRows));
   } else {
@@ -2686,7 +2847,7 @@ document.getElementById('signalTabsBar').addEventListener('click', (e) => {
   renderSignalCenter();
 });
 document.getElementById('signalBody').addEventListener('click', (e) => {
-  const row = e.target.closest('.signal-row[data-code]');
+  const row = e.target.closest('.signal-row[data-code], .race-row[data-code]');
   if (!row) return;
   // 使用者要求：K 線圖關掉之後訊號中心要還在，不用再去右上角重開。
   // 所以不關視窗，只讓它退到 K 線圖後面；closeStockChart 會把它拉回來。
@@ -2729,7 +2890,10 @@ if (CHART_WINDOW_MODE){
   refreshSignalData();
   refreshStockFlags();
   setInterval(refreshStockFlags, 300000);
+  refreshGroupDailyChanges(true);
+  setInterval(() => refreshGroupDailyChanges(false), 600000);
   renderOtcStrengthWidget();
+  setInterval(renderOtcStrengthWidget, 60000);
   if (location.hash === '#signal-center'){
     document.body.classList.add('signal-window-mode');
   }

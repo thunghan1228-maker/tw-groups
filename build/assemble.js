@@ -264,6 +264,14 @@ export default {
         return Response.json({ status: "error", error: String(err), ranking: [] }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/group-daily-changes") {
+      try {
+        // 族群昨天／前天的平均漲跌幅（盤中打 333 用）：來自日K，收盤後才會變，快取 10 分鐘。
+        return await proxyHanstockBars("/api/hub/group-daily-changes", 600);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/stock-flags") {
       try {
         return await proxyHanstockBars("/api/hub/stock-flags", 120);
