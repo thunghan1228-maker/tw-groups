@@ -337,13 +337,16 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   .race-row .pill-live{background:#16a34a;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   /* 族群綜合表：大戶力+處置/注意狀態合併成表格，欄位對齊，不是條列式一排排pill */
-  .combo-table-wrap{overflow-x:auto;margin-bottom:4px;-webkit-overflow-scrolling:touch;}
+  /* 手機版（2026-09-24 使用者）：表格不要硬擠進螢幕寬度，漲跌幅／漲跌／成交價會疊在一起；
+     表格最少 52em 寬（桌機 672px 視窗剛好放得下、不會多出橫向捲軸），手機上超出的部分讓整個
+     訊號中心視窗往右滑動看（overflow 交給 .signal-modal-inner，不是每張表各自捲）。 */
+  .combo-table-wrap{overflow-x:visible;margin-bottom:4px;}
   /* table-layout:fixed + 明確欄寬：欄寬由百分比決定、不被最長的那顆標籤撐開，表頭跟每一列的欄位才會對齊；
      太長的標籤文字在自己的格子裡換行，不會把整張表撐到超出視窗。 */
-  .combo-table{width:100%;table-layout:fixed;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px;}
-  .combo-table col.c-code{width:10%;} .combo-table col.c-name{width:14%;} .combo-table col.c-pct{width:12%;}
+  .combo-table{width:100%;min-width:52em;table-layout:fixed;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px;}
+  .combo-table col.c-code{width:9%;} .combo-table col.c-name{width:13%;} .combo-table col.c-pct{width:12%;}
   .combo-table col.c-chg{width:10%;} .combo-table col.c-price{width:11%;}
-  .combo-table col.c-holder{width:19%;} .combo-table col.c-disp{width:24%;}
+  .combo-table col.c-holder{width:21%;} .combo-table col.c-disp{width:24%;}
   /* 表頭：白字、字放大到 12px（原 10px 的 1.2 倍）、底色淺灰帶一點紫，跟資料列分開 */
   .combo-table th{text-align:left;color:#fff;background:#645a72;font-weight:600;font-size:12px;padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .combo-table td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:normal;overflow-wrap:anywhere;}
