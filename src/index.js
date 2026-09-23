@@ -386,8 +386,13 @@ const HTML_PAGE = `<!DOCTYPE html>
   body.chart-window-mode .chart-modal-inner{left:0!important;top:0!important;right:0;bottom:0;width:auto!important;height:auto!important;max-width:none;max-height:none;border-radius:0;border:0;resize:none;}
   body.chart-window-mode .chart-modal-head{cursor:default;}
   body.chart-window-mode #cmMax{display:none;}
-  .signal-modal-inner{position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(672px,94vw);height:min(768px,86vh);min-width:280px;min-height:320px;max-width:98vw;max-height:96vh;overflow:auto;resize:both;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);pointer-events:auto;}
+  .signal-modal-inner{position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(672px,94vw);height:min(768px,86vh);min-width:280px;min-height:320px;max-width:100vw;max-height:100vh;overflow:auto;resize:both;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);pointer-events:auto;}
   .signal-modal-inner.collapsed{height:auto!important;min-height:0;overflow:hidden;resize:none;padding:10px 14px;}
+  /* 視窗四邊＋四角的伸縮把手（2026-09-24 使用者：要能上下左右伸展），放在覆蓋層上、用 JS 貼著視窗邊緣 */
+  .sm-resize{position:absolute;z-index:2;pointer-events:auto;touch-action:none;}
+  .sm-resize-n,.sm-resize-s{cursor:ns-resize;} .sm-resize-e,.sm-resize-w{cursor:ew-resize;}
+  .sm-resize-ne,.sm-resize-sw{cursor:nesw-resize;} .sm-resize-nw,.sm-resize-se{cursor:nwse-resize;}
+  body.signal-window-mode .sm-resize{display:none;}
   .signal-modal-inner.collapsed .signal-help,
   .signal-modal-inner.collapsed .signal-tabs-bar,
   .signal-modal-inner.collapsed .signal-body,
@@ -457,7 +462,7 @@ const HTML_PAGE = `<!DOCTYPE html>
      瀏覽器行為一致。只加在#signalModalInner底下，不會連帶把K線圖
      共用的.chart-tab分頁也放大。 */
   @media (min-width: 768px){
-    #signalModalInner{width:min(860px,96vw);height:min(860px,90vh);}
+    #signalModalInner{width:min(1180px,96vw);height:min(920px,92vh);}
     #signalModalInner .sm-title{font-size:21px;}
     #signalModalInner .sm-sub{font-size:14px;max-width:420px;}
     #signalModalInner .sm-date-pill{font-size:14px;padding:8px 13px;}
@@ -466,16 +471,39 @@ const HTML_PAGE = `<!DOCTYPE html>
     #signalModalInner .chart-tab{font-size:17px;padding:8px 18px;}
     #signalModalInner .sig-count{font-size:13px;}
     #signalModalInner .signal-history-bar{font-size:16px;}
-    #signalModalInner .signal-row{font-size:16px;gap:13px;padding:12px 5px;}
-    #signalModalInner .signal-row .sig-time{width:52px;}
-    #signalModalInner .signal-row .sig-group{font-size:14px;}
-    #signalModalInner .signal-row .sig-note{font-size:13px;padding-left:65px;}
+    /* 2026-09-24 使用者：篇幅多的分頁（盤中大戶力、特大買賣單、族群大戶力、族群綜合表、盤中333）
+       名稱與數字再放大 1.2 倍、每一行的間距加大。欄位標籤列跟資料列字級要一樣，em 寬度才會對齊。 */
+    #signalModalInner .signal-row{font-size:19px;gap:14px;padding:14px 6px;}
+    #signalModalInner .signal-row .sig-time{width:60px;}
+    #signalModalInner .signal-row .sig-group{font-size:17px;}
+    #signalModalInner .signal-row .sig-note{font-size:15px;padding-left:74px;}
+    #signalModalInner .signal-row .sig-eligibility span{font-size:12px;}
     #signalModalInner .signal-row .sig-label.sig-bull,
     #signalModalInner .signal-row .sig-label.sig-bear{padding:3px 10px;}
     #signalModalInner .signal-note{font-size:16px;}
     #signalModalInner .signal-section-title{font-size:16px;}
     #signalModalInner .se-title{font-size:17px;}
     #signalModalInner .se-sub{font-size:14px;}
+    #signalModalInner .race-row,#signalModalInner .race-col-labels{font-size:19px;}
+    #signalModalInner .race-row{gap:10px;padding:9px 8px;}
+    #signalModalInner .race-row .race-code,#signalModalInner .race-row .race-rank{font-size:14px;}
+    #signalModalInner .race-row .sig-group{font-size:14px;}
+    #signalModalInner .race-row .sig-label{font-size:14px;}
+    #signalModalInner .race-row .race-holder .sig-label{font-size:13px;}
+    #signalModalInner .race-row .pill-warn,#signalModalInner .race-row .pill-gap,#signalModalInner .race-row .pill-live{font-size:13px;}
+    #signalModalInner .race-row .sig-eligibility span,#signalModalInner .race-row .disp-clauses{font-size:12px;}
+    #signalModalInner .race-row .race-badge{font-size:17px;}
+    #signalModalInner .race-col-labels span b{font-size:12px;}
+    #signalModalInner .race-head{font-size:17px;margin:8px 0 6px;}
+    #signalModalInner .race-sub{font-size:13px;}
+    #signalModalInner .race-note,#signalModalInner .race-sep{font-size:14px;}
+    #signalModalInner .race-group{font-size:17px;padding:6px 8px;}
+    #signalModalInner .race-block{margin-bottom:18px;}
+    #signalModalInner .combo-table,#signalModalInner .combo-table th{font-size:14.5px;}
+    #signalModalInner .combo-table th{padding:6px 8px;}
+    #signalModalInner .combo-table td{padding:8px 8px;}
+    #signalModalInner .combo-table .pill-warn,#signalModalInner .combo-table .pill-gap{font-size:13px;}
+    #signalModalInner .combo-table .disp-clauses{font-size:12px;}
   }
 </style>
 </head>
@@ -3296,8 +3324,8 @@ function positionSignalModal(){
   // width/height規則，所以斷點邏輯要跟CSS那邊保持一致，不然只有CSS
   // 改了、JS沒有跟著改，放大規則會被這裡蓋掉。
   const isLarge = window.innerWidth >= 768;
-  const w = isLarge ? Math.min(860, window.innerWidth * 0.96) : Math.min(672, window.innerWidth * 0.94);
-  const h = isLarge ? Math.min(860, window.innerHeight * 0.90) : Math.min(768, window.innerHeight * 0.86);
+  const w = isLarge ? Math.min(1180, window.innerWidth * 0.96) : Math.min(672, window.innerWidth * 0.94);
+  const h = isLarge ? Math.min(920, window.innerHeight * 0.92) : Math.min(768, window.innerHeight * 0.86);
   panel.style.width = w + 'px'; panel.style.height = h + 'px';
   panel.style.left = Math.max(0, (window.innerWidth - w) / 2) + 'px';
   panel.style.top = Math.max(10, (window.innerHeight - h) / 2) + 'px';
@@ -3351,6 +3379,81 @@ function initSignalWindowChrome(){
   });
   head.addEventListener('pointerup', () => { dragging = false; });
   head.addEventListener('pointercancel', () => { dragging = false; });
+
+  // 2026-09-24 使用者：視窗要能上下左右伸展。CSS 的 resize:both 只有右下角一個把手，這裡在覆蓋層上
+  // 另外放 8 個把手（四邊＋四角）貼著視窗邊緣，拖哪一邊就往那一邊放大縮小；把手位置靠
+  // ResizeObserver／MutationObserver 跟著視窗的移動、縮放、開關走。把手大部分在視窗外側
+  // （外 8px、內 2px），不會壓到視窗裡的捲軸跟內容。
+  const overlay = document.getElementById('signalModal');
+  const DIRS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+  const OUT = 8, IN = 2, CORNER = 8;
+  const handles = DIRS.map((dir) => {
+    const h = document.createElement('div');
+    h.className = 'sm-resize sm-resize-' + dir;
+    h.dataset.dir = dir;
+    overlay.appendChild(h);
+    return h;
+  });
+  function syncResizeHandles(){
+    const hide = overlay.hidden || panel.classList.contains('collapsed');
+    const r = panel.getBoundingClientRect();
+    handles.forEach((h) => {
+      h.hidden = hide;
+      if (hide) return;
+      const d = h.dataset.dir;
+      let left, top, width, height;
+      if (d.length === 2){  // 角落：以角為中心的 16px 方塊
+        left = (d.includes('w') ? r.left : r.right) - CORNER;
+        top = (d.includes('n') ? r.top : r.bottom) - CORNER;
+        width = height = CORNER * 2;
+      } else if (d === 'n' || d === 's'){
+        left = r.left + CORNER; width = Math.max(0, r.width - CORNER * 2);
+        top = d === 'n' ? r.top - OUT : r.bottom - IN; height = OUT + IN;
+      } else {
+        top = r.top + CORNER; height = Math.max(0, r.height - CORNER * 2);
+        left = d === 'w' ? r.left - OUT : r.right - IN; width = OUT + IN;
+      }
+      h.style.left = left + 'px'; h.style.top = top + 'px';
+      h.style.width = width + 'px'; h.style.height = height + 'px';
+    });
+  }
+  const MIN_W = 280, MIN_H = 320;
+  let resizing = null;
+  handles.forEach((h) => {
+    h.addEventListener('pointerdown', (e) => {
+      const r = panel.getBoundingClientRect();
+      resizing = { dir: h.dataset.dir, x: e.clientX, y: e.clientY, left: r.left, top: r.top, width: r.width, height: r.height };
+      h.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    h.addEventListener('pointermove', (e) => {
+      if (!resizing) return;
+      const dx = e.clientX - resizing.x, dy = e.clientY - resizing.y;
+      const d = resizing.dir;
+      let { left, top, width, height } = resizing;
+      if (d.includes('e')) width = Math.min(window.innerWidth - left, Math.max(MIN_W, resizing.width + dx));
+      if (d.includes('s')) height = Math.min(window.innerHeight - top, Math.max(MIN_H, resizing.height + dy));
+      if (d.includes('w')){
+        const newLeft = Math.max(0, Math.min(resizing.left + dx, resizing.left + resizing.width - MIN_W));
+        width = resizing.width + (resizing.left - newLeft); left = newLeft;
+      }
+      if (d.includes('n')){
+        const newTop = Math.max(0, Math.min(resizing.top + dy, resizing.top + resizing.height - MIN_H));
+        height = resizing.height + (resizing.top - newTop); top = newTop;
+      }
+      panel.style.left = left + 'px'; panel.style.top = top + 'px';
+      panel.style.width = width + 'px'; panel.style.height = height + 'px';
+      syncResizeHandles();
+    });
+    const stop = () => { resizing = null; };
+    h.addEventListener('pointerup', stop);
+    h.addEventListener('pointercancel', stop);
+  });
+  new ResizeObserver(syncResizeHandles).observe(panel);
+  new MutationObserver(syncResizeHandles).observe(panel, { attributes: true, attributeFilter: ['class', 'style'] });
+  new MutationObserver(syncResizeHandles).observe(overlay, { attributes: true, attributeFilter: ['hidden'] });
+  window.addEventListener('resize', syncResizeHandles);
+  syncResizeHandles();
 }
 
 let toastTimer = null;
