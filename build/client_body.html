@@ -2741,7 +2741,9 @@ function groupCombinedBoardModel(){
   if (!lastData || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
   const groups = lastData.groups.filter((g) => g.name !== '股期標的');
   if (!groups.length) return null;
-  const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
+  // 偏賣篩選（大戶力<=-10%）時跌幅大的族群排前面（-5% 在 -4% 前面、負越多越上面）；
+  // 沒篩選或偏買篩選時照舊漲幅大的在前。
+  const ranked = groups.slice().sort((a, b) => groupCombinedBoardFilter === 'down' ? a.avgChange - b.avgChange : b.avgChange - a.avgChange);
   const holderByCode = new Map((mainForceRanking || []).map((r) => [r.code, r]));
   const d = dispositionRiskData;
   const dispByCode = new Set();
@@ -2817,7 +2819,7 @@ function groupCombinedBoardHtml(){
   }
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
   return filterBar +
-    '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。族群標題依今天平均漲跌幅正負分紅/綠，並依漲跌幅排序，共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
+    '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。族群標題依今天平均漲跌幅正負分紅/綠，並依漲跌幅排序（偏賣篩選時跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
     m.blocks.map(groupCombinedBoardBlockHtml).join('');
 }
 
