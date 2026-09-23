@@ -317,6 +317,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .sig-eligibility span.sig-futures{color:#93c5fd;border-color:#93c5fd66;}
   .race-row .sig-eligibility span.pill-disposition{background:#d4a017;color:#fff;border-color:#d4a017;font-weight:700;}
   .race-row .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;flex-shrink:0;}
+  .race-row .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -2757,9 +2758,12 @@ function dispositionRiskStockRowHtml(r){
   const warnTitle = accum ? accum.triggerPath + (accum.durationCaveat ? '\\n' + accum.durationCaveat : '') : '';
   const warnHtml = accum
     ? '<span class="pill-warn" title="' + warnTitle + '">預計處置' + accum.predictedDurationBusinessDays + '個營業日</span>' : '';
+  const gap = r.gapPrediction;
+  const gapTitle = gap ? '明天收盤價門檻約' + gap.thresholdClose + '元（' + (gap.direction === 'up' ? '漲幅' : '跌幅') + (gap.changePctFromToday > 0 ? '+' : '') + gap.changePctFromToday.toFixed(2) + '%）；收盤後用官方定案資料反推，不是盤中即時值' : '';
+  const gapHtml = gap ? '<span class="pill-gap" title="' + gapTitle + '">🔮 明天' + gap.detail + '</span>' : '';
   return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
-    clausesHtml + warnHtml + '</div>';
+    clausesHtml + warnHtml + gapHtml + '</div>';
 }
 function dispositionRiskHtml(){
   const data = dispositionRiskData;
@@ -2767,7 +2771,7 @@ function dispositionRiskHtml(){
   if (!data.results.length) return '<div class="signal-empty"><div class="se-title">今天沒有股票觸發任何處置股款別</div><div class="se-sub">交易日 ' + data.tradeDate + '</div></div>';
   const accumulating = data.results.filter((r) => r.accumulation);
   const firedOnly = data.results.filter((r) => !r.accumulation);
-  return '<div class="race-sub">依證交所公布或通知注意交易資訊暨處置作業要點第四條14款異常標準，只算43個官方族群524檔（第五款需要券商分點資料、第八款限台灣存託憑證，這兩款沒有列入判定）；今天觸發款別的股票，以及依第六條累積規則已經累積到會被處置的股票。交易日 ' + data.tradeDate + '</div>' +
+  return '<div class="race-sub">依證交所公布或通知注意交易資訊暨處置作業要點第四條14款異常標準，只算43個官方族群524檔（第五款需要券商分點資料、第八款限台灣存託憑證，這兩款沒有列入判定）；今天觸發款別的股票，以及依第六條累積規則已經累積到會被處置的股票。🔮 標籤是「連續2天中第一款、還差1次就觸發」的股票，收盤後用官方定案資料反推明天收盤價門檻（不是盤中即時值）。交易日 ' + data.tradeDate + '</div>' +
     (accumulating.length ? '<div class="race-sep">------↓(已進入處置累積路徑，預計會被處置)↓------</div>' +
       accumulating.map(dispositionRiskStockRowHtml).join('') : '') +
     (firedOnly.length ? '<div class="race-sep">------↓(今天觸發款別，尚未累積到處置門檻)↓------</div>' +
