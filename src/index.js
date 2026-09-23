@@ -321,22 +321,27 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .pill-live{background:#16a34a;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   /* 族群綜合表：大戶力+處置/注意狀態合併成表格，欄位對齊，不是條列式一排排pill */
   .combo-table-wrap{overflow-x:auto;margin-bottom:4px;-webkit-overflow-scrolling:touch;}
-  .combo-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px;}
-  .combo-table th{text-align:left;color:var(--muted);font-weight:600;font-size:10px;padding:3px 6px;border-bottom:1px solid var(--line);white-space:nowrap;}
-  .combo-table td{padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  /* table-layout:fixed + 明確欄寬：欄寬由百分比決定、不被最長的那顆標籤撐開，表頭跟每一列的欄位才會對齊；
+     太長的標籤文字在自己的格子裡換行，不會把整張表撐到超出視窗。 */
+  .combo-table{width:100%;table-layout:fixed;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px;}
+  .combo-table col.c-code{width:13%;} .combo-table col.c-name{width:17%;} .combo-table col.c-pct{width:17%;}
+  .combo-table col.c-holder{width:21%;} .combo-table col.c-disp{width:32%;}
+  .combo-table th{text-align:left;color:var(--muted);font-weight:600;font-size:10px;padding:3px 6px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .combo-table td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:normal;overflow-wrap:anywhere;}
   .combo-table tr.stock-row{cursor:pointer;}
   .combo-table tr.stock-row:hover{background:var(--panel-2);}
-  .combo-table .combo-code{color:var(--muted);}
-  .combo-table .combo-name{font-weight:700;max-width:7em;overflow:hidden;text-overflow:ellipsis;}
+  .combo-table .combo-code{color:var(--muted);white-space:nowrap;}
+  .combo-table .combo-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .combo-table .combo-pct{font-weight:700;}
   .combo-table .combo-pct.up{color:var(--up);} .combo-table .combo-pct.down{color:var(--down);}
-  .combo-table .combo-disp{white-space:normal;min-width:9em;}
-  .combo-table .sig-bull{background:var(--up);color:#fff;padding:2px 6px;border-radius:6px;font-weight:700;white-space:nowrap;}
-  .combo-table .sig-bear{background:var(--down);color:#fff;padding:2px 6px;border-radius:6px;font-weight:700;white-space:nowrap;}
-  .combo-table .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;white-space:nowrap;display:inline-block;}
-  .combo-table .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;display:inline-block;}
-  .combo-table .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;white-space:nowrap;display:inline-block;}
+  .combo-table .sig-bull{background:var(--up);color:#fff;padding:2px 6px;border-radius:6px;font-weight:700;display:inline-block;}
+  .combo-table .sig-bear{background:var(--down);color:#fff;padding:2px 6px;border-radius:6px;font-weight:700;display:inline-block;}
+  .combo-table .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;display:inline-block;}
+  .combo-table .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;display:inline-block;}
+  .combo-table .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;display:inline-block;}
   .combo-head.up{color:var(--up);} .combo-head.down{color:var(--down);}
+  .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
+  .combo-filter-bar .combo-filter-btn{padding:4px 10px;font-size:12px;}
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -2751,6 +2756,9 @@ function groupHolderForceHtml(){
 
 // ---- 族群綜合表：把大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併成一個表格，
 // 一個族群一個 block，只列出有大戶力資料或有處置/注意資料的股票 ----
+// 使用者要求：可以只看大戶力>=+10%（偏買）或<=-10%（偏賣）其中一邊，把強弱兩邊分開看。
+// null=兩邊都顯示（預設）；'up'/'down'=只顯示那一邊，再點一次同一個按鈕取消篩選。
+let groupCombinedBoardFilter = null;
 function groupCombinedBoardDispositionCell(code){
   const f = stockFlags[code];
   if (f && f.disposition){
@@ -2801,7 +2809,7 @@ function groupCombinedBoardModel(){
 
   const blocks = ranked.map((g) => {
     const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined);
-    const rows = valid.map((s) => {
+    const rowsAll = valid.map((s) => {
       const h = holderByCode.get(s.code);
       const hasDisp = dispByCode.has(s.code);
       // 使用者要求：大戶力要 |strengthPct| >= 10 才單獨夠格上榜；沒到10%的大戶力
@@ -2814,6 +2822,12 @@ function groupCombinedBoardModel(){
         limitUp: !!s.limitUp, limitDown: !!s.limitDown,
       };
     }).filter(Boolean);
+    let rows = rowsAll;
+    if (groupCombinedBoardFilter === 'up'){
+      rows = rowsAll.filter((r) => r.strengthPct !== null && r.strengthPct !== undefined && r.strengthPct >= 10);
+    } else if (groupCombinedBoardFilter === 'down'){
+      rows = rowsAll.filter((r) => r.strengthPct !== null && r.strengthPct !== undefined && r.strengthPct <= -10);
+    }
     rows.sort((a, b) => {
       const av = a.strengthPct === null || a.strengthPct === undefined ? -Infinity : Math.abs(a.strengthPct);
       const bv = b.strengthPct === null || b.strengthPct === undefined ? -Infinity : Math.abs(b.strengthPct);
@@ -2838,15 +2852,28 @@ function groupCombinedBoardRowHtml(r){
 }
 function groupCombinedBoardBlockHtml(block){
   return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + block.name + '（' + block.groupTotal + ' 檔） 今天平均 ' + fmt(block.avgChange) + '%・有大戶力或處置/注意資料 ' + block.rows.length + ' 檔</div>' +
-    '<div class="combo-table-wrap"><table class="combo-table"><thead><tr>' +
+    '<div class="combo-table-wrap"><table class="combo-table">' +
+    '<colgroup><col class="c-code"><col class="c-name"><col class="c-pct"><col class="c-holder"><col class="c-disp"></colgroup>' +
+    '<thead><tr>' +
     '<th>代號</th><th>名稱</th><th>漲跌%</th><th>大戶力</th><th>處置／注意</th>' +
     '</tr></thead><tbody>' + block.rows.map(groupCombinedBoardRowHtml).join('') + '</tbody></table></div></div>';
 }
+function groupCombinedBoardFilterBarHtml(){
+  return '<div class="combo-filter-bar">' +
+    '<button class="chart-tab combo-filter-btn' + (groupCombinedBoardFilter === 'up' ? ' active' : '') + '" data-filter="up">大戶力≥10%</button>' +
+    '<button class="chart-tab combo-filter-btn' + (groupCombinedBoardFilter === 'down' ? ' active' : '') + '" data-filter="down">大戶力≤-10%</button>' +
+    '</div>';
+}
 function groupCombinedBoardHtml(){
   const m = groupCombinedBoardModel();
-  if (!m || !m.blocks.length) return '<div class="signal-empty"><div class="se-title">目前沒有族群有大戶力或處置/注意資料</div><div class="se-sub">首頁資料或大戶力資料還在載入。</div></div>';
+  const filterBar = groupCombinedBoardFilterBarHtml();
+  if (!m || !m.blocks.length){
+    const reason = groupCombinedBoardFilter ? '目前沒有股票符合這個篩選條件' : '目前沒有族群有大戶力或處置/注意資料';
+    return filterBar + '<div class="signal-empty"><div class="se-title">' + reason + '</div><div class="se-sub">首頁資料或大戶力資料還在載入，或再點一次篩選按鈕取消篩選。</div></div>';
+  }
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
-  return '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。族群標題依今天平均漲跌幅正負分紅/綠，並依漲跌幅排序，共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
+  return filterBar +
+    '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。族群標題依今天平均漲跌幅正負分紅/綠，並依漲跌幅排序，共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
     m.blocks.map(groupCombinedBoardBlockHtml).join('');
 }
 
@@ -3364,7 +3391,14 @@ document.getElementById('signalTabsBar').addEventListener('click', (e) => {
   renderSignalCenter();
 });
 document.getElementById('signalBody').addEventListener('click', (e) => {
-  const row = e.target.closest('.signal-row[data-code], .race-row[data-code]');
+  const filterBtn = e.target.closest('.combo-filter-btn');
+  if (filterBtn){
+    const f = filterBtn.dataset.filter;
+    groupCombinedBoardFilter = groupCombinedBoardFilter === f ? null : f;
+    renderSignalCenter();
+    return;
+  }
+  const row = e.target.closest('.signal-row[data-code], .race-row[data-code], .combo-row[data-code]');
   if (!row) return;
   // 使用者要求：K 線圖關掉之後訊號中心要還在，不用再去右上角重開。
   // 所以不關視窗，只讓它退到 K 線圖後面；closeStockChart 會把它拉回來。
