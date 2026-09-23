@@ -302,18 +302,18 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row:hover{background:var(--panel-2);}
   .race-row .race-code{color:var(--muted);font-size:12px;min-width:44px;}
   .race-row .race-rank{color:var(--muted);font-size:12px;min-width:40px;}
-  .race-row .race-name{font-weight:700;flex:0 0 8em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .race-row .race-name{font-weight:700;flex:0 1 8em;min-width:3.5em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .race-row .sig-group{background:#d4a017;color:#fff;font-weight:700;font-size:12px;border-radius:6px;padding:1px 8px;flex-shrink:0;white-space:nowrap;}
   .race-row .race-pct{margin-left:auto;font-weight:700;}
   /* 族群大戶力：漲跌幅／漲跌／成交價三欄固定寬、靠右，跟卡片頂端的欄位標籤對齊；漲停／處置警示留固定寬的格子在最後面 */
-  .race-row .race-pct,.race-row .race-chg,.race-row .race-price{font-weight:700;flex:0 0 5.2em;text-align:right;white-space:nowrap;}
+  .race-row .race-pct,.race-row .race-chg,.race-row .race-price{font-weight:700;flex:0 0 5em;text-align:right;white-space:nowrap;}
   .race-row .race-chg.up,.race-row .race-price.up{color:var(--up);} .race-row .race-chg.down,.race-row .race-price.down{color:var(--down);}
-  .race-row .race-warn-slot{flex:0 0 4.2em;text-align:right;}
+  .race-row .race-warn-slot{flex:0 0 3.6em;text-align:right;}
   .race-col-labels{display:flex;justify-content:flex-end;gap:8px;padding:0 8px 2px;}
   /* 外層格子不設字級：flex 的 5.2em 才會跟資料列的 5.2em 用同一個字級算、欄寬一致；只縮小裡面的字 */
-  .race-col-labels span{flex:0 0 5.2em;text-align:right;}
+  .race-col-labels span{flex:0 0 5em;text-align:right;}
   .race-col-labels span b{color:var(--muted);font-size:10px;font-weight:600;}
-  .race-col-labels .race-warn-slot{flex:0 0 4.2em;}
+  .race-col-labels .race-warn-slot{flex:0 0 3.6em;}
   .race-row .race-pct.up{color:var(--up);} .race-row .race-pct.down{color:var(--down);}
   .race-row .race-badge{font-size:14px;min-width:22px;text-align:right;}
   .race-row .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
@@ -321,7 +321,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .sig-label{color:var(--text);opacity:.85;white-space:nowrap;flex-shrink:0;font-size:12px;}
   .race-row .sig-label.sig-bull{background:var(--up);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
   .race-row .sig-label.sig-bear{background:var(--down);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
-  .race-row .sig-eligibility{display:inline-flex;gap:4px;flex-shrink:0;}
+  .race-row .sig-eligibility{display:inline-flex;gap:4px;flex:1 1 auto;min-width:0;overflow:hidden;}
   .race-row .sig-eligibility span{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;}
   .race-row .sig-eligibility span.sig-futures{color:#93c5fd;border-color:#93c5fd66;}
   .race-row .sig-eligibility span.pill-disposition{background:#d4a017;color:#fff;border-color:#d4a017;font-weight:700;}
