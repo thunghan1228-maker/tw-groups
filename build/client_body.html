@@ -3590,15 +3590,19 @@ function brewViewDate(){
   if (typeof brewDayOffset === 'string') return null;  // 'x01'／'x12'＝兩天交集，不是單一天
   return brewDayOffset === 0 ? brewSessionDate() : (brewPastDates()[brewDayOffset - 1] || null);
 }
+// 週末、國定假日（2026-09-25 中秋節，使用者：「今天沒有交易啊」）後端的交易日停在最後一個交易日：
+// 「今天」那顆按鈕改寫成「最近交易日 mm/dd」，才不會以為是今天的行情。
+function brewTodayName(){ const s = brewSessionDate(); return s && s !== twTodayStr() ? '最近交易日' : '今天'; }
+function brewTodayLabel(){ const s = brewSessionDate(); return s && s !== twTodayStr() ? '最近交易日 ' + String(s).slice(5).replace('-', '/') : '今天'; }
 function brewDayBarHtml(){
   const past = brewPastDates();
   const mmdd = (d) => (d ? String(d).slice(5).replace('-', '/') : '');
   const btn = (offset, label, date) => '<button class="chart-tab bl-day-btn' + (brewDayOffset === offset ? ' active' : '') + '" data-offset="' + offset + '"' + (date || offset === 0 ? '' : ' disabled') + '>' + label + '</button>';
   return '<div class="combo-filter-bar bl-day-bar">' +
-    btn(0, '今天', brewSessionDate()) +
+    btn(0, brewTodayLabel(), brewSessionDate()) +
     btn(1, '昨天' + (past[0] ? ' ' + mmdd(past[0]) : ''), past[0]) +
     btn(2, '前天' + (past[1] ? ' ' + mmdd(past[1]) : ''), past[1]) +
-    btn('x01', '今天∩昨天', past[0]) +
+    btn('x01', brewTodayName() + '∩昨天', past[0]) +
     btn('x12', '昨天∩前天', past[1]) +
     '</div>';
 }
@@ -3672,18 +3676,18 @@ function brewOverlapHtml(mode){
   const past = brewPastDates();
   const mmdd = (d) => String(d).slice(5).replace('-', '/');
   const later = mode === 'x01'
-    ? { label: '今天', date: brewSessionDate(), rows: brewTodayRows() }
-    : { label: '昨天 ' + mmdd(past[0]), date: past[0], rows: brewHistoryDay(past[0]) };
+    ? { name: brewTodayName(), label: brewTodayLabel(), date: brewSessionDate(), rows: brewTodayRows() }
+    : { name: '昨天', label: '昨天 ' + mmdd(past[0]), date: past[0], rows: brewHistoryDay(past[0]) };
   const earlier = mode === 'x01'
-    ? { label: '昨天 ' + mmdd(past[0]), date: past[0], rows: brewHistoryDay(past[0]) }
-    : { label: '前天 ' + mmdd(past[1]), date: past[1], rows: brewHistoryDay(past[1]) };
+    ? { name: '昨天', label: '昨天 ' + mmdd(past[0]), date: past[0], rows: brewHistoryDay(past[0]) }
+    : { name: '前天', label: '前天 ' + mmdd(past[1]), date: past[1], rows: brewHistoryDay(past[1]) };
   if (!later.date || !earlier.date) return '<div class="signal-empty"><div class="se-title">還沒有可以比對的兩天紀錄</div></div>';
   const pick = (kind) => {
     const prev = new Map(earlier.rows[kind].map((r) => [r.code, r]));
     return { rows: later.rows[kind].filter((r) => prev.has(r.code)), prev };
   };
   const launch = pick('launch'), brew = pick('brew');
-  const laterName = later.label.slice(0, 2), earlierName = earlier.label.slice(0, 2);
+  const laterName = later.name, earlierName = earlier.name;
   return '<div class="race-sub">' + later.label + ' ∩ ' + earlier.label + '：兩天都出現的股票。表格數字是' + laterName + '的，「' + earlier.label + '」那欄是前一天的（發動：時間、發動價、漲幅；醞釀：均線分數、收盤）。' +
     '發動＝兩天都符合發動、醞釀＝兩天都在醞釀名單。</div>' +
     '<div class="bl-section bl-launch">2 發動（突破）' + laterName + '、' + earlierName + '都有・' + launch.rows.length + ' 檔</div>' +
