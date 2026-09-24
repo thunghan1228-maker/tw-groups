@@ -320,6 +320,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bl-section{font-weight:800;font-size:15px;color:#fff;border-radius:8px;padding:6px 10px;margin:12px 0 8px;}
   .bl-section.bl-launch{background:#c0392b;}
   .bl-section.bl-brew{background:#0f766e;}
+  .bl-section.bl-fallen{background:#7c2d12;}
   .bl-backfill-note{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:8px;font-weight:700;margin:8px 0;}
   .race-head{font-weight:800;font-size:14px;color:#fff;margin:6px 0 4px;}
   .race-sub{font-size:11px;color:var(--muted);margin-bottom:6px;}
@@ -444,14 +445,15 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-head .head-pill{background:#7c3aed;color:#fff;border-radius:6px;padding:1px 8px;font-weight:700;display:inline-block;}
   .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
   .bigorder-filter-note{font-size:12px;color:var(--muted);align-self:center;margin-left:4px;}
-  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn,.combo-filter-bar .race333-filter-btn,.combo-filter-bar .bigorder-filter-btn{padding:4px 10px;font-size:12px;}
+  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn,.combo-filter-bar .race333-filter-btn,.combo-filter-bar .bigorder-filter-btn,.combo-filter-bar .bl-day-btn{padding:4px 10px;font-size:12px;}
   .combo-filter-bar .hf-day-btn[disabled]{opacity:.45;cursor:default;}
   /* 大戶力≥10%／≤-10%篩選鈕改黑底白字（2026-09-24 使用者：「這兩項功能全部改成黑底白字」），
      族群大戶力／族群綜合表／盤中333三個分頁共用同一套樣式；選取中額外加紫色外框標示，
      不然黑底白字選取前後兩個狀態會分不出哪個正在篩選中。 */
-  .hf-filter-btn,.combo-filter-btn,.race333-filter-btn,.bigorder-filter-btn{background:#000;color:#fff;border-color:#000;}
+  .hf-filter-btn,.combo-filter-btn,.race333-filter-btn,.bigorder-filter-btn,.bl-day-btn{background:#000;color:#fff;border-color:#000;}
+  .combo-filter-bar .bl-day-btn[disabled]{opacity:.45;cursor:default;}
   .hf-filter-btn:hover,.combo-filter-btn:hover,.race333-filter-btn:hover,.bigorder-filter-btn:hover{background:#2a2a2a;}
-  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active,.bigorder-filter-btn.active{background:#000;color:#c084fc;border-color:#000;font-weight:800;}  /* 按下去整個字變紫色（2026-09-24 使用者），不用外框 */
+  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active,.bigorder-filter-btn.active,.bl-day-btn.active{background:#000;color:#c084fc;border-color:#000;font-weight:800;}  /* 按下去整個字變紫色（2026-09-24 使用者），不用外框 */
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -801,7 +803,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>族群大戶力</b>：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)、刀劍空(32)等多空條件篩出的個股與族群名單。</li>
         <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。</li>
-        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。</li>
+        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：11:00～13:30，5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。</li>
@@ -3571,10 +3573,105 @@ function brewBackfillNoteHtml(bf){
     : '日K歷史還沒補齊' + (bf.failures ? '（上次有 ' + bf.failures + ' 檔沒抓到，系統重啟時會再補）' : '') + '，均線分數要 240 天日K，補齊前大部分股票算不出來。';
   return '<div class="race-note bl-backfill-note">' + text + '</div>';
 }
+// ---- 醞釀／發動每日保存（2026-09-25 使用者：訊號要永久保存，不能明天就不見）----
+// 後端每個交易日存醞釀名單快照、盤中第一次發動的紀錄；這裡讓分頁可以切「昨天／前天」看那天的名單，
+// 今天的發動也把「盤中曾經發動、現在回落」的一起列出來（後端紀錄）。
+let brewDayOffset = 0;
+let brewHistoryData = null;
+let brewHistoryFetchedAt = 0;
+async function refreshBrewHistory(force){
+  if (!force && Date.now() - brewHistoryFetchedAt < 60000) return;
+  brewHistoryFetchedAt = Date.now();
+  try {
+    const res = await fetch('/api/brew-launch-history?days=10');
+    if (!res.ok) throw new Error('brew-launch-history http ' + res.status);
+    const data = await res.json();
+    if (!data || data.status !== 'ok' || !data.days) throw new Error('bad payload');
+    brewHistoryData = data;
+    if (!document.getElementById('signalModal').hidden && signalCenterState.activeTab === 'brewLaunch') renderSignalCenter();
+  } catch (e) {
+    brewHistoryFetchedAt = Date.now() - 45000;  // 抓不到 15 秒後再試
+  }
+}
+function brewSessionDate(){ return brewLaunchData ? brewLaunchData.session : null; }
+function brewPastDates(){
+  const session = brewSessionDate();
+  const dates = brewHistoryData && Array.isArray(brewHistoryData.dates) ? brewHistoryData.dates : [];
+  return dates.filter((d) => !session || d < session);
+}
+function brewViewDate(){ return brewDayOffset === 0 ? brewSessionDate() : (brewPastDates()[brewDayOffset - 1] || null); }
+function brewDayBarHtml(){
+  const past = brewPastDates();
+  const mmdd = (d) => (d ? String(d).slice(5).replace('-', '/') : '');
+  const btn = (offset, label, date) => '<button class="chart-tab bl-day-btn' + (brewDayOffset === offset ? ' active' : '') + '" data-offset="' + offset + '"' + (date || offset === 0 ? '' : ' disabled') + '>' + label + '</button>';
+  return '<div class="combo-filter-bar bl-day-bar">' +
+    btn(0, '今天', brewSessionDate()) +
+    btn(1, '昨天' + (past[0] ? ' ' + mmdd(past[0]) : ''), past[0]) +
+    btn(2, '前天' + (past[1] ? ' ' + mmdd(past[1]) : ''), past[1]) +
+    '</div>';
+}
+function brewHistoryDay(date){
+  const days = brewHistoryData && brewHistoryData.days ? brewHistoryData.days : {};
+  return (date && days[date]) || { brew: [], launch: [] };
+}
+const fmtTime = (iso) => { const m = /T(\\d{2}):(\\d{2})/.exec(String(iso || '')); return m ? m[1] + ':' + m[2] : ''; };
+const num2 = (v) => (Number.isFinite(Number(v)) && v !== null ? Number(v).toFixed(2) : '—');
+function brewPastLaunchRowHtml(r){
+  const cls = dirClass(r.changePct);
+  return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
+    '<td class="combo-code">' + fmtTime(r.recordedAt) + '</td>' +
+    '<td class="combo-code">' + r.code + '</td><td class="combo-name">' + r.name + '</td>' +
+    '<td><span class="sig-group">' + (r.group || '—') + '</span></td>' +
+    '<td class="bl-score">' + r.score + '</td>' +
+    '<td class="combo-pct ' + cls + '">' + (r.changePct === null || r.changePct === undefined ? '—' : fmt(r.changePct) + '%') + '</td>' +
+    '<td class="combo-price ' + cls + '">' + num2(r.price) + '</td>' +
+    '<td class="bl-box">' + num2(r.boxHigh) + '</td>' +
+    '<td class="bl-turn">' + (r.projTurnoverPct === null || r.projTurnoverPct === undefined ? '—' : Number(r.projTurnoverPct).toFixed(2) + '%') + '</td>' +
+    '<td class="bl-ratio">' + (r.volRatio === null || r.volRatio === undefined ? '—' : Number(r.volRatio).toFixed(2) + ' 倍') + (r.brewing ? ' <span class="bl-tag">醞釀→發動</span>' : '') + '</td>' +
+    '</tr>';
+}
+function brewPastBrewRowHtml(r){
+  return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
+    '<td class="combo-code">' + r.code + '</td><td class="combo-name">' + r.name + '</td>' +
+    '<td><span class="sig-group">' + (r.group || '—') + '</span></td>' +
+    '<td class="bl-score">' + r.score + '</td>' +
+    '<td class="combo-price">' + num2(r.prevClose) + '</td>' +
+    '<td class="bl-box">' + num2(r.boxHigh) + '</td>' +
+    '<td class="bl-turn">' + (r.boxRangePct === null || r.boxRangePct === undefined ? '—' : Number(r.boxRangePct).toFixed(2) + '%') + '</td>' +
+    '<td class="bl-ratio">' + (r.maSpreadPct === null || r.maSpreadPct === undefined ? '—' : Number(r.maSpreadPct).toFixed(2) + '%') + '</td>' +
+    '</tr>';
+}
+function brewPastTableHtml(kind, rows){
+  const sorted = rows.slice().sort((a, b) => String(a.group).localeCompare(String(b.group), 'zh-Hant') || b.score - a.score || (kind === 'launch' ? String(a.recordedAt).localeCompare(String(b.recordedAt)) : 0));
+  const head = kind === 'launch'
+    ? '<th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th><th>均線分數</th><th>漲跌幅</th><th>發動價</th><th>箱頂</th><th>預估周轉</th><th>量比</th>'
+    : '<th>代號</th><th>名稱</th><th>族群</th><th>均線分數</th><th>收盤</th><th>箱頂(突破價)</th><th>箱子高低差</th><th>均線糾結</th>';
+  return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table bl-past-table"><thead><tr>' + head + '</tr></thead><tbody>' +
+    sorted.map((r) => (kind === 'launch' ? brewPastLaunchRowHtml(r) : brewPastBrewRowHtml(r))).join('') + '</tbody></table></div></div>';
+}
+function brewPastDayHtml(){
+  const date = brewViewDate();
+  if (!date) return '<div class="signal-empty"><div class="se-title">還沒有那一天的紀錄</div><div class="se-sub">每日保存從 2026-09-25 開始，之後每個交易日都會留下醞釀名單與發動紀錄。</div></div>';
+  const day = brewHistoryDay(date);
+  const mmdd = String(date).slice(5).replace('-', '/');
+  return '<div class="race-sub">' + mmdd + ' 的紀錄（後端每日保存）：發動＝那天盤中第一次符合發動條件的時間與價格（一檔記一次）；醞釀＝那天盤前算出來的醞釀名單。</div>' +
+    '<div class="bl-section bl-launch">2 發動（突破）・' + day.launch.length + ' 檔</div>' +
+    (day.launch.length ? brewPastTableHtml('launch', day.launch) : '<div class="race-note">那天沒有股票發動</div>') +
+    '<div class="bl-section bl-brew">1 醞釀（整理）・' + day.brew.length + ' 檔</div>' +
+    (day.brew.length ? brewPastTableHtml('brew', day.brew) : '<div class="race-note">那天沒有醞釀名單紀錄</div>');
+}
+function brewFallenTodayHtml(m){
+  // 今天盤中曾經發動（後端紀錄）、現在已經回落不符合發動條件的：一起列出來，訊號才不會「不見」
+  const live = new Set(m.launchBlocks.flatMap((b) => b.rows.map((r) => r.code)));
+  const rows = brewHistoryDay(brewSessionDate()).launch.filter((r) => !live.has(r.code));
+  if (!rows.length) return '';
+  return '<div class="bl-section bl-fallen">今天曾發動、現在已回落・' + rows.length + ' 檔</div>' + brewPastTableHtml('launch', rows);
+}
 function brewLaunchHtml(){
   if (!brewLaunchData){
     return '<div class="signal-empty"><div class="se-title">醞釀／發動資料讀取中…</div><div class="se-sub">箱子、均線是每天收盤後用日K算好的，再加上即時價量判斷；讀不到的話稍後再試。</div></div>';
   }
+  if (brewDayOffset > 0) return brewDayBarHtml() + brewPastDayHtml();
   const m = brewLaunchModel();
   if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div></div>';
   const r = m.rules;
@@ -3591,7 +3688,7 @@ function brewLaunchHtml(){
     (m.launchBlocks.length ? m.launchBlocks.map((b) => brewLaunchBlockHtml(b, 'launch')).join('') : '<div class="race-note">目前沒有股票發動（過箱頂、均線分數、周轉三個條件要同時到）</div>');
   const brew = '<div class="bl-section bl-brew">1 醞釀（整理）・' + m.brewCount + ' 檔</div>' +
     (m.brewBlocks.length ? m.brewBlocks.map((b) => brewLaunchBlockHtml(b, 'brew')).join('') : '<div class="race-note">目前沒有股票符合醞釀條件</div>');
-  return note + launch + brew;
+  return brewDayBarHtml() + note + launch + brewFallenTodayHtml(m) + brew;
 }
 
 // ---- 發動通知（2026-09-24 使用者：36／15 檔要怎麼即時收到通知 → 頁面開著時跳瀏覽器通知＋提示音）----
@@ -3732,6 +3829,7 @@ function renderSignalCenter(){
     refreshGroupDailyChanges(false);
     replaceSignalHtml(body, 'groupCombinedBoard', groupCombinedBoardHtml());
   } else if (active === 'brewLaunch'){
+    refreshBrewHistory(false);
     replaceSignalHtml(body, 'brewLaunch', brewLaunchHtml());
   } else if (active === 'now'){
     replaceSignalHtml(body, 'now', nowTabRowsHtml(todaySignalEvents, bigHolderRows));
@@ -4204,6 +4302,12 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
     renderSignalCenter();
     return;
   }
+  const blDayBtn = e.target.closest('.bl-day-btn');
+  if (blDayBtn){
+    brewDayOffset = Number(blDayBtn.dataset.offset) || 0;
+    renderSignalCenter();
+    return;
+  }
   const boBtn = e.target.closest('.bigorder-filter-btn');
   if (boBtn){
     const f = boBtn.dataset.filter;
@@ -4542,6 +4646,14 @@ export default {
         return await proxyHanstockBars("/api/hub/group-daily-changes", 600);
       } catch (err) {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/brew-launch-history") {
+      try {
+        // 醞釀／發動每日保存（昨天／前天的醞釀名單、盤中曾發動的紀錄）：快取 1 分鐘。
+        return await proxyHanstockBars("/api/hub/brew-launch/history" + url.search, 60);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), dates: [], days: {} }, { status: 502 });
       }
     }
     if (url.pathname === "/api/brew-launch") {

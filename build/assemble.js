@@ -305,6 +305,14 @@ export default {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/brew-launch-history") {
+      try {
+        // 醞釀／發動每日保存（昨天／前天的醞釀名單、盤中曾發動的紀錄）：快取 1 分鐘。
+        return await proxyHanstockBars("/api/hub/brew-launch/history" + url.search, 60);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), dates: [], days: {} }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/brew-launch") {
       try {
         // 醞釀／發動選股：箱子、均線、5日均量等都是日K算的，收盤後才會變，快取 10 分鐘；發動用即時價由前端判斷。
