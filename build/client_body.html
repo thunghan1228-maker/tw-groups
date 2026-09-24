@@ -263,7 +263,8 @@
   .bl-table .bl-box,.bl-table .bl-turn,.bl-table .bl-ratio{white-space:nowrap;}
   .bl-table .bl-tobox.up{color:var(--up);font-weight:700;}
   .bl-star{color:#d97706;margin-left:3px;}
-  .bl-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 6px;margin-left:4px;background:#7c3aed;color:#fff;white-space:nowrap;}
+  .bl-eod{color:var(--muted);font-weight:700}
+.bl-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 6px;margin-left:4px;background:#7c3aed;color:#fff;white-space:nowrap;}
   .bl-tag.warn{background:#d97706;}
   .bl-section{font-weight:800;font-size:15px;color:#fff;border-radius:8px;padding:6px 10px;margin:12px 0 8px;}
   .bl-section.bl-launch{background:#c0392b;}
@@ -749,7 +750,7 @@
         <li><b>族群大戶力</b>：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)、刀劍空(32)等多空條件篩出的個股與族群名單。</li>
         <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。</li>
-        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」。</li>
+        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：11:00～13:30，5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。</li>
@@ -3565,7 +3566,7 @@ const num2 = (v) => (Number.isFinite(Number(v)) && v !== null ? Number(v).toFixe
 function brewPastLaunchRowHtml(r){
   const cls = dirClass(r.changePct);
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
-    '<td class="combo-code">' + fmtTime(r.recordedAt) + '</td>' +
+    '<td class="combo-code">' + (r.eod ? '<span class="bl-eod" title="那天沒有盤中紀錄，用收盤價回推">收盤</span>' : fmtTime(r.recordedAt)) + '</td>' +
     '<td class="combo-code">' + r.code + '</td><td class="combo-name">' + r.name + '</td>' +
     '<td><span class="sig-group">' + (r.group || '—') + '</span></td>' +
     '<td class="bl-score">' + r.score + '</td>' +
@@ -3597,10 +3598,12 @@ function brewPastTableHtml(kind, rows){
 }
 function brewPastDayHtml(){
   const date = brewViewDate();
-  if (!date) return '<div class="signal-empty"><div class="se-title">還沒有那一天的紀錄</div><div class="se-sub">每日保存從 2026-09-25 開始，之後每個交易日都會留下醞釀名單與發動紀錄。</div></div>';
+  if (!date) return '<div class="signal-empty"><div class="se-title">還沒有那一天的紀錄</div><div class="se-sub">後端每個交易日都會留下醞釀名單與發動紀錄，上線前幾天的用日K回推；資料還沒進來時稍後再看。</div></div>';
   const day = brewHistoryDay(date);
   const mmdd = String(date).slice(5).replace('-', '/');
-  return '<div class="race-sub">' + mmdd + ' 的紀錄（後端每日保存）：發動＝那天盤中第一次符合發動條件的時間與價格（一檔記一次）；醞釀＝那天盤前算出來的醞釀名單。</div>' +
+  const eod = day.launch.some((r) => r.eod);
+  return '<div class="race-sub">' + mmdd + ' 的紀錄（後端每日保存）：發動＝那天盤中第一次符合發動條件的時間與價格（一檔記一次）；醞釀＝那天盤前算出來的醞釀名單。' +
+    (eod ? '發動時間寫「收盤」的＝那天沒有盤中紀錄（保存功能上線前，或那天程式沒在跑），用收盤價回推：收盤過箱頂、收盤均線分數>10、全天周轉率≥5% 或量≥5 日均量 1.5 倍；盤中曾發動又回落的補不回來。' : '') + '</div>' +
     '<div class="bl-section bl-launch">2 發動（突破）・' + day.launch.length + ' 檔</div>' +
     (day.launch.length ? brewPastTableHtml('launch', day.launch) : '<div class="race-note">那天沒有股票發動</div>') +
     '<div class="bl-section bl-brew">1 醞釀（整理）・' + day.brew.length + ' 檔</div>' +
