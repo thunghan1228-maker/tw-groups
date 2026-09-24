@@ -2361,6 +2361,19 @@ function mapLargeOrderSignal(s){
   };
 }
 
+// 只看 43 個族群的股票（2026-09-24 使用者：不在 43 個族群裡的不要掃；「股期標的」是股票期貨標的清單不是族群）。
+// 後端已經不掃了，這裡把之前已經存下來的族群外訊號（例如達發、中華電的創高黑龍）也濾掉。
+let industryCodeCache = { src: null, set: null };
+function industryCodes(){
+  const groups = lastData && Array.isArray(lastData.groups) ? lastData.groups : null;
+  if (!groups || !groups.length) return null;
+  if (industryCodeCache.src !== groups){
+    const set = new Set();
+    groups.forEach((g) => { if (g.name !== '股期標的') g.stocks.forEach((st) => set.add(String(st.code).toUpperCase())); });
+    industryCodeCache = { src: groups, set };
+  }
+  return industryCodeCache.set;
+}
 async function fetchRealSignals(dateStr){
   // limit要跟後端load_latest_signals()真正的上限(5000)看齊：活躍盤勢
   // 一天全部kind種類加總很容易超過500，之前卡在500時只是把早盤訊號被
@@ -2371,8 +2384,10 @@ async function fetchRealSignals(dateStr){
   if (!data || !Array.isArray(data.signals)) throw new Error('bad payload');
   // 一般5分鐘K策略訊號(MA交叉/520/A8空等)只在K線圖上用符號呈現；只留下
   // 不是這個家族的訊號、以及兩個獨立的「結構性」訊號(1+2多/創高黑龍)。
+  const inScope = industryCodes();
   return data.signals
     .filter((s) => !KLINE_SIGNAL_INFO[s.kind] || DEDICATED_KLINE_TABS.has(s.kind))
+    .filter((s) => !inScope || inScope.has(String(s.ticker || s.code || '').toUpperCase()))
     .map(mapLargeOrderSignal);
 }
 
