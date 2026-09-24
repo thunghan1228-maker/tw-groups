@@ -387,6 +387,18 @@ const HTML_PAGE = `<!DOCTYPE html>
   body.chart-window-mode .chart-modal-head{cursor:default;}
   body.chart-window-mode #cmMax{display:none;}
   .signal-modal-inner{position:absolute;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(672px,94vw);height:min(768px,86vh);min-width:280px;min-height:320px;max-width:100vw;max-height:100vh;overflow:auto;resize:both;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);pointer-events:auto;}
+  /* 盤中訊號中心改成淺灰底、深色字（2026-09-24 使用者），只影響這個視窗，其他頁面（含K線圖）維持原本深色主題。
+     面板／列表／表格幾乎都是用下面這組CSS變數畫的，在這裡重新定義同一組變數，視窗裡的東西會自動跟著換色；
+     少數幾個沒有走變數、原本假設深色背景寫死淺色文字的地方（族群標題白字、「有股期」淡藍字）另外覆寫。 */
+  #signalModalInner{
+    --bg:#eef0f2; --panel:#e2e4e8; --panel-2:#d7d9de; --line:#c3c6cc;
+    --text:#1a1c1f; --muted:#54585f; --accent:#8a6d3f; --up:#c0392b; --down:#15803d;
+    color:var(--text);  /* body 本身也是用var(--text)畫字，但那是套用:root原本的深色主題值算出來的固定顏色，
+      子層沒有另外設color的元素會直接繼承那個算好的顏色，不會因為這裡重新定義了--text就自動換色；
+      這裡的元素要親自再宣告一次color:var(--text)，才會用新的淺色主題值重算、往下繼承。 */
+  }
+  #signalModalInner .race-head{color:var(--text);}
+  #signalModalInner .sig-futures{color:#1d4ed8;border-color:#1d4ed866;}
   .signal-modal-inner.collapsed{height:auto!important;min-height:0;overflow:hidden;resize:none;padding:10px 14px;}
   /* 視窗四邊＋四角的伸縮把手（2026-09-24 使用者：要能上下左右伸展），放在覆蓋層上、用 JS 貼著視窗邊緣 */
   .sm-resize{position:absolute;z-index:2;pointer-events:auto;touch-action:none;}
