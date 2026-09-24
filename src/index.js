@@ -304,23 +304,29 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .race-rank{color:var(--muted);font-size:12px;min-width:40px;}
   .race-row .race-name{font-weight:700;flex:0 1 auto;max-width:8em;min-width:3.5em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .race-row .sig-group{background:#7c3aed;color:#fff;font-weight:700;font-size:12px;border-radius:6px;padding:1px 8px;flex-shrink:0;white-space:nowrap;}  /* 盤中333個股列的族群標籤：紫底白字（2026-09-24 使用者） */
-  .race-row .race-pct{margin-left:auto;font-weight:700;}
+  .race-row .race-pct{font-weight:700;}
   /* 族群大戶力：漲跌幅／漲跌／成交價三欄固定寬、靠右，跟卡片頂端的欄位標籤對齊；漲停／處置警示留固定寬的格子在最後面 */
   .race-row .race-pct,.race-row .race-chg,.race-row .race-price{font-weight:700;flex:0 0 5em;text-align:right;white-space:nowrap;}
   .race-row .race-chg.up,.race-row .race-price.up{color:var(--up);} .race-row .race-chg.down,.race-row .race-price.down{color:var(--down);}
   .race-row .race-warn-slot{flex:0 0 3.6em;text-align:right;}
-  .race-col-labels{display:flex;justify-content:flex-end;gap:8px;padding:0 8px 2px;}
+  .race-col-labels{display:flex;align-items:center;gap:8px;padding:0 8px 2px;}
   .race-row:has(.race-holder),.race-col-labels:has(.race-holder){max-width:900px;}  /* 盤中333專用（2026-09-24 使用者：壓縮鬆散的空白） */
   /* 外層格子不設字級：flex 的 5.2em 才會跟資料列的 5.2em 用同一個字級算、欄寬一致；只縮小裡面的字 */
   .race-col-labels span{flex:0 0 5em;text-align:right;}
   .race-col-labels span b{color:var(--muted);font-size:10px;font-weight:600;}
+  /* 欄位標題加「代號」「名稱」（2026-09-24 使用者），寬度跟資料列的代號／名稱格子一致，靠左對齊、
+     不套用上面泛用的5em/靠右樣式。數字那一群（大戶力／漲跌幅／漲跌／成交價／符號）包成.race-line2，
+     用margin-left:auto整組貼齊右邊，取代原本個別元素各自margin-left:auto／justify-content:flex-end
+     （手機版寬度不夠時，這一群會整個換到下一行，見下面mobile media query）。 */
+  .race-col-labels .race-code{flex:0 0 auto;min-width:44px;text-align:left;}
+  .race-col-labels .race-name{flex:0 1 auto;max-width:8em;min-width:3.5em;text-align:left;}
+  .race-row .race-line2,.race-col-labels .race-line2{display:flex;align-items:center;gap:8px;margin-left:auto;}
   .race-col-labels .race-warn-slot{flex:0 0 3.6em;}
   .race-row .race-pct.up{color:var(--up);} .race-row .race-pct.down{color:var(--down);}
   /* 盤中333：族群標籤是列裡可縮的部分；盤中大戶力／漲跌幅／漲跌／成交價／符號都是固定寬、貼齊右邊，跟欄位標籤對齊 */
   .race-row .race-badge{font-size:14px;flex:0 0 6.5em;text-align:right;white-space:nowrap;}
   .race-row .sig-group{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .race-row .race-holder{margin-left:auto;flex:0 0 8.5em;text-align:right;white-space:nowrap;overflow:hidden;}
-  .race-row .race-holder ~ .race-pct{margin-left:0;}
+  .race-row .race-holder{flex:0 0 8.5em;text-align:right;white-space:nowrap;overflow:hidden;}
   .race-row .race-holder .sig-label{font-size:11px;padding:2px 6px;}
   .race-row .race-holder-none{color:var(--muted);}
   .race-col-labels .race-holder{flex:0 0 8.5em;}
@@ -467,6 +473,20 @@ const HTML_PAGE = `<!DOCTYPE html>
        避免搜尋框、進入分K按鈕被壓縮到點不到。 */
     .chart-modal-head{flex-wrap:wrap;row-gap:8px;}
     .cm-actions{width:100%;justify-content:flex-end;}
+    /* 盤中333／族群大戶力的個股列（2026-09-24 使用者：漲跌幅/漲跌/成交價/大戶力手機上被擠到畫面外、
+       對不齊）：代號、名稱（跟族群標籤/資格標籤）留在第一行；大戶力／漲跌幅／漲跌／成交價／符號這一群
+       (.race-line2) 塞不下第一行剩餘空間時，整組換到自己獨立的第二行、貼齊右邊，不會被切在畫面外，
+       欄位標題列也用同一顆.race-line2、同樣換行，兩者維持對齊。 */
+    .race-row,.race-col-labels{flex-wrap:wrap;row-gap:4px;}
+    /* 換到第二行還是塞不太下（8.5em+5em×3+6.5em 這種桌機欄寬，手機版寬度根本不夠）：字級跟固定欄寬
+       一起縮小；真的還是放不下（例如族群大戶力那顆大戶力標籤文字特別長）就讓這一群自己橫向捲動，
+       不會整個被切掉看不到，也不會拖著代號/名稱一起被推出畫面。 */
+    .race-row .race-line2,.race-col-labels .race-line2{flex:1 1 100%;justify-content:flex-end;margin-left:0;font-size:14px;}
+    .race-row .race-line2{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:1px;}
+    .race-row .race-holder,.race-col-labels .race-holder{flex:0 0 6.5em;}
+    .race-row .race-pct,.race-row .race-chg,.race-row .race-price,.race-col-labels .race-line2 span{flex:0 0 4em;}
+    .race-row .race-badge,.race-col-labels .race-badge-slot{flex:0 0 5em;}
+    .race-row .race-warn-slot,.race-col-labels .race-warn-slot{flex:0 0 3em;}
   }
 
   /* 平板(iPad)以上：盤中訊號中心視窗跟裡面文字放大約1.3倍，方便閱讀。
@@ -2781,7 +2801,10 @@ function bladeBadge(r){
 // 刀劍空 ⚔️（劍）後面的數字＝現價低於前天收盤幾 %（🔪 刀＝低於昨收）；其他名單是名次（👑＝第 1）。
 function raceColLabelsHtml(opts){
   const badgeLabel = opts && opts.fire ? '🚀高於前天收盤%' : opts && opts.blade ? '⚔️低於前天收盤%' : '名次';
-  return '<div class="race-col-labels"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"><b>' + badgeLabel + '</b></span></div>';
+  // 使用者 2026-09-24：欄位標題要加「代號」「名稱」；數字那一群（大戶力／漲跌幅／漲跌／成交價／符號）
+  // 包一層.race-line2，跟資料列一致——手機版塞不下時這一群整個換到下一行，不會被切在畫面外。
+  return '<div class="race-col-labels"><span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span>' +
+    '<span class="race-line2"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"><b>' + badgeLabel + '</b></span></span></div>';
 }
 function raceHolderCellHtml(r){
   if (r.strengthPct === null || r.strengthPct === undefined) return '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>';
@@ -2809,11 +2832,13 @@ function raceStockRowHtml(r, idx, opts){
   return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' + rank +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + r.name + star + '</span>' +
     '<span class="sig-group" title="族群第 ' + r.groupRank + ' 名，族內第 ' + r.inGroupRank + ' 名">' + r.groupName + '</span>' +
+    '<span class="race-line2">' +
     '<span class="race-holder">' + raceHolderCellHtml(r) + '</span>' +
     '<span class="race-pct ' + cls + '">' + fmt(r.pct) + '%</span>' +
     '<span class="race-chg ' + cls + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
     '<span class="race-price ' + cls + '">' + (hasPrice ? price.toFixed(2) : '—') + '</span>' +
-    '<span class="race-badge" title="' + dailyTitle + '">' + badge + '</span></div>';
+    '<span class="race-badge" title="' + dailyTitle + '">' + badge + '</span>' +
+    '</span></div>';
 }
 function raceGroupRowHtml(g){
   const diff = g.prevRank !== null ? g.prevRank - g.rank : null;
@@ -2953,11 +2978,13 @@ function groupHolderForceStockRowHtml(r, idx){
     '<span class="race-badge">' + (RACE_NUM[idx + 1] || String(idx + 1)) + '</span>' +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
     tradingEligibilityTagsHtml(r) + (r.isPast ? '' : flagPillsHtml(r.code, { dispositionOnly: true })) +
+    '<span class="race-line2">' +
     '<span class="sig-label ' + cls + '" title="' + (r.holderLabel || '大戶力（大單淨額÷累計成交額）') + '">' + pctText + (amtText ? '・' + amtText : '') + '</span>' +
     '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' +
     '<span class="race-chg ' + dirClass(r.pct) + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
     '<span class="race-price ' + dirClass(r.pct) + '">' + (hasPrice ? price.toFixed(2) : '—') + '</span>' +
-    '<span class="race-warn-slot">' + (r.isPast ? '' : groupHolderForceWarnPillHtml(r)) + '</span></div>';
+    '<span class="race-warn-slot">' + (r.isPast ? '' : groupHolderForceWarnPillHtml(r)) + '</span>' +
+    '</span></div>';
 }
 function groupHolderForceCardHtml(card, mode){
   const icon = mode === 'up' ? '📈' : '📉';
@@ -2969,7 +2996,8 @@ function groupHolderForceCardHtml(card, mode){
   const namePill = '<span class="head-pill">' + card.name + '（' + card.groupTotal + ' 檔）</span>';
   const avgPill = '<span class="head-pill">' + (card.dayWord || '今天') + '平均 ' + fmt(card.avgChange) + '%</span>';
   return '<div class="race-block"><div class="race-head">' + icon + ' <span class="combo-rank">' + rankLabel + '</span> ' + namePill + ' ' + avgPill + '・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
-    '<div class="race-col-labels"><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-warn-slot"></span></div>' +
+    '<div class="race-col-labels"><span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span>' +
+    '<span class="race-line2"><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-warn-slot"></span></span></div>' +
     (card.rows.length ? card.rows.map((r, i) => groupHolderForceStockRowHtml(r, i)).join('')
       : '<div class="race-note">目前沒有符合條件的個股（大戶力資料還在累積中，或沒有' + (mode === 'up' ? '偏買' : '偏賣') + '方向的大戶力）</div>') +
     '</div>';
