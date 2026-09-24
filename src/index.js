@@ -241,14 +241,16 @@ const HTML_PAGE = `<!DOCTYPE html>
   .sb-count{background:var(--accent);color:var(--bg);border-radius:999px;min-width:18px;padding:0 5px;text-align:center;font-size:11px;}
   .alert-toggle{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;}
   .alert-toggle.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
-  .market-strength-bar{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex-wrap:wrap;flex:1 1 300px;max-width:420px;}
-  .ms-badge{font-size:14px;font-weight:800;padding:6px 14px;border-radius:8px;background:var(--panel-2);flex-shrink:0;}
+  .market-strength-bar{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex-wrap:wrap;flex:1 1 360px;max-width:640px;}
+  .ms-badge{font-size:20px;font-weight:900;padding:8px 16px;border-radius:8px;background:var(--panel-2);flex-shrink:0;}
   .ms-badge.up{color:var(--up);}
   .ms-badge.down{color:var(--down);}
-  .ms-lines{font-size:11px;color:var(--muted);line-height:1.6;}
-  .ms-line.up{color:var(--up);}
-  .ms-line.down{color:var(--down);}
-  .ms-updated{color:var(--muted);opacity:.8;}
+  .ms-lines{font-size:16px;font-weight:800;color:var(--text);line-height:1.5;}
+  .ms-line.up{color:#ff5a5a;}
+  .ms-line.down{color:#3ddc84;}
+  .ms-badge.up{color:#ff5a5a;}
+  .ms-badge.down{color:#3ddc84;}
+  .ms-updated{font-size:13px;font-weight:700;color:var(--text);opacity:.85;}
 
   /* 股票搜尋 */
   .stock-search-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex:1 1 260px;max-width:360px;}
