@@ -120,6 +120,7 @@
   .cm-name{font-weight:800;font-size:17px;}
   .cm-data-badge{margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;vertical-align:middle;}
   .chart-info-bar{flex:1;text-align:center;padding:0 8px;font-size:20px;font-weight:700;color:#fff5e0;font-variant-numeric:tabular-nums;}
+  .chart-info-bar .cib-item{white-space:nowrap;display:inline-block;margin:0 3px;}
   .cm-actions{display:flex;gap:6px;align-items:center;}
   .cm-quick-search{width:120px;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;}
   .cm-quick-search:focus{outline:2px solid var(--accent);outline-offset:1px;}
@@ -972,7 +973,7 @@ function generateForceFlow(code, tf, bars){
 let currentChart = {
   code: null, name: null, tf: 'daily', bars: null, force: null, macd: null, kd: null,
   maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, hoverIndex: null,
-  viewStart: 0, viewCount: null, isRealBars: false, requestToken: 0,
+  viewStart: 0, viewCount: null, isRealBars: false, requestToken: 0, dailyBars: null,
 };
 
 // 五分鐘K盤中訊號符號／顏色／白話解釋；規格來源見HANSTOCK策略定義備份文件。
@@ -1109,18 +1110,48 @@ function attachPinchZoom(canvasIds){
   });
 }
 
-function updateChartInfoBar(ib){
-  const el = document.getElementById('chartInfoBar');
-  if (!el || !ib) return;
-  const amplitude = ib.open ? (ib.high - ib.low) / ib.open * 100 : 0;
-  let html = ib.fullLabel + '　開' + ib.open.toFixed(2) + ' 高' + ib.high.toFixed(2) +
-    ' 低' + ib.low.toFixed(2) + ' 收' + ib.close.toFixed(2) +
-    '　量' + Math.round(ib.volume) + '張　振幅' + amplitude.toFixed(2) + '%';
-  if (Number.isFinite(ib.mainNet)){
-    const color = ib.mainNet >= 0 ? '#e6675f' : '#5fae6f';
-    html += '　<span style="color:' + color + '">主力' + (ib.mainNet >= 0 ? '+' : '') + Math.round(ib.mainNet) + '張</span>';
+function chartDayKey(ts){
+  const d = new Date(ts);
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+}
+function chartPrevClose(bars, index){
+  // 漲跌的基準＝前一個交易日收盤。日線：前一根；分K：先查日線（開圖時載過、或切分K時背景補抓）裡
+  // 那天之前最後一根的收盤，沒有就用這批分K裡前一天最後一根；都沒有（只載到一天）就不顯示。
+  const bar = bars[index];
+  if (!bar) return null;
+  if (currentChart.tf === 'daily') return index > 0 ? bars[index - 1].close : null;
+  const day = chartDayKey(bar.ts);
+  const daily = currentChart.dailyBars;
+  if (Array.isArray(daily)){
+    for (let i = daily.length - 1; i >= 0; i--){ if (chartDayKey(daily[i].ts) < day) return daily[i].close; }
   }
-  el.innerHTML = html;
+  for (let i = index - 1; i >= 0; i--){ if (chartDayKey(bars[i].ts) < day) return bars[i].close; }
+  return null;
+}
+function updateChartInfoBar(bars, index){
+  // 使用者 2026-09-25：順序改成 開、高、低 → 量 → 漲跌／漲跌幅 → 成交價（收）→ 主力；原本的振幅拿掉，換成漲跌幅。
+  // 每一項自己不換行，窄螢幕就整項跳下一行，不會「量」在上一行、「309張」在下一行。
+  const el = document.getElementById('chartInfoBar');
+  const ib = bars && bars[index];
+  if (!el || !ib) return;
+  const item = (text, color) => '<span class="cib-item"' + (color ? ' style="color:' + color + '"' : '') + '>' + text + '</span>';
+  const prevClose = chartPrevClose(bars, index);
+  let change = '—';
+  let changeColor = null;
+  if (prevClose > 0){
+    const amt = ib.close - prevClose;
+    const sign = amt > 0 ? '+' : '';
+    change = sign + amt.toFixed(2) + '（' + sign + (amt / prevClose * 100).toFixed(2) + '%）';
+    changeColor = amt > 0 ? '#e6675f' : amt < 0 ? '#5fae6f' : null;
+  }
+  const parts = [
+    item(ib.fullLabel), item('開' + ib.open.toFixed(2)), item('高' + ib.high.toFixed(2)), item('低' + ib.low.toFixed(2)),
+    item('量' + Math.round(ib.volume) + '張'), item('漲跌' + change, changeColor), item('收' + ib.close.toFixed(2), changeColor),
+  ];
+  if (Number.isFinite(ib.mainNet)){
+    parts.push(item('主力' + (ib.mainNet >= 0 ? '+' : '') + Math.round(ib.mainNet) + '張', ib.mainNet >= 0 ? '#e6675f' : '#5fae6f'));
+  }
+  el.innerHTML = parts.join(' ');
 }
 
 function drawChart(){
@@ -1311,14 +1342,13 @@ function drawChart(){
     ctx.restore();
   }
 
-  // 游標移到K棒上時，標題列中間空位顯示該根的開高低收／成交量／主力買賣力／
-  // 振幅，沒有游標時預設顯示最後一根。振幅用「這根自己的開盤價」當基準
-  // （不是前一天收盤價），分K圖沒有現成的「前一交易日收盤」可以逐根對照。
+  // 游標移到K棒上時，標題列中間空位顯示該根的開高低／成交量／漲跌（對前一個交易日收盤）／
+  // 收／主力買賣力，沒有游標時預設顯示最後一根。
   {
     const infoIndex = currentChart.hoverIndex != null
       ? Math.max(0, Math.min(bars.length - 1, currentChart.hoverIndex))
       : bars.length - 1;
-    updateChartInfoBar(bars[infoIndex]);
+    updateChartInfoBar(allBars, vStart + infoIndex);
   }
 
   if (currentChart.hoverIndex != null){
@@ -1862,6 +1892,14 @@ async function switchTimeframe(tf){
   if (!bars) bars = generateOHLC(currentChart.code, tf);
   currentChart.bars = bars;
   currentChart.isRealBars = isReal;
+  if (tf === 'daily') currentChart.dailyBars = isReal ? bars : null;
+  else if (!currentChart.dailyBars){
+    // 分K的漲跌要對前一個交易日收盤：沒載過日線就背景抓一次（同一檔才用）
+    const code = currentChart.code;
+    fetchRealDailyBars(code).then((daily) => {
+      if (code === currentChart.code && currentChart.tf !== 'daily'){ currentChart.dailyBars = daily; drawChart(); }
+    }).catch(() => {});
+  }
 
   document.getElementById('cmDataBadge').hidden = isReal;
   document.getElementById('forceNote').textContent = forceNoteText(isReal);
@@ -2031,6 +2069,7 @@ function openStockChart(code, name, tf){
   if (useFloatingCharts()){ openChartWindow(code, name, tf); return; }
   const overlay = document.getElementById('chartModal');
   const wasHidden = overlay.hidden;
+  if (currentChart.code !== code) currentChart.dailyBars = null;  // 換股票：漲跌用的日線快取要重抓
   currentChart.code = code;
   currentChart.name = name;
   document.getElementById('cmCode').textContent = code;
