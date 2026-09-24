@@ -308,7 +308,12 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* .race-line2用margin-left:auto貼齊右邊，族群大戶力這排後面還接了交易條件標籤
      （2026-09-24 使用者移到最後面）；原本.race-row沒有flex-wrap，line2後面的東西沒地方放
      只能疊在一起、把成交價蓋掉。加flex-wrap讓放不下的部分換到下一行，不會疊在一起
-     （盤中333等其他沒有這排東西的列不受影響，本來就排得下，不會觸發換行）。 */
+     （盤中333等其他沒有這排東西的列不受影響，本來就排得下，不會觸發換行）。
+     使用者實機（iPad/iPhone Safari）測過還是跑版：auto-margin flex item加flex-wrap
+     這個組合在不同瀏覽器引擎判斷「放不放得下」時不夠可靠。改成不管放不放得下，交易
+     條件標籤／處置股徽章都強制自己獨立一行（跟手機版.race-line2強制換行是同一招），
+     不用依賴瀏覽器自己算有沒有空間，各家引擎行為才會一致。 */
+  .race-row .sig-eligibility{flex:1 1 100%;}
   .race-row:hover{background:var(--panel-2);}
   .race-row .race-code{color:var(--muted);font-size:12px;min-width:44px;}
   .race-row .race-rank{color:var(--muted);font-size:12px;min-width:40px;}
@@ -459,7 +464,13 @@ const HTML_PAGE = `<!DOCTYPE html>
   .sm-btn{background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer;font-family:inherit;}
   .sm-btn:hover{background:var(--panel-2);}
   .sm-btn.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
-  .signal-help{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--muted);margin-bottom:8px;display:flex;flex-direction:column;gap:3px;}
+  .signal-help{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px 8px 26px;font-size:11px;color:var(--muted);margin-bottom:8px;}
+  /* 訊號教學改條列式（2026-09-24 使用者：不要全部擠在一起），每個分頁一條、清楚分開 */
+  .signal-help ul{margin:0;padding:0;list-style:none;}
+  .signal-help li{position:relative;margin-bottom:7px;}
+  .signal-help li:last-child{margin-bottom:0;}
+  .signal-help li::before{content:'•';position:absolute;left:-14px;color:var(--accent);font-weight:700;}
+  .signal-help li b{color:var(--text);}
   .signal-tabs-bar{flex-wrap:wrap;}
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
@@ -719,12 +730,17 @@ const HTML_PAGE = `<!DOCTYPE html>
       </div>
     </div>
     <div class="signal-help" id="signalHelp" hidden>
-      <div>今日即時：彙整下列各類訊號的即時清單。</div>
-      <div>四項精選（強多/強空）：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</div>
-      <div>主力翻多空（主力累計翻多／翻空）：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</div>
-      <div>盤中特大買單／賣單：單筆超大額買進／賣出成交。</div>
-      <div>盤中大戶力：個股大戶買賣力道明顯轉強或轉弱。</div>
-      <div>歷史查詢：選擇日期查看當天的訊號紀錄。</div>
+      <ul>
+        <li><b>今日即時</b>：彙整下列各類訊號的即時清單。</li>
+        <li><b>族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。</li>
+        <li><b>族群大戶力</b>：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
+        <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)、刀劍空(32)等多空條件篩出的個股與族群名單。</li>
+        <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
+        <li><b>主力翻多空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
+        <li><b>盤中特大買單／賣單</b>：單筆超大額買進／賣出成交。</li>
+        <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。</li>
+        <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。</li>
+      </ul>
     </div>
     <div class="chart-tabs signal-tabs-bar" id="signalTabsBar"></div>
     <div class="signal-body" id="signalBody"></div>
@@ -2204,8 +2220,8 @@ async function renderOtcStrengthWidget(){
 // 使用者 2026-09-24：族群大戶力／族群綜合表／盤中333 這三個移到今日即時後面（原本排在後段）。
 const SIGNAL_KINDS = [
   { key: 'now', label: '今日即時' },
-  { key: 'groupHolderForce', label: '族群大戶力' },
   { key: 'groupCombinedBoard', label: '族群綜合表' },
+  { key: 'groupHolderForce', label: '族群大戶力' },
   { key: 'race333', label: '盤中333' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
   { key: 'fourGate', label: '四項精選' },
