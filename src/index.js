@@ -302,6 +302,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .flag-pill.disposition{background:#d4a017;border-color:#d4a017;color:#fff;font-weight:700;}
   /* 盤中打 333：33 賽馬多／34 河流多／188 做多族群／199 做空族群 */
   .race-block{margin:0 0 14px;}
+  /* 族群跟族群之間畫兩條粗黑線區隔（2026-09-24 使用者：族群綜合表、族群大戶力），第一個族群上面不畫。 */
+  .combo-block + .combo-block,.ghf-block + .ghf-block{border-top:8px double #111;padding-top:10px;}
   .race-head{font-weight:800;font-size:14px;color:#fff;margin:6px 0 4px;}
   .race-sub{font-size:11px;color:var(--muted);margin-bottom:6px;}
   .race-row{display:flex;flex-wrap:wrap;row-gap:4px;align-items:center;gap:8px;padding:5px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;cursor:pointer;}
@@ -3127,7 +3129,7 @@ function groupHolderForceCardHtml(card, mode){
   const rankLabel = groupHolderForceFilter === 'down' ? '族排最弱第 ' + (card.groupCount - card.rank + 1) + ' 名' : '族排第 ' + card.rank + ' 名';
   const namePill = '<span class="head-pill">' + card.name + '（' + card.groupTotal + ' 檔）</span>';
   const avgPill = '<span class="head-pill">' + (card.dayWord || '今天') + '平均 ' + fmt(card.avgChange) + '%</span>';
-  return '<div class="race-block"><div class="race-head">' + icon + ' <span class="combo-rank">' + rankLabel + '</span> ' + namePill + ' ' + avgPill + '・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
+  return '<div class="race-block ghf-block"><div class="race-head">' + icon + ' <span class="combo-rank">' + rankLabel + '</span> ' + namePill + ' ' + avgPill + '・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
     '<div class="race-col-labels ghf-labels"><span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span>' +
     '<span class="race-line2"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-warn-slot"></span></span></div>' +
     (card.rows.length ? card.rows.map((r, i) => groupHolderForceStockRowHtml(r, i)).join('')
@@ -3289,7 +3291,7 @@ function groupCombinedBoardBlockHtml(block){
   // （有大戶力或處置/注意資料N檔）仍照平均漲跌幅正負分紅/綠（combo-head這個外層class）。
   const namePill = '<span class="head-pill">' + block.name + '（' + block.groupTotal + ' 檔）</span>';
   const avgPill = '<span class="head-pill">' + (block.dayWord || '今天') + '平均 ' + fmt(block.avgChange) + '%</span>';
-  return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + (rankLabel ? '<span class="combo-rank">' + rankLabel + '</span> ' : '') + namePill + ' ' + avgPill + (block.isPast ? '・大戶力≥+10%或≤-10% ' : '・有大戶力或處置/注意資料 ') + block.rows.length + ' 檔</div>' +
+  return '<div class="race-block combo-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + (rankLabel ? '<span class="combo-rank">' + rankLabel + '</span> ' : '') + namePill + ' ' + avgPill + (block.isPast ? '・大戶力≥+10%或≤-10% ' : '・有大戶力或處置/注意資料 ') + block.rows.length + ' 檔</div>' +
     '<div class="combo-table-wrap"><table class="combo-table">' +
     '<colgroup><col class="c-code"><col class="c-name"><col class="c-holder"><col class="c-pct"><col class="c-chg"><col class="c-price"><col class="c-disp"></colgroup>' +
     '<thead><tr>' +
