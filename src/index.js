@@ -183,6 +183,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chart-tab{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:700;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;transition:background .12s ease,color .12s ease;}
   .chart-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
   .chart-tab.active{color:var(--bg);background:var(--accent);border-color:var(--accent);}
+  .signal-tab.signal-tab-purple{color:#d946ef;}  /* 族群大戶力／族群綜合表／盤中333 分頁字（2026-09-24 使用者：紫紅色） */
 
   /* 指標設定面板（週期／顏色／粗細／顯示） */
   .ind-settings{display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;}
@@ -417,7 +418,11 @@ const HTML_PAGE = `<!DOCTYPE html>
   .signal-modal-inner.collapsed .signal-tabs-bar,
   .signal-modal-inner.collapsed .signal-body,
   .signal-modal-inner.collapsed .sm-sub{display:none;}
-  .signal-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:move;touch-action:none;flex-wrap:wrap;}
+  /* 使用者 2026-09-24：標題列跟下面內容區塊都變淺灰後分不出來，改成深灰底、白字，
+     跟下面淺灰底的內容區隔開；裡面的按鈕（交易日期／訊號教學／…）本來就有自己的淺色底、
+     深色字，疊在深灰底上對比更清楚，不用另外調。 */
+  .signal-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:move;touch-action:none;flex-wrap:wrap;background:#33333a;color:#fff;padding:10px 12px;border-radius:10px;}
+  .signal-modal-head .sm-sub{color:#b8b8bf;}
   .sm-title{font-weight:800;font-size:16px;}
   .sm-sub{color:var(--muted);font-size:11px;margin-top:2px;max-width:320px;}
   .sm-actions{display:flex;gap:6px;align-items:center;cursor:default;flex-wrap:wrap;}
@@ -2148,8 +2153,12 @@ async function renderOtcStrengthWidget(){
   }
 }
 
+// 使用者 2026-09-24：族群大戶力／族群綜合表／盤中333 這三個移到今日即時後面（原本排在後段）。
 const SIGNAL_KINDS = [
   { key: 'now', label: '今日即時' },
+  { key: 'groupHolderForce', label: '族群大戶力' },
+  { key: 'groupCombinedBoard', label: '族群綜合表' },
+  { key: 'race333', label: '盤中333' },
   { key: 'fourGate', label: '四項精選' },
   { key: 'combo12Bull', label: '1+2多' },
   { key: 'blackDragon', label: '創高黑龍' },
@@ -2157,10 +2166,7 @@ const SIGNAL_KINDS = [
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
-  { key: 'groupHolderForce', label: '族群大戶力' },
-  { key: 'groupCombinedBoard', label: '族群綜合表' },
   { key: 'dispositionRisk', label: '處置股預測' },
-  { key: 'race333', label: '盤中333' },
   { key: 'history', label: '歷史查詢' },
 ];
 // 5分鐘K策略訊號家族(MA交叉/520/A8空等)只在K線圖上用符號呈現，不進盤中
@@ -3308,9 +3314,11 @@ function renderSignalCenter(){
     if (key === 'bigHolderForce') return bigHolderRows.length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
+  // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
+  const PURPLE_TAB_KEYS = new Set(['groupHolderForce', 'groupCombinedBoard', 'race333']);
   const tabsHtml = SIGNAL_KINDS.map((k) => {
     const count = countFor(k.key);
-    return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + '" data-kind="' + k.key + '">' +
+    return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + (PURPLE_TAB_KEYS.has(k.key) ? ' signal-tab-purple' : '') + '" data-kind="' + k.key + '">' +
       k.label + (count === null ? '' : ' <span class="sig-count">' + count + '</span>') +
     '</button>';
   }).join('');
