@@ -2221,7 +2221,9 @@ async function renderOtcStrengthWidget(){
       '<div class="ms-badge' + (badgeCls ? ' ' + badgeCls : '') + '">' + data.label + '</div>' +
       '<div class="ms-lines"><div class="ms-line ' + line1Cls + '">' + (data.aboveMa20 ? '↑' : '↓') + ' 5K 20MA　即時 ' + data.price.toFixed(2) + '，在20MA ' + data.ma20.toFixed(2) + ' 之' + (data.aboveMa20 ? '上' : '下') + '</div>' +
       '<div class="ms-line ' + line2Cls + '">' + (data.aboveRefLow ? '↑' : '↓') + ' 第三根5K低點　即時 ' + data.price.toFixed(2) + '，在第3根低點 ' + data.refLow.toFixed(2) + ' 之' + (data.aboveRefLow ? '上' : '下') + '</div>' +
-      '<div class="ms-updated">最新更新 ' + new Date(data.updatedAt).toLocaleTimeString('zh-TW') + '</div></div>';
+      '<div class="ms-updated">' + (data.heldFrom
+        ? String(data.tradeDate || '').slice(5).replace('-', '/') + ' 收盤時的判斷，下一個交易日開盤前（08:45）沿用'
+        : '最新更新 ' + new Date(data.updatedAt).toLocaleTimeString('zh-TW')) + '</div></div>';
   } catch (e) {
     const s = buildOtcStrengthDemo();
     el.innerHTML =
