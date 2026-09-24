@@ -2907,7 +2907,7 @@ function groupHolderForceModel(view){
       });
     }).filter(Boolean);
     rows.sort((a, b) => mode === 'up' ? b.strengthPct - a.strengthPct : a.strengthPct - b.strengthPct);
-    return { name: g.name, rank: rankOf.get(g.name), avgChange: g.avgChange, groupTotal: valid.length, qualified: rows.length, rows: rows.slice(0, 5), dayWord };
+    return { name: g.name, rank: rankOf.get(g.name), groupCount: total, avgChange: g.avgChange, groupTotal: valid.length, qualified: rows.length, rows: rows.slice(0, 5), dayWord };
   };
   const risingGroups = ranked.slice(0, 10).map((g) => cardFor(g, 'up'));
   const fallingGroups = ranked.slice(Math.max(0, total - 10)).reverse().map((g) => cardFor(g, 'down'));
@@ -2948,7 +2948,10 @@ function groupHolderForceStockRowHtml(r, idx){
 function groupHolderForceCardHtml(card, mode){
   const icon = mode === 'up' ? '📈' : '📉';
   // 使用者 2026-09-24：族排名次搬到最前面（紫紅色），再來是族群名稱——漲的族群紅字、跌的族群綠字，其餘照舊白字。
-  return '<div class="race-block"><div class="race-head">' + icon + ' <span class="combo-rank">族排第 ' + card.rank + ' 名</span> <span class="hf-gname ' + dirClass(card.avgChange) + '">' + card.name + '（' + card.groupTotal + ' 檔）</span>・' + (card.dayWord || '今天') + '平均 ' + fmt(card.avgChange) + '%・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
+  // 使用者 2026-09-24：大戶力≤-10%篩選時（只剩跌幅段）名次改從最弱倒數（族排最弱第1名＝全體最弱），
+  // 比「族排第43名」直覺；≥10%篩選或沒篩選時維持原本從最強數的「族排第N名」。
+  const rankLabel = groupHolderForceFilter === 'down' ? '族排最弱第 ' + (card.groupCount - card.rank + 1) + ' 名' : '族排第 ' + card.rank + ' 名';
+  return '<div class="race-block"><div class="race-head">' + icon + ' <span class="combo-rank">' + rankLabel + '</span> <span class="hf-gname ' + dirClass(card.avgChange) + '">' + card.name + '（' + card.groupTotal + ' 檔）</span>・' + (card.dayWord || '今天') + '平均 ' + fmt(card.avgChange) + '%・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
     '<div class="race-col-labels"><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-warn-slot"></span></div>' +
     (card.rows.length ? card.rows.map((r, i) => groupHolderForceStockRowHtml(r, i)).join('')
       : '<div class="race-note">目前沒有符合條件的個股（大戶力資料還在累積中，或沒有' + (mode === 'up' ? '偏買' : '偏賣') + '方向的大戶力）</div>') +
@@ -3030,10 +3033,17 @@ function groupCombinedBoardModel(view){
   const dayWord = isPast ? view.date + ' ' : '今天';
   // 偏賣篩選（大戶力<=-10%）時跌幅大的族群排前面（-5% 在 -4% 前面、負越多越上面）；
   // 沒篩選或偏買篩選時照舊漲幅大的在前。
-  const ranked = groups.slice().sort((a, b) => groupCombinedBoardFilter === 'down' ? a.avgChange - b.avgChange : b.avgChange - a.avgChange);
+  // 族排名次跟顯示順序都從同一份「由弱到強」的穩定排序衍生（強到弱用 .reverse() 做鏡像，不是另外再排序一次）：
+  // 各自獨立排序在遇到平均漲跌幅完全相同的族群時，穩定排序不保證彼此互為鏡像，「族排第N名」跟下面
+  // 「族排最弱第N名」的號碼會兜不起來；用同一份排序＋reverse就不會有這個問題。
+  const weakToStrong = groups.slice().sort((a, b) => a.avgChange - b.avgChange);
+  const groupCount = weakToStrong.length;
+  const ranked = groupCombinedBoardFilter === 'down' ? weakToStrong : weakToStrong.slice().reverse();
   // 族排名次：那一天平均漲跌幅在全部族群裡的名次（第 1 名最強），跟族群大戶力分頁的「族排第 N 名」同一套；
   // 不受篩選影響——偏賣篩選只列出部分族群時名次照樣是全體的名次，所以數字可能跳號。
-  const rankOf = new Map(groups.slice().sort((a, b) => b.avgChange - a.avgChange).map((g, i) => [g.name, i + 1]));
+  const rankOf = new Map(weakToStrong.map((g, i) => [g.name, groupCount - i]));
+  // 族排最弱名次：由弱到強倒數（第 1 名全體最弱），大戶力≤-10%篩選時用這個代替上面的族排第N名。
+  const weakestRankOf = new Map(weakToStrong.map((g, i) => [g.name, i + 1]));
   const holderByCode = new Map((view.ranking || []).map((r) => [r.code, r]));
   // 處置／注意資料只有今天的：看昨天／前天時不併入，只列大戶力夠格（|大戶力| >= 10%）的股票。
   const d = isPast ? null : dispositionRiskData;
@@ -3070,7 +3080,7 @@ function groupCombinedBoardModel(view){
       const bv = b.strengthPct === null || b.strengthPct === undefined ? -Infinity : Math.abs(b.strengthPct);
       return bv - av;
     });
-    return { name: g.name, rank: rankOf.get(g.name), avgChange: g.avgChange, groupTotal: valid.length, rows, dayWord, isPast };
+    return { name: g.name, rank: rankOf.get(g.name), weakestRank: weakestRankOf.get(g.name), avgChange: g.avgChange, groupTotal: valid.length, rows, dayWord, isPast };
   }).filter((b) => b.rows.length);
   return { blocks, total: blocks.reduce((sum, b) => sum + b.rows.length, 0) };
 }
@@ -3094,7 +3104,10 @@ function groupCombinedBoardRowHtml(r){
     '</tr>';
 }
 function groupCombinedBoardBlockHtml(block){
-  return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + (block.rank ? '<span class="combo-rank">族排第 ' + block.rank + ' 名</span> ' : '') + block.name + '（' + block.groupTotal + ' 檔） ' + (block.dayWord || '今天') + '平均 ' + fmt(block.avgChange) + (block.isPast ? '%・大戶力≥+10%或≤-10% ' : '%・有大戶力或處置/注意資料 ') + block.rows.length + ' 檔</div>' +
+  // 使用者 2026-09-24：大戶力≤-10%篩選時名次改從最弱倒數（族排最弱第1名＝全體最弱），比「族排第43名」直覺；
+  // ≥10%篩選或沒篩選時維持原本從最強數的「族排第N名」。
+  const rankLabel = block.rank ? (groupCombinedBoardFilter === 'down' ? '族排最弱第 ' + block.weakestRank + ' 名' : '族排第 ' + block.rank + ' 名') : '';
+  return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + (rankLabel ? '<span class="combo-rank">' + rankLabel + '</span> ' : '') + block.name + '（' + block.groupTotal + ' 檔） ' + (block.dayWord || '今天') + '平均 ' + fmt(block.avgChange) + (block.isPast ? '%・大戶力≥+10%或≤-10% ' : '%・有大戶力或處置/注意資料 ') + block.rows.length + ' 檔</div>' +
     '<div class="combo-table-wrap"><table class="combo-table">' +
     '<colgroup><col class="c-code"><col class="c-name"><col class="c-pct"><col class="c-chg"><col class="c-price"><col class="c-holder"><col class="c-disp"></colgroup>' +
     '<thead><tr>' +
@@ -3120,7 +3133,9 @@ function groupCombinedBoardHtml(){
   const dayWord = view.isPast ? view.date + ' ' : '今天';
   const scopeNote = view.isPast ? '只列出那一天大戶力≥+10%或≤-10%的股票（處置/注意只有今天的資料）' : '只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票';
   return filterBar + holderPastNoteHtml(view) +
-    '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題前的「族排第 N 名」是' + dayWord + '平均漲跌幅在全部族群裡的名次（第 1 名最強，篩選後可能跳號），標題依平均漲跌幅正負分紅/綠，並依漲跌幅排序（偏賣篩選時跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>' +
+    (groupCombinedBoardFilter === 'down'
+      ? '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題前的「族排最弱第 N 名」是' + dayWord + '平均漲跌幅由弱到強倒數的名次（第 1 名全體最弱），標題依平均漲跌幅正負分紅/綠，並依跌幅大小排序（跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>'
+      : '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題前的「族排第 N 名」是' + dayWord + '平均漲跌幅在全部族群裡的名次（第 1 名最強，篩選後可能跳號），標題依平均漲跌幅正負分紅/綠，並依漲跌幅排序，共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>') +
     m.blocks.map(groupCombinedBoardBlockHtml).join('');
 }
 
