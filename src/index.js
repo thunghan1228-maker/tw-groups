@@ -798,7 +798,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>族群大戶力</b>：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)、刀劍空(32)等多空條件篩出的個股與族群名單。</li>
         <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。</li>
-        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。</li>
+        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：11:00～13:30，5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。</li>
@@ -3432,7 +3432,9 @@ function brewLaunchModel(){
   if (!brewLaunchData || !lastData || !Array.isArray(lastData.groups)) return null;
   const rules = brewLaunchData.rules;
   const factor = brewVolumeFactor();
-  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+  // 使用者 2026-09-24：金融股不列入醞釀／發動（醞釀一次 14 檔金融股太多）；後端把這些股票標 skipped、族群名放在 rules.skipGroups
+  const skipGroups = new Set(rules.skipGroups || []);
+  const groups = lastData.groups.filter((g) => g.name !== '股期標的' && !skipGroups.has(g.name));
   if (!groups.length) return null;
   // 族排：今天平均漲跌幅在全部族群裡的名次（第 1 名最強），跟族群綜合表同一套；族群也照這個順序排。
   const weakToStrong = groups.slice().sort((a, b) => a.avgChange - b.avgChange);
@@ -3450,7 +3452,7 @@ function brewLaunchModel(){
     const launchRows = [], brewRows = [];
     g.stocks.forEach((s) => {
       const info = brewLaunchData.stocks[s.code];
-      if (!info) return;
+      if (!info || info.skipped) return;
       const live = brewLiveMetrics(info, s, factor, rules);
       if (!live) return;
       const row = Object.assign({ code: s.code, name: s.name, pct: s.changePercent, limitUp: !!s.limitUp, limitDown: !!s.limitDown, info }, live);
@@ -3514,6 +3516,7 @@ function brewLaunchHtml(){
   const note = '<div class="race-sub">老師的選股法：1＝醞釀（整理形態）、2＝發動（突破）。醞釀以前一個交易日（' + (d.asOf || '—') + '）收盤為準：均線分數≥' + r.brewMinScore +
     '、收盤站上月線、近 ' + r.boxDays + ' 天最高到最低相差≤' + r.boxRangeMaxPct + '%、5/10/20 日線相差≤' + r.maSpreadMaxPct + '%。發動看即時價量：價格衝過箱頂（近 ' + r.boxDays + ' 天最高價）、均線分數>' + (r.launchMinScore - 1) +
     '、預估全天周轉率≥' + r.turnoverMinPct + '% 或預估量≥5 日均量 ' + r.volumeRatioMin + ' 倍。同族群依均線分數排序，★＝族群裡分數最高。' +
+    (r.skipGroups && r.skipGroups.length ? r.skipGroups.join('、') + '不列入。' : '') +
     (skipped && !(bf && !bf.done) ? '另有 ' + skipped + ' 檔日K不足 240 天（新上市等）或停牌沒列入。' : '') + stamp + '</div>' + brewBackfillNoteHtml(bf);
   const launch = '<div class="bl-section bl-launch">2 發動（突破）・' + m.launchCount + ' 檔</div>' +
     (m.launchBlocks.length ? m.launchBlocks.map((b) => brewLaunchBlockHtml(b, 'launch')).join('') : '<div class="race-note">目前沒有股票發動（過箱頂、均線分數、周轉三個條件要同時到）</div>');
