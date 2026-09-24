@@ -390,6 +390,12 @@ const HTML_PAGE = `<!DOCTYPE html>
   .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
   .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn,.combo-filter-bar .race333-filter-btn{padding:4px 10px;font-size:12px;}
   .combo-filter-bar .hf-day-btn[disabled]{opacity:.45;cursor:default;}
+  /* 大戶力≥10%／≤-10%篩選鈕改黑底白字（2026-09-24 使用者：「這兩項功能全部改成黑底白字」），
+     族群大戶力／族群綜合表／盤中333三個分頁共用同一套樣式；選取中額外加紫色外框標示，
+     不然黑底白字選取前後兩個狀態會分不出哪個正在篩選中。 */
+  .hf-filter-btn,.combo-filter-btn,.race333-filter-btn{background:#000;color:#fff;border-color:#000;}
+  .hf-filter-btn:hover,.combo-filter-btn:hover,.race333-filter-btn:hover{background:#2a2a2a;}
+  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active{background:#000;color:#fff;border:2px solid #d946ef;}
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
