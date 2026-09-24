@@ -804,7 +804,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：11:00～13:30，5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。</li>
         <li><b>主力翻多空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
-        <li><b>盤中特大買單／賣單</b>：同一秒內大單連續敲進／倒出（同秒合計 ≥100 張或 ≥3,000 萬，觸發時大戶力要同向）；合計 ≥300 張或 ≥5,000 萬標「瞬間特大」。訊號很多時用上方篩選鈕縮減（可同時開幾個）：只看特大單、金額≥1億、族群前10名（族群同步漲幅／跌幅前 10 名）、每檔只留最大一筆（同一檔一天觸發好幾次只留金額最大的）；分頁上的數字會跟著篩選變。</li>
+        <li><b>盤中特大買單／賣單</b>：同一秒內大單連續敲進／倒出（同秒合計 ≥100 張或 ≥3,000 萬，觸發時大戶力要同向）；合計 ≥300 張或 ≥5,000 萬標「瞬間特大」。訊號很多時用上方篩選鈕縮減（可同時開幾個）：只看特大單、金額≥1億、族群前10名（族群同步漲幅／跌幅前 10 名）、每檔只留最大一筆（同一檔一天觸發好幾次，只留到目前為止金額最大的，之後有更大的會換成新的）、每檔只留最新一筆（只留最近發生的那筆，看誰剛剛有大單進來；跟最大一筆二選一）；分頁上的數字會跟著篩選變。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。</li>
       </ul>
     </div>
@@ -2629,13 +2629,16 @@ function signalEventRowHtml(ev){
 //   只看特大單：後端標「瞬間特大買單敲進／賣單倒出」的（同秒合計 ≥300 張或 ≥5,000 萬）；一般「瞬間大單連續」的不看
 //   金額≥1億：同秒合計金額 ≥ 1 億元
 //   族群前10名：族群同步排名（漲幅／跌幅第 N 名）前 10 名的族群
-//   每檔只留最大一筆：同一檔股票一天可能觸發好幾次，只留合計金額最大的那筆
+//   每檔只留最大一筆：同一檔股票一天可能觸發好幾次，只留「到目前為止」合計金額最大的那筆（之後有更大的會換成新的）
+//   每檔只留最新一筆：同一檔只留最近發生的那筆（誰剛剛有大單進來）；跟「最大一筆」二選一
 const BIG_ORDER_FILTER_DEFS = [
   { key: 'extraOnly', label: '只看特大單', title: '只看同秒合計 ≥300 張或 ≥5,000 萬的「瞬間特大」訊號' },
   { key: 'amount1e8', label: '金額≥1億', title: '同秒合計金額 1 億元以上' },
   { key: 'top10', label: '族群前10名', title: '族群同步排名（漲幅或跌幅）前 10 名的族群' },
-  { key: 'onePerStock', label: '每檔只留最大一筆', title: '同一檔股票只留合計金額最大的那一筆' },
+  { key: 'onePerStock', label: '每檔只留最大一筆', title: '同一檔股票只留到目前為止合計金額最大的那一筆；之後出現更大的會換成新的' },
+  { key: 'onePerStockLatest', label: '每檔只留最新一筆', title: '同一檔股票只留最近發生的那一筆（誰剛剛有大單進來）' },
 ];
+const BIG_ORDER_EXCLUSIVE = { onePerStock: 'onePerStockLatest', onePerStockLatest: 'onePerStock' };  // 這兩個二選一
 let bigOrderFilters = {};
 try { bigOrderFilters = JSON.parse(localStorage.getItem('bigOrderFilters') || '{}') || {}; } catch (e) { bigOrderFilters = {}; }
 function bigOrderFilterActive(){ return BIG_ORDER_FILTER_DEFS.some((d) => bigOrderFilters[d.key]); }
@@ -2661,12 +2664,15 @@ function filterLargeOrderEvents(events){
     if (bigOrderFilters.top10 && !(f.rank !== null && f.rank <= 10)) return false;
     return true;
   });
-  if (bigOrderFilters.onePerStock){
+  if (bigOrderFilters.onePerStock || bigOrderFilters.onePerStockLatest){
+    const latest = !!bigOrderFilters.onePerStockLatest;
     const best = new Map();
     out.forEach((e) => {
       const amount = largeOrderFacts(e.note).amount || 0;
       const cur = best.get(e.code);
-      if (!cur || amount > cur.amount || (amount === cur.amount && e.ts > cur.e.ts)) best.set(e.code, { amount, e });
+      // 最新一筆：時間最晚的；最大一筆：金額最大的（同金額取較晚的）
+      const better = !cur || (latest ? e.ts > cur.e.ts : (amount > cur.amount || (amount === cur.amount && e.ts > cur.e.ts)));
+      if (better) best.set(e.code, { amount, e });
     });
     const keep = new Set([...best.values()].map((v) => v.e));
     out = out.filter((e) => keep.has(e));
@@ -4112,6 +4118,7 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
   if (boBtn){
     const f = boBtn.dataset.filter;
     bigOrderFilters[f] = !bigOrderFilters[f];
+    if (bigOrderFilters[f] && BIG_ORDER_EXCLUSIVE[f]) bigOrderFilters[BIG_ORDER_EXCLUSIVE[f]] = false;  // 最大／最新二選一
     try { localStorage.setItem('bigOrderFilters', JSON.stringify(bigOrderFilters)); } catch (err) { /* 記不住就算了 */ }
     renderSignalCenter();
     return;
