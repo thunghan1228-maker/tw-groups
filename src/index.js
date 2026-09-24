@@ -550,8 +550,8 @@ const HTML_PAGE = `<!DOCTYPE html>
     #signalModalInner .se-sub{font-size:14px;}
     #signalModalInner .race-row,#signalModalInner .race-col-labels{font-size:19px;}
     #signalModalInner .race-row{gap:10px;padding:9px 8px;}
-    #signalModalInner .race-row .race-code,#signalModalInner .race-row .race-rank{font-size:14px;}
-    #signalModalInner .race-row .sig-group{font-size:14px;}
+    #signalModalInner .race-row .race-code,#signalModalInner .race-row .race-rank,#signalModalInner .race-col-labels .race-code{font-size:14px;}
+    #signalModalInner .race-row .sig-group,#signalModalInner .race-col-labels .race-group-label{font-size:14px;}
     #signalModalInner .race-row .sig-label{font-size:14px;}
     #signalModalInner .race-row .race-holder .sig-label{font-size:13px;}
     #signalModalInner .race-row .pill-warn,#signalModalInner .race-row .pill-gap,#signalModalInner .race-row .pill-live{font-size:13px;}
