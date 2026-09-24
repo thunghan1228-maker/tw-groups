@@ -367,7 +367,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .combo-head.up{color:var(--up);} .combo-head.down{color:var(--down);}
   /* 族排名次：白底紫紅字的小標籤（2026-09-24 使用者），族群綜合表、族群大戶力共用；漲的、跌的族群都一樣 */
   .race-head .combo-rank{color:#d946ef;background:#fff;border-radius:6px;padding:1px 7px;font-weight:700;display:inline-block;line-height:1.35;}
-  .race-head .hf-gname.up{color:var(--up);} .race-head .hf-gname.down{color:var(--down);}  /* 族群大戶力：漲的族群紅字、跌的綠字 */
+  /* 族群名稱、今天平均漲跌幅：紫底白字的獨立色塊（2026-09-24 使用者），跟漲跌方向無關，族群大戶力、族群綜合表共用 */
+  .race-head .head-pill{background:#7c3aed;color:#fff;border-radius:6px;padding:1px 8px;font-weight:700;display:inline-block;}
   .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
   .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn{padding:4px 10px;font-size:12px;}
   .combo-filter-bar .hf-day-btn[disabled]{opacity:.45;cursor:default;}
@@ -2959,11 +2960,14 @@ function groupHolderForceStockRowHtml(r, idx){
 }
 function groupHolderForceCardHtml(card, mode){
   const icon = mode === 'up' ? '📈' : '📉';
-  // 使用者 2026-09-24：族排名次搬到最前面（紫紅色），再來是族群名稱——漲的族群紅字、跌的族群綠字，其餘照舊白字。
+  // 使用者 2026-09-24：族排名次搬到最前面（白底紫紅字）；族群名稱、今天平均漲跌幅這兩塊各自變成
+  // 紫底白字的獨立色塊（跟漲跌方向無關，統一紫色），不再用紅字/綠字區分漲跌族群。
   // 使用者 2026-09-24：大戶力≤-10%篩選時（只剩跌幅段）名次改從最弱倒數（族排最弱第1名＝全體最弱），
   // 比「族排第43名」直覺；≥10%篩選或沒篩選時維持原本從最強數的「族排第N名」。
   const rankLabel = groupHolderForceFilter === 'down' ? '族排最弱第 ' + (card.groupCount - card.rank + 1) + ' 名' : '族排第 ' + card.rank + ' 名';
-  return '<div class="race-block"><div class="race-head">' + icon + ' <span class="combo-rank">' + rankLabel + '</span> <span class="hf-gname ' + dirClass(card.avgChange) + '">' + card.name + '（' + card.groupTotal + ' 檔）</span>・' + (card.dayWord || '今天') + '平均 ' + fmt(card.avgChange) + '%・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
+  const namePill = '<span class="head-pill">' + card.name + '（' + card.groupTotal + ' 檔）</span>';
+  const avgPill = '<span class="head-pill">' + (card.dayWord || '今天') + '平均 ' + fmt(card.avgChange) + '%</span>';
+  return '<div class="race-block"><div class="race-head">' + icon + ' <span class="combo-rank">' + rankLabel + '</span> ' + namePill + ' ' + avgPill + '・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
     '<div class="race-col-labels"><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-warn-slot"></span></div>' +
     (card.rows.length ? card.rows.map((r, i) => groupHolderForceStockRowHtml(r, i)).join('')
       : '<div class="race-note">目前沒有符合條件的個股（大戶力資料還在累積中，或沒有' + (mode === 'up' ? '偏買' : '偏賣') + '方向的大戶力）</div>') +
@@ -3119,7 +3123,11 @@ function groupCombinedBoardBlockHtml(block){
   // 使用者 2026-09-24：大戶力≤-10%篩選時名次改從最弱倒數（族排最弱第1名＝全體最弱），比「族排第43名」直覺；
   // ≥10%篩選或沒篩選時維持原本從最強數的「族排第N名」。
   const rankLabel = block.rank ? (groupCombinedBoardFilter === 'down' ? '族排最弱第 ' + block.weakestRank + ' 名' : '族排第 ' + block.rank + ' 名') : '';
-  return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + (rankLabel ? '<span class="combo-rank">' + rankLabel + '</span> ' : '') + block.name + '（' + block.groupTotal + ' 檔） ' + (block.dayWord || '今天') + '平均 ' + fmt(block.avgChange) + (block.isPast ? '%・大戶力≥+10%或≤-10% ' : '%・有大戶力或處置/注意資料 ') + block.rows.length + ' 檔</div>' +
+  // 使用者 2026-09-24：族群名稱、今天平均漲跌幅這兩塊各自變成紫底白字的獨立色塊；標題其餘文字
+  // （有大戶力或處置/注意資料N檔）仍照平均漲跌幅正負分紅/綠（combo-head這個外層class）。
+  const namePill = '<span class="head-pill">' + block.name + '（' + block.groupTotal + ' 檔）</span>';
+  const avgPill = '<span class="head-pill">' + (block.dayWord || '今天') + '平均 ' + fmt(block.avgChange) + '%</span>';
+  return '<div class="race-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '">' + (rankLabel ? '<span class="combo-rank">' + rankLabel + '</span> ' : '') + namePill + ' ' + avgPill + (block.isPast ? '・大戶力≥+10%或≤-10% ' : '・有大戶力或處置/注意資料 ') + block.rows.length + ' 檔</div>' +
     '<div class="combo-table-wrap"><table class="combo-table">' +
     '<colgroup><col class="c-code"><col class="c-name"><col class="c-pct"><col class="c-chg"><col class="c-price"><col class="c-holder"><col class="c-disp"></colgroup>' +
     '<thead><tr>' +
