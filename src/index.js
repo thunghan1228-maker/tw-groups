@@ -787,7 +787,6 @@ const HTML_PAGE = `<!DOCTYPE html>
         <button class="sm-btn" id="smHelp">? 訊號教學</button>
         <button class="sm-btn" id="smMoveWindow">⧉ 移到另一螢幕</button>
         <button class="sm-btn" id="smRecenter">回到中央</button>
-        <button class="sm-btn" id="smPin">訂閱</button>
         <button class="cm-icon-btn" id="smCollapse" aria-label="收合">－</button>
         <button class="cm-icon-btn" id="smClose" aria-label="隱藏">✕</button>
       </div>
@@ -2367,7 +2366,7 @@ function buildDemoSignalsForDate(dateStr){
 }
 
 let alertsEnabled = true;
-let signalCenterState = { activeTab: 'now', historyDate: null, pinned: false };
+let signalCenterState = { activeTab: 'now', historyDate: null };
 let todaySignalEvents = [];
 let mainForceRanking = [];
 let mainForceRankingLoaded = false; // 第一次抓/api/main-force-ranking成功後才true，且不會因為後面某次輪詢失敗而變回false；
@@ -4191,12 +4190,6 @@ document.getElementById('smClose').addEventListener('click', closeSignalCenter);
 document.getElementById('smCollapse').addEventListener('click', toggleSignalCollapse);
 document.getElementById('smRecenter').addEventListener('click', recenterSignalModal);
 document.getElementById('smMoveWindow').addEventListener('click', openSignalWindow);
-document.getElementById('smPin').addEventListener('click', () => {
-  signalCenterState.pinned = !signalCenterState.pinned;
-  const btn = document.getElementById('smPin');
-  btn.classList.toggle('on', signalCenterState.pinned);
-  btn.textContent = signalCenterState.pinned ? '已訂閱' : '訂閱';
-});
 document.getElementById('smHelp').addEventListener('click', () => {
   const help = document.getElementById('signalHelp');
   help.hidden = !help.hidden;
