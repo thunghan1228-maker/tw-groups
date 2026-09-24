@@ -265,6 +265,7 @@
   .bl-section{font-weight:800;font-size:15px;color:#fff;border-radius:8px;padding:6px 10px;margin:12px 0 8px;}
   .bl-section.bl-launch{background:#c0392b;}
   .bl-section.bl-brew{background:#0f766e;}
+  .bl-backfill-note{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:8px;font-weight:700;margin:8px 0;}
   .race-head{font-weight:800;font-size:14px;color:#fff;margin:6px 0 4px;}
   .race-sub{font-size:11px;color:var(--muted);margin-bottom:6px;}
   .race-row{display:flex;flex-wrap:wrap;row-gap:4px;align-items:center;gap:8px;padding:5px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;cursor:pointer;}
@@ -3569,6 +3570,15 @@ function brewLaunchBlockHtml(block, kind){
     '<thead><tr><th>代號</th><th>名稱</th><th>均線分數</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
     '<tbody>' + block.rows.map((r) => brewLaunchRowHtml(r, kind)).join('') + '</tbody></table></div></div>';
 }
+function brewBackfillNoteHtml(bf){
+  // 均線分數要 240 根日K；歷史日K還在回補（或上次沒補完）時講清楚，不要讓人以為是沒有訊號
+  if (!bf || bf.done) return '';
+  const p = bf.progress || {};
+  const text = p.running
+    ? '日K歷史回補中（已補 ' + (p.doneStocks || 0) + '／' + (p.totalStocks || 0) + ' 檔），均線分數要 240 天日K，補完就會出現醞釀／發動，約需幾分鐘。'
+    : '日K歷史還沒補齊' + (bf.failures ? '（上次有 ' + bf.failures + ' 檔沒抓到，系統重啟時會再補）' : '') + '，均線分數要 240 天日K，補齊前大部分股票算不出來。';
+  return '<div class="race-note bl-backfill-note">' + text + '</div>';
+}
 function brewLaunchHtml(){
   if (!brewLaunchData){
     return '<div class="signal-empty"><div class="se-title">醞釀／發動資料讀取中…</div><div class="se-sub">箱子、均線是每天收盤後用日K算好的，再加上即時價量判斷；讀不到的話稍後再試。</div></div>';
@@ -3578,11 +3588,12 @@ function brewLaunchHtml(){
   const r = m.rules;
   const d = brewLaunchData;
   const skipped = (d.insufficient || []).length + (d.stale || []).length;
+  const bf = d.historyBackfill;
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
   const note = '<div class="race-sub">老師的選股法：1＝醞釀（整理形態）、2＝發動（突破）。醞釀以前一個交易日（' + (d.asOf || '—') + '）收盤為準：均線分數≥' + r.brewMinScore +
     '、收盤站上月線、近 ' + r.boxDays + ' 天最高到最低相差≤' + r.boxRangeMaxPct + '%、5/10/20 日線相差≤' + r.maSpreadMaxPct + '%。發動看即時價量：價格衝過箱頂（近 ' + r.boxDays + ' 天最高價）、均線分數>' + (r.launchMinScore - 1) +
     '、預估全天周轉率≥' + r.turnoverMinPct + '% 或預估量≥5 日均量 ' + r.volumeRatioMin + ' 倍。同族群依均線分數排序，★＝族群裡分數最高。' +
-    (skipped ? '另有 ' + skipped + ' 檔日K不足 240 天（新上市等）或停牌沒列入。' : '') + stamp + '</div>';
+    (skipped && !(bf && !bf.done) ? '另有 ' + skipped + ' 檔日K不足 240 天（新上市等）或停牌沒列入。' : '') + stamp + '</div>' + brewBackfillNoteHtml(bf);
   const launch = '<div class="bl-section bl-launch">2 發動（突破）・' + m.launchCount + ' 檔</div>' +
     (m.launchBlocks.length ? m.launchBlocks.map((b) => brewLaunchBlockHtml(b, 'launch')).join('') : '<div class="race-note">目前沒有股票發動（過箱頂、均線分數、周轉三個條件要同時到）</div>');
   const brew = '<div class="bl-section bl-brew">1 醞釀（整理）・' + m.brewCount + ' 檔</div>' +
