@@ -323,10 +323,12 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 族群大戶力：漲跌幅／漲跌／成交價三欄固定寬、靠右，跟卡片頂端的欄位標籤對齊；漲停／處置警示留固定寬的格子在最後面 */
   .race-row .race-pct,.race-row .race-chg,.race-row .race-price{font-weight:700;flex:0 0 5em;text-align:right;white-space:nowrap;}
   .race-row .race-chg.up,.race-row .race-price.up{color:var(--up);} .race-row .race-chg.down,.race-row .race-price.down{color:var(--down);}
-  /* 漲停／跌停直接顯示在成交價底色上（2026-09-24 使用者：紅底白字＝漲停、綠底白字＝跌停），
-     不用另外佔一格文字標籤。 */
-  .race-row .race-price.limit-up{background:var(--up);color:#fff;padding:2px 6px;border-radius:6px;}
-  .race-row .race-price.limit-down{background:var(--down);color:#fff;padding:2px 6px;border-radius:6px;}
+  /* 漲停／跌停直接顯示在成交價底色上（2026-09-24 使用者：紅底白字＝漲停、綠底白字＝跌停），漲跌幅只留數字、
+     不要🔒跟「漲停」字。底色包在成交價數字外面那顆小膠囊上，不是整個固定寬的格子，才不會塗到沒有數字的地方。
+     族群綜合表／盤中333／族群大戶力共用。 */
+  .limit-pill{display:inline-block;color:#fff;padding:1px 5px;border-radius:5px;font-weight:700;line-height:1.35;}
+  .limit-pill.limit-up{background:var(--up);}
+  .limit-pill.limit-down{background:var(--down);}
   .race-row .race-warn-slot{flex:0 0 3.6em;text-align:right;}
   .race-col-labels{display:flex;align-items:center;gap:8px;padding:0 8px 2px;}
   .race-row:has(.race-holder),.race-col-labels:has(.race-holder){max-width:900px;}  /* 盤中333專用（2026-09-24 使用者：壓縮鬆散的空白） */
@@ -350,7 +352,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 大戶力％跟金額改上下兩行放（2026-09-24 使用者：不要前後放一起、金額放下面），各自靠右對齊自己的
      格子，萬／億不同長度也不會看起來歪一邊；欄寬跟著縮窄。 */
   .race-row .race-holder{flex:0 0 6.5em;text-align:right;white-space:nowrap;overflow:hidden;}
-  .race-row .race-holder .sig-label{font-size:11px;padding:2px 6px;display:flex;flex-direction:column;align-items:flex-end;line-height:1.25;gap:1px;}
+  /* inline-flex：紅／綠底只包住％跟金額本身（2026-09-24 使用者：沒有數字的地方不要塗底色），靠格子的
+     text-align:right 貼齊右邊；原本 display:flex 是區塊元素，會撐滿整個格子寬。 */
+  .race-row .race-holder .sig-label{font-size:11px;padding:2px 6px;display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.25;gap:1px;}
   .race-row .race-holder .sig-label .hf-amt{font-size:.82em;font-weight:600;opacity:.92;}
   .race-row .race-holder-none{color:var(--muted);}
   .race-col-labels .race-holder{flex:0 0 6.5em;}
@@ -394,7 +398,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .combo-table .sig-bear{background:var(--down);color:#fff;padding:2px 6px;border-radius:6px;font-weight:700;display:inline-block;}
   /* 大戶力格（2026-09-24 使用者：也要切起）跟盤中333／族群大戶力共用raceHolderCellHtml，
      %在上、金額在下兩行疊放，不要左右塞一行。 */
-  .combo-table .combo-holder .sig-label{font-size:11px;padding:2px 6px;display:flex;flex-direction:column;align-items:flex-end;line-height:1.25;gap:1px;}
+  .combo-table .combo-holder .sig-label{font-size:11px;padding:2px 6px;display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.25;gap:1px;}
   .combo-table .combo-holder .sig-label .hf-amt{font-size:.82em;font-weight:600;opacity:.92;}
   .combo-table .combo-holder .race-holder-none{color:var(--muted);}
   .combo-table .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;display:inline-block;}
@@ -557,7 +561,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     .ghf-row .race-badge,.ghf-row .race-warn-slot,.ghf-labels .race-warn-slot{display:none;}
     .ghf-row .race-code,.ghf-labels .race-code,.ghf-row .race-name,.ghf-labels .race-name{min-width:0;max-width:none;}
     .ghf-row .race-holder .sig-label{padding:2px 4px;}
-    .ghf-row .race-price.limit-up,.ghf-row .race-price.limit-down{padding:2px 3px;}
+    .ghf-row .limit-pill{padding:1px 3px;}
     .ghf-row .sig-eligibility{grid-column:2 / -1;flex-wrap:wrap;row-gap:3px;}
   }
 
@@ -2916,12 +2920,16 @@ function raceHolderCellHtml(r){
     '<span class="hf-pct">' + (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%</span>' +
     (amt ? '<span class="hf-amt">' + amt + '</span>' : '') + '</span>';
 }
+function limitPriceHtml(r, text){
+  if (r.limitUp) return '<span class="limit-pill limit-up" title="漲停">' + text + '</span>';
+  if (r.limitDown) return '<span class="limit-pill limit-down" title="跌停">' + text + '</span>';
+  return text;
+}
 function raceStockRowHtml(r, idx, opts){
-  const lock = r.limitUp ? '🔒漲停' : r.limitDown ? '🔒跌停' : '';
-  const badge = (opts && opts.fire
+  const badge = opts && opts.fire
     ? (r.inGroupRank === 1 ? '👑' : '') + (r.horse ? '🐎' : '') + (r.rocket !== null ? '🚀' + r.rocket.toFixed(1) : '')
     : opts && opts.blade ? bladeBadge(r)
-    : idx === 0 ? '👑' : idx <= 10 ? RACE_NUM[idx] : '') + lock;
+    : idx === 0 ? '👑' : idx <= 10 ? RACE_NUM[idx] : '';
   const rank = opts && opts.blade ? '<span class="race-rank" title="族群第 ' + r.groupRank + ' 名">' + r.groupRank + (opts.zone || '') + '</span>' : '';
   const dates = (opts && opts.dates) || [];
   const dailyTitle = '現價對昨收 ' + fmt(r.pct) + '%'
@@ -2940,7 +2948,7 @@ function raceStockRowHtml(r, idx, opts){
     '<span class="race-holder">' + raceHolderCellHtml(r) + '</span>' +
     '<span class="race-pct ' + cls + '">' + fmt(r.pct) + '%</span>' +
     '<span class="race-chg ' + cls + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
-    '<span class="race-price ' + cls + '">' + (hasPrice ? price.toFixed(2) : '—') + '</span>' +
+    '<span class="race-price ' + cls + '">' + (hasPrice ? limitPriceHtml(r, price.toFixed(2)) : '—') + '</span>' +
     '<span class="race-badge" title="' + dailyTitle + '">' + badge + '</span>' +
     '</span></div>';
 }
@@ -2980,7 +2988,7 @@ function raceStockListHtml(list, opts){
   return html;
 }
 function raceBladeListHtml(m){
-  const names = (list) => list.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%' + (r.limitDown ? '🔒' : '')).join('、');
+  const names = (list) => list.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、');
   const bladeLower = race333FilterList(m.bladeLower);
   const bladeUpper = race333FilterList(m.bladeUpper);
   const bladeHarvest = race333FilterList(m.bladeHarvest);
@@ -3092,7 +3100,6 @@ function groupHolderForceStockRowHtml(r, idx){
   const price = Number(r.price);
   const hasPrice = Number.isFinite(price);
   const chg = Number.isFinite(r.changeAmt) ? r.changeAmt : hasPrice ? price - price / (1 + r.pct / 100) : 0;
-  const priceLimitCls = r.limitUp ? ' limit-up' : r.limitDown ? ' limit-down' : '';
   // 欄位順序（2026-09-24 使用者）：代號、名稱、盤中大戶力、漲跌幅、漲跌、成交價，可融資／可融券／
   // 可現股當沖／有股期這些交易條件標籤移到最後面（原本夾在名稱跟大戶力中間）。
   return '<div class="race-row stock-row ghf-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
@@ -3105,7 +3112,7 @@ function groupHolderForceStockRowHtml(r, idx){
     '<span class="race-holder">' + raceHolderCellHtml(r) + '</span>' +
     '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' +
     '<span class="race-chg ' + dirClass(r.pct) + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
-    '<span class="race-price ' + dirClass(r.pct) + priceLimitCls + '">' + (hasPrice ? price.toFixed(2) : '—') + '</span>' +
+    '<span class="race-price ' + dirClass(r.pct) + '">' + (hasPrice ? limitPriceHtml(r, price.toFixed(2)) : '—') + '</span>' +
     '<span class="race-warn-slot">' + (r.isPast ? '' : groupHolderForceWarnPillHtml(r)) + '</span>' +
     '</span>' +
     tradingEligibilityTagsHtml(r) + (r.isPast ? '' : flagPillsHtml(r.code, { dispositionOnly: true })) +
@@ -3259,7 +3266,6 @@ function groupCombinedBoardRowHtml(r){
   // 大戶力格跟盤中333／族群大戶力共用raceHolderCellHtml：%在上、金額在下兩行疊放，不要左右塞一行
   // （2026-09-24 使用者：大戶力也要切起）。
   const holderText = raceHolderCellHtml(r);
-  const lock = r.limitUp ? '🔒漲停' : r.limitDown ? '🔒跌停' : '';
   const cls = dirClass(r.pct);
   const price = Number(r.price);
   const hasPrice = Number.isFinite(price);
@@ -3269,9 +3275,9 @@ function groupCombinedBoardRowHtml(r){
     '<td class="combo-code">' + r.code + '</td>' +
     '<td class="combo-name">' + backendName + '</td>' +
     '<td class="combo-holder">' + holderText + '</td>' +
-    '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%' + lock + '</td>' +
+    '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%</td>' +
     '<td class="combo-chg ' + cls + '">' + (hasPrice ? (changeAmt > 0 ? '+' : '') + changeAmt.toFixed(2) : '—') + '</td>' +
-    '<td class="combo-price ' + cls + '">' + (hasPrice ? price.toFixed(2) : '—') + '</td>' +
+    '<td class="combo-price ' + cls + '">' + (hasPrice ? limitPriceHtml(r, price.toFixed(2)) : '—') + '</td>' +
     '<td class="combo-disp">' + (r.isPast ? '—' : groupCombinedBoardDispositionCell(r.code)) + '</td>' +
     '</tr>';
 }
