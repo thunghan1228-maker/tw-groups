@@ -441,14 +441,15 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 族群名稱、今天平均漲跌幅：紫底白字的獨立色塊（2026-09-24 使用者），跟漲跌方向無關，族群大戶力、族群綜合表共用 */
   .race-head .head-pill{background:#7c3aed;color:#fff;border-radius:6px;padding:1px 8px;font-weight:700;display:inline-block;}
   .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
-  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn,.combo-filter-bar .race333-filter-btn{padding:4px 10px;font-size:12px;}
+  .bigorder-filter-note{font-size:12px;color:var(--muted);align-self:center;margin-left:4px;}
+  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn,.combo-filter-bar .race333-filter-btn,.combo-filter-bar .bigorder-filter-btn{padding:4px 10px;font-size:12px;}
   .combo-filter-bar .hf-day-btn[disabled]{opacity:.45;cursor:default;}
   /* 大戶力≥10%／≤-10%篩選鈕改黑底白字（2026-09-24 使用者：「這兩項功能全部改成黑底白字」），
      族群大戶力／族群綜合表／盤中333三個分頁共用同一套樣式；選取中額外加紫色外框標示，
      不然黑底白字選取前後兩個狀態會分不出哪個正在篩選中。 */
-  .hf-filter-btn,.combo-filter-btn,.race333-filter-btn{background:#000;color:#fff;border-color:#000;}
-  .hf-filter-btn:hover,.combo-filter-btn:hover,.race333-filter-btn:hover{background:#2a2a2a;}
-  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active{background:#000;color:#c084fc;border-color:#000;font-weight:800;}  /* 按下去整個字變紫色（2026-09-24 使用者），不用外框 */
+  .hf-filter-btn,.combo-filter-btn,.race333-filter-btn,.bigorder-filter-btn{background:#000;color:#fff;border-color:#000;}
+  .hf-filter-btn:hover,.combo-filter-btn:hover,.race333-filter-btn:hover,.bigorder-filter-btn:hover{background:#2a2a2a;}
+  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active,.bigorder-filter-btn.active{background:#000;color:#c084fc;border-color:#000;font-weight:800;}  /* 按下去整個字變紫色（2026-09-24 使用者），不用外框 */
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -803,7 +804,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：11:00～13:30，5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。</li>
         <li><b>主力翻多空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
-        <li><b>盤中特大買單／賣單</b>：單筆超大額買進／賣出成交。</li>
+        <li><b>盤中特大買單／賣單</b>：同一秒內大單連續敲進／倒出（同秒合計 ≥100 張或 ≥3,000 萬，觸發時大戶力要同向）；合計 ≥300 張或 ≥5,000 萬標「瞬間特大」。訊號很多時用上方篩選鈕縮減（可同時開幾個）：只看特大單、金額≥1億、族群前10名（族群同步漲幅／跌幅前 10 名）、每檔只留最大一筆（同一檔一天觸發好幾次只留金額最大的）；分頁上的數字會跟著篩選變。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。</li>
       </ul>
     </div>
@@ -2623,6 +2624,62 @@ function signalEventRowHtml(ev){
     signalNoteHtml(ev.code, ev.note) +
   '</div>';
 }
+// ---- 盤中特大買單／賣單篩選（2026-09-24 使用者：一天 175／254 筆太多，要一個過濾器把數量降下來）----
+// 條件可以同時開好幾個，一起生效：
+//   只看特大單：後端標「瞬間特大買單敲進／賣單倒出」的（同秒合計 ≥300 張或 ≥5,000 萬）；一般「瞬間大單連續」的不看
+//   金額≥1億：同秒合計金額 ≥ 1 億元
+//   族群前10名：族群同步排名（漲幅／跌幅第 N 名）前 10 名的族群
+//   每檔只留最大一筆：同一檔股票一天可能觸發好幾次，只留合計金額最大的那筆
+const BIG_ORDER_FILTER_DEFS = [
+  { key: 'extraOnly', label: '只看特大單', title: '只看同秒合計 ≥300 張或 ≥5,000 萬的「瞬間特大」訊號' },
+  { key: 'amount1e8', label: '金額≥1億', title: '同秒合計金額 1 億元以上' },
+  { key: 'top10', label: '族群前10名', title: '族群同步排名（漲幅或跌幅）前 10 名的族群' },
+  { key: 'onePerStock', label: '每檔只留最大一筆', title: '同一檔股票只留合計金額最大的那一筆' },
+];
+let bigOrderFilters = {};
+try { bigOrderFilters = JSON.parse(localStorage.getItem('bigOrderFilters') || '{}') || {}; } catch (e) { bigOrderFilters = {}; }
+function bigOrderFilterActive(){ return BIG_ORDER_FILTER_DEFS.some((d) => bigOrderFilters[d.key]); }
+function largeOrderFacts(note){
+  // 後端 note：「同秒 N 筆｜合計 X 張｜約 Y 億／萬｜成交價 …｜族群同步 G 漲幅第 R 名…」
+  const text = String(note || '');
+  const lots = /合計\\s*([\\d,]+)\\s*張/.exec(text);
+  const amt = /約\\s*([\\d,.]+)\\s*(億|萬|元)/.exec(text);
+  const rank = /第\\s*(\\d+)\\s*名/.exec(text);
+  const unit = amt ? { '億': 1e8, '萬': 1e4, '元': 1 }[amt[2]] : 1;
+  return {
+    lots: lots ? Number(lots[1].replace(/,/g, '')) : null,
+    amount: amt ? Number(amt[1].replace(/,/g, '')) * unit : null,
+    rank: rank ? Number(rank[1]) : null,
+  };
+}
+function filterLargeOrderEvents(events){
+  if (!bigOrderFilterActive()) return events;
+  let out = events.filter((e) => {
+    const f = largeOrderFacts(e.note);
+    if (bigOrderFilters.extraOnly && !/特大/.test(e.label || '')) return false;
+    if (bigOrderFilters.amount1e8 && !(f.amount >= 1e8)) return false;
+    if (bigOrderFilters.top10 && !(f.rank !== null && f.rank <= 10)) return false;
+    return true;
+  });
+  if (bigOrderFilters.onePerStock){
+    const best = new Map();
+    out.forEach((e) => {
+      const amount = largeOrderFacts(e.note).amount || 0;
+      const cur = best.get(e.code);
+      if (!cur || amount > cur.amount || (amount === cur.amount && e.ts > cur.e.ts)) best.set(e.code, { amount, e });
+    });
+    const keep = new Set([...best.values()].map((v) => v.e));
+    out = out.filter((e) => keep.has(e));
+  }
+  return out;
+}
+function bigOrderFilterBarHtml(total, shown){
+  const btns = BIG_ORDER_FILTER_DEFS.map((d) =>
+    '<button class="chart-tab bigorder-filter-btn' + (bigOrderFilters[d.key] ? ' active' : '') + '" data-filter="' + d.key + '" title="' + d.title + '">' + d.label + '</button>'
+  ).join('');
+  const note = bigOrderFilterActive() ? '<span class="bigorder-filter-note">篩選後 ' + shown + ' 筆（原本 ' + total + ' 筆）</span>' : '';
+  return '<div class="combo-filter-bar bigorder-filter-bar">' + btns + note + '</div>';
+}
 function signalRowsHtml(events){
   if (!events.length){
     return '<div class="signal-empty"><div class="se-title">目前沒有符合條件的訊號' + (signalDataIsReal ? '' : '（示範資料）') + '</div>' +
@@ -3534,10 +3591,11 @@ function renderSignalCenter(){
     if (key === 'history' || key === 'race333' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     if (key === 'brewLaunch'){ const bm = brewLaunchModel(); return bm ? bm.brewCount + '/' + bm.launchCount : null; }
+    if (key === 'bigBuy' || key === 'bigSell') return filterLargeOrderEvents(todaySignalEvents.filter((e) => e.tabs.includes(key))).length;
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
   // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
-  const PURPLE_TAB_KEYS = new Set(['groupHolderForce', 'groupCombinedBoard', 'race333', 'bigHolderForce']);
+  const PURPLE_TAB_KEYS = new Set(['groupHolderForce', 'groupCombinedBoard', 'race333', 'bigHolderForce', 'brewLaunch']);  // 2026-09-24 使用者：醞釀／發動也紫紅色
   const tabsHtml = SIGNAL_KINDS.map((k) => {
     const count = countFor(k.key);
     return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + (PURPLE_TAB_KEYS.has(k.key) ? ' signal-tab-purple' : '') + '" data-kind="' + k.key + '">' +
@@ -3601,6 +3659,10 @@ function renderSignalCenter(){
     refreshKlineBackfillStatus();
     const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
     replaceSignalHtml(body, active, klineBackfillNoteHtml() + signalRowsHtml(events));
+  } else if (active === 'bigBuy' || active === 'bigSell'){
+    const all = todaySignalEvents.filter((e) => e.tabs.includes(active));
+    const events = filterLargeOrderEvents(all);
+    replaceSignalHtml(body, active, bigOrderFilterBarHtml(all.length, events.length) + signalRowsHtml(events));
   } else {
     const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
     replaceSignalHtml(body, active, signalRowsHtml(events));
@@ -4043,6 +4105,14 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
   if (hfBtn){
     const f = hfBtn.dataset.filter;
     groupHolderForceFilter = groupHolderForceFilter === f ? null : f;
+    renderSignalCenter();
+    return;
+  }
+  const boBtn = e.target.closest('.bigorder-filter-btn');
+  if (boBtn){
+    const f = boBtn.dataset.filter;
+    bigOrderFilters[f] = !bigOrderFilters[f];
+    try { localStorage.setItem('bigOrderFilters', JSON.stringify(bigOrderFilters)); } catch (err) { /* 記不住就算了 */ }
     renderSignalCenter();
     return;
   }
