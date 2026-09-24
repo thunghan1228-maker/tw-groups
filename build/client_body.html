@@ -404,6 +404,8 @@
      跟下面淺灰底的內容區隔開；裡面的按鈕（交易日期／訊號教學／…）本來就有自己的淺色底、
      深色字，疊在深灰底上對比更清楚，不用另外調。 */
   .signal-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:move;touch-action:none;flex-wrap:wrap;background:#33333a;color:#fff;padding:10px 12px;border-radius:10px;}
+  /* 拖曳標題列時不要選到標題文字：選到之後下一次按住拖曳會變成「拖曳選取的文字」，瀏覽器直接取消視窗拖曳，只動一下就停。 */
+  .signal-modal-head{-webkit-user-select:none;user-select:none;}
   .signal-modal-head .sm-sub{color:#b8b8bf;}
   .sm-title{font-weight:800;font-size:16px;}
   .sm-sub{color:var(--muted);font-size:11px;margin-top:2px;max-width:320px;}
@@ -3510,7 +3512,11 @@ function initSignalWindowChrome(){
     if (!dragging) return;
     const dx = e.clientX - startX, dy = e.clientY - startY;
     let left = startLeft + dx, top = startTop + dy;
-    left = Math.max(-panel.offsetWidth + 100, Math.min(window.innerWidth - 100, left));
+    // 左右不能拖出畫面（2026-09-24 使用者 iPad 截圖：整個視窗往左跑掉、左半邊被切掉——iPad 上視窗佔滿
+    // 96% 寬，手指在深灰標題列上橫向一滑就把整個視窗拖走）。比畫面窄就整個留在畫面內；比畫面寬就只能在
+    // 「左邊貼齊」到「右邊貼齊」之間移動。上下維持原本可以往下拖、露出後面頁面。
+    const slack = document.documentElement.clientWidth - panel.offsetWidth;
+    left = Math.max(Math.min(0, slack), Math.min(Math.max(0, slack), left));
     top = Math.max(0, Math.min(window.innerHeight - 40, top));
     panel.style.left = left + 'px'; panel.style.top = top + 'px';
   });
@@ -3590,6 +3596,12 @@ function initSignalWindowChrome(){
   new MutationObserver(syncResizeHandles).observe(panel, { attributes: true, attributeFilter: ['class', 'style'] });
   new MutationObserver(syncResizeHandles).observe(overlay, { attributes: true, attributeFilter: ['hidden'] });
   window.addEventListener('resize', syncResizeHandles);
+  // iPad 直橫切換或瀏覽器變窄後，視窗還是舊的寬度／位置，會凸出畫面左右邊；這時自動重新置中、套用新畫面的預設大小。
+  window.addEventListener('resize', () => {
+    if (overlay.hidden) return;
+    const r = panel.getBoundingClientRect();
+    if (r.left < -1 || r.right > document.documentElement.clientWidth + 1) positionSignalModal();
+  });
   syncResizeHandles();
 }
 
