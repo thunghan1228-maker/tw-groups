@@ -403,9 +403,6 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .sig-eligibility span.pill-disposition{background:#d4a017;color:#fff;border-color:#d4a017;font-weight:700;}
   .race-row .sig-eligibility span.pill-attention{background:#2563eb;color:#fff;border-color:#2563eb;font-weight:700;}
   .race-row .pill-attention{background:#2563eb;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
-  .race-row .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;flex-shrink:0;}
-  .race-row .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
-  .race-row .pill-live{background:#16a34a;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   /* 族群綜合表：大戶力+處置/注意狀態合併成表格，欄位對齊，不是條列式一排排pill */
   /* 手機版（2026-09-24 使用者）：表格不要硬擠進螢幕寬度，漲跌幅／漲跌／成交價會疊在一起；
      表格最少 52em 寬（桌機 672px 視窗剛好放得下、不會多出橫向捲軸），手機上超出的部分讓整個
@@ -437,10 +434,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .combo-table .combo-holder .sig-label .hf-amt{font-size:.82em;font-weight:600;opacity:.92;}
   .combo-table .combo-holder .race-holder-none{color:var(--muted);}
   .combo-table .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;display:inline-block;}
-  .combo-table .disp-clauses{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;display:inline-block;}
-  .combo-table .pill-gap{background:#d97706;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;display:inline-block;}
   .combo-table .pill-attention{background:#2563eb;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;display:inline-block;margin:0 4px 2px 0;}
-  .disp-paused-note{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:8px;font-size:12px;font-weight:700;padding:6px 8px;margin:6px 0;}
   .combo-head.up{color:var(--up);} .combo-head.down{color:var(--down);}
   /* 族排名次：白底紫紅字的小標籤（2026-09-24 使用者），族群綜合表、族群大戶力共用；漲的、跌的族群都一樣 */
   .race-head .combo-rank{color:#d946ef;background:#fff;border-radius:6px;padding:1px 7px;font-weight:700;display:inline-block;line-height:1.35;}
@@ -648,8 +642,8 @@ const HTML_PAGE = `<!DOCTYPE html>
     #signalModalInner .race-row .sig-group,#signalModalInner .race-col-labels .race-group-label{font-size:14px;}
     #signalModalInner .race-row .sig-label{font-size:14px;}
     #signalModalInner .race-row .race-holder .sig-label{font-size:13px;}
-    #signalModalInner .race-row .pill-warn,#signalModalInner .race-row .pill-gap,#signalModalInner .race-row .pill-live,#signalModalInner .race-row .pill-attention{font-size:13px;}
-    #signalModalInner .race-row .sig-eligibility span,#signalModalInner .race-row .disp-clauses{font-size:12px;}
+    #signalModalInner .race-row .pill-warn,#signalModalInner .race-row .pill-attention{font-size:13px;}
+    #signalModalInner .race-row .sig-eligibility span{font-size:12px;}
     #signalModalInner .race-row .race-badge{font-size:17px;}
     #signalModalInner .race-col-labels .race-badge-slot{font-size:17px;}
     #signalModalInner .race-col-labels span b{font-size:12px;}
@@ -661,8 +655,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     #signalModalInner .combo-table,#signalModalInner .combo-table th{font-size:14.5px;}
     #signalModalInner .combo-table th{padding:6px 8px;}
     #signalModalInner .combo-table td{padding:8px 8px;}
-    #signalModalInner .combo-table .pill-warn,#signalModalInner .combo-table .pill-gap,#signalModalInner .combo-table .pill-attention{font-size:13px;}
-    #signalModalInner .combo-table .disp-clauses{font-size:12px;}
+    #signalModalInner .combo-table .pill-warn,#signalModalInner .combo-table .pill-attention{font-size:13px;}
   }
   /* 桌機版（螢幕夠寬，>=1100px）大戶力%跟金額改回前後（同一行）排列；手機／iPad（<1100px，
      含1180px上限的視窗本身撐不到這麼寬時）維持%在上、金額在下的兩行疊放
@@ -801,7 +794,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="signal-help" id="signalHelp" hidden>
       <ul>
         <li><b>今日即時</b>：彙整下列各類訊號的即時清單。</li>
-        <li><b>族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單；藍色「注意股」是交易所已公布的官方注意股；「今天中幾款」「🔮」是自己算的預測。</li>
+        <li><b>族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
         <li><b>族群大戶力</b>：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)、刀劍空(32)等多空條件篩出的個股與族群名單。</li>
         <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。</li>
@@ -811,7 +804,6 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>創高黑龍</b>：11:00～13:30，5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。</li>
         <li><b>主力翻多空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
         <li><b>盤中特大買單／賣單</b>：單筆超大額買進／賣出成交。</li>
-        <li><b>處置股預測</b>：依證交所／櫃買中心的注意、處置規則，列出今天觸發注意的款別、已進入處置累積路徑（預計會被處置）的股票，以及差距預測（還差多少漲幅或成交量就會觸發注意）。2026-09-24 起不續訂 FinMind：第四、十款（週轉率）、第六款（本益比／淨值比）、第七款（券資比）、第十二款（借券賣出）、第十三款（當沖）暫停判斷，第一款少了同類股比較；第二、三、九、十一款（價量）照常。藍色「注意股」是交易所已公布的官方名單，不受影響。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。</li>
       </ul>
     </div>
@@ -2304,7 +2296,6 @@ const SIGNAL_KINDS = [
   { key: 'mainForceFlip', label: '主力翻多空' },
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
-  { key: 'dispositionRisk', label: '處置股預測' },
   { key: 'history', label: '歷史查詢' },
 ];
 // 5分鐘K策略訊號家族(MA交叉/520/A8空等)只在K線圖上用符號呈現，不進盤中
@@ -3247,40 +3238,13 @@ function groupHolderForceHtml(){
 // null=兩邊都顯示（預設）；'up'/'down'=只顯示那一邊，再點一次同一個按鈕取消篩選。
 let groupCombinedBoardFilter = null;
 function groupCombinedBoardDispositionCell(code){
+  // 2026-09-24 使用者拿掉處置股預測：這格只剩官方資料——處置中（官方處置股名單）或注意股（交易所公布的注意股）。
   const f = stockFlags[code];
   if (f && f.disposition){
     const until = f.dispositionUntil ? ' 至' + String(f.dispositionUntil).slice(5).replace('-', '/') : '';
     return '<span class="pill-warn" title="' + (f.dispositionReason || '') + '">處置中' + until + '</span>';
   }
-  const d = dispositionRiskData;
-  const row = d && Array.isArray(d.results) ? d.results.find((r) => r.code === code) : null;
-  if (row && row.accumulation){
-    const a = row.accumulation;
-    const title = a.triggerPath + (a.durationCaveat ? '\\n' + a.durationCaveat : '');
-    return '<span class="pill-warn" title="' + title + '">預計處置' + a.predictedDurationBusinessDays + '天</span>';
-  }
-  // 官方注意股放最前面，後面接預測（今天中幾款／🔮明天門檻）：注意股是交易所已經公布的，預測是還沒公布的
-  const attention = attentionPillHtml(code);
-  if (row && row.firedToday && row.firedToday.length){
-    const clauseText = row.firedToday.map((c) => c.clause).join('・');
-    const title = row.firedToday.map((c) => '第' + c.clause + '款：' + c.detail).join('\\n');
-    return attention + '<span class="disp-clauses" title="' + title + '">今天中' + clauseText + '款</span>';
-  }
-  if (row && row.gapPrediction){
-    const g = row.gapPrediction;
-    const title = '明天收盤價門檻約' + g.thresholdClose + '元；觸發只代表公布注意，不是處置';
-    return attention + '<span class="pill-gap" title="' + title + '">🔮' + g.detail + '</span>';
-  }
-  const vw = dispositionVolumeWatchData;
-  const vrow = vw && Array.isArray(vw.results) ? vw.results.find((r) => r.code === code) : null;
-  if (vrow){
-    return attention + '<span class="pill-gap" title="第' + vrow.clause + '款；觸發只代表公布注意，不是處置">🔮' + vrow.detail + '</span>';
-  }
-  const pw = d && Array.isArray(d.priceExtremeWatch) ? d.priceExtremeWatch.find((r) => r.code === code) : null;
-  if (pw){
-    return attention + '<span class="pill-gap" title="明天收盤價門檻約' + pw.thresholdClose + '元；觸發只代表公布注意，不是處置">🔮' + pw.detail + '</span>';
-  }
-  return attention;
+  return attentionPillHtml(code);
 }
 function groupCombinedBoardModel(view){
   // view 來自 holderView()：今天＝首頁即時行情＋目前排行；昨天／前天＝那一天的日K收盤＋那一天的最終排行。
@@ -3304,13 +3268,8 @@ function groupCombinedBoardModel(view){
   // 族排最弱名次：由弱到強倒數（第 1 名全體最弱），大戶力≤-10%篩選時用這個代替上面的族排第N名。
   const weakestRankOf = new Map(weakToStrong.map((g, i) => [g.name, i + 1]));
   const holderByCode = new Map((view.ranking || []).map((r) => [r.code, r]));
-  // 處置／注意資料只有今天的：看昨天／前天時不併入，只列大戶力夠格（|大戶力| >= 10%）的股票。
-  const d = isPast ? null : dispositionRiskData;
+  // 處置／注意（官方名單）只有今天的：看昨天／前天時不併入，只列大戶力夠格（|大戶力| >= 10%）的股票。
   const dispByCode = new Set();
-  if (d && Array.isArray(d.results)) d.results.forEach((r) => { if (r.firedToday.length || r.accumulation || r.gapPrediction) dispByCode.add(r.code); });
-  if (d && Array.isArray(d.priceExtremeWatch)) d.priceExtremeWatch.forEach((r) => dispByCode.add(r.code));
-  const vw = isPast ? null : dispositionVolumeWatchData;
-  if (vw && Array.isArray(vw.results)) vw.results.forEach((r) => dispByCode.add(r.code));
   if (!isPast) Object.keys(stockFlags).forEach((code) => { if (stockFlags[code] && (stockFlags[code].disposition || stockFlags[code].attention)) dispByCode.add(code); });
 
   const blocks = ranked.map((g) => {
@@ -3401,119 +3360,6 @@ function groupCombinedBoardHtml(){
       ? '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題前的「族排最弱第 N 名」是' + dayWord + '平均漲跌幅由弱到強倒數的名次（第 1 名全體最弱），標題依平均漲跌幅正負分紅/綠，並依跌幅大小排序（跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>'
       : '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題前的「族排第 N 名」是' + dayWord + '平均漲跌幅在全部族群裡的名次（第 1 名最強，篩選後可能跳號），標題依平均漲跌幅正負分紅/綠，並依漲跌幅排序，共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>') +
     m.blocks.map(groupCombinedBoardBlockHtml).join('');
-}
-
-// ---- 處置股預測：43個官方族群股票，依證交所14款異常標準判定今天觸發哪些款、
-// 以及依第六條累積規則是不是已經累積到會被處置（含5/7天處置期間預測）----
-let dispositionRiskData = null;
-let dispositionRiskFetchedAt = 0;
-async function fetchDispositionRisk(){
-  const res = await fetch('/api/disposition-risk');
-  if (!res.ok) throw new Error('disposition-risk http ' + res.status);
-  const data = await res.json();
-  if (!data || !Array.isArray(data.results)) throw new Error('bad payload');
-  return data;
-}
-async function refreshDispositionRisk(force){
-  if (!force && Date.now() - dispositionRiskFetchedAt < 600000) return;
-  dispositionRiskFetchedAt = Date.now();
-  try {
-    dispositionRiskData = await fetchDispositionRisk();
-    if (!document.getElementById('signalModal').hidden) renderSignalCenter();
-  } catch (e) { /* 抓不到就沿用上一次 */ }
-}
-// 第九/十款(成交量類)差距預測即時觀察版：門檻收盤後算好，比對用的成交量盡量即時。
-// 門檻本身不太會變，但目前成交量會一直動，所以用比dispositionRisk(10分鐘)短很多的
-// 過期時間(20秒)，靠renderSignalCenter()既有的5秒心跳(見refreshSignalData)自然帶動
-// 重抓，不用另外開一個setInterval一直跑。
-let dispositionVolumeWatchData = null;
-let dispositionVolumeWatchFetchedAt = 0;
-async function fetchDispositionVolumeWatch(){
-  const res = await fetch('/api/disposition-volume-watch');
-  if (!res.ok) throw new Error('disposition-volume-watch http ' + res.status);
-  const data = await res.json();
-  if (!data || !Array.isArray(data.results)) throw new Error('bad payload');
-  return data;
-}
-async function refreshDispositionVolumeWatch(force){
-  if (!force && Date.now() - dispositionVolumeWatchFetchedAt < 20000) return;
-  dispositionVolumeWatchFetchedAt = Date.now();
-  try {
-    dispositionVolumeWatchData = await fetchDispositionVolumeWatch();
-    if (!document.getElementById('signalModal').hidden) renderSignalCenter();
-  } catch (e) { /* 抓不到就沿用上一次 */ }
-}
-function dispositionRiskStockRowHtml(r){
-  const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
-  const clauseText = r.firedToday.map((c) => c.clause).join('・');
-  const clauseTitle = r.firedToday.map((c) => '第' + c.clause + '款：' + c.detail).join('\\n');
-  const clausesHtml = r.firedToday.length
-    ? '<span class="disp-clauses" title="' + clauseTitle + '">今天中：' + clauseText + '款</span>' : '';
-  const accum = r.accumulation;
-  const warnTitle = accum ? accum.triggerPath + (accum.durationCaveat ? '\\n' + accum.durationCaveat : '') : '';
-  const warnHtml = accum
-    ? '<span class="pill-warn" title="' + warnTitle + '">預計處置' + accum.predictedDurationBusinessDays + '個營業日</span>' : '';
-  const gap = r.gapPrediction;
-  const gapTitle = gap ? '明天收盤價門檻約' + gap.thresholdClose + '元（' + (gap.direction === 'up' ? '漲幅' : '跌幅') + (gap.changePctFromToday > 0 ? '+' : '') + gap.changePctFromToday.toFixed(2) + '%）；收盤後用官方定案資料反推，不是盤中即時值' : '';
-  const gapHtml = gap ? '<span class="pill-gap" title="' + gapTitle + '">🔮 明天' + gap.detail + '</span>' : '';
-  return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
-    '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
-    attentionPillHtml(r.code) + clausesHtml + warnHtml + gapHtml + '</div>';
-}
-function dispositionPriceExtremeWatchRowHtml(r){
-  const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
-  const title = '明天收盤價門檻約' + r.thresholdClose + '元（' + (r.direction === 'up' ? '漲幅' : '跌幅') +
-    (r.changePctFromToday > 0 ? '+' : '') + r.changePctFromToday.toFixed(2) +
-    '%）；收盤後用官方定案資料反推，不是盤中即時值；觸發只代表公布注意，不計入處置累積路徑';
-  return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
-    '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
-    '<span class="disp-clauses">第十一款</span>' +
-    '<span class="pill-gap" title="' + title + '">🔮 明天' + r.detail + '</span></div>';
-}
-function dispositionPriceExtremeWatchSectionHtml(){
-  const data = dispositionRiskData;
-  const list = data && Array.isArray(data.priceExtremeWatch) ? data.priceExtremeWatch : [];
-  if (!list.length) return '';
-  return '<div class="race-sep">------↓(收盤價接近第十一款門檻，創6日新高/新低觀察中)↓------</div>' +
-    '<div class="race-sub">【注意】這裡達標只代表會觸發一次公布「注意交易資訊」，第十一款不計入處置累積路徑，跟是否會被處置無關。反推明天收盤價要達到多少才會創6日新高或新低，收盤後用官方定案資料算，不是盤中即時值；超過台股單日漲跌幅限制(±10%)的不會列出。</div>' +
-    list.map(dispositionPriceExtremeWatchRowHtml).join('');
-}
-function dispositionVolumeWatchRowHtml(r){
-  const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
-  const liveHtml = r.liveData
-    ? '<span class="pill-live" title="即時成交量（市場數據中樞，Shioaji逐筆餵入）">直播</span>'
-    : '<span class="disp-clauses" title="這檔目前不在即時追蹤範圍內，用門檻計算那天(' + dispositionVolumeWatchData.tradeDate + ')收盤量估計">估計</span>';
-  const volTitle = '門檻' + r.thresholdVolume.toFixed(0) + '張／目前' + r.currentVolume.toFixed(0) + '張';
-  return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
-    '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
-    '<span class="disp-clauses">第' + r.clause + '款</span>' + liveHtml +
-    '<span class="pill-gap" title="' + volTitle + '">' + r.detail + '</span></div>';
-}
-function dispositionVolumeWatchSectionHtml(){
-  const data = dispositionVolumeWatchData;
-  if (!data || !data.results.length) return '';
-  const liveNote = data.liveCount > 0 ? '目前 ' + data.liveCount + ' / ' + data.count + ' 檔有即時成交量。' : '目前沒有股票在即時追蹤範圍內，全部用收盤量估計。';
-  return '<div class="race-sep">------↓(成交量接近第九/十款門檻，盤中觀察中)↓------</div>' +
-    '<div class="race-sub">【注意】這裡達標只代表會觸發一次公布「注意交易資訊」，第九／十款不計入證交所第六條的處置累積路徑，跟是否會被處置無關——不會因為這裡達標就被限制交易。第九款(單日爆量)／第十款(週轉率)差距預測：門檻收盤後用官方定案資料算好，對整個下一個交易日都有效；' + liveNote + (data.liveSubscriptionCapNote || '') + '</div>' +
-    data.results.map(dispositionVolumeWatchRowHtml).join('');
-}
-// 2026-09-24 使用者決定不續訂 FinMind：本益比／淨值比、融資融券、當沖、借券、市值（週轉率）這些盤後資料沒有了，
-// 用到它們的款別暫停；只看價量的款別照算。官方注意股／處置股名單不受影響（永豐＋證交所）。
-const DISPOSITION_PAUSED_NOTE = '<div class="disp-paused-note">⚠️ 已停用 FinMind（2026-09-24 起）：第四、十款（週轉率）、第六款（本益比／淨值比）、第七款（券資比）、第十二款（借券賣出）、第十三款（當沖比例，也用來判斷處置 5 天或 7 天）暫停判斷；第一款少了同類股比較。第二、三、九、十一款（價量）照常。藍色「注意股」是交易所已公布的官方名單，不受影響。</div>';
-function dispositionRiskHtml(){
-  const data = dispositionRiskData;
-  const volumeSection = dispositionVolumeWatchSectionHtml();
-  const priceSection = dispositionPriceExtremeWatchSectionHtml();
-  if (!data) return '<div class="signal-empty"><div class="se-title">讀取中…</div><div class="se-sub">處置股預測資料還沒載入。</div></div>';
-  if (!data.results.length && !volumeSection && !priceSection) return '<div class="signal-empty"><div class="se-title">今天沒有股票觸發任何處置股款別</div><div class="se-sub">交易日 ' + data.tradeDate + '</div></div>';
-  const accumulating = data.results.filter((r) => r.accumulation);
-  const firedOnly = data.results.filter((r) => !r.accumulation);
-  return DISPOSITION_PAUSED_NOTE + '<div class="race-sub">依證交所公布或通知注意交易資訊暨處置作業要點第四條14款異常標準，只算43個官方族群524檔（第五款需要券商分點資料、第八款限台灣存託憑證，這兩款沒有列入判定）；今天觸發款別的股票，以及依第六條累積規則已經累積到會被處置的股票。🔮 標籤是「連續2天中第一款、還差1次就觸發」的股票，收盤後用官方定案資料反推明天收盤價門檻（不是盤中即時值）。交易日 ' + data.tradeDate + '</div>' +
-    (accumulating.length ? '<div class="race-sep">------↓(已進入處置累積路徑，預計會被處置)↓------</div>' +
-      accumulating.map(dispositionRiskStockRowHtml).join('') : '') +
-    (firedOnly.length ? '<div class="race-sep">------↓(今天觸發款別，尚未累積到處置門檻)↓------</div>' +
-      firedOnly.map(dispositionRiskStockRowHtml).join('') : '') +
-    volumeSection + priceSection;
 }
 
 // ---- 醞釀／發動（2026-09-24 使用者：老師的「1＝醞釀（整理形態）、2＝發動（突破）」）----
@@ -3683,7 +3529,6 @@ function renderSignalCenter(){
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
     if (key === 'history' || key === 'race333' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
-    if (key === 'dispositionRisk') return dispositionRiskData ? dispositionRiskData.results.length + (dispositionVolumeWatchData ? dispositionVolumeWatchData.results.length : 0) + (Array.isArray(dispositionRiskData.priceExtremeWatch) ? dispositionRiskData.priceExtremeWatch.length : 0) : null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     if (key === 'brewLaunch'){ const bm = brewLaunchModel(); return bm ? bm.brewCount + '/' + bm.launchCount : null; }
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
@@ -3744,15 +3589,9 @@ function renderSignalCenter(){
     replaceSignalHtml(body, 'groupHolderForce', groupHolderForceHtml());
   } else if (active === 'groupCombinedBoard'){
     refreshGroupDailyChanges(false);
-    refreshDispositionRisk(false);
-    refreshDispositionVolumeWatch(false);
     replaceSignalHtml(body, 'groupCombinedBoard', groupCombinedBoardHtml());
   } else if (active === 'brewLaunch'){
     replaceSignalHtml(body, 'brewLaunch', brewLaunchHtml());
-  } else if (active === 'dispositionRisk'){
-    refreshDispositionRisk(false);
-    refreshDispositionVolumeWatch(false);
-    replaceSignalHtml(body, 'dispositionRisk', dispositionRiskHtml());
   } else if (active === 'now'){
     replaceSignalHtml(body, 'now', nowTabRowsHtml(todaySignalEvents, bigHolderRows));
   } else if (DEDICATED_KLINE_TABS.has(active)){
@@ -4541,22 +4380,6 @@ export default {
         return await proxyHanstockBars("/api/hub/brew-launch", 600);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), stocks: {} }, { status: 502 });
-      }
-    }
-    if (url.pathname === "/api/disposition-risk") {
-      try {
-        // 處置股預測：收盤後背景收集器算好才會變，快取 10 分鐘。
-        return await proxyHanstockBars("/api/hub/disposition-risk" + url.search, 600);
-      } catch (err) {
-        return Response.json({ status: "error", error: String(err), results: [] }, { status: 502 });
-      }
-    }
-    if (url.pathname === "/api/disposition-volume-watch") {
-      try {
-        // 第九/十款差距預測即時觀察版：門檻收盤後算好，但比對用的成交量盡量即時，不快取。
-        return await proxyHanstockBars("/api/hub/disposition-risk/volume-watch" + url.search, 0);
-      } catch (err) {
-        return Response.json({ status: "error", error: String(err), results: [] }, { status: 502 });
       }
     }
     if (url.pathname === "/api/stock-flags") {
