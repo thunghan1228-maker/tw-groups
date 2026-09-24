@@ -10,9 +10,10 @@
   header{padding:20px 16px 8px;}
   h1{font-size:20px;margin:0 0 4px;text-wrap:balance;}
   .sub{color:var(--muted);font-size:13px;}
-  .draft-badge{display:inline-flex;align-items:center;gap:6px;margin:10px 16px 0;padding:5px 10px;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.02em;}
-  .draft-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;}
   .updated{color:var(--muted);font-size:11px;text-align:center;padding:8px 0 28px;}
+  /* 2026-09-24 使用者：搜尋框、櫃買強弱widget移到標題列（跟盤中訊號同一排）；
+     強勢/弱勢族群統計移到強勢/弱勢分頁正上方，不再擠在「各族群前三強個股」標題旁邊。 */
+  .stat-bar-row{padding:12px 16px 0;}
   .loading{color:var(--muted);text-align:center;padding:40px 0;}
 
   .layout{display:flex;gap:14px;padding:8px 16px 32px;align-items:flex-start;flex-wrap:wrap;}
@@ -75,6 +76,9 @@
   @media (max-width: 640px){
     .top-groups-row{grid-template-columns:1fr;grid-template-rows:none;grid-auto-flow:row;}
     .stat-bar{gap:12px;}
+    /* 手機版寬度不夠並排：搜尋框、櫃買強弱widget、盤中訊號各自佔滿一整行 */
+    .stock-search-bar,.market-strength-bar{flex-basis:100%;max-width:none;}
+    .signal-controls{margin-left:0;width:100%;justify-content:flex-end;}
   }
   @media (prefers-reduced-motion: reduce){
     *{transition:none!important;}
@@ -176,15 +180,16 @@
   .fl-cum{background:var(--accent);border-radius:50%;}
   .force-note{font-size:11px;color:#f1ece6;margin-bottom:6px;}
 
-  /* 頂部：櫃買盤勢／盤中訊號 */
-  .header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
-  .signal-controls{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  /* 頂部：標題／搜尋框／櫃買盤勢／盤中訊號同一排（2026-09-24 使用者：搜尋框移到標題右邊、
+     櫃買強弱widget移到搜尋框右邊，盤中訊號維持最右邊；空間不夠時各自換行）。 */
+  .header-top{display:flex;justify-content:flex-start;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .signal-controls{display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:auto;}
   .signal-badge-btn{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;}
   .signal-badge-btn:hover{background:var(--panel-2);}
   .sb-count{background:var(--accent);color:var(--bg);border-radius:999px;min-width:18px;padding:0 5px;text-align:center;font-size:11px;}
   .alert-toggle{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;}
   .alert-toggle.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
-  .market-strength-bar{display:flex;align-items:center;gap:14px;margin-top:12px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex-wrap:wrap;}
+  .market-strength-bar{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex-wrap:wrap;flex:1 1 300px;max-width:420px;}
   .ms-badge{font-size:14px;font-weight:800;padding:6px 14px;border-radius:8px;background:var(--panel-2);flex-shrink:0;}
   .ms-badge.up{color:var(--up);}
   .ms-badge.down{color:var(--down);}
@@ -194,7 +199,7 @@
   .ms-updated{color:var(--muted);opacity:.8;}
 
   /* 股票搜尋 */
-  .stock-search-bar{display:flex;align-items:center;gap:10px;margin:0 16px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;}
+  .stock-search-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex:1 1 260px;max-width:360px;}
   .stock-search-bar input{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;}
   .stock-search-bar input:focus{outline:2px solid var(--accent);outline-offset:1px;}
   .ssb-hint{color:var(--down);font-size:12px;flex-shrink:0;}
@@ -396,7 +401,7 @@
   .signal-row:hover{background:rgba(201,169,140,0.08);}
   .signal-row .sig-time{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0;width:40px;}
   .signal-row .sig-code{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0;}
-  .signal-row .sig-group{color:var(--muted);font-size:11px;background:var(--panel-2);border-radius:6px;padding:1px 8px;flex-shrink:0;white-space:nowrap;}
+  .signal-row .sig-group{color:#fff;font-size:11px;background:#7c3aed;font-weight:700;border-radius:6px;padding:1px 8px;flex-shrink:0;white-space:nowrap;}
   .signal-row .sig-name{font-weight:700;flex-shrink:0;}
   .signal-row .sig-label{color:var(--text);opacity:.85;white-space:nowrap;flex-shrink:0;}
   .signal-row .sig-label.sig-bull{background:var(--up);color:#fff;opacity:1;padding:2px 8px;border-radius:6px;font-weight:700;}
@@ -514,19 +519,19 @@
       <h1>台股族群強弱排行</h1>
       <div class="sub">依族群平均漲跌幅排序，每 15 秒自動更新一次</div>
     </div>
+    <div class="stock-search-bar">
+      <input type="text" id="stockSearchInput" placeholder="輸入代號或名稱，按 Enter 或點右邊圖示開啟五分鐘K線圖">
+      <button class="ssb-go-btn" id="stockSearchGoBtn" aria-label="開啟K線圖">🔍</button>
+      <span class="ssb-hint" id="stockSearchHint" hidden>查無此股票</span>
+    </div>
+    <div class="market-strength-bar" id="otcStrengthBox"></div>
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
   </div>
-  <div class="market-strength-bar" id="otcStrengthBox"></div>
 </header>
-<div class="draft-badge"><span class="dot"></span>全部項目（含K線圖／主力買賣力／日線）皆為後端真實資料，連不上或該股尚無資料時自動退回示範資料</div>
-<div class="stock-search-bar">
-  <input type="text" id="stockSearchInput" placeholder="輸入代號或名稱，按 Enter 或點右邊圖示開啟五分鐘K線圖">
-  <button class="ssb-go-btn" id="stockSearchGoBtn" aria-label="開啟K線圖">🔍</button>
-  <span class="ssb-hint" id="stockSearchHint" hidden>查無此股票</span>
-</div>
+<div class="stat-bar-row" id="groupStatBar"></div>
 <div class="tabs">
   <button class="tab-btn strong active" id="tabStrong">強勢</button>
   <button class="tab-btn weak" id="tabWeak">弱勢</button>
@@ -3593,11 +3598,16 @@ function render(){
     '</div>';
   }).join('');
 
-  const statBarHtml =
-    '<div class="stat-bar">' +
-      '<div class="stat-item"><div class="stat-num up">' + strongCount + ' / ' + total + '</div><div class="stat-label">強勢族群</div></div>' +
-      '<div class="stat-item"><div class="stat-num down">' + weakCount + ' / ' + total + '</div><div class="stat-label">弱勢族群</div></div>' +
-    '</div>';
+  // 強勢/弱勢族群統計移到強勢/弱勢分頁正上方（2026-09-24 使用者），不再跟著#app一起
+  // 重畫在「各族群前三強個股」標題旁邊——獨立更新到#groupStatBar這個固定位置。
+  const statBarEl = document.getElementById('groupStatBar');
+  if (statBarEl){
+    statBarEl.innerHTML =
+      '<div class="stat-bar">' +
+        '<div class="stat-item"><div class="stat-num up">' + strongCount + ' / ' + total + '</div><div class="stat-label">強勢族群</div></div>' +
+        '<div class="stat-item"><div class="stat-num down">' + weakCount + ' / ' + total + '</div><div class="stat-label">弱勢族群</div></div>' +
+      '</div>';
+  }
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-left">' +
@@ -3605,7 +3615,7 @@ function render(){
         '<div class="top6-grid">' + side6Html + '</div>' +
       '</div>' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">各族群前三' + rankLabel + '個股</div>' + statBarHtml + '</div>' +
+        '<div class="section-head"><div class="section-title">各族群前三' + rankLabel + '個股</div></div>' +
         '<div class="top-groups-row">' + sideGroupsHtml + '</div>' +
       '</div>' +
     '</div>';
