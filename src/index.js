@@ -388,7 +388,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 族群名稱、今天平均漲跌幅：紫底白字的獨立色塊（2026-09-24 使用者），跟漲跌方向無關，族群大戶力、族群綜合表共用 */
   .race-head .head-pill{background:#7c3aed;color:#fff;border-radius:6px;padding:1px 8px;font-weight:700;display:inline-block;}
   .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
-  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn{padding:4px 10px;font-size:12px;}
+  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn,.combo-filter-bar .race333-filter-btn{padding:4px 10px;font-size:12px;}
   .combo-filter-bar .hf-day-btn[disabled]{opacity:.45;cursor:default;}
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
@@ -2918,10 +2918,28 @@ function raceStockListHtml(list, opts){
 }
 function raceBladeListHtml(m){
   const names = (list) => list.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%' + (r.limitDown ? '🔒' : '')).join('、');
+  const bladeLower = race333FilterList(m.bladeLower);
+  const bladeUpper = race333FilterList(m.bladeUpper);
+  const bladeHarvest = race333FilterList(m.bladeHarvest);
   return '<div class="race-sep">----↓(強空積極)↓----</div>' +
-    (m.bladeLower.length ? raceColLabelsHtml({ blade: true }) + m.bladeLower.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone: '🔰', dates: m.dates })).join('') : '<div class="race-note">目前沒有符合條件的股票</div>') +
-    (m.bladeUpper.length ? '<div class="race-note">多方打少（強族群裡逆勢走弱，空得保守）' + m.bladeUpper.length + ' 檔：' + names(m.bladeUpper) + '</div>' : '') +
-    (m.bladeHarvest.length ? '<div class="race-note">收割區域（已跌 ' + BLADE_HARVEST_PCT + '% 以上或跌停，不追空）' + m.bladeHarvest.length + ' 檔：' + names(m.bladeHarvest) + '</div>' : '');
+    (bladeLower.length ? raceColLabelsHtml({ blade: true }) + bladeLower.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone: '🔰', dates: m.dates })).join('') : '<div class="race-note">目前沒有符合條件的股票</div>') +
+    (bladeUpper.length ? '<div class="race-note">多方打少（強族群裡逆勢走弱，空得保守）' + bladeUpper.length + ' 檔：' + names(bladeUpper) + '</div>' : '') +
+    (bladeHarvest.length ? '<div class="race-note">收割區域（已跌 ' + BLADE_HARVEST_PCT + '% 以上或跌停，不追空）' + bladeHarvest.length + ' 檔：' + names(bladeHarvest) + '</div>' : '');
+}
+// 盤中333 大戶力篩選（2026-09-24 使用者）：null=不篩選；'up'=只留大戶力≥10%的個股；'down'=只留
+// 大戶力≤-10%的個股；只套用在馬火多/賽馬多/河流多/刀劍空這幾個「個股」名單（30/33/34/32），
+// 「條件>7%」跟188/199是族群層級的名單、沒有個股大戶力可篩，維持原樣不變（使用者明確要求）。
+let race333HolderFilter = null;
+function race333FilterList(list){
+  if (!race333HolderFilter) return list;
+  return list.filter((r) => r.strengthPct !== null && r.strengthPct !== undefined &&
+    (race333HolderFilter === 'up' ? r.strengthPct >= 10 : r.strengthPct <= -10));
+}
+function race333FilterBarHtml(){
+  return '<div class="combo-filter-bar">' +
+    '<button class="chart-tab race333-filter-btn' + (race333HolderFilter === 'up' ? ' active' : '') + '" data-filter="up">大戶力≥10%</button>' +
+    '<button class="chart-tab race333-filter-btn' + (race333HolderFilter === 'down' ? ' active' : '') + '" data-filter="down">大戶力≤-10%</button>' +
+  '</div>';
 }
 function race333Html(){
   const m = race333Model();
@@ -2931,17 +2949,21 @@ function race333Html(){
   const dailyNote = m.hasDaily
     ? '昨天＝' + (m.dates[0] || '') + (m.dates[1] ? '，前天＝' + m.dates[1] : '')
     : '還沒拿到族群昨天的資料，188／199 暫時無法判定，33／34 先不用「族群要在 188／199 裡」這條';
-  return raceOtcBoxHtml(m) +
+  const triple = race333FilterList(m.triple);
+  const both = race333FilterList(m.both);
+  const fires = race333FilterList(m.fires);
+  const fireLocked = race333FilterList(m.fireLocked);
+  return race333FilterBarHtml() + raceOtcBoxHtml(m) +
     '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
       '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、族群在 188／199 裡、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・漲幅高的在前</div>' +
-      raceStockListHtml(m.triple, { fire: true, dates: m.dates }) + '</div>' +
+      raceStockListHtml(triple, { fire: true, dates: m.dates }) + '</div>' +
     '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
       '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・族群在 188／199 裡</div>' +
-      raceStockListHtml(m.both, { dates: m.dates }) + '</div>' +
+      raceStockListHtml(both, { dates: m.dates }) + '</div>' +
     '<div class="race-block"><div class="race-head">🐎🚀馬火多(30) ' + stamp + '</div>' +
       '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔，漲幅高的在前・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
-      raceStockListHtml(m.fires, { fire: true, dates: m.dates }) +
-      (m.fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + m.fireLocked.length + ' 檔：' + m.fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
+      raceStockListHtml(fires, { fire: true, dates: m.dates }) +
+      (fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + fireLocked.length + ' 檔：' + fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
       '</div>' +
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
       '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要有 ⚔️ 劍（現價低於前天收盤，數字＝低幾 %；🔪 刀＝低於昨收）・最多 ' + BLADE_MAX_ROWS + ' 檔，跌幅深的在前・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
@@ -3850,6 +3872,13 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
   if (hfBtn){
     const f = hfBtn.dataset.filter;
     groupHolderForceFilter = groupHolderForceFilter === f ? null : f;
+    renderSignalCenter();
+    return;
+  }
+  const r333Btn = e.target.closest('.race333-filter-btn');
+  if (r333Btn){
+    const f = r333Btn.dataset.filter;
+    race333HolderFilter = race333HolderFilter === f ? null : f;
     renderSignalCenter();
     return;
   }
