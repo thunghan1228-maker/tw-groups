@@ -262,6 +262,10 @@
   /* 族群大戶力：漲跌幅／漲跌／成交價三欄固定寬、靠右，跟卡片頂端的欄位標籤對齊；漲停／處置警示留固定寬的格子在最後面 */
   .race-row .race-pct,.race-row .race-chg,.race-row .race-price{font-weight:700;flex:0 0 5em;text-align:right;white-space:nowrap;}
   .race-row .race-chg.up,.race-row .race-price.up{color:var(--up);} .race-row .race-chg.down,.race-row .race-price.down{color:var(--down);}
+  /* 漲停／跌停直接顯示在成交價底色上（2026-09-24 使用者：紅底白字＝漲停、綠底白字＝跌停），
+     不用另外佔一格文字標籤。 */
+  .race-row .race-price.limit-up{background:var(--up);color:#fff;padding:2px 6px;border-radius:6px;}
+  .race-row .race-price.limit-down{background:var(--down);color:#fff;padding:2px 6px;border-radius:6px;}
   .race-row .race-warn-slot{flex:0 0 3.6em;text-align:right;}
   .race-col-labels{display:flex;align-items:center;gap:8px;padding:0 8px 2px;}
   .race-row:has(.race-holder),.race-col-labels:has(.race-holder){max-width:900px;}  /* 盤中333專用（2026-09-24 使用者：壓縮鬆散的空白） */
@@ -522,6 +526,15 @@
     #signalModalInner .combo-table td{padding:8px 8px;}
     #signalModalInner .combo-table .pill-warn,#signalModalInner .combo-table .pill-gap{font-size:13px;}
     #signalModalInner .combo-table .disp-clauses{font-size:12px;}
+  }
+  /* 桌機版（螢幕夠寬，>=1100px）大戶力%跟金額改回前後（同一行）排列；手機／iPad（<1100px，
+     含1180px上限的視窗本身撐不到這麼寬時）維持%在上、金額在下的兩行疊放
+     （2026-09-24 使用者：這個並排只有電腦版，手機跟iPad要維持上下）。 */
+  @media (min-width:1100px){
+    #signalModalInner .race-row .race-holder,#signalModalInner .race-col-labels .race-holder{flex:0 0 9em;}
+    #signalModalInner .race-row .race-holder .sig-label,#signalModalInner .combo-table .combo-holder .sig-label{flex-direction:row;align-items:baseline;gap:0;}
+    #signalModalInner .race-row .race-holder .sig-label .hf-amt,#signalModalInner .combo-table .combo-holder .sig-label .hf-amt{font-size:.82em;}
+    #signalModalInner .race-row .race-holder .sig-label .hf-amt::before,#signalModalInner .combo-table .combo-holder .sig-label .hf-amt::before{content:'・';opacity:.7;}
   }
 </style>
 
@@ -2974,28 +2987,25 @@ function groupHolderForceModel(view){
   return { risingGroups, fallingGroups, total };
 }
 function groupHolderForceWarnPillHtml(r){
-  // 使用者要求：超過漲跌幅鎖死(漲停/跌停)、或會被處置(關)的個股，紅底白字寫在該列最後面。
-  const parts = [];
-  if (r.limitUp) parts.push('漲停');
-  if (r.limitDown) parts.push('跌停');
+  // 使用者2026-09-24：漲停/跌停改直接顯示在成交價那格的底色（紅底白字/綠底白字），不用另外
+  // 佔一格；這裡只留處置股警示（跟漲跌停無關，是另一件事，還是要單獨標示）。
   const f = stockFlags[r.code];
-  if (f && f.disposition){
-    const until = f.dispositionUntil ? ' 至' + String(f.dispositionUntil).slice(5).replace('-', '/') : '';
-    parts.push('處置股' + until);
-  }
-  if (!parts.length) return '';
-  const title = f && f.disposition && f.dispositionReason ? f.dispositionReason : '';
-  return '<span class="pill-warn"' + (title ? ' title="' + title + '"' : '') + '>' + parts.join('・') + '</span>';
+  if (!f || !f.disposition) return '';
+  const until = f.dispositionUntil ? ' 至' + String(f.dispositionUntil).slice(5).replace('-', '/') : '';
+  const title = f.dispositionReason || '';
+  return '<span class="pill-warn"' + (title ? ' title="' + title + '"' : '') + '>' + '處置股' + until + '</span>';
 }
 function groupHolderForceStockRowHtml(r, idx){
   const backendName = r.name && r.name !== r.code ? r.name : lookupStockName(r.code);
   const price = Number(r.price);
   const hasPrice = Number.isFinite(price);
   const chg = Number.isFinite(r.changeAmt) ? r.changeAmt : hasPrice ? price - price / (1 + r.pct / 100) : 0;
+  const priceLimitCls = r.limitUp ? ' limit-up' : r.limitDown ? ' limit-down' : '';
+  // 欄位順序（2026-09-24 使用者）：代號、名稱、盤中大戶力、漲跌幅、漲跌、成交價，可融資／可融券／
+  // 可現股當沖／有股期這些交易條件標籤移到最後面（原本夾在名稱跟大戶力中間）。
   return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
     '<span class="race-badge">' + (RACE_NUM[idx + 1] || String(idx + 1)) + '</span>' +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
-    tradingEligibilityTagsHtml(r) + (r.isPast ? '' : flagPillsHtml(r.code, { dispositionOnly: true })) +
     '<span class="race-line2">' +
     // 大戶力這格跟盤中333一樣改用.race-holder固定寬＋raceHolderCellHtml的%在上、金額在下兩行疊放
     // （2026-09-24 使用者：手機版最左邊的數字被螢幕截到——這格原本沒有固定寬度，.race-line2在手機版
@@ -3003,9 +3013,11 @@ function groupHolderForceStockRowHtml(r, idx){
     '<span class="race-holder">' + raceHolderCellHtml(r) + '</span>' +
     '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' +
     '<span class="race-chg ' + dirClass(r.pct) + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
-    '<span class="race-price ' + dirClass(r.pct) + '">' + (hasPrice ? price.toFixed(2) : '—') + '</span>' +
+    '<span class="race-price ' + dirClass(r.pct) + priceLimitCls + '">' + (hasPrice ? price.toFixed(2) : '—') + '</span>' +
     '<span class="race-warn-slot">' + (r.isPast ? '' : groupHolderForceWarnPillHtml(r)) + '</span>' +
-    '</span></div>';
+    '</span>' +
+    tradingEligibilityTagsHtml(r) + (r.isPast ? '' : flagPillsHtml(r.code, { dispositionOnly: true })) +
+    '</div>';
 }
 function groupHolderForceCardHtml(card, mode){
   const icon = mode === 'up' ? '📈' : '📉';
