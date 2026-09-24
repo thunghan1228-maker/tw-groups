@@ -304,7 +304,11 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-block{margin:0 0 14px;}
   .race-head{font-weight:800;font-size:14px;color:#fff;margin:6px 0 4px;}
   .race-sub{font-size:11px;color:var(--muted);margin-bottom:6px;}
-  .race-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;cursor:pointer;}
+  .race-row{display:flex;flex-wrap:wrap;row-gap:4px;align-items:center;gap:8px;padding:5px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;cursor:pointer;}
+  /* .race-line2用margin-left:auto貼齊右邊，族群大戶力這排後面還接了交易條件標籤
+     （2026-09-24 使用者移到最後面）；原本.race-row沒有flex-wrap，line2後面的東西沒地方放
+     只能疊在一起、把成交價蓋掉。加flex-wrap讓放不下的部分換到下一行，不會疊在一起
+     （盤中333等其他沒有這排東西的列不受影響，本來就排得下，不會觸發換行）。 */
   .race-row:hover{background:var(--panel-2);}
   .race-row .race-code{color:var(--muted);font-size:12px;min-width:44px;}
   .race-row .race-rank{color:var(--muted);font-size:12px;min-width:40px;}
