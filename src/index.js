@@ -557,6 +557,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     #signalModalInner .race-row .pill-warn,#signalModalInner .race-row .pill-gap,#signalModalInner .race-row .pill-live{font-size:13px;}
     #signalModalInner .race-row .sig-eligibility span,#signalModalInner .race-row .disp-clauses{font-size:12px;}
     #signalModalInner .race-row .race-badge{font-size:17px;}
+    #signalModalInner .race-col-labels .race-badge-slot{font-size:17px;}
     #signalModalInner .race-col-labels span b{font-size:12px;}
     #signalModalInner .race-head{font-size:17px;margin:8px 0 6px;}
     #signalModalInner .race-sub{font-size:13px;}
