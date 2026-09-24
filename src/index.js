@@ -471,7 +471,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .signal-help li:last-child{margin-bottom:0;}
   .signal-help li::before{content:'•';position:absolute;left:-14px;color:var(--accent);font-weight:700;}
   .signal-help li b{color:var(--text);}
-  .signal-tabs-bar{flex-wrap:wrap;}
+  /* 分頁按鈕列墊一塊灰底（2026-09-24 使用者：背景白白的，加灰色底色跳脫出層次感）：
+     深灰標題列 → 灰底分頁列 → 淺色分頁按鈕，三層分得出來。 */
+  .signal-tabs-bar{flex-wrap:wrap;background:#c4c8cf;padding:8px;border-radius:10px;}
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
   .signal-history-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:8px;}
@@ -541,6 +543,20 @@ const HTML_PAGE = `<!DOCTYPE html>
     .race-row .race-pct,.race-row .race-chg,.race-row .race-price,.race-col-labels .race-line2 span{flex:0 0 4em;}
     .race-row .race-badge,.race-col-labels .race-badge-slot{flex:0 0 5em;}
     .race-row .race-warn-slot,.race-col-labels .race-warn-slot{flex:0 0 3em;}
+  }
+  /* 手機版族群大戶力改成跟族群綜合表一樣一檔一行（2026-09-24 使用者）：代號、名稱、大戶力、漲跌幅、漲跌、
+     成交價排同一行，可融資／可融券等交易條件標籤放在股名下面。每一列跟欄位標題列各自是同一組固定欄寬的
+     grid（字級也一樣，em 欄寬才算得一樣），名稱欄吃剩下的寬度、太長就「…」；.race-line2 用 display:contents
+     攤平，讓裡面的四格直接當欄位。名次徽章手機版不顯示；處置股膠囊標籤列已經有，warn-slot 手機版也不重複放。
+     放在上面手機版規則後面，同樣特殊性時這裡才會蓋過去。 */
+  @media (max-width: 640px){
+    .race-row.ghf-row,.race-col-labels.ghf-labels{display:grid;grid-template-columns:2.7em minmax(0,1fr) 4.4em 4.2em 3.9em 4.7em;column-gap:3px;row-gap:3px;align-items:center;font-size:12px;}
+    .ghf-row .race-line2,.ghf-labels .race-line2{display:contents;font-size:inherit;}
+    .ghf-row .race-badge,.ghf-row .race-warn-slot,.ghf-labels .race-warn-slot{display:none;}
+    .ghf-row .race-code,.ghf-labels .race-code,.ghf-row .race-name,.ghf-labels .race-name{min-width:0;max-width:none;}
+    .ghf-row .race-holder .sig-label{padding:2px 4px;}
+    .ghf-row .race-price.limit-up,.ghf-row .race-price.limit-down{padding:2px 3px;}
+    .ghf-row .sig-eligibility{grid-column:2 / -1;flex-wrap:wrap;row-gap:3px;}
   }
 
   /* 平板(iPad)以上：盤中訊號中心視窗跟裡面文字放大約1.3倍，方便閱讀。
@@ -3077,7 +3093,7 @@ function groupHolderForceStockRowHtml(r, idx){
   const priceLimitCls = r.limitUp ? ' limit-up' : r.limitDown ? ' limit-down' : '';
   // 欄位順序（2026-09-24 使用者）：代號、名稱、盤中大戶力、漲跌幅、漲跌、成交價，可融資／可融券／
   // 可現股當沖／有股期這些交易條件標籤移到最後面（原本夾在名稱跟大戶力中間）。
-  return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
+  return '<div class="race-row stock-row ghf-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
     '<span class="race-badge">' + (RACE_NUM[idx + 1] || String(idx + 1)) + '</span>' +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + backendName + '</span>' +
     '<span class="race-line2">' +
@@ -3103,7 +3119,7 @@ function groupHolderForceCardHtml(card, mode){
   const namePill = '<span class="head-pill">' + card.name + '（' + card.groupTotal + ' 檔）</span>';
   const avgPill = '<span class="head-pill">' + (card.dayWord || '今天') + '平均 ' + fmt(card.avgChange) + '%</span>';
   return '<div class="race-block"><div class="race-head">' + icon + ' <span class="combo-rank">' + rankLabel + '</span> ' + namePill + ' ' + avgPill + '・大戶力命中 ' + card.qualified + ' / ' + card.groupTotal + '</div>' +
-    '<div class="race-col-labels"><span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span>' +
+    '<div class="race-col-labels ghf-labels"><span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span>' +
     '<span class="race-line2"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-warn-slot"></span></span></div>' +
     (card.rows.length ? card.rows.map((r, i) => groupHolderForceStockRowHtml(r, i)).join('')
       : '<div class="race-note">目前沒有符合條件的個股（大戶力資料還在累積中，或沒有' + (mode === 'up' ? '偏買' : '偏賣') + '方向的大戶力）</div>') +
