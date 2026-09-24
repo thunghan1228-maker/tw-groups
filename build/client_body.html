@@ -2184,6 +2184,10 @@ let alertsEnabled = true;
 let signalCenterState = { activeTab: 'now', historyDate: null, pinned: false };
 let todaySignalEvents = [];
 let mainForceRanking = [];
+let mainForceRankingLoaded = false; // 第一次抓/api/main-force-ranking成功後才true，且不會因為後面某次輪詢失敗而變回false；
+                                     // 用來分辨「這個分頁/視窗根本還沒抓到過大戶力資料」跟「抓到了但目前真的是空的」，
+                                     // 不然新開的彈出視窗(移到另一螢幕)一開始mainForceRanking是[]，族群大戶力／族群
+                                     // 綜合表會在抓到資料前先顯示「目前沒有符合條件的個股」，看起來像是壞掉。
 let signalDataIsReal = false;
 const BIG_HOLDER_THRESHOLD = 500; // 累計買賣超達 500 張視為大戶力，跟K線圖大戶定義一致
 function bigHolderRowsFrom(ranking){
@@ -2321,7 +2325,7 @@ function holderSnapshotGroups(date){
 }
 function holderView(){
   if (holderDayOffset === 0){
-    return { offset: 0, date: holderCurrentDate(), ranking: mainForceRanking || [], groups: lastData ? lastData.groups : null, loading: false, isPast: false, unavailable: false };
+    return { offset: 0, date: holderCurrentDate(), ranking: mainForceRanking || [], groups: lastData ? lastData.groups : null, loading: !mainForceRankingLoaded, isPast: false, unavailable: false };
   }
   const date = holderViewDate();
   if (!date) return { offset: holderDayOffset, date: null, ranking: [], groups: null, loading: false, isPast: true, unavailable: true };
@@ -2372,6 +2376,7 @@ async function refreshSignalData(){
       const [signals, ranking] = await Promise.all([fetchRealSignals(today), fetchMainForceRanking()]);
       todaySignalEvents = signals;
       mainForceRanking = ranking;
+      mainForceRankingLoaded = true;
       signalDataIsReal = true;
     } catch (e) {
       todaySignalEvents = buildDemoSignalsForDate(today)
