@@ -303,7 +303,20 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 盤中打 333：33 賽馬多／34 河流多／188 做多族群／199 做空族群 */
   .race-block{margin:0 0 14px;}
   /* 族群跟族群之間畫兩條粗黑線區隔（2026-09-24 使用者：族群綜合表、族群大戶力），第一個族群上面不畫。 */
-  .combo-block + .combo-block,.ghf-block + .ghf-block{border-top:8px double #111;padding-top:10px;}
+  .combo-block + .combo-block,.ghf-block + .ghf-block,.bl-block + .bl-block{border-top:8px double #111;padding-top:10px;}
+  /* 醞釀／發動分頁：沿用族群綜合表的表格樣式，另外給 9 欄的欄寬；發動（2）紅底、醞釀（1）藍綠底的段落標題 */
+  .bl-table{min-width:58em;}
+  .bl-table col.b-code{width:8%;} .bl-table col.b-name{width:12%;} .bl-table col.b-score{width:10%;} .bl-table col.b-pct{width:10%;}
+  .bl-table col.b-price{width:11%;} .bl-table col.b-box{width:12%;} .bl-table col.b-tobox{width:15%;} .bl-table col.b-turn{width:9%;} .bl-table col.b-ratio{width:13%;}
+  .bl-table .bl-score{font-weight:800;white-space:nowrap;}
+  .bl-table .bl-box,.bl-table .bl-turn,.bl-table .bl-ratio{white-space:nowrap;}
+  .bl-table .bl-tobox.up{color:var(--up);font-weight:700;}
+  .bl-star{color:#d97706;margin-left:3px;}
+  .bl-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 6px;margin-left:4px;background:#7c3aed;color:#fff;white-space:nowrap;}
+  .bl-tag.warn{background:#d97706;}
+  .bl-section{font-weight:800;font-size:15px;color:#fff;border-radius:8px;padding:6px 10px;margin:12px 0 8px;}
+  .bl-section.bl-launch{background:#c0392b;}
+  .bl-section.bl-brew{background:#0f766e;}
   .race-head{font-weight:800;font-size:14px;color:#fff;margin:6px 0 4px;}
   .race-sub{font-size:11px;color:var(--muted);margin-bottom:6px;}
   .race-row{display:flex;flex-wrap:wrap;row-gap:4px;align-items:center;gap:8px;padding:5px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;cursor:pointer;}
@@ -334,6 +347,22 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .race-warn-slot{flex:0 0 3.6em;text-align:right;}
   .race-col-labels{display:flex;align-items:center;gap:8px;padding:0 8px 2px;}
   .race-row:has(.race-holder),.race-col-labels:has(.race-holder){max-width:900px;}  /* 盤中333專用（2026-09-24 使用者：壓縮鬆散的空白） */
+  /* 盤中333：族群後面加均線分數欄（2026-09-24 使用者），名稱欄改固定寬（太長「…」），族群標籤跟均線分數每一列才會對齊，
+     不會像「昇陽半導體」這種長名字把族群標籤往右推；多一欄所以整列最寬放到 1000px，電腦版才不會被擠到換行。 */
+  .r333-row,.r333-labels{max-width:1000px !important;}
+  .race-row.r333-row .race-name,.race-col-labels.r333-labels .race-name{flex:0 0 5.5em;max-width:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  /* 首頁的 .stock-row 是 justify-content:space-between：盤中333 列（也掛 stock-row）換行時，第一行的代號／名稱／族群／均線分數
+     會被拉開散到整行，跟欄位標題對不齊；這裡改回靠左排。 */
+  .race-row.r333-row{justify-content:flex-start;}
+  /* 標題列跟資料列要同一套：資料列 .race-row 本來就 flex-wrap，標題列沒有 → iPad 寬度資料列換行、標題列沒換，欄位就錯開；
+     代號／族群兩格的 em 寬度要用跟資料列一樣的字級（12px）算，手機版才不會標題比資料寬。 */
+  .race-col-labels.r333-labels{flex-wrap:wrap;row-gap:4px;}
+  .race-col-labels.r333-labels .race-code,.race-col-labels.r333-labels .race-group-label{font-size:12px;}
+  .race-row .race-rank,.race-col-labels .race-rank-slot{flex:0 0 3.4em;font-size:12px;white-space:nowrap;}
+  .race-row .race-ma-score,.race-col-labels .race-ma-score{flex:0 0 3.5em;text-align:center;white-space:nowrap;}
+  .race-row .race-ma-score .race-ma-val{font-weight:800;color:var(--muted);}
+  .race-row .race-ma-score .race-ma-val.hi{color:var(--up);}
+  .race-row .race-ma-none{color:var(--muted);}
   /* 外層格子不設字級：flex 的 5.2em 才會跟資料列的 5.2em 用同一個字級算、欄寬一致；只縮小裡面的字 */
   .race-col-labels span{flex:0 0 5em;text-align:right;}
   .race-col-labels span b{color:var(--muted);font-size:10px;font-weight:600;}
@@ -419,7 +448,7 @@ const HTML_PAGE = `<!DOCTYPE html>
      不然黑底白字選取前後兩個狀態會分不出哪個正在篩選中。 */
   .hf-filter-btn,.combo-filter-btn,.race333-filter-btn{background:#000;color:#fff;border-color:#000;}
   .hf-filter-btn:hover,.combo-filter-btn:hover,.race333-filter-btn:hover{background:#2a2a2a;}
-  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active{background:#000;color:#fff;border:2px solid #d946ef;}
+  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active{background:#000;color:#c084fc;border-color:#000;font-weight:800;}  /* 按下去整個字變紫色（2026-09-24 使用者），不用外框 */
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -565,6 +594,15 @@ const HTML_PAGE = `<!DOCTYPE html>
     .ghf-row .race-holder .sig-label{padding:2px 4px;}
     .ghf-row .limit-pill{padding:1px 3px;}
     .ghf-row .sig-eligibility{grid-column:2 / -1;flex-wrap:wrap;row-gap:3px;}
+    /* 盤中333 手機版第二行（大戶力／漲跌幅／漲跌／成交價／名次）：原本 14px＋8px 間距總寬超過螢幕，靠右對齊時最左邊的
+       大戶力被切掉；改 12px、6px 間距剛好放得下，標題列的大戶力／名次格子寬度也改成跟資料列一樣。 */
+    .r333-row .race-line2,.r333-labels .race-line2{font-size:12px;gap:6px;}
+    .r333-row .race-line2 .race-holder,.r333-labels .race-line2 .race-holder{flex:0 0 6.5em;}
+    .r333-row .race-line2 .race-badge,.r333-labels .race-line2 .race-badge-slot{flex:0 0 5em;min-width:0;}
+    /* 名次那格：資料列字級 14px，標題列也用 14px 算 5em 才一樣寬；「🚀高於前天收盤%」放不下一行就在格子裡換行，不要把整排撐寬 */
+    .r333-labels .race-line2 .race-badge-slot{font-size:14px;white-space:normal;line-height:1.15;}
+    .r333-row .race-line2 .race-pct,.r333-row .race-line2 .race-chg,.r333-row .race-line2 .race-price,
+    .r333-labels .race-line2 span:not(.race-holder):not(.race-badge-slot){flex:0 0 4em;}
   }
 
   /* 平板(iPad)以上：盤中訊號中心視窗跟裡面文字放大約1.3倍，方便閱讀。
@@ -598,7 +636,8 @@ const HTML_PAGE = `<!DOCTYPE html>
     #signalModalInner .se-sub{font-size:14px;}
     #signalModalInner .race-row,#signalModalInner .race-col-labels{font-size:19px;}
     #signalModalInner .race-row{gap:10px;padding:9px 8px;}
-    #signalModalInner .race-row .race-code,#signalModalInner .race-row .race-rank,#signalModalInner .race-col-labels .race-code{font-size:14px;}
+    #signalModalInner .race-row .race-code,#signalModalInner .race-row .race-rank,#signalModalInner .race-col-labels .race-code,#signalModalInner .race-col-labels .race-rank-slot{font-size:14px;}
+    #signalModalInner .race-col-labels.r333-labels{gap:10px;}  /* 資料列在這個寬度 gap 是 10px，標題列要一樣，左邊固定寬的欄位才對得齊 */
     #signalModalInner .race-row .sig-group,#signalModalInner .race-col-labels .race-group-label{font-size:14px;}
     #signalModalInner .race-row .sig-label{font-size:14px;}
     #signalModalInner .race-row .race-holder .sig-label{font-size:13px;}
@@ -759,10 +798,14 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。</li>
         <li><b>族群大戶力</b>：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)、刀劍空(32)等多空條件篩出的個股與族群名單。</li>
+        <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。</li>
+        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤15%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
+        <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
+        <li><b>創高黑龍</b>：11:00～13:30，5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。</li>
         <li><b>主力翻多空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
         <li><b>盤中特大買單／賣單</b>：單筆超大額買進／賣出成交。</li>
-        <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。</li>
+        <li><b>處置股預測</b>：依證交所／櫃買中心的注意、處置規則，列出今天觸發注意的款別、已進入處置累積路徑（預計會被處置）的股票，以及差距預測（還差多少漲幅或成交量就會觸發注意）。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。</li>
       </ul>
     </div>
@@ -2248,6 +2291,7 @@ const SIGNAL_KINDS = [
   { key: 'groupHolderForce', label: '族群大戶力' },
   { key: 'race333', label: '盤中333' },
   { key: 'bigHolderForce', label: '盤中大戶力' },
+  { key: 'brewLaunch', label: '醞釀／發動' },
   { key: 'fourGate', label: '四項精選' },
   { key: 'combo12Bull', label: '1+2多' },
   { key: 'blackDragon', label: '創高黑龍' },
@@ -2911,7 +2955,9 @@ function raceColLabelsHtml(opts){
   // 使用者 2026-09-24：欄位標題要加「代號」「名稱」；數字那一群（大戶力／漲跌幅／漲跌／成交價／符號）
   // 包一層.race-line2，跟資料列一致——手機版塞不下時這一群整個換到下一行，不會被切在畫面外。
   // 族群標籤欄也留一個對應的標題格子，資料列的族群標籤才會跟標題對齊（2026-09-24 使用者）。
-  return '<div class="race-col-labels"><span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span><span class="race-group-label"><b>族群</b></span>' +
+  // 族群後面加「均線分數」（2026-09-24 使用者：族群跟盤中大戶力中間那塊空白放均線分數，15 分那個比法）。
+  return '<div class="race-col-labels r333-labels">' + (opts && opts.blade ? '<span class="race-rank-slot"><b>族排</b></span>' : '') + '<span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span><span class="race-group-label"><b>族群</b></span>' +
+    '<span class="race-ma-score"><b>均線分數</b></span>' +
     '<span class="race-line2"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"><b>' + badgeLabel + '</b></span></span></div>';
 }
 function raceHolderCellHtml(r){
@@ -2943,9 +2989,10 @@ function raceStockRowHtml(r, idx, opts){
   const price = Number(r.price);
   const hasPrice = Number.isFinite(price);
   const chg = hasPrice ? price - price / (1 + r.pct / 100) : 0;
-  return '<div class="race-row stock-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' + rank +
+  return '<div class="race-row stock-row r333-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' + rank +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + r.name + star + '</span>' +
     '<span class="sig-group" title="族群第 ' + r.groupRank + ' 名，族內第 ' + r.inGroupRank + ' 名">' + r.groupName + '</span>' +
+    '<span class="race-ma-score">' + maScoreCellHtml(r.code, hasPrice ? price : null) + '</span>' +
     '<span class="race-line2">' +
     '<span class="race-holder">' + raceHolderCellHtml(r) + '</span>' +
     '<span class="race-pct ' + cls + '">' + fmt(r.pct) + '%</span>' +
@@ -3433,14 +3480,166 @@ function dispositionRiskHtml(){
     volumeSection + priceSection;
 }
 
+// ---- 醞釀／發動（2026-09-24 使用者：老師的「1＝醞釀（整理形態）、2＝發動（突破）」）----
+// 後端每天用日K算好箱子（近10天最高／最低）、均線、5日均量、發行張數，並判定前一個交易日收盤是否「醞釀」；
+// 「發動」要看即時價量，這裡用首頁行情（/api/groups）即時判斷：過箱頂、均線分數（用即時價當今天收盤重算）、周轉高。
+let brewLaunchData = null;
+let brewLaunchFetchedAt = 0;
+async function refreshBrewLaunch(force){
+  if (!force && Date.now() - brewLaunchFetchedAt < 600000) return;
+  brewLaunchFetchedAt = Date.now();
+  try {
+    const res = await fetch('/api/brew-launch');
+    if (!res.ok) throw new Error('brew-launch http ' + res.status);
+    const data = await res.json();
+    if (!data || data.status !== 'ok' || !data.stocks || !data.rules) throw new Error('bad payload');
+    brewLaunchData = data;
+    if (!document.getElementById('signalModal').hidden) renderSignalCenter();
+  } catch (e) {
+    brewLaunchFetchedAt = Date.now() - 540000;  // 抓不到就一分鐘後再試，先沿用上一次的資料
+  }
+}
+function twTodayStr(){ return new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10); }
+function brewVolumeFactor(){
+  // 盤中累積量換算全天預估量：09:00～13:30 共 270 分鐘，依已經過的時間等比放大（最多 4 倍，開盤頭幾分鐘
+  // 不會放大過頭）；行情不是今天盤中的（週末、假日、收盤後、盤前）就是那一天的實際量，不放大。
+  const qd = lastData && lastData.quoteDate;
+  if (!qd || qd !== twTodayStr()) return 1;
+  const m = /^(\\d{1,2}):(\\d{2})/.exec(String((lastData && lastData.quoteTime) || ''));
+  if (!m) return 1;
+  const elapsed = Number(m[1]) * 60 + Number(m[2]) - 540;
+  if (elapsed <= 0 || elapsed >= 270) return 1;
+  return Math.min(270 / elapsed, 4);
+}
+function maScoreFromSums(info, price, rules){
+  // 均線分數：5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分；今天的均線用現價當今天收盤：
+  // MA_p = (最近 p-1 根收盤合計 + 現價) / p（合計由後端 /api/brew-launch 算好）。
+  const periods = rules.maPeriods.slice().sort((a, b) => a - b);
+  const mas = periods.map((p) => (Number(info.maSums[p]) + price) / p);
+  let score = 0;
+  for (let i = 0; i < mas.length; i++) for (let j = i + 1; j < mas.length; j++) if (mas[i] > mas[j]) score++;
+  return score;
+}
+function maScoreCellHtml(code, price){
+  const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[code] : null;
+  if (!info || !(price > 0)){
+    const bf = brewLaunchData && brewLaunchData.historyBackfill;
+    const why = !brewLaunchData ? '均線資料讀取中' : bf && !bf.done ? '日K歷史回補中，補完就有' : '日K不足 240 天（新上市等）算不出 MA240';
+    return '<span class="race-ma-none" title="' + why + '">—</span>';
+  }
+  const score = maScoreFromSums(info, price, brewLaunchData.rules);
+  return '<b class="race-ma-val' + (score > 10 ? ' hi' : '') + '" title="均線分數（5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分；用現價當今天收盤）">' + score + '</b>';
+}
+function brewLiveMetrics(info, s, factor, rules){
+  const price = Number(s.price);
+  if (!Number.isFinite(price) || price <= 0) return null;
+  const score = maScoreFromSums(info, price, rules);
+  const vol = Number(s.volume) || 0;
+  const projVol = vol * factor;
+  const shares = Number(info.sharesLots) > 0 ? Number(info.sharesLots) : null;
+  const turnoverPct = shares ? vol / shares * 100 : null;
+  const projTurnoverPct = shares ? projVol / shares * 100 : null;
+  const volRatio = Number(info.avgVol5) > 0 ? projVol / Number(info.avgVol5) : null;
+  const brokeOut = price > info.boxHigh;
+  const scoreOk = score >= rules.launchMinScore;
+  const volumeOk = (projTurnoverPct !== null && projTurnoverPct >= rules.turnoverMinPct) || (volRatio !== null && volRatio >= rules.volumeRatioMin);
+  return { price, score, turnoverPct, projTurnoverPct, volRatio, brokeOut, scoreOk, volumeOk,
+    launch: brokeOut && scoreOk && volumeOk, toBoxPct: (info.boxHigh / price - 1) * 100 };
+}
+function brewLaunchModel(){
+  if (!brewLaunchData || !lastData || !Array.isArray(lastData.groups)) return null;
+  const rules = brewLaunchData.rules;
+  const factor = brewVolumeFactor();
+  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+  if (!groups.length) return null;
+  // 族排：今天平均漲跌幅在全部族群裡的名次（第 1 名最強），跟族群綜合表同一套；族群也照這個順序排。
+  const weakToStrong = groups.slice().sort((a, b) => a.avgChange - b.avgChange);
+  const rankOf = new Map(weakToStrong.map((g, i) => [g.name, weakToStrong.length - i]));
+  const launchBlocks = [], brewBlocks = [];
+  const launchCodes = new Set(), brewCodes = new Set();
+  const byLaunch = (a, b) => b.score - a.score || (b.projTurnoverPct || 0) - (a.projTurnoverPct || 0);
+  const byBrew = (a, b) => b.score - a.score || a.toBoxPct - b.toBoxPct;  // 同分時離突破越近的越前面
+  const blockOf = (g, rows, cmp) => {
+    rows.sort(cmp);
+    rows.forEach((r) => { r.topScore = r.score === rows[0].score; });  // 族群多就挑分數最高的：★
+    return { name: g.name, rank: rankOf.get(g.name), avgChange: g.avgChange, groupTotal: g.stocks.length, rows };
+  };
+  weakToStrong.slice().reverse().forEach((g) => {
+    const launchRows = [], brewRows = [];
+    g.stocks.forEach((s) => {
+      const info = brewLaunchData.stocks[s.code];
+      if (!info) return;
+      const live = brewLiveMetrics(info, s, factor, rules);
+      if (!live) return;
+      const row = Object.assign({ code: s.code, name: s.name, pct: s.changePercent, limitUp: !!s.limitUp, limitDown: !!s.limitDown, info }, live);
+      if (live.launch){ launchRows.push(row); launchCodes.add(s.code); }
+      else if (info.brewing){ brewRows.push(row); brewCodes.add(s.code); }
+    });
+    if (launchRows.length) launchBlocks.push(blockOf(g, launchRows, byLaunch));
+    if (brewRows.length) brewBlocks.push(blockOf(g, brewRows, byBrew));
+  });
+  return { launchBlocks, brewBlocks, launchCount: launchCodes.size, brewCount: brewCodes.size, factor, rules };
+}
+function brewLaunchRowHtml(r, kind){
+  const cls = dirClass(r.pct);
+  const star = r.topScore ? '<span class="bl-star" title="族群裡均線分數最高">★</span>' : '';
+  let tag = '';
+  if (kind === 'launch' && r.info.brewing) tag = '<span class="bl-tag">醞釀→發動</span>';
+  if (kind === 'brew' && r.brokeOut) tag = '<span class="bl-tag warn">' + (r.scoreOk ? '過箱頂・量能未到' : '過箱頂・分數未到') + '</span>';
+  const toBox = r.toBoxPct <= 0 ? '已過 ' + (-r.toBoxPct).toFixed(2) + '%' : '差 ' + r.toBoxPct.toFixed(2) + '%';
+  const turnTitle = r.projTurnoverPct === null ? '沒有發行股數資料' : '預估全天周轉率 ' + r.projTurnoverPct.toFixed(2) + '%';
+  return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
+    '<td class="combo-code">' + r.code + '</td>' +
+    '<td class="combo-name">' + r.name + '</td>' +
+    '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
+    '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%</td>' +
+    '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, r.price.toFixed(2)) + '</td>' +
+    '<td class="bl-box" title="箱底 ' + r.info.boxLow.toFixed(2) + '，箱子高低差 ' + r.info.boxRangePct + '%">' + r.info.boxHigh.toFixed(2) + '</td>' +
+    '<td class="bl-tobox' + (r.toBoxPct <= 0 ? ' up' : '') + '">' + toBox + tag + '</td>' +
+    '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2) + '%') + '</td>' +
+    '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2) + ' 倍') + '</td>' +
+    '</tr>';
+}
+function brewLaunchBlockHtml(block, kind){
+  const namePill = '<span class="head-pill">' + block.name + '（' + block.groupTotal + ' 檔）</span>';
+  const avgPill = '<span class="head-pill">今天平均 ' + fmt(block.avgChange) + '%</span>';
+  return '<div class="race-block bl-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '"><span class="combo-rank">族排第 ' + block.rank + ' 名</span> ' + namePill + ' ' + avgPill + '・' + (kind === 'launch' ? '發動 ' : '醞釀 ') + block.rows.length + ' 檔</div>' +
+    '<div class="combo-table-wrap"><table class="combo-table bl-table">' +
+    '<colgroup><col class="b-code"><col class="b-name"><col class="b-score"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-tobox"><col class="b-turn"><col class="b-ratio"></colgroup>' +
+    '<thead><tr><th>代號</th><th>名稱</th><th>均線分數</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
+    '<tbody>' + block.rows.map((r) => brewLaunchRowHtml(r, kind)).join('') + '</tbody></table></div></div>';
+}
+function brewLaunchHtml(){
+  if (!brewLaunchData){
+    return '<div class="signal-empty"><div class="se-title">醞釀／發動資料讀取中…</div><div class="se-sub">箱子、均線是每天收盤後用日K算好的，再加上即時價量判斷；讀不到的話稍後再試。</div></div>';
+  }
+  const m = brewLaunchModel();
+  if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div></div>';
+  const r = m.rules;
+  const d = brewLaunchData;
+  const skipped = (d.insufficient || []).length + (d.stale || []).length;
+  const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const note = '<div class="race-sub">老師的選股法：1＝醞釀（整理形態）、2＝發動（突破）。醞釀以前一個交易日（' + (d.asOf || '—') + '）收盤為準：均線分數≥' + r.brewMinScore +
+    '、收盤站上月線、近 ' + r.boxDays + ' 天最高到最低相差≤' + r.boxRangeMaxPct + '%、5/10/20 日線相差≤' + r.maSpreadMaxPct + '%。發動看即時價量：價格衝過箱頂（近 ' + r.boxDays + ' 天最高價）、均線分數>' + (r.launchMinScore - 1) +
+    '、預估全天周轉率≥' + r.turnoverMinPct + '% 或預估量≥5 日均量 ' + r.volumeRatioMin + ' 倍。同族群依均線分數排序，★＝族群裡分數最高。' +
+    (skipped ? '另有 ' + skipped + ' 檔日K不足 240 天（新上市等）或停牌沒列入。' : '') + stamp + '</div>';
+  const launch = '<div class="bl-section bl-launch">2 發動（突破）・' + m.launchCount + ' 檔</div>' +
+    (m.launchBlocks.length ? m.launchBlocks.map((b) => brewLaunchBlockHtml(b, 'launch')).join('') : '<div class="race-note">目前沒有股票發動（過箱頂、均線分數、周轉三個條件要同時到）</div>');
+  const brew = '<div class="bl-section bl-brew">1 醞釀（整理）・' + m.brewCount + ' 檔</div>' +
+    (m.brewBlocks.length ? m.brewBlocks.map((b) => brewLaunchBlockHtml(b, 'brew')).join('') : '<div class="race-note">目前沒有股票符合醞釀條件</div>');
+  return note + launch + brew;
+}
+
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
+  refreshBrewLaunch(false);
   const bigHolderRows = bigHolderRowsFrom(mainForceRanking);
   const countFor = (key) => {
     if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
     if (key === 'history' || key === 'race333' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
     if (key === 'dispositionRisk') return dispositionRiskData ? dispositionRiskData.results.length + (dispositionVolumeWatchData ? dispositionVolumeWatchData.results.length : 0) + (Array.isArray(dispositionRiskData.priceExtremeWatch) ? dispositionRiskData.priceExtremeWatch.length : 0) : null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
+    if (key === 'brewLaunch'){ const bm = brewLaunchModel(); return bm ? bm.brewCount + '/' + bm.launchCount : null; }
     return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
   };
   // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
@@ -3502,6 +3701,8 @@ function renderSignalCenter(){
     refreshDispositionRisk(false);
     refreshDispositionVolumeWatch(false);
     replaceSignalHtml(body, 'groupCombinedBoard', groupCombinedBoardHtml());
+  } else if (active === 'brewLaunch'){
+    replaceSignalHtml(body, 'brewLaunch', brewLaunchHtml());
   } else if (active === 'dispositionRisk'){
     refreshDispositionRisk(false);
     refreshDispositionVolumeWatch(false);
@@ -4054,9 +4255,14 @@ async function fetchQuotes(codes) {
   for (const code of codes) quotes[code] = { price: null, change: 0, changePercent: 0 };
   const chunks = chunk(codes, CHUNK_SIZE);
   const results = await Promise.all(chunks.map((c) => fetchQuoteChunk(c)));
+  let quoteDate = "", quoteTime = "";
   for (const msgArray of results) {
     for (const item of msgArray) {
       const code = item.c;
+      // d／t＝這筆報價的日期（YYYYMMDD）／時間（HH:MM:SS）；取最新的一筆，讓頁面知道行情是不是今天盤中的
+      // （醞釀／發動用來把盤中累積量換算成全天預估量；週末、假日行情停在上一個交易日就不換算）。
+      const d = String(item.d || ""), t = String(item.t || "");
+      if (/^d{8}$/.test(d) && (d > quoteDate || (d === quoteDate && t > quoteTime))) { quoteDate = d; quoteTime = t; }
       if (!code || !(code in quotes)) continue;
       const price = parseFloat(item.z);
       const prevClose = parseFloat(item.y);
@@ -4089,6 +4295,10 @@ async function fetchQuotes(codes) {
       }
     }
   }
+  Object.defineProperty(quotes, "__meta", {
+    value: { quoteDate: quoteDate ? quoteDate.slice(0, 4) + "-" + quoteDate.slice(4, 6) + "-" + quoteDate.slice(6, 8) : null, quoteTime: quoteTime || null },
+    enumerable: false
+  });
   return quotes;
 }
 
@@ -4285,6 +4495,14 @@ export default {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/brew-launch") {
+      try {
+        // 醞釀／發動選股：箱子、均線、5日均量等都是日K算的，收盤後才會變，快取 10 分鐘；發動用即時價由前端判斷。
+        return await proxyHanstockBars("/api/hub/brew-launch", 600);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), stocks: {} }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/disposition-risk") {
       try {
         // 處置股預測：收盤後背景收集器算好才會變，快取 10 分鐘。
@@ -4364,7 +4582,8 @@ export default {
           const avgChange = valid.length ? valid.reduce((sum, s) => sum + s.changePercent, 0) / valid.length : 0;
           return { name: g.name, avgChange, stocks };
         });
-        return Response.json({ groups });
+        const meta = quotes.__meta || {};
+        return Response.json({ groups, quoteDate: meta.quoteDate || null, quoteTime: meta.quoteTime || null });
       } catch (err) {
         return Response.json({ error: String(err) }, { status: 502 });
       }

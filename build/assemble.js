@@ -65,9 +65,14 @@ async function fetchQuotes(codes) {
   for (const code of codes) quotes[code] = { price: null, change: 0, changePercent: 0 };
   const chunks = chunk(codes, CHUNK_SIZE);
   const results = await Promise.all(chunks.map((c) => fetchQuoteChunk(c)));
+  let quoteDate = "", quoteTime = "";
   for (const msgArray of results) {
     for (const item of msgArray) {
       const code = item.c;
+      // d／t＝這筆報價的日期（YYYYMMDD）／時間（HH:MM:SS）；取最新的一筆，讓頁面知道行情是不是今天盤中的
+      // （醞釀／發動用來把盤中累積量換算成全天預估量；週末、假日行情停在上一個交易日就不換算）。
+      const d = String(item.d || ""), t = String(item.t || "");
+      if (/^\d{8}$/.test(d) && (d > quoteDate || (d === quoteDate && t > quoteTime))) { quoteDate = d; quoteTime = t; }
       if (!code || !(code in quotes)) continue;
       const price = parseFloat(item.z);
       const prevClose = parseFloat(item.y);
@@ -100,6 +105,10 @@ async function fetchQuotes(codes) {
       }
     }
   }
+  Object.defineProperty(quotes, "__meta", {
+    value: { quoteDate: quoteDate ? quoteDate.slice(0, 4) + "-" + quoteDate.slice(4, 6) + "-" + quoteDate.slice(6, 8) : null, quoteTime: quoteTime || null },
+    enumerable: false
+  });
   return quotes;
 }
 
@@ -296,6 +305,14 @@ export default {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/brew-launch") {
+      try {
+        // 醞釀／發動選股：箱子、均線、5日均量等都是日K算的，收盤後才會變，快取 10 分鐘；發動用即時價由前端判斷。
+        return await proxyHanstockBars("/api/hub/brew-launch", 600);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), stocks: {} }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/disposition-risk") {
       try {
         // 處置股預測：收盤後背景收集器算好才會變，快取 10 分鐘。
@@ -375,7 +392,8 @@ export default {
           const avgChange = valid.length ? valid.reduce((sum, s) => sum + s.changePercent, 0) / valid.length : 0;
           return { name: g.name, avgChange, stocks };
         });
-        return Response.json({ groups });
+        const meta = quotes.__meta || {};
+        return Response.json({ groups, quoteDate: meta.quoteDate || null, quoteTime: meta.quoteTime || null });
       } catch (err) {
         return Response.json({ error: String(err) }, { status: 502 });
       }
