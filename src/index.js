@@ -799,7 +799,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>族群大戶力</b>：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)、刀劍空(32)等多空條件篩出的個股與族群名單。</li>
         <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。</li>
-        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。</li>
+        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：11:00～13:30，5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。</li>
@@ -2365,6 +2365,7 @@ function buildDemoSignalsForDate(dateStr){
 }
 
 let alertsEnabled = true;
+try { alertsEnabled = localStorage.getItem('alertsEnabled') !== '0'; } catch (e) { /* 讀不到就預設開 */ }
 let signalCenterState = { activeTab: 'now', historyDate: null };
 let todaySignalEvents = [];
 let mainForceRanking = [];
@@ -3439,6 +3440,7 @@ async function refreshBrewLaunch(force){
     const data = await res.json();
     if (!data || data.status !== 'ok' || !data.stocks || !data.rules) throw new Error('bad payload');
     brewLaunchData = data;
+    try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     if (!document.getElementById('signalModal').hidden) renderSignalCenter();
   } catch (e) {
     brewLaunchFetchedAt = Date.now() - 540000;  // 抓不到就一分鐘後再試，先沿用上一次的資料
@@ -3518,7 +3520,7 @@ function brewLaunchModel(){
       if (!info || info.skipped) return;
       const live = brewLiveMetrics(info, s, factor, rules);
       if (!live) return;
-      const row = Object.assign({ code: s.code, name: s.name, pct: s.changePercent, limitUp: !!s.limitUp, limitDown: !!s.limitDown, info }, live);
+      const row = Object.assign({ code: s.code, name: s.name, groupName: g.name, pct: s.changePercent, limitUp: !!s.limitUp, limitDown: !!s.limitDown, info }, live);
       if (live.launch){ launchRows.push(row); launchCodes.add(s.code); }
       else if (info.brewing){ brewRows.push(row); brewCodes.add(s.code); }
     });
@@ -3588,6 +3590,74 @@ function brewLaunchHtml(){
   return note + launch + brew;
 }
 
+// ---- 發動通知（2026-09-24 使用者：36／15 檔要怎麼即時收到通知 → 頁面開著時跳瀏覽器通知＋提示音）----
+// 每 15 秒行情更新後重算發動名單，出現新的發動就通知；右上角「提醒開啟／關閉」控制。
+// 第一次算到的名單當作已經看過（開頁面時不會一次跳幾十個），之後新出現的才通知；名單記在瀏覽器裡，
+// 重新整理不會重複通知同一檔。（使用者 2026-09-24：先只做網頁通知，Telegram 推播不做。）
+let launchNotified = { date: null, codes: new Set(), seeded: false };
+try {
+  const raw = JSON.parse(localStorage.getItem('launchNotified') || 'null');
+  if (raw && raw.date === twTodayStr()) launchNotified = { date: raw.date, codes: new Set(raw.codes || []), seeded: true };
+} catch (e) { /* 沒有就從頭來 */ }
+function saveLaunchNotified(){
+  try { localStorage.setItem('launchNotified', JSON.stringify({ date: launchNotified.date, codes: [...launchNotified.codes] })); } catch (e) { /* 記不住就算了 */ }
+}
+let alertAudioCtx = null;
+function primeAlertAudio(){
+  try {
+    alertAudioCtx = alertAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (alertAudioCtx.state === 'suspended') alertAudioCtx.resume();
+  } catch (e) { alertAudioCtx = null; }
+}
+function launchBeep(){
+  try {
+    primeAlertAudio();
+    if (!alertAudioCtx) return;
+    [0, 0.3].forEach((delay) => {  // 叮、叮兩聲
+      const osc = alertAudioCtx.createOscillator(), gain = alertAudioCtx.createGain();
+      osc.frequency.value = 880; gain.gain.value = 0.15;
+      osc.connect(gain); gain.connect(alertAudioCtx.destination);
+      osc.start(alertAudioCtx.currentTime + delay); osc.stop(alertAudioCtx.currentTime + delay + 0.2);
+    });
+  } catch (e) { /* 出不了聲就算了 */ }
+}
+function requestNotifyPermission(done){
+  if (!('Notification' in window)){ if (done) done('unsupported'); return; }
+  if (Notification.permission !== 'default'){ if (done) done(Notification.permission); return; }
+  try { Notification.requestPermission().then((state) => { if (done) done(state); }); } catch (e) { if (done) done('unsupported'); }
+}
+function launchNotificationBody(r){
+  return '成交價 ' + r.price.toFixed(2) + (Number.isFinite(r.pct) ? '（' + (r.pct > 0 ? '+' : '') + r.pct.toFixed(2) + '%）' : '') +
+    ' 過箱頂 ' + Number(r.info.boxHigh).toFixed(2) + '｜均線分數 ' + r.score +
+    (r.projTurnoverPct !== null ? '｜預估周轉 ' + r.projTurnoverPct.toFixed(1) + '%' : '') +
+    (r.volRatio !== null ? '｜量比 ' + r.volRatio.toFixed(1) + ' 倍' : '') + (r.info.brewing ? '｜醞釀→發動' : '');
+}
+function checkLaunchNotifications(){
+  const m = brewLaunchModel();
+  if (!m) return [];
+  const today = twTodayStr();
+  if (launchNotified.date !== today) launchNotified = { date: today, codes: new Set(), seeded: false };
+  const rows = m.launchBlocks.flatMap((b) => b.rows);
+  if (!launchNotified.seeded){
+    rows.forEach((r) => launchNotified.codes.add(r.code));
+    launchNotified.seeded = true;
+    saveLaunchNotified();
+    return [];
+  }
+  const fresh = rows.filter((r) => !launchNotified.codes.has(r.code));
+  if (!fresh.length) return [];
+  fresh.forEach((r) => launchNotified.codes.add(r.code));
+  saveLaunchNotified();
+  if (!alertsEnabled) return fresh;
+  launchBeep();
+  showToast('🚀 發動：' + fresh.map((r) => r.code + ' ' + r.name).join('、'));
+  if ('Notification' in window && Notification.permission === 'granted'){
+    fresh.forEach((r) => {
+      try { new Notification('🚀 發動 ' + r.code + ' ' + r.name + '（' + (r.groupName || '') + '）', { body: launchNotificationBody(r), tag: 'launch-' + r.code }); } catch (e) { /* 跳不出來就算了 */ }
+    });
+  }
+  return fresh;
+}
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
   refreshBrewLaunch(false);
@@ -3953,6 +4023,7 @@ async function refresh(){
     const data = await res.json();
     if (!data || !Array.isArray(data.groups)) throw new Error('bad payload');
     lastData = data;
+    try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     lastDataFetchedAt = new Date();
   } catch (e) {
     if (!lastData) lastData = buildMockData();
@@ -4076,12 +4147,27 @@ document.getElementById('cmQuickSearch').addEventListener('keydown', (e) => {
 document.getElementById('cmQuickSearchGoBtn').addEventListener('click', triggerChartQuickSearch);
 
 document.getElementById('signalBadgeBtn').addEventListener('click', openSignalCenter);
-document.getElementById('alertToggle').addEventListener('click', () => {
-  alertsEnabled = !alertsEnabled;
+function syncAlertToggle(){
   const btn = document.getElementById('alertToggle');
   btn.textContent = alertsEnabled ? '提醒開啟' : '提醒關閉';
   btn.classList.toggle('on', alertsEnabled);
   btn.setAttribute('aria-pressed', String(alertsEnabled));
+}
+syncAlertToggle();
+document.getElementById('alertToggle').addEventListener('click', () => {
+  alertsEnabled = !alertsEnabled;
+  try { localStorage.setItem('alertsEnabled', alertsEnabled ? '1' : '0'); } catch (e) { /* 記不住就算了 */ }
+  syncAlertToggle();
+  if (alertsEnabled){
+    primeAlertAudio();  // 使用者剛點了按鈕，趁這個手勢把聲音打開（瀏覽器規定要有互動才能出聲）
+    requestNotifyPermission((state) => {
+      showToast(state === 'granted' ? '提醒已開啟：出現新的發動會跳通知並提示音'
+        : state === 'denied' ? '瀏覽器擋掉了通知，請到網址列左邊的設定允許通知；提示音照樣會響'
+        : '提醒已開啟（提示音）；允許通知後也會跳通知');
+    });
+  } else {
+    showToast('提醒已關閉');
+  }
 });
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => showToast('「' + btn.dataset.label + '」功能開發中'));
