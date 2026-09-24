@@ -282,6 +282,26 @@ export default {
         }
       }
     }
+    if (url.pathname === "/api/diag/tpex") {
+      // 診斷：櫃買中心 2026-09-22 起擋 Railway 主機；測 Cloudflare 這邊連不連得到（只打固定網址，不是開放代理）。
+      const targets = [
+        "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes",
+        "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_peratio_analysis",
+        "https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=2026%2F09%2F24&id=&response=json",
+      ];
+      const results = [];
+      for (const target of targets) {
+        const started = Date.now();
+        try {
+          const resp = await fetch(target, { headers: { "Accept": "application/json,text/plain,*/*", "User-Agent": "Mozilla/5.0 (compatible; HanStock/1.0)" } });
+          const text = await resp.text();
+          results.push({ url: target, status: resp.status, ms: Date.now() - started, bytes: text.length, head: text.slice(0, 300) });
+        } catch (err) {
+          results.push({ url: target, error: String(err), ms: Date.now() - started });
+        }
+      }
+      return Response.json({ status: "ok", colo: (request.cf && request.cf.colo) || null, results });
+    }
     if (url.pathname === "/api/main-force-ranking") {
       try {
         return await proxyHanstockBars("/api/hub/main-force/ranking" + url.search, 0);
