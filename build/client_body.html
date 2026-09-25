@@ -462,6 +462,9 @@
   .sm-btn{background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer;font-family:inherit;}
   .sm-btn:hover{background:var(--panel-2);}
   .sm-btn.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+  /* 訊號中心右上角的「收合」「隱藏」（2026-09-25 使用者）：紅底白色符號；手機、平板、桌機都一樣，沒有另外的媒體查詢 */
+  #signalModalInner #smCollapse,#signalModalInner #smClose{background:#dc2626;border-color:#dc2626;color:#fff;font-weight:800;}
+  #signalModalInner #smCollapse:hover,#signalModalInner #smClose:hover{background:#b91c1c;border-color:#b91c1c;}
   .signal-help{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px 8px 26px;font-size:11px;color:var(--muted);margin-bottom:8px;}
   /* 訊號教學改條列式（2026-09-24 使用者：不要全部擠在一起），每個分頁一條、清楚分開 */
   .signal-help ul{margin:0;padding:0;list-style:none;}
