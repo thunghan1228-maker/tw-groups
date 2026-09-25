@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-25 16:39:39";
+const BUILD_STAMP = "2026-09-25 17:32:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3916,9 +3916,14 @@ function brewLaunchHtml(){
 const CHIPS_MEASURES = [
   { key: 'mf', label: '主力大單' }, { key: 'foreign', label: '外資' }, { key: 'trust', label: '投信' },
   { key: 'dealer', label: '自營商' }, { key: 'total', label: '三大法人' }, { key: 'brewx', label: '法人連買∩醞釀發動' },
+  { key: 'mfx', label: '主力大單∩醞釀發動' },
 ];
 const CHIPS_PAGE = 30;
-let chipsState = { measure: 'mf', side: 'buy', dayIndex: 0, market: 'all', limit: CHIPS_PAGE, inst: 'total', minStreak: 2, list: 'all' };
+let chipsState = { measure: 'mf', side: 'buy', dayIndex: 0, market: 'all', limit: CHIPS_PAGE, inst: 'total', minStreak: 2, list: 'all', mfMinStreak: 1 };
+// 主力大單∩醞釀發動（2026-09-25 使用者：再多一個跟主力大單的交集）：同一套交集，只是「連續」改看主力大單連續買超天數、
+// 欄位改成主力淨額／淨額金額／佔成交額；那天沒有主力大單資料的股票不算。
+const chipsBrewMfMode = () => chipsState.measure === 'mfx';
+const chipsBrewTabs = () => chipsState.measure === 'brewx' || chipsState.measure === 'mfx';
 // 法人連買∩醞釀發動（2026-09-25 使用者）：那一天的醞釀名單快照／發動紀錄（後端每日保存）跟那天收盤的法人連續買超天數做交集
 const chipsBrewCache = {};   // date -> {brew: [...], launch: [...]}
 const chipsBrewLoading = {};
@@ -3942,7 +3947,8 @@ async function ensureChipsBrew(date){
 }
 const CHIPS_INST_LABEL = { total: '三大法人', foreign: '外資', trust: '投信', dealer: '自營商' };
 function chipsBrewRows(data, day){
-  const inst = chipsState.inst, minStreak = chipsState.minStreak;
+  const mfMode = chipsBrewMfMode();
+  const inst = chipsState.inst, minStreak = mfMode ? chipsState.mfMinStreak : chipsState.minStreak;
   const want = chipsState.market === 'all' ? null : (chipsState.market === 'tse' ? 'TSE' : 'OTC');
   const byCode = {};
   (day.brew || []).forEach((r) => { byCode[r.code] = Object.assign(byCode[r.code] || {}, { brew: r }); });
@@ -3951,13 +3957,14 @@ function chipsBrewRows(data, day){
   Object.keys(byCode).forEach((code) => {
     const s = data.stocks[code];
     if (!s || !s.streak) return;
-    const streak = s.streak[inst] || 0;
+    if (mfMode && !s.mf) return;
+    const streak = (mfMode ? s.streak.mf : s.streak[inst]) || 0;
     if (streak < minStreak) return;
     if (want && s.market !== want) return;
     const kind = byCode[code].launch ? (byCode[code].brew || byCode[code].launch.brewing ? 'both' : 'launch') : 'brew';
     if (chipsState.list === 'brew' && !byCode[code].brew) return;
     if (chipsState.list === 'launch' && !byCode[code].launch) return;
-    rows.push({ code, s, streak, net: s[inst], kind, brew: byCode[code].brew, launch: byCode[code].launch });
+    rows.push({ code, s, streak, net: mfMode ? s.mf.net : s[inst], kind, brew: byCode[code].brew, launch: byCode[code].launch });
   });
   rows.sort((a, b) => b.streak - a.streak || (b.net || 0) - (a.net || 0));
   return rows;
@@ -3976,8 +3983,11 @@ function chipsBrewRowHtml(r, rank){
     '<td><span class="sig-group">' + (s.group || '—') + '</span></td>' +
     '<td>' + listCell + '</td>' +
     '<td>' + chipsStreakHtml(r.streak) + '</td>' +
-    lots('foreign') + lots('trust') + lots('dealer') + lots('total') +
-    '<td class="num">' + (s.mf ? fmtLots(s.mf.net) : '—') + '</td>' +
+    (chipsBrewMfMode()
+      ? '<td class="num ' + dirClass(s.mf.net) + ' chips-active">' + fmtLots(s.mf.net) + '</td><td class="num ' + dirClass(s.mf.netAmount) + '">' + fmtAmount(s.mf.netAmount) + '</td>' +
+        '<td class="num">' + (s.mf.pct !== null && s.mf.pct !== undefined ? s.mf.pct.toFixed(1) + '%' : '—') + '</td>' +
+        '<td class="num ' + dirClass(s.total || 0) + '">' + fmtLots(s.total) + '</td>'
+      : lots('foreign') + lots('trust') + lots('dealer') + lots('total') + '<td class="num">' + (s.mf ? fmtLots(s.mf.net) : '—') + '</td>') +
     '<td class="bl-score">' + (score === null || score === undefined ? '—' : score) + '</td>' +
     '<td class="num ' + dirClass(s.changePct || 0) + '">' + chg + '</td>' +
     '<td class="num">' + (s.close === null || s.close === undefined ? '—' : num2(s.close)) + '</td></tr>';
@@ -3985,8 +3995,10 @@ function chipsBrewRowHtml(r, rank){
 function chipsBrewTableHtml(rows){
   const cls = (key) => (key === chipsState.inst ? ' class="chips-active num"' : ' class="num"');
   const head = '<th>名次</th><th>代號</th><th>名稱</th><th>族群</th><th>名單</th><th>連續</th>' +
-    '<th' + cls('foreign') + '>外資</th><th' + cls('trust') + '>投信</th><th' + cls('dealer') + '>自營商</th><th' + cls('total') + '>三大法人</th>' +
-    '<th class="num">主力</th><th>均線分數</th><th class="num">漲跌幅</th><th class="num">收盤</th>';
+    (chipsBrewMfMode()
+      ? '<th class="chips-active num">主力淨額(張)</th><th class="num">淨額金額</th><th class="num">佔成交額</th><th class="num">三大法人</th>'
+      : '<th' + cls('foreign') + '>外資</th><th' + cls('trust') + '>投信</th><th' + cls('dealer') + '>自營商</th><th' + cls('total') + '>三大法人</th><th class="num">主力</th>') +
+    '<th>均線分數</th><th class="num">漲跌幅</th><th class="num">收盤</th>';
   const shown = rows.slice(0, chipsState.limit);
   return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table chips-table"><thead><tr>' + head + '</tr></thead><tbody>' +
     shown.map((r, i) => chipsBrewRowHtml(r, i + 1)).join('') + '</tbody></table></div></div>' +
@@ -3994,9 +4006,11 @@ function chipsBrewTableHtml(rows){
 }
 function chipsBrewControlsHtml(){
   const btn = (cls, attr, value, label, active) => '<button class="chart-tab chips-btn ' + cls + (active ? ' active' : '') + '" data-' + attr + '="' + value + '">' + label + '</button>';
+  const mfMode = chipsBrewMfMode();
+  const minStreak = mfMode ? chipsState.mfMinStreak : chipsState.minStreak;
   return '<div class="chips-controls">' +
-    '<div class="combo-filter-bar">' + Object.keys(CHIPS_INST_LABEL).map((k) => btn('chips-inst-btn', 'inst', k, CHIPS_INST_LABEL[k], chipsState.inst === k)).join('') + '</div>' +
-    '<div class="combo-filter-bar">' + [1, 2, 3, 5].map((n) => btn('chips-streak-btn', 'streak', n, '連買≥' + n + '天', chipsState.minStreak === n)).join('') + '</div>' +
+    (mfMode ? '' : '<div class="combo-filter-bar">' + Object.keys(CHIPS_INST_LABEL).map((k) => btn('chips-inst-btn', 'inst', k, CHIPS_INST_LABEL[k], chipsState.inst === k)).join('') + '</div>') +
+    '<div class="combo-filter-bar">' + [1, 2, 3, 5].map((n) => btn('chips-streak-btn', 'streak', n, (mfMode ? '主力連買≥' : '連買≥') + n + '天', minStreak === n)).join('') + '</div>' +
     '<div class="combo-filter-bar">' + btn('chips-list-btn', 'list', 'all', '醞釀＋發動', chipsState.list === 'all') + btn('chips-list-btn', 'list', 'brew', '只看醞釀', chipsState.list === 'brew') + btn('chips-list-btn', 'list', 'launch', '只看發動', chipsState.list === 'launch') + '</div>' +
     '</div>';
 }
@@ -4005,14 +4019,18 @@ function chipsBrewSectionHtml(data){
   ensureChipsBrew(date);
   const day = chipsBrewCache[date];
   const mmdd = String(date || '').slice(5).replace('-', '/');
-  const note = '<div class="race-sub">' + mmdd + '：那天盤前的醞釀名單（快照）與那天的發動紀錄，跟那天收盤的法人買賣超做交集；「連續」＝所選法人連續買超的交易日數（到 ' + mmdd + ' 為止）。名單欄：醞釀＝在醞釀名單、發動＝那天發動（時間、發動價）、醞釀→發動＝從醞釀名單發動。</div>';
+  const mfMode = chipsBrewMfMode();
+  const listNote = '名單欄：醞釀＝在醞釀名單、發動＝那天發動（時間、發動價）、醞釀→發動＝從醞釀名單發動。';
+  const note = mfMode
+    ? '<div class="race-sub">' + mmdd + '：那天盤前的醞釀名單（快照）與那天的發動紀錄，跟那天的主力大單淨額做交集（只算那天有主力大單資料的股票）；「連續」＝主力大單連續買超的交易日數（到 ' + mmdd + ' 為止）；佔成交額＝主力淨額金額 ÷ 當天成交額。' + listNote + '</div>'
+    : '<div class="race-sub">' + mmdd + '：那天盤前的醞釀名單（快照）與那天的發動紀錄，跟那天收盤的法人買賣超做交集；「連續」＝所選法人連續買超的交易日數（到 ' + mmdd + ' 為止）。' + listNote + '</div>';
   if (!day){
     return chipsBrewControlsHtml() + note + '<div class="signal-empty"><div class="se-title">' + (chipsBrewFailedAt[date] ? '醞釀／發動名單讀取失敗' : '讀取中…') + '</div><div class="se-sub">正在抓 ' + mmdd + ' 的醞釀名單快照與發動紀錄。</div></div>';
   }
   const rows = chipsBrewRows(data, day);
-  const title = CHIPS_INST_LABEL[chipsState.inst] + '連買≥' + chipsState.minStreak + '天 ∩ ' + (chipsState.list === 'brew' ? '醞釀' : chipsState.list === 'launch' ? '發動' : '醞釀／發動') + '・' + rows.length + ' 檔';
+  const title = (mfMode ? '主力大單連買≥' + chipsState.mfMinStreak : CHIPS_INST_LABEL[chipsState.inst] + '連買≥' + chipsState.minStreak) + '天 ∩ ' + (chipsState.list === 'brew' ? '醞釀' : chipsState.list === 'launch' ? '發動' : '醞釀／發動') + '・' + rows.length + ' 檔';
   return chipsBrewControlsHtml() + note + '<div class="bl-section bl-launch">' + title + '</div>' +
-    (rows.length ? chipsBrewTableHtml(rows) : '<div class="race-note">沒有同時符合的股票（那天醞釀 ' + (day.brew || []).length + ' 檔、發動 ' + (day.launch || []).length + ' 檔）</div>');
+    (rows.length ? chipsBrewTableHtml(rows) : '<div class="race-note">沒有同時符合的股票（那天醞釀 ' + (day.brew || []).length + ' 檔、發動 ' + (day.launch || []).length + ' 檔' + (mfMode ? '、主力大單 ' + (data.mainForceRows || 0) + ' 檔' : '') + '）</div>');
 }
 const chipsCache = {};        // date('' = 最新) -> payload
 const chipsLoading = {};
@@ -4106,7 +4124,7 @@ function chipsControlsHtml(data){
   const btn = (cls, attr, value, label, active, disabled) => '<button class="chart-tab chips-btn ' + cls + (active ? ' active' : '') + '" data-' + attr + '="' + value + '"' + (disabled ? ' disabled' : '') + '>' + label + '</button>';
   const dates = chipsDates.length ? chipsDates : (data && data.date ? [data.date] : []);
   return '<div class="chips-controls">' +
-    (chipsState.measure === 'brewx' ? '' : '<div class="combo-filter-bar">' + btn('chips-side-btn', 'side', 'buy', '買超', chipsState.side === 'buy') + btn('chips-side-btn', 'side', 'sell', '賣超', chipsState.side === 'sell') + '</div>') +
+    (chipsBrewTabs() ? '' : '<div class="combo-filter-bar">' + btn('chips-side-btn', 'side', 'buy', '買超', chipsState.side === 'buy') + btn('chips-side-btn', 'side', 'sell', '賣超', chipsState.side === 'sell') + '</div>') +
     '<div class="combo-filter-bar">' + [0, 1, 2].map((i) => btn('chips-day-btn', 'day', i, (i === 0 ? '最新 ' : '') + (dates[i] ? mmdd(dates[i]) : (i === 1 ? '前一日' : '前二日')), chipsState.dayIndex === i, !dates[i])).join('') + '</div>' +
     '<div class="combo-filter-bar">' + btn('chips-mkt-btn', 'market', 'all', '全部', chipsState.market === 'all') + btn('chips-mkt-btn', 'market', 'tse', '上市', chipsState.market === 'tse') + btn('chips-mkt-btn', 'market', 'otc', '上櫃', chipsState.market === 'otc') + '</div>' +
     '</div>';
@@ -4133,7 +4151,7 @@ function renderChips(){
     body.innerHTML = chipsControlsHtml(data) + '<div class="signal-empty"><div class="se-title">還沒有盤後籌碼資料</div><div class="se-sub">第一個交易日收盤後（約 15:00 起）會開始累積。</div></div>';
     return;
   }
-  if (chipsState.measure === 'brewx'){
+  if (chipsBrewTabs()){
     body.innerHTML = chipsControlsHtml(data) + chipsSourceNoteHtml(data) + chipsBrewSectionHtml(data);
     return;
   }
@@ -4167,7 +4185,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
   const inst = e.target.closest('.chips-inst-btn');
   if (inst){ chipsState.inst = inst.dataset.inst; chipsState.limit = CHIPS_PAGE; renderChips(); return; }
   const streak = e.target.closest('.chips-streak-btn');
-  if (streak){ chipsState.minStreak = Number(streak.dataset.streak) || 1; chipsState.limit = CHIPS_PAGE; renderChips(); return; }
+  if (streak){ const n = Number(streak.dataset.streak) || 1; if (chipsBrewMfMode()) chipsState.mfMinStreak = n; else chipsState.minStreak = n; chipsState.limit = CHIPS_PAGE; renderChips(); return; }
   const list = e.target.closest('.chips-list-btn');
   if (list){ chipsState.list = list.dataset.list; chipsState.limit = CHIPS_PAGE; renderChips(); return; }
   const row = e.target.closest('.chips-row[data-code]');
@@ -4187,7 +4205,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-25 16:39:39';
+const BUILD_STAMP = '2026-09-25 17:32:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
