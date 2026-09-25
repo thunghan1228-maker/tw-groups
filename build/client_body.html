@@ -396,15 +396,15 @@
   .race-head .head-pill{background:#7c3aed;color:#fff;border-radius:6px;padding:1px 8px;font-weight:700;display:inline-block;}
   .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
   .bigorder-filter-note{font-size:12px;color:var(--muted);align-self:center;margin-left:4px;}
-  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn,.combo-filter-bar .race333-filter-btn,.combo-filter-bar .bigorder-filter-btn,.combo-filter-bar .bl-day-btn{padding:4px 10px;font-size:12px;}
+  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn,.combo-filter-bar .race333-filter-btn,.combo-filter-bar .bigorder-filter-btn,.combo-filter-bar .bl-day-btn,.combo-filter-bar .sig-day-btn{padding:4px 10px;font-size:12px;}
   .combo-filter-bar .hf-day-btn[disabled]{opacity:.45;cursor:default;}
   /* 大戶力≥10%／≤-10%篩選鈕改黑底白字（2026-09-24 使用者：「這兩項功能全部改成黑底白字」），
      族群大戶力／族群綜合表／盤中333三個分頁共用同一套樣式；選取中額外加紫色外框標示，
      不然黑底白字選取前後兩個狀態會分不出哪個正在篩選中。 */
-  .hf-filter-btn,.combo-filter-btn,.race333-filter-btn,.bigorder-filter-btn,.bl-day-btn{background:#000;color:#fff;border-color:#000;}
-  .combo-filter-bar .bl-day-btn[disabled]{opacity:.45;cursor:default;}
+  .hf-filter-btn,.combo-filter-btn,.race333-filter-btn,.bigorder-filter-btn,.bl-day-btn,.sig-day-btn{background:#000;color:#fff;border-color:#000;}
+  .combo-filter-bar .bl-day-btn[disabled],.combo-filter-bar .sig-day-btn[disabled]{opacity:.45;cursor:default;}
   .hf-filter-btn:hover,.combo-filter-btn:hover,.race333-filter-btn:hover,.bigorder-filter-btn:hover{background:#2a2a2a;}
-  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active,.bigorder-filter-btn.active,.bl-day-btn.active{background:#000;color:#c084fc;border-color:#000;font-weight:800;}  /* 按下去整個字變紫色（2026-09-24 使用者），不用外框 */
+  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active,.bigorder-filter-btn.active,.bl-day-btn.active,.sig-day-btn.active{background:#000;color:#c084fc;border-color:#000;font-weight:800;}  /* 按下去整個字變紫色（2026-09-24 使用者），不用外框 */
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -758,7 +758,7 @@
         <li><b>創高黑龍</b>：11:00～13:30，5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。</li>
         <li><b>主力翻多空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
         <li><b>盤中特大買單／賣單</b>：同一秒內大單連續敲進／倒出（同秒合計 ≥100 張或 ≥3,000 萬，觸發時大戶力要同向）；合計 ≥300 張或 ≥5,000 萬標「瞬間特大」。訊號很多時用上方篩選鈕縮減（可同時開幾個）：只看特大單、金額≥1億、族群前10名（族群同步漲幅／跌幅前 10 名）、每檔只留最大一筆（同一檔一天觸發好幾次，只留到目前為止金額最大的，之後有更大的會換成新的）、每檔只留最新一筆（只留最近發生的那筆，看誰剛剛有大單進來；跟最大一筆二選一）；分頁上的數字會跟著篩選變。</li>
-        <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。</li>
+        <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選／1+2多／創高黑龍／主力翻多空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日或開盤前 08:45 今天還沒有訊號時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
       </ul>
     </div>
     <div class="chart-tabs signal-tabs-bar" id="signalTabsBar"></div>
@@ -2454,7 +2454,7 @@ const holderHistoryRanking = {};   // date -> ranking[]（抓過就留著，不�
 const holderHistoryLoading = {};   // date -> true（抓取中）
 const holderHistoryFailedAt = {};  // date -> 最近一次抓失敗的時間，30 秒內不重試
 function holderCurrentDate(){
-  return mainForceRankingInfo.tradeDate || new Date().toISOString().slice(0, 10);
+  return mainForceRankingInfo.tradeDate || twTodayStr();
 }
 function holderPastDates(){
   const dates = groupDailyChanges && Array.isArray(groupDailyChanges.dates) ? groupDailyChanges.dates : [];
@@ -2548,6 +2548,81 @@ function holderEmptyHtml(view, title, sub){
   else if (view && view.unavailable){ title = '還沒有那一天的資料'; sub = '後端日K累積到那一天之後就會出現。'; }
   return '<div class="signal-empty"><div class="se-title">' + title + '</div><div class="se-sub">' + sub + '</div></div>';
 }
+// ---- 訊號分頁（今日即時／四項精選／1+2多／創高黑龍／主力翻多空／盤中特大買賣單）的「今天／昨天／前天」----
+// 使用者 2026-09-25：訊號為零的分頁昨天的都沒留下來，要能看昨天、前天的資料來檢查。往日的訊號後端本來就
+// 每天保存（跟歷史查詢分頁同一條路），這裡讓每個訊號分頁都能直接切；休市日或開盤前 08:45 今天還沒有訊號時，
+// 比照大戶力分頁沿用上一個交易日（後端排行帶 heldFrom），按鈕寫「今天（mm/dd 收盤）」。
+const SIGNAL_DAY_TABS = new Set(['now', 'fourGate', 'combo12Bull', 'blackDragon', 'mainForceFlip', 'bigBuy', 'bigSell']);
+let sigDayOffset = 0;
+const sigHistoryEvents = {};   // date -> events[]（抓過就留著）
+const sigHistoryLoading = {};
+const sigHistoryFailedAt = {}; // 30 秒內不重試
+function sigCurrentDate(){
+  const today = twTodayStr();
+  if (todaySignalEvents.length) return today;
+  return mainForceRankingInfo.heldFrom && mainForceRankingInfo.tradeDate ? mainForceRankingInfo.tradeDate : today;
+}
+function sigPastDates(){
+  const dates = groupDailyChanges && Array.isArray(groupDailyChanges.dates) ? groupDailyChanges.dates : [];
+  const cur = sigCurrentDate();
+  return dates.filter((d) => d < cur);
+}
+function sigViewDate(){ return sigDayOffset === 0 ? sigCurrentDate() : (sigPastDates()[sigDayOffset - 1] || null); }
+async function ensureSigHistory(date){
+  if (sigHistoryEvents[date] || sigHistoryLoading[date]) return;
+  if (sigHistoryFailedAt[date] && Date.now() - sigHistoryFailedAt[date] < 30000) return;
+  sigHistoryLoading[date] = true;
+  try {
+    sigHistoryEvents[date] = await fetchRealSignals(date);
+  } catch (e) {
+    sigHistoryFailedAt[date] = Date.now();
+  } finally {
+    delete sigHistoryLoading[date];
+  }
+  if (!document.getElementById('signalModal').hidden) renderSignalCenter();
+}
+function sigCurrentEvents(){
+  const date = sigCurrentDate();
+  if (date === twTodayStr()) return todaySignalEvents;
+  ensureSigHistory(date);  // 沿用上一個交易日：那天的訊號另外抓
+  return sigHistoryEvents[date] || [];
+}
+function sigView(){
+  const today = twTodayStr();
+  if (sigDayOffset === 0){
+    const date = sigCurrentDate();
+    const held = date !== today;
+    return { offset: 0, date, events: sigCurrentEvents(), loading: held && !sigHistoryEvents[date], isPast: false, held, unavailable: false,
+      rankingRows: bigHolderRowsFrom(mainForceRanking || []) };
+  }
+  const date = sigViewDate();
+  if (!date) return { offset: sigDayOffset, date: null, events: [], loading: false, isPast: true, held: false, unavailable: true, rankingRows: [] };
+  ensureSigHistory(date);
+  ensureHolderHistory(date);  // 今日即時分頁要合併那一天的大戶力
+  return { offset: sigDayOffset, date, events: sigHistoryEvents[date] || [], loading: !sigHistoryEvents[date], isPast: true, held: false, unavailable: false,
+    rankingRows: bigHolderRowsFrom(holderHistoryRanking[date] || []) };
+}
+function sigDayBarHtml(){
+  const past = sigPastDates();
+  const mmdd = (d) => (d ? String(d).slice(5).replace('-', '/') : '');
+  const cur = sigCurrentDate();
+  const todayLabel = cur !== twTodayStr() ? '今天（' + mmdd(cur) + ' 收盤）' : '今天';
+  const btn = (offset, label, date) => '<button class="chart-tab sig-day-btn' + (sigDayOffset === offset ? ' active' : '') + '" data-offset="' + offset + '"' + (date ? '' : ' disabled') + '>' + label + '</button>';
+  return '<div class="combo-filter-bar sig-day-bar">' +
+    btn(0, todayLabel, cur) +
+    btn(1, '昨天' + (past[0] ? ' ' + mmdd(past[0]) : ''), past[0]) +
+    btn(2, '前天' + (past[1] ? ' ' + mmdd(past[1]) : ''), past[1]) +
+    '</div>';
+}
+function sigDayNoteHtml(view){
+  if (view.unavailable) return '<div class="race-sub">後端還沒有那一天的資料，暫時沒辦法顯示。</div>';
+  if (view.held) return '<div class="race-sub">目前顯示 ' + view.date + ' 的訊號（今天還沒開盤或休市），保留到下一個交易日開盤前 15 分鐘（08:45）才清空。' + (view.loading ? '讀取中…' : '') + '</div>';
+  if (view.isPast) return '<div class="race-sub">目前顯示 ' + view.date + ' 的訊號紀錄（後端每日保存）；時間是那天訊號發生的時間，成交價／漲跌幅是那一天的日K收盤值。' + (view.loading ? '讀取中…' : '') + '</div>';
+  return '';
+}
+function sigLoadingHtml(view){
+  return '<div class="signal-empty"><div class="se-title">讀取中…</div><div class="se-sub">正在抓 ' + view.date + ' 的訊號紀錄。</div></div>';
+}
 async function fetchMainForceRanking(){
   // limit拉到1000(後端上限)：族群大戶力要從43個官方族群裡各挑前5名，
   // 只抓前200名很容易讓某些族群完全沒有股票入選，跟真正的全市場排行對不起來。
@@ -2563,7 +2638,7 @@ let signalRefreshInFlight = false;
 async function refreshSignalData(){
   if (signalRefreshInFlight) return;
   signalRefreshInFlight = true;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = twTodayStr();
   try {
     try {
       const [signals, ranking] = await Promise.all([fetchRealSignals(today), fetchMainForceRanking()]);
@@ -2580,7 +2655,7 @@ async function refreshSignalData(){
     const countEl = document.getElementById('signalBadgeCount');
     // 跟「今日即時」分頁的數量算法要一致(事件訊號+盤中大戶力)，不然這裡
     // 少算大戶力筆數，右上角徽章數字就會比今日即時分頁裡的數字還小。
-    if (countEl) countEl.textContent = String(todaySignalEvents.length + bigHolderRowsFrom(mainForceRanking).length);
+    if (countEl) countEl.textContent = String(sigCurrentEvents().length + bigHolderRowsFrom(mainForceRanking).length);
     if (!document.getElementById('signalModal').hidden) renderSignalCenter();
   } finally {
     signalRefreshInFlight = false;
@@ -2600,13 +2675,15 @@ const LARGE_ORDER_TOOLTIPS = {
   '主力累計翻空': 'A～D同步：主力累計淨額由正翻負(零軸)、1分K收盤跌破VWAP，兩者5分鐘內發生；主力淨額率 ≤ -20%、量比 ≥ 1.5×',
   '主力累計強勢翻空': 'A～D同步：主力累計淨額由正翻負(零軸)、1分K收盤跌破VWAP，兩者5分鐘內發生；主力淨額率 ≤ -40%、量比 ≥ 3×',
 };
-function signalEventRowHtml(ev){
+function signalEventRowHtml(ev, view){
   const labelCls = ev.isBuy != null
     ? (ev.isBuy ? ' sig-bull' : ' sig-bear')
     : (/[買多]/.test(ev.label) ? ' sig-bull' : /[賣空]/.test(ev.label) ? ' sig-bear' : '');
   const group = lookupStockGroup(ev.code);
-  const quote = getStockQuote(ev.code);
-  const priceCols = quote ? stockValueColsHtml(quote.price, quote.price - quote.price / (1 + quote.changePercent / 100), quote.changePercent) : '';
+  // 看昨天／前天時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價（跟大戶力分頁一樣）。
+  const quote = view && view.isPast ? holderPastQuote(ev.code, view.date) : getStockQuote(ev.code);
+  const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
+  const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '';
   const labelTitle = LARGE_ORDER_TOOLTIPS[ev.label] || '';
   return '<div class="signal-row" data-code="' + ev.code + '" data-name="' + ev.name + '">' +
     '<span class="sig-time">' + ev.time + '</span>' +
@@ -2680,12 +2757,13 @@ function bigOrderFilterBarHtml(total, shown){
   const note = bigOrderFilterActive() ? '<span class="bigorder-filter-note">篩選後 ' + shown + ' 筆（原本 ' + total + ' 筆）</span>' : '';
   return '<div class="combo-filter-bar bigorder-filter-bar">' + btns + note + '</div>';
 }
-function signalRowsHtml(events){
+function signalRowsHtml(events, view){
   if (!events.length){
+    if (view && view.isPast) return '<div class="signal-empty"><div class="se-title">那一天沒有這類訊號</div><div class="se-sub">' + view.date + ' 的紀錄裡沒有符合這個分頁的訊號。</div></div>';
     return '<div class="signal-empty"><div class="se-title">目前沒有符合條件的訊號' + (signalDataIsReal ? '' : '（示範資料）') + '</div>' +
       '<div class="se-sub">' + (signalDataIsReal ? '全市場掃描中，符合條件才會出現。' : '後端暫時連不上，先用示範資料展示介面。') + '</div></div>';
   }
-  return '<div class="signal-list">' + events.map(signalEventRowHtml).join('') + '</div>';
+  return '<div class="signal-list">' + events.map((ev) => signalEventRowHtml(ev, view)).join('') + '</div>';
 }
 
 function holderStrengthLabelHtml(r){
@@ -2839,15 +2917,15 @@ function rankingRowsHtml(rows, view){
   }
   return rankingColLabelsHtml() + '<div class="signal-list">' + rows.map((r) => rankingRowHtml(r, view)).join('') + '</div>';
 }
-function nowTabRowsHtml(events, rankingRows){
-  if (!events.length && !rankingRows.length) return signalRowsHtml([]);
+function nowTabRowsHtml(events, rankingRows, view){
+  if (!events.length && !rankingRows.length) return signalRowsHtml([], view);
   // 使用者要求：全部訊號依實際發生時間新到舊排序，不要再分事件/排行
   // 兩段各自呈現。rankingRows的時間(lastTs)是那檔股票主力副圖最後一根
   // bar的時間，個股之間本來就不一樣，不是統一的「現在」，可以跟事件
   // 訊號的barTs放在同一個時間軸上比較、排序。
   const merged = [
-    ...events.map((ev) => ({ sortTs: ev.ts || 0, html: signalEventRowHtml(ev) })),
-    ...rankingRows.map((r) => ({ sortTs: r.lastTs || 0, html: rankingRowHtml(r) })),
+    ...events.map((ev) => ({ sortTs: ev.ts || 0, html: signalEventRowHtml(ev, view) })),
+    ...rankingRows.map((r) => ({ sortTs: r.lastTs || 0, html: rankingRowHtml(r, view) })),
   ];
   merged.sort((a, b) => b.sortTs - a.sortTs);
   return '<div class="signal-list">' + merged.map((m) => m.html).join('') + '</div>';
@@ -3812,13 +3890,14 @@ function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
   refreshBrewLaunch(false);
   const bigHolderRows = bigHolderRowsFrom(mainForceRanking);
+  const currentEvents = sigCurrentEvents();  // 休市日／開盤前沿用上一個交易日的訊號，數字才不會全部是 0
   const countFor = (key) => {
-    if (key === 'now') return todaySignalEvents.length + bigHolderRows.length;
+    if (key === 'now') return currentEvents.length + bigHolderRows.length;
     if (key === 'history' || key === 'race333' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     if (key === 'brewLaunch'){ const bm = brewLaunchModel(); return bm ? bm.brewCount + '/' + bm.launchCount : null; }
-    if (key === 'bigBuy' || key === 'bigSell') return filterLargeOrderEvents(todaySignalEvents.filter((e) => e.tabs.includes(key))).length;
-    return todaySignalEvents.filter((e) => e.tabs.includes(key)).length;
+    if (key === 'bigBuy' || key === 'bigSell') return filterLargeOrderEvents(currentEvents.filter((e) => e.tabs.includes(key))).length;
+    return currentEvents.filter((e) => e.tabs.includes(key)).length;
   };
   // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
   const PURPLE_TAB_KEYS = new Set(['groupHolderForce', 'groupCombinedBoard', 'race333', 'bigHolderForce', 'brewLaunch']);  // 2026-09-24 使用者：醞釀／發動也紫紅色
@@ -3837,7 +3916,7 @@ function renderSignalCenter(){
   const body = document.getElementById('signalBody');
   const active = signalCenterState.activeTab;
   if (active === 'history'){
-    const today = new Date().toISOString().slice(0, 10);
+    const today = twTodayStr();
     const d = signalCenterState.historyDate || today;
     const key = 'history:' + d;
     if (signalBodyRendered.key !== key || !document.getElementById('signalHistoryBody')){
@@ -3880,16 +3959,23 @@ function renderSignalCenter(){
   } else if (active === 'brewLaunch'){
     refreshBrewHistory(false);
     replaceSignalHtml(body, 'brewLaunch', brewLaunchHtml());
-  } else if (active === 'now'){
-    replaceSignalHtml(body, 'now', nowTabRowsHtml(todaySignalEvents, bigHolderRows));
-  } else if (DEDICATED_KLINE_TABS.has(active)){
-    refreshKlineBackfillStatus();
-    const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
-    replaceSignalHtml(body, active, klineBackfillNoteHtml() + signalRowsHtml(events));
-  } else if (active === 'bigBuy' || active === 'bigSell'){
-    const all = todaySignalEvents.filter((e) => e.tabs.includes(active));
-    const events = filterLargeOrderEvents(all);
-    replaceSignalHtml(body, active, bigOrderFilterBarHtml(all.length, events.length) + signalRowsHtml(events));
+  } else if (SIGNAL_DAY_TABS.has(active)){
+    refreshGroupDailyChanges(false);  // 昨天／前天的日期清單與那天的收盤價
+    const view = sigView();
+    const key = active + ':' + (view.date || 'none');
+    let inner;
+    if (view.unavailable) inner = holderEmptyHtml(view, '', '');
+    else if (view.loading && !view.events.length) inner = sigLoadingHtml(view);
+    else if (active === 'now') inner = nowTabRowsHtml(view.events, view.rankingRows, view);
+    else if (DEDICATED_KLINE_TABS.has(active)){
+      refreshKlineBackfillStatus();
+      inner = (view.isPast ? '' : klineBackfillNoteHtml()) + signalRowsHtml(view.events.filter((e) => e.tabs.includes(active)), view);
+    } else if (active === 'bigBuy' || active === 'bigSell'){
+      const all = view.events.filter((e) => e.tabs.includes(active));
+      const events = filterLargeOrderEvents(all);
+      inner = bigOrderFilterBarHtml(all.length, events.length) + signalRowsHtml(events, view);
+    } else inner = signalRowsHtml(view.events.filter((e) => e.tabs.includes(active)), view);
+    replaceSignalHtml(body, key, sigDayBarHtml() + sigDayNoteHtml(view) + inner);
   } else {
     const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
     replaceSignalHtml(body, active, signalRowsHtml(events));
@@ -3912,7 +3998,7 @@ function positionSignalModal(){
 function recenterSignalModal(){ positionSignalModal(); }
 function openSignalCenter(){
   const datePill = document.getElementById('smDatePill');
-  if (datePill) datePill.textContent = '交易日期 ' + new Date().toISOString().slice(0, 10).replace(/-/g, '/');
+  if (datePill) datePill.textContent = '交易日期 ' + twTodayStr().replace(/-/g, '/');
   const overlay = document.getElementById('signalModal');
   overlay.hidden = false;
   positionSignalModal();
@@ -4348,6 +4434,12 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
   if (hfBtn){
     const f = hfBtn.dataset.filter;
     groupHolderForceFilter = groupHolderForceFilter === f ? null : f;
+    renderSignalCenter();
+    return;
+  }
+  const sigDayBtn = e.target.closest('.sig-day-btn');
+  if (sigDayBtn){
+    sigDayOffset = Number(sigDayBtn.dataset.offset) || 0;
     renderSignalCenter();
     return;
   }
