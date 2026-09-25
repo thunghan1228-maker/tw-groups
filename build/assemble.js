@@ -305,6 +305,10 @@ export default {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/chips-daily") {
+      // 盤後籌碼排行（2026-09-25 使用者）：主力大單、三大法人買賣超，後端每天收盤後收好，快取 1 分鐘
+      return await proxyHanstockBars("/api/hub/chips/daily" + url.search, 60);
+    }
     if (url.pathname === "/api/brew-launch-history") {
       try {
         // 醞釀／發動每日保存（昨天／前天的醞釀名單、盤中曾發動的紀錄）：快取 1 分鐘。

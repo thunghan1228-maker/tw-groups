@@ -396,15 +396,15 @@
   .race-head .head-pill{background:#7c3aed;color:#fff;border-radius:6px;padding:1px 8px;font-weight:700;display:inline-block;}
   .combo-filter-bar{display:flex;gap:6px;margin-bottom:6px;}
   .bigorder-filter-note{font-size:12px;color:var(--muted);align-self:center;margin-left:4px;}
-  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn,.combo-filter-bar .race333-filter-btn,.combo-filter-bar .bigorder-filter-btn,.combo-filter-bar .bl-day-btn,.combo-filter-bar .sig-day-btn{padding:4px 10px;font-size:12px;}
+  .combo-filter-bar .combo-filter-btn,.combo-filter-bar .hf-filter-btn,.combo-filter-bar .hf-day-btn,.combo-filter-bar .race333-filter-btn,.combo-filter-bar .bigorder-filter-btn,.combo-filter-bar .bl-day-btn,.combo-filter-bar .sig-day-btn,.combo-filter-bar .chips-btn{padding:4px 10px;font-size:12px;}
   .combo-filter-bar .hf-day-btn[disabled]{opacity:.45;cursor:default;}
   /* 大戶力≥10%／≤-10%篩選鈕改黑底白字（2026-09-24 使用者：「這兩項功能全部改成黑底白字」），
      族群大戶力／族群綜合表／盤中333三個分頁共用同一套樣式；選取中額外加紫色外框標示，
      不然黑底白字選取前後兩個狀態會分不出哪個正在篩選中。 */
-  .hf-filter-btn,.combo-filter-btn,.race333-filter-btn,.bigorder-filter-btn,.bl-day-btn,.sig-day-btn{background:#000;color:#fff;border-color:#000;}
-  .combo-filter-bar .bl-day-btn[disabled],.combo-filter-bar .sig-day-btn[disabled]{opacity:.45;cursor:default;}
+  .hf-filter-btn,.combo-filter-btn,.race333-filter-btn,.bigorder-filter-btn,.bl-day-btn,.sig-day-btn,.chips-btn{background:#000;color:#fff;border-color:#000;}
+  .combo-filter-bar .bl-day-btn[disabled],.combo-filter-bar .sig-day-btn[disabled],.combo-filter-bar .chips-btn[disabled]{opacity:.45;cursor:default;}
   .hf-filter-btn:hover,.combo-filter-btn:hover,.race333-filter-btn:hover,.bigorder-filter-btn:hover{background:#2a2a2a;}
-  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active,.bigorder-filter-btn.active,.bl-day-btn.active,.sig-day-btn.active{background:#000;color:#c084fc;border-color:#000;font-weight:800;}  /* 按下去整個字變紫色（2026-09-24 使用者），不用外框 */
+  .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active,.bigorder-filter-btn.active,.bl-day-btn.active,.sig-day-btn.active,.chips-btn.active{background:#000;color:#c084fc;border-color:#000;font-weight:800;}  /* 按下去整個字變紫色（2026-09-24 使用者），不用外框 */
   .race-group{display:flex;align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .race-group .race-gname{font-weight:700;}
   .race-group .race-gpct{color:var(--muted);font-size:12px;margin-left:auto;}
@@ -467,6 +467,21 @@
   /* 分頁按鈕列墊一塊灰底（2026-09-24 使用者：背景白白的，加灰色底色跳脫出層次感）：
      深灰標題列 → 灰底分頁列 → 淺色分頁按鈕，三層分得出來。 */
   .signal-tabs-bar{flex-wrap:wrap;background:#c4c8cf;padding:8px;border-radius:10px;}
+  /* 盤後籌碼排行（2026-09-25 使用者：底部「盤後籌碼排行」先做） */
+  .chips-modal{position:fixed;inset:0;z-index:102;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:10px;}
+  .chips-modal[hidden]{display:none;}
+  .chips-inner{background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(1120px,96vw);height:min(920px,92vh);overflow:auto;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);}
+  .chips-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;background:#33333a;color:#fff;padding:10px 12px;border-radius:10px;margin-bottom:10px;}
+  .chips-title{font-weight:800;font-size:18px;}
+  .chips-sub{font-size:12px;color:#d5d5d5;margin-top:2px;}
+  .chips-controls{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:8px 0;}
+  .chips-controls .combo-filter-bar{margin-bottom:0;flex-wrap:wrap;}
+  .chips-table th.num,.chips-table td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .chips-table td.chips-active,.chips-table th.chips-active{font-weight:800;background:rgba(192,132,252,.14);}
+  .chips-table .chips-rank{color:var(--muted);width:2.4em;}
+  .chips-streak-buy{color:#ff5a5a;font-weight:700;white-space:nowrap;}
+  .chips-streak-sell{color:#3ddc84;font-weight:700;white-space:nowrap;}
+  .chips-more{margin:8px 0 4px;}
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
   .signal-history-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:8px;}
@@ -660,6 +675,19 @@
   </div>
 </div>
 
+<div class="chips-modal" id="chipsModal" hidden>
+  <div class="chips-inner" id="chipsInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">盤後籌碼排行</div>
+        <div class="chips-sub">主力大單（永豐逐筆算的大單淨額）＋三大法人買賣超（證交所、櫃買中心公開資料），每個交易日收盤後更新；只列 43 個族群的股票，點股票可開K線圖。</div>
+      </div>
+      <button class="cm-icon-btn" id="chipsClose" aria-label="關閉">✕</button>
+    </div>
+    <div class="chart-tabs signal-tabs-bar" id="chipsTabs"></div>
+    <div id="chipsBody"></div>
+  </div>
+</div>
 <div id="chartWindows"></div>
 <div id="chartTray"></div>
 <div class="chart-modal" id="chartModal" hidden>
@@ -3818,6 +3846,165 @@ function brewLaunchHtml(){
   return brewDayBarHtml() + note + launch + brewFallenTodayHtml(m) + brew;
 }
 
+// ---- 盤後籌碼排行（2026-09-25 使用者：底部「盤後籌碼排行」先做，只用免費資料）----
+// 後端 /api/chips-daily：每個交易日收盤後的主力大單淨額（永豐逐筆）＋三大法人買賣超（上市＝證交所 T86，
+// 上櫃＝櫃買中心開放資料經排程主機鏡像），連續買超／賣超天數，收盤與漲跌幅。這裡只做排序、篩選、切日期。
+const CHIPS_MEASURES = [
+  { key: 'mf', label: '主力大單' }, { key: 'foreign', label: '外資' }, { key: 'trust', label: '投信' },
+  { key: 'dealer', label: '自營商' }, { key: 'total', label: '三大法人' },
+];
+const CHIPS_PAGE = 30;
+let chipsState = { measure: 'mf', side: 'buy', dayIndex: 0, market: 'all', limit: CHIPS_PAGE };
+const chipsCache = {};        // date('' = 最新) -> payload
+const chipsLoading = {};
+const chipsFailedAt = {};
+let chipsDates = [];          // 有資料的交易日（新的在前），第一次抓最新那份時填
+function chipsCurrentDate(){ return chipsDates[chipsState.dayIndex] || (chipsState.dayIndex === 0 ? '' : null); }
+async function ensureChips(date){
+  const key = date || '';
+  if (chipsCache[key] || chipsLoading[key]) return;
+  if (chipsFailedAt[key] && Date.now() - chipsFailedAt[key] < 30000) return;
+  chipsLoading[key] = true;
+  try {
+    const res = await fetch('/api/chips-daily' + (date ? '?date=' + encodeURIComponent(date) : ''));
+    if (!res.ok) throw new Error('chips-daily http ' + res.status);
+    const data = await res.json();
+    if (!data || !data.status) throw new Error('bad payload');
+    chipsCache[key] = data;
+    if (data.date) chipsCache[data.date] = data;
+    if (Array.isArray(data.dates) && data.dates.length) chipsDates = data.dates;
+  } catch (e) {
+    chipsFailedAt[key] = Date.now();
+  } finally {
+    delete chipsLoading[key];
+  }
+  if (!document.getElementById('chipsModal').hidden) renderChips();
+}
+function chipsData(){
+  const date = chipsCurrentDate();
+  if (date === null) return null;
+  ensureChips(date);
+  return chipsCache[date || ''] || null;
+}
+function chipsValue(s, measure){ return measure === 'mf' ? (s.mf ? s.mf.net : null) : s[measure]; }
+function chipsRows(data){
+  const sign = chipsState.side === 'buy' ? 1 : -1;
+  const want = chipsState.market === 'all' ? null : (chipsState.market === 'tse' ? 'TSE' : 'OTC');
+  const rows = [];
+  Object.keys(data.stocks || {}).forEach((code) => {
+    const s = data.stocks[code];
+    const v = chipsValue(s, chipsState.measure);
+    if (v === null || v === undefined || v === 0 || (v > 0 ? 1 : -1) !== sign) return;
+    if (want && s.market !== want) return;
+    rows.push({ code, s, v });
+  });
+  rows.sort((a, b) => sign * (b.v - a.v));
+  return rows;
+}
+const fmtLots = (v) => (v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + Math.round(v).toLocaleString('zh-TW'));
+function fmtAmount(v){
+  if (v === null || v === undefined) return '—';
+  const abs = Math.abs(v);
+  const sign = v > 0 ? '+' : v < 0 ? '-' : '';
+  return abs >= 1e8 ? sign + (abs / 1e8).toFixed(2) + '億' : sign + Math.round(abs / 1e4).toLocaleString('zh-TW') + '萬';
+}
+function chipsStreakHtml(n){
+  if (!n) return '<span class="muted">—</span>';
+  return n > 0 ? '<span class="chips-streak-buy">連買 ' + n + ' 天</span>' : '<span class="chips-streak-sell">連賣 ' + (-n) + ' 天</span>';
+}
+function chipsRowHtml(r, rank){
+  const s = r.s, m = chipsState.measure;
+  const cls = (key) => (key === m ? ' chips-active' : '');
+  const lotsCell = (key) => '<td class="num ' + dirClass(s[key] || 0) + cls(key) + '">' + fmtLots(s[key]) + '</td>';
+  const volPct = m === 'mf'
+    ? (s.mf && s.mf.pct !== null && s.mf.pct !== undefined ? s.mf.pct.toFixed(1) + '%' : '—')
+    : (s.volume && r.v !== null ? (Math.abs(r.v) / s.volume * 100).toFixed(1) + '%' : '—');
+  const chg = s.changePct === null || s.changePct === undefined ? '—' : fmt(s.changePct) + '%';
+  return '<tr class="combo-row chips-row" data-code="' + r.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
+    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + '</td>' +
+    '<td><span class="sig-group">' + (s.group || '—') + '</span>' + (s.market ? ' <span class="muted">' + (s.market === 'OTC' ? '櫃' : '市') + '</span>' : '') + '</td>' +
+    (m === 'mf'
+      ? '<td class="num ' + dirClass(r.v) + ' chips-active">' + fmtLots(r.v) + '</td><td class="num ' + dirClass(s.mf.netAmount) + '">' + fmtAmount(s.mf.netAmount) + '</td>'
+      : lotsCell('foreign') + lotsCell('trust') + lotsCell('dealer') + lotsCell('total')) +
+    '<td>' + chipsStreakHtml(s.streak ? s.streak[m] : 0) + '</td>' +
+    '<td class="num">' + volPct + '</td>' +
+    '<td class="num ' + dirClass(s.changePct || 0) + '">' + chg + '</td>' +
+    '<td class="num">' + (s.close === null || s.close === undefined ? '—' : num2(s.close)) + '</td></tr>';
+}
+function chipsTableHtml(rows){
+  const m = chipsState.measure;
+  const cls = (key) => (key === m ? ' class="chips-active num"' : ' class="num"');
+  const head = '<th>名次</th><th>代號</th><th>名稱</th><th>族群</th>' +
+    (m === 'mf' ? '<th class="num chips-active">主力淨額(張)</th><th class="num">淨額金額</th>' : '<th' + cls('foreign') + '>外資</th><th' + cls('trust') + '>投信</th><th' + cls('dealer') + '>自營商</th><th' + cls('total') + '>三大法人</th>') +
+    '<th>連續</th><th class="num">' + (m === 'mf' ? '佔成交額' : '佔成交量') + '</th><th class="num">漲跌幅</th><th class="num">收盤</th>';
+  const shown = rows.slice(0, chipsState.limit);
+  return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table chips-table"><thead><tr>' + head + '</tr></thead><tbody>' +
+    shown.map((r, i) => chipsRowHtml(r, i + 1)).join('') + '</tbody></table></div></div>' +
+    (rows.length > shown.length ? '<div class="chips-more"><button class="chart-tab chips-btn" id="chipsMore">再顯示 ' + Math.min(CHIPS_PAGE, rows.length - shown.length) + ' 檔（共 ' + rows.length + ' 檔）</button></div>' : '');
+}
+function chipsControlsHtml(data){
+  const mmdd = (d) => (d ? String(d).slice(5).replace('-', '/') : '');
+  const btn = (cls, attr, value, label, active, disabled) => '<button class="chart-tab chips-btn ' + cls + (active ? ' active' : '') + '" data-' + attr + '="' + value + '"' + (disabled ? ' disabled' : '') + '>' + label + '</button>';
+  const dates = chipsDates.length ? chipsDates : (data && data.date ? [data.date] : []);
+  return '<div class="chips-controls">' +
+    '<div class="combo-filter-bar">' + btn('chips-side-btn', 'side', 'buy', '買超', chipsState.side === 'buy') + btn('chips-side-btn', 'side', 'sell', '賣超', chipsState.side === 'sell') + '</div>' +
+    '<div class="combo-filter-bar">' + [0, 1, 2].map((i) => btn('chips-day-btn', 'day', i, (i === 0 ? '最新 ' : '') + (dates[i] ? mmdd(dates[i]) : (i === 1 ? '前一日' : '前二日')), chipsState.dayIndex === i, !dates[i])).join('') + '</div>' +
+    '<div class="combo-filter-bar">' + btn('chips-mkt-btn', 'market', 'all', '全部', chipsState.market === 'all') + btn('chips-mkt-btn', 'market', 'tse', '上市', chipsState.market === 'tse') + btn('chips-mkt-btn', 'market', 'otc', '上櫃', chipsState.market === 'otc') + '</div>' +
+    '</div>';
+}
+function chipsSourceNoteHtml(data){
+  const src = data.sources || {};
+  const mmdd = String(data.date || '').slice(5).replace('-', '/');
+  const tse = src.TSE ? '上市法人 ✓' : '上市法人：還沒進來（證交所收盤後約 15:00 公布）';
+  const otc = src.OTC ? '上櫃法人 ✓' + (src.OTC.source === 'mirror' ? '（鏡像）' : '') : '上櫃法人：還沒進來（排程主機每個交易日 16:40 抓）';
+  const mf = data.mainForceRows ? '主力大單 ' + data.mainForceRows + ' 檔' : '主力大單：那天沒有資料';
+  return '<div class="race-sub">' + mmdd + '：' + tse + '・' + otc + '・' + mf + '。單位：張；「連續」＝連續買超或賣超的交易日數；佔成交量＝當天買賣超張數 ÷ 當天成交量（主力大單看佔成交額）。分點資料沒有免費來源，主力大單是我們自己用永豐逐筆算的大單淨額。</div>';
+}
+function renderChips(){
+  const tabs = document.getElementById('chipsTabs');
+  tabs.innerHTML = CHIPS_MEASURES.map((mm) => '<button class="chart-tab signal-tab' + (chipsState.measure === mm.key ? ' active' : '') + '" data-measure="' + mm.key + '">' + mm.label + '</button>').join('');
+  const body = document.getElementById('chipsBody');
+  const data = chipsData();
+  if (!data){
+    const date = chipsCurrentDate();
+    body.innerHTML = chipsControlsHtml(null) + '<div class="signal-empty"><div class="se-title">' + (date === null ? '還沒有那一天的資料' : (chipsFailedAt[date || ''] ? '讀取失敗' : '讀取中…')) + '</div><div class="se-sub">' + (date === null ? '後端累積到那一天之後就會出現。' : '後端每個交易日收盤後才有資料；讀不到的話稍後再試。') + '</div></div>';
+    return;
+  }
+  if (data.status !== 'ok' || !data.date){
+    body.innerHTML = chipsControlsHtml(data) + '<div class="signal-empty"><div class="se-title">還沒有盤後籌碼資料</div><div class="se-sub">第一個交易日收盤後（約 15:00 起）會開始累積。</div></div>';
+    return;
+  }
+  const rows = chipsRows(data);
+  const label = CHIPS_MEASURES.find((mm) => mm.key === chipsState.measure).label;
+  body.innerHTML = chipsControlsHtml(data) + chipsSourceNoteHtml(data) +
+    '<div class="bl-section ' + (chipsState.side === 'buy' ? 'bl-launch' : 'bl-brew') + '">' + label + (chipsState.side === 'buy' ? '買超' : '賣超') + '排行・' + rows.length + ' 檔</div>' +
+    (rows.length ? chipsTableHtml(rows) : '<div class="race-note">那天沒有符合的股票' + (chipsState.measure !== 'mf' && !(data.sources || {})[chipsState.market === 'otc' ? 'OTC' : 'TSE'] ? '（法人資料還沒進來）' : '') + '</div>');
+}
+function openChipsPanel(){
+  document.getElementById('chipsModal').hidden = false;
+  renderChips();
+}
+function closeChipsPanel(){ document.getElementById('chipsModal').hidden = true; }
+document.getElementById('chipsClose').addEventListener('click', closeChipsPanel);
+document.getElementById('chipsModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeChipsPanel(); });
+document.getElementById('chipsTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-measure]');
+  if (!btn) return;
+  chipsState.measure = btn.dataset.measure; chipsState.limit = CHIPS_PAGE;
+  renderChips();
+});
+document.getElementById('chipsBody').addEventListener('click', (e) => {
+  const side = e.target.closest('.chips-side-btn');
+  if (side){ chipsState.side = side.dataset.side; chipsState.limit = CHIPS_PAGE; renderChips(); return; }
+  const day = e.target.closest('.chips-day-btn');
+  if (day && !day.disabled){ chipsState.dayIndex = Number(day.dataset.day) || 0; chipsState.limit = CHIPS_PAGE; renderChips(); return; }
+  const mkt = e.target.closest('.chips-mkt-btn');
+  if (mkt){ chipsState.market = mkt.dataset.market; chipsState.limit = CHIPS_PAGE; renderChips(); return; }
+  if (e.target.closest('#chipsMore')){ chipsState.limit += CHIPS_PAGE; renderChips(); return; }
+  const row = e.target.closest('.chips-row[data-code]');
+  if (row){ openStockChart(row.dataset.code, row.dataset.name); }
+});
+
 // ---- 發動通知（2026-09-24 使用者：36／15 檔要怎麼即時收到通知 → 頁面開著時跳瀏覽器通知＋提示音）----
 // 每 15 秒行情更新後重算發動名單，出現新的發動就通知；右上角「提醒開啟／關閉」控制。
 // 第一次算到的名單當作已經看過（開頁面時不會一次跳幾十個），之後新出現的才通知；名單記在瀏覽器裡，
@@ -4407,7 +4594,10 @@ document.getElementById('alertToggle').addEventListener('click', () => {
   }
 });
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
-  btn.addEventListener('click', () => showToast('「' + btn.dataset.label + '」功能開發中'));
+  btn.addEventListener('click', () => {
+    if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
+    showToast('「' + btn.dataset.label + '」功能開發中');
+  });
 });
 document.getElementById('signalTabsBar').addEventListener('click', (e) => {
   const btn = e.target.closest('.signal-tab');

@@ -1,0 +1,57 @@
+# 上櫃三大法人買賣超鏡像：櫃買中心擋 HanStock 的正式站主機（Railway）和 Cloudflare，
+# 但 GitHub 的 runner 抓得到。每個交易日 16:40（台北）把櫃買中心開放資料
+# tpex_3insti_daily_trading 抓下來，推到這個 repo 的 data 分支（不部署），
+# 再戳後端立刻拉回去。也可以手動跑。
+name: TPEx data mirror
+
+on:
+  schedule:
+    - cron: "40 8 * * 1-5"   # 16:40 台北時間（UTC+8）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data
+      - name: 抓櫃買中心三大法人（最新一天）
+        run: |
+          curl -sS --max-time 90 -H "Accept: application/json" -H "Accept-Language: zh-TW,zh;q=0.9" \
+            -H "User-Agent: Mozilla/5.0 (compatible; HanStock-mirror/1.0)" \
+            "https://www.tpex.org.tw/openapi/v1/tpex_3insti_daily_trading" -o /tmp/3insti.json -w "HTTP %{http_code}\n"
+          python3 - <<'PY'
+          import json, os
+          rows = json.load(open('/tmp/3insti.json', encoding='utf-8'))
+          assert isinstance(rows, list) and len(rows) >= 600, f"rows={len(rows) if isinstance(rows, list) else type(rows)}"
+          roc = str(rows[0].get('Date', ''))
+          assert len(roc) == 7 and roc.isdigit(), roc
+          iso = f"{int(roc[:3]) + 1911}-{roc[3:5]}-{roc[5:7]}"
+          os.makedirs('tpex', exist_ok=True)
+          text = json.dumps(rows, ensure_ascii=False, separators=(',', ':'))
+          open('tpex/3insti-latest.json', 'w', encoding='utf-8').write(text)
+          open(f'tpex/3insti-{iso}.json', 'w', encoding='utf-8').write(text)
+          try:
+              index = json.load(open('tpex/index.json', encoding='utf-8'))
+          except Exception:
+              index = []
+          index = sorted(set(index) | {iso}, reverse=True)[:60]
+          json.dump(index, open('tpex/index.json', 'w', encoding='utf-8'))
+          print('date', iso, 'rows', len(rows))
+          PY
+      - name: 推到 data 分支
+        run: |
+          git config user.name "tpex-mirror"
+          git config user.email "tpex-mirror@users.noreply.github.com"
+          git add tpex
+          git commit -m "上櫃三大法人鏡像 $(date -u +%Y-%m-%dT%H:%MZ)" || echo "沒有變動"
+          git push
+      - name: 戳後端立刻拉回去
+        run: |
+          curl -sS -X POST --max-time 170 "https://hanstock-production-b872.up.railway.app/api/hub/chips/collect" -o /tmp/collect.json -w "HTTP %{http_code}\n" || true
+          head -c 3000 /tmp/collect.json; echo
