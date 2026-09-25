@@ -185,9 +185,10 @@
      櫃買強弱widget移到搜尋框右邊，盤中訊號維持最右邊；空間不夠時各自換行）。 */
   .header-top{display:flex;justify-content:flex-start;align-items:flex-start;gap:12px;flex-wrap:wrap;}
   .signal-controls{display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:auto;}
-  .signal-badge-btn{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;}
-  .signal-badge-btn:hover{background:var(--panel-2);}
-  .sb-count{background:var(--accent);color:var(--bg);border-radius:999px;min-width:18px;padding:0 5px;text-align:center;font-size:11px;}
+  /* 盤中訊號按鈕（2026-09-25 使用者）：紫底白字、字放大、按鈕加寬加高；手機、平板、桌機都一樣，沒有另外的媒體查詢 */
+  .signal-badge-btn{display:flex;align-items:center;gap:10px;background:#7c3aed;border:1px solid #7c3aed;color:#fff;font-size:17px;font-weight:800;padding:10px 22px;border-radius:999px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(124,58,237,.35);white-space:nowrap;}
+  .signal-badge-btn:hover{background:#6d28d9;border-color:#6d28d9;}
+  .sb-count{background:#fff;color:#5b21b6;border-radius:999px;min-width:28px;padding:1px 9px;text-align:center;font-size:15px;font-weight:800;}
   .alert-toggle{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;}
   .alert-toggle.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
   .market-strength-bar{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex-wrap:wrap;flex:1 1 360px;max-width:640px;}

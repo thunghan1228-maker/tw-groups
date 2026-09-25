@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-25 17:44:00";
+const BUILD_STAMP = "2026-09-25 22:03:47";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -238,9 +238,10 @@ const HTML_PAGE = `<!DOCTYPE html>
      櫃買強弱widget移到搜尋框右邊，盤中訊號維持最右邊；空間不夠時各自換行）。 */
   .header-top{display:flex;justify-content:flex-start;align-items:flex-start;gap:12px;flex-wrap:wrap;}
   .signal-controls{display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:auto;}
-  .signal-badge-btn{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;}
-  .signal-badge-btn:hover{background:var(--panel-2);}
-  .sb-count{background:var(--accent);color:var(--bg);border-radius:999px;min-width:18px;padding:0 5px;text-align:center;font-size:11px;}
+  /* 盤中訊號按鈕（2026-09-25 使用者）：紫底白字、字放大、按鈕加寬加高；手機、平板、桌機都一樣，沒有另外的媒體查詢 */
+  .signal-badge-btn{display:flex;align-items:center;gap:10px;background:#7c3aed;border:1px solid #7c3aed;color:#fff;font-size:17px;font-weight:800;padding:10px 22px;border-radius:999px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(124,58,237,.35);white-space:nowrap;}
+  .signal-badge-btn:hover{background:#6d28d9;border-color:#6d28d9;}
+  .sb-count{background:#fff;color:#5b21b6;border-radius:999px;min-width:28px;padding:1px 9px;text-align:center;font-size:15px;font-weight:800;}
   .alert-toggle{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;}
   .alert-toggle.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
   .market-strength-bar{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex-wrap:wrap;flex:1 1 360px;max-width:640px;}
@@ -4224,7 +4225,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-25 17:44:00';
+const BUILD_STAMP = '2026-09-25 22:03:47';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
