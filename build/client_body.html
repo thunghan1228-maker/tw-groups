@@ -4113,7 +4113,11 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
   if (row){
     // 使用者 2026-09-25（手機截圖）：點代號、名稱沒反應——K線圖視窗（z-index 100）開在面板（102）後面被蓋住。
     // 窄螢幕走K線圖視窗時先把面板退到後面，關圖時 closeStockChart 會拉回來；桌機另開的視窗本來就在最上層。
-    if (!useFloatingCharts()) document.getElementById('chipsModal').classList.add('behind-chart');
+    // 訊號中心（z-index 101）頁面一打開就預設開著，也會蓋住K線圖視窗（100）：一起退到後面。
+    if (!useFloatingCharts()){
+      document.getElementById('chipsModal').classList.add('behind-chart');
+      document.getElementById('signalModal').classList.add('behind-chart');
+    }
     openStockChart(row.dataset.code, row.dataset.name);
   }
 });
