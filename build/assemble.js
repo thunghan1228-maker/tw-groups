@@ -9,6 +9,12 @@ const groupsLiteral = groupsMatch[1];
 
 let clientBody = fs.readFileSync(path.join(__dirname, 'client_body.html'), 'utf8');
 
+// 版本戳記（台北時間，組裝當下）：頁面右上角顯示，/api/version 也回同一個字串；
+// 前端切回頁面時比對，不一樣就重新載入（2026-09-25 使用者：iPhone 加到主畫面的網頁一直跑舊版）。
+const BUILD_STAMP = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Taipei' });
+if (!clientBody.includes('__BUILD_STAMP__')) throw new Error('__BUILD_STAMP__ placeholder not found in client_body.html');
+clientBody = clientBody.split('__BUILD_STAMP__').join(BUILD_STAMP);
+
 // 組成完整 HTML 文件：在 <style> 結束後補上 </head><body>，並在檔案最前面補齊 doctype/head 開頭
 const styleCloseTag = '</style>';
 const styleCloseIdx = clientBody.indexOf(styleCloseTag);
@@ -34,7 +40,8 @@ const protectedHtml = fullHtml.split('${JSON.stringify(GROUPS)}').join(PLACEHOLD
 // （\s、\d）放進模板字面值後會被當成跳脫序列吃掉，到了瀏覽器變成 s、d。
 const templateBody = protectedHtml.replace(/\\/g, '\\\\').split(PLACEHOLDER).join('${JSON.stringify(GROUPS)}');
 
-const serverPrelude = 'const GROUPS = ' + groupsLiteral + ';\n' +
+const serverPrelude = 'const BUILD_STAMP = ' + JSON.stringify(BUILD_STAMP) + ';\n' +
+  'const GROUPS = ' + groupsLiteral + ';\n' +
   'const ALL_CODES = [...new Set(GROUPS.flatMap((g) => g.stocks.map((s) => s.code)))];\n\n' +
   'const HTML_PAGE = `' + templateBody + '`;\n\n';
 
@@ -370,6 +377,11 @@ export default {
       } catch (err) {
         return Response.json({ status: "error", error: String(err), entries: [] }, { status: 502 });
       }
+    }
+    if (url.pathname === "/api/version") {
+      return new Response(JSON.stringify({ build: BUILD_STAMP }), {
+        headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store, must-revalidate" }
+      });
     }
     if (url.pathname === "/api/groups") {
       try {

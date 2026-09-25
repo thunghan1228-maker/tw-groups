@@ -84,6 +84,20 @@ const log = (label, obj) => console.log('## ' + label + ' ' + (obj === undefined
     log('after tap name cell', await state());
     log('tapLog', await page.evaluate(() => window.__tapLog));
     await shot('after-tap-name');
+
+    // 使用者截圖是在「法人連買∩醞釀發動」分頁點的，也在那個分頁點一列
+    await page.evaluate(() => { closeStockChart(); window.__tapLog = []; });
+    await page.tap('#chipsTabs [data-measure="brewx"]');
+    const gotBrewRows = await page.waitForFunction(() => document.querySelectorAll('#chipsBody .chips-row[data-code]').length > 0 && document.getElementById('chipsBody').innerText.includes('醞釀'), null, { timeout: 45000 }).then(() => true).catch(() => false);
+    log('brewx panel', { gotBrewRows, rows: await page.evaluate(() => document.querySelectorAll('#chipsBody .chips-row[data-code]').length) });
+    if (gotBrewRows){
+      await page.tap('#chipsBody .chips-row[data-code] td.combo-code');
+      await page.waitForTimeout(3000);
+      log('after tap brewx code cell', await state());
+      log('tapLog', await page.evaluate(() => window.__tapLog));
+      await shot('after-tap-brewx');
+    }
+    log('build stamp', await page.evaluate(() => ({ stamp: typeof BUILD_STAMP === 'string' ? BUILD_STAMP : null, label: (document.getElementById('buildStamp') || {}).textContent || null })));
   }
   log('errors', errors);
   await browser.close();

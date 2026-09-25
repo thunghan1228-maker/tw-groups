@@ -1,3 +1,4 @@
+const BUILD_STAMP = "2026-09-25 16:39:39";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -269,6 +270,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .tb-btn:hover{background:rgba(255,255,255,0.14);color:#fff;}
   .tb-icon{width:20px;height:20px;border-radius:6px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;}
   .toast{position:fixed;left:50%;bottom:72px;transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
+  /* 版本戳記（右上角小字）與「有新版本」提示：加到主畫面的網頁沒有重新整理鈕，靠這個知道自己在跑哪一版。 */
+  #buildStamp{position:fixed;top:calc(env(safe-area-inset-top,0px) + 2px);right:6px;font-size:10px;line-height:1;color:var(--muted);opacity:.75;z-index:120;pointer-events:none;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  #updateBanner{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);transform:translateX(-50%);z-index:121;background:#e6675f;color:#fff;border:0;border-radius:999px;font-size:14px;font-weight:800;padding:10px 18px;box-shadow:0 6px 20px rgba(0,0,0,.5);cursor:pointer;font-family:inherit;white-space:nowrap;}
+  #updateBanner[hidden]{display:none;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* 盤中訊號中心：常駐浮動視窗，不擋住底下頁面（不是點開才出現的彈窗） */
@@ -744,6 +749,8 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div id="chipsBody"></div>
   </div>
 </div>
+<div id="buildStamp"></div>
+<button type="button" id="updateBanner" hidden>網頁有新版本，點一下更新</button>
 <div id="chartWindows"></div>
 <div id="chartTray"></div>
 <div class="chart-modal" id="chartModal" hidden>
@@ -4176,6 +4183,39 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
   }
 });
 
+// ---- 版本戳記與自動更新（2026-09-25 使用者：iPhone 加到主畫面的網頁點籌碼排行沒反應，其實是一直跑舊版）----
+// 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
+// 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
+// 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
+const BUILD_STAMP = '2026-09-25 16:39:39';
+let buildHiddenSince = null;
+async function fetchServerBuild(){
+  try {
+    const r = await fetch('/api/version?_=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j && typeof j.build === 'string' ? j.build : null;
+  } catch (e) { return null; }
+}
+async function checkForNewBuild(autoReload){
+  if (CHART_WINDOW_MODE) return;
+  const build = await fetchServerBuild();
+  if (!build || build === BUILD_STAMP) return false;
+  if (autoReload){ location.reload(); return true; }
+  document.getElementById('updateBanner').hidden = false;
+  return true;
+}
+document.getElementById('updateBanner').addEventListener('click', () => location.reload());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden'){ buildHiddenSince = Date.now(); return; }
+  const away = buildHiddenSince ? Date.now() - buildHiddenSince : 0;
+  buildHiddenSince = null;
+  checkForNewBuild(away >= 60 * 1000);
+});
+window.addEventListener('pageshow', (e) => { if (e.persisted) checkForNewBuild(true); });
+setInterval(() => { if (document.visibilityState === 'visible') checkForNewBuild(false); }, 5 * 60 * 1000);
+document.getElementById('buildStamp').textContent = '版本 ' + BUILD_STAMP.slice(5, 16).replace('-', '/');
+
 // ---- 發動通知（2026-09-24 使用者：36／15 檔要怎麼即時收到通知 → 頁面開著時跳瀏覽器通知＋提示音）----
 // 每 15 秒行情更新後重算發動名單，出現新的發動就通知；右上角「提醒開啟／關閉」控制。
 // 第一次算到的名單當作已經看過（開頁面時不會一次跳幾十個），之後新出現的才通知；名單記在瀏覽器裡，
@@ -5216,6 +5256,11 @@ export default {
       } catch (err) {
         return Response.json({ status: "error", error: String(err), entries: [] }, { status: 502 });
       }
+    }
+    if (url.pathname === "/api/version") {
+      return new Response(JSON.stringify({ build: BUILD_STAMP }), {
+        headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store, must-revalidate" }
+      });
     }
     if (url.pathname === "/api/groups") {
       try {
