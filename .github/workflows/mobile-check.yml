@@ -1,0 +1,42 @@
+name: Mobile tap check
+
+# 沙盒裡沒有 WebKit、也連不到線上網址；用 GitHub runner 跑 Playwright WebKit（iPhone 模擬）
+# 對線上頁面實際點「今日盤後籌碼排行」的股票列，把狀態與截圖（base64）印在 log 裡讓沙盒讀回來。
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "要檢查的頁面"
+        required: false
+        default: "https://tw-groups.judystock.workers.dev/"
+      device:
+        description: "Playwright 裝置名稱（例如 iPhone 13、iPhone 15 Pro Max、iPad Mini）"
+        required: false
+        default: "iPhone 13"
+      engine:
+        description: "webkit 或 chromium"
+        required: false
+        default: "webkit"
+
+jobs:
+  tap-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright
+        env:
+          ENGINE: ${{ inputs.engine }}
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1 >/dev/null 2>&1
+          npx playwright install --with-deps "$ENGINE" >/dev/null 2>&1
+      - name: Tap check
+        env:
+          TARGET_URL: ${{ inputs.url }}
+          DEVICE: ${{ inputs.device }}
+          ENGINE: ${{ inputs.engine }}
+        run: node scripts/mobile_tap_check.js
