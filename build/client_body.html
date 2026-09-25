@@ -470,6 +470,7 @@
   /* 盤後籌碼排行（2026-09-25 使用者：底部「盤後籌碼排行」先做） */
   .chips-modal{position:fixed;inset:0;z-index:102;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:10px;}
   .chips-modal[hidden]{display:none;}
+  .chips-modal.behind-chart{z-index:98;}  /* 手機／iPad 直式開K線圖（z-index 100）時退到後面，關圖再回來 */
   .chips-inner{background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(1120px,96vw);height:min(920px,92vh);overflow:auto;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);}
   .chips-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;background:#33333a;color:#fff;padding:10px 12px;border-radius:10px;margin-bottom:10px;}
   .chips-title{font-weight:800;font-size:18px;}
@@ -2127,8 +2128,9 @@ function closeStockChart(){
   }
   document.getElementById('chartModal').hidden = true;
   document.body.style.overflow = '';
-  // 若是從訊號中心點進來的，關圖後讓訊號中心回到最上層。
+  // 若是從訊號中心／盤後籌碼排行點進來的，關圖後讓它們回到最上層。
   document.getElementById('signalModal').classList.remove('behind-chart');
+  document.getElementById('chipsModal').classList.remove('behind-chart');
 }
 
 let openGroupName = null;
@@ -4108,7 +4110,12 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
   const list = e.target.closest('.chips-list-btn');
   if (list){ chipsState.list = list.dataset.list; chipsState.limit = CHIPS_PAGE; renderChips(); return; }
   const row = e.target.closest('.chips-row[data-code]');
-  if (row){ openStockChart(row.dataset.code, row.dataset.name); }
+  if (row){
+    // 使用者 2026-09-25（手機截圖）：點代號、名稱沒反應——K線圖視窗（z-index 100）開在面板（102）後面被蓋住。
+    // 窄螢幕走K線圖視窗時先把面板退到後面，關圖時 closeStockChart 會拉回來；桌機另開的視窗本來就在最上層。
+    if (!useFloatingCharts()) document.getElementById('chipsModal').classList.add('behind-chart');
+    openStockChart(row.dataset.code, row.dataset.name);
+  }
 });
 
 // ---- 發動通知（2026-09-24 使用者：36／15 檔要怎麼即時收到通知 → 頁面開著時跳瀏覽器通知＋提示音）----
