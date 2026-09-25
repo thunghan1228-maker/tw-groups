@@ -497,6 +497,10 @@
   .chips-flag{display:inline-block;font-size:10px;font-weight:700;line-height:16px;border-radius:6px;padding:0 5px;margin:1px 0 1px 4px;vertical-align:middle;white-space:nowrap;}
   .chips-flag.stop{background:#c2410c;color:#fff;}      /* 停資／停券／不可當沖 */
   .chips-flag.futures{background:#1d4ed8;color:#fff;}   /* 有股票期貨 */
+  /* 放空籌碼分頁鈕（2026-09-25 使用者）：綠底白字；選到時用亮一點的綠加白框，手機、平板、桌機都一樣 */
+  #chipsTabs .signal-tab[data-measure="short"]{background:#15803d;border-color:#15803d;color:#fff;}
+  #chipsTabs .signal-tab[data-measure="short"]:hover{background:#166534;border-color:#166534;}
+  #chipsTabs .signal-tab[data-measure="short"].active{background:#22c55e;border-color:#fff;color:#fff;box-shadow:0 0 0 2px #22c55e;}
   .chips-weak-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;background:#166534;color:#fff;white-space:nowrap;}  /* 放空籌碼：弱勢型態 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
