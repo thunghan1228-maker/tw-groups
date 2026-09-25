@@ -488,7 +488,9 @@
   .chips-streak-sell{color:#3ddc84;font-weight:700;white-space:nowrap;}
   .chips-more{margin:8px 0 4px;}
   .chips-brew-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 6px;background:#0f766e;color:#fff;white-space:nowrap;}
-  .chips-flag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;vertical-align:middle;white-space:nowrap;}
+  /* 名稱欄原本單行截斷（…），標記放在名稱後面會被切掉：籌碼表的名稱欄改可換行，標記接在名稱後、放不下就換到下一行 */
+  .chips-table td.combo-name{white-space:normal;overflow:visible;text-overflow:clip;}
+  .chips-flag{display:inline-block;font-size:10px;font-weight:700;line-height:16px;border-radius:6px;padding:0 5px;margin:1px 0 1px 4px;vertical-align:middle;white-space:nowrap;}
   .chips-flag.stop{background:#c2410c;color:#fff;}      /* 停資／停券／不可當沖 */
   .chips-flag.futures{background:#1d4ed8;color:#fff;}   /* 有股票期貨 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
