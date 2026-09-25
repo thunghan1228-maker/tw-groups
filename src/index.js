@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-25 17:32:12";
+const BUILD_STAMP = "2026-09-25 17:43:04";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -541,6 +541,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chips-streak-sell{color:#3ddc84;font-weight:700;white-space:nowrap;}
   .chips-more{margin:8px 0 4px;}
   .chips-brew-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 6px;background:#0f766e;color:#fff;white-space:nowrap;}
+  .chips-flag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;vertical-align:middle;white-space:nowrap;}
+  .chips-flag.stop{background:#c2410c;color:#fff;}      /* 停資／停券／不可當沖 */
+  .chips-flag.futures{background:#1d4ed8;color:#fff;}   /* 有股票期貨 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
   .signal-history-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:8px;}
@@ -2888,6 +2891,7 @@ async function refreshStockFlags(){
       stockFlags = data.stocks;
       if (!document.getElementById('signalModal').hidden) renderSignalCenter();
       if (!document.getElementById('chartModal').hidden) renderChartFlags(currentChart.code);
+      if (!document.getElementById('chipsModal').hidden) renderChips();
     }
   } catch (e) { /* 抓不到就先不標，下一輪再試 */ }
 }
@@ -3945,6 +3949,19 @@ async function ensureChipsBrew(date){
   }
   if (!document.getElementById('chipsModal').hidden) renderChips();
 }
+// 名稱旁的標記（2026-09-25 使用者）：停資／停券／不可當沖（永豐個股資訊：目前不可融資、不可融券、不可現股當沖）與有股期；
+// 旗標還沒進來或四項都沒有就不標，維持原樣。
+function chipsFlagPillsHtml(code){
+  const f = stockFlags[code];
+  if (!f) return '';
+  const out = [];
+  if (f.marginable === false && f.shortable === false) out.push('<span class="chips-flag stop" title="目前不可融資、不可融券">停資停券</span>');
+  else if (f.marginable === false) out.push('<span class="chips-flag stop" title="目前不可融資">停資</span>');
+  else if (f.shortable === false) out.push('<span class="chips-flag stop" title="目前不可融券">停券</span>');
+  if (f.dayTradeEligible === false) out.push('<span class="chips-flag stop" title="不可現股當沖">不可當沖</span>');
+  if (f.hasStockFutures) out.push('<span class="chips-flag futures" title="有股票期貨">有股期</span>');
+  return out.join('');
+}
 const CHIPS_INST_LABEL = { total: '三大法人', foreign: '外資', trust: '投信', dealer: '自營商' };
 function chipsBrewRows(data, day){
   const mfMode = chipsBrewMfMode();
@@ -3979,7 +3996,7 @@ function chipsBrewRowHtml(r, rank){
   const score = launch ? launch.score : r.brew.score;
   const chg = s.changePct === null || s.changePct === undefined ? '—' : fmt(s.changePct) + '%';
   return '<tr class="combo-row chips-row" data-code="' + r.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + '</td>' +
+    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + chipsFlagPillsHtml(r.code) + '</td>' +
     '<td><span class="sig-group">' + (s.group || '—') + '</span></td>' +
     '<td>' + listCell + '</td>' +
     '<td>' + chipsStreakHtml(r.streak) + '</td>' +
@@ -4098,7 +4115,7 @@ function chipsRowHtml(r, rank){
     : (s.volume && r.v !== null ? (Math.abs(r.v) / s.volume * 100).toFixed(1) + '%' : '—');
   const chg = s.changePct === null || s.changePct === undefined ? '—' : fmt(s.changePct) + '%';
   return '<tr class="combo-row chips-row" data-code="' + r.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + '</td>' +
+    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + chipsFlagPillsHtml(r.code) + '</td>' +
     '<td><span class="sig-group">' + (s.group || '—') + '</span>' + (s.market ? ' <span class="muted">' + (s.market === 'OTC' ? '櫃' : '市') + '</span>' : '') + '</td>' +
     (m === 'mf'
       ? '<td class="num ' + dirClass(r.v) + ' chips-active">' + fmtLots(r.v) + '</td><td class="num ' + dirClass(s.mf.netAmount) + '">' + fmtAmount(s.mf.netAmount) + '</td>'
@@ -4135,7 +4152,7 @@ function chipsSourceNoteHtml(data){
   const tse = src.TSE ? '上市法人 ✓' : '上市法人：還沒進來（證交所收盤後約 15:00 公布）';
   const otc = src.OTC ? '上櫃法人 ✓' + (src.OTC.source === 'mirror' ? '（鏡像）' : '') : '上櫃法人：還沒進來（排程主機每個交易日 16:40 抓）';
   const mf = data.mainForceRows ? '主力大單 ' + data.mainForceRows + ' 檔' : '主力大單：那天沒有資料';
-  return '<div class="race-sub">' + mmdd + '：' + tse + '・' + otc + '・' + mf + '。單位：張；「連續」＝連續買超或賣超的交易日數；佔成交量＝當天買賣超張數 ÷ 當天成交量（主力大單看佔成交額）。分點資料沒有免費來源，主力大單是我們自己用永豐逐筆算的大單淨額。</div>';
+  return '<div class="race-sub">' + mmdd + '：' + tse + '・' + otc + '・' + mf + '。單位：張；「連續」＝連續買超或賣超的交易日數；佔成交量＝當天買賣超張數 ÷ 當天成交量（主力大單看佔成交額）。分點資料沒有免費來源，主力大單是我們自己用永豐逐筆算的大單淨額。名稱旁的標記：停資／停券／不可當沖＝目前不可融資、不可融券、不可現股當沖，有股期＝有股票期貨；都沒有就不標。</div>';
 }
 function renderChips(){
   const tabs = document.getElementById('chipsTabs');
@@ -4205,7 +4222,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-25 17:32:12';
+const BUILD_STAMP = '2026-09-25 17:43:04';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
