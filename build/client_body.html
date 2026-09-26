@@ -544,6 +544,11 @@
   .sw-drow .sw-dgroup{font-size:12px;color:var(--muted);}
   .sw-drow .sw-dextra{flex-basis:100%;font-size:13px;}
   .sw-verdict{display:inline-block;margin-top:6px;border-radius:6px;padding:2px 8px;font-size:13px;font-weight:700;background:#0f766e;color:#fff;}
+  .sw-tile.etf b{font-size:18px;}
+  .sw-tile.etf span{display:block;}
+  .sw-etf-issuer{font-size:12px;font-weight:400;margin-left:6px;opacity:.85;}
+  .sw-etf-kind{font-size:13px;font-weight:700;margin:8px 0 2px;color:var(--muted);}
+  .sw-drow.etf{border-left-color:#7c3aed;}
   .sw-verdict.bad{background:#b91c1c;}
   .chips-weak-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;background:#166534;color:#fff;white-space:nowrap;}  /* 放空籌碼：弱勢型態 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
@@ -4344,10 +4349,10 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // ---- 波段日報（2026-09-26 使用者：照「波段精選日報」的樣子做，第一階段用現有資料）----
 // 後端每個交易日收盤後整理一份（/api/swing-report），以資料基準日為鍵保存；這裡照日期切換、五個段落顯示。
 const SWING_SECTIONS = [
-  { key: 'summary', label: '今日摘要' }, { key: 'disposition', label: '處置動態' }, { key: 'groups', label: '產業觀察' },
+  { key: 'summary', label: '今日摘要' }, { key: 'disposition', label: '處置動態' }, { key: 'etf', label: '主動式基金' }, { key: 'groups', label: '產業觀察' },
   { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '均線轉強' },
 ];
-let swingState = { section: 'summary', date: '', groupsLimit: 12 };
+let swingState = { section: 'summary', date: '', groupsLimit: 12, etfOpen: {} };   // etfOpen: 主動式基金各檔展開全部
 const swingCache = {};      // date('' = 最新) -> payload
 const swingLoading = {};
 const swingFailedAt = {};
@@ -4477,6 +4482,62 @@ function swingLastWeekHtml(data){
     '<div class="sw-cards">' + picks.map(swingLastWeekCardHtml).join('') + '</div>' +
     '<div class="sw-quote">榜單不是拿來追的，是拿來驗證：守住月線的才算籌碼有效</div>';
 }
+// 主動式基金五檔（2026-09-26 第三階段）：每檔跟前一份比出新增／加碼／減碼／刪除，再看五檔有沒有同步
+const ETF_ROW_LIMIT = 6;
+const swLotsPlain = (v) => Math.round(Math.abs(v || 0)).toLocaleString('en-US') + ' 張';   // 不帶正負號、不縮成萬張
+function swingEtfRowHtml(r, kind){
+  const delta = r.deltaLots || 0;
+  const move = (kind === 'new' ? '新增 ' : kind === 'removed' ? '出清 ' : delta >= 0 ? '加碼 ' : '減碼 ') + swLotsPlain(delta);
+  const cls = kind === 'new' || (kind === 'increased') ? 'up' : 'down';
+  const shares = kind === 'removed' ? swLotsPlain(r.prevShares / 1000) + ' → 0' : (r.prevShares ? swLotsPlain(r.prevShares / 1000) + ' → ' : '') + swLotsPlain(r.shares / 1000);
+  return '<div class="sw-drow etf" data-code="' + r.code + '" data-name="' + (r.name || '') + '" role="button" tabindex="0">' +
+    '<b class="sw-dcode">' + r.code + '</b><span class="sw-dname">' + (r.name || '') + '</span><span class="sw-dgroup">' + (r.group || '—') + '</span>' +
+    '<span class="sw-dextra"><b class="' + cls + '">' + move + '</b><span class="muted">・持股 ' + shares + (swHas(r.weight) && kind !== 'removed' ? '・權重 ' + Number(r.weight).toFixed(2) + '%' : '') + '</span></span></div>';
+}
+function swingEtfBlockHtml(e){
+  const open = !!swingState.etfOpen[e.code];
+  const c = e.counts || {};
+  const head = '<div class="bl-section bl-launch">' + e.code + ' ' + e.name + '<span class="sw-etf-issuer">' + (e.issuer || '') + '</span>・' + swMmdd(e.date) +
+    (e.prevDate ? ' 比 ' + swMmdd(e.prevDate) + '：新增 ' + c.new + '／加碼 ' + c.increased + '／減碼 ' + c.decreased + '／刪除 ' + c.removed : '・還沒有前一份可比') + '</div>';
+  const info = '<div class="sw-rule">持股 ' + e.holdings + ' 檔' + (swHas(e.nav) ? '・規模 ' + (e.nav / 1e8).toFixed(0) + ' 億' : '') +
+    (swHas(e.unitsDelta) && e.unitsDelta !== 0 ? '・受益單位 ' + (e.unitsDelta > 0 ? '增 ' : '減 ') + (Math.abs(e.unitsDelta) / 1e4).toFixed(0) + ' 萬（' + (e.unitsDelta > 0 ? '有人申購' : '有人贖回') + '）' : '') +
+    (e.top && e.top.length ? '・前五大：' + e.top.slice(0, 5).map((t) => t.name + ' ' + (swHas(t.weight) ? Number(t.weight).toFixed(1) + '%' : '')).join('、') : '') + '</div>';
+  if (!e.prevDate) return head + info;
+  const kinds = [['new', '新增'], ['increased', '加碼'], ['decreased', '減碼'], ['removed', '刪除']];
+  let hidden = 0;
+  const lists = kinds.map(([k, label]) => {
+    const rows = e[k] || [];
+    if (!rows.length) return '';
+    const shown = open ? rows : rows.slice(0, ETF_ROW_LIMIT);
+    hidden += rows.length - shown.length;
+    return '<div class="sw-etf-kind">' + label + '（' + rows.length + '）</div><div class="sw-dlist">' + shown.map((r) => swingEtfRowHtml(r, k)).join('') + '</div>';
+  }).join('');
+  const total = kinds.reduce((n, [k]) => n + ((e[k] || []).length), 0);
+  return head + info + (total ? lists : '<div class="race-note">這一天持股沒有變動</div>') +
+    (hidden > 0 || (open && total > ETF_ROW_LIMIT) ? '<div class="chips-more"><button class="chart-tab chips-btn sw-etf-more" data-etf="' + e.code + '">' + (open ? '收合' : '展開全部（還有 ' + hidden + ' 檔）') + '</button></div>' : '');
+}
+function swingEtfSyncHtml(title, cls, rows, verb){
+  return '<div class="bl-section ' + cls + '">' + title + '（' + rows.length + '）</div>' +
+    (rows.length ? '<div class="sw-dlist">' + rows.map((r) => '<div class="sw-drow etf" data-code="' + r.code + '" data-name="' + (r.name || '') + '" role="button" tabindex="0">' +
+      '<b class="sw-dcode">' + r.code + '</b><span class="sw-dname">' + (r.name || '') + '</span><span class="sw-dgroup">' + (r.group || '—') + '</span>' +
+      '<span class="sw-dextra"><b class="' + (r.deltaLots >= 0 ? 'up' : 'down') + '">' + r.count + ' 檔同步' + verb + ' ' + swLots(Math.abs(r.deltaLots)) + '</b><span class="muted">・' +
+      (r.etfs || []).map((x) => x.name + ' ' + swLots(x.deltaLots)).join('、') + '</span></span></div>').join('') + '</div>' : '<div class="race-note">沒有兩檔以上同步' + verb + '的股票</div>');
+}
+function swingEtfHtml(data){
+  const ae = data.activeEtf, rules = data.rules || {};
+  const head = '<div class="sw-rule">' + (rules.activeEtf || '五檔規模最大的台股主動式基金每日持股變化') + '。</div>';
+  if (ae === undefined) return head + '<div class="race-note">這一份是主動式基金接入前整理的，沒有持股資料</div>';
+  if (!ae) return head + '<div class="race-note">還沒有主動式基金的持股資料（排程主機每個交易日晚上抓各投信公告）</div>';
+  const etfs = ae.etfs || [], sync = ae.sync || {};
+  const tiles = '<div class="sw-tiles">' + etfs.map((e) => '<div class="sw-tile etf"><b>' + e.code + '</b><span>' + e.name + '</span><span>' +
+    (e.prevDate ? '加碼 ' + ((e.counts || {}).new + (e.counts || {}).increased) + '・減碼 ' + ((e.counts || {}).decreased + (e.counts || {}).removed) : '持股 ' + e.holdings + ' 檔') + '</span></div>').join('') + '</div>';
+  return head + '<div class="sw-basis">資料日 ' + swMmdd(ae.date) + '・' + etfs.length + ' 檔有資料' + (ae.missing && ae.missing.length ? '・缺 ' + ae.missing.join('、') : '') + (ae.withPrev < etfs.length ? '・' + (etfs.length - ae.withPrev) + ' 檔還沒有前一份可比' : '') + '</div>' +
+    tiles +
+    swingEtfSyncHtml('五檔同步加碼', 'bl-launch', sync.buy || [], '加碼') +
+    swingEtfSyncHtml('五檔同步減碼', 'bl-brew', sync.sell || [], '減碼') +
+    '<div class="sw-quote">五檔一起加碼的，才算主動式基金的共識；單檔進出多半是換股</div>' +
+    etfs.map(swingEtfBlockHtml).join('');
+}
 // 處置動態一列：明日起處置／明日出獄／處置中／觀察名單（出獄 ≤5 個交易日）
 function swingDispoReason(e){
   // 券商來的處置原因是一整段公告文，只留前 80 字，完整的放在 hover 提示
@@ -4506,7 +4567,8 @@ function swingSectionHtml(data){
       '<div class="sw-tile"><b>' + (t.chips || 0) + '</b><span>籌碼面候選(檔)</span></div>' +
       '<div class="sw-tile"><b>' + (t.disposition || 0) + '</b><span>處置中(檔)</span></div>' +
       '<div class="sw-tile"><b>' + (t.upcoming || 0) + '</b><span>明日起處置(檔)</span></div>' +
-      '<div class="sw-tile"><b>' + (t.releasing || 0) + '</b><span>明日出獄(檔)</span></div></div>' +
+      '<div class="sw-tile"><b>' + (t.releasing || 0) + '</b><span>明日出獄(檔)</span></div>' +
+      (data.activeEtf ? '<div class="sw-tile"><b>' + (t.etfSyncBuy || 0) + '</b><span>主動式基金同步加碼(檔)</span></div>' : '') + '</div>' +
       '<ol class="sw-summary">' + (data.summary || []).map((line) => '<li>' + line + '</li>').join('') + '</ol>' +
       '<div class="sw-quote">先看族群再看個股：族群沒翻，個股只能算單兵</div>';
   }
@@ -4522,6 +4584,7 @@ function swingSectionHtml(data){
       block('觀察名單・出獄 5 個交易日內', 'bl-brew', d.watch || [], 'watch', '沒有剛出獄的股票') +
       '<div class="sw-quote">出獄不等於能追：先看有沒有站回月線、法人有沒有回來</div>';
   }
+  if (sec === 'etf') return swingEtfHtml(data);
   if (sec === 'groups'){
     const groups = data.groups || [];
     const shown = groups.slice(0, swingState.groupsLimit);
@@ -4560,7 +4623,7 @@ function swingSectionHtml(data){
     '<div class="sw-quote">' + quote + '</div>' +
     (sec === 'chips' ? swingLastWeekHtml(data) : '');
 }
-const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。本益比、月營收年增、集保 400 張以上大戶週籌碼、處置動態與上一週籌碼對照每個交易日收盤後更新；主動式 ETF 五檔是下一階段要接的資料。</div>';
+const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。本益比、月營收年增、集保 400 張以上大戶週籌碼、處置動態與上一週籌碼對照每個交易日收盤後更新；主動式基金五檔的持股在各投信晚上公告後更新。</div>';
 function renderSwing(){
   const tabs = document.getElementById('swingTabs');
   tabs.innerHTML = SWING_SECTIONS.map((sc) => '<button class="chart-tab signal-tab' + (swingState.section === sc.key ? ' active' : '') + '" data-section="' + sc.key + '">' + sc.label + '</button>').join('');
@@ -4593,6 +4656,8 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
   const day = e.target.closest('.sw-date-btn');
   if (day){ swingState.date = day.dataset.date || ''; swingState.groupsLimit = 12; renderSwing(); return; }
   if (e.target.closest('#swingMoreGroups')){ swingState.groupsLimit += 12; renderSwing(); return; }
+  const more = e.target.closest('.sw-etf-more');
+  if (more){ swingState.etfOpen[more.dataset.etf] = !swingState.etfOpen[more.dataset.etf]; renderSwing(); return; }
   const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code]');
   if (card){
     if (!useFloatingCharts()){
