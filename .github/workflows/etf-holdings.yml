@@ -34,7 +34,7 @@ jobs:
           BACKFILL_DAYS: ${{ inputs.backfill_days || '0' }}
         run: |
           python3 - <<'PY'
-          import json, os, re, time, urllib.request, urllib.error
+          import json, os, re, time, urllib.request, urllib.error, urllib.parse
           from datetime import datetime, timedelta, timezone
 
           TW = timezone(timedelta(hours=8))
@@ -45,14 +45,37 @@ jobs:
           os.makedirs('tpex', exist_ok=True)
           UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36'
 
+          class _NoRedirect(urllib.request.HTTPRedirectHandler):
+              # urllib 不會幫 POST 跟 307／308 轉址（統一投信的介面會先 307 到同一個網址並給 cookie），自己接手
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  return None
+
+          _opener = urllib.request.build_opener(_NoRedirect)
+
           def http(url, data=None, headers=None, timeout=60, retries=3):
               last = None
               for i in range(retries):
                   try:
                       body = json.dumps(data).encode('utf-8') if data is not None else None
-                      req = urllib.request.Request(url, data=body, headers={'User-Agent': UA, **(headers or {})}, method='POST' if data is not None else 'GET')
-                      with urllib.request.urlopen(req, timeout=timeout) as r:
-                          return json.loads(r.read().decode('utf-8'))
+                      cookie = None
+                      target = url
+                      for _hop in range(4):
+                          h = {'User-Agent': UA, **(headers or {})}
+                          if cookie:
+                              h['Cookie'] = cookie
+                          req = urllib.request.Request(target, data=body, headers=h, method='POST' if data is not None else 'GET')
+                          try:
+                              with _opener.open(req, timeout=timeout) as r:
+                                  return json.loads(r.read().decode('utf-8'))
+                          except urllib.error.HTTPError as e:
+                              if e.code in (301, 302, 303, 307, 308) and e.headers.get('Location'):
+                                  target = urllib.parse.urljoin(target, e.headers['Location'])
+                                  set_cookie = e.headers.get_all('Set-Cookie') or []
+                                  if set_cookie:
+                                      cookie = '; '.join(c.split(';', 1)[0] for c in set_cookie)
+                                  continue
+                              raise
+                      raise RuntimeError('too many redirects')
                   except Exception as e:  # noqa: BLE001
                       last = e
                       time.sleep(4 * (i + 1))
