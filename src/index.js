@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-26 10:27:03";
+const BUILD_STAMP = "2026-09-26 14:20:58";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3263,24 +3263,6 @@ function raceStockRowHtml(r, idx, opts){
     '<span class="race-badge" title="' + dailyTitle + '">' + badge + '</span>' +
     '</span></div>';
 }
-function raceGroupRowHtml(g){
-  const diff = g.prevRank !== null ? g.prevRank - g.rank : null;
-  const move = diff === null ? '' : diff > 0 ? '🔺' + diff : diff < 0 ? '🔽' + (-diff) : '0';
-  const marks = (g.weakerThanYesterday ? '🔪' : '') + (g.weakerThanDayBefore ? '⚔️' : '');
-  const ratio = (g.weakerThanYesterday || g.weakerThanDayBefore) && g.downRatio !== null ? (g.downRatio >= 0.999 ? 'all' : g.downRatio.toFixed(1)) : '';
-  const title = '今天平均 ' + fmt(g.avgChange) + '%（對昨收）' + (g.twoDayAvg !== null ? '，對前天收盤 ' + fmt(g.twoDayAvg) + '%' : '') + (g.yesterday !== null ? '，昨天 ' + fmt(g.yesterday) + '%' : '') + (g.dayBefore !== null ? '，前天 ' + fmt(g.dayBefore) + '%' : '');
-  return '<div class="race-group" data-group="' + g.name + '" title="' + title + '"><span class="race-gname">' + g.name + '-(' + g.rank + ')</span>' +
-    '<span>' + move + '</span><span>' + marks + (ratio ? ' ' + ratio : '') + '</span><span class="race-gpct">' + fmt(g.avgChange) + '%</span></div>';
-}
-function raceGroupListHtml(list, half, sepLabel){
-  if (!list.length) return '<div class="race-note">沒有符合的族群</div>';
-  const upper = list.filter((g) => g.rank <= half), lower = list.filter((g) => g.rank > half);
-  let html = upper.map(raceGroupRowHtml).join('');
-  if (upper.length && lower.length) html += '<div class="race-sep">' + sepLabel + '</div>';
-  else if (!upper.length) html += '<div class="race-sep">' + sepLabel + '</div>';
-  html += lower.map(raceGroupRowHtml).join('');
-  return html;
-}
 function raceOtcBoxHtml(m){
   // 櫃買指數狀況只在最上面放一次（使用者 2026-09-23），不再每個區塊下面重複。
   if (!m.otcLabel) return '<div class="race-otc">櫃買指數狀況：資料尚未就緒</div>';
@@ -3350,13 +3332,11 @@ function race333Html(){
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
       '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要有 ⚔️ 劍（現價低於前天收盤，數字＝低幾 %；🔪 刀＝低於昨收）・最多 ' + BLADE_MAX_ROWS + ' 檔，跌幅深的在前・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
       raceBladeListHtml(m) + '</div>' +
+    // 2026-09-26 使用者：「續抱勿追高」以下的東西都不要（188 的族群列、整個 199 做空族群區塊）；
+    // 188／199 的族群集合仍在模型裡，33／34 的「族群要在 188／199 裡」照舊用。
     '<div class="race-block"><div class="race-head">⚠️符合條件>7%有 ' + over7 + ' 檔　做多族群(188) ' + stamp + '</div>' +
-      '<div class="race-sub">「符合條件>7%」＝賽馬多裡漲超過 7% 的（續抱不追），列在下面；再下面是昨天跌最多的前 1/3 族群（今天可以買）・' + dailyNote + '</div>' +
-      (over7 ? raceStockListHtml(m.horses.filter((r) => r.pct > 7), { dates: m.dates }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '') +
-      raceGroupListHtml(m.longGroups, m.half, '------↑(多方)↑------') + '</div>' +
-    '<div class="race-block"><div class="race-head">⚔️⚔️做空族群(199) ' + stamp + '</div>' +
-      '<div class="race-sub">昨天漲最多的前 1/3 族群（今天可以空）・🔪 刀＝族群平均低於昨收、⚔️ 劍＝平均低於前天收盤、數字＝族內下跌檔數比例</div>' +
-      raceGroupListHtml(m.shortGroups, m.half, '------↓(空方)↓------') + '</div>';
+      '<div class="race-sub">「符合條件>7%」＝賽馬多裡漲超過 7% 的（續抱不追）・' + dailyNote + '</div>' +
+      (over7 ? raceStockListHtml(m.horses.filter((r) => r.pct > 7), { dates: m.dates }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '<div class="race-note">賽馬多裡沒有漲超過 7% 的</div>') + '</div>';
 }
 
 // ---- 族群大戶力：漲幅前10大族群各取大戶力最強前5名、跌幅前10大族群各取大戶力最負前5名 ----
@@ -4347,7 +4327,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-26 10:27:03';
+const BUILD_STAMP = '2026-09-26 14:20:58';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
