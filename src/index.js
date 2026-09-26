@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-26 18:35:16";
+const BUILD_STAMP = "2026-09-26 19:00:19";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -596,6 +596,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .sw-drow .sw-dname{font-size:16px;font-weight:700;}
   .sw-drow .sw-dgroup{font-size:12px;color:var(--muted);}
   .sw-drow .sw-dextra{flex-basis:100%;font-size:13px;}
+  .sw-verdict{display:inline-block;margin-top:6px;border-radius:6px;padding:2px 8px;font-size:13px;font-weight:700;background:#0f766e;color:#fff;}
+  .sw-verdict.bad{background:#b91c1c;}
   .chips-weak-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;background:#166534;color:#fff;white-space:nowrap;}  /* 放空籌碼：弱勢型態 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
@@ -4499,6 +4501,37 @@ function swingGroupFundHtml(g){
   if (swHas(g.weekPct)) parts.push('大戶週增均 <b class="' + dirClass(g.weekPct) + '">' + swPct(g.weekPct, 1) + '</b>');
   return parts.length ? '<div class="sw-gline">' + parts.join('　') + '</div>' : '';
 }
+// 上一週籌碼那一組（2026-09-26 第三階段）：一週前那份的籌碼面精選，這一週表現如何
+function swingLastWeekCardHtml(x){
+  const bad = x.aboveMa20 === false;
+  const verdict = x.verdict ? '<div class="sw-verdict' + (bad ? ' bad' : '') + '">' + x.verdict + '</div>' : '';
+  if (x.changePct === null || x.changePct === undefined){
+    return '<div class="sw-card lw" data-code="' + x.code + '" data-name="' + (x.name || '') + '" role="button" tabindex="0">' +
+      '<div class="sw-code">' + x.code + '</div><div class="sw-name">' + (x.name || '') + chipsFlagPillsHtml(x.code) + '</div>' +
+      '<div class="sw-group">' + (x.group || '—') + '</div>' + (x.tag ? '<div class="sw-pill">' + x.tag + '</div>' : '') + verdict + '</div>';
+  }
+  return '<div class="sw-card lw' + (bad ? '' : ' green') + '" data-code="' + x.code + '" data-name="' + (x.name || '') + '" role="button" tabindex="0">' +
+    '<div class="sw-code">' + x.code + '</div><div class="sw-name">' + (x.name || '') + chipsFlagPillsHtml(x.code) + '</div>' +
+    '<div class="sw-group">' + (x.group || '—') + '</div>' + (x.tag ? '<div class="sw-pill">入榜時 ' + x.tag + '</div>' : '') +
+    '<div class="sw-line">入榜收 ' + num2(x.pickClose) + ' → 現在收 ' + num2(x.close) + ' <b class="' + dirClass(x.changePct) + '">' + swPct(x.changePct, 1) + '</b></div>' +
+    '<div class="sw-line">期間最高收 ' + num2(x.maxClose) + '<span class="muted">（' + swPct(x.maxGainPct, 1) + '）</span>・最低收 ' + num2(x.minClose) + '<span class="muted">（' + swPct(x.minGainPct, 1) + '）</span></div>' +
+    '<div class="sw-line">法人這週 ' + (swHas(x.instSince) ? '<span class="' + dirClass(x.instSince) + '">' + swLots(x.instSince) + '</span>' + (x.instDays ? '<span class="muted">（' + x.instDays + ' 天）</span>' : '') : '—') +
+      '・月線 ' + num2(x.ma20) + (swHas(x.aboveMa20Pct) ? '<span class="muted">（' + (x.aboveMa20 ? '之上 ' : '之下 ') + Math.abs(x.aboveMa20Pct).toFixed(1) + '%）</span>' : '') + (swHas(x.score) ? '・均線 <b>' + x.score + '</b>' : '') + '</div>' +
+    verdict + '</div>';
+}
+function swingLastWeekHtml(data){
+  const lw = data.lastWeek, rules = data.rules || {};
+  const head = '<div class="bl-section bl-launch">上一週籌碼那一組' + (lw && lw.date ? '・' + swMmdd(lw.date) + ' 那份的籌碼面精選，到 ' + swMmdd(data.date) + ' 的表現' : '') + '</div>' +
+    (rules.lastWeek ? '<div class="sw-rule">' + rules.lastWeek + '。</div>' : '');
+  if (lw === undefined) return head + '<div class="race-note">這一份是對照功能接入前整理的，沒有上一週資料</div>';
+  if (!lw) return head + '<div class="race-note">一週前還沒有報告可以對照（要累積 5 個交易日的報告）</div>';
+  const picks = lw.picks || [];
+  if (!picks.length) return head + '<div class="race-note">' + swMmdd(lw.date) + ' 那份沒有籌碼面精選</div>';
+  const recap = swHas(lw.avgChangePct) ? '這一組平均 <b class="' + dirClass(lw.avgChangePct) + '">' + swPct(lw.avgChangePct, 1) + '</b>・' + lw.aboveMa20 + '/' + lw.count + ' 檔還在月線上' : '這一組還沒有可對照的日K';
+  return head + '<div class="sw-noteBox">' + recap + '</div>' +
+    '<div class="sw-cards">' + picks.map(swingLastWeekCardHtml).join('') + '</div>' +
+    '<div class="sw-quote">榜單不是拿來追的，是拿來驗證：守住月線的才算籌碼有效</div>';
+}
 // 處置動態一列：明日起處置／明日出獄／處置中／觀察名單（出獄 ≤5 個交易日）
 function swingDispoReason(e){
   // 券商來的處置原因是一整段公告文，只留前 80 字，完整的放在 hover 提示
@@ -4579,9 +4612,10 @@ function swingSectionHtml(data){
     (rules.fund ? '<div class="sw-rule">' + rules.fund + '。</div>' : '') +
     (skipped ? '<div class="sw-noteBox">略過：' + skipped + '</div>' : '') +
     (list.length ? '<div class="sw-cards">' + list.map((x) => swingCardHtml(x, { green: sec === 'tech' })).join('') + '</div>' : '<div class="race-note">那天沒有符合條件的股票</div>') +
-    '<div class="sw-quote">' + quote + '</div>';
+    '<div class="sw-quote">' + quote + '</div>' +
+    (sec === 'chips' ? swingLastWeekHtml(data) : '');
 }
-const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。本益比、月營收年增、集保 400 張以上大戶週籌碼與處置動態每個交易日收盤後接入；上一週籌碼對照與主動式 ETF 五檔是下一階段要接的資料。</div>';
+const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。本益比、月營收年增、集保 400 張以上大戶週籌碼、處置動態與上一週籌碼對照每個交易日收盤後更新；主動式 ETF 五檔是下一階段要接的資料。</div>';
 function renderSwing(){
   const tabs = document.getElementById('swingTabs');
   tabs.innerHTML = SWING_SECTIONS.map((sc) => '<button class="chart-tab signal-tab' + (swingState.section === sc.key ? ' active' : '') + '" data-section="' + sc.key + '">' + sc.label + '</button>').join('');
@@ -4628,7 +4662,7 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-26 18:35:16';
+const BUILD_STAMP = '2026-09-26 19:00:19';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
