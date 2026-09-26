@@ -756,7 +756,7 @@
   <div class="chips-inner" id="swingInner">
     <div class="chips-head">
       <div>
-        <div class="chips-title">波段日報</div>
+        <div class="chips-title">下午報</div>
         <div class="chips-sub">隔天盤前讀：籌碼、技術、均線三面向各挑最多 5 檔，附防守價與風險提示；每個交易日收盤後整理，法人資料齊了會再更新，可回看近 10 個交易日。點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="swingClose" aria-label="關閉">✕</button>
@@ -831,7 +831,7 @@
   <button class="tb-btn" data-label="個股研究中心"><span class="tb-icon">本</span>個股研究中心</button>
   <button class="tb-btn" data-label="每週籌碼分析"><span class="tb-icon">週</span>每週籌碼分析</button>
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
-  <button class="tb-btn" data-label="波段日報"><span class="tb-icon">波</span>波段日報</button>
+  <button class="tb-btn" data-label="下午報"><span class="tb-icon">午</span>下午報</button>
   <button class="tb-btn" data-label="個股盤中訊號追蹤"><span class="tb-icon">追</span>個股訊號追蹤</button>
 </div>
 
@@ -4571,7 +4571,7 @@ function renderSwing(){
     return;
   }
   if (data.status !== 'ok'){
-    body.innerHTML = swingDatePillsHtml(data) + '<div class="signal-empty"><div class="se-title">' + (swingState.date ? '那一天沒有報告' : '還沒有波段日報') + '</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
+    body.innerHTML = swingDatePillsHtml(data) + '<div class="signal-empty"><div class="se-title">' + (swingState.date ? '那一天沒有報告' : '還沒有下午報') + '</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
     return;
   }
   body.innerHTML = swingDatePillsHtml(data) + swingBasisHtml(data) + swingSectionHtml(data) + SWING_FOOT;
@@ -5227,7 +5227,7 @@ document.getElementById('alertToggle').addEventListener('click', () => {
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
-    if (btn.dataset.label === '波段日報'){ openSwingPanel(); return; }
+    if (btn.dataset.label === '下午報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」
     showToast('「' + btn.dataset.label + '」功能開發中');
   });
 });
