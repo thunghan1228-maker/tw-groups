@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-26 17:56:16";
+const BUILD_STAMP = "2026-09-26 18:05:46";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -584,6 +584,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .sw-gbadge{display:inline-block;border:1px solid #e6675f;color:#e6675f;border-radius:999px;padding:1px 10px;font-size:12px;font-weight:700;margin-left:6px;}
   .sw-gline{font-size:14px;margin:4px 0;}
   .sw-gjudge{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5;}
+  .sw-noteBox{border:1px dashed var(--line);border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.6;color:var(--text);margin:8px 0;}
+  .sw-foot{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin-top:14px;line-height:1.6;}
   .sw-rule{font-size:12px;color:var(--muted);border-left:3px solid var(--line);padding:4px 10px;margin:8px 0;line-height:1.6;}
   .chips-weak-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;background:#166534;color:#fff;white-space:nowrap;}  /* 放空籌碼：弱勢型態 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
@@ -4478,17 +4480,33 @@ function swingSectionHtml(data){
       (groups.length > shown.length ? '<div class="chips-more"><button class="chart-tab chips-btn" id="swingMoreGroups">再顯示 ' + Math.min(12, groups.length - shown.length) + ' 個族群（共 ' + groups.length + ' 個）</button></div>' : '') +
       '<div class="sw-quote">先看族群再看個股：族群沒翻，個股只能算單兵</div>';
   }
+  if (sec === 'ma'){
+    const notes = data.notes || {};
+    const maList = picks.ma || [], fullList = picks.full || [];
+    const sustained = (notes.sustained || []).map((x) => x.name + '（均線 ' + x.score + '）').join('、');
+    const jumps = (notes.jumpTop || []).map((x) => x.name + ' ' + x.from + '→' + x.to).join('、');
+    return '<div class="bl-section bl-launch">體質轉強・均線分數跳升 ' + (counts.ma || 0) + ' 檔，列前 ' + maList.length + ' 檔</div>' +
+      '<div class="sw-rule">' + (rules.ma || '') + '。風險提示：' + (rules.risks || '') + '。</div>' +
+      (maList.length ? '<div class="sw-cards">' + maList.map((x) => swingCardHtml(x, { health: true })).join('') + '</div>' : '<div class="race-note">那天沒有均線分數跳升 3 分以上的股票</div>') +
+      '<div class="sw-noteBox">續強確認（' + (notes.prevDate ? swMmdd(notes.prevDate) + ' 那份的精選、' : '') + '今天仍在月線上且均線分數 ≥10）：' + (sustained || '無') + '</div>' +
+      '<div class="sw-quote">跳升＝從弱轉強的第一天，比一直強的更值得記</div>' +
+      '<div class="bl-section bl-brew">均線結構轉強・' + swMmdd(data.date) + ' 收盤新達 15 分 ' + (counts.full || 0) + ' 檔，列前 ' + fullList.length + ' 檔</div>' +
+      '<div class="sw-rule">' + (rules.full || '') + '。</div>' +
+      (fullList.length ? '<div class="sw-cards">' + fullList.map((x) => swingCardHtml(x, { green: true })).join('') + '</div>' : '<div class="race-note">那天沒有新達 15 分的股票</div>') +
+      '<div class="sw-noteBox">跳升最多：' + (jumps || '無') + '</div>' +
+      '<div class="sw-quote">滿分不等於能追，看估值與法人有沒有跟</div>';
+  }
   const list = picks[sec] || [];
-  const title = sec === 'chips' ? '籌碼面精選' : sec === 'tech' ? '技術面精選' : '均線轉強';
+  const title = sec === 'chips' ? '籌碼面精選' : '技術面精選';
   const sub = sec === 'chips' ? '法人連買、主力連買優先・候選 ' + (counts.chips || 0) + ' 檔，列前 ' + list.length + ' 檔'
-    : sec === 'tech' ? '真穿月線 ' + (counts.tech || 0) + ' 檔；剛站上未達門檻 ' + (counts.techNear || 0) + ' 檔不列'
-    : '均線分數跳升 ' + (counts.ma || 0) + ' 檔，列前 ' + list.length + ' 檔';
-  const quote = sec === 'chips' ? '籌碼是候選名單，型態確認再進' : sec === 'tech' ? '站上月線第一天，防守就是月線本身' : '分數跳升是轉強的開始，還要看量能與籌碼有沒有跟上';
+    : '真穿月線 ' + (counts.tech || 0) + ' 檔；剛站上未達門檻 ' + (counts.techNear || 0) + ' 檔不列';
+  const quote = sec === 'chips' ? '籌碼是候選名單，型態確認再進' : '站上月線第一天，防守就是月線本身';
   return '<div class="bl-section ' + (sec === 'tech' ? 'bl-brew' : 'bl-launch') + '">' + title + '・' + sub + '</div>' +
     '<div class="sw-rule">' + (rules[sec] || '') + '。風險提示：' + (rules.risks || '') + '。防守價＝' + swMmdd(data.date) + ' 收盤的月線與最近三天最低價，下一個交易日適用。</div>' +
-    (list.length ? '<div class="sw-cards">' + list.map((x) => swingCardHtml(x, { green: sec === 'tech', health: sec === 'ma' })).join('') + '</div>' : '<div class="race-note">那天沒有符合條件的股票</div>') +
+    (list.length ? '<div class="sw-cards">' + list.map((x) => swingCardHtml(x, { green: sec === 'tech' })).join('') + '</div>' : '<div class="race-note">那天沒有符合條件的股票</div>') +
     '<div class="sw-quote">' + quote + '</div>';
 }
+const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。第一階段用法人連買、主力連買代替集保週籌碼；本益比、營收年增、處置動態、上一週對照是下一階段要接的資料。</div>';
 function renderSwing(){
   const tabs = document.getElementById('swingTabs');
   tabs.innerHTML = SWING_SECTIONS.map((sc) => '<button class="chart-tab signal-tab' + (swingState.section === sc.key ? ' active' : '') + '" data-section="' + sc.key + '">' + sc.label + '</button>').join('');
@@ -4502,7 +4520,7 @@ function renderSwing(){
     body.innerHTML = swingDatePillsHtml(data) + '<div class="signal-empty"><div class="se-title">' + (swingState.date ? '那一天沒有報告' : '還沒有波段日報') + '</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
     return;
   }
-  body.innerHTML = swingDatePillsHtml(data) + swingBasisHtml(data) + swingSectionHtml(data);
+  body.innerHTML = swingDatePillsHtml(data) + swingBasisHtml(data) + swingSectionHtml(data) + SWING_FOOT;
 }
 function openSwingPanel(){
   document.getElementById('swingModal').hidden = false;
@@ -4535,7 +4553,7 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-26 17:56:16';
+const BUILD_STAMP = '2026-09-26 18:05:46';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
