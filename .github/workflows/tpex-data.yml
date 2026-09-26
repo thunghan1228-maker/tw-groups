@@ -167,9 +167,10 @@ jobs:
                   c = code_of(r)
                   if codes and c not in codes:
                       continue
-                  shares = next((v for k, v in r.items() if '已發行普通股數' in str(k)), None)
+                  # 櫃買中心這份是英文欄位（IssueShares／CompanyAbbreviation），證交所那份才是中文欄位
+                  shares = r.get('IssueShares') or next((v for k, v in r.items() if '已發行普通股數' in str(k)), None)
                   if c and shares:
-                      keep.append({'公司代號': c, '公司簡稱': r.get('公司簡稱') or r.get('CompanyName') or '', '已發行普通股數或TDR原股發行股數': str(shares)})
+                      keep.append({'公司代號': c, '公司簡稱': r.get('公司簡稱') or r.get('CompanyAbbreviation') or r.get('CompanyName') or '', '已發行普通股數或TDR原股發行股數': str(shares)})
               assert keep, 'no basics rows'
               json.dump(keep, open('tpex/basics-latest.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
               print('basics rows', len(keep))
