@@ -501,6 +501,37 @@
   #chipsTabs .signal-tab[data-measure="short"]{background:#15803d;border-color:#15803d;color:#fff;}
   #chipsTabs .signal-tab[data-measure="short"]:hover{background:#166534;border-color:#166534;}
   #chipsTabs .signal-tab[data-measure="short"].active{background:#22c55e;border-color:#fff;color:#fff;box-shadow:0 0 0 2px #22c55e;}
+  /* 波段日報（2026-09-26 使用者：照波段精選日報做）：數字方塊、摘要、族群卡、個股卡 */
+  .sw-basis{font-size:12px;color:var(--muted);margin:6px 0 8px;line-height:1.6;}
+  .sw-tiles{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px;}
+  .sw-tile{flex:1 1 120px;background:var(--panel);border:1px solid var(--line);border-top:3px solid #e6675f;border-radius:10px;padding:10px 8px;text-align:center;}
+  .sw-tile b{display:block;font-size:26px;line-height:1.1;color:#e6675f;font-variant-numeric:tabular-nums;}
+  .sw-tile span{font-size:12px;color:var(--muted);}
+  .sw-summary{list-style:decimal;padding-left:24px;margin:8px 0 12px;font-size:14px;line-height:1.7;}
+  .sw-summary li{margin:4px 0;}
+  .sw-quote{border:1px solid var(--line);border-radius:10px;padding:8px 12px;text-align:center;color:#e6675f;font-weight:800;margin:10px 0;}
+  .sw-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;margin:8px 0;}
+  .sw-card{background:var(--panel);border:1px solid var(--line);border-left:4px solid #e6675f;border-radius:12px;padding:12px 14px;cursor:pointer;}
+  .sw-card:hover{background:var(--panel-2);}
+  .sw-card.green{border-left-color:#5fae6f;}
+  .sw-card .sw-code{font-size:22px;font-weight:800;color:#e6675f;line-height:1.1;}
+  .sw-card .sw-name{font-size:17px;font-weight:700;margin-top:2px;}
+  .sw-card .sw-group{font-size:12px;color:var(--muted);margin-top:2px;}
+  .sw-hot{color:#e6675f;font-weight:700;margin-left:6px;}
+  .sw-pill{display:inline-block;border:1px solid #7c3aed;color:#7c3aed;background:rgba(124,58,237,.08);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;margin:6px 0 4px;}
+  .sw-line{font-size:14px;margin:3px 0;line-height:1.6;}
+  .sw-line .muted{color:var(--muted);}
+  .sw-def{font-size:14px;margin-top:4px;}
+  .sw-def b{color:#e6675f;}
+  .sw-risk{color:#e6675f;font-size:13px;margin-top:4px;font-weight:700;}
+  .sw-health{display:inline-block;font-size:12px;border-radius:6px;padding:0 6px;background:#0f766e;color:#fff;font-weight:700;margin-left:6px;}
+  .sw-gcard{background:var(--panel);border:1px solid var(--line);border-left:4px solid #5fae6f;border-radius:12px;padding:12px 14px;}
+  .sw-gcard.cold{border-left-color:#e6675f;}
+  .sw-gcard .sw-gname{font-size:20px;font-weight:800;color:#e6675f;}
+  .sw-gbadge{display:inline-block;border:1px solid #e6675f;color:#e6675f;border-radius:999px;padding:1px 10px;font-size:12px;font-weight:700;margin-left:6px;}
+  .sw-gline{font-size:14px;margin:4px 0;}
+  .sw-gjudge{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5;}
+  .sw-rule{font-size:12px;color:var(--muted);border-left:3px solid var(--line);padding:4px 10px;margin:8px 0;line-height:1.6;}
   .chips-weak-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;background:#166534;color:#fff;white-space:nowrap;}  /* 放空籌碼：弱勢型態 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
@@ -708,6 +739,19 @@
     <div id="chipsBody"></div>
   </div>
 </div>
+<div class="chips-modal" id="swingModal" hidden>
+  <div class="chips-inner" id="swingInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">波段日報</div>
+        <div class="chips-sub">隔天盤前讀：籌碼、技術、均線三面向各挑最多 5 檔，附防守價與風險提示；每個交易日收盤後整理，法人資料齊了會再更新，可回看近 10 個交易日。點股票可開K線圖。</div>
+      </div>
+      <button class="cm-icon-btn" id="swingClose" aria-label="關閉">✕</button>
+    </div>
+    <div class="chart-tabs signal-tabs-bar" id="swingTabs"></div>
+    <div id="swingBody"></div>
+  </div>
+</div>
 <div id="buildStamp"></div>
 <button type="button" id="updateBanner" hidden>網頁有新版本，點一下更新</button>
 <div id="chartWindows"></div>
@@ -774,7 +818,7 @@
   <button class="tb-btn" data-label="個股研究中心"><span class="tb-icon">本</span>個股研究中心</button>
   <button class="tb-btn" data-label="每週籌碼分析"><span class="tb-icon">週</span>每週籌碼分析</button>
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
-  <button class="tb-btn" data-label="選股程式"><span class="tb-icon">選</span>選股程式</button>
+  <button class="tb-btn" data-label="波段日報"><span class="tb-icon">波</span>波段日報</button>
   <button class="tb-btn" data-label="個股盤中訊號追蹤"><span class="tb-icon">追</span>個股訊號追蹤</button>
 </div>
 
@@ -2150,6 +2194,7 @@ function closeStockChart(){
   // 若是從訊號中心／盤後籌碼排行點進來的，關圖後讓它們回到最上層。
   document.getElementById('signalModal').classList.remove('behind-chart');
   document.getElementById('chipsModal').classList.remove('behind-chart');
+  document.getElementById('swingModal').classList.remove('behind-chart');
 }
 
 let openGroupName = null;
@@ -4283,6 +4328,154 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
   }
 });
 
+// ---- 波段日報（2026-09-26 使用者：照「波段精選日報」的樣子做，第一階段用現有資料）----
+// 後端每個交易日收盤後整理一份（/api/swing-report），以資料基準日為鍵保存；這裡照日期切換、五個段落顯示。
+const SWING_SECTIONS = [
+  { key: 'summary', label: '今日摘要' }, { key: 'groups', label: '產業觀察' },
+  { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '均線轉強' },
+];
+let swingState = { section: 'summary', date: '', groupsLimit: 12 };
+const swingCache = {};      // date('' = 最新) -> payload
+const swingLoading = {};
+const swingFailedAt = {};
+async function ensureSwing(date){
+  const key = date || '';
+  if (swingCache[key] || swingLoading[key]) return;
+  if (swingFailedAt[key] && Date.now() - swingFailedAt[key] < 30000) return;
+  swingLoading[key] = true;
+  try {
+    const res = await fetch('/api/swing-report' + (date ? '?date=' + encodeURIComponent(date) : ''));
+    if (!res.ok) throw new Error('swing-report http ' + res.status);
+    const data = await res.json();
+    if (!data || !data.status) throw new Error('bad payload');
+    swingCache[key] = data;
+    if (data.date && data.status === 'ok') swingCache[data.date] = data;
+  } catch (e) {
+    swingFailedAt[key] = Date.now();
+  } finally {
+    delete swingLoading[key];
+  }
+  if (!document.getElementById('swingModal').hidden) renderSwing();
+}
+function swingData(){ ensureSwing(swingState.date); return swingCache[swingState.date || '']; }
+const swMmdd = (d) => (d ? String(d).slice(5).replace('-', '/') : '');
+function swLots(v){
+  if (v === null || v === undefined) return '—';
+  const sign = v > 0 ? '+' : '';
+  return Math.abs(v) >= 10000 ? sign + (v / 10000).toFixed(1) + ' 萬張' : sign + Math.round(v).toLocaleString('en-US') + ' 張';
+}
+function swPct(v, digits){ return v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(digits === undefined ? 2 : digits) + '%'; }
+function swingDatePillsHtml(data){
+  const dates = (data && data.dates) || [];
+  const btn = (value, label, active) => '<button class="chart-tab chips-btn sw-date-btn' + (active ? ' active' : '') + '" data-date="' + value + '">' + label + '</button>';
+  const latest = dates[0] || '';
+  return '<div class="chips-controls"><div class="combo-filter-bar">' +
+    btn('', '最新' + (latest ? ' ' + swMmdd(latest) : ''), !swingState.date) +
+    dates.slice(1, 10).map((d) => btn(d, swMmdd(d), swingState.date === d)).join('') + '</div></div>';
+}
+function swingBasisHtml(data){
+  const b = data.basis || {};
+  const inst = b.hasInst ? '法人資料已齊（5 日＝' + (b.instDates || []).slice().reverse().map(swMmdd).join('～') + '）' : '法人資料還沒進來，籌碼相關的判斷等資料齊了會自動更新';
+  return '<div class="sw-basis">資料基準 ' + swMmdd(data.date) + ' 收盤・隔天盤前讀・' + inst + '・主力 5 日＝' + ((b.mfDates || []).length ? (b.mfDates || []).slice().reverse().map(swMmdd).join('～') : '沒有資料') +
+    '・個股 ' + (b.stocks || 0) + ' 檔（日K滿 240 天可算均線分數的 ' + (b.withScore || 0) + ' 檔）・整理時間 ' + String(data.generatedAt || '').slice(11, 16) + '</div>';
+}
+function swingCardHtml(x, opts){
+  const risks = (x.risks || []).length ? '<div class="sw-risk">⚠️ ' + x.risks.join('、') + '</div>' : '';
+  const health = opts && opts.health && x.health !== null && x.health !== undefined ? '<span class="sw-health">體質 ' + x.health + '/7</span>' : '';
+  const scoreText = x.score === null || x.score === undefined ? '—' : (x.prevScore !== null && x.prevScore !== undefined && x.prevScore !== x.score ? x.prevScore + '→<b>' + x.score + '</b>' : '<b>' + x.score + '</b>');
+  const instText = x.inst5 === null || x.inst5 === undefined ? '法人 5 日 —'
+    : '法人 5 日 <span class="' + dirClass(x.inst5) + '">' + swLots(x.inst5) + (x.inst5Pct !== null && x.inst5Pct !== undefined ? '（股本 ' + swPct(x.inst5Pct, 1) + '）' : '') + '</span>' +
+      (x.instStreak > 0 ? '・連買 ' + x.instStreak + ' 天' : x.instStreak < 0 ? '・連賣 ' + (-x.instStreak) + ' 天' : '');
+  const mfText = x.mf5 === null || x.mf5 === undefined ? '' : '・主力 5 日 <span class="' + dirClass(x.mf5) + '">' + swLots(x.mf5) + '</span>' + (x.mfStreak > 0 ? '（連買 ' + x.mfStreak + ' 天）' : x.mfStreak < 0 ? '（連賣 ' + (-x.mfStreak) + ' 天）' : '');
+  return '<div class="sw-card' + (opts && opts.green ? ' green' : '') + '" data-code="' + x.code + '" data-name="' + x.name + '" role="button" tabindex="0">' +
+    '<div class="sw-code">' + x.code + '</div><div class="sw-name">' + x.name + chipsFlagPillsHtml(x.code) + '</div>' +
+    '<div class="sw-group">' + (x.group || '—') + (x.hot ? '<span class="sw-hot">熱門族</span>' : '') + '</div>' +
+    '<div class="sw-pill">' + x.tag + '</div>' + health +
+    '<div class="sw-line">收 ' + num2(x.close) + ' <span class="' + dirClass(x.changePct || 0) + '">' + swPct(x.changePct, 1) + '</span>' + (x.aboveMa20Pct !== null && x.aboveMa20Pct !== undefined ? '<span class="muted">・月線之' + (x.aboveMa20Pct >= 0 ? '上 ' : '下 ') + Math.abs(x.aboveMa20Pct).toFixed(1) + '%</span>' : '') + '</div>' +
+    '<div class="sw-line">' + instText + mfText + '・均線 ' + scoreText + '</div>' +
+    '<div class="sw-def">防守 <b>月線 ' + num2(x.defense.ma20) + '</b> / <b>三日低 ' + num2(x.defense.threeDayLow) + '</b></div>' +
+    risks + '</div>';
+}
+function swingGroupCardHtml(g){
+  const cold = g.aboveRatio < 0.5 && g.inst5 <= 0;
+  return '<div class="sw-gcard' + (cold ? ' cold' : '') + '"><div><span class="sw-gname">' + g.name + '</span><span class="sw-gbadge">收盤排名 ' + g.rank + '</span>' + (g.hot ? '<span class="sw-hot">熱門族</span>' : '') + '</div>' +
+    '<div class="sw-gline">站上月線 <b class="' + (g.aboveRatio >= 0.5 ? 'up' : 'down') + '">' + g.aboveMa20 + '/' + g.members + '</b>　法人 5 日 <b class="' + dirClass(g.inst5) + '">' + swLots(g.inst5) + '</b></div>' +
+    '<div class="sw-gline">均線分數平均 <b>' + (g.avgScore === null || g.avgScore === undefined ? '—' : g.avgScore) + '</b>　今天真穿月線 <b>' + g.crossed + '</b> 檔　當天均漲 <b class="' + dirClass(g.avgChange) + '">' + swPct(g.avgChange) + '</b></div>' +
+    '<div class="sw-gjudge">' + g.judge + '</div></div>';
+}
+function swingSectionHtml(data){
+  const sec = swingState.section, picks = data.picks || {}, counts = data.counts || {}, rules = data.rules || {};
+  if (sec === 'summary'){
+    const t = data.tiles || {};
+    return '<div class="sw-tiles">' +
+      '<div class="sw-tile"><b>' + (t.crossedQualified || 0) + '</b><span>今日真穿月線(檔)</span></div>' +
+      '<div class="sw-tile"><b>' + (t.maJump || 0) + '</b><span>均線轉強(檔)</span></div>' +
+      '<div class="sw-tile"><b>' + (t.chips || 0) + '</b><span>籌碼面候選(檔)</span></div>' +
+      '<div class="sw-tile"><b>' + (t.disposition || 0) + '</b><span>處置中(檔)</span></div></div>' +
+      '<ol class="sw-summary">' + (data.summary || []).map((line) => '<li>' + line + '</li>').join('') + '</ol>' +
+      '<div class="sw-quote">先看族群再看個股：族群沒翻，個股只能算單兵</div>';
+  }
+  if (sec === 'groups'){
+    const groups = data.groups || [];
+    const shown = groups.slice(0, swingState.groupsLimit);
+    return '<div class="sw-rule">族群層數據・' + swMmdd(data.date) + ' 收盤：站上月線檔數＝收盤在 20 日線之上的檔數；法人 5 日＝三大法人最近 5 個交易日合計；收盤排名＝當天平均漲跌幅名次（前 10 名＝熱門族）。</div>' +
+      '<div class="sw-cards">' + shown.map(swingGroupCardHtml).join('') + '</div>' +
+      (groups.length > shown.length ? '<div class="chips-more"><button class="chart-tab chips-btn" id="swingMoreGroups">再顯示 ' + Math.min(12, groups.length - shown.length) + ' 個族群（共 ' + groups.length + ' 個）</button></div>' : '') +
+      '<div class="sw-quote">先看族群再看個股：族群沒翻，個股只能算單兵</div>';
+  }
+  const list = picks[sec] || [];
+  const title = sec === 'chips' ? '籌碼面精選' : sec === 'tech' ? '技術面精選' : '均線轉強';
+  const sub = sec === 'chips' ? '法人連買、主力連買優先・候選 ' + (counts.chips || 0) + ' 檔，列前 ' + list.length + ' 檔'
+    : sec === 'tech' ? '真穿月線 ' + (counts.tech || 0) + ' 檔；剛站上未達門檻 ' + (counts.techNear || 0) + ' 檔不列'
+    : '均線分數跳升 ' + (counts.ma || 0) + ' 檔，列前 ' + list.length + ' 檔';
+  const quote = sec === 'chips' ? '籌碼是候選名單，型態確認再進' : sec === 'tech' ? '站上月線第一天，防守就是月線本身' : '分數跳升是轉強的開始，還要看量能與籌碼有沒有跟上';
+  return '<div class="bl-section ' + (sec === 'tech' ? 'bl-brew' : 'bl-launch') + '">' + title + '・' + sub + '</div>' +
+    '<div class="sw-rule">' + (rules[sec] || '') + '。風險提示：' + (rules.risks || '') + '。防守價＝' + swMmdd(data.date) + ' 收盤的月線與最近三天最低價，下一個交易日適用。</div>' +
+    (list.length ? '<div class="sw-cards">' + list.map((x) => swingCardHtml(x, { green: sec === 'tech', health: sec === 'ma' })).join('') + '</div>' : '<div class="race-note">那天沒有符合條件的股票</div>') +
+    '<div class="sw-quote">' + quote + '</div>';
+}
+function renderSwing(){
+  const tabs = document.getElementById('swingTabs');
+  tabs.innerHTML = SWING_SECTIONS.map((sc) => '<button class="chart-tab signal-tab' + (swingState.section === sc.key ? ' active' : '') + '" data-section="' + sc.key + '">' + sc.label + '</button>').join('');
+  const body = document.getElementById('swingBody');
+  const data = swingData();
+  if (!data){
+    body.innerHTML = swingDatePillsHtml(swingCache['']) + '<div class="signal-empty"><div class="se-title">' + (swingFailedAt[swingState.date || ''] ? '讀取失敗' : '讀取中…') + '</div><div class="se-sub">後端每個交易日收盤後整理；讀不到的話稍後再試。</div></div>';
+    return;
+  }
+  if (data.status !== 'ok'){
+    body.innerHTML = swingDatePillsHtml(data) + '<div class="signal-empty"><div class="se-title">' + (swingState.date ? '那一天沒有報告' : '還沒有波段日報') + '</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
+    return;
+  }
+  body.innerHTML = swingDatePillsHtml(data) + swingBasisHtml(data) + swingSectionHtml(data);
+}
+function openSwingPanel(){
+  document.getElementById('swingModal').hidden = false;
+  renderSwing();
+}
+function closeSwingPanel(){ document.getElementById('swingModal').hidden = true; }
+document.getElementById('swingClose').addEventListener('click', closeSwingPanel);
+document.getElementById('swingModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeSwingPanel(); });
+document.getElementById('swingTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-section]');
+  if (!btn) return;
+  swingState.section = btn.dataset.section;
+  renderSwing();
+});
+document.getElementById('swingBody').addEventListener('click', (e) => {
+  const day = e.target.closest('.sw-date-btn');
+  if (day){ swingState.date = day.dataset.date || ''; swingState.groupsLimit = 12; renderSwing(); return; }
+  if (e.target.closest('#swingMoreGroups')){ swingState.groupsLimit += 12; renderSwing(); return; }
+  const card = e.target.closest('.sw-card[data-code]');
+  if (card){
+    if (!useFloatingCharts()){
+      document.getElementById('swingModal').classList.add('behind-chart');
+      document.getElementById('signalModal').classList.add('behind-chart');
+    }
+    openStockChart(card.dataset.code, card.dataset.name);
+  }
+});
+
 // ---- 版本戳記與自動更新（2026-09-25 使用者：iPhone 加到主畫面的網頁點籌碼排行沒反應，其實是一直跑舊版）----
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
@@ -4907,6 +5100,7 @@ document.getElementById('alertToggle').addEventListener('click', () => {
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
+    if (btn.dataset.label === '波段日報'){ openSwingPanel(); return; }
     showToast('「' + btn.dataset.label + '」功能開發中');
   });
 });
