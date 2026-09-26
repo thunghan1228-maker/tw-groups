@@ -534,6 +534,15 @@
   .sw-noteBox{border:1px dashed var(--line);border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.6;color:var(--text);margin:8px 0;}
   .sw-foot{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin-top:14px;line-height:1.6;}
   .sw-rule{font-size:12px;color:var(--muted);border-left:3px solid var(--line);padding:4px 10px;margin:8px 0;line-height:1.6;}
+  /* 第二階段（2026-09-26）：基本面那一行、處置動態的列 */
+  .sw-fund{font-size:13px;}
+  .sw-dlist{display:flex;flex-direction:column;gap:6px;margin:6px 0 10px;}
+  .sw-drow{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;background:var(--panel);border:1px solid var(--line);border-left:4px solid #e6675f;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:14px;line-height:1.5;}
+  .sw-drow:hover{background:var(--panel-2);}
+  .sw-drow .sw-dcode{font-size:18px;font-weight:800;color:#e6675f;}
+  .sw-drow .sw-dname{font-size:16px;font-weight:700;}
+  .sw-drow .sw-dgroup{font-size:12px;color:var(--muted);}
+  .sw-drow .sw-dextra{flex-basis:100%;font-size:13px;}
   .chips-weak-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;background:#166534;color:#fff;white-space:nowrap;}  /* 放空籌碼：弱勢型態 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
@@ -4333,7 +4342,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // ---- 波段日報（2026-09-26 使用者：照「波段精選日報」的樣子做，第一階段用現有資料）----
 // 後端每個交易日收盤後整理一份（/api/swing-report），以資料基準日為鍵保存；這裡照日期切換、五個段落顯示。
 const SWING_SECTIONS = [
-  { key: 'summary', label: '今日摘要' }, { key: 'groups', label: '產業觀察' },
+  { key: 'summary', label: '今日摘要' }, { key: 'disposition', label: '處置動態' }, { key: 'groups', label: '產業觀察' },
   { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '均線轉強' },
 ];
 let swingState = { section: 'summary', date: '', groupsLimit: 12 };
@@ -4367,6 +4376,23 @@ function swLots(v){
   return Math.abs(v) >= 10000 ? sign + (v / 10000).toFixed(1) + ' 萬張' : sign + Math.round(v).toLocaleString('en-US') + ' 張';
 }
 function swPct(v, digits){ return v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(digits === undefined ? 2 : digits) + '%'; }
+const swHas = (v) => v !== null && v !== undefined;
+const swYm = (ym) => (ym ? String(ym).replace('-', '/') : '');                       // 2026-08 → 2026/08
+const swMonth = (ym) => (ym ? parseInt(String(ym).slice(5), 10) + ' 月' : '');      // 2026-08 → 8 月
+// 第二階段（2026-09-26）：本益比、月營收年增、集保 400 張以上大戶週變化；沒接到的欄位不顯示
+function swingFundLineHtml(x){
+  const parts = [];
+  if (swHas(x.pe)) parts.push('本益比 <b>' + Number(x.pe).toFixed(1) + '</b>' + (swHas(x.peGroupAvg) ? '<span class="muted">（族群均 ' + Number(x.peGroupAvg).toFixed(1) + '）</span>' : ''));
+  if (swHas(x.revenueYoy)) parts.push(swMonth(x.revenueYm) + '營收年增 <b class="' + dirClass(x.revenueYoy) + '">' + swPct(x.revenueYoy, 1) + '</b>');
+  if (swHas(x.weekPct)) parts.push('大戶週' + (x.weekPct >= 0 ? '增' : '減') + ' <b class="' + dirClass(x.weekPct) + '">' + swPct(x.weekPct, 1) + '</b>' + (x.weeks > 0 ? '（連 ' + x.weeks + ' 週）' : '') +
+    (swHas(x.bigPct) ? '<span class="muted">・大戶持股 ' + Number(x.bigPct).toFixed(1) + '%' + (x.tdccDate ? '（' + swMmdd(x.tdccDate) + '）' : '') + '</span>' : ''));
+  return parts.length ? '<div class="sw-line sw-fund">' + parts.join('・') + '</div>' : '';
+}
+function swingFundBasisText(b){
+  return (b.peDate ? '本益比 ' + swMmdd(b.peDate) + '（' + (b.peCount || 0) + ' 檔）' : '本益比還沒進來') +
+    '・' + (b.revenueYm ? '月營收 ' + swYm(b.revenueYm) + '（' + (b.revenueCount || 0) + ' 檔）' : '月營收還沒進來') +
+    '・' + (b.tdccDate ? '集保大戶 ' + swMmdd(b.tdccDate) + '（' + (b.tdccCount || 0) + ' 檔）' : '集保週籌碼還沒進來');
+}
 function swingDatePillsHtml(data){
   const dates = (data && data.dates) || [];
   const btn = (value, label, active) => '<button class="chart-tab chips-btn sw-date-btn' + (active ? ' active' : '') + '" data-date="' + value + '">' + label + '</button>';
@@ -4379,7 +4405,7 @@ function swingBasisHtml(data){
   const b = data.basis || {};
   const inst = b.hasInst ? '法人資料已齊（5 日＝' + (b.instDates || []).slice().reverse().map(swMmdd).join('～') + '）' : '法人資料還沒進來，籌碼相關的判斷等資料齊了會自動更新';
   return '<div class="sw-basis">資料基準 ' + swMmdd(data.date) + ' 收盤・隔天盤前讀・' + inst + '・主力 5 日＝' + ((b.mfDates || []).length ? (b.mfDates || []).slice().reverse().map(swMmdd).join('～') : '沒有資料') +
-    '・個股 ' + (b.stocks || 0) + ' 檔（日K滿 240 天可算均線分數的 ' + (b.withScore || 0) + ' 檔）・整理時間 ' + String(data.generatedAt || '').slice(11, 16) + '</div>';
+    '・個股 ' + (b.stocks || 0) + ' 檔（日K滿 240 天可算均線分數的 ' + (b.withScore || 0) + ' 檔）・' + swingFundBasisText(b) + '・整理時間 ' + String(data.generatedAt || '').slice(11, 16) + '</div>';
 }
 function swingCardHtml(x, opts){
   const risks = (x.risks || []).length ? '<div class="sw-risk">⚠️ ' + x.risks.join('、') + '</div>' : '';
@@ -4395,6 +4421,7 @@ function swingCardHtml(x, opts){
     '<div class="sw-pill">' + x.tag + '</div>' + health +
     '<div class="sw-line">收 ' + num2(x.close) + ' <span class="' + dirClass(x.changePct || 0) + '">' + swPct(x.changePct, 1) + '</span>' + (x.aboveMa20Pct !== null && x.aboveMa20Pct !== undefined ? '<span class="muted">・月線之' + (x.aboveMa20Pct >= 0 ? '上 ' : '下 ') + Math.abs(x.aboveMa20Pct).toFixed(1) + '%</span>' : '') + '</div>' +
     '<div class="sw-line">' + instText + mfText + '・均線 ' + scoreText + '</div>' +
+    swingFundLineHtml(x) +
     '<div class="sw-def">防守 <b>月線 ' + num2(x.defense.ma20) + '</b> / <b>三日低 ' + num2(x.defense.threeDayLow) + '</b></div>' +
     risks + '</div>';
 }
@@ -4403,7 +4430,27 @@ function swingGroupCardHtml(g){
   return '<div class="sw-gcard' + (cold ? ' cold' : '') + '"><div><span class="sw-gname">' + g.name + '</span><span class="sw-gbadge">收盤排名 ' + g.rank + '</span>' + (g.hot ? '<span class="sw-hot">熱門族</span>' : '') + '</div>' +
     '<div class="sw-gline">站上月線 <b class="' + (g.aboveRatio >= 0.5 ? 'up' : 'down') + '">' + g.aboveMa20 + '/' + g.members + '</b>　法人 5 日 <b class="' + dirClass(g.inst5) + '">' + swLots(g.inst5) + '</b></div>' +
     '<div class="sw-gline">均線分數平均 <b>' + (g.avgScore === null || g.avgScore === undefined ? '—' : g.avgScore) + '</b>　今天真穿月線 <b>' + g.crossed + '</b> 檔　當天均漲 <b class="' + dirClass(g.avgChange) + '">' + swPct(g.avgChange) + '</b></div>' +
+    swingGroupFundHtml(g) +
     '<div class="sw-gjudge">' + g.judge + '</div></div>';
+}
+function swingGroupFundHtml(g){
+  const parts = [];
+  if (swHas(g.peAvg)) parts.push('本益比均 <b>' + g.peAvg + '</b>');
+  if (swHas(g.revenueYoyMedian)) parts.push('營收年增中位 <b class="' + dirClass(g.revenueYoyMedian) + '">' + swPct(g.revenueYoyMedian, 1) + '</b>');
+  if (swHas(g.weekPct)) parts.push('大戶週增均 <b class="' + dirClass(g.weekPct) + '">' + swPct(g.weekPct, 1) + '</b>');
+  return parts.length ? '<div class="sw-gline">' + parts.join('　') + '</div>' : '';
+}
+// 處置動態一列：明日起處置／明日出獄／處置中／觀察名單（出獄 ≤5 個交易日）
+function swingDispoRowHtml(e, kind){
+  const period = (e.start ? swMmdd(e.start) : '？') + '～' + (e.end ? swMmdd(e.end) : '？');
+  let extra;
+  if (kind === 'upcoming') extra = '處置期間 ' + period + (e.reason ? '・' + e.reason : '');
+  else if (kind === 'releasing') extra = '處置 ' + period + '，' + (e.releaseDay ? swMmdd(e.releaseDay) + ' ' : '') + '恢復正常交易';
+  else if (kind === 'watch') extra = '出獄第 ' + e.daysOut + ' 天' + (e.releaseDay ? '（' + swMmdd(e.releaseDay) + ' 出獄）' : '') + '・處置曾 ' + period;
+  else extra = '處置 ' + period + (e.releaseDay ? '・' + swMmdd(e.releaseDay) + ' 出獄' : '') + (e.reason ? '・' + e.reason : '');
+  return '<div class="sw-drow" data-code="' + e.code + '" data-name="' + (e.name || '') + '" role="button" tabindex="0">' +
+    '<b class="sw-dcode">' + e.code + '</b><span class="sw-dname">' + (e.name || '') + chipsFlagPillsHtml(e.code) + '</span><span class="sw-dgroup">' + (e.group || '—') + '</span>' +
+    '<span class="sw-dextra">' + extra + '</span></div>';
 }
 function swingSectionHtml(data){
   const sec = swingState.section, picks = data.picks || {}, counts = data.counts || {}, rules = data.rules || {};
@@ -4413,9 +4460,23 @@ function swingSectionHtml(data){
       '<div class="sw-tile"><b>' + (t.crossedQualified || 0) + '</b><span>今日真穿月線(檔)</span></div>' +
       '<div class="sw-tile"><b>' + (t.maJump || 0) + '</b><span>均線轉強(檔)</span></div>' +
       '<div class="sw-tile"><b>' + (t.chips || 0) + '</b><span>籌碼面候選(檔)</span></div>' +
-      '<div class="sw-tile"><b>' + (t.disposition || 0) + '</b><span>處置中(檔)</span></div></div>' +
+      '<div class="sw-tile"><b>' + (t.disposition || 0) + '</b><span>處置中(檔)</span></div>' +
+      '<div class="sw-tile"><b>' + (t.upcoming || 0) + '</b><span>明日起處置(檔)</span></div>' +
+      '<div class="sw-tile"><b>' + (t.releasing || 0) + '</b><span>明日出獄(檔)</span></div></div>' +
       '<ol class="sw-summary">' + (data.summary || []).map((line) => '<li>' + line + '</li>').join('') + '</ol>' +
       '<div class="sw-quote">先看族群再看個股：族群沒翻，個股只能算單兵</div>';
+  }
+  if (sec === 'disposition'){
+    const d = data.disposition;
+    if (!d) return '<div class="race-note">這一份是處置動態接入前整理的，沒有處置資料</div>';
+    const block = (title, cls, list, kind, empty) => '<div class="bl-section ' + cls + '">' + title + '（' + list.length + '）</div>' +
+      (list.length ? '<div class="sw-dlist">' + list.map((e) => swingDispoRowHtml(e, kind)).join('') + '</div>' : '<div class="race-note">' + empty + '</div>');
+    return '<div class="sw-rule">' + (rules.disposition || '') + '。下一個交易日＝' + (d.nextTradingDay ? swMmdd(d.nextTradingDay) : '—') + '；只列族群名單內的股票，點一列開K線圖。</div>' +
+      block('明日起處置', 'bl-launch', d.upcoming || [], 'upcoming', '沒有下一個交易日起處置的股票') +
+      block('明日出獄', 'bl-brew', d.releasing || [], 'releasing', '沒有下一個交易日出獄的股票') +
+      block('處置中', 'bl-launch', d.active || [], 'active', '目前沒有處置中的股票') +
+      block('觀察名單・出獄 5 個交易日內', 'bl-brew', d.watch || [], 'watch', '沒有剛出獄的股票') +
+      '<div class="sw-quote">出獄不等於能追：先看有沒有站回月線、法人有沒有回來</div>';
   }
   if (sec === 'groups'){
     const groups = data.groups || [];
@@ -4443,15 +4504,18 @@ function swingSectionHtml(data){
   }
   const list = picks[sec] || [];
   const title = sec === 'chips' ? '籌碼面精選' : '技術面精選';
-  const sub = sec === 'chips' ? '法人連買、主力連買優先・候選 ' + (counts.chips || 0) + ' 檔，列前 ' + list.length + ' 檔'
+  const sub = sec === 'chips' ? '大戶週增、法人連買、主力連買優先・候選 ' + (counts.chips || 0) + ' 檔，列前 ' + list.length + ' 檔'
     : '真穿月線 ' + (counts.tech || 0) + ' 檔；剛站上未達門檻 ' + (counts.techNear || 0) + ' 檔不列';
+  const skipped = sec === 'tech' ? (data.techSkipped || []).map((x) => x.name + '（' + x.why + '）').join('、') : '';
   const quote = sec === 'chips' ? '籌碼是候選名單，型態確認再進' : '站上月線第一天，防守就是月線本身';
   return '<div class="bl-section ' + (sec === 'tech' ? 'bl-brew' : 'bl-launch') + '">' + title + '・' + sub + '</div>' +
     '<div class="sw-rule">' + (rules[sec] || '') + '。風險提示：' + (rules.risks || '') + '。防守價＝' + swMmdd(data.date) + ' 收盤的月線與最近三天最低價，下一個交易日適用。</div>' +
+    (rules.fund ? '<div class="sw-rule">' + rules.fund + '。</div>' : '') +
+    (skipped ? '<div class="sw-noteBox">略過：' + skipped + '</div>' : '') +
     (list.length ? '<div class="sw-cards">' + list.map((x) => swingCardHtml(x, { green: sec === 'tech' })).join('') + '</div>' : '<div class="race-note">那天沒有符合條件的股票</div>') +
     '<div class="sw-quote">' + quote + '</div>';
 }
-const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。第一階段用法人連買、主力連買代替集保週籌碼；本益比、營收年增、處置動態、上一週對照是下一階段要接的資料。</div>';
+const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。本益比、月營收年增、集保 400 張以上大戶週籌碼與處置動態每個交易日收盤後接入；上一週籌碼對照與主動式 ETF 五檔是下一階段要接的資料。</div>';
 function renderSwing(){
   const tabs = document.getElementById('swingTabs');
   tabs.innerHTML = SWING_SECTIONS.map((sc) => '<button class="chart-tab signal-tab' + (swingState.section === sc.key ? ' active' : '') + '" data-section="' + sc.key + '">' + sc.label + '</button>').join('');
@@ -4484,7 +4548,7 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
   const day = e.target.closest('.sw-date-btn');
   if (day){ swingState.date = day.dataset.date || ''; swingState.groupsLimit = 12; renderSwing(); return; }
   if (e.target.closest('#swingMoreGroups')){ swingState.groupsLimit += 12; renderSwing(); return; }
-  const card = e.target.closest('.sw-card[data-code]');
+  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code]');
   if (card){
     if (!useFloatingCharts()){
       document.getElementById('swingModal').classList.add('behind-chart');
