@@ -1,0 +1,50 @@
+name: Probe with Playwright
+
+# 沙盒連不到一般網站，用這個工作流程在 GitHub runner 上跑一段 Playwright／Node 程式碼
+# 探路（看下拉選單、找 API、抓渲染後的表格），結果印在 log 裡讓沙盒讀回來。
+# script 是 async 函式的內容，可用 page、browser、console.log、fetch。
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: "async 函式本體（已有 page、browser 變數）"
+        required: true
+      url:
+        description: "先打開的網址（可留空）"
+        required: false
+        default: ""
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Run
+        env:
+          PROBE_SCRIPT: ${{ inputs.script }}
+          PROBE_URL: ${{ inputs.url }}
+        run: |
+          cat > probe.js <<'JS'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          (async () => {
+            const browser = await chromium.launch();
+            const context = await browser.newContext({ viewport: { width: 1400, height: 1000 }, locale: 'zh-TW',
+              userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36' });
+            const page = await context.newPage();
+            page.on('response', (r) => { const t = r.request().resourceType(); if (t === 'xhr' || t === 'fetch' || t === 'document') console.log('[net]', r.status(), r.request().method(), r.url().slice(0, 300)); });
+            if (process.env.PROBE_URL) await page.goto(process.env.PROBE_URL, { waitUntil: 'networkidle', timeout: 60000 }).catch((e) => console.log('goto failed', String(e)));
+            const fn = new Function('page', 'browser', 'context', 'fs', 'return (async () => {' + process.env.PROBE_SCRIPT + '\n})()');
+            await fn(page, browser, context, fs);
+            await browser.close();
+          })().catch((e) => { console.error('PROBE ERROR', e); process.exit(1); });
+          JS
+          node probe.js 2>&1 | head -c 200000
