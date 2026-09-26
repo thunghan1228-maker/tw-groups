@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-26 14:20:58";
+const BUILD_STAMP = "2026-09-26 14:39:39";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3312,17 +3312,17 @@ function race333Html(){
   const over7 = m.horses.filter((r) => r.pct > 7).length;
   const dailyNote = m.hasDaily
     ? '昨天＝' + (m.dates[0] || '') + (m.dates[1] ? '，前天＝' + m.dates[1] : '')
-    : '還沒拿到族群昨天的資料，188／199 暫時無法判定，33／34 先不用「族群要在 188／199 裡」這條';
+    : '還沒拿到族群昨天的資料，33／34 先不用「族群昨天要跌最多／漲最多的前 1/3」這條';
   const triple = race333FilterList(m.triple);
   const both = race333FilterList(m.both);
   const fires = race333FilterList(m.fires);
   const fireLocked = race333FilterList(m.fireLocked);
   return race333FilterBarHtml() + raceOtcBoxHtml(m) +
     '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
-      '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、族群在 188／199 裡、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・漲幅高的在前</div>' +
+      '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・漲幅高的在前</div>' +
       raceStockListHtml(triple, { fire: true, dates: m.dates }) + '</div>' +
     '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
-      '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・族群在 188／199 裡</div>' +
+      '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%</div>' +
       raceStockListHtml(both, { dates: m.dates }) + '</div>' +
     '<div class="race-block"><div class="race-head">🐎🚀馬火多(30) ' + stamp + '</div>' +
       '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔，漲幅高的在前・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
@@ -3332,9 +3332,9 @@ function race333Html(){
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
       '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要有 ⚔️ 劍（現價低於前天收盤，數字＝低幾 %；🔪 刀＝低於昨收）・最多 ' + BLADE_MAX_ROWS + ' 檔，跌幅深的在前・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
       raceBladeListHtml(m) + '</div>' +
-    // 2026-09-26 使用者：「續抱勿追高」以下的東西都不要（188 的族群列、整個 199 做空族群區塊）；
-    // 188／199 的族群集合仍在模型裡，33／34 的「族群要在 188／199 裡」照舊用。
-    '<div class="race-block"><div class="race-head">⚠️符合條件>7%有 ' + over7 + ' 檔　做多族群(188) ' + stamp + '</div>' +
+    // 2026-09-26 使用者：「續抱勿追高」以下的東西都不要（188 的族群列、整個 199 做空族群區塊），畫面上的 188／199 字樣也都拿掉；
+    // 188／199 的族群集合仍在模型裡，33／34 的「族群要在 188／199 裡」照舊用（說明文字不再提）。
+    '<div class="race-block"><div class="race-head">⚠️符合條件>7%有 ' + over7 + ' 檔 ' + stamp + '</div>' +
       '<div class="race-sub">「符合條件>7%」＝賽馬多裡漲超過 7% 的（續抱不追）・' + dailyNote + '</div>' +
       (over7 ? raceStockListHtml(m.horses.filter((r) => r.pct > 7), { dates: m.dates }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '<div class="race-note">賽馬多裡沒有漲超過 7% 的</div>') + '</div>';
 }
@@ -4327,7 +4327,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-26 14:20:58';
+const BUILD_STAMP = '2026-09-26 14:39:39';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
