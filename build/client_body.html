@@ -553,7 +553,7 @@
 
   @media (max-width: 640px){
     .toolbar-bottom{justify-content:flex-start;}
-    .tb-btn{min-width:72px;}
+    .tb-btn{min-width:64px;}  /* 2026-09-26：六顆在 390px 的手機也要一排放得下（6×64=384） */
     /* 手機版K線圖視窗：標題列跟快速切換搜尋列擠不下，改成換行成兩列，
        避免搜尋框、進入分K按鈕被壓縮到點不到。 */
     .chart-modal-head{flex-wrap:wrap;row-gap:8px;}
@@ -770,8 +770,7 @@
 
 <div class="toolbar-bottom" id="toolbarBottom">
   <button class="tb-btn" data-label="自選股"><span class="tb-icon">★</span>自選股</button>
-  <button class="tb-btn" data-label="三角收斂"><span class="tb-icon">▲</span>三角收斂</button>
-  <button class="tb-btn" data-label="疑似隔日沖大單籌碼"><span class="tb-icon">沖</span>隔日沖大單籌碼</button>
+  <!-- 2026-09-26 使用者：下方導覽列的「三角收斂」「隔日沖大單籌碼」不用再留著（本來就是開發中的空位），拿掉後手機一排放得下六顆。 -->
   <button class="tb-btn" data-label="個股研究中心"><span class="tb-icon">本</span>個股研究中心</button>
   <button class="tb-btn" data-label="每週籌碼分析"><span class="tb-icon">週</span>每週籌碼分析</button>
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
