@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-26 15:00:34";
+const BUILD_STAMP = "2026-09-26 15:13:40";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -854,7 +854,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>今日即時</b>：彙整下列各類訊號的即時清單。</li>
         <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
         <li><b>精選十大多空族群</b>（原族群大戶力）：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
-        <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)、刀劍空(32)等多空條件篩出的個股與族群名單。</li>
+        <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)、刀劍空(32)等多空條件篩出的個股與族群名單。<b>排序</b>：個股名單預設照盤中大戶力排，值大的在上、小的在下，沒有大戶力資料的排最後；刀劍空是最負的在上。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
         <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。</li>
         <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
@@ -3282,7 +3282,7 @@ function raceStockListHtml(list, opts){
 }
 function raceBladeListHtml(m){
   const names = (list) => list.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、');
-  const bladeLower = race333FilterList(m.bladeLower);
+  const bladeLower = race333SortByHolder(race333FilterList(m.bladeLower), true);
   const bladeUpper = race333FilterList(m.bladeUpper);
   const bladeHarvest = race333FilterList(m.bladeHarvest);
   return '<div class="race-sep">----↓(強空積極)↓----</div>' +
@@ -3294,6 +3294,19 @@ function raceBladeListHtml(m){
 // 大戶力≤-10%的個股；只套用在馬火多/賽馬多/河流多/刀劍空這幾個「個股」名單（30/33/34/32），
 // 「條件>7%」跟188/199是族群層級的名單、沒有個股大戶力可篩，維持原樣不變（使用者明確要求）。
 let race333HolderFilter = null;
+// 盤中333 個股名單的顯示順序（2026-09-26 使用者）：照盤中大戶力（strengthPct）排，預設大的在上；刀劍空用最負的在上；
+// 沒有大戶力資料的排最後；同值再照漲跌幅。
+function race333SortByHolder(list, mostNegativeFirst){
+  const val = (r) => (r.strengthPct === null || r.strengthPct === undefined ? null : r.strengthPct);
+  const byPct = (a, b) => (mostNegativeFirst ? a.pct - b.pct : b.pct - a.pct);
+  return list.slice().sort((a, b) => {
+    const va = val(a), vb = val(b);
+    if (va === null && vb === null) return byPct(a, b);
+    if (va === null) return 1;
+    if (vb === null) return -1;
+    return (mostNegativeFirst ? va - vb : vb - va) || byPct(a, b);
+  });
+}
 function race333FilterList(list){
   if (!race333HolderFilter) return list;
   return list.filter((r) => r.strengthPct !== null && r.strengthPct !== undefined &&
@@ -3313,24 +3326,26 @@ function race333Html(){
   const dailyNote = m.hasDaily
     ? '昨天＝' + (m.dates[0] || '') + (m.dates[1] ? '，前天＝' + m.dates[1] : '')
     : '還沒拿到族群昨天的資料，33／34 先不用「族群昨天要跌最多／漲最多的前 1/3」這條';
-  const triple = race333FilterList(m.triple);
-  const both = race333FilterList(m.both);
-  const fires = race333FilterList(m.fires);
+  // 2026-09-26 使用者：個股名單預設照盤中大戶力排，值大的在上面、小的在下面（沒有大戶力資料的排最後），不再照漲幅；
+  // 名單的挑法（漲幅前 N 檔等）不變，只改顯示順序。
+  const triple = race333SortByHolder(race333FilterList(m.triple));
+  const both = race333SortByHolder(race333FilterList(m.both));
+  const fires = race333SortByHolder(race333FilterList(m.fires));
   const fireLocked = race333FilterList(m.fireLocked);
   return race333FilterBarHtml() + raceOtcBoxHtml(m) +
     '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
-      '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・漲幅高的在前</div>' +
+      '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・大戶力高的在上（沒有大戶力資料的排最後）</div>' +
       raceStockListHtml(triple, { fire: true, dates: m.dates }) + '</div>' +
     '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
-      '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%</div>' +
+      '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・大戶力高的在上（沒有大戶力資料的排最後）</div>' +
       raceStockListHtml(both, { dates: m.dates }) + '</div>' +
     '<div class="race-block"><div class="race-head">🐎🚀馬火多(30) ' + stamp + '</div>' +
-      '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔，漲幅高的在前・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
+      '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔（取漲幅前 ' + FIRE_MAX_ROWS + ' 檔），大戶力高的在上・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
       raceStockListHtml(fires, { fire: true, dates: m.dates }) +
       (fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + fireLocked.length + ' 檔：' + fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
       '</div>' +
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
-      '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要有 ⚔️ 劍（現價低於前天收盤，數字＝低幾 %；🔪 刀＝低於昨收）・最多 ' + BLADE_MAX_ROWS + ' 檔，跌幅深的在前・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
+      '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要有 ⚔️ 劍（現價低於前天收盤，數字＝低幾 %；🔪 刀＝低於昨收）・最多 ' + BLADE_MAX_ROWS + ' 檔（取跌幅前 ' + BLADE_MAX_ROWS + ' 檔），大戶力最負的在上・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・滑鼠移到符號上看三天的數字</div>' +
       raceBladeListHtml(m) + '</div>' +
     // 2026-09-26 使用者：「續抱勿追高」以下的東西都不要（188 的族群列、整個 199 做空族群區塊），畫面上的 188／199 字樣也都拿掉；
     // 188／199 的族群集合仍在模型裡，33／34 的「族群要在 188／199 裡」照舊用（說明文字不再提）。
@@ -4327,7 +4342,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-26 15:00:34';
+const BUILD_STAMP = '2026-09-26 15:13:40';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
