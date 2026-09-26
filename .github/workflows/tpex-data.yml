@@ -1,4 +1,4 @@
-# 上櫃三大法人買賣超鏡像：櫃買中心擋 HanStock 的正式站主機（Railway）和 Cloudflare，
+# 上櫃資料鏡像（三大法人、本益比、月營收、基本資料、集保股權分散）：櫃買中心擋 HanStock 的正式站主機（Railway）和 Cloudflare，
 # 但 GitHub 的 runner 抓得到。每個交易日 16:40（台北）把櫃買中心開放資料
 # tpex_3insti_daily_trading（最新一天）抓下來，推到這個 repo 的 data 分支（不部署），
 # 再戳後端立刻拉回去。手動跑時可以填「回補幾天」，用櫃買中心的指定日期查詢
@@ -118,6 +118,95 @@ jobs:
           json.dump(sorted(index, reverse=True)[:60], open('tpex/index.json', 'w', encoding='utf-8'))
           print('added', added)
           PY
+      - name: 抓本益比、月營收、基本資料與集保股權分散（波段日報第二階段）
+        run: |
+          python3 - <<'PY'
+          import csv, io, json, os, urllib.request
+          H = {'Accept': 'application/json, text/plain, */*', 'Accept-Language': 'zh-TW,zh;q=0.9',
+               'User-Agent': 'Mozilla/5.0 (compatible; HanStock-mirror/1.0)', 'Referer': 'https://www.tpex.org.tw/'}
+          def get(url, timeout=120):
+              with urllib.request.urlopen(urllib.request.Request(url, headers=H), timeout=timeout) as r:
+                  return r.read()
+          def get_json(url):
+              return json.loads(get(url).decode('utf-8'))
+          os.makedirs('tpex', exist_ok=True)
+          # 族群股票代號（只留這些，檔案才小）
+          codes = set()
+          try:
+              groups = get_json('https://tw-groups.judystock.workers.dev/api/groups').get('groups') or []
+              for g in groups:
+                  for s in g.get('stocks') or []:
+                      codes.add(str(s.get('code', '')).strip().upper())
+          except Exception as e:
+              print('groups fetch failed', e)
+          print('universe codes', len(codes))
+          def code_of(item):
+              return str(item.get('公司代號') or item.get('SecuritiesCompanyCode') or '').strip().upper()
+          # 上櫃本益比（整份不大，照存）
+          try:
+              rows = get_json('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_peratio_analysis')
+              assert isinstance(rows, list) and len(rows) > 300, len(rows)
+              json.dump(rows, open('tpex/peratio-latest.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+              print('peratio rows', len(rows), rows[0].get('Date'))
+          except Exception as e:
+              print('peratio failed', type(e).__name__, e)
+          # 上櫃月營收（只留族群股票）
+          try:
+              rows = get_json('https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_O')
+              keep = [r for r in rows if not codes or code_of(r) in codes]
+              assert keep, 'no revenue rows'
+              json.dump(keep, open('tpex/revenue-latest.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+              print('revenue rows', len(keep), keep[0].get('資料年月'))
+          except Exception as e:
+              print('revenue failed', type(e).__name__, e)
+          # 上櫃基本資料：只留代號、名稱、已發行普通股數
+          try:
+              rows = get_json('https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O')
+              keep = []
+              for r in rows:
+                  c = code_of(r)
+                  if codes and c not in codes:
+                      continue
+                  shares = next((v for k, v in r.items() if '已發行普通股數' in str(k)), None)
+                  if c and shares:
+                      keep.append({'公司代號': c, '公司簡稱': r.get('公司簡稱') or r.get('CompanyName') or '', '已發行普通股數或TDR原股發行股數': str(shares)})
+              assert keep, 'no basics rows'
+              json.dump(keep, open('tpex/basics-latest.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+              print('basics rows', len(keep))
+          except Exception as e:
+              print('basics failed', type(e).__name__, e)
+          # 集保股權分散（每週）：整份過濾成族群股票，一週一份
+          try:
+              raw = get('https://opendata.tdcc.com.tw/getOD.ashx?id=1-5', timeout=300).decode('utf-8-sig', errors='replace')
+              reader = csv.reader(io.StringIO(raw))
+              header = next(reader)
+              day = None
+              rows = []
+              for row in reader:
+                  if len(row) < 6:
+                      continue
+                  d, code, level, holders, shares, pct = row[:6]
+                  code = code.strip().upper()
+                  if codes and code not in codes:
+                      continue
+                  day = day or (f"{d[:4]}-{d[4:6]}-{d[6:8]}" if len(d) == 8 else d)
+                  rows.append([code, int(level), int(holders.replace(',', '')), int(shares.replace(',', '')), float(pct)])
+              assert day and len(rows) > 100, f"day={day} rows={len(rows)}"
+              path = f'tpex/tdcc-{day}.json'
+              if not os.path.exists(path):
+                  json.dump({'date': day, 'rows': rows}, open(path, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+                  print('tdcc saved', day, len(rows))
+              else:
+                  print('tdcc already have', day)
+              try:
+                  index = json.load(open('tpex/tdcc-index.json', encoding='utf-8'))
+              except Exception:
+                  index = []
+              index = sorted(set(index) | {day}, reverse=True)[:20]
+              json.dump(index, open('tpex/tdcc-index.json', 'w', encoding='utf-8'))
+          except Exception as e:
+              print('tdcc failed', type(e).__name__, e)
+          PY
       - name: 推到 data 分支
         run: |
           git config user.name "tpex-mirror"
@@ -129,3 +218,5 @@ jobs:
         run: |
           curl -sS -X POST --max-time 170 "https://hanstock-production-b872.up.railway.app/api/hub/chips/collect" -o /tmp/collect.json -w "HTTP %{http_code}\n" || true
           head -c 3000 /tmp/collect.json; echo
+          curl -sS -X POST --max-time 170 "https://hanstock-production-b872.up.railway.app/api/hub/fundamentals/collect" -o /tmp/fund.json -w "HTTP %{http_code}\n" || true
+          head -c 3000 /tmp/fund.json; echo
