@@ -2353,10 +2353,8 @@ function closeStockChart(){
   }
   document.getElementById('chartModal').hidden = true;
   document.body.style.overflow = '';
-  // 若是從訊號中心／盤後籌碼排行點進來的，關圖後讓它們回到最上層。
-  document.getElementById('signalModal').classList.remove('behind-chart');
-  document.getElementById('chipsModal').classList.remove('behind-chart');
-  document.getElementById('swingModal').classList.remove('behind-chart');
+  // 若是從訊號中心／盤後籌碼排行／下午報／健診／問診點進來的，關圖後讓它們回到最上層。
+  for (const id of ['signalModal', 'chipsModal', 'swingModal', 'checkupModal', 'diagModal']) document.getElementById(id).classList.remove('behind-chart');
 }
 
 let openGroupName = null;
