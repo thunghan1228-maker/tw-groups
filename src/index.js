@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-28 15:08:24";
+const BUILD_STAMP = "2026-09-28 17:08:20";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -691,6 +691,36 @@ const HTML_PAGE = `<!DOCTYPE html>
   .ck-sub.s0{background:#15803d;color:#fff;border-color:#15803d;}
   .ck-compact{white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:12px;border:1px dashed var(--line);border-radius:10px;padding:8px 12px;margin:8px 0;line-height:1.6;}
   .ck-rules{font-size:12px;color:var(--muted);line-height:1.7;padding-left:20px;margin:6px 0;}
+  /* 個股問診（2026-09-28 使用者：照學員專區「個股問診・完整版」做）：總評、防守線表、日線圖、七科、同族、強度榜、今日名單、穿惡 */
+  .dg-search{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:8px 0;}
+  .dg-in{width:180px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--text);font-size:15px;}
+  .dg-recent{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12px;color:var(--muted);}
+  .dg-recent .ck-tag{cursor:pointer;}
+  .dg-head{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;margin:8px 0 4px;}
+  .dg-head .dg-code{font-size:26px;font-weight:800;color:#e6675f;}
+  .dg-head .dg-name{font-size:20px;font-weight:800;}
+  .dg-head .dg-grp{font-size:13px;color:var(--muted);}
+  .dg-head .dg-px{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .dg-pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:800;color:#fff;background:#6b7280;}
+  .dg-pill.strong{background:#b91c1c;}.dg-pill.mid{background:#a16207;}.dg-pill.weak{background:#15803d;}
+  .dg-lines{list-style:none;padding:0;margin:6px 0 10px;font-size:14px;line-height:1.8;}
+  .dg-lines li{border-bottom:1px dashed var(--line);padding:2px 0;}
+  .dg-lines b{color:#e6675f;}
+  .dg-chart{margin:8px 0;}
+  .dg-chart svg{display:block;font-size:10px;}
+  .dg-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;margin:2px 0 4px;}
+  .dg-legend i{display:inline-block;width:14px;height:0;border-top:2px solid;margin-right:4px;vertical-align:middle;}
+  .dg-spark svg{display:inline-block;vertical-align:middle;}
+  .ck-table tr.dg-cur td{background:rgba(230,103,95,.12);}
+  .ck-table tr.dg-grp td{background:var(--panel-2);font-weight:800;text-align:left;color:#e6675f;}
+  .ck-table tr.dg-link{cursor:pointer;}
+  .ck-table tr.dg-link:hover td{background:var(--panel-2);}
+  .dg-filter{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
+  .dg-filter .chips-btn{padding:3px 9px;font-size:12px;}
+  .dg-sub{font-size:12px;color:var(--muted);}
+  .dg-defrow b{font-size:14px;}
+  .dg-ok{color:#e6675f;font-weight:800;}
+  .dg-bad{color:#15803d;font-weight:800;}
   .chips-weak-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;background:#166534;color:#fff;white-space:nowrap;}  /* 放空籌碼：弱勢型態 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
@@ -925,6 +955,18 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div id="checkupBody"></div>
   </div>
 </div>
+<div class="chips-modal" id="diagModal" hidden>
+  <div class="chips-inner" id="diagInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">個股問診</div>
+        <div class="chips-sub">打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。收盤後跟下午報一起更新，非即時報價。</div>
+      </div>
+      <button class="cm-icon-btn" id="diagClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="diagBody"></div>
+  </div>
+</div>
 <div id="buildStamp"></div>
 <button type="button" id="updateBanner" hidden>網頁有新版本，點一下更新</button>
 <div id="chartWindows"></div>
@@ -993,6 +1035,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
   <button class="tb-btn" data-label="下午報"><span class="tb-icon">午</span>下午報</button>
   <button class="tb-btn" data-label="健診"><span class="tb-icon">診</span>健診</button>
+  <button class="tb-btn" data-label="問診"><span class="tb-icon">問</span>問診</button>
   <button class="tb-btn" data-label="個股盤中訊號追蹤"><span class="tb-icon">追</span>個股訊號追蹤</button>
 </div>
 
@@ -5161,7 +5204,7 @@ function ckRowHtml(r){
     '<td>' + ckPrice(r.close) + ' <span class="ck-lab ' + dirClass(r.chgPct || 0) + '">' + swPct(r.chgPct, 1) + '</span></td>' +
     '<td class="' + dirClass(r.chg20Pct || 0) + '">' + swPct(r.chg20Pct, 1) + '</td><td class="' + dirClass(r.distMa20Pct || 0) + '">' + swPct(r.distMa20Pct, 1) + '</td>' +
     '<td class="l">' + ckDefenseHtml(r) + '</td><td class="l">' + ckJudgeHtml(r) + '</td>' +
-    '<td><span class="ck-btn ck-toggle" data-code="' + r.code + '" title="明細">' + (open ? '▾' : '▸') + '</span><span class="ck-btn ck-remove" data-code="' + r.code + '" title="從清單刪掉">✕</span></td></tr>' +
+    '<td><span class="ck-btn ck-toggle" data-code="' + r.code + '" title="明細">' + (open ? '▾' : '▸') + '</span><span class="ck-btn ck-diag" data-code="' + r.code + '" title="完整問診">🩺</span><span class="ck-btn ck-remove" data-code="' + r.code + '" title="從清單刪掉">✕</span></td></tr>' +
     (open ? ckDetailHtml(r) : '');
 }
 function ckCompactText(rows){
@@ -5256,6 +5299,8 @@ document.getElementById('checkupBody').addEventListener('click', (e) => {
   if (remove){ ckRun(ckState.codes.filter((c) => c !== remove.dataset.code).join('/')); return; }
   const toggle = e.target.closest('.ck-toggle');
   if (toggle){ ckState.open[toggle.dataset.code] = !ckState.open[toggle.dataset.code]; renderCheckup(); return; }
+  const diagBtn = e.target.closest('.ck-diag');
+  if (diagBtn){ openDiagPanel(diagBtn.dataset.code); return; }
   const th = e.target.closest('th[data-sort]');
   if (th){ ckPrefs.sort = th.dataset.sort; ckSavePrefs(); renderCheckup(); return; }
   const dim = e.target.closest('.ck-dim[data-dim]');
@@ -5277,11 +5322,281 @@ document.getElementById('checkupBody').addEventListener('change', (e) => {
   else if (el.id === 'ckListSel'){ ckState.listName = el.value; if (el.value && ckLists.saved[el.value]) ckRun(ckLists.saved[el.value]); }
 });
 
+// ---- 個股問診（2026-09-28 使用者：照學員專區「個股問診・完整版」做）----
+// 打股號 → /api/diag 拿回那檔收盤後算好的三面向分數、七科、防守線、近 120 根日K、同族對照、族群強度榜與今日名單、穿惡名單。
+let dgState = { code: '', query: null, data: null, loading: false, failedAt: 0, error: '', filter: 'all', recent: [] };
+try { dgState.recent = (JSON.parse(localStorage.getItem('diagRecent') || '[]') || []).filter((x) => x && x.code); } catch (e) { /* 用空的 */ }
+function dgRemember(code, name){
+  dgState.recent = [{ code, name: name || '' }].concat(dgState.recent.filter((x) => x.code !== code)).slice(0, 8);
+  try { localStorage.setItem('diagRecent', JSON.stringify(dgState.recent)); } catch (e) { /* 記不住就算了 */ }
+}
+async function ensureDiag(){
+  const code = dgState.code;
+  if (!code){ dgState.data = null; dgState.query = null; return; }
+  if (dgState.query === code && (dgState.data || dgState.loading)) return;
+  if (dgState.query === code && dgState.failedAt && Date.now() - dgState.failedAt < 30000) return;
+  dgState.query = code; dgState.loading = true; dgState.data = null; dgState.error = '';
+  try {
+    const res = await fetch('/api/diag?code=' + encodeURIComponent(code));
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && (data.detail || data.error)) || ('diag http ' + res.status));
+    if (!data || !data.status) throw new Error('bad payload');
+    if (dgState.query !== code) return;
+    dgState.data = data; dgState.failedAt = 0;
+    if (data.status === 'ok' && data.stock) dgRemember(data.stock.code, data.stock.name);
+  } catch (e) {
+    if (dgState.query !== code) return;
+    dgState.failedAt = Date.now(); dgState.error = String((e && e.message) || e);
+  } finally {
+    if (dgState.query === code) dgState.loading = false;
+  }
+  if (!document.getElementById('diagModal').hidden) renderDiag();
+}
+function dgRun(text){
+  const code = ckResolve(text)[0] || '';
+  dgState.code = code; dgState.query = null; dgState.failedAt = 0; dgState.filter = 'all';
+  renderDiag();
+  const inner = document.getElementById('diagInner');
+  if (inner) inner.scrollTop = 0;
+}
+const dgClsClass = (cls) => (cls === '強勢' ? 'strong' : cls === '中等' ? 'mid' : cls === '弱勢' ? 'weak' : '');
+const dgClsPill = (cls) => (cls ? '<span class="dg-pill ' + dgClsClass(cls) + '">' + cls + '</span>' : '');
+function dgAboveList(s){
+  const ma = s.ma || {};
+  return ['5', '10', '20', '60', '120', '240'].filter((p) => swHas(ma[p]) && s.close > ma[p]).join('・');
+}
+function dgSummaryLines(s){
+  const c = s.chip || {}, f = s.fund || {}, d = s.def, sc = s.score2, above = dgAboveList(s);
+  const lines = [];
+  lines.push(swHas(sc) ? '均線 <b>' + sc + ' 分</b>，' + (sc >= 12 ? '很強' : sc >= 8 ? '不強不弱' : '偏弱') + (above ? '（站上 ' + above + ' 日線）' : '（沒站上任何均線）') : '均線分數：日K不足 240 根，還算不出來' + (above ? '（目前站上 ' + above + ' 日線）' : ''));
+  lines.push(swHas(c.weekPct) ? '籌碼本週 <b>' + swPct(c.weekPct, 2) + '</b>，' + (c.weekPct >= 3 ? '大戶明顯進' : c.weekPct <= -3 ? '大戶明顯出' : '沒明顯進出') : '籌碼：集保大戶週增還沒有資料' + (swHas(c.mf5) ? '，主力 5 日 <b>' + swLots(c.mf5) + '</b>' : ''));
+  lines.push(swHas(f.yoy) ? '營收 ' + swYm(f.ym) + ' 年增 <b>' + swPct(f.yoy, 1) + '</b>，' + (f.yoy >= 30 ? '成長很強' : f.yoy >= 0 ? '有成長' : '衰退') + (swHas(f.mom) ? '（月增 ' + swPct(f.mom, 1) + '）' : '') : '營收：沒有月營收資料');
+  if (swHas(c.inst5)){
+    const same = swHas(c.instToday) && c.instToday !== 0 && c.inst5 !== 0 && (c.inst5 > 0) === (c.instToday > 0);
+    lines.push('法人近 5 日 <b>' + swLots(c.inst5) + '</b>、今日 <b>' + (swHas(c.instToday) ? swLots(c.instToday) : '—') + '</b>，' + (swHas(c.instToday) ? (same ? '買賣一致' : '買賣不一致') : '今天的還沒進來'));
+  } else lines.push('法人：沒有買賣超資料');
+  lines.push(s.group ? '族群 <b>' + s.group + '</b>' + (s.groupRank ? '，族內第 ' + s.groupRank + '/' + s.groupN : '') + (swHas(s.groupAvg2) ? '，族群平均 ' + s.groupAvg2 + ' 分' : '') + (s.groupSrank ? '，強度榜第 ' + s.groupSrank : '') : '沒有歸在任何族群');
+  lines.push(swHas(f.pe) ? '本益比 <b>' + f.pe + '</b>（' + (f.pe < 15 ? '便宜' : f.pe < 30 ? '合理' : f.pe < 50 ? '偏貴' : '貴') + '）' : '本益比：沒有資料');
+  lines.push(d ? '防守：明天守 <b>三日低 ' + ckPrice(d.low3T) + '</b>、<b>月線 ' + ckPrice(d.ma20T) + '</b>' + (d.halfT ? '、<b>紅半 ' + ckPrice(d.halfT) + '</b>' : '') + '（收盤跌破任一 → 減碼；雙破 → 出場）' : '防守：日K不足 21 根，算不出防守線');
+  return lines;
+}
+function dgDefenseHtml(d){
+  if (!d) return '<div class="race-note">日K不足，沒有防守線</div>';
+  const judge = (broken, extra) => (broken ? '<span class="dg-bad">❌ 跌破' + (extra || '') + '</span>' : '<span class="dg-ok">✅ 守住</span>');
+  const row = (label, y, dist, judgeHtml, t) => '<tr class="dg-defrow"><td class="l">' + label + '</td><td>' + (swHas(y) ? ckPrice(y) : '—') + '</td><td class="' + dirClass(dist || 0) + '">' + (swHas(dist) ? swPct(dist, 2) : '—') + '</td><td class="l">' + judgeHtml + '</td><td><b>' + (swHas(t) ? ckPrice(t) : '—') + '</b></td></tr>';
+  return '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">防守線</th><th>昨日值(今天用)</th><th>今收距離</th><th class="l">今日判定</th><th>明日防守值(今收後定案)</th></tr></thead><tbody>' +
+    row('三日低', d.low3Y, d.dL3, judge(d.brkL3), d.low3T) +
+    row('月線 MA20', d.ma20Y, d.dMa, judge(d.brkMa, d.nearMa ? '・🐉 即將穿惡' : ''), d.ma20T) +
+    ((swHas(d.halfY) || swHas(d.halfT)) ? row('紅半', d.halfY, d.dHalf, swHas(d.halfY) ? judge(d.brkHalf) : '<span class="muted">昨天沒有</span>', d.halfT) : '') +
+    '</tbody></table></div>' +
+    '<div class="sw-rule">口徑：三日低＝不含當天的前三個交易日最低（明日值＝含今天的近三日最低）；月線＝20 日收盤均；紅半＝近三個交易日最高與最低的中間值，三日振幅 ≥10% 且收盤站在中點之上才列（漲多時多一個防守點）。收盤跌破任一 → 減碼；兩條都破 → 出場。🐉 即將穿惡＝收盤在月線下但距月線 10% 以內，一根漲停就能站回。日K未還原除權息。</div>';
+}
+function dgCandlesHtml(bars, d, days){
+  const all = (bars || []).filter((b) => b && b.length >= 5);
+  if (all.length < 5) return '<div class="race-note">日K不足，畫不出來</div>';
+  const closes = all.map((b) => b[4]);
+  const ma = (n, i) => (i + 1 >= n ? closes.slice(i + 1 - n, i + 1).reduce((a, b) => a + b, 0) / n : null);
+  const start = Math.max(0, all.length - (days || 60));
+  const shown = all.slice(start);
+  const W = Math.max(360, shown.length * 11 + 90), H = 260, L = 8, R = 82, T = 10, B = 30;
+  const levels = d ? [['三日低', d.low3T, '4 3'], ['月線', d.ma20T, '8 4'], ['紅半', d.halfT, '10 3 2 3']].filter((x) => swHas(x[1])) : [];
+  let lo = Math.min(...shown.map((b) => b[3])), hi = Math.max(...shown.map((b) => b[2]));
+  for (const [, v] of levels){ lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  const pad = (hi - lo) * 0.04 || 1; lo -= pad; hi += pad;
+  const x = (i) => L + (i + 0.5) * (W - L - R) / shown.length;
+  const y = (v) => T + (hi - v) / (hi - lo) * (H - T - B);
+  const cw = Math.max(3, Math.min(8, (W - L - R) / shown.length * 0.6));
+  let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '">';
+  for (let t = 0; t <= 4; t++){ const v = lo + (hi - lo) * t / 4; svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" stroke="currentColor" stroke-opacity=".1"/><text x="' + (W - R + 4) + '" y="' + (y(v) + 3).toFixed(1) + '" fill="currentColor" fill-opacity=".55">' + ckPrice(v) + '</text>'; }
+  shown.forEach((b, i) => {
+    const up = b[4] >= b[1], color = up ? '#e6675f' : '#5fae6f';
+    const top = y(Math.max(b[1], b[4])), bottom = y(Math.min(b[1], b[4]));
+    svg += '<line x1="' + x(i).toFixed(1) + '" x2="' + x(i).toFixed(1) + '" y1="' + y(b[2]).toFixed(1) + '" y2="' + y(b[3]).toFixed(1) + '" stroke="' + color + '" stroke-width="1"/>';
+    svg += '<rect x="' + (x(i) - cw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + cw.toFixed(1) + '" height="' + Math.max(1, bottom - top).toFixed(1) + '" fill="' + color + '"><title>' + b[0] + ' 開 ' + ckPrice(b[1]) + ' 高 ' + ckPrice(b[2]) + ' 低 ' + ckPrice(b[3]) + ' 收 ' + ckPrice(b[4]) + (b[5] ? ' 量 ' + b[5] : '') + '</title></rect>';
+    if (i % 10 === 0 || i === shown.length - 1) svg += '<text x="' + x(i).toFixed(1) + '" y="' + (H - B + 14) + '" text-anchor="middle" fill="currentColor" fill-opacity=".7">' + String(b[0]).slice(5) + '</text>';
+  });
+  for (const [n, color] of [[5, '#f59e0b'], [20, '#60a5fa'], [60, '#a78bfa']]){
+    let path = '', pen = false;
+    shown.forEach((b, i) => { const v = ma(n, start + i); if (v === null){ pen = false; return; } path += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); pen = true; });
+    if (path) svg += '<path d="' + path + '" fill="none" stroke="' + color + '" stroke-width="1.5"/>';
+  }
+  for (const [label, v, dash] of levels){
+    svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" stroke="#e6675f" stroke-opacity=".9" stroke-dasharray="' + dash + '"/>' +
+      '<text x="' + (W - R + 4) + '" y="' + (y(v) - 4).toFixed(1) + '" fill="#e6675f" font-weight="700">明日 ' + label + ' ' + ckPrice(v) + '</text>';
+  }
+  svg += '</svg>';
+  const last = shown[shown.length - 1];
+  return '<div class="dg-legend"><span><i style="border-color:#f59e0b"></i>MA5</span><span><i style="border-color:#60a5fa"></i>MA20</span><span><i style="border-color:#a78bfa"></i>MA60</span><span><i style="border-color:#e6675f;border-top-style:dashed"></i>明日要守的 三日低／月線／紅半</span><span class="muted">' + last[0] + ' 收 ' + ckPrice(last[4]) + '</span></div>' +
+    '<div class="hl-scroll dg-chart">' + svg + '</div><div class="race-note">滑過 K 棒看當日開高低收與成交量・虛線＝明天要守的線（同上面防守線）・價格未還原除權息</div>';
+}
+function dgSpark(points, opts){
+  const pts = (points || []).filter((p) => p && swHas(p[1]));
+  if (!pts.length) return '<span class="muted">—</span>';
+  const W = 150, H = 40, L = 2, R = 40;
+  const vals = pts.map((p) => Number(p[1]));
+  let lo = Math.min(...vals, opts && opts.zero ? 0 : Infinity), hi = Math.max(...vals, opts && opts.zero ? 0 : -Infinity);
+  if (hi === lo){ hi += 1; lo -= 1; }
+  const x = (i) => L + (pts.length === 1 ? (W - L - R) / 2 : i * (W - L - R) / (pts.length - 1));
+  const y = (v) => 4 + (hi - v) / (hi - lo) * (H - 8);
+  let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '">';
+  if (opts && opts.bars){
+    const bw = Math.max(3, (W - L - R) / pts.length * 0.6);
+    pts.forEach((p, i) => { const v = Number(p[1]); svg += '<rect x="' + (x(i) - bw / 2).toFixed(1) + '" y="' + Math.min(y(v), y(0)).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(1, Math.abs(y(v) - y(0))).toFixed(1) + '" fill="' + (v >= 0 ? '#e6675f' : '#5fae6f') + '"><title>' + p[0] + ' ' + p[1] + '</title></rect>'; });
+    if (lo < 0 && hi > 0) svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(0).toFixed(1) + '" y2="' + y(0).toFixed(1) + '" stroke="currentColor" stroke-opacity=".4"/>';
+  } else {
+    svg += '<polyline points="' + pts.map((p, i) => x(i).toFixed(1) + ',' + y(Number(p[1])).toFixed(1)).join(' ') + '" fill="none" stroke="#e6675f" stroke-width="1.5"/>';
+    pts.forEach((p, i) => { svg += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(Number(p[1])).toFixed(1) + '" r="2" fill="#e6675f"><title>' + p[0] + ' ' + p[1] + '</title></circle>'; });
+  }
+  const lastV = vals[vals.length - 1];
+  svg += '<text x="' + (W - R + 4) + '" y="' + (y(lastV) + 3).toFixed(1) + '" fill="currentColor" font-weight="700">' + (opts && opts.fmt ? opts.fmt(lastV) : lastV) + '</text></svg>';
+  return '<span class="dg-spark">' + svg + '</span><div class="dg-sub">' + (opts && opts.note ? opts.note : '') + '</div>';
+}
+function dgSubjectsHtml(s){
+  const sc = (s.subjects && s.subjects.sc) || {}, c = s.chip || {}, f = s.fund || {}, h = s.hist || {};
+  const chip = (k) => (swHas(sc[k]) ? '<span class="ck-sub s' + sc[k] + '">' + sc[k] + ' 分</span>' : '<span class="muted">—</span>');
+  const row = (label, k, now, grp, trend) => '<tr><td class="l"><b>' + label + '</b> ' + chip(k) + '</td><td class="l">' + now + '</td><td class="l">' + grp + '</td><td class="l">' + trend + '</td></tr>';
+  const above = dgAboveList(s);
+  return '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">科目</th><th class="l">目前</th><th class="l">族內</th><th class="l">近期走勢</th></tr></thead><tbody>' +
+    row('均線分數', 'ma', (swHas(s.score2) ? '<b>' + s.score2 + '</b>/15' : '—') + '<div class="dg-sub">' + (above ? '站上 ' + above + ' 日線' : '沒站上任何均線') + '・本站算法 ' + (swHas(s.score) ? s.score : '—') + '</div>', swHas(s.groupAvg2) ? '族群平均 ' + s.groupAvg2 : '—', dgSpark(h.score10, { note: '近 10 日分數' })) +
+    row('族群名次', 'grp', s.group ? (s.groupSrank ? '強度榜第 <b>' + s.groupSrank + '</b>' : '—') + (s.groupCloseRank ? '<div class="dg-sub">收盤排名第 ' + s.groupCloseRank + '（下午報）</div>' : '') : '沒有歸在任何族群', s.group ? (swHas(s.groupStrength) ? '族群強度 ' + s.groupStrength : '—') : '—', '<span class="muted">—</span>') +
+    row('個股族內名次', 'pos', s.groupRank ? '第 <b>' + s.groupRank + '</b>/' + s.groupN + '<div class="dg-sub">今日 ' + swPct(s.chgPct, 2) + '</div>' : '—', '—', '<span class="muted">—</span>') +
+    row('籌碼暴增', 'chip', swHas(c.weekPct) ? '<b>' + swPct(c.weekPct, 2) + '</b><div class="dg-sub">' + (c.tdccDate ? swMmdd(c.tdccDate) + ' 週' : '') + (c.weeks > 0 ? '・連 ' + c.weeks + ' 週增' : '') + (swHas(c.bigPct) ? '・大戶持股 ' + c.bigPct + '%' : '') + '</div>' : '還沒有集保週增資料' + (swHas(c.bigPct) ? '<div class="dg-sub">大戶持股 ' + c.bigPct + '%（' + swMmdd(c.tdccDate) + '）</div>' : ''), '—', dgSpark(h.chip8, { bars: true, zero: true, note: '近 8 週增減', fmt: (v) => swPct(v, 1) })) +
+    row('本益比', 'pe', swHas(f.pe) ? '<b>' + f.pe + '</b><div class="dg-sub">' + (f.pe < 15 ? '便宜' : f.pe < 30 ? '合理' : f.pe < 50 ? '偏貴' : '貴') + (f.peDate ? '・' + swMmdd(f.peDate) : '') + '</div>' : '—', '—', dgSpark(h.pe8, { note: '近 8 天本益比' })) +
+    row('營收成長', 'rev', swHas(f.yoy) ? '<b>' + swPct(f.yoy, 1) + '</b><div class="dg-sub">' + swYm(f.ym) + (swHas(f.revenue) ? '・' + (f.revenue >= 1e5 ? (f.revenue / 1e5).toFixed(1) + ' 億' : f.revenue.toLocaleString('en-US') + ' 千元') : '') + (swHas(f.mom) ? '・月增 ' + swPct(f.mom, 1) : '') + '</div>' : '—', '—', dgSpark(h.rev4, { bars: true, zero: true, note: '近 4 個月年增', fmt: (v) => swPct(v, 0) })) +
+    row('法人買賣超', 'inst', swHas(c.instToday) ? '<b class="' + dirClass(c.instToday) + '">' + swLots(c.instToday) + '</b>' + (c.f3 ? '<div class="dg-sub">外資 ' + swLots(c.f3.foreign) + '・投信 ' + swLots(c.f3.trust) + '・自營 ' + swLots(c.f3.dealer) + '</div>' : '') : (swHas(c.inst5) ? '今天的還沒進來' : '—'), swHas(c.inst5) ? '近 5 日 <b class="' + dirClass(c.inst5) + '">' + swLots(c.inst5) + '</b>' + (c.instStreak > 0 ? '<div class="dg-sub">連買 ' + c.instStreak + ' 天</div>' : c.instStreak < 0 ? '<div class="dg-sub">連賣 ' + (-c.instStreak) + ' 天</div>' : '') : '—', dgSpark((h.inst10 || []).map((p) => [p[0], swHas(p[1]) ? Math.round(p[1] / 1000) : null]), { bars: true, zero: true, note: '近 10 日三大法人（張）', fmt: (v) => swLots(v) })) +
+    '</tbody></table></div>';
+}
+const dgDefCell = (d) => (d ? ckPrice(d.ma20T) + ' / ' + ckPrice(d.low3T) + (swHas(d.halfT) ? '<div class="dg-sub">紅半 ' + ckPrice(d.halfT) + '</div>' : '') : '—');
+const dgJudge = (d) => (d ? '<span class="' + ((d.brkMa || d.brkL3 || d.brkHalf) ? 'dg-bad' : 'dg-ok') + '">' + d.label + '</span>' : '—');
+function dgListRowHtml(r, i, cur){
+  return '<tr class="dg-link' + (cur ? ' dg-cur' : '') + '" data-code="' + r.code + '"><td>' + i + '</td><td class="l"><b>' + r.code + '</b> ' + (r.name || '') + (r.disposed ? ' 🔒' : '') + '</td><td class="l">' + dgClsPill(r.cls) + '</td>' +
+    '<td class="' + dirClass(r.chgPct || 0) + '">' + swPct(r.chgPct, 2) + '</td><td>' + (swHas(r.score2) ? r.score2 : '—') + '</td><td class="' + dirClass(r.weekPct || 0) + '">' + swPct(r.weekPct, 2) + '</td><td>' + (swHas(r.pe) ? r.pe : '—') + '</td>' +
+    '<td class="' + dirClass(r.yoy || 0) + '">' + (swHas(r.yoy) ? swPct(r.yoy, 0) : '—') + '</td><td class="' + dirClass(r.inst5 || 0) + '">' + (swHas(r.inst5) ? swLots(r.inst5) : '—') + '</td><td>' + ckPrice(r.close) + '</td><td class="l">' + dgDefCell(r.def) + '</td><td class="l">' + dgJudge(r.def) + '</td></tr>';
+}
+const DG_LIST_HEAD = '<tr><th>#</th><th class="l">股票</th><th class="l">判定</th><th>今日</th><th>均線</th><th>籌碼</th><th>PE</th><th>營收年增</th><th>法人 5 日</th><th>今收</th><th class="l">明日守 月線 / 三日低</th><th class="l">防守判定</th></tr>';
+function dgSiblingsHtml(data){
+  const s = data.stock, rows = data.siblings || [];
+  if (!s.group) return '<div class="bl-section bl-brew">👥 同族對照</div><div class="race-note">沒有歸在任何族群，沒得比</div>';
+  return '<div class="bl-section bl-brew">👥 同族對照・' + s.group + '（' + rows.length + ' 檔，依七科總分排）</div>' +
+    '<div class="hl-scroll"><table class="ck-table"><thead>' + DG_LIST_HEAD + '</thead><tbody>' + rows.map((r, i) => dgListRowHtml(r, i + 1, r.code === s.code)).join('') + '</tbody></table></div>' +
+    '<div class="sw-rule">防守判定＝今收 vs 昨日月線／昨日三日低（守住＝兩條都沒破；破一條先減碼；雙破＝出場）。明日守＝今收後算出、明天要守的月線／三日低（有紅半也列）。點任一列可換該股問診。</div>';
+}
+function dgTopHtml(data){
+  const top = data.top || {}, groups = (top.groups || []).slice(0, 10);
+  if (!groups.length) return '';
+  const rows = groups.map((g) => '<tr><td>' + g.srank + '</td><td class="l"><b>' + g.g + '</b></td><td>' + g.n + '</td><td class="l">' + (g.top || []).map((t) => '<span class="ck-tag dg-link" data-code="' + t[0] + '">' + dgClsPill(t[3]) + ' ' + t[0] + ' ' + t[1] + ' <span class="muted">' + t[2] + '</span></span>').join(' ') + '</td>' +
+    '<td>' + (g.cnt || {})['強勢'] + ' / ' + (g.cnt || {})['中等'] + ' / ' + (g.cnt || {})['弱勢'] + '</td><td>' + g.strength + '</td><td>' + (g.rank || '—') + '</td></tr>').join('');
+  return '<div class="bl-section bl-launch">🏆 族群強度榜前 10 族</div>' +
+    '<div class="hl-scroll"><table class="ck-table"><thead><tr><th>#</th><th class="l">族群</th><th>檔數</th><th class="l">代表股（七科總分）</th><th>強 / 中 / 弱</th><th>強度</th><th>收盤排名</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="sw-rule">族群強度＝每族七科總分最高的前 3 檔平均；收盤排名＝下午報當天族群平均漲跌幅的名次。點代表股可換該股問診。</div>';
+}
+const DG_FILTERS = [['all', '全部'], ['near', '🐉 即將穿惡'], ['hold', '✅ 守住'], ['ma', '🌙 破月線'], ['both', '💥 雙破'], ['half', '🔻 破紅半'], ['hashalf', '🚩 有紅半']];
+function dgFilterOk(r){
+  const d = r.def || {}, f = dgState.filter;
+  if (f === 'all') return true;
+  if (f === 'near') return !!d.nearMa;
+  if (f === 'hold') return !d.brkMa && !d.brkL3 && !d.brkHalf;
+  if (f === 'ma') return !!d.brkMa;
+  if (f === 'both') return !!(d.brkMa && d.brkL3);
+  if (f === 'half') return !!d.brkHalf;
+  if (f === 'hashalf') return swHas(d.halfT);
+  return true;
+}
+function dgTodayHtml(data){
+  const top = data.top || {}, list = (top.list || []).filter(dgFilterOk), byRank = {};
+  for (const g of (top.groups || [])) byRank[g.srank] = g;
+  const btn = (k, label) => '<button class="chart-tab chips-btn dg-fbtn' + (dgState.filter === k ? ' active' : '') + '" data-filter="' + k + '">' + label + '</button>';
+  let rows = '', last = null, i = 0;
+  for (const r of list){
+    if (r.srank !== last){ last = r.srank; i = 0; const g = byRank[r.srank] || {}; rows += '<tr class="dg-grp"><td colspan="12">強度榜 第 ' + r.srank + '・' + (g.g || r.group) + '</td></tr>'; }
+    rows += dgListRowHtml(r, ++i, r.code === data.stock.code);
+  }
+  return '<div class="bl-section bl-brew">📋 今日名單・族群強度榜前十族 × 強勢／中等（' + (top.list || []).length + ' 檔）</div>' +
+    '<div class="dg-filter">防守判定：' + DG_FILTERS.map(([k, l]) => btn(k, l)).join('') + '</div>' +
+    (list.length ? '<div class="hl-scroll"><table class="ck-table"><thead>' + DG_LIST_HEAD + '</thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">沒有符合這個判定的股票</div>') +
+    '<div class="sw-rule">依族群強度 → 七科總分排；點列可換該股問診。「即將穿惡」＝破月線但一根漲停能站回。</div>';
+}
+function dgCrossHtml(data){
+  const cross = data.cross || {}, groups = cross.groups || {};
+  const total = cross.n || 0;
+  const block = (cls) => { const rows = groups[cls] || []; if (!rows.length) return ''; return '<div class="sw-etf-kind">' + cls + '・' + rows.length + ' 檔</div><div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>🔴🟢</th><th>均線</th><th>昨收</th><th>收盤</th><th>漲幅</th><th>成交量</th><th>月線</th><th>站上多少</th><th class="l">明日守 三日低 / 紅半</th></tr></thead><tbody>' +
+    rows.map((r) => '<tr class="dg-link' + (r.code === data.stock.code ? ' dg-cur' : '') + '" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + r.name + '</td><td class="l">' + (r.group || '—') + '</td><td>🔴' + (r.red || 0) + '・🟢' + (r.green || 0) + '</td><td>' + (swHas(r.score2) ? r.score2 : '—') + '</td><td>' + ckPrice(r.prev) + '</td><td>' + ckPrice(r.close) + '</td><td class="' + dirClass(r.chgPct || 0) + '">' + swPct(r.chgPct, 2) + '</td><td>' + (r.volume || 0).toLocaleString('en-US') + ' 張</td><td>' + (r.def ? ckPrice(r.def.ma20T) : '—') + '</td><td class="up">' + (r.cross ? swPct(r.cross.dist, 1) : '—') + '</td><td class="l">' + (r.def ? ckPrice(r.def.low3T) + (swHas(r.def.halfT) ? ' / 紅半 ' + ckPrice(r.def.halfT) : '') : '—') + '</td></tr>').join('') + '</tbody></table></div>'; };
+  return '<div class="bl-section bl-launch">🐉 今日穿惡名單・' + swMmdd(data.date) + ' 真穿惡 ' + total + ' 檔</div>' +
+    '<div class="sw-basis">強勢 ' + (groups['強勢'] || []).length + '・中等 ' + (groups['中等'] || []).length + '・弱勢 ' + (groups['弱勢'] || []).length + (swHas(cross.nearLeft) ? '・還在月線下但一根漲停可站回 ' + cross.nearLeft + ' 檔' : '') + '</div>' +
+    (total ? block('強勢') + block('中等') + block('弱勢') : '<div class="race-note">今天沒有真穿惡的股票</div>') +
+    '<div class="sw-rule">口徑：只掃族群表內的股票；昨收在昨日月線之下、今收站上今日月線 2% 以上、成交量 ≥500 張才算真穿惡；強／中／弱＝七科體質分級。點列可換該股問診。</div>';
+}
+function dgHeaderHtml(data){
+  const s = data.stock, sub = s.subjects || {}, ov = ckOverall(s);
+  return '<div class="dg-head"><span class="dg-code">' + s.code + '</span><span class="dg-name">' + (s.name || '') + '</span>' + chipsFlagPillsHtml(s.code) + '<span class="dg-grp">' + (s.group ? s.group : '沒有歸在任何族群') + (s.disposed ? '・🔒 處置中' : '') + '</span>' +
+    '<span class="dg-px">' + ckPrice(s.close) + ' <span class="' + dirClass(s.chgPct || 0) + '">' + swPct(s.chgPct, 2) + '</span></span><span class="dg-grp">' + swMmdd(s.date) + ' 收盤・昨收 ' + ckPrice(s.prev) + (s.stale ? '・資料停在 ' + swMmdd(s.date) : '') + '</span></div>' +
+    '<div class="dg-head">' + dgClsPill(sub.cls) + '<span>🔴 ' + (sub.red || 0) + '・🟢 ' + (sub.green || 0) + '</span><span>綜合 ' + ckScoreHtml(ov) + ' ' + ckLabel(ov) + '</span><span class="muted">基本面 ' + (swHas(s.scores.fund) ? s.scores.fund : '—') + '・籌碼面 ' + (swHas(s.scores.chip) ? s.scores.chip : '—') + '・技術面 ' + (swHas(s.scores.tech) ? s.scores.tech : '—') + '</span>' +
+    '<button class="chart-tab chips-btn" id="dgChartBtn" data-code="' + s.code + '" data-name="' + (s.name || '') + '">開K線圖</button></div>' +
+    '<ul class="dg-lines">' + dgSummaryLines(s).map((l) => '<li>' + l + '</li>').join('') + '</ul>';
+}
+function dgSearchHtml(){
+  return '<div class="dg-search"><input class="dg-in" id="dgInput" placeholder="股號或股名，例 2330" value="' + (dgState.code || '') + '"><button class="chart-tab chips-btn active" id="dgRun">🩺 問診</button>' +
+    (dgState.recent.length ? '<span class="dg-recent">最近：' + dgState.recent.map((x) => '<span class="ck-tag dg-link" data-code="' + x.code + '"><b>' + x.code + '</b>' + (x.name || '') + '</span>').join('') + '</span>' : '') + '</div>';
+}
+function renderDiag(){
+  const body = document.getElementById('diagBody');
+  ensureDiag();
+  let html = dgSearchHtml();
+  if (!dgState.code){
+    body.innerHTML = html + '<div class="race-note">打股號按「問診」，一次看那檔的強弱、七科體檢、防守線、同族比較與今天的名單。</div>' + ckRulesHtml(null);
+    return;
+  }
+  const data = dgState.data;
+  if (!data){
+    body.innerHTML = html + '<div class="signal-empty"><div class="se-title">' + (dgState.failedAt ? '讀取失敗' + (dgState.error ? '：' + dgState.error : '') : '問診中…') + '</div><div class="se-sub">後端每個交易日收盤後整理；讀不到的話稍後再試。</div></div>';
+    return;
+  }
+  if (data.status !== 'ok'){
+    body.innerHTML = html + '<div class="signal-empty"><div class="se-title">' + (data.status === 'missing' ? dgState.code + ' 本站沒有這檔的日K' : '還沒有問診資料') + '</div><div class="se-sub">' + (data.reason || '') + '</div></div>';
+    return;
+  }
+  const s = data.stock;
+  html += '<div class="sw-basis">' + swMmdd(data.date) + ' 收盤資料・整理時間 ' + (data.collector && data.collector.builtAt ? String(data.collector.builtAt).slice(5, 16).replace('T', ' ') : '—') + '・每個交易日收盤後跟下午報一起更新，非即時報價</div>';
+  html += dgHeaderHtml(data);
+  html += '<div class="bl-section bl-launch">🛡 防守線・出場與停損依據</div>' + dgDefenseHtml(s.def);
+  html += '<div class="bl-section bl-brew">📈 日線圖・' + s.code + ' ' + (s.name || '') + '・K棒＋均線＋明日防守線（近 60 個交易日）</div>' + dgCandlesHtml(data.bars, s.def, 60);
+  html += '<div class="bl-section bl-launch">📋 七科問診</div>' + dgSubjectsHtml(s);
+  html += dgSiblingsHtml(data);
+  html += dgTopHtml(data);
+  html += dgTodayHtml(data);
+  html += dgCrossHtml(data);
+  body.innerHTML = html + ckRulesHtml(data);
+}
+function openDiagPanel(code){
+  document.getElementById('diagModal').hidden = false;
+  if (code) dgRun(code); else renderDiag();
+}
+function closeDiagPanel(){ document.getElementById('diagModal').hidden = true; }
+document.getElementById('diagClose').addEventListener('click', closeDiagPanel);
+document.getElementById('diagModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDiagPanel(); });
+document.getElementById('diagBody').addEventListener('click', (e) => {
+  if (e.target.closest('#dgRun')){ dgRun((document.getElementById('dgInput') || {}).value || ''); return; }
+  const fbtn = e.target.closest('.dg-fbtn');
+  if (fbtn){ dgState.filter = fbtn.dataset.filter; renderDiag(); return; }
+  const chart = e.target.closest('#dgChartBtn');
+  if (chart){
+    if (!useFloatingCharts()){
+      document.getElementById('diagModal').classList.add('behind-chart');
+      document.getElementById('signalModal').classList.add('behind-chart');
+    }
+    openStockChart(chart.dataset.code, chart.dataset.name);
+    return;
+  }
+  const link = e.target.closest('.dg-link[data-code]');
+  if (link){ dgRun(link.dataset.code); }
+});
+document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target && e.target.id === 'dgInput'){ e.preventDefault(); dgRun(e.target.value); } });
+
 // ---- 版本戳記與自動更新（2026-09-25 使用者：iPhone 加到主畫面的網頁點籌碼排行沒反應，其實是一直跑舊版）----
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-28 15:08:24';
+const BUILD_STAMP = '2026-09-28 17:08:20';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -5903,6 +6218,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '下午報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」
     if (btn.dataset.label === '健診'){ openCheckupPanel(); return; }    // 2026-09-28 使用者：每日持股健診
+    if (btn.dataset.label === '問診'){ openDiagPanel(); return; }       // 2026-09-28 使用者：個股問診
     showToast('「' + btn.dataset.label + '」功能開發中');
   });
 });
@@ -6298,6 +6614,10 @@ export default {
     if (url.pathname === "/api/checkup") {
       // 每日持股健診（2026-09-28 使用者）：股號清單帶給後端，60 秒快取
       return await proxyHanstockBars("/api/hub/checkup" + url.search, 60);
+    }
+    if (url.pathname === "/api/diag") {
+      // 個股問診（2026-09-28 使用者）：股號帶給後端，60 秒快取
+      return await proxyHanstockBars("/api/hub/diag" + url.search, 60);
     }
     if (url.pathname === "/api/chips-daily") {
       // 盤後籌碼排行（2026-09-25 使用者）：主力大單、三大法人買賣超，後端每天收盤後收好，快取 1 分鐘
