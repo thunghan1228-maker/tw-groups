@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-28 12:50:58";
+const BUILD_STAMP = "2026-09-28 15:08:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -643,6 +643,54 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hl-day .hl-scroll{padding:0 8px 8px;}
   .hl-rules{font-size:12px;color:var(--muted);line-height:1.7;padding-left:20px;margin:6px 0;}
   .sw-tile.hl b{font-size:22px;}
+  /* 每日持股健診（2026-09-28 使用者：照學員專區「每日持股健診」做）：清單、權重、表格、明細 */
+  .ck-form{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;background:var(--panel);}
+  .ck-ta{width:100%;box-sizing:border-box;min-height:64px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--text);font-size:14px;font-family:inherit;resize:vertical;}
+  .ck-line{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:6px 0;font-size:13px;}
+  .ck-line label{display:inline-flex;align-items:center;gap:4px;}
+  .ck-line .chips-btn{padding:4px 10px;font-size:13px;}
+  .ck-in{width:56px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:13px;}
+  .ck-sel{padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:13px;max-width:160px;}
+  .ck-dims{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0;}
+  .ck-dim{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--panel);cursor:pointer;}
+  .ck-dim.active{border-color:#e6675f;box-shadow:inset 0 0 0 1px #e6675f;}
+  .ck-dim.off{opacity:.55;}
+  .ck-dim b{display:block;font-size:14px;}
+  .ck-dim span{display:block;font-size:12px;color:var(--muted);}
+  .ck-dim label{margin-top:4px;font-size:12px;}
+  .ck-dim .ck-w{display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-size:12px;}
+  .ck-tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
+  .ck-tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;background:var(--panel);}
+  .ck-tag b{color:#e6675f;}
+  .ck-tag .ck-x{cursor:pointer;color:var(--muted);font-weight:800;}
+  .ck-table{border-collapse:collapse;font-size:13px;white-space:nowrap;min-width:100%;}
+  .ck-table th,.ck-table td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle;}
+  .ck-table th{color:var(--muted);font-weight:700;background:var(--panel);cursor:pointer;}
+  .ck-table th.on{color:#e6675f;}
+  .ck-table th.l,.ck-table td.l{text-align:left;}
+  .ck-table tr.ck-row td.ck-stock{cursor:pointer;}
+  .ck-table tr.ck-row:hover td{background:var(--panel-2);}
+  .ck-table .ck-code{font-size:16px;font-weight:800;color:#e6675f;}
+  .ck-table .ck-name{font-size:14px;font-weight:700;margin-left:4px;}
+  .ck-table .ck-grp{font-size:11px;color:var(--muted);display:block;}
+  .ck-score{display:inline-block;min-width:36px;text-align:center;border-radius:6px;padding:2px 6px;font-weight:800;color:#fff;background:#6b7280;}
+  .ck-score.s4{background:#b91c1c;}.ck-score.s3{background:#e6675f;}.ck-score.s2{background:#a16207;}.ck-score.s1{background:#0f766e;}.ck-score.s0{background:#15803d;}
+  .ck-score.none{background:transparent;color:var(--muted);border:1px dashed var(--line);font-weight:400;}
+  .ck-lab{font-size:12px;margin-left:4px;}
+  .ck-def{font-size:12px;line-height:1.4;}
+  .ck-def b{font-size:13px;}
+  .ck-judge{font-weight:700;}
+  .ck-judge.bad{color:#15803d;}
+  .ck-judge.ok{color:#e6675f;}
+  .ck-btn{cursor:pointer;color:var(--muted);font-weight:800;padding:0 4px;}
+  .ck-detail td{background:var(--panel-2);white-space:normal;text-align:left;font-size:12px;line-height:1.6;padding:8px 12px;}
+  .ck-dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 16px;}
+  .ck-dgrid b{color:#e6675f;}
+  .ck-sub{display:inline-block;border-radius:6px;padding:1px 6px;margin:1px 2px;font-size:12px;border:1px solid var(--line);}
+  .ck-sub.s2{background:#e6675f;color:#fff;border-color:#e6675f;}
+  .ck-sub.s0{background:#15803d;color:#fff;border-color:#15803d;}
+  .ck-compact{white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:12px;border:1px dashed var(--line);border-radius:10px;padding:8px 12px;margin:8px 0;line-height:1.6;}
+  .ck-rules{font-size:12px;color:var(--muted);line-height:1.7;padding-left:20px;margin:6px 0;}
   .chips-weak-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;background:#166534;color:#fff;white-space:nowrap;}  /* 放空籌碼：弱勢型態 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
@@ -865,6 +913,18 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div id="swingBody"></div>
   </div>
 </div>
+<div class="chips-modal" id="checkupModal" hidden>
+  <div class="chips-inner" id="checkupInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">每日持股健診</div>
+        <div class="chips-sub">貼上手上的股票，每檔算基本面／籌碼面／技術面三個 0～100 分再合成綜合，附明天的防守價（三日低／月線／紅半）與判定。收盤後跟下午報一起更新，非即時報價。點股票可開K線圖。</div>
+      </div>
+      <button class="cm-icon-btn" id="checkupClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="checkupBody"></div>
+  </div>
+</div>
 <div id="buildStamp"></div>
 <button type="button" id="updateBanner" hidden>網頁有新版本，點一下更新</button>
 <div id="chartWindows"></div>
@@ -932,6 +992,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   <button class="tb-btn" data-label="每週籌碼分析"><span class="tb-icon">週</span>每週籌碼分析</button>
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
   <button class="tb-btn" data-label="下午報"><span class="tb-icon">午</span>下午報</button>
+  <button class="tb-btn" data-label="健診"><span class="tb-icon">診</span>健診</button>
   <button class="tb-btn" data-label="個股盤中訊號追蹤"><span class="tb-icon">追</span>個股訊號追蹤</button>
 </div>
 
@@ -4974,11 +5035,253 @@ for (const type of ['input', 'change']) document.getElementById('swingBody').add
   else if (el.classList.contains('hl-in')) hlParams[el.dataset.key] = el.value === '' ? '' : Number(el.value);
 });
 
+// ---- 每日持股健診（2026-09-28 使用者：照學員專區「每日持股健診」做）----
+// 貼一串股號 → /api/checkup 拿回每檔收盤後算好的三面向分數（基本面／籌碼面／技術面，0～100）、防守線（三日低／月線／紅半）、
+// 七科小體檢；綜合在這裡照你勾的面向與權重算。清單與偏好只存在這台瀏覽器（localStorage）。
+const CK_DEFAULT_PREFS = { fund: true, chip: true, tech: true, wFund: 34, wChip: 33, wTech: 33, zero: false, sort: 'overall', compact: false };
+const CK_DIMS = [['fund', '📒 基本面', '月營收年增／月增＋本益比位階', 'wFund'], ['chip', '💰 籌碼面', '大戶週增＋法人 5 日＋主力 5 日', 'wChip'], ['tech', '📈 技術面', '官網式均線分數換成百分', 'wTech']];
+const CK_SUBJECT_LABELS = { ma: '均線', grp: '族群', pos: '族內名次', chip: '籌碼', pe: '本益比', rev: '營收', inst: '法人' };
+let ckPrefs = Object.assign({}, CK_DEFAULT_PREFS);
+let ckLists = { current: '', saved: {} };
+try { ckPrefs = Object.assign({}, CK_DEFAULT_PREFS, JSON.parse(localStorage.getItem('checkupPrefs') || '{}') || {}); } catch (e) { /* 用預設 */ }
+try { const saved = JSON.parse(localStorage.getItem('checkupLists') || 'null'); if (saved && typeof saved === 'object') ckLists = Object.assign({ current: '', saved: {} }, saved); } catch (e) { /* 用預設 */ }
+let ckState = { codes: [], query: null, data: null, loading: false, failedAt: 0, error: '', open: {}, savedNote: '', listName: '' };
+function ckSavePrefs(){ try { localStorage.setItem('checkupPrefs', JSON.stringify(ckPrefs)); } catch (e) { /* 記不住就算了 */ } }
+function ckSaveLists(){ try { localStorage.setItem('checkupLists', JSON.stringify(ckLists)); } catch (e) { /* 記不住就算了 */ } }
+let ckNameMap = null;
+function ckResolve(text){
+  // 股號用 / 、逗號、空白或換行隔開；打股名也可以（族群表裡查得到的）
+  if (!ckNameMap){ ckNameMap = {}; for (const g of GROUPS) for (const s of (g.stocks || [])) if (s.name) ckNameMap[s.name] = s.code; }
+  const out = [];
+  for (const raw of String(text || '').split(/[\\/,，、\\s]+/)){
+    const t = raw.trim(); if (!t) continue;
+    let code = /^\\d{4,6}[A-Za-z]?$/.test(t) ? t.toUpperCase() : (ckNameMap[t] || (/^(\\d{4,6}[A-Za-z]?)/.exec(t) || [])[1] || '');
+    if (code && !out.includes(code)) out.push(code);
+  }
+  return out.slice(0, 120);
+}
+async function ensureCheckup(){
+  const query = ckState.codes.join(',');
+  if (!query){ ckState.data = null; ckState.query = null; return; }
+  if (ckState.query === query && (ckState.data || ckState.loading)) return;
+  if (ckState.query === query && ckState.failedAt && Date.now() - ckState.failedAt < 30000) return;
+  ckState.query = query; ckState.loading = true; ckState.data = null; ckState.error = '';
+  try {
+    const res = await fetch('/api/checkup?codes=' + encodeURIComponent(query));
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && (data.detail || data.error)) || ('checkup http ' + res.status));
+    if (!data || !data.status) throw new Error('bad payload');
+    if (ckState.query !== query) return;
+    ckState.data = data; ckState.failedAt = 0;
+  } catch (e) {
+    if (ckState.query !== query) return;
+    ckState.failedAt = Date.now(); ckState.error = String((e && e.message) || e);
+  } finally {
+    if (ckState.query === query) ckState.loading = false;
+  }
+  if (!document.getElementById('checkupModal').hidden) renderCheckup();
+}
+function ckRun(text){
+  ckState.codes = ckResolve(text);
+  ckLists.current = ckState.codes.join('/'); ckSaveLists();
+  ckState.query = null; ckState.failedAt = 0; ckState.open = {};
+  renderCheckup();
+}
+function ckOverall(row){
+  const s = row.scores || {};
+  const dims = [['fund', ckPrefs.fund, Number(ckPrefs.wFund) || 0], ['chip', ckPrefs.chip, Number(ckPrefs.wChip) || 0], ['tech', ckPrefs.tech, Number(ckPrefs.wTech) || 0]];
+  let total = 0, wsum = 0;
+  for (const [key, on, w] of dims){
+    if (!on || w <= 0) continue;
+    const v = s[key];
+    if (v === null || v === undefined){ if (!ckPrefs.zero) continue; }
+    total += (v || 0) * w; wsum += w;
+  }
+  return wsum > 0 ? Math.round(total / wsum) : null;
+}
+const ckLabel = (v) => (v === null || v === undefined ? '' : v >= 80 ? '強' : v >= 60 ? '中上' : v >= 45 ? '普通' : v >= 30 ? '偏弱' : '弱');
+const ckScoreHtml = (v) => (v === null || v === undefined ? '<span class="ck-score none">—</span>' : '<span class="ck-score s' + (v >= 80 ? 4 : v >= 60 ? 3 : v >= 45 ? 2 : v >= 30 ? 1 : 0) + '">' + v + '</span>');
+const ckPrice = (v) => (v === null || v === undefined ? '—' : hlPrice(v));
+function ckSortValue(row, key){
+  if (key === 'overall') return ckOverall(row);
+  if (key === 'chg20') return row.chg20Pct;
+  if (key === 'dist') return row.distMa20Pct;
+  return (row.scores || {})[key];
+}
+function ckSorted(rows){
+  const key = ckPrefs.sort || 'overall';
+  return rows.slice().sort((a, b) => {
+    const va = ckSortValue(a, key), vb = ckSortValue(b, key);
+    if (va === null || va === undefined) return (vb === null || vb === undefined) ? 0 : 1;
+    if (vb === null || vb === undefined) return -1;
+    return vb - va;
+  });
+}
+function ckDefenseHtml(r){
+  const d = r.def;
+  if (!d) return '<span class="muted">日K不足</span>';
+  return '<div class="ck-def"><b>' + ckPrice(d.low3T) + '</b><span class="muted"> 三日低</span><br>' + ckPrice(d.ma20T) + '<span class="muted"> 月線</span>' + (d.halfT ? '<br>' + ckPrice(d.halfT) + '<span class="muted"> 紅半</span>' : '') + '</div>';
+}
+function ckJudgeHtml(r){
+  const d = r.def;
+  if (!d) return '—';
+  const bad = d.brkMa || d.brkL3 || d.brkHalf;
+  return '<span class="ck-judge ' + (bad ? 'bad' : 'ok') + '">' + d.label + '</span>' + (d.halfT && !bad ? '<span class="muted">・🚩 有紅半</span>' : '');
+}
+function ckSubjectsHtml(r){
+  const sub = r.subjects;
+  if (!sub || !sub.sc) return '';
+  return Object.entries(sub.sc).filter(([k, v]) => v !== null && v !== undefined).map(([k, v]) => '<span class="ck-sub s' + v + '">' + CK_SUBJECT_LABELS[k] + ' ' + v + '</span>').join(' ') +
+    '<span class="muted">　🔴 ' + sub.red + '・🟢 ' + sub.green + '・' + (sub.cls || '—') + '</span>';
+}
+function ckDetailHtml(r){
+  const f = r.fund || {}, c = r.chip || {}, d = r.def || {}, s = r.scores || {};
+  const fundText = swHas(f.yoy) ? swMonth(f.ym) + '營收年增 <b>' + swPct(f.yoy, 1) + '</b>・月增 ' + swPct(f.mom, 1) : '沒有月營收資料';
+  const peText = swHas(f.pe) ? '本益比 <b>' + f.pe + '</b>' + (f.peDate ? '（' + swMmdd(f.peDate) + '）' : '') : '沒有本益比';
+  const chipText = (swHas(c.weekPct) ? '大戶週' + (c.weekPct >= 0 ? '增' : '減') + ' <b>' + swPct(c.weekPct, 1) + '</b>' + (c.weeks > 0 ? '（連 ' + c.weeks + ' 週）' : '') + (c.tdccDate ? '・' + swMmdd(c.tdccDate) : '') : '集保週資料還沒進來') +
+    '<br>法人 5 日 ' + (swHas(c.inst5) ? '<b class="' + dirClass(c.inst5) + '">' + swLots(c.inst5) + '</b>' + (c.instStreak > 0 ? '・連買 ' + c.instStreak + ' 天' : c.instStreak < 0 ? '・連賣 ' + (-c.instStreak) + ' 天' : '') : '—') +
+    '・今日 ' + (swHas(c.instToday) ? '<span class="' + dirClass(c.instToday) + '">' + swLots(c.instToday) + '</span>' : '—') +
+    '<br>主力 5 日 ' + (swHas(c.mf5) ? '<b class="' + dirClass(c.mf5) + '">' + swLots(c.mf5) + '</b>' + (c.mfStreak > 0 ? '・連買 ' + c.mfStreak + ' 天' : c.mfStreak < 0 ? '・連賣 ' + (-c.mfStreak) + ' 天' : '') : '—');
+  const ma = r.ma || {};
+  const techText = '均線分數 官網式 <b>' + (swHas(r.score2) ? r.score2 : '—') + '</b>／本站 ' + (swHas(r.score) ? r.score : '—') + (swHas(r.groupAvg2) ? '・族群平均 ' + r.groupAvg2 : '') + (r.groupRank ? '・族內第 ' + r.groupRank + '/' + r.groupN : '') +
+    '<br>MA5 ' + ckPrice(ma['5']) + '・MA10 ' + ckPrice(ma['10']) + '・MA20 ' + ckPrice(ma['20']) + '・MA60 ' + ckPrice(ma['60']) +
+    (r.def ? '<br>今日判定：三日低 ' + ckPrice(d.low3Y) + '（' + swPct(d.dL3, 1) + '）・月線 ' + ckPrice(d.ma20Y) + '（' + swPct(d.dMa, 1) + '）' + (d.halfY ? '・紅半 ' + ckPrice(d.halfY) + '（' + swPct(d.dHalf, 1) + '）' : '') + ' → ' + d.label : '');
+  return '<tr class="ck-detail"><td colspan="11"><div class="ck-dgrid">' +
+    '<div>📒 基本面 ' + ckScoreHtml(s.fund) + '<br>' + fundText + '<br>' + peText + '</div>' +
+    '<div>💰 籌碼面 ' + ckScoreHtml(s.chip) + '<br>' + chipText + '</div>' +
+    '<div>📈 技術面 ' + ckScoreHtml(s.tech) + '<br>' + techText + '</div></div>' +
+    '<div style="margin-top:6px">七科：' + ckSubjectsHtml(r) + (r.disposed ? '<span class="muted">　🔒 處置中</span>' : '') + '</div></td></tr>';
+}
+function ckRowHtml(r){
+  const ov = ckOverall(r), open = !!ckState.open[r.code];
+  return '<tr class="ck-row" data-code="' + r.code + '" data-name="' + (r.name || '') + '">' +
+    '<td class="l ck-stock"><span class="ck-code">' + r.code + '</span> <span class="ck-name">' + (r.name || '') + '</span>' + chipsFlagPillsHtml(r.code) + (r.stale ? '<span class="muted">（資料到 ' + swMmdd(r.date) + '）</span>' : '') + '<span class="ck-grp">' + (r.group || '—') + '</span></td>' +
+    '<td>' + ckScoreHtml((r.scores || {}).fund) + '</td><td>' + ckScoreHtml((r.scores || {}).chip) + '</td><td>' + ckScoreHtml((r.scores || {}).tech) + '</td>' +
+    '<td>' + ckScoreHtml(ov) + ' <span class="ck-lab">' + ckLabel(ov) + '</span></td>' +
+    '<td>' + ckPrice(r.close) + ' <span class="ck-lab ' + dirClass(r.chgPct || 0) + '">' + swPct(r.chgPct, 1) + '</span></td>' +
+    '<td class="' + dirClass(r.chg20Pct || 0) + '">' + swPct(r.chg20Pct, 1) + '</td><td class="' + dirClass(r.distMa20Pct || 0) + '">' + swPct(r.distMa20Pct, 1) + '</td>' +
+    '<td class="l">' + ckDefenseHtml(r) + '</td><td class="l">' + ckJudgeHtml(r) + '</td>' +
+    '<td><span class="ck-btn ck-toggle" data-code="' + r.code + '" title="明細">' + (open ? '▾' : '▸') + '</span><span class="ck-btn ck-remove" data-code="' + r.code + '" title="從清單刪掉">✕</span></td></tr>' +
+    (open ? ckDetailHtml(r) : '');
+}
+function ckCompactText(rows){
+  const data = ckState.data || {};
+  return '每日持股健診 ' + swMmdd(data.date) + ' 收盤\\n' + rows.map((r) => {
+    const ov = ckOverall(r), d = r.def || {}, s = r.scores || {};
+    const n = (v) => (v === null || v === undefined ? '—' : v);
+    return r.code + ' ' + (r.name || '') + '　綜合 ' + n(ov) + (ov !== null ? ' ' + ckLabel(ov) : '') + '　基 ' + n(s.fund) + '／籌 ' + n(s.chip) + '／技 ' + n(s.tech) +
+      '　收 ' + ckPrice(r.close) + '　明天守 ' + ckPrice(d.low3T) + '／月線 ' + ckPrice(d.ma20T) + (d.halfT ? '／紅半 ' + ckPrice(d.halfT) : '') + '　' + (d.label || '');
+  }).join('\\n');
+}
+function ckFormHtml(){
+  const names = Object.keys(ckLists.saved || {});
+  const dims = CK_DIMS.map(([key, label, desc, wkey]) => '<div class="ck-dim' + (ckPrefs.sort === key ? ' active' : '') + (ckPrefs[key] ? '' : ' off') + '" data-dim="' + key + '">' +
+    '<label onclick="event.stopPropagation()"><input type="checkbox" class="ck-chk" data-key="' + key + '"' + (ckPrefs[key] ? ' checked' : '') + '> <b>' + label + '</b></label><span>' + desc + '</span>' +
+    '<span class="ck-w" onclick="event.stopPropagation()">權重 <input class="ck-in ck-weight" data-key="' + wkey + '" type="number" min="0" max="100" step="1" value="' + ckPrefs[wkey] + '"> %</span></div>').join('') +
+    '<div class="ck-dim' + (ckPrefs.sort === 'overall' ? ' active' : '') + '" data-dim="overall"><b>🏆 綜合</b><span>勾選面向的加權平均</span><label onclick="event.stopPropagation()"><input type="checkbox" class="ck-chk" data-key="zero"' + (ckPrefs.zero ? ' checked' : '') + '> 沒資料的面向當 0 分</label></div>';
+  return '<div class="ck-form">' +
+    '<div class="ck-line"><b>① 貼上你的股票清單</b><span class="muted">股號用 /、逗號、空白或換行隔開都可以；族群表裡的股打股名也行</span></div>' +
+    '<textarea class="ck-ta" id="ckInput" placeholder="2481/2408/2344 或 2330 台積電 2317 鴻海">' + (ckLists.current || '') + '</textarea>' +
+    '<div class="ck-line"><button class="chart-tab chips-btn active" id="ckRun">📊 開始健診</button><button class="chart-tab chips-btn" id="ckClear">清空</button><button class="chart-tab chips-btn" id="ckExample">範例</button>' +
+      '<span class="hl-field">我的清單 <select class="ck-sel" id="ckListSel"><option value="">' + (names.length ? '選一組' : '（還沒存過）') + '</option>' + names.map((n) => '<option value="' + n.replace(/"/g, '&quot;') + '"' + (ckState.listName === n ? ' selected' : '') + '>' + n + '（' + ckResolve(ckLists.saved[n]).length + ' 檔）</option>').join('') + '</select>' +
+      '<button class="chart-tab chips-btn" id="ckSave">💾 存成清單</button><button class="chart-tab chips-btn" id="ckDelete">🗑 刪掉這組</button><button class="chart-tab chips-btn" id="ckCopy">📋 複製清單</button></span>' + (ckState.savedNote ? '<span class="muted">' + ckState.savedNote + '</span>' : '') + '</div>' +
+    (ckState.codes.length ? '<div class="ck-tags">' + ckState.codes.map((c) => '<span class="ck-tag"><b>' + c + '</b>' + ((ckState.data && (ckState.data.rows || []).find((r) => r.code === c) || {}).name || '') + '<span class="ck-x ck-remove" data-code="' + c + '">✕</span></span>').join('') + '</div>' : '') +
+    '<div class="ck-line"><b>② 勾選要用的面向</b><span class="muted">勾起來的才算進綜合；點方塊＝改用它排序；權重改完按重新計算或直接生效</span></div>' +
+    '<div class="ck-dims">' + dims + '</div>' +
+    '<div class="sw-rule">清單與權重只存在這台瀏覽器；換裝置請按「複製清單」把整串代號帶過去。</div></div>';
+}
+function renderCheckup(){
+  const body = document.getElementById('checkupBody');
+  ensureCheckup();
+  let html = ckFormHtml();
+  if (!ckState.codes.length){
+    body.innerHTML = html + '<div class="race-note">貼上股號後按「開始健診」</div>' + ckRulesHtml(null);
+    return;
+  }
+  const data = ckState.data;
+  if (!data){
+    body.innerHTML = html + '<div class="signal-empty"><div class="se-title">' + (ckState.failedAt ? '讀取失敗' + (ckState.error ? '：' + ckState.error : '') : '健診中…') + '</div><div class="se-sub">後端每個交易日收盤後整理；讀不到的話稍後再試。</div></div>';
+    return;
+  }
+  if (data.status !== 'ok'){
+    body.innerHTML = html + '<div class="signal-empty"><div class="se-title">還沒有健診資料</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
+    return;
+  }
+  const rows = ckSorted(data.rows || []);
+  const th = (key, label) => '<th class="' + (ckPrefs.sort === key ? 'on' : '') + '" data-sort="' + key + '">' + label + (ckPrefs.sort === key ? ' ▼' : '') + '</th>';
+  html += '<div class="sw-basis">資料 ' + swMmdd(data.date) + ' 收盤・' + rows.length + ' 檔' + (data.missing && data.missing.length ? '・本站沒有日K：' + data.missing.join('、') : '') + '・整理時間 ' + (data.collector && data.collector.builtAt ? String(data.collector.builtAt).slice(5, 16).replace('T', ' ') : '—') + '・點股票開K線圖、點 ▸ 看三面向明細</div>';
+  html += '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">個股（' + rows.length + '）</th>' + th('fund', '📒 基本面') + th('chip', '💰 籌碼面') + th('tech', '📈 技術面') + th('overall', '🏆 綜合') +
+    '<th>收盤(' + swMmdd(data.date) + ')</th>' + th('chg20', '20日漲幅') + th('dist', '距月線') + '<th class="l">明天防守價</th><th class="l">防守</th><th></th></tr></thead><tbody>' + rows.map(ckRowHtml).join('') + '</tbody></table></div>';
+  html += '<div class="ck-line"><button class="chart-tab chips-btn" id="ckCompactBtn">📋 ' + (ckPrefs.compact ? '收起精簡版' : '精簡版文字') + '</button><button class="chart-tab chips-btn" id="ckCopyCompact">複製精簡版</button></div>';
+  if (ckPrefs.compact) html += '<div class="ck-compact" id="ckCompact">' + ckCompactText(rows).replace(/</g, '&lt;') + '</div>';
+  body.innerHTML = html + ckRulesHtml(data);
+}
+function ckRulesHtml(data){
+  const rules = (data && data.rules) || [];
+  return (rules.length ? '<div class="bl-section bl-brew">口徑與注意</div><ol class="ck-rules">' + rules.map((r) => '<li>' + r + '</li>').join('') + '</ol>' : '') +
+    '<div class="sw-foot">分數是體質快照，不是買賣訊號；資料為收盤後數據，非即時報價，僅供學習參考，不構成投資建議。</div>';
+}
+function openCheckupPanel(){
+  document.getElementById('checkupModal').hidden = false;
+  if (!ckState.codes.length && ckLists.current) ckState.codes = ckResolve(ckLists.current);
+  renderCheckup();
+}
+function closeCheckupPanel(){ document.getElementById('checkupModal').hidden = true; }
+document.getElementById('checkupClose').addEventListener('click', closeCheckupPanel);
+document.getElementById('checkupModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeCheckupPanel(); });
+function ckCopy(text, note){
+  const done = () => { ckState.savedNote = note; renderCheckup(); setTimeout(() => { if (ckState.savedNote === note){ ckState.savedNote = ''; renderCheckup(); } }, 4000); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done); else done();
+}
+document.getElementById('checkupBody').addEventListener('click', (e) => {
+  const input = () => (document.getElementById('ckInput') || {}).value || '';
+  if (e.target.closest('#ckRun')){ ckRun(input()); return; }
+  if (e.target.closest('#ckClear')){ ckState.codes = []; ckLists.current = ''; ckSaveLists(); ckState.data = null; ckState.query = null; renderCheckup(); return; }
+  if (e.target.closest('#ckExample')){ ckRun('2481/2408/2344'); return; }
+  if (e.target.closest('#ckSave')){
+    const codes = ckResolve(input());
+    if (!codes.length){ ckState.savedNote = '先貼股號再存'; renderCheckup(); return; }
+    const name = window.prompt('這組清單叫什麼名字？', ckState.listName || '我的清單');
+    if (!name) return;
+    ckLists.saved[name] = codes.join('/'); ckState.listName = name; ckSaveLists(); ckRun(codes.join('/')); return;
+  }
+  if (e.target.closest('#ckDelete')){
+    if (ckState.listName && ckLists.saved[ckState.listName]){ delete ckLists.saved[ckState.listName]; ckSaveLists(); }
+    ckState.listName = ''; renderCheckup(); return;
+  }
+  if (e.target.closest('#ckCopy')){ ckCopy(ckResolve(input()).join('/'), '清單已複製'); return; }
+  if (e.target.closest('#ckCompactBtn')){ ckPrefs.compact = !ckPrefs.compact; ckSavePrefs(); renderCheckup(); return; }
+  if (e.target.closest('#ckCopyCompact')){ ckCopy(ckCompactText(ckSorted((ckState.data && ckState.data.rows) || [])), '精簡版已複製'); return; }
+  const remove = e.target.closest('.ck-remove');
+  if (remove){ ckRun(ckState.codes.filter((c) => c !== remove.dataset.code).join('/')); return; }
+  const toggle = e.target.closest('.ck-toggle');
+  if (toggle){ ckState.open[toggle.dataset.code] = !ckState.open[toggle.dataset.code]; renderCheckup(); return; }
+  const th = e.target.closest('th[data-sort]');
+  if (th){ ckPrefs.sort = th.dataset.sort; ckSavePrefs(); renderCheckup(); return; }
+  const dim = e.target.closest('.ck-dim[data-dim]');
+  if (dim && !e.target.closest('input, label')){ ckPrefs.sort = dim.dataset.dim; ckSavePrefs(); renderCheckup(); return; }
+  const stock = e.target.closest('td.ck-stock');
+  if (stock){
+    const row = stock.closest('tr');
+    if (!useFloatingCharts()){
+      document.getElementById('checkupModal').classList.add('behind-chart');
+      document.getElementById('signalModal').classList.add('behind-chart');
+    }
+    openStockChart(row.dataset.code, row.dataset.name);
+  }
+});
+document.getElementById('checkupBody').addEventListener('change', (e) => {
+  const el = e.target;
+  if (el.classList.contains('ck-chk')){ ckPrefs[el.dataset.key] = !!el.checked; ckSavePrefs(); renderCheckup(); }
+  else if (el.classList.contains('ck-weight')){ ckPrefs[el.dataset.key] = Math.max(0, Math.min(100, Number(el.value) || 0)); ckSavePrefs(); renderCheckup(); }
+  else if (el.id === 'ckListSel'){ ckState.listName = el.value; if (el.value && ckLists.saved[el.value]) ckRun(ckLists.saved[el.value]); }
+});
+
 // ---- 版本戳記與自動更新（2026-09-25 使用者：iPhone 加到主畫面的網頁點籌碼排行沒反應，其實是一直跑舊版）----
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-28 12:50:58';
+const BUILD_STAMP = '2026-09-28 15:08:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -5599,6 +5902,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '下午報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」
+    if (btn.dataset.label === '健診'){ openCheckupPanel(); return; }    // 2026-09-28 使用者：每日持股健診
     showToast('「' + btn.dataset.label + '」功能開發中');
   });
 });
@@ -5990,6 +6294,10 @@ export default {
     if (url.pathname === "/api/heilong") {
       // 下午報・黑龍回測（2026-09-28 使用者）：參數帶給後端算，60 秒快取
       return await proxyHanstockBars("/api/hub/heilong" + url.search, 60);
+    }
+    if (url.pathname === "/api/checkup") {
+      // 每日持股健診（2026-09-28 使用者）：股號清單帶給後端，60 秒快取
+      return await proxyHanstockBars("/api/hub/checkup" + url.search, 60);
     }
     if (url.pathname === "/api/chips-daily") {
       // 盤後籌碼排行（2026-09-25 使用者）：主力大單、三大法人買賣超，後端每天收盤後收好，快取 1 分鐘

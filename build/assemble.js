@@ -320,6 +320,10 @@ export default {
       // 下午報・黑龍回測（2026-09-28 使用者）：參數帶給後端算，60 秒快取
       return await proxyHanstockBars("/api/hub/heilong" + url.search, 60);
     }
+    if (url.pathname === "/api/checkup") {
+      // 每日持股健診（2026-09-28 使用者）：股號清單帶給後端，60 秒快取
+      return await proxyHanstockBars("/api/hub/checkup" + url.search, 60);
+    }
     if (url.pathname === "/api/chips-daily") {
       // 盤後籌碼排行（2026-09-25 使用者）：主力大單、三大法人買賣超，後端每天收盤後收好，快取 1 分鐘
       return await proxyHanstockBars("/api/hub/chips/daily" + url.search, 60);
