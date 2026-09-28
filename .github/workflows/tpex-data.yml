@@ -188,15 +188,18 @@ jobs:
                       continue
                   d, code, level, holders, shares, pct = row[:6]
                   code = code.strip().upper()
-                  if codes and code not in codes:
+                  level_int = int(level)
+                  # 族群股票全部分級都留；其他四碼一般股票只留 400 張以上（12～15 級），給持股健診用（2026-09-28）
+                  if not (code in codes or (len(code) == 4 and code.isdigit() and level_int in (12, 13, 14, 15))):
                       continue
                   day = day or (f"{d[:4]}-{d[4:6]}-{d[6:8]}" if len(d) == 8 else d)
-                  rows.append([code, int(level), int(holders.replace(',', '')), int(shares.replace(',', '')), float(pct)])
+                  rows.append([code, level_int, int(holders.replace(',', '')), int(shares.replace(',', '')), float(pct)])
               assert day and len(rows) > 100, f"day={day} rows={len(rows)}"
               path = f'tpex/tdcc-{day}.json'
-              if not os.path.exists(path):
+              old_rows = len(json.load(open(path, encoding='utf-8')).get('rows') or []) if os.path.exists(path) else -1
+              if old_rows < len(rows):
                   json.dump({'date': day, 'rows': rows}, open(path, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
-                  print('tdcc saved', day, len(rows))
+                  print('tdcc saved', day, len(rows), '(was', old_rows, ')')
               else:
                   print('tdcc already have', day)
               try:
