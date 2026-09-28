@@ -657,7 +657,7 @@
   .dg-chart svg{display:block;font-size:10px;}
   .dg-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;margin:2px 0 4px;}
   .dg-legend i{display:inline-block;width:14px;height:0;border-top:2px solid;margin-right:4px;vertical-align:middle;}
-  .dg-spark svg{display:inline-block;vertical-align:middle;}
+  .dg-spark svg{display:inline-block;vertical-align:middle;overflow:visible;}  /* 最後一個數值標籤可以超出框，不被切掉 */
   .ck-table tr.dg-cur td{background:rgba(230,103,95,.12);}
   .ck-table tr.dg-grp td{background:var(--panel-2);font-weight:800;text-align:left;color:#e6675f;}
   .ck-table tr.dg-link{cursor:pointer;}
@@ -5391,7 +5391,7 @@ function dgSpark(points, opts){
     pts.forEach((p, i) => { svg += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(Number(p[1])).toFixed(1) + '" r="2" fill="#e6675f"><title>' + p[0] + ' ' + p[1] + '</title></circle>'; });
   }
   const lastV = vals[vals.length - 1];
-  svg += '<text x="' + (W - R + 4) + '" y="' + (y(lastV) + 3).toFixed(1) + '" fill="currentColor" font-weight="700">' + (opts && opts.fmt ? opts.fmt(lastV) : lastV) + '</text></svg>';
+  svg += '<text x="' + (W - R + 4) + '" y="' + Math.max(11, Math.min(H - 2, y(lastV) + 3)).toFixed(1) + '" fill="currentColor" font-weight="700" font-size="12">' + (opts && opts.fmt ? opts.fmt(lastV) : lastV) + '</text></svg>';
   return '<span class="dg-spark">' + svg + '</span><div class="dg-sub">' + (opts && opts.note ? opts.note : '') + '</div>';
 }
 function dgSubjectsHtml(s){
