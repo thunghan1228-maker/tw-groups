@@ -4499,7 +4499,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // 後端每個交易日收盤後整理一份（/api/swing-report），以資料基準日為鍵保存；這裡照日期切換、五個段落顯示。
 const SWING_SECTIONS = [
   { key: 'summary', label: '今日摘要' }, { key: 'disposition', label: '處置動態' }, { key: 'etf', label: '主動式基金' }, { key: 'groups', label: '產業觀察' },
-  { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '均線轉強' }, { key: 'heilong', label: '黑龍回測' },
+  { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '體質轉強' }, { key: 'heilong', label: '黑龍回測' },
 ];
 let swingState = { section: 'summary', date: '', groupsLimit: 12, etfOpen: {} };   // etfOpen: 主動式基金各檔展開全部
 const swingCache = {};      // date('' = 最新) -> payload
@@ -4893,7 +4893,7 @@ function swingSectionHtml(data){
     const t = data.tiles || {};
     return '<div class="sw-tiles">' +
       '<div class="sw-tile"><b>' + (t.crossedQualified || 0) + '</b><span>今日真穿月線(檔)</span></div>' +
-      '<div class="sw-tile"><b>' + (t.maJump || 0) + '</b><span>均線轉強(檔)</span></div>' +
+      '<div class="sw-tile"><b>' + (t.bodyJump || 0) + '</b><span>體質轉強(檔)</span></div>' +
       '<div class="sw-tile"><b>' + (t.chips || 0) + '</b><span>籌碼面候選(檔)</span></div>' +
       '<div class="sw-tile"><b>' + (t.disposition || 0) + '</b><span>處置中(檔)</span></div>' +
       '<div class="sw-tile"><b>' + (t.upcoming || 0) + '</b><span>明日起處置(檔)</span></div>' +
@@ -4925,13 +4925,13 @@ function swingSectionHtml(data){
   }
   if (sec === 'ma'){
     const notes = data.notes || {};
-    const maList = picks.ma || [], fullList = picks.full || [];
+    const bodyList = picks.body || [], fullList = picks.full || [];
     const sustained = (notes.sustained || []).map((x) => x.name + '（均線 ' + x.score + '）').join('、');
     const jumps = (notes.jumpTop || []).map((x) => x.name + ' ' + x.from + '→' + x.to).join('、');
-    return '<div class="bl-section bl-launch">體質轉強・均線分數跳升 ' + (counts.ma || 0) + ' 檔，列前 ' + maList.length + ' 檔</div>' +
-      '<div class="sw-rule">' + (rules.ma || '') + '。風險提示：' + (rules.risks || '') + '。</div>' +
-      (maList.length ? '<div class="sw-cards">' + maList.map((x) => swingCardHtml(x, { health: true })).join('') + '</div>' : '<div class="race-note">那天沒有均線分數跳升 3 分以上的股票</div>') +
-      '<div class="sw-noteBox">續強確認（' + (notes.prevDate ? swMmdd(notes.prevDate) + ' 那份的精選、' : '') + '今天仍在月線上且均線分數 ≥10）：' + (sustained || '無') + '</div>' +
+    return '<div class="bl-section bl-launch">體質轉強・問診七科判強勢 ' + (counts.strong || 0) + ' 檔，取均線分數跳升 ≥3 者 ' + (counts.body || 0) + ' 檔，列前 ' + bodyList.length + ' 檔</div>' +
+      '<div class="sw-rule">' + (rules.body || '') + '。風險提示：' + (rules.risks || '') + '。</div>' +
+      (bodyList.length ? '<div class="sw-cards">' + bodyList.map((x) => swingCardHtml(x)).join('') + '</div>' : '<div class="race-note">那天沒有問診判強勢且均線分數跳升 3 分以上的股票</div>') +
+      '<div class="sw-noteBox">續強確認（昨日已強、今日維持）：' + (sustained || '無') + '</div>' +
       '<div class="sw-quote">跳升＝從弱轉強的第一天，比一直強的更值得記</div>' +
       '<div class="bl-section bl-brew">均線結構轉強・' + swMmdd(data.date) + ' 收盤新達 15 分 ' + (counts.full || 0) + ' 檔，列前 ' + fullList.length + ' 檔</div>' +
       '<div class="sw-rule">' + (rules.full || '') + '。</div>' +
