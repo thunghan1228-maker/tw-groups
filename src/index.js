@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-28 22:15:01";
+const BUILD_STAMP = "2026-09-28 22:27:59";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4765,9 +4765,8 @@ function swingDispoRowHtml(e, kind){
 // 後端每個交易日收盤後把族群表內每檔的均線分數、K棒、漲跌幅、週籌碼…存成一張表（近 60 個交易日），
 // 這裡把參數丟給 /api/heilong，拿回各種出場方式的績效、累積曲線、爆發力、今日名單與每日明細。
 // 「存成我的參數」存在這台瀏覽器（localStorage）。K棒／停利／回測天數按鈕點了立刻重算；數字欄改完按「重新計算」。
-const HL_DEFAULTS = { score: 10, k: 'black', min: -10, max: 3, week: '', gavg: '', hits: '', val: '', exdispo: true, cap: 0, sort: 'score', tp: 3, useTp: true, useSl: true, days: 10, amt: 50, algo: 'site' };
-// 均線分數兩套（2026-09-28 使用者：查對方的 15 分算法，兩邊都做）：本站＝六條均線兩兩比較；官網式＝站上 6 條＋創 6 個天期新高＋多頭排列 3
-const HL_ALGOS = [['site', '本站'], ['official', '官網式']];
+const HL_DEFAULTS = { score: 10, k: 'black', min: -10, max: 3, week: '', gavg: '', hits: '', val: '', exdispo: true, cap: 0, sort: 'score', tp: 3, useTp: true, useSl: true, days: 10, amt: 50 };
+// 均線分數只用「內定」算法（2026-09-28 使用者：本站算法拿掉、留這套，名稱叫「內定」）：收盤站上 6 條均線各 1 分＋創 6 個天期新高各 1 分＋多頭排列加分 3 分，滿分 15。後端仍保留兩套，這裡固定送 algo=official。
 const HL_SORTS = [['score', '均線分數 高→低'], ['week', '週籌碼% 高→低'], ['gavg', '族群平均分 高→低'], ['hits', '近 20 日 >8% 次數 多→少'], ['drop', '當天跌最多 → 少'], ['val', '成交值 大→小']];
 let hlParams = Object.assign({}, HL_DEFAULTS);
 try { const saved = JSON.parse(localStorage.getItem('heilongParams') || 'null'); if (saved && typeof saved === 'object') hlParams = Object.assign({}, HL_DEFAULTS, saved); } catch (e) { /* 讀不到就用預設 */ }
@@ -4778,7 +4777,7 @@ function hlQuery(p){
   const q = new URLSearchParams();
   q.set('score', p.score); q.set('k', p.k); q.set('min', p.min); q.set('max', p.max);
   for (const key of ['week', 'gavg', 'hits', 'val']) if (p[key] !== '' && p[key] !== null && p[key] !== undefined && !isNaN(Number(p[key]))) q.set(key, p[key]);
-  q.set('exdispo', p.exdispo ? '1' : '0'); q.set('cap', p.cap || 0); q.set('sort', p.sort); q.set('tp', p.tp); q.set('mine', hlMine(p)); q.set('days', p.days); q.set('amt', p.amt || 50); q.set('algo', p.algo === 'official' ? 'official' : 'site');
+  q.set('exdispo', p.exdispo ? '1' : '0'); q.set('cap', p.cap || 0); q.set('sort', p.sort); q.set('tp', p.tp); q.set('mine', hlMine(p)); q.set('days', p.days); q.set('amt', p.amt || 50); q.set('algo', 'official');
   return q.toString();
 }
 async function ensureHeilong(){
@@ -4817,9 +4816,8 @@ function hlParamsHtml(p){
   const daysBtn = (v, label) => '<button class="chart-tab chips-btn hl-days' + (Number(p.days) === v ? ' active' : '') + '" data-days="' + v + '">' + label + '</button>';
   const inp = (key, attrs) => '<input class="hl-in" data-key="' + key + '" type="number" inputmode="decimal" value="' + (p[key] === null || p[key] === undefined ? '' : p[key]) + '" ' + (attrs || '') + '>';
   const chk = (key, label) => '<label><input type="checkbox" class="hl-chk" data-key="' + key + '"' + (p[key] ? ' checked' : '') + '> ' + label + '</label>';
-  const algoBtn = (v, label) => '<button class="chart-tab chips-btn hl-algo' + ((p.algo || 'site') === v ? ' active' : '') + '" data-algo="' + v + '" title="' + (v === 'site' ? '5／10／20／60／120／240 日均線兩兩比較，短的在長的上面得 1 分，滿分 15' : '照學員專區均線分數排行：收盤站上 6 條均線各 1 分＋創 6 個天期新高各 1 分＋多頭排列加分 3 分，滿分 15') + '">' + label + '</button>';
   return '<div class="hl-form">' +
-    '<div class="hl-line"><span class="hl-field">均線分數算法 ' + HL_ALGOS.map(([v, l]) => algoBtn(v, l)).join('') + '</span><label>均線分數 ≥ ' + inp('score', 'min="0" max="15" step="1"') + '</label>' +
+    '<div class="hl-line"><label title="內定算法：收盤站上 6 條均線各 1 分＋創 6 個天期新高各 1 分＋多頭排列加分 3 分，滿分 15">均線分數（內定）≥ ' + inp('score', 'min="0" max="15" step="1"') + '</label>' +
       '<span class="hl-field">K棒 ' + kBtn('black', '黑K') + kBtn('red', '紅K') + kBtn('any', '不限') + '</span>' +
       '<label>漲跌幅 ' + inp('min', 'step="0.5"') + ' ～ ' + inp('max', 'step="0.5"') + ' %</label></div>' +
     '<div class="hl-line"><label>週籌碼（大戶週增%）≥ ' + inp('week', 'step="1" placeholder="不用"') + '</label>' +
@@ -4892,37 +4890,35 @@ function hlLiveInfo(listDate){
   const ok = !!(lastData && lastData.quoteDate && listDate && lastData.quoteDate > listDate);
   return { ok, time: ok ? (lastData.quoteDate.slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5)) : '' };
 }
-function hlRowHead(r, algo){
-  const official = algo === 'official';
+function hlRowHead(r){
   const sc = (v) => (v === null || v === undefined ? '—' : v);
   return '<tr class="hl-row" data-code="' + r.code + '" data-name="' + (r.name || '') + '"><td class="l"><b>' + r.code + '</b></td><td class="l">' + (r.name || '') + (r.disposed ? ' 🔒' : '') + '</td><td class="l">' + (r.group || '—') + '</td>' +
-    '<td' + (official ? '' : ' class="hl-use"') + '>' + sc(r.score) + '</td><td' + (official ? ' class="hl-use"' : '') + '>' + sc(r.score2) + '</td><td>' + hlN(official ? r.groupAvg2 : r.groupAvg, 1) + '</td><td class="' + dirClass(r.weekPct || 0) + '">' + swPct(r.weekPct) + '</td><td class="' + dirClass(r.changePct || 0) + '">' + swPct(r.changePct) + '</td>' +
+    '<td class="hl-use">' + sc(r.score2) + '</td><td>' + hlN(r.groupAvg2, 1) + '</td><td class="' + dirClass(r.weekPct || 0) + '">' + swPct(r.weekPct) + '</td><td class="' + dirClass(r.changePct || 0) + '">' + swPct(r.changePct) + '</td>' +
     '<td>' + hlN(r.hits20, 0) + '</td><td>' + hlN(r.val5, 1) + '</td><td>' + hlPrice(r.entry) + '</td><td>' + hlPrice(r.lowK) + '</td><td>' + hlN(r.target, 2) + '</td>';
 }
-const hlHead = (algo) => '<th class="l">代號</th><th class="l">股名</th><th class="l">族群</th><th' + (algo === 'official' ? '' : ' class="hl-use"') + '>均線本站</th><th' + (algo === 'official' ? ' class="hl-use"' : '') + '>均線官網式</th><th>族群平均(' + (algo === 'official' ? '官網式' : '本站') + ')</th><th>週籌碼%</th><th>當天漲跌</th><th>20日>8%</th><th>5日均值(億)</th><th>進場(收盤)</th><th>黑K低</th><th>停利價</th>';
-const hlAlgoOf = (data) => ((data && data.params && data.params.algo) === 'official' ? 'official' : 'site');
+const hlHead = () => '<th class="l">代號</th><th class="l">股名</th><th class="l">族群</th><th class="hl-use">均線分數</th><th>族群平均</th><th>週籌碼%</th><th>當天漲跌</th><th>20日>8%</th><th>5日均值(億)</th><th>進場(收盤)</th><th>黑K低</th><th>停利價</th>';
 function hlTodayHtml(data){
-  const t = data.today || {}, rows = t.rows || [], live = hlLiveInfo(t.date), algo = hlAlgoOf(data);
+  const t = data.today || {}, rows = t.rows || [], live = hlLiveInfo(t.date);
   const cell = (r) => {
     const q = live.ok ? hlLive(r.code) : null, price = q ? q.price : null;
     const hitTp = price === null ? null : price >= r.target, hitSl = price === null ? null : price < r.lowK;
-    return hlRowHead(r, algo) + '<td>' + (price === null ? '—' : hlPrice(price)) + '</td><td class="' + (q ? dirClass(q.changePercent || 0) : '') + '">' + (q ? swPct(q.changePercent) : '—') + '</td>' +
+    return hlRowHead(r) + '<td>' + (price === null ? '—' : hlPrice(price)) + '</td><td class="' + (q ? dirClass(q.changePercent || 0) : '') + '">' + (q ? swPct(q.changePercent) : '—') + '</td>' +
       '<td class="' + (hitTp ? 'ok' : '') + '">' + (hitTp === null ? '—' : hitTp ? '✔' : '') + '</td><td class="' + (hitSl ? 'bad' : '') + '">' + (hitSl === null ? '—' : hitSl ? '✔' : '') + '</td></tr>';
   };
   return '<div class="bl-section bl-launch">④ 今日名單・' + swMmdd(t.date) + '(' + hlWd(t.date) + ') 收盤符合參數、還沒有 D+1 資料的名單（' + rows.length + ' 檔）</div>' +
     '<div class="sw-rule">' + (live.ok ? '現價＝首頁即時報價（' + live.time + '）；✔ 達停利＝現價 ≥ 停利價、✔ 破黑低＝現價 < 黑K最低價。' : '隔天開盤後再打開這一頁，現價欄會用首頁的即時報價打勾（✔ 達停利／✔ 破黑低）。') + '點一列開K線圖。</div>' +
-    (rows.length ? '<div class="hl-scroll"><table class="hl-table hl-today"><thead><tr>' + hlHead(algo) + '<th>現價</th><th>現價漲跌</th><th>✔達停利</th><th>✔破黑低</th></tr></thead><tbody>' + rows.map(cell).join('') + '</tbody></table></div>' : '<div class="race-note">那天沒有符合參數的股票</div>');
+    (rows.length ? '<div class="hl-scroll"><table class="hl-table hl-today"><thead><tr>' + hlHead() + '<th>現價</th><th>現價漲跌</th><th>✔達停利</th><th>✔破黑低</th></tr></thead><tbody>' + rows.map(cell).join('') + '</tbody></table></div>' : '<div class="race-note">那天沒有符合參數的股票</div>');
 }
-function hlDayTableHtml(day, latest, algo){
+function hlDayTableHtml(day, latest){
   const cell = (v) => '<td class="' + dirClass(v || 0) + '">' + swPct(v) + '</td>';
   const rows = (day.rows || []).map((r) => {
-    if (!r.next) return hlRowHead(r, algo) + '<td colspan="13" class="l muted">' + (r.gap ? '價格斷層（分割／減資），不算' : day.date === latest ? 'D+1 尚未收盤' : '沒有 D+1 日K') + '</td></tr>';
+    if (!r.next) return hlRowHead(r) + '<td colspan="13" class="l muted">' + (r.gap ? '價格斷層（分割／減資），不算' : day.date === latest ? 'D+1 尚未收盤' : '沒有 D+1 日K') + '</td></tr>';
     const n = r.next, x = r.exits || {};
-    return hlRowHead(r, algo) + '<td>' + hlPrice(n.open) + '</td><td>' + hlPrice(n.high) + '</td><td>' + hlPrice(n.low) + '</td><td>' + hlPrice(n.close) + '</td>' +
+    return hlRowHead(r) + '<td>' + hlPrice(n.open) + '</td><td>' + hlPrice(n.high) + '</td><td>' + hlPrice(n.low) + '</td><td>' + hlPrice(n.close) + '</td>' +
       '<td class="' + (r.hitTp ? 'ok' : '') + '">' + (r.hitTp ? '✔' : '') + '</td><td class="' + (r.hitSl ? 'bad' : '') + '">' + (r.hitSl ? '✔' : '') + '</td>' +
       cell(x.close) + cell(x.tp) + cell(x.sl) + cell(x.both) + cell(x.open) + cell(x.ohl) + (x.d2 === null || x.d2 === undefined ? '<td>—</td>' : cell(x.d2)) + '</tr>';
   }).join('');
-  return '<div class="hl-scroll"><table class="hl-table"><thead><tr>' + hlHead(algo) + '<th>D+1 開</th><th>D+1 高</th><th>D+1 低</th><th>D+1 收</th><th>✔碰停利</th><th>✔破黑低</th><th>收盤出</th><th>停利出</th><th>破黑低出</th><th>停利+破黑低</th><th>隔天開盤出</th><th>開高走開低抱</th><th>D+2</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+  return '<div class="hl-scroll"><table class="hl-table"><thead><tr>' + hlHead() + '<th>D+1 開</th><th>D+1 高</th><th>D+1 低</th><th>D+1 收</th><th>✔碰停利</th><th>✔破黑低</th><th>收盤出</th><th>停利出</th><th>破黑低出</th><th>停利+破黑低</th><th>隔天開盤出</th><th>開高走開低抱</th><th>D+2</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 function hlDailyHtml(data){
   const days = data.daily || [];
@@ -4931,13 +4927,13 @@ function hlDailyHtml(data){
       const open = !!hlState.open[day.date], avg = day.avg || {};
       const sub = day.date === data.date ? 'D+1 尚未收盤（見 ④ 今日名單）' : day.withNext ? '收盤出 ' + swPct(avg.close) + ' ・ 停利出 ' + swPct(avg.tp) + ' ・ 破黑低出 ' + swPct(avg.sl) + ' ・ 停利＋破黑低 ' + swPct(avg.both) : (day.count ? '沒有 D+1 資料' : '');
       return '<div class="hl-day"><div class="hl-day-head" data-date="' + day.date + '"><b>' + swMmdd(day.date) + '(' + hlWd(day.date) + ')</b><span>' + day.count + ' 檔</span><span class="muted">' + sub + '</span><span class="hl-caret">' + (open ? '▾' : '▸') + '</span></div>' +
-        (open ? (day.count ? hlDayTableHtml(day, data.date, hlAlgoOf(data)) : '<div class="race-note">那天沒有符合參數的股票</div>') : '') + '</div>';
+        (open ? (day.count ? hlDayTableHtml(day, data.date) : '<div class="race-note">那天沒有符合參數的股票</div>') : '') + '</div>';
     }).join('');
 }
 function swingHeilongHtml(){
   ensureHeilong();
   const data = hlState.data;
-  const head = '<div class="sw-rule">出發點＝官網選股系統「創高黑龍」（均線分數高＋當天收黑）。自訂參數 → 看歷史 D+1 各種出場方式的績效 → 每天收盤挑自己的名單 → 隔天回來看要不要出場。均線分數可切「本站」或「官網式」兩套算法，表格兩欄都列出來、選用的那欄標紅。</div>' +
+  const head = '<div class="sw-rule">出發點＝官網選股系統「創高黑龍」（均線分數高＋當天收黑）。自訂參數 → 看歷史 D+1 各種出場方式的績效 → 每天收盤挑自己的名單 → 隔天回來看要不要出場。均線分數＝內定算法（站上 6 條均線＋創 6 個天期新高＋多頭排列 3 分，滿分 15）。</div>' +
     '<div class="bl-section bl-launch">① 選股參數</div>' + hlParamsHtml(hlParams);
   if (!data) return head + '<div class="signal-empty"><div class="se-title">' + (hlState.failedAt ? '讀取失敗' + (hlState.error ? '：' + hlState.error : '') : '計算中…') + '</div><div class="se-sub">後端每個交易日收盤後整理黑龍表；讀不到的話稍後再試。</div></div>';
   if (data.status !== 'ok') return head + '<div class="signal-empty"><div class="se-title">還沒有黑龍名單</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
@@ -5049,9 +5045,8 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
   const more = e.target.closest('.sw-etf-more');
   if (more){ swingState.etfOpen[more.dataset.etf] = !swingState.etfOpen[more.dataset.etf]; renderSwing(); return; }
   // 黑龍回測：K棒／停利／回測天數按鈕點了立刻重算；重新計算、預設、存參數；每日明細展開
-  const hlBtn = e.target.closest('.hl-k, .hl-tp, .hl-days, .hl-algo');
+  const hlBtn = e.target.closest('.hl-k, .hl-tp, .hl-days');
   if (hlBtn){
-    if (hlBtn.dataset.algo) hlParams.algo = hlBtn.dataset.algo;
     if (hlBtn.dataset.k) hlParams.k = hlBtn.dataset.k;
     if (hlBtn.dataset.tp) hlParams.tp = Number(hlBtn.dataset.tp);
     if (hlBtn.dataset.days !== undefined) hlParams.days = Number(hlBtn.dataset.days);
@@ -5087,7 +5082,7 @@ for (const type of ['input', 'change']) document.getElementById('swingBody').add
 // 貼一串股號 → /api/checkup 拿回每檔收盤後算好的三面向分數（基本面／籌碼面／技術面，0～100）、防守線（三日低／月線／紅半）、
 // 七科小體檢；綜合在這裡照你勾的面向與權重算。清單與偏好只存在這台瀏覽器（localStorage）。
 const CK_DEFAULT_PREFS = { fund: true, chip: true, tech: true, wFund: 34, wChip: 33, wTech: 33, zero: false, sort: 'overall', compact: false, byGroup: false };
-const CK_DIMS = [['fund', '📒 基本面', '月營收年增／月增＋本益比位階', 'wFund'], ['chip', '💰 籌碼面', '大戶週增＋法人 5 日＋主力 5 日', 'wChip'], ['tech', '📈 技術面', '官網式均線分數換成百分', 'wTech']];
+const CK_DIMS = [['fund', '📒 基本面', '月營收年增／月增＋本益比位階', 'wFund'], ['chip', '💰 籌碼面', '大戶週增＋法人 5 日＋主力 5 日', 'wChip'], ['tech', '📈 技術面', '內定均線分數換成百分', 'wTech']];
 const CK_SUBJECT_LABELS = { ma: '均線', grp: '族群', pos: '族內名次', chip: '籌碼', pe: '本益比', rev: '營收', inst: '法人' };
 let ckPrefs = Object.assign({}, CK_DEFAULT_PREFS);
 let ckLists = { current: '', saved: {} };
@@ -5191,7 +5186,7 @@ function ckDetailHtml(r){
     '・今日 ' + (swHas(c.instToday) ? '<span class="' + dirClass(c.instToday) + '">' + swLots(c.instToday) + '</span>' : '—') +
     '<br>主力 5 日 ' + (swHas(c.mf5) ? '<b class="' + dirClass(c.mf5) + '">' + swLots(c.mf5) + '</b>' + (c.mfStreak > 0 ? '・連買 ' + c.mfStreak + ' 天' : c.mfStreak < 0 ? '・連賣 ' + (-c.mfStreak) + ' 天' : '') : '—');
   const ma = r.ma || {};
-  const techText = '均線分數 官網式 <b>' + (swHas(r.score2) ? r.score2 : '—') + '</b>／本站 ' + (swHas(r.score) ? r.score : '—') + (swHas(r.groupAvg2) ? '・族群平均 ' + r.groupAvg2 : '') + (r.groupRank ? '・族內第 ' + r.groupRank + '/' + r.groupN : '') +
+  const techText = '均線分數（內定）<b>' + (swHas(r.score2) ? r.score2 : '—') + '</b>/15' + (swHas(r.groupAvg2) ? '・族群平均 ' + r.groupAvg2 : '') + (r.groupRank ? '・族內第 ' + r.groupRank + '/' + r.groupN : '') +
     '<br>MA5 ' + ckPrice(ma['5']) + '・MA10 ' + ckPrice(ma['10']) + '・MA20 ' + ckPrice(ma['20']) + '・MA60 ' + ckPrice(ma['60']) +
     (r.def ? '<br>今日判定：三日低 ' + ckPrice(d.low3Y) + '（' + swPct(d.dL3, 1) + '）・月線 ' + ckPrice(d.ma20Y) + '（' + swPct(d.dMa, 1) + '）' + (d.halfY ? '・紅半 ' + ckPrice(d.halfY) + '（' + swPct(d.dHalf, 1) + '）' : '') + ' → ' + d.label : '');
   return '<tr class="ck-detail"><td colspan="11"><div class="ck-dgrid">' +
@@ -5505,7 +5500,7 @@ function dgSubjectsHtml(s){
   const row = (label, k, now, grp, trend) => '<tr><td class="l"><b>' + label + '</b> ' + chip(k) + '</td><td class="l">' + now + '</td><td class="l">' + grp + '</td><td class="l">' + trend + '</td></tr>';
   const above = dgAboveList(s);
   return '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">科目</th><th class="l">目前</th><th class="l">族內</th><th class="l">近期走勢</th></tr></thead><tbody>' +
-    row('均線分數', 'ma', (swHas(s.score2) ? '<b>' + s.score2 + '</b>/15' : '—') + '<div class="dg-sub">' + (above ? '站上 ' + above + ' 日線' : '沒站上任何均線') + '・本站算法 ' + (swHas(s.score) ? s.score : '—') + '</div>', swHas(s.groupAvg2) ? '族群平均 ' + s.groupAvg2 : '—', dgSpark(h.score10, { note: '近 10 日分數' })) +
+    row('均線分數', 'ma', (swHas(s.score2) ? '<b>' + s.score2 + '</b>/15' : '—') + '<div class="dg-sub">' + (above ? '站上 ' + above + ' 日線' : '沒站上任何均線') + '</div>', swHas(s.groupAvg2) ? '族群平均 ' + s.groupAvg2 : '—', dgSpark(h.score10, { note: '近 10 日分數' })) +
     row('族群名次', 'grp', s.group ? (s.groupSrank ? '強度榜第 <b>' + s.groupSrank + '</b>' : '—') + (s.groupCloseRank ? '<div class="dg-sub">收盤排名第 ' + s.groupCloseRank + '（下午報）</div>' : '') : '沒有歸在任何族群', s.group ? (swHas(s.groupStrength) ? '族群強度 ' + s.groupStrength : '—') : '—', '<span class="muted">—</span>') +
     row('個股族內名次', 'pos', s.groupRank ? '第 <b>' + s.groupRank + '</b>/' + s.groupN + '<div class="dg-sub">今日 ' + swPct(s.chgPct, 2) + '</div>' : '—', '—', '<span class="muted">—</span>') +
     row('籌碼暴增', 'chip', swHas(c.weekPct) ? '<b>' + swPct(c.weekPct, 2) + '</b><div class="dg-sub">' + (c.tdccDate ? swMmdd(c.tdccDate) + ' 週' : '') + (c.weeks > 0 ? '・連 ' + c.weeks + ' 週增' : '') + (swHas(c.bigPct) ? '・大戶持股 ' + c.bigPct + '%' : '') + '</div>' : '還沒有集保週增資料' + (swHas(c.bigPct) ? '<div class="dg-sub">大戶持股 ' + c.bigPct + '%（' + swMmdd(c.tdccDate) + '）</div>' : ''), '—', dgSpark(h.chip8, { bars: true, zero: true, note: '近 8 週增減', fmt: (v) => swPct(v, 1) })) +
@@ -5644,7 +5639,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-28 22:15:01';
+const BUILD_STAMP = '2026-09-28 22:27:59';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
