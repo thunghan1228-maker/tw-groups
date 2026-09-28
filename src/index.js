@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-28 18:28:37";
+const BUILD_STAMP = "2026-09-28 22:15:01";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -684,6 +684,14 @@ const HTML_PAGE = `<!DOCTYPE html>
   .ck-judge.ok{color:#e6675f;}
   .ck-btn{cursor:pointer;color:var(--muted);font-weight:800;padding:0 4px;}
   .ck-detail td{background:var(--panel-2);white-space:normal;text-align:left;font-size:12px;line-height:1.6;padding:8px 12px;}
+  /* 2026-09-28 使用者：健診表要能照族群看（像學員專區的族群籤），也能整張表分族群排 */
+  .ck-gchip{display:inline-flex;align-items:center;gap:4px;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;background:var(--panel);user-select:none;}
+  .ck-gchip b{font-weight:700;}
+  .ck-gchip .ck-gn{color:var(--muted);font-size:12px;}
+  .ck-gchip.on{border-color:#e6675f;background:rgba(230,103,95,.16);color:#e6675f;}
+  .ck-gchip.on .ck-gn{color:#e6675f;}
+  .ck-table tr.ck-ghead td{background:var(--panel-2);text-align:left;font-weight:800;font-size:13px;color:#e6675f;border-top:2px solid #e6675f;padding:6px 8px;}
+  .ck-table tr.ck-ghead td .muted{font-weight:400;margin-left:8px;}
   .ck-dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 16px;}
   .ck-dgrid b{color:#e6675f;}
   .ck-sub{display:inline-block;border-radius:6px;padding:1px 6px;margin:1px 2px;font-size:12px;border:1px solid var(--line);}
@@ -5078,14 +5086,14 @@ for (const type of ['input', 'change']) document.getElementById('swingBody').add
 // ---- 每日持股健診（2026-09-28 使用者：照學員專區「每日持股健診」做）----
 // 貼一串股號 → /api/checkup 拿回每檔收盤後算好的三面向分數（基本面／籌碼面／技術面，0～100）、防守線（三日低／月線／紅半）、
 // 七科小體檢；綜合在這裡照你勾的面向與權重算。清單與偏好只存在這台瀏覽器（localStorage）。
-const CK_DEFAULT_PREFS = { fund: true, chip: true, tech: true, wFund: 34, wChip: 33, wTech: 33, zero: false, sort: 'overall', compact: false };
+const CK_DEFAULT_PREFS = { fund: true, chip: true, tech: true, wFund: 34, wChip: 33, wTech: 33, zero: false, sort: 'overall', compact: false, byGroup: false };
 const CK_DIMS = [['fund', '📒 基本面', '月營收年增／月增＋本益比位階', 'wFund'], ['chip', '💰 籌碼面', '大戶週增＋法人 5 日＋主力 5 日', 'wChip'], ['tech', '📈 技術面', '官網式均線分數換成百分', 'wTech']];
 const CK_SUBJECT_LABELS = { ma: '均線', grp: '族群', pos: '族內名次', chip: '籌碼', pe: '本益比', rev: '營收', inst: '法人' };
 let ckPrefs = Object.assign({}, CK_DEFAULT_PREFS);
 let ckLists = { current: '', saved: {} };
 try { ckPrefs = Object.assign({}, CK_DEFAULT_PREFS, JSON.parse(localStorage.getItem('checkupPrefs') || '{}') || {}); } catch (e) { /* 用預設 */ }
 try { const saved = JSON.parse(localStorage.getItem('checkupLists') || 'null'); if (saved && typeof saved === 'object') ckLists = Object.assign({ current: '', saved: {} }, saved); } catch (e) { /* 用預設 */ }
-let ckState = { codes: [], query: null, data: null, loading: false, failedAt: 0, error: '', open: {}, savedNote: '', listName: '' };
+let ckState = { codes: [], query: null, data: null, loading: false, failedAt: 0, error: '', open: {}, savedNote: '', listName: '', groups: [] };   // groups＝勾起來要看的族群（空＝全部）
 function ckSavePrefs(){ try { localStorage.setItem('checkupPrefs', JSON.stringify(ckPrefs)); } catch (e) { /* 記不住就算了 */ } }
 function ckSaveLists(){ try { localStorage.setItem('checkupLists', JSON.stringify(ckLists)); } catch (e) { /* 記不住就算了 */ } }
 let ckNameMap = null;
@@ -5204,6 +5212,40 @@ function ckRowHtml(r){
     '<td><span class="ck-btn ck-toggle" data-code="' + r.code + '" title="明細">' + (open ? '▾' : '▸') + '</span><span class="ck-btn ck-diag" data-code="' + r.code + '" title="完整問診">🩺</span><span class="ck-btn ck-remove" data-code="' + r.code + '" title="從清單刪掉">✕</span></td></tr>' +
     (open ? ckDetailHtml(r) : '');
 }
+const ckGroupKey = (r) => (r && r.group) || '—';
+const ckGroupLabel = (k) => (k === '—' ? '沒有族群' : k);
+function ckSortMetric(r){
+  // 分族群時族群的先後：照目前排序欄的族內平均（綜合／三面向／20日漲幅／距月線）
+  const key = ckPrefs.sort;
+  if (key === 'overall') return ckOverall(r);
+  if (key === 'chg20') return r.chg20Pct; if (key === 'dist') return r.distMa20Pct;
+  return (r.scores || {})[key];
+}
+function ckSections(all){
+  // 回 { counts, keys, rows（篩過的）, sections[{key,label,rows,avg}] }；勾了族群就只留那些族群；分族群顯示時一族一段
+  const counts = {}; all.forEach((r) => { const k = ckGroupKey(r); counts[k] = (counts[k] || 0) + 1; });
+  const keys = Object.keys(counts).sort((a, b) => ((a === '—') - (b === '—')) || (counts[b] - counts[a]) || a.localeCompare(b, 'zh-Hant'));
+  ckState.groups = ckState.groups.filter((k) => counts[k]);
+  const rows = ckState.groups.length ? all.filter((r) => ckState.groups.includes(ckGroupKey(r))) : all;
+  let sections = [{ key: null, label: '', rows, avg: null }];
+  if (ckPrefs.byGroup){
+    const by = {}; rows.forEach((r) => { (by[ckGroupKey(r)] = by[ckGroupKey(r)] || []).push(r); });
+    sections = Object.keys(by).map((k) => { const vals = by[k].map(ckSortMetric).filter(swHas); const ovs = by[k].map(ckOverall).filter(swHas);
+      return { key: k, label: ckGroupLabel(k), rows: by[k], metric: vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null, avg: ovs.length ? Math.round(ovs.reduce((a, b) => a + b, 0) / ovs.length) : null }; });
+    sections.sort((a, b) => ((a.key === '—') - (b.key === '—')) || ((b.metric === null ? -1e9 : b.metric) - (a.metric === null ? -1e9 : a.metric)) || (b.rows.length - a.rows.length));
+  }
+  return { counts, keys, rows, sections };
+}
+function ckGroupBarHtml(sec, total){
+  const chip = (k, label, n, on) => '<span class="ck-gchip' + (on ? ' on' : '') + '" data-group="' + k.replace(/"/g, '&quot;') + '">' + (on ? '☑' : '☐') + ' <b>' + label + '</b> <span class="ck-gn">' + n + '</span></span>';
+  return '<div class="ck-line ck-groups"><b>③ 看族群</b>' + chip('*', '全部', total, !ckState.groups.length) +
+    sec.keys.map((k) => chip(k, ckGroupLabel(k), sec.counts[k], ckState.groups.includes(k))).join('') +
+    '<label><input type="checkbox" class="ck-chk" data-key="byGroup"' + (ckPrefs.byGroup ? ' checked' : '') + '> 分族群顯示</label>' +
+    '<span class="muted">點族群只看那幾族（可多選）；分族群顯示＝整張表一族一段，族的先後照目前排序欄的族內平均</span></div>';
+}
+function ckSectionRowsHtml(sections){
+  return sections.map((sec) => (sec.key === null ? '' : '<tr class="ck-ghead"><td colspan="11">🏷 ' + sec.label + ' <span class="muted">' + sec.rows.length + ' 檔' + (sec.avg !== null ? '・綜合平均 ' + sec.avg : '') + '・守住 ' + sec.rows.filter((r) => r.def && !r.def.brkMa && !r.def.brkL3 && !r.def.brkHalf).length + '／破線 ' + sec.rows.filter((r) => r.def && (r.def.brkMa || r.def.brkL3 || r.def.brkHalf)).length + '</span></td></tr>') + sec.rows.map(ckRowHtml).join('')).join('');
+}
 function ckCompactText(rows){
   const data = ckState.data || {};
   return '每日持股健診 ' + swMmdd(data.date) + ' 收盤\\n' + rows.map((r) => {
@@ -5247,11 +5289,14 @@ function renderCheckup(){
     body.innerHTML = html + '<div class="signal-empty"><div class="se-title">還沒有健診資料</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
     return;
   }
-  const rows = ckSorted(data.rows || []);
+  const all = ckSorted(data.rows || []);
+  const sec = ckSections(all);
+  const rows = sec.sections.reduce((acc, x) => acc.concat(x.rows), []);   // 畫出來的順序（篩過、分族群後）
   const th = (key, label) => '<th class="' + (ckPrefs.sort === key ? 'on' : '') + '" data-sort="' + key + '">' + label + (ckPrefs.sort === key ? ' ▼' : '') + '</th>';
-  html += '<div class="sw-basis">資料 ' + swMmdd(data.date) + ' 收盤・' + rows.length + ' 檔' + (data.missing && data.missing.length ? '・本站沒有日K：' + data.missing.join('、') : '') + '・整理時間 ' + (data.collector && data.collector.builtAt ? String(data.collector.builtAt).slice(5, 16).replace('T', ' ') : '—') + '・點股票開K線圖、點 ▸ 看三面向明細</div>';
+  html += '<div class="sw-basis">資料 ' + swMmdd(data.date) + ' 收盤・' + all.length + ' 檔' + (rows.length !== all.length ? '（只看 ' + ckState.groups.map(ckGroupLabel).join('、') + '：' + rows.length + ' 檔）' : '') + (data.missing && data.missing.length ? '・本站沒有日K：' + data.missing.join('、') : '') + '・整理時間 ' + (data.collector && data.collector.builtAt ? String(data.collector.builtAt).slice(5, 16).replace('T', ' ') : '—') + '・點股票開K線圖、點 ▸ 看三面向明細</div>';
+  html += ckGroupBarHtml(sec, all.length);
   html += '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">個股（' + rows.length + '）</th>' + th('fund', '📒 基本面') + th('chip', '💰 籌碼面') + th('tech', '📈 技術面') + th('overall', '🏆 綜合') +
-    '<th>收盤(' + swMmdd(data.date) + ')</th>' + th('chg20', '20日漲幅') + th('dist', '距月線') + '<th class="l">明天防守價</th><th class="l">防守</th><th></th></tr></thead><tbody>' + rows.map(ckRowHtml).join('') + '</tbody></table></div>';
+    '<th>收盤(' + swMmdd(data.date) + ')</th>' + th('chg20', '20日漲幅') + th('dist', '距月線') + '<th class="l">明天防守價</th><th class="l">防守</th><th></th></tr></thead><tbody>' + ckSectionRowsHtml(sec.sections) + '</tbody></table></div>';
   html += '<div class="ck-line"><button class="chart-tab chips-btn" id="ckCompactBtn">📋 ' + (ckPrefs.compact ? '收起精簡版' : '精簡版文字') + '</button><button class="chart-tab chips-btn" id="ckCopyCompact">複製精簡版</button></div>';
   if (ckPrefs.compact) html += '<div class="ck-compact" id="ckCompact">' + ckCompactText(rows).replace(/</g, '&lt;') + '</div>';
   body.innerHTML = html + ckRulesHtml(data);
@@ -5291,7 +5336,13 @@ document.getElementById('checkupBody').addEventListener('click', (e) => {
   }
   if (e.target.closest('#ckCopy')){ ckCopy(ckResolve(input()).join('/'), '清單已複製'); return; }
   if (e.target.closest('#ckCompactBtn')){ ckPrefs.compact = !ckPrefs.compact; ckSavePrefs(); renderCheckup(); return; }
-  if (e.target.closest('#ckCopyCompact')){ ckCopy(ckCompactText(ckSorted((ckState.data && ckState.data.rows) || [])), '精簡版已複製'); return; }
+  if (e.target.closest('#ckCopyCompact')){ ckCopy(ckCompactText(ckSections(ckSorted((ckState.data && ckState.data.rows) || [])).sections.reduce((acc, x) => acc.concat(x.rows), [])), '精簡版已複製'); return; }
+  const gchip = e.target.closest('.ck-gchip');
+  if (gchip){
+    const k = gchip.dataset.group;
+    if (k === '*') ckState.groups = []; else ckState.groups = ckState.groups.includes(k) ? ckState.groups.filter((x) => x !== k) : ckState.groups.concat([k]);
+    renderCheckup(); return;
+  }
   const remove = e.target.closest('.ck-remove');
   if (remove){ ckRun(ckState.codes.filter((c) => c !== remove.dataset.code).join('/')); return; }
   const toggle = e.target.closest('.ck-toggle');
@@ -5593,7 +5644,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-28 18:28:37';
+const BUILD_STAMP = '2026-09-28 22:15:01';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
