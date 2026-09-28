@@ -150,22 +150,22 @@ jobs:
               print('peratio rows', len(rows), rows[0].get('Date'))
           except Exception as e:
               print('peratio failed', type(e).__name__, e)
-          # 上櫃月營收（只留族群股票）
+          # 上櫃月營收：全部上櫃公司都留（持股健診貼族群表以外的股票也要有基本面，2026-09-28）
           try:
               rows = get_json('https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_O')
-              keep = [r for r in rows if not codes or code_of(r) in codes]
+              keep = [r for r in rows if code_of(r)]
               assert keep, 'no revenue rows'
               json.dump(keep, open('tpex/revenue-latest.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
               print('revenue rows', len(keep), keep[0].get('資料年月'))
           except Exception as e:
               print('revenue failed', type(e).__name__, e)
-          # 上櫃基本資料：只留代號、名稱、已發行普通股數
+          # 上櫃基本資料：全部上櫃公司都留，只留代號、名稱、已發行普通股數
           try:
               rows = get_json('https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O')
               keep = []
               for r in rows:
                   c = code_of(r)
-                  if codes and c not in codes:
+                  if not c:
                       continue
                   # 櫃買中心這份是英文欄位（IssueShares／CompanyAbbreviation），證交所那份才是中文欄位
                   shares = r.get('IssueShares') or next((v for k, v in r.items() if '已發行普通股數' in str(k)), None)
