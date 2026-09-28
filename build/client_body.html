@@ -550,6 +550,45 @@
   .sw-etf-kind{font-size:13px;font-weight:700;margin:8px 0 2px;color:var(--muted);}
   .sw-drow.etf{border-left-color:#7c3aed;}
   .sw-verdict.bad{background:#b91c1c;}
+  /* 黑龍回測（2026-09-28 使用者：照學員專區「創高黑龍・績效分析」做在下午報裡）：參數列、爆發力、出場方式表、曲線、名單表、每日明細 */
+  .hl-form{border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:8px 0;background:var(--panel);}
+  .hl-row{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin:4px 0;font-size:13px;}
+  .hl-row label,.hl-field{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;}
+  .hl-in{width:64px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:13px;}
+  .hl-sel{padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:13px;}
+  .hl-actions{margin-top:6px;}
+  .hl-form .chips-btn{padding:3px 9px;font-size:12px;}
+  .hl-bursts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:8px 0;}
+  .hl-burst{background:var(--panel);border:1px solid var(--line);border-top:3px solid #7c3aed;border-radius:10px;padding:8px 10px;}
+  .hl-bhead{font-weight:800;font-size:14px;margin-bottom:4px;}
+  .hl-bgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:4px;text-align:center;}
+  .hl-bgrid b{display:block;font-size:20px;line-height:1.2;font-variant-numeric:tabular-nums;}
+  .hl-bgrid span{font-size:11px;color:var(--muted);}
+  .hl-bfoot{font-size:12px;color:var(--muted);margin-top:4px;}
+  .hl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0;}
+  .hl-table{border-collapse:collapse;font-size:12px;white-space:nowrap;min-width:100%;}
+  .hl-table th,.hl-table td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:right;font-variant-numeric:tabular-nums;}
+  .hl-table th{color:var(--muted);font-weight:700;background:var(--panel);}
+  .hl-table th.l,.hl-table td.l{text-align:left;}
+  .hl-table tr.hl-mine td{background:rgba(124,58,237,.10);font-weight:700;}
+  .hl-table tr.hl-row{cursor:pointer;}
+  .hl-table tr.hl-row:hover td{background:var(--panel-2);}
+  .hl-table td.ok{color:#0f766e;font-weight:800;}
+  .hl-table td.bad{color:#b91c1c;font-weight:800;}
+  .hl-table td.muted{color:var(--muted);}
+  .hl-chart{margin:8px 0;}
+  .hl-chart-title{font-size:13px;font-weight:700;margin:4px 0;}
+  .hl-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;margin:2px 0 4px;}
+  .hl-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle;}
+  .hl-chart svg{display:block;font-size:10px;}
+  .hl-day{border:1px solid var(--line);border-radius:10px;margin:6px 0;background:var(--panel);}
+  .hl-day-head{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;padding:8px 12px;cursor:pointer;font-size:14px;}
+  .hl-day-head b{font-size:16px;color:#e6675f;}
+  .hl-day-head .muted{font-size:12px;color:var(--muted);}
+  .hl-caret{margin-left:auto;color:var(--muted);}
+  .hl-day .hl-scroll{padding:0 8px 8px;}
+  .hl-rules{font-size:12px;color:var(--muted);line-height:1.7;padding-left:20px;margin:6px 0;}
+  .sw-tile.hl b{font-size:22px;}
   .chips-weak-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 5px;margin-left:4px;background:#166534;color:#fff;white-space:nowrap;}  /* 放空籌碼：弱勢型態 */
   .sig-count{background:var(--panel-2);color:var(--muted);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px;}
   .signal-tab.active .sig-count{background:var(--bg);color:var(--accent);}
@@ -762,7 +801,7 @@
     <div class="chips-head">
       <div>
         <div class="chips-title">下午報</div>
-        <div class="chips-sub">隔天盤前讀：籌碼、技術、均線三面向各挑最多 5 檔，附防守價與風險提示；每個交易日收盤後整理，法人資料齊了會再更新，可回看近 10 個交易日。點股票可開K線圖。</div>
+        <div class="chips-sub">隔天盤前讀：籌碼、技術、均線三面向各挑最多 5 檔，附防守價與風險提示；每個交易日收盤後整理，法人資料齊了會再更新，可回看近 10 個交易日。「黑龍回測」照均線分數＋收黑挑名單、回測 D+1 各種出場方式。點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="swingClose" aria-label="關閉">✕</button>
     </div>
@@ -4350,7 +4389,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // 後端每個交易日收盤後整理一份（/api/swing-report），以資料基準日為鍵保存；這裡照日期切換、五個段落顯示。
 const SWING_SECTIONS = [
   { key: 'summary', label: '今日摘要' }, { key: 'disposition', label: '處置動態' }, { key: 'etf', label: '主動式基金' }, { key: 'groups', label: '產業觀察' },
-  { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '均線轉強' },
+  { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '均線轉強' }, { key: 'heilong', label: '黑龍回測' },
 ];
 let swingState = { section: 'summary', date: '', groupsLimit: 12, etfOpen: {} };   // etfOpen: 主動式基金各檔展開全部
 const swingCache = {};      // date('' = 最新) -> payload
@@ -4557,6 +4596,185 @@ function swingDispoRowHtml(e, kind){
     '<b class="sw-dcode">' + e.code + '</b><span class="sw-dname">' + (e.name || '') + chipsFlagPillsHtml(e.code) + '</span><span class="sw-dgroup">' + (e.group || '—') + '</span>' +
     '<span class="sw-dextra">' + extra + '</span></div>';
 }
+// ---- 黑龍回測（2026-09-28 使用者：照學員專區「創高黑龍・績效分析」做在下午報裡，參數可以在頁面上調）----
+// 後端每個交易日收盤後把族群表內每檔的均線分數、K棒、漲跌幅、週籌碼…存成一張表（近 60 個交易日），
+// 這裡把參數丟給 /api/heilong，拿回各種出場方式的績效、累積曲線、爆發力、今日名單與每日明細。
+// 「存成我的參數」存在這台瀏覽器（localStorage）。K棒／停利／回測天數按鈕點了立刻重算；數字欄改完按「重新計算」。
+const HL_DEFAULTS = { score: 10, k: 'black', min: -10, max: 3, week: '', gavg: '', hits: '', val: '', exdispo: true, cap: 0, sort: 'score', tp: 3, useTp: true, useSl: true, days: 10, amt: 50 };
+const HL_SORTS = [['score', '均線分數 高→低'], ['week', '週籌碼% 高→低'], ['gavg', '族群平均分 高→低'], ['hits', '近 20 日 >8% 次數 多→少'], ['drop', '當天跌最多 → 少'], ['val', '成交值 大→小']];
+let hlParams = Object.assign({}, HL_DEFAULTS);
+try { const saved = JSON.parse(localStorage.getItem('heilongParams') || 'null'); if (saved && typeof saved === 'object') hlParams = Object.assign({}, HL_DEFAULTS, saved); } catch (e) { /* 讀不到就用預設 */ }
+let hlState = { query: null, data: null, loading: false, failedAt: 0, error: '', open: {}, savedAt: 0 };
+function hlMine(p){ return p.useTp && p.useSl ? 'both' : p.useTp ? 'tp' : p.useSl ? 'sl' : 'close'; }
+function hlMineLabel(p){ return p.useTp && p.useSl ? '停利 +' + Number(p.tp) + '% ＋ 破黑低停損' : p.useTp ? '停利 +' + Number(p.tp) + '%' : p.useSl ? '破黑低停損' : '隔天收盤出場'; }
+function hlQuery(p){
+  const q = new URLSearchParams();
+  q.set('score', p.score); q.set('k', p.k); q.set('min', p.min); q.set('max', p.max);
+  for (const key of ['week', 'gavg', 'hits', 'val']) if (p[key] !== '' && p[key] !== null && p[key] !== undefined && !isNaN(Number(p[key]))) q.set(key, p[key]);
+  q.set('exdispo', p.exdispo ? '1' : '0'); q.set('cap', p.cap || 0); q.set('sort', p.sort); q.set('tp', p.tp); q.set('mine', hlMine(p)); q.set('days', p.days); q.set('amt', p.amt || 50);
+  return q.toString();
+}
+async function ensureHeilong(){
+  const query = hlQuery(hlParams);
+  if (hlState.query === query && (hlState.data || hlState.loading)) return;
+  if (hlState.query === query && hlState.failedAt && Date.now() - hlState.failedAt < 30000) return;
+  hlState.query = query; hlState.loading = true; hlState.data = null; hlState.error = '';
+  try {
+    const res = await fetch('/api/heilong?' + query);
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && (data.detail || data.error)) || ('heilong http ' + res.status));
+    if (!data || !data.status) throw new Error('bad payload');
+    if (hlState.query !== query) return;    // 參數已經換了
+    hlState.data = data; hlState.failedAt = 0;
+  } catch (e) {
+    if (hlState.query !== query) return;
+    hlState.failedAt = Date.now(); hlState.error = String((e && e.message) || e);
+  } finally {
+    if (hlState.query === query) hlState.loading = false;
+  }
+  if (!document.getElementById('swingModal').hidden && swingState.section === 'heilong') renderSwing();
+}
+function hlRun(){ hlState.query = null; hlState.failedAt = 0; renderSwing(); }
+const hlN = (v, digits) => (v === null || v === undefined ? '—' : Number(v).toFixed(digits === undefined ? 2 : digits));
+const hlPrice = (v) => (v === null || v === undefined ? '—' : Number(v) >= 500 ? Number(v).toFixed(0) : Number(v) >= 50 ? Number(v).toFixed(1) : Number(v).toFixed(2));
+const hlMoney = (v) => (v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(1) + ' 萬');
+const hlWd = (d) => '日一二三四五六'[new Date(d + 'T00:00:00').getDay()] || '';
+function hlLive(code){
+  if (!lastData || !Array.isArray(lastData.groups)) return null;
+  for (const g of lastData.groups) for (const s of (g.stocks || [])) if (s.code === code && s.price > 0) return s;
+  return null;
+}
+function hlParamsHtml(p){
+  const kBtn = (v, label) => '<button class="chart-tab chips-btn hl-k' + (p.k === v ? ' active' : '') + '" data-k="' + v + '">' + label + '</button>';
+  const tpBtn = (v) => '<button class="chart-tab chips-btn hl-tp' + (Number(p.tp) === v ? ' active' : '') + '" data-tp="' + v + '">' + v + '%</button>';
+  const daysBtn = (v, label) => '<button class="chart-tab chips-btn hl-days' + (Number(p.days) === v ? ' active' : '') + '" data-days="' + v + '">' + label + '</button>';
+  const inp = (key, attrs) => '<input class="hl-in" data-key="' + key + '" type="number" inputmode="decimal" value="' + (p[key] === null || p[key] === undefined ? '' : p[key]) + '" ' + (attrs || '') + '>';
+  const chk = (key, label) => '<label><input type="checkbox" class="hl-chk" data-key="' + key + '"' + (p[key] ? ' checked' : '') + '> ' + label + '</label>';
+  return '<div class="hl-form">' +
+    '<div class="hl-row"><label>均線分數 ≥ ' + inp('score', 'min="0" max="15" step="1"') + '</label>' +
+      '<span class="hl-field">K棒 ' + kBtn('black', '黑K') + kBtn('red', '紅K') + kBtn('any', '不限') + '</span>' +
+      '<label>漲跌幅 ' + inp('min', 'step="0.5"') + ' ～ ' + inp('max', 'step="0.5"') + ' %</label></div>' +
+    '<div class="hl-row"><label>週籌碼（大戶週增%）≥ ' + inp('week', 'step="1" placeholder="不用"') + '</label>' +
+      '<label>族群平均分 ≥ ' + inp('gavg', 'step="1" placeholder="不用"') + '</label>' +
+      '<label>近 20 日漲 >8% 次數 ≥ ' + inp('hits', 'step="1" min="0" placeholder="不用"') + '</label>' +
+      '<label>5 日均成交值 ≥ ' + inp('val', 'step="1" placeholder="不用"') + ' 億</label></div>' +
+    '<div class="hl-row">' + chk('exdispo', '排除當天處置中的股（分盤交易，隔天出不掉）') +
+      '<label>每天最多 ' + inp('cap', 'step="1" min="0"') + ' 檔（0＝不限），依 <select class="hl-sel" data-key="sort">' + HL_SORTS.map(([v, l]) => '<option value="' + v + '"' + (p.sort === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select> 取</label></div>' +
+    '<div class="hl-row"><span class="hl-field">停利 ' + tpBtn(3) + tpBtn(5) + tpBtn(8) + ' 自訂 ' + inp('tp', 'step="0.5" min="0.5" max="50"') + ' %</span>' +
+      chk('useTp', '用停利') + chk('useSl', '破黑低停損') +
+      '<span class="hl-field">回測 ' + daysBtn(10, '近 10 天') + daysBtn(20, '近 20 天') + daysBtn(0, '全部') + '</span>' +
+      '<label>每檔 ' + inp('amt', 'step="10" min="1"') + ' 萬</label></div>' +
+    '<div class="hl-row hl-actions"><button class="chart-tab chips-btn active" id="hlRun">▶ 重新計算</button><button class="chart-tab chips-btn" id="hlReset">官網創高黑龍預設</button><button class="chart-tab chips-btn" id="hlSave">💾 存成我的參數</button>' +
+      (hlState.savedAt && Date.now() - hlState.savedAt < 5000 ? '<span class="muted">已存在這台瀏覽器，下次打開就是這組</span>' : '') + '</div>' +
+    '<div class="sw-rule">官網創高黑龍預設＝均線分數 ≥10・黑K・漲跌幅 −10%～3%，其餘條件不用。「用停利」「破黑低停損」是「我的出場法」：碰到停利價就賣、跌破黑K最低價就賣，都沒碰到收盤賣；兩個都不勾＝隔天收盤出場。數字欄改完按「重新計算」。</div></div>';
+}
+function hlChartHtml(points, series, opts){
+  const pts = (points || []).filter((p) => p);
+  if (!pts.length) return '';
+  const W = Math.max(320, pts.length * 48 + 60), H = 190, L = 46, R = 12, T = 12, B = 38;
+  let lo = 0, hi = 0;
+  for (const p of pts) for (const [key] of series){ const v = opts.cum ? (p.cum || {})[key] : p[key]; if (v !== null && v !== undefined){ lo = Math.min(lo, v); hi = Math.max(hi, v); } }
+  if (hi === lo) hi = lo + 1;
+  const pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
+  const x = (i) => L + (pts.length === 1 ? (W - L - R) / 2 : i * (W - L - R) / (pts.length - 1));
+  const y = (v) => T + (hi - v) / (hi - lo) * (H - T - B);
+  let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '">';
+  for (let t = 0; t <= 4; t++){ const v = lo + (hi - lo) * t / 4; svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" stroke="currentColor" stroke-opacity=".12"/><text x="' + (L - 4) + '" y="' + (y(v) + 3).toFixed(1) + '" text-anchor="end" fill="currentColor" fill-opacity=".7">' + v.toFixed(1) + '%</text>'; }
+  if (lo < 0 && hi > 0) svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(0).toFixed(1) + '" y2="' + y(0).toFixed(1) + '" stroke="currentColor" stroke-opacity=".45"/>';
+  pts.forEach((p, i) => { svg += '<text x="' + x(i).toFixed(1) + '" y="' + (H - B + 14) + '" text-anchor="middle" fill="currentColor" fill-opacity=".8">' + swMmdd(p.date) + '</text><text x="' + x(i).toFixed(1) + '" y="' + (H - B + 27) + '" text-anchor="middle" fill="currentColor" fill-opacity=".55">' + (p.count || 0) + '檔</text>'; });
+  for (const [key, , color] of series){
+    let d = '', pen = false, dots = '';
+    pts.forEach((p, i) => { const v = opts.cum ? (p.cum || {})[key] : p[key]; if (v === null || v === undefined){ pen = false; return; } d += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); pen = true; dots += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="2.5" fill="' + color + '"/>'; });
+    if (d) svg += '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2"/>' + dots;
+  }
+  svg += '</svg>';
+  const last = pts[pts.length - 1];
+  const legend = series.map(([key, label, color]) => '<span><i style="background:' + color + '"></i>' + label + (opts.cum ? ' 累積 ' + swPct((last.cum || {})[key]) : '') + '</span>').join('');
+  return '<div class="hl-chart"><div class="hl-chart-title">' + opts.title + '</div><div class="hl-legend">' + legend + '</div><div class="hl-scroll">' + svg + '</div>' + (opts.note ? '<div class="race-note">' + opts.note + '</div>' : '') + '</div>';
+}
+function hlTile(value, label){ return '<div class="sw-tile hl"><b>' + value + '</b><span>' + label + '</span></div>'; }
+function hlBurstHtml(data){
+  const b = data.burst || {};
+  const block = (n) => {
+    const x = b['d' + n] || {};
+    return '<div class="hl-burst"><div class="hl-bhead">' + n + ' 日最高 <span class="muted">取樣 ' + (x.samples || 0) + '</span></div>' +
+      (x.samples ? '<div class="hl-bgrid"><div><b class="' + dirClass(x.avg) + '">' + swPct(x.avg) + '</b><span>平均</span></div><div><b>' + x.win + '%</b><span>勝率 >0</span></div><div><b>' + x.ge5 + '%</b><span>≥ +5%</span></div><div><b>' + x.ge10 + '%</b><span>≥ +10%</span></div>' +
+        (n === 1 ? '<div><b class="' + dirClass(x.openAvg) + '">' + swPct(x.openAvg) + '</b><span>隔天開盤均</span></div>' : '') + '</div>' +
+        '<div class="hl-bfoot">最佳 ' + swPct(x.best) + ' · 最差 ' + swPct(x.worst) + ' · 收盤均 ' + swPct(x.closeAvg) + '</div>' : '<div class="race-note">還沒有 D+' + n + ' 的資料</div>') + '</div>';
+  };
+  return '<div class="bl-section bl-launch">② 爆發力・選股日收盤進場 → 之後 1／2／3 個交易日的盤中最高</div>' +
+    '<div class="sw-rule">最高是盤中價、實際賣不到，看的是「停利目標到得到嗎」。</div>' +
+    '<div class="hl-bursts">' + block(1) + block(2) + block(3) + '</div>' +
+    hlChartHtml(data.curve, [['max1', '1 日最高', '#e6675f'], ['max2', '2 日最高', '#7c3aed'], ['max3', '3 日最高', '#0f766e']], { title: '每日平均最高%（爆發力趨勢）', note: '每天取當天所有筆的平均；下方數字＝當天檔數；圖可左右捲' });
+}
+function hlMethodsHtml(data){
+  const s = data.stats || {}, methods = s.methods || [], p = data.params || {};
+  const mine = methods.find((m) => m.key === s.mine);
+  const row = (m, star) => '<tr' + (star ? ' class="hl-mine"' : '') + '><td class="l">' + (star ? '⭐ 我的出場法：' + hlMineLabel(hlParams) : m.label) + '</td><td>' + m.count + '</td><td class="' + dirClass(m.avg || 0) + '">' + swPct(m.avg) + '</td><td class="' + dirClass(m.median || 0) + '">' + swPct(m.median) + '</td>' +
+    '<td>' + (m.win === null || m.win === undefined ? '—' : m.win + '%（' + m.wins + '/' + m.count + '）') + '</td><td class="' + dirClass(m.total || 0) + '">' + hlMoney(m.total) + '</td><td class="down">' + swPct(m.worst) + '</td><td class="up">' + swPct(m.best) + '</td></tr>';
+  return '<div class="bl-section bl-brew">③ 出場方式績效・進場＝符合那天的收盤價；D+1＝下一個交易日；這裡都是真的賣得掉的價</div>' +
+    '<div class="sw-tiles">' + hlTile(s.days || 0, '回測天數') + hlTile(s.trades || 0, '交易筆數') + hlTile(s.perDay === null || s.perDay === undefined ? '—' : s.perDay, '平均每天(檔)') +
+      hlTile(s.hitTp === null || s.hitTp === undefined ? '—' : s.hitTp + '%', '盤中碰到停利') + hlTile(s.hitSl === null || s.hitSl === undefined ? '—' : s.hitSl + '%', '盤中跌破黑K低') + '</div>' +
+    '<div class="hl-scroll"><table class="hl-table hl-methods"><thead><tr><th class="l">出場方式</th><th>筆數</th><th>平均</th><th>中位數</th><th>勝率</th><th>總損益(每檔 ' + (p.amt || 50) + ' 萬)</th><th>最差單筆</th><th>最佳單筆</th></tr></thead><tbody>' +
+      (mine ? row(mine, true) : '') + methods.map((m) => row(m, false)).join('') + '</tbody></table></div>' +
+    '<div class="sw-rule">收盤出場＝D+1 收盤賣。停利出場＝D+1 開盤 ≥ 目標就開盤賣；盤中最高碰到目標 → 用目標價賣；都沒有 → 收盤賣。破黑低出場＝D+1 開盤就低於黑K最低 → 開盤賣；盤中最低跌破黑K最低 → 用黑K最低價賣（停損）；沒破 → 收盤賣。停利＋破黑低＝兩個一起掛；同一天兩個都碰到（日K分不出先後）保守算停損。開高走・開低抱＝開盤高於進場價就開盤賣，否則抱到收盤。D+2 收盤＝抱兩天（資金會跟隔天那批重疊，總損益參考就好）。</div>' +
+    hlChartHtml(data.curve, [['close', '收盤出場', '#a89c8f'], ['tp', '停利出場', '#e6675f'], ['sl', '破黑低出場', '#0f766e'], ['both', '停利＋破黑低', '#7c3aed']], { title: '累積曲線（每天取當天所有筆的平均，逐日累加）', cum: true, note: '圖可左右捲' });
+}
+function hlLiveInfo(listDate){
+  const ok = !!(lastData && lastData.quoteDate && listDate && lastData.quoteDate > listDate);
+  return { ok, time: ok ? (lastData.quoteDate.slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5)) : '' };
+}
+function hlRowHead(r){
+  return '<tr class="hl-row" data-code="' + r.code + '" data-name="' + (r.name || '') + '"><td class="l"><b>' + r.code + '</b></td><td class="l">' + (r.name || '') + (r.disposed ? ' 🔒' : '') + '</td><td class="l">' + (r.group || '—') + '</td>' +
+    '<td>' + (r.score === null || r.score === undefined ? '—' : r.score) + '</td><td>' + hlN(r.groupAvg, 1) + '</td><td class="' + dirClass(r.weekPct || 0) + '">' + swPct(r.weekPct) + '</td><td class="' + dirClass(r.changePct || 0) + '">' + swPct(r.changePct) + '</td>' +
+    '<td>' + hlN(r.hits20, 0) + '</td><td>' + hlN(r.val5, 1) + '</td><td>' + hlPrice(r.entry) + '</td><td>' + hlPrice(r.lowK) + '</td><td>' + hlN(r.target, 2) + '</td>';
+}
+const HL_HEAD = '<th class="l">代號</th><th class="l">股名</th><th class="l">族群</th><th>均線分數</th><th>族群平均</th><th>週籌碼%</th><th>當天漲跌</th><th>20日>8%</th><th>5日均值(億)</th><th>進場(收盤)</th><th>黑K低</th><th>停利價</th>';
+function hlTodayHtml(data){
+  const t = data.today || {}, rows = t.rows || [], live = hlLiveInfo(t.date);
+  const cell = (r) => {
+    const q = live.ok ? hlLive(r.code) : null, price = q ? q.price : null;
+    const hitTp = price === null ? null : price >= r.target, hitSl = price === null ? null : price < r.lowK;
+    return hlRowHead(r) + '<td>' + (price === null ? '—' : hlPrice(price)) + '</td><td class="' + (q ? dirClass(q.changePercent || 0) : '') + '">' + (q ? swPct(q.changePercent) : '—') + '</td>' +
+      '<td class="' + (hitTp ? 'ok' : '') + '">' + (hitTp === null ? '—' : hitTp ? '✔' : '') + '</td><td class="' + (hitSl ? 'bad' : '') + '">' + (hitSl === null ? '—' : hitSl ? '✔' : '') + '</td></tr>';
+  };
+  return '<div class="bl-section bl-launch">④ 今日名單・' + swMmdd(t.date) + '(' + hlWd(t.date) + ') 收盤符合參數、還沒有 D+1 資料的名單（' + rows.length + ' 檔）</div>' +
+    '<div class="sw-rule">' + (live.ok ? '現價＝首頁即時報價（' + live.time + '）；✔ 達停利＝現價 ≥ 停利價、✔ 破黑低＝現價 < 黑K最低價。' : '隔天開盤後再打開這一頁，現價欄會用首頁的即時報價打勾（✔ 達停利／✔ 破黑低）。') + '點一列開K線圖。</div>' +
+    (rows.length ? '<div class="hl-scroll"><table class="hl-table hl-today"><thead><tr>' + HL_HEAD + '<th>現價</th><th>現價漲跌</th><th>✔達停利</th><th>✔破黑低</th></tr></thead><tbody>' + rows.map(cell).join('') + '</tbody></table></div>' : '<div class="race-note">那天沒有符合參數的股票</div>');
+}
+function hlDayTableHtml(day, latest){
+  const cell = (v) => '<td class="' + dirClass(v || 0) + '">' + swPct(v) + '</td>';
+  const rows = (day.rows || []).map((r) => {
+    if (!r.next) return hlRowHead(r) + '<td colspan="13" class="l muted">' + (r.gap ? '價格斷層（分割／減資），不算' : day.date === latest ? 'D+1 尚未收盤' : '沒有 D+1 日K') + '</td></tr>';
+    const n = r.next, x = r.exits || {};
+    return hlRowHead(r) + '<td>' + hlPrice(n.open) + '</td><td>' + hlPrice(n.high) + '</td><td>' + hlPrice(n.low) + '</td><td>' + hlPrice(n.close) + '</td>' +
+      '<td class="' + (r.hitTp ? 'ok' : '') + '">' + (r.hitTp ? '✔' : '') + '</td><td class="' + (r.hitSl ? 'bad' : '') + '">' + (r.hitSl ? '✔' : '') + '</td>' +
+      cell(x.close) + cell(x.tp) + cell(x.sl) + cell(x.both) + cell(x.open) + cell(x.ohl) + (x.d2 === null || x.d2 === undefined ? '<td>—</td>' : cell(x.d2)) + '</tr>';
+  }).join('');
+  return '<div class="hl-scroll"><table class="hl-table"><thead><tr>' + HL_HEAD + '<th>D+1 開</th><th>D+1 高</th><th>D+1 低</th><th>D+1 收</th><th>✔碰停利</th><th>✔破黑低</th><th>收盤出</th><th>停利出</th><th>破黑低出</th><th>停利+破黑低</th><th>隔天開盤出</th><th>開高走開低抱</th><th>D+2</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+function hlDailyHtml(data){
+  const days = data.daily || [];
+  return '<div class="bl-section bl-brew">⑤ 每日明細・新 → 舊；點日期展開。✔ 欄是事後對照：那天盤中有沒有碰到停利／有沒有跌破黑K低</div>' +
+    days.map((day) => {
+      const open = !!hlState.open[day.date], avg = day.avg || {};
+      const sub = day.date === data.date ? 'D+1 尚未收盤（見 ④ 今日名單）' : day.withNext ? '收盤出 ' + swPct(avg.close) + ' ・ 停利出 ' + swPct(avg.tp) + ' ・ 破黑低出 ' + swPct(avg.sl) + ' ・ 停利＋破黑低 ' + swPct(avg.both) : (day.count ? '沒有 D+1 資料' : '');
+      return '<div class="hl-day"><div class="hl-day-head" data-date="' + day.date + '"><b>' + swMmdd(day.date) + '(' + hlWd(day.date) + ')</b><span>' + day.count + ' 檔</span><span class="muted">' + sub + '</span><span class="hl-caret">' + (open ? '▾' : '▸') + '</span></div>' +
+        (open ? (day.count ? hlDayTableHtml(day, data.date) : '<div class="race-note">那天沒有符合參數的股票</div>') : '') + '</div>';
+    }).join('');
+}
+function swingHeilongHtml(){
+  ensureHeilong();
+  const data = hlState.data;
+  const head = '<div class="sw-rule">出發點＝官網選股系統「創高黑龍」（均線分數高＋當天收黑）。自訂參數 → 看歷史 D+1 各種出場方式的績效 → 每天收盤挑自己的名單 → 隔天回來看要不要出場。</div>' +
+    '<div class="bl-section bl-launch">① 選股參數</div>' + hlParamsHtml(hlParams);
+  if (!data) return head + '<div class="signal-empty"><div class="se-title">' + (hlState.failedAt ? '讀取失敗' + (hlState.error ? '：' + hlState.error : '') : '計算中…') + '</div><div class="se-sub">後端每個交易日收盤後整理黑龍表；讀不到的話稍後再試。</div></div>';
+  if (data.status !== 'ok') return head + '<div class="signal-empty"><div class="se-title">還沒有黑龍名單</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
+  const dates = data.dates || [], w = data.window || {}, c = data.collector || {};
+  const basis = '<div class="sw-basis">資料到 ' + swMmdd(data.date) + '(' + hlWd(data.date) + ') 收盤・表內 ' + dates.length + ' 個交易日（' + swMmdd(dates[0]) + '～' + swMmdd(data.date) + '）・這次看' + (w.days ? '近 ' + w.days + ' 天' : '全部') + '＝' + swMmdd(w.from) + ' 起，可回測 ' + (w.backtestDays || 0) + ' 天・整理時間 ' + (c.builtAt ? String(c.builtAt).slice(5, 16).replace('T', ' ') : '—') + '</div>';
+  return head + basis + hlBurstHtml(data) + hlMethodsHtml(data) + hlTodayHtml(data) + hlDailyHtml(data) +
+    '<div class="bl-section bl-launch">⑥ 口徑與注意</div><ol class="hl-rules">' + (data.rules || []).map((r) => '<li>' + r + '</li>').join('') + '</ol>';
+}
 function swingSectionHtml(data){
   const sec = swingState.section, picks = data.picks || {}, counts = data.counts || {}, rules = data.rules || {};
   if (sec === 'summary'){
@@ -4628,6 +4846,7 @@ function renderSwing(){
   const tabs = document.getElementById('swingTabs');
   tabs.innerHTML = SWING_SECTIONS.map((sc) => '<button class="chart-tab signal-tab' + (swingState.section === sc.key ? ' active' : '') + '" data-section="' + sc.key + '">' + sc.label + '</button>').join('');
   const body = document.getElementById('swingBody');
+  if (swingState.section === 'heilong'){ body.innerHTML = swingHeilongHtml() + SWING_FOOT; return; }   // 黑龍回測有自己的資料（/api/heilong）
   const data = swingData();
   if (!data){
     body.innerHTML = swingDatePillsHtml(swingCache['']) + '<div class="signal-empty"><div class="se-title">' + (swingFailedAt[swingState.date || ''] ? '讀取失敗' : '讀取中…') + '</div><div class="se-sub">後端每個交易日收盤後整理；讀不到的話稍後再試。</div></div>';
@@ -4658,7 +4877,23 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
   if (e.target.closest('#swingMoreGroups')){ swingState.groupsLimit += 12; renderSwing(); return; }
   const more = e.target.closest('.sw-etf-more');
   if (more){ swingState.etfOpen[more.dataset.etf] = !swingState.etfOpen[more.dataset.etf]; renderSwing(); return; }
-  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code]');
+  // 黑龍回測：K棒／停利／回測天數按鈕點了立刻重算；重新計算、預設、存參數；每日明細展開
+  const hlBtn = e.target.closest('.hl-k, .hl-tp, .hl-days');
+  if (hlBtn){
+    if (hlBtn.dataset.k) hlParams.k = hlBtn.dataset.k;
+    if (hlBtn.dataset.tp) hlParams.tp = Number(hlBtn.dataset.tp);
+    if (hlBtn.dataset.days !== undefined) hlParams.days = Number(hlBtn.dataset.days);
+    hlRun(); return;
+  }
+  if (e.target.closest('#hlRun')){ hlRun(); return; }
+  if (e.target.closest('#hlReset')){ hlParams = Object.assign({}, HL_DEFAULTS); hlRun(); return; }
+  if (e.target.closest('#hlSave')){
+    try { localStorage.setItem('heilongParams', JSON.stringify(hlParams)); hlState.savedAt = Date.now(); } catch (err) { /* 記不住就算了 */ }
+    renderSwing(); return;
+  }
+  const dayHead = e.target.closest('.hl-day-head');
+  if (dayHead){ hlState.open[dayHead.dataset.date] = !hlState.open[dayHead.dataset.date]; renderSwing(); return; }
+  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code], .hl-row[data-code]');
   if (card){
     if (!useFloatingCharts()){
       document.getElementById('swingModal').classList.add('behind-chart');
@@ -4666,6 +4901,14 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
     }
     openStockChart(card.dataset.code, card.dataset.name);
   }
+});
+
+for (const type of ['input', 'change']) document.getElementById('swingBody').addEventListener(type, (e) => {
+  const el = e.target;
+  if (!el || !el.dataset || !el.dataset.key) return;
+  if (el.classList.contains('hl-chk')) hlParams[el.dataset.key] = !!el.checked;
+  else if (el.classList.contains('hl-sel')) hlParams[el.dataset.key] = el.value;
+  else if (el.classList.contains('hl-in')) hlParams[el.dataset.key] = el.value === '' ? '' : Number(el.value);
 });
 
 // ---- 版本戳記與自動更新（2026-09-25 使用者：iPhone 加到主畫面的網頁點籌碼排行沒反應，其實是一直跑舊版）----
