@@ -13,12 +13,25 @@ on:
         description: "先打開的網址（可留空）"
         required: false
         default: ""
+      hs:
+        description: "登入帳號（可留空；會遮罩，不會印在紀錄裡）"
+        required: false
+        default: ""
+      pin:
+        description: "登入密碼（可留空；會遮罩，不會印在紀錄裡）"
+        required: false
+        default: ""
 
 jobs:
   probe:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: 遮罩登入資料
+        uses: actions/github-script@v7
+        with:
+          script: |
+            for (const v of [context.payload.inputs.hs, context.payload.inputs.pin]) { if (v) core.setSecret(v); }
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -31,6 +44,8 @@ jobs:
         env:
           PROBE_SCRIPT: ${{ inputs.script }}
           PROBE_URL: ${{ inputs.url }}
+          PROBE_HS: ${{ inputs.hs }}
+          PROBE_PIN: ${{ inputs.pin }}
         run: |
           cat > probe.js <<'JS'
           const { chromium } = require('playwright');
