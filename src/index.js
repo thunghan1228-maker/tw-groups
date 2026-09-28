@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-28 23:04:08";
+const BUILD_STAMP = "2026-09-28 23:16:25";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3435,7 +3435,7 @@ function raceConditionsHtml(r, m, opts){
   } else if (opts && opts.both3334){
     groupPart = '族排 ' + r.groupRank + '/' + m.total + '（33 門檻 ≤' + m.horseLimit + '・34 門檻 ≤' + m.riverLimit + '）';
   } else if (opts && opts.limit !== undefined){
-    groupPart = '族排 ' + r.groupRank + '/' + m.total + '（30 門檻 ≤' + opts.limit + '）';
+    groupPart = '族排 ' + r.groupRank + '/' + m.total + '（' + (opts.limitLabel || '30') + ' 門檻 ≤' + opts.limit + '）';
   } else {
     groupPart = '族排 ' + r.groupRank + '/' + m.total;
   }
@@ -3568,11 +3568,13 @@ function race333Html(){
   const both = race333SortByHolder(race333FilterList(m.both));
   const fires = race333SortByHolder(race333FilterList(m.fires));
   const fireLocked = race333FilterList(m.fireLocked);
+  const horses = race333SortByHolder(race333FilterList(m.horses));
+  const rivers = race333SortByHolder(race333FilterList(m.rivers));
   const condsNote = '每列下面多一行列出門檻比例（族排、族內、距櫃買%、昨／前天%），之前只寫在這行說明文字裡的數字。';
   return race333FilterBarHtml() + raceOtcBoxHtml(m) +
-    // 2026-09-28 使用者：漲幅最高（符合條件>7%）放最上面、給抬頭，裡面把 33／34 的門檻比例列出來。
-    '<div class="race-block"><div class="race-head">🚀漲幅最高・賽馬多(33)>7%有 ' + over7 + ' 檔 ' + stamp + '</div>' +
-      '<div class="race-sub">「漲幅最高」＝賽馬多裡漲超過 7% 的（續抱不追，不是可進場名單）・' + condsNote + '・' + dailyNote + '</div>' +
+    // 2026-09-28 使用者：符合條件>7%放最上面，抬頭改「續抱勿追高」（不是「漲幅最高」）；裡面把 33／34 的門檻比例列出來。
+    '<div class="race-block"><div class="race-head">🚀續抱勿追高・賽馬多(33)>7%有 ' + over7 + ' 檔 ' + stamp + '</div>' +
+      '<div class="race-sub">「續抱勿追高」＝賽馬多裡漲超過 7% 的（不是可進場名單，已經漲多了）・' + condsNote + '・' + dailyNote + '</div>' +
       (over7 ? raceStockListHtml(m.horses.filter((r) => r.pct > 7), { dates: m.dates, conditions: true, m, both3334: true }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '<div class="race-note">賽馬多裡沒有漲超過 7% 的</div>') + '</div>' +
     '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
       '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・大戶力高的在上（沒有大戶力資料的排最後）・' + condsNote + '</div>' +
@@ -3580,9 +3582,18 @@ function race333Html(){
     '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
       '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・大戶力高的在上（沒有大戶力資料的排最後）・' + condsNote + '</div>' +
       raceStockListHtml(both, { dates: m.dates, conditions: true, m, both3334: true }) + '</div>' +
+    // 2026-09-28 使用者：33／34 各自單獨也要列出來（之前只有跟別的條件合在一起才看得到）。
+    '<div class="race-block"><div class="race-head">🐎賽馬多(33) ' + stamp + '</div>' +
+      '<div class="race-sub">族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・現價 ≥ 櫃買%・大戶力高的在上（沒有大戶力資料的排最後）・不限漲幅（超過 7% 的另外放最上面「續抱勿追高」，這裡兩邊都列）・' + condsNote + '</div>' +
+      raceStockListHtml(horses, { dates: m.dates, conditions: true, m, limit: m.horseLimit, limitLabel: '33' }) + '</div>' +
+    '<div class="race-block"><div class="race-head">🌊河流多(34) ' + stamp + '</div>' +
+      '<div class="race-sub">族群排名前 ' + m.riverLimit + '（共 ' + m.total + ' 個、比 33 的門檻寬）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・大戶力高的在上（沒有大戶力資料的排最後）・' + condsNote + '</div>' +
+      raceStockListHtml(rivers, { dates: m.dates, conditions: true, m, limit: m.riverLimit, limitLabel: '34' }) +
+      (m.riverOver.length ? '<div class="race-note">漲超過 7% 的另外 ' + m.riverOver.length + ' 檔（不一定符合 33 的門檻，沒算進「續抱勿追高」）：' + m.riverOver.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
+      '</div>' +
     '<div class="race-block"><div class="race-head">🐎🚀馬火多(30) ' + stamp + '</div>' +
       '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔（取漲幅前 ' + FIRE_MAX_ROWS + ' 檔），大戶力高的在上・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字</div>' +
-      raceStockListHtml(fires, { fire: true, dates: m.dates, conditions: true, m, limit: m.fireGroupTop }) +
+      raceStockListHtml(fires, { fire: true, dates: m.dates, conditions: true, m, limit: m.fireGroupTop, limitLabel: '30' }) +
       (fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + fireLocked.length + ' 檔：' + fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
       '</div>' +
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
@@ -5663,7 +5674,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-28 23:04:08';
+const BUILD_STAMP = '2026-09-28 23:16:25';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
