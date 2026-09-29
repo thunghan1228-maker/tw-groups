@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-28 23:16:25";
+const BUILD_STAMP = "2026-09-29 09:26:41";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -316,9 +316,11 @@ const HTML_PAGE = `<!DOCTYPE html>
   .combo-block + .combo-block,.ghf-block + .ghf-block,.bl-block + .bl-block{border-top:8px double #111;padding-top:10px;}
   /* 醞釀／發動分頁：沿用族群綜合表的表格樣式，另外給 9 欄的欄寬；發動（2）紅底、醞釀（1）藍綠底的段落標題 */
   .bl-table{min-width:58em;}
-  .bl-table col.b-code{width:8%;} .bl-table col.b-name{width:12%;} .bl-table col.b-score{width:10%;} .bl-table col.b-pct{width:10%;}
-  .bl-table col.b-price{width:11%;} .bl-table col.b-box{width:12%;} .bl-table col.b-tobox{width:15%;} .bl-table col.b-turn{width:9%;} .bl-table col.b-ratio{width:13%;}
+  .bl-table col.b-time{width:9%;}
+  .bl-table col.b-code{width:8%;} .bl-table col.b-name{width:11%;} .bl-table col.b-score{width:10%;} .bl-table col.b-pct{width:10%;}
+  .bl-table col.b-price{width:10%;} .bl-table col.b-box{width:10%;} .bl-table col.b-tobox{width:12%;} .bl-table col.b-turn{width:9%;} .bl-table col.b-ratio{width:11%;}
   .bl-table .bl-score{font-weight:800;white-space:nowrap;}
+  .bl-table .bl-time{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;}
   .bl-table .bl-box,.bl-table .bl-turn,.bl-table .bl-ratio{white-space:nowrap;}
   .bl-table .bl-tobox.up{color:var(--up);font-weight:700;}
   .bl-star{color:#d97706;margin-left:3px;}
@@ -3924,6 +3926,10 @@ function brewLaunchModel(){
   // 族排：今天平均漲跌幅在全部族群裡的名次（第 1 名最強），跟族群綜合表同一套；族群也照這個順序排。
   const weakToStrong = groups.slice().sort((a, b) => a.avgChange - b.avgChange);
   const rankOf = new Map(weakToStrong.map((g, i) => [g.name, weakToStrong.length - i]));
+  // 2026-09-29 使用者：正在發動中的也要看得到「第一次發動是幾點」，不是只有回落之後才看得到。
+  // 後端每次掃描第一次符合就永久記一筆（INSERT OR IGNORE），這裡從已經抓回來的今天紀錄查對應時間；
+  // 剛觸發、後端這次掃描還沒記到的（brewHistoryData 還沒更新）先當作「盤中」，之後自動補上實際時間。
+  const launchRecordByCode = new Map((brewHistoryDay(brewSessionDate()).launch || []).map((r) => [r.code, r]));
   const launchBlocks = [], brewBlocks = [];
   const launchCodes = new Set(), brewCodes = new Set();
   const byLaunch = (a, b) => b.score - a.score || (b.projTurnoverPct || 0) - (a.projTurnoverPct || 0);
@@ -3941,7 +3947,11 @@ function brewLaunchModel(){
       const live = brewLiveMetrics(info, s, factor, rules);
       if (!live) return;
       const row = Object.assign({ code: s.code, name: s.name, groupName: g.name, pct: s.changePercent, limitUp: !!s.limitUp, limitDown: !!s.limitDown, info }, live);
-      if (live.launch){ launchRows.push(row); launchCodes.add(s.code); }
+      if (live.launch){
+        const rec = launchRecordByCode.get(s.code);
+        row.recordedAt = rec ? rec.recordedAt : null; row.live = !rec;
+        launchRows.push(row); launchCodes.add(s.code);
+      }
       else if (info.brewing){ brewRows.push(row); brewCodes.add(s.code); }
     });
     if (launchRows.length) launchBlocks.push(blockOf(g, launchRows, byLaunch));
@@ -3957,7 +3967,10 @@ function brewLaunchRowHtml(r, kind){
   if (kind === 'brew' && r.brokeOut) tag = '<span class="bl-tag warn">' + (r.scoreOk ? '過箱頂・量能未到' : '過箱頂・分數未到') + '</span>';
   const toBox = r.toBoxPct <= 0 ? '已過 ' + (-r.toBoxPct).toFixed(2) + '%' : '差 ' + r.toBoxPct.toFixed(2) + '%';
   const turnTitle = r.projTurnoverPct === null ? '沒有發行股數資料' : '預估全天周轉率 ' + r.projTurnoverPct.toFixed(2) + '%';
+  // 2026-09-29 使用者：發動要能查到第一次是幾點發動的（後端永久記錄，不會因為回落就找不到）。
+  const timeCell = kind === 'launch' ? '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先顯示「盤中」">' + brewWhen(r) + '</td>' : '';
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
+    timeCell +
     '<td class="combo-code">' + r.code + '</td>' +
     '<td class="combo-name">' + r.name + '</td>' +
     '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
@@ -3972,10 +3985,12 @@ function brewLaunchRowHtml(r, kind){
 function brewLaunchBlockHtml(block, kind){
   const namePill = '<span class="head-pill">' + block.name + '（' + block.groupTotal + ' 檔）</span>';
   const avgPill = '<span class="head-pill">今天平均 ' + fmt(block.avgChange) + '%</span>';
+  const timeCol = kind === 'launch' ? '<col class="b-time">' : '';
+  const timeHead = kind === 'launch' ? '<th>發動時間</th>' : '';
   return '<div class="race-block bl-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '"><span class="combo-rank">族排第 ' + block.rank + ' 名</span> ' + namePill + ' ' + avgPill + '・' + (kind === 'launch' ? '發動 ' : '醞釀 ') + block.rows.length + ' 檔</div>' +
     '<div class="combo-table-wrap"><table class="combo-table bl-table">' +
-    '<colgroup><col class="b-code"><col class="b-name"><col class="b-score"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-tobox"><col class="b-turn"><col class="b-ratio"></colgroup>' +
-    '<thead><tr><th>代號</th><th>名稱</th><th>均線分數</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
+    '<colgroup>' + timeCol + '<col class="b-code"><col class="b-name"><col class="b-score"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-tobox"><col class="b-turn"><col class="b-ratio"></colgroup>' +
+    '<thead><tr>' + timeHead + '<th>代號</th><th>名稱</th><th>均線分數</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
     '<tbody>' + block.rows.map((r) => brewLaunchRowHtml(r, kind)).join('') + '</tbody></table></div></div>';
 }
 function brewBackfillNoteHtml(bf){
@@ -4135,12 +4150,37 @@ function brewPastDayHtml(){
     '<div class="bl-section bl-brew">1 醞釀（整理）・' + day.brew.length + ' 檔</div>' +
     (day.brew.length ? brewPastTableHtml('brew', day.brew) : '<div class="race-note">那天沒有醞釀名單紀錄</div>');
 }
+function brewDismissedKey(){ return 'brewDismissed:' + (brewSessionDate() || ''); }
+function brewDismissedCodes(){
+  try { return new Set(JSON.parse(localStorage.getItem(brewDismissedKey()) || '[]')); } catch (e) { return new Set(); }
+}
+function brewDismissAll(codes){
+  try {
+    const cur = brewDismissedCodes();
+    codes.forEach((c) => cur.add(c));
+    localStorage.setItem(brewDismissedKey(), JSON.stringify([...cur]));
+  } catch (e) { /* 存不了就算了，畫面還是看得到 */ }
+}
+function brewRestoreDismissed(){
+  try { localStorage.removeItem(brewDismissedKey()); } catch (e) { /* 忽略 */ }
+}
 function brewFallenTodayHtml(m){
   // 今天盤中曾經發動（後端紀錄）、現在已經回落不符合發動條件的：一起列出來，訊號才不會「不見」
   const live = new Set(m.launchBlocks.flatMap((b) => b.rows.map((r) => r.code)));
-  const rows = brewHistoryDay(brewSessionDate()).launch.filter((r) => !live.has(r.code));
-  if (!rows.length) return '';
-  return '<div class="bl-section bl-fallen">今天曾發動、現在已回落・' + rows.length + ' 檔</div>' + brewPastTableHtml('launch', rows);
+  const all = brewHistoryDay(brewSessionDate()).launch.filter((r) => !live.has(r.code));
+  if (!all.length) return '';
+  const dismissed = brewDismissedCodes();
+  const rows = all.filter((r) => !dismissed.has(r.code));
+  const hiddenCount = all.length - rows.length;
+  const restoreBtn = hiddenCount ? '<button class="chart-tab chips-btn bl-restore-btn">顯示已隱藏的 ' + hiddenCount + ' 檔</button>' : '';
+  if (!rows.length){
+    return '<div class="bl-section bl-fallen">今天曾發動、現在已回落・已全部隱藏（' + all.length + ' 檔）</div>' +
+      '<div class="race-note">紀錄還在，明天切到「昨天」還是查得到。' + restoreBtn + '</div>';
+  }
+  return '<div class="bl-section bl-fallen">今天曾發動、現在已回落・' + rows.length + ' 檔</div>' +
+    '<div class="race-sub">回落後訊號不會消失，這裡永遠找得到；按右邊「全部隱藏」只是這台瀏覽器不再顯示，紀錄還在，明天用「昨天」查得到。' +
+    '<button class="chart-tab chips-btn bl-dismiss-btn" data-codes="' + rows.map((r) => r.code).join(',') + '">全部隱藏</button></div>' +
+    brewPastTableHtml('launch', rows) + (hiddenCount ? '<div class="race-note">' + restoreBtn + '</div>' : '');
 }
 function brewLaunchHtml(){
   if (!brewLaunchData){
@@ -5674,7 +5714,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-28 23:16:25';
+const BUILD_STAMP = '2026-09-29 09:26:41';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -6338,6 +6378,19 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
   if (blDayBtn){
     const v = blDayBtn.dataset.offset;
     brewDayOffset = /^x/.test(v) ? v : (Number(v) || 0);
+    renderSignalCenter();
+    return;
+  }
+  const blDismissBtn = e.target.closest('.bl-dismiss-btn');
+  if (blDismissBtn){
+    const codes = (blDismissBtn.dataset.codes || '').split(',').filter(Boolean);
+    brewDismissAll(codes);
+    renderSignalCenter();
+    return;
+  }
+  const blRestoreBtn = e.target.closest('.bl-restore-btn');
+  if (blRestoreBtn){
+    brewRestoreDismissed();
     renderSignalCenter();
     return;
   }
