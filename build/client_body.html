@@ -3871,9 +3871,10 @@ function brewLaunchModel(){
   // 族排：今天平均漲跌幅在全部族群裡的名次（第 1 名最強），跟族群綜合表同一套；族群也照這個順序排。
   const weakToStrong = groups.slice().sort((a, b) => a.avgChange - b.avgChange);
   const rankOf = new Map(weakToStrong.map((g, i) => [g.name, weakToStrong.length - i]));
-  // 2026-09-29 使用者：正在發動中的也要看得到「第一次發動是幾點」，不是只有回落之後才看得到。
-  // 後端每次掃描第一次符合就永久記一筆（INSERT OR IGNORE），這裡從已經抓回來的今天紀錄查對應時間；
-  // 剛觸發、後端這次掃描還沒記到的（brewHistoryData 還沒更新）先當作「盤中」，之後自動補上實際時間。
+  // 2026-09-29 使用者：正在發動中的也要看得到「這一次是幾點發動的」，不是只有回落之後才看得到；
+  // 同一檔今天可以分好幾次發動（發動→回落→再發動），時間要跟著最新那次更新，不能停在很久以前的第一次。
+  // 後端第一次符合永久記一筆 recordedAt（回查用，不會被蓋掉），每次重新發動另外更新 latestRecordedAt，
+  // 這裡顯示 latestRecordedAt；剛觸發、後端這次掃描還沒記到的（brewHistoryData 還沒更新）先當作「盤中」。
   const launchRecordByCode = new Map((brewHistoryDay(brewSessionDate()).launch || []).map((r) => [r.code, r]));
   const launchBlocks = [], brewBlocks = [];
   const launchCodes = new Set(), brewCodes = new Set();
@@ -3894,7 +3895,7 @@ function brewLaunchModel(){
       const row = Object.assign({ code: s.code, name: s.name, groupName: g.name, pct: s.changePercent, limitUp: !!s.limitUp, limitDown: !!s.limitDown, info }, live);
       if (live.launch){
         const rec = launchRecordByCode.get(s.code);
-        row.recordedAt = rec ? rec.recordedAt : null; row.live = !rec;
+        row.recordedAt = rec ? (rec.latestRecordedAt || rec.recordedAt) : null; row.live = !rec;
         launchRows.push(row); launchCodes.add(s.code);
       }
       else if (info.brewing){ brewRows.push(row); brewCodes.add(s.code); }
@@ -4034,7 +4035,10 @@ function brewPastBrewRowHtml(r, opts){
     '</tr>';
 }
 function brewPastTableHtml(kind, rows, opts){
-  const sorted = rows.slice().sort((a, b) => String(a.group).localeCompare(String(b.group), 'zh-Hant') || b.score - a.score || (kind === 'launch' ? String(a.recordedAt).localeCompare(String(b.recordedAt)) : 0));
+  // 2026-09-29 使用者：發動要照時間排，最新發生的排最上面，比較久的排下面。
+  const sorted = rows.slice().sort((a, b) => kind === 'launch'
+    ? String(b.recordedAt).localeCompare(String(a.recordedAt)) || b.score - a.score
+    : String(a.group).localeCompare(String(b.group), 'zh-Hant') || b.score - a.score);
   const prevHead = opts && opts.prevLabel ? '<th>' + opts.prevLabel + '</th>' : '';
   const head = kind === 'launch'
     ? '<th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>漲跌幅</th><th>發動價</th><th>箱頂</th><th>預估周轉</th><th>量比</th>'
