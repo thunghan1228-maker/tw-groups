@@ -3928,6 +3928,33 @@ function brewLaunchRowHtml(r, kind){
     '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2) + ' 倍') + '</td>' +
     '</tr>';
 }
+function brewLaunchFlatRowHtml(r){
+  const cls = dirClass(r.pct);
+  const star = r.topScore ? '<span class="bl-star" title="族群裡均線分數最高">★</span>' : '';
+  const tag = r.info.brewing ? '<span class="bl-tag">醞釀→發動</span>' : '';
+  const toBox = r.toBoxPct <= 0 ? '已過 ' + (-r.toBoxPct).toFixed(2) + '%' : '差 ' + r.toBoxPct.toFixed(2) + '%';
+  const turnTitle = r.projTurnoverPct === null ? '沒有發行股數資料' : '預估全天周轉率 ' + r.projTurnoverPct.toFixed(2) + '%';
+  return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
+    '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先顯示「盤中」">' + brewWhen(r) + '</td>' +
+    '<td class="combo-code">' + r.code + '</td>' +
+    '<td class="combo-name">' + r.name + '</td>' +
+    '<td><span class="sig-group">' + (r.groupName || '—') + '</span></td>' +
+    '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
+    '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%</td>' +
+    '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, r.price.toFixed(2)) + '</td>' +
+    '<td class="bl-box" title="箱底 ' + r.info.boxLow.toFixed(2) + '，箱子高低差 ' + r.info.boxRangePct + '%">' + r.info.boxHigh.toFixed(2) + '</td>' +
+    '<td class="bl-tobox' + (r.toBoxPct <= 0 ? ' up' : '') + '">' + toBox + tag + '</td>' +
+    '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2) + '%') + '</td>' +
+    '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2) + ' 倍') + '</td>' +
+    '</tr>';
+}
+function brewLaunchFlatTableHtml(rows){
+  // 2026-09-29 使用者：發動列表不要照族群排，照發動時間排，最新發動的排最上面，比較久的排下面。
+  const sorted = rows.slice().sort((a, b) => String(b.recordedAt).localeCompare(String(a.recordedAt)));
+  return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table">' +
+    '<thead><tr><th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th><th>均線分數</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
+    '<tbody>' + sorted.map(brewLaunchFlatRowHtml).join('') + '</tbody></table></div></div>';
+}
 function brewLaunchBlockHtml(block, kind){
   const namePill = '<span class="head-pill">' + block.name + '（' + block.groupTotal + ' 檔）</span>';
   const avgPill = '<span class="head-pill">今天平均 ' + fmt(block.avgChange) + '%</span>';
@@ -4150,7 +4177,7 @@ function brewLaunchHtml(){
     (r.skipGroups && r.skipGroups.length ? r.skipGroups.join('、') + '不列入。' : '') +
     (skipped && !(bf && !bf.done) ? '另有 ' + skipped + ' 檔日K不足 240 天（新上市等）或停牌沒列入。' : '') + stamp + '</div>' + brewBackfillNoteHtml(bf);
   const launch = '<div class="bl-section bl-launch">2 發動（突破）・' + m.launchCount + ' 檔</div>' +
-    (m.launchBlocks.length ? m.launchBlocks.map((b) => brewLaunchBlockHtml(b, 'launch')).join('') : '<div class="race-note">目前沒有股票發動（過箱頂、均線分數、周轉三個條件要同時到）</div>');
+    (m.launchBlocks.length ? brewLaunchFlatTableHtml(m.launchBlocks.flatMap((b) => b.rows)) : '<div class="race-note">目前沒有股票發動（過箱頂、均線分數、周轉三個條件要同時到）</div>');
   const brew = '<div class="bl-section bl-brew">1 醞釀（整理）・' + m.brewCount + ' 檔</div>' +
     (m.brewBlocks.length ? m.brewBlocks.map((b) => brewLaunchBlockHtml(b, 'brew')).join('') : '<div class="race-note">目前沒有股票符合醞釀條件</div>');
   return brewDayBarHtml() + note + launch + brewFallenTodayHtml(m) + brew;
