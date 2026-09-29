@@ -4175,10 +4175,10 @@ function brewFallenTodayHtml(m){
   const hiddenCount = all.length - rows.length;
   const restoreBtn = hiddenCount ? '<button class="chart-tab chips-btn bl-restore-btn">顯示已隱藏的 ' + hiddenCount + ' 檔</button>' : '';
   if (!rows.length){
-    return '<div class="bl-section bl-fallen">今天曾發動、現在已回落・已全部隱藏（' + all.length + ' 檔）</div>' +
+    return '<div class="bl-section bl-fallen">今天曾發動・已全部隱藏（' + all.length + ' 檔）</div>' +
       '<div class="race-note">紀錄還在，明天切到「昨天」還是查得到。' + restoreBtn + '</div>';
   }
-  return '<div class="bl-section bl-fallen">今天曾發動、現在已回落・' + rows.length + ' 檔</div>' +
+  return '<div class="bl-section bl-fallen">今天曾發動・' + rows.length + ' 檔</div>' +
     '<div class="race-sub">回落後訊號不會消失，這裡永遠找得到；按右邊「全部隱藏」只是這台瀏覽器不再顯示，紀錄還在，明天用「昨天」查得到。' +
     '<button class="chart-tab chips-btn bl-dismiss-btn" data-codes="' + rows.map((r) => r.code).join(',') + '">全部隱藏</button></div>' +
     brewPastTableHtml('launch', rows) + (hiddenCount ? '<div class="race-note">' + restoreBtn + '</div>' : '');
