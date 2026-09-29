@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-29 10:27:49";
+const BUILD_STAMP = "2026-09-29 10:34:30";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -334,6 +334,7 @@ const HTML_PAGE = `<!DOCTYPE html>
 .bl-prev{white-space:nowrap;font-variant-numeric:tabular-nums}
 .bl-tag{display:inline-block;font-size:10px;font-weight:700;border-radius:6px;padding:0 6px;margin-left:4px;background:#7c3aed;color:#fff;white-space:nowrap;}
   .bl-tag.warn{background:#d97706;}
+  .bl-relaunch{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;padding:0 6px;margin-left:2px;background:#7c3aed;color:#fff;white-space:nowrap;vertical-align:1px;}
   .bl-section{font-weight:800;font-size:15px;color:#fff;border-radius:8px;padding:6px 10px;margin:12px 0 8px;}
   .bl-section.bl-launch{background:#c0392b;}
   .bl-section.bl-brew{background:#0f766e;}
@@ -3936,8 +3937,12 @@ function brewLaunchModel(){
   // 第一次發動的時間要永久保留、不能被蓋掉——同一檔今天可以分好幾次發動（發動→回落→再發動），
   // 後端每次都另外存一筆（不覆蓋），這裡按時間排序後只取每檔股票「最早」那筆當作顯示的時間；
   // 剛觸發、後端這次掃描還沒記到的（brewHistoryData 還沒更新）先當作「盤中」。
-  const launchRecordByCode = new Map();
-  (brewHistoryDay(brewSessionDate()).launch || []).forEach((r) => { if (!launchRecordByCode.has(r.code)) launchRecordByCode.set(r.code, r); });
+  // 2026-09-29 使用者：光看第一次時間看不出來它今天有沒有重新發動過，另外算一份「今天總共發動幾次」給時間欄標記用。
+  const launchRecordByCode = new Map(), launchCountByCode = new Map();
+  (brewHistoryDay(brewSessionDate()).launch || []).forEach((r) => {
+    if (!launchRecordByCode.has(r.code)) launchRecordByCode.set(r.code, r);
+    launchCountByCode.set(r.code, (launchCountByCode.get(r.code) || 0) + 1);
+  });
   const launchBlocks = [], brewBlocks = [];
   const launchCodes = new Set(), brewCodes = new Set();
   const byLaunch = (a, b) => b.score - a.score || (b.projTurnoverPct || 0) - (a.projTurnoverPct || 0);
@@ -3958,6 +3963,7 @@ function brewLaunchModel(){
       if (live.launch){
         const rec = launchRecordByCode.get(s.code);
         row.recordedAt = rec ? rec.recordedAt : null; row.live = !rec;
+        row.launchCount = launchCountByCode.get(s.code) || 0;
         launchRows.push(row); launchCodes.add(s.code);
       }
       else if (info.brewing){ brewRows.push(row); brewCodes.add(s.code); }
@@ -3996,11 +4002,13 @@ function brewLaunchFlatRowHtml(r){
   const tag = r.info.brewing ? '<span class="bl-tag">醞釀→發動</span>' : '';
   const toBox = r.toBoxPct <= 0 ? '已過 ' + (-r.toBoxPct).toFixed(2) + '%' : '差 ' + r.toBoxPct.toFixed(2) + '%';
   const turnTitle = r.projTurnoverPct === null ? '沒有發行股數資料' : '預估全天周轉率 ' + r.projTurnoverPct.toFixed(2) + '%';
+  // 2026-09-29 使用者：只看第一次時間看不出來它今天有沒有重新發動過，時間旁邊加個「×N」標記。
+  const relaunchBadge = r.launchCount > 1 ? ' <span class="bl-relaunch" title="今天總共發動過 ' + r.launchCount + ' 次（含回落又重新發動）">×' + r.launchCount + '</span>' : '';
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
-    '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先顯示「盤中」">' + brewWhen(r) + '</td>' +
+    '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先顯示「盤中」">' + brewWhen(r) + relaunchBadge + '</td>' +
     '<td class="combo-code">' + r.code + '</td>' +
     '<td class="combo-name">' + r.name + '</td>' +
-    '<td><span class="sig-group">' + (r.groupName || '—') + '</span></td>' +
+    '<td><span class="sig-group">' + r.groupNames.join('、') + '</span></td>' +
     '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
     '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%</td>' +
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, r.price.toFixed(2)) + '</td>' +
@@ -4011,8 +4019,16 @@ function brewLaunchFlatRowHtml(r){
     '</tr>';
 }
 function brewLaunchFlatTableHtml(rows){
+  // 2026-09-29 使用者：同一檔股票同時屬於好幾個官方族群時，攤平後會重複出現好幾列（內容一模一樣）；
+  // 改成同一檔股票只顯示一列，族群欄把它屬於的族群全部列出來。
+  const byCode = new Map();
+  rows.forEach((r) => {
+    const existing = byCode.get(r.code);
+    if (existing){ existing.groupNames.push(r.groupName); return; }
+    byCode.set(r.code, Object.assign({}, r, { groupNames: [r.groupName] }));
+  });
   // 2026-09-29 使用者：發動列表不要照族群排，照發動時間排，最新發動的排最上面，比較久的排下面。
-  const sorted = rows.slice().sort((a, b) => String(b.recordedAt).localeCompare(String(a.recordedAt)));
+  const sorted = [...byCode.values()].sort((a, b) => String(b.recordedAt).localeCompare(String(a.recordedAt)));
   return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table">' +
     '<thead><tr><th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th><th>均線分數</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
     '<tbody>' + sorted.map(brewLaunchFlatRowHtml).join('') + '</tbody></table></div></div>';
@@ -5754,7 +5770,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-29 10:27:49';
+const BUILD_STAMP = '2026-09-29 10:34:30';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -5852,7 +5868,8 @@ function checkLaunchNotifications(){
   if (!m) return [];
   const today = twTodayStr();
   if (launchNotified.date !== today) launchNotified = { date: today, codes: new Set(), seeded: false };
-  const rows = m.launchBlocks.flatMap((b) => b.rows);
+  // 同一檔股票可能同時屬於好幾個官方族群，攤平後會重複；一檔股票只通知一次，不要因為它在兩個族群裡就跳兩次。
+  const rows = [...new Map(m.launchBlocks.flatMap((b) => b.rows).map((r) => [r.code, r])).values()];
   if (!launchNotified.seeded){
     rows.forEach((r) => launchNotified.codes.add(r.code));
     launchNotified.seeded = true;
