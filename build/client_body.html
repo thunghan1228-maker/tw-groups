@@ -137,6 +137,7 @@
   .chart-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
   .chart-tab.active{color:var(--bg);background:var(--accent);border-color:var(--accent);}
   .signal-tab.signal-tab-purple{color:#d946ef;}  /* 族群大戶力／族群綜合表／盤中333 分頁字（2026-09-24 使用者：紫紅色） */
+  .signal-tab.signal-tab-red{color:#dc2626;}  /* 2026-09-30 使用者：刀劍空(32) 分頁字改紅色 */
 
   /* 指標設定面板（週期／顏色／粗細／顯示） */
   .ind-settings{display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;}
@@ -2554,13 +2555,14 @@ async function renderOtcStrengthWidget(){
 }
 
 // 使用者 2026-09-24：族群大戶力／族群綜合表／盤中333 這三個移到今日即時後面（原本排在後段）。
+// 2026-09-30 使用者：醞釀／發動要排第二個位置，在今日即時右邊，方便盯著看；其餘順序不變。
 const SIGNAL_KINDS = [
   { key: 'now', label: '今日即時' },
+  { key: 'brewLaunch', label: '醞釀／發動' },
   { key: 'groupCombinedBoard', label: '所有族群綜合表' },     // 2026-09-26 使用者：改名
   { key: 'groupHolderForce', label: '精選十大多空族群' },   // 2026-09-26 使用者：原「族群大戶力」改名
   { key: 'race333', label: '盤中333' },
   { key: 'bladeShort', label: '刀劍空(32)' },   // 2026-09-30 使用者：從盤中333拆出來獨立成一個分頁
-  { key: 'brewLaunch', label: '醞釀／發動' },   // 2026-09-26 使用者：跟盤中大戶力對調
   { key: 'bigHolderForce', label: '盤中大戶力' },
   { key: 'fourGate', label: '四項精選' },
   { key: 'combo12Bull', label: '1+2多' },
@@ -5876,9 +5878,10 @@ function renderSignalCenter(){
   };
   // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
   const PURPLE_TAB_KEYS = new Set(['groupHolderForce', 'groupCombinedBoard', 'race333', 'brewLaunch']);  // 2026-09-24 使用者：醞釀／發動也紫紅色；2026-09-26：盤中大戶力改回黑字
+  const RED_TAB_KEYS = new Set(['bladeShort']);  // 2026-09-30 使用者：刀劍空(32) 分頁字改紅色
   const tabsHtml = SIGNAL_KINDS.map((k) => {
     const count = countFor(k.key);
-    return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + (PURPLE_TAB_KEYS.has(k.key) ? ' signal-tab-purple' : '') + '" data-kind="' + k.key + '">' +
+    return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + (PURPLE_TAB_KEYS.has(k.key) ? ' signal-tab-purple' : '') + (RED_TAB_KEYS.has(k.key) ? ' signal-tab-red' : '') + '" data-kind="' + k.key + '">' +
       k.label + (count === null ? '' : ' <span class="sig-count">' + count + '</span>') +
     '</button>';
   }).join('');
