@@ -229,6 +229,7 @@
   .launch-alert-close{flex:0 0 auto;width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,.22);border:0;color:#fff;font-size:18px;font-weight:800;line-height:1;cursor:pointer;font-family:inherit;}
   .launch-alert-close:hover{background:rgba(255,255,255,.34);}
   .launch-alert-body{margin-top:8px;font-size:15px;font-weight:600;line-height:1.6;}
+  .launch-alert-time{display:inline-block;min-width:2.6em;font-variant-numeric:tabular-nums;font-weight:800;color:#ffd8d3;}
 
   /* 盤中訊號中心：常駐浮動視窗，不擋住底下頁面（不是點開才出現的彈窗） */
   .signal-modal{position:fixed;inset:0;z-index:101;pointer-events:none;}
@@ -5791,8 +5792,10 @@ function renderLaunchAlertBox(){
     el.addEventListener('click', (e) => { if (e.target.closest('.launch-alert-close')) dismissLaunchAlert(); });
     document.body.appendChild(el);
   }
+  // 2026-09-30 使用者：卡片裡也要標出發動時間，最新的排最上面，比較舊的排下面。
+  const sorted = launchAlertRows.slice().sort((a, b) => String(b.recordedAt).localeCompare(String(a.recordedAt)));
   el.innerHTML = '<div class="launch-alert-head">🚀 發動<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
-    '<div class="launch-alert-body">' + launchAlertRows.map((r) => r.code + ' ' + r.name + (r.groupName ? '（' + r.groupName + '）' : '')).join('<br>') + '</div>';
+    '<div class="launch-alert-body">' + sorted.map((r) => '<span class="launch-alert-time">' + brewWhen(r) + '</span> ' + r.code + ' ' + r.name + (r.groupName ? '（' + r.groupName + '）' : '')).join('<br>') + '</div>';
 }
 function showLaunchAlert(rows){
   launchAlertRows = launchAlertRows.concat(rows);
