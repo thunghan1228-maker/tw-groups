@@ -362,6 +362,9 @@
   .race-row .race-holder-none{color:var(--muted);}
   .race-col-labels .race-holder{flex:0 0 6.5em;}
   .race-col-labels .race-badge-slot{flex:0 0 6.5em;white-space:nowrap;overflow:visible;}
+  /* 2026-09-30 使用者：刀劍空名單多一欄「圖」，明顯可以按（雖然點整列本身就會開K線圖，這裡是額外多一個明顯的按鈕）。 */
+  .race-row .race-chart-slot,.race-col-labels .race-chart-slot{flex:0 0 3.8em;text-align:center;}
+  .race-row .race-chart-btn{display:inline-block;background:var(--accent);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;white-space:nowrap;}
   .race-row .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   /* 族群大戶力卡片複用signal-row的大戶力顏色膠囊／資格標籤樣式，但外層是race-row */
   .race-row .sig-label{color:var(--text);opacity:.85;white-space:nowrap;flex-shrink:0;font-size:12px;}
@@ -1023,7 +1026,8 @@
         <li><b>今日即時</b>：彙整下列各類訊號的即時清單。</li>
         <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
         <li><b>精選十大多空族群</b>（原族群大戶力）：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
-        <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)、刀劍空(32)等多空條件篩出的個股與族群名單。<b>排序</b>：個股名單預設照盤中大戶力排，值大的在上、小的在下，沒有大戶力資料的排最後；刀劍空是最負的在上。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
+        <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。<b>排序</b>：個股名單預設照盤中大戶力排，值大的在上、小的在下，沒有大戶力資料的排最後。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
+        <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。今天跌、族內後 1/3、不比櫃買強，且現價低於前天收盤（⚔️劍）；🔪（刀）＝現價低於昨收。正式名單（強空積極）最多 10 檔，跌幅深的在前，大戶力最負的在上；多方打少（強族群裡逆勢走弱）和收割區域（已跌 5% 以上，不追空）只列名字。點列或按「圖」欄可以開該檔的K線圖。</li>
         <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（預估全天周轉率≥5% 或預估量≥5 日均量 1.5 倍）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。</li>
         <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
@@ -2555,6 +2559,7 @@ const SIGNAL_KINDS = [
   { key: 'groupCombinedBoard', label: '所有族群綜合表' },     // 2026-09-26 使用者：改名
   { key: 'groupHolderForce', label: '精選十大多空族群' },   // 2026-09-26 使用者：原「族群大戶力」改名
   { key: 'race333', label: '盤中333' },
+  { key: 'bladeShort', label: '刀劍空(32)' },   // 2026-09-30 使用者：從盤中333拆出來獨立成一個分頁
   { key: 'brewLaunch', label: '醞釀／發動' },   // 2026-09-26 使用者：跟盤中大戶力對調
   { key: 'bigHolderForce', label: '盤中大戶力' },
   { key: 'fourGate', label: '四項精選' },
@@ -3411,7 +3416,8 @@ function raceColLabelsHtml(opts){
   // 族群後面加「均線分數」（2026-09-24 使用者：族群跟盤中大戶力中間那塊空白放均線分數，15 分那個比法）。
   return '<div class="race-col-labels r333-labels">' + (opts && opts.blade ? '<span class="race-rank-slot"><b>族排</b></span>' : '') + '<span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span><span class="race-group-label"><b>族群</b></span>' +
     '<span class="race-ma-score"><b>均線分數</b></span>' +
-    '<span class="race-line2"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"><b>' + badgeLabel + '</b></span></span></div>';
+    '<span class="race-line2"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"><b>' + badgeLabel + '</b></span></span>' +
+    (opts && opts.blade ? '<span class="race-chart-slot"><b>圖</b></span>' : '') + '</div>';
 }
 function raceHolderCellHtml(r){
   if (r.strengthPct === null || r.strengthPct === undefined) return '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>';
@@ -3452,7 +3458,8 @@ function raceStockRowHtml(r, idx, opts){
     '<span class="race-chg ' + cls + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
     '<span class="race-price ' + cls + '">' + (hasPrice ? limitPriceHtml(r, price.toFixed(2)) : '—') + '</span>' +
     '<span class="race-badge" title="' + dailyTitle + '">' + badge + '</span>' +
-    '</span>' + (opts && opts.conditions ? raceConditionsHtml(r, opts.m, opts) : '') + '</div>';
+    '</span>' + (opts && opts.blade ? '<span class="race-chart-slot"><span class="race-chart-btn" title="開' + r.code + ' K線圖">📈圖</span></span>' : '') +
+    (opts && opts.conditions ? raceConditionsHtml(r, opts.m, opts) : '') + '</div>';
 }
 function raceOtcBoxHtml(m){
   // 櫃買指數狀況只在最上面放一次（使用者 2026-09-23），不再每個區塊下面重複。
@@ -3550,9 +3557,21 @@ function race333Html(){
       '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔（取漲幅前 ' + FIRE_MAX_ROWS + ' 檔），大戶力高的在上・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字</div>' +
       raceStockListHtml(fires, { fire: true, dates: m.dates, conditions: true, m, limit: m.fireGroupTop, limitLabel: '30' }) +
       (fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + fireLocked.length + ' 檔：' + fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
-      '</div>' +
+      '</div>';
+}
+// 2026-09-30 使用者：「刀劍空(32)」拿出來另外做一個獨立的盤中訊號分頁，不要再放在盤中333裡面混在一起；
+// 選股邏輯完全不變，還是共用 race333Model() 算出來的 bladeUpper/bladeLower/bladeHarvest，只是單獨一個分頁呈現。
+function bladeShortHtml(){
+  const m = race333Model();
+  if (!m) return '<div class="signal-empty"><div class="se-title">族群行情還沒載入</div><div class="se-sub">首頁資料抓到後就會出現。</div></div>';
+  const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const dailyNote = m.hasDaily
+    ? '昨天＝' + (m.dates[0] || '') + (m.dates[1] ? '，前天＝' + m.dates[1] : '')
+    : '還沒拿到族群昨天的資料';
+  const condsNote = '每列下面多一行列出門檻比例（族排、族內、距櫃買%、昨／前天%）。';
+  return race333FilterBarHtml() + raceOtcBoxHtml(m) +
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
-      '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要有 ⚔️ 劍（現價低於前天收盤，數字＝低幾 %；🔪 刀＝低於昨收）・最多 ' + BLADE_MAX_ROWS + ' 檔（取跌幅前 ' + BLADE_MAX_ROWS + ' 檔），大戶力最負的在上・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字</div>' +
+      '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要有 ⚔️ 劍（現價低於前天收盤，數字＝低幾 %；🔪 刀＝低於昨收）・最多 ' + BLADE_MAX_ROWS + ' 檔（取跌幅前 ' + BLADE_MAX_ROWS + ' 檔），大戶力最負的在上・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字・點列或按「圖」開K線圖</div>' +
       raceBladeListHtml(m) + '</div>';
 }
 
@@ -5849,7 +5868,7 @@ function renderSignalCenter(){
   const currentEvents = sigCurrentEvents();  // 休市日／開盤前沿用上一個交易日的訊號，數字才不會全部是 0
   const countFor = (key) => {
     if (key === 'now') return currentEvents.length + bigHolderRows.length;
-    if (key === 'history' || key === 'race333' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
+    if (key === 'history' || key === 'race333' || key === 'bladeShort' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
     if (key === 'bigHolderForce') return bigHolderRows.length;
     if (key === 'brewLaunch'){ const bm = brewLaunchModel(); return bm ? bm.brewCount + '/' + bm.launchCount : null; }
     if (key === 'bigBuy' || key === 'bigSell') return filterLargeOrderEvents(currentEvents.filter((e) => e.tabs.includes(key))).length;
@@ -5906,6 +5925,9 @@ function renderSignalCenter(){
   } else if (active === 'race333'){
     refreshGroupDailyChanges(false);
     replaceSignalHtml(body, 'race333', race333Html());
+  } else if (active === 'bladeShort'){
+    refreshGroupDailyChanges(false);
+    replaceSignalHtml(body, 'bladeShort', bladeShortHtml());
   } else if (active === 'groupHolderForce'){
     refreshGroupDailyChanges(false);
     replaceSignalHtml(body, 'groupHolderForce', groupHolderForceHtml());
