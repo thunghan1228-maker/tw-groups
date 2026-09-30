@@ -5878,7 +5878,7 @@ function renderSignalCenter(){
   };
   // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
   const PURPLE_TAB_KEYS = new Set(['groupHolderForce', 'groupCombinedBoard', 'race333', 'brewLaunch']);  // 2026-09-24 使用者：醞釀／發動也紫紅色；2026-09-26：盤中大戶力改回黑字
-  const GREEN_TAB_KEYS = new Set(['bladeShort']);  // 2026-09-30 使用者：刀劍空(32) 分頁字改綠色（不要紅色）
+  const GREEN_TAB_KEYS = new Set(['bladeShort', 'bigSell']);  // 2026-09-30 使用者：刀劍空(32)、盤中特大賣單 分頁字改綠色
   const tabsHtml = SIGNAL_KINDS.map((k) => {
     const count = countFor(k.key);
     return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + (PURPLE_TAB_KEYS.has(k.key) ? ' signal-tab-purple' : '') + (GREEN_TAB_KEYS.has(k.key) ? ' signal-tab-green' : '') + '" data-kind="' + k.key + '">' +
