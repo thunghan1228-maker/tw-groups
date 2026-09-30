@@ -396,10 +396,14 @@
   .combo-table tr.combo-row:hover{background:var(--panel-2);}
   .combo-table .combo-code{color:var(--muted);white-space:nowrap;}
   .combo-table .combo-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  /* 2026-09-30 使用者：醞釀／發動的發動列表要看得到融資融券／現股當沖／股期；放名稱欄下面自己一行，
-     只有查得到資料的股票才會多這一行，那一列才會跟著變高，其他列維持原本高度。 */
-  .combo-table .combo-name.bl-name{white-space:normal;overflow:visible;text-overflow:clip;min-width:11em;}
-  .combo-table .sig-eligibility{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px;min-width:11em;}
+  /* 2026-09-30 使用者：醞釀／發動的發動列表要看得到融資融券／現股當沖／股期；使用者回報放名稱欄裡
+     會跟旁邊的族群欄文字重疊糊在一起，改成獨立一整行（colspan 整個表格寬度），接在該股票那一列
+     下面，不會動到任何欄位本身的寬度／溢出設定，不可能再疊到別的欄位。 */
+  .combo-table tr.bl-elig-row{cursor:default;}
+  .combo-table tr.bl-elig-row:hover{background:inherit;}
+  .combo-table tr.bl-elig-row td{padding:2px 8px 6px;}
+  .combo-table tr.combo-row:has(+ tr.bl-elig-row) td{border-bottom:none;}
+  .combo-table .sig-eligibility{display:flex;flex-wrap:wrap;gap:4px;}
   .combo-table .sig-eligibility span{font-size:10px;font-weight:400;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 6px;white-space:nowrap;}
   .combo-table .sig-eligibility span.sig-futures{color:#93c5fd;border-color:#93c5fd66;}
   .combo-table .combo-pct{font-weight:700;}
@@ -3983,13 +3987,15 @@ function brewLaunchFlatRowHtml(r){
   const turnTitle = r.projTurnoverPct === null ? '沒有發行股數資料' : '預估全天周轉率 ' + r.projTurnoverPct.toFixed(2) + '%';
   // 2026-09-29 使用者：只看第一次時間看不出來它今天有沒有重新發動過，時間旁邊加個「×N」標記。
   const relaunchBadge = r.launchCount > 1 ? ' <span class="bl-relaunch" title="今天總共發動過 ' + r.launchCount + ' 次（含回落又重新發動）">×' + r.launchCount + '</span>' : '';
-  // 2026-09-30 使用者：要看得到融資融券／現股當沖／股期這些交易資訊；放在名稱欄下面自己一行，
-  // 沒有資料（沒查到）就不多顯示，那一列的高度也不會被撐高。
+  // 2026-09-30 使用者：要看得到融資融券／現股當沖／股期這些交易資訊。原本放名稱欄裡讓那一列自己變高，
+  // 使用者回報在手機上會跟旁邊的族群欄文字重疊糊在一起——改成獨立一整列（橫跨全部欄位，接在該股票
+  // 那一列下面），不會動到任何欄位本身的寬度／溢出設定，不會再疊到別的欄位。沒有資料就不多這一列。
   const eligTags = tradingEligibilityTagsHtml(r);
+  const eligRow = eligTags ? '<tr class="bl-elig-row" data-code="' + r.code + '" data-name="' + r.name + '"><td colspan="11">' + eligTags + '</td></tr>' : '';
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
     '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先用現在時間顯示，定案後會換成正式時間">' + brewWhen(r) + relaunchBadge + '</td>' +
     '<td class="combo-code">' + r.code + '</td>' +
-    '<td class="combo-name bl-name">' + r.name + eligTags + '</td>' +
+    '<td class="combo-name">' + r.name + '</td>' +
     '<td><span class="sig-group">' + r.groupNames.join('、') + '</span></td>' +
     '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
     '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%</td>' +
@@ -3998,7 +4004,7 @@ function brewLaunchFlatRowHtml(r){
     '<td class="bl-tobox' + (r.toBoxPct <= 0 ? ' up' : '') + '">' + toBox + tag + '</td>' +
     '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2) + '%') + '</td>' +
     '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2) + ' 倍') + '</td>' +
-    '</tr>';
+    '</tr>' + eligRow;
 }
 function brewLaunchFlatTableHtml(rows){
   // 2026-09-29 使用者：同一檔股票同時屬於好幾個官方族群時，攤平後會重複出現好幾列（內容一模一樣）；
