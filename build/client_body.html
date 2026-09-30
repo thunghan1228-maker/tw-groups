@@ -3928,7 +3928,7 @@ function brewLaunchRowHtml(r, kind){
   const toBox = r.toBoxPct <= 0 ? '已過 ' + (-r.toBoxPct).toFixed(2) + '%' : '差 ' + r.toBoxPct.toFixed(2) + '%';
   const turnTitle = r.projTurnoverPct === null ? '沒有發行股數資料' : '預估全天周轉率 ' + r.projTurnoverPct.toFixed(2) + '%';
   // 2026-09-29 使用者：發動要能查到第一次是幾點發動的（後端永久記錄，不會因為回落就找不到）。
-  const timeCell = kind === 'launch' ? '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先顯示「盤中」">' + brewWhen(r) + '</td>' : '';
+  const timeCell = kind === 'launch' ? '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先用現在時間顯示，定案後會換成正式時間">' + brewWhen(r) + '</td>' : '';
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
     timeCell +
     '<td class="combo-code">' + r.code + '</td>' +
@@ -3951,7 +3951,7 @@ function brewLaunchFlatRowHtml(r){
   // 2026-09-29 使用者：只看第一次時間看不出來它今天有沒有重新發動過，時間旁邊加個「×N」標記。
   const relaunchBadge = r.launchCount > 1 ? ' <span class="bl-relaunch" title="今天總共發動過 ' + r.launchCount + ' 次（含回落又重新發動）">×' + r.launchCount + '</span>' : '';
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
-    '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先顯示「盤中」">' + brewWhen(r) + relaunchBadge + '</td>' +
+    '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先用現在時間顯示，定案後會換成正式時間">' + brewWhen(r) + relaunchBadge + '</td>' +
     '<td class="combo-code">' + r.code + '</td>' +
     '<td class="combo-name">' + r.name + '</td>' +
     '<td><span class="sig-group">' + r.groupNames.join('、') + '</span></td>' +
@@ -4051,7 +4051,9 @@ function brewHistoryDay(date){
 }
 const fmtTime = (iso) => { const m = /T(\d{2}):(\d{2})/.exec(String(iso || '')); return m ? m[1] + ':' + m[2] : ''; };
 const num2 = (v) => (Number.isFinite(Number(v)) && v !== null ? Number(v).toFixed(2) : '—');
-const brewWhen = (r) => (r.live ? '盤中' : r.eod ? '<span class="bl-eod" title="那天沒有盤中紀錄，用收盤價回推">收盤</span>' : fmtTime(r.recordedAt));
+// 2026-09-30 使用者：「盤中」看不懂，要直接秀時間——剛觸發、後端還沒記到的先用現在的時間顯示，
+// 後端這次掃描記到之後（brewHistoryData 更新）會自動換成正式時間，畫面上一律是時間、不會出現文字。
+const brewWhen = (r) => (r.live ? new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : r.eod ? '<span class="bl-eod" title="那天沒有盤中紀錄，用收盤價回推">收盤</span>' : fmtTime(r.recordedAt));
 // 交集表多一欄「前一天」：發動＝前一天的發動時間、發動價、漲幅；醞釀＝前一天的均線分數、收盤
 function brewPrevCellHtml(kind, prev){
   if (!prev) return '<td class="bl-prev">—</td>';
