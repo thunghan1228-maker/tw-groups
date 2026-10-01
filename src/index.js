@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-09-30 18:37:19";
+const BUILD_STAMP = "2026-10-01 09:18:36";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -279,7 +279,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   /* 2026-09-29 使用者：發動跳出來的提醒要大一點、停留住不要自己消失，按掉才消失（跟小小的 toast 分開一個元件）。 */
   .launch-alert{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 16px);transform:translateX(-50%);z-index:210;background:#c0392b;color:#fff;border-radius:14px;box-shadow:0 10px 32px rgba(0,0,0,.5);max-width:min(92vw,560px);padding:14px 18px;}
-  .launch-alert-head{display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:20px;font-weight:800;}
+  /* 2026-09-30 使用者：卡片擋住後面內容時要能拖到別的地方，不要釘死在正中間。 */
+  .launch-alert-head{display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:20px;font-weight:800;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
   .launch-alert-close{flex:0 0 auto;width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,.22);border:0;color:#fff;font-size:18px;font-weight:800;line-height:1;cursor:pointer;font-family:inherit;}
   .launch-alert-close:hover{background:rgba(255,255,255,.34);}
   .launch-alert-body{margin-top:8px;font-size:15px;font-weight:600;line-height:1.6;}
@@ -5815,7 +5816,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-09-30 18:37:19';
+const BUILD_STAMP = '2026-10-01 09:18:36';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -5881,6 +5882,16 @@ function requestNotifyPermission(done){
   try { Notification.requestPermission().then((state) => { if (done) done(state); }); } catch (e) { if (done) done('unsupported'); }
 }
 let launchAlertRows = [];  // 還沒被按掉的發動提醒；還沒按掉又有新的發動，陸續加進來，不會蓋掉前面的
+// 2026-09-30 使用者：卡片擋住後面內容時要能拖到畫面別的地方，不要釘死在正中間。
+// 卡片內容（innerHTML）每次有新發動都會整個重畫，拖曳的事件綁在外層常駐的 el 上（用委派抓 .launch-alert-head），
+// 不會因為重畫把監聽器跟著清掉；位置也是寫在 el 自己的 inline style，重畫 innerHTML 不會動到，所以拖到哪就停在哪。
+let launchAlertDragging = false, launchAlertDragX = 0, launchAlertDragY = 0, launchAlertStartLeft = 0, launchAlertStartTop = 0;
+function clampLaunchAlertPos(el, left, top){
+  return {
+    left: Math.max(0, Math.min(document.documentElement.clientWidth - el.offsetWidth, left)),
+    top: Math.max(0, Math.min(window.innerHeight - 40, top)),
+  };
+}
 function renderLaunchAlertBox(){
   let el = document.getElementById('launchAlertBox');
   if (!launchAlertRows.length){ if (el) el.remove(); return; }
@@ -5889,6 +5900,23 @@ function renderLaunchAlertBox(){
     el.id = 'launchAlertBox';
     el.className = 'launch-alert';
     el.addEventListener('click', (e) => { if (e.target.closest('.launch-alert-close')) dismissLaunchAlert(); });
+    el.addEventListener('pointerdown', (e) => {
+      if (!e.target.closest('.launch-alert-head') || e.target.closest('.launch-alert-close')) return;
+      launchAlertDragging = true;
+      launchAlertDragX = e.clientX; launchAlertDragY = e.clientY;
+      const rect = el.getBoundingClientRect();
+      launchAlertStartLeft = rect.left; launchAlertStartTop = rect.top;
+      el.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (!launchAlertDragging) return;
+      const pos = clampLaunchAlertPos(el, launchAlertStartLeft + (e.clientX - launchAlertDragX), launchAlertStartTop + (e.clientY - launchAlertDragY));
+      el.style.left = pos.left + 'px'; el.style.top = pos.top + 'px'; el.style.transform = 'none';
+    });
+    const stopLaunchAlertDrag = () => { launchAlertDragging = false; };
+    el.addEventListener('pointerup', stopLaunchAlertDrag);
+    el.addEventListener('pointercancel', stopLaunchAlertDrag);
     document.body.appendChild(el);
   }
   // 2026-09-30 使用者：卡片裡也要標出發動時間，最新的排最上面，比較舊的排下面。
@@ -5896,6 +5924,14 @@ function renderLaunchAlertBox(){
   el.innerHTML = '<div class="launch-alert-head">🚀 發動<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
     '<div class="launch-alert-body">' + sorted.map((r) => '<span class="launch-alert-time">' + brewWhen(r) + '</span> ' + r.code + ' ' + r.name + (r.groupName ? '（' + r.groupName + '）' : '')).join('<br>') + '</div>';
 }
+// 拖過之後（el.style.left 有值）換了screen尺寸（轉螢幕、瀏覽器拖去另一台螢幕）要是卡片被擠出畫面，重新夾回畫面內；
+// 還沒拖過的（維持 CSS 預設置中）不要動，不然會覆蓋掉 left:50% 置中。
+window.addEventListener('resize', () => {
+  const el = document.getElementById('launchAlertBox');
+  if (!el || !el.style.left) return;
+  const pos = clampLaunchAlertPos(el, el.offsetLeft, el.offsetTop);
+  el.style.left = pos.left + 'px'; el.style.top = pos.top + 'px';
+});
 function showLaunchAlert(rows){
   launchAlertRows = launchAlertRows.concat(rows);
   renderLaunchAlertBox();
