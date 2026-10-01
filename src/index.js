@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-01 09:18:36";
+const BUILD_STAMP = "2026-10-01 09:38:16";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3971,10 +3971,12 @@ function brewLaunchModel(){
   // 後端每次都另外存一筆（不覆蓋），這裡按時間排序後只取每檔股票「最早」那筆當作顯示的時間；
   // 剛觸發、後端這次掃描還沒記到的（brewHistoryData 還沒更新）先當作「盤中」。
   // 2026-09-29 使用者：光看第一次時間看不出來它今天有沒有重新發動過，另外算一份「今天總共發動幾次」給時間欄標記用。
-  const launchRecordByCode = new Map(), launchCountByCode = new Map();
+  // 2026-09-30 使用者：滑鼠移到「×N次」旁邊要看得到每一次發動分別是幾點，所以把每一筆的時間都留著，不是只留次數。
+  const launchRecordByCode = new Map(), launchTimesByCode = new Map();
   (brewHistoryDay(brewSessionDate()).launch || []).forEach((r) => {
     if (!launchRecordByCode.has(r.code)) launchRecordByCode.set(r.code, r);
-    launchCountByCode.set(r.code, (launchCountByCode.get(r.code) || 0) + 1);
+    if (!launchTimesByCode.has(r.code)) launchTimesByCode.set(r.code, []);
+    launchTimesByCode.get(r.code).push(r.recordedAt);
   });
   // 2026-09-30 使用者：發動列表要看得到融資融券／現股當沖／股期這些交易資訊；跟盤中大戶力排行
   // 共用同一份 mainForceRanking（後端 get_trading_eligibility 查到的），不用另外打 API。
@@ -4002,7 +4004,9 @@ function brewLaunchModel(){
       if (live.launch){
         const rec = launchRecordByCode.get(s.code);
         row.recordedAt = rec ? rec.recordedAt : null; row.live = !rec;
-        row.launchCount = launchCountByCode.get(s.code) || 0;
+        const times = (launchTimesByCode.get(s.code) || []).slice().sort();  // ISO字串字典排序就是時間排序
+        row.launchCount = times.length;
+        row.launchTimes = times;
         launchRows.push(row); launchCodes.add(s.code);
       }
       else if (info.brewing){ brewRows.push(row); brewCodes.add(s.code); }
@@ -4042,7 +4046,9 @@ function brewLaunchFlatRowHtml(r){
   const toBox = r.toBoxPct <= 0 ? '已過 ' + (-r.toBoxPct).toFixed(2) + '%' : '差 ' + r.toBoxPct.toFixed(2) + '%';
   const turnTitle = r.projTurnoverPct === null ? '沒有發行股數資料' : '預估全天周轉率 ' + r.projTurnoverPct.toFixed(2) + '%';
   // 2026-09-29 使用者：只看第一次時間看不出來它今天有沒有重新發動過，時間旁邊加個「×N」標記。
-  const relaunchBadge = r.launchCount > 1 ? ' <span class="bl-relaunch" title="今天總共發動過 ' + r.launchCount + ' 次（含回落又重新發動）">×' + r.launchCount + '</span>' : '';
+  // 2026-09-30 使用者：滑鼠移到「×N次」旁邊要看得到每一次發動分別是幾點。
+  const relaunchTimes = (r.launchTimes || []).map(fmtTime).filter(Boolean).join('、');
+  const relaunchBadge = r.launchCount > 1 ? ' <span class="bl-relaunch" title="今天發動過 ' + r.launchCount + ' 次（含回落又重新發動）：' + relaunchTimes + '">×' + r.launchCount + '</span>' : '';
   // 2026-09-30 使用者：要看得到融資融券／現股當沖／股期這些交易資訊。原本放名稱欄裡讓那一列自己變高，
   // 使用者回報在手機上會跟旁邊的族群欄文字重疊糊在一起——改成獨立一整列（橫跨全部欄位，接在該股票
   // 那一列下面），不會動到任何欄位本身的寬度／溢出設定，不會再疊到別的欄位。沒有資料就不多這一列。
@@ -5816,7 +5822,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-01 09:18:36';
+const BUILD_STAMP = '2026-10-01 09:38:16';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -5947,12 +5953,30 @@ function launchNotificationBody(r){
     (r.volRatio !== null ? '｜量比 ' + r.volRatio.toFixed(1) + ' 倍' : '') + (r.info.brewing ? '｜醞釀→發動' : '');
 }
 function checkLaunchNotifications(){
+  // 2026-10-01 使用者回報：有些股票發動後很快就回落（在兩次15秒報價輪詢之間），這裡keep它warm，
+  // 讓歷史紀錄不會因為訊號中心剛好沒開在醞釀／發動分頁就一直是舊資料。
+  refreshBrewHistory(false);
   const m = brewLaunchModel();
   if (!m) return [];
   const today = twTodayStr();
   if (launchNotified.date !== today) launchNotified = { date: today, codes: new Set(), seeded: false };
+  // 2026-10-01 使用者回報：有些股票發動後很快就回落（在兩次15秒報價輪詢之間），只看「現在還活著」的
+  // m.launchBlocks 會完全抓不到它活著的那一刻，就永遠不會跳提醒——但「今天曾發動」列表看得到（後端永久
+  // 記錄 brewHistoryDay），造成「列表裡有、提醒卻從來沒跳過」的不一致。改成也跟永久紀錄比對：現在還活著
+  // 的用即時資料（比較新鮮，有完整的分數/量比等欄位可以給通知內文用），已經回落的用永久紀錄湊一筆陽春的。
+  const liveByCode = new Map(m.launchBlocks.flatMap((b) => b.rows).map((r) => [r.code, r]));
+  const recordedByCode = new Map();
+  (brewHistoryDay(brewSessionDate()).launch || []).forEach((r) => { if (!recordedByCode.has(r.code)) recordedByCode.set(r.code, r); });
+  const toAlertRow = (code) => {
+    const live = liveByCode.get(code);
+    if (live) return live;
+    const rec = recordedByCode.get(code);
+    return { code: rec.code, name: rec.name, groupName: rec.group, price: rec.price, pct: rec.changePct, score: rec.score,
+      projTurnoverPct: rec.projTurnoverPct, volRatio: rec.volRatio, recordedAt: rec.recordedAt, live: false,
+      info: { boxHigh: rec.boxHigh, brewing: !!rec.brewing } };
+  };
   // 同一檔股票可能同時屬於好幾個官方族群，攤平後會重複；一檔股票只通知一次，不要因為它在兩個族群裡就跳兩次。
-  const rows = [...new Map(m.launchBlocks.flatMap((b) => b.rows).map((r) => [r.code, r])).values()];
+  const rows = [...new Set([...recordedByCode.keys(), ...liveByCode.keys()])].map(toAlertRow);
   if (!launchNotified.seeded){
     rows.forEach((r) => launchNotified.codes.add(r.code));
     launchNotified.seeded = true;
