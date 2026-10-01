@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-01 09:38:16";
+const BUILD_STAMP = "2026-10-01 10:36:21";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1100,9 +1100,9 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：11:00～13:30，5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。</li>
-        <li><b>主力翻多空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
+        <li><b>主力翻多／主力翻空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
         <li><b>盤中特大買單／賣單</b>：同一秒內大單連續敲進／倒出（同秒合計 ≥100 張或 ≥3,000 萬，觸發時大戶力要同向）；合計 ≥300 張或 ≥5,000 萬標「瞬間特大」。訊號很多時用上方篩選鈕縮減（可同時開幾個）：只看特大單、金額≥1億、族群前10名（族群同步漲幅／跌幅前 10 名）、每檔只留最大一筆（同一檔一天觸發好幾次，只留到目前為止金額最大的，之後有更大的會換成新的）、每檔只留最新一筆（只留最近發生的那筆，看誰剛剛有大單進來；跟最大一筆二選一）；分頁上的數字會跟著篩選變。</li>
-        <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選／1+2多／創高黑龍／主力翻多空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日或開盤前 08:45 今天還沒有訊號時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
+        <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選強多／四項精選強空／1+2多／創高黑龍／主力翻多／主力翻空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日或開盤前 08:45 今天還沒有訊號時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
       </ul>
     </div>
     <div class="chart-tabs signal-tabs-bar" id="signalTabsBar"></div>
@@ -2629,11 +2629,16 @@ const SIGNAL_KINDS = [
   { key: 'groupHolderForce', label: '精選十大多空族群' },   // 2026-09-26 使用者：原「族群大戶力」改名
   { key: 'race333', label: '盤中333' },
   { key: 'bladeShort', label: '刀劍空(32)' },   // 2026-09-30 使用者：從盤中333拆出來獨立成一個分頁
-  { key: 'bigHolderForce', label: '盤中大戶力' },
-  { key: 'fourGate', label: '四項精選' },
+  // 2026-10-01 使用者：盤中大戶力、四項精選也都拆成多／空各一個分頁，不要放在一起。
+  { key: 'bigHolderForceBull', label: '盤中大戶力多' },
+  { key: 'bigHolderForceBear', label: '盤中大戶力空' },
+  { key: 'fourGateBuy', label: '四項精選強多' },
+  { key: 'fourGateSell', label: '四項精選強空' },
   { key: 'combo12Bull', label: '1+2多' },
   { key: 'blackDragon', label: '創高黑龍' },
-  { key: 'mainForceFlip', label: '主力翻多空' },
+  // 2026-10-01 使用者：主力翻多空原本混在一起，拆成主力翻多／主力翻空各一個分頁，不要放在一起。
+  { key: 'mainForceFlipBull', label: '主力翻多' },
+  { key: 'mainForceFlipBear', label: '主力翻空' },
   { key: 'bigBuy', label: '盤中特大買單' },
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'history', label: '歷史查詢' },
@@ -2681,7 +2686,7 @@ function pickDemoStocks(n, seedExtra){
 function buildDemoSignalsForDate(dateStr){
   const rnd = mulberry32(hashCode('signals-' + dateStr));
   const stockPool = pickDemoStocks(20, dateStr);
-  const counts = { fourGate: 1, bigBuy: 2, bigSell: 2, bigHolderForce: 2 };
+  const counts = { fourGateBuy: 1, bigBuy: 2, bigSell: 2, bigHolderForce: 2 };
   const events = [];
   let si = 0;
   Object.keys(counts).forEach((kind) => {
@@ -2692,7 +2697,7 @@ function buildDemoSignalsForDate(dateStr){
       const timeLabel = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
       const qty = Math.round(500 + rnd() * 2500);
       let label = '';
-      if (kind === 'fourGate') label = '四項條件同時成立';
+      if (kind === 'fourGateBuy') label = '四項條件同時成立';
       else if (kind === 'bigBuy') label = '單筆買進 ' + qty + ' 張';
       else if (kind === 'bigSell') label = '單筆賣出 ' + qty + ' 張';
       else if (kind === 'bigHolderForce') label = '大戶買賣力' + (rnd() > 0.5 ? '轉強' : '轉弱');
@@ -2714,8 +2719,15 @@ let mainForceRankingLoaded = false; // 第一次抓/api/main-force-ranking成功
                                      // 綜合表會在抓到資料前先顯示「目前沒有符合條件的個股」，看起來像是壞掉。
 let signalDataIsReal = false;
 const BIG_HOLDER_THRESHOLD = 500; // 累計買賣超達 500 張視為大戶力，跟K線圖大戶定義一致
-function bigHolderRowsFrom(ranking){
-  return ranking.filter((r) => Math.abs(r.netVolume) >= BIG_HOLDER_THRESHOLD);
+// 2026-10-01 使用者：盤中大戶力偏買跟偏賣原本混在同一個列表，要拆成兩個分頁；netVolume（大單淨額）
+// 正負號就是買賣方向，strengthPct／holderLabel是它換算出來的百分比／門檻標籤，符號一定同向，
+// 用netVolume判斷才每一列都有得判斷（strengthPct可能因為資料還在累積是null）。
+const holderRowIsBull = (r) => Number(r.netVolume) >= 0;
+function bigHolderRowsFrom(ranking, dir){
+  const rows = ranking.filter((r) => Math.abs(r.netVolume) >= BIG_HOLDER_THRESHOLD);
+  if (dir === 'bull') return rows.filter(holderRowIsBull);
+  if (dir === 'bear') return rows.filter((r) => !holderRowIsBull(r));
+  return rows;
 }
 
 function lookupStockName(code){
@@ -2745,7 +2757,7 @@ function mapLargeOrderSignal(s){
   const isBuy = klineInfo ? klineInfo.side === 'bull' : (kind === 'instantLargeBuy' || kind === 'fourGateBuy' || kind === 'mainForceFlipBull');
   const backendName = s.name && s.name !== s.ticker ? s.name : null;
   return {
-    tabs: isFourGate ? ['now', 'fourGate'] : isFlip ? ['now', 'mainForceFlip'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : ['now', isBuy ? 'bigBuy' : 'bigSell']),
+    tabs: isFourGate ? ['now', kind] : isFlip ? ['now', isBuy ? 'mainForceFlipBull' : 'mainForceFlipBear'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : ['now', isBuy ? 'bigBuy' : 'bigSell']),
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
     ts: s.barTs,
     code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label, isBuy,
@@ -2894,11 +2906,11 @@ function holderEmptyHtml(view, title, sub){
   else if (view && view.unavailable){ title = '還沒有那一天的資料'; sub = '後端日K累積到那一天之後就會出現。'; }
   return '<div class="signal-empty"><div class="se-title">' + title + '</div><div class="se-sub">' + sub + '</div></div>';
 }
-// ---- 訊號分頁（今日即時／四項精選／1+2多／創高黑龍／主力翻多空／盤中特大買賣單）的「今天／昨天／前天」----
+// ---- 訊號分頁（今日即時／四項精選強多／強空／1+2多／創高黑龍／主力翻多／翻空／盤中特大買賣單）的「今天／昨天／前天」----
 // 使用者 2026-09-25：訊號為零的分頁昨天的都沒留下來，要能看昨天、前天的資料來檢查。往日的訊號後端本來就
 // 每天保存（跟歷史查詢分頁同一條路），這裡讓每個訊號分頁都能直接切；休市日或開盤前 08:45 今天還沒有訊號時，
 // 比照大戶力分頁沿用上一個交易日（後端排行帶 heldFrom），按鈕寫「今天（mm/dd 收盤）」。
-const SIGNAL_DAY_TABS = new Set(['now', 'fourGate', 'combo12Bull', 'blackDragon', 'mainForceFlip', 'bigBuy', 'bigSell']);
+const SIGNAL_DAY_TABS = new Set(['now', 'fourGateBuy', 'fourGateSell', 'combo12Bull', 'blackDragon', 'mainForceFlipBull', 'mainForceFlipBear', 'bigBuy', 'bigSell']);
 let sigDayOffset = 0;
 const sigHistoryEvents = {};   // date -> events[]（抓過就留著）
 const sigHistoryLoading = {};
@@ -5822,7 +5834,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-01 09:38:16';
+const BUILD_STAMP = '2026-10-01 10:36:21';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -6007,7 +6019,8 @@ function renderSignalCenter(){
   const countFor = (key) => {
     if (key === 'now') return currentEvents.length + bigHolderRows.length;
     if (key === 'history' || key === 'race333' || key === 'bladeShort' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
-    if (key === 'bigHolderForce') return bigHolderRows.length;
+    if (key === 'bigHolderForceBull') return bigHolderRowsFrom(mainForceRanking, 'bull').length;
+    if (key === 'bigHolderForceBear') return bigHolderRowsFrom(mainForceRanking, 'bear').length;
     if (key === 'brewLaunch'){ const bm = brewLaunchModel(); return bm ? bm.brewCount + '/' + bm.launchCount : null; }
     if (key === 'bigBuy' || key === 'bigSell') return filterLargeOrderEvents(currentEvents.filter((e) => e.tabs.includes(key))).length;
     return currentEvents.filter((e) => e.tabs.includes(key)).length;
@@ -6054,12 +6067,12 @@ function renderSignalCenter(){
       const el = document.getElementById('signalHistoryBody');
       if (el && !el.querySelector('.signal-list')) el.innerHTML = '<div class="signal-empty"><div class="se-title">讀取失敗</div><div class="se-sub">後端暫時連不上，稍後再試。</div></div>';
     });
-  } else if (active === 'bigHolderForce'){
+  } else if (active === 'bigHolderForceBull' || active === 'bigHolderForceBear'){
     // 昨天／前天的日期清單來自 group-daily-changes，三個大戶力分頁都要確保它有抓。
     refreshGroupDailyChanges(false);
     const view = holderView();
-    const rows = view.offset === 0 ? bigHolderRows : bigHolderRowsFrom(view.ranking);
-    replaceSignalHtml(body, 'bigHolderForce', holderDayBarHtml() + holderPastNoteHtml(view) +
+    const rows = bigHolderRowsFrom(view.ranking, active === 'bigHolderForceBull' ? 'bull' : 'bear');
+    replaceSignalHtml(body, active, holderDayBarHtml() + holderPastNoteHtml(view) +
       (view.loading || view.unavailable ? holderEmptyHtml(view, '', '') : rankingRowsHtml(rows, view)));
   } else if (active === 'race333'){
     refreshGroupDailyChanges(false);
