@@ -3988,7 +3988,7 @@ function brewLaunchRowHtml(r, kind){
     '<td class="combo-code">' + r.code + '</td>' +
     '<td class="combo-name">' + r.name + '</td>' +
     '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
-    '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%</td>' +
+    '<td class="combo-pct ' + cls + '">' + limitPriceHtml(r, fmt(r.pct) + '%') + '</td>' +
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, r.price.toFixed(2)) + '</td>' +
     '<td class="bl-box" title="箱底 ' + r.info.boxLow.toFixed(2) + '，箱子高低差 ' + r.info.boxRangePct + '%">' + r.info.boxHigh.toFixed(2) + '</td>' +
     '<td class="bl-tobox' + (r.toBoxPct <= 0 ? ' up' : '') + '">' + toBox + tag + '</td>' +
@@ -4017,7 +4017,7 @@ function brewLaunchFlatRowHtml(r){
     '<td class="combo-name">' + r.name + '</td>' +
     '<td><span class="sig-group">' + r.groupNames.join('、') + '</span></td>' +
     '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
-    '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%</td>' +
+    '<td class="combo-pct ' + cls + '">' + limitPriceHtml(r, fmt(r.pct) + '%') + '</td>' +
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, r.price.toFixed(2)) + '</td>' +
     '<td class="bl-box" title="箱底 ' + r.info.boxLow.toFixed(2) + '，箱子高低差 ' + r.info.boxRangePct + '%">' + r.info.boxHigh.toFixed(2) + '</td>' +
     '<td class="bl-tobox' + (r.toBoxPct <= 0 ? ' up' : '') + '">' + toBox + tag + '</td>' +
