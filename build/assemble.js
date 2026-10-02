@@ -71,7 +71,15 @@ async function fetchQuotes(codes) {
   const quotes = {};
   for (const code of codes) quotes[code] = { price: null, change: 0, changePercent: 0 };
   const chunks = chunk(codes, CHUNK_SIZE);
-  const results = await Promise.all(chunks.map((c) => fetchQuoteChunk(c)));
+  // 2026-10-02 使用者回報某台電腦/api/groups一直502、其他台正常：查出來是TWSE那個公開查詢
+  // API偶爾某一段（chunk）會failed，原本Promise.all只要有一段掛了就整個請求502，其他段明明
+  // 有抓到的資料也一起被丟掉。改成允許個別段失敗：只要還有至少一段抓到，就用抓到的那些正常
+  // 回（失敗那幾段的股票價格維持null，前端本來就會跳過不計入族群平均漲跌幅）；真的整批都失敗
+  // 才維持原本502（連不上後端的提示要照舊出現）。
+  const settled = await Promise.allSettled(chunks.map((c) => fetchQuoteChunk(c)));
+  const fulfilled = settled.filter((r) => r.status === "fulfilled");
+  if (!fulfilled.length) throw settled[0].reason;
+  const results = fulfilled.map((r) => r.value);
   let quoteDate = "", quoteTime = "";
   for (const msgArray of results) {
     for (const item of msgArray) {

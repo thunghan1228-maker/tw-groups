@@ -4129,8 +4129,8 @@ function brewPastLaunchRowHtml(r, opts){
     '<td><span class="sig-group">' + (r.group || '—') + '</span></td>' +
     (opts && opts.prev ? brewPrevCellHtml('launch', opts.prev.get(r.code)) : '') +
     '<td class="bl-score">' + r.score + '</td>' +
-    '<td class="combo-pct ' + cls + '">' + (r.changePct === null || r.changePct === undefined ? '—' : fmt(r.changePct) + '%') + '</td>' +
-    '<td class="combo-price ' + cls + '">' + num2(r.price) + '</td>' +
+    '<td class="combo-pct ' + cls + '">' + (r.changePct === null || r.changePct === undefined ? '—' : limitPriceHtml(r, fmt(r.changePct) + '%')) + '</td>' +
+    '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, num2(r.price)) + '</td>' +
     '<td class="bl-box">' + num2(r.boxHigh) + '</td>' +
     '<td class="bl-turn">' + (r.projTurnoverPct === null || r.projTurnoverPct === undefined ? '—' : Number(r.projTurnoverPct).toFixed(2) + '%') + '</td>' +
     '<td class="bl-ratio">' + (r.volRatio === null || r.volRatio === undefined ? '—' : Number(r.volRatio).toFixed(2) + ' 倍') + (r.brewing ? ' <span class="bl-tag">醞釀→發動</span>' : '') + '</td>' +
