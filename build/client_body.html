@@ -5831,11 +5831,17 @@ function launchBeep(){
   try {
     primeAlertAudio();
     if (!alertAudioCtx) return;
-    [0, 0.3].forEach((delay) => {  // 叮、叮兩聲
+    // 2026-10-02 使用者：原本兩聲同音「叮、叮」要換成完全不同的提示音，不是只改音高——
+    // 改成三個音階漸漸升高的鈴聲（C5→E5→G5大三和弦，像一般App的「有好事」通知音），
+    // 音色也從預設的sine換成triangle，整體比較活潑、跟原本平板的雙叮聲聽起來不一樣。
+    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+    notes.forEach((freq, i) => {
       const osc = alertAudioCtx.createOscillator(), gain = alertAudioCtx.createGain();
-      osc.frequency.value = 880; gain.gain.value = 0.15;
+      osc.type = 'triangle';
+      osc.frequency.value = freq; gain.gain.value = 0.15;
       osc.connect(gain); gain.connect(alertAudioCtx.destination);
-      osc.start(alertAudioCtx.currentTime + delay); osc.stop(alertAudioCtx.currentTime + delay + 0.2);
+      const t = alertAudioCtx.currentTime + i * 0.12;
+      osc.start(t); osc.stop(t + 0.18);
     });
   } catch (e) { /* 出不了聲就算了 */ }
 }
