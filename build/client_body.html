@@ -272,10 +272,12 @@
   .combo-block + .combo-block,.ghf-block + .ghf-block,.bl-block + .bl-block{border-top:8px double #111;padding-top:10px;}
   /* 醞釀／發動分頁：沿用族群綜合表的表格樣式，另外給 9 欄的欄寬；發動（2）紅底、醞釀（1）藍綠底的段落標題 */
   .bl-table{min-width:68em;}
-  .bl-table col.b-time{width:9%;}
-  .bl-table col.b-code{width:7%;} .bl-table col.b-name{width:10%;} .bl-table col.b-score{width:8%;} .bl-table col.b-holder{width:21%;} .bl-table col.b-pct{width:8%;}
+  .bl-table col.b-time{width:16%;}
+  .bl-table col.b-code{width:8%;} .bl-table col.b-name{width:10%;} .bl-table col.b-score{width:9%;} .bl-table col.b-holder{width:23%;} .bl-table col.b-pct{width:9%;}
   .bl-table col.b-price{width:9%;} .bl-table col.b-box{width:8%;} .bl-table col.b-tobox{width:10%;} .bl-table col.b-turn{width:7%;} .bl-table col.b-ratio{width:9%;}
   .bl-table col.b-group{width:9%;} .bl-table col.b-prev{width:9%;}
+  /* 2026-10-03 使用者：欄位太窄時表頭文字被省略號吃掉看不到，改成可以換成兩行 */
+  .combo-table.bl-table th{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25;}
   .bl-table .bl-score{font-weight:800;white-space:nowrap;}
   .bl-table .bl-time{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;}
   .bl-table .bl-box,.bl-table .bl-turn,.bl-table .bl-ratio{white-space:nowrap;}
@@ -408,7 +410,7 @@
   .combo-table .sig-eligibility{display:flex;flex-wrap:wrap;gap:4px;}
   .combo-table .sig-eligibility span{font-size:10px;font-weight:400;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 6px;white-space:nowrap;}
   .combo-table .sig-eligibility span.sig-futures{color:#93c5fd;border-color:#93c5fd66;}
-  .combo-table .combo-pct{font-weight:700;}
+  .combo-table .combo-pct{font-weight:700;white-space:nowrap;}
   .combo-table .combo-pct.up{color:var(--up);} .combo-table .combo-pct.down{color:var(--down);}
   .combo-table .combo-chg,.combo-table .combo-price{font-weight:700;white-space:nowrap;}
   .combo-table .combo-chg.up,.combo-table .combo-price.up{color:var(--up);} .combo-table .combo-chg.down,.combo-table .combo-price.down{color:var(--down);}
