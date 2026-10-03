@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-03 14:16:49";
+const BUILD_STAMP = "2026-10-03 14:26:20";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -326,8 +326,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 醞釀／發動分頁：沿用族群綜合表的表格樣式，另外給 9 欄的欄寬；發動（2）紅底、醞釀（1）藍綠底的段落標題 */
   .bl-table{min-width:68em;}
   .bl-table col.b-time{width:16%;}
-  .bl-table col.b-code{width:8%;} .bl-table col.b-name{width:10%;} .bl-table col.b-score{width:9%;} .bl-table col.b-holder{width:23%;} .bl-table col.b-pct{width:9%;}
-  .bl-table col.b-price{width:9%;} .bl-table col.b-box{width:8%;} .bl-table col.b-tobox{width:10%;} .bl-table col.b-turn{width:7%;} .bl-table col.b-ratio{width:9%;}
+  .bl-table col.b-code{width:8%;} .bl-table col.b-name{width:10%;} .bl-table col.b-score{width:9%;} .bl-table col.b-holder{width:28%;} .bl-table col.b-pct{width:9%;}
+  .bl-table col.b-price{width:9%;} .bl-table col.b-box{width:8%;} .bl-table col.b-tobox{width:10%;} .bl-table col.b-turn{width:5%;} .bl-table col.b-ratio{width:6%;}
   .bl-table col.b-group{width:9%;} .bl-table col.b-prev{width:9%;}
   /* 2026-10-03 使用者：欄位太窄時表頭文字被省略號吃掉看不到，改成可以換成兩行 */
   .combo-table.bl-table th{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25;}
@@ -4062,8 +4062,8 @@ function brewLaunchRowHtml(r, kind){
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, r.price.toFixed(2)) + '</td>' +
     '<td class="bl-box" title="箱底 ' + r.info.boxLow.toFixed(2) + '，箱子高低差 ' + r.info.boxRangePct + '%">' + r.info.boxHigh.toFixed(2) + '</td>' +
     '<td class="bl-tobox' + (r.toBoxPct <= 0 ? ' up' : '') + '">' + toBox + tag + '</td>' +
-    '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2) + '%') + '</td>' +
-    '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2) + ' 倍') + '</td>' +
+    '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2)) + '</td>' +
+    '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2)) + '</td>' +
     '</tr>';
 }
 function brewLaunchFlatRowHtml(r){
@@ -4092,8 +4092,8 @@ function brewLaunchFlatRowHtml(r){
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, r.price.toFixed(2)) + '</td>' +
     '<td class="bl-box" title="箱底 ' + r.info.boxLow.toFixed(2) + '，箱子高低差 ' + r.info.boxRangePct + '%">' + r.info.boxHigh.toFixed(2) + '</td>' +
     '<td class="bl-tobox' + (r.toBoxPct <= 0 ? ' up' : '') + '">' + toBox + tag + '</td>' +
-    '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2) + '%') + '</td>' +
-    '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2) + ' 倍') + '</td>' +
+    '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2)) + '</td>' +
+    '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2)) + '</td>' +
     '</tr>' + eligRow;
 }
 function brewLaunchFlatTableHtml(rows){
@@ -4109,7 +4109,7 @@ function brewLaunchFlatTableHtml(rows){
   const sorted = [...byCode.values()].sort((a, b) => String(b.recordedAt).localeCompare(String(a.recordedAt)));
   return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table">' +
     '<colgroup><col class="b-time"><col class="b-code"><col class="b-name"><col class="b-group"><col class="b-score"><col class="b-holder"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-tobox"><col class="b-turn"><col class="b-ratio"></colgroup>' +
-    '<thead><tr><th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
+    '<thead><tr><th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率(%)</th><th>量比(倍)</th></tr></thead>' +
     '<tbody>' + sorted.map(brewLaunchFlatRowHtml).join('') + '</tbody></table></div></div>';
 }
 function brewLaunchBlockHtml(block, kind){
@@ -4120,7 +4120,7 @@ function brewLaunchBlockHtml(block, kind){
   return '<div class="race-block bl-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '"><span class="combo-rank">族排第 ' + block.rank + ' 名</span> ' + namePill + ' ' + avgPill + '・' + (kind === 'launch' ? '發動 ' : '醞釀 ') + block.rows.length + ' 檔</div>' +
     '<div class="combo-table-wrap"><table class="combo-table bl-table">' +
     '<colgroup>' + timeCol + '<col class="b-code"><col class="b-name"><col class="b-score"><col class="b-holder"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-tobox"><col class="b-turn"><col class="b-ratio"></colgroup>' +
-    '<thead><tr>' + timeHead + '<th>代號</th><th>名稱</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
+    '<thead><tr>' + timeHead + '<th>代號</th><th>名稱</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率(%)</th><th>量比(倍)</th></tr></thead>' +
     '<tbody>' + block.rows.map((r) => brewLaunchRowHtml(r, kind)).join('') + '</tbody></table></div></div>';
 }
 function brewBackfillNoteHtml(bf){
@@ -4205,8 +4205,8 @@ function brewPastLaunchRowHtml(r, opts){
     '<td class="combo-pct ' + cls + '">' + (r.changePct === null || r.changePct === undefined ? '—' : limitPriceHtml(r, fmt(r.changePct) + '%')) + '</td>' +
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, num2(r.price)) + '</td>' +
     '<td class="bl-box">' + num2(r.boxHigh) + '</td>' +
-    '<td class="bl-turn">' + (r.projTurnoverPct === null || r.projTurnoverPct === undefined ? '—' : Number(r.projTurnoverPct).toFixed(2) + '%') + '</td>' +
-    '<td class="bl-ratio">' + (r.volRatio === null || r.volRatio === undefined ? '—' : Number(r.volRatio).toFixed(2) + ' 倍') + (r.brewing ? ' <span class="bl-tag">醞釀→發動</span>' : '') + '</td>' +
+    '<td class="bl-turn">' + (r.projTurnoverPct === null || r.projTurnoverPct === undefined ? '—' : Number(r.projTurnoverPct).toFixed(2)) + '</td>' +
+    '<td class="bl-ratio">' + (r.volRatio === null || r.volRatio === undefined ? '—' : Number(r.volRatio).toFixed(2)) + (r.brewing ? ' <span class="bl-tag">醞釀→發動</span>' : '') + '</td>' +
     '</tr>';
 }
 function brewPastBrewRowHtml(r, opts){
@@ -4229,7 +4229,7 @@ function brewPastTableHtml(kind, rows, opts){
   const prevHead = opts && opts.prevLabel ? '<th>' + opts.prevLabel + '</th>' : '';
   const prevCol = opts && opts.prevLabel ? '<col class="b-prev">' : '';
   const head = kind === 'launch'
-    ? '<th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>發動價</th><th>箱頂</th><th>預估周轉</th><th>量比</th>'
+    ? '<th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>發動價</th><th>箱頂</th><th>預估周轉(%)</th><th>量比(倍)</th>'
     : '<th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>收盤</th><th>箱頂(突破價)</th><th>箱子高低差</th><th>均線糾結</th>';
   const colgroup = kind === 'launch'
     ? '<colgroup><col class="b-time"><col class="b-code"><col class="b-name"><col class="b-group">' + prevCol + '<col class="b-score"><col class="b-holder"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-turn"><col class="b-ratio"></colgroup>'
@@ -5856,7 +5856,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-03 14:16:49';
+const BUILD_STAMP = '2026-10-03 14:26:20';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

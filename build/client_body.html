@@ -273,8 +273,8 @@
   /* 醞釀／發動分頁：沿用族群綜合表的表格樣式，另外給 9 欄的欄寬；發動（2）紅底、醞釀（1）藍綠底的段落標題 */
   .bl-table{min-width:68em;}
   .bl-table col.b-time{width:16%;}
-  .bl-table col.b-code{width:8%;} .bl-table col.b-name{width:10%;} .bl-table col.b-score{width:9%;} .bl-table col.b-holder{width:23%;} .bl-table col.b-pct{width:9%;}
-  .bl-table col.b-price{width:9%;} .bl-table col.b-box{width:8%;} .bl-table col.b-tobox{width:10%;} .bl-table col.b-turn{width:7%;} .bl-table col.b-ratio{width:9%;}
+  .bl-table col.b-code{width:8%;} .bl-table col.b-name{width:10%;} .bl-table col.b-score{width:9%;} .bl-table col.b-holder{width:28%;} .bl-table col.b-pct{width:9%;}
+  .bl-table col.b-price{width:9%;} .bl-table col.b-box{width:8%;} .bl-table col.b-tobox{width:10%;} .bl-table col.b-turn{width:5%;} .bl-table col.b-ratio{width:6%;}
   .bl-table col.b-group{width:9%;} .bl-table col.b-prev{width:9%;}
   /* 2026-10-03 使用者：欄位太窄時表頭文字被省略號吃掉看不到，改成可以換成兩行 */
   .combo-table.bl-table th{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25;}
@@ -4007,8 +4007,8 @@ function brewLaunchRowHtml(r, kind){
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, r.price.toFixed(2)) + '</td>' +
     '<td class="bl-box" title="箱底 ' + r.info.boxLow.toFixed(2) + '，箱子高低差 ' + r.info.boxRangePct + '%">' + r.info.boxHigh.toFixed(2) + '</td>' +
     '<td class="bl-tobox' + (r.toBoxPct <= 0 ? ' up' : '') + '">' + toBox + tag + '</td>' +
-    '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2) + '%') + '</td>' +
-    '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2) + ' 倍') + '</td>' +
+    '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2)) + '</td>' +
+    '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2)) + '</td>' +
     '</tr>';
 }
 function brewLaunchFlatRowHtml(r){
@@ -4037,8 +4037,8 @@ function brewLaunchFlatRowHtml(r){
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, r.price.toFixed(2)) + '</td>' +
     '<td class="bl-box" title="箱底 ' + r.info.boxLow.toFixed(2) + '，箱子高低差 ' + r.info.boxRangePct + '%">' + r.info.boxHigh.toFixed(2) + '</td>' +
     '<td class="bl-tobox' + (r.toBoxPct <= 0 ? ' up' : '') + '">' + toBox + tag + '</td>' +
-    '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2) + '%') + '</td>' +
-    '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2) + ' 倍') + '</td>' +
+    '<td class="bl-turn" title="' + turnTitle + '">' + (r.turnoverPct === null ? '—' : r.turnoverPct.toFixed(2)) + '</td>' +
+    '<td class="bl-ratio" title="預估全天量 ÷ 5 日均量">' + (r.volRatio === null ? '—' : r.volRatio.toFixed(2)) + '</td>' +
     '</tr>' + eligRow;
 }
 function brewLaunchFlatTableHtml(rows){
@@ -4054,7 +4054,7 @@ function brewLaunchFlatTableHtml(rows){
   const sorted = [...byCode.values()].sort((a, b) => String(b.recordedAt).localeCompare(String(a.recordedAt)));
   return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table">' +
     '<colgroup><col class="b-time"><col class="b-code"><col class="b-name"><col class="b-group"><col class="b-score"><col class="b-holder"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-tobox"><col class="b-turn"><col class="b-ratio"></colgroup>' +
-    '<thead><tr><th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
+    '<thead><tr><th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率(%)</th><th>量比(倍)</th></tr></thead>' +
     '<tbody>' + sorted.map(brewLaunchFlatRowHtml).join('') + '</tbody></table></div></div>';
 }
 function brewLaunchBlockHtml(block, kind){
@@ -4065,7 +4065,7 @@ function brewLaunchBlockHtml(block, kind){
   return '<div class="race-block bl-block"><div class="race-head combo-head ' + dirClass(block.avgChange) + '"><span class="combo-rank">族排第 ' + block.rank + ' 名</span> ' + namePill + ' ' + avgPill + '・' + (kind === 'launch' ? '發動 ' : '醞釀 ') + block.rows.length + ' 檔</div>' +
     '<div class="combo-table-wrap"><table class="combo-table bl-table">' +
     '<colgroup>' + timeCol + '<col class="b-code"><col class="b-name"><col class="b-score"><col class="b-holder"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-tobox"><col class="b-turn"><col class="b-ratio"></colgroup>' +
-    '<thead><tr>' + timeHead + '<th>代號</th><th>名稱</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
+    '<thead><tr>' + timeHead + '<th>代號</th><th>名稱</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率(%)</th><th>量比(倍)</th></tr></thead>' +
     '<tbody>' + block.rows.map((r) => brewLaunchRowHtml(r, kind)).join('') + '</tbody></table></div></div>';
 }
 function brewBackfillNoteHtml(bf){
@@ -4150,8 +4150,8 @@ function brewPastLaunchRowHtml(r, opts){
     '<td class="combo-pct ' + cls + '">' + (r.changePct === null || r.changePct === undefined ? '—' : limitPriceHtml(r, fmt(r.changePct) + '%')) + '</td>' +
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, num2(r.price)) + '</td>' +
     '<td class="bl-box">' + num2(r.boxHigh) + '</td>' +
-    '<td class="bl-turn">' + (r.projTurnoverPct === null || r.projTurnoverPct === undefined ? '—' : Number(r.projTurnoverPct).toFixed(2) + '%') + '</td>' +
-    '<td class="bl-ratio">' + (r.volRatio === null || r.volRatio === undefined ? '—' : Number(r.volRatio).toFixed(2) + ' 倍') + (r.brewing ? ' <span class="bl-tag">醞釀→發動</span>' : '') + '</td>' +
+    '<td class="bl-turn">' + (r.projTurnoverPct === null || r.projTurnoverPct === undefined ? '—' : Number(r.projTurnoverPct).toFixed(2)) + '</td>' +
+    '<td class="bl-ratio">' + (r.volRatio === null || r.volRatio === undefined ? '—' : Number(r.volRatio).toFixed(2)) + (r.brewing ? ' <span class="bl-tag">醞釀→發動</span>' : '') + '</td>' +
     '</tr>';
 }
 function brewPastBrewRowHtml(r, opts){
@@ -4174,7 +4174,7 @@ function brewPastTableHtml(kind, rows, opts){
   const prevHead = opts && opts.prevLabel ? '<th>' + opts.prevLabel + '</th>' : '';
   const prevCol = opts && opts.prevLabel ? '<col class="b-prev">' : '';
   const head = kind === 'launch'
-    ? '<th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>發動價</th><th>箱頂</th><th>預估周轉</th><th>量比</th>'
+    ? '<th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>發動價</th><th>箱頂</th><th>預估周轉(%)</th><th>量比(倍)</th>'
     : '<th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>收盤</th><th>箱頂(突破價)</th><th>箱子高低差</th><th>均線糾結</th>';
   const colgroup = kind === 'launch'
     ? '<colgroup><col class="b-time"><col class="b-code"><col class="b-name"><col class="b-group">' + prevCol + '<col class="b-score"><col class="b-holder"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-turn"><col class="b-ratio"></colgroup>'
