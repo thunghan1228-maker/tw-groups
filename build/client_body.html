@@ -271,10 +271,10 @@
   /* 族群跟族群之間畫兩條粗黑線區隔（2026-09-24 使用者：族群綜合表、族群大戶力），第一個族群上面不畫。 */
   .combo-block + .combo-block,.ghf-block + .ghf-block,.bl-block + .bl-block{border-top:8px double #111;padding-top:10px;}
   /* 醞釀／發動分頁：沿用族群綜合表的表格樣式，另外給 9 欄的欄寬；發動（2）紅底、醞釀（1）藍綠底的段落標題 */
-  .bl-table{min-width:64em;}
+  .bl-table{min-width:68em;}
   .bl-table col.b-time{width:9%;}
-  .bl-table col.b-code{width:8%;} .bl-table col.b-name{width:11%;} .bl-table col.b-score{width:9%;} .bl-table col.b-holder{width:11%;} .bl-table col.b-pct{width:9%;}
-  .bl-table col.b-price{width:9%;} .bl-table col.b-box{width:9%;} .bl-table col.b-tobox{width:11%;} .bl-table col.b-turn{width:8%;} .bl-table col.b-ratio{width:10%;}
+  .bl-table col.b-code{width:7%;} .bl-table col.b-name{width:10%;} .bl-table col.b-score{width:8%;} .bl-table col.b-holder{width:16%;} .bl-table col.b-pct{width:8%;}
+  .bl-table col.b-price{width:9%;} .bl-table col.b-box{width:8%;} .bl-table col.b-tobox{width:10%;} .bl-table col.b-turn{width:7%;} .bl-table col.b-ratio{width:9%;}
   .bl-table .bl-score{font-weight:800;white-space:nowrap;}
   .bl-table .bl-time{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;}
   .bl-table .bl-box,.bl-table .bl-turn,.bl-table .bl-ratio{white-space:nowrap;}
@@ -858,6 +858,14 @@
     #signalModalInner .race-row .race-holder .sig-label .hf-amt,#signalModalInner .combo-table .combo-holder .sig-label .hf-amt{font-size:.82em;}
     #signalModalInner .race-row .race-holder .sig-label .hf-amt::before,#signalModalInner .combo-table .combo-holder .sig-label .hf-amt::before{content:'・';opacity:.7;}
   }
+  /* 2026-10-03 使用者：醞釀／發動這張表欄位本來就多，手機版大戶力欄太窄，%跟金額堆兩行還各自
+     再換行、數字擠成一團——這張表的大戶力欄不受上面>=1100px才橫排的限制，全尺寸都跟桌機版一樣
+     %跟金額同一行左右排、不換行，並把欄寬加大到放得下（放在最後面、選擇器權重打平時靠後蓋掉
+     上面.combo-table .combo-holder .sig-label 的直排規則）。 */
+  .bl-table .combo-holder{min-width:7.5em;}
+  .bl-table .combo-holder .sig-label{flex-direction:row;align-items:baseline;gap:3px;white-space:nowrap;}
+  .bl-table .combo-holder .sig-label .hf-amt{font-size:.82em;}
+  .bl-table .combo-holder .sig-label .hf-amt::before{content:'・';opacity:.7;}
 </style>
 
 <header>
