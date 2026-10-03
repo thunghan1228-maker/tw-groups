@@ -4134,6 +4134,7 @@ function brewPastLaunchRowHtml(r, opts){
     '<td><span class="sig-group">' + (r.group || '—') + '</span></td>' +
     (opts && opts.prev ? brewPrevCellHtml('launch', opts.prev.get(r.code)) : '') +
     '<td class="bl-score">' + r.score + '</td>' +
+    '<td class="combo-holder">' + raceHolderCellHtml(r) + '</td>' +
     '<td class="combo-pct ' + cls + '">' + (r.changePct === null || r.changePct === undefined ? '—' : limitPriceHtml(r, fmt(r.changePct) + '%')) + '</td>' +
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, num2(r.price)) + '</td>' +
     '<td class="bl-box">' + num2(r.boxHigh) + '</td>' +
@@ -4160,7 +4161,7 @@ function brewPastTableHtml(kind, rows, opts){
     : String(a.group).localeCompare(String(b.group), 'zh-Hant') || b.score - a.score);
   const prevHead = opts && opts.prevLabel ? '<th>' + opts.prevLabel + '</th>' : '';
   const head = kind === 'launch'
-    ? '<th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>漲跌幅</th><th>發動價</th><th>箱頂</th><th>預估周轉</th><th>量比</th>'
+    ? '<th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>發動價</th><th>箱頂</th><th>預估周轉</th><th>量比</th>'
     : '<th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>收盤</th><th>箱頂(突破價)</th><th>箱子高低差</th><th>均線糾結</th>';
   return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table bl-past-table"><thead><tr>' + head + '</tr></thead><tbody>' +
     sorted.map((r) => (kind === 'launch' ? brewPastLaunchRowHtml(r, opts) : brewPastBrewRowHtml(r, opts))).join('') + '</tbody></table></div></div>';
