@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-03 10:46:43";
+const BUILD_STAMP = "2026-10-03 11:32:44";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -326,8 +326,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 醞釀／發動分頁：沿用族群綜合表的表格樣式，另外給 9 欄的欄寬；發動（2）紅底、醞釀（1）藍綠底的段落標題 */
   .bl-table{min-width:68em;}
   .bl-table col.b-time{width:9%;}
-  .bl-table col.b-code{width:7%;} .bl-table col.b-name{width:10%;} .bl-table col.b-score{width:8%;} .bl-table col.b-holder{width:16%;} .bl-table col.b-pct{width:8%;}
+  .bl-table col.b-code{width:7%;} .bl-table col.b-name{width:10%;} .bl-table col.b-score{width:8%;} .bl-table col.b-holder{width:21%;} .bl-table col.b-pct{width:8%;}
   .bl-table col.b-price{width:9%;} .bl-table col.b-box{width:8%;} .bl-table col.b-tobox{width:10%;} .bl-table col.b-turn{width:7%;} .bl-table col.b-ratio{width:9%;}
+  .bl-table col.b-group{width:9%;} .bl-table col.b-prev{width:9%;}
   .bl-table .bl-score{font-weight:800;white-space:nowrap;}
   .bl-table .bl-time{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;}
   .bl-table .bl-box,.bl-table .bl-turn,.bl-table .bl-ratio{white-space:nowrap;}
@@ -4105,6 +4106,7 @@ function brewLaunchFlatTableHtml(rows){
   // 2026-09-29 使用者：發動列表不要照族群排，照發動時間排，最新發動的排最上面，比較久的排下面。
   const sorted = [...byCode.values()].sort((a, b) => String(b.recordedAt).localeCompare(String(a.recordedAt)));
   return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table">' +
+    '<colgroup><col class="b-time"><col class="b-code"><col class="b-name"><col class="b-group"><col class="b-score"><col class="b-holder"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-tobox"><col class="b-turn"><col class="b-ratio"></colgroup>' +
     '<thead><tr><th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>成交價</th><th>箱頂(突破價)</th><th>距箱頂</th><th>周轉率</th><th>量比(預估)</th></tr></thead>' +
     '<tbody>' + sorted.map(brewLaunchFlatRowHtml).join('') + '</tbody></table></div></div>';
 }
@@ -4223,10 +4225,14 @@ function brewPastTableHtml(kind, rows, opts){
     ? String(b.recordedAt).localeCompare(String(a.recordedAt)) || b.score - a.score
     : String(a.group).localeCompare(String(b.group), 'zh-Hant') || b.score - a.score);
   const prevHead = opts && opts.prevLabel ? '<th>' + opts.prevLabel + '</th>' : '';
+  const prevCol = opts && opts.prevLabel ? '<col class="b-prev">' : '';
   const head = kind === 'launch'
     ? '<th>發動時間</th><th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>發動價</th><th>箱頂</th><th>預估周轉</th><th>量比</th>'
     : '<th>代號</th><th>名稱</th><th>族群</th>' + prevHead + '<th>均線分數</th><th>收盤</th><th>箱頂(突破價)</th><th>箱子高低差</th><th>均線糾結</th>';
-  return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table bl-past-table"><thead><tr>' + head + '</tr></thead><tbody>' +
+  const colgroup = kind === 'launch'
+    ? '<colgroup><col class="b-time"><col class="b-code"><col class="b-name"><col class="b-group">' + prevCol + '<col class="b-score"><col class="b-holder"><col class="b-pct"><col class="b-price"><col class="b-box"><col class="b-turn"><col class="b-ratio"></colgroup>'
+    : '';
+  return '<div class="race-block bl-block"><div class="combo-table-wrap"><table class="combo-table bl-table bl-past-table">' + colgroup + '<thead><tr>' + head + '</tr></thead><tbody>' +
     sorted.map((r) => (kind === 'launch' ? brewPastLaunchRowHtml(r, opts) : brewPastBrewRowHtml(r, opts))).join('') + '</tbody></table></div></div>';
 }
 // 今天的名單轉成跟往日紀錄一樣的欄位：發動＝後端今天記到的 ∪ 盤中現在正在發動的；醞釀＝今天的醞釀名單
@@ -5848,7 +5854,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-03 10:46:43';
+const BUILD_STAMP = '2026-10-03 11:32:44';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
