@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-04 09:45:21";
+const BUILD_STAMP = "2026-10-04 10:13:54";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5876,7 +5876,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-04 09:45:21';
+const BUILD_STAMP = '2026-10-04 10:13:54';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -6453,6 +6453,9 @@ async function refresh(){
       updatedEl.textContent = '⚠ 尚未成功取得即時報價';
     } else if (Date.now() - lastDataFetchedAt.getTime() > STALE_WARNING_MS){
       updatedEl.textContent = '⚠ 報價可能已過期（最後成功更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + '）';
+    } else if (lastData && lastData.heldClose && lastData.heldClose.session){
+      // 休市日／開盤前：worker 給的是上一個交易日的日K收盤，不是即時報價（2026-10-04 使用者：週末 TWSE 測試盤假價）。
+      updatedEl.textContent = '休市中，顯示 ' + String(lastData.heldClose.session).slice(5).replace('-', '/') + ' 收盤（' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + ' 確認）';
     } else {
       updatedEl.textContent = '報價更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW');
     }
@@ -6766,7 +6769,7 @@ async function fetchQuotes(codes) {
       // d／t＝這筆報價的日期（YYYYMMDD）／時間（HH:MM:SS）；取最新的一筆，讓頁面知道行情是不是今天盤中的
       // （醞釀／發動用來把盤中累積量換算成全天預估量；週末、假日行情停在上一個交易日就不換算）。
       const d = String(item.d || ""), t = String(item.t || "");
-      if (/^d{8}$/.test(d) && (d > quoteDate || (d === quoteDate && t > quoteTime))) { quoteDate = d; quoteTime = t; }
+      if (/^\d{8}$/.test(d) && (d > quoteDate || (d === quoteDate && t > quoteTime))) { quoteDate = d; quoteTime = t; }
       if (!code || !(code in quotes)) continue;
       // 價格一定要是正數才算有效：2026-10-04（週日）TWSE 回了一批 z／委買委賣是 0 的資料
       // （週末測試盤），0 被當成有效成交價算出 -100%、前端再推算漲跌就變 NaN。
@@ -6807,6 +6810,18 @@ async function fetchQuotes(codes) {
     enumerable: false
   });
   return quotes;
+}
+
+async function fetchSessionClose() {
+  // 後端的「該不該顯示上一個交易日收盤」快照（休市日整天、交易日 08:45 前 held=true，附族群成員那天的
+  // 日K收盤／漲跌／成交量／漲跌停）。邊緣快取 2 分鐘；抓不到或格式不對就回 null，/api/groups 照舊用即時報價。
+  const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/session-close", {
+    headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
+    cf: { cacheTtl: 120, cacheEverything: true }
+  });
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  return data && data.status === "ok" ? data : null;
 }
 
 async function proxyHanstockBars(pathname, cacheSeconds = 20) {
@@ -7091,23 +7106,46 @@ export default {
     }
     if (url.pathname === "/api/groups") {
       try {
-        const quotes = await fetchQuotes(ALL_CODES);
+        // 休市日（週末、假日）與交易日 08:45 前，後端 session-close 說要暫留（held）時，用上一個交易日的
+        // 日K收盤取代 TWSE 即時報價：2026-10-04（週日）TWSE 跑測試盤，即時報價不是 0 就是測試用的假價
+        // （鴻海 276 漲停），首頁跟盤中333／刀劍空／醞釀發動全跟著亂。快照裡沒有的股票照舊用即時報價；
+        // 快照抓不到就整個照舊；TWSE 整批失敗但有暫留快照時照樣回資料。
+        const [quotesResult, sessionResult] = await Promise.allSettled([fetchQuotes(ALL_CODES), fetchSessionClose()]);
+        const sessionClose = sessionResult.status === "fulfilled" ? sessionResult.value : null;
+        const held = !!(sessionClose && sessionClose.held && sessionClose.session && sessionClose.stocks);
+        if (quotesResult.status === "rejected" && !held) throw quotesResult.reason;
+        const quotes = quotesResult.status === "fulfilled" ? quotesResult.value : {};
+        const closeOf = (code) => {
+          const c = held ? sessionClose.stocks[code] : null;
+          return c && Number.isFinite(c.close) && c.close > 0 && Number.isFinite(c.pct) ? c : null;
+        };
         const groups = GROUPS.map((g) => {
-          const stocks = g.stocks.map((s) => ({
-            code: s.code,
-            name: s.name,
-            price: quotes[s.code]?.price ?? null,
-            changePercent: quotes[s.code]?.changePercent ?? 0,
-            limitUp: quotes[s.code]?.limitUp ?? false,
-            limitDown: quotes[s.code]?.limitDown ?? false,
-            volume: quotes[s.code]?.volume ?? null
-          }));
+          const stocks = g.stocks.map((s) => {
+            const c = closeOf(s.code);
+            if (c) {
+              return { code: s.code, name: s.name, price: c.close, changePercent: c.pct, limitUp: !!c.limitUp, limitDown: !!c.limitDown, volume: Number.isFinite(c.volume) ? c.volume : null };
+            }
+            return {
+              code: s.code,
+              name: s.name,
+              price: quotes[s.code]?.price ?? null,
+              changePercent: quotes[s.code]?.changePercent ?? 0,
+              limitUp: quotes[s.code]?.limitUp ?? false,
+              limitDown: quotes[s.code]?.limitDown ?? false,
+              volume: quotes[s.code]?.volume ?? null
+            };
+          });
           const valid = stocks.filter((s) => s.price !== null);
           const avgChange = valid.length ? valid.reduce((sum, s) => sum + s.changePercent, 0) / valid.length : 0;
           return { name: g.name, avgChange, stocks };
         });
-        const meta = quotes.__meta || {};
-        return Response.json({ groups, quoteDate: meta.quoteDate || null, quoteTime: meta.quoteTime || null });
+        const meta = (quotes && quotes.__meta) || {};
+        return Response.json({
+          groups,
+          quoteDate: held ? sessionClose.session : (meta.quoteDate || null),
+          quoteTime: held ? "13:30:00" : (meta.quoteTime || null),
+          heldClose: held ? { session: sessionClose.session, today: sessionClose.today || null } : null
+        });
       } catch (err) {
         return Response.json({ error: String(err) }, { status: 502 });
       }

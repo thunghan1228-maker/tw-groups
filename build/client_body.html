@@ -6398,6 +6398,9 @@ async function refresh(){
       updatedEl.textContent = '⚠ 尚未成功取得即時報價';
     } else if (Date.now() - lastDataFetchedAt.getTime() > STALE_WARNING_MS){
       updatedEl.textContent = '⚠ 報價可能已過期（最後成功更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + '）';
+    } else if (lastData && lastData.heldClose && lastData.heldClose.session){
+      // 休市日／開盤前：worker 給的是上一個交易日的日K收盤，不是即時報價（2026-10-04 使用者：週末 TWSE 測試盤假價）。
+      updatedEl.textContent = '休市中，顯示 ' + String(lastData.heldClose.session).slice(5).replace('-', '/') + ' 收盤（' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + ' 確認）';
     } else {
       updatedEl.textContent = '報價更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW');
     }
