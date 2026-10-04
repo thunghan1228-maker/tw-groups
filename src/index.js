@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-04 10:46:58";
+const BUILD_STAMP = "2026-10-04 11:16:11";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1103,7 +1103,8 @@ const HTML_PAGE = `<!DOCTYPE html>
     </div>
     <div class="signal-help" id="signalHelp" hidden>
       <ul>
-        <li><b>今日即時</b>：彙整下列各類訊號的即時清單。</li>
+        <li><b>今日即時多</b>：彙整多方向訊號的即時清單：盤中大戶力多、四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單，依發生時間新到舊排序。</li>
+        <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（沒有發生時間，只有今天有），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。</li>
         <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
         <li><b>精選十大多空族群</b>（原族群大戶力）：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。<b>排序</b>：個股名單預設照盤中大戶力排，值大的在上、小的在下，沒有大戶力資料的排最後。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
@@ -2642,7 +2643,8 @@ async function renderOtcStrengthWidget(){
 // 使用者 2026-09-24：族群大戶力／族群綜合表／盤中333 這三個移到今日即時後面（原本排在後段）。
 // 2026-09-30 使用者：醞釀／發動要排第二個位置，在今日即時右邊，方便盯著看；其餘順序不變。
 const SIGNAL_KINDS = [
-  { key: 'now', label: '今日即時' },
+  { key: 'now', label: '今日即時多' },      // 2026-10-04 使用者：拆成多／空兩頁，多方向留在這裡
+  { key: 'nowBear', label: '今日即時空' },  // 2026-10-04 使用者：刀劍空＋盤中大戶力空＋四項精選強空＋主力翻空＋盤中特大賣單集中這一頁
   { key: 'brewLaunch', label: '醞釀／發動' },
   { key: 'groupCombinedBoard', label: '所有族群綜合表' },     // 2026-09-26 使用者：改名
   { key: 'groupHolderForce', label: '精選十大多空族群' },   // 2026-09-26 使用者：原「族群大戶力」改名
@@ -2779,7 +2781,8 @@ function mapLargeOrderSignal(s){
   const isBuy = klineInfo ? klineInfo.side === 'bull' : (kind === 'instantLargeBuy' || kind === 'fourGateBuy' || kind === 'mainForceFlipBull');
   const backendName = s.name && s.name !== s.ticker ? s.name : null;
   return {
-    tabs: isFourGate ? ['now', kind] : isFlip ? ['now', isBuy ? 'mainForceFlipBull' : 'mainForceFlipBear'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : ['now', isBuy ? 'bigBuy' : 'bigSell']),
+    // 2026-10-04 使用者：今日即時拆成多／空兩頁，空方向的訊號（四項精選強空／主力翻空／特大賣單）進「今日即時空」，不再混在一起。
+    tabs: isFourGate ? [isBuy ? 'now' : 'nowBear', kind] : isFlip ? [isBuy ? 'now' : 'nowBear', isBuy ? 'mainForceFlipBull' : 'mainForceFlipBear'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : [isBuy ? 'now' : 'nowBear', isBuy ? 'bigBuy' : 'bigSell']),
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
     ts: s.barTs,
     code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label, isBuy,
@@ -2949,7 +2952,7 @@ function holderEmptyHtml(view, title, sub){
 // 使用者 2026-09-25：訊號為零的分頁昨天的都沒留下來，要能看昨天、前天的資料來檢查。往日的訊號後端本來就
 // 每天保存（跟歷史查詢分頁同一條路），這裡讓每個訊號分頁都能直接切；休市日或開盤前 08:45 今天還沒有訊號時，
 // 比照大戶力分頁沿用上一個交易日（後端排行帶 heldFrom），按鈕寫「今天（mm/dd 收盤）」。
-const SIGNAL_DAY_TABS = new Set(['now', 'fourGateBuy', 'fourGateSell', 'combo12Bull', 'blackDragon', 'mainForceFlipBull', 'mainForceFlipBear', 'bigBuy', 'bigSell']);
+const SIGNAL_DAY_TABS = new Set(['now', 'nowBear', 'fourGateBuy', 'fourGateSell', 'combo12Bull', 'blackDragon', 'mainForceFlipBull', 'mainForceFlipBear', 'bigBuy', 'bigSell']);
 let sigDayOffset = 0;
 const sigHistoryEvents = {};   // date -> events[]（抓過就留著）
 const sigHistoryLoading = {};
@@ -3045,7 +3048,7 @@ async function refreshSignalData(){
       signalDataIsReal = true;
     } catch (e) {
       todaySignalEvents = buildDemoSignalsForDate(today)
-        .map((ev) => ({ ...ev, tabs: ['now', ev.kind] }));
+        .map((ev) => ({ ...ev, tabs: [ev.kind === 'bigSell' || /轉弱|賣/.test(ev.label) ? 'nowBear' : 'now', ev.kind] }));
       mainForceRanking = [];
       signalDataIsReal = false;
     }
@@ -3327,6 +3330,21 @@ function nowTabRowsHtml(events, rankingRows, view){
   ];
   merged.sort((a, b) => b.sortTs - a.sortTs);
   return '<div class="signal-list">' + merged.map((m) => m.html).join('') + '</div>';
+}
+// 2026-10-04 使用者：「今日即時」拆成多／空兩頁。空的這一頁集中放刀劍空（即時算出來的名單，沒有發生時間，當一個
+// 區塊放最上面，只有今天有）＋盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單（依發生時間新到舊合併排序，
+// 跟多的那頁同一套）；兩頁內容完全不重複。
+function nowBearTabHtml(view){
+  const events = view.events.filter((e) => e.tabs.includes('nowBear'));
+  const rows = view.rankingRows.filter((r) => !holderRowIsBull(r));
+  let blade = '';
+  if (!view.isPast){
+    const m = race333Model();
+    blade = '<div class="race-block now-bear-blade"><div class="race-head">🔪⚔️刀劍空(32)</div>' +
+      '<div class="race-sub">跟「刀劍空(32)」分頁同一份即時名單（只有今天有；昨天／前天沒有紀錄）。下面才是依發生時間排序的空方向訊號。</div>' +
+      (m ? raceBladeListHtml(m) : '<div class="race-note">族群行情還沒載入，刀劍空名單稍後才會出現。</div>') + '</div>';
+  }
+  return blade + nowTabRowsHtml(events, rows, view);
 }
 
 // 每5秒的自動更新不要把訊號列表整個砍掉重畫：歷史查詢原本先變成「讀取中…」再填回去，
@@ -5864,7 +5882,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-04 10:46:58';
+const BUILD_STAMP = '2026-10-04 11:16:11';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -6050,10 +6068,11 @@ function checkLaunchNotifications(){
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
   refreshBrewLaunch(false);
-  const bigHolderRows = bigHolderRowsFrom(mainForceRanking);
   const currentEvents = sigCurrentEvents();  // 休市日／開盤前沿用上一個交易日的訊號，數字才不會全部是 0
   const countFor = (key) => {
-    if (key === 'now') return currentEvents.length + bigHolderRows.length;
+    // 2026-10-04 使用者：今日即時拆成多／空兩頁，各自只算自己那一邊的訊號＋大戶力列。
+    if (key === 'now') return currentEvents.filter((e) => e.tabs.includes('now')).length + bigHolderRowsFrom(mainForceRanking, 'bull').length;
+    if (key === 'nowBear') return currentEvents.filter((e) => e.tabs.includes('nowBear')).length + bigHolderRowsFrom(mainForceRanking, 'bear').length;
     if (key === 'history' || key === 'race333' || key === 'bladeShort' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
     if (key === 'bigHolderForceBull') return bigHolderRowsFrom(mainForceRanking, 'bull').length;
     if (key === 'bigHolderForceBear') return bigHolderRowsFrom(mainForceRanking, 'bear').length;
@@ -6064,7 +6083,7 @@ function renderSignalCenter(){
   // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
   const PURPLE_TAB_KEYS = new Set(['groupHolderForce', 'groupCombinedBoard', 'race333', 'brewLaunch']);  // 2026-09-24 使用者：醞釀／發動也紫紅色；2026-09-26：盤中大戶力改回黑字
   // 2026-10-04 使用者：「空」方向另外三個分頁(盤中大戶力空／四項精選強空／主力翻空)也改綠色，跟刀劍空、盤中特大賣單一致。
-  const GREEN_TAB_KEYS = new Set(['bladeShort', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear']);
+  const GREEN_TAB_KEYS = new Set(['nowBear', 'bladeShort', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear']);  // 2026-10-04：今日即時空也綠字
   const tabsHtml = SIGNAL_KINDS.map((k) => {
     const count = countFor(k.key);
     return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + (PURPLE_TAB_KEYS.has(k.key) ? ' signal-tab-purple' : '') + (GREEN_TAB_KEYS.has(k.key) ? ' signal-tab-green' : '') + '" data-kind="' + k.key + '">' +
@@ -6133,7 +6152,8 @@ function renderSignalCenter(){
     let inner;
     if (view.unavailable) inner = holderEmptyHtml(view, '', '');
     else if (view.loading && !view.events.length) inner = sigLoadingHtml(view);
-    else if (active === 'now') inner = nowTabRowsHtml(view.events, view.rankingRows, view);
+    else if (active === 'now') inner = nowTabRowsHtml(view.events.filter((e) => e.tabs.includes('now')), view.rankingRows.filter(holderRowIsBull), view);
+    else if (active === 'nowBear') inner = nowBearTabHtml(view);
     else if (DEDICATED_KLINE_TABS.has(active)){
       refreshKlineBackfillStatus();
       inner = (view.isPast ? '' : klineBackfillNoteHtml()) + signalRowsHtml(view.events.filter((e) => e.tabs.includes(active)), view);
