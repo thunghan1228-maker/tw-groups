@@ -5211,12 +5211,13 @@ function rdSearchHtml(){
     '<div class="rd-hint">輸入股號帶出「九週籌碼軌跡＋三大法人＋當週族群排名」；名單上的股票點一下也會帶到這裡，點股名或 K 線開大圖。</div>' +
     (result ? '<div style="margin-top:10px">' + result + '</div>' : '') + '</div>';
 }
+// 榜單一位小數用後端給的 chip1（還沒取兩位的值直接取一位，跟莊爸一樣：眾達 6.148 → 6.1，不是 6.15 → 6.2）
 function rdListRows(rows, side){
   if (!rows.length) return '<div class="rd-empty-list">這週沒有' + (side === 'buy' ? '籌碼% ≥ 4' : '籌碼% ≤ −1.5') + ' 的股票。</div>';
   const max = Math.max(0.01, ...rows.map((r) => Math.abs(r.chip)));
   return rows.map((r) => '<div class="rd-lrow" data-rd-code="' + r.code + '"><span class="rd-c">' + r.code + '</span><span class="rd-n">' + rdEsc(r.name) + (r.star ? '<span class="rd-star" title="連續兩週上榜">★</span>' : '') + rdCapTag(r.capital) + '</span>' +
     '<span class="rd-bar"><i class="' + (side === 'buy' ? 'up' : 'down') + '" style="width:' + Math.min(100, Math.abs(r.chip) / max * 100).toFixed(1) + '%"></i></span>' +
-    '<span class="rd-val ' + (side === 'buy' ? 'rd-up' : 'rd-down') + '">' + rdPct(r.chip, 1) + '</span>' + rdMa(r.score) + '</div>').join('');
+    '<span class="rd-val ' + (side === 'buy' ? 'rd-up' : 'rd-down') + '">' + rdPct(rdHas(r.chip1) ? r.chip1 : r.chip, 1) + '</span>' + rdMa(r.score) + '</div>').join('');
 }
 function rdListsHtml(d){
   const lists = d.lists || [];
