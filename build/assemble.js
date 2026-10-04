@@ -89,19 +89,22 @@ async function fetchQuotes(codes) {
       const d = String(item.d || ""), t = String(item.t || "");
       if (/^\d{8}$/.test(d) && (d > quoteDate || (d === quoteDate && t > quoteTime))) { quoteDate = d; quoteTime = t; }
       if (!code || !(code in quotes)) continue;
-      const price = parseFloat(item.z);
-      const prevClose = parseFloat(item.y);
+      // 價格一定要是正數才算有效：2026-10-04（週日）TWSE 回了一批 z／委買委賣是 0 的資料
+      // （週末測試盤），0 被當成有效成交價算出 -100%、前端再推算漲跌就變 NaN。
+      const pos = (v) => (Number.isFinite(v) && v > 0 ? v : NaN);
+      const price = pos(parseFloat(item.z));
+      const prevClose = pos(parseFloat(item.y));
       // z 是「這一盤」的成交價，這一盤沒成交就是 "-"；漲停鎖死的股票常常好幾盤沒成交，
       // 以前退回開盤價會讓漲停的股票一直顯示開盤那個漲幅（2026-09-23 尼克森漲停卻顯示 +4.79%）。
       // 沒成交時改用委買／委賣推算：漲停鎖死只剩委買（＝漲停價）、跌停鎖死只剩委賣（＝跌停價）、
       // 兩邊都有就取中價；開盤前 b/a 也都是 "-" 時才退回開盤價／昨收。
-      const bids = String(item.b || "").split("_").map((v) => parseFloat(v)).filter(Number.isFinite);
-      const asks = String(item.a || "").split("_").map((v) => parseFloat(v)).filter(Number.isFinite);
+      const bids = String(item.b || "").split("_").map((v) => pos(parseFloat(v))).filter(Number.isFinite);
+      const asks = String(item.a || "").split("_").map((v) => pos(parseFloat(v))).filter(Number.isFinite);
       const quotePrice = bids.length && !asks.length ? bids[0]
         : asks.length && !bids.length ? asks[0]
         : bids.length && asks.length ? (bids[0] + asks[0]) / 2
         : NaN;
-      const fallbackPrice = parseFloat(item.o) || parseFloat(item.h) || parseFloat(item.l) || prevClose;
+      const fallbackPrice = pos(parseFloat(item.o)) || pos(parseFloat(item.h)) || pos(parseFloat(item.l)) || prevClose;
       const finalPrice = Number.isFinite(price) ? price : Number.isFinite(quotePrice) ? quotePrice : fallbackPrice;
       if (Number.isFinite(finalPrice) && Number.isFinite(prevClose) && prevClose > 0) {
         // u／w＝當天漲停價／跌停價、v＝累積成交量（張）：盤中333 用來排除已經漲停買不到的股票、

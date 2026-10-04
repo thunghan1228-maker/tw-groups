@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-04 09:20:04";
+const BUILD_STAMP = "2026-10-04 09:45:21";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2542,6 +2542,12 @@ function fmtAmountWan(n){
 const STOCK_COL_LABELS_HTML = '<div class="stock-col-labels"><span></span><span class="srow-right">' +
   '<span class="spct">漲跌幅</span><span class="schg">漲跌</span><span class="sprice">成交價</span></span></div>';
 function stockValueColsHtml(price, changeAmt, changePercent){
+  // 報價不合理（價格不是正數、漲跌或漲跌幅不是數字）就顯示「—」，不要印出 -100.00%／NaN 這種假數字
+  // （2026-10-04 週末 TWSE 測試盤回了成交價 0 的資料，漲跌幅算成 -100%、漲跌推算成 NaN）。
+  if (!(price > 0) || !Number.isFinite(changeAmt) || !Number.isFinite(changePercent)){
+    return '<div class="srow-right"><span class="spct flat">—</span><span class="schg flat">—</span>' +
+      '<span class="sprice flat">' + (price > 0 ? price.toFixed(2) : '—') + '</span></div>';
+  }
   const cls = dirClass(changePercent);
   return '<div class="srow-right">' +
     '<span class="spct ' + cls + '">' + fmt(changePercent) + '%</span>' +
@@ -2641,7 +2647,6 @@ const SIGNAL_KINDS = [
   { key: 'groupCombinedBoard', label: '所有族群綜合表' },     // 2026-09-26 使用者：改名
   { key: 'groupHolderForce', label: '精選十大多空族群' },   // 2026-09-26 使用者：原「族群大戶力」改名
   { key: 'race333', label: '盤中333' },
-  { key: 'bladeShort', label: '刀劍空(32)' },   // 2026-09-30 使用者：從盤中333拆出來獨立成一個分頁
   // 2026-10-01 使用者：盤中大戶力、四項精選也都拆成多／空各一個分頁，不要放在一起。
   { key: 'bigHolderForceBull', label: '盤中大戶力多' },
   { key: 'fourGateBuy', label: '四項精選強多' },
@@ -2650,8 +2655,10 @@ const SIGNAL_KINDS = [
   // 2026-10-01 使用者：主力翻多空原本混在一起，拆成主力翻多／主力翻空各一個分頁，不要放在一起。
   { key: 'mainForceFlipBull', label: '主力翻多' },
   { key: 'bigBuy', label: '盤中特大買單' },
-  // 2026-10-04 使用者：「空」方向的四個分頁(盤中大戶力空／四項精選強空／主力翻空／盤中特大賣單)
-  // 移到這裡集中放在一起、排在歷史查詢前面，字改綠色跟「多」方向區隔開。
+  // 2026-10-04 使用者：「空」方向的分頁(刀劍空／盤中大戶力空／四項精選強空／主力翻空／盤中特大賣單)
+  // 移到這裡集中放在一起、排在歷史查詢前面，字改綠色跟「多」方向區隔開；
+  // 刀劍空(32)（2026-09-30 從盤中333拆出來的）也是空方向，排在盤中大戶力空左邊。
+  { key: 'bladeShort', label: '刀劍空(32)' },
   { key: 'bigHolderForceBear', label: '盤中大戶力空' },
   { key: 'fourGateSell', label: '四項精選強空' },
   { key: 'mainForceFlipBear', label: '主力翻空' },
@@ -2815,7 +2822,7 @@ async function fetchRealSignals(dateStr){
 let mainForceRankingInfo = { tradeDate: null, heldFrom: null };
 function holderDataHeldNoteHtml(){
   if (!mainForceRankingInfo.heldFrom) return '';
-  return '<div class="race-sub">目前顯示 ' + mainForceRankingInfo.tradeDate + ' 收盤時的最終大戶力資料（今天還沒開盤），保留到下一個交易日開盤前 15 分鐘（08:45）才清空重算。</div>';
+  return '<div class="race-sub">目前顯示 ' + mainForceRankingInfo.tradeDate + ' 收盤時的最終大戶力資料（今天還沒開盤），漲跌幅／漲跌／成交價是那一天的日K收盤值，保留到下一個交易日開盤前 15 分鐘（08:45）才清空重算。</div>';
 }
 // ---- 三個大戶力分頁（盤中大戶力／族群大戶力／族群綜合表）的「今天／昨天／前天」切換 ----
 // 使用者 2026-09-24：資料要留著才能比較族群今天跟昨天、前天的強弱。昨天／前天＝那一天收盤時的
@@ -2867,6 +2874,17 @@ function holderPastQuote(code, date){
   const change = num(d.change);
   return { price: close, changePercent: pct, changeAmt: Number.isFinite(change) ? change : close - close / (1 + pct / 100) };
 }
+// 訊號列／排行列的成交價、漲跌：看昨天／前天（isPast）或休市日／開盤前沿用上一個交易日（held）時，
+// 用那一天的日K收盤值，不是首頁現在的即時報價（2026-10-04 週日 TWSE 跑測試盤，即時報價不是 0 就是
+// 測試用的假價，「今天（10/02 收盤）」的大戶力列全部顯示 -100%／NaN／0.00）。日K還沒有那一天時，
+// 沿用上一個交易日的情況才退回即時報價（跟以前一樣）；看昨天／前天本來就只用日K。
+function viewStockQuote(code, view){
+  if (view && (view.isPast || view.held)){
+    const q = holderPastQuote(code, view.date);
+    if (q || view.isPast) return q;
+  }
+  return getStockQuote(code);
+}
 // 把首頁的族群結構套上那一天的日K收盤，做成跟 lastData.groups 一樣形狀的資料給族群模型用。
 function holderSnapshotGroups(date){
   if (!lastData || !Array.isArray(lastData.groups) || !groupDailyChanges || !Array.isArray(groupDailyChanges.dates)) return null;
@@ -2891,7 +2909,13 @@ function holderSnapshotGroups(date){
 }
 function holderView(){
   if (holderDayOffset === 0){
-    return { offset: 0, date: holderCurrentDate(), ranking: mainForceRanking || [], groups: lastData ? lastData.groups : null, loading: !mainForceRankingLoaded, isPast: false, unavailable: false };
+    const date = holderCurrentDate();
+    // 後端暫留上一個交易日（heldFrom）時，族群表也改套那一天的日K收盤（跟昨天／前天同一套），
+    // 不用首頁的即時報價；日K還沒有那一天時才退回即時報價。
+    const held = !!mainForceRankingInfo.heldFrom;
+    const liveGroups = lastData ? lastData.groups : null;
+    const groups = held ? (holderSnapshotGroups(date) || liveGroups) : liveGroups;
+    return { offset: 0, date, ranking: mainForceRanking || [], groups, loading: !mainForceRankingLoaded, isPast: false, held, unavailable: false };
   }
   const date = holderViewDate();
   if (!date) return { offset: holderDayOffset, date: null, ranking: [], groups: null, loading: false, isPast: true, unavailable: true };
@@ -3053,8 +3077,8 @@ function signalEventRowHtml(ev, view){
     ? (ev.isBuy ? ' sig-bull' : ' sig-bear')
     : (/[買多]/.test(ev.label) ? ' sig-bull' : /[賣空]/.test(ev.label) ? ' sig-bear' : '');
   const group = lookupStockGroup(ev.code);
-  // 看昨天／前天時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價（跟大戶力分頁一樣）。
-  const quote = view && view.isPast ? holderPastQuote(ev.code, view.date) : getStockQuote(ev.code);
+  // 看昨天／前天或沿用上一個交易日時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價（跟大戶力分頁一樣）。
+  const quote = viewStockQuote(ev.code, view);
   const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
   const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '';
   const labelTitle = LARGE_ORDER_TOOLTIPS[ev.label] || '';
@@ -3260,8 +3284,8 @@ function rankingRowHtml(r, view){
   const name = backendName || lookupStockName(r.code);
   const timeLabel = r.lastTs ? new Date(r.lastTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
   const group = lookupStockGroup(r.code);
-  // 看昨天／前天時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價。
-  const quote = past ? holderPastQuote(r.code, view.date) : getStockQuote(r.code);
+  // 看昨天／前天或沿用上一個交易日時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價。
+  const quote = viewStockQuote(r.code, view);
   const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
   const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '';
   return '<div class="signal-row" data-code="' + r.code + '" data-name="' + name + '">' +
@@ -5852,7 +5876,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-04 09:20:04';
+const BUILD_STAMP = '2026-10-04 09:45:21';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -6744,19 +6768,22 @@ async function fetchQuotes(codes) {
       const d = String(item.d || ""), t = String(item.t || "");
       if (/^d{8}$/.test(d) && (d > quoteDate || (d === quoteDate && t > quoteTime))) { quoteDate = d; quoteTime = t; }
       if (!code || !(code in quotes)) continue;
-      const price = parseFloat(item.z);
-      const prevClose = parseFloat(item.y);
+      // 價格一定要是正數才算有效：2026-10-04（週日）TWSE 回了一批 z／委買委賣是 0 的資料
+      // （週末測試盤），0 被當成有效成交價算出 -100%、前端再推算漲跌就變 NaN。
+      const pos = (v) => (Number.isFinite(v) && v > 0 ? v : NaN);
+      const price = pos(parseFloat(item.z));
+      const prevClose = pos(parseFloat(item.y));
       // z 是「這一盤」的成交價，這一盤沒成交就是 "-"；漲停鎖死的股票常常好幾盤沒成交，
       // 以前退回開盤價會讓漲停的股票一直顯示開盤那個漲幅（2026-09-23 尼克森漲停卻顯示 +4.79%）。
       // 沒成交時改用委買／委賣推算：漲停鎖死只剩委買（＝漲停價）、跌停鎖死只剩委賣（＝跌停價）、
       // 兩邊都有就取中價；開盤前 b/a 也都是 "-" 時才退回開盤價／昨收。
-      const bids = String(item.b || "").split("_").map((v) => parseFloat(v)).filter(Number.isFinite);
-      const asks = String(item.a || "").split("_").map((v) => parseFloat(v)).filter(Number.isFinite);
+      const bids = String(item.b || "").split("_").map((v) => pos(parseFloat(v))).filter(Number.isFinite);
+      const asks = String(item.a || "").split("_").map((v) => pos(parseFloat(v))).filter(Number.isFinite);
       const quotePrice = bids.length && !asks.length ? bids[0]
         : asks.length && !bids.length ? asks[0]
         : bids.length && asks.length ? (bids[0] + asks[0]) / 2
         : NaN;
-      const fallbackPrice = parseFloat(item.o) || parseFloat(item.h) || parseFloat(item.l) || prevClose;
+      const fallbackPrice = pos(parseFloat(item.o)) || pos(parseFloat(item.h)) || pos(parseFloat(item.l)) || prevClose;
       const finalPrice = Number.isFinite(price) ? price : Number.isFinite(quotePrice) ? quotePrice : fallbackPrice;
       if (Number.isFinite(finalPrice) && Number.isFinite(prevClose) && prevClose > 0) {
         // u／w＝當天漲停價／跌停價、v＝累積成交量（張）：盤中333 用來排除已經漲停買不到的股票、

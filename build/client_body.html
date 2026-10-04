@@ -2487,6 +2487,12 @@ function fmtAmountWan(n){
 const STOCK_COL_LABELS_HTML = '<div class="stock-col-labels"><span></span><span class="srow-right">' +
   '<span class="spct">漲跌幅</span><span class="schg">漲跌</span><span class="sprice">成交價</span></span></div>';
 function stockValueColsHtml(price, changeAmt, changePercent){
+  // 報價不合理（價格不是正數、漲跌或漲跌幅不是數字）就顯示「—」，不要印出 -100.00%／NaN 這種假數字
+  // （2026-10-04 週末 TWSE 測試盤回了成交價 0 的資料，漲跌幅算成 -100%、漲跌推算成 NaN）。
+  if (!(price > 0) || !Number.isFinite(changeAmt) || !Number.isFinite(changePercent)){
+    return '<div class="srow-right"><span class="spct flat">—</span><span class="schg flat">—</span>' +
+      '<span class="sprice flat">' + (price > 0 ? price.toFixed(2) : '—') + '</span></div>';
+  }
   const cls = dirClass(changePercent);
   return '<div class="srow-right">' +
     '<span class="spct ' + cls + '">' + fmt(changePercent) + '%</span>' +
@@ -2586,7 +2592,6 @@ const SIGNAL_KINDS = [
   { key: 'groupCombinedBoard', label: '所有族群綜合表' },     // 2026-09-26 使用者：改名
   { key: 'groupHolderForce', label: '精選十大多空族群' },   // 2026-09-26 使用者：原「族群大戶力」改名
   { key: 'race333', label: '盤中333' },
-  { key: 'bladeShort', label: '刀劍空(32)' },   // 2026-09-30 使用者：從盤中333拆出來獨立成一個分頁
   // 2026-10-01 使用者：盤中大戶力、四項精選也都拆成多／空各一個分頁，不要放在一起。
   { key: 'bigHolderForceBull', label: '盤中大戶力多' },
   { key: 'fourGateBuy', label: '四項精選強多' },
@@ -2595,8 +2600,10 @@ const SIGNAL_KINDS = [
   // 2026-10-01 使用者：主力翻多空原本混在一起，拆成主力翻多／主力翻空各一個分頁，不要放在一起。
   { key: 'mainForceFlipBull', label: '主力翻多' },
   { key: 'bigBuy', label: '盤中特大買單' },
-  // 2026-10-04 使用者：「空」方向的四個分頁(盤中大戶力空／四項精選強空／主力翻空／盤中特大賣單)
-  // 移到這裡集中放在一起、排在歷史查詢前面，字改綠色跟「多」方向區隔開。
+  // 2026-10-04 使用者：「空」方向的分頁(刀劍空／盤中大戶力空／四項精選強空／主力翻空／盤中特大賣單)
+  // 移到這裡集中放在一起、排在歷史查詢前面，字改綠色跟「多」方向區隔開；
+  // 刀劍空(32)（2026-09-30 從盤中333拆出來的）也是空方向，排在盤中大戶力空左邊。
+  { key: 'bladeShort', label: '刀劍空(32)' },
   { key: 'bigHolderForceBear', label: '盤中大戶力空' },
   { key: 'fourGateSell', label: '四項精選強空' },
   { key: 'mainForceFlipBear', label: '主力翻空' },
@@ -2760,7 +2767,7 @@ async function fetchRealSignals(dateStr){
 let mainForceRankingInfo = { tradeDate: null, heldFrom: null };
 function holderDataHeldNoteHtml(){
   if (!mainForceRankingInfo.heldFrom) return '';
-  return '<div class="race-sub">目前顯示 ' + mainForceRankingInfo.tradeDate + ' 收盤時的最終大戶力資料（今天還沒開盤），保留到下一個交易日開盤前 15 分鐘（08:45）才清空重算。</div>';
+  return '<div class="race-sub">目前顯示 ' + mainForceRankingInfo.tradeDate + ' 收盤時的最終大戶力資料（今天還沒開盤），漲跌幅／漲跌／成交價是那一天的日K收盤值，保留到下一個交易日開盤前 15 分鐘（08:45）才清空重算。</div>';
 }
 // ---- 三個大戶力分頁（盤中大戶力／族群大戶力／族群綜合表）的「今天／昨天／前天」切換 ----
 // 使用者 2026-09-24：資料要留著才能比較族群今天跟昨天、前天的強弱。昨天／前天＝那一天收盤時的
@@ -2812,6 +2819,17 @@ function holderPastQuote(code, date){
   const change = num(d.change);
   return { price: close, changePercent: pct, changeAmt: Number.isFinite(change) ? change : close - close / (1 + pct / 100) };
 }
+// 訊號列／排行列的成交價、漲跌：看昨天／前天（isPast）或休市日／開盤前沿用上一個交易日（held）時，
+// 用那一天的日K收盤值，不是首頁現在的即時報價（2026-10-04 週日 TWSE 跑測試盤，即時報價不是 0 就是
+// 測試用的假價，「今天（10/02 收盤）」的大戶力列全部顯示 -100%／NaN／0.00）。日K還沒有那一天時，
+// 沿用上一個交易日的情況才退回即時報價（跟以前一樣）；看昨天／前天本來就只用日K。
+function viewStockQuote(code, view){
+  if (view && (view.isPast || view.held)){
+    const q = holderPastQuote(code, view.date);
+    if (q || view.isPast) return q;
+  }
+  return getStockQuote(code);
+}
 // 把首頁的族群結構套上那一天的日K收盤，做成跟 lastData.groups 一樣形狀的資料給族群模型用。
 function holderSnapshotGroups(date){
   if (!lastData || !Array.isArray(lastData.groups) || !groupDailyChanges || !Array.isArray(groupDailyChanges.dates)) return null;
@@ -2836,7 +2854,13 @@ function holderSnapshotGroups(date){
 }
 function holderView(){
   if (holderDayOffset === 0){
-    return { offset: 0, date: holderCurrentDate(), ranking: mainForceRanking || [], groups: lastData ? lastData.groups : null, loading: !mainForceRankingLoaded, isPast: false, unavailable: false };
+    const date = holderCurrentDate();
+    // 後端暫留上一個交易日（heldFrom）時，族群表也改套那一天的日K收盤（跟昨天／前天同一套），
+    // 不用首頁的即時報價；日K還沒有那一天時才退回即時報價。
+    const held = !!mainForceRankingInfo.heldFrom;
+    const liveGroups = lastData ? lastData.groups : null;
+    const groups = held ? (holderSnapshotGroups(date) || liveGroups) : liveGroups;
+    return { offset: 0, date, ranking: mainForceRanking || [], groups, loading: !mainForceRankingLoaded, isPast: false, held, unavailable: false };
   }
   const date = holderViewDate();
   if (!date) return { offset: holderDayOffset, date: null, ranking: [], groups: null, loading: false, isPast: true, unavailable: true };
@@ -2998,8 +3022,8 @@ function signalEventRowHtml(ev, view){
     ? (ev.isBuy ? ' sig-bull' : ' sig-bear')
     : (/[買多]/.test(ev.label) ? ' sig-bull' : /[賣空]/.test(ev.label) ? ' sig-bear' : '');
   const group = lookupStockGroup(ev.code);
-  // 看昨天／前天時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價（跟大戶力分頁一樣）。
-  const quote = view && view.isPast ? holderPastQuote(ev.code, view.date) : getStockQuote(ev.code);
+  // 看昨天／前天或沿用上一個交易日時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價（跟大戶力分頁一樣）。
+  const quote = viewStockQuote(ev.code, view);
   const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
   const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '';
   const labelTitle = LARGE_ORDER_TOOLTIPS[ev.label] || '';
@@ -3205,8 +3229,8 @@ function rankingRowHtml(r, view){
   const name = backendName || lookupStockName(r.code);
   const timeLabel = r.lastTs ? new Date(r.lastTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
   const group = lookupStockGroup(r.code);
-  // 看昨天／前天時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價。
-  const quote = past ? holderPastQuote(r.code, view.date) : getStockQuote(r.code);
+  // 看昨天／前天或沿用上一個交易日時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價。
+  const quote = viewStockQuote(r.code, view);
   const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
   const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '';
   return '<div class="signal-row" data-code="' + r.code + '" data-name="' + name + '">' +
