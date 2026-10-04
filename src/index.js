@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-04 11:16:11";
+const BUILD_STAMP = "2026-10-04 20:56:37";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -982,12 +982,25 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="chips-head">
       <div>
         <div class="chips-title">下午報</div>
-        <div class="chips-sub">隔天盤前讀：籌碼、技術、均線三面向各挑最多 5 檔，附防守價與風險提示；每個交易日收盤後整理，法人資料齊了會再更新，可回看近 10 個交易日。「黑龍回測」照均線分數＋收黑挑名單、回測 D+1 各種出場方式。點股票可開K線圖。</div>
+        <div class="chips-sub">隔天盤前讀：籌碼、技術、均線三面向各挑最多 5 檔，附防守價與風險提示；每個交易日收盤後整理，法人資料齊了會再更新，可回看近 10 個交易日。點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="swingClose" aria-label="關閉">✕</button>
     </div>
     <div class="chart-tabs signal-tabs-bar" id="swingTabs"></div>
     <div id="swingBody"></div>
+  </div>
+</div>
+<!-- 2026-10-04 使用者：黑龍回測從下午報分離成獨立面板（下方導覽列「創高黑龍」） -->
+<div class="chips-modal" id="heilongModal" hidden>
+  <div class="chips-inner" id="heilongInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">創高黑龍・績效分析</div>
+        <div class="chips-sub">出發點＝官網選股系統「創高黑龍」（均線分數高＋當天收黑）。自訂參數 → 看歷史 D+1 各種出場方式的績效 → 每天收盤挑自己的名單 → 隔天回來看要不要出場；每個交易日收盤後整理，可回測近 60 個交易日。</div>
+      </div>
+      <button class="cm-icon-btn" id="heilongClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="heilongBody"></div>
   </div>
 </div>
 <div class="chips-modal" id="checkupModal" hidden>
@@ -1080,6 +1093,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   <button class="tb-btn" data-label="每週籌碼分析"><span class="tb-icon">週</span>每週籌碼分析</button>
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
   <button class="tb-btn" data-label="下午報"><span class="tb-icon">午</span>下午報</button>
+  <button class="tb-btn" data-label="創高黑龍"><span class="tb-icon">龍</span>創高黑龍</button>  <!-- 2026-10-04 使用者：黑龍回測從下午報分離成獨立面板 -->
   <button class="tb-btn" data-label="健診"><span class="tb-icon">診</span>每日持股健診</button>  <!-- 2026-09-28 使用者：鈕的名字改成「每日持股健診」 -->
   <button class="tb-btn" data-label="問診"><span class="tb-icon">研</span>個股研究</button>  <!-- 2026-09-28 使用者：鈕的名字改成「個股研究」 -->
   <button class="tb-btn" data-label="個股盤中訊號追蹤"><span class="tb-icon">追</span>個股訊號追蹤</button>
@@ -2457,7 +2471,7 @@ function closeStockChart(){
   document.getElementById('chartModal').hidden = true;
   document.body.style.overflow = '';
   // 若是從訊號中心／盤後籌碼排行／下午報／健診／問診點進來的，關圖後讓它們回到最上層。
-  for (const id of ['signalModal', 'chipsModal', 'swingModal', 'checkupModal', 'diagModal']) document.getElementById(id).classList.remove('behind-chart');
+  for (const id of ['signalModal', 'chipsModal', 'swingModal', 'heilongModal', 'checkupModal', 'diagModal']) document.getElementById(id).classList.remove('behind-chart');
 }
 
 let openGroupName = null;
@@ -4797,8 +4811,8 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // 後端每個交易日收盤後整理一份（/api/swing-report），以資料基準日為鍵保存；這裡照日期切換、五個段落顯示。
 const SWING_SECTIONS = [
   { key: 'summary', label: '今日摘要' }, { key: 'disposition', label: '處置動態' }, { key: 'etf', label: '主動式基金' }, { key: 'groups', label: '產業觀察' },
-  { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '體質轉強' }, { key: 'heilong', label: '黑龍回測' },
-];
+  { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '體質轉強' },
+];   // 2026-10-04 使用者：黑龍回測搬到獨立面板（下方導覽列「創高黑龍」）
 let swingState = { section: 'summary', date: '', groupsLimit: 12, etfOpen: {} };   // etfOpen: 主動式基金各檔展開全部
 const swingCache = {};      // date('' = 最新) -> payload
 const swingLoading = {};
@@ -5008,7 +5022,9 @@ function swingDispoRowHtml(e, kind){
 // 後端每個交易日收盤後把族群表內每檔的均線分數、K棒、漲跌幅、週籌碼…存成一張表（近 60 個交易日），
 // 這裡把參數丟給 /api/heilong，拿回各種出場方式的績效、累積曲線、爆發力、今日名單與每日明細。
 // 「存成我的參數」存在這台瀏覽器（localStorage）。K棒／停利／回測天數按鈕點了立刻重算；數字欄改完按「重新計算」。
-const HL_DEFAULTS = { score: 10, k: 'black', min: -10, max: 3, week: '', gavg: '', hits: '', val: '', exdispo: true, cap: 0, sort: 'score', tp: 3, useTp: true, useSl: true, days: 10, amt: 50 };
+const HL_DEFAULTS = { score: 10, k: 'black', min: -10, max: 3, week: '', gavg: '', hits: '', val: '', exdispo: true, cap: 0, sort: 'score', tp: 3, useTp: true, useSl: true, days: 10, amt: 50,
+  // 2026-10-04 使用者：照學員專區補的參數——月季乖離下／上限、排除注意股、排除剛出關 ≤N 日、收盤價下／上限、當天成交量、只看有股期、範圍、扣費用（手續費折數）
+  bmin: '', bmax: '', exattn: false, exout: false, exoutDays: 5, pmin: '', pmax: '', vminOn: false, vmin: 1000, fut: false, scope: 'groups', fee: false, feeDisc: 0.6 };
 // 均線分數只用「內定」算法（2026-09-28 使用者：本站算法拿掉、留這套，名稱叫「內定」）：收盤站上 6 條均線各 1 分＋創 6 個天期新高各 1 分＋多頭排列加分 3 分，滿分 15。後端仍保留兩套，這裡固定送 algo=official。
 const HL_SORTS = [['score', '均線分數 高→低'], ['week', '週籌碼% 高→低'], ['gavg', '族群平均分 高→低'], ['hits', '近 20 日 >8% 次數 多→少'], ['drop', '當天跌最多 → 少'], ['val', '成交值 大→小']];
 let hlParams = Object.assign({}, HL_DEFAULTS);
@@ -5021,6 +5037,14 @@ function hlQuery(p){
   q.set('score', p.score); q.set('k', p.k); q.set('min', p.min); q.set('max', p.max);
   for (const key of ['week', 'gavg', 'hits', 'val']) if (p[key] !== '' && p[key] !== null && p[key] !== undefined && !isNaN(Number(p[key]))) q.set(key, p[key]);
   q.set('exdispo', p.exdispo ? '1' : '0'); q.set('cap', p.cap || 0); q.set('sort', p.sort); q.set('tp', p.tp); q.set('mine', hlMine(p)); q.set('days', p.days); q.set('amt', p.amt || 50); q.set('algo', 'official');
+  const num = (v) => v !== '' && v !== null && v !== undefined && !isNaN(Number(v));
+  for (const key of ['bmin', 'bmax', 'pmin', 'pmax']) if (num(p[key])) q.set(key, p[key]);
+  q.set('exattn', p.exattn ? '1' : '0');
+  q.set('exout', p.exout ? (Number(p.exoutDays) > 0 ? Number(p.exoutDays) : 5) : 0);
+  if (p.vminOn && Number(p.vmin) > 0) q.set('vmin', Number(p.vmin));
+  q.set('fut', p.fut ? '1' : '0');
+  q.set('scope', p.scope === 'market' ? 'market' : 'groups');
+  q.set('fee', p.fee ? (Number(p.feeDisc) > 0 ? Number(p.feeDisc) : 0.6) : 0);
   return q.toString();
 }
 async function ensureHeilong(){
@@ -5041,9 +5065,9 @@ async function ensureHeilong(){
   } finally {
     if (hlState.query === query) hlState.loading = false;
   }
-  if (!document.getElementById('swingModal').hidden && swingState.section === 'heilong') renderSwing();
+  if (!document.getElementById('heilongModal').hidden) renderHeilong();
 }
-function hlRun(){ hlState.query = null; hlState.failedAt = 0; renderSwing(); }
+function hlRun(){ hlState.query = null; hlState.failedAt = 0; renderHeilong(); }
 const hlN = (v, digits) => (v === null || v === undefined ? '—' : Number(v).toFixed(digits === undefined ? 2 : digits));
 const hlPrice = (v) => (v === null || v === undefined ? '—' : Number(v) >= 500 ? Number(v).toFixed(0) : Number(v) >= 50 ? Number(v).toFixed(1) : Number(v).toFixed(2));
 const hlMoney = (v) => (v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(1) + ' 萬');
@@ -5059,6 +5083,8 @@ function hlParamsHtml(p){
   const daysBtn = (v, label) => '<button class="chart-tab chips-btn hl-days' + (Number(p.days) === v ? ' active' : '') + '" data-days="' + v + '">' + label + '</button>';
   const inp = (key, attrs) => '<input class="hl-in" data-key="' + key + '" type="number" inputmode="decimal" value="' + (p[key] === null || p[key] === undefined ? '' : p[key]) + '" ' + (attrs || '') + '>';
   const chk = (key, label) => '<label><input type="checkbox" class="hl-chk" data-key="' + key + '"' + (p[key] ? ' checked' : '') + '> ' + label + '</label>';
+  const scopeBtn = (v, label) => '<button class="chart-tab chips-btn hl-scope' + ((p.scope === 'market' ? 'market' : 'groups') === v ? ' active' : '') + '" data-scope="' + v + '">' + label + '</button>';
+  const attnSince = hlState.data && hlState.data.attentionSince ? '紀錄自 ' + hlState.data.attentionSince + ' 起，更早的日子排不到' : '尚無紀錄，第一個交易日收盤後開始記';
   return '<div class="hl-form">' +
     '<div class="hl-line"><label title="內定算法：收盤站上 6 條均線各 1 分＋創 6 個天期新高各 1 分＋多頭排列加分 3 分，滿分 15">均線分數（內定）≥ ' + inp('score', 'min="0" max="15" step="1"') + '</label>' +
       '<span class="hl-field">K棒 ' + kBtn('black', '黑K') + kBtn('red', '紅K') + kBtn('any', '不限') + '</span>' +
@@ -5069,13 +5095,22 @@ function hlParamsHtml(p){
       '<label>5 日均成交值 ≥ ' + inp('val', 'step="1" placeholder="不用"') + ' 億</label></div>' +
     '<div class="hl-line">' + chk('exdispo', '排除當天處置中的股（分盤交易，隔天出不掉）') +
       '<label>每天最多 ' + inp('cap', 'step="1" min="0"') + ' 檔（0＝不限），依 <select class="hl-sel" data-key="sort">' + HL_SORTS.map(([v, l]) => '<option value="' + v + '"' + (p.sort === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select> 取</label></div>' +
+    // 2026-10-04 使用者：照學員專區補的參數
+    '<div class="hl-line"><label title="收盤價 ÷（20 日線＋60 日線）÷2 − 1。上市不滿 60 天沒有數字，設了門檻就不算符合；超過 30% 通常是相對高檔，打少跑快">月季乖離 ' + inp('bmin', 'step="1" placeholder="下限"') + ' ～ ' + inp('bmax', 'step="1" placeholder="上限"') + ' %（留空＝那一邊不限）</label>' +
+      '<label>收盤價 ' + inp('pmin', 'step="1" min="0" placeholder="下限"') + ' ～ ' + inp('pmax', 'step="1" min="0" placeholder="上限"') + ' 元</label>' +
+      '<span class="hl-field">' + chk('vminOn', '當天成交量 ≥') + ' ' + inp('vmin', 'step="100" min="0"') + ' 張</span></div>' +
+    '<div class="hl-line">' + chk('exattn', '排除注意股（交易所公布；' + attnSince + '）') +
+      '<span class="hl-field">' + chk('exout', '排除剛出關 ≤') + ' ' + inp('exoutDays', 'step="1" min="1"') + ' 個交易日的股（出關後先觀察）</span>' +
+      chk('fut', '只看有股票期貨的股') + '</div>' +
+    '<div class="hl-line"><span class="hl-field">範圍 ' + scopeBtn('groups', '族群表內') + scopeBtn('market', '全市場') + '</span>' +
+      chk('fee', '扣手續費／交易稅') + '<label>手續費折數 ' + inp('feeDisc', 'step="0.1" min="0.1" max="1"') + '（例如 0.6＝6 折；證交稅 0.3% 固定）</label></div>' +
     '<div class="hl-line"><span class="hl-field">停利 ' + tpBtn(3) + tpBtn(5) + tpBtn(8) + ' 自訂 ' + inp('tp', 'step="0.5" min="0.5" max="50"') + ' %</span>' +
       chk('useTp', '用停利') + chk('useSl', '破黑低停損') +
       '<span class="hl-field">回測 ' + daysBtn(10, '近 10 天') + daysBtn(20, '近 20 天') + daysBtn(0, '全部') + '</span>' +
       '<label>每檔 ' + inp('amt', 'step="10" min="1"') + ' 萬</label></div>' +
     '<div class="hl-line hl-actions"><button class="chart-tab chips-btn active" id="hlRun">▶ 重新計算</button><button class="chart-tab chips-btn" id="hlReset">官網創高黑龍預設</button><button class="chart-tab chips-btn" id="hlSave">💾 存成我的參數</button>' +
       (hlState.savedAt && Date.now() - hlState.savedAt < 5000 ? '<span class="muted">已存在這台瀏覽器，下次打開就是這組</span>' : '') + '</div>' +
-    '<div class="sw-rule">官網創高黑龍預設＝均線分數 ≥10・黑K・漲跌幅 −10%～3%，其餘條件不用。「用停利」「破黑低停損」是「我的出場法」：碰到停利價就賣、跌破黑K最低價就賣，都沒碰到收盤賣；兩個都不勾＝隔天收盤出場。數字欄改完按「重新計算」。</div></div>';
+    '<div class="sw-rule">官網創高黑龍預設＝均線分數 ≥10・黑K・漲跌幅 −10%～3%・族群表內，其餘條件不用。「用停利」「破黑低停損」是「我的出場法」：碰到停利價就賣、跌破黑K最低價就賣，都沒碰到收盤賣；兩個都不勾＝隔天收盤出場。全市場＝日K裡所有 4 位數代號的股票（不在族群表的沒有族群平均分）。扣費用＝每筆扣手續費×折數×2＋證交稅 0.3%。數字欄改完按「重新計算」。</div></div>';
 }
 function hlChartHtml(points, series, opts){
   const pts = (points || []).filter((p) => p);
@@ -5256,7 +5291,6 @@ function renderSwing(){
   const tabs = document.getElementById('swingTabs');
   tabs.innerHTML = SWING_SECTIONS.map((sc) => '<button class="chart-tab signal-tab' + (swingState.section === sc.key ? ' active' : '') + '" data-section="' + sc.key + '">' + sc.label + '</button>').join('');
   const body = document.getElementById('swingBody');
-  if (swingState.section === 'heilong'){ body.innerHTML = swingHeilongHtml() + SWING_FOOT; return; }   // 黑龍回測有自己的資料（/api/heilong）
   const data = swingData();
   if (!data){
     body.innerHTML = swingDatePillsHtml(swingCache['']) + '<div class="signal-empty"><div class="se-title">' + (swingFailedAt[swingState.date || ''] ? '讀取失敗' : '讀取中…') + '</div><div class="se-sub">後端每個交易日收盤後整理；讀不到的話稍後再試。</div></div>';
@@ -5287,23 +5321,7 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
   if (e.target.closest('#swingMoreGroups')){ swingState.groupsLimit += 12; renderSwing(); return; }
   const more = e.target.closest('.sw-etf-more');
   if (more){ swingState.etfOpen[more.dataset.etf] = !swingState.etfOpen[more.dataset.etf]; renderSwing(); return; }
-  // 黑龍回測：K棒／停利／回測天數按鈕點了立刻重算；重新計算、預設、存參數；每日明細展開
-  const hlBtn = e.target.closest('.hl-k, .hl-tp, .hl-days');
-  if (hlBtn){
-    if (hlBtn.dataset.k) hlParams.k = hlBtn.dataset.k;
-    if (hlBtn.dataset.tp) hlParams.tp = Number(hlBtn.dataset.tp);
-    if (hlBtn.dataset.days !== undefined) hlParams.days = Number(hlBtn.dataset.days);
-    hlRun(); return;
-  }
-  if (e.target.closest('#hlRun')){ hlRun(); return; }
-  if (e.target.closest('#hlReset')){ hlParams = Object.assign({}, HL_DEFAULTS); hlRun(); return; }
-  if (e.target.closest('#hlSave')){
-    try { localStorage.setItem('heilongParams', JSON.stringify(hlParams)); hlState.savedAt = Date.now(); } catch (err) { /* 記不住就算了 */ }
-    renderSwing(); return;
-  }
-  const dayHead = e.target.closest('.hl-day-head');
-  if (dayHead){ hlState.open[dayHead.dataset.date] = !hlState.open[dayHead.dataset.date]; renderSwing(); return; }
-  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code], .hl-row[data-code]');
+  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code]');
   if (card){
     if (!useFloatingCharts()){
       document.getElementById('swingModal').classList.add('behind-chart');
@@ -5313,7 +5331,43 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
   }
 });
 
-for (const type of ['input', 'change']) document.getElementById('swingBody').addEventListener(type, (e) => {
+// ---- 創高黑龍（黑龍回測）獨立面板：2026-10-04 使用者，從下午報分離出來 ----
+function renderHeilong(){ document.getElementById('heilongBody').innerHTML = swingHeilongHtml() + SWING_FOOT; }
+function openHeilongPanel(){
+  document.getElementById('heilongModal').hidden = false;
+  renderHeilong();
+}
+function closeHeilongPanel(){ document.getElementById('heilongModal').hidden = true; }
+document.getElementById('heilongClose').addEventListener('click', closeHeilongPanel);
+document.getElementById('heilongModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeHeilongPanel(); });
+document.getElementById('heilongBody').addEventListener('click', (e) => {
+  // K棒／停利／回測天數／範圍按鈕點了立刻重算；重新計算、預設、存參數；每日明細展開
+  const hlBtn = e.target.closest('.hl-k, .hl-tp, .hl-days, .hl-scope');
+  if (hlBtn){
+    if (hlBtn.dataset.k) hlParams.k = hlBtn.dataset.k;
+    if (hlBtn.dataset.tp) hlParams.tp = Number(hlBtn.dataset.tp);
+    if (hlBtn.dataset.days !== undefined) hlParams.days = Number(hlBtn.dataset.days);
+    if (hlBtn.dataset.scope) hlParams.scope = hlBtn.dataset.scope;
+    hlRun(); return;
+  }
+  if (e.target.closest('#hlRun')){ hlRun(); return; }
+  if (e.target.closest('#hlReset')){ hlParams = Object.assign({}, HL_DEFAULTS); hlRun(); return; }
+  if (e.target.closest('#hlSave')){
+    try { localStorage.setItem('heilongParams', JSON.stringify(hlParams)); hlState.savedAt = Date.now(); } catch (err) { /* 記不住就算了 */ }
+    renderHeilong(); return;
+  }
+  const dayHead = e.target.closest('.hl-day-head');
+  if (dayHead){ hlState.open[dayHead.dataset.date] = !hlState.open[dayHead.dataset.date]; renderHeilong(); return; }
+  const card = e.target.closest('.hl-row[data-code]');
+  if (card){
+    if (!useFloatingCharts()){
+      document.getElementById('heilongModal').classList.add('behind-chart');
+      document.getElementById('signalModal').classList.add('behind-chart');
+    }
+    openStockChart(card.dataset.code, card.dataset.name);
+  }
+});
+for (const type of ['input', 'change']) document.getElementById('heilongBody').addEventListener(type, (e) => {
   const el = e.target;
   if (!el || !el.dataset || !el.dataset.key) return;
   if (el.classList.contains('hl-chk')) hlParams[el.dataset.key] = !!el.checked;
@@ -5882,7 +5936,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-04 11:16:11';
+const BUILD_STAMP = '2026-10-04 20:56:37';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -6603,6 +6657,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '下午報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」
+    if (btn.dataset.label === '創高黑龍'){ openHeilongPanel(); return; } // 2026-10-04 使用者：黑龍回測獨立面板
     if (btn.dataset.label === '健診'){ openCheckupPanel(); return; }    // 2026-09-28 使用者：每日持股健診
     if (btn.dataset.label === '問診'){ openDiagPanel(); return; }       // 2026-09-28 使用者：個股問診
     showToast('「' + btn.dataset.label + '」功能開發中');
