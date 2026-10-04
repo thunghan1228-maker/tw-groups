@@ -1,0 +1,48 @@
+# 上櫃日K鏡像（創高黑選股要三年日K）：櫃買中心擋 HanStock 的正式站主機（Railway），GitHub runner 抓得到。
+# 每個交易日 16:50（台北）把上個月與這個月還沒有的日子補進 data 分支 tpex/quotes/YYYY-MM.json.gz；
+# 手動跑時填月份範圍（例如 2023-08:2026-10）一次回補，後端再從這裡把上櫃日K補到三年。
+# 每年一份櫃買「減資恢復買賣參考價格」存在 tpex/actions/revivt-YYYY.json，後端做減資還原用。
+# 腳本在 main 分支 scripts/tpex_quotes_mirror.py。
+name: TPEx quotes mirror
+
+on:
+  schedule:
+    - cron: "50 8 * * 1-5"   # 16:50 台北時間（UTC+8）
+  workflow_dispatch:
+    inputs:
+      months:
+        description: "回補月份範圍 YYYY-MM:YYYY-MM（例如 2023-08:2026-10）；留空＝只補上個月與這個月缺的日子"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tpex-quotes-mirror
+  cancel-in-progress: false
+
+jobs:
+  quotes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: main
+      - uses: actions/checkout@v4
+        with:
+          ref: data
+          path: data
+      - name: 補櫃買每日行情（缺的日子）
+        env:
+          MONTHS: ${{ inputs.months }}
+        run: |
+          git -C data config user.name "tpex-mirror"
+          git -C data config user.email "tpex-mirror@users.noreply.github.com"
+          python3 main/scripts/tpex_quotes_mirror.py --root data --months "$MONTHS" --sleep 2
+      - name: 戳後端把新的上櫃日K拉回去
+        if: always()
+        run: |
+          curl -sS -X POST --max-time 60 "https://hanstock-production-b872.up.railway.app/api/hub/bars-history/run" -o /tmp/poke.json -w "HTTP %{http_code}\n" || true
+          head -c 1500 /tmp/poke.json; echo
