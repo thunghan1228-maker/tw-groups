@@ -2589,15 +2589,17 @@ const SIGNAL_KINDS = [
   { key: 'bladeShort', label: '刀劍空(32)' },   // 2026-09-30 使用者：從盤中333拆出來獨立成一個分頁
   // 2026-10-01 使用者：盤中大戶力、四項精選也都拆成多／空各一個分頁，不要放在一起。
   { key: 'bigHolderForceBull', label: '盤中大戶力多' },
-  { key: 'bigHolderForceBear', label: '盤中大戶力空' },
   { key: 'fourGateBuy', label: '四項精選強多' },
-  { key: 'fourGateSell', label: '四項精選強空' },
   { key: 'combo12Bull', label: '1+2多' },
   { key: 'blackDragon', label: '創高黑龍' },
   // 2026-10-01 使用者：主力翻多空原本混在一起，拆成主力翻多／主力翻空各一個分頁，不要放在一起。
   { key: 'mainForceFlipBull', label: '主力翻多' },
-  { key: 'mainForceFlipBear', label: '主力翻空' },
   { key: 'bigBuy', label: '盤中特大買單' },
+  // 2026-10-04 使用者：「空」方向的四個分頁(盤中大戶力空／四項精選強空／主力翻空／盤中特大賣單)
+  // 移到這裡集中放在一起、排在歷史查詢前面，字改綠色跟「多」方向區隔開。
+  { key: 'bigHolderForceBear', label: '盤中大戶力空' },
+  { key: 'fourGateSell', label: '四項精選強空' },
+  { key: 'mainForceFlipBear', label: '主力翻空' },
   { key: 'bigSell', label: '盤中特大賣單' },
   { key: 'history', label: '歷史查詢' },
 ];
@@ -5994,7 +5996,8 @@ function renderSignalCenter(){
   };
   // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
   const PURPLE_TAB_KEYS = new Set(['groupHolderForce', 'groupCombinedBoard', 'race333', 'brewLaunch']);  // 2026-09-24 使用者：醞釀／發動也紫紅色；2026-09-26：盤中大戶力改回黑字
-  const GREEN_TAB_KEYS = new Set(['bladeShort', 'bigSell']);  // 2026-09-30 使用者：刀劍空(32)、盤中特大賣單 分頁字改綠色
+  // 2026-10-04 使用者：「空」方向另外三個分頁(盤中大戶力空／四項精選強空／主力翻空)也改綠色，跟刀劍空、盤中特大賣單一致。
+  const GREEN_TAB_KEYS = new Set(['bladeShort', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear']);
   const tabsHtml = SIGNAL_KINDS.map((k) => {
     const count = countFor(k.key);
     return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + (PURPLE_TAB_KEYS.has(k.key) ? ' signal-tab-purple' : '') + (GREEN_TAB_KEYS.has(k.key) ? ' signal-tab-green' : '') + '" data-kind="' + k.key + '">' +
