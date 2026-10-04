@@ -8,6 +8,7 @@ name: TPEx data mirror
 on:
   schedule:
     - cron: "40 8 * * 1-5"   # 16:40 台北時間（UTC+8）
+    - cron: "10 2 * * 6"     # 週六 10:10：集保週資料（週五結算、週六公布）不用等到週一（籌碼暴增雷達）
   workflow_dispatch:
     inputs:
       backfill_days:
@@ -189,8 +190,9 @@ jobs:
                   d, code, level, holders, shares, pct = row[:6]
                   code = code.strip().upper()
                   level_int = int(level)
-                  # 族群股票全部分級都留；其他四碼一般股票只留 400 張以上（12～15 級），給持股健診用（2026-09-28）
-                  if not (code in codes or (len(code) == 4 and code.isdigit() and level_int in (12, 13, 14, 15))):
+                  # 族群股票全部分級都留；其他四碼一般股票只留 400 張以上（12～15 級），給持股健診用（2026-09-28）；
+                  # 再加第 17 級（合計）：籌碼暴增雷達的籌碼%要除以這週總股數（2026-10-04）
+                  if not (code in codes or (len(code) == 4 and code.isdigit() and level_int in (12, 13, 14, 15, 17))):
                       continue
                   day = day or (f"{d[:4]}-{d[4:6]}-{d[6:8]}" if len(d) == 8 else d)
                   rows.append([code, level_int, int(holders.replace(',', '')), int(shares.replace(',', '')), float(pct)])
@@ -206,7 +208,7 @@ jobs:
                   index = json.load(open('tpex/tdcc-index.json', encoding='utf-8'))
               except Exception:
                   index = []
-              index = sorted(set(index) | {day}, reverse=True)[:20]
+              index = sorted(set(index) | {day}, reverse=True)[:30]   # 雷達要 16 週累積＋8 週可切（後端留 26 週）
               json.dump(index, open('tpex/tdcc-index.json', 'w', encoding='utf-8'))
           except Exception as e:
               print('tdcc failed', type(e).__name__, e)

@@ -530,6 +530,127 @@
   #chipsTabs .signal-tab[data-measure="short"]{background:#15803d;border-color:#15803d;color:#fff;}
   #chipsTabs .signal-tab[data-measure="short"]:hover{background:#166534;border-color:#166534;}
   #chipsTabs .signal-tab[data-measure="short"].active{background:#22c55e;border-color:#fff;color:#fff;box-shadow:0 0 0 2px #22c55e;}
+  /* 籌碼暴增雷達（2026-10-04 使用者：照莊爸 zhuang.tw/radar 做，盤後籌碼排行第一個分頁）：集保週資料的大戶增減；
+     紅＝大戶增加、綠＝減少；金色方塊＝均線分數（12 分以上實心、8～11 半填、7 以下只描邊）；圓圈＝當週買超榜名次 */
+  #chipsTabs .signal-tab[data-measure="radar"]{background:#9f1239;border-color:#9f1239;color:#fff;}
+  #chipsTabs .signal-tab[data-measure="radar"]:hover{background:#881337;border-color:#881337;}
+  #chipsTabs .signal-tab[data-measure="radar"].active{background:#e11d48;border-color:#fff;color:#fff;box-shadow:0 0 0 2px #e11d48;}
+  .rd-wrap{display:flex;flex-direction:column;gap:16px;padding-bottom:10px;}
+  .rd-tag{display:inline-block;border:1px solid #e6675f;color:#f08a7e;border-radius:4px;padding:1px 8px;font-size:11px;letter-spacing:1px;}
+  .rd-title{font-size:28px;font-weight:900;color:#f08a7e;margin:6px 0 2px;letter-spacing:3px;font-family:"Noto Serif TC","Songti TC",serif;}
+  .rd-sub{font-size:12px;color:var(--muted);}
+  .rd-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #6b5b3e;background:rgba(227,179,65,.10);color:#e3c27a;border-radius:999px;padding:3px 12px;font-size:12px;margin-top:8px;line-height:1.5;}
+  .rd-intro{border-left:3px solid #e6675f;background:var(--panel);border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.85;}
+  .rd-intro p{margin:0 0 4px;}
+  .rd-intro b.rd-up{color:#ff6b6b;} .rd-intro b.rd-down{color:#4ade80;}
+  .rd-search{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .rd-search input{flex:1 1 150px;max-width:240px;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:8px 10px;font-size:16px;font-family:inherit;}
+  .rd-search button{background:#2a2420;border:1px solid #e6675f;color:#fff;border-radius:6px;padding:8px 14px;font-weight:800;cursor:pointer;font-family:inherit;font-size:14px;}
+  .rd-hint{font-size:11px;color:var(--muted);line-height:1.7;margin-top:4px;}
+  .rd-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;align-items:start;}
+  .rd-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0;}
+  .rd-card-head{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;margin-bottom:8px;}
+  .rd-name{font-size:18px;font-weight:800;cursor:pointer;}
+  .rd-code{font-size:12px;color:var(--muted);}
+  .rd-badge{display:inline-flex;align-items:center;gap:4px;border:1px solid #e6675f;color:#f08a7e;border-radius:999px;padding:0 8px;font-size:11px;line-height:20px;}
+  .rd-big{margin-left:auto;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .rd-up{color:#ff6b6b;} .rd-down{color:#4ade80;}
+  .rd-circle{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1.5px solid #e6675f;border-radius:50%;font-size:10px;color:#f08a7e;font-weight:800;flex:0 0 auto;}
+  .rd-trow{display:grid;grid-template-columns:42px 1fr 62px 20px;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px;}
+  .rd-track{position:relative;height:10px;background:rgba(255,255,255,.08);border-radius:999px;}
+  .rd-track::after{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:rgba(255,255,255,.35);}
+  .rd-fill{position:absolute;top:0;bottom:0;border-radius:999px;}
+  .rd-fill.up{left:50%;background:linear-gradient(90deg,#b4233c,#ff6b81);}
+  .rd-fill.down{right:50%;background:linear-gradient(90deg,#4ade80,#16a34a);}
+  .rd-val{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap;}
+  .rd-note{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.7;}
+  .rd-ma{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:18px;border-radius:4px;font-size:11px;font-weight:800;padding:0 3px;box-sizing:border-box;}
+  .rd-ma.full{background:#e3b341;color:#1a1408;}
+  .rd-ma.half{background:rgba(227,179,65,.30);color:#f1d48a;border:1px solid rgba(227,179,65,.65);}
+  .rd-ma.line{border:1px solid #8a7a5a;color:#cbbd9b;}
+  .rd-ma.none{visibility:hidden;}
+  .rd-sec-title{font-size:21px;font-weight:900;letter-spacing:1px;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:2px 0 8px;font-family:"Noto Serif TC","Songti TC",serif;}
+  .rd-sec-title small{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:0;font-family:inherit;}
+  .rd-weeks{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 10px;}
+  .rd-week{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .rd-week.active{border-color:#e6675f;color:#fff;background:rgba(230,103,95,.25);font-weight:800;}
+  .rd-list-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+  .rd-list-title{font-size:16px;font-weight:800;}
+  .rd-date-pill{border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:11px;color:var(--muted);white-space:nowrap;}
+  .rd-lrow{display:grid;grid-template-columns:40px minmax(60px,1.1fr) minmax(50px,1.3fr) 54px 24px;align-items:center;gap:6px;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;cursor:pointer;}
+  .rd-lrow:hover,.rd-grow:hover,.rd-srow:hover{background:var(--panel-2);}
+  .rd-c{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums;}
+  .rd-n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+  .rd-bar{height:10px;border-radius:999px;background:rgba(255,255,255,.08);position:relative;overflow:hidden;}
+  .rd-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;}
+  .rd-bar i.up{background:linear-gradient(90deg,#b4233c,#ff6b81);}
+  .rd-bar i.down{background:linear-gradient(90deg,#15803d,#4ade80);}
+  .rd-star{color:#facc15;margin-left:3px;font-size:12px;}
+  .rd-empty-list{font-size:12px;color:var(--muted);padding:8px 2px;}
+  .rd-select{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:3px 6px;font-size:12px;font-family:inherit;}
+  .rd-ctl{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:8px;}
+  .rd-legend{border:1px dashed var(--line);border-radius:8px;padding:8px 10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--muted);margin:0 0 8px;line-height:1.7;}
+  .rd-cell{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:54px;height:54px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:10px;line-height:1.3;flex:0 0 auto;}
+  .rd-cell.gold{background:#e3b341;color:#1a1408;border-color:#e3b341;}
+  .rd-cell b{font-size:14px;}
+  .rd-cells{display:flex;flex-wrap:wrap;gap:4px;padding:4px 0;}
+  .rd-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:10px;background:var(--panel);}
+  .rd-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .rd-table th{font-size:11px;color:#f08a7e;text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);white-space:nowrap;font-weight:700;}
+  .rd-table th small{display:block;color:var(--muted);font-weight:500;}
+  .rd-table td{padding:7px 6px;border-bottom:1px solid rgba(255,255,255,.06);white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .rd-table tr.rd-crow{cursor:pointer;}
+  .rd-table tr.rd-crow:hover td{background:var(--panel-2);}
+  .rd-table tr.rd-open td{background:rgba(227,179,65,.08);}
+  .rd-table tr.rd-gridrow td{white-space:normal;background:rgba(255,255,255,.02);}
+  .rd-count{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-weight:800;font-size:12px;}
+  .rd-count.gold{background:#e3b341;color:#1a1408;}
+  .rd-count.line{border:1.5px solid #e6675f;color:#f08a7e;}
+  .rd-share{display:inline-block;width:46px;height:8px;border-radius:999px;background:rgba(255,255,255,.08);vertical-align:middle;margin-right:6px;position:relative;overflow:hidden;}
+  .rd-share i{position:absolute;left:0;top:0;bottom:0;background:#e3b341;border-radius:999px;}
+  .rd-muted{color:var(--muted);}
+  .rd-groups{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start;}
+  .rd-grow{display:grid;grid-template-columns:22px minmax(64px,1fr) minmax(50px,1.2fr) 60px;gap:6px;align-items:center;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;cursor:pointer;border-radius:4px;}
+  .rd-grow.active{background:rgba(230,103,95,.18);}
+  .rd-srow{display:grid;grid-template-columns:40px minmax(60px,1fr) minmax(40px,1.2fr) 30px 58px 24px;gap:6px;align-items:center;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;cursor:pointer;}
+  .rd-srow.rd-three{grid-template-columns:40px minmax(60px,1fr) minmax(40px,1.4fr) 58px 24px;}
+  .rd-range{border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:11px;color:var(--muted);white-space:nowrap;}
+  .rd-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;align-items:center;font-size:12px;color:var(--muted);}
+  .rd-chip{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:3px 8px;font-size:12px;color:var(--text);cursor:pointer;font-family:inherit;}
+  .rd-hot{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+  .rd-kbox{border:1px solid var(--line);border-radius:8px;padding:6px 6px 2px;margin:6px 0 8px;background:rgba(0,0,0,.18);}
+  .rd-kbox.closed{cursor:pointer;padding:6px;}
+  .rd-khead{font-size:11px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:2px;}
+  .rd-kbox svg{display:block;width:100%;height:auto;}
+  .rd-ma5{color:#60a5fa;} .rd-ma20{color:#f59e0b;} .rd-ma60{color:#c084fc;}
+  .rd-inst-wrap{display:flex;gap:6px;align-items:stretch;margin:6px 0 2px;}
+  .rd-inst-cols{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;}
+  .rd-inst-col{display:flex;flex-direction:column;align-items:center;min-width:0;}
+  .rd-inst-plot{position:relative;width:100%;max-width:44px;height:96px;background:rgba(255,255,255,.06);border-radius:4px;}
+  .rd-inst-plot::after{content:'';position:absolute;left:-3px;right:-3px;top:50%;height:1px;background:rgba(255,255,255,.35);}
+  .rd-inst-plot i{position:absolute;left:0;right:0;border-radius:3px;}
+  .rd-inst-plot i.up{bottom:50%;background:linear-gradient(0deg,#b4233c,#ff6b81);}
+  .rd-inst-plot i.down{top:50%;background:linear-gradient(180deg,#16a34a,#4ade80);}
+  .rd-inst-axis{display:flex;flex-direction:column;justify-content:space-between;height:96px;font-size:10px;color:var(--muted);text-align:right;white-space:nowrap;}
+  .rd-inst-lab{font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;}
+  .rd-inst-pct{font-size:10px;font-weight:700;}
+  .rd-itable{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;}
+  .rd-itable th{font-size:11px;color:var(--muted);font-weight:600;text-align:right;padding:4px 3px;border-bottom:1px solid var(--line);}
+  .rd-itable th:first-child,.rd-itable td:first-child{text-align:left;}
+  .rd-itable td{text-align:right;padding:5px 3px;border-bottom:1px solid rgba(255,255,255,.06);font-variant-numeric:tabular-nums;}
+  .rd-sel{outline:1.5px solid #e6675f;background:rgba(230,103,95,.14);border-radius:4px;}
+  .rd-cap{display:inline-block;font-size:10px;line-height:15px;border:1px solid #8b5cf6;color:#c4b5fd;border-radius:4px;padding:0 4px;margin-left:4px;vertical-align:middle;white-space:nowrap;}
+  .rd-cap-short{display:none;}
+  @media (max-width:640px){ .rd-lrow .rd-cap-long{display:none;} .rd-lrow .rd-cap-short{display:inline;} }
+  .rd-btn-sm{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:6px;padding:2px 8px;font-size:12px;cursor:pointer;font-family:inherit;}
+  @media (max-width:640px){
+    .rd-title{font-size:23px;}
+    .rd-groups{grid-template-columns:1fr;}
+    .rd-lrow{grid-template-columns:36px minmax(56px,1.2fr) minmax(36px,1fr) 50px 22px;font-size:12px;}
+    .rd-srow{grid-template-columns:36px minmax(56px,1fr) minmax(30px,1fr) 28px 52px 22px;font-size:12px;}
+    .rd-srow.rd-three{grid-template-columns:36px minmax(56px,1fr) minmax(30px,1.2fr) 52px 22px;}
+    .rd-hot{grid-template-columns:1fr;}
+  }
   /* 波段日報（2026-09-26 使用者：照波段精選日報做）：數字方塊、摘要、族群卡、個股卡 */
   .sw-basis{font-size:12px;color:var(--muted);margin:6px 0 8px;line-height:1.6;}
   .sw-tiles{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px;}
@@ -997,7 +1118,7 @@
     <div class="chips-head">
       <div>
         <div class="chips-title">盤後籌碼排行</div>
-        <div class="chips-sub">主力大單（永豐逐筆算的大單淨額）＋三大法人買賣超（證交所、櫃買中心公開資料），每個交易日收盤後更新；只列 43 個族群的股票，點股票可開K線圖。</div>
+        <div class="chips-sub">籌碼暴增雷達＝集保週資料的大戶增減（每週五結算）；其他分頁是主力大單（永豐逐筆算的大單淨額）＋三大法人買賣超（證交所、櫃買中心公開資料），每個交易日收盤後更新，只列 43 個族群的股票，點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="chipsClose" aria-label="關閉">✕</button>
     </div>
@@ -4436,12 +4557,13 @@ function brewLaunchHtml(){
 // 後端 /api/chips-daily：每個交易日收盤後的主力大單淨額（永豐逐筆）＋三大法人買賣超（上市＝證交所 T86，
 // 上櫃＝櫃買中心開放資料經排程主機鏡像），連續買超／賣超天數，收盤與漲跌幅。這裡只做排序、篩選、切日期。
 const CHIPS_MEASURES = [
+  { key: 'radar', label: '籌碼暴增雷達' },   // 2026-10-04 使用者：照莊爸 zhuang.tw/radar 做（集保週資料），放第一個
   { key: 'mf', label: '主力大單' }, { key: 'foreign', label: '外資' }, { key: 'trust', label: '投信' },
   { key: 'dealer', label: '自營商' }, { key: 'total', label: '三大法人' }, { key: 'brewx', label: '法人連買∩醞釀發動' },
   { key: 'mfx', label: '主力大單∩醞釀發動' }, { key: 'short', label: '放空籌碼' },
 ];
 const CHIPS_PAGE = 30;
-let chipsState = { measure: 'mf', side: 'buy', dayIndex: 0, market: 'all', limit: CHIPS_PAGE, inst: 'total', minStreak: 2, list: 'all', mfMinStreak: 1,
+let chipsState = { measure: 'radar', side: 'buy', dayIndex: 0, market: 'all', limit: CHIPS_PAGE, inst: 'total', minStreak: 2, list: 'all', mfMinStreak: 1,
   shortMode: 'inst', shortInst: 'total', shortMin: 2, shortMfMin: 1, shortTech: 'weak', shortFlag: 'all' };
 // 主力大單∩醞釀發動（2026-09-25 使用者：再多一個跟主力大單的交集）：同一套交集，只是「連續」改看主力大單連續買超天數、
 // 欄位改成主力淨額／淨額金額／佔成交額；那天沒有主力大單資料的股票不算。
@@ -4774,6 +4896,14 @@ function renderChips(){
   const tabs = document.getElementById('chipsTabs');
   tabs.innerHTML = CHIPS_MEASURES.map((mm) => '<button class="chart-tab signal-tab' + (chipsState.measure === mm.key ? ' active' : '') + '" data-measure="' + mm.key + '">' + mm.label + '</button>').join('');
   const body = document.getElementById('chipsBody');
+  if (chipsState.measure === 'radar'){
+    const active = document.activeElement;
+    const hadFocus = !!(active && active.id === 'rdInput');
+    const caret = hadFocus ? (active.selectionStart || 0) : 0;
+    body.innerHTML = radarHtml();
+    radarAfterRender(hadFocus, caret);
+    return;
+  }
   const data = chipsData();
   if (!data){
     const date = chipsCurrentDate();
@@ -4812,6 +4942,7 @@ document.getElementById('chipsTabs').addEventListener('click', (e) => {
   renderChips();
 });
 document.getElementById('chipsBody').addEventListener('click', (e) => {
+  if (chipsState.measure === 'radar'){ radarClick(e); return; }
   const side = e.target.closest('.chips-side-btn');
   if (side){ chipsState.side = side.dataset.side; chipsState.limit = CHIPS_PAGE; renderChips(); return; }
   const day = e.target.closest('.chips-day-btn');
@@ -4848,6 +4979,425 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
     }
     openStockChart(row.dataset.code, row.dataset.name);
   }
+});
+
+// ---- 籌碼暴增雷達（2026-10-04 使用者：照莊爸 zhuang.tw/radar「籌碼暴增雷達」做，放在盤後籌碼排行第一個分頁）----
+// 後端 /api/chip-radar：集保股權分散表（每週五結算）算「大戶手上的股票變多還是變少」。
+// x＝（這週 400 張以上大戶持股股數 − 上週）÷ 這週總股數 ×100；籌碼%＝3√x（大戶增加）或 x（減少）——跟莊爸截圖逐一比對過。
+// 個股查詢 /api/chip-radar-stock（九週軌跡、同族群、三大法人）；迷你 K 線用 /api/bars1d。
+const RD_WINDOWS = [16, 8, 4];
+const RD_TOPS = [15, 30, 50];
+let radarState = { listWeek: '', window: 16, top: 15, group: '', code: '', query: '', expanded: {}, kOpen: {}, scrollTo: '' };
+let radarData = null, radarLoading = false, radarFailedAt = 0, radarLoadedAt = 0, radarError = '';
+const radarStockCache = {}, radarStockLoading = {}, radarStockFailedAt = {}, radarStockError = {};
+const rdBarsCache = {}, rdBarsLoading = {}, rdBarsFailed = {};
+function rdEsc(s){ return String(s === null || s === undefined ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+const rdHas = (v) => v !== null && v !== undefined && Number.isFinite(Number(v));
+const rdCls = (v) => (rdHas(v) ? (v > 0 ? 'rd-up' : (v < 0 ? 'rd-down' : '')) : 'rd-muted');
+function rdPct(v, digits){
+  // 跟莊爸一樣去掉尾巴的 0：+0.6%、+4%、0%
+  if (!rdHas(v)) return '—';
+  let t = Number(v).toFixed(digits === undefined ? 2 : digits);
+  if (t.indexOf('.') >= 0) t = t.replace(/0+$/, '').replace(/\.$/, '');
+  if (t === '-0') t = '0';
+  return (Number(t) > 0 ? '+' : '') + t + '%';
+}
+const rdMd = (d) => (d ? String(d).slice(5, 10).replace('-', '/') : '');
+// 那週總股數變動（增資、減資、轉換公司債）：大戶持股會跟著機械式地變；≥15% 的後端不列入排行
+function rdCapTag(v, excluded){
+  if (!rdHas(v)) return '';
+  return '<span class="rd-cap" title="那週總股數' + (v > 0 ? '增加' : '減少') + ' ' + Math.abs(v) + '%（增資、減資或轉換公司債），籌碼% 有一部分是股本變動造成的' + (excluded ? '；變動太大，不列入排行' : '') + '"><span class="rd-cap-long">股本' + (v > 0 ? '+' : '') + v + '%' + (excluded ? '・不列入' : '') + '</span><span class="rd-cap-short">股</span></span>';
+}
+const rdMdShort = (d) => (d ? Number(String(d).slice(5, 7)) + '/' + Number(String(d).slice(8, 10)) : '');
+function rdMa(score){
+  if (!rdHas(score)) return '<span class="rd-ma none">0</span>';
+  const s = Number(score);
+  return '<span class="rd-ma ' + (s >= 12 ? 'full' : (s >= 8 ? 'half' : 'line')) + '" title="均線分數 ' + s + '/15">' + s + '</span>';
+}
+function rdLots(v){
+  if (!rdHas(v)) return '—';
+  return (v > 0 ? '+' : '') + Math.round(v).toLocaleString('en-US');
+}
+async function ensureRadar(force){
+  if (radarLoading) return;
+  if (!force && radarData && Date.now() - radarLoadedAt < 10 * 60 * 1000) return;
+  if (!force && radarFailedAt && Date.now() - radarFailedAt < 30000) return;
+  radarLoading = true;
+  try {
+    const res = await fetch('/api/chip-radar');
+    if (res.status === 404) throw new Error('後端還沒更新，合併部署後幾分鐘就會出現');
+    if (!res.ok) throw new Error('chip-radar http ' + res.status);
+    const data = await res.json();
+    if (!data || !data.status) throw new Error('資料格式不對');
+    radarData = data; radarLoadedAt = Date.now(); radarError = '';
+  } catch (e) {
+    radarFailedAt = Date.now(); radarError = e && e.message ? e.message : String(e);
+  } finally {
+    radarLoading = false;
+  }
+  if (radarVisible()) renderChips();
+}
+async function ensureRadarStock(code){
+  if (!code || radarStockCache[code] || radarStockLoading[code]) return;
+  if (radarStockFailedAt[code] && Date.now() - radarStockFailedAt[code] < 20000) return;
+  radarStockLoading[code] = true;
+  try {
+    const res = await fetch('/api/chip-radar-stock?code=' + encodeURIComponent(code));
+    if (res.status === 404){
+      let msg = '找不到 ' + code;
+      try { const j = await res.json(); if (j && j.detail && String(j.detail).indexOf('Not Found') < 0) msg = j.detail; else if (j && j.detail) msg = '後端還沒更新，合併部署後幾分鐘就會出現'; } catch (e2) { /* 沒有內容 */ }
+      throw new Error(msg);
+    }
+    if (!res.ok) throw new Error('chip-radar-stock http ' + res.status);
+    radarStockCache[code] = await res.json();
+    delete radarStockError[code];
+  } catch (e) {
+    radarStockFailedAt[code] = Date.now(); radarStockError[code] = e && e.message ? e.message : String(e);
+  } finally {
+    delete radarStockLoading[code];
+  }
+  if (radarVisible()) renderChips();
+}
+async function ensureRdBars(code){
+  if (!code || rdBarsCache[code] || rdBarsLoading[code] || rdBarsFailed[code]) return;
+  rdBarsLoading[code] = true;
+  try {
+    const res = await fetch('/api/bars1d/' + encodeURIComponent(code));
+    if (!res.ok) throw new Error('bars1d http ' + res.status);
+    const data = await res.json();
+    if (!data || !Array.isArray(data.bars) || !data.bars.length) throw new Error('沒有日K');
+    rdBarsCache[code] = data.bars;
+  } catch (e) {
+    rdBarsFailed[code] = true;
+  } finally {
+    delete rdBarsLoading[code];
+  }
+  if (radarVisible()) renderChips();
+}
+function radarVisible(){ return !document.getElementById('chipsModal').hidden && chipsState.measure === 'radar'; }
+// 迷你日K（近 70 日，MA5／MA20／MA60，底下成交量）
+function rdKlineSvg(bars){
+  const N = 70, W = 300, PH = 112, VH = 26, GAP = 4, PADR = 36, H = PH + GAP + VH;
+  const closes = bars.map((b) => Number(b.close));
+  const maAt = (p, i) => {
+    if (i + 1 < p) return null;
+    let s = 0;
+    for (let j = i + 1 - p; j <= i; j++) s += closes[j];
+    return s / p;
+  };
+  const start = Math.max(0, bars.length - N);
+  const view = bars.slice(start);
+  if (!view.length) return '';
+  const mas = { 5: [], 20: [], 60: [] };
+  let hi = -Infinity, lo = Infinity, vmax = 0;
+  view.forEach((b, k) => {
+    const i = start + k;
+    hi = Math.max(hi, Number(b.high)); lo = Math.min(lo, Number(b.low)); vmax = Math.max(vmax, Number(b.volume) || 0);
+    [5, 20, 60].forEach((p) => { const m = maAt(p, i); mas[p].push(m); if (m !== null){ hi = Math.max(hi, m); lo = Math.min(lo, m); } });
+  });
+  const span = hi - lo || 1;
+  const cw = (W - PADR) / N;
+  const y = (v) => (3 + (hi - v) / span * (PH - 6)).toFixed(1);
+  const xOf = (k) => (k + (N - view.length)) * cw + cw / 2;
+  let out = '';
+  view.forEach((b, k) => {
+    const o = Number(b.open), c = Number(b.close), up = c >= o;
+    const color = up ? '#ef4444' : '#22c55e';
+    const x = xOf(k);
+    out += '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + y(Number(b.high)) + '" y2="' + y(Number(b.low)) + '" stroke="' + color + '" stroke-width="0.8"/>';
+    const top = Math.min(Number(y(o)), Number(y(c))), hgt = Math.max(0.8, Math.abs(Number(y(o)) - Number(y(c))));
+    out += '<rect x="' + (x - cw * 0.32).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + Math.max(0.8, cw * 0.64).toFixed(1) + '" height="' + hgt.toFixed(1) + '" fill="' + color + '"/>';
+    const vh = vmax ? (Number(b.volume) || 0) / vmax * VH : 0;
+    out += '<rect x="' + (x - cw * 0.32).toFixed(1) + '" y="' + (H - vh).toFixed(1) + '" width="' + Math.max(0.8, cw * 0.64).toFixed(1) + '" height="' + vh.toFixed(1) + '" fill="' + color + '" opacity="0.35"/>';
+  });
+  const line = (arr, color) => {
+    const pts = [];
+    arr.forEach((m, k) => { if (m !== null) pts.push(xOf(k).toFixed(1) + ',' + y(m)); });
+    return pts.length > 1 ? '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + color + '" stroke-width="1.1"/>' : '';
+  };
+  out += line(mas[5], '#60a5fa') + line(mas[20], '#f59e0b') + line(mas[60], '#c084fc');
+  const last = view[view.length - 1];
+  const lastUp = Number(last.close) >= (view.length > 1 ? Number(view[view.length - 2].close) : Number(last.open));
+  const tx = W - PADR + 3;
+  out += '<line x1="0" x2="' + (W - PADR) + '" y1="' + y(hi) + '" y2="' + y(hi) + '" stroke="rgba(255,255,255,.12)" stroke-dasharray="2,2"/>';
+  out += '<text x="' + tx + '" y="' + (Number(y(hi)) + 4) + '" fill="#a89c8f" font-size="9">' + num2(hi).replace(/\.00$/, '') + '</text>';
+  out += '<text x="' + tx + '" y="' + (Number(y(lo)) + 1) + '" fill="#a89c8f" font-size="9">' + num2(lo).replace(/\.00$/, '') + '</text>';
+  const ly = Math.min(PH - 12, Math.max(14, Number(y(Number(last.close))) + 3));
+  out += '<text x="' + tx + '" y="' + ly + '" fill="' + (lastUp ? '#ff6b6b' : '#4ade80') + '" font-size="10" font-weight="700">' + num2(last.close).replace(/\.00$/, '') + '</text>';
+  const ticks = [0, Math.floor((view.length - 1) / 2), view.length - 1];
+  const labels = ticks.map((k, j) => '<text x="' + Math.min(W - PADR - 12, Math.max(12, xOf(k))).toFixed(1) + '" y="' + (H + 11) + '" fill="#a89c8f" font-size="9" text-anchor="' + (j === 0 ? 'start' : (j === 2 ? 'end' : 'middle')) + '">' + rdMd(String(view[k].ts || '').slice(0, 10)) + '</text>').join('');
+  return '<svg viewBox="0 0 ' + W + ' ' + (H + 14) + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近 70 日日K">' + out + labels + '</svg>';
+}
+function rdKlineBox(code, open){
+  if (!open){
+    return '<div class="rd-kbox closed" data-rd-kopen="' + code + '"><div class="rd-khead">📈 日線 K 棒<span>點一下看最近 70 日</span></div></div>';
+  }
+  ensureRdBars(code);
+  const bars = rdBarsCache[code];
+  const lastDay = bars && bars.length ? rdMd(String(bars[bars.length - 1].ts || '').slice(0, 10)) : '';
+  const head = '<div class="rd-khead">📈 日線 K 棒<span>近 70 日' + (lastDay ? '・' + lastDay + ' 收' : '') + '</span><span class="rd-ma5">MA5</span><span class="rd-ma20">MA20</span><span class="rd-ma60">MA60</span></div>';
+  const body = bars ? rdKlineSvg(bars) : '<div class="rd-note">' + (rdBarsFailed[code] ? '日K讀不到' : '讀取中…') + '</div>';
+  return '<div class="rd-kbox" data-rd-chart="' + code + '" title="點一下開大圖">' + head + body + '</div>';
+}
+// 九週籌碼軌跡（新→舊），條長照這幾週最大的值
+function rdTrailHtml(trail){
+  const rows = (trail || []).filter((t) => t);
+  const max = Math.max(0.01, ...rows.map((t) => (rdHas(t.chip) ? Math.abs(t.chip) : 0)));
+  return rows.map((t) => {
+    const v = t.chip;
+    const w = rdHas(v) ? Math.min(50, Math.abs(v) / max * 50) : 0;
+    return '<div class="rd-trow"><span class="rd-c">' + rdMd(t.date) + '</span>' +
+      '<span class="rd-track">' + (w ? '<i class="rd-fill ' + (v > 0 ? 'up' : 'down') + '" style="width:' + w.toFixed(1) + '%"></i>' : '') + '</span>' +
+      '<span class="rd-val ' + rdCls(v) + '"' + (rdHas(t.capital) ? ' title="那週股本' + (t.capital > 0 ? '+' : '') + t.capital + '%' + (t.excluded ? '，不列入排行' : '') + '"' : '') + '>' +
+      (rdHas(t.capital) ? '<span class="rd-cap" style="margin:0 3px 0 0">股' + (t.excluded ? '✕' : '') + '</span>' : '') + (rdHas(v) ? (v === 0 ? '0%' : rdPct(v)) : '—') + '</span>' +
+      (t.rank ? '<span class="rd-circle">' + t.rank + '</span>' : '<span></span>') + '</div>';
+  }).join('') + '<div class="rd-note">近 ' + rows.length + ' 週籌碼增減（新→舊）・紅＝週增、綠＝週減・<span class="rd-circle" style="width:14px;height:14px;font-size:9px">n</span>＝當週買超榜名次（前 10）' +
+    (rows.some((t) => rdHas(t.capital)) ? '・<span class="rd-cap" style="margin:0">股</span>＝那週股本有變動（✕＝變動 15% 以上，不列入排行）' : '') + '</div>';
+}
+function rdInstHtml(inst){
+  if (!inst || ((!inst.weeks || !inst.weeks.length) && (!inst.days || !inst.days.length))){
+    return '<div class="rd-note">三大法人：還沒有這檔的資料。</div>';
+  }
+  const weeks = inst.weeks || [];
+  const max = Math.max(1, ...weeks.map((w) => Math.abs(w.total || 0)));
+  const nice = (() => { const p = Math.pow(10, Math.floor(Math.log10(max))); const m = max / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; })();
+  const fmtAxis = (v) => (Math.abs(v) >= 10000 ? (v / 10000).toFixed(1).replace(/\.0$/, '') + '萬' : String(Math.round(v)));
+  const cols = weeks.map((w) => {
+    const h = Math.min(50, Math.abs(w.total || 0) / nice * 50);
+    return '<div class="rd-inst-col"><div class="rd-inst-plot" title="' + rdMd(w.date) + ' 那週合計 ' + rdLots(w.total) + ' 張（' + w.days + ' 天）">' +
+      (h ? '<i class="' + (w.total > 0 ? 'up' : 'down') + '" style="height:' + h.toFixed(1) + '%"></i>' : '') + '</div>' +
+      '<div class="rd-inst-lab">' + rdMd(w.date) + '</div><div class="rd-inst-pct ' + rdCls(w.pct) + '">' + (rdHas(w.pct) ? rdPct(w.pct, 1) : '—') + '</div></div>';
+  }).join('');
+  const axis = '<div class="rd-inst-axis"><span>+' + fmtAxis(nice) + '</span><span>+' + fmtAxis(nice / 2) + '</span><span>0</span><span>-' + fmtAxis(nice / 2) + '</span><span>-' + fmtAxis(nice) + '</span></div>';
+  const days = (inst.days || []).map((d) => '<tr><td>' + rdMd(d.date) + '</td><td class="' + rdCls(d.foreign) + '">' + rdLots(d.foreign) + '</td><td class="' + rdCls(d.trust) + '">' + rdLots(d.trust) + '</td><td class="' + rdCls(d.dealer) + '">' + rdLots(d.dealer) + '</td><td class="' + rdCls(d.total) + '"><b>' + rdLots(d.total) + '</b></td><td class="' + rdCls(d.pct) + '">' + (rdHas(d.pct) ? rdPct(d.pct, 1) : '—') + '</td></tr>').join('');
+  return (weeks.length ? '<div class="rd-note" style="margin-top:0">週加總（合計買賣超，張）・柱下 %＝佔那週成交量</div><div class="rd-inst-wrap"><div class="rd-inst-cols">' + cols + '</div>' + axis + '</div>' : '') +
+    (days ? '<div class="rd-note">近 5 日明細</div><table class="rd-itable"><thead><tr><th>日期</th><th>外資</th><th>投信</th><th>自營</th><th>合計</th><th>佔量%</th></tr></thead><tbody>' + days + '</tbody></table>' : '') +
+    '<div class="rd-note">資料源：證交所／櫃買中心官方日資料（收盤後更新）</div>';
+}
+function rdStockCardHtml(s){
+  const market = s.market === 'OTC' ? '上櫃' : (s.market === 'TSE' ? '上市' : '');
+  return '<div class="rd-card" id="rdStockCard"><div class="rd-card-head"><span class="rd-name" data-rd-chart="' + s.code + '">' + rdEsc(s.name) + '</span><span class="rd-code">' + s.code + '</span>' +
+    (s.rank ? '<span class="rd-badge">本週榜 <span class="rd-circle">' + s.rank + '</span></span>' : '') + rdMa(s.score) + rdCapTag(s.capital, rdHas(s.capital) && Math.abs(s.capital) >= 15) +
+    '<span class="rd-big ' + rdCls(s.chip) + '">' + rdPct(s.chip) + '</span></div>' +
+    rdKlineBox(s.code, true) + rdTrailHtml(s.trail) +
+    '<div class="rd-sec-title" style="font-size:16px;margin-top:12px">三大法人 <small>' + (market ? market + '・' : '') + '張</small></div>' + rdInstHtml(s.inst) + '</div>';
+}
+function rdGroupCardHtml(s){
+  if (!s.group){
+    return '<div class="rd-card"><div class="rd-list-title">族群</div><div class="rd-note">' + rdEsc(s.name) + ' 不在我們的 43 個族群裡，沒有同族群可以比。</div></div>';
+  }
+  const members = s.groupMembers || [];
+  const max = Math.max(0.01, ...members.map((m) => Math.abs(m.chip || 0)));
+  const rows = members.map((m) => '<div class="rd-lrow' + (m.code === s.code ? ' rd-sel' : '') + '" data-rd-code="' + m.code + '"><span class="rd-c">' + m.code + '</span><span class="rd-n">' + rdEsc(m.name) + '</span>' +
+    '<span class="rd-bar"><i class="' + (m.chip >= 0 ? 'up' : 'down') + '" style="width:' + Math.min(100, Math.abs(m.chip) / max * 100).toFixed(1) + '%"></i></span>' +
+    '<span class="rd-val ' + rdCls(m.chip) + '">' + rdPct(m.chip) + '</span>' + rdMa(m.score) + '</div>').join('');
+  return '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title">' + rdEsc(s.group) + ' 族群（籌碼暴增）</span>' +
+    (rdHas(s.groupAvg) ? '<span class="rd-date-pill">前 5 檔平均 ' + rdPct(s.groupAvg) + '</span>' : '') + '</div>' +
+    (rows || '<div class="rd-empty-list">這週同族群沒有集保資料。</div>') + '<div class="rd-note">資料週：' + String(s.groupWeek || s.week || '').replace(/-/g, '/') + '</div></div>';
+}
+function rdSearchHtml(){
+  const code = radarState.code;
+  let result = '';
+  if (code){
+    ensureRadarStock(code);
+    const s = radarStockCache[code];
+    if (s && s.status === 'ok') result = '<div class="rd-grid2">' + rdStockCardHtml(s) + rdGroupCardHtml(s) + '</div>';
+    else if (s) result = '<div class="rd-card"><div class="rd-note">' + rdEsc(s.message || '還沒有資料') + '</div></div>';
+    else if (radarStockError[code]) result = '<div class="rd-card"><div class="rd-note">' + rdEsc(radarStockError[code]) + '</div></div>';
+    else result = '<div class="rd-card"><div class="rd-note">讀取 ' + rdEsc(code) + '…</div></div>';
+  }
+  return '<div><form class="rd-search" id="rdSearch" autocomplete="off"><input id="rdInput" inputmode="numeric" placeholder="輸入股號，例如 3094" value="' + rdEsc(radarState.query) + '" aria-label="股號">' +
+    '<button type="submit">查詢（軌跡＋族群）</button>' + (code ? '<button type="button" class="rd-btn-sm" data-rd-clear="1">收起</button>' : '') + '</form>' +
+    '<div class="rd-hint">輸入股號帶出「九週籌碼軌跡＋三大法人＋當週族群排名」；名單上的股票點一下也會帶到這裡，點股名或 K 線開大圖。</div>' +
+    (result ? '<div style="margin-top:10px">' + result + '</div>' : '') + '</div>';
+}
+function rdListRows(rows, side){
+  if (!rows.length) return '<div class="rd-empty-list">這週沒有' + (side === 'buy' ? '籌碼% ≥ 4' : '籌碼% ≤ −1.5') + ' 的股票。</div>';
+  const max = Math.max(0.01, ...rows.map((r) => Math.abs(r.chip)));
+  return rows.map((r) => '<div class="rd-lrow" data-rd-code="' + r.code + '"><span class="rd-c">' + r.code + '</span><span class="rd-n">' + rdEsc(r.name) + (r.star ? '<span class="rd-star" title="連續兩週上榜">★</span>' : '') + rdCapTag(r.capital) + '</span>' +
+    '<span class="rd-bar"><i class="' + (side === 'buy' ? 'up' : 'down') + '" style="width:' + Math.min(100, Math.abs(r.chip) / max * 100).toFixed(1) + '%"></i></span>' +
+    '<span class="rd-val ' + (side === 'buy' ? 'rd-up' : 'rd-down') + '">' + rdPct(r.chip, 1) + '</span>' + rdMa(r.score) + '</div>').join('');
+}
+function rdListsHtml(d){
+  const lists = d.lists || [];
+  if (!lists.length) return '';
+  const pick = lists.find((w) => w.date === radarState.listWeek) || lists[0];
+  const chips = lists.map((w, i) => '<button class="rd-week' + (w.date === pick.date ? ' active' : '') + '" data-rd-week="' + w.date + '">' + (i === 0 && w.date === d.latest ? '本週 ' : '') + rdMdShort(w.date) + '</button>').join('');
+  return '<section><div class="rd-sec-title">本週籌碼暴增榜<small>買超・賣超 排序・⭐＝連續兩週上榜</small></div><div class="rd-weeks">' + chips + '</div><div class="rd-grid2">' +
+    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-up">▲ 買超榜（' + pick.buy.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.buy, 'buy') + '</div>' +
+    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-down">▼ 賣超榜（' + pick.sell.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.sell, 'sell') + '</div>' +
+    '</div></section>';
+}
+// 累積榜：後端給 16 週每週前十名的格子（舊到新），這裡照選的週數加總
+function rdCumRows(d, n){
+  const cum = d.cumulative || { dates: [], rows: [] };
+  const k = Math.min(n, cum.dates.length);
+  const dates = cum.dates.slice(cum.dates.length - k);
+  const rows = [];
+  (cum.rows || []).forEach((r) => {
+    const grid = r.grid.slice(r.grid.length - k);
+    const hits = grid.filter((g) => g[0] > 0);
+    if (!hits.length) return;
+    const sum = hits.reduce((a, g) => a + (Number(g[1]) || 0), 0);
+    const recent = grid.slice(-4).filter((g) => g[0] > 0).length;
+    rows.push({ r, grid, count: hits.length, avg: sum / hits.length, sum, best: Math.min(...hits.map((g) => g[0])), recent });
+  });
+  rows.sort((a, b) => b.sum - a.sum || b.count - a.count || a.best - b.best);
+  return { dates, rows, weeks: k };
+}
+function rdCumHtml(d){
+  const cum = d.cumulative || { dates: [] };
+  if (!cum.dates.length) return '';
+  const res = rdCumRows(d, radarState.window);
+  const k = res.weeks;
+  const shown = res.rows.slice(0, radarState.top);
+  const winOpts = RD_WINDOWS.filter((w, i) => i === 0 || w < cum.dates.length).map((w) => '<option value="' + w + '"' + (w === radarState.window ? ' selected' : '') + '>' + (w >= cum.dates.length ? '全部 ' + cum.dates.length + ' 週' : '近 ' + w + ' 週') + '</option>').join('');
+  const topOpts = RD_TOPS.map((t) => '<option value="' + t + '"' + (t === radarState.top ? ' selected' : '') + '>前 ' + t + ' 檔</option>').join('');
+  const body = shown.map((x, i) => {
+    const r = x.r, open = !!radarState.expanded[r.code];
+    const share = x.count / k * 100;
+    let html = '<tr class="rd-crow' + (open ? ' rd-open' : '') + '" data-rd-expand="' + r.code + '"><td class="rd-muted">' + (i + 1) + ' ' + (open ? '▾' : '▸') + '</td><td>' + r.code + '</td><td><span data-rd-code="' + r.code + '" style="cursor:pointer;text-decoration:underline dotted">' + rdEsc(r.name) + '</span></td>' +
+      '<td><span class="rd-count ' + (x.count >= 3 ? 'gold' : 'line') + '">' + x.count + '</span></td>' +
+      '<td><span class="rd-share"><i style="width:' + share.toFixed(0) + '%"></i></span>' + share.toFixed(0) + '%</td>' +
+      '<td class="' + (x.recent ? '' : 'rd-muted') + '">' + x.recent + '/' + Math.min(4, k) + '</td><td>' + rdMa(r.score) + '</td>' +
+      '<td>' + x.avg.toFixed(2) + '%</td><td><b>' + x.sum.toFixed(2) + '</b></td><td>#' + x.best + '</td><td class="rd-muted">' + rdEsc(r.group || '') + '</td></tr>';
+    if (open){
+      const cells = x.grid.map((g, j) => '<span class="rd-cell' + (g[0] ? ' gold' : '') + '"><span>' + rdMd(res.dates[j]) + '</span><b>' + (g[0] || '—') + '</b><span class="' + (g[0] ? '' : rdCls(g[1])) + '">' + (rdHas(g[1]) ? rdPct(g[1]) : '—') + '</span></span>').join('');
+      html += '<tr class="rd-gridrow"><td colspan="11"><div class="rd-cells">' + cells + '</div></td></tr>';
+    }
+    return html;
+  }).join('');
+  return '<section><div class="rd-sec-title">上榜累積榜<small>近 ' + k + ' 週（集保結算 ' + rdMd(res.dates[0]) + ' ～ ' + rdMd(res.dates[res.dates.length - 1]) + '）・擠進當週買超榜前十名幾次</small></div>' +
+    '<div class="rd-ctl"><label>回看 <select class="rd-select" id="rdWindow">' + winOpts + '</select></label><label>列出 <select class="rd-select" id="rdTop">' + topOpts + '</select></label></div>' +
+    '<div class="rd-legend"><span class="rd-cell gold"><span>08/14</span><b>4</b><span>+7.97%</span></span><span>← 結算週<br>← 當週買超榜名次（只列到第 10）<br>← 當週籌碼增減</span><span>點任一列展開逐週格子：金色＝那週擠進前十，白色＝沒進榜。</span></div>' +
+    (shown.length ? '<div class="rd-scroll"><table class="rd-table"><thead><tr><th></th><th>股號</th><th>股名</th><th>進榜次數<small>共 ' + k + ' 週</small></th><th>占比</th><th>近 4 週</th><th>均線分數</th><th>平均籌碼%</th><th>分數</th><th>最佳名次</th><th>族群</th></tr></thead><tbody>' + body + '</tbody></table></div>' : '<div class="rd-empty-list">這段期間沒有資料。</div>') +
+    '<div class="rd-note"><b>分數怎麼算：</b>視窗內每一次擠進當週前十名就記一筆，把那幾週的籌碼% 加起來——等於「次數 × 平均籌碼%」，又常又猛的才排得到前面。<br>' +
+    '<b>近 4 週</b>那欄是重點：次數多但近期 0/4 的，是「前一陣子很熱、現在已經掉下來」；次數多又近期還在的，才是「一路都在」。<br>' +
+    '只算買超，籌碼減少的那幾週不計（展開後白格子若是負數，就是那週在賣）。名次只到第 10，所以次數最多就是週數。<br>' +
+    '資料 ' + rdMd(res.dates[0]) + ' ～ ' + rdMd(res.dates[res.dates.length - 1]) + '，這段期間曾進前十的共 ' + res.rows.length + ' 檔。這是過去的籌碼統計，不是買賣建議。</div></section>';
+}
+function rdGroupsHtml(d){
+  const groups = d.groups || [];
+  if (!groups.length) return '';
+  const top = groups.slice(0, (d.rules && d.rules.groupShow) || 10);
+  const pick = groups.find((g) => g.name === radarState.group) || top[0];
+  const max = Math.max(0.01, ...top.map((g) => Math.abs(g.avg)));
+  const left = top.map((g, i) => '<div class="rd-grow' + (g.name === pick.name ? ' active' : '') + '" data-rd-group="' + rdEsc(g.name) + '"><span class="rd-c">' + (i + 1) + '</span><span class="rd-n">' + rdEsc(g.name) + '</span>' +
+    '<span class="rd-bar"><i class="' + (g.avg >= 0 ? 'up' : 'down') + '" style="width:' + Math.min(100, Math.abs(g.avg) / max * 100).toFixed(1) + '%"></i></span><span class="rd-val ' + rdCls(g.avg) + '">' + rdPct(g.avg) + '</span></div>').join('');
+  const mmax = Math.max(0.01, ...pick.members.map((m) => Math.abs(m.chip)));
+  const right = pick.members.map((m) => '<div class="rd-lrow" data-rd-code="' + m.code + '"><span class="rd-c">' + m.code + '</span><span class="rd-n">' + rdEsc(m.name) + (m.rank ? ' <span class="rd-circle">' + m.rank + '</span>' : '') + '</span>' +
+    '<span class="rd-bar"><i class="' + (m.chip >= 0 ? 'up' : 'down') + '" style="width:' + Math.min(100, Math.abs(m.chip) / mmax * 100).toFixed(1) + '%"></i></span>' +
+    '<span class="rd-val ' + rdCls(m.chip) + '">' + rdPct(m.chip) + '</span>' + rdMa(m.score) + '</div>').join('');
+  return '<section><div class="rd-sec-title">族群排名比較<small>週籌碼暴增 前十族群（族群裡籌碼% 最高 5 檔的平均）・' + rdMdShort(d.week) + '</small></div><div class="rd-groups">' +
+    '<div class="rd-card">' + left + '<div class="rd-note">點族群名稱，右邊帶出那個族群這週的籌碼排名。</div></div>' +
+    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title">' + rdEsc(pick.name) + ' 當週籌碼排名</span><span class="rd-date-pill">前 5 平均 ' + rdPct(pick.avg) + '・' + pick.count + ' 檔</span></div>' + right + '</div>' +
+    '</div></section>';
+}
+function rdStreakHtml(d){
+  const st = d.streaks;
+  if (!st) return '';
+  const card = (title, block, six) => {
+    const rows = block.rows || [];
+    const max = Math.max(0.01, ...rows.map((r) => Math.abs(r.avg)));
+    const body = rows.length ? rows.map((r) => '<div class="rd-srow' + (six ? '' : ' rd-three') + '" data-rd-code="' + r.code + '"><span class="rd-c">' + r.code + '</span><span class="rd-n">' + rdEsc(r.name) + '</span>' +
+      '<span class="rd-bar"><i class="up" style="width:' + Math.min(100, Math.abs(r.avg) / max * 100).toFixed(1) + '%"></i></span>' +
+      (six ? '<span class="rd-c">' + r.ups + '/' + block.weeks + '</span>' : '') + '<span class="rd-val ' + rdCls(r.avg) + '">' + rdPct(r.avg) + '</span>' + rdMa(r.score) + '</div>').join('')
+      : '<div class="rd-empty-list">' + (block.weeks < (six ? 6 : 3) ? '集保週資料還不夠 ' + (six ? 6 : 3) + ' 週。' : '這段期間沒有符合的股票。') + '</div>';
+    return '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title">' + title + '</span>' + (block.from ? '<span class="rd-range">' + rdMd(block.from) + '~' + rdMd(block.to) + '</span>' : '') + '</div>' + body + '</div>';
+  };
+  return '<section><div class="rd-sec-title">連續增排行<small>六週榜＝六週裡至少五週增（可漏一週）・三週榜＝連三週都增・都用窗口平均排序・右邊方塊＝均線分數/15</small></div><div class="rd-grid2">' +
+    card('六週內五週增 前 20', st.six, true) + card('連三週增 前 20', st.three, false) + '</div></section>';
+}
+function rdHotHtml(d){
+  const hot = d.hot;
+  if (!hot || !hot.cards || !hot.cards.length) return '';
+  const leaders = (hot.leaders || []).map((l) => '<button class="rd-chip" data-rd-code="' + l.code + '">' + rdEsc(l.group) + ' 👑 ' + rdEsc(l.name) + ' <b class="' + rdCls(l.chip) + '">' + rdPct(l.chip) + '</b></button>').join('');
+  const cards = hot.cards.map((c, i) => {
+    const open = i < 3 || !!radarState.kOpen[c.code];
+    return '<div class="rd-card"><div class="rd-card-head"><span class="rd-name" data-rd-code="' + c.code + '">' + rdEsc(c.name) + '</span><span class="rd-code">' + c.code + '</span>' +
+      (c.rank ? '<span class="rd-badge">本週榜 <span class="rd-circle">' + c.rank + '</span></span>' : '') + '<span class="rd-big ' + rdCls(c.chip) + '">' + rdPct(c.chip) + '</span></div>' +
+      rdKlineBox(c.code, open) + rdTrailHtml(c.trail) + '</div>';
+  }).join('');
+  return '<section><div class="rd-sec-title">熱門股籌碼分析<small>本週買超榜前十名＋五大族群第一名</small></div><div class="rd-chips"><span>五大族群第一名</span>' + leaders + '</div><div class="rd-hot">' + cards + '</div></section>';
+}
+function radarHtml(){
+  ensureRadar(false);
+  const d = radarData;
+  const head = '<div><span class="rd-tag">籌碼暴增雷達・互動版</span><div class="rd-title">籌碼暴增雷達</div>' +
+    '<div class="rd-sub">集保週資料 ' + (d && d.week ? String(d.week).replace(/-/g, '/') : '—') + '（每週五結算）・均線分數 ' + (d && d.scoreDate ? rdMd(d.scoreDate) + ' 收盤' : '—') + (d && d.universe ? '・' + d.universe + ' 檔' : '') + '</div>' +
+    '<div class="rd-pill">ⓘ 每週更新一次——集保在每週五結算、週六公布，整個下一週看到的都是同一份；個股的三大法人是每個交易日收盤後更新。</div></div>';
+  const intro = '<div class="rd-intro"><p>這頁看的是「大戶手上的股票變多還是變少」：集保 400 張以上的大戶，這週持股比上週多了（或少了）總股數的幾 %。</p>' +
+    '<p>籌碼暴增代表主力在收貨、把股票買進口袋——也就是主力進場，若再搭配型態，有機會續強；反過來變少，就是主力在鬆手。<b class="rd-up">紅色是增加</b>、<b class="rd-down">綠色是減少</b>。</p>' +
+    '<p>連續兩週上榜、而且同族群其他股票也一起增加，是最值得盯的組合。⭐＝連續兩週上榜——主力不是買一週就走，是連著兩週都在收。</p>' +
+    '<p>籌碼%：x＝（這週 400 張以上大戶持股 − 上週）÷ 這週總股數 ×100；大戶增加顯示 3×√x（小幅增加也看得出來）、減少照原樣（跟莊爸的算法一樣）。每列最後的方塊＝均線分數（滿分 15，每個交易日收盤後更新）：12 分以上實心金＝位置最強、8～11 半填、7 以下只描邊。</p>' +
+    '<p>那週有增資、減資的（總股數變動），大戶持股會跟著機械式地變，名單上標<span class="rd-cap">股本±x%</span>；變動 15% 以上的不列入排行。</p></div>';
+  if (!d){
+    return '<div class="rd-wrap">' + head + '<div class="signal-empty"><div class="se-title">' + (radarError ? '讀取失敗' : '讀取中…') + '</div><div class="se-sub">' + rdEsc(radarError || '正在抓集保週資料。') + '</div></div></div>';
+  }
+  if (d.status !== 'ok'){
+    return '<div class="rd-wrap">' + head + intro + '<div class="signal-empty"><div class="se-title">還沒有集保週資料</div><div class="se-sub">' + rdEsc(d.message || '') + '（後端會從鏡像匯入近 18 週，第一次大約要幾分鐘）</div></div></div>';
+  }
+  return '<div class="rd-wrap">' + head + intro + rdSearchHtml() + rdListsHtml(d) + rdCumHtml(d) + rdGroupsHtml(d) + rdStreakHtml(d) + rdHotHtml(d) + '</div>';
+}
+function radarShowStock(code){
+  code = String(code || '').trim().toUpperCase();
+  if (!/^[0-9A-Z]{4,6}$/.test(code)) return;
+  radarState.code = code; radarState.query = code; radarState.scrollTo = 'rdSearch';
+  delete radarStockFailedAt[code];
+  renderChips();
+}
+function radarAfterRender(hadFocus, caret){
+  // 背景資料回來重畫時，正在打字的搜尋框不能被洗掉：重新聚焦、游標放回原位
+  if (hadFocus){
+    const input = document.getElementById('rdInput');
+    if (input){ input.focus(); try { input.setSelectionRange(caret, caret); } catch (e) { /* 部分輸入法不支援 */ } }
+  }
+  if (radarState.scrollTo){
+    const el = document.getElementById(radarState.scrollTo);
+    radarState.scrollTo = '';
+    if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+}
+function radarOpenChart(code){
+  const name = (radarStockCache[code] && radarStockCache[code].name) || '';
+  if (!useFloatingCharts()){
+    document.getElementById('chipsModal').classList.add('behind-chart');
+    document.getElementById('signalModal').classList.add('behind-chart');
+  }
+  openStockChart(code, name);
+}
+function radarClick(e){
+  const week = e.target.closest('[data-rd-week]');
+  if (week){ radarState.listWeek = week.dataset.rdWeek; renderChips(); return true; }
+  const grp = e.target.closest('[data-rd-group]');
+  if (grp){ radarState.group = grp.dataset.rdGroup; renderChips(); return true; }
+  const kopen = e.target.closest('[data-rd-kopen]');
+  if (kopen){ radarState.kOpen[kopen.dataset.rdKopen] = true; renderChips(); return true; }
+  const chart = e.target.closest('[data-rd-chart]');
+  if (chart){ radarOpenChart(chart.dataset.rdChart); return true; }
+  if (e.target.closest('[data-rd-clear]')){ radarState.code = ''; renderChips(); return true; }
+  const code = e.target.closest('[data-rd-code]');
+  if (code){ radarShowStock(code.dataset.rdCode); return true; }
+  const exp = e.target.closest('[data-rd-expand]');
+  if (exp){ const c = exp.dataset.rdExpand; radarState.expanded[c] = !radarState.expanded[c]; renderChips(); return true; }
+  return false;
+}
+document.getElementById('chipsBody').addEventListener('submit', (e) => {
+  if (e.target && e.target.id === 'rdSearch'){
+    e.preventDefault();
+    const input = document.getElementById('rdInput');
+    radarState.query = input ? input.value : '';
+    const m = String(radarState.query).match(/[0-9]{4,6}[A-Z]?/i);
+    if (m) radarShowStock(m[0]);
+  }
+});
+document.getElementById('chipsBody').addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'rdInput') radarState.query = e.target.value;
+});
+document.getElementById('chipsBody').addEventListener('change', (e) => {
+  if (!e.target) return;
+  if (e.target.id === 'rdWindow'){ radarState.window = Number(e.target.value) || 16; renderChips(); }
+  if (e.target.id === 'rdTop'){ radarState.top = Number(e.target.value) || 15; renderChips(); }
 });
 
 // ---- 波段日報（2026-09-26 使用者：照「波段精選日報」的樣子做，第一階段用現有資料）----

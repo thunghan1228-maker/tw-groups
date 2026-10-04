@@ -345,6 +345,14 @@ export default {
       // 下午報・黑龍回測（2026-09-28 使用者）：參數帶給後端算，60 秒快取
       return await proxyHanstockBars("/api/hub/heilong" + url.search, 60);
     }
+    if (url.pathname === "/api/chip-radar") {
+      // 籌碼暴增雷達（2026-10-04 使用者：照莊爸 zhuang.tw/radar 做，放在盤後籌碼排行）：集保週資料，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/chip-radar" + url.search, 300);
+    }
+    if (url.pathname === "/api/chip-radar-stock") {
+      // 籌碼暴增雷達的個股查詢（九週軌跡、同族群、三大法人），60 秒快取
+      return await proxyHanstockBars("/api/hub/chip-radar/stock" + url.search, 60);
+    }
     if (url.pathname === "/api/picker") {
       // 創高黑選股（2026-10-04 使用者：照莊爸 App「創高黑」做）：模組參數帶給後端算，60 秒快取
       return await proxyHanstockBars("/api/hub/picker" + url.search, 60);
