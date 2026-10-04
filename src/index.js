@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-04 23:33:37";
+const BUILD_STAMP = "2026-10-04 23:53:04";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5058,10 +5058,10 @@ function rdPct(v, digits){
   return (Number(t) > 0 ? '+' : '') + t + '%';
 }
 const rdMd = (d) => (d ? String(d).slice(5, 10).replace('-', '/') : '');
-// 那週總股數變動（增資、減資、轉換公司債）：大戶持股會跟著機械式地變；≥15% 的後端不列入排行
+// 那週總股數變動（增資、減資、轉換公司債）：增資照算（跟莊爸一樣）；總股數減少 ≥5%（減資、股份轉換）後端不列入排行
 function rdCapTag(v, excluded){
   if (!rdHas(v)) return '';
-  return '<span class="rd-cap" title="那週總股數' + (v > 0 ? '增加' : '減少') + ' ' + Math.abs(v) + '%（增資、減資或轉換公司債），籌碼% 有一部分是股本變動造成的' + (excluded ? '；變動太大，不列入排行' : '') + '"><span class="rd-cap-long">股本' + (v > 0 ? '+' : '') + v + '%' + (excluded ? '・不列入' : '') + '</span><span class="rd-cap-short">股</span></span>';
+  return '<span class="rd-cap" title="那週總股數' + (v > 0 ? '增加' : '減少') + ' ' + Math.abs(v) + '%（增資、減資或轉換公司債），籌碼% 有一部分是股本變動造成的' + (excluded ? '；減資／股份轉換，不列入排行' : '') + '"><span class="rd-cap-long">股本' + (v > 0 ? '+' : '') + v + '%' + (excluded ? '・不列入' : '') + '</span><span class="rd-cap-short">股</span></span>';
 }
 const rdMdShort = (d) => (d ? Number(String(d).slice(5, 7)) + '/' + Number(String(d).slice(8, 10)) : '');
 function rdMa(score){
@@ -5207,7 +5207,7 @@ function rdTrailHtml(trail){
       (rdHas(t.capital) ? '<span class="rd-cap" style="margin:0 3px 0 0">股' + (t.excluded ? '✕' : '') + '</span>' : '') + (rdHas(v) ? (v === 0 ? '0%' : rdPct(v)) : '—') + '</span>' +
       (t.rank ? '<span class="rd-circle">' + t.rank + '</span>' : '<span></span>') + '</div>';
   }).join('') + '<div class="rd-note">近 ' + rows.length + ' 週籌碼增減（新→舊）・紅＝週增、綠＝週減・<span class="rd-circle" style="width:14px;height:14px;font-size:9px">n</span>＝當週買超榜名次（前 10）' +
-    (rows.some((t) => rdHas(t.capital)) ? '・<span class="rd-cap" style="margin:0">股</span>＝那週股本有變動（✕＝變動 15% 以上，不列入排行）' : '') + '</div>';
+    (rows.some((t) => rdHas(t.capital)) ? '・<span class="rd-cap" style="margin:0">股</span>＝那週股本有變動（✕＝減資或股份轉換、總股數少 5% 以上，不列入排行）' : '') + '</div>';
 }
 function rdInstHtml(inst){
   if (!inst || ((!inst.weeks || !inst.weeks.length) && (!inst.days || !inst.days.length))){
@@ -5232,7 +5232,7 @@ function rdInstHtml(inst){
 function rdStockCardHtml(s){
   const market = s.market === 'OTC' ? '上櫃' : (s.market === 'TSE' ? '上市' : '');
   return '<div class="rd-card" id="rdStockCard"><div class="rd-card-head"><span class="rd-name" data-rd-chart="' + s.code + '">' + rdEsc(s.name) + '</span><span class="rd-code">' + s.code + '</span>' +
-    (s.rank ? '<span class="rd-badge">本週榜 <span class="rd-circle">' + s.rank + '</span></span>' : '') + rdMa(s.score) + rdCapTag(s.capital, rdHas(s.capital) && Math.abs(s.capital) >= 15) +
+    (s.rank ? '<span class="rd-badge">本週榜 <span class="rd-circle">' + s.rank + '</span></span>' : '') + rdMa(s.score) + rdCapTag(s.capital, !!s.excluded) +
     '<span class="rd-big ' + rdCls(s.chip) + '">' + rdPct(s.chip) + '</span></div>' +
     rdKlineBox(s.code, true) + rdTrailHtml(s.trail) +
     '<div class="rd-sec-title" style="font-size:16px;margin-top:12px">三大法人 <small>' + (market ? market + '・' : '') + '張</small></div>' + rdInstHtml(s.inst) + '</div>';
@@ -5385,7 +5385,7 @@ function radarHtml(){
     '<p>籌碼暴增代表主力在收貨、把股票買進口袋——也就是主力進場，若再搭配型態，有機會續強；反過來變少，就是主力在鬆手。<b class="rd-up">紅色是增加</b>、<b class="rd-down">綠色是減少</b>。</p>' +
     '<p>連續兩週上榜、而且同族群其他股票也一起增加，是最值得盯的組合。⭐＝連續兩週上榜——主力不是買一週就走，是連著兩週都在收。</p>' +
     '<p>籌碼%：x＝（這週 400 張以上大戶持股 − 上週）÷ 這週總股數 ×100；大戶增加顯示 3×√x（小幅增加也看得出來）、減少照原樣（跟莊爸的算法一樣）。每列最後的方塊＝均線分數（滿分 15，每個交易日收盤後更新）：12 分以上實心金＝位置最強、8～11 半填、7 以下只描邊。</p>' +
-    '<p>那週有增資、減資的（總股數變動），大戶持股會跟著機械式地變，名單上標<span class="rd-cap">股本±x%</span>；變動 15% 以上的不列入排行。</p></div>';
+    '<p>那週有增資、減資的（總股數變動）名單上標<span class="rd-cap">股本±x%</span>：增資照算（跟莊爸一樣，例如佳大 9/24 私募）；減資或股份轉換（總股數少 5% 以上）大戶股數會跟著縮水，不列入排行。</p></div>';
   if (!d){
     return '<div class="rd-wrap">' + head + '<div class="signal-empty"><div class="se-title">' + (radarError ? '讀取失敗' : '讀取中…') + '</div><div class="se-sub">' + rdEsc(radarError || '正在抓集保週資料。') + '</div></div></div>';
   }
@@ -6584,7 +6584,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-04 23:33:37';
+const BUILD_STAMP = '2026-10-04 23:53:04';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
