@@ -114,6 +114,8 @@ async function fetchQuotes(codes) {
         const volume = parseInt(item.v, 10);
         quotes[code] = {
           price: finalPrice,
+          // 開盤價：創高黑選股 13:20 提醒用來判斷「收黑」（現價 < 開盤）；/api/groups 不會帶出去
+          open: pos(parseFloat(item.o)),
           change: finalPrice - prevClose,
           changePercent: (finalPrice - prevClose) / prevClose * 100,
           limitUp: Number.isFinite(limitUpPrice) && finalPrice >= limitUpPrice - 1e-6,
@@ -342,6 +344,27 @@ export default {
     if (url.pathname === "/api/heilong") {
       // 下午報・黑龍回測（2026-09-28 使用者）：參數帶給後端算，60 秒快取
       return await proxyHanstockBars("/api/hub/heilong" + url.search, 60);
+    }
+    if (url.pathname === "/api/picker") {
+      // 創高黑選股（2026-10-04 使用者：照莊爸 App「創高黑」做）：模組參數帶給後端算，60 秒快取
+      return await proxyHanstockBars("/api/hub/picker" + url.search, 60);
+    }
+    if (url.pathname === "/api/picker-live") {
+      // 創高黑選股 13:20 提醒：持股＋觀察中的即時報價（含開盤價，判斷收黑）；一次最多 150 檔，不快取
+      const codes = [...new Set(String(url.searchParams.get("codes") || "").split(",").map((c) => c.trim().toUpperCase()).filter((c) => /^[0-9A-Z]{4,6}$/.test(c)))].slice(0, 150);
+      const headers = { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" };
+      if (!codes.length) return new Response(JSON.stringify({ quotes: {}, quoteDate: null, quoteTime: null }), { headers });
+      try {
+        const quotes = await fetchQuotes(codes);
+        const out = {};
+        for (const code of codes) {
+          const q = quotes[code];
+          if (q && Number.isFinite(q.price)) out[code] = { price: q.price, open: Number.isFinite(q.open) ? q.open : null, changePercent: q.changePercent, limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: q.volume };
+        }
+        return new Response(JSON.stringify({ quotes: out, quoteDate: quotes.__meta.quoteDate, quoteTime: quotes.__meta.quoteTime }), { headers });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: String(e && e.message || e) }), { status: 502, headers });
+      }
     }
     if (url.pathname === "/api/checkup") {
       // 每日持股健診（2026-09-28 使用者）：股號清單帶給後端，60 秒快取
