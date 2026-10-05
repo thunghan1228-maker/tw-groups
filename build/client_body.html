@@ -1239,7 +1239,7 @@
     <div class="chips-head">
       <div>
         <div class="chips-title">創高黑選股</div>
-        <div class="chips-sub">先在「模組」設規則 → 「選股」看每週名單、每日新進、條件池 → 「今天」看模組照規則怎麼進出（模擬帳戶、今天要做、13:20 提醒）→ 「實績」比較各種出場方式。全市場三年還原日線，每個交易日收盤後更新；全部是試算，不是買賣建議。點股票可開K線圖。</div>
+        <div class="chips-sub">先在「模組」設規則 → 「選股」看每週名單、每日新進、條件池 → 「今天」看模組照規則怎麼進出（模擬帳戶、今天要做、13:00 提醒）→ 「實績」比較各種出場方式。全市場三年還原日線，每個交易日收盤後更新；全部是試算，不是買賣建議。點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="pickerClose" aria-label="關閉">✕</button>
     </div>
@@ -8290,7 +8290,7 @@ document.getElementById('alertToggle').addEventListener('click', () => {
 // 四個分頁：今天（模擬帳戶照模組規則每天進出、今天要做、操作紀錄）、選股（漏斗、每週名單、每日新進、條件池）、
 // 實績（每個每日新進當訊號，各種出場方式的成績）、模組（四段規則）。參數存在這台瀏覽器；名單打勾、設成優先也存在這台。
 // 後端 /api/picker 照參數即時算（收盤後整理好的特徵表：還原日線、內定均線分數、創高天數）。
-// 13:20 提醒：頁面開著、交易日 13:20 抓持股＋觀察中的即時報價，算出要出場／減碼／買進／加碼的跳通知（App 推播做不到，頁面要開著）。
+// 13:00 提醒（2026-10-05 使用者：原本 13:20 改成 13:00）：頁面開著、交易日 13:00 抓持股＋觀察中的即時報價，算出要出場／減碼／買進／加碼的跳通知（App 推播做不到，頁面要開著）。
 const PK_DEFAULTS = { hi: 20, within: 6, score: 10, sdays: 10, spct: 8, stimes: 2, val: 1, mcap: 50, track: 10, exdispo: true, scope: 'market',
   weekN: 6, wsort: 'score', swaps: 2, swapFrom: 'daily', fri: true, full: true, norebuy: true,
   black: 'oc', bscore: 0, lots: 3, addon: true, reduce: true, rma: 5, xma: 10, tpr: 0,
@@ -8433,7 +8433,7 @@ function pkTodayHtml(data){
     '<div class="pk-steps"><span class="box"><em>① 觀察</em>在名單</span><span class="pk-arrow">→</span><span class="box"><em>② 收黑</em>買第 1 批</span><span class="pk-arrow">→</span>' +
     (p.addon ? '<span class="box"><em>③ 再收黑</em>加到 ' + p.lots + ' 批</span><span class="pk-arrow">→</span>' : '') +
     (p.reduce ? '<span class="box"><em>④ 破 ' + p.rma + ' 日線</em>減 1 批</span><span class="pk-arrow">→</span>' : '') + '<span class="box"><em>⑤ 破 ' + p.xma + ' 日線</em>全部出</span></div>' +
-    '<div class="sw-rule">收黑＝收盤＜開盤' + (p.black === 'range' ? '（而且當天漲跌 −10%～+3%）' : '') + '。名單裡的股票哪天收黑，13:20 提醒、收盤買第 1 批（每批 ' + pkNum(p.per / p.lots, 1) + ' 萬）。</div>';
+    '<div class="sw-rule">收黑＝收盤＜開盤' + (p.black === 'range' ? '（而且當天漲跌 −10%～+3%）' : '') + '。名單裡的股票哪天收黑，13:00 提醒、收盤買第 1 批（每批 ' + pkNum(p.per / p.lots, 1) + ' 萬）。</div>';
   const sortBtn = (k, label) => '<button class="chart-tab chips-btn' + (pkState.sort === k ? ' active' : '') + '" data-pk-sort="' + k + '">' + label + '</button>';
   html += '<div class="pk-nav"><span class="muted">排序</span>' + sortBtn('combo', '綜合') + sortBtn('tech', '技術') + sortBtn('chip', '籌碼') + sortBtn('fund', '基本') + '</div>' +
     '<div class="pk-btn-row"><button data-pk-pick="system">🎯 系統挑一檔</button><button data-pk-pick="dice">🎲 擲骰子</button></div>';
@@ -8459,12 +8459,12 @@ function pkTodayHtml(data){
   const key = (x) => x.type + ':' + x.code;
   const doneCount = today.filter((x) => done[key(x)]).length;
   const badge = { exit: '出場', buy: '買進', add: '加碼', reduce: '減碼' };
-  html += '<div class="pk-sec">③ ' + pkDay(data.date) + ' 要做（13:20） <small>' + today.length + ' 筆・做完打勾 ' + doneCount + ' / ' + today.length + '・打勾的會記進 ④「我的」</small></div>';
+  html += '<div class="pk-sec">③ ' + pkDay(data.date) + ' 要做（13:00 提醒） <small>' + today.length + ' 筆・做完打勾 ' + doneCount + ' / ' + today.length + '・打勾的會記進 ④「我的」</small></div>';
   html += today.length ? '<div class="pk-todo">' + today.map((x) => '<label class="pk-act"><input type="checkbox" data-pk-done="' + key(x) + '"' + (done[key(x)] ? ' checked' : '') + '><span class="pk-badge ' + x.type + '">' + badge[x.type] + '</span>' +
       '<span class="pk-act-main"><b>' + x.name + '</b> ' + x.code + '<br><span class="muted">' + x.reason + '・收盤 ' + pkPrice(x.price) + '・</span><b>' + Number(x.shares).toLocaleString() + ' 股</b> <span class="muted">≈ ' + pkNum(x.amount, 1) + ' 萬</span></span>' +
       (x.pnl !== undefined ? '<span class="pk-act-pnl ' + dirClass(x.pnl || 0) + '">' + pkMoney(x.pnl) + '</span>' : '') + '</label>').join('') + '</div>' : '<div class="race-note">這天模組沒有要做的事。</div>';
-  html += '<button class="pk-btn-big" data-pk-remind="1">🔔 模擬 13:20 的提醒</button>' +
-    '<div class="sw-rule">13:20 提醒：交易日 13:20 頁面開著（不用開這個面板）就會用即時報價算一次：持股跌破出場線／減碼線、名單裡現價低於開盤（收黑）、持股再收黑，跳通知加提示音。' +
+  html += '<button class="pk-btn-big" data-pk-remind="1">🔔 模擬 13:00 的提醒</button>' +
+    '<div class="sw-rule">13:00 提醒：交易日 13:00（到 13:25 收盤試撮前都算）頁面開著（不用開這個面板）就會用即時報價算一次：持股跌破出場線／減碼線、名單裡現價低於開盤（收黑）、持股再收黑，跳通知加提示音。' +
     '手機 App 那種背景推播做不到，頁面要開著；可以在「模組」關掉。盤中按這顆就是用現在的報價算；收盤後按就用上面這天的結果示範。</div>';
   const missed = sim.missed || [];
   html += '<div class="pk-fold" data-pk-fold="missed"><span>今天也收黑、但沒進（' + missed.length + '）</span><span>' + (pkState.showMissed ? '▾' : '▸') + '</span></div>';
@@ -8490,7 +8490,7 @@ function pkTodayHtml(data){
   html += '<div class="pk-fold" data-pk-fold="black"><span>今天創高黑全部（' + black.length + ' 檔：名單／每日新進裡今天收黑）</span><span>' + (pkState.showBlack ? '▾' : '▸') + '</span></div>';
   if (pkState.showBlack) html += black.length ? '<div class="hl-scroll"><table class="hl-table pk-table"><thead><tr><th class="l">股票名稱</th><th>來源</th><th>股價</th><th>漲跌</th><th>均線分</th><th>創高天數</th></tr></thead><tbody>' +
     black.map((r) => '<tr class="pk-click" data-code="' + r.code + '" data-name="' + r.name + '">' + pkName(r) + '<td><span class="pk-src ' + r.source + '">' + PK_SRC_LABEL[r.source] + '</span></td><td>' + pkPrice(r.close) + '</td><td class="' + dirClass(r.changePct || 0) + '">' + swPct(r.changePct) + '</td><td>' + (r.score === null || r.score === undefined ? '—' : r.score) + '</td><td>' + (r.hiLen || '—') + '</td></tr>').join('') + '</tbody></table></div>' : '<div class="race-note">沒有</div>';
-  html += '<div class="sw-foot">流程：週末在「選股」勾名單 → 名單的股票進「觀察中」等收黑 → 收黑那天 13:20 照「今天要做」進場 → 之後再收黑加碼、跌破減碼或出場。條件是你設的，本頁是試算，不是買賣建議。</div>';
+  html += '<div class="sw-foot">流程：週末在「選股」勾名單 → 名單的股票進「觀察中」等收黑 → 收黑那天 13:00 提醒、照「今天要做」收盤進場 → 之後再收黑加碼、跌破減碼或出場。條件是你設的，本頁是試算，不是買賣建議。</div>';
   return html;
 }
 function pkCondSummary(p){
@@ -8620,7 +8620,7 @@ function pkModuleHtml(){
     row('同時最多幾檔', range('maxpos', 1, 15, 1, '檔') + ' <span class="muted">（額度＝每檔資金 × 檔數）</span>') +
     row('從哪一週開始', opt('start', [0, 1, 2, 4, 8, -1], ['下週起（實盤）', '回放 1 週', '回放 2 週', '回放 4 週', '回放 8 週', '全部'])) +
     row('', chk('feeOn', '績效扣手續費與交易稅') + ' 手續費折數 <input class="hl-in" type="number" min="0.1" max="1" step="0.01" data-pk-in="fee" value="' + p.fee + '"> <span class="muted">（2.8 折＋證交稅 0.3%＝來回約 0.38%）</span>') +
-    row('13:20 提醒', chk('remind', '交易日 13:20 頁面開著就跳提醒')) +
+    row('13:00 提醒', chk('remind', '交易日 13:00 頁面開著就跳提醒')) +
     row('推播文字', opt('push', ['count', 'names'], ['只講檔數', '含股名'])) + '</div>';
   html += '<div class="pk-btn-row"><button data-pk-run="1">▶ 試算</button><button data-pk-reset="1">回到預設</button></div>' +
     '<div class="sw-foot">資料：' + (info ? '日K ' + pkDay(info.data.from) + '～' + pkDay(info.data.to) + '・' + info.data.stocks + ' 檔，' : '') + '還原日線（分割減資已還原，除權息不還原）・均線分數同創高黑龍的內定算法・不接盤中訊號。' +
@@ -8762,8 +8762,9 @@ document.getElementById('pickerBody').addEventListener('change', (e) => {
     pkSet(t.dataset.pkIn, t.dataset.pkIn === 'hi' ? Math.round(v) : v); pkClear();
   }
 });
-// ---- 13:20 提醒 ----
-// 交易日 13:20～13:29 頁面開著（用過這個面板、模組裡沒關掉、總開關沒關）就算一次；「模擬 13:20 的提醒」按下去馬上算。
+// ---- 13:00 提醒（2026-10-05 使用者：原本 13:20，改成 13:00）----
+// 交易日 13:00～13:24 頁面開著（用過這個面板、模組裡沒關掉、總開關沒關）就算一次（13:25 起是收盤試撮，不再算）；
+// 「模擬 13:00 的提醒」按下去馬上算。
 // 盤中用即時報價：持股現價跌破出場線（最近 N−1 根收盤＋現價的均線）全部出、跌破減碼線減一批、現價低於開盤（收黑）加一批；
 // 觀察中的股票現價低於開盤＝收黑，照優先（★、名單、均線分）補空位。收盤後按，就用那天模組實際做的事示範。
 let pkRemindFired = '';
@@ -8837,7 +8838,7 @@ async function pkRunReminder(manual){
       const res = await fetch('/api/picker?' + query);
       data = await res.json();
       if (!res.ok || !data || data.status !== 'ok') throw new Error('picker');
-    } catch (e) { if (manual) pkShowAlert('創高黑・模擬 13:20 提醒', ['資料還沒好，晚一點再試']); return; }
+    } catch (e) { if (manual) pkShowAlert('創高黑・模擬 13:00 提醒', ['資料還沒好，晚一點再試']); return; }
   }
   const sim = data.sim || {};
   const codes = [...new Set((sim.holdings || []).map((h) => h.code).concat((sim.watch || []).map((w) => w.code)))].slice(0, 150);
@@ -8858,7 +8859,7 @@ async function pkRunReminder(manual){
   }
   const real = actions.filter((x) => x.type !== 'skip');
   const count = (t) => real.filter((x) => x.type === t).length;
-  const title = '創高黑・' + (live ? '13:20 組合提醒（' + when + '）' : '模擬示範（' + pkDay(data.date) + ' 收盤結果）');
+  const title = '創高黑・' + (live ? '13:00 組合提醒（' + when + '）' : '模擬示範（' + pkDay(data.date) + ' 收盤結果）');
   const summary = ['exit', 'reduce', 'buy', 'add'].filter((t) => count(t)).map((t) => ({ exit: '出場', reduce: '減碼', buy: '買進', add: '加碼' })[t] + ' ' + count(t) + ' 檔').join('、') || '沒有要做的事';
   const lines = p.push === 'count' ? [summary, '點開看是哪幾檔、幾批、什麼價位。'] :
     actions.map((x) => ({ exit: '🟢 出場', reduce: '🔵 減碼', buy: '🔴 買進', add: '🟡 加碼', skip: '⚪ 沒進' })[x.type] + ' ' + x.name + ' ' + x.code + '・' + x.reason + '・' + pkPrice(x.price) + (x.shares ? '・' + Number(x.shares).toLocaleString() + ' 股' : ''));
@@ -8875,7 +8876,7 @@ setInterval(() => {
   const now = new Date(Date.now() + 8 * 3600000);
   const day = now.getUTCDay(), minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
   const today = now.toISOString().slice(0, 10);
-  if (day === 0 || day === 6 || minutes < 13 * 60 + 20 || minutes >= 13 * 60 + 30 || pkRemindFired === today) return;
+  if (day === 0 || day === 6 || minutes < 13 * 60 || minutes >= 13 * 60 + 25 || pkRemindFired === today) return;
   pkRemindFired = today;
   try { localStorage.setItem('pickerRemindFired', today); } catch (e) { /* 存不了就算了 */ }
   pkRunReminder(false);
