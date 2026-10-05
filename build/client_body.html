@@ -926,6 +926,22 @@
   .wl-star:hover{color:#f5b301;}
   .wl-star.on{color:#f5b301;}
   .race-row .race-star-slot,.race-col-labels .race-star-slot{flex:0 0 20px;text-align:center;}  /* 要蓋過 .race-col-labels span 的 5em */
+  /* 個股訊號追蹤（2026-10-05 使用者） */
+  .trk-table{min-width:720px;}
+  .trk-badge{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;margin:1px 4px 1px 0;background:#3a3a44;color:#fff;}
+  .trk-badge.bull{background:var(--up);}
+  .trk-badge.bear{background:var(--down);}
+  .trk-badge.brew{background:#7c3aed;}
+  .trk-sig{font-weight:700;}
+  .trk-sig.bull{color:var(--up);}
+  .trk-sig.bear{color:var(--down);}
+  .trk-note{color:var(--muted);font-size:12px;white-space:normal !important;min-width:200px;}
+  .trk-ma{font-size:12px;}
+  .trk-in{width:90px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:13px;font-family:inherit;text-align:right;}
+  .trk-chk{display:inline-flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;white-space:nowrap;flex:0 0 auto;}
+  .trk-alert{border-color:#f5b301;}
+  .trk-alert-foot{margin-top:6px;text-align:right;}
+  @media (max-width: 640px){ .trk-table{min-width:560px;} }
   .ck-detail td{background:var(--panel-2);white-space:normal;text-align:left;font-size:12px;line-height:1.6;padding:8px 12px;}
   /* 2026-09-28 使用者：健診表要能照族群看（像學員專區的族群籤），也能整張表分族群排 */
   .ck-gchip{display:inline-flex;align-items:center;gap:4px;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;background:var(--panel);user-select:none;}
@@ -1265,6 +1281,18 @@
       <button class="cm-icon-btn" id="watchClose" aria-label="關閉">✕</button>
     </div>
     <div id="watchBody"></div>
+  </div>
+</div>
+<div class="chips-modal" id="trackModal" hidden>
+  <div class="chips-inner" id="trackInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">個股訊號追蹤</div>
+        <div class="chips-sub">自選股今天出現的盤中訊號（發動、特大買賣單、四項精選、主力翻多空、創高黑龍、1+2多）照時間列，加上提醒：到價、跌破均線、自選股出現訊號就跳通知＋響聲。</div>
+      </div>
+      <button class="cm-icon-btn" id="trackClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="trackBody"></div>
   </div>
 </div>
 <div id="buildStamp"></div>
@@ -2714,7 +2742,7 @@ function closeStockChart(){
   document.getElementById('chartModal').hidden = true;
   document.body.style.overflow = '';
   // 若是從訊號中心／盤後籌碼排行／下午報／健診／問診點進來的，關圖後讓它們回到最上層。
-  for (const id of ['signalModal', 'chipsModal', 'swingModal', 'heilongModal', 'pickerModal', 'checkupModal', 'diagModal', 'watchModal']) document.getElementById(id).classList.remove('behind-chart');
+  for (const id of ['signalModal', 'chipsModal', 'swingModal', 'heilongModal', 'pickerModal', 'checkupModal', 'diagModal', 'watchModal', 'trackModal']) document.getElementById(id).classList.remove('behind-chart');
 }
 
 let openGroupName = null;
@@ -3305,6 +3333,7 @@ async function refreshSignalData(){
       mainForceRanking = ranking;
       mainForceRankingLoaded = true;
       try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
+      trkTick();
       signalDataIsReal = true;
     } catch (e) {
       todaySignalEvents = buildDemoSignalsForDate(today)
@@ -6742,6 +6771,7 @@ function wlAfterChange(){
     } else renderWatch();
   }
   wlRefreshStars();
+  try { renderTrack(); } catch (e) { /* 個股訊號追蹤重畫失敗不影響畫面 */ }
 }
 document.getElementById('watchClose').addEventListener('click', closeWatchPanel);
 document.getElementById('watchModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeWatchPanel(); });
@@ -6897,6 +6927,326 @@ document.addEventListener('click', (e) => {
   }
 }, true);
 setTimeout(() => { if (wl.key && !document.body.classList.contains('chart-window-mode')) wlLoad(); }, 1500);   // 開頁面先跟雲端對一次，其他地方的 ☆ 才會是最新的
+
+// ---- 個股訊號追蹤（2026-10-05 使用者：自選股第二階段）----
+// 自選股今天出現的盤中訊號照時間列（資料跟盤中訊號中心同一份，不另外抓）＋提醒：到價（站上／跌破）、跌破均線、
+// 自選股出現發動／特大單／四項精選／主力翻多空／創高黑龍／1+2多 就跳通知＋響聲。
+// 提醒只有網頁開著時會跳（跟發動通知一樣）；同一個條件一天只提醒一次；開網頁或剛加進自選股時，
+// 今天已經出現過的訊號不會再跳（只提醒之後新出現的）。提醒設定存在自選股清單裡，有同步碼就三台共用。
+const TRK_KINDS = [
+  { key: 'launch', label: '發動', bull: true },
+  { key: 'bigBuy', label: '特大買單', bull: true },
+  { key: 'bigSell', label: '特大賣單', bull: false },
+  { key: 'fourGateBuy', label: '四項精選強多', bull: true },
+  { key: 'fourGateSell', label: '四項精選強空', bull: false },
+  { key: 'mainForceFlipBull', label: '主力翻多', bull: true },
+  { key: 'mainForceFlipBear', label: '主力翻空', bull: false },
+  { key: 'blackDragon', label: '創高黑龍', bull: null },
+  { key: 'combo12Bull', label: '1+2多', bull: true },
+];
+const TRK_KIND_LABEL = Object.fromEntries(TRK_KINDS.map((k) => [k.key, k.label]));
+const TRK_MAS = [5, 10, 20];
+let trk = { group: '*', kind: 'all', state: null };
+function trkLoadState(){
+  const today = twTodayStr();
+  let st = null;
+  try { st = JSON.parse(localStorage.getItem('trackState') || 'null'); } catch (e) { st = null; }
+  if (!st || st.date !== today) st = { date: today, seen: [], fired: [], log: [], sigCodes: [], launchCodes: [] };
+  trk.state = { date: st.date, seen: new Set(st.seen || []), fired: new Set(st.fired || []), log: st.log || [],
+    sigCodes: new Set(st.sigCodes || []), launchCodes: new Set(st.launchCodes || []) };
+  return trk.state;
+}
+function trkSaveState(){
+  const s = trk.state;
+  if (!s) return;
+  try {
+    localStorage.setItem('trackState', JSON.stringify({ date: s.date, seen: [...s.seen].slice(-3000), fired: [...s.fired], log: s.log.slice(-200),
+      sigCodes: [...s.sigCodes], launchCodes: [...s.launchCodes] }));
+  } catch (e) { /* 存不了就算了 */ }
+}
+function trkSetting(key, dflt){
+  const v = wl.data.settings ? wl.data.settings[key] : undefined;
+  return v === undefined ? dflt : v;
+}
+function trkAllCodes(){
+  const s = new Set();
+  for (const g of wl.data.groups) for (const it of g.items) s.add(it.code);
+  return s;
+}
+function trkCodesInView(){
+  if (trk.group === '*') return trkAllCodes();
+  const g = wl.data.groups.find((x) => x.id === trk.group);
+  return new Set(g ? g.items.map((it) => it.code) : []);
+}
+function trkItemOf(code){
+  for (const g of wl.data.groups){ const it = g.items.find((x) => x.code === code); if (it) return it; }
+  return null;
+}
+function trkEventKind(e){ return e.tabs && e.tabs.length ? e.tabs[e.tabs.length - 1] : ''; }
+function trkTime(ts){ return Number.isFinite(ts) && ts > 0 ? new Date(ts + 8 * 3600000).toISOString().slice(11, 16) : ''; }
+function trkSignalEvents(){
+  // 訊號中心同一份（休市日／開盤前沿用上一個交易日）；特大買賣單套用訊號中心那邊設的篩選
+  const events = sigCurrentEvents() || [];
+  // 特大買賣單只收標「特大」的（一般瞬間大單一天好幾百筆會洗版），再套訊號中心那邊設的篩選
+  const big = new Set(filterLargeOrderEvents(events.filter((e) => (e.tabs.includes('bigBuy') || e.tabs.includes('bigSell')) && /特大/.test(e.label || ''))));
+  return events.filter((e) => TRK_KIND_LABEL[trkEventKind(e)] && ((trkEventKind(e) !== 'bigBuy' && trkEventKind(e) !== 'bigSell') || big.has(e)));
+}
+function trkLaunchRecords(){
+  const day = brewSessionDate();
+  return day ? (brewHistoryDay(day).launch || []) : [];
+}
+function trkTimeline(codes){
+  const rows = [];
+  for (const e of trkSignalEvents()){
+    if (!codes.has(e.code)) continue;
+    const kind = trkEventKind(e);
+    rows.push({ ts: Number(e.ts) || 0, time: trkTime(Number(e.ts)) || e.time, code: e.code, name: e.name, kind, label: e.label || TRK_KIND_LABEL[kind], bull: e.isBuy, note: e.note || '' });
+  }
+  for (const r of trkLaunchRecords()){
+    if (!codes.has(r.code) || r.eod) continue;
+    rows.push({ ts: Date.parse(r.recordedAt) || 0, time: fmtTime(r.recordedAt), code: r.code, name: r.name, kind: 'launch', label: '🚀 發動', bull: true,
+      note: '發動價 ' + num2(r.price) + (r.boxHigh ? '・箱頂 ' + num2(r.boxHigh) : '') + (r.score !== undefined && r.score !== null ? '・均線分數 ' + r.score : '') });
+  }
+  const st = trk.state || trkLoadState();
+  for (const a of st.log) if (codes.has(a.code)) rows.push(Object.assign({}, a, { kind: 'alert' }));
+  return rows.sort((a, b) => b.ts - a.ts);
+}
+function trkMaOf(code, price, p){
+  const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[code] : null;
+  if (!info || !info.maSums || !(price > 0) || info.maSums[p] === undefined) return null;
+  return (Number(info.maSums[p]) + price) / p;
+}
+function trkMarketLive(){
+  // 盤中、而且首頁報價是今天的（休市日、開盤前、暫留收盤價時不判斷到價／均線）
+  if (!lastData || lastData.mock || lastData.heldClose) return false;
+  const now = new Date(Date.now() + 8 * 3600000), minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  return lastData.quoteDate === twTodayStr() && minutes >= 9 * 60 && minutes <= 13 * 60 + 31;
+}
+
+// ---- 判斷要不要提醒（首頁報價 15 秒、訊號 5 秒更新一次就看一次）
+function trkCheck(){
+  if (document.body.classList.contains('chart-window-mode')) return;
+  const codes = trkAllCodes();
+  if (!codes.size) return;
+  const st = trkLoadState();   // 每次重讀：另一個視窗（訊號中心小視窗）提醒過的這裡就不再跳
+  const today = twTodayStr();
+  const fresh = [];
+  // 1) 訊號：今天的訊號資料到了才看。這台第一次看（開網頁）或剛加進自選股的股票，今天已經有的訊號先記成看過、不提醒
+  if (signalDataIsReal && sigCurrentDate() === today){
+    for (const e of trkSignalEvents()){
+      if (!codes.has(e.code)) continue;
+      const kind = trkEventKind(e), key = 's|' + e.code + '|' + kind + '|' + e.ts + '|' + (e.label || '');
+      if (st.seen.has(key)) continue;
+      st.seen.add(key);
+      if (!st.sigCodes.has(e.code) || trkSetting('trk_' + kind, true) === false) continue;
+      fresh.push({ code: e.code, name: e.name, text: (TRK_KIND_LABEL[kind] || e.label) + (e.label && e.label !== TRK_KIND_LABEL[kind] ? '（' + e.label + '）' : ''), time: trkTime(Number(e.ts)) || e.time, bull: e.isBuy });
+    }
+    codes.forEach((c) => st.sigCodes.add(c));
+  }
+  // 發動：後端的發動紀錄抓到了才看（同上，先記成看過的不提醒）
+  if (brewHistoryData && brewHistoryData.days && brewSessionDate() === today){
+    for (const r of trkLaunchRecords()){
+      if (!codes.has(r.code) || r.eod) continue;
+      const key = 'l|' + r.code + '|' + r.recordedAt;
+      if (st.seen.has(key)) continue;
+      st.seen.add(key);
+      if (!st.launchCodes.has(r.code) || trkSetting('trk_launch', true) === false) continue;
+      fresh.push({ code: r.code, name: r.name, text: '🚀 發動（' + num2(r.price) + '）', time: fmtTime(r.recordedAt), bull: true });
+    }
+    codes.forEach((c) => st.launchCodes.add(c));
+  }
+  // 2) 到價、跌破均線：盤中才看，同一個條件一天一次
+  if (trkMarketLive()){
+    const quotes = wlQuoteMap();
+    const done = new Set();
+    let needExtra = false;
+    for (const g of wl.data.groups) for (const it of g.items){
+      if (done.has(it.code) || !(it.above || it.below || it.ma)) continue;
+      done.add(it.code);
+      if (!WL_GROUP_INDEX[it.code]) needExtra = true;
+      const q = quotes[it.code], price = q && Number(q.price) > 0 ? Number(q.price) : null;
+      if (price === null) continue;
+      const name = wlNameOf(it.code, it), hits = [];
+      if (it.above && price >= it.above) hits.push(['a|' + it.code + '|' + it.above, '站上 ' + num2(it.above) + '（現價 ' + num2(price) + '）', true]);
+      if (it.below && price <= it.below) hits.push(['b|' + it.code + '|' + it.below, '跌破 ' + num2(it.below) + '（現價 ' + num2(price) + '）', false]);
+      if (it.ma){
+        const ma = trkMaOf(it.code, price, it.ma);
+        if (ma !== null && price < ma) hits.push(['m|' + it.code + '|' + it.ma, '跌破 ' + it.ma + ' 日線 ' + num2(ma) + '（現價 ' + num2(price) + '）', false]);
+      }
+      for (const [key, text, bull] of hits){
+        if (st.fired.has(key)) continue;
+        st.fired.add(key);
+        const time = trkTime(Date.now());
+        st.log.push({ ts: Date.now(), time, code: it.code, name, label: '🔔 ' + text, bull, note: '提醒' });
+        fresh.push({ code: it.code, name, text: '🔔 ' + text, time, bull });
+      }
+    }
+    if (needExtra) wlFetchExtra(false);
+  }
+  trkSaveState();
+  if (fresh.length) trkNotify(fresh);
+}
+let trkAlertLines = [];
+function trkNotify(list){
+  if (!alertsEnabled || trkSetting('trkOn', true) === false) return;
+  launchBeep();
+  trkAlertLines = list.map((x) => (x.time ? x.time + ' ' : '') + '<b>' + wlEsc(x.code + ' ' + x.name) + '</b>・' + wlEsc(x.text)).concat(trkAlertLines).slice(0, 12);
+  let el = document.getElementById('trkAlertBox');
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'trkAlertBox'; el.className = 'pk-alert trk-alert';
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.pk-alert-close')){ el.remove(); trkAlertLines = []; return; }
+      if (e.target.closest('.trk-alert-open')){ el.remove(); trkAlertLines = []; openTrackPanel(); }
+    });
+    document.body.appendChild(el);
+  }
+  el.innerHTML = '<div class="pk-alert-head">★ 自選股提醒<button class="pk-alert-close" aria-label="關閉">✕</button></div><div>' + trkAlertLines.join('<br>') +
+    '</div><div class="trk-alert-foot"><button class="wl-btn trk-alert-open">打開個股訊號追蹤</button></div>';
+  if ('Notification' in window && Notification.permission === 'granted'){
+    list.slice(0, 5).forEach((x) => {
+      try { new Notification('★ ' + x.code + ' ' + x.name + '・' + x.text.replace(/<[^>]+>/g, ''), { body: (x.time || '') + ' 自選股提醒（個股訊號追蹤）', tag: 'trk-' + x.code + '-' + x.text, requireInteraction: true }); } catch (e) { /* 跳不出來就算了 */ }
+    });
+  }
+  if (!document.getElementById('trackModal').hidden) renderTrack();
+}
+
+// ---- 畫面
+function trkStatusBadges(code, quote, ranking, launchCount, liveLaunch, blade){
+  const out = [];
+  if (liveLaunch) out.push('<span class="trk-badge bull">發動中</span>');
+  else if (launchCount) out.push('<span class="trk-badge">今天發動 ×' + launchCount + '</span>');
+  const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[code] : null;
+  if (info && info.brewing && !info.skipped) out.push('<span class="trk-badge brew">醞釀</span>');
+  if (blade) out.push('<span class="trk-badge bear">刀劍空</span>');
+  if (quote && quote.limitUp) out.push('<span class="trk-badge bull">漲停</span>');
+  if (quote && quote.limitDown) out.push('<span class="trk-badge bear">跌停</span>');
+  if (ranking && ranking.holderLabel) out.push('<span class="trk-badge ' + (ranking.holderLabel.indexOf('買') >= 0 ? 'bull' : 'bear') + '">' + wlEsc(ranking.holderLabel) + '</span>');
+  return out.join('') + flagPillsHtml(code, { dispositionOnly: true });
+}
+function renderTrack(force){
+  const body = document.getElementById('trackBody');
+  if (!body || document.getElementById('trackModal').hidden) return;
+  const active = document.activeElement;
+  if (!force && body.contains(active) && active.tagName === 'INPUT' && /^(number|text)$/.test(active.type)) return;
+  const all = trkAllCodes();
+  if (!all.size){
+    body.innerHTML = '<div class="signal-empty"><div class="se-title">自選股還沒有股票</div><div class="se-sub">按下方導覽列「自選股」加入股票，或在首頁、盤中333、醞釀／發動、K線圖等名稱旁點 ☆；加進來的股票今天出現訊號就會列在這裡。</div></div>';
+    return;
+  }
+  const codes = trkCodesInView();
+  const evDate = sigCurrentDate(), today = twTodayStr();
+  const quotes = wlQuoteMap(), holders = wlHolderMap();
+  const timeline = trkTimeline(codes).filter((r) => trk.kind === 'all' || (trk.kind === 'bull' ? r.bull === true : trk.kind === 'bear' ? r.bull === false : r.kind === trk.kind));
+  // 現況
+  const launchCount = new Map(), lastSignal = new Map(), count = new Map();
+  for (const r of trkLaunchRecords()) launchCount.set(r.code, (launchCount.get(r.code) || 0) + 1);
+  for (const r of trkTimeline(codes)){ count.set(r.code, (count.get(r.code) || 0) + 1); if (!lastSignal.has(r.code)) lastSignal.set(r.code, r); }
+  const bm = brewLaunchModel();
+  const liveLaunch = new Set(bm ? bm.launchBlocks.flatMap((b) => b.rows).map((r) => r.code) : []);
+  let bladeCodes = new Set();
+  try { const m = race333Model(); bladeCodes = new Set(((m && m.bladeLower) || []).map((r) => r.code)); } catch (e) { /* 盤中333 算不出來就不標 */ }
+  const groupChips = '<button class="wl-gtab' + (trk.group === '*' ? ' active' : '') + '" data-tgroup="*">全部<span class="wl-gcount">' + all.size + '</span></button>' +
+    wl.data.groups.map((g) => '<button class="wl-gtab' + (trk.group === g.id ? ' active' : '') + '" data-tgroup="' + wlEsc(g.id) + '">' + wlEsc(g.name) + '<span class="wl-gcount">' + g.items.length + '</span></button>').join('');
+  const kindChips = [['all', '全部'], ['bull', '多方'], ['bear', '空方']].concat(TRK_KINDS.map((k) => [k.key, k.label])).concat([['alert', '🔔 提醒']])
+    .map((k) => '<button class="wl-sort' + (trk.kind === k[0] ? ' active' : '') + '" data-tkind="' + k[0] + '">' + k[1] + '</button>').join('');
+  const statusRows = [...codes].map((code) => {
+    const it = trkItemOf(code), q = quotes[code] || null, name = wlNameOf(code, it);
+    const pct = q && Number.isFinite(Number(q.changePercent)) ? Number(q.changePercent) : null;
+    const last = lastSignal.get(code);
+    return '<tr data-code="' + code + '" data-name="' + wlEsc(name) + '"><td class="l wl-stock">' + code + '</td><td class="l wl-stock"><span class="wl-name">' + wlEsc(name) + '</span></td>' +
+      '<td class="' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</td>' +
+      '<td class="l">' + (trkStatusBadges(code, q, holders[code], launchCount.get(code) || 0, liveLaunch.has(code), bladeCodes.has(code)) || '<span class="flat">—</span>') + '</td>' +
+      '<td>' + (count.get(code) || 0) + '</td>' +
+      '<td class="l">' + (last ? '<span class="muted">' + last.time + '</span> ' + wlEsc(last.label) : '<span class="flat">—</span>') + '</td></tr>';
+  }).join('');
+  const timelineHtml = timeline.length
+    ? '<div class="wl-table-wrap"><table class="wl-table trk-table"><thead><tr><th class="l">時間</th><th class="l">代號</th><th class="l">名稱</th><th class="l">訊號</th><th class="l">說明</th></tr></thead><tbody>' +
+      timeline.map((r) => '<tr data-code="' + r.code + '" data-name="' + wlEsc(r.name || '') + '"><td class="l">' + r.time + '</td><td class="l wl-stock">' + r.code + '</td><td class="l wl-stock">' + wlEsc(r.name || r.code) + '</td>' +
+        '<td class="l"><span class="trk-sig ' + (r.bull === true ? 'bull' : r.bull === false ? 'bear' : '') + '">' + wlEsc(r.label) + '</span></td><td class="l trk-note">' + wlEsc(r.note || '') + '</td></tr>').join('') +
+      '</tbody></table></div>'
+    : '<div class="race-note">' + (evDate !== today ? '今天還沒開盤，' : '') + '自選股' + (trk.kind === 'all' ? '' : '這類') + '目前沒有訊號。</div>';
+  // 提醒設定
+  const kindToggles = TRK_KINDS.map((k) => '<label class="trk-chk"><input type="checkbox" data-tset="trk_' + k.key + '"' + (trkSetting('trk_' + k.key, true) !== false ? ' checked' : '') + '>' + k.label + '</label>').join('');
+  const seen = new Set();
+  const alertRows = [];
+  for (const g of wl.data.groups) for (const it of g.items){
+    if (seen.has(it.code) || !codes.has(it.code)) continue;
+    seen.add(it.code);
+    const q = quotes[it.code], price = q && Number(q.price) > 0 ? Number(q.price) : null, name = wlNameOf(it.code, it);
+    const maHint = price !== null ? TRK_MAS.map((p) => { const v = trkMaOf(it.code, price, p); return v === null ? '' : p + '日 ' + num2(v); }).filter(Boolean).join('・') : '';
+    alertRows.push('<tr data-code="' + it.code + '"><td class="l wl-stock">' + it.code + '</td><td class="l">' + wlEsc(name) + '</td><td>' + (price === null ? '—' : num2(price)) + '</td>' +
+      '<td><input class="trk-in" type="number" step="0.01" min="0" data-tfield="above" value="' + (it.above || '') + '" placeholder="價格"></td>' +
+      '<td><input class="trk-in" type="number" step="0.01" min="0" data-tfield="below" value="' + (it.below || '') + '" placeholder="價格"></td>' +
+      '<td><select class="wl-gsel" data-tfield="ma"><option value="0">不提醒</option>' + TRK_MAS.map((p) => '<option value="' + p + '"' + (it.ma === p ? ' selected' : '') + '>' + p + ' 日線</option>').join('') + '</select></td>' +
+      '<td class="l muted trk-ma">' + (WL_GROUP_INDEX[it.code] ? maHint : '族群表外的股票沒有均線資料') + '</td></tr>');
+  }
+  body.innerHTML =
+    '<div class="wl-groups">' + groupChips + '</div>' +
+    '<div class="pk-sec">① 現況 <small>' + (evDate !== today ? '今天還沒開盤，訊號顯示 ' + evDate.slice(5).replace('-', '/') + ' 的' : '盤中即時（跟首頁、訊號中心同一份）') + '</small></div>' +
+    '<div class="wl-table-wrap"><table class="wl-table trk-table"><thead><tr><th class="l">代號</th><th class="l">名稱</th><th>漲跌幅</th><th class="l">狀態</th><th>今天訊號</th><th class="l">最新訊號</th></tr></thead><tbody>' + statusRows + '</tbody></table></div>' +
+    '<div class="pk-sec">② 今日訊號 <small>時間新→舊・' + timeline.length + ' 筆</small></div>' +
+    '<div class="wl-sorts">' + kindChips + '</div>' + timelineHtml +
+    '<div class="pk-sec">③ 提醒設定 <small>網頁開著才會跳；同一個條件一天只提醒一次</small></div>' +
+    '<div class="wl-sync"><label class="trk-chk"><input type="checkbox" data-tset="trkOn"' + (trkSetting('trkOn', true) !== false ? ' checked' : '') + '><b>自選股提醒</b></label>' +
+      '<span class="wl-hint" style="flex-basis:auto;margin:0">自選股出現這些訊號就跳通知＋響聲：</span>' + kindToggles +
+      (alertsEnabled ? '' : '<div class="wl-status err" style="flex-basis:100%">右上角「提醒開啟」目前是關的，所有提醒都不會跳。</div>') + '</div>' +
+    '<div class="wl-table-wrap"><table class="wl-table trk-table"><thead><tr><th class="l">代號</th><th class="l">名稱</th><th>現價</th><th>站上（≥）</th><th>跌破（≤）</th><th>跌破均線</th><th class="l">目前均線</th></tr></thead><tbody>' + alertRows.join('') + '</tbody></table></div>' +
+    '<div class="sw-foot">訊號跟盤中訊號中心同一份（特大買賣單套用訊號中心那邊設的篩選）；🚀 發動是後端每次發動的永久紀錄。到價、跌破均線只在盤中判斷，均線用現價當今天收盤算（跟均線分數同一套），族群表外的股票沒有均線。' +
+    '提醒設定存在自選股清單裡，設了同步碼就三台共用；每台電腦網頁開著時各自跳提醒。點代號或名稱開K線圖。</div>';
+}
+function openTrackPanel(){
+  document.getElementById('trackModal').hidden = false;
+  refreshBrewLaunch();
+  refreshBrewHistory(false);
+  if (wl.key) wlLoad();
+  wlFetchExtra(true);
+  renderTrack(true);
+}
+function closeTrackPanel(){ document.getElementById('trackModal').hidden = true; }
+document.getElementById('trackClose').addEventListener('click', closeTrackPanel);
+document.getElementById('trackModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeTrackPanel(); });
+document.getElementById('trackBody').addEventListener('click', (e) => {
+  if (e.target.closest('input, select, label')) return;
+  const g = e.target.closest('[data-tgroup]');
+  if (g){ trk.group = g.dataset.tgroup; renderTrack(); return; }
+  const k = e.target.closest('[data-tkind]');
+  if (k){ trk.kind = k.dataset.tkind; renderTrack(); return; }
+  const cell = e.target.closest('.wl-stock');
+  if (cell){
+    const row = cell.closest('tr[data-code]');
+    if (!useFloatingCharts()){
+      document.getElementById('trackModal').classList.add('behind-chart');
+      document.getElementById('signalModal').classList.add('behind-chart');
+    }
+    openStockChart(row.dataset.code, row.dataset.name || wlNameOf(row.dataset.code, trkItemOf(row.dataset.code)));
+  }
+});
+document.getElementById('trackBody').addEventListener('change', (e) => {
+  const set = e.target.closest('[data-tset]');
+  if (set){
+    const key = set.dataset.tset, on = !!set.checked;
+    wlMutate((data) => { data.settings = data.settings || {}; data.settings[key] = on; });
+    if (key === 'trkOn' && on) requestNotifyPermission();
+    return;
+  }
+  const field = e.target.closest('[data-tfield]');
+  if (!field) return;
+  const code = field.closest('tr[data-code]').dataset.code, name = field.dataset.tfield;
+  const raw = Number(field.value);
+  const value = name === 'ma' ? (TRK_MAS.includes(raw) ? raw : 0) : (raw > 0 ? Math.round(raw * 10000) / 10000 : 0);
+  wlMutate((data) => {
+    for (const g of data.groups) for (const it of g.items){
+      if (it.code !== code) continue;
+      if (value) it[name] = value; else delete it[name];
+    }
+  });
+  if (value) requestNotifyPermission();
+});
+function trkTick(){
+  try { trkCheck(); } catch (e) { /* 提醒判斷失敗不影響畫面 */ }
+  try { renderTrack(); } catch (e) { /* 重畫失敗不影響畫面 */ }
+}
 
 // ---- 個股問診（2026-09-28 使用者：照學員專區「個股問診・完整版」做）----
 // 打股號 → /api/diag 拿回那檔收盤後算好的三面向分數、七科、防守線、近 120 根日K、同族對照、族群強度榜與今日名單、穿惡名單。
@@ -7778,6 +8128,7 @@ async function refresh(){
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
     try { if (!document.getElementById('signalModal').hidden && signalCenterState.activeTab === 'brewLaunch') renderSignalCenter(); } catch (e) { /* 訊號中心重畫失敗不影響畫面 */ }
     try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
+    trkTick();
     lastDataFetchedAt = new Date();
   } catch (e) {
     if (!lastData) lastData = buildMockData();
@@ -8532,6 +8883,7 @@ setInterval(() => {
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '自選股'){ openWatchPanel(); return; }        // 2026-10-05 使用者：自選股
+    if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '下午報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」
     if (btn.dataset.label === '創高黑龍'){ openHeilongPanel(); return; } // 2026-10-04 使用者：黑龍回測獨立面板
