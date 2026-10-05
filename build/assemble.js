@@ -53,18 +53,26 @@ function chunk(arr, size) {
   return out;
 }
 
-async function fetchQuoteChunk(codes) {
+async function fetchQuoteChunk(codes, timeoutMs) {
   const exCh = codes.flatMap((c) => [\`tse_\${c}.tw\`, \`otc_\${c}.tw\`]).join("|");
   const url = \`https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=\${exCh}&json=1&delay=0\`;
-  const resp = await fetch(url, {
-    headers: {
-      Referer: "https://mis.twse.com.tw/stock/index.jsp",
-      "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)"
-    }
-  });
-  if (!resp.ok) throw new Error(\`TWSE API 回應錯誤: \${resp.status}\`);
-  const data = await resp.json();
-  return data.msgArray || [];
+  // timeoutMs：重抓時才給（重抓有總時間上限，不能卡在一段一直不回的請求上）
+  const ctrl = timeoutMs ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+  try {
+    const resp = await fetch(url, {
+      headers: {
+        Referer: "https://mis.twse.com.tw/stock/index.jsp",
+        "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)"
+      },
+      signal: ctrl ? ctrl.signal : undefined
+    });
+    if (!resp.ok) throw new Error(\`TWSE API 回應錯誤: \${resp.status}\`);
+    const data = await resp.json();
+    return data.msgArray || [];
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 async function fetchQuotes(codes) {
@@ -77,11 +85,27 @@ async function fetchQuotes(codes) {
   // 回（失敗那幾段的股票價格維持null，前端本來就會跳過不計入族群平均漲跌幅）；真的整批都失敗
   // 才維持原本502（連不上後端的提示要照舊出現）。
   const settled = await Promise.allSettled(chunks.map((c) => fetchQuoteChunk(c)));
-  const fulfilled = settled.filter((r) => r.status === "fulfilled");
-  if (!fulfilled.length) throw settled[0].reason;
-  const results = fulfilled.map((r) => r.value);
+  // 2026-10-05 使用者：兩台電腦「今天曾發動」一台 2 檔、一台 35 檔。35 檔那台列出來的全是族群表後半段
+  // （第 4、5 段：光電、光學鏡頭、面板…）的股票：那兩段報價整段沒抓到，沒有價格就判斷不了還在不在發動，
+  // 全被當成「已回落」。5 段同時打偶爾後面幾段會失敗或回空的；沒抓到的段落一段一段重抓（隔 0.3 秒、
+  // 每段最多再 2 次、全部重抓最多 5 秒），還是沒有的才維持 null，並把沒價格的檔數交給前端標示。
+  const results = settled.map((r) => (r.status === "fulfilled" ? r.value : null));
+  const retryUntil = Date.now() + 5000;
+  let retried = 0;
+  for (let i = 0; i < chunks.length; i++) {
+    for (let attempt = 0; attempt < 2 && !(results[i] && results[i].length) && Date.now() < retryUntil - 500; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      retried++;
+      try {
+        const again = await fetchQuoteChunk(chunks[i], Math.max(1000, retryUntil - Date.now()));
+        if (again.length || !results[i]) results[i] = again;
+      } catch (e) { /* 這段再試一次，還是不行就算了 */ }
+    }
+  }
+  if (!results.some((r) => r !== null)) throw settled[0].reason;
   let quoteDate = "", quoteTime = "";
   for (const msgArray of results) {
+    if (!msgArray) continue;
     for (const item of msgArray) {
       const code = item.c;
       // d／t＝這筆報價的日期（YYYYMMDD）／時間（HH:MM:SS）；取最新的一筆，讓頁面知道行情是不是今天盤中的
@@ -125,8 +149,10 @@ async function fetchQuotes(codes) {
       }
     }
   }
+  const missing = codes.filter((c) => quotes[c].price === null).length;
   Object.defineProperty(quotes, "__meta", {
-    value: { quoteDate: quoteDate ? quoteDate.slice(0, 4) + "-" + quoteDate.slice(4, 6) + "-" + quoteDate.slice(6, 8) : null, quoteTime: quoteTime || null },
+    value: { quoteDate: quoteDate ? quoteDate.slice(0, 4) + "-" + quoteDate.slice(4, 6) + "-" + quoteDate.slice(6, 8) : null, quoteTime: quoteTime || null,
+      missing, retried },
     enumerable: false
   });
   return quotes;
@@ -493,7 +519,9 @@ export default {
           groups,
           quoteDate: held ? sessionClose.session : (meta.quoteDate || null),
           quoteTime: held ? "13:30:00" : (meta.quoteTime || null),
-          heldClose: held ? { session: sessionClose.session, today: sessionClose.today || null } : null
+          heldClose: held ? { session: sessionClose.session, today: sessionClose.today || null } : null,
+          // 這次重抓後還是沒有報價的檔數（休市暫留收盤時不算）；前端多到不正常會標示
+          quoteMissing: held ? 0 : (meta.missing || 0)
         });
       } catch (err) {
         return Response.json({ error: String(err) }, { status: 502 });

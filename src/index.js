@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-05 00:20:07";
+const BUILD_STAMP = "2026-10-05 10:05:17";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1342,7 +1342,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>精選十大多空族群</b>（原族群大戶力）：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。<b>排序</b>：個股名單預設照盤中大戶力排，值大的在上、小的在下，沒有大戶力資料的排最後。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
         <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。今天跌、族內後 1/3、不比櫃買強，且現價低於前天收盤（⚔️劍）；🔪（刀）＝現價低於昨收。正式名單（強空積極）最多 10 檔，跌幅深的在前，大戶力最負的在上；多方打少（強族群裡逆勢走弱）和收割區域（已跌 5% 以上，不追空）只列名字。點列或按「圖」欄可以開該檔的K線圖。</li>
-        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
+        <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
         <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。每列最前面的時間是「這檔主力副圖最後更新到幾點」，不是「資料只算到這個時間點」——大戶力%一直都是當天開盤到現在整天累加；越接近收盤，越多股票這欄會顯示接近的時間（因為大家幾乎都還在更新），不代表比較早的資料不見了。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
@@ -4443,6 +4443,24 @@ function brewHistoryDay(date){
   const days = brewHistoryData && brewHistoryData.days ? brewHistoryData.days : {};
   return (date && days[date]) || { brew: [], launch: [] };
 }
+// 2026-10-05 使用者：兩台電腦「今天曾發動」一台 2 檔、一台 35 檔。後端同一檔每次「回落→再發動」都另存一筆
+// （鼎元今天 10 筆、9/30 聯合再生 56 筆），列表一筆一列就變成同一檔重複出現、檔數灌水（35 筆其實 13 檔）。
+// 一檔只列一次：時間＝第一次發動，旁邊標 ×N（滑鼠移上去看每一次的時間），跟上面正在發動的列表一樣。
+function brewLaunchByStock(rows){
+  const byCode = new Map();
+  (rows || []).slice().sort((a, b) => String(a.recordedAt).localeCompare(String(b.recordedAt))).forEach((r) => {
+    const cur = byCode.get(r.code);
+    if (cur){ cur.launchTimes.push(r.recordedAt); cur.launchCount += 1; return; }
+    byCode.set(r.code, Object.assign({}, r, { launchTimes: [r.recordedAt], launchCount: 1 }));
+  });
+  return [...byCode.values()];
+}
+// 這台電腦現在有報價（價格 > 0）的代號；證交所那段沒抓到、停牌的就沒有
+function brewQuotedCodes(){
+  const out = new Set();
+  ((lastData && lastData.groups) || []).forEach((g) => (g.stocks || []).forEach((st) => { if (Number(st.price) > 0) out.add(st.code); }));
+  return out;
+}
 const fmtTime = (iso) => { const m = /T(\\d{2}):(\\d{2})/.exec(String(iso || '')); return m ? m[1] + ':' + m[2] : ''; };
 const num2 = (v) => (Number.isFinite(Number(v)) && v !== null ? Number(v).toFixed(2) : '—');
 // 2026-09-30 使用者：「盤中」看不懂，要直接秀時間——剛觸發、後端還沒記到的先用現在的時間顯示，
@@ -4456,8 +4474,10 @@ function brewPrevCellHtml(kind, prev){
 }
 function brewPastLaunchRowHtml(r, opts){
   const cls = dirClass(r.changePct);
+  const relaunchTimes = (r.launchTimes || []).map(fmtTime).filter(Boolean).join('、');
+  const relaunchBadge = r.launchCount > 1 ? ' <span class="bl-relaunch" title="這天發動過 ' + r.launchCount + ' 次（含回落又重新發動）：' + relaunchTimes + '">×' + r.launchCount + '</span>' : '';
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
-    '<td class="combo-code">' + brewWhen(r) + '</td>' +
+    '<td class="combo-code">' + brewWhen(r) + relaunchBadge + '</td>' +
     '<td class="combo-code">' + r.code + '</td><td class="combo-name">' + r.name + '</td>' +
     '<td><span class="sig-group">' + (r.group || '—') + '</span></td>' +
     (opts && opts.prev ? brewPrevCellHtml('launch', opts.prev.get(r.code)) : '') +
@@ -4502,7 +4522,7 @@ function brewTodayRows(){
   const recorded = brewHistoryDay(brewSessionDate());
   // 發動同一檔今天可能有好幾筆（分好幾次發動），只取最早（第一次）那筆；recorded.launch 已經照時間由舊到新排好。
   const launch = new Map();
-  recorded.launch.forEach((r) => { if (!launch.has(r.code)) launch.set(r.code, r); });
+  brewLaunchByStock(recorded.launch).forEach((r) => launch.set(r.code, r));
   const brew = new Map(recorded.brew.map((r) => [r.code, r]));
   if (m){
     m.launchBlocks.forEach((b) => b.rows.forEach((r) => {
@@ -4525,9 +4545,10 @@ function brewOverlapHtml(mode){
     ? { name: '昨天', label: '昨天 ' + mmdd(past[0]), date: past[0], rows: brewHistoryDay(past[0]) }
     : { name: '前天', label: '前天 ' + mmdd(past[1]), date: past[1], rows: brewHistoryDay(past[1]) };
   if (!later.date || !earlier.date) return '<div class="signal-empty"><div class="se-title">還沒有可以比對的兩天紀錄</div></div>';
+  const byStock = (kind, rows) => (kind === 'launch' ? brewLaunchByStock(rows[kind]) : rows[kind]);
   const pick = (kind) => {
-    const prev = new Map(earlier.rows[kind].map((r) => [r.code, r]));
-    return { rows: later.rows[kind].filter((r) => prev.has(r.code)), prev };
+    const prev = new Map(byStock(kind, earlier.rows).map((r) => [r.code, r]));
+    return { rows: byStock(kind, later.rows).filter((r) => prev.has(r.code)), prev };
   };
   const launch = pick('launch'), brew = pick('brew');
   const laterName = later.name, earlierName = earlier.name;
@@ -4542,12 +4563,13 @@ function brewPastDayHtml(){
   const date = brewViewDate();
   if (!date) return '<div class="signal-empty"><div class="se-title">還沒有那一天的紀錄</div><div class="se-sub">後端每個交易日都會留下醞釀名單與發動紀錄，上線前幾天的用日K回推；資料還沒進來時稍後再看。</div></div>';
   const day = brewHistoryDay(date);
+  const launchRows = brewLaunchByStock(day.launch);
   const mmdd = String(date).slice(5).replace('-', '/');
   const eod = day.launch.some((r) => r.eod);
-  return '<div class="race-sub">' + mmdd + ' 的紀錄（後端每日保存）：發動＝那天盤中第一次符合發動條件的時間與價格（一檔記一次）；醞釀＝那天盤前算出來的醞釀名單。' +
+  return '<div class="race-sub">' + mmdd + ' 的紀錄（後端每日保存）：發動＝那天盤中第一次符合發動條件的時間與價格（一檔一列，×N＝那天回落又重新發動、總共發動 N 次）；醞釀＝那天盤前算出來的醞釀名單。' +
     (eod ? '發動時間寫「收盤」的＝那天沒有盤中紀錄（保存功能上線前，或那天程式沒在跑），用收盤價回推：收盤過箱頂、收盤均線分數>10、全天周轉率≥5% 或量≥5 日均量 1.5 倍；盤中曾發動又回落的補不回來。' : '') + '</div>' +
-    '<div class="bl-section bl-launch">發動（突破）・' + day.launch.length + ' 檔</div>' +
-    (day.launch.length ? brewPastTableHtml('launch', day.launch) : '<div class="race-note">那天沒有股票發動</div>') +
+    '<div class="bl-section bl-launch">發動（突破）・' + launchRows.length + ' 檔</div>' +
+    (launchRows.length ? brewPastTableHtml('launch', launchRows) : '<div class="race-note">那天沒有股票發動</div>') +
     '<div class="bl-section bl-brew">醞釀（整理）・' + day.brew.length + ' 檔</div>' +
     (day.brew.length ? brewPastTableHtml('brew', day.brew) : '<div class="race-note">那天沒有醞釀名單紀錄</div>');
 }
@@ -4568,20 +4590,27 @@ function brewRestoreDismissed(){
 function brewFallenTodayHtml(m){
   // 今天盤中曾經發動（後端紀錄）、現在已經回落不符合發動條件的：一起列出來，訊號才不會「不見」
   const live = new Set(m.launchBlocks.flatMap((b) => b.rows.map((r) => r.code)));
-  const all = brewHistoryDay(brewSessionDate()).launch.filter((r) => !live.has(r.code));
-  if (!all.length) return '';
+  const notLive = brewLaunchByStock(brewHistoryDay(brewSessionDate()).launch).filter((r) => !live.has(r.code));
+  // 2026-10-05 使用者：35 檔那台是族群表後半段的報價整段沒抓到——沒有價格就判斷不了還在不在發動，
+  // 不能當成「已回落」，另外列名字說明（下次報價抓到就會回到上面的發動列表或這裡）。
+  const quoted = brewQuotedCodes();
+  const all = notLive.filter((r) => quoted.has(r.code));
+  const unknown = notLive.filter((r) => !quoted.has(r.code));
+  const unknownNote = unknown.length ? '<div class="race-note">另有 ' + unknown.length + ' 檔今天發動過、但這台電腦現在抓不到它的報價，判斷不了還有沒有在發動，先不列進「今天曾發動」：' +
+    unknown.map((r) => r.name).join('、') + '</div>' : '';
+  if (!all.length) return unknownNote ? '<div class="bl-section bl-fallen">今天曾發動・0 檔</div>' + unknownNote : '';
   const dismissed = brewDismissedCodes();
   const rows = all.filter((r) => !dismissed.has(r.code));
   const hiddenCount = all.length - rows.length;
   const restoreBtn = hiddenCount ? '<button class="chart-tab chips-btn bl-restore-btn">顯示已隱藏的 ' + hiddenCount + ' 檔</button>' : '';
   if (!rows.length){
     return '<div class="bl-section bl-fallen">今天曾發動・已全部隱藏（' + all.length + ' 檔）</div>' +
-      '<div class="race-note">紀錄還在，明天切到「昨天」還是查得到。' + restoreBtn + '</div>';
+      '<div class="race-note">紀錄還在，明天切到「昨天」還是查得到。' + restoreBtn + '</div>' + unknownNote;
   }
   return '<div class="bl-section bl-fallen">今天曾發動・' + rows.length + ' 檔</div>' +
     '<div class="race-sub">回落後訊號不會消失，這裡永遠找得到；按右邊「全部隱藏」只是這台瀏覽器不再顯示，紀錄還在，明天用「昨天」查得到。' +
     '<button class="chart-tab chips-btn bl-dismiss-btn" data-codes="' + rows.map((r) => r.code).join(',') + '">全部隱藏</button></div>' +
-    brewPastTableHtml('launch', rows) + (hiddenCount ? '<div class="race-note">' + restoreBtn + '</div>' : '');
+    brewPastTableHtml('launch', rows) + (hiddenCount ? '<div class="race-note">' + restoreBtn + '</div>' : '') + unknownNote;
 }
 function brewLaunchHtml(){
   if (!brewLaunchData){
@@ -6585,7 +6614,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-05 00:20:07';
+const BUILD_STAMP = '2026-10-05 10:05:17';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -7168,7 +7197,11 @@ async function refresh(){
       // 休市日／開盤前：worker 給的是上一個交易日的日K收盤，不是即時報價（2026-10-04 使用者：週末 TWSE 測試盤假價）。
       updatedEl.textContent = '休市中，顯示 ' + String(lastData.heldClose.session).slice(5).replace('-', '/') + ' 收盤（' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + ' 確認）';
     } else {
-      updatedEl.textContent = '報價更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW');
+      // 2026-10-05：證交所那段報價重抓後還是沒拿到的股票數（worker 算好的）；多到不正常就標出來，
+      // 才知道這台電腦的名單（醞釀／發動、盤中333…）少了一批股票，不是它們真的沒動。
+      const missing = Number(lastData && lastData.quoteMissing) || 0;
+      updatedEl.textContent = '報價更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') +
+        (missing > 10 ? '（⚠ 有 ' + missing + ' 檔這次沒抓到報價）' : '');
     }
   }
   render();
@@ -8042,18 +8075,26 @@ function chunk(arr, size) {
   return out;
 }
 
-async function fetchQuoteChunk(codes) {
+async function fetchQuoteChunk(codes, timeoutMs) {
   const exCh = codes.flatMap((c) => [`tse_${c}.tw`, `otc_${c}.tw`]).join("|");
   const url = `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${exCh}&json=1&delay=0`;
-  const resp = await fetch(url, {
-    headers: {
-      Referer: "https://mis.twse.com.tw/stock/index.jsp",
-      "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)"
-    }
-  });
-  if (!resp.ok) throw new Error(`TWSE API 回應錯誤: ${resp.status}`);
-  const data = await resp.json();
-  return data.msgArray || [];
+  // timeoutMs：重抓時才給（重抓有總時間上限，不能卡在一段一直不回的請求上）
+  const ctrl = timeoutMs ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+  try {
+    const resp = await fetch(url, {
+      headers: {
+        Referer: "https://mis.twse.com.tw/stock/index.jsp",
+        "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)"
+      },
+      signal: ctrl ? ctrl.signal : undefined
+    });
+    if (!resp.ok) throw new Error(`TWSE API 回應錯誤: ${resp.status}`);
+    const data = await resp.json();
+    return data.msgArray || [];
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 async function fetchQuotes(codes) {
@@ -8066,11 +8107,27 @@ async function fetchQuotes(codes) {
   // 回（失敗那幾段的股票價格維持null，前端本來就會跳過不計入族群平均漲跌幅）；真的整批都失敗
   // 才維持原本502（連不上後端的提示要照舊出現）。
   const settled = await Promise.allSettled(chunks.map((c) => fetchQuoteChunk(c)));
-  const fulfilled = settled.filter((r) => r.status === "fulfilled");
-  if (!fulfilled.length) throw settled[0].reason;
-  const results = fulfilled.map((r) => r.value);
+  // 2026-10-05 使用者：兩台電腦「今天曾發動」一台 2 檔、一台 35 檔。35 檔那台列出來的全是族群表後半段
+  // （第 4、5 段：光電、光學鏡頭、面板…）的股票：那兩段報價整段沒抓到，沒有價格就判斷不了還在不在發動，
+  // 全被當成「已回落」。5 段同時打偶爾後面幾段會失敗或回空的；沒抓到的段落一段一段重抓（隔 0.3 秒、
+  // 每段最多再 2 次、全部重抓最多 5 秒），還是沒有的才維持 null，並把沒價格的檔數交給前端標示。
+  const results = settled.map((r) => (r.status === "fulfilled" ? r.value : null));
+  const retryUntil = Date.now() + 5000;
+  let retried = 0;
+  for (let i = 0; i < chunks.length; i++) {
+    for (let attempt = 0; attempt < 2 && !(results[i] && results[i].length) && Date.now() < retryUntil - 500; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      retried++;
+      try {
+        const again = await fetchQuoteChunk(chunks[i], Math.max(1000, retryUntil - Date.now()));
+        if (again.length || !results[i]) results[i] = again;
+      } catch (e) { /* 這段再試一次，還是不行就算了 */ }
+    }
+  }
+  if (!results.some((r) => r !== null)) throw settled[0].reason;
   let quoteDate = "", quoteTime = "";
   for (const msgArray of results) {
+    if (!msgArray) continue;
     for (const item of msgArray) {
       const code = item.c;
       // d／t＝這筆報價的日期（YYYYMMDD）／時間（HH:MM:SS）；取最新的一筆，讓頁面知道行情是不是今天盤中的
@@ -8114,8 +8171,10 @@ async function fetchQuotes(codes) {
       }
     }
   }
+  const missing = codes.filter((c) => quotes[c].price === null).length;
   Object.defineProperty(quotes, "__meta", {
-    value: { quoteDate: quoteDate ? quoteDate.slice(0, 4) + "-" + quoteDate.slice(4, 6) + "-" + quoteDate.slice(6, 8) : null, quoteTime: quoteTime || null },
+    value: { quoteDate: quoteDate ? quoteDate.slice(0, 4) + "-" + quoteDate.slice(4, 6) + "-" + quoteDate.slice(6, 8) : null, quoteTime: quoteTime || null,
+      missing, retried },
     enumerable: false
   });
   return quotes;
@@ -8482,7 +8541,9 @@ export default {
           groups,
           quoteDate: held ? sessionClose.session : (meta.quoteDate || null),
           quoteTime: held ? "13:30:00" : (meta.quoteTime || null),
-          heldClose: held ? { session: sessionClose.session, today: sessionClose.today || null } : null
+          heldClose: held ? { session: sessionClose.session, today: sessionClose.today || null } : null,
+          // 這次重抓後還是沒有報價的檔數（休市暫留收盤時不算）；前端多到不正常會標示
+          quoteMissing: held ? 0 : (meta.missing || 0)
         });
       } catch (err) {
         return Response.json({ error: String(err) }, { status: 502 });
