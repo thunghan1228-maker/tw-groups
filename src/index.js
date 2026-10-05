@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-05 20:17:17";
+const BUILD_STAMP = "2026-10-05 20:44:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -799,6 +799,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .pk-badge.buy{background:rgba(230,103,95,.16);color:#e6675f;border:1px solid #e6675f;}
   .pk-badge.add{background:rgba(234,179,8,.16);color:#eab308;border:1px solid #eab308;}
   .pk-badge.reduce{background:rgba(56,189,248,.14);color:#38bdf8;border:1px solid #38bdf8;}
+  .pk-badge.skip{background:transparent;color:var(--muted);border:1px solid var(--line);}
+  .pk-why{font-size:12.5px;font-weight:700;color:var(--accent);}
   .pk-act .pk-act-main{flex:1;min-width:0;}
   .pk-act .pk-act-pnl{font-weight:800;white-space:nowrap;}
   .pk-log-day{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;}
@@ -7577,7 +7579,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-05 20:17:17';
+const BUILD_STAMP = '2026-10-05 20:44:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -8521,9 +8523,13 @@ function pkTodayHtml(data){
   html += '<button class="pk-btn-big" data-pk-remind="1">🔔 模擬 13:00 的提醒</button>' +
     '<div class="sw-rule">13:00 提醒：交易日 13:00（到 13:25 收盤試撮前都算）頁面開著（不用開這個面板）就會用即時報價算一次：持股跌破出場線／減碼線、名單裡現價低於開盤（收黑）、持股再收黑，跳通知加提示音。' +
     '手機 App 那種背景推播做不到，頁面要開著；可以在「模組」關掉。盤中按這顆就是用現在的報價算；收盤後按就用上面這天的結果示範。</div>';
+  // 2026-10-05 使用者：「沒進」看不懂 → 標題寫「模組沒買」，每檔寫後端算出來的實際原因（舊後端沒有 reason 就照舊）
   const missed = sim.missed || [];
-  html += '<div class="pk-fold" data-pk-fold="missed"><span>今天也收黑、但沒進（' + missed.length + '）</span><span>' + (pkState.showMissed ? '▾' : '▸') + '</span></div>';
-  if (pkState.showMissed) html += missed.length ? '<div class="pk-todo">' + missed.map((r) => '<div class="pk-act pk-click" data-code="' + r.code + '" data-name="' + r.name + '"><b>' + r.name + '</b> ' + r.code + ' <span class="muted">收盤 ' + pkPrice(r.close) + '・' + swPct(r.changePct) + '・滿檔或換股次數用完</span></div>').join('') + '</div>' : '<div class="race-note">沒有</div>';
+  html += '<div class="pk-fold" data-pk-fold="missed"><span>今天也收黑、但模組沒買（' + missed.length + '）</span><span>' + (pkState.showMissed ? '▾' : '▸') + '</span></div>';
+  if (pkState.showMissed) html += missed.length ? '<div class="sw-rule">這些股票在名單或每日新進裡、今天也收黑，照規則是買點，但模組沒買。同一天好幾檔收黑時，先買設成 ★ 優先的，再來是名單（照名次），最後才是每日新進；' +
+      '滿檔時只會換掉正在賠錢的持股，不在名單裡的每買一檔算一次換股。</div><div class="pk-todo">' + missed.map((r) => '<div class="pk-act pk-click" data-code="' + r.code + '" data-name="' + r.name + '"><span class="pk-badge skip">沒買</span>' +
+      '<span class="pk-act-main"><b>' + r.name + '</b> ' + r.code + (r.source ? ' <span class="pk-src ' + r.source + '">' + (PK_SRC_LABEL[r.source] || r.source) + '</span>' : '') +
+      ' <span class="muted">收盤 ' + pkPrice(r.close) + '・' + swPct(r.changePct) + '</span><br><span class="pk-why">' + (r.reason || '滿檔或換股次數用完') + '</span></span></div>').join('') + '</div>' : '<div class="race-note">沒有</div>';
   // ④ 本週操作紀錄
   const log = sim.log || [];
   const week = data.thisWeek || {};
@@ -8829,31 +8835,83 @@ function pkMaLive(closes, price, n){
   if (prev.length < n - 1) return null;
   return (prev.reduce((s, x) => s + x, 0) + price) / n;
 }
-function pkLiveActions(sim, quotes, p){
+// 13:00 提醒：用即時報價、照後端收盤時同一套順序先算一次（2026-10-05 使用者：沒買的寫清楚實際原因）
+// 1) 持股：破出場線全部賣 → 破減碼線減 1 批（只剩 1 批就是出場）→ 星期五還在賠的全部賣
+// 2) 收黑的候選照順序買：★優先 → 名單（照名次）→ 每日新進（照排序方式）。不在名單的每買一檔算一次換股；
+//    滿檔時開了滿檔換股、本週還有次數，就換掉賠最多的一檔；買不了的寫原因
+// 3) 今天沒動過的持股再收黑加 1 批
+function pkLiveBlack(q, score, p){
+  if (!q || !(q.price > 0) || !(q.open > 0) || !(q.price < q.open)) return false;
+  if (p.black === 'range' && !(q.changePercent >= -10 && q.changePercent <= 3)) return false;
+  return !(Number(p.bscore) && (score || 0) < Number(p.bscore));
+}
+function pkMonday(day){
+  const d = new Date(day + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() - (d.getUTCDay() + 6) % 7);
+  return d.toISOString().slice(0, 10);
+}
+function pkLiveActions(sim, quotes, p, dataDate){
   const out = [];
-  let holding = (sim.holdings || []).length;
+  const fee = pkFee(p), sellRate = fee > 0 ? (0.1425 * fee + 0.3) / 100 : 0;
+  const today = twTodayStr();
+  const friday = new Date(today + 'T00:00:00Z').getUTCDay() === 5;
+  const swaps = Number(sim.swaps !== undefined ? sim.swaps : p.swaps) || 0;
+  // 資料最新一天跟今天不同週（例如拿週五的資料算週一）：今天是新的一週，換股次數從 0 算
+  let used = dataDate && pkMonday(dataDate) !== pkMonday(today) ? 0 : (Number(sim.swapsUsed) || 0);
+  const held = [];               // 收盤後還抱著的：{ h, q, ret（扣賣出費用後的報酬，換股挑賠最多的）, touched（今天有動過，不加碼）}
   for (const h of sim.holdings || []){
     const q = quotes[h.code];
-    if (!q || !(q.price > 0)) continue;
+    if (!q || !(q.price > 0)){ held.push({ h, q: null, ret: null, touched: false }); continue; }
+    const ret = h.cost > 0 && h.shares > 0 ? (h.shares * q.price * (1 - sellRate) / 10000 - h.cost) / h.cost : null;
     const xma = pkMaLive(h.lastCloses, q.price, p.xma), rma = pkMaLive(h.lastCloses, q.price, p.rma);
-    if (xma !== null && q.price < xma){ out.push({ type: 'exit', code: h.code, name: h.name, price: q.price, reason: '跌破' + p.xma + '日線・全部賣', shares: h.shares }); holding -= 1; continue; }
-    if (p.reduce && rma !== null && q.price < rma && h.armed !== false){ out.push({ type: 'reduce', code: h.code, name: h.name, price: q.price, reason: '跌破' + p.rma + '日線・減1批' }); continue; }
-    if (p.addon && h.batches < p.lots && q.open > 0 && q.price < q.open) out.push({ type: 'add', code: h.code, name: h.name, price: q.price, reason: '再收黑・加到第' + (h.batches + 1) + '批' });
+    if (xma !== null && q.price < xma){ out.push({ type: 'exit', code: h.code, name: h.name, price: q.price, reason: '跌破' + p.xma + '日線・全部賣', shares: h.shares }); continue; }
+    if (p.reduce && rma !== null && q.price < rma && h.armed !== false){
+      const last = (h.batches || 0) <= 1;
+      out.push({ type: last ? 'exit' : 'reduce', code: h.code, name: h.name, price: q.price, reason: '跌破' + p.rma + '日線・減1批' + (last ? '（最後一批）' : '') });
+      if (!last) held.push({ h, q, ret, touched: true });
+      continue;
+    }
+    if (p.fri && friday && ret !== null && ret < 0){ out.push({ type: 'exit', code: h.code, name: h.name, price: q.price, reason: '週五汰弱・全部賣', shares: h.shares }); continue; }
+    held.push({ h, q, ret, touched: false });
   }
-  const black = (sim.watch || []).filter((w) => {
-    const q = quotes[w.code];
-    if (!q || !(q.price > 0) || !(q.open > 0) || !(q.price < q.open)) return false;
-    if (p.black === 'range' && !(q.changePercent >= -10 && q.changePercent <= 3)) return false;
-    return !(Number(p.bscore) && (w.score || 0) < Number(p.bscore));
-  }).sort((a, b) => (pkStars.includes(b.code) - pkStars.includes(a.code)) || ((a.source === 'list') ? -1 : 0) - ((b.source === 'list') ? -1 : 0) || (b.score || 0) - (a.score || 0));
-  let free = Math.max(0, p.maxpos - holding);
-  for (const w of black){
-    const q = quotes[w.code];
-    const amount = p.per * 10000 / p.lots;
-    if (free > 0 && (w.source === 'list' || sim.swapsUsed < sim.swaps)){
-      out.push({ type: 'buy', code: w.code, name: w.name, price: q.price, reason: (PK_SRC_LABEL[w.source] || '') + '收黑・買第1批', shares: Math.floor(amount / q.price) });
-      free -= 1;
-    } else out.push({ type: 'skip', code: w.code, name: w.name, price: q.price, reason: '收黑但滿檔（或換股次數用完）' });
+  const wsortVal = (w) => Number(p.wsort === 'val' ? w.val5 : p.wsort === 'hilen' ? w.hiLen : p.wsort === 'mcap' ? w.mcap : w.score) || 0;
+  const black = (sim.watch || []).map((w, k) => ({ w, k })).filter((x) => pkLiveBlack(quotes[x.w.code], x.w.score, p)).sort((a, b) =>
+    (pkStars.includes(b.w.code) - pkStars.includes(a.w.code)) || ((a.w.source === 'list' ? 0 : 1) - (b.w.source === 'list' ? 0 : 1)) ||
+    (a.w.source === 'list' ? a.k - b.k : (wsortVal(b.w) - wsortVal(a.w)) || ((b.w.score || 0) - (a.w.score || 0)) || ((b.w.val5 || 0) - (a.w.val5 || 0)) ||
+      String(a.w.code).localeCompare(String(b.w.code))));
+  const amount = p.per * 10000 / p.lots;
+  const bought = [];
+  const swapNote = () => swaps <= 0 ? '模組設定不換股' : '本週換股 ' + used + '/' + swaps + ' 次用完';
+  for (const { w } of black){
+    const q = quotes[w.code], isList = w.source === 'list', label = PK_SRC_LABEL[w.source] || '';
+    const shares = Math.floor(amount / q.price);
+    let why = '';
+    if (shares <= 0) why = '一批 ' + pkNum(amount / 10000, 1) + ' 萬買不到 1 股';
+    else if (held.length + bought.length >= p.maxpos){
+      let worst = null;
+      if (p.full && used < swaps) for (const x of held) if (x.ret !== null && x.ret < 0 && (!worst || x.ret < worst.ret)) worst = x;
+      if (worst){
+        held.splice(held.indexOf(worst), 1);
+        out.push({ type: 'exit', code: worst.h.code, name: worst.h.name, price: worst.q.price, reason: '滿檔換弱・換成 ' + w.name, shares: worst.h.shares });
+        used += 1;
+        bought.push(w.name);
+        out.push({ type: 'buy', code: w.code, name: w.name, price: q.price, reason: label + '收黑・買第1批（換股）', shares });
+        continue;
+      }
+      let head = '滿檔 ' + (held.length + bought.length) + '/' + p.maxpos;
+      if (bought.length) head = '空位給了排前面的' + bought.join('、') + '，' + head;
+      why = head + '，' + (!p.full ? '模組沒開滿檔換股' : (swaps <= 0 || used >= swaps) ? swapNote() : (bought.length ? '其他持股都沒賠錢' : '持股都沒賠錢') + '，沒有可以換掉的');
+    } else if (!isList && used >= swaps) why = label + '買進要算換股，' + swapNote();
+    if (why){ out.push({ type: 'skip', code: w.code, name: w.name, price: q.price, reason: '收黑・' + why }); continue; }
+    if (!isList) used += 1;
+    bought.push(w.name);
+    out.push({ type: 'buy', code: w.code, name: w.name, price: q.price, reason: label + '收黑・買第1批' + (isList ? '' : '（換股）'), shares });
+  }
+  if (p.addon){
+    for (const x of held){
+      if (x.touched || (x.h.batches || 0) >= p.lots || !pkLiveBlack(x.q, x.h.score, p)) continue;
+      out.push({ type: 'add', code: x.h.code, name: x.h.name, price: x.q.price, reason: '再收黑・加到第' + ((x.h.batches || 0) + 1) + '批', shares: Math.floor(amount / x.q.price) });
+    }
   }
   return out;
 }
@@ -8904,7 +8962,7 @@ async function pkRunReminder(manual){
       const q = await res.json();
       // 今天盤中的報價（日期是今天、而且比資料最新一天新）才拿來算
       if (res.ok && q && q.quotes && q.quoteDate === twTodayStr() && q.quoteDate > data.date){
-        actions = pkLiveActions(sim, q.quotes, p); live = true; when = String(q.quoteTime || '').slice(0, 5);
+        actions = pkLiveActions(sim, q.quotes, p, data.date); live = true; when = String(q.quoteTime || '').slice(0, 5);
       }
     } catch (e) { /* 抓不到即時報價就用收盤結果示範 */ }
   }
@@ -8917,7 +8975,7 @@ async function pkRunReminder(manual){
   const title = '創高黑・' + (live ? '13:00 組合提醒（' + when + '）' : '模擬示範（' + pkDay(data.date) + ' 收盤結果）');
   const summary = ['exit', 'reduce', 'buy', 'add'].filter((t) => count(t)).map((t) => ({ exit: '出場', reduce: '減碼', buy: '買進', add: '加碼' })[t] + ' ' + count(t) + ' 檔').join('、') || '沒有要做的事';
   const lines = p.push === 'count' ? [summary, '點開看是哪幾檔、幾批、什麼價位。'] :
-    actions.map((x) => ({ exit: '🟢 出場', reduce: '🔵 減碼', buy: '🔴 買進', add: '🟡 加碼', skip: '⚪ 沒進' })[x.type] + ' ' + x.name + ' ' + x.code + '・' + x.reason + '・' + pkPrice(x.price) + (x.shares ? '・' + Number(x.shares).toLocaleString() + ' 股' : ''));
+    actions.map((x) => ({ exit: '🟢 出場', reduce: '🔵 減碼', buy: '🔴 買進', add: '🟡 加碼', skip: '⚪ 沒買' })[x.type] + ' ' + x.name + ' ' + x.code + '・' + x.reason + '・' + pkPrice(x.price) + (x.shares ? '・' + Number(x.shares).toLocaleString() + ' 股' : ''));
   pkBeep();
   pkShowAlert(title + '・' + summary, lines);
   if ('Notification' in window && Notification.permission === 'granted'){
