@@ -114,6 +114,8 @@ async function fetchQuotes(codes) {
       const d = String(item.d || ""), t = String(item.t || "");
       if (/^\\d{8}$/.test(d) && (d > quoteDate || (d === quoteDate && t > quoteTime))) { quoteDate = d; quoteTime = t; }
       if (!code || !(code in quotes)) continue;
+      // 股名（2026-10-05 自選股：族群表以外的股票也要有中文股名）；/api/groups 不會帶出去
+      if (item.n) quotes[code].name = String(item.n).trim();
       // 價格一定要是正數才算有效：2026-10-04（週日）TWSE 回了一批 z／委買委賣是 0 的資料
       // （週末測試盤），0 被當成有效成交價算出 -100%、前端再推算漲跌就變 NaN。
       const pos = (v) => (Number.isFinite(v) && v > 0 ? v : NaN);
@@ -138,6 +140,7 @@ async function fetchQuotes(codes) {
         const limitDownPrice = parseFloat(item.w);
         const volume = parseInt(item.v, 10);
         quotes[code] = {
+          name: quotes[code].name,
           price: finalPrice,
           // 開盤價：創高黑選股 13:20 提醒用來判斷「收黑」（現價 < 開盤）；/api/groups 不會帶出去
           open: pos(parseFloat(item.o)),
@@ -190,6 +193,21 @@ async function proxyHanstockBars(pathname, cacheSeconds = 20) {
       "content-type": "application/json; charset=UTF-8",
       "cache-control": live ? "no-store" : "public, max-age=" + cacheSeconds
     }
+  });
+}
+
+async function proxyHanstockPost(pathname, request) {
+  // 自選股（2026-10-05 使用者）：同步碼放在 POST 內容裡原樣轉給後端，不放網址、不快取
+  const body = await request.text();
+  if (body.length > 80000) return Response.json({ status: "error", error: "清單太大了" }, { status: 413 });
+  const resp = await fetch("https://hanstock-production-b872.up.railway.app" + pathname, {
+    method: "POST",
+    headers: { "content-type": "application/json", Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
+    body
+  });
+  return new Response(await resp.text(), {
+    status: resp.status,
+    headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" }
   });
 }
 
@@ -395,6 +413,38 @@ export default {
         for (const code of codes) {
           const q = quotes[code];
           if (q && Number.isFinite(q.price)) out[code] = { price: q.price, open: Number.isFinite(q.open) ? q.open : null, changePercent: q.changePercent, limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: q.volume };
+        }
+        return new Response(JSON.stringify({ quotes: out, quoteDate: quotes.__meta.quoteDate, quoteTime: quotes.__meta.quoteTime }), { headers });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: String(e && e.message || e) }), { status: 502, headers });
+      }
+    }
+    if (url.pathname === "/api/watchlist/load" || url.pathname === "/api/watchlist/save") {
+      // 自選股（2026-10-05 使用者）：兩台電腦＋手機用同一個同步碼看到同一份清單
+      if (request.method !== "POST") return Response.json({ status: "error", error: "要用 POST" }, { status: 405 });
+      try {
+        return await proxyHanstockPost("/api/hub" + url.pathname.slice(4), request);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/watch-quotes") {
+      // 自選股：族群表以外的股票報價（族群股前端直接用首頁那份 /api/groups）；上市、上櫃都問，附股名；
+      // 一次最多 200 檔，不快取
+      const codes = [...new Set(String(url.searchParams.get("codes") || "").split(",").map((c) => c.trim().toUpperCase()).filter((c) => /^[0-9A-Z]{4,6}$/.test(c)))].slice(0, 200);
+      const headers = { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" };
+      if (!codes.length) return new Response(JSON.stringify({ quotes: {} }), { headers });
+      try {
+        const quotes = await fetchQuotes(codes);
+        const out = {};
+        for (const code of codes) {
+          const q = quotes[code];
+          if (!q) continue;
+          if (Number.isFinite(q.price)) {
+            out[code] = { name: q.name || null, price: q.price, change: q.change, changePercent: q.changePercent, limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: q.volume };
+          } else if (q.name) {
+            out[code] = { name: q.name, price: null };
+          }
         }
         return new Response(JSON.stringify({ quotes: out, quoteDate: quotes.__meta.quoteDate, quoteTime: quotes.__meta.quoteTime }), { headers });
       } catch (e) {

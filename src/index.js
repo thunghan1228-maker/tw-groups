@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-05 18:50:59";
+const BUILD_STAMP = "2026-10-05 19:14:15";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -920,6 +920,65 @@ const HTML_PAGE = `<!DOCTYPE html>
   .ck-judge.bad{color:#15803d;}
   .ck-judge.ok{color:#e6675f;}
   .ck-btn{cursor:pointer;color:var(--muted);font-weight:800;padding:0 4px;}
+  /* 自選股（2026-10-05 使用者） */
+  .wl-sync{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);margin-bottom:10px;font-size:13px;}
+  .wl-sync input{flex:1 1 220px;min-width:0;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);font-size:14px;font-family:inherit;}
+  .wl-sync-ops{margin-left:auto;display:inline-flex;gap:6px;flex-wrap:wrap;}
+  .wl-key{font-family:monospace;font-size:14px;padding:2px 6px;border-radius:6px;background:var(--bg);}
+  .wl-hint{flex-basis:100%;font-size:12px;color:var(--muted);margin:2px 0 6px;}
+  .wl-status{font-size:12px;color:var(--muted);}
+  .wl-status.ok{color:#4ade80;}
+  .wl-status.err{color:#f87171;font-weight:700;}
+  .wl-btn{padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:#33333a;color:#fff;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;white-space:nowrap;}
+  .wl-btn:hover{filter:brightness(1.2);}
+  .wl-btn.primary{background:#7c3aed;border-color:#7c3aed;}
+  .wl-groups{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:8px;}
+  .wl-gtab{padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;}
+  .wl-gtab.active{background:#f5b301;border-color:#f5b301;color:#1a1a1a;}
+  .wl-gtab.add{border-style:dashed;color:var(--muted);}
+  .wl-gcount{display:inline-block;margin-left:6px;font-size:12px;opacity:.75;}
+  .wl-gops{margin-left:auto;display:inline-flex;gap:6px;}
+  .wl-add{display:flex;gap:6px;margin-bottom:6px;}
+  .wl-add input{flex:1;min-width:0;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--text);font-size:14px;font-family:inherit;}
+  .wl-sorts{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin:6px 0 8px;}
+  .wl-sort{padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;}
+  .wl-sort.active{background:#7c3aed;border-color:#7c3aed;color:#fff;}
+  .wl-table-wrap{overflow-x:auto;}
+  .wl-table{width:100%;border-collapse:collapse;font-size:14px;min-width:900px;font-variant-numeric:tabular-nums;}
+  .wl-table th,.wl-table td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:middle;}
+  .wl-table th{color:var(--muted);font-size:12px;font-weight:700;}
+  .wl-table .l{text-align:left;}
+  .wl-table tbody tr:hover{background:rgba(255,255,255,.04);}
+  .wl-stock{cursor:pointer;font-weight:700;}
+  .wl-stock:hover .wl-name{text-decoration:underline;}
+  .wl-name{margin-right:6px;}
+  .wl-note{max-width:200px;overflow:hidden;text-overflow:ellipsis;color:var(--muted);cursor:pointer;}
+  .wl-note-empty{opacity:.45;font-size:12px;}
+  .wl-ops{display:inline-flex;gap:4px;justify-content:flex-end;align-items:center;}
+  .wl-op{background:none;border:1px solid var(--line);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 6px;font-family:inherit;}
+  .wl-op.del:hover{color:#f87171;border-color:#f87171;}
+  .wl-gsel{padding:2px 4px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:12px;max-width:90px;}
+  .wl-summary{font-size:13px;color:var(--muted);margin-top:8px;}
+  .wl-table .sig-label{font-size:11px;padding:2px 6px;display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.25;gap:1px;}
+  .wl-table .sig-label .hf-amt{font-size:.82em;font-weight:600;opacity:.92;}
+  .wl-table .sig-bull{background:var(--up);color:#fff;border-radius:6px;font-weight:700;}
+  .wl-table .sig-bear{background:var(--down);color:#fff;border-radius:6px;font-weight:700;}
+  .wl-table .chips-flag,.wl-table .sig-eligibility{margin-left:4px;}
+  @media (max-width: 640px){
+    /* 手機：留代號、名稱、均線分數、大戶力、漲跌幅、成交價、分組／移除；族群、漲跌、成交量、備註、標籤、上下移收起來 */
+    .wl-table{min-width:0;font-size:13px;}
+    .wl-table th,.wl-table td{padding:6px 4px;}
+    .wl-table th:nth-child(3),.wl-table td:nth-child(3),.wl-table th:nth-child(7),.wl-table td:nth-child(7),
+    .wl-table th:nth-child(9),.wl-table td:nth-child(9),.wl-table th:nth-child(10),.wl-table td:nth-child(10){display:none;}
+    .wl-table .chips-flag,.wl-table .sig-eligibility,.wl-table .wl-op[data-op="up"],.wl-table .wl-op[data-op="down"]{display:none;}
+    .wl-table .wl-name{display:inline-block;max-width:5.5em;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;margin-right:0;}
+    .wl-gsel{max-width:64px;}
+    .wl-gops{margin-left:0;}
+  }
+  .wl-star{background:none;border:none;cursor:pointer;color:#8b8178;font-size:15px;padding:0 3px;line-height:1;vertical-align:middle;font-family:inherit;}
+  .wl-star:hover{color:#f5b301;}
+  .wl-star.on{color:#f5b301;}
+  .race-row .race-star-slot,.race-col-labels .race-star-slot{flex:0 0 20px;text-align:center;}  /* 要蓋過 .race-col-labels span 的 5em */
   .ck-detail td{background:var(--panel-2);white-space:normal;text-align:left;font-size:12px;line-height:1.6;padding:8px 12px;}
   /* 2026-09-28 使用者：健診表要能照族群看（像學員專區的族群籤），也能整張表分族群排 */
   .ck-gchip{display:inline-flex;align-items:center;gap:4px;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;background:var(--panel);user-select:none;}
@@ -1019,7 +1078,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   @media (max-width: 640px){
     .toolbar-bottom{justify-content:flex-start;}
     .tb-btn{min-width:53px;}
-    .tb-sub{display:block;}  /* 手機窄：（自動）（手動）換到下一行，不要把名字從中間折斷 */  /* 2026-09-28：拿掉「個股研究中心」後剩七顆，在 375px 的手機也要一排放得下（7×53=371） */
+    .tb-sub{display:block;}
+    .race-row .race-star-slot,.race-col-labels .race-star-slot{display:none;}  /* 盤中333 手機一行塞不下，☆ 只在電腦／平板顯示（K線圖標題一樣有 ☆） */  /* 手機窄：（自動）（手動）換到下一行，不要把名字從中間折斷 */  /* 2026-09-28：拿掉「個股研究中心」後剩七顆，在 375px 的手機也要一排放得下（7×53=371） */
     /* 手機版K線圖視窗：標題列跟快速切換搜尋列擠不下，改成換行成兩列，
        避免搜尋框、進入分K按鈕被壓縮到點不到。 */
     .chart-modal-head{flex-wrap:wrap;row-gap:8px;}
@@ -1250,6 +1310,18 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div id="diagBody"></div>
   </div>
 </div>
+<div class="chips-modal" id="watchModal" hidden>
+  <div class="chips-inner" id="watchInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">自選股</div>
+        <div class="chips-sub">自己挑的股票分組追蹤：即時報價、盤中大戶力、均線分數、漲跌停、處置／注意、融資券／當沖／股期，點股票開K線圖。設定同步碼後，兩台電腦＋手機看到同一份清單。</div>
+      </div>
+      <button class="cm-icon-btn" id="watchClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="watchBody"></div>
+  </div>
+</div>
 <div id="buildStamp"></div>
 <button type="button" id="updateBanner" hidden>網頁有新版本，點一下更新</button>
 <div id="chartWindows"></div>
@@ -1257,7 +1329,7 @@ const HTML_PAGE = `<!DOCTYPE html>
 <div class="chart-modal" id="chartModal" hidden>
   <div class="chart-modal-inner" id="chartModalInner">
     <div class="chart-modal-head" id="chartModalHead">
-      <div><span class="cm-code" id="cmCode"></span><span class="cm-name" id="cmName"></span><span class="cm-data-badge" id="cmDataBadge" hidden>示範資料</span></div>
+      <div><span class="cm-code" id="cmCode"></span><span class="cm-name" id="cmName"></span><button type="button" class="wl-star" id="cmStar" data-code="" data-name="" title="加入自選股">☆</button><span class="cm-data-badge" id="cmDataBadge" hidden>示範資料</span></div>
       <span class="chart-info-bar" id="chartInfoBar"></span>
       <div class="cm-actions">
         <input type="text" class="cm-quick-search" id="cmQuickSearch" placeholder="輸入代號切換">
@@ -2671,6 +2743,8 @@ function openStockChart(code, name, tf){
   currentChart.name = name;
   document.getElementById('cmCode').textContent = code;
   document.getElementById('cmName').textContent = name;
+  const cmStar = document.getElementById('cmStar');
+  if (cmStar){ cmStar.dataset.code = code; cmStar.dataset.name = name || ''; wlRefreshStars(); }
   renderChartFlags(code);
   if (wasHidden){
     const panel = document.getElementById('chartModalInner');
@@ -2695,7 +2769,7 @@ function closeStockChart(){
   document.getElementById('chartModal').hidden = true;
   document.body.style.overflow = '';
   // 若是從訊號中心／盤後籌碼排行／下午報／健診／問診點進來的，關圖後讓它們回到最上層。
-  for (const id of ['signalModal', 'chipsModal', 'swingModal', 'heilongModal', 'pickerModal', 'checkupModal', 'diagModal']) document.getElementById(id).classList.remove('behind-chart');
+  for (const id of ['signalModal', 'chipsModal', 'swingModal', 'heilongModal', 'pickerModal', 'checkupModal', 'diagModal', 'watchModal']) document.getElementById(id).classList.remove('behind-chart');
 }
 
 let openGroupName = null;
@@ -2711,7 +2785,7 @@ function openGroupDetail(groupName){
     const prevClose = price / (1 + s.changePercent / 100);
     const changeAmt = price - prevClose;
     return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-      '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span></div>' +
+      '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + wlStarHtml(s.code, s.name) + '</div>' +
       stockValueColsHtml(price, changeAmt, s.changePercent) +
     '</div>';
   }).join('');
@@ -3285,6 +3359,7 @@ async function refreshSignalData(){
       todaySignalEvents = signals;
       mainForceRanking = ranking;
       mainForceRankingLoaded = true;
+      try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
       signalDataIsReal = true;
     } catch (e) {
       todaySignalEvents = buildDemoSignalsForDate(today)
@@ -3434,6 +3509,7 @@ async function refreshStockFlags(){
     const data = await res.json();
     if (data && data.stocks && typeof data.stocks === 'object'){
       stockFlags = data.stocks;
+      try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
       if (!document.getElementById('signalModal').hidden) renderSignalCenter();
       if (!document.getElementById('chartModal').hidden) renderChartFlags(currentChart.code);
       if (!document.getElementById('chipsModal').hidden) renderChips();
@@ -3791,7 +3867,7 @@ function raceColLabelsHtml(opts){
   // 包一層.race-line2，跟資料列一致——手機版塞不下時這一群整個換到下一行，不會被切在畫面外。
   // 族群標籤欄也留一個對應的標題格子，資料列的族群標籤才會跟標題對齊（2026-09-24 使用者）。
   // 族群後面加「均線分數」（2026-09-24 使用者：族群跟盤中大戶力中間那塊空白放均線分數，15 分那個比法）。
-  return '<div class="race-col-labels r333-labels">' + (opts && opts.blade ? '<span class="race-rank-slot"><b>族排</b></span>' : '') + '<span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span><span class="race-group-label"><b>族群</b></span>' +
+  return '<div class="race-col-labels r333-labels">' + (opts && opts.blade ? '<span class="race-rank-slot"><b>族排</b></span>' : '') + '<span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span><span class="race-star-slot"></span><span class="race-group-label"><b>族群</b></span>' +
     '<span class="race-ma-score"><b>均線分數</b></span>' +
     '<span class="race-line2"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"><b>' + badgeLabel + '</b></span></span>' +
     (opts && opts.blade ? '<span class="race-chart-slot"><b>圖</b></span>' : '') + '</div>';
@@ -3827,6 +3903,7 @@ function raceStockRowHtml(r, idx, opts){
   const chg = hasPrice ? price - price / (1 + r.pct / 100) : 0;
   return '<div class="race-row stock-row r333-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' + rank +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + r.name + star + '</span>' +
+    '<span class="race-star-slot">' + wlStarHtml(r.code, r.name) + '</span>' +
     '<span class="sig-group" title="族群第 ' + r.groupRank + ' 名，族內第 ' + r.inGroupRank + ' 名">' + r.groupName + '</span>' +
     '<span class="race-ma-score">' + maScoreCellHtml(r.code, hasPrice ? price : null) + '</span>' +
     '<span class="race-line2">' +
@@ -4148,7 +4225,7 @@ function groupCombinedBoardRowHtml(r){
   // 大戶力欄移到漲跌幅前面（2026-09-24 使用者：把大戶力移到漲跌幅的前面）。
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + backendName + '" tabindex="0" role="button">' +
     '<td class="combo-code">' + r.code + '</td>' +
-    '<td class="combo-name">' + backendName + '</td>' +
+    '<td class="combo-name">' + backendName + wlStarHtml(r.code, backendName) + '</td>' +
     '<td class="combo-holder">' + holderText + '</td>' +
     '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%</td>' +
     '<td class="combo-chg ' + cls + '">' + (hasPrice ? (changeAmt > 0 ? '+' : '') + changeAmt.toFixed(2) : '—') + '</td>' +
@@ -4211,6 +4288,7 @@ async function refreshBrewLaunch(force){
     if (!data || data.status !== 'ok' || !data.stocks || !data.rules) throw new Error('bad payload');
     brewLaunchData = data;
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
+    try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
     if (!document.getElementById('signalModal').hidden) renderSignalCenter();
     if (!document.getElementById('chipsModal').hidden) renderChips();  // 放空籌碼的均線資料
   } catch (e) {
@@ -4328,7 +4406,7 @@ function brewLaunchRowHtml(r, kind){
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
     timeCell +
     '<td class="combo-code">' + r.code + '</td>' +
-    '<td class="combo-name">' + r.name + '</td>' +
+    '<td class="combo-name">' + r.name + wlStarHtml(r.code, r.name) + '</td>' +
     '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
     '<td class="combo-holder">' + raceHolderCellHtml(r) + '</td>' +
     '<td class="combo-pct ' + cls + '">' + limitPriceHtml(r, fmt(r.pct) + '%') + '</td>' +
@@ -4354,7 +4432,7 @@ function brewLaunchFlatRowHtml(r){
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
     '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先用現在時間顯示，定案後會換成正式時間">' + brewWhen(r) + relaunchBadge + '</td>' +
     '<td class="combo-code">' + r.code + '</td>' +
-    '<td class="combo-name">' + r.name + '</td>' +
+    '<td class="combo-name">' + r.name + wlStarHtml(r.code, r.name) + '</td>' +
     '<td><span class="sig-group">' + r.groupNames.join('、') + '</span></td>' +
     '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
     '<td class="combo-holder">' + raceHolderCellHtml(r) + '</td>' +
@@ -4485,7 +4563,7 @@ function brewPastLaunchRowHtml(r, opts){
   const relaunchBadge = r.launchCount > 1 ? ' <span class="bl-relaunch" title="這天發動過 ' + r.launchCount + ' 次（含回落又重新發動）：' + relaunchTimes + '">×' + r.launchCount + '</span>' : '';
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
     '<td class="combo-code">' + brewWhen(r) + relaunchBadge + '</td>' +
-    '<td class="combo-code">' + r.code + '</td><td class="combo-name">' + r.name + '</td>' +
+    '<td class="combo-code">' + r.code + '</td><td class="combo-name">' + r.name + wlStarHtml(r.code, r.name) + '</td>' +
     '<td><span class="sig-group">' + (r.group || '—') + '</span></td>' +
     (opts && opts.prev ? brewPrevCellHtml('launch', opts.prev.get(r.code)) : '') +
     '<td class="bl-score">' + r.score + '</td>' +
@@ -4497,7 +4575,7 @@ function brewPastLaunchRowHtml(r, opts){
 }
 function brewPastBrewRowHtml(r, opts){
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
-    '<td class="combo-code">' + r.code + '</td><td class="combo-name">' + r.name + '</td>' +
+    '<td class="combo-code">' + r.code + '</td><td class="combo-name">' + r.name + wlStarHtml(r.code, r.name) + '</td>' +
     '<td><span class="sig-group">' + (r.group || '—') + '</span></td>' +
     (opts && opts.prev ? brewPrevCellHtml('brew', opts.prev.get(r.code)) : '') +
     '<td class="bl-score">' + r.score + '</td>' +
@@ -4728,7 +4806,7 @@ function chipsBrewRowHtml(r, rank){
   const score = launch ? launch.score : r.brew.score;
   const chg = s.changePct === null || s.changePct === undefined ? '—' : fmt(s.changePct) + '%';
   return '<tr class="combo-row chips-row" data-code="' + r.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + chipsFlagPillsHtml(r.code) + '</td>' +
+    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + wlStarHtml(r.code, s.name) + chipsFlagPillsHtml(r.code) + '</td>' +
     '<td><span class="sig-group">' + (s.group || '—') + '</span></td>' +
     '<td>' + listCell + '</td>' +
     '<td>' + chipsStreakHtml(r.streak) + '</td>' +
@@ -4828,7 +4906,7 @@ function chipsShortRowHtml(r, rank){
   const t = r.tech;
   const techCell = t ? '<td class="bl-score">' + t.score + (chipsIsWeak(t) ? '<span class="chips-weak-tag">弱勢</span>' : '') + '</td>' : '<td class="muted">—</td>';
   return '<tr class="combo-row chips-row" data-code="' + r.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + chipsFlagPillsHtml(r.code) + '</td>' +
+    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + wlStarHtml(r.code, s.name) + chipsFlagPillsHtml(r.code) + '</td>' +
     '<td><span class="sig-group">' + (s.group || '—') + '</span>' + (s.market ? ' <span class="muted">' + (s.market === 'OTC' ? '櫃' : '市') + '</span>' : '') + '</td>' +
     '<td>' + chipsStreakHtml(r.instStreak) + '</td>' +
     lots('foreign') + lots('trust') + lots('dealer') + lots('total') +
@@ -4944,7 +5022,7 @@ function chipsRowHtml(r, rank){
     : (s.volume && r.v !== null ? (Math.abs(r.v) / s.volume * 100).toFixed(1) + '%' : '—');
   const chg = s.changePct === null || s.changePct === undefined ? '—' : fmt(s.changePct) + '%';
   return '<tr class="combo-row chips-row" data-code="' + r.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + chipsFlagPillsHtml(r.code) + '</td>' +
+    '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + wlStarHtml(r.code, s.name) + chipsFlagPillsHtml(r.code) + '</td>' +
     '<td><span class="sig-group">' + (s.group || '—') + '</span>' + (s.market ? ' <span class="muted">' + (s.market === 'OTC' ? '櫃' : '市') + '</span>' : '') + '</td>' +
     (m === 'mf'
       ? '<td class="num ' + dirClass(r.v) + ' chips-active">' + fmtLots(r.v) + '</td><td class="num ' + dirClass(s.mf.netAmount) + '">' + fmtAmount(s.mf.netAmount) + '</td>'
@@ -6180,7 +6258,7 @@ function ckDetailHtml(r){
 function ckRowHtml(r){
   const ov = ckOverall(r), open = !!ckState.open[r.code];
   return '<tr class="ck-row" data-code="' + r.code + '" data-name="' + (r.name || '') + '">' +
-    '<td class="l ck-stock"><span class="ck-code">' + r.code + '</span> <span class="ck-name">' + (r.name || '') + '</span>' + chipsFlagPillsHtml(r.code) + (r.stale ? '<span class="muted">（資料到 ' + swMmdd(r.date) + '）</span>' : '') + '<span class="ck-grp">' + (r.group || '—') + '</span></td>' +
+    '<td class="l ck-stock"><span class="ck-code">' + r.code + '</span> <span class="ck-name">' + (r.name || '') + '</span>' + wlStarHtml(r.code, r.name || '') + chipsFlagPillsHtml(r.code) + (r.stale ? '<span class="muted">（資料到 ' + swMmdd(r.date) + '）</span>' : '') + '<span class="ck-grp">' + (r.group || '—') + '</span></td>' +
     '<td>' + ckScoreHtml((r.scores || {}).fund) + '</td><td>' + ckScoreHtml((r.scores || {}).chip) + '</td><td>' + ckScoreHtml((r.scores || {}).tech) + '</td>' +
     '<td>' + ckScoreHtml(ov) + ' <span class="ck-lab">' + ckLabel(ov) + '</span></td>' +
     '<td>' + ckPrice(r.close) + ' <span class="ck-lab ' + dirClass(r.chgPct || 0) + '">' + swPct(r.chgPct, 1) + '</span></td>' +
@@ -6346,6 +6424,534 @@ document.getElementById('checkupBody').addEventListener('change', (e) => {
   else if (el.classList.contains('ck-weight')){ ckPrefs[el.dataset.key] = Math.max(0, Math.min(100, Number(el.value) || 0)); ckSavePrefs(); renderCheckup(); }
   else if (el.id === 'ckListSel'){ ckState.listName = el.value; if (el.value && ckLists.saved[el.value]) ckRun(ckLists.saved[el.value]); }
 });
+
+// ---- 自選股（2026-10-05 使用者）----
+// 清單＝分組（持股／觀察…）→ 每檔 {code, name, note, addedAt}。設了同步碼就存在後端，兩台電腦＋手機同一份；
+// 沒設只存在這台電腦。每次修改是一個函式：先改這台、存本機，有同步碼就送後端；別台電腦剛存過（後端回 409）
+// 就換成最新的一份、把這台還沒送出去的修改再做一次再送，不會互相蓋掉。
+// 報價：族群表裡的股票用首頁那份 /api/groups（15 秒）；族群外的用 /api/watch-quotes（面板開著時 15 秒）。
+const WL_KEY_RE = /^[\\w一-鿿-]{6,40}$/;
+const WL_SORTS = [['manual', '自訂順序'], ['pct', '漲跌幅'], ['holder', '盤中大戶力'], ['score', '均線分數']];
+const WL_GROUP_INDEX = (() => {
+  const m = {};
+  for (const g of GROUPS) for (const s of g.stocks) if (!m[s.code]) m[s.code] = { name: s.name, group: g.name };
+  return m;
+})();
+function wlEmpty(){ return { groups: [{ id: 'g1', name: '自選', items: [] }], settings: {} }; }
+let wl = { key: '', data: wlEmpty(), version: 0, active: 'g1', sort: 'manual', queue: [], busy: false, loading: false,
+  error: '', notice: '', syncedAt: null, extra: {}, extraAt: 0, showKey: false, retryTimer: null, timers: [] };
+function wlEsc(s){
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function wlNormalize(){
+  if (!wl.data || !Array.isArray(wl.data.groups)) wl.data = wlEmpty();
+  if (!wl.data.groups.length) wl.data.groups.push({ id: 'g1', name: '自選', items: [] });
+  if (!wl.data.settings || typeof wl.data.settings !== 'object') wl.data.settings = {};
+  for (const g of wl.data.groups) if (!Array.isArray(g.items)) g.items = [];
+  if (!wl.data.groups.some((g) => g.id === wl.active)) wl.active = wl.data.groups[0].id;
+}
+function wlReadLocal(){
+  try {
+    wl.key = localStorage.getItem('watchKey') || '';
+    const cached = JSON.parse(localStorage.getItem('watchData') || 'null');
+    if (cached && cached.data && Array.isArray(cached.data.groups)){ wl.data = cached.data; wl.version = Number(cached.version) || 0; }
+    wl.sort = localStorage.getItem('watchSort') || 'manual';
+    wl.active = localStorage.getItem('watchActive') || wl.active;
+  } catch (e) { /* 讀不到就用預設 */ }
+  wlNormalize();
+}
+function wlSaveLocal(){
+  try { localStorage.setItem('watchData', JSON.stringify({ data: wl.data, version: wl.version })); } catch (e) { /* 存不了就算了 */ }
+}
+function wlSavePrefs(){
+  try { localStorage.setItem('watchSort', wl.sort); localStorage.setItem('watchActive', wl.active); } catch (e) { /* 存不了就算了 */ }
+}
+wlReadLocal();
+function wlGroup(){ return wl.data.groups.find((g) => g.id === wl.active) || wl.data.groups[0]; }
+function wlHas(code){ return wl.data.groups.some((g) => g.items.some((it) => it.code === code)); }
+function wlCount(data){ return (data || wl.data).groups.reduce((n, g) => n + g.items.length, 0); }
+function wlNewGroupId(data){
+  let i = data.groups.length + 1;
+  while (data.groups.some((g) => g.id === 'g' + i)) i++;
+  return 'g' + i;
+}
+function wlNameOf(code, item){
+  const g = WL_GROUP_INDEX[code];
+  if (g) return g.name;
+  if (item && item.name) return item.name;
+  const x = wl.extra[code];
+  return x && x.name ? x.name : code;
+}
+
+// ---- 同步
+async function wlPost(path, payload){
+  const res = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+  let body = null;
+  try { body = await res.json(); } catch (e) { body = null; }
+  return { res, body: body || {} };
+}
+function wlReplay(fns){
+  for (const fn of fns){ try { fn(wl.data); } catch (e) { /* 這個修改在新版本上做不了就算了 */ } }
+  wlNormalize();
+}
+function wlMutate(fn){
+  fn(wl.data);
+  wlNormalize();
+  wlSaveLocal();
+  wlAfterChange();
+  if (wl.key){ wl.queue.push(fn); wlFlush(); }
+}
+async function wlFlush(){
+  if (wl.busy || wl.loading || !wl.queue.length || !wl.key) return;
+  wl.busy = true;
+  const pending = wl.queue.splice(0);
+  let ok = false;
+  try {
+    for (let attempt = 0; attempt < 3 && !ok; attempt++){
+      const { res, body } = await wlPost('/api/watchlist/save', { key: wl.key, data: wl.data, baseVersion: wl.version });
+      if (res.status === 409 && body.data){
+        // 別台電腦剛存過：換成最新的一份，把這台還沒送出去的修改（包括送的時候又改的）再做一次
+        wl.data = body.data; wl.version = Number(body.version) || 0;
+        wlReplay(pending.concat(wl.queue));
+        continue;
+      }
+      if (!res.ok || body.status !== 'ok') throw new Error(body.error || ('HTTP ' + res.status));
+      wl.version = Number(body.version) || wl.version;
+      if (body.data){ wl.data = body.data; wlReplay(wl.queue); }
+      ok = true;
+    }
+    if (!ok) throw new Error('別台電腦一直在改');
+    wl.error = '';
+    wl.syncedAt = new Date();
+  } catch (e) {
+    wl.queue = pending.concat(wl.queue);
+    wl.error = '同步失敗（' + (e && e.message || e) + '），先存在這台電腦，30 秒後再送';
+    clearTimeout(wl.retryTimer);
+    wl.retryTimer = setTimeout(wlFlush, 30000);
+  } finally {
+    wl.busy = false;
+    wlSaveLocal();
+    wlAfterChange();
+    if (ok && wl.queue.length) wlFlush();
+  }
+}
+function wlMergeInto(target, source){
+  // 剛設同步碼、這台本來就有清單：同名分組合在一起，同一組裡同一檔不重複
+  for (const sg of source.groups){
+    if (!sg.items.length) continue;
+    let tg = target.groups.find((g) => g.name === sg.name);
+    if (!tg){ tg = { id: wlNewGroupId(target), name: sg.name, items: [] }; target.groups.push(tg); }
+    for (const it of sg.items) if (!tg.items.some((x) => x.code === it.code)) tg.items.push(it);
+  }
+}
+async function wlLoad(opts){
+  if (!wl.key || wl.loading || wl.busy) return;
+  wl.loading = true;
+  let push = false;
+  try {
+    const { res, body } = await wlPost('/api/watchlist/load', { key: wl.key });
+    if (!res.ok || body.status !== 'ok') throw new Error(body.error || ('HTTP ' + res.status));
+    const version = Number(body.version) || 0;
+    const remote = version && body.data && Array.isArray(body.data.groups) ? body.data : { groups: [], settings: {} };
+    if (opts && opts.merge){
+      const local = JSON.parse(JSON.stringify(wl.data)), before = JSON.stringify(remote);
+      wl.data = JSON.parse(before); wl.version = version;
+      wlMergeInto(wl.data, local);
+      wlNormalize();
+      push = wlCount() > 0 && JSON.stringify(wl.data) !== before;
+    } else if (!wl.queue.length){
+      if (version){ wl.data = remote; wl.version = version; wlNormalize(); }
+      else if (wlCount()){ wl.version = 0; push = true; }   // 雲端還沒有這份：把這台的送上去
+    }
+    wl.error = '';
+    wl.syncedAt = new Date();
+  } catch (e) {
+    wl.error = '讀取失敗（' + (e && e.message || e) + '）';
+  } finally {
+    wl.loading = false;
+    wlSaveLocal();
+    if (push) wl.queue.push(() => {});
+    wlAfterChange();
+    if (wl.queue.length) wlFlush();
+  }
+}
+function wlSetKey(raw){
+  const key = String(raw || '').trim().toLowerCase();
+  if (!WL_KEY_RE.test(key)){
+    wl.notice = '同步碼要 6～40 個字（英文、數字、中文、底線、減號），不能有空白';
+    renderWatch();
+    return;
+  }
+  wl.key = key; wl.version = 0; wl.notice = ''; wl.error = ''; wl.queue = [];
+  try { localStorage.setItem('watchKey', key); } catch (e) { /* 存不了就算了 */ }
+  renderWatch();
+  wlLoad({ merge: true });
+}
+function wlStopSync(){
+  if (!window.confirm('這台電腦不再同步？清單會留在這台，雲端那份不會刪，其他電腦照常同步。')) return;
+  wl.key = ''; wl.queue = []; wl.error = ''; wl.syncedAt = null;
+  clearTimeout(wl.retryTimer);
+  try { localStorage.removeItem('watchKey'); } catch (e) { /* 存不了就算了 */ }
+  renderWatch();
+}
+
+// ---- 修改清單
+function wlParseInput(text){
+  const parts = String(text || '').split(/[\\s,，、\\/;；]+/).map((x) => x.trim()).filter(Boolean);
+  const found = [], unknown = [];
+  for (const p of parts){
+    const s = findStockByQuery(p);
+    if (s) found.push({ code: String(s.code).toUpperCase(), name: s.name && s.name !== s.code ? s.name : '' });
+    else unknown.push(p);
+  }
+  return { found, unknown };
+}
+function wlAddCodes(entries, groupId){
+  const today = twTodayStr();
+  wlMutate((data) => {
+    const g = data.groups.find((x) => x.id === groupId) || data.groups[0];
+    for (const e of entries){
+      if (g.items.some((it) => it.code === e.code)) continue;
+      const item = { code: e.code, addedAt: today };
+      if (e.name && !WL_GROUP_INDEX[e.code]) item.name = e.name;
+      g.items.push(item);
+    }
+  });
+  wlFetchExtra(true);
+}
+function wlRemoveEverywhere(code){
+  wlMutate((data) => { for (const g of data.groups) g.items = g.items.filter((it) => it.code !== code); });
+}
+function wlLearnNames(){
+  // 族群外的股票第一次抓到股名就存進清單，其他電腦不用再查
+  const missing = [];
+  for (const g of wl.data.groups) for (const it of g.items){
+    const x = wl.extra[it.code];
+    if (!WL_GROUP_INDEX[it.code] && !it.name && x && x.name) missing.push(it.code);
+  }
+  if (!missing.length) return;
+  wlMutate((data) => {
+    for (const g of data.groups) for (const it of g.items){
+      const x = wl.extra[it.code];
+      if (!WL_GROUP_INDEX[it.code] && !it.name && x && x.name) it.name = String(x.name).slice(0, 20);
+    }
+  });
+}
+
+// ---- 報價
+async function wlFetchExtra(force){
+  const codes = [...new Set(wl.data.groups.flatMap((g) => g.items.map((it) => it.code)))].filter((c) => !WL_GROUP_INDEX[c]);
+  if (!codes.length) return;
+  if (!force && Date.now() - wl.extraAt < 14000) return;
+  wl.extraAt = Date.now();
+  try {
+    const res = await fetch('/api/watch-quotes?codes=' + encodeURIComponent(codes.slice(0, 200).join(',')));
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.quotes){
+      wl.extra = Object.assign({}, wl.extra, data.quotes);
+      wlLearnNames();
+      renderWatchTable();
+    }
+  } catch (e) { /* 下一輪再抓 */ }
+}
+function wlQuoteMap(){
+  const m = {};
+  if (lastData && !lastData.mock && Array.isArray(lastData.groups)){
+    for (const g of lastData.groups) for (const s of g.stocks) if (s.price != null && !m[s.code]) m[s.code] = s;
+  }
+  for (const code in wl.extra){
+    const x = wl.extra[code];
+    if (!m[code] && x && x.price != null) m[code] = x;
+  }
+  return m;
+}
+function wlHolderMap(){
+  const m = {};
+  for (const r of mainForceRanking || []) if (r && r.code && !m[r.code]) m[r.code] = r;
+  return m;
+}
+function wlScoreOf(code, price){
+  const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[code] : null;
+  return info && info.maSums && price > 0 ? maScoreFromSums(info, price, brewLaunchData.rules) : null;
+}
+
+// ---- 畫面
+function wlSyncHtml(){
+  if (!wl.key){
+    return '<div class="wl-sync"><b>同步碼</b>' +
+      '<input type="text" id="wlKeyInput" maxlength="40" autocomplete="off" placeholder="自己取一個，例如 judy-2026（6～40 字）">' +
+      '<button class="wl-btn primary" id="wlKeySet">開始同步</button>' +
+      (wl.notice ? '<span class="wl-status err">' + wlEsc(wl.notice) + '</span>' : '') +
+      '<div class="wl-hint">還沒設定：清單只存在這台電腦。兩台電腦＋手機都輸入同一個同步碼，就會看到同一份清單（這台已經加的股票會一起帶上去）。' +
+      '同步碼就像密碼，知道的人都能看到、改你的自選股，不要用太簡單的。</div></div>';
+  }
+  const shown = wl.showKey ? wl.key : wl.key.slice(0, 2) + '•••' + wl.key.slice(-1);
+  const status = wl.error ? '<span class="wl-status err">' + wlEsc(wl.error) + '</span>'
+    : wl.busy || wl.loading ? '<span class="wl-status">同步中…</span>'
+    : wl.syncedAt ? '<span class="wl-status ok">✓ 已同步 ' + wl.syncedAt.toLocaleTimeString('zh-TW') + '</span>' : '';
+  return '<div class="wl-sync"><b>同步碼</b><span class="wl-key">' + wlEsc(shown) + '</span>' +
+    '<button class="wl-btn" id="wlKeyShow">' + (wl.showKey ? '隱藏' : '顯示') + '</button>' + status +
+    '<span class="wl-sync-ops"><button class="wl-btn" id="wlSyncNow">立即同步</button><button class="wl-btn" id="wlKeyStop">這台停止同步</button></span></div>';
+}
+function wlTabsHtml(){
+  return '<div class="wl-groups">' + wl.data.groups.map((g) => '<button class="wl-gtab' + (g.id === wl.active ? ' active' : '') + '" data-gid="' + wlEsc(g.id) + '">' +
+      wlEsc(g.name) + '<span class="wl-gcount">' + g.items.length + '</span></button>').join('') +
+    '<button class="wl-gtab add" id="wlGroupAdd" title="新增一個分組">＋ 分組</button>' +
+    '<span class="wl-gops"><button class="wl-btn" id="wlGroupRename">改名</button><button class="wl-btn" id="wlGroupDelete">刪除這組</button></span></div>';
+}
+function renderWatch(){
+  const body = document.getElementById('watchBody');
+  if (!body) return;
+  const g = wlGroup();
+  body.innerHTML = wlSyncHtml() + wlTabsHtml() +
+    '<div class="wl-add"><input type="text" id="wlAddInput" autocomplete="off" placeholder="輸入代號或名稱加入「' + wlEsc(g.name) + '」，可一次貼多檔：2330 2317 3707">' +
+    '<button class="wl-btn primary" id="wlAddBtn">加入</button></div>' +
+    (wl.addNote ? '<div class="wl-hint">' + wlEsc(wl.addNote) + '</div>' : '') +
+    '<div class="wl-sorts">排序 ' + WL_SORTS.map((s) => '<button class="wl-sort' + (wl.sort === s[0] ? ' active' : '') + '" data-sort="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>' +
+    '<div id="wlTable"></div>' +
+    '<div class="sw-foot">報價：族群表裡的股票跟首頁同一份（15 秒更新）；族群表外的股票另外向證交所抓，沒有盤中大戶力、均線分數、融資券等標籤。' +
+    '點代號或名稱開K線圖；首頁、盤中333、醞釀／發動、健診、K線圖名稱旁的 ☆ 也能直接加入（加到目前這組），★ 再點一下移除。</div>';
+  renderWatchTable();
+}
+function renderWatchTable(){
+  const el = document.getElementById('wlTable');
+  if (!el || document.getElementById('watchModal').hidden) return;
+  const g = wlGroup();
+  if (!g.items.length){
+    el.innerHTML = '<div class="signal-empty"><div class="se-title">這組還沒有股票</div><div class="se-sub">在上面輸入代號或名稱加入；首頁、盤中333、醞釀／發動、K線圖等名稱旁的 ☆ 也可以直接加入。</div></div>';
+    return;
+  }
+  const quotes = wlQuoteMap(), holders = wlHolderMap();
+  let rows = g.items.map((it, idx) => {
+    const q = quotes[it.code] || null;
+    const price = q && Number(q.price) > 0 ? Number(q.price) : null;
+    const pct = q && Number.isFinite(Number(q.changePercent)) ? Number(q.changePercent) : null;
+    const chg = q && Number.isFinite(Number(q.change)) ? Number(q.change) : price !== null && pct !== null ? price - price / (1 + pct / 100) : null;
+    const h = holders[it.code] || null;
+    return { it, idx, q, price, pct, chg, holder: h, score: price !== null ? wlScoreOf(it.code, price) : null };
+  });
+  const by = (f) => (a, b) => {
+    const x = f(a), y = f(b);
+    if (x === null || x === undefined) return (y === null || y === undefined) ? a.idx - b.idx : 1;
+    if (y === null || y === undefined) return -1;
+    return y - x || a.idx - b.idx;
+  };
+  if (wl.sort === 'pct') rows.sort(by((r) => r.pct));
+  else if (wl.sort === 'holder') rows.sort(by((r) => r.holder ? r.holder.strengthPct : null));
+  else if (wl.sort === 'score') rows.sort(by((r) => r.score));
+  const manual = wl.sort === 'manual';
+  const groupOpts = (cur) => wl.data.groups.map((x) => '<option value="' + wlEsc(x.id) + '"' + (x.id === cur ? ' selected' : '') + '>' + wlEsc(x.name) + '</option>').join('');
+  let up = 0, down = 0, flat = 0;
+  const body = rows.map((r) => {
+    const code = r.it.code, name = wlNameOf(code, r.it), cls = r.pct === null ? 'flat' : dirClass(r.pct);
+    if (r.pct !== null){ if (r.pct > 0) up++; else if (r.pct < 0) down++; else flat++; }
+    const grp = WL_GROUP_INDEX[code] ? WL_GROUP_INDEX[code].group : '';
+    const limit = r.q ? { limitUp: !!r.q.limitUp, limitDown: !!r.q.limitDown } : {};
+    const vol = r.q && Number.isFinite(Number(r.q.volume)) ? Number(r.q.volume).toLocaleString() : '—';
+    return '<tr data-code="' + code + '" data-name="' + wlEsc(name) + '">' +
+      '<td class="l wl-stock">' + code + '</td>' +
+      '<td class="l wl-stock"><span class="wl-name">' + wlEsc(name) + '</span>' + chipsFlagPillsHtml(code) + flagPillsHtml(code, { dispositionOnly: true }) + '</td>' +
+      '<td class="l">' + (grp ? '<span class="sig-group">' + wlEsc(grp) + '</span>' : '<span class="flat">—</span>') + '</td>' +
+      '<td>' + (WL_GROUP_INDEX[code] ? maScoreCellHtml(code, r.price) : '<span class="flat">—</span>') + '</td>' +
+      '<td>' + (r.holder ? raceHolderCellHtml(r.holder) : '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>') + '</td>' +
+      '<td class="' + cls + '">' + (r.pct === null ? '—' : fmt(r.pct) + '%') + '</td>' +
+      '<td class="' + cls + '">' + (r.chg === null ? '—' : (r.chg > 0 ? '+' : '') + r.chg.toFixed(2)) + '</td>' +
+      '<td class="' + cls + '">' + (r.price === null ? (r.q === null ? '<span class="flat" title="還沒抓到報價">—</span>' : '—') : limitPriceHtml(limit, r.price.toFixed(2))) + '</td>' +
+      '<td>' + vol + '</td>' +
+      '<td class="l wl-note" title="點一下寫備註">' + (r.it.note ? wlEsc(r.it.note) : '<span class="wl-note-empty">＋備註</span>') + '</td>' +
+      '<td><span class="wl-ops">' +
+        (manual ? '<button class="wl-op" data-op="up" title="往上">▲</button><button class="wl-op" data-op="down" title="往下">▼</button>' : '') +
+        (wl.data.groups.length > 1 ? '<select class="wl-gsel" title="移到別組">' + groupOpts(g.id) + '</select>' : '') +
+        '<button class="wl-op del" data-op="del" title="從這組移除">✕</button></span></td>' +
+    '</tr>';
+  }).join('');
+  el.innerHTML = '<div class="wl-table-wrap"><table class="wl-table"><thead><tr>' +
+    '<th class="l">代號</th><th class="l">名稱</th><th class="l">族群</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>漲跌</th><th>成交價</th><th>成交量(張)</th><th class="l">備註</th><th></th>' +
+    '</tr></thead><tbody>' + body + '</tbody></table></div>' +
+    '<div class="wl-summary">共 ' + g.items.length + ' 檔・<span class="up">上漲 ' + up + '</span>・<span class="down">下跌 ' + down + '</span>・平盤 ' + flat + '</div>';
+}
+function openWatchPanel(){
+  document.getElementById('watchModal').hidden = false;
+  renderWatch();
+  refreshBrewLaunch();
+  wlFetchExtra(true);
+  wlLoad();
+  for (const t of wl.timers) clearInterval(t);
+  wl.timers = [setInterval(() => wlFetchExtra(false), 15000), setInterval(() => wlLoad(), 60000)];
+}
+function closeWatchPanel(){
+  document.getElementById('watchModal').hidden = true;
+  for (const t of wl.timers) clearInterval(t);
+  wl.timers = [];
+}
+function wlAfterChange(){
+  const modal = document.getElementById('watchModal');
+  if (modal && !modal.hidden){
+    // 打字中的輸入框不要被重畫掉：只重畫表格跟同步狀態那一列
+    const typing = document.activeElement && (document.activeElement.id === 'wlAddInput' || document.activeElement.id === 'wlKeyInput');
+    if (typing){
+      const sync = document.querySelector('#watchBody .wl-sync');
+      if (sync && wl.key) sync.outerHTML = wlSyncHtml();
+      renderWatchTable();
+    } else renderWatch();
+  }
+  wlRefreshStars();
+}
+document.getElementById('watchClose').addEventListener('click', closeWatchPanel);
+document.getElementById('watchModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeWatchPanel(); });
+function wlSubmitAdd(){
+  const input = document.getElementById('wlAddInput');
+  const { found, unknown } = wlParseInput(input ? input.value : '');
+  wl.addNote = unknown.length ? '找不到：' + unknown.join('、') + '（族群表外的股票請直接打代號）' : '';
+  if (found.length) wlAddCodes(found, wlGroup().id);
+  renderWatch();
+  const again = document.getElementById('wlAddInput');
+  if (again){ again.value = unknown.join(' '); again.focus(); }
+}
+document.getElementById('watchBody').addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  if (e.target.id === 'wlAddInput'){ e.preventDefault(); wlSubmitAdd(); }
+  else if (e.target.id === 'wlKeyInput'){ e.preventDefault(); wlSetKey(e.target.value); }
+});
+document.getElementById('watchBody').addEventListener('click', (e) => {
+  if (e.target.closest('select, input')) return;
+  if (e.target.closest('#wlAddBtn')){ wlSubmitAdd(); return; }
+  if (e.target.closest('#wlKeySet')){ wlSetKey((document.getElementById('wlKeyInput') || {}).value); return; }
+  if (e.target.closest('#wlKeyShow')){ wl.showKey = !wl.showKey; renderWatch(); return; }
+  if (e.target.closest('#wlKeyStop')){ wlStopSync(); return; }
+  if (e.target.closest('#wlSyncNow')){ wl.error = ''; if (wl.queue.length) wlFlush(); else wlLoad(); renderWatch(); return; }
+  const tab = e.target.closest('.wl-gtab[data-gid]');
+  if (tab){ wl.active = tab.dataset.gid; wl.addNote = ''; wlSavePrefs(); renderWatch(); return; }
+  if (e.target.closest('#wlGroupAdd')){
+    const name = (window.prompt('新分組的名字（例如：持股、觀察、短線）', '') || '').trim().slice(0, 20);
+    if (!name) return;
+    let newId = '';
+    wlMutate((data) => {
+      const hit = data.groups.find((g) => g.name === name);
+      if (hit){ newId = hit.id; return; }
+      newId = wlNewGroupId(data);
+      data.groups.push({ id: newId, name, items: [] });
+    });
+    wl.active = newId || wl.active; wlSavePrefs(); renderWatch();
+    return;
+  }
+  if (e.target.closest('#wlGroupRename')){
+    const g = wlGroup();
+    const name = (window.prompt('分組改成什麼名字？', g.name) || '').trim().slice(0, 20);
+    if (!name || name === g.name) return;
+    const gid = g.id;
+    wlMutate((data) => { const x = data.groups.find((y) => y.id === gid); if (x) x.name = name; });
+    return;
+  }
+  if (e.target.closest('#wlGroupDelete')){
+    const g = wlGroup();
+    if (wl.data.groups.length <= 1 && !g.items.length) return;
+    if (!window.confirm('刪除分組「' + g.name + '」' + (g.items.length ? '（裡面 ' + g.items.length + ' 檔一起刪掉）' : '') + '？')) return;
+    const gid = g.id;
+    wlMutate((data) => {
+      data.groups = data.groups.filter((x) => x.id !== gid);
+      if (!data.groups.length) data.groups.push({ id: 'g1', name: '自選', items: [] });
+    });
+    return;
+  }
+  const sortBtn = e.target.closest('.wl-sort');
+  if (sortBtn){ wl.sort = sortBtn.dataset.sort; wlSavePrefs(); renderWatch(); return; }
+  const row = e.target.closest('tr[data-code]');
+  if (!row) return;
+  const code = row.dataset.code, gid = wlGroup().id;
+  const op = e.target.closest('.wl-op');
+  if (op){
+    if (op.dataset.op === 'del'){
+      wlMutate((data) => { const g = data.groups.find((x) => x.id === gid); if (g) g.items = g.items.filter((it) => it.code !== code); });
+    } else {
+      const dir = op.dataset.op === 'up' ? -1 : 1;
+      wlMutate((data) => {
+        const g = data.groups.find((x) => x.id === gid);
+        if (!g) return;
+        const i = g.items.findIndex((it) => it.code === code), j = i + dir;
+        if (i < 0 || j < 0 || j >= g.items.length) return;
+        const t = g.items[i]; g.items[i] = g.items[j]; g.items[j] = t;
+      });
+    }
+    return;
+  }
+  if (e.target.closest('.wl-note')){
+    const g = wlGroup(), it = g.items.find((x) => x.code === code);
+    const note = window.prompt(code + ' ' + row.dataset.name + ' 的備註（空白＝刪掉）', (it && it.note) || '');
+    if (note === null) return;
+    const text = note.trim().slice(0, 200);
+    wlMutate((data) => {
+      const x = data.groups.find((y) => y.id === gid), item = x && x.items.find((y) => y.code === code);
+      if (!item) return;
+      if (text) item.note = text; else delete item.note;
+    });
+    return;
+  }
+  if (e.target.closest('.wl-stock')){
+    if (!useFloatingCharts()){
+      document.getElementById('watchModal').classList.add('behind-chart');
+      document.getElementById('signalModal').classList.add('behind-chart');
+    }
+    openStockChart(code, row.dataset.name);
+  }
+});
+document.getElementById('watchBody').addEventListener('change', (e) => {
+  const sel = e.target.closest('.wl-gsel');
+  if (!sel) return;
+  const row = sel.closest('tr[data-code]');
+  const code = row.dataset.code, from = wlGroup().id, to = sel.value;
+  if (to === from) return;
+  wlMutate((data) => {
+    const a = data.groups.find((x) => x.id === from), b = data.groups.find((x) => x.id === to);
+    if (!a || !b) return;
+    const it = a.items.find((x) => x.code === code);
+    if (!it) return;
+    a.items = a.items.filter((x) => x.code !== code);
+    if (!b.items.some((x) => x.code === code)) b.items.push(it);
+  });
+});
+// 別的分頁／K線圖小視窗改了自選股（同一台電腦的 localStorage）：這裡跟著更新
+window.addEventListener('storage', (e) => {
+  if (e.key !== 'watchData' && e.key !== 'watchKey') return;
+  wlReadLocal();
+  wlAfterChange();
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && wl.key) wlLoad(); });
+
+// ---- 各列表的 ☆：點一下加入自選股（目前這組），★ 再點一下從所有分組移除
+function wlStarHtml(code, name){
+  if (!code) return '';
+  const on = wlHas(code);
+  return '<button type="button" class="wl-star' + (on ? ' on' : '') + '" data-code="' + wlEsc(code) + '" data-name="' + wlEsc(name || '') + '" title="' +
+    (on ? '已在自選股（點一下移除）' : '加入自選股') + '">' + (on ? '★' : '☆') + '</button>';
+}
+function wlRefreshStars(){
+  document.querySelectorAll('.wl-star').forEach((b) => {
+    const on = !!b.dataset.code && wlHas(b.dataset.code);
+    b.classList.toggle('on', on);
+    b.textContent = on ? '★' : '☆';
+    b.title = on ? '已在自選股（點一下移除）' : '加入自選股';
+  });
+}
+document.addEventListener('click', (e) => {
+  const star = e.target.closest('.wl-star');
+  if (!star) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const code = star.dataset.code;
+  if (!code) return;
+  if (wlHas(code)){
+    const names = wl.data.groups.filter((g) => g.items.some((it) => it.code === code)).map((g) => g.name);
+    wlRemoveEverywhere(code);
+    showToast('已從自選股「' + names.join('、') + '」移除 ' + (star.dataset.name || code));
+  } else {
+    const g = wlGroup();
+    wlAddCodes([{ code, name: star.dataset.name || '' }], g.id);
+    showToast('已加入自選股「' + g.name + '」：' + (star.dataset.name || code));
+  }
+}, true);
+setTimeout(() => { if (wl.key && !document.body.classList.contains('chart-window-mode')) wlLoad(); }, 1500);   // 開頁面先跟雲端對一次，其他地方的 ☆ 才會是最新的
 
 // ---- 個股問診（2026-09-28 使用者：照學員專區「個股問診・完整版」做）----
 // 打股號 → /api/diag 拿回那檔收盤後算好的三面向分數、七科、防守線、近 120 根日K、同族對照、族群強度榜與今日名單、穿惡名單。
@@ -6553,7 +7159,7 @@ function dgCrossHtml(data){
 }
 function dgHeaderHtml(data){
   const s = data.stock, sub = s.subjects || {}, ov = ckOverall(s);
-  return '<div class="dg-head"><span class="dg-code">' + s.code + '</span><span class="dg-name">' + (s.name || '') + '</span>' + chipsFlagPillsHtml(s.code) + '<span class="dg-grp">' + (s.group ? s.group : '沒有歸在任何族群') + (s.disposed ? '・🔒 處置中' : '') + '</span>' +
+  return '<div class="dg-head"><span class="dg-code">' + s.code + '</span><span class="dg-name">' + (s.name || '') + '</span>' + wlStarHtml(s.code, s.name || '') + chipsFlagPillsHtml(s.code) + '<span class="dg-grp">' + (s.group ? s.group : '沒有歸在任何族群') + (s.disposed ? '・🔒 處置中' : '') + '</span>' +
     '<span class="dg-px">' + ckPrice(s.close) + ' <span class="' + dirClass(s.chgPct || 0) + '">' + swPct(s.chgPct, 2) + '</span></span><span class="dg-grp">' + swMmdd(s.date) + ' 收盤・昨收 ' + ckPrice(s.prev) + (s.stale ? '・資料停在 ' + swMmdd(s.date) : '') + '</span></div>' +
     '<div class="dg-head">' + dgClsPill(sub.cls) + '<span>🔴 ' + (sub.red || 0) + '・🟢 ' + (sub.green || 0) + '</span><span>綜合 ' + ckScoreHtml(ov) + ' ' + ckLabel(ov) + '</span><span class="muted">基本面 ' + (swHas(s.scores.fund) ? s.scores.fund : '—') + '・籌碼面 ' + (swHas(s.scores.chip) ? s.scores.chip : '—') + '・技術面 ' + (swHas(s.scores.tech) ? s.scores.tech : '—') + '</span>' +
     '<button class="chart-tab chips-btn" id="dgChartBtn" data-code="' + s.code + '" data-name="' + (s.name || '') + '">開K線圖</button></div>' +
@@ -6621,7 +7227,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-05 18:50:59';
+const BUILD_STAMP = '2026-10-05 19:14:15';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -7133,7 +7739,7 @@ function render(){
           const prevClose = price / (1 + s.changePercent / 100);
           const changeAmt = price - prevClose;
           return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-            '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span></div>' +
+            '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + wlStarHtml(s.code, s.name) + '</div>' +
             stockValueColsHtml(price, changeAmt, s.changePercent) +
           '</div>';
         }).join('')
@@ -7226,6 +7832,7 @@ async function refresh(){
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
     try { if (!document.getElementById('signalModal').hidden && signalCenterState.activeTab === 'brewLaunch') renderSignalCenter(); } catch (e) { /* 訊號中心重畫失敗不影響畫面 */ }
+    try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
     lastDataFetchedAt = new Date();
   } catch (e) {
     if (!lastData) lastData = buildMockData();
@@ -7979,6 +8586,7 @@ setInterval(() => {
 }, 30000);
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
+    if (btn.dataset.label === '自選股'){ openWatchPanel(); return; }        // 2026-10-05 使用者：自選股
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '下午報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」
     if (btn.dataset.label === '創高黑龍'){ openHeilongPanel(); return; } // 2026-10-04 使用者：黑龍回測獨立面板
@@ -8184,6 +8792,8 @@ async function fetchQuotes(codes) {
       const d = String(item.d || ""), t = String(item.t || "");
       if (/^\d{8}$/.test(d) && (d > quoteDate || (d === quoteDate && t > quoteTime))) { quoteDate = d; quoteTime = t; }
       if (!code || !(code in quotes)) continue;
+      // 股名（2026-10-05 自選股：族群表以外的股票也要有中文股名）；/api/groups 不會帶出去
+      if (item.n) quotes[code].name = String(item.n).trim();
       // 價格一定要是正數才算有效：2026-10-04（週日）TWSE 回了一批 z／委買委賣是 0 的資料
       // （週末測試盤），0 被當成有效成交價算出 -100%、前端再推算漲跌就變 NaN。
       const pos = (v) => (Number.isFinite(v) && v > 0 ? v : NaN);
@@ -8208,6 +8818,7 @@ async function fetchQuotes(codes) {
         const limitDownPrice = parseFloat(item.w);
         const volume = parseInt(item.v, 10);
         quotes[code] = {
+          name: quotes[code].name,
           price: finalPrice,
           // 開盤價：創高黑選股 13:20 提醒用來判斷「收黑」（現價 < 開盤）；/api/groups 不會帶出去
           open: pos(parseFloat(item.o)),
@@ -8260,6 +8871,21 @@ async function proxyHanstockBars(pathname, cacheSeconds = 20) {
       "content-type": "application/json; charset=UTF-8",
       "cache-control": live ? "no-store" : "public, max-age=" + cacheSeconds
     }
+  });
+}
+
+async function proxyHanstockPost(pathname, request) {
+  // 自選股（2026-10-05 使用者）：同步碼放在 POST 內容裡原樣轉給後端，不放網址、不快取
+  const body = await request.text();
+  if (body.length > 80000) return Response.json({ status: "error", error: "清單太大了" }, { status: 413 });
+  const resp = await fetch("https://hanstock-production-b872.up.railway.app" + pathname, {
+    method: "POST",
+    headers: { "content-type": "application/json", Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
+    body
+  });
+  return new Response(await resp.text(), {
+    status: resp.status,
+    headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" }
   });
 }
 
@@ -8465,6 +9091,38 @@ export default {
         for (const code of codes) {
           const q = quotes[code];
           if (q && Number.isFinite(q.price)) out[code] = { price: q.price, open: Number.isFinite(q.open) ? q.open : null, changePercent: q.changePercent, limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: q.volume };
+        }
+        return new Response(JSON.stringify({ quotes: out, quoteDate: quotes.__meta.quoteDate, quoteTime: quotes.__meta.quoteTime }), { headers });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: String(e && e.message || e) }), { status: 502, headers });
+      }
+    }
+    if (url.pathname === "/api/watchlist/load" || url.pathname === "/api/watchlist/save") {
+      // 自選股（2026-10-05 使用者）：兩台電腦＋手機用同一個同步碼看到同一份清單
+      if (request.method !== "POST") return Response.json({ status: "error", error: "要用 POST" }, { status: 405 });
+      try {
+        return await proxyHanstockPost("/api/hub" + url.pathname.slice(4), request);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/watch-quotes") {
+      // 自選股：族群表以外的股票報價（族群股前端直接用首頁那份 /api/groups）；上市、上櫃都問，附股名；
+      // 一次最多 200 檔，不快取
+      const codes = [...new Set(String(url.searchParams.get("codes") || "").split(",").map((c) => c.trim().toUpperCase()).filter((c) => /^[0-9A-Z]{4,6}$/.test(c)))].slice(0, 200);
+      const headers = { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" };
+      if (!codes.length) return new Response(JSON.stringify({ quotes: {} }), { headers });
+      try {
+        const quotes = await fetchQuotes(codes);
+        const out = {};
+        for (const code of codes) {
+          const q = quotes[code];
+          if (!q) continue;
+          if (Number.isFinite(q.price)) {
+            out[code] = { name: q.name || null, price: q.price, change: q.change, changePercent: q.changePercent, limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: q.volume };
+          } else if (q.name) {
+            out[code] = { name: q.name, price: null };
+          }
         }
         return new Response(JSON.stringify({ quotes: out, quoteDate: quotes.__meta.quoteDate, quoteTime: quotes.__meta.quoteTime }), { headers });
       } catch (e) {
