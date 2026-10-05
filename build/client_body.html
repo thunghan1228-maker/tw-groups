@@ -917,13 +917,38 @@
     /* 手機：留代號、名稱、均線分數、大戶力、漲跌幅、成交價、分組／移除；族群、漲跌、成交量、備註、標籤、上下移收起來 */
     .wl-table{min-width:0;font-size:13px;}
     .wl-table th,.wl-table td{padding:6px 4px;}
-    .wl-table th:nth-child(3),.wl-table td:nth-child(3),.wl-table th:nth-child(7),.wl-table td:nth-child(7),
-    .wl-table th:nth-child(9),.wl-table td:nth-child(9),.wl-table th:nth-child(10),.wl-table td:nth-child(10){display:none;}
+    .wl-table.v-live th:nth-child(3),.wl-table.v-live td:nth-child(3),.wl-table.v-live th:nth-child(7),.wl-table.v-live td:nth-child(7),
+    .wl-table.v-live th:nth-child(9),.wl-table.v-live td:nth-child(9),.wl-table.v-live th:nth-child(10),.wl-table.v-live td:nth-child(10){display:none;}
+    /* 持股損益：留代號、名稱、成交價、成本、張數、損益、報酬率；漲跌幅、市值、今日損益、防守收起來 */
+    .wl-table.v-pnl tr:not(.wl-edit-row) > :nth-child(4),.wl-table.v-pnl tr:not(.wl-edit-row) > :nth-child(7),
+    .wl-table.v-pnl tr:not(.wl-edit-row) > :nth-child(10),.wl-table.v-pnl tr:not(.wl-edit-row) > :nth-child(11){display:none;}
+    /* 盤後籌碼：族群、法人今日、防守收起來，其他可以左右滑 */
+    .wl-table.v-chips{min-width:600px;}
+    .wl-table.v-chips tr > :nth-child(3),.wl-table.v-chips tr > :nth-child(5),.wl-table.v-chips tr > :nth-child(12){display:none;}
+    .wl-edit label{flex-basis:100%;}
     .wl-table .chips-flag,.wl-table .sig-eligibility,.wl-table .wl-op[data-op="up"],.wl-table .wl-op[data-op="down"]{display:none;}
     .wl-table .wl-name{display:inline-block;max-width:5.5em;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;margin-right:0;}
     .wl-gsel{max-width:64px;}
     .wl-gops{margin-left:0;}
   }
+  .wl-views{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 2px;}
+  .wl-view{padding:5px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-weight:800;cursor:pointer;font-size:14px;font-family:inherit;}
+  .wl-view.active{background:#7c3aed;border-color:#7c3aed;color:#fff;}
+  .wl-views #wlToCheckup{margin-left:auto;}
+  .wl-pos{cursor:pointer;text-decoration:underline dotted var(--muted);text-underline-offset:3px;}
+  .wl-pos:hover{background:rgba(124,58,237,.12);}
+  .wl-table tr.wl-editing td{background:rgba(124,58,237,.10);}
+  .wl-edit-row td{background:var(--panel-2);text-align:left;white-space:normal;}
+  .wl-edit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:13px;}
+  .wl-edit input{width:110px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);font-size:15px;font-family:inherit;}
+  .wl-edit-ops{display:inline-flex;gap:6px;}
+  .wl-feebar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;font-size:13px;color:var(--muted);margin:4px 0 6px;}
+  .wl-feebar input[type=number]{width:64px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;}
+  .wl-pnl-sum{font-size:14px;margin:4px 0 8px;line-height:1.7;}
+  .wl-def{line-height:1.35;font-size:12.5px;}
+  .wl-warn{display:inline-block;background:var(--down);color:#fff;border-radius:6px;padding:0 6px;font-weight:800;}
+  .wl-streak{font-size:11.5px;font-weight:700;}
+  .wl-table.v-chips td,.wl-table.v-pnl td{line-height:1.35;}
   .wl-star{background:none;border:none;cursor:pointer;color:#8b8178;font-size:15px;padding:0 3px;line-height:1;vertical-align:middle;font-family:inherit;}
   .wl-star:hover{color:#f5b301;}
   .wl-star.on{color:#f5b301;}
@@ -1278,7 +1303,7 @@
     <div class="chips-head">
       <div>
         <div class="chips-title">自選股</div>
-        <div class="chips-sub">自己挑的股票分組追蹤：即時報價、盤中大戶力、均線分數、漲跌停、處置／注意、融資券／當沖／股期，點股票開K線圖。設定同步碼後，兩台電腦＋手機看到同一份清單。</div>
+        <div class="chips-sub">自己挑的股票分組追蹤：即時報價、盤中大戶力、均線分數、漲跌停、處置／注意、融資券／當沖／股期；「持股損益」填成本張數算損益，「盤後籌碼」看法人、主力、大戶、創高天數。點股票開K線圖。設定同步碼後，兩台電腦＋手機看到同一份清單。</div>
       </div>
       <button class="cm-icon-btn" id="watchClose" aria-label="關閉">✕</button>
     </div>
@@ -6415,7 +6440,8 @@ const WL_GROUP_INDEX = (() => {
 })();
 function wlEmpty(){ return { groups: [{ id: 'g1', name: '自選', items: [] }], settings: {} }; }
 let wl = { key: '', data: wlEmpty(), version: 0, active: 'g1', sort: 'manual', queue: [], busy: false, loading: false,
-  error: '', notice: '', syncedAt: null, extra: {}, extraAt: 0, showKey: false, retryTimer: null, timers: [] };
+  error: '', notice: '', syncedAt: null, extra: {}, extraAt: 0, showKey: false, retryTimer: null, timers: [],
+  view: 'live', sortPnl: 'manual', sortChips: 'manual', editing: null, editDraft: null };
 function wlEsc(s){
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
@@ -6433,6 +6459,9 @@ function wlReadLocal(){
     if (cached && cached.data && Array.isArray(cached.data.groups)){ wl.data = cached.data; wl.version = Number(cached.version) || 0; }
     wl.sort = localStorage.getItem('watchSort') || 'manual';
     wl.active = localStorage.getItem('watchActive') || wl.active;
+    wl.view = localStorage.getItem('watchView') || 'live';
+    wl.sortPnl = localStorage.getItem('watchSortPnl') || 'manual';
+    wl.sortChips = localStorage.getItem('watchSortChips') || 'manual';
   } catch (e) { /* 讀不到就用預設 */ }
   wlNormalize();
 }
@@ -6440,7 +6469,10 @@ function wlSaveLocal(){
   try { localStorage.setItem('watchData', JSON.stringify({ data: wl.data, version: wl.version })); } catch (e) { /* 存不了就算了 */ }
 }
 function wlSavePrefs(){
-  try { localStorage.setItem('watchSort', wl.sort); localStorage.setItem('watchActive', wl.active); } catch (e) { /* 存不了就算了 */ }
+  try {
+    localStorage.setItem('watchSort', wl.sort); localStorage.setItem('watchActive', wl.active); localStorage.setItem('watchView', wl.view);
+    localStorage.setItem('watchSortPnl', wl.sortPnl); localStorage.setItem('watchSortChips', wl.sortChips);
+  } catch (e) { /* 存不了就算了 */ }
 }
 wlReadLocal();
 function wlGroup(){ return wl.data.groups.find((g) => g.id === wl.active) || wl.data.groups[0]; }
@@ -6684,18 +6716,27 @@ function renderWatch(){
     '<div class="wl-add"><input type="text" id="wlAddInput" autocomplete="off" placeholder="輸入代號或名稱加入「' + wlEsc(g.name) + '」，可一次貼多檔：2330 2317 3707">' +
     '<button class="wl-btn primary" id="wlAddBtn">加入</button></div>' +
     (wl.addNote ? '<div class="wl-hint">' + wlEsc(wl.addNote) + '</div>' : '') +
-    '<div class="wl-sorts">排序 ' + WL_SORTS.map((s) => '<button class="wl-sort' + (wl.sort === s[0] ? ' active' : '') + '" data-sort="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>' +
+    wlViewsHtml() +
+    '<div class="wl-sorts">排序 ' + (WL_VIEW_SORTS[wl.view] || WL_SORTS).map((s) => '<button class="wl-sort' + (wlViewSort() === s[0] ? ' active' : '') + '" data-sort="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>' +
     '<div id="wlTable"></div>' +
-    '<div class="sw-foot">報價：族群表裡的股票跟首頁同一份（15 秒更新）；族群表外的股票另外向證交所抓，沒有盤中大戶力、均線分數、融資券等標籤。' +
-    '點代號或名稱開K線圖；首頁、盤中333、醞釀／發動、健診、K線圖名稱旁的 ☆ 也能直接加入（加到目前這組），★ 再點一下移除。</div>';
+    '<div class="sw-foot">' + (WL_VIEW_FOOT[wl.view] || WL_VIEW_FOOT.live) + '</div>';
   renderWatchTable();
 }
 function renderWatchTable(){
   const el = document.getElementById('wlTable');
   if (!el || document.getElementById('watchModal').hidden) return;
+  const active = document.activeElement;
+  if (active && active.tagName === 'INPUT' && /^(number|text)$/.test(active.type) && el.contains(active)) return;    // 正在打成本、張數、折數：先不要重畫
+  const draftCost = document.getElementById('wlEditCost'), draftLots = document.getElementById('wlEditLots');
+  if (draftCost && draftLots) wl.editDraft = { code: draftCost.dataset.code, cost: draftCost.value, lots: draftLots.value };   // 打一半、點到別處：重畫後保留
   const g = wlGroup();
   if (!g.items.length){
     el.innerHTML = '<div class="signal-empty"><div class="se-title">這組還沒有股票</div><div class="se-sub">在上面輸入代號或名稱加入；首頁、盤中333、醞釀／發動、K線圖等名稱旁的 ☆ 也可以直接加入。</div></div>';
+    return;
+  }
+  if (wl.view === 'pnl' || wl.view === 'chips'){
+    wlEnsureCheckup();
+    el.innerHTML = wl.view === 'pnl' ? wlPnlHtml(g) : wlChipsHtml(g);
     return;
   }
   const quotes = wlQuoteMap(), holders = wlHolderMap();
@@ -6742,10 +6783,264 @@ function renderWatchTable(){
         '<button class="wl-op del" data-op="del" title="從這組移除">✕</button></span></td>' +
     '</tr>';
   }).join('');
-  el.innerHTML = '<div class="wl-table-wrap"><table class="wl-table"><thead><tr>' +
+  el.innerHTML = '<div class="wl-table-wrap"><table class="wl-table v-live"><thead><tr>' +
     '<th class="l">代號</th><th class="l">名稱</th><th class="l">族群</th><th>均線分數</th><th>盤中大戶力</th><th>漲跌幅</th><th>漲跌</th><th>成交價</th><th>成交量(張)</th><th class="l">備註</th><th></th>' +
     '</tr></thead><tbody>' + body + '</tbody></table></div>' +
     '<div class="wl-summary">共 ' + g.items.length + ' 檔・<span class="up">上漲 ' + up + '</span>・<span class="down">下跌 ' + down + '</span>・平盤 ' + flat + '</div>';
+}
+// ---- 第三階段（2026-10-05 使用者）：持股損益、盤後籌碼、一鍵健診
+// 持股損益：每檔可填成本均價、張數（跟著同步碼存）；損益＝現價賣掉的預估淨額－買進花的錢，預設扣手續費（折數可改）＋證交稅。
+// 盤後籌碼：跟「每日持股健診」同一份 /api/checkup（收盤後整理）：法人、主力、大戶週增、創高天數、防守線，加上醞釀／發動。
+const WL_VIEWS = [['live', '即時報價'], ['pnl', '持股損益'], ['chips', '盤後籌碼']];
+const WL_VIEW_SORTS = {
+  live: WL_SORTS,
+  pnl: [['manual', '自訂順序'], ['ret', '報酬率'], ['pnl', '損益'], ['today', '今日損益'], ['pct', '漲跌幅']],
+  chips: [['manual', '自訂順序'], ['inst5', '法人5日'], ['mf5', '主力5日'], ['week', '大戶週增'], ['hilen', '創高天數'], ['overall', '健診綜合']],
+};
+const WL_SORT_FIELD = { live: 'sort', pnl: 'sortPnl', chips: 'sortChips' };
+const WL_VIEW_FOOT = {
+  live: '報價：族群表裡的股票跟首頁同一份（15 秒更新）；族群表外的股票另外向證交所抓，沒有盤中大戶力、均線分數、融資券等標籤。' +
+    '點代號或名稱開K線圖；首頁、盤中333、醞釀／發動、健診、K線圖名稱旁的 ☆ 也能直接加入（加到目前這組），★ 再點一下移除。',
+  pnl: '點「成本」或「張數」那一格輸入你的成本均價和張數（零股打小數：0.5 張＝500 股），跟著同步碼存，三台一樣。' +
+    '損益＝用現價賣掉的預估淨額－買進花的錢（含手續費）；勾「扣手續費＋證交稅」時，手續費照你填的折數、證交稅股票 0.3%、ETF 0.1%。今日損益＝今天的漲跌×股數。' +
+    '明天防守＝每日持股健診算的三日低／月線（收盤後更新），盤中現價跌破會標紅。',
+  chips: '盤後資料跟「每日持股健診」同一份，每個交易日收盤後整理。法人＝三大法人買賣超、主力＝主力大單買賣超（張），下面一行是連續買超／賣超幾天；' +
+    '大戶週增＝集保大戶持股比例的週變化（連幾週增加）；創高天數＝今天收盤是近幾日最高收盤（20 以上就是創 20 日新高）；' +
+    '醞釀／發動跟訊號中心同一份（盤中即時）；健診＝綜合分數，照你在每日持股健診設的面向與權重。',
+};
+function wlViewSort(){ return wl[WL_SORT_FIELD[wl.view] || 'sort'] || 'manual'; }
+function wlViewsHtml(){
+  if (!WL_VIEWS.some((v) => v[0] === wl.view)) wl.view = 'live';
+  return '<div class="wl-views">' + WL_VIEWS.map(([k, label]) => '<button class="wl-view' + (wl.view === k ? ' active' : '') + '" data-view="' + k + '">' + label + '</button>').join('') +
+    '<button class="wl-btn" id="wlToCheckup" title="把這組的股票丟進「每日持股健診」">🩺 這組送去健診</button></div>';
+}
+// 盤後資料：整份自選股（最多 120 檔，太多就只抓這一組）一次抓，10 分鐘內不重抓
+let wlCk = { key: '', data: null, at: 0, loading: false, error: '', byCode: {} };
+function wlCheckupCodes(){
+  const all = [...new Set(wl.data.groups.flatMap((g) => g.items.map((it) => it.code)))];
+  return (all.length <= 120 ? all : wlGroup().items.map((it) => it.code).slice(0, 120)).sort();
+}
+async function wlEnsureCheckup(){
+  const codes = wlCheckupCodes(), key = codes.join(',');
+  if (!key) return;
+  const fresh = wlCk.key === key && wlCk.data && Date.now() - wlCk.at < 600000;
+  const recentFail = wlCk.key === key && wlCk.error && Date.now() - wlCk.at < 30000;
+  if (fresh || recentFail || (wlCk.key === key && wlCk.loading)) return;
+  wlCk = { key, data: wlCk.key === key ? wlCk.data : null, at: wlCk.at, loading: true, error: '', byCode: wlCk.key === key ? wlCk.byCode : {} };
+  try {
+    const res = await fetch('/api/checkup?codes=' + encodeURIComponent(key));
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || !data.status) throw new Error((data && (data.detail || data.error)) || ('HTTP ' + res.status));
+    if (wlCk.key !== key) return;
+    wlCk.data = data; wlCk.byCode = {};
+    for (const r of data.rows || []) wlCk.byCode[r.code] = r;
+  } catch (e) {
+    if (wlCk.key === key) wlCk.error = String((e && e.message) || e);
+  } finally {
+    if (wlCk.key === key){ wlCk.loading = false; wlCk.at = Date.now(); }
+  }
+  renderWatchTable();
+}
+function wlCkNote(){
+  if (wlCk.data && wlCk.data.status === 'ok') return '';
+  if (wlCk.loading || !wlCk.key) return '<div class="wl-hint">盤後資料讀取中…</div>';
+  if (wlCk.error) return '<div class="wl-hint">盤後資料讀不到（' + wlEsc(wlCk.error) + '），30 秒後再試</div>';
+  return '<div class="wl-hint">' + wlEsc((wlCk.data && wlCk.data.reason) || '還沒有盤後資料（收盤後整理）') + '</div>';
+}
+function wlFeeRates(code){
+  const s = wl.data.settings || {};
+  if (s.pnlFee === false) return { buy: 0, sell: 0 };
+  const disc = Number(s.feeDisc) > 0 && Number(s.feeDisc) <= 10 ? Number(s.feeDisc) / 10 : 0.28;
+  const commission = 0.001425 * disc;
+  return { buy: commission, sell: commission + (/^00/.test(code) ? 0.001 : 0.003) };    // ETF 證交稅 0.1%
+}
+function wlPosition(it, price, change){
+  const cost = Number(it.cost), lots = Number(it.lots);
+  if (!(cost > 0) || !(lots > 0)) return null;
+  const shares = Math.round(lots * 1000), fee = wlFeeRates(it.code);
+  const paid = cost * shares * (1 + fee.buy);
+  const pos = { shares, paid, value: null, pnl: null, ret: null, today: null };
+  if (price > 0){
+    pos.value = price * shares;
+    pos.pnl = price * shares * (1 - fee.sell) - paid;
+    pos.ret = pos.pnl / paid * 100;
+    if (Number.isFinite(change)) pos.today = change * shares;
+  }
+  return pos;
+}
+const wlMoney = (v) => (v === null || v === undefined || !Number.isFinite(v) ? '—' : (v > 0 ? '+' : v < 0 ? '-' : '') + Math.round(Math.abs(v)).toLocaleString('en-US'));
+const wlAmount = (v) => (v === null || v === undefined || !Number.isFinite(v) ? '—' : Math.round(v).toLocaleString('en-US'));
+const wlLotsText = (v) => { const n = Number(v); return Number.isInteger(n) ? String(n) : String(+n.toFixed(3)); };
+function wlSortRows(rows, key, value){
+  if (key === 'manual') return rows;
+  return rows.sort((a, b) => {
+    const x = value(a), y = value(b);
+    const nx = x === null || x === undefined || !Number.isFinite(x), ny = y === null || y === undefined || !Number.isFinite(y);
+    if (nx || ny) return nx && ny ? a.idx - b.idx : nx ? 1 : -1;
+    return y - x || a.idx - b.idx;
+  });
+}
+function wlLiveRow(it, idx, quotes){
+  const q = quotes[it.code] || null;
+  const price = q && Number(q.price) > 0 ? Number(q.price) : null;
+  const pct = q && Number.isFinite(Number(q.changePercent)) ? Number(q.changePercent) : null;
+  const chg = q && Number.isFinite(Number(q.change)) ? Number(q.change) : price !== null && pct !== null ? price - price / (1 + pct / 100) : null;
+  return { it, idx, q, price, pct, chg };
+}
+function wlDefenseHtml(ck, price){
+  const d = ck && ck.def;
+  if (!d) return '<span class="flat">—</span>';
+  const broke = price > 0 && d.ma20T && price < d.ma20T ? '盤中破月線' : price > 0 && d.low3T && price < d.low3T ? '盤中破三日低' : '';
+  return '<div class="wl-def">' + (broke ? '<span class="wl-warn">' + broke + '</span>' : ckJudgeHtml(ck)) +
+    '<br><span class="muted">三日低 ' + ckPrice(d.low3T) + '・月線 ' + ckPrice(d.ma20T) + '</span></div>';
+}
+function wlPnlHtml(g){
+  const quotes = wlQuoteMap();
+  const rows = g.items.map((it, idx) => {
+    const r = wlLiveRow(it, idx, quotes);
+    r.pos = wlPosition(it, r.price, r.chg);
+    return r;
+  });
+  const key = wl.sortPnl;
+  wlSortRows(rows, key, (r) => key === 'pct' ? r.pct : r.pos ? (key === 'ret' ? r.pos.ret : key === 'pnl' ? r.pos.pnl : key === 'today' ? r.pos.today : null) : null);
+  const tot = { n: 0, paid: 0, value: 0, pnl: 0, today: 0, priced: 0 };
+  const fee = wl.data.settings || {};
+  const feeOn = fee.pnlFee !== false, disc = Number(fee.feeDisc) > 0 ? Number(fee.feeDisc) : 2.8;
+  const body = rows.map((r) => {
+    const code = r.it.code, name = wlNameOf(code, r.it), cls = r.pct === null ? 'flat' : dirClass(r.pct), p = r.pos;
+    if (p){
+      tot.n++;
+      if (p.pnl !== null){ tot.priced++; tot.paid += p.paid; tot.value += p.value; tot.pnl += p.pnl; tot.today += p.today || 0; }
+    }
+    const editing = wl.editing && wl.editing.gid === g.id && wl.editing.code === code;
+    const ck = wlCk.byCode[code] || null;
+    const limit = r.q ? { limitUp: !!r.q.limitUp, limitDown: !!r.q.limitDown } : {};
+    let html = '<tr data-code="' + code + '" data-name="' + wlEsc(name) + '"' + (editing ? ' class="wl-editing"' : '') + '>' +
+      '<td class="l wl-stock">' + code + '</td><td class="l wl-stock"><span class="wl-name">' + wlEsc(name) + '</span></td>' +
+      '<td class="' + cls + '">' + (r.price === null ? '—' : limitPriceHtml(limit, r.price.toFixed(2))) + '</td>' +
+      '<td class="' + cls + '">' + (r.pct === null ? '—' : fmt(r.pct) + '%') + '</td>' +
+      '<td class="wl-pos" data-field="cost" title="點一下輸入成本均價">' + (Number(r.it.cost) > 0 ? hlPrice(Number(r.it.cost)) : '<span class="wl-note-empty">＋成本</span>') + '</td>' +
+      '<td class="wl-pos" data-field="lots" title="點一下輸入張數">' + (Number(r.it.lots) > 0 ? wlLotsText(r.it.lots) : '<span class="wl-note-empty">＋張數</span>') + '</td>' +
+      '<td>' + (p ? wlAmount(p.value) : '') + '</td>' +
+      '<td class="' + (p && p.pnl !== null ? dirClass(p.pnl) : '') + '"><b>' + (p ? wlMoney(p.pnl) : '') + '</b></td>' +
+      '<td class="' + (p && p.ret !== null ? dirClass(p.ret) : '') + '">' + (p && p.ret !== null ? swPct(p.ret) : '') + '</td>' +
+      '<td class="' + (p && p.today !== null ? dirClass(p.today) : '') + '">' + (p ? wlMoney(p.today) : '') + '</td>' +
+      '<td class="l">' + wlDefenseHtml(ck, r.price) + '</td></tr>';
+    if (editing){
+      const draft = wl.editDraft && wl.editDraft.code === code ? wl.editDraft : null;
+      const costVal = draft ? draft.cost : Number(r.it.cost) > 0 ? Number(r.it.cost) : '';
+      const lotsVal = draft ? draft.lots : Number(r.it.lots) > 0 ? Number(r.it.lots) : '';
+      html += '<tr class="wl-edit-row"><td colspan="11"><div class="wl-edit"><b>' + code + ' ' + wlEsc(name) + '</b>' +
+        '<label>成本均價 <input type="number" class="wl-edit-in" id="wlEditCost" data-code="' + code + '" inputmode="decimal" step="0.01" min="0" value="' + wlEsc(costVal) + '"> 元</label>' +
+        '<label>張數 <input type="number" class="wl-edit-in" id="wlEditLots" data-code="' + code + '" inputmode="decimal" step="0.001" min="0" value="' + wlEsc(lotsVal) + '"> 張</label>' +
+        '<span class="muted">零股打小數：0.5 張＝500 股</span>' +
+        '<span class="wl-edit-ops"><button class="wl-btn primary" data-edit="save">儲存</button><button class="wl-btn" data-edit="clear">清除</button><button class="wl-btn" data-edit="cancel">取消</button></span></div></td></tr>';
+    }
+    return html;
+  }).join('');
+  const ret = tot.paid > 0 ? tot.pnl / tot.paid * 100 : null;
+  const summary = tot.n
+    ? '<div class="wl-pnl-sum">有填成本 <b>' + tot.n + '</b> 檔・投入 <b>' + wlAmount(tot.paid) + '</b>・市值 <b>' + wlAmount(tot.value) + '</b>・損益 <b class="' + dirClass(tot.pnl) + '">' + wlMoney(tot.pnl) + '</b>' +
+      (ret !== null ? '（<span class="' + dirClass(ret) + '">' + swPct(ret) + '</span>）' : '') + '・今日 <b class="' + dirClass(tot.today) + '">' + wlMoney(tot.today) + '</b>' +
+      (tot.priced < tot.n ? '<span class="muted">（' + (tot.n - tot.priced) + ' 檔還沒抓到報價，沒算進去）</span>' : '') + '</div>'
+    : '<div class="wl-hint">點表格裡的「＋成本」「＋張數」輸入你的成本均價和張數，就會算損益。</div>';
+  return '<div class="wl-feebar"><label><input type="checkbox" id="wlFeeOn"' + (feeOn ? ' checked' : '') + '> 損益扣手續費＋證交稅</label>' +
+      '<label>手續費 <input type="number" id="wlFeeDisc" inputmode="decimal" step="0.1" min="0.1" max="10" value="' + disc + '"' + (feeOn ? '' : ' disabled') + '> 折</label></div>' +
+    summary + wlCkNote() +
+    '<div class="wl-table-wrap"><table class="wl-table v-pnl"><thead><tr><th class="l">代號</th><th class="l">名稱</th><th>成交價</th><th>漲跌幅</th><th>成本</th><th>張數</th><th>市值</th><th>損益</th><th>報酬率</th><th>今日損益</th><th class="l">明天防守</th></tr></thead><tbody>' +
+    body + '</tbody></table></div>';
+}
+function wlEditAction(kind){
+  const ed = wl.editing;
+  if (!ed) return;
+  if (kind === 'cancel'){
+    wl.editing = null; wl.editDraft = null;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // 游標還在輸入框時表格不會重畫
+    renderWatchTable();
+    return;
+  }
+  let cost = null, lots = null;
+  if (kind === 'save'){
+    const rawCost = String((document.getElementById('wlEditCost') || {}).value || '').trim();
+    const rawLots = String((document.getElementById('wlEditLots') || {}).value || '').trim();
+    cost = rawCost === '' ? null : Number(rawCost);
+    lots = rawLots === '' ? null : Number(rawLots);
+    if ((cost !== null && !(cost > 0 && cost < 1e7)) || (lots !== null && !(lots > 0 && lots < 1e6))){
+      showToast('成本、張數要是大於 0 的數字（不填＝清掉）');
+      return;
+    }
+  }
+  wl.editing = null; wl.editDraft = null;
+  const { gid, code } = ed;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  wlMutate((data) => {
+    const g = data.groups.find((x) => x.id === gid), item = g && g.items.find((x) => x.code === code);
+    if (!item) return;
+    if (cost !== null) item.cost = Math.round(cost * 10000) / 10000; else delete item.cost;
+    if (lots !== null) item.lots = Math.round(lots * 1000) / 1000; else delete item.lots;
+  });
+}
+function wlChipsHtml(g){
+  const quotes = wlQuoteMap();
+  const launchCount = new Map();
+  for (const r of trkLaunchRecords()) launchCount.set(r.code, (launchCount.get(r.code) || 0) + 1);
+  let liveLaunch = new Set();
+  try { const bm = brewLaunchModel(); liveLaunch = new Set(bm ? bm.launchBlocks.flatMap((b) => b.rows).map((r) => r.code) : []); } catch (e) { /* 醞釀／發動算不出來就不標 */ }
+  const rows = g.items.map((it, idx) => ({ it, idx, ck: wlCk.byCode[it.code] || null }));
+  const key = wl.sortChips;
+  wlSortRows(rows, key, (r) => {
+    const c = r.ck && r.ck.chip ? r.ck.chip : {};
+    if (!r.ck) return null;
+    return key === 'inst5' ? c.inst5 : key === 'mf5' ? c.mf5 : key === 'week' ? c.weekPct : key === 'hilen' ? r.ck.hiLen : key === 'overall' ? ckOverall(r.ck) : null;
+  });
+  const streak = (n, word) => (n > 0 ? '<span class="wl-streak up">連' + word[0] + ' ' + n + ' 天</span>' : n < 0 ? '<span class="wl-streak down">連' + word[1] + ' ' + (-n) + ' 天</span>' : '');
+  const lotsCell = (v, sub) => '<td><span class="' + (swHas(v) ? dirClass(v) : 'flat') + '">' + swLots(v) + '</span>' + (sub ? '<br>' + sub : '') + '</td>';
+  const body = rows.map((r) => {
+    const code = r.it.code, name = wlNameOf(code, r.it), ck = r.ck, c = (ck && ck.chip) || {};
+    const grp = (ck && ck.group) || (WL_GROUP_INDEX[code] ? WL_GROUP_INDEX[code].group : '');
+    const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[code] : null, n = launchCount.get(code) || 0;
+    const tags = (liveLaunch.has(code) ? '<span class="trk-badge bull">發動中</span>' : n ? '<span class="trk-badge">今天發動 ×' + n + '</span>' : '') +
+      (info && info.brewing && !info.skipped ? '<span class="trk-badge brew">醞釀</span>' : '');
+    const q = quotes[code];
+    const price = q && Number(q.price) > 0 ? Number(q.price) : null;
+    const f3 = c.f3 ? '外資 ' + swLots(c.f3.foreign) + '・投信 ' + swLots(c.f3.trust) + '・自營 ' + swLots(c.f3.dealer) : '';
+    if (!ck){
+      return '<tr data-code="' + code + '" data-name="' + wlEsc(name) + '"><td class="l wl-stock">' + code + '</td><td class="l wl-stock"><span class="wl-name">' + wlEsc(name) + '</span></td>' +
+        '<td class="l">' + (grp ? '<span class="sig-group">' + wlEsc(grp) + '</span>' : '<span class="flat">—</span>') + '</td>' +
+        '<td colspan="7" class="l"><span class="flat">' + (wlCk.data && wlCk.data.status === 'ok' ? '沒有盤後資料（本站沒有這檔的日K）' : '—') + '</span></td>' +
+        '<td class="l">' + (tags || '<span class="flat">—</span>') + '</td><td class="l"><span class="flat">—</span></td></tr>';
+    }
+    const ov = ckOverall(ck);
+    return '<tr data-code="' + code + '" data-name="' + wlEsc(name) + '">' +
+      '<td class="l wl-stock">' + code + '</td><td class="l wl-stock"><span class="wl-name">' + wlEsc(name) + '</span>' + (ck.stale ? '<span class="muted">（資料到 ' + swMmdd(ck.date) + '）</span>' : '') + '</td>' +
+      '<td class="l">' + (grp ? '<span class="sig-group">' + wlEsc(grp) + '</span>' : '<span class="flat">—</span>') + '</td>' +
+      '<td>' + ckPrice(ck.close) + '<br><span class="' + dirClass(ck.chgPct || 0) + '">' + swPct(ck.chgPct, 1) + '</span></td>' +
+      '<td title="' + wlEsc(f3) + '"><span class="' + (swHas(c.instToday) ? dirClass(c.instToday) : 'flat') + '">' + swLots(c.instToday) + '</span></td>' +
+      lotsCell(c.inst5, streak(c.instStreak || 0, ['買', '賣'])) +
+      lotsCell(c.mf5, streak(c.mfStreak || 0, ['買', '賣'])) +
+      '<td title="' + (c.tdccDate ? '集保 ' + swMmdd(c.tdccDate) : '') + '"><span class="' + (swHas(c.weekPct) ? dirClass(c.weekPct) : 'flat') + '">' + swPct(c.weekPct) + '</span>' +
+        (c.weeks > 0 ? '<br><span class="wl-streak up">連增 ' + c.weeks + ' 週</span>' : '') + '</td>' +
+      '<td>' + (swHas(ck.hiLen) ? (ck.hiLen >= 20 ? '<b class="up">' + ck.hiLen + '</b>' : ck.hiLen) : '—') + '</td>' +
+      '<td class="l">' + (tags || '<span class="flat">—</span>') + '</td>' +
+      '<td>' + ckScoreHtml(ov) + (ov !== null ? ' <span class="ck-lab">' + ckLabel(ov) + '</span>' : '') + '</td>' +
+      '<td class="l">' + wlDefenseHtml(ck, price) + '</td></tr>';
+  }).join('');
+  const d = wlCk.data && wlCk.data.status === 'ok' ? swMmdd(wlCk.data.date) : '';
+  return wlCkNote() + '<div class="wl-table-wrap"><table class="wl-table v-chips"><thead><tr><th class="l">代號</th><th class="l">名稱</th><th class="l">族群</th>' +
+    '<th>收盤' + (d ? '(' + d + ')' : '') + '</th><th>法人今日</th><th>法人5日</th><th>主力5日</th><th>大戶週增</th><th>創高天數</th><th class="l">醞釀／發動</th><th>健診</th><th class="l">明天防守</th></tr></thead><tbody>' +
+    body + '</tbody></table></div>';
+}
+function wlSendToCheckup(){
+  const g = wlGroup(), codes = g.items.map((it) => it.code);
+  if (!codes.length){ showToast('這組還沒有股票'); return; }
+  const name = ('自選・' + g.name).slice(0, 30);
+  ckLists.saved[name] = codes.slice(0, 120).join('/');
+  ckState.listName = name;
+  ckSaveLists();
+  closeWatchPanel();
+  ckRun(codes.slice(0, 120).join('/'));     // 先換清單再打開，不會先抓一次舊清單
+  openCheckupPanel();
+  if (codes.length > 120) showToast('健診一次最多 120 檔，先看前 120 檔');
 }
 function openWatchPanel(){
   document.getElementById('watchModal').hidden = false;
@@ -6765,7 +7060,8 @@ function wlAfterChange(){
   const modal = document.getElementById('watchModal');
   if (modal && !modal.hidden){
     // 打字中的輸入框不要被重畫掉：只重畫表格跟同步狀態那一列
-    const typing = document.activeElement && (document.activeElement.id === 'wlAddInput' || document.activeElement.id === 'wlKeyInput');
+    const act = document.activeElement;
+    const typing = act && (act.id === 'wlAddInput' || act.id === 'wlKeyInput' || (act.tagName === 'INPUT' && /^(number|text)$/.test(act.type) && !!act.closest('#wlTable')));
     if (typing){
       const sync = document.querySelector('#watchBody .wl-sync');
       if (sync && wl.key) sync.outerHTML = wlSyncHtml();
@@ -6787,7 +7083,13 @@ function wlSubmitAdd(){
   if (again){ again.value = unknown.join(' '); again.focus(); }
 }
 document.getElementById('watchBody').addEventListener('keydown', (e) => {
+  if (e.target.classList && e.target.classList.contains('wl-edit-in')){
+    if (e.key === 'Enter'){ e.preventDefault(); wlEditAction('save'); }
+    else if (e.key === 'Escape'){ e.preventDefault(); wlEditAction('cancel'); }
+    return;
+  }
   if (e.key !== 'Enter') return;
+  if (e.target.id === 'wlFeeDisc'){ e.preventDefault(); e.target.blur(); return; }
   if (e.target.id === 'wlAddInput'){ e.preventDefault(); wlSubmitAdd(); }
   else if (e.target.id === 'wlKeyInput'){ e.preventDefault(); wlSetKey(e.target.value); }
 });
@@ -6833,10 +7135,22 @@ document.getElementById('watchBody').addEventListener('click', (e) => {
     return;
   }
   const sortBtn = e.target.closest('.wl-sort');
-  if (sortBtn){ wl.sort = sortBtn.dataset.sort; wlSavePrefs(); renderWatch(); return; }
+  if (sortBtn){ wl[WL_SORT_FIELD[wl.view] || 'sort'] = sortBtn.dataset.sort; wlSavePrefs(); renderWatch(); return; }
+  const viewBtn = e.target.closest('.wl-view[data-view]');
+  if (viewBtn){ wl.view = viewBtn.dataset.view; wl.editing = null; wlSavePrefs(); renderWatch(); return; }
+  if (e.target.closest('#wlToCheckup')){ wlSendToCheckup(); return; }
+  const editBtn = e.target.closest('[data-edit]');
+  if (editBtn){ wlEditAction(editBtn.dataset.edit); return; }
   const row = e.target.closest('tr[data-code]');
   if (!row) return;
   const code = row.dataset.code, gid = wlGroup().id;
+  if (e.target.closest('.wl-pos')){
+    wl.editing = { gid, code }; wl.editDraft = null;
+    renderWatchTable();
+    const input = document.getElementById(e.target.closest('.wl-pos').dataset.field === 'lots' ? 'wlEditLots' : 'wlEditCost');
+    if (input){ input.focus(); input.select(); }
+    return;
+  }
   const op = e.target.closest('.wl-op');
   if (op){
     if (op.dataset.op === 'del'){
@@ -6874,6 +7188,17 @@ document.getElementById('watchBody').addEventListener('click', (e) => {
   }
 });
 document.getElementById('watchBody').addEventListener('change', (e) => {
+  if (e.target.id === 'wlFeeOn' || e.target.id === 'wlFeeDisc'){
+    const on = !!(document.getElementById('wlFeeOn') || {}).checked;
+    const disc = Number((document.getElementById('wlFeeDisc') || {}).value);
+    wlMutate((data) => {
+      data.settings.pnlFee = on;
+      if (disc > 0 && disc <= 10) data.settings.feeDisc = Math.round(disc * 100) / 100;
+    });
+    if (e.target.id === 'wlFeeDisc') e.target.blur();
+    renderWatchTable();
+    return;
+  }
   const sel = e.target.closest('.wl-gsel');
   if (!sel) return;
   const row = sel.closest('tr[data-code]');
