@@ -2762,7 +2762,9 @@ function buildMockData(){
     const avgChange = stocks.reduce((sum, s) => sum + s.changePercent, 0) / stocks.length;
     return { name: g.name, avgChange, stocks };
   });
-  return { groups };
+  // mock：還沒拿到任何一次真的報價時墊著首頁用的示範資料（沒有價格）；醞釀／發動、盤中333 這些要價格的名單
+  // 看到它就顯示「還在載入」，不能拿示範資料去算（2026-10-05 使用者：整頁 0/0、29 檔都說抓不到報價）
+  return { groups, mock: true };
 }
 
 function buildOtcStrengthDemo(){
@@ -3593,7 +3595,7 @@ const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停�
 const FIRE_MIN_VOLUME = 500;  // 馬火多：成交量（張）低於這個太冷門
 const FIRE_MAX_ROWS = 10;     // 馬火多：最多列這麼多檔
 function race333Model(){
-  if (!lastData || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
+  if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
   const groups = lastData.groups.filter((g) => g.name !== '股期標的');
   const total = groups.length;
   const half = Math.ceil(total / 2);
@@ -4195,7 +4197,7 @@ function brewLiveMetrics(info, s, rules){
     launch: brokeOut && scoreOk && volumeOk, toBoxPct: (info.boxHigh / price - 1) * 100 };
 }
 function brewLaunchModel(){
-  if (!brewLaunchData || !lastData || !Array.isArray(lastData.groups)) return null;
+  if (!brewLaunchData || !lastData || lastData.mock || !Array.isArray(lastData.groups)) return null;
   const rules = brewLaunchData.rules;
   // 使用者 2026-09-24：金融股不列入醞釀／發動（醞釀一次 14 檔金融股太多）；後端把這些股票標 skipped、族群名放在 rules.skipGroups
   const skipGroups = new Set(rules.skipGroups || []);
@@ -4567,7 +4569,7 @@ function brewLaunchHtml(){
   if (typeof brewDayOffset === 'string') return brewDayBarHtml() + brewOverlapHtml(brewDayOffset);
   if (brewDayOffset > 0) return brewDayBarHtml() + brewPastDayHtml();
   const m = brewLaunchModel();
-  if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div></div>';
+  if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div><div class="se-sub">還沒拿到證交所的即時報價（剛打開頁面、或第一次抓報價失敗），幾秒後會自動重抓，拿到就會出現。</div></div>';
   const r = m.rules;
   const d = brewLaunchData;
   const skipped = (d.insufficient || []).length + (d.stale || []).length;
@@ -7122,12 +7124,47 @@ let lastDataFetchedAt = null;
 // 明確標示資料可能過期、以及最後一次真的成功更新是什麼時候。
 const STALE_WARNING_MS = 40000;
 
+// 2026-10-05 使用者：「剛剛還有訊號，現在又抓不到報價」——證交所報價偶爾某幾段（甚至整批）這一輪沒抓到，
+// 名單就整個掉光。這一輪沒價格的股票，3 分鐘內抓到過的先沿用上一筆（標 stale），族群平均也重算；
+// 超過 3 分鐘還抓不到才真的當成沒有報價。
+const QUOTE_CARRY_MS = 3 * 60 * 1000;
+const lastGoodQuotes = new Map();
+function carryMissingQuotes(data){
+  const now = Date.now();
+  let carried = 0;
+  data.groups.forEach((g) => {
+    let touched = false;
+    (g.stocks || []).forEach((st) => {
+      if (Number(st.price) > 0){
+        lastGoodQuotes.set(st.code, { price: st.price, changePercent: st.changePercent, limitUp: st.limitUp, limitDown: st.limitDown, volume: st.volume, at: now });
+        return;
+      }
+      const prev = lastGoodQuotes.get(st.code);
+      if (!prev || now - prev.at > QUOTE_CARRY_MS) return;
+      Object.assign(st, { price: prev.price, changePercent: prev.changePercent, limitUp: prev.limitUp, limitDown: prev.limitDown, volume: prev.volume, stale: true });
+      carried += 1;
+      touched = true;
+    });
+    if (touched){
+      const valid = g.stocks.filter((st) => Number(st.price) > 0);
+      g.avgChange = valid.length ? valid.reduce((sum, st) => sum + (Number(st.changePercent) || 0), 0) / valid.length : 0;
+    }
+  });
+  data.quoteCarried = carried;
+  return data;
+}
+let quickRetryTimer = null;
+
 async function refresh(){
   try {
-    const res = await fetch('/api/groups');
+    // 證交所那邊卡住時 /api/groups 可能好幾十秒才回（2026-10-05 實測 60 秒還沒回），等太久就放棄這一輪
+    const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), 20000) : null;
+    let res;
+    try { res = await fetch('/api/groups', ctrl ? { signal: ctrl.signal } : undefined); } finally { if (timer) clearTimeout(timer); }
     const data = await res.json();
     if (!data || !Array.isArray(data.groups)) throw new Error('bad payload');
-    lastData = data;
+    lastData = carryMissingQuotes(data);
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
@@ -7135,6 +7172,10 @@ async function refresh(){
     lastDataFetchedAt = new Date();
   } catch (e) {
     if (!lastData) lastData = buildMockData();
+    // 還沒拿到過真的報價（剛打開頁面就失敗）：不要等 15 秒，4 秒後先再試一次
+    if (lastData && lastData.mock && !quickRetryTimer){
+      quickRetryTimer = setTimeout(() => { quickRetryTimer = null; refresh(); }, 4000);
+    }
   }
   const updatedEl = document.getElementById('updatedAt');
   if (updatedEl){
@@ -7149,8 +7190,9 @@ async function refresh(){
       // 2026-10-05：證交所那段報價重抓後還是沒拿到的股票數（worker 算好的）；多到不正常就標出來，
       // 才知道這台電腦的名單（醞釀／發動、盤中333…）少了一批股票，不是它們真的沒動。
       const missing = Number(lastData && lastData.quoteMissing) || 0;
+      const carried = Number(lastData && lastData.quoteCarried) || 0;
       updatedEl.textContent = '報價更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') +
-        (missing > 10 ? '（⚠ 有 ' + missing + ' 檔這次沒抓到報價）' : '');
+        (missing > 10 ? '（⚠ 有 ' + missing + ' 檔這次沒抓到報價' + (carried ? '，' + carried + ' 檔先沿用上一筆' : '') + '）' : '');
     }
   }
   render();
