@@ -3977,7 +3977,8 @@ function race333FilterBarHtml(){
 function raceNotReadyHtml(){
   if (lastData && lastData.mock){
     return '<div class="signal-empty"><div class="se-title">族群行情暫時抓不到，正在自動重試…</div>' +
-      '<div class="se-sub">刀劍空、盤中333 要用首頁的族群報價來算；證交所報價這一輪沒回來（開盤前後最常見），每幾秒會自動再抓，抓到就會出現。一直這樣的話按 F5 重新整理。</div></div>';
+      '<div class="se-sub">刀劍空、盤中333 要用首頁的族群報價來算；證交所報價這一輪沒回來（開盤前後最常見），每幾秒會自動再抓，抓到就會出現。一直這樣的話按 F5 重新整理。' +
+      (groupsLastError ? '<br>上次失敗原因：' + wlEsc(groupsLastError) : '') + '</div></div>';
   }
   return '<div class="signal-empty"><div class="se-title">族群行情載入中…</div>' +
     '<div class="se-sub">刀劍空、盤中333 要用首頁的族群報價來算；開盤前後證交所比較慢，通常 10～20 秒內就會出現。</div></div>';
@@ -4716,7 +4717,8 @@ function brewLaunchHtml(){
   if (typeof brewDayOffset === 'string') return brewDayBarHtml() + brewOverlapHtml(brewDayOffset);
   if (brewDayOffset > 0) return brewDayBarHtml() + brewPastDayHtml();
   const m = brewLaunchModel();
-  if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div><div class="se-sub">還沒拿到證交所的即時報價（剛打開頁面、或第一次抓報價失敗），幾秒後會自動重抓，拿到就會出現。</div></div>';
+  if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div><div class="se-sub">還沒拿到證交所的即時報價（剛打開頁面、或第一次抓報價失敗），幾秒後會自動重抓，拿到就會出現。' +
+    (groupsLastError ? '<br>上次失敗原因：' + wlEsc(groupsLastError) : '') + '</div></div>';
   const r = m.rules;
   const d = brewLaunchData;
   const skipped = (d.insufficient || []).length + (d.stale || []).length;
@@ -8503,6 +8505,7 @@ function carryMissingQuotes(data){
   return data;
 }
 let quickRetryTimer = null;
+let groupsLastError = '';   // 2026-10-06：上一次抓首頁報價失敗的原因，顯示在畫面上（使用者那邊整個早上都抓不到，要看得到原因）
 
 async function refresh(){
   try {
@@ -8511,8 +8514,14 @@ async function refresh(){
     const timer = ctrl ? setTimeout(() => ctrl.abort(), 20000) : null;
     let res;
     try { res = await fetch('/api/groups', ctrl ? { signal: ctrl.signal } : undefined); } finally { if (timer) clearTimeout(timer); }
+    if (!res.ok){
+      let detail = '';
+      try { const body = await res.json(); detail = body && body.error ? '：' + String(body.error).slice(0, 60) : ''; } catch (e2) { /* 不是 JSON（例如 Cloudflare 的錯誤頁） */ }
+      throw new Error('伺服器回 ' + res.status + detail);
+    }
     const data = await res.json();
-    if (!data || !Array.isArray(data.groups)) throw new Error('bad payload');
+    if (!data || !Array.isArray(data.groups)) throw new Error('回來的資料格式不對');
+    groupsLastError = '';
     lastData = carryMissingQuotes(data);
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
@@ -8524,6 +8533,7 @@ async function refresh(){
     trkTick();
     lastDataFetchedAt = new Date();
   } catch (e) {
+    groupsLastError = e && e.name === 'AbortError' ? '等了 20 秒還沒回' : String((e && e.message) || e).slice(0, 80);
     if (!lastData) lastData = buildMockData();
     // 還沒拿到過真的報價（剛打開頁面就失敗）：不要等 15 秒，4 秒後先再試一次
     if (lastData && lastData.mock && !quickRetryTimer){
@@ -8533,7 +8543,7 @@ async function refresh(){
   const updatedEl = document.getElementById('updatedAt');
   if (updatedEl){
     if (!lastDataFetchedAt){
-      updatedEl.textContent = '⚠ 尚未成功取得即時報價';
+      updatedEl.textContent = '⚠ 尚未成功取得即時報價' + (groupsLastError ? '（' + groupsLastError + '）' : '');
     } else if (Date.now() - lastDataFetchedAt.getTime() > STALE_WARNING_MS){
       updatedEl.textContent = '⚠ 報價可能已過期（最後成功更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + '）';
     } else if (lastData && lastData.heldClose && lastData.heldClose.session){
@@ -8545,6 +8555,7 @@ async function refresh(){
       const missing = Number(lastData && lastData.quoteMissing) || 0;
       const carried = Number(lastData && lastData.quoteCarried) || 0;
       updatedEl.textContent = '報價更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') +
+        (lastData && lastData.quoteSource === 'backend' ? '（備援來源）' : '') +
         (missing > 10 ? '（⚠ 有 ' + missing + ' 檔這次沒抓到報價' + (carried ? '，' + carried + ' 檔先沿用上一筆' : '') + '）' : '');
     }
   }

@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-06 09:39:05";
+const BUILD_STAMP = "2026-10-06 09:47:37";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4032,7 +4032,8 @@ function race333FilterBarHtml(){
 function raceNotReadyHtml(){
   if (lastData && lastData.mock){
     return '<div class="signal-empty"><div class="se-title">族群行情暫時抓不到，正在自動重試…</div>' +
-      '<div class="se-sub">刀劍空、盤中333 要用首頁的族群報價來算；證交所報價這一輪沒回來（開盤前後最常見），每幾秒會自動再抓，抓到就會出現。一直這樣的話按 F5 重新整理。</div></div>';
+      '<div class="se-sub">刀劍空、盤中333 要用首頁的族群報價來算；證交所報價這一輪沒回來（開盤前後最常見），每幾秒會自動再抓，抓到就會出現。一直這樣的話按 F5 重新整理。' +
+      (groupsLastError ? '<br>上次失敗原因：' + wlEsc(groupsLastError) : '') + '</div></div>';
   }
   return '<div class="signal-empty"><div class="se-title">族群行情載入中…</div>' +
     '<div class="se-sub">刀劍空、盤中333 要用首頁的族群報價來算；開盤前後證交所比較慢，通常 10～20 秒內就會出現。</div></div>';
@@ -4771,7 +4772,8 @@ function brewLaunchHtml(){
   if (typeof brewDayOffset === 'string') return brewDayBarHtml() + brewOverlapHtml(brewDayOffset);
   if (brewDayOffset > 0) return brewDayBarHtml() + brewPastDayHtml();
   const m = brewLaunchModel();
-  if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div><div class="se-sub">還沒拿到證交所的即時報價（剛打開頁面、或第一次抓報價失敗），幾秒後會自動重抓，拿到就會出現。</div></div>';
+  if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div><div class="se-sub">還沒拿到證交所的即時報價（剛打開頁面、或第一次抓報價失敗），幾秒後會自動重抓，拿到就會出現。' +
+    (groupsLastError ? '<br>上次失敗原因：' + wlEsc(groupsLastError) : '') + '</div></div>';
   const r = m.rules;
   const d = brewLaunchData;
   const skipped = (d.insufficient || []).length + (d.stale || []).length;
@@ -7915,7 +7917,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-06 09:39:05';
+const BUILD_STAMP = '2026-10-06 09:47:37';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -8558,6 +8560,7 @@ function carryMissingQuotes(data){
   return data;
 }
 let quickRetryTimer = null;
+let groupsLastError = '';   // 2026-10-06：上一次抓首頁報價失敗的原因，顯示在畫面上（使用者那邊整個早上都抓不到，要看得到原因）
 
 async function refresh(){
   try {
@@ -8566,8 +8569,14 @@ async function refresh(){
     const timer = ctrl ? setTimeout(() => ctrl.abort(), 20000) : null;
     let res;
     try { res = await fetch('/api/groups', ctrl ? { signal: ctrl.signal } : undefined); } finally { if (timer) clearTimeout(timer); }
+    if (!res.ok){
+      let detail = '';
+      try { const body = await res.json(); detail = body && body.error ? '：' + String(body.error).slice(0, 60) : ''; } catch (e2) { /* 不是 JSON（例如 Cloudflare 的錯誤頁） */ }
+      throw new Error('伺服器回 ' + res.status + detail);
+    }
     const data = await res.json();
-    if (!data || !Array.isArray(data.groups)) throw new Error('bad payload');
+    if (!data || !Array.isArray(data.groups)) throw new Error('回來的資料格式不對');
+    groupsLastError = '';
     lastData = carryMissingQuotes(data);
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
@@ -8579,6 +8588,7 @@ async function refresh(){
     trkTick();
     lastDataFetchedAt = new Date();
   } catch (e) {
+    groupsLastError = e && e.name === 'AbortError' ? '等了 20 秒還沒回' : String((e && e.message) || e).slice(0, 80);
     if (!lastData) lastData = buildMockData();
     // 還沒拿到過真的報價（剛打開頁面就失敗）：不要等 15 秒，4 秒後先再試一次
     if (lastData && lastData.mock && !quickRetryTimer){
@@ -8588,7 +8598,7 @@ async function refresh(){
   const updatedEl = document.getElementById('updatedAt');
   if (updatedEl){
     if (!lastDataFetchedAt){
-      updatedEl.textContent = '⚠ 尚未成功取得即時報價';
+      updatedEl.textContent = '⚠ 尚未成功取得即時報價' + (groupsLastError ? '（' + groupsLastError + '）' : '');
     } else if (Date.now() - lastDataFetchedAt.getTime() > STALE_WARNING_MS){
       updatedEl.textContent = '⚠ 報價可能已過期（最後成功更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + '）';
     } else if (lastData && lastData.heldClose && lastData.heldClose.session){
@@ -8600,6 +8610,7 @@ async function refresh(){
       const missing = Number(lastData && lastData.quoteMissing) || 0;
       const carried = Number(lastData && lastData.quoteCarried) || 0;
       updatedEl.textContent = '報價更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') +
+        (lastData && lastData.quoteSource === 'backend' ? '（備援來源）' : '') +
         (missing > 10 ? '（⚠ 有 ' + missing + ' 檔這次沒抓到報價' + (carried ? '，' + carried + ' 檔先沿用上一筆' : '') + '）' : '');
     }
   }
@@ -9563,7 +9574,71 @@ async function fetchQuoteChunk(codes, timeoutMs) {
   }
 }
 
+// 證交所報價：先自己從 Cloudflare 打證交所；整批失敗（2026-10-06 使用者那邊整個早上首頁都抓不到）就改問
+// HanStock 後端代抓（/api/hub/group-quotes，從 Railway 那台主機抓證交所），並且 20 秒內不再直接打證交所，
+// 省得每個視窗每 4 秒重試又把證交所打得更兇。抓到的不到一半時，缺的也拿後端補。
+let misDownUntil = 0;
+const MIS_DOWN_MS = 20000;
 async function fetchQuotes(codes) {
+  if (Date.now() >= misDownUntil) {
+    let quotes;
+    try {
+      quotes = await fetchQuotesFromMis(codes);
+    } catch (err) {
+      misDownUntil = Date.now() + MIS_DOWN_MS;
+      try { return await fetchQuotesFromBackend(codes); } catch (backendErr) { throw err; }
+    }
+    const meta = quotes.__meta || {};
+    if ((meta.missing || 0) > codes.length / 2) {
+      try { return mergeBackendQuotes(quotes, await fetchQuotesFromBackend(codes), codes); } catch (backendErr) { /* 後端也沒有就照原本的回 */ }
+    }
+    return quotes;
+  }
+  return await fetchQuotesFromBackend(codes);
+}
+
+async function fetchQuotesFromBackend(codes) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  let data = null;
+  try {
+    const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/group-quotes?codes=" + encodeURIComponent(codes.join(",")), {
+      headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
+      signal: ctrl.signal
+    });
+    if (!resp.ok) throw new Error("後端代抓 HTTP " + resp.status);
+    data = await resp.json();
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!data || data.status !== "ok" || !data.quotes) throw new Error("後端代抓格式不對");
+  const quotes = {};
+  for (const code of codes) {
+    const q = data.quotes[code];
+    quotes[code] = q && q.price > 0
+      ? { name: q.name || undefined, price: q.price, open: q.open, change: q.change, changePercent: q.changePercent,
+          limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: Number.isFinite(q.volume) ? q.volume : null }
+      : { price: null, change: 0, changePercent: 0 };
+  }
+  const missing = codes.filter((c) => quotes[c].price === null).length;
+  Object.defineProperty(quotes, "__meta", {
+    value: { quoteDate: data.quoteDate || null, quoteTime: data.quoteTime || null, missing, retried: 0, source: "backend" },
+    enumerable: false
+  });
+  return quotes;
+}
+
+function mergeBackendQuotes(quotes, backup, codes) {
+  for (const code of codes) {
+    if (quotes[code].price === null && backup[code] && backup[code].price !== null) quotes[code] = backup[code];
+  }
+  const meta = quotes.__meta || {};
+  meta.missing = codes.filter((c) => quotes[c].price === null).length;
+  meta.source = "mis+backend";
+  return quotes;
+}
+
+async function fetchQuotesFromMis(codes) {
   const quotes = {};
   for (const code of codes) quotes[code] = { price: null, change: 0, changePercent: 0 };
   const chunks = chunk(codes, CHUNK_SIZE);
@@ -10063,7 +10138,9 @@ export default {
           quoteTime: held ? "13:30:00" : (meta.quoteTime || null),
           heldClose: held ? { session: sessionClose.session, today: sessionClose.today || null } : null,
           // 這次重抓後還是沒有報價的檔數（休市暫留收盤時不算）；前端多到不正常會標示
-          quoteMissing: held ? 0 : (meta.missing || 0)
+          quoteMissing: held ? 0 : (meta.missing || 0),
+          // 報價來源：mis＝這裡直接抓證交所、backend＝後端代抓、mis+backend＝缺的拿後端補
+          quoteSource: held ? "close" : (meta.source || "mis")
         });
         groupsMemo = { at: Date.now(), body };
         return new Response(body, { headers: { "content-type": "application/json" } });

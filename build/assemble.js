@@ -81,7 +81,71 @@ async function fetchQuoteChunk(codes, timeoutMs) {
   }
 }
 
+// 證交所報價：先自己從 Cloudflare 打證交所；整批失敗（2026-10-06 使用者那邊整個早上首頁都抓不到）就改問
+// HanStock 後端代抓（/api/hub/group-quotes，從 Railway 那台主機抓證交所），並且 20 秒內不再直接打證交所，
+// 省得每個視窗每 4 秒重試又把證交所打得更兇。抓到的不到一半時，缺的也拿後端補。
+let misDownUntil = 0;
+const MIS_DOWN_MS = 20000;
 async function fetchQuotes(codes) {
+  if (Date.now() >= misDownUntil) {
+    let quotes;
+    try {
+      quotes = await fetchQuotesFromMis(codes);
+    } catch (err) {
+      misDownUntil = Date.now() + MIS_DOWN_MS;
+      try { return await fetchQuotesFromBackend(codes); } catch (backendErr) { throw err; }
+    }
+    const meta = quotes.__meta || {};
+    if ((meta.missing || 0) > codes.length / 2) {
+      try { return mergeBackendQuotes(quotes, await fetchQuotesFromBackend(codes), codes); } catch (backendErr) { /* 後端也沒有就照原本的回 */ }
+    }
+    return quotes;
+  }
+  return await fetchQuotesFromBackend(codes);
+}
+
+async function fetchQuotesFromBackend(codes) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  let data = null;
+  try {
+    const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/group-quotes?codes=" + encodeURIComponent(codes.join(",")), {
+      headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
+      signal: ctrl.signal
+    });
+    if (!resp.ok) throw new Error("後端代抓 HTTP " + resp.status);
+    data = await resp.json();
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!data || data.status !== "ok" || !data.quotes) throw new Error("後端代抓格式不對");
+  const quotes = {};
+  for (const code of codes) {
+    const q = data.quotes[code];
+    quotes[code] = q && q.price > 0
+      ? { name: q.name || undefined, price: q.price, open: q.open, change: q.change, changePercent: q.changePercent,
+          limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: Number.isFinite(q.volume) ? q.volume : null }
+      : { price: null, change: 0, changePercent: 0 };
+  }
+  const missing = codes.filter((c) => quotes[c].price === null).length;
+  Object.defineProperty(quotes, "__meta", {
+    value: { quoteDate: data.quoteDate || null, quoteTime: data.quoteTime || null, missing, retried: 0, source: "backend" },
+    enumerable: false
+  });
+  return quotes;
+}
+
+function mergeBackendQuotes(quotes, backup, codes) {
+  for (const code of codes) {
+    if (quotes[code].price === null && backup[code] && backup[code].price !== null) quotes[code] = backup[code];
+  }
+  const meta = quotes.__meta || {};
+  meta.missing = codes.filter((c) => quotes[c].price === null).length;
+  meta.source = "mis+backend";
+  return quotes;
+}
+
+async function fetchQuotesFromMis(codes) {
   const quotes = {};
   for (const code of codes) quotes[code] = { price: null, change: 0, changePercent: 0 };
   const chunks = chunk(codes, CHUNK_SIZE);
@@ -581,7 +645,9 @@ export default {
           quoteTime: held ? "13:30:00" : (meta.quoteTime || null),
           heldClose: held ? { session: sessionClose.session, today: sessionClose.today || null } : null,
           // 這次重抓後還是沒有報價的檔數（休市暫留收盤時不算）；前端多到不正常會標示
-          quoteMissing: held ? 0 : (meta.missing || 0)
+          quoteMissing: held ? 0 : (meta.missing || 0),
+          // 報價來源：mis＝這裡直接抓證交所、backend＝後端代抓、mis+backend＝缺的拿後端補
+          quoteSource: held ? "close" : (meta.source || "mis")
         });
         groupsMemo = { at: Date.now(), body };
         return new Response(body, { headers: { "content-type": "application/json" } });
