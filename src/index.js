@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-06 11:46:44";
+const BUILD_STAMP = "2026-10-06 12:59:13";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1889,7 +1889,7 @@ function updateChartInfoBar(bars, index){
     changeColor = amt > 0 ? '#e6675f' : amt < 0 ? '#5fae6f' : null;
   }
   const parts = [
-    item(ib.fullLabel), item('開' + ib.open.toFixed(2)), item('高' + ib.high.toFixed(2)), item('低' + ib.low.toFixed(2)),
+    item(ib.fullLabel + (ib.liveNote ? '（' + ib.liveNote + '）' : '')), item('開' + ib.open.toFixed(2)), item('高' + ib.high.toFixed(2)), item('低' + ib.low.toFixed(2)),
     item('量' + Math.round(ib.volume) + '張'), item('漲跌' + change, changeColor), item('收' + ib.close.toFixed(2), changeColor),
   ];
   if (Number.isFinite(ib.mainNet)){
@@ -2607,6 +2607,88 @@ async function fetchRealDailyBars(code){
   if (!data || !Array.isArray(data.bars) || !data.bars.length) throw new Error('bars1d empty');
   return data.bars.map(dailyBarToBar);
 }
+// 2026-10-06 使用者：日線圖盤中沒更新（最後一根停在昨天）。日K是後端官方盤後資料，證交所／櫃買收盤後公布才寫今天
+// 那根；今天還沒有官方日K時，改用證交所即時報價（開盤、最高、最低、現價、累積量）組今天這根接在最後面，
+// 標題寫「盤中 HH:MM」，主力淨量加總今天的 5 分K；圖開著的時候盤中每 20 秒更新一次。
+// 開盤前（還沒有開盤價）不接；收盤後官方日K進來，就改用官方那根（日期一樣的話不再接即時的）。
+const LIVE_DAILY_REFRESH_MS = 20000;
+function dailyBarDay(bar){
+  return typeof bar.ts === 'string' ? bar.ts.slice(0, 10) : taipeiDateStr(bar.ts);
+}
+function withTimeout(promise, ms, fallback){
+  return Promise.race([promise, new Promise((resolve) => setTimeout(() => resolve(fallback), ms))]);
+}
+async function fetchLiveDailyBar(code){
+  try {
+    const [data, m5] = await Promise.all([
+      withTimeout(fetch('/api/watch-quotes?codes=' + encodeURIComponent(code)).then((res) => (res.ok ? res.json() : null)), 6000, null),
+      withTimeout(fetchRealBars(code, 'm5'), 6000, []).catch(() => []),
+    ]);
+    const q = data && data.quotes && data.quotes[code];
+    const day = String((data && data.quoteDate) || '');
+    if (!q || !Number.isFinite(q.price) || !Number.isFinite(q.open) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(day)) return null;
+    const prices = [q.open, q.price, q.high, q.low].filter(Number.isFinite);
+    const nets = (m5 || []).filter((b) => Number.isFinite(b.mainNet) && taipeiDateStr(typeof b.ts === 'number' ? b.ts : Date.parse(b.ts)) === day);
+    const bar = dailyBarToBar({
+      ts: day + 'T00:00:00+00:00', open: q.open, high: Math.max(...prices), low: Math.min(...prices), close: q.price,
+      volume: Number.isFinite(q.volume) ? q.volume : 0,
+      mainNet: nets.length ? nets.reduce((sum, b) => sum + b.mainNet, 0) : null,
+    });
+    bar.live = true;
+    bar.liveNote = '盤中' + (data.quoteTime ? ' ' + String(data.quoteTime).slice(0, 5) : '');
+    return bar;
+  } catch (e) {
+    return null;
+  }
+}
+function mergeLiveDailyBar(bars, live){
+  // 回傳 { bars, appended }：今天還沒有官方日K才接；已經接過今天的即時K棒就換成新的。
+  if (!live || !bars.length) return { bars, appended: false };
+  const last = bars[bars.length - 1];
+  const lastDay = dailyBarDay(last), liveDay = dailyBarDay(live);
+  if (last.live && lastDay === liveDay) return { bars: bars.slice(0, -1).concat([live]), appended: false };
+  if (liveDay > lastDay) return { bars: bars.concat([live]), appended: true };
+  return { bars, appended: false };
+}
+function chartForceSeries(bars){
+  // 累積線必須按交易日歸零：多日回補後bars橫跨好幾天，若不reset，
+  // 只要有一天量能特別大(例如漲停爆量)，y軸尺度會被那天撐開，
+  // 其他天原本存在的真實數字就會被壓成視覺上的一條平線。
+  let cum = 0, cumDate = null;
+  return bars.map((b) => {
+    const net = b.mainNet ?? 0;
+    const d = taipeiDateStr(b.ts);
+    if (d !== cumDate) { cum = 0; cumDate = d; }
+    cum += net;
+    return { net, cum, date: d };
+  });
+}
+function twMarketLiveNow(){
+  // 台北時間平日 09:00～13:40（收盤 13:30，多留幾分鐘拿到最後一盤）
+  const t = new Date(Date.now() + 8 * 3600000);
+  const day = t.getUTCDay(), minutes = t.getUTCHours() * 60 + t.getUTCMinutes();
+  return day >= 1 && day <= 5 && minutes >= 9 * 60 && minutes <= 13 * 60 + 40;
+}
+async function refreshLiveDailyBar(){
+  if (currentChart.tf !== 'daily' || !currentChart.isRealBars || !Array.isArray(currentChart.bars) || !currentChart.bars.length) return;
+  if (document.visibilityState === 'hidden' || !twMarketLiveNow()) return;
+  if (!CHART_WINDOW_MODE && document.getElementById('chartModal').hidden) return;
+  const code = currentChart.code, token = currentChart.requestToken;
+  const live = await fetchLiveDailyBar(code);
+  if (!live || code !== currentChart.code || token !== currentChart.requestToken || currentChart.tf !== 'daily') return;
+  const before = currentChart.bars.length;
+  const { start, count } = visibleRange(before);
+  const merged = mergeLiveDailyBar(currentChart.bars, live);
+  if (merged.bars === currentChart.bars) return;
+  currentChart.bars = merged.bars;
+  currentChart.dailyBars = merged.bars;
+  // 放大看最右邊（最新）那段的時候，多一根就跟著往右移一根，不會把新的那根擠到畫面外
+  if (merged.appended && currentChart.viewCount != null && start + count >= before) currentChart.viewStart = start + 1;
+  currentChart.force = TF_CONFIG.daily.force ? chartForceSeries(merged.bars) : null;
+  currentChart.macd = computeMACD(merged.bars);
+  redrawAll();
+}
+setInterval(() => { refreshLiveDailyBar().catch(() => {}); }, LIVE_DAILY_REFRESH_MS);
 
 async function switchTimeframe(tf){
   const requestToken = ++currentChart.requestToken;
@@ -2630,7 +2712,9 @@ async function switchTimeframe(tf){
   } else if (tf === 'm1'){
     try { bars = await fetchRealBars1Range(currentChart.code); isReal = true; } catch (e) { bars = null; }
   } else if (tf === 'daily'){
-    try { bars = await fetchRealDailyBars(currentChart.code); isReal = true; } catch (e) { bars = null; }
+    // 官方日K跟即時報價一起抓：今天還沒有官方日K時，接上今天盤中那根（見 fetchLiveDailyBar）
+    const [daily, live] = await Promise.all([fetchRealDailyBars(currentChart.code).catch(() => null), fetchLiveDailyBar(currentChart.code)]);
+    if (daily){ bars = mergeLiveDailyBar(daily, live).bars; isReal = true; }
   }
   if (requestToken !== currentChart.requestToken) return; // 使用者已切到別的分頁/個股，這次結果作廢
   if (!bars) bars = generateOHLC(currentChart.code, tf);
@@ -2649,17 +2733,7 @@ async function switchTimeframe(tf){
   document.getElementById('forceNote').textContent = forceNoteText(isReal);
 
   if (isReal){
-    // 累積線必須按交易日歸零：多日回補後bars橫跨好幾天，若不reset，
-    // 只要有一天量能特別大(例如漲停爆量)，y軸尺度會被那天撐開，
-    // 其他天原本存在的真實數字就會被壓成視覺上的一條平線。
-    let cum = 0, cumDate = null;
-    currentChart.force = cfg.force ? bars.map((b) => {
-      const net = b.mainNet ?? 0;
-      const d = taipeiDateStr(b.ts);
-      if (d !== cumDate) { cum = 0; cumDate = d; }
-      cum += net;
-      return { net, cum, date: d };
-    }) : null;
+    currentChart.force = cfg.force ? chartForceSeries(bars) : null;
   } else {
     currentChart.force = cfg.force ? generateForceFlow(currentChart.code, tf, bars) : null;
   }
@@ -7980,7 +8054,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-06 11:46:44';
+const BUILD_STAMP = '2026-10-06 12:59:13';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -9684,7 +9758,7 @@ async function fetchQuotesFromBackend(codes) {
   for (const code of codes) {
     const q = data.quotes[code];
     quotes[code] = q && q.price > 0
-      ? { name: q.name || undefined, price: q.price, open: q.open, change: q.change, changePercent: q.changePercent,
+      ? { name: q.name || undefined, price: q.price, open: q.open, prevClose: q.prevClose, change: q.change, changePercent: q.changePercent,
           limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: Number.isFinite(q.volume) ? q.volume : null }
       : { price: null, change: 0, changePercent: 0 };
   }
@@ -9775,6 +9849,10 @@ async function fetchQuotesFromMis(codes) {
           price: finalPrice,
           // 開盤價：創高黑選股 13:20 提醒用來判斷「收黑」（現價 < 開盤）；/api/groups 不會帶出去
           open: pos(parseFloat(item.o)),
+          // 今天到目前的最高／最低、昨收（2026-10-06 日線圖盤中接上今天那根K棒用）；/api/groups 不會帶出去
+          high: pos(parseFloat(item.h)),
+          low: pos(parseFloat(item.l)),
+          prevClose,
           change: finalPrice - prevClose,
           changePercent: (finalPrice - prevClose) / prevClose * 100,
           limitUp: Number.isFinite(limitUpPrice) && finalPrice >= limitUpPrice - 1e-6,
@@ -10072,7 +10150,10 @@ export default {
           const q = quotes[code];
           if (!q) continue;
           if (Number.isFinite(q.price)) {
-            out[code] = { name: q.name || null, price: q.price, change: q.change, changePercent: q.changePercent, limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: q.volume };
+            // 開高低／昨收：日線圖盤中用即時報價接上今天那根K棒（2026-10-06）；後端代抓的備援沒有高低就是 null
+            const num = (v) => (Number.isFinite(v) ? v : null);
+            out[code] = { name: q.name || null, price: q.price, change: q.change, changePercent: q.changePercent, limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: q.volume,
+              open: num(q.open), high: num(q.high), low: num(q.low), prevClose: num(q.prevClose) };
           } else if (q.name) {
             out[code] = { name: q.name, price: null };
           }

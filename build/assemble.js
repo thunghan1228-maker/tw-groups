@@ -123,7 +123,7 @@ async function fetchQuotesFromBackend(codes) {
   for (const code of codes) {
     const q = data.quotes[code];
     quotes[code] = q && q.price > 0
-      ? { name: q.name || undefined, price: q.price, open: q.open, change: q.change, changePercent: q.changePercent,
+      ? { name: q.name || undefined, price: q.price, open: q.open, prevClose: q.prevClose, change: q.change, changePercent: q.changePercent,
           limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: Number.isFinite(q.volume) ? q.volume : null }
       : { price: null, change: 0, changePercent: 0 };
   }
@@ -214,6 +214,10 @@ async function fetchQuotesFromMis(codes) {
           price: finalPrice,
           // 開盤價：創高黑選股 13:20 提醒用來判斷「收黑」（現價 < 開盤）；/api/groups 不會帶出去
           open: pos(parseFloat(item.o)),
+          // 今天到目前的最高／最低、昨收（2026-10-06 日線圖盤中接上今天那根K棒用）；/api/groups 不會帶出去
+          high: pos(parseFloat(item.h)),
+          low: pos(parseFloat(item.l)),
+          prevClose,
           change: finalPrice - prevClose,
           changePercent: (finalPrice - prevClose) / prevClose * 100,
           limitUp: Number.isFinite(limitUpPrice) && finalPrice >= limitUpPrice - 1e-6,
@@ -511,7 +515,10 @@ export default {
           const q = quotes[code];
           if (!q) continue;
           if (Number.isFinite(q.price)) {
-            out[code] = { name: q.name || null, price: q.price, change: q.change, changePercent: q.changePercent, limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: q.volume };
+            // 開高低／昨收：日線圖盤中用即時報價接上今天那根K棒（2026-10-06）；後端代抓的備援沒有高低就是 null
+            const num = (v) => (Number.isFinite(v) ? v : null);
+            out[code] = { name: q.name || null, price: q.price, change: q.change, changePercent: q.changePercent, limitUp: !!q.limitUp, limitDown: !!q.limitDown, volume: q.volume,
+              open: num(q.open), high: num(q.high), low: num(q.low), prevClose: num(q.prevClose) };
           } else if (q.name) {
             out[code] = { name: q.name, price: null };
           }
