@@ -3974,9 +3974,17 @@ function race333FilterBarHtml(){
     '<button class="chart-tab race333-filter-btn' + (race333HolderFilter === 'down' ? ' active' : '') + '" data-filter="down">大戶力≤-10%</button>' +
   '</div>';
 }
+function raceNotReadyHtml(){
+  if (lastData && lastData.mock){
+    return '<div class="signal-empty"><div class="se-title">族群行情暫時抓不到，正在自動重試…</div>' +
+      '<div class="se-sub">刀劍空、盤中333 要用首頁的族群報價來算；證交所報價這一輪沒回來（開盤前後最常見），每幾秒會自動再抓，抓到就會出現。一直這樣的話按 F5 重新整理。</div></div>';
+  }
+  return '<div class="signal-empty"><div class="se-title">族群行情載入中…</div>' +
+    '<div class="se-sub">刀劍空、盤中333 要用首頁的族群報價來算；開盤前後證交所比較慢，通常 10～20 秒內就會出現。</div></div>';
+}
 function race333Html(){
   const m = race333Model();
-  if (!m) return '<div class="signal-empty"><div class="se-title">族群行情還沒載入</div><div class="se-sub">首頁資料抓到後就會出現。</div></div>';
+  if (!m) return raceNotReadyHtml();
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
   const over7 = m.horses.filter((r) => r.pct > 7).length;
   const dailyNote = m.hasDaily
@@ -4021,7 +4029,7 @@ function race333Html(){
 // 選股邏輯完全不變，還是共用 race333Model() 算出來的 bladeUpper/bladeLower/bladeHarvest，只是單獨一個分頁呈現。
 function bladeShortHtml(){
   const m = race333Model();
-  if (!m) return '<div class="signal-empty"><div class="se-title">族群行情還沒載入</div><div class="se-sub">首頁資料抓到後就會出現。</div></div>';
+  if (!m) return raceNotReadyHtml();
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
   const dailyNote = m.hasDaily
     ? '昨天＝' + (m.dates[0] || '') + (m.dates[1] ? '，前天＝' + m.dates[1] : '')
@@ -8509,7 +8517,9 @@ async function refresh(){
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
-    try { if (!document.getElementById('signalModal').hidden && signalCenterState.activeTab === 'brewLaunch') renderSignalCenter(); } catch (e) { /* 訊號中心重畫失敗不影響畫面 */ }
+    // 2026-10-06 使用者：刀劍空一直顯示「族群行情還沒載入」——開盤前後首頁報價要 10 幾秒，報價回來後只有醞釀／發動會馬上重畫，
+    // 其他靠首頁報價的分頁（刀劍空、盤中333、族群表…）要等下一輪訊號輪詢；改成報價一回來就重畫目前這個分頁。
+    try { if (!document.getElementById('signalModal').hidden) renderSignalCenter(); } catch (e) { /* 訊號中心重畫失敗不影響畫面 */ }
     try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
     trkTick();
     lastDataFetchedAt = new Date();

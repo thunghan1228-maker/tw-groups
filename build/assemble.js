@@ -47,6 +47,12 @@ const serverPrelude = 'const BUILD_STAMP = ' + JSON.stringify(BUILD_STAMP) + ';\
 
 const serverTail = `const CHUNK_SIZE = 80;
 
+// /api/groups 最近一份結果（2026-10-06 使用者：開盤時首頁報價要 10 幾秒，刀劍空、盤中333 一直顯示「還沒載入」）：
+// 同一個 worker 執行環境裡 8 秒內再有人要（主畫面、釘選視窗、另一個螢幕、另一台電腦），直接給這一份，
+// 不用每個視窗各自再去證交所抓一次。只存抓成功的結果；失敗不存。
+let groupsMemo = null;
+const GROUPS_MEMO_MS = 8000;
+
 function chunk(arr, size) {
   const out = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
@@ -531,6 +537,9 @@ export default {
       });
     }
     if (url.pathname === "/api/groups") {
+      if (groupsMemo && Date.now() - groupsMemo.at < GROUPS_MEMO_MS) {
+        return new Response(groupsMemo.body, { headers: { "content-type": "application/json", "x-groups-memo": "hit" } });
+      }
       try {
         // 休市日（週末、假日）與交易日 08:45 前，後端 session-close 說要暫留（held）時，用上一個交易日的
         // 日K收盤取代 TWSE 即時報價：2026-10-04（週日）TWSE 跑測試盤，即時報價不是 0 就是測試用的假價
@@ -566,7 +575,7 @@ export default {
           return { name: g.name, avgChange, stocks };
         });
         const meta = (quotes && quotes.__meta) || {};
-        return Response.json({
+        const body = JSON.stringify({
           groups,
           quoteDate: held ? sessionClose.session : (meta.quoteDate || null),
           quoteTime: held ? "13:30:00" : (meta.quoteTime || null),
@@ -574,6 +583,8 @@ export default {
           // 這次重抓後還是沒有報價的檔數（休市暫留收盤時不算）；前端多到不正常會標示
           quoteMissing: held ? 0 : (meta.missing || 0)
         });
+        groupsMemo = { at: Date.now(), body };
+        return new Response(body, { headers: { "content-type": "application/json" } });
       } catch (err) {
         return Response.json({ error: String(err) }, { status: 502 });
       }

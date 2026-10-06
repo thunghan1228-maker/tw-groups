@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-06 09:25:38";
+const BUILD_STAMP = "2026-10-06 09:39:05";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4029,9 +4029,17 @@ function race333FilterBarHtml(){
     '<button class="chart-tab race333-filter-btn' + (race333HolderFilter === 'down' ? ' active' : '') + '" data-filter="down">大戶力≤-10%</button>' +
   '</div>';
 }
+function raceNotReadyHtml(){
+  if (lastData && lastData.mock){
+    return '<div class="signal-empty"><div class="se-title">族群行情暫時抓不到，正在自動重試…</div>' +
+      '<div class="se-sub">刀劍空、盤中333 要用首頁的族群報價來算；證交所報價這一輪沒回來（開盤前後最常見），每幾秒會自動再抓，抓到就會出現。一直這樣的話按 F5 重新整理。</div></div>';
+  }
+  return '<div class="signal-empty"><div class="se-title">族群行情載入中…</div>' +
+    '<div class="se-sub">刀劍空、盤中333 要用首頁的族群報價來算；開盤前後證交所比較慢，通常 10～20 秒內就會出現。</div></div>';
+}
 function race333Html(){
   const m = race333Model();
-  if (!m) return '<div class="signal-empty"><div class="se-title">族群行情還沒載入</div><div class="se-sub">首頁資料抓到後就會出現。</div></div>';
+  if (!m) return raceNotReadyHtml();
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
   const over7 = m.horses.filter((r) => r.pct > 7).length;
   const dailyNote = m.hasDaily
@@ -4076,7 +4084,7 @@ function race333Html(){
 // 選股邏輯完全不變，還是共用 race333Model() 算出來的 bladeUpper/bladeLower/bladeHarvest，只是單獨一個分頁呈現。
 function bladeShortHtml(){
   const m = race333Model();
-  if (!m) return '<div class="signal-empty"><div class="se-title">族群行情還沒載入</div><div class="se-sub">首頁資料抓到後就會出現。</div></div>';
+  if (!m) return raceNotReadyHtml();
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
   const dailyNote = m.hasDaily
     ? '昨天＝' + (m.dates[0] || '') + (m.dates[1] ? '，前天＝' + m.dates[1] : '')
@@ -7907,7 +7915,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-06 09:25:38';
+const BUILD_STAMP = '2026-10-06 09:39:05';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -8564,7 +8572,9 @@ async function refresh(){
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
-    try { if (!document.getElementById('signalModal').hidden && signalCenterState.activeTab === 'brewLaunch') renderSignalCenter(); } catch (e) { /* 訊號中心重畫失敗不影響畫面 */ }
+    // 2026-10-06 使用者：刀劍空一直顯示「族群行情還沒載入」——開盤前後首頁報價要 10 幾秒，報價回來後只有醞釀／發動會馬上重畫，
+    // 其他靠首頁報價的分頁（刀劍空、盤中333、族群表…）要等下一輪訊號輪詢；改成報價一回來就重畫目前這個分頁。
+    try { if (!document.getElementById('signalModal').hidden) renderSignalCenter(); } catch (e) { /* 訊號中心重畫失敗不影響畫面 */ }
     try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
     trkTick();
     lastDataFetchedAt = new Date();
@@ -9519,6 +9529,12 @@ if (CHART_WINDOW_MODE){
 
 const CHUNK_SIZE = 80;
 
+// /api/groups 最近一份結果（2026-10-06 使用者：開盤時首頁報價要 10 幾秒，刀劍空、盤中333 一直顯示「還沒載入」）：
+// 同一個 worker 執行環境裡 8 秒內再有人要（主畫面、釘選視窗、另一個螢幕、另一台電腦），直接給這一份，
+// 不用每個視窗各自再去證交所抓一次。只存抓成功的結果；失敗不存。
+let groupsMemo = null;
+const GROUPS_MEMO_MS = 8000;
+
 function chunk(arr, size) {
   const out = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
@@ -10003,6 +10019,9 @@ export default {
       });
     }
     if (url.pathname === "/api/groups") {
+      if (groupsMemo && Date.now() - groupsMemo.at < GROUPS_MEMO_MS) {
+        return new Response(groupsMemo.body, { headers: { "content-type": "application/json", "x-groups-memo": "hit" } });
+      }
       try {
         // 休市日（週末、假日）與交易日 08:45 前，後端 session-close 說要暫留（held）時，用上一個交易日的
         // 日K收盤取代 TWSE 即時報價：2026-10-04（週日）TWSE 跑測試盤，即時報價不是 0 就是測試用的假價
@@ -10038,7 +10057,7 @@ export default {
           return { name: g.name, avgChange, stocks };
         });
         const meta = (quotes && quotes.__meta) || {};
-        return Response.json({
+        const body = JSON.stringify({
           groups,
           quoteDate: held ? sessionClose.session : (meta.quoteDate || null),
           quoteTime: held ? "13:30:00" : (meta.quoteTime || null),
@@ -10046,6 +10065,8 @@ export default {
           // 這次重抓後還是沒有報價的檔數（休市暫留收盤時不算）；前端多到不正常會標示
           quoteMissing: held ? 0 : (meta.missing || 0)
         });
+        groupsMemo = { at: Date.now(), body };
+        return new Response(body, { headers: { "content-type": "application/json" } });
       } catch (err) {
         return Response.json({ error: String(err) }, { status: 502 });
       }
