@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-05 21:02:44";
+const BUILD_STAMP = "2026-10-06 09:25:38";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1115,8 +1115,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   body.signal-window-mode > *:not(.signal-modal):not(.chart-modal):not(.group-modal){display:none!important;}
   body.signal-window-mode .signal-modal{position:static;background:none;padding:0;}
   body.signal-window-mode .signal-modal-inner{position:static;width:100%;height:100vh;max-width:none;max-height:none;border-radius:0;box-shadow:none;}
+  body.signal-window-mode #signalModalInner{width:100%;height:100vh;}   /* 蓋過寬螢幕的 92vh：獨立視窗、釘選視窗都要填滿 */
   body.signal-window-mode .signal-modal-head{cursor:default;}
-  body.signal-window-mode #smMoveWindow,body.signal-window-mode #smRecenter{display:none;}
+  body.signal-window-mode #smMoveWindow,body.signal-window-mode #smRecenter,body.signal-window-mode #smPinWindow{display:none!important;}
+  #smPinWindow.on{background:#f5b301;border-color:#f5b301;color:#1a1a1a;}
 
   @media (max-width: 640px){
     .toolbar-bottom{justify-content:flex-start;}
@@ -1461,6 +1463,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <span class="sm-date-pill" id="smDatePill"></span>
         <button class="sm-btn" id="smHelp">? 訊號教學</button>
         <button class="sm-btn" id="smMoveWindow">⧉ 移到另一螢幕</button>
+        <button class="sm-btn" id="smPinWindow" hidden title="開一個永遠浮在最上層的小視窗（可以拖到另一個螢幕），操作別的程式時也不會被蓋住">📌 釘選最上層</button>
         <button class="sm-btn" id="smRecenter">回到中央</button>
         <button class="cm-icon-btn" id="smCollapse" aria-label="收合">－</button>
         <button class="cm-icon-btn" id="smClose" aria-label="隱藏">✕</button>
@@ -7904,7 +7907,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-05 21:02:44';
+const BUILD_STAMP = '2026-10-06 09:25:38';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -8224,12 +8227,65 @@ function toggleSignalCollapse(){
   if (btn){ btn.textContent = collapsed ? '▢' : '－'; btn.setAttribute('aria-label', collapsed ? '展開' : '收合'); }
 }
 function closeSignalCenter(){
-  if (document.body.classList.contains('signal-window-mode')){ window.close(); return; }
+  if (document.body.classList.contains('signal-window-mode')){
+    if (window.parent !== window){ try { window.parent.close(); } catch (e) { /* 關不掉就算了 */ } return; }   // 釘選視窗裡的 ✕：關掉釘選視窗
+    window.close();
+    return;
+  }
   hideSignalModalPanel();
 }
 function openSignalWindow(){
   const w = window.open(location.pathname + location.search + '#signal-center', 'hanstockSignalCenter', 'width=480,height=700');
   if (w) w.focus();
+}
+// 📌 釘選最上層（2026-10-06 使用者：移到另一螢幕的視窗要能釘選，操作別的程式時還留在桌面最上層、不要被蓋掉）。
+// 一般網頁視窗做不到「永遠在最上層」，只有電腦版 Chrome／Edge 的「文件子母畫面」（Document Picture-in-Picture）可以：
+// 開一個永遠浮在最上層的視窗，裡面用 iframe 放一份「訊號中心」（跟移到另一螢幕同一頁），可以拖到另一個螢幕、拉大小，
+// 下次再開 Chrome 會記得上次的位置。這一頁（主畫面）要開著，關掉或重新整理，釘選視窗也會一起關。
+let signalPipWindow = null;
+function updatePinButton(){
+  const btn = document.getElementById('smPinWindow');
+  if (!btn) return;
+  const supported = 'documentPictureInPicture' in window && !document.body.classList.contains('signal-window-mode');
+  btn.hidden = !supported;
+  const pinned = !!(signalPipWindow && !signalPipWindow.closed);
+  btn.classList.toggle('on', pinned);
+  btn.textContent = pinned ? '📌 取消釘選' : '📌 釘選最上層';
+}
+async function toggleSignalPin(){
+  if (signalPipWindow && !signalPipWindow.closed){ signalPipWindow.close(); return; }
+  if (!('documentPictureInPicture' in window)){
+    showToast('這個瀏覽器不能釘選在最上層（要電腦版 Chrome 或 Edge），先改用「移到另一螢幕」');
+    openSignalWindow();
+    return;
+  }
+  const panel = document.getElementById('signalModalInner');
+  const width = Math.round(Math.max(480, Math.min(1400, (panel && panel.offsetWidth) || 1000)));
+  const height = Math.round(Math.max(420, Math.min(1000, (panel && panel.offsetHeight) || 760)));
+  let pip;
+  try {
+    pip = await documentPictureInPicture.requestWindow({ width, height });
+  } catch (e) {
+    showToast('釘選視窗開不起來（' + ((e && e.message) || e) + '），先改用「移到另一螢幕」');
+    openSignalWindow();
+    return;
+  }
+  signalPipWindow = pip;
+  pip.document.title = '盤中訊號中心（釘選）';
+  const style = pip.document.createElement('style');
+  style.textContent = 'html,body{margin:0;height:100%;overflow:hidden;background:#17130f;}iframe{display:block;border:0;width:100%;height:100%;}';
+  pip.document.head.appendChild(style);
+  const frame = pip.document.createElement('iframe');
+  frame.src = location.pathname + location.search + '#signal-center';
+  frame.title = '盤中訊號中心';
+  pip.document.body.appendChild(frame);
+  pip.addEventListener('pagehide', () => {
+    if (signalPipWindow === pip) signalPipWindow = null;
+    updatePinButton();
+    openSignalCenter();          // 釘選視窗關掉：主畫面的訊號中心再出現，不會不見
+  });
+  hideSignalModalPanel();        // 主畫面這份先收起來，不要同時兩份
+  updatePinButton();
 }
 function initSignalWindowChrome(){
   if (document.body.classList.contains('signal-window-mode')) return;
@@ -9413,6 +9469,7 @@ document.getElementById('smClose').addEventListener('click', closeSignalCenter);
 document.getElementById('smCollapse').addEventListener('click', toggleSignalCollapse);
 document.getElementById('smRecenter').addEventListener('click', recenterSignalModal);
 document.getElementById('smMoveWindow').addEventListener('click', openSignalWindow);
+document.getElementById('smPinWindow').addEventListener('click', toggleSignalPin);
 document.getElementById('smHelp').addEventListener('click', () => {
   const help = document.getElementById('signalHelp');
   help.hidden = !help.hidden;
@@ -9447,6 +9504,7 @@ if (CHART_WINDOW_MODE){
     document.body.classList.add('signal-window-mode');
   }
   initSignalWindowChrome();
+  updatePinButton();  // 電腦版 Chrome／Edge 才有「📌 釘選最上層」
   openSignalCenter(); // 盤中訊號中心預設常駐顯示，不用點才出現；要隱藏就按✕，要收合成小條就按－
 
   refresh();
