@@ -374,6 +374,18 @@
   /* 2026-09-30 使用者：刀劍空名單多一欄「圖」，明顯可以按（雖然點整列本身就會開K線圖，這裡是額外多一個明顯的按鈕）。 */
   .race-row .race-chart-slot,.race-col-labels .race-chart-slot{flex:0 0 3.8em;text-align:center;}
   .race-row .race-chart-btn{display:inline-block;background:var(--accent);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;white-space:nowrap;}
+  /* 2026-10-06 使用者：刀劍空每列第二行左邊空白處放交易條件（可融資／可融券／可現股當沖／有股期，或停資／停券）。
+     交易條件＋（數字那一群＋「圖」＝.race-l2nums，綁在一起不拆開）包成 .race-l2wrap 自己一整行（flex 100%），交易條件吃掉左邊
+     剩下的寬度，數字那一群照舊貼齊右邊；左邊放不下一整排標籤（iPad、標籤多的）就交易條件自己一行、數字＋圖整組換到下一行，
+     不會把標籤擠成直的一長條，也不會只有「圖」掉下去。標題列同一套（「交易條件」標題），欄位才對得齊。手機版見下面 media query。 */
+  .race-row .race-l2wrap,.race-col-labels .race-l2wrap{display:flex;flex-wrap:wrap;align-items:center;gap:inherit;flex:1 1 100%;min-width:0;text-align:left;}
+  .race-row .race-flags,.race-col-labels .race-flags-slot{flex:1 1 auto;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px;text-align:left;}
+  .race-row .race-l2nums,.race-col-labels .race-l2nums{display:flex;align-items:center;gap:inherit;flex:0 0 auto;margin-left:auto;}
+  .race-row .race-flags span{font-size:10px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:1px 7px;white-space:nowrap;}
+  .race-row .race-flags span.sig-futures{color:#93c5fd;border-color:#93c5fd66;}
+  .race-row .race-flags span.stop{background:#c2410c;color:#fff;border-color:#c2410c;font-weight:700;}
+  .race-row .race-flags span.pill-disposition{background:#d4a017;color:#fff;border-color:#d4a017;font-weight:700;}
+  .race-row .race-flags span.pill-attention{background:#2563eb;color:#fff;border-color:#2563eb;font-weight:700;}
   .race-row .pill-warn{background:#dc2626;color:#fff;font-weight:700;font-size:11px;border-radius:6px;padding:2px 8px;flex-shrink:0;white-space:nowrap;}
   /* 族群大戶力卡片複用signal-row的大戶力顏色膠囊／資格標籤樣式，但外層是race-row */
   .race-row .sig-label{color:var(--text);opacity:.85;white-space:nowrap;flex-shrink:0;font-size:12px;}
@@ -1090,6 +1102,9 @@
     .race-row .race-pct,.race-row .race-chg,.race-row .race-price,.race-col-labels .race-line2 span{flex:0 0 4em;}
     .race-row .race-badge,.race-col-labels .race-badge-slot{flex:0 0 5em;}
     .race-row .race-warn-slot,.race-col-labels .race-warn-slot{flex:0 0 3em;}
+    /* 刀劍空交易條件：.race-l2wrap 攤平（display:contents），交易條件接在均線分數後面那塊空白（手機那一行原本只有均線分數），
+       放不下才自己換一行；數字那一群照上面規則自己一整行。 */
+    .race-row .race-l2wrap,.race-col-labels .race-l2wrap,.race-row .race-l2nums,.race-col-labels .race-l2nums{display:contents;}
   }
   /* 手機版族群大戶力改成跟族群綜合表一樣一檔一行（2026-09-24 使用者）：代號、名稱、大戶力、漲跌幅、漲跌、
      成交價排同一行，可融資／可融券等交易條件標籤放在股名下面。每一列跟欄位標題列各自是同一組固定欄寬的
@@ -1153,6 +1168,7 @@
     #signalModalInner .race-row .race-holder .sig-label{font-size:13px;}
     #signalModalInner .race-row .pill-warn,#signalModalInner .race-row .pill-attention{font-size:13px;}
     #signalModalInner .race-row .sig-eligibility span{font-size:12px;}
+    #signalModalInner .race-row .race-flags span{font-size:12px;}
     #signalModalInner .race-row .race-badge{font-size:17px;}
     #signalModalInner .race-col-labels .race-badge-slot{font-size:17px;}
     #signalModalInner .race-col-labels span b{font-size:12px;}
@@ -1417,11 +1433,11 @@
     <div class="signal-help" id="signalHelp" hidden>
       <ul>
         <li><b>今日即時多</b>：彙整多方向訊號的即時清單：盤中大戶力多、四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單，依發生時間新到舊排序。</li>
-        <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（沒有發生時間，只有今天有），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。</li>
+        <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（沒有發生時間，只有今天有），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。</li>
         <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
         <li><b>精選十大多空族群</b>（原族群大戶力）：今天漲幅前10大族群、跌幅前10大族群，各自取大戶力最強（或最負）的前5檔個股。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。<b>排序</b>：個股名單預設照盤中大戶力排，值大的在上、小的在下，沒有大戶力資料的排最後。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
-        <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。今天跌、族內後 1/3、不比櫃買強，且現價低於前天收盤（⚔️劍）；🔪（刀）＝現價低於昨收。正式名單（強空積極）最多 10 檔，跌幅深的在前，大戶力最負的在上；多方打少（強族群裡逆勢走弱）和收割區域（已跌 5% 以上，不追空）只列名字。點列或按「圖」欄可以開該檔的K線圖。</li>
+        <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。今天跌、族內後 1/3、不比櫃買強，且現價低於前天收盤（⚔️劍）；🔪（刀）＝現價低於昨收。正式名單（強空積極）最多 10 檔，跌幅深的在前，大戶力最負的在上；多方打少（強族群裡逆勢走弱）和收割區域（已跌 5% 以上，不追空）只列名字。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
         <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
         <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。每列最前面的時間是「這檔主力副圖最後更新到幾點」，不是「資料只算到這個時間點」——大戶力%一直都是當天開盤到現在整天累加；越接近收盤，越多股票這欄會顯示接近的時間（因為大家幾乎都還在更新），不代表比較早的資料不見了。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
@@ -3679,6 +3695,20 @@ function signalScroller(){
   if (body && body.scrollHeight > body.clientHeight && /auto|scroll/.test(getComputedStyle(body).overflowY)) return body;
   return document.getElementById('signalModalInner') || body;
 }
+// 2026-10-06 使用者：今日即時空捲到刀劍空下面那兩條黑線時，畫面就固定在那條線——自動更新後黑線留在畫面同一個位置，
+// 最新的訊號從線的正下方冒出來、舊的往下推，畫面不再跳開。原本的算法是「總高度變多少就往下捲多少」，線下面每多一筆
+// 新訊號，線就被往上推出畫面（少一筆又往下掉）。現在：線在畫面上面 2/3 以內＝固定這條線；線在畫面下面 1/3（主要在看
+// 刀劍空名單）＝維持原本捲到的位置；已經捲過線、在看下面較早的訊號＝照舊固定在正在看的那幾筆。
+const SIGNAL_PIN_SELECTOR = '.now-bear-blade';
+function signalPinState(el, scroller){
+  const line = el.querySelector(SIGNAL_PIN_SELECTOR);
+  if (!line) return null;
+  const top = scroller.getBoundingClientRect().top + scroller.clientTop;
+  const y = line.getBoundingClientRect().bottom;
+  if (y < top - 24) return null;                                   // 捲過線了：固定正在看的那幾筆（原本的算法）
+  if (y <= top + scroller.clientHeight * 2 / 3) return { mode: 'line', y: y };
+  return { mode: 'keep' };
+}
 function replaceSignalHtml(el, key, html){
   if (!el) return;
   if (signalBodyRendered.key === key && signalBodyRendered.html === html) return;
@@ -3686,9 +3716,13 @@ function replaceSignalHtml(el, key, html){
   const sameView = signalBodyRendered.key === key;
   const prevTop = scroller ? scroller.scrollTop : 0;
   const prevHeight = scroller ? scroller.scrollHeight : 0;
+  const pin = scroller && sameView && prevTop > 0 ? signalPinState(el, scroller) : null;
   el.innerHTML = html;
   if (scroller){
-    if (sameView && prevTop > 0) scroller.scrollTop = prevTop + (scroller.scrollHeight - prevHeight);
+    const line = pin && pin.mode === 'line' ? el.querySelector(SIGNAL_PIN_SELECTOR) : null;
+    if (line) scroller.scrollTop += line.getBoundingClientRect().bottom - pin.y;
+    else if (pin && pin.mode === 'keep') scroller.scrollTop = prevTop;
+    else if (sameView && prevTop > 0) scroller.scrollTop = prevTop + (scroller.scrollHeight - prevHeight);
     else if (!sameView) scroller.scrollTop = 0;
   }
   signalBodyRendered = { key: key, html: html };
@@ -3873,8 +3907,9 @@ function raceColLabelsHtml(opts){
   // 族群後面加「均線分數」（2026-09-24 使用者：族群跟盤中大戶力中間那塊空白放均線分數，15 分那個比法）。
   return '<div class="race-col-labels r333-labels">' + (opts && opts.blade ? '<span class="race-rank-slot"><b>族排</b></span>' : '') + '<span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span><span class="race-star-slot"></span><span class="race-group-label"><b>族群</b></span>' +
     '<span class="race-ma-score"><b>均線分數</b></span>' +
+    (opts && opts.blade ? '<span class="race-l2wrap"><span class="race-flags-slot"><b>交易條件</b></span><span class="race-l2nums">' : '') +
     '<span class="race-line2"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"><b>' + badgeLabel + '</b></span></span>' +
-    (opts && opts.blade ? '<span class="race-chart-slot"><b>圖</b></span>' : '') + '</div>';
+    (opts && opts.blade ? '<span class="race-chart-slot"><b>圖</b></span></span></span>' : '') + '</div>';
 }
 function raceHolderCellHtml(r){
   if (r.strengthPct === null || r.strengthPct === undefined) return '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>';
@@ -3910,14 +3945,41 @@ function raceStockRowHtml(r, idx, opts){
     '<span class="race-star-slot">' + wlStarHtml(r.code, r.name) + '</span>' +
     '<span class="sig-group" title="族群第 ' + r.groupRank + ' 名，族內第 ' + r.inGroupRank + ' 名">' + r.groupName + '</span>' +
     '<span class="race-ma-score">' + maScoreCellHtml(r.code, hasPrice ? price : null) + '</span>' +
+    // 刀劍空：第二行左邊原本空白，放這檔的交易條件（2026-10-06 使用者）；交易條件＋（數字那一群＋「圖」）包成同一行（.race-l2wrap）。
+    (opts && opts.blade ? '<span class="race-l2wrap"><span class="race-flags">' + raceFlagsHtml(r.code) + '</span><span class="race-l2nums">' : '') +
     '<span class="race-line2">' +
     '<span class="race-holder">' + raceHolderCellHtml(r) + '</span>' +
     '<span class="race-pct ' + cls + '">' + fmt(r.pct) + '%</span>' +
     '<span class="race-chg ' + cls + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
     '<span class="race-price ' + cls + '">' + (hasPrice ? limitPriceHtml(r, price.toFixed(2)) : '—') + '</span>' +
     '<span class="race-badge" title="' + dailyTitle + '">' + badge + '</span>' +
-    '</span>' + (opts && opts.blade ? '<span class="race-chart-slot"><span class="race-chart-btn" title="開' + r.code + ' K線圖">📈圖</span></span>' : '') +
+    '</span>' + (opts && opts.blade ? '<span class="race-chart-slot"><span class="race-chart-btn" title="開' + r.code + ' K線圖">📈圖</span></span></span></span>' : '') +
     (opts && opts.conditions ? raceConditionsHtml(r, opts.m, opts) : '') + '</div>';
+}
+// 刀劍空每列的交易條件（2026-10-06 使用者：第二行左邊空白處放融資／融券／當沖／股期，或停資／停券）：
+// 可以的寫「可融資／可融券／可現股當沖／有股期」，不行的寫「停資／停券／不可當沖」（橘底白字，做空最在意能不能融券），
+// 處置股、注意股也標。資料同訊號中心的全族群旗標（永豐個股資訊）；某一項抓不到（null）就不標那項，不是「不行」。
+function raceFlagsHtml(code){
+  const f = stockFlags[code];
+  if (!f) return '';
+  const out = [];
+  if (f.marginable === false && f.shortable === false) out.push('<span class="stop" title="目前不可融資、不可融券">停資停券</span>');
+  else {
+    if (f.marginable === true) out.push('<span>可融資</span>');
+    else if (f.marginable === false) out.push('<span class="stop" title="目前不可融資">停資</span>');
+    if (f.shortable === true) out.push('<span>可融券</span>');
+    else if (f.shortable === false) out.push('<span class="stop" title="目前不可融券">停券</span>');
+  }
+  if (f.dayTradeEligible === true) out.push('<span>可現股當沖</span>');
+  else if (f.dayTradeEligible === false) out.push('<span class="stop" title="不可現股當沖">不可當沖</span>');
+  if (f.hasStockFutures) out.push('<span class="sig-futures" title="有股票期貨">有股期</span>');
+  if (f.disposition){
+    const title = '處置股' + (f.dispositionUntil ? '，處置至 ' + f.dispositionUntil : '') + (f.dispositionReason ? '：' + f.dispositionReason : '');
+    const until = f.dispositionUntil ? ' 至' + String(f.dispositionUntil).slice(5).replace('-', '/') : '';
+    out.push('<span class="pill-disposition" title="' + title + '">處置股' + until + '</span>');
+  }
+  out.push(attentionPillHtml(code));
+  return out.join('');
 }
 function raceOtcBoxHtml(m){
   // 櫃買指數狀況只在最上面放一次（使用者 2026-09-23），不再每個區塊下面重複。
@@ -8073,8 +8135,13 @@ function renderSignalCenter(){
   }).join('');
   // 分頁列也只在數字或選取狀態有變時才重畫，免得使用者正要點的按鈕被換掉。
   if (tabsHtml !== signalTabsRenderedHtml){
+    // 分頁列的數字變長、某一顆被擠到下一排時，分頁列會變高／變矮；捲下去在看的時候把這段差補回去，下面的內容才不會跟著跳。
+    const scroller = signalScroller();
+    const keep = scroller && scroller.scrollTop > 0 && scroller.contains(tabsEl);
+    const before = keep ? tabsEl.offsetHeight : 0;
     tabsEl.innerHTML = tabsHtml;
     signalTabsRenderedHtml = tabsHtml;
+    if (keep && tabsEl.offsetHeight !== before) scroller.scrollTop += tabsEl.offsetHeight - before;
   }
 
   const body = document.getElementById('signalBody');
