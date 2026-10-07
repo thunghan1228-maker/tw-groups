@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-06 13:08:54";
+const BUILD_STAMP = "2026-10-07 09:51:56";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -770,6 +770,45 @@ const HTML_PAGE = `<!DOCTYPE html>
   .sw-etf-kind{font-size:13px;font-weight:700;margin:8px 0 2px;color:var(--muted);}
   .sw-drow.etf{border-left-color:#7c3aed;}
   .sw-verdict.bad{background:#b91c1c;}
+  /* 飆股雷達（2026-10-07 使用者：照莊爸 App 的飆股雷達做）：聖杯分組、邏輯卡片、時間點膠囊、名單 */
+  .gr-controls{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:2px 0 8px;font-size:13px;}
+  .gr-controls select{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:3px 6px;font-family:inherit;font-size:13px;}
+  .gr-controls label{display:inline-flex;align-items:center;gap:4px;color:var(--muted);}
+  .gr-controls button{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:3px 10px;font-family:inherit;font-size:13px;cursor:pointer;}
+  .gr-updated{font-size:12px;color:var(--muted);}
+  .gr-saint{margin:12px 0 6px;font-size:16px;font-weight:800;display:flex;align-items:baseline;gap:8px;}
+  .gr-saint small{font-size:12px;color:var(--muted);font-weight:400;}
+  .gr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:8px;}
+  .gr-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0;}
+  .gr-card-head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-bottom:2px;}
+  .gr-card-head b{font-size:15px;}
+  .gr-kind{font-size:11px;border-radius:999px;padding:0 7px;border:1px solid var(--line);color:var(--muted);}
+  .gr-kind.swing{border-color:#60a5fa;color:#60a5fa;}
+  .gr-kind.overnight{border-color:#f59e0b;color:#f59e0b;}
+  .gr-cal{font-size:11px;color:var(--muted);margin-left:auto;}
+  .gr-info{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;font-size:11px;padding:0 7px;cursor:pointer;font-family:inherit;}
+  .gr-desc{font-size:12px;color:var(--muted);background:var(--panel-2);border-radius:8px;padding:6px 8px;margin:4px 0;line-height:1.55;}
+  .gr-slots{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 6px;}
+  .gr-slot{font-size:12px;border-radius:999px;padding:1px 8px;border:1px dashed var(--line);color:var(--muted);background:none;cursor:pointer;font-family:inherit;}
+  .gr-slot.has{border-style:solid;color:var(--text);}
+  .gr-slot.sel{border-color:#eab308;color:#eab308;background:rgba(234,179,8,.14);font-weight:700;}
+  .gr-slot b{font-weight:800;margin-left:3px;}
+  .gr-list{width:100%;border-collapse:collapse;font-size:13px;}
+  .gr-list th{font-size:11px;color:var(--muted);font-weight:400;padding:2px 4px;white-space:nowrap;}
+  .gr-list td{padding:3px 4px;border-top:1px solid var(--line);white-space:nowrap;}
+  .gr-list tr.gr-row{cursor:pointer;}
+  .gr-list tr.gr-row:hover td{background:var(--panel-2);}
+  .gr-list .l{text-align:left;} .gr-list .r{text-align:right;}
+  .gr-name b{font-weight:700;} .gr-name small{color:var(--muted);margin-left:4px;}
+  .gr-grp{font-size:11px;color:#c4b5fd;margin-left:4px;}
+  .gr-new{font-size:10px;background:#dc2626;color:#fff;border-radius:4px;padding:0 4px;margin-left:4px;}
+  .gr-ma{display:inline-block;min-width:22px;text-align:center;border-radius:6px;font-weight:800;font-size:12px;}
+  .gr-ma.hi{background:#eab308;color:#111;} .gr-ma.mid{background:rgba(234,179,8,.22);color:#eab308;} .gr-ma.lo{color:var(--muted);}
+  .gr-list tr.gone td{opacity:.5;}
+  .gr-list tr.gone .gr-name b,.gr-list tr.gone .gr-name small{text-decoration:line-through;}
+  .gr-none{font-size:12px;color:var(--muted);padding:4px 2px;}
+  .gr-up{color:var(--up);} .gr-down{color:var(--down);}
+  @media(max-width:640px){ .gr-grid{grid-template-columns:1fr;} .gr-list .gr-mcap{display:none;} }
   /* 創高黑選股（2026-10-04 使用者：照莊爸 App「創高黑」做選股程式，跟創高黑龍分開放）：流程列、帳戶卡、持股／觀察／要做清單、模組設定 */
   .pk-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 10px;}
   .pk-step{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer;color:var(--text);font-family:inherit;}
@@ -1334,6 +1373,19 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div id="heilongBody"></div>
   </div>
 </div>
+<!-- 2026-10-07 使用者：照莊爸 App 的「飆股雷達」做一個（下方導覽列「飆股雷達」），條件我們自己算 -->
+<div class="chips-modal" id="grailModal" hidden>
+  <div class="chips-inner" id="grailInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">飆股雷達</div>
+        <div class="chips-sub">照莊爸 App 做：嗨投資紫殺學院四個選股聖杯、15 個邏輯。條件是用嗨投資名單反推的近似條件，跟嗨投資不會完全一樣（每個邏輯旁邊有對答案的結果）。盤中照各邏輯的時間點用證交所即時報價算，收盤後再用官方日K算一次「收盤」。點股票開K線圖；不是買賣建議。</div>
+      </div>
+      <button class="cm-icon-btn" id="grailClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="grailBody"></div>
+  </div>
+</div>
 <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式（下方導覽列「創高黑選股」），跟創高黑龍分開放 -->
 <div class="chips-modal" id="pickerModal" hidden>
   <div class="chips-inner" id="pickerInner">
@@ -1458,6 +1510,7 @@ const HTML_PAGE = `<!DOCTYPE html>
 
 <div class="toolbar-bottom" id="toolbarBottom">
   <button class="tb-btn" data-label="自選股"><span class="tb-icon">★</span>自選股</button>
+  <button class="tb-btn" data-label="飆股雷達"><span class="tb-icon">雷</span>飆股雷達</button>  <!-- 2026-10-07 使用者：照莊爸 App 的飆股雷達做 -->
   <!-- 2026-09-26 使用者：下方導覽列的「三角收斂」「隔日沖大單籌碼」不用再留著（本來就是開發中的空位）；2026-09-28 再拿掉「個股研究中心」；
        2026-10-05 再拿掉「每週籌碼分析」（開發中的空位）。「個股訊號追蹤」拿掉後使用者又要加回來，要放自選股的今日訊號與提醒。 -->
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
@@ -8064,7 +8117,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-06 13:08:54';
+const BUILD_STAMP = '2026-10-07 09:51:56';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -9548,9 +9601,182 @@ setInterval(() => {
   try { localStorage.setItem('pickerRemindFired', today); } catch (e) { /* 存不了就算了 */ }
   pkRunReminder(false);
 }, 30000);
+// ---- 飆股雷達（2026-10-07 使用者：照莊爸 App 的飆股雷達做一個，條件我們自己算）----
+// 後端 /api/grail-radar：嗨投資紫殺四個聖杯 15 個邏輯，每個邏輯照固定時間點（盤中證交所即時報價、收盤後官方日K）篩出的名單，每天保存。
+// 卡片上的時間點膠囊：實線＝有名單（數字是檔數）、虛線＝還沒到或沒算到、黃框＝正在看的那一輪；預設看最新一輪。
+// 「新」＝上一輪沒有、這一輪才進來；劃線＝上一輪有、這一輪掉出去。篩選（族群、均線分數、成交量）存在這台瀏覽器。
+const GR_FILTER_DEFAULTS = { group: 'all', maSwing: 0, maOvernight: 0, vol: 0, onlyHits: false, sort: 'ma' };
+const GR_SORTS = [['ma', '均線'], ['chg', '漲跌'], ['vol', '量'], ['mcap', '市值']];
+let grFilter = Object.assign({}, GR_FILTER_DEFAULTS);
+try {
+  const saved = JSON.parse(localStorage.getItem('grailFilter') || 'null');
+  if (saved && typeof saved === 'object') grFilter = Object.assign({}, GR_FILTER_DEFAULTS, saved);
+} catch (e) { /* 讀不到就用預設 */ }
+let grState = { date: null, data: null, loading: false, error: null, sel: {}, info: {} };
+function grSaveFilter(){ try { localStorage.setItem('grailFilter', JSON.stringify(grFilter)); } catch (e) { /* 存不了就算了 */ } }
+async function grLoad(fresh){
+  if (grState.loading) return;
+  grState.loading = true;
+  if (!document.getElementById('grailModal').hidden) renderGrail();
+  try {
+    const q = new URLSearchParams();
+    if (grState.date) q.set('date', grState.date);
+    if (fresh) q.set('_', String(Date.now()));
+    const res = await fetch('/api/grail-radar' + (q.toString() ? '?' + q.toString() : ''));
+    const data = await res.json().catch(() => null);
+    if (res.status === 404) throw new Error('後端還沒更新，合併部署後幾分鐘就會出現');
+    if (!res.ok || !data || data.status !== 'ok') throw new Error((data && (data.detail || data.error)) || ('http ' + res.status));
+    grState.data = data;
+    grState.error = null;
+    if (!grState.date) grState.date = data.date;
+  } catch (e) {
+    grState.error = String((e && e.message) || e);
+  } finally {
+    grState.loading = false;
+  }
+  if (!document.getElementById('grailModal').hidden) renderGrail();
+}
+function grPrice(v){ return v === null || v === undefined ? '—' : Number(v) >= 500 ? Number(v).toFixed(0) : Number(v) >= 50 ? Number(v).toFixed(1) : Number(v).toFixed(2); }
+function grMa(m){
+  if (m === null || m === undefined) return '<span class="gr-ma lo">—</span>';
+  return '<span class="gr-ma ' + (m >= 12 ? 'hi' : m >= 7 ? 'mid' : 'lo') + '">' + m + '</span>';
+}
+function grPass(logic, s){
+  if (grFilter.group === 'grouped' && !s.g) return false;
+  const minMa = logic.kind === '隔日沖' ? Number(grFilter.maOvernight) : Number(grFilter.maSwing);
+  if (minMa > 0 && !(s.m >= minMa)) return false;
+  if (Number(grFilter.vol) > 0 && !(s.vol >= Number(grFilter.vol))) return false;
+  return true;
+}
+function grSortRows(rows){
+  const key = grFilter.sort;
+  const val = (s) => (key === 'ma' ? s.m : key === 'chg' ? s.chg : key === 'vol' ? s.vol : s.mcap);
+  return rows.slice().sort((a, b) => {
+    const va = val(a), vb = val(b);
+    if (va === vb || (va == null && vb == null)) return (b.vol || 0) - (a.vol || 0);
+    if (va == null) return 1;
+    if (vb == null) return -1;
+    return vb - va;
+  });
+}
+function grSlots(logic, closeSlot){ return logic.times.concat([closeSlot]); }
+function grCard(logic, runs, closeSlot){
+  const slots = grSlots(logic, closeSlot);
+  const have = slots.filter((s) => runs && runs[s]);
+  let sel = grState.sel[logic.key];
+  if (!sel || !(runs && runs[sel])) sel = have.length ? have[have.length - 1] : null;
+  const run = sel ? runs[sel] : null;
+  const prevSlot = sel ? have.slice(0, have.indexOf(sel)).pop() : null;
+  const prev = prevSlot ? runs[prevSlot] : null;
+  const prevCodes = new Set(prev ? prev.stocks.map((s) => s.c) : []);
+  const rows = run ? grSortRows(run.stocks.filter((s) => grPass(logic, s))) : [];
+  const nowCodes = new Set(run ? run.stocks.map((s) => s.c) : []);
+  const gone = prev ? prev.stocks.filter((s) => !nowCodes.has(s.c) && grPass(logic, s)) : [];
+  if (grFilter.onlyHits && !rows.length) return '';
+  const kindCls = logic.kind === '隔日沖' ? 'overnight' : 'swing';
+  const cal = logic.calibration ? '對答案：抓到 ' + logic.calibration.recall + '%・準 ' + logic.calibration.precision + '%' : '';
+  const pills = slots.map((s) => {
+    const r = runs && runs[s];
+    return '<button class="gr-slot' + (r ? ' has' : '') + (s === sel ? ' sel' : '') + '" data-gr-logic="' + logic.key + '" data-gr-slot="' + rdEsc(s) + '"'
+      + ' title="' + (r ? rdEsc(s) + ' 算的（' + r.at + '）' : rdEsc(s) + ' 還沒到或沒算到') + '">' + rdEsc(s) + (r ? '<b>' + r.n + '</b>' : '') + '</button>';
+  }).join('');
+  const rowHtml = (s, isGone) => {
+    const chgCls = s.chg > 0 ? 'gr-up' : s.chg < 0 ? 'gr-down' : '';
+    const isNew = !isGone && prev && !prevCodes.has(s.c);
+    return '<tr class="gr-row' + (isGone ? ' gone' : '') + '" data-code="' + rdEsc(s.c) + '" data-name="' + rdEsc(s.n) + '">'
+      + '<td class="l gr-name"><b>' + rdEsc(s.n) + '</b><small>' + rdEsc(s.c) + '</small>' + (isNew ? '<span class="gr-new">新</span>' : '')
+      + (isGone ? ' ✕' : '') + (s.g ? '<span class="gr-grp">' + rdEsc(s.g) + '</span>' : '') + '</td>'
+      + '<td class="r">' + grPrice(s.px) + '</td>'
+      + '<td class="r ' + chgCls + '">' + (s.chg > 0 ? '+' : '') + Number(s.chg).toFixed(2) + '%</td>'
+      + '<td class="r">' + Number(s.vol || 0).toLocaleString() + '</td>'
+      + '<td class="r">' + grMa(s.m) + '</td>'
+      + '<td class="r gr-mcap">' + (s.mcap === null || s.mcap === undefined ? '—' : Number(s.mcap).toLocaleString() + '億') + '</td></tr>';
+  };
+  let body;
+  if (!run) body = '<div class="gr-none">' + (have.length ? '' : '今天還沒有名單（時間點到了才會算）') + '</div>';
+  else if (!rows.length && !gone.length) body = '<div class="gr-none">' + rdEsc(sel) + ' 這一輪 ' + (run.n ? '篩選後' : '') + '沒有股票</div>';
+  else body = '<table class="gr-list"><thead><tr><th class="l">股票</th><th class="r">價</th><th class="r">漲跌</th><th class="r">量(張)</th><th class="r">均線</th><th class="r gr-mcap">市值</th></tr></thead><tbody>'
+    + rows.map((s) => rowHtml(s, false)).join('') + gone.map((s) => rowHtml(s, true)).join('') + '</tbody></table>';
+  return '<div class="gr-card"><div class="gr-card-head"><b>' + rdEsc(logic.name) + '</b><span class="gr-kind ' + kindCls + '">' + rdEsc(logic.kind) + '</span>'
+    + '<button class="gr-info" data-gr-info="' + logic.key + '">條件</button><span class="gr-cal">' + cal + '</span></div>'
+    + (grState.info[logic.key] ? '<div class="gr-desc">' + rdEsc(logic.desc) + '</div>' : '')
+    + '<div class="gr-slots">' + pills + '</div>' + body + '</div>';
+}
+function grSelect(key, options, value){
+  return '<select data-gr-filter="' + key + '">' + options.map(([v, label]) => '<option value="' + v + '"' + (String(v) === String(value) ? ' selected' : '') + '>' + label + '</option>').join('') + '</select>';
+}
+function renderGrail(){
+  const body = document.getElementById('grailBody');
+  const data = grState.data;
+  const dates = (data && data.dates) || [];
+  const controls = '<div class="gr-controls">'
+    + '<label>日期 <select data-gr-date>' + (dates.length ? dates : [grState.date || '']).map((d) => '<option value="' + rdEsc(d) + '"' + (d === grState.date ? ' selected' : '') + '>' + rdEsc(d ? swMmdd(d) + '（' + '日一二三四五六'[new Date(d + 'T00:00:00').getDay()] + '）' : '最新') + '</option>').join('') + '</select></label>'
+    + '<button data-gr-refresh>重新整理</button>'
+    + '<label>族群 ' + grSelect('group', [['all', '全部'], ['grouped', '只看有族群的']], grFilter.group) + '</label>'
+    + '<label>波段均線 ' + grSelect('maSwing', [[0, '不限'], [5, '≥5'], [7, '≥7'], [10, '≥10'], [12, '≥12']], grFilter.maSwing) + '</label>'
+    + '<label>隔日沖均線 ' + grSelect('maOvernight', [[0, '不限'], [7, '≥7'], [10, '≥10'], [12, '≥12'], [15, '15']], grFilter.maOvernight) + '</label>'
+    + '<label>成交量 ' + grSelect('vol', [[0, '不限'], [500, '≥500'], [1000, '≥1000'], [3000, '≥3000'], [5000, '≥5000'], [10000, '≥10000']], grFilter.vol) + '</label>'
+    + '<label>排序 ' + grSelect('sort', GR_SORTS, grFilter.sort) + '</label>'
+    + '<label><input type="checkbox" data-gr-only' + (grFilter.onlyHits ? ' checked' : '') + '>只看有訊號的</label>'
+    + (data && data.updated ? '<span class="gr-updated">更新 ' + rdEsc(String(data.updated).slice(11, 19)) + '</span>' : '')
+    + '</div>';
+  if (!data){
+    body.innerHTML = controls + '<div class="race-note">' + (grState.error ? '讀不到（' + rdEsc(grState.error) + '），按「重新整理」再試' : '讀取中…') + '</div>';
+    return;
+  }
+  const runs = data.runs || {};
+  const sections = (data.saints || []).map((saint) => {
+    const cards = (data.logics || []).filter((l) => l.saintId === saint.id).map((l) => grCard(l, runs[l.key], data.closeSlot || '收盤')).join('');
+    if (!cards) return '';
+    return '<div class="gr-saint">' + rdEsc(saint.name) + '</div><div class="gr-grid">' + cards + '</div>';
+  }).join('');
+  body.innerHTML = controls + (grState.error ? '<div class="race-note">更新失敗（' + rdEsc(grState.error) + '），先顯示上一次的資料</div>' : '')
+    + (sections || '<div class="race-note">這一天沒有符合的股票</div>')
+    + '<div class="race-note">' + rdEsc(data.note || '') + '</div>';
+}
+function openGrailPanel(){
+  document.getElementById('grailModal').hidden = false;
+  renderGrail();
+  grLoad(false);
+}
+function closeGrailPanel(){ document.getElementById('grailModal').hidden = true; }
+document.getElementById('grailClose').addEventListener('click', closeGrailPanel);
+document.getElementById('grailModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeGrailPanel(); });
+document.getElementById('grailBody').addEventListener('click', (e) => {
+  const t = e.target;
+  const slot = t.closest('[data-gr-slot]');
+  if (slot){ grState.sel[slot.dataset.grLogic] = slot.dataset.grSlot; renderGrail(); return; }
+  const info = t.closest('[data-gr-info]');
+  if (info){ grState.info[info.dataset.grInfo] = !grState.info[info.dataset.grInfo]; renderGrail(); return; }
+  if (t.closest('[data-gr-refresh]')){ grLoad(true); return; }
+  const row = t.closest('tr.gr-row');
+  if (row) openStockChart(row.dataset.code, row.dataset.name);
+});
+document.getElementById('grailBody').addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.matches('[data-gr-date]')){ grState.date = t.value || null; grState.sel = {}; grLoad(false); return; }
+  if (t.matches('[data-gr-only]')){ grFilter.onlyHits = t.checked; grSaveFilter(); renderGrail(); return; }
+  if (t.matches('[data-gr-filter]')){
+    const key = t.dataset.grFilter;
+    grFilter[key] = key === 'group' || key === 'sort' ? t.value : Number(t.value);
+    grSaveFilter();
+    renderGrail();
+  }
+});
+setInterval(() => {
+  // 面板開著、看的是最新那天：交易時段（09:30～15:30）每 90 秒更新一次（各邏輯的時間點到了後端才會有新的一輪）
+  if (document.getElementById('grailModal').hidden || document.visibilityState === 'hidden') return;
+  const data = grState.data;
+  if (data && data.dates && data.dates.length && grState.date && grState.date !== data.dates[0]) return;
+  const t = new Date(Date.now() + 8 * 3600000);
+  const day = t.getUTCDay(), minutes = t.getUTCHours() * 60 + t.getUTCMinutes();
+  if (day < 1 || day > 5 || minutes < 9 * 60 + 30 || minutes > 15 * 60 + 30) return;
+  grLoad(false);
+}, 90000);
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '自選股'){ openWatchPanel(); return; }        // 2026-10-05 使用者：自選股
+    if (btn.dataset.label === '飆股雷達'){ openGrailPanel(); return; }     // 2026-10-07 使用者：照莊爸 App 的飆股雷達
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '下午報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」
@@ -10112,6 +10338,10 @@ export default {
     if (url.pathname === "/api/chip-radar") {
       // 籌碼暴增雷達（2026-10-04 使用者：照莊爸 zhuang.tw/radar 做，放在盤後籌碼排行）：集保週資料，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar" + url.search, 300);
+    }
+    if (url.pathname === "/api/grail-radar") {
+      // 飆股雷達（2026-10-07 使用者：照莊爸 App 的飆股雷達做）：紫殺四個聖杯 15 個邏輯照時間點的名單，30 秒快取
+      return await proxyHanstockBars("/api/hub/grail-radar" + url.search, 30);
     }
     if (url.pathname === "/api/chip-radar-stock") {
       // 籌碼暴增雷達的個股查詢（九週軌跡、同族群、三大法人），60 秒快取

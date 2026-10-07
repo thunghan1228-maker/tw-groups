@@ -468,6 +468,10 @@ export default {
       // 籌碼暴增雷達（2026-10-04 使用者：照莊爸 zhuang.tw/radar 做，放在盤後籌碼排行）：集保週資料，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar" + url.search, 300);
     }
+    if (url.pathname === "/api/grail-radar") {
+      // 飆股雷達（2026-10-07 使用者：照莊爸 App 的飆股雷達做）：紫殺四個聖杯 15 個邏輯照時間點的名單，30 秒快取
+      return await proxyHanstockBars("/api/hub/grail-radar" + url.search, 30);
+    }
     if (url.pathname === "/api/chip-radar-stock") {
       // 籌碼暴增雷達的個股查詢（九週軌跡、同族群、三大法人），60 秒快取
       return await proxyHanstockBars("/api/hub/chip-radar/stock" + url.search, 60);
