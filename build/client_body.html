@@ -1317,13 +1317,13 @@
     <div id="heilongBody"></div>
   </div>
 </div>
-<!-- 2026-10-07 使用者：照莊爸 App 的「飆股雷達」做一個（下方導覽列「飆股雷達」），條件我們自己算 -->
+<!-- 2026-10-07 使用者：照莊爸 App 的「飆股雷達」做一個（下方導覽列「飆股雷達」），條件我們自己算；同日使用者：說明開頭講來源和「近似條件」那段拿掉 -->
 <div class="chips-modal" id="grailModal" hidden>
   <div class="chips-inner" id="grailInner">
     <div class="chips-head">
       <div>
         <div class="chips-title">飆股雷達</div>
-        <div class="chips-sub">照莊爸 App 做：嗨投資紫殺學院四個選股聖杯、15 個邏輯。條件是用嗨投資名單反推的近似條件，跟嗨投資不會完全一樣（每個邏輯旁邊有對答案的結果）。盤中照各邏輯的時間點用證交所即時報價算，收盤後再用官方日K算一次「收盤」。點股票開K線圖；不是買賣建議。</div>
+        <div class="chips-sub">每個邏輯旁邊有對答案的結果。盤中照各邏輯的時間點用證交所即時報價算，收盤後再用官方日K算一次「收盤」。點股票開K線圖；不是買賣建議。</div>
       </div>
       <button class="cm-icon-btn" id="grailClose" aria-label="關閉">✕</button>
     </div>
@@ -9674,9 +9674,9 @@ function renderGrail(){
     if (!cards) return '';
     return '<div class="gr-saint">' + rdEsc(saint.name) + '</div><div class="gr-grid">' + cards + '</div>';
   }).join('');
+  // 後端 note（來源和「近似條件」的說明）不顯示：2026-10-07 使用者要頂端那段拿掉，這行是同一句
   body.innerHTML = controls + (grState.error ? '<div class="race-note">更新失敗（' + rdEsc(grState.error) + '），先顯示上一次的資料</div>' : '')
-    + (sections || '<div class="race-note">這一天沒有符合的股票</div>')
-    + '<div class="race-note">' + rdEsc(data.note || '') + '</div>';
+    + (sections || '<div class="race-note">這一天沒有符合的股票</div>');
 }
 function openGrailPanel(){
   document.getElementById('grailModal').hidden = false;
