@@ -1182,6 +1182,25 @@
      實際體感沒有放大效果；改成把各元素font-size直接乘1.3寫死，所有
      瀏覽器行為一致。只加在#signalModalInner底下，不會連帶把K線圖
      共用的.chart-tab分頁也放大。 */
+  /* 2026-10-08 使用者（iPad 截圖）：精選十大多空族群 iPad／電腦版價位沒對齊、很亂。原本是 flex 一列排，名稱長短不一、
+     交易條件標籤只有一個時會被擠進數字那排（Safari 判斷放得下），每一列的大戶力／漲跌幅／漲跌／成交價位置都不一樣，
+     右邊還會被切掉。改成跟手機版同一招：每一列跟標題列都是同一組固定欄寬的 grid（名次、代號、名稱吃剩下的寬度、
+     大戶力、漲跌幅、漲跌、成交價），交易條件標籤固定在下一行；處置／注意股標籤列已經有，warn-slot 不重複放。
+     標題列沒有名次那格，代號直接指定放第 2 欄，後面幾格自動接著排。 */
+  @media (min-width: 641px){
+    .race-row.ghf-row,.race-col-labels.ghf-labels{display:grid;grid-template-columns:1.7em 3.4em minmax(0,1fr) 6.6em 4.8em 4.8em 5.2em;column-gap:8px;row-gap:4px;align-items:center;}
+    #signalModalInner .race-row.ghf-row,#signalModalInner .race-col-labels.ghf-labels{column-gap:10px;row-gap:4px;}
+    .ghf-row .race-line2,.ghf-labels .race-line2{display:contents;}
+    .ghf-row .race-warn-slot,.ghf-labels .race-warn-slot{display:none;}
+    .ghf-labels .race-code{grid-column:2;}
+    .ghf-row .race-badge{text-align:center;}
+    .ghf-row .race-code,.ghf-labels .race-code,.ghf-row .race-name,.ghf-labels .race-name{min-width:0;max-width:none;}
+    .ghf-row .sig-eligibility{grid-column:2 / -1;flex-wrap:wrap;row-gap:3px;}
+  }
+  /* 電腦版大戶力%跟金額同一行（見下面 1100px 那段），這一欄要放寬到 9em */
+  @media (min-width: 1100px){
+    .race-row.ghf-row,.race-col-labels.ghf-labels{grid-template-columns:1.7em 3.4em minmax(0,1fr) 9em 4.8em 4.8em 5.2em;}
+  }
   @media (min-width: 768px){
     #signalModalInner{width:min(1180px,96vw);height:min(920px,92vh);}
     #signalModalInner .sm-title{font-size:21px;}

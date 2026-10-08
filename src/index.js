@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-08 11:09:49";
+const BUILD_STAMP = "2026-10-08 11:13:38";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1236,6 +1236,25 @@ const HTML_PAGE = `<!DOCTYPE html>
      實際體感沒有放大效果；改成把各元素font-size直接乘1.3寫死，所有
      瀏覽器行為一致。只加在#signalModalInner底下，不會連帶把K線圖
      共用的.chart-tab分頁也放大。 */
+  /* 2026-10-08 使用者（iPad 截圖）：精選十大多空族群 iPad／電腦版價位沒對齊、很亂。原本是 flex 一列排，名稱長短不一、
+     交易條件標籤只有一個時會被擠進數字那排（Safari 判斷放得下），每一列的大戶力／漲跌幅／漲跌／成交價位置都不一樣，
+     右邊還會被切掉。改成跟手機版同一招：每一列跟標題列都是同一組固定欄寬的 grid（名次、代號、名稱吃剩下的寬度、
+     大戶力、漲跌幅、漲跌、成交價），交易條件標籤固定在下一行；處置／注意股標籤列已經有，warn-slot 不重複放。
+     標題列沒有名次那格，代號直接指定放第 2 欄，後面幾格自動接著排。 */
+  @media (min-width: 641px){
+    .race-row.ghf-row,.race-col-labels.ghf-labels{display:grid;grid-template-columns:1.7em 3.4em minmax(0,1fr) 6.6em 4.8em 4.8em 5.2em;column-gap:8px;row-gap:4px;align-items:center;}
+    #signalModalInner .race-row.ghf-row,#signalModalInner .race-col-labels.ghf-labels{column-gap:10px;row-gap:4px;}
+    .ghf-row .race-line2,.ghf-labels .race-line2{display:contents;}
+    .ghf-row .race-warn-slot,.ghf-labels .race-warn-slot{display:none;}
+    .ghf-labels .race-code{grid-column:2;}
+    .ghf-row .race-badge{text-align:center;}
+    .ghf-row .race-code,.ghf-labels .race-code,.ghf-row .race-name,.ghf-labels .race-name{min-width:0;max-width:none;}
+    .ghf-row .sig-eligibility{grid-column:2 / -1;flex-wrap:wrap;row-gap:3px;}
+  }
+  /* 電腦版大戶力%跟金額同一行（見下面 1100px 那段），這一欄要放寬到 9em */
+  @media (min-width: 1100px){
+    .race-row.ghf-row,.race-col-labels.ghf-labels{grid-template-columns:1.7em 3.4em minmax(0,1fr) 9em 4.8em 4.8em 5.2em;}
+  }
   @media (min-width: 768px){
     #signalModalInner{width:min(1180px,96vw);height:min(920px,92vh);}
     #signalModalInner .sm-title{font-size:21px;}
@@ -8148,7 +8167,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-08 11:09:49';
+const BUILD_STAMP = '2026-10-08 11:13:38';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
