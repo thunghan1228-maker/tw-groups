@@ -1095,10 +1095,17 @@
   .signal-row .sig-name{flex:0 0 5.5em;max-width:5.5em;overflow:hidden;text-overflow:ellipsis;}
   .signal-row .sig-group{flex:0 0 7em;text-align:center;overflow:hidden;text-overflow:ellipsis;}
   .signal-row .sig-label.hf-tier{flex:0 0 12.5em;text-align:left;}
+  /* 均線分數欄（2026-10-08 使用者：特大買賣單、大戶力、四項精選、1+2多、創高黑龍、主力翻多空都加均線分數）：族群後面固定寬 */
+  .signal-row .sig-ma{flex:0 0 3.2em;text-align:center;white-space:nowrap;}
+  .signal-row .sig-ma .race-ma-val{font-weight:800;color:var(--muted);}
+  .signal-row .sig-ma .race-ma-val.hi{color:var(--up);}
+  .signal-row .sig-ma .race-ma-none{color:var(--muted);}
+  .signal-row .sig-group.sig-group-empty{background:none;}
   .signal-row .srow-right{margin-left:auto;}
   .signal-row.signal-col-labels{cursor:default;padding-top:2px;padding-bottom:4px;}
   .signal-row.signal-col-labels:hover{background:none;}
   .signal-row.signal-col-labels b{color:var(--muted);font-size:10px;font-weight:600;}
+  .signal-row.signal-col-labels .sig-group{background:none;}   /* 標題列的「族群」不要紫色底 */
   .rank-pill{display:inline-block;font-size:10px;border-radius:10px;padding:1px 7px;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);white-space:nowrap;vertical-align:middle;}
   .rank-pill.top-up{background:var(--up);color:#fff;border-color:var(--up);font-weight:700;}
   .rank-pill.top-down{background:var(--down);color:#fff;border-color:var(--down);font-weight:700;}
@@ -3561,7 +3568,8 @@ function signalEventRowHtml(ev, view){
     '<span class="sig-time">' + ev.time + '</span>' +
     '<span class="sig-code">' + ev.code + '</span>' +
     '<span class="sig-name">' + ev.name + '</span>' +
-    (group ? '<span class="sig-group">' + group + '</span>' : '') +
+    (group ? '<span class="sig-group">' + group + '</span>' : '<span class="sig-group sig-group-empty"></span>') +
+    sigMaCellHtml(ev.code, view) +
     '<span class="sig-label' + labelCls + '"' + (labelTitle ? ' title="' + labelTitle + '"' : '') + '>' + ev.label + '</span>' +
     priceCols +
     signalNoteHtml(ev.code, ev.note) +
@@ -3635,7 +3643,29 @@ function signalRowsHtml(events, view){
     return '<div class="signal-empty"><div class="se-title">目前沒有符合條件的訊號' + (signalDataIsReal ? '' : '（示範資料）') + '</div>' +
       '<div class="se-sub">' + (signalDataIsReal ? '全市場掃描中，符合條件才會出現。' : '後端暫時連不上，先用示範資料展示介面。') + '</div></div>';
   }
-  return '<div class="signal-list">' + events.map((ev) => signalEventRowHtml(ev, view)).join('') + '</div>';
+  return signalColLabelsHtml() + '<div class="signal-list">' + events.map((ev) => signalEventRowHtml(ev, view)).join('') + '</div>';
+}
+// 訊號列表的欄位標題（2026-10-08 使用者加均線分數欄時一起加，數字才知道是什麼）
+function signalColLabelsHtml(){
+  return '<div class="signal-row signal-col-labels"><span class="sig-time"><b>時間</b></span><span class="sig-code"></span>' +
+    '<span class="sig-name"><b>名稱</b></span><span class="sig-group"><b>族群</b></span><span class="sig-ma"><b>均線分數</b></span>' +
+    '<span class="sig-label"><b>訊號</b></span>' +
+    '<span class="srow-right"><span class="spct"><b>漲跌幅</b></span><span class="schg"><b>漲跌</b></span><span class="sprice"><b>成交價</b></span></span></div>';
+}
+// 每一列的均線分數（5/10/20/60/120/240 日線兩兩比較 15 組，跟盤中333 同一套）：今天用現價當今天收盤即時算；
+// 看昨天／沿用上一個交易日時用那天收盤的分數（醞釀資料的 score，只有前一個交易日），更早的日子沒有資料顯示「—」。
+function sigMaCellHtml(code, view){
+  let inner;
+  if (view && (view.isPast || view.held)){
+    const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[code] : null;
+    inner = info && info.asOf === view.date && Number.isFinite(info.score)
+      ? '<b class="race-ma-val' + (info.score > 10 ? ' hi' : '') + '" title="均線分數（' + view.date + ' 收盤）">' + info.score + '</b>'
+      : '<span class="race-ma-none" title="只留前一個交易日收盤的均線分數，更早的日子沒有">—</span>';
+  } else {
+    const q = getStockQuote(code);
+    inner = maScoreCellHtml(code, q ? Number(q.price) : NaN);
+  }
+  return '<span class="sig-ma">' + inner + '</span>';
 }
 
 function holderStrengthLabelHtml(r){
@@ -3769,6 +3799,7 @@ function rankingRowHtml(r, view){
       '<span class="sig-code">' + r.code + '</span>' +
       '<span class="sig-name">' + name + '</span>' +
       '<span class="sig-group">' + group + '</span>' +
+      sigMaCellHtml(r.code, view) +
       holderStrengthLabelHtml(r) +
       tradingEligibilityTagsHtml(r) +
       (past ? '' : flagPillsHtml(r.code, { dispositionOnly: true })) +
@@ -3779,7 +3810,7 @@ function rankingRowHtml(r, view){
 // 跟資料列共用.signal-row同一套固定欄寬規則，標題才會真的跟下面資料對齊。
 function rankingColLabelsHtml(){
   return '<div class="signal-row signal-col-labels"><span class="sig-time" title="這檔主力副圖最後更新到幾點；大戶力%是當天開盤到現在整天累加，不是只算這個時間點以後"><b>更新</b></span><span class="sig-code"></span>' +
-    '<span class="sig-name"><b>名稱</b></span><span class="sig-group"><b>族群</b></span>' +
+    '<span class="sig-name"><b>名稱</b></span><span class="sig-group"><b>族群</b></span><span class="sig-ma"><b>均線分數</b></span>' +
     '<span class="sig-label hf-tier"><b>大戶力</b></span>' +
     '<span class="srow-right"><span class="spct"><b>漲跌幅</b></span><span class="schg"><b>漲跌</b></span><span class="sprice"><b>成交價</b></span></span></div>';
 }
@@ -9556,7 +9587,8 @@ try {
   const saved = JSON.parse(localStorage.getItem('grailFilter') || 'null');
   if (saved && typeof saved === 'object') grFilter = Object.assign({}, GR_FILTER_DEFAULTS, saved);
 } catch (e) { /* 讀不到就用預設 */ }
-let grState = { date: null, data: null, loading: false, error: null, sel: {}, info: {} };
+// follow＝跟著最新那天（沒自己選往日）：頁面開過夜也會自己換到今天（2026-10-08 使用者：早上打開停在昨天）
+let grState = { date: null, follow: true, data: null, loading: false, error: null, sel: {}, info: {} };
 function grSaveFilter(){ try { localStorage.setItem('grailFilter', JSON.stringify(grFilter)); } catch (e) { /* 存不了就算了 */ } }
 async function grLoad(fresh){
   if (grState.loading) return;
@@ -9564,7 +9596,7 @@ async function grLoad(fresh){
   if (!document.getElementById('grailModal').hidden) renderGrail();
   try {
     const q = new URLSearchParams();
-    if (grState.date) q.set('date', grState.date);
+    if (grState.date && !grState.follow) q.set('date', grState.date);
     if (fresh) q.set('_', String(Date.now()));
     const res = await fetch('/api/grail-radar' + (q.toString() ? '?' + q.toString() : ''));
     const data = await res.json().catch(() => null);
@@ -9572,7 +9604,10 @@ async function grLoad(fresh){
     if (!res.ok || !data || data.status !== 'ok') throw new Error((data && (data.detail || data.error)) || ('http ' + res.status));
     grState.data = data;
     grState.error = null;
-    if (!grState.date) grState.date = data.date;
+    if (grState.follow || !grState.date){
+      if (grState.date !== data.date) grState.sel = {};
+      grState.date = data.date;
+    }
   } catch (e) {
     grState.error = String((e && e.message) || e);
   } finally {
@@ -9654,7 +9689,7 @@ function renderGrail(){
   const data = grState.data;
   const dates = (data && data.dates) || [];
   const controls = '<div class="gr-controls">'
-    + '<label>日期 <select data-gr-date>' + (dates.length ? dates : [grState.date || '']).map((d) => '<option value="' + rdEsc(d) + '"' + (d === grState.date ? ' selected' : '') + '>' + rdEsc(d ? swMmdd(d) + '（' + '日一二三四五六'[new Date(d + 'T00:00:00').getDay()] + '）' : '最新') + '</option>').join('') + '</select></label>'
+    + '<label>日期 <select data-gr-date>' + (dates.length ? dates : [grState.date || '']).map((d) => '<option value="' + rdEsc(d) + '"' + (d === grState.date ? ' selected' : '') + '>' + rdEsc(d ? swMmdd(d) + '（' + '日一二三四五六'[new Date(d + 'T00:00:00').getDay()] + '）' + (d === twTodayStr() ? ' 今天' : '') : '最新') + '</option>').join('') + '</select></label>'
     + '<button data-gr-refresh>重新整理</button>'
     + '<label>族群 ' + grSelect('group', [['all', '全部'], ['grouped', '只看有族群的']], grFilter.group) + '</label>'
     + '<label>波段均線 ' + grSelect('maSwing', [[0, '不限'], [5, '≥5'], [7, '≥7'], [10, '≥10'], [12, '≥12']], grFilter.maSwing) + '</label>'
@@ -9663,6 +9698,7 @@ function renderGrail(){
     + '<label>排序 ' + grSelect('sort', GR_SORTS, grFilter.sort) + '</label>'
     + '<label><input type="checkbox" data-gr-only' + (grFilter.onlyHits ? ' checked' : '') + '>只看有訊號的</label>'
     + (data && data.updated ? '<span class="gr-updated">更新 ' + rdEsc(String(data.updated).slice(11, 19)) + '</span>' : '')
+    + (data && data.nextSlot ? '<span class="gr-updated">下一輪 ' + rdEsc(data.nextSlot) + '</span>' : '')
     + '</div>';
   if (!data){
     body.innerHTML = controls + '<div class="race-note">' + (grState.error ? '讀不到（' + rdEsc(grState.error) + '），按「重新整理」再試' : '讀取中…') + '</div>';
@@ -9675,7 +9711,11 @@ function renderGrail(){
     return '<div class="gr-saint">' + rdEsc(saint.name) + '</div><div class="gr-grid">' + cards + '</div>';
   }).join('');
   // 後端 note（來源和「近似條件」的說明）不顯示：2026-10-07 使用者要頂端那段拿掉，這行是同一句
-  body.innerHTML = controls + (grState.error ? '<div class="race-note">更新失敗（' + rdEsc(grState.error) + '），先顯示上一次的資料</div>' : '')
+  // 2026-10-08 使用者：早上打開停在昨天。後端交易日預設給今天，還沒到時間點就寫清楚第一輪幾點
+  const kindTimes = (kind) => [...new Set((data.logics || []).filter((l) => l.kind === kind).flatMap((l) => l.times))].sort().join('、');
+  const waiting = data.nextSlot && !Object.keys(runs).length
+    ? '<div class="race-note">今天的時間點還沒到：隔日沖 ' + rdEsc(kindTimes('隔日沖')) + '；波段 ' + rdEsc(kindTimes('波段')) + '、收盤。下一輪 ' + rdEsc(data.nextSlot) + '，到了會自己更新；要看昨天的名單請切日期。</div>' : '';
+  body.innerHTML = controls + waiting + (grState.error ? '<div class="race-note">更新失敗（' + rdEsc(grState.error) + '），先顯示上一次的資料</div>' : '')
     + (sections || '<div class="race-note">這一天沒有符合的股票</div>');
 }
 function openGrailPanel(){
@@ -9698,7 +9738,11 @@ document.getElementById('grailBody').addEventListener('click', (e) => {
 });
 document.getElementById('grailBody').addEventListener('change', (e) => {
   const t = e.target;
-  if (t.matches('[data-gr-date]')){ grState.date = t.value || null; grState.sel = {}; grLoad(false); return; }
+  if (t.matches('[data-gr-date]')){
+    const latest = grState.data && grState.data.dates ? grState.data.dates[0] : null;
+    grState.follow = !t.value || t.value === latest;
+    grState.date = t.value || null; grState.sel = {}; grLoad(false); return;
+  }
   if (t.matches('[data-gr-only]')){ grFilter.onlyHits = t.checked; grSaveFilter(); renderGrail(); return; }
   if (t.matches('[data-gr-filter]')){
     const key = t.dataset.grFilter;
@@ -9708,13 +9752,13 @@ document.getElementById('grailBody').addEventListener('change', (e) => {
   }
 });
 setInterval(() => {
-  // 面板開著、看的是最新那天：交易時段（09:30～15:30）每 90 秒更新一次（各邏輯的時間點到了後端才會有新的一輪）
+  // 面板開著、跟著最新那天：平日 08:30～18:30 每 90 秒更新一次（時間點 12:00～13:45，收盤名單 14:30～18:00 之間出來；
+  // 早上第一次更新會從昨天換到今天）
   if (document.getElementById('grailModal').hidden || document.visibilityState === 'hidden') return;
-  const data = grState.data;
-  if (data && data.dates && data.dates.length && grState.date && grState.date !== data.dates[0]) return;
+  if (!grState.follow) return;
   const t = new Date(Date.now() + 8 * 3600000);
   const day = t.getUTCDay(), minutes = t.getUTCHours() * 60 + t.getUTCMinutes();
-  if (day < 1 || day > 5 || minutes < 9 * 60 + 30 || minutes > 15 * 60 + 30) return;
+  if (day < 1 || day > 5 || minutes < 8 * 60 + 30 || minutes > 18 * 60 + 30) return;
   grLoad(false);
 }, 90000);
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
