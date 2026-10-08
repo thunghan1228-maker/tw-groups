@@ -138,6 +138,7 @@
   .chart-tab.active{color:var(--bg);background:var(--accent);border-color:var(--accent);}
   .signal-tab.signal-tab-purple{color:#d946ef;}  /* 族群大戶力／族群綜合表／盤中333 分頁字（2026-09-24 使用者：紫紅色） */
   .signal-tab.signal-tab-green{color:#15803d;}
+  .signal-tab.signal-tab-red{color:#dc2626;}  /* 2026-10-08 使用者：盤中大戶力多分頁字改紅色 */
   .signal-tab.signal-tab-pink{color:#db2777;}  /* 2026-10-05 使用者：盤中特大買單分頁字改桃紅色 */  /* 2026-09-30 使用者：刀劍空(32) 分頁字改綠色（不要紅色） */
 
   /* 指標設定面板（週期／顏色／粗細／顯示） */
@@ -8295,9 +8296,10 @@ function renderSignalCenter(){
   // 2026-10-04 使用者：「空」方向另外三個分頁(盤中大戶力空／四項精選強空／主力翻空)也改綠色，跟刀劍空、盤中特大賣單一致。
   const GREEN_TAB_KEYS = new Set(['nowBear', 'bladeShort', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear']);  // 2026-10-04：今日即時空也綠字
   const PINK_TAB_KEYS = new Set(['bigBuy']);  // 2026-10-05 使用者：盤中特大買單桃紅色字
+  const RED_TAB_KEYS = new Set(['bigHolderForceBull']);  // 2026-10-08 使用者：盤中大戶力多紅色字
   const tabsHtml = SIGNAL_KINDS.map((k) => {
     const count = countFor(k.key);
-    return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + (PURPLE_TAB_KEYS.has(k.key) ? ' signal-tab-purple' : '') + (GREEN_TAB_KEYS.has(k.key) ? ' signal-tab-green' : '') + (PINK_TAB_KEYS.has(k.key) ? ' signal-tab-pink' : '') + '" data-kind="' + k.key + '">' +
+    return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + (PURPLE_TAB_KEYS.has(k.key) ? ' signal-tab-purple' : '') + (GREEN_TAB_KEYS.has(k.key) ? ' signal-tab-green' : '') + (PINK_TAB_KEYS.has(k.key) ? ' signal-tab-pink' : '') + (RED_TAB_KEYS.has(k.key) ? ' signal-tab-red' : '') + '" data-kind="' + k.key + '">' +
       k.label + (count === null ? '' : ' <span class="sig-count">' + count + '</span>') +
     '</button>';
   }).join('');
