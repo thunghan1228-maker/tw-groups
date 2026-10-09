@@ -10006,7 +10006,7 @@ function renderJail(){
     + '<div class="jl-box"><b>什麼是處置？</b>一檔股票短期漲跌太兇 / 週轉太高，證交所會列「注意」；累積多次就「<b>處置</b>」—— 改成<b>分盤集合競價</b>讓它冷靜。<br>'
     + '<b>2026/8/10 新制</b>：撮合由舊制每 5 / 20 分鐘加快到<b>約每 2 分鐘一次</b>，處置期間也由 10 個營業日縮短為 <b>5 個營業日</b>（當沖比重過高加重為 7 日），期滿次一交易日「<b>出獄</b>」恢復正常。</div>';
   const query = '<div class="jl-h">🔎 個股前科查詢 <small>打股號 → 看它的處置前科・最近任款・明天判定</small></div>'
-    + '<div class="jl-box">收錄今日<b>在關 + 嫌疑 + 入獄 + 近 90 日有前科</b>的股（共 <b>' + d.index.length + '</b> 檔）；等級分 🆕 新嫌 → 🔒 前科犯 → 👑 老大級慣犯（被關越多次越上去）。明天判定用<b>公開收盤價</b>依證交所 / 櫃買規則推算，<b>非即時報價、非選股建議</b>。</div>'
+    + '<div class="jl-box">收錄今日<b>在關 + 嫌疑 + 入獄 + 老大慣犯</b>的股（共 <b>' + d.index.length + '</b> 檔）；等級分 🆕 新嫌 → 🔒 前科犯 → 👑 老大級慣犯（被關越多次越上去）。明天判定用<b>公開收盤價</b>依證交所 / 櫃買規則推算，<b>非即時報價、非選股建議</b>。</div>'
     + '<div class="jl-q"><input id="jlQ" inputmode="numeric" placeholder="輸入股號，例 3026" value="' + rdEsc(jlState.queryCode) + '"><button type="button" data-jl-go>查前科</button></div>'
     + '<div id="jlResult">' + jailQueryHtml() + '</div>';
   const weeks = '<div class="jl-h">🗓 一週出獄時間表 <small>處置期滿・恢復正常交易的日子（共 ' + d.pendingCount + ' 檔待出獄）</small></div>' + jailWeeksHtml(d);
@@ -10035,7 +10035,7 @@ function renderJail(){
     + (d.firstTime.length ? '<div class="jl-grid">' + d.firstTime.map((f) => '<div class="jl-card"><div class="jl-card-h">' + jlCardStock(f.code, f.name, f.market)
       + '<span class="jl-badge first">🆕 第一次</span></div><div class="jl-sub">10日第一次・參考日 ' + rdEsc(jlMd(d.dataDate)) + '</div></div>').join('') + '</div>'
       : '<div class="jl-note">今天沒有第一次觸及第一款的股票</div>');
-  const index = '<div class="jl-h">📇 個股處置前科索引 <small>近 90 日曾被處置 / 注意的股，點股號看該股處置紀錄與出關日</small></div>'
+  const index = '<div class="jl-h">📇 個股處置前科索引 <small>近 3 個月曾被處置、近 25 個交易日曾被注意的股，點股號看該股處置紀錄與出關日</small></div>'
     + '<details class="jl-index"><summary>展開全部 ' + d.index.length + ' 檔個股索引</summary><div class="jl-index-grid">'
     + d.index.map((r) => jlStock(r.code, r.name, r.jailed ? ' 🔒' : (r.tier === 'boss' ? ' 👑' : ''))).join('') + '</div></details>';
   const faq = '<div class="jl-h">❓ 處置股常見問題 <small>制度面的公開規則整理，非買賣建議</small></div>'

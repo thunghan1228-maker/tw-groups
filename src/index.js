@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-09 11:50:39";
+const BUILD_STAMP = "2026-10-09 12:08:05";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -8253,7 +8253,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-09 11:50:39';
+const BUILD_STAMP = '2026-10-09 12:08:05';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -10062,7 +10062,7 @@ function renderJail(){
     + '<div class="jl-box"><b>什麼是處置？</b>一檔股票短期漲跌太兇 / 週轉太高，證交所會列「注意」；累積多次就「<b>處置</b>」—— 改成<b>分盤集合競價</b>讓它冷靜。<br>'
     + '<b>2026/8/10 新制</b>：撮合由舊制每 5 / 20 分鐘加快到<b>約每 2 分鐘一次</b>，處置期間也由 10 個營業日縮短為 <b>5 個營業日</b>（當沖比重過高加重為 7 日），期滿次一交易日「<b>出獄</b>」恢復正常。</div>';
   const query = '<div class="jl-h">🔎 個股前科查詢 <small>打股號 → 看它的處置前科・最近任款・明天判定</small></div>'
-    + '<div class="jl-box">收錄今日<b>在關 + 嫌疑 + 入獄 + 近 90 日有前科</b>的股（共 <b>' + d.index.length + '</b> 檔）；等級分 🆕 新嫌 → 🔒 前科犯 → 👑 老大級慣犯（被關越多次越上去）。明天判定用<b>公開收盤價</b>依證交所 / 櫃買規則推算，<b>非即時報價、非選股建議</b>。</div>'
+    + '<div class="jl-box">收錄今日<b>在關 + 嫌疑 + 入獄 + 老大慣犯</b>的股（共 <b>' + d.index.length + '</b> 檔）；等級分 🆕 新嫌 → 🔒 前科犯 → 👑 老大級慣犯（被關越多次越上去）。明天判定用<b>公開收盤價</b>依證交所 / 櫃買規則推算，<b>非即時報價、非選股建議</b>。</div>'
     + '<div class="jl-q"><input id="jlQ" inputmode="numeric" placeholder="輸入股號，例 3026" value="' + rdEsc(jlState.queryCode) + '"><button type="button" data-jl-go>查前科</button></div>'
     + '<div id="jlResult">' + jailQueryHtml() + '</div>';
   const weeks = '<div class="jl-h">🗓 一週出獄時間表 <small>處置期滿・恢復正常交易的日子（共 ' + d.pendingCount + ' 檔待出獄）</small></div>' + jailWeeksHtml(d);
@@ -10091,7 +10091,7 @@ function renderJail(){
     + (d.firstTime.length ? '<div class="jl-grid">' + d.firstTime.map((f) => '<div class="jl-card"><div class="jl-card-h">' + jlCardStock(f.code, f.name, f.market)
       + '<span class="jl-badge first">🆕 第一次</span></div><div class="jl-sub">10日第一次・參考日 ' + rdEsc(jlMd(d.dataDate)) + '</div></div>').join('') + '</div>'
       : '<div class="jl-note">今天沒有第一次觸及第一款的股票</div>');
-  const index = '<div class="jl-h">📇 個股處置前科索引 <small>近 90 日曾被處置 / 注意的股，點股號看該股處置紀錄與出關日</small></div>'
+  const index = '<div class="jl-h">📇 個股處置前科索引 <small>近 3 個月曾被處置、近 25 個交易日曾被注意的股，點股號看該股處置紀錄與出關日</small></div>'
     + '<details class="jl-index"><summary>展開全部 ' + d.index.length + ' 檔個股索引</summary><div class="jl-index-grid">'
     + d.index.map((r) => jlStock(r.code, r.name, r.jailed ? ' 🔒' : (r.tier === 'boss' ? ' 👑' : ''))).join('') + '</div></details>';
   const faq = '<div class="jl-h">❓ 處置股常見問題 <small>制度面的公開規則整理，非買賣建議</small></div>'
