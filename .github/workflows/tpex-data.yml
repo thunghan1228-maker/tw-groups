@@ -160,7 +160,7 @@ jobs:
               print('revenue rows', len(keep), keep[0].get('資料年月'))
           except Exception as e:
               print('revenue failed', type(e).__name__, e)
-          # 上櫃基本資料：全部上櫃公司都留，只留代號、名稱、已發行普通股數
+          # 上櫃基本資料：全部上櫃公司都留，只留代號、名稱、已發行普通股數、產業別（處置監獄的犯罪集團用官方產業別補傳產股）
           try:
               rows = get_json('https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O')
               keep = []
@@ -170,8 +170,9 @@ jobs:
                       continue
                   # 櫃買中心這份是英文欄位（IssueShares／CompanyAbbreviation），證交所那份才是中文欄位
                   shares = r.get('IssueShares') or next((v for k, v in r.items() if '已發行普通股數' in str(k)), None)
+                  industry = r.get('SecuritiesIndustryCode') or r.get('產業別') or ''
                   if c and shares:
-                      keep.append({'公司代號': c, '公司簡稱': r.get('公司簡稱') or r.get('CompanyAbbreviation') or r.get('CompanyName') or '', '已發行普通股數或TDR原股發行股數': str(shares)})
+                      keep.append({'公司代號': c, '公司簡稱': r.get('公司簡稱') or r.get('CompanyAbbreviation') or r.get('CompanyName') or '', '已發行普通股數或TDR原股發行股數': str(shares), '產業別': str(industry).strip()})
               assert keep, 'no basics rows'
               json.dump(keep, open('tpex/basics-latest.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
               print('basics rows', len(keep))
