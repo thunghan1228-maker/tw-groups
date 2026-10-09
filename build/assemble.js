@@ -480,6 +480,14 @@ export default {
       // 處置監獄的個股前科查詢，60 秒快取
       return await proxyHanstockBars("/api/hub/jail/stock" + url.search, 60);
     }
+    if (url.pathname === "/api/revenue") {
+      // 營收成長榜（2026-10-09 使用者：照莊爸「每月營收成長榜」做）：觀測站每月營收彙總表＋公布日＋隔日漲跌，2 分鐘快取
+      return await proxyHanstockBars("/api/hub/revenue" + url.search, 120);
+    }
+    if (url.pathname === "/api/revenue-stock") {
+      // 營收成長榜的查個股營收（每個月的年增、公布日、隔日漲跌），60 秒快取
+      return await proxyHanstockBars("/api/hub/revenue/stock" + url.search, 60);
+    }
     if (url.pathname === "/api/chip-radar-stock") {
       // 籌碼暴增雷達的個股查詢（九週軌跡、同族群、三大法人），60 秒快取
       return await proxyHanstockBars("/api/hub/chip-radar/stock" + url.search, 60);

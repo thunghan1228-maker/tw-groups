@@ -766,7 +766,7 @@
   .jl-note{font-size:12px;color:var(--muted);margin:4px 0;}
   .jl-q{display:flex;gap:8px;margin:8px 0;}
   .jl-q input{flex:0 1 260px;min-width:0;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:15px;font-family:inherit;}
-  .jl-q button{background:#b91c1c;color:#fff;border:0;border-radius:10px;padding:8px 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+  .jl-q button{background:#b91c1c;color:#fff;border:0;border-radius:10px;padding:8px 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;white-space:nowrap;}
   .jl-week{border:1px solid var(--line);border-radius:10px;padding:8px;margin:6px 0;background:var(--panel);}
   .jl-week-h{font-weight:800;color:#dc2626;margin:0 0 6px;}
   .jl-week-h small{font-weight:400;color:var(--muted);margin-left:6px;}
@@ -827,6 +827,100 @@
   .jl-att span{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:1px 6px;background:var(--panel-2);}
   .jl-foot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:8px;line-height:1.6;}
   @media(max-width:640px){ .jl-days{grid-template-columns:repeat(2,minmax(0,1fr));} .jl-grid{grid-template-columns:1fr;} .jl-table th:nth-child(4),.jl-table td:nth-child(4){display:none;} }
+  /* 營收成長榜（2026-10-09 使用者：照莊爸「每月營收成長榜 學員版」做一模一樣的）：族群卡片、多觀察、火箭烏龜統計、散點圖、懸賞榜、總表 */
+  .rv-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:2px 0 4px;}
+  .rv-month{font-size:15px;color:var(--muted);}
+  .rv-meta{font-size:12px;color:var(--muted);margin:2px 0 8px;line-height:1.6;}
+  .rv-months{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
+  .rv-mbtn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:8px;padding:4px 12px;font-family:inherit;font-size:13px;cursor:pointer;}
+  .rv-mbtn.active{background:#b91c1c;border-color:#b91c1c;color:#fff;font-weight:700;}
+  .rv-sec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:12px 0;}
+  .rv-h{font-size:18px;font-weight:800;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:0 0 6px;}
+  .rv-h small{font-size:12px;font-weight:400;color:var(--muted);}
+  .rv-h .rv-fold{margin-left:auto;}
+  .rv-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:13px;color:var(--muted);margin:4px 0 6px;}
+  .rv-ctl select,.rv-ctl input{background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-family:inherit;font-size:13px;}
+  .rv-ctl input{width:150px;}
+  .rv-btn{background:#7c3aed;color:#fff;border:0;border-radius:999px;padding:4px 12px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;}
+  .rv-btn.red{background:#b91c1c;}
+  .rv-btn.ghost{background:var(--panel-2);color:var(--text);border:1px solid var(--line);}
+  .rv-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:12px;color:var(--muted);margin:4px 0 8px;}
+  .rv-chip{border-radius:6px;padding:1px 7px;color:#fff;font-weight:700;font-size:11px;}
+  .rv-chip.t100,.rv-card.t100{background:linear-gradient(135deg,#f0506e,#dc2626);}
+  .rv-chip.t50,.rv-card.t50{background:linear-gradient(135deg,#fb923c,#f97316);}
+  .rv-chip.t30,.rv-card.t30{background:linear-gradient(135deg,#a78bfa,#7c3aed);}
+  .rv-chip.t0,.rv-card.t0{background:var(--panel-2);color:var(--text);border:1px solid var(--line);}
+  .rv-chip.tneg,.rv-card.tneg{background:var(--panel-2);color:var(--text);border:1.5px solid #16a34a;}
+  .rv-card.tnone{background:transparent;color:var(--muted);border:1.5px dashed var(--line);}
+  .rv-grp{display:grid;grid-template-columns:200px 92px 1fr;gap:10px;align-items:center;border:1px solid var(--line);border-left:5px solid #b45309;border-radius:12px;padding:8px 10px;margin:8px 0;background:var(--panel-2);}
+  .rv-grp.r1{border-left-color:#eab308;} .rv-grp.r2{border-left-color:#94a3b8;} .rv-grp.r3{border-left-color:#c2410c;}
+  .rv-gname{display:flex;gap:8px;align-items:center;min-width:0;}
+  .rv-rank{flex:0 0 30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:#7c3aed;}
+  .rv-grp.r1 .rv-rank{background:linear-gradient(135deg,#fde047,#eab308);color:#713f12;}
+  .rv-grp.r2 .rv-rank{background:linear-gradient(135deg,#e2e8f0,#94a3b8);color:#1e293b;}
+  .rv-grp.r3 .rv-rank{background:linear-gradient(135deg,#fdba74,#c2410c);}
+  .rv-grp.star .rv-rank{background:linear-gradient(135deg,#fde047,#f59e0b);}
+  .rv-gname b{font-size:15px;}
+  .rv-gsub{font-size:11px;color:var(--muted);line-height:1.5;}
+  .rv-med{text-align:center;}
+  .rv-med span{display:inline-block;border-radius:999px;color:#fff;font-weight:800;padding:4px 10px;font-size:13px;}
+  .rv-med small{display:block;font-size:10px;color:var(--muted);margin-top:2px;}
+  .rv-cards{display:flex;flex-wrap:wrap;gap:6px;}
+  .rv-card{width:92px;border-radius:8px;padding:4px 6px;color:#fff;cursor:pointer;line-height:1.25;border:0;font-family:inherit;text-align:left;}
+  .rv-card .n{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rv-card .y{font-size:19px;font-weight:800;}
+  .rv-card .d{font-size:10px;opacity:.95;white-space:nowrap;}
+  .rv-new{display:inline-block;background:#fff;color:#4c1d95;border-radius:4px;padding:0 3px;font-size:9px;font-weight:700;margin-left:2px;}
+  .rv-card.t0 .rv-new,.rv-card.tneg .rv-new{background:#4c1d95;color:#fff;}
+  .rv-up{color:var(--up);} .rv-down{color:var(--down);}
+  .rv-card .rv-up,.rv-card .rv-down{color:inherit;}
+  .rv-card.t0 .rv-up,.rv-card.tneg .rv-up{color:var(--up);} .rv-card.t0 .rv-down,.rv-card.tneg .rv-down{color:var(--down);}
+  .rv-tables{display:flex;flex-wrap:wrap;gap:12px;}
+  .rv-table{border-collapse:collapse;font-size:13px;margin:4px 0;}
+  .rv-table th{background:#5b21b6;color:#fff;padding:5px 8px;font-weight:700;white-space:nowrap;}
+  .rv-table td{border-bottom:1px solid var(--line);padding:4px 8px;text-align:right;white-space:nowrap;}
+  .rv-table td:first-child{text-align:left;}
+  .rv-table tr.pink td{background:rgba(236,72,153,.10);} .rv-table tr.mint td{background:rgba(22,163,74,.10);}
+  .rv-table td.pink{background:rgba(236,72,153,.10);} .rv-table td.mint{background:rgba(22,163,74,.10);}
+  .rv-table th.pink{background:#db2777;} .rv-table th.mint{background:#15803d;}
+  .rv-table small{display:block;font-size:10px;color:var(--muted);}
+  .rv-scroll{overflow-x:auto;max-width:100%;}
+  .rv-tables > .rv-scroll{min-width:0;}
+  .rv-note{font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0;}
+  .rv-svg{width:100%;max-width:720px;height:auto;display:block;}
+  .rv-svg text{font-size:11px;fill:var(--muted);}
+  .rv-gold{font-size:12px;line-height:1.8;}
+  .rv-list details{border-radius:8px;margin:6px 0;padding:6px 10px;}
+  .rv-list details.pink{background:rgba(236,72,153,.12);} .rv-list details.mint{background:rgba(22,163,74,.12);}
+  .rv-list summary{cursor:pointer;font-weight:700;font-size:13px;}
+  .rv-li{display:grid;grid-template-columns:150px 1fr 70px;gap:6px;font-size:12px;border-top:1px dashed var(--line);padding:3px 0;}
+  .rv-li small{color:var(--muted);}
+  .rv-board{border:2px solid #b91c1c;outline:1px solid #b91c1c;outline-offset:3px;border-radius:12px;padding:10px 12px;margin:16px 0;position:relative;background:var(--panel);}
+  .rv-bgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 18px;}
+  .rv-bi{display:grid;grid-template-columns:44px 1fr auto;gap:6px;align-items:center;border-bottom:1px dashed var(--line);padding:6px 0;cursor:pointer;}
+  .rv-bi .c{color:var(--muted);font-size:12px;}
+  .rv-bi .nm{font-weight:700;font-size:14px;}
+  .rv-bi .nm small{display:block;font-weight:400;font-size:11px;color:var(--muted);}
+  .rv-bi .y{color:var(--up);font-weight:700;font-size:15px;}
+  .rv-gtag{display:inline-block;font-size:10px;border:1px solid #b45309;color:#b45309;border-radius:4px;padding:0 4px;margin-left:4px;font-weight:400;vertical-align:1px;}
+  .rv-stamp{position:absolute;right:16px;bottom:10px;border:2px solid #dc2626;color:#dc2626;border-radius:6px;padding:1px 8px;font-weight:800;letter-spacing:2px;transform:rotate(-8deg);opacity:.75;font-size:12px;}
+  .rv-tabs{display:inline-flex;border:1px solid #b91c1c;border-radius:8px;overflow:hidden;}
+  .rv-tabs button{background:var(--panel);color:var(--text);border:0;padding:4px 10px;font-family:inherit;font-size:13px;cursor:pointer;}
+  .rv-tabs button.active{background:#b91c1c;color:#fff;font-weight:700;}
+  .rv-full{width:100%;}
+  .rv-full th{position:sticky;top:0;cursor:pointer;background:#33333a;}
+  .rv-full td:nth-child(2){text-align:left;}
+  .rv-full tr:hover td{background:var(--panel-2);}
+  .rv-qcard{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0;background:var(--panel-2);}
+  .rv-foot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:8px;line-height:1.6;}
+  @media(max-width:760px){
+    .rv-grp{grid-template-columns:1fr;}
+    .rv-med{text-align:left;}
+    .rv-bgrid{grid-template-columns:1fr;}
+    .rv-li{grid-template-columns:1fr 1fr;}
+    .rv-tables .rv-table td:first-child{white-space:normal;min-width:110px;}
+    .rv-full th:nth-child(3),.rv-full td:nth-child(3),.rv-full th:nth-child(7),.rv-full td:nth-child(7),.rv-full th:nth-child(9),.rv-full td:nth-child(9){display:none;}
+  }
   /* 創高黑選股（2026-10-04 使用者：照莊爸 App「創高黑」做選股程式，跟創高黑龍分開放）：流程列、帳戶卡、持股／觀察／要做清單、模組設定 */
   .pk-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 10px;}
   .pk-step{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer;color:var(--text);font-family:inherit;}
@@ -1441,6 +1535,19 @@
     <div id="jailBody"></div>
   </div>
 </div>
+<!-- 2026-10-09 使用者：照莊爸「每月營收成長榜 學員版」做一模一樣的（下方導覽列「營收成長榜」），資料用公開資訊觀測站每月營收彙總表 -->
+<div class="chips-modal" id="revModal" hidden>
+  <div class="chips-inner" id="revInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">每月營收成長榜</div>
+        <div class="chips-sub">族群分析、多觀察（自選股）、火箭烏龜（營收公布後隔日漲跌統計）、懸賞榜、全部公司總表。點股票看該股每月營收。</div>
+      </div>
+      <button class="cm-icon-btn" id="revClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="revBody"></div>
+  </div>
+</div>
 <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式（下方導覽列「創高黑選股」），跟創高黑龍分開放 -->
 <div class="chips-modal" id="pickerModal" hidden>
   <div class="chips-inner" id="pickerInner">
@@ -1567,6 +1674,7 @@
   <button class="tb-btn" data-label="自選股"><span class="tb-icon">★</span>自選股</button>
   <button class="tb-btn" data-label="飆股雷達"><span class="tb-icon">雷</span>飆股雷達</button>  <!-- 2026-10-07 使用者：照莊爸 App 的飆股雷達做 -->
   <button class="tb-btn" data-label="處置監獄"><span class="tb-icon">獄</span>處置監獄</button>  <!-- 2026-10-09 使用者：照莊爸處置監獄頁做 -->
+  <button class="tb-btn" data-label="營收成長榜"><span class="tb-icon">營</span>營收成長榜</button>  <!-- 2026-10-09 使用者：照莊爸每月營收成長榜做 -->
   <!-- 2026-09-26 使用者：下方導覽列的「三角收斂」「隔日沖大單籌碼」不用再留著（本來就是開發中的空位）；2026-09-28 再拿掉「個股研究中心」；
        2026-10-05 再拿掉「每週籌碼分析」（開發中的空位）。「個股訊號追蹤」拿掉後使用者又要加回來，要放自選股的今日訊號與提醒。 -->
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
@@ -10083,11 +10191,542 @@ setInterval(() => {
   if (document.getElementById('jailModal').hidden || document.visibilityState === 'hidden') return;
   jlLoad();
 }, 600000);
+// ---- 營收成長榜（2026-10-09 使用者：照莊爸「每月營收成長榜 學員版」做一模一樣的）----
+// 後端 /api/revenue?month=：公開資訊觀測站「每月營業收入彙總表」（排程主機每天 12:30／18:30／23:30 抓），公布日＝我們第一次抓到的日期，
+// 收盤、成交量、公布隔日漲跌用我們的日K。段落照莊爸的順序：查個股營收、族群分析、多觀察分析（我們用自選股）、
+// 火箭烏龜數據分析（全市場統計、散點圖、歷月統計、族群／多觀察 × 隔日、合併完整清單）、懸賞榜、全部公司總表。
+const RV_GROUP_INDEX = (() => {
+  const m = {};
+  for (const g of GROUPS) for (const s of g.stocks) (m[s.code] = m[s.code] || []).push(g.name);
+  return m;
+})();
+const rvState = { data: null, loading: false, error: null, query: null, queryCode: '', queryLoading: false,
+  minN: 3, topN: 20, day: '', boardDay: null, boardMin: 30, boardVol: 0, tab: 'pos', market: 'all', group: 'all', search: '',
+  show: 100, sortKey: 'yoy', sortDir: -1, rtOpen: true, open: {}, expand: {} };
+async function rvLoad(month){
+  if (rvState.loading) return;
+  rvState.loading = true;
+  if (!document.getElementById('revModal').hidden) renderRevenue();
+  try {
+    const res = await fetch('/api/revenue' + (month ? '?month=' + encodeURIComponent(month) : ''));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    rvState.data = d;
+    if (rvState.boardDay === null || (rvState.boardDay && !(d.announceDays || []).includes(rvState.boardDay))) rvState.boardDay = d.latestDay || '';
+    if (rvState.day && !(d.announceDays || []).includes(rvState.day)) rvState.day = '';
+    rvState.error = null;
+  } catch (e){
+    rvState.error = e.message || String(e);
+  } finally {
+    rvState.loading = false;
+    if (!document.getElementById('revModal').hidden) renderRevenue();
+  }
+}
+async function rvQuery(code){
+  code = String(code || '').replace(/[^0-9A-Za-z]/g, '');
+  rvState.queryCode = code;
+  const input = document.getElementById('rvQ');
+  if (input) input.value = code;
+  if (!code){ rvState.query = null; rvRenderQuery(); return; }
+  rvState.queryLoading = true;
+  rvRenderQuery();
+  const el = document.getElementById('rvResult');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  try {
+    const res = await fetch('/api/revenue-stock?code=' + encodeURIComponent(code));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    rvState.query = await res.json();
+  } catch (e){
+    rvState.query = { status: 'error', message: e.message || String(e) };
+  } finally {
+    rvState.queryLoading = false;
+    rvRenderQuery();
+  }
+}
+function rvRows(){
+  const d = rvState.data;
+  if (!d || !Array.isArray(d.rows)) return [];
+  if (d._rows) return d._rows;
+  const idx = {};
+  d.fields.forEach((k, i) => { idx[k] = i; });
+  d._rows = d.rows.map((r) => {
+    const o = {};
+    for (const k in idx) o[k] = r[idx[k]];
+    o.groups = RV_GROUP_INDEX[o.code] || [];
+    o.accel = o.yoy != null && o.prevYoy != null && o.yoy - o.prevYoy >= 10;
+    o.decel = o.yoy != null && o.prevYoy != null && o.yoy - o.prevYoy <= -10;
+    o.warn = (o.yoy != null && o.yoy < 0) || (o.cumYoy != null && o.cumYoy < 0);
+    return o;
+  });
+  d._byCode = {};
+  for (const o of d._rows) d._byCode[o.code] = o;
+  return d._rows;
+}
+const rvMonthLabel = (m) => m ? m.slice(0, 4) + '/' + m.slice(5, 7) : '';
+const rvMd = (iso) => jlMd(iso);
+function rvPct(v, digits){
+  if (v == null || Number.isNaN(v)) return '—';
+  return (v > 0 ? '+' : '') + Number(v).toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }) + '%';
+}
+const rvCls = (v) => v == null ? '' : v > 0 ? 'rv-up' : v < 0 ? 'rv-down' : '';
+const rvTierOf = (v) => v == null ? 'tnone' : v >= 100 ? 't100' : v >= 50 ? 't50' : v >= 30 ? 't30' : v >= 0 ? 't0' : 'tneg';
+const rvIcon = (o) => (o.accel ? '🚀' : o.decel ? '🐢' : '') + (o.warn ? '⚠️' : '');
+function rvMedian(values){
+  const s = values.filter((v) => v != null).sort((a, b) => a - b);
+  if (!s.length) return null;
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function rvAvg(values){
+  const v = values.filter((x) => x != null);
+  if (!v.length) return null;
+  return { avg: v.reduce((a, b) => a + b, 0) / v.length, up: v.filter((x) => x > 0).length / v.length * 100, n: v.length };
+}
+const rvAvgHtml = (st) => st ? '<span class="' + rvCls(st.avg) + '">' + rvPct(st.avg, 1) + '</span><small>' + Math.round(st.up) + '% 漲・' + st.n + ' 檔</small>' : '—';
+function rvDayTag(o){
+  const d = rvState.data;
+  if (!o.announce) return '';
+  if (!o.known) return '<span class="rv-new">' + rvMd(o.announce) + '前</span>';
+  return o.announce === d.latestDay ? '<span class="rv-new">📅' + rvMd(o.announce) + '</span>' : '';
+}
+function rvTitle(o){
+  return o.name + '・年增 ' + rvPct(o.yoy, 2) + '・上月年增 ' + rvPct(o.prevYoy, 2) + '・月增 ' + rvPct(o.mom, 2) + '・累計年增 ' + rvPct(o.cumYoy, 2)
+    + (o.announce ? '・公布 ' + rvMd(o.announce) + (o.known ? '' : ' 前') : '') + (o.note ? '\n' + o.note : '');
+}
+function rvCard(o, code, name){
+  if (!o) return '<div class="rv-card tnone" title="還沒公布"><div class="n">⏳ ' + rdEsc(code) + ' ' + rdEsc(name || '') + '</div><div class="y">&nbsp;</div><div class="d">未公布</div></div>';
+  const next = o.next != null ? '<span class="' + rvCls(o.next) + '">' + rvPct(o.next, 1) + '</span>' : '—';
+  return '<button type="button" class="rv-card ' + rvTierOf(o.yoy) + '" data-rv-code="' + rdEsc(o.code) + '" title="' + rdEsc(rvTitle(o)) + '">'
+    + '<div class="n">' + rvIcon(o) + rdEsc(o.code) + ' ' + rdEsc(o.name) + '</div>'
+    + '<div class="y">' + (o.yoy == null ? '—' : rvPct(Math.round(o.yoy), 0)) + '</div>'
+    + '<div class="d">隔日 ' + next + ' ' + rvDayTag(o) + '</div></button>';
+}
+function rvGroupStats(members){
+  const by = rvState.data._byCode;
+  const pub = members.map((s) => by[s.code]).filter(Boolean);
+  return {
+    total: members.length, pub, published: pub.length,
+    positive: pub.filter((o) => o.yoy != null && o.yoy > 0).length,
+    listed: pub.filter((o) => o.yoy != null && o.yoy >= 30).length,
+    accel: pub.filter((o) => o.accel), decel: pub.filter((o) => o.decel),
+    median: rvMedian(pub.map((o) => o.yoy)),
+    all: rvAvg(pub.map((o) => o.next)),
+  };
+}
+function rvIndustryGroups(){
+  return GROUPS.map((g) => ({ name: g.name, members: g.stocks, st: rvGroupStats(g.stocks) }))
+    .filter((g) => g.st.published >= rvState.minN && g.st.median != null)
+    .sort((a, b) => b.st.median - a.st.median);
+}
+function rvWatchGroups(){
+  const names = {};
+  const codes = [];
+  for (const g of wl.data.groups) for (const it of g.items){
+    if (!names[it.code]){ codes.push(it.code); names[it.code] = it.name || (WL_GROUP_INDEX[it.code] || {}).name || ''; }
+  }
+  const by = rvState.data._byCode;
+  const byGroup = {};
+  const outside = [];
+  for (const c of codes){
+    const gs = RV_GROUP_INDEX[c];
+    const item = { code: c, name: names[c] || ((by[c] || {}).name) || '' };
+    if (gs && gs.length) (byGroup[gs[0]] = byGroup[gs[0]] || []).push(item);
+    else outside.push(item);
+  }
+  const list = Object.entries(byGroup).map(([name, members]) => ({ name, members, st: rvGroupStats(members) }))
+    .sort((a, b) => (b.st.median == null ? -1e9 : b.st.median) - (a.st.median == null ? -1e9 : a.st.median));
+  if (outside.length) list.push({ name: '自選・族群外', members: outside, st: rvGroupStats(outside), star: true });
+  return { list, codes, published: codes.filter((c) => by[c]).length };
+}
+function rvMedPill(v){
+  return '<div class="rv-med"><span class="rv-chip ' + rvTierOf(v) + '">' + rvPct(v, 1) + '</span><small>年增中位</small></div>';
+}
+function rvGroupRow(g, i, all){
+  const st = g.st;
+  let cards;
+  if (all){
+    const by = rvState.data._byCode;
+    const pub = g.members.filter((s) => by[s.code]).map((s) => by[s.code]).sort((a, b) => (b.yoy == null ? -1e9 : b.yoy) - (a.yoy == null ? -1e9 : a.yoy));
+    cards = pub.map((o) => rvCard(o)).concat(g.members.filter((s) => !by[s.code]).map((s) => rvCard(null, s.code, s.name)));
+  } else {
+    cards = st.pub.filter((o) => o.yoy != null && o.yoy >= 30 && (!rvState.day || (o.known && o.announce === rvState.day)))
+      .sort((a, b) => b.yoy - a.yoy).map((o) => rvCard(o));
+  }
+  const sub = all
+    ? '已公布 ' + st.published + ' / ' + st.total + ' 檔・' + st.positive + '/' + st.published + ' 年增為正'
+    : '已公布 ' + st.published + ' / 名單 ' + st.total + ' 檔(' + Math.round(st.published / st.total * 100) + '%)・' + st.positive + '/' + st.published
+      + ' 年增為正・上榜 ' + st.listed + '<br>🚀 ' + st.accel.length + '・🐢 ' + st.decel.length + '・全族隔日 '
+      + (st.all ? '<span class="' + rvCls(st.all.avg) + '">' + rvPct(st.all.avg, 1) + '</span>' : '—');
+  const cls = 'rv-grp' + (g.star ? ' star' : i < 3 ? ' r' + (i + 1) : '');
+  return '<div class="' + cls + '"><div class="rv-gname"><span class="rv-rank">' + (g.star ? '⭐' : i + 1) + '</span><div><b>' + rdEsc(g.name) + '</b>'
+    + '<div class="rv-gsub">' + sub + '</div></div></div>' + rvMedPill(st.median)
+    + '<div class="rv-cards">' + (cards.join('') || '<span class="rv-note">' + (rvState.day ? '這天沒有上榜成員' : '沒有年增 ≥ 30% 的成員') + '</span>') + '</div></div>';
+}
+const RV_LEGEND = '<div class="rv-legend">顏色 = 年增：<span class="rv-chip t100">≥100%</span><span class="rv-chip t50">50~100%</span><span class="rv-chip t30">30~50%</span>'
+  + '{extra}　🚀／🐢 = 比上月年增加速／放緩 10 點以上・⚠️ 年增或累計為負・隔日 = 公布後下一個交易日的漲跌・📅 = 最新一天公布</div>';
+function rvDayOptions(cur, allLabel){
+  const d = rvState.data;
+  const rows = rvRows();
+  const count = {};
+  for (const o of rows) if (o.known && o.announce) count[o.announce] = (count[o.announce] || 0) + 1;
+  return '<option value=""' + (cur ? '' : ' selected') + '>' + allLabel + '</option>'
+    + (d.announceDays || []).slice().reverse().map((day) => '<option value="' + day + '"' + (day === cur ? ' selected' : '') + '>' + rvMd(day) + ' 公布（' + (count[day] || 0) + ' 檔）</option>').join('');
+}
+function rvSelect(key, options, cur){
+  return '<select data-rv-set="' + key + '">' + options.map(([v, label]) => '<option value="' + v + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + label + '</option>').join('') + '</select>';
+}
+function rvIndustryHtml(groups){
+  const d = rvState.data;
+  const shown = rvState.topN ? groups.slice(0, rvState.topN) : groups;
+  return '<div class="rv-sec"><div class="rv-h">🧭 族群分析 <small>' + rvMonthLabel(d.month) + ' 營收・只看已公布 ≥ ' + rvState.minN + ' 檔的族群（共 ' + groups.length + ' 族，列前 '
+    + shown.length + '）・年增中位由高到低・只列上榜成員（年增 ≥ 30%）</small></div>'
+    + '<div class="rv-ctl">至少 ' + rvSelect('minN', [[1, '1 檔'], [2, '2 檔'], [3, '3 檔'], [5, '5 檔']], rvState.minN)
+    + ' 列 ' + rvSelect('topN', [[10, '10 族'], [20, '20 族'], [30, '30 族'], [0, '全部']], rvState.topN)
+    + ' <select data-rv-set="day">' + rvDayOptions(rvState.day, '📅 全部公布日') + '</select></div>'
+    + RV_LEGEND.replace('{extra}', '') + shown.map((g, i) => rvGroupRow(g, i, false)).join('') + '</div>';
+}
+function rvWatchHtml(w){
+  const d = rvState.data;
+  const legend = RV_LEGEND.replace('{extra}', '<span class="rv-chip t0">0~30%</span><span class="rv-chip tneg">負成長</span>');
+  if (!w.codes.length){
+    return '<div class="rv-sec"><div class="rv-h">⭐ 多觀察分析 <small>自選股・' + rvMonthLabel(d.month) + ' 營收</small></div>'
+      + '<div class="rv-note">還沒有自選股——在下方「自選股」加入股票後，這裡會照族群整理它們這個月的營收（好壞都標）。</div></div>';
+  }
+  return '<div class="rv-sec"><div class="rv-h">⭐ 多觀察分析 <small>自選股・' + rvMonthLabel(d.month) + ' 營收・已公布 ' + w.published + ' / ' + w.codes.length
+    + ' 檔・有族群的照年增中位排序；族群外的殿後・好壞都標</small></div>' + legend
+    + w.list.map((g, i) => rvGroupRow(g, i, true)).join('') + '</div>';
+}
+function rvCorr(points){
+  if (points.length < 3) return null;
+  const n = points.length;
+  const mx = points.reduce((a, p) => a + p[0], 0) / n;
+  const my = points.reduce((a, p) => a + p[1], 0) / n;
+  let sxy = 0, sxx = 0, syy = 0;
+  for (const [x, y] of points){ sxy += (x - mx) * (y - my); sxx += (x - mx) ** 2; syy += (y - my) ** 2; }
+  return sxx && syy ? sxy / Math.sqrt(sxx * syy) : null;
+}
+function rvScatter(sample, watchSet){
+  const x0 = 50, x1 = 630, y0 = 14, y1 = 270;
+  const cx = (v) => Math.max(-100, Math.min(300, v));
+  const cy = (v) => Math.max(-10, Math.min(10, v));
+  const X = (v) => (x0 + (cx(v) + 100) / 400 * (x1 - x0)).toFixed(1);
+  const Y = (v) => (y1 - (cy(v) + 10) / 20 * (y1 - y0)).toFixed(1);
+  let svg = '<svg class="rv-svg" viewBox="0 0 640 300" role="img" aria-label="年增率對公布隔日漲跌散點圖">';
+  svg += '<line x1="' + x0 + '" y1="' + Y(0) + '" x2="' + x1 + '" y2="' + Y(0) + '" stroke="currentColor" stroke-opacity=".35"/>';
+  svg += '<line x1="' + X(0) + '" y1="' + y0 + '" x2="' + X(0) + '" y2="' + y1 + '" stroke="currentColor" stroke-opacity=".35"/>';
+  for (const t of [-100, 0, 100, 200, 300]) svg += '<text x="' + X(t) + '" y="292" text-anchor="middle">' + (t === 300 ? '300%+' : t + '%') + '</text>';
+  for (const t of [10, 5, -5, -10]) svg += '<text x="' + (x0 - 6) + '" y="' + (Number(Y(t)) + 4) + '" text-anchor="end">' + (t > 0 ? '+' : '') + t + '%</text>';
+  svg += '<text x="' + (x0 + 4) + '" y="' + (y0 + 10) + '">↑ 隔日漲跌</text><text x="' + x1 + '" y="' + (Number(Y(0)) - 6) + '" text-anchor="end">年增 →</text>';
+  for (const o of sample) if (!watchSet.has(o.code)) svg += '<circle cx="' + X(o.yoy) + '" cy="' + Y(o.next) + '" r="2.6" fill="currentColor" fill-opacity=".28"><title>' + rdEsc(o.code + ' ' + o.name + ' 年增 ' + rvPct(o.yoy, 0) + ' → ' + rvPct(o.next, 1)) + '</title></circle>';
+  for (const o of sample) if (watchSet.has(o.code)) svg += '<circle cx="' + X(o.yoy) + '" cy="' + Y(o.next) + '" r="5.5" fill="#f5b301" stroke="#a16207"><title>⭐ ' + rdEsc(o.code + ' ' + o.name + ' 年增 ' + rvPct(o.yoy, 0) + ' → ' + rvPct(o.next, 1)) + '</title></circle>';
+  return svg + '</svg>';
+}
+function rvStatTable(head, defs, sample){
+  return '<div class="rv-scroll"><table class="rv-table"><tr><th>' + head + '</th><th>檔數</th><th>隔日平均</th><th>上漲比例</th></tr>' + defs.map(([label, fn, tone]) => {
+    const st = rvAvg(sample.filter(fn).map((o) => o.next));
+    return '<tr class="' + (tone || '') + '"><td>' + label + '</td><td>' + (st ? st.n : 0) + '</td><td class="' + (st ? rvCls(st.avg) : '') + '">' + (st ? rvPct(st.avg, 1) : '—')
+      + '</td><td>' + (st ? Math.round(st.up) + '%' : '—') + '</td></tr>';
+  }).join('') + '</table></div>';
+}
+const RV_HIST_COLS = [['all', '全部', ''], ['accel', '🚀 加速', 'pink'], ['flat', '持平', ''], ['decel', '🐢 放緩', 'mint'], ['yoy100', '年增 ≥100%', 'pink'], ['warn', '⚠️ 有', 'mint'], ['nowarn', '沒 ⚠️', '']];
+function rvHistoryHtml(){
+  const h = rvState.data.history || [];
+  const cell = (b, tone) => {
+    if (!b || !b.n) return '<td class="' + tone + '">—</td>';
+    const avg = b.sum / b.n;
+    return '<td class="' + tone + '"><span class="' + rvCls(avg) + '">' + rvPct(avg, 1) + '</span><small>' + Math.round(b.up / b.n * 100) + '% 漲・' + b.n + ' 檔</small></td>';
+  };
+  const total = {};
+  for (const [k] of RV_HIST_COLS) total[k] = { n: 0, up: 0, sum: 0 };
+  for (const m of h) for (const [k] of RV_HIST_COLS){ total[k].n += m[k].n; total[k].up += m[k].up; total[k].sum += m[k].sum; }
+  const rows = h.map((m) => '<tr><td>' + rvMonthLabel(m.month) + '</td>' + RV_HIST_COLS.map(([k, , tone]) => cell(m[k], tone)).join('') + '</tr>').join('');
+  return '<div class="rv-h" style="font-size:15px;margin-top:14px">📚 歷月統計 <small>每月營收公布 → 隔日漲跌</small></div>'
+    + (h.length ? '<div class="rv-scroll"><table class="rv-table"><tr><th>營收月份</th>' + RV_HIST_COLS.map(([, label, tone]) => '<th class="' + tone + '">' + label + '</th>').join('') + '</tr>'
+      + rows + (h.length > 1 ? '<tr><td>合計</td>' + RV_HIST_COLS.map(([k, , tone]) => cell(total[k], tone)).join('') + '</tr>' : '') + '</table></div>'
+      : '<div class="rv-note">還沒有累積到有公布日的月份。</div>')
+    + '<div class="rv-note">每格 = 隔日平均漲跌，下面是上漲比例與檔數。🚀／🐢 = 年增比上個月多／少 10 個百分點以上；⚠️ = 年增或累計年增為負。'
+    + '資料從 2026/09 營收開始記（公布日是我們每天三次抓觀測站彙總表時第一次出現的日期，10/09 起；10/09 以前就公布的公布日不確定、不算），之後每個月自動累積、不會消失。</div>';
+}
+function rvNextTable(kind, groups){
+  const allOpen = !!rvState.expand[kind];
+  const rows = groups.map((g) => {
+    const st = g.st;
+    const key = kind + ':' + g.name;
+    const open = allOpen || rvState.open[key];
+    const pubSorted = st.pub.slice().sort((a, b) => (b.next == null ? -1e9 : b.next) - (a.next == null ? -1e9 : a.next));
+    const detail = open ? '<tr><td colspan="8"><div class="rv-list">' + pubSorted.map((o) => rvListItem(o, null)).join('') + '</div></td></tr>' : '';
+    return '<tr><td>' + (g.star ? '⭐ ' : '') + rdEsc(g.name) + '</td><td>' + st.published + '</td><td class="pink">' + st.accel.length + '</td><td class="mint">' + st.decel.length + '</td>'
+      + '<td class="pink">' + rvAvgHtml(rvAvg(st.accel.map((o) => o.next))) + '</td><td class="mint">' + rvAvgHtml(rvAvg(st.decel.map((o) => o.next))) + '</td>'
+      + '<td>' + rvAvgHtml(st.all) + '</td><td><button type="button" class="rv-btn ghost" data-rv-open="' + rdEsc(key) + '">' + (open ? '收起' : '看全部') + '</button></td></tr>' + detail;
+  }).join('');
+  return '<div class="rv-scroll"><table class="rv-table"><tr><th>族群</th><th>已公布</th><th class="pink">🚀 檔數</th><th class="mint">🐢 檔數</th><th class="pink">🚀 隔日</th><th class="mint">🐢 隔日</th><th>全族隔日</th>'
+    + '<th>名單 <button type="button" class="rv-btn ghost" data-rv-expand="' + kind + '">' + (allOpen ? '全部收起' : '全部展開') + '</button></th></tr>' + rows + '</table></div>';
+}
+function rvListItem(o, watchSet){
+  const star = watchSet && watchSet.has(o.code) ? '⭐' : '';
+  return '<div class="rv-li"><div>' + rvIcon(o) + '<button type="button" class="jl-stk" data-rv-code="' + rdEsc(o.code) + '"><span class="jl-code">' + rdEsc(o.code) + '</span> ' + rdEsc(o.name) + '</button>' + star
+    + '</div><div>' + rvPct(o.prevYoy, 0) + ' → <b class="' + rvCls(o.yoy) + '">' + rvPct(o.yoy, 0) + '</b> <small>' + rdEsc(o.groups.join('、')) + '</small></div>'
+    + '<div class="' + rvCls(o.next) + '">' + (o.next != null ? rvPct(o.next, 1) : '—') + '</div></div>';
+}
+function rvRocketHtml(groups, w){
+  const d = rvState.data;
+  const rows = rvRows();
+  const sample = rows.filter((o) => o.next != null && o.yoy != null);
+  const watchSet = new Set(w.codes);
+  const rocket = rvAvg(sample.filter((o) => o.accel).map((o) => o.next));
+  const turtle = rvAvg(sample.filter((o) => o.decel).map((o) => o.next));
+  const fold = '<button type="button" class="rv-btn rv-fold" data-rv-fold>' + (rvState.rtOpen ? '收起' : '展開') + '</button>';
+  const head = '<div class="rv-h">🚀🐢 火箭烏龜數據分析 <small>' + rvMonthLabel(d.month) + ' 營收・全市場 🚀 ' + (rocket ? rocket.n + ' 檔隔日 ' + rvPct(rocket.avg, 1) + '（' + Math.round(rocket.up) + '% 漲）' : '—')
+    + '・🐢 ' + (turtle ? turtle.n + ' 檔隔日 ' + rvPct(turtle.avg, 1) + '（' + Math.round(turtle.up) + '% 漲）' : '—') + '</small>' + fold + '</div>';
+  if (!rvState.rtOpen) return '<div class="rv-sec">' + head + '</div>';
+  const yoyDefs = [['年增 ≥100%', (o) => o.yoy >= 100, 'pink'], ['50~100%', (o) => o.yoy >= 50 && o.yoy < 100], ['30~50%', (o) => o.yoy >= 30 && o.yoy < 50],
+    ['0~30%', (o) => o.yoy >= 0 && o.yoy < 30], ['負成長', (o) => o.yoy < 0, 'mint']];
+  const markDefs = [['🚀 加速（比上月多 10 點以上）', (o) => o.accel, 'pink'], ['持平', (o) => !o.accel && !o.decel], ['🐢 放緩（比上月少 10 點以上）', (o) => o.decel, 'mint'],
+    ['⚠️ 年增或累計為負', (o) => o.warn, 'mint'], ['沒有 ⚠️', (o) => !o.warn]];
+  const r = rvCorr(sample.map((o) => [Math.max(-100, Math.min(300, o.yoy)), o.next]));
+  const gold = sample.filter((o) => watchSet.has(o.code)).sort((a, b) => a.next - b.next);
+  const goldText = gold.length ? '⭐ 金點 = 自選股（游標停在點上看名稱）。自選股隔日由跌到漲：' + gold.map((o) => rvIcon(o) + rdEsc(o.code + ' ' + o.name) + ' 年增 ' + rvPct(o.yoy, 0)
+    + ' → <span class="' + rvCls(o.next) + '">' + rvPct(o.next, 1) + '</span>').join('、') : '⭐ 金點 = 自選股（自選股裡還沒有公布後有隔日收盤的）。';
+  const merged = new Map();
+  for (const g of groups) for (const o of g.st.pub) merged.set(o.code, o);
+  for (const c of w.codes) if (d._byCode[c]) merged.set(c, d._byCode[c]);
+  const listOf = (fn) => [...merged.values()].filter(fn).sort((a, b) => (b.next == null ? -1e9 : b.next) - (a.next == null ? -1e9 : a.next));
+  const rockets = listOf((o) => o.accel);
+  const turtles = listOf((o) => o.decel);
+  const sumText = (list) => { const st = rvAvg(list.map((o) => o.next)); return list.length + ' 檔・隔日平均 ' + (st ? rvPct(st.avg, 1) + '・' + Math.round(st.up) + '% 上漲（' + st.n + ' 檔有隔日）' : '—（還沒有隔日）'); };
+  return '<div class="rv-sec">' + head
+    + '<div class="rv-h" style="font-size:15px">📊 全市場：' + Number(d.month.slice(5, 7)) + ' 月營收公布 vs 隔日漲跌</div>'
+    + '<div class="rv-note">樣本 = 本月已公布、隔天有收盤的 ' + sample.length + ' 檔（全市場，不只自選股）；隔日 = 公布後下一個交易日收盤 vs 公布日收盤。公司可能盤中或盤後公布，這裡一律以「公布那天之後的第一個交易日」算。</div>'
+    + '<div class="rv-tables">' + rvStatTable('年增級距', yoyDefs, sample) + rvStatTable('標記', markDefs, sample) + '</div>'
+    + '<div class="rv-note">年增 vs 隔日漲跌 相關係數 r = ' + (r == null ? '—' : r.toFixed(2)) + '（0 = 沒關係、1 = 完全同方向）</div>'
+    + rvScatter(sample, watchSet) + '<div class="rv-gold">' + goldText + '</div>'
+    + rvHistoryHtml()
+    + '<div class="rv-h" style="font-size:15px;margin-top:14px">🧭 族群分析 × 公布隔日漲跌 <small>族群分析目前列出的 ' + groups.length + ' 族（跟著上面「至少／列幾族」走），每族算已公布的全部成員</small></div>'
+    + rvNextTable('g', groups)
+    + '<div class="rv-h" style="font-size:15px;margin-top:14px">⭐ 多觀察分析 × 公布隔日漲跌 <small>只算自選股，「看全部」連持平的也列出來</small></div>'
+    + (w.list.length ? rvNextTable('w', w.list) : '<div class="rv-note">還沒有自選股。</div>')
+    + '<div class="rv-h" style="font-size:15px;margin-top:14px">🚀🐢 族群分析＋多觀察分析 合併完整清單 <small>隔日由高到低；兩區重複的只算一次；中間 = 年增率 上月 → 本月；小字 = 族群，⭐ = 自選股</small></div>'
+    + '<div class="rv-list"><details class="pink"><summary>🚀 火箭 完整清單：' + sumText(rockets) + '</summary>' + rockets.map((o) => rvListItem(o, watchSet)).join('') + '</details>'
+    + '<details class="mint"><summary>🐢 烏龜 完整清單：' + sumText(turtles) + '</summary>' + turtles.map((o) => rvListItem(o, watchSet)).join('') + '</details></div></div>';
+}
+function rvBoardRows(){
+  return rvRows().filter((o) => o.yoy != null && o.yoy >= rvState.boardMin && (!rvState.boardDay || (o.known && o.announce === rvState.boardDay))
+    && (!rvState.boardVol || (o.volume || 0) >= rvState.boardVol)).sort((a, b) => b.yoy - a.yoy);
+}
+function rvBoardHtml(){
+  const d = rvState.data;
+  const list = rvBoardRows();
+  const copy = list.map((o) => o.code + ' ' + o.name + ' 年增 ' + rvPct(o.yoy, 2)).join('\n');
+  const head = (rvState.boardDay ? rvMd(rvState.boardDay) + ' 公布 ' : '') + rvMonthLabel(d.month) + ' 營收・年增 ≥ ' + rvState.boardMin + '%・共 ' + list.length + ' 檔';
+  const fmtClose = (v) => v == null ? '—' : v >= 1000 ? Math.round(v).toLocaleString() : String(Number(v.toPrecision(3)));
+  return '<div class="rv-board"><div class="rv-h">🎯 懸賞榜 <small>' + head + '</small></div>'
+    + '<div class="rv-ctl" style="justify-content:flex-end">日期 <select data-rv-set="boardDay">' + rvDayOptions(rvState.boardDay, '全部公布日') + '</select>'
+    + ' 門檻 ' + rvSelect('boardMin', [[30, '≥30%'], [50, '≥50%'], [100, '≥100%']], rvState.boardMin)
+    + ' 量 ' + rvSelect('boardVol', [[0, '不限'], [100, '≥100 張'], [500, '≥500 張'], [1000, '≥1000 張']], rvState.boardVol)
+    + ' <button type="button" class="rv-btn red" data-rv-copy>複製名單</button><textarea id="rvCopyText" style="position:absolute;left:-9999px;top:0" readonly>' + rdEsc(copy) + '</textarea></div>'
+    + (list.length ? '<div class="rv-bgrid">' + list.map((o) => '<div class="rv-bi" data-rv-code="' + rdEsc(o.code) + '" title="' + rdEsc(rvTitle(o)) + '"><span class="c">' + rdEsc(o.code) + '</span>'
+      + '<span class="nm">' + rdEsc(o.name) + (o.groups[0] ? '<span class="rv-gtag">' + rdEsc(o.groups[0]) + '</span>' : '')
+      + '<small>' + fmtClose(o.close) + '・' + (o.volume != null ? Number(o.volume).toLocaleString() + ' 張' : '—') + '</small></span>'
+      + '<span class="y">' + rvPct(o.yoy, 2) + '</span></div>').join('') + '</div>' : '<div class="rv-note">這個條件沒有股票。</div>')
+    + '<div class="rv-note">收盤與成交量為 ' + rdEsc(d.priceDate || '—') + ' 證交所 / 櫃買開放資料（張 = 千股）；公布日 = 我們每天三次（12:30／18:30／23:30）抓公開資訊觀測站彙總表時第一次出現的日期。</div>'
+    + '<span class="rv-stamp">WANTED</span></div>';
+}
+function rvTableRows(){
+  const q = rvState.search.trim().toLowerCase();
+  let rows = rvRows().filter((o) => (rvState.tab !== 'pos' || (o.yoy != null && o.yoy > 0))
+    && (rvState.market === 'all' || o.market === rvState.market)
+    && (rvState.group === 'all' || o.groups.includes(rvState.group))
+    && (!q || o.code.toLowerCase().includes(q) || String(o.name).toLowerCase().includes(q)));
+  const key = rvState.sortKey;
+  const dir = rvState.sortDir;
+  const val = (o) => key === 'announce' ? (o.announce || '') : key === 'code' ? o.code : o[key];
+  rows = rows.slice().sort((a, b) => {
+    const x = val(a), y = val(b);
+    if (x == null && y == null) return 0;
+    if (x == null) return 1;
+    if (y == null) return -1;
+    return (x > y ? 1 : x < y ? -1 : 0) * dir;
+  });
+  if (rvState.tab === 'grp'){
+    const out = [];
+    const want = rvState.group === 'all' ? GROUPS.map((g) => g.name) : [rvState.group];
+    for (const name of want){
+      const members = rows.filter((o) => o.groups.includes(name));
+      if (members.length) out.push({ header: name, n: members.length, median: rvMedian(members.map((o) => o.yoy)) }, ...members);
+    }
+    return out;
+  }
+  return rows;
+}
+function rvTableHtml(){
+  const d = rvState.data;
+  const rows = rvTableRows();
+  const total = rows.filter((r) => !r.header).length;
+  const limit = rvState.show || Infinity;
+  const cols = [['#', ''], ['公司', 'code'], ['族群', ''], ['年增率', 'yoy'], ['月增率', 'mom'], ['累計年增', 'cumYoy'], ['月營收(億)', 'revYi'], ['收盤', 'close'], ['成交量(張)', 'volume'], ['公布日', 'announce']];
+  const th = cols.map(([label, key]) => '<th' + (key ? ' data-rv-sort="' + key + '"' : '') + '>' + label + (key && key === rvState.sortKey ? (rvState.sortDir < 0 ? ' ▼' : ' ▲') : '') + '</th>').join('');
+  let n = 0;
+  const body = [];
+  for (const o of rows){
+    if (n >= limit) break;
+    if (o.header){ body.push('<tr><td colspan="10" style="text-align:left;background:var(--panel-2);font-weight:700">' + rdEsc(o.header) + ' <small style="display:inline">' + o.n + ' 檔・年增中位 ' + rvPct(o.median, 1) + '</small></td></tr>'); continue; }
+    n += 1;
+    body.push('<tr><td>' + n + '</td><td><button type="button" class="jl-stk" data-rv-code="' + rdEsc(o.code) + '" title="' + rdEsc(rvTitle(o)) + '"><span class="jl-code">' + rdEsc(o.code) + '</span> <b>' + rdEsc(o.name) + '</b> <small>' + rdEsc(o.market) + '</small></button></td>'
+      + '<td>' + (o.groups[0] ? '<span class="rv-gtag">' + rdEsc(o.groups[0]) + '</span>' : '—') + '</td>'
+      + '<td class="' + rvCls(o.yoy) + '">' + rvPct(o.yoy, 2) + '</td><td class="' + rvCls(o.mom) + '">' + rvPct(o.mom, 2) + '</td><td class="' + rvCls(o.cumYoy) + '">' + rvPct(o.cumYoy, 2) + '</td>'
+      + '<td>' + (o.revYi == null ? '—' : o.revYi >= 100 ? Math.round(o.revYi).toLocaleString() : o.revYi.toFixed(2)) + '</td>'
+      + '<td>' + (o.close == null ? '—' : o.close) + '</td><td>' + (o.volume == null ? '—' : Number(o.volume).toLocaleString()) + '</td>'
+      + '<td>' + (o.announce ? rvMd(o.announce) + (o.known ? '' : '前') : '—') + '</td></tr>');
+  }
+  const tabs = [['pos', '年增為正'], ['all', '全部已公布'], ['grp', '族群檢視']];
+  return '<div class="rv-sec" id="rvTableSec"><div class="rv-ctl">月份 ' + rvMonthButtons() + '</div>'
+    + '<div class="rv-ctl"><span class="rv-tabs">' + tabs.map(([k, label]) => '<button type="button" data-rv-tab="' + k + '" class="' + (rvState.tab === k ? 'active' : '') + '">' + label + '</button>').join('') + '</span>'
+    + ' 市場 ' + rvSelect('market', [['all', '全部'], ['上市', '上市'], ['上櫃', '上櫃']], rvState.market)
+    + ' 族群 ' + rvSelect('group', [['all', '全部']].concat(GROUPS.map((g) => [g.name, g.name])), rvState.group)
+    + ' 搜尋 <input id="rvSearch" data-rv-set="search" placeholder="股號 / 名稱" value="' + rdEsc(rvState.search) + '">'
+    + ' 顯示 ' + rvSelect('show', [[50, '50'], [100, '100'], [200, '200'], [0, '全部']], rvState.show) + '</div>'
+    + '<div class="rv-note" style="text-align:right">符合 ' + total.toLocaleString() + ' 檔' + (total > n ? '，顯示前 ' + n : '') + '</div>'
+    + '<div class="rv-scroll"><table class="rv-table rv-full"><tr>' + th + '</tr>' + body.join('') + '</table></div>'
+    + '<div class="rv-note">怎麼看：年增率 = 當月營收 vs 去年同月；月增率 = vs 上月；累計年增 = 今年至今 vs 去年同期。營建、生技授權、一次性訂單等「認列型」產業單月數字起伏大，請搭配累計年增看。月營收單位為新台幣億元（官方千元 ÷ 100,000）。'
+    + (d.month ? '' : '') + '</div></div>';
+}
+function rvMonthButtons(){
+  const d = rvState.data;
+  return (d.months || []).slice(0, 6).map((m) => '<button type="button" class="rv-mbtn' + (m === d.month ? ' active' : '') + '" data-rv-month="' + m + '">' + rvMonthLabel(m) + ' 營收</button>').join(' ');
+}
+function rvQueryHtml(){
+  const q = rvState.query;
+  if (rvState.queryLoading) return '<div class="rv-note">查詢中…</div>';
+  if (!q) return '';
+  if (q.status === 'error') return '<div class="rv-note">查詢失敗（' + rdEsc(q.message || '') + '），請稍後再試。</div>';
+  if (q.status !== 'ok') return '<div class="rv-note">查無「' + rdEsc(rvState.queryCode) + '」的營收紀錄——收錄上市、上櫃公司（含 KY），興櫃不收。</div>';
+  const groups = RV_GROUP_INDEX[q.code] || [];
+  return '<div class="rv-qcard"><div class="jl-card-h"><b>' + rdEsc(q.name) + '</b> <small>' + rdEsc(q.code) + '・' + rdEsc(q.market) + (q.industry ? '・' + rdEsc(q.industry) : '') + '</small>'
+    + groups.map((g) => '<span class="rv-gtag">' + rdEsc(g) + '</span>').join('')
+    + (q.close != null ? ' <small>收盤 ' + q.close + '</small>' : '') + '<button type="button" class="jl-chart" data-rv-chart="' + rdEsc(q.code) + '" data-rv-name="' + rdEsc(q.name) + '">K線圖</button></div>'
+    + '<div class="rv-scroll"><table class="rv-table"><tr><th>營收月份</th><th>年增率</th><th>比上月年增</th><th>月增率</th><th>累計年增</th><th>月營收(億)</th><th>公布日</th><th>公布隔日</th></tr>'
+    + q.months.map((m) => '<tr><td>' + rvMonthLabel(m.month) + '</td><td class="' + rvCls(m.yoy) + '">' + rvPct(m.yoy, 2) + '</td>'
+      + '<td>' + (m.accel == null ? '—' : (m.accel >= 10 ? '🚀 ' : m.accel <= -10 ? '🐢 ' : '') + (m.accel > 0 ? '+' : '') + m.accel.toFixed(1) + ' 點') + '</td>'
+      + '<td class="' + rvCls(m.mom) + '">' + rvPct(m.mom, 2) + '</td><td class="' + rvCls(m.cumYoy) + '">' + rvPct(m.cumYoy, 2) + '</td><td>' + (m.revYi == null ? '—' : m.revYi) + '</td>'
+      + '<td>' + (m.announce ? rvMd(m.announce) + (m.known ? '' : ' 前') : '—') + '</td><td class="' + rvCls(m.next) + '">' + (m.next != null ? rvPct(m.next, 2) : '—') + '</td></tr>').join('')
+    + '</table></div>' + (q.months[0] && q.months[0].note ? '<div class="rv-note">備註：' + rdEsc(q.months[0].note) + '</div>' : '') + '</div>';
+}
+function rvRenderQuery(){
+  const el = document.getElementById('rvResult');
+  if (el) el.innerHTML = rvQueryHtml();
+}
+function renderRevenue(){
+  const body = document.getElementById('revBody');
+  const d = rvState.data;
+  if (!d){
+    body.innerHTML = '<div class="rv-note">' + (rvState.error ? '讀取失敗（' + rdEsc(rvState.error) + '），請稍後再試。' : '讀取中…') + '</div>';
+    return;
+  }
+  if (d.status !== 'ok'){
+    body.innerHTML = '<div class="rv-note">' + rdEsc(d.message || '營收資料還在抓，晚一點再看') + '</div>';
+    return;
+  }
+  rvRows();
+  const scrollTop = document.getElementById('revInner').scrollTop;
+  const c = d.counts || {};
+  const pub = d.published || {};
+  const pubText = pub.sii0 || pub.otc0 || Object.values(pub)[0] || '';
+  const m = d.month;
+  const head = '<div class="rv-top"><span class="chips-title" style="font-size:22px">📈 每月營收成長榜</span><span class="rv-month">' + m.slice(0, 4) + ' 年 ' + Number(m.slice(5, 7)) + ' 月營收（隔月 1~10 號陸續公布）</span></div>'
+    + '<div class="rv-meta">已公布 <b>' + (c.published || 0).toLocaleString() + '</b> 檔（上市 ' + (c.tse || 0) + ' / 上櫃 ' + (c.otc || 0) + '）・年增為正 <b>' + (c.positive || 0).toLocaleString() + '</b> 檔'
+    + '・最後更新 ' + rdEsc(jlTime(d.fetched || d.updatedAt)) + (pubText ? '・觀測站出表 ' + rdEsc(pubText) : '')
+    + (rvState.loading ? '・更新中…' : '') + '</div><div class="rv-months">' + rvMonthButtons() + '</div>'
+    + (rvState.error ? '<div class="race-note">更新失敗（' + rdEsc(rvState.error) + '），先顯示上一次的資料</div>' : '');
+  const query = '<div class="rv-sec"><div class="rv-h">🔎 查個股營收 <small>每個月的年增、月增、累計年增、公布日、公布隔日漲跌</small></div>'
+    + '<div class="jl-q"><input id="rvQ" inputmode="numeric" placeholder="股號，例 2451" value="' + rdEsc(rvState.queryCode) + '"><button type="button" data-rv-go>查詢</button></div>'
+    + '<div id="rvResult">' + rvQueryHtml() + '</div></div>';
+  const groups = rvIndustryGroups();
+  const shown = rvState.topN ? groups.slice(0, rvState.topN) : groups;
+  const w = rvWatchGroups();
+  const foot = '<div class="rv-foot">資料來源：公開資訊觀測站「每月營業收入彙總表」（上市、上櫃，含 KY），每天三次（12:30／18:30／23:30）更新；年增 / 月增 / 累計年增照官方公布數字。'
+    + '公布日為我們第一次抓到該公司資料的日期（2026/09 營收從 10/09 開始記，之前就公布的標「前」）；收盤與成交量為證交所 / 櫃買開放資料。本頁整理公開資訊供參考，<b>不構成任何投資建議</b>，投資有風險，盈虧自負。</div>';
+  body.innerHTML = head + query + rvIndustryHtml(groups) + rvWatchHtml(w) + rvRocketHtml(shown, w) + rvBoardHtml() + rvTableHtml() + foot;
+  document.getElementById('revInner').scrollTop = scrollTop;
+}
+function rvRenderTable(){
+  const sec = document.getElementById('rvTableSec');
+  if (!sec) return renderRevenue();
+  const focus = document.activeElement && document.activeElement.id === 'rvSearch';
+  const caret = focus ? document.activeElement.selectionStart : 0;
+  sec.outerHTML = rvTableHtml();
+  if (focus){ const el = document.getElementById('rvSearch'); el.focus(); el.setSelectionRange(caret, caret); }
+}
+function openRevenuePanel(){
+  document.getElementById('revModal').hidden = false;
+  renderRevenue();
+  rvLoad(rvState.data && rvState.data.month);
+}
+function closeRevenuePanel(){ document.getElementById('revModal').hidden = true; }
+document.getElementById('revClose').addEventListener('click', closeRevenuePanel);
+document.getElementById('revModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeRevenuePanel(); });
+document.getElementById('revBody').addEventListener('click', (e) => {
+  const t = e.target;
+  const chart = t.closest('[data-rv-chart]');
+  if (chart){ openStockChart(chart.dataset.rvChart, chart.dataset.rvName); return; }
+  const month = t.closest('[data-rv-month]');
+  if (month){ rvState.boardDay = null; rvLoad(month.dataset.rvMonth); return; }
+  if (t.closest('[data-rv-go]')){ rvQuery((document.getElementById('rvQ') || {}).value); return; }
+  if (t.closest('[data-rv-fold]')){ rvState.rtOpen = !rvState.rtOpen; renderRevenue(); return; }
+  const open = t.closest('[data-rv-open]');
+  if (open){ const k = open.dataset.rvOpen; rvState.open[k] = !rvState.open[k]; renderRevenue(); return; }
+  const expand = t.closest('[data-rv-expand]');
+  if (expand){ const k = expand.dataset.rvExpand; rvState.expand[k] = !rvState.expand[k]; rvState.open = {}; renderRevenue(); return; }
+  const tab = t.closest('[data-rv-tab]');
+  if (tab){ rvState.tab = tab.dataset.rvTab; rvRenderTable(); return; }
+  const sort = t.closest('[data-rv-sort]');
+  if (sort){
+    const k = sort.dataset.rvSort;
+    if (rvState.sortKey === k) rvState.sortDir = -rvState.sortDir; else { rvState.sortKey = k; rvState.sortDir = k === 'code' ? 1 : -1; }
+    rvRenderTable();
+    return;
+  }
+  if (t.closest('[data-rv-copy]')){
+    const area = document.getElementById('rvCopyText');
+    const btn = t.closest('[data-rv-copy]');
+    if (!area) return;
+    area.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (err){ ok = false; }
+    if (navigator.clipboard){ navigator.clipboard.writeText(area.value).catch(() => {}); ok = true; }
+    btn.textContent = ok ? '已複製 ✓' : '請手動選取';
+    setTimeout(() => { btn.textContent = '複製名單'; }, 1800);
+    return;
+  }
+  const stk = t.closest('[data-rv-code]');
+  if (stk && !t.closest('select')){ rvQuery(stk.dataset.rvCode); }
+});
+document.getElementById('revBody').addEventListener('change', (e) => {
+  const el = e.target.closest('[data-rv-set]');
+  if (!el || el.tagName !== 'SELECT') return;
+  const key = el.dataset.rvSet;
+  const numeric = ['minN', 'topN', 'boardMin', 'boardVol', 'show'];
+  rvState[key] = numeric.includes(key) ? Number(el.value) : el.value;
+  if (['market', 'group', 'show'].includes(key)) rvRenderTable(); else renderRevenue();
+});
+document.getElementById('revBody').addEventListener('input', (e) => {
+  if (e.target.id !== 'rvSearch') return;
+  rvState.search = e.target.value;
+  rvRenderTable();
+});
+document.getElementById('revBody').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'rvQ') rvQuery(e.target.value);
+});
+setInterval(() => {
+  // 面板開著就每 10 分鐘問一次（彙總表每天抓三次）
+  if (document.getElementById('revModal').hidden || document.visibilityState === 'hidden') return;
+  rvLoad(rvState.data && rvState.data.month);
+}, 600000);
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '自選股'){ openWatchPanel(); return; }        // 2026-10-05 使用者：自選股
     if (btn.dataset.label === '飆股雷達'){ openGrailPanel(); return; }     // 2026-10-07 使用者：照莊爸 App 的飆股雷達
     if (btn.dataset.label === '處置監獄'){ openJailPanel(); return; }     // 2026-10-09 使用者：照莊爸處置監獄頁
+    if (btn.dataset.label === '營收成長榜'){ openRevenuePanel(); return; }  // 2026-10-09 使用者：照莊爸每月營收成長榜
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '下午報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」
