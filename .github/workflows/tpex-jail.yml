@@ -1,0 +1,77 @@
+# 上櫃「注意股／處置股」公告鏡像（處置監獄頁，2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」做）。
+# 櫃買中心擋 HanStock 的正式站主機（Railway），GitHub 的 runner 抓得到：每個交易日晚上公告出來後（約 18:00），
+# 把最近 150 天的「公布注意有價證券」與「處置有價證券」整份抓下來，推到 data 分支 tpex/jail-attention.json、
+# tpex/jail-disposal.json（櫃買原始欄位照存），再戳後端立刻拉回去。上市的直接由後端抓證交所，不走這裡。
+name: TPEx jail mirror
+
+on:
+  schedule:
+    - cron: "15 10 * * 1-5"   # 18:15 台北
+    - cron: "50 10 * * 1-5"   # 18:50
+    - cron: "40 11 * * 1-5"   # 19:40（晚公告的補抓）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tpex-data-branch
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data
+      - name: 抓櫃買注意股／處置股（最近 150 天）
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.request
+          from datetime import date, timedelta, datetime, timezone
+          tw = timezone(timedelta(hours=8))
+          today = datetime.now(tw).date()
+          start = today - timedelta(days=150)
+          headers = {'Accept': 'application/json', 'Accept-Language': 'zh-TW,zh;q=0.9',
+                     'User-Agent': 'Mozilla/5.0 (compatible; HanStock-mirror/1.0)', 'Referer': 'https://www.tpex.org.tw/'}
+          def fetch(kind, a, b):
+              url = f"https://www.tpex.org.tw/www/zh-tw/bulletin/{kind}?startDate={a:%Y/%m/%d}&endDate={b:%Y/%m/%d}&response=json"
+              for attempt in range(4):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=90) as r:
+                          return json.load(r)
+                  except Exception as e:
+                      print('retry', kind, a, b, type(e).__name__, e)
+                      time.sleep(5 * (attempt + 1))
+              raise RuntimeError(url)
+          os.makedirs('tpex', exist_ok=True)
+          # 處置的查詢是照「處置期間」篩，今天公告、下一個交易日才生效的要把迄日往後拉 30 天才查得到
+          for kind, name, until in (('attention', 'jail-attention.json', today), ('disposal', 'jail-disposal.json', today + timedelta(days=30))):
+              fields, rows = None, []
+              a = start
+              while a <= until:   # 一次查 30 天，避免單次回應太大被截斷
+                  b = min(until, a + timedelta(days=29))
+                  table = (fetch(kind, a, b).get('tables') or [{}])[0]
+                  fields = fields or table.get('fields')
+                  rows.extend(table.get('data') or [])
+                  a = b + timedelta(days=1)
+                  time.sleep(1.5)
+              assert fields and rows, f'{kind}: fields={fields} rows={len(rows)}'
+              out = {'kind': kind, 'updated': datetime.now(tw).isoformat(timespec='seconds'),
+                     'start': start.isoformat(), 'end': until.isoformat(), 'fields': fields, 'data': rows}
+              json.dump(out, open('tpex/' + name, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+              print(kind, 'rows', len(rows), 'fields', fields)
+          PY
+      - name: 推到 data 分支
+        run: |
+          git config user.name "tpex-mirror"
+          git config user.email "tpex-mirror@users.noreply.github.com"
+          git add tpex/jail-attention.json tpex/jail-disposal.json
+          git commit -m "上櫃注意股／處置股鏡像 $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "沒有變動"; exit 0; }
+          for i in 1 2 3 4; do git pull --rebase origin data && git push && break; sleep $((i * 5)); done
+      - name: 戳後端立刻拉回去
+        run: |
+          curl -sS -X POST --max-time 170 "https://hanstock-production-b872.up.railway.app/api/hub/jail/collect" -o /tmp/jail.json -w "HTTP %{http_code}\n" || true
+          head -c 2000 /tmp/jail.json; echo
