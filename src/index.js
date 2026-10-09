@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-08 12:16:33";
+const BUILD_STAMP = "2026-10-09 11:50:39";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -809,6 +809,78 @@ const HTML_PAGE = `<!DOCTYPE html>
   .gr-none{font-size:12px;color:var(--muted);padding:4px 2px;}
   .gr-up{color:var(--up);} .gr-down{color:var(--down);}
   @media(max-width:640px){ .gr-grid{grid-template-columns:1fr;} .gr-list .gr-mcap{display:none;} }
+  /* 處置監獄（2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」做）：說明框、出獄週表、犯罪集團、入獄／嫌疑卡片、門檻、前科查詢 */
+  .jl-meta{font-size:12px;color:var(--muted);margin:2px 0 6px;}
+  .jl-pill{display:inline-block;font-size:12px;border:1px solid var(--line);background:var(--panel-2);border-radius:999px;padding:3px 10px;margin-bottom:8px;color:var(--muted);}
+  .jl-box{background:var(--panel);border:1px solid var(--line);border-left:4px solid #b91c1c;border-radius:6px;padding:8px 12px;margin:6px 0;font-size:13px;line-height:1.7;}
+  .jl-box b{color:#dc2626;}
+  .jl-faq-q{display:inline;margin-right:4px;}
+  .jl-h{font-size:18px;font-weight:800;margin:18px 0 6px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;}
+  .jl-h small{font-size:12px;font-weight:400;color:var(--muted);}
+  .jl-note{font-size:12px;color:var(--muted);margin:4px 0;}
+  .jl-q{display:flex;gap:8px;margin:8px 0;}
+  .jl-q input{flex:0 1 260px;min-width:0;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:15px;font-family:inherit;}
+  .jl-q button{background:#b91c1c;color:#fff;border:0;border-radius:10px;padding:8px 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+  .jl-week{border:1px solid var(--line);border-radius:10px;padding:8px;margin:6px 0;background:var(--panel);}
+  .jl-week-h{font-weight:800;color:#dc2626;margin:0 0 6px;}
+  .jl-week-h small{font-weight:400;color:var(--muted);margin-left:6px;}
+  .jl-days{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;}
+  .jl-day{border:1px solid var(--line);border-radius:10px;padding:6px 8px;min-height:64px;background:var(--panel-2);}
+  .jl-day.past{opacity:.75;}
+  .jl-day-h{font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:4px;}
+  .jl-day-h small{color:var(--muted);font-weight:400;}
+  .jl-cnt{margin-left:auto;border:1px solid #dc2626;color:#dc2626;border-radius:999px;font-size:11px;padding:0 6px;font-weight:700;}
+  .jl-cnt.big{font-size:12px;padding:1px 8px;}
+  .jl-closed{color:#3b82f6;font-size:12px;}
+  .jl-empty{color:var(--muted);}
+  .jl-stk{background:none;border:0;padding:1px 0;color:var(--text);font-family:inherit;font-size:13px;cursor:pointer;text-align:left;}
+  .jl-stk:hover{text-decoration:underline;}
+  .jl-code{color:#dc2626;font-variant-numeric:tabular-nums;}
+  .jl-stk small{color:var(--muted);}
+  .jl-newtag{font-size:10px;border:1px solid #dc2626;color:#dc2626;border-radius:4px;padding:0 3px;margin-left:4px;}
+  .jl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;}
+  .jl-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0;}
+  .jl-card-h{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-bottom:4px;}
+  .jl-card-h > b{font-size:15px;}
+  .jl-card-h .jl-stk{font-size:15px;font-weight:700;}
+  .jl-row{display:flex;align-items:center;gap:6px;border-top:1px solid var(--line);padding:3px 0;}
+  .jl-rel{margin-left:auto;font-size:12px;color:var(--muted);}
+  .jl-badge{margin-left:auto;font-size:12px;border-radius:999px;padding:1px 9px;border:1px solid var(--line);white-space:nowrap;}
+  .jl-badge.jail{border-color:#dc2626;color:#dc2626;}
+  .jl-badge.hi{border-color:#dc2626;color:#dc2626;background:rgba(220,38,38,.08);}
+  .jl-badge.lo{border-color:#16a34a;color:#16a34a;background:rgba(22,163,74,.08);}
+  .jl-badge.first{border-color:#b45309;color:#b45309;}
+  .jl-sub{font-size:12px;color:var(--muted);}
+  .jl-why{font-size:11px;color:var(--muted);margin-top:2px;}
+  .jl-status{font-size:13px;margin:2px 0 4px;}
+  .jl-th{border-top:1px dashed var(--line);padding-top:4px;}
+  .jl-th-h{font-size:12px;color:var(--muted);margin-bottom:2px;}
+  .jl-line{font-size:13px;line-height:1.6;}
+  .jl-line b{color:#dc2626;font-size:14px;}
+  .jl-line.note{color:var(--muted);font-size:12px;}
+  .jl-today{color:var(--muted);font-size:12px;}
+  .jl-today.ok{color:#16a34a;}
+  .jl-copy{border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0;background:var(--panel);}
+  .jl-copy-h{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px;}
+  .jl-copy-h button{margin-left:auto;border:1px solid #dc2626;color:#dc2626;background:none;border-radius:999px;padding:2px 12px;cursor:pointer;font-family:inherit;}
+  .jl-copy textarea{width:100%;box-sizing:border-box;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-family:inherit;font-size:13px;line-height:1.6;}
+  .jl-index{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--panel);}
+  .jl-index summary{cursor:pointer;color:#dc2626;font-size:13px;}
+  .jl-index-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:2px 8px;margin-top:6px;}
+  .jl-qcard{margin:6px 0;}
+  .jl-tier{font-size:12px;border-radius:999px;padding:1px 8px;border:1px solid var(--line);}
+  .jl-tier.boss{border-color:#b45309;color:#b45309;} .jl-tier.prior{border-color:#dc2626;color:#dc2626;} .jl-tier.new{border-color:#16a34a;color:#16a34a;}
+  .jl-chart{margin-left:auto;font-size:12px;border:1px solid var(--line);background:none;color:var(--text);border-radius:8px;padding:1px 8px;cursor:pointer;font-family:inherit;}
+  .jl-sec-t{font-size:12px;font-weight:700;margin:8px 0 2px;}
+  .jl-verdict{font-size:14px;font-weight:700;}
+  .jl-verdict.hi,.jl-verdict.jail{color:#dc2626;} .jl-verdict.lo{color:#16a34a;} .jl-verdict.ok{color:var(--muted);font-weight:400;}
+  .jl-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .jl-table th{color:var(--muted);font-weight:400;text-align:left;padding:2px 4px;}
+  .jl-table td{border-top:1px solid var(--line);padding:3px 4px;vertical-align:top;}
+  .jl-att{display:flex;flex-wrap:wrap;gap:4px;}
+  .jl-att span{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:1px 6px;background:var(--panel-2);}
+  .jl-foot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:8px;line-height:1.6;}
+  @media(max-width:640px){ .jl-days{grid-template-columns:repeat(2,minmax(0,1fr));} .jl-grid{grid-template-columns:1fr;} .jl-table th:nth-child(4),.jl-table td:nth-child(4){display:none;} }
   /* 創高黑選股（2026-10-04 使用者：照莊爸 App「創高黑」做選股程式，跟創高黑龍分開放）：流程列、帳戶卡、持股／觀察／要做清單、模組設定 */
   .pk-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 10px;}
   .pk-step{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer;color:var(--text);font-family:inherit;}
@@ -1412,6 +1484,19 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div id="grailBody"></div>
   </div>
 </div>
+<!-- 2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」zhuang.tw/prison 做一模一樣的（下方導覽列「處置監獄」），資料用證交所／櫃買公開公告 -->
+<div class="chips-modal" id="jailModal" hidden>
+  <div class="chips-inner" id="jailInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">處置股・出獄與嫌疑名單</div>
+        <div class="chips-sub">處置監獄：每日出獄時間表、犯罪集團、今日入獄、嫌疑名單（明天門檻）、個股前科查詢。點股票看前科，卡片裡可開K線圖。</div>
+      </div>
+      <button class="cm-icon-btn" id="jailClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="jailBody"></div>
+  </div>
+</div>
 <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式（下方導覽列「創高黑選股」），跟創高黑龍分開放 -->
 <div class="chips-modal" id="pickerModal" hidden>
   <div class="chips-inner" id="pickerInner">
@@ -1537,6 +1622,7 @@ const HTML_PAGE = `<!DOCTYPE html>
 <div class="toolbar-bottom" id="toolbarBottom">
   <button class="tb-btn" data-label="自選股"><span class="tb-icon">★</span>自選股</button>
   <button class="tb-btn" data-label="飆股雷達"><span class="tb-icon">雷</span>飆股雷達</button>  <!-- 2026-10-07 使用者：照莊爸 App 的飆股雷達做 -->
+  <button class="tb-btn" data-label="處置監獄"><span class="tb-icon">獄</span>處置監獄</button>  <!-- 2026-10-09 使用者：照莊爸處置監獄頁做 -->
   <!-- 2026-09-26 使用者：下方導覽列的「三角收斂」「隔日沖大單籌碼」不用再留著（本來就是開發中的空位）；2026-09-28 再拿掉「個股研究中心」；
        2026-10-05 再拿掉「每週籌碼分析」（開發中的空位）。「個股訊號追蹤」拿掉後使用者又要加回來，要放自選股的今日訊號與提醒。 -->
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
@@ -8167,7 +8253,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-08 12:16:33';
+const BUILD_STAMP = '2026-10-09 11:50:39';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -9854,10 +9940,210 @@ setInterval(() => {
   if (day < 1 || day > 5 || minutes < 8 * 60 + 30 || minutes > 18 * 60 + 30) return;
   grLoad(false);
 }, 90000);
+// ---- 處置監獄（2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」zhuang.tw/prison 做一模一樣的）----
+// 後端 /api/jail：證交所／櫃買公開的注意股、處置股公告（上市直抓、上櫃走鏡像），每天晚上公告出來後更新。
+// 段落照莊爸頁面的順序：前科查詢、一週出獄時間表、犯罪集團、今日入獄、嫌疑名單（明天門檻＋可複製文字）、今日第一次第一款、
+// 前科索引、常見問題。前科查詢不限次數（/api/jail-stock）。
+const jlState = { data: null, loading: false, error: null, query: null, queryCode: '', queryLoading: false };
+async function jlLoad(){
+  if (jlState.loading) return;
+  jlState.loading = true;
+  if (!document.getElementById('jailModal').hidden) renderJail();
+  try {
+    const res = await fetch('/api/jail');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    jlState.data = await res.json();
+    jlState.error = null;
+  } catch (e){
+    jlState.error = e.message || String(e);
+  } finally {
+    jlState.loading = false;
+    if (!document.getElementById('jailModal').hidden) renderJail();
+  }
+}
+async function jlQuery(code){
+  code = String(code || '').replace(/[^0-9A-Za-z]/g, '');
+  jlState.queryCode = code;
+  if (!code){ jlState.query = null; renderJailQuery(); return; }
+  jlState.queryLoading = true;
+  renderJailQuery();
+  try {
+    const res = await fetch('/api/jail-stock?code=' + encodeURIComponent(code));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    jlState.query = await res.json();
+  } catch (e){
+    jlState.query = { status: 'error', message: e.message || String(e) };
+  } finally {
+    jlState.queryLoading = false;
+    renderJailQuery();
+    const el = document.getElementById('jlResult');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+const jlStock = (code, name, extra) => '<button type="button" class="jl-stk" data-jl-code="' + rdEsc(code) + '" data-jl-name="' + rdEsc(name || '') + '">'
+  + '<span class="jl-code">' + rdEsc(code) + '</span> ' + rdEsc(name || '') + (extra || '') + '</button>';
+const jlMd = (iso) => { const p = String(iso || '').split('-'); return p.length === 3 ? Number(p[1]) + '/' + Number(p[2]) : ''; };
+const jlCardStock = (code, name, market) => '<button type="button" class="jl-stk" data-jl-code="' + rdEsc(code) + '" data-jl-name="' + rdEsc(name || '') + '">'
+  + '<b>' + rdEsc(name || code) + '</b> <small>' + rdEsc(code) + '・' + rdEsc(market || '') + '</small></button>';
+const jlNew = (on) => on ? '<span class="jl-newtag">新</span>' : '';
+const jlClauseText = (list) => (list || []).map((c) => '第' + ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三'][c] + '款').join('、');
+function jlTime(iso){
+  if (!iso) return '—';
+  const m = /^(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2})/.exec(iso);
+  return m ? m[1] + ' ' + m[2] : iso;
+}
+function jlLineHtml(line){
+  if (line.kind === 'note') return '<div class="jl-line note">' + rdEsc(line.text) + '</div>';
+  const today = line.kind === 'volume' && line.today !== undefined
+    ? ' <span class="jl-today' + (line.passed ? ' ok' : '') + '">（今 ' + Number(line.today).toLocaleString() + ' 張' + (line.passed ? ' ✓ 已過' : '') + '）</span>' : '';
+  const text = rdEsc(line.text).replace(/([0-9,]+\\.[0-9]{2}) 元/g, '<b>$1</b> 元').replace(/&gt; ([0-9,]+) 張/g, '&gt; <b>$1</b> 張');
+  return '<div class="jl-line">' + text + today + '</div>';
+}
+function jailQueryHtml(){
+  const q = jlState.query;
+  if (jlState.queryLoading) return '<div class="jl-note">查詢中…</div>';
+  if (!q) return '';
+  if (q.status === 'error') return '<div class="jl-note">查詢失敗（' + rdEsc(q.message || '') + '），請稍後再試。</div>';
+  if (q.status !== 'ok') return '<div class="jl-note">查無「' + rdEsc(jlState.queryCode) + '」的處置／注意紀錄——收錄近半年的注意股、處置股。</div>';
+  const v = q.verdict || {};
+  const verdict = v.kind === 'suspect'
+    ? '<div class="jl-verdict ' + (v.high ? 'hi' : 'lo') + '">' + (v.high ? '🔴 高機率' : '🟢 低機率') + '・' + rdEsc(v.text) + '</div>'
+      + '<div class="jl-th"><div class="jl-th-h">📐 明天（' + rdEsc(q.nextMd) + '）門檻</div>' + (v.lines || []).map(jlLineHtml).join('') + '</div>'
+    : '<div class="jl-verdict ' + (v.kind === 'jailed' ? 'jail' : 'ok') + '">' + rdEsc(v.text || '') + '</div>';
+  const records = (q.records || []).length
+    ? '<table class="jl-table"><tr><th>公布</th><th>處置期間</th><th>出獄</th><th>原因</th><th>措施</th></tr>'
+      + q.records.map((r) => '<tr><td>' + rdEsc((r.announce || '').slice(5)) + '</td><td>' + rdEsc(r.start.slice(5)) + '～' + rdEsc(r.end.slice(5))
+        + (r.days ? '（' + r.days + ' 日' + (r.minutes ? '・' + r.minutes + ' 分盤' : '') + '）' : '') + '</td><td><b>' + rdEsc(r.release.slice(5)) + '</b></td><td>'
+        + rdEsc(r.condition || '') + '</td><td>' + rdEsc(r.measure || '') + '</td></tr>').join('') + '</table>'
+    : '<div class="jl-note">近半年沒有被處置過</div>';
+  const att = (q.attention || []).length
+    ? '<div class="jl-att">' + q.attention.map((a) => '<span title="' + rdEsc(a.info || '') + '"><b>' + rdEsc(a.md) + '</b> ' + rdEsc(jlClauseText(a.clauses)) + '</span>').join('') + '</div>'
+    : '<div class="jl-note">近 30 個交易日沒有注意紀錄</div>';
+  return '<div class="jl-card jl-qcard">'
+    + '<div class="jl-card-h"><b>' + rdEsc(q.name) + '</b> <small>' + rdEsc(q.code) + '・' + rdEsc(q.market) + '</small>'
+    + '<span class="jl-tier ' + rdEsc(q.tier.key) + '">' + q.tier.icon + ' ' + rdEsc(q.tier.label) + '</span>'
+    + '<button type="button" class="jl-chart" data-jl-chart="' + rdEsc(q.code) + '" data-jl-name="' + rdEsc(q.name) + '">K線圖</button></div>'
+    + '<div class="jl-sub">處置前科 ' + q.jailCount + ' 次' + (q.latestClause ? '・最近任款 ' + rdEsc(q.latestClause.md) + ' ' + rdEsc(jlClauseText(q.latestClause.clauses)) : '') + '</div>'
+    + '<div class="jl-sec-t">明天判定</div>' + verdict
+    + '<div class="jl-sec-t">處置紀錄</div>' + records
+    + '<div class="jl-sec-t">近 30 個交易日注意（滑鼠移上去看內容）</div>' + att
+    + '</div>';
+}
+function renderJailQuery(){
+  const el = document.getElementById('jlResult');
+  if (el) el.innerHTML = jailQueryHtml();
+}
+function jailWeeksHtml(d){
+  return d.weeks.map((w) => '<div class="jl-week"><div class="jl-week-h">' + rdEsc(w.label) + ' <small>' + rdEsc(w.range) + '</small></div><div class="jl-days">'
+    + w.days.map((day) => {
+      const n = day.stocks.length;
+      const body = day.closed ? '<div class="jl-closed">休市</div>'
+        : n ? day.stocks.map((s) => '<div>' + jlStock(s.code, s.name, jlNew(s.new)) + '</div>').join('') : '<div class="jl-empty">—</div>';
+      return '<div class="jl-day' + (day.past ? ' past' : '') + '"><div class="jl-day-h">' + rdEsc(day.md) + ' <small>(' + rdEsc(day.weekday) + ')</small>'
+        + (n ? '<span class="jl-cnt">' + n + '</span>' : '') + '</div>' + body + '</div>';
+    }).join('') + '</div></div>').join('');
+}
+function renderJail(){
+  const body = document.getElementById('jailBody');
+  const d = jlState.data;
+  if (!d){
+    body.innerHTML = '<div class="race-note">' + (jlState.error ? '載入失敗（' + rdEsc(jlState.error) + '）' : '載入中…') + '</div>';
+    return;
+  }
+  if (d.status !== 'ok'){
+    body.innerHTML = '<div class="race-note">' + rdEsc(d.message || '處置／注意資料還在抓，晚一點再看') + '</div>';
+    return;
+  }
+  const next = rdEsc(d.nextMd) + '(' + rdEsc(d.nextWeekday) + ')';
+  const marketDates = d.marketDates || {};
+  const lag = marketDates.OTC && marketDates.OTC < d.dataDate ? '<div class="jl-note">上櫃今天的公告還沒進來（櫃買資料 ' + rdEsc(marketDates.OTC) + '），上櫃的嫌疑名單晚一點才會出現。</div>' : '';
+  const head = '<div class="jl-meta">資料快照 ' + rdEsc(d.dataDate) + '・本頁更新於 ' + rdEsc(jlTime(d.updatedAt)) + '｜來源：證交所 / 櫃買中心 公開處置公告</div>'
+    + '<div class="jl-pill">🕐 每日更新 —— 處置、出獄日皆為證交所 / 櫃買公開公告；本頁每天晚上公告出來後更新，不是即時報價。</div>'
+    + '<div class="jl-box"><b>什麼是處置？</b>一檔股票短期漲跌太兇 / 週轉太高，證交所會列「注意」；累積多次就「<b>處置</b>」—— 改成<b>分盤集合競價</b>讓它冷靜。<br>'
+    + '<b>2026/8/10 新制</b>：撮合由舊制每 5 / 20 分鐘加快到<b>約每 2 分鐘一次</b>，處置期間也由 10 個營業日縮短為 <b>5 個營業日</b>（當沖比重過高加重為 7 日），期滿次一交易日「<b>出獄</b>」恢復正常。</div>';
+  const query = '<div class="jl-h">🔎 個股前科查詢 <small>打股號 → 看它的處置前科・最近任款・明天判定</small></div>'
+    + '<div class="jl-box">收錄今日<b>在關 + 嫌疑 + 入獄 + 近 90 日有前科</b>的股（共 <b>' + d.index.length + '</b> 檔）；等級分 🆕 新嫌 → 🔒 前科犯 → 👑 老大級慣犯（被關越多次越上去）。明天判定用<b>公開收盤價</b>依證交所 / 櫃買規則推算，<b>非即時報價、非選股建議</b>。</div>'
+    + '<div class="jl-q"><input id="jlQ" inputmode="numeric" placeholder="輸入股號，例 3026" value="' + rdEsc(jlState.queryCode) + '"><button type="button" data-jl-go>查前科</button></div>'
+    + '<div id="jlResult">' + jailQueryHtml() + '</div>';
+  const weeks = '<div class="jl-h">🗓 一週出獄時間表 <small>處置期滿・恢復正常交易的日子（共 ' + d.pendingCount + ' 檔待出獄）</small></div>' + jailWeeksHtml(d);
+  const gangs = '<div class="jl-h">🏴 犯罪集團 <small>同族群 ≥2 檔被關或即將被關 = 資金熱區（標「新」= 今天剛進）</small></div>'
+    + '<div class="jl-box">同一族群<b>同時多檔進處置</b>，常代表市場資金正集中在這個題材；整族一起關、也可能一起出獄。</div>'
+    + (d.gangs.length ? '<div class="jl-grid">' + d.gangs.map((g) => '<div class="jl-card"><div class="jl-card-h"><b>' + rdEsc(g.group) + '</b><span class="jl-cnt big">' + g.stocks.length + ' 檔</span></div>'
+      + g.stocks.map((s) => '<div class="jl-row">' + jlStock(s.code, s.name, jlNew(s.new)) + '<span class="jl-rel">出獄 ' + rdEsc(s.releaseMd) + '</span></div>').join('') + '</div>').join('') + '</div>'
+      : '<div class="jl-note">目前沒有同族群 2 檔以上一起被關</div>');
+  const startDay = d.newJail.length ? d.newJail[0].start : d.nextDay;
+  const newJail = '<div class="jl-h">🔒 今日入獄 <small>' + rdEsc(startDay) + ' 生效・新進處置</small></div>'
+    + '<div class="jl-note">資料日 ' + rdEsc(d.dataDate) + '・抓取 ' + rdEsc(jlTime(d.updatedAt)) + '（證交所 / 櫃買每天晚上公告，本頁跟著更新）</div>'
+    + (d.newJail.length ? '<div class="jl-grid">' + d.newJail.map((j) => '<div class="jl-card"><div class="jl-card-h">' + jlCardStock(j.code, j.name, j.market)
+      + '<span class="jl-badge jail">🔒 入獄</span></div><div class="jl-sub">' + (j.minutes ? j.minutes + ' 分盤' : '分盤') + '（剩 ' + j.daysLeft + ' 天）・' + rdEsc(j.measure || '') + '・' + rdEsc(j.releaseMd) + ' 出獄</div>'
+      + '<div class="jl-why">' + rdEsc(j.condition || '') + '</div></div>').join('') + '</div>'
+      : '<div class="jl-note">今天沒有新進處置</div>');
+  const sc = d.suspectCounts || { high: 0, low: 0 };
+  const suspects = '<div class="jl-h">🔍 嫌疑名單 <small>每天更新・明天(' + next + ')收盤若符合條件 → 會被關（🔴 高機率 ' + sc.high + '・🟢 低機率 ' + sc.low + '）</small></div>'
+    + '<div class="jl-box">依證交所 / 櫃買處置辦法用<b>公開收盤價</b>推算——<b>明天(' + next + ')收盤若再符合條件</b>，這些股高機率會被處置（處置中的會延長）。僅為<b>制度示範與風險提醒</b>，非即時報價、非選股建議。</div>'
+    + (d.suspects.length ? '<div class="jl-grid">' + d.suspects.map((s) => '<div class="jl-card"><div class="jl-card-h">' + jlCardStock(s.code, s.name, s.market)
+      + '<span class="jl-badge ' + (s.high ? 'hi' : 'lo') + '">' + (s.high ? '🔴 高機率' : '🟢 低機率') + '</span></div>'
+      + '<div class="jl-status">' + rdEsc(s.status) + '</div>'
+      + '<div class="jl-th"><div class="jl-th-h">📐 明天門檻</div>' + (s.lines.length ? s.lines.map(jlLineHtml).join('') : '<div class="jl-line note">' + (s.missingBars ? '今天的日K還沒進來，門檻晚一點算' : '明天再被公布一次注意就會' + (s.jailed ? '延長' : '被關')) + '</div>') + '</div></div>').join('') + '</div>'
+      + '<div class="jl-copy"><div class="jl-copy-h">📋 可直接複製貼上 <button type="button" data-jl-copy>複製</button></div><textarea id="jlCopyText" readonly rows="8">' + rdEsc(d.copyText || '') + '</textarea></div>'
+      : '<div class="jl-note">明天沒有一次就會被關的股票</div>');
+  const first = '<div class="jl-h">🆕 今日第一次第一款 <small>10 個營業日內首次觸及第一款（累積會走向處置）</small></div>'
+    + (d.firstTime.length ? '<div class="jl-grid">' + d.firstTime.map((f) => '<div class="jl-card"><div class="jl-card-h">' + jlCardStock(f.code, f.name, f.market)
+      + '<span class="jl-badge first">🆕 第一次</span></div><div class="jl-sub">10日第一次・參考日 ' + rdEsc(jlMd(d.dataDate)) + '</div></div>').join('') + '</div>'
+      : '<div class="jl-note">今天沒有第一次觸及第一款的股票</div>');
+  const index = '<div class="jl-h">📇 個股處置前科索引 <small>近 90 日曾被處置 / 注意的股，點股號看該股處置紀錄與出關日</small></div>'
+    + '<details class="jl-index"><summary>展開全部 ' + d.index.length + ' 檔個股索引</summary><div class="jl-index-grid">'
+    + d.index.map((r) => jlStock(r.code, r.name, r.jailed ? ' 🔒' : (r.tier === 'boss' ? ' 👑' : ''))).join('') + '</div></details>';
+  const faq = '<div class="jl-h">❓ 處置股常見問題 <small>制度面的公開規則整理，非買賣建議</small></div>'
+    + [['處置股會怎樣？', '被列入處置的股票改採分盤集合競價，2026/8/10 新制後約每 2 分鐘撮合一次；委託達一定數量要預收款券，第二次以上處置則全部預收。可以買也可以賣，只是成交變慢、流動性變差。'],
+       ['處置股多久出關？', '2026/8/10 新制後處置期間為 5 個營業日（舊制 10 個營業日；當沖比重過高等情形加重為 7 日），期滿次一營業日恢復正常交易，也就是俗稱的「出關」或「出獄」。本頁每天列出處置中個股的出關日與一週出獄時間表。'],
+       ['處置股票可以賣嗎？', '可以。處置期間仍可買賣，只是改為分盤撮合、成交速度較慢，且可能須預收款券或限制信用交易；以證交所 / 櫃買中心公告與券商規定為準。'],
+       ['怎麼查某檔股票有沒有被處置、什麼時候出關？', '用本頁「個股前科查詢」輸入股號，可看到它目前是否在處置中、過去的處置前科與出關日；資料每天依證交所 / 櫃買中心公開處置公告更新。']]
+      .map(([q, a]) => '<div class="jl-box"><b class="jl-faq-q">' + q + '</b>' + a + '</div>').join('');
+  const foot = '<div class="jl-foot">資料來源：臺灣證券交易所 / 證券櫃檯買賣中心 公開注意、處置公告（每日快照，非即時報價）。本頁整理公開交易制度資訊供教學參考，<b>不構成任何買賣建議</b>；投資有風險，盈虧自負。</div>';
+  body.innerHTML = head + lag + (jlState.error ? '<div class="race-note">更新失敗（' + rdEsc(jlState.error) + '），先顯示上一次的資料</div>' : '')
+    + query + weeks + gangs + newJail + suspects + first + index + faq + foot;
+}
+function openJailPanel(){
+  document.getElementById('jailModal').hidden = false;
+  renderJail();
+  jlLoad();
+}
+function closeJailPanel(){ document.getElementById('jailModal').hidden = true; }
+document.getElementById('jailClose').addEventListener('click', closeJailPanel);
+document.getElementById('jailModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeJailPanel(); });
+document.getElementById('jailBody').addEventListener('click', (e) => {
+  const t = e.target;
+  const chart = t.closest('[data-jl-chart]');
+  if (chart){ openStockChart(chart.dataset.jlChart, chart.dataset.jlName); return; }
+  const stk = t.closest('[data-jl-code]');
+  if (stk){ const input = document.getElementById('jlQ'); if (input) input.value = stk.dataset.jlCode; jlQuery(stk.dataset.jlCode); return; }
+  if (t.closest('[data-jl-go]')){ jlQuery((document.getElementById('jlQ') || {}).value); return; }
+  if (t.closest('[data-jl-copy]')){
+    const area = document.getElementById('jlCopyText');
+    const btn = t.closest('[data-jl-copy]');
+    if (!area) return;
+    area.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (err){ ok = false; }
+    if (navigator.clipboard){ navigator.clipboard.writeText(area.value).catch(() => {}); ok = true; }
+    btn.textContent = ok ? '已複製 ✓' : '請手動選取';
+    setTimeout(() => { btn.textContent = '複製'; }, 1800);
+  }
+});
+document.getElementById('jailBody').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'jlQ') jlQuery(e.target.value);
+});
+setInterval(() => {
+  // 面板開著就每 10 分鐘問一次（公告每天晚上才變，平常不用常抓）
+  if (document.getElementById('jailModal').hidden || document.visibilityState === 'hidden') return;
+  jlLoad();
+}, 600000);
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '自選股'){ openWatchPanel(); return; }        // 2026-10-05 使用者：自選股
     if (btn.dataset.label === '飆股雷達'){ openGrailPanel(); return; }     // 2026-10-07 使用者：照莊爸 App 的飆股雷達
+    if (btn.dataset.label === '處置監獄'){ openJailPanel(); return; }     // 2026-10-09 使用者：照莊爸處置監獄頁
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '下午報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」
@@ -10423,6 +10709,14 @@ export default {
     if (url.pathname === "/api/grail-radar") {
       // 飆股雷達（2026-10-07 使用者：照莊爸 App 的飆股雷達做）：紫殺四個聖杯 15 個邏輯照時間點的名單，30 秒快取
       return await proxyHanstockBars("/api/hub/grail-radar" + url.search, 30);
+    }
+    if (url.pathname === "/api/jail") {
+      // 處置監獄（2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」做）：證交所／櫃買注意、處置公告，2 分鐘快取
+      return await proxyHanstockBars("/api/hub/jail" + url.search, 120);
+    }
+    if (url.pathname === "/api/jail-stock") {
+      // 處置監獄的個股前科查詢，60 秒快取
+      return await proxyHanstockBars("/api/hub/jail/stock" + url.search, 60);
     }
     if (url.pathname === "/api/chip-radar-stock") {
       // 籌碼暴增雷達的個股查詢（九週軌跡、同族群、三大法人），60 秒快取

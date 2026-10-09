@@ -472,6 +472,14 @@ export default {
       // 飆股雷達（2026-10-07 使用者：照莊爸 App 的飆股雷達做）：紫殺四個聖杯 15 個邏輯照時間點的名單，30 秒快取
       return await proxyHanstockBars("/api/hub/grail-radar" + url.search, 30);
     }
+    if (url.pathname === "/api/jail") {
+      // 處置監獄（2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」做）：證交所／櫃買注意、處置公告，2 分鐘快取
+      return await proxyHanstockBars("/api/hub/jail" + url.search, 120);
+    }
+    if (url.pathname === "/api/jail-stock") {
+      // 處置監獄的個股前科查詢，60 秒快取
+      return await proxyHanstockBars("/api/hub/jail/stock" + url.search, 60);
+    }
     if (url.pathname === "/api/chip-radar-stock") {
       // 籌碼暴增雷達的個股查詢（九週軌跡、同族群、三大法人），60 秒快取
       return await proxyHanstockBars("/api/hub/chip-radar/stock" + url.search, 60);
