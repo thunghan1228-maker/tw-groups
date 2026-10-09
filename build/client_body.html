@@ -3116,6 +3116,9 @@ window.addEventListener('message', (e) => {
 
 function openStockChart(code, name, tf){
   if (useFloatingCharts()){ openChartWindow(code, name, tf); return; }
+  // 手機／iPad 直式：從任何面板點進來，面板一律退到K線圖後面、關圖再回來（2026-10-09 使用者：營收成長榜的「K線圖」按了沒出來
+  // ——處置監獄、飆股雷達、營收成長榜沒有自己加 behind-chart，K線圖其實開了但被面板蓋住）
+  document.querySelectorAll('.chips-modal, #signalModal').forEach((el) => el.classList.add('behind-chart'));
   const overlay = document.getElementById('chartModal');
   const wasHidden = overlay.hidden;
   if (currentChart.code !== code) currentChart.dailyBars = null;  // 換股票：漲跌用的日線快取要重抓
@@ -3149,7 +3152,7 @@ function closeStockChart(){
   document.getElementById('chartModal').hidden = true;
   document.body.style.overflow = '';
   // 若是從訊號中心／盤後籌碼排行／下午報／健診／問診點進來的，關圖後讓它們回到最上層。
-  for (const id of ['signalModal', 'chipsModal', 'swingModal', 'heilongModal', 'pickerModal', 'checkupModal', 'diagModal', 'watchModal', 'trackModal']) document.getElementById(id).classList.remove('behind-chart');
+  document.querySelectorAll('.behind-chart').forEach((el) => el.classList.remove('behind-chart'));
 }
 
 let openGroupName = null;
