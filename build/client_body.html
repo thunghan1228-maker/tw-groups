@@ -10286,7 +10286,7 @@ const rvAvgHtml = (st) => st ? '<span class="' + rvCls(st.avg) + '">' + rvPct(st
 function rvDayTag(o){
   const d = rvState.data;
   if (!o.announce) return '';
-  if (!o.known) return '<span class="rv-new">' + rvMd(o.announce) + '前</span>';
+  if (!o.known) return '';   // 公布日不確定（第一次抓就在）：卡片不標，滑鼠提示裡有「前」
   return o.announce === d.latestDay ? '<span class="rv-new">📅' + rvMd(o.announce) + '</span>' : '';
 }
 function rvTitle(o){
@@ -10494,12 +10494,16 @@ function rvRocketHtml(groups, w){
   const rockets = listOf((o) => o.accel);
   const turtles = listOf((o) => o.decel);
   const sumText = (list) => { const st = rvAvg(list.map((o) => o.next)); return list.length + ' 檔・隔日平均 ' + (st ? rvPct(st.avg, 1) + '・' + Math.round(st.up) + '% 上漲（' + st.n + ' 檔有隔日）' : '—（還沒有隔日）'); };
+  const market = sample.length
+    ? '<div class="rv-tables">' + rvStatTable('年增級距', yoyDefs, sample) + rvStatTable('標記', markDefs, sample) + '</div>'
+      + '<div class="rv-note">年增 vs 隔日漲跌 相關係數 r = ' + (r == null ? '—' : r.toFixed(2)) + '（0 = 沒關係、1 = 完全同方向）</div>'
+      + rvScatter(sample, watchSet) + '<div class="rv-gold">' + goldText + '</div>'
+    : '<div class="jl-box">這個月還沒有可以算「隔日」的公司。觀測站沒有每家公司的公布日期，我們從 ' + rdEsc(rvMd(d.baselineDay) || '第一次抓') + ' 起每天三次記錄第一次出現的時間；'
+      + '在那之前就公布的公布日不確定，不列入統計。之後新公布的，隔天收盤後就會出現在這裡（9 月營收最後期限 10/12），下個月起整個月都有。</div>';
   return '<div class="rv-sec">' + head
     + '<div class="rv-h" style="font-size:15px">📊 全市場：' + Number(d.month.slice(5, 7)) + ' 月營收公布 vs 隔日漲跌</div>'
     + '<div class="rv-note">樣本 = 本月已公布、隔天有收盤的 ' + sample.length + ' 檔（全市場，不只自選股）；隔日 = 公布後下一個交易日收盤 vs 公布日收盤。公司可能盤中或盤後公布，這裡一律以「公布那天之後的第一個交易日」算。</div>'
-    + '<div class="rv-tables">' + rvStatTable('年增級距', yoyDefs, sample) + rvStatTable('標記', markDefs, sample) + '</div>'
-    + '<div class="rv-note">年增 vs 隔日漲跌 相關係數 r = ' + (r == null ? '—' : r.toFixed(2)) + '（0 = 沒關係、1 = 完全同方向）</div>'
-    + rvScatter(sample, watchSet) + '<div class="rv-gold">' + goldText + '</div>'
+    + market
     + rvHistoryHtml()
     + '<div class="rv-h" style="font-size:15px;margin-top:14px">🧭 族群分析 × 公布隔日漲跌 <small>族群分析目前列出的 ' + groups.length + ' 族（跟著上面「至少／列幾族」走），每族算已公布的全部成員</small></div>'
     + rvNextTable('g', groups)
