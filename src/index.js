@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-09 13:18:02";
+const BUILD_STAMP = "2026-10-09 13:23:42";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -966,6 +966,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .rv-full td:nth-child(2){text-align:left;}
   .rv-full tr:hover td{background:var(--panel-2);}
   .rv-qcard{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0;background:var(--panel-2);}
+  .rv-qrow{flex-wrap:wrap;align-items:center;}
+  .jl-q .rv-mark{background:var(--panel-2);border:1.5px solid var(--line);color:var(--text);}
+  .jl-q .rv-mark.accel{border-color:#db2777;color:#db2777;} .jl-q .rv-mark.decel{border-color:#16a34a;color:#16a34a;}
+  .jl-q .rv-mark.accel.active{background:#db2777;color:#fff;} .jl-q .rv-mark.decel.active{background:#16a34a;color:#fff;}
   .rv-foot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:8px;line-height:1.6;}
   @media(max-width:760px){
     .rv-grp{grid-template-columns:1fr;}
@@ -8361,7 +8365,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-09 13:18:02';
+const BUILD_STAMP = '2026-10-09 13:23:42';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -10258,7 +10262,10 @@ const RV_GROUP_INDEX = (() => {
 })();
 const rvState = { data: null, loading: false, error: null, query: null, queryCode: '', queryLoading: false,
   minN: 3, topN: 20, day: '', boardDay: null, boardMin: 30, boardVol: 0, tab: 'pos', market: 'all', group: 'all', search: '',
-  show: 100, sortKey: 'yoy', sortDir: -1, rtOpen: true, open: {}, expand: {} };
+  show: 100, sortKey: 'yoy', sortDir: -1, rtOpen: true, open: {}, expand: {}, mark: '' };
+// 2026-10-09 使用者：查詢旁邊加「只看火箭」「只看烏龜」兩顆篩選（族群分析、多觀察、懸賞榜、總表都套用；全市場統計不變）
+const RV_MARK_LABEL = { accel: '🚀 火箭', decel: '🐢 烏龜' };
+const rvMarkOk = (o) => !rvState.mark || !!(o && o[rvState.mark]);
 async function rvLoad(month){
   if (rvState.loading) return;
   rvState.loading = true;
@@ -10402,10 +10409,10 @@ function rvGroupRow(g, i, all){
   let cards;
   if (all){
     const by = rvState.data._byCode;
-    const pub = g.members.filter((s) => by[s.code]).map((s) => by[s.code]).sort((a, b) => (b.yoy == null ? -1e9 : b.yoy) - (a.yoy == null ? -1e9 : a.yoy));
-    cards = pub.map((o) => rvCard(o)).concat(g.members.filter((s) => !by[s.code]).map((s) => rvCard(null, s.code, s.name)));
+    const pub = g.members.filter((s) => by[s.code] && rvMarkOk(by[s.code])).map((s) => by[s.code]).sort((a, b) => (b.yoy == null ? -1e9 : b.yoy) - (a.yoy == null ? -1e9 : a.yoy));
+    cards = pub.map((o) => rvCard(o)).concat(rvState.mark ? [] : g.members.filter((s) => !by[s.code]).map((s) => rvCard(null, s.code, s.name)));
   } else {
-    cards = st.pub.filter((o) => o.yoy != null && o.yoy >= 30 && (!rvState.day || (o.known && o.announce === rvState.day)))
+    cards = st.pub.filter((o) => o.yoy != null && o.yoy >= 30 && rvMarkOk(o) && (!rvState.day || (o.known && o.announce === rvState.day)))
       .sort((a, b) => b.yoy - a.yoy).map((o) => rvCard(o));
   }
   const sub = all
@@ -10416,7 +10423,7 @@ function rvGroupRow(g, i, all){
   const cls = 'rv-grp' + (g.star ? ' star' : i < 3 ? ' r' + (i + 1) : '');
   return '<div class="' + cls + '"><div class="rv-gname"><span class="rv-rank">' + (g.star ? '⭐' : i + 1) + '</span><div><b>' + rdEsc(g.name) + '</b>'
     + '<div class="rv-gsub">' + sub + '</div></div></div>' + rvMedPill(st.median)
-    + '<div class="rv-cards">' + (cards.join('') || '<span class="rv-note">' + (rvState.day ? '這天沒有上榜成員' : '沒有年增 ≥ 30% 的成員') + '</span>') + '</div></div>';
+    + '<div class="rv-cards">' + (cards.join('') || '<span class="rv-note">' + (rvState.mark ? '沒有' + RV_MARK_LABEL[rvState.mark] : rvState.day ? '這天沒有上榜成員' : '沒有年增 ≥ 30% 的成員') + '</span>') + '</div></div>';
 }
 const RV_LEGEND = '<div class="rv-legend">顏色 = 年增：<span class="rv-chip t100">≥100%</span><span class="rv-chip t50">50~100%</span><span class="rv-chip t30">30~50%</span>'
   + '{extra}　🚀／🐢 = 比上月年增加速／放緩 10 點以上・⚠️ 年增或累計為負・隔日 = 公布後下一個交易日的漲跌・📅 = 最新一天公布</div>';
@@ -10433,9 +10440,10 @@ function rvSelect(key, options, cur){
 }
 function rvIndustryHtml(groups){
   const d = rvState.data;
-  const shown = rvState.topN ? groups.slice(0, rvState.topN) : groups;
-  return '<div class="rv-sec"><div class="rv-h">🧭 族群分析 <small>' + rvMonthLabel(d.month) + ' 營收・只看已公布 ≥ ' + rvState.minN + ' 檔的族群（共 ' + groups.length + ' 族，列前 '
-    + shown.length + '）・年增中位由高到低・只列上榜成員（年增 ≥ 30%）</small></div>'
+  const list = rvState.mark ? groups.filter((g) => g.st.pub.some((o) => o.yoy != null && o.yoy >= 30 && rvMarkOk(o) && (!rvState.day || (o.known && o.announce === rvState.day)))) : groups;
+  const shown = rvState.topN ? list.slice(0, rvState.topN) : list;
+  return '<div class="rv-sec"><div class="rv-h">🧭 族群分析 <small>' + rvMonthLabel(d.month) + ' 營收・只看已公布 ≥ ' + rvState.minN + ' 檔的族群（共 ' + list.length + ' 族，列前 '
+    + shown.length + '）・年增中位由高到低・只列上榜成員（年增 ≥ 30%）' + (rvState.mark ? '・<b>只看' + RV_MARK_LABEL[rvState.mark] + '</b>' : '') + '</small></div>'
     + '<div class="rv-ctl">至少 ' + rvSelect('minN', [[1, '1 檔'], [2, '2 檔'], [3, '3 檔'], [5, '5 檔']], rvState.minN)
     + ' 列 ' + rvSelect('topN', [[10, '10 族'], [20, '20 族'], [30, '30 族'], [0, '全部']], rvState.topN)
     + ' <select data-rv-set="day">' + rvDayOptions(rvState.day, '📅 全部公布日') + '</select></div>'
@@ -10448,9 +10456,10 @@ function rvWatchHtml(w){
     return '<div class="rv-sec"><div class="rv-h">⭐ 多觀察分析 <small>自選股・' + rvMonthLabel(d.month) + ' 營收</small></div>'
       + '<div class="rv-note">還沒有自選股——在下方「自選股」加入股票後，這裡會照族群整理它們這個月的營收（好壞都標）。</div></div>';
   }
+  const list = rvState.mark ? w.list.filter((g) => g.st.pub.some(rvMarkOk)) : w.list;
   return '<div class="rv-sec"><div class="rv-h">⭐ 多觀察分析 <small>自選股・' + rvMonthLabel(d.month) + ' 營收・已公布 ' + w.published + ' / ' + w.codes.length
-    + ' 檔・有族群的照年增中位排序；族群外的殿後・好壞都標</small></div>' + legend
-    + w.list.map((g, i) => rvGroupRow(g, i, true)).join('') + '</div>';
+    + ' 檔・有族群的照年增中位排序；族群外的殿後・好壞都標' + (rvState.mark ? '・<b>只看' + RV_MARK_LABEL[rvState.mark] + '</b>' : '') + '</small></div>' + legend
+    + (list.map((g, i) => rvGroupRow(g, i, true)).join('') || '<div class="rv-note">自選股裡沒有' + RV_MARK_LABEL[rvState.mark] + '。</div>') + '</div>';
 }
 function rvCorr(points){
   if (points.length < 3) return null;
@@ -10570,14 +10579,15 @@ function rvRocketHtml(groups, w){
     + '<details class="mint"><summary>🐢 烏龜 完整清單：' + sumText(turtles) + '</summary>' + turtles.map((o) => rvListItem(o, watchSet)).join('') + '</details></div></div>';
 }
 function rvBoardRows(){
-  return rvRows().filter((o) => o.yoy != null && o.yoy >= rvState.boardMin && (!rvState.boardDay || (o.known && o.announce === rvState.boardDay))
+  return rvRows().filter((o) => o.yoy != null && o.yoy >= rvState.boardMin && rvMarkOk(o) && (!rvState.boardDay || (o.known && o.announce === rvState.boardDay))
     && (!rvState.boardVol || (o.volume || 0) >= rvState.boardVol)).sort((a, b) => b.yoy - a.yoy);
 }
 function rvBoardHtml(){
   const d = rvState.data;
   const list = rvBoardRows();
   const copy = list.map((o) => o.code + ' ' + o.name + ' 年增 ' + rvPct(o.yoy, 2)).join('\\n');
-  const head = (rvState.boardDay ? rvMd(rvState.boardDay) + ' 公布 ' : '') + rvMonthLabel(d.month) + ' 營收・年增 ≥ ' + rvState.boardMin + '%・共 ' + list.length + ' 檔';
+  const head = (rvState.boardDay ? rvMd(rvState.boardDay) + ' 公布 ' : '') + rvMonthLabel(d.month) + ' 營收・年增 ≥ ' + rvState.boardMin + '%'
+    + (rvState.mark ? '・只看' + RV_MARK_LABEL[rvState.mark] : '') + '・共 ' + list.length + ' 檔';
   const fmtClose = (v) => v == null ? '—' : v >= 1000 ? Math.round(v).toLocaleString() : String(Number(v.toPrecision(3)));
   return '<div class="rv-board"><div class="rv-h">🎯 懸賞榜 <small>' + head + '</small></div>'
     + '<div class="rv-ctl" style="justify-content:flex-end">日期 <select data-rv-set="boardDay">' + rvDayOptions(rvState.boardDay, '全部公布日') + '</select>'
@@ -10596,7 +10606,7 @@ function rvTableRows(){
   let rows = rvRows().filter((o) => (rvState.tab !== 'pos' || (o.yoy != null && o.yoy > 0))
     && (rvState.market === 'all' || o.market === rvState.market)
     && (rvState.group === 'all' || o.groups.includes(rvState.group))
-    && (!q || o.code.toLowerCase().includes(q) || String(o.name).toLowerCase().includes(q)));
+    && rvMarkOk(o) && (!q || o.code.toLowerCase().includes(q) || String(o.name).toLowerCase().includes(q)));
   const key = rvState.sortKey;
   const dir = rvState.sortDir;
   const val = (o) => key === 'announce' ? (o.announce || '') : key === 'code' ? o.code : o[key];
@@ -10698,7 +10708,10 @@ function renderRevenue(){
     + (rvState.loading ? '・更新中…' : '') + '</div><div class="rv-months">' + rvMonthButtons() + '</div>'
     + (rvState.error ? '<div class="race-note">更新失敗（' + rdEsc(rvState.error) + '），先顯示上一次的資料</div>' : '');
   const query = '<div class="rv-sec"><div class="rv-h">🔎 查個股營收 <small>每個月的年增、月增、累計年增、公布日、公布隔日漲跌</small></div>'
-    + '<div class="jl-q"><input id="rvQ" inputmode="numeric" placeholder="股號，例 2451" value="' + rdEsc(rvState.queryCode) + '"><button type="button" data-rv-go>查詢</button></div>'
+    + '<div class="jl-q rv-qrow"><input id="rvQ" inputmode="numeric" placeholder="股號，例 2451" value="' + rdEsc(rvState.queryCode) + '"><button type="button" data-rv-go>查詢</button>'
+    + [['accel', '🚀 只看火箭'], ['decel', '🐢 只看烏龜']].map(([k, label]) => '<button type="button" class="rv-mark ' + k + (rvState.mark === k ? ' active' : '') + '" data-rv-mark="' + k
+      + '" title="族群分析、多觀察、懸賞榜、總表只顯示' + RV_MARK_LABEL[k] + '（年增比上個月' + (k === 'accel' ? '多' : '少') + ' 10 點以上）；再按一次取消">' + label + '（'
+      + rvRows().filter((o) => o[k]).length + '）</button>').join('') + '</div>'
     + '<div id="rvResult">' + rvQueryHtml() + '</div></div>';
   const groups = rvIndustryGroups();
   const shown = rvState.topN ? groups.slice(0, rvState.topN) : groups;
@@ -10731,6 +10744,8 @@ document.getElementById('revBody').addEventListener('click', (e) => {
   const month = t.closest('[data-rv-month]');
   if (month){ rvState.boardDay = null; rvLoad(month.dataset.rvMonth); return; }
   if (t.closest('[data-rv-go]')){ rvQuery((document.getElementById('rvQ') || {}).value); return; }
+  const mark = t.closest('[data-rv-mark]');
+  if (mark){ rvState.mark = rvState.mark === mark.dataset.rvMark ? '' : mark.dataset.rvMark; renderRevenue(); return; }
   if (t.closest('[data-rv-fold]')){ rvState.rtOpen = !rvState.rtOpen; renderRevenue(); return; }
   const open = t.closest('[data-rv-open]');
   if (open){ const k = open.dataset.rvOpen; rvState.open[k] = !rvState.open[k]; renderRevenue(); return; }
