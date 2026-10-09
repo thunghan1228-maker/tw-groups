@@ -258,14 +258,16 @@ async function proxyHanstockBars(pathname, cacheSeconds = 20) {
   const live = !(cacheSeconds > 0);
   const resp = await fetch(upstream, {
     headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
-    cf: live ? { cacheTtl: 0, cacheEverything: false } : { cacheTtl: cacheSeconds, cacheEverything: true }
+    // 只快取成功的回應：2026-10-09 後端重新部署那兩分鐘回錯誤，原本錯誤也照樣在 Cloudflare 跟瀏覽器
+    // 各快取 10 分鐘，醞釀／發動前端每分鐘重試都拿到快取的錯誤，一直卡在「讀取中」。
+    cf: live ? { cacheTtl: 0, cacheEverything: false } : { cacheTtlByStatus: { "200-299": cacheSeconds, "300-599": 0 }, cacheEverything: true }
   });
   const body = await resp.text();
   return new Response(body, {
     status: resp.status,
     headers: {
       "content-type": "application/json; charset=UTF-8",
-      "cache-control": live ? "no-store" : "public, max-age=" + cacheSeconds
+      "cache-control": live || !resp.ok ? "no-store" : "public, max-age=" + cacheSeconds
     }
   });
 }
