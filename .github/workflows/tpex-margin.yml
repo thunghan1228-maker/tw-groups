@@ -1,0 +1,105 @@
+# 上櫃融資餘額鏡像（研究室「資金保護傘」加上櫃，2026-10-10 使用者）。
+# 櫃買中心「上櫃股票融資融券餘額」每天一張表，最下面的合計列有融資張數、融資金額（仟元）、融券張數。
+# 櫃買擋 HanStock 的正式站主機，GitHub 的 runner 抓得到：每個交易日晚上抓最近幾天，第一次（或給 since）往回補到 2020 年，
+# 整份存在 data 分支 tpex/margin-otc.json（{日期: [融資張數, 融資金額仟元, 融券張數]}），再戳後端立刻拉回去。
+name: TPEx margin mirror
+
+on:
+  schedule:
+    - cron: "50 13 * * 1-5"   # 21:50 台北
+  workflow_dispatch:
+    inputs:
+      since:
+        description: "從哪天開始回補（YYYY-MM-DD，留空＝只補最近 15 天）"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tpex-data-branch
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data
+      - name: 抓櫃買融資融券餘額合計
+        env:
+          SINCE: ${{ inputs.since }}
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.error, urllib.request
+          from datetime import date, datetime, timedelta, timezone
+          tw = timezone(timedelta(hours=8))
+          now = datetime.now(tw)
+          path = 'tpex/margin-otc.json'
+          os.makedirs('tpex', exist_ok=True)
+          data = json.load(open(path, encoding='utf-8')) if os.path.exists(path) else {'rows': {}, 'empty': []}
+          rows, empty = data.get('rows') or {}, set(data.get('empty') or [])
+          since = (os.environ.get('SINCE') or '').strip()
+          start = date.fromisoformat(since) if since else (now.date() - timedelta(days=15) if rows else date(2020, 1, 1))
+          today = now.date() if (now.hour, now.minute) >= (21, 30) else now.date() - timedelta(days=1)
+          days = []
+          d = start
+          while d <= today:
+              key = d.isoformat()
+              if d.weekday() < 5 and key not in rows and (key not in empty or (today - d).days <= 3):
+                  days.append(d)
+              d += timedelta(days=1)
+          days = list(reversed(days))[:1300]          # 新的先抓；一次最多 1300 天（約 25 分鐘）
+          print('要抓', len(days), '天')
+          UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128.0 Safari/537.36'
+
+          def num(text):
+              try:
+                  return float(str(text).replace(',', '').strip())
+              except ValueError:
+                  return None
+
+          got = 0
+          for i, d in enumerate(days):
+              url = f'https://www.tpex.org.tw/www/zh-tw/margin/balance?date={d.year}%2F{d.month:02d}%2F{d.day:02d}&response=json'
+              payload = None
+              for attempt in range(3):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': UA}), timeout=40) as r:
+                          payload = json.load(r)
+                      break
+                  except Exception as e:
+                      print('retry', d, type(e).__name__, e)
+                      time.sleep(4 * (attempt + 1))
+              tables = (payload or {}).get('tables') or []
+              summary = (tables[0].get('summary') if tables else None) or []
+              units = next((r for r in summary if len(r) > 14 and '合計' in str(r[1])), None)
+              money = next((r for r in summary if len(r) > 6 and '融資金' in str(r[1])), None)
+              if units and money and num(money[6]):
+                  rows[d.isoformat()] = [num(units[6]), num(money[6]), num(units[14])]
+                  empty.discard(d.isoformat())
+                  got += 1
+              elif payload is not None:
+                  empty.add(d.isoformat())         # 休市日
+              time.sleep(0.9)
+              if i % 100 == 99:
+                  print('  ', i + 1, '天，抓到', got)
+          json.dump({'updated': now.isoformat(timespec='minutes'), 'fields': ['marginUnits', 'marginAmountThousand', 'shortUnits'],
+                     'rows': dict(sorted(rows.items())), 'empty': sorted(empty)},
+                    open(path, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+          print('抓到', got, '天；總共', len(rows), '天，最新', max(rows) if rows else None)
+          PY
+      - name: 推到 data 分支
+        run: |
+          git config user.name "tpex-margin-mirror"
+          git config user.email "tpex-margin-mirror@users.noreply.github.com"
+          git add tpex/margin-otc.json
+          git commit -m "上櫃融資餘額鏡像 $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "沒有變動"; exit 0; }
+          for i in 1 2 3 4; do git pull --rebase origin data && git push && break; sleep $((i * 5)); done
+      - name: 戳後端立刻拉回去
+        run: |
+          curl -sS -X POST --max-time 170 "https://hanstock-production-b872.up.railway.app/api/hub/fund-umbrella/fetch" -o /tmp/fu.json -w "HTTP %{http_code}\n" || true
+          head -c 600 /tmp/fu.json; echo
