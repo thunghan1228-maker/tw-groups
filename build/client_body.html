@@ -884,6 +884,52 @@
   .mc-card dt{color:var(--muted);}
   .mc-card dd{margin:0;}
   .mc-foot{font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:10px;line-height:1.7;}
+  /* 研究室：資金保護傘 */
+  .fu-umb{display:flex;gap:14px;align-items:flex-start;border-radius:12px;padding:12px 14px;margin:6px 0 10px;border:1px solid var(--line);}
+  .fu-umb.bull{border-color:rgba(230,103,95,.5);background:rgba(230,103,95,.07);}
+  .fu-umb.warn{border-color:rgba(245,158,11,.6);background:rgba(245,158,11,.08);}
+  .fu-umb.bear{border-color:rgba(95,174,111,.6);background:rgba(95,174,111,.09);}
+  .fu-ui{font-size:40px;line-height:1;}
+  .fu-un{font-size:20px;font-weight:900;}
+  .fu-un small{font-size:12px;color:var(--muted);font-weight:700;margin-left:6px;}
+  .fu-ua{font-size:13px;margin-top:3px;line-height:1.6;}
+  .fu-ur{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.7;}
+  .fu-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .fu-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px;min-width:0;}
+  .fu-ct{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .fu-state{font-size:11px;border-radius:6px;padding:1px 7px;font-weight:800;border:1px solid currentColor;}
+  .fu-state.bull{color:var(--up);}
+  .fu-state.warn{color:#f59e0b;}
+  .fu-state.bear{color:var(--down);}
+  .fu-big{font-size:24px;font-weight:900;margin:4px 0;}
+  .fu-big small{font-size:13px;font-weight:700;}
+  .fu-big small.up,.fu-line b.up,.fu-gap.up,.fu-cm b.up{color:var(--up);}
+  .fu-big small.down,.fu-line b.down,.fu-cm b.down{color:var(--down);}
+  .fu-line{font-size:13px;color:var(--muted);line-height:1.7;}
+  .fu-line b{color:var(--text);}
+  .fu-hold{margin-top:6px;border-top:1px dashed var(--line);padding-top:6px;font-size:13px;line-height:1.7;}
+  .fu-hold b{color:#f59e0b;font-size:15px;}
+  .fu-sub{font-size:12px;color:var(--muted);}
+  .fu-div{margin-top:8px;font-size:13px;border-left:3px solid var(--line);padding:4px 10px;line-height:1.6;}
+  .fu-div.bear{border-color:var(--down);}
+  .fu-div.warn{border-color:#f59e0b;}
+  .fu-div.bull{border-color:var(--up);}
+  .fu-chart{width:100%;max-width:760px;height:auto;display:block;margin:0 auto;}
+  .fu-chart .fu-tx{fill:none;stroke:var(--text);stroke-width:1.5;}
+  .fu-chart .fu-ma{fill:none;stroke:#f59e0b;stroke-width:1.2;stroke-dasharray:4 3;}
+  .fu-chart .fu-marea{fill:rgba(230,103,95,.28);stroke:var(--up);stroke-width:1;}
+  .fu-chart .fu-grid{stroke:var(--line);stroke-width:1;}
+  .fu-chart .fu-ax{fill:var(--muted);font-size:11px;}
+  .fu-chart .fu-lg{fill:var(--muted);font-size:11px;}
+  .fu-crash{display:grid;grid-template-columns:90px minmax(0,1fr);gap:10px;padding:8px 6px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.65;}
+  .fu-cd{display:flex;flex-direction:column;}
+  .fu-cd b{font-size:15px;}
+  .fu-cd small{color:var(--muted);font-size:12px;}
+  .fu-gap{font-weight:800;}
+  @media (max-width: 640px){
+    .fu-grid2{grid-template-columns:minmax(0,1fr);}
+    .fu-crash{grid-template-columns:64px minmax(0,1fr);}
+  }
   @media (max-width: 640px){
     .mc-ev{grid-template-columns:58px minmax(0,1fr);gap:8px;padding:8px 4px;}
     .mc-ggrid{grid-template-columns:minmax(0,1fr);}
@@ -11538,10 +11584,10 @@ document.getElementById('hwBody').addEventListener('change', (e) => {
 // ---- 研究室：國際大事行事曆（2026-10-10 使用者：照莊爸 zhuang.tw/calendar 做，含名詞小學堂）----
 // 後端 /api/macro-calendar：TradingView 經濟日曆（美／中／日／歐）每小時更新公布值，加台指期結算、美股季度結算、公司法說。
 // 版面照莊爸：頁首更新時間 → 下一件大事倒數 → 全部／★★ 以上／只看大事篩選 → 依週分段的事件（前值／預期／公布）→ 小學堂。
-const LAB_TABS = [['cal', '🌐 國際大事行事曆']];
+const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘']];
 const MC_FLAGS = { US: '🇺🇸', CN: '🇨🇳', JP: '🇯🇵', EU: '🇪🇺', TW: '🇹🇼' };
 const MC_FILTERS = [['all', '全部'], ['2', '★★ 以上'], ['3', '只看大事 ★★★']];
-const labState = { tab: 'cal', timer: null };
+const labState = { tab: (() => { try { const t = localStorage.getItem('labTab'); return LAB_TABS.some((x) => x[0] === t) ? t : 'cal'; } catch (_){ return 'cal'; } })(), timer: null };
 const mcState = { data: null, loading: false, error: null, loadedAt: 0,
   filter: (() => { try { return localStorage.getItem('mcFilter') || 'all'; } catch (_){ return 'all'; } })() };
 async function mcLoad(force){
@@ -11648,23 +11694,103 @@ function mcCalendarHtml(){
     '「高於／低於預期」只是比兩個數字的大小，不代表好壞。公司法說、財報標「慣例時間」的，以公司公告為準。本頁只是把公開行事曆整理成白話，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
   return html;
 }
+// ---- 研究室：資金保護傘（2026-10-10 使用者：照莊爸課程講的「融資水位＋加權／櫃買多空轉折」做成一頁）----
+// 後端 /api/fund-umbrella：上市融資餘額、加權／櫃買日K（FinMind 公開資料），每天晚上更新。
+const fuState = { data: null, loading: false, error: null, loadedAt: 0 };
+async function fuLoad(force){
+  if (fuState.loading || (fuState.data && !force && Date.now() - fuState.loadedAt < 30 * 60e3)) return;
+  fuState.loading = true; fuState.error = null;
+  renderLab();
+  try {
+    const r = await fetch('/api/fund-umbrella', { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status === 404 ? '後端還沒有這個功能（HanStock PR 合併部署後就會有）' : 'HTTP ' + r.status);
+    fuState.data = await r.json();
+    fuState.loadedAt = Date.now();
+  } catch (err){ fuState.error = String((err && err.message) || err); }
+  fuState.loading = false;
+  renderLab();
+}
+function fuNum(v, digits){ return v === null || v === undefined ? '—' : Number(v).toLocaleString('zh-TW', { minimumFractionDigits: digits || 0, maximumFractionDigits: digits || 0 }); }
+function fuSigned(v, digits, unit){ return v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + fuNum(v, digits) + (unit || ''); }
+function fuIndexCard(name, s, digits){
+  if (!s) return '<div class="fu-card"><div class="fu-ct">' + name + '</div><div class="race-note">資料不足</div></div>';
+  const streak = (s.above20 ? '站上月線第 ' : '跌破月線第 ') + s.streak + ' 天' + (s.turnDate ? '（' + mcMd(s.turnDate) + ' 起）' : '');
+  return '<div class="fu-card"><div class="fu-ct">' + name + ' <span class="fu-state ' + s.tone + '">' + s.state + '</span></div>' +
+    '<div class="fu-big">' + fuNum(s.close, digits) + ' <small class="' + (s.change >= 0 ? 'up' : 'down') + '">' + fuSigned(s.change, 2, '%') + '</small></div>' +
+    '<div class="fu-line">月線 <b>' + fuNum(s.ma20, digits) + '</b>（' + fuSigned(s.vs20, 2, '%') + '，' + (s.ma20Up ? '上彎' : '下彎') + '）・季線 <b>' + fuNum(s.ma60, digits) + '</b>（' + fuSigned(s.vs60, 2, '%') + '）</div>' +
+    '<div class="fu-line">' + streak + '</div>' +
+    '<div class="fu-hold"><div>明天守月線：收盤 ≥ <b>' + fuNum(s.hold20, digits) + '</b></div><div>明天守季線：收盤 ≥ <b>' + fuNum(s.hold60, digits) + '</b></div>' +
+    '<div class="fu-sub">月線扣抵 ' + fuNum(s.deduct20, digits) + '：明天收在它之上，月線繼續往上</div></div></div>';
+}
+function fuChartSvg(series){
+  if (!series || series.length < 30) return '';
+  const W = 640, H = 300, L = 8, R = 56, top1 = 10, h1 = 170, top2 = 200, h2 = 80;
+  const n = series.length, x = (i) => L + (W - L - R) * i / (n - 1);
+  const t = series.map((p) => p.t), m = series.map((p) => p.m);
+  const ma20 = t.map((_, i) => i >= 19 ? t.slice(i - 19, i + 1).reduce((a, b) => a + b, 0) / 20 : null);
+  const tMin = Math.min(...t), tMax = Math.max(...t);
+  const mv = m.filter((v) => v !== null), mMin = Math.min(...mv), mMax = Math.max(...mv);
+  const yT = (v) => top1 + h1 * (1 - (v - tMin) / ((tMax - tMin) || 1));
+  const yM = (v) => top2 + h2 * (1 - (v - mMin) / ((mMax - mMin) || 1));
+  const path = (arr, y) => arr.map((v, i) => v === null ? null : (x(i).toFixed(1) + ',' + y(v).toFixed(1))).filter(Boolean).join(' ');
+  let months = '', last = '';
+  series.forEach((p, i) => { const mo = p.d.slice(0, 7); if (mo !== last){ last = mo; if (i > 3) months += '<line x1="' + x(i).toFixed(1) + '" y1="' + top1 + '" x2="' + x(i).toFixed(1) + '" y2="' + (top2 + h2) + '" class="fu-grid"/><text x="' + (x(i) + 2).toFixed(1) + '" y="' + (top2 + h2 + 12) + '" class="fu-ax">' + Number(mo.slice(5)) + '月</text>'; } });
+  const mArea = 'M' + x(0).toFixed(1) + ',' + (top2 + h2) + ' L' + path(m, yM).replace(/ /g, ' L') + ' L' + x(n - 1).toFixed(1) + ',' + (top2 + h2) + ' Z';
+  return '<svg class="fu-chart" viewBox="0 0 ' + W + ' ' + (H + 16) + '" preserveAspectRatio="xMidYMid meet">' + months +
+    '<polyline points="' + path(ma20, yT) + '" class="fu-ma"/><polyline points="' + path(t, yT) + '" class="fu-tx"/>' +
+    '<text x="' + (W - R + 4) + '" y="' + (yT(tMax) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(tMax) + '</text><text x="' + (W - R + 4) + '" y="' + (yT(tMin) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(tMin) + '</text>' +
+    '<path d="' + mArea + '" class="fu-marea"/>' +
+    '<text x="' + (W - R + 4) + '" y="' + (yM(mMax) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(mMax) + '億</text><text x="' + (W - R + 4) + '" y="' + (yM(mMin) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(mMin) + '億</text>' +
+    '<text x="' + (L + 4) + '" y="' + (top1 + 12) + '" class="fu-lg">— 加權指數　┄ 月線</text><text x="' + (L + 4) + '" y="' + (top2 + 12) + '" class="fu-lg">■ 上市融資餘額</text></svg>';
+}
+function fuHtml(){
+  const d = fuState.data;
+  if (!d) return fuState.error ? '<div class="race-note">讀取失敗：' + wlEsc(fuState.error) + ' <button type="button" class="chart-tab" data-fu-reload="1">重試</button></div>' : '<div class="race-note">讀取中…</div>';
+  if (d.status !== 'ok') return '<div class="race-note">' + wlEsc(d.message || '還沒有資料') + (d.error ? '：' + wlEsc(d.error) : '') + '</div>';
+  const u = d.umbrella, m = d.margin;
+  let html = '<div class="mc-meta">資料日 <b>' + mcMd(d.asOf) + '</b>・證交所融資餘額每天晚上公布，21:40 後更新 <button type="button" class="mc-reload" data-fu-reload="1" title="重新整理">↻</button></div>';
+  html += '<div class="fu-umb ' + u.tone + '"><div class="fu-ui">' + u.icon + '</div><div><div class="fu-un">保護傘：' + u.name + ' <small>' + u.score + ' 點</small></div>' +
+    '<div class="fu-ua">' + wlEsc(u.advice) + '</div>' +
+    (u.reasons.length ? '<ul class="fu-ur">' + u.reasons.map((r) => '<li>' + wlEsc(r.text) + '</li>').join('') + '</ul>' : '<div class="fu-ua">加權、櫃買都在月線上，融資沒有過熱。</div>') + '</div></div>';
+  html += '<div class="fu-grid2">' + fuIndexCard('加權指數', d.taiex, 0) + fuIndexCard('櫃買指數', d.tpex, 2) + '</div>';
+  const newHigh = m.vsHigh !== null && m.vsHigh >= 0;
+  html += '<div class="fu-card"><div class="fu-ct">上市融資餘額</div><div class="fu-big">' + fuNum(m.balance, 1) + ' <small>億</small></div>' +
+    '<div class="fu-line">日 <b class="' + (m.d1 >= 0 ? 'up' : 'down') + '">' + fuSigned(m.d1, 1, ' 億') + '</b>・週 <b class="' + (m.d5 >= 0 ? 'up' : 'down') + '">' + fuSigned(m.d5, 1, ' 億') + '</b>・月 <b class="' + (m.d20 >= 0 ? 'up' : 'down') + '">' + fuSigned(m.d20, 1, ' 億') + '（' + fuSigned(m.d20Pct, 1, '%') + '）</b></div>' +
+    '<div class="fu-line">三年百分位 <b>' + m.percentile + '%</b>' + (newHigh ? '・<b class="up">2020 年以來新高</b>' : '・2020 年以來最高 ' + fuNum(m.high, 1) + ' 億（' + m.highDate.slice(0, 7).replace('-', '/') + '），還差 ' + fuNum(m.high - m.balance, 1) + ' 億') + '</div>' +
+    '<div class="fu-line">融券 ' + fuNum(m.shortUnits) + ' 張・券資比 ' + (m.shortRatio ?? '—') + '%</div>' +
+    (d.diverge ? '<div class="fu-div ' + d.diverge.tone + '">' + wlEsc(d.diverge.text) + '</div>' : '') + '</div>';
+  html += '<div class="fu-card">' + fuChartSvg(d.series) + '</div>';
+  if (d.crashes && d.crashes.length){
+    html += '<h3 class="mc-h">歷次崩盤前的融資高點 <small>現在的融資跟每一次崩盤前比</small></h3>';
+    html += d.crashes.slice().reverse().map((c) => {
+      const over = c.gap !== null && c.gap >= 0;
+      return '<div class="fu-crash"><div class="fu-cd"><b>' + c.peakDate.slice(0, 7).replace('-', '/') + '</b><small>' + c.days + ' 個交易日</small></div>' +
+        '<div class="fu-cm"><div>加權 ' + fuNum(c.peak) + ' → ' + fuNum(c.trough) + '（' + mcMd(c.troughDate) + '）<b class="down">' + c.drop + '%</b>' + (c.recovered ? '' : ' <span class="fu-state bear">還沒回來</span>') + '</div>' +
+        '<div>崩盤前融資高點 <b>' + fuNum(c.marginPeak, 1) + ' 億</b>（' + (c.marginPeakDate ? mcMd(c.marginPeakDate) : '—') + '）→ 低點時 ' + fuNum(c.marginTrough, 1) + ' 億（' + (c.marginDrop ?? '—') + '%）</div>' +
+        '<div class="fu-gap ' + (over ? 'up' : '') + '">' + (c.gap === null ? '' : over ? '現在已經超過 ' + fuNum(c.gap, 1) + ' 億（+' + c.gapPct + '%）' : '現在還差 ' + fuNum(-c.gap, 1) + ' 億追平（' + c.gapPct + '%）') + '</div></div></div>';
+    }).join('');
+  }
+  html += '<div class="mc-foot">' + wlEsc(d.rule || '') + '<br>融資是散戶借錢買股票的總額：越高代表市場越熱、也越容易在下跌時被追繳斷頭；但融資高不代表馬上會跌，要搭配指數有沒有跌破月線一起看。本頁只是整理公開數據，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
+  return html;
+}
 function renderLab(){
   const body = document.getElementById('labBody');
   if (!body || document.getElementById('labModal').hidden) return;
   const pastOpen = !!body.querySelector('details.mc-pastweek[open]');
   body.innerHTML = '<div class="hw-tabs">' + LAB_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (labState.tab === k ? ' active' : '') + '" data-lab-tab="' + k + '">' + label + '</button>').join('') + '</div>' +
-    mcCalendarHtml();
+    (labState.tab === 'fund' ? fuHtml() : mcCalendarHtml());
   if (pastOpen){ const det = body.querySelector('details.mc-pastweek'); if (det) det.open = true; }
 }
+function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else mcLoad(false); }
 function openLabPanel(){
   document.getElementById('labModal').hidden = false;
   renderLab();
-  mcLoad(false);
+  labLoad();
   clearInterval(labState.timer);
   labState.timer = setInterval(() => {   // 每分鐘更新倒數；超過 30 分鐘重抓一次（後端每小時更新公布值）
     if (document.getElementById('labModal').hidden){ clearInterval(labState.timer); return; }
     renderLab();
-    mcLoad(false);
+    labLoad();
   }, 60e3);
 }
 function closeLabPanel(){ document.getElementById('labModal').hidden = true; clearInterval(labState.timer); }
@@ -11673,7 +11799,8 @@ document.getElementById('labModal').addEventListener('click', (e) => { if (e.tar
 document.getElementById('labBody').addEventListener('click', (e) => {
   const t = e.target;
   const tab = t.closest('[data-lab-tab]');
-  if (tab){ labState.tab = tab.dataset.labTab; renderLab(); return; }
+  if (tab){ labState.tab = tab.dataset.labTab; try { localStorage.setItem('labTab', labState.tab); } catch (_){} renderLab(); labLoad(); return; }
+  if (t.closest('[data-fu-reload]')){ fuLoad(true); return; }
   const flt = t.closest('[data-mc-flt]');
   if (flt){ mcState.filter = flt.dataset.mcFlt; try { localStorage.setItem('mcFilter', mcState.filter); } catch (_){} renderLab(); return; }
   if (t.closest('[data-mc-reload]')){ mcLoad(true); return; }
