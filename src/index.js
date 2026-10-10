@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-09 23:52:46";
+const BUILD_STAMP = "2026-10-10 11:39:45";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1535,7 +1535,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="chips-head">
       <div>
         <div class="chips-title">盤後籌碼排行</div>
-        <div class="chips-sub">籌碼暴增雷達＝集保週資料的大戶增減（每週五結算）；其他分頁是主力大單（永豐逐筆算的大單淨額）＋三大法人買賣超（證交所、櫃買中心公開資料），每個交易日收盤後更新，只列 44 個族群的股票，點股票可開K線圖。</div>
+        <div class="chips-sub">籌碼週報＝集保週資料的大戶增減（每週五結算）；其他分頁是主力大單（永豐逐筆算的大單淨額）＋三大法人買賣超（證交所、櫃買中心公開資料），每個交易日收盤後更新，只列 44 個族群的股票，點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="chipsClose" aria-label="關閉">✕</button>
     </div>
@@ -5246,7 +5246,7 @@ function brewLaunchHtml(){
 // 後端 /api/chips-daily：每個交易日收盤後的主力大單淨額（永豐逐筆）＋三大法人買賣超（上市＝證交所 T86，
 // 上櫃＝櫃買中心開放資料經排程主機鏡像），連續買超／賣超天數，收盤與漲跌幅。這裡只做排序、篩選、切日期。
 const CHIPS_MEASURES = [
-  { key: 'radar', label: '籌碼暴增雷達' },   // 2026-10-04 使用者：照莊爸 zhuang.tw/radar 做（集保週資料），放第一個
+  { key: 'radar', label: '籌碼週報' },   // 2026-10-04 使用者：照莊爸 zhuang.tw/radar 做（集保週資料），放第一個；2026-10-10 改名「籌碼週報」
   { key: 'mf', label: '主力大單' }, { key: 'foreign', label: '外資' }, { key: 'trust', label: '投信' },
   { key: 'dealer', label: '自營商' }, { key: 'total', label: '三大法人' }, { key: 'brewx', label: '法人連買∩醞釀發動' },
   { key: 'mfx', label: '主力大單∩醞釀發動' }, { key: 'short', label: '放空籌碼' },
@@ -6013,7 +6013,7 @@ function rdHotHtml(d){
 function radarHtml(){
   ensureRadar(false);
   const d = radarData;
-  const head = '<div><span class="rd-tag">籌碼暴增雷達・互動版</span><div class="rd-title">籌碼暴增雷達</div>' +
+  const head = '<div><span class="rd-tag">籌碼週報・互動版</span><div class="rd-title">籌碼週報</div>' +
     '<div class="rd-sub">集保週資料 ' + (d && d.week ? String(d.week).replace(/-/g, '/') : '—') + '（每週五結算）・均線分數 ' + (d && d.scoreDate ? rdMd(d.scoreDate) + ' 收盤' : '—') + (d && d.universe ? '・' + d.universe + ' 檔' : '') + '</div>' +
     '<div class="rd-pill">ⓘ 每週更新一次——集保在每週五結算、週六公布，整個下一週看到的都是同一份；個股的三大法人是每個交易日收盤後更新。</div></div>';
   const intro = '<div class="rd-intro"><p>這頁看的是「大戶手上的股票變多還是變少」：集保 400 張以上的大戶，這週持股比上週多了（或少了）總股數的幾 %。</p>' +
@@ -8368,7 +8368,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-09 23:52:46';
+const BUILD_STAMP = '2026-10-10 11:39:45';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

@@ -1479,7 +1479,7 @@
     <div class="chips-head">
       <div>
         <div class="chips-title">盤後籌碼排行</div>
-        <div class="chips-sub">籌碼暴增雷達＝集保週資料的大戶增減（每週五結算）；其他分頁是主力大單（永豐逐筆算的大單淨額）＋三大法人買賣超（證交所、櫃買中心公開資料），每個交易日收盤後更新，只列 44 個族群的股票，點股票可開K線圖。</div>
+        <div class="chips-sub">籌碼週報＝集保週資料的大戶增減（每週五結算）；其他分頁是主力大單（永豐逐筆算的大單淨額）＋三大法人買賣超（證交所、櫃買中心公開資料），每個交易日收盤後更新，只列 44 個族群的股票，點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="chipsClose" aria-label="關閉">✕</button>
     </div>
@@ -5190,7 +5190,7 @@ function brewLaunchHtml(){
 // 後端 /api/chips-daily：每個交易日收盤後的主力大單淨額（永豐逐筆）＋三大法人買賣超（上市＝證交所 T86，
 // 上櫃＝櫃買中心開放資料經排程主機鏡像），連續買超／賣超天數，收盤與漲跌幅。這裡只做排序、篩選、切日期。
 const CHIPS_MEASURES = [
-  { key: 'radar', label: '籌碼暴增雷達' },   // 2026-10-04 使用者：照莊爸 zhuang.tw/radar 做（集保週資料），放第一個
+  { key: 'radar', label: '籌碼週報' },   // 2026-10-04 使用者：照莊爸 zhuang.tw/radar 做（集保週資料），放第一個；2026-10-10 改名「籌碼週報」
   { key: 'mf', label: '主力大單' }, { key: 'foreign', label: '外資' }, { key: 'trust', label: '投信' },
   { key: 'dealer', label: '自營商' }, { key: 'total', label: '三大法人' }, { key: 'brewx', label: '法人連買∩醞釀發動' },
   { key: 'mfx', label: '主力大單∩醞釀發動' }, { key: 'short', label: '放空籌碼' },
@@ -5957,7 +5957,7 @@ function rdHotHtml(d){
 function radarHtml(){
   ensureRadar(false);
   const d = radarData;
-  const head = '<div><span class="rd-tag">籌碼暴增雷達・互動版</span><div class="rd-title">籌碼暴增雷達</div>' +
+  const head = '<div><span class="rd-tag">籌碼週報・互動版</span><div class="rd-title">籌碼週報</div>' +
     '<div class="rd-sub">集保週資料 ' + (d && d.week ? String(d.week).replace(/-/g, '/') : '—') + '（每週五結算）・均線分數 ' + (d && d.scoreDate ? rdMd(d.scoreDate) + ' 收盤' : '—') + (d && d.universe ? '・' + d.universe + ' 檔' : '') + '</div>' +
     '<div class="rd-pill">ⓘ 每週更新一次——集保在每週五結算、週六公布，整個下一週看到的都是同一份；個股的三大法人是每個交易日收盤後更新。</div></div>';
   const intro = '<div class="rd-intro"><p>這頁看的是「大戶手上的股票變多還是變少」：集保 400 張以上的大戶，這週持股比上週多了（或少了）總股數的幾 %。</p>' +
