@@ -187,8 +187,10 @@ jobs:
                           if b and r[8] is not None and b[8] is not None:
                               net += r[8] - b[8]
                           if b and r[3] and b[3] and abs(r[3] / b[3] - 1) >= 0.0005:
-                              # 配股／減資：上月董監＋經理人持股 × 股本變動比例不算買賣
-                              net -= ((b[6] or 0) + (b[8] or 0)) * (r[3] / b[3] - 1)
+                              # 配股／減資：上月董監＋經理人持股 × 股本變動比例不算買賣；只扣同方向、最多扣到實際變動（現增時內部人沒動不算賣）
+                              ratio = r[3] / b[3] - 1
+                              expected = ((b[6] or 0) + (b[8] or 0)) * ratio
+                              net -= min(max(net, 0), expected) if ratio > 0 else max(min(net, 0), expected)
                           if abs(net) < 1000:
                               continue
                           cand.append((r[0], abs(net), abs(net) / r[3] if r[3] else 0))
