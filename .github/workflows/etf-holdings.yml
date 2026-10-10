@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       backfill_days:
-        description: "回補幾個日曆日（0＝只抓最新一天）"
+        description: "回補幾個日曆日（排程固定 7；0＝只抓最新一天）"
         required: false
         default: "0"
 
@@ -31,7 +31,8 @@ jobs:
           ref: data
       - name: 抓五檔主動式 ETF 的持股
         env:
-          BACKFILL_DAYS: ${{ inputs.backfill_days || '0' }}
+          # 排程每次順便回補前 7 天缺的（已有的不重抓）：復華晚上 21 點常常還沒公告，只抓當天會整天落空（2026-10-10 發現 9/29 起 00991A 全缺）
+          BACKFILL_DAYS: ${{ inputs.backfill_days || '7' }}
         run: |
           python3 - <<'PY'
           import json, os, re, time, urllib.request, urllib.error, urllib.parse
