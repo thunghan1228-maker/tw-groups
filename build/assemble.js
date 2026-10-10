@@ -502,6 +502,14 @@ export default {
       // 均線分數查詢（股號→所屬族群全部成員；或族群名），60 秒快取
       return await proxyHanstockBars("/api/hub/ma-rank/q" + url.search, 60);
     }
+    if (url.pathname === "/api/screener") {
+      // 系統選股・條件選股（2026-10-10 使用者：照莊爸選股系統做，併進個股研究）：收盤後才變，3 分鐘快取（不同條件各自快取）
+      return await proxyHanstockBars("/api/hub/screener" + url.search, 180);
+    }
+    if (url.pathname === "/api/screener-stock") {
+      // 選股系統的個股完整彙整，3 分鐘快取
+      return await proxyHanstockBars("/api/hub/screener/stock" + url.search, 180);
+    }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);

@@ -1000,6 +1000,49 @@
   .ma-legend{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.7;}
   .ma-err{color:#dc2626;padding:10px 0;}
   @media (max-width: 640px){ .ma-q input{width:100%;} .ma-vsum{margin-left:0;width:100%;} .ma-gbar{width:70px;} }
+  /* 2026-10-10 使用者：系統選股・條件選股（照莊爸選股系統），放在個股研究面板上面 */
+  .scr-toggle{cursor:pointer;}
+  .scr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:8px 0;}
+  .scr-card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--panel-2);display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .scr-card.on{border-color:#b45309;background:rgba(245,179,1,.10);}
+  .scr-card.off{opacity:.55;}
+  .scr-ct{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;cursor:pointer;}
+  .scr-cd{font-size:11.5px;color:var(--muted);line-height:1.6;flex:1;}
+  .scr-sl{display:flex;align-items:center;gap:10px;}
+  .scr-sl input{flex:1;min-width:0;accent-color:#f5b301;}
+  .scr-sl b{min-width:64px;text-align:right;font-size:15px;color:#b45309;}
+  .scr-kr{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;}
+  .scr-kr input{width:64px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:3px 6px;}
+  .scr-kb{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:3px 10px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .scr-kb.on{border-color:#b45309;color:#b45309;font-weight:700;background:rgba(245,179,1,.12);}
+  .scr-presets{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin:8px 0;}
+  .scr-pre{background:rgba(124,58,237,.12);color:var(--text);border:1px solid rgba(124,58,237,.45);border-radius:999px;padding:3px 11px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .scr-pre.on{background:#7c3aed;color:#fff;border-color:#7c3aed;}
+  .scr-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0;}
+  .scr-actions select{background:var(--panel-2);color:var(--text);border:1px solid #f59e0b;border-radius:8px;padding:6px 8px;font-size:13px;}
+  .scr-go{background:#f5b301;color:#1a1a1a;border:none;border-radius:10px;padding:8px 18px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .scr-btn{background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .scr-btn[disabled]{opacity:.45;cursor:not-allowed;}
+  .scr-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 6px;font-size:13px;}
+  .scr-head b{font-size:17px;}
+  .scr-badge{background:#9f1239;color:#fff;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700;}
+  .scr-chip{border:1px solid #b45309;color:#b45309;border-radius:999px;padding:1px 8px;font-size:11px;}
+  .scr-info{border:1px solid rgba(185,28,28,.4);background:rgba(185,28,28,.06);border-radius:10px;padding:7px 10px;font-size:12.5px;margin-bottom:6px;}
+  .scr-wrap{max-height:520px;overflow:auto;}
+  .scr-table th{position:sticky;top:0;background:var(--panel);z-index:1;}
+  .scr-table th.act{background:#6d28d9;color:#fff;}
+  .scr-row{cursor:pointer;} .scr-row:hover td{background:rgba(245,179,1,.08);}
+  .scr-grp{background:rgba(124,58,237,.14);border-radius:999px;padding:1px 8px;font-size:11.5px;}
+  .scr-up{color:#dc2626;} .scr-dn{color:#16a34a;}
+  .scr-chip-on{font-weight:800;} .scr-chip-off{opacity:.55;}
+  .scr-sword{background:#fcd34d;color:#3b2500;border-radius:999px;padding:1px 8px;font-size:11.5px;font-weight:700;}
+  .scr-lock{background:#5b21b6;color:#fff;border-radius:6px;padding:1px 7px;font-size:11.5px;font-weight:700;} .scr-lock.next{background:#9333ea;}
+  .scr-fut{background:#15803d;color:#fff;border-radius:4px;padding:0 6px;font-size:11.5px;font-weight:700;} .scr-fut.mini{background:#2563eb;}
+  .scr-facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:6px 0 10px;}
+  .scr-fact{border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--panel);}
+  .scr-fact small{display:block;font-size:11px;color:var(--muted);} .scr-fact b{font-size:14px;}
+  @media (max-width: 900px){ .scr-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  @media (max-width: 560px){ .scr-grid{gap:6px;} .scr-card{padding:8px;} .scr-ct{font-size:13px;} .scr-cd{font-size:10.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;} .scr-sl b{min-width:44px;font-size:13px;} .scr-kr input{width:52px;} }
   .rv-scroll{overflow-x:auto;max-width:100%;}
   .rv-tables > .rv-scroll{min-width:0;}
   .rv-note{font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0;}
@@ -1711,11 +1754,12 @@
   <div class="chips-inner" id="diagInner">
     <div class="chips-head">
       <div>
-        <div class="chips-title">個股問診</div>
-        <div class="chips-sub">打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。收盤後跟籌碼日報一起更新，非即時報價。</div>
+        <div class="chips-title">系統選股・個股研究</div>
+        <div class="chips-sub">上面「系統選股」勾條件挑名單（照莊爸選股系統）；下面「個股研究」打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。點名單任一列就帶到下面。收盤後更新，非即時報價。</div>
       </div>
       <button class="cm-icon-btn" id="diagClose" aria-label="關閉">✕</button>
     </div>
+    <div id="scrBody"></div>  <!-- 2026-10-10 使用者：選股系統首頁下面的欄位併進個股問診 -->
     <div id="diagBody"></div>
   </div>
 </div>
@@ -1816,7 +1860,7 @@
   <button class="tb-btn" data-label="創高黑龍"><span class="tb-icon">龍</span><span>創高黑龍<span class="tb-sub">（自動）</span></span></button>  <!-- 2026-10-04 使用者：黑龍回測從下午報分離成獨立面板；2026-10-05 名字後面加（自動），跟創高黑選股（手動）分開 -->
   <button class="tb-btn" data-label="創高黑選股"><span class="tb-icon">選</span><span>創高黑選股<span class="tb-sub">（手動）</span></span></button>  <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式；2026-10-05 名字後面加（手動） -->
   <button class="tb-btn" data-label="健診"><span class="tb-icon">診</span>每日持股健診</button>  <!-- 2026-09-28 使用者：鈕的名字改成「每日持股健診」 -->
-  <button class="tb-btn" data-label="問診"><span class="tb-icon">研</span>個股研究</button>  <!-- 2026-09-28 使用者：鈕的名字改成「個股研究」 -->
+  <button class="tb-btn" data-label="問診"><span class="tb-icon">研</span>選股・個股研究</button>  <!-- 2026-09-28 使用者：鈕的名字改成「個股研究」；2026-10-10 併進系統選股，改「選股・個股研究」 -->
   <button class="tb-btn" data-label="個股盤中訊號追蹤"><span class="tb-icon">追</span>個股訊號追蹤</button>
 </div>
 
@@ -8572,6 +8616,8 @@ function renderDiag(){
   const s = data.stock;
   html += '<div class="sw-basis">' + swMmdd(data.date) + ' 收盤資料・整理時間 ' + (data.collector && data.collector.builtAt ? String(data.collector.builtAt).slice(5, 16).replace('T', ' ') : '—') + '・每個交易日收盤後跟籌碼日報一起更新，非即時報價</div>';
   html += dgHeaderHtml(data);
+  scrLoadStock(s.code);
+  html += scrStockCardHtml(s.code);
   html += '<div class="bl-section bl-launch">🛡 防守線・出場與停損依據</div>' + dgDefenseHtml(s.def);
   html += '<div class="bl-section bl-brew">📈 日線圖・' + s.code + ' ' + (s.name || '') + '・K棒＋均線＋明日防守線（近 60 個交易日）</div>' + dgCandlesHtml(data.bars, s.def, 60);
   html += '<div class="bl-section bl-launch">📋 七科問診</div>' + dgSubjectsHtml(s);
@@ -8581,8 +8627,258 @@ function renderDiag(){
   html += dgCrossHtml(data);
   body.innerHTML = html + ckRulesHtml(data);
 }
+// ---- 系統選股・條件選股（2026-10-10 使用者：照莊爸「選股系統」做，跟個股問診合併在同一個面板）----
+// 勾條件、拉門檻 → 「開始篩選」列出同時符合的股票；點名單任一列，下面的個股研究就帶出那一檔。條件與後端 /api/screener 一一對應。
+const SCR_CARDS = [
+  { key: 'score', title: '均線分數 ≥', desc: '滿分 15：站上 6 條均線＋創 6 個天期新高＋多頭排列加分', min: 0, max: 15, step: 1, def: 10, unit: '' },
+  { key: 'chip', title: '籌碼暴增 ≥', desc: '籌碼暴增雷達買超榜的週增減籌碼%（沒上榜視為不符合；上榜門檻是買超 >4）', min: 4, max: 20, step: 0.5, def: 5, unit: '%' },
+  { key: 'etf', title: '主動式 ETF 持有 ≥', desc: '五檔主動式 ETF 最新持股中，有幾檔同時持有它', min: 1, max: 5, step: 1, def: 1, unit: ' 家' },
+  { key: 'inst3', title: '法人 3 日累積買超・估量 ≥', desc: '近 3 個交易日三大法人合計是買超，且累積買超張數 ÷ 3 日成交量', min: 0, max: 40, step: 1, def: 5, unit: '%' },
+  { key: 'inst5', title: '法人 5 日累積買超・估量 ≥', desc: '近一週（5 個交易日）三大法人合計是買超，且累積買超張數 ÷ 5 日成交量', min: 0, max: 40, step: 1, def: 10, unit: '%' },
+  { key: 'sword', title: '⚔ 雙劍出擊・兩張榜各取前', desc: '均線常客 ∩ 籌碼常客 —— 兩張榜都排得進去才算。均線常客：近 20 個交易日每天取均線分數前 10 名，誰上榜次數多；籌碼常客：近 9 週每週取籌碼暴增榜前 10 名，誰進榜次數多。一張看技術位置一直待在前段、一張看大戶一直在收 —— 兩把劍同時指向同一檔，才叫雙劍出擊。', min: 10, max: 60, step: 5, def: 60, unit: ' 名' },
+  { key: 'dispo', title: '處置股倒數 ≤', desc: '目前還在處置中、而且快出關的股。倒數＝還要關幾個交易日（迄日當天＝1，下一個交易日出關）。只扣週末與國定假日，碰到颱風假會少算一兩天。', min: 1, max: 10, step: 1, def: 5, unit: ' 天' },
+  { key: 'river', title: '河流圖位置 ≤', desc: '照估值河流圖的目前位置挑「股價回到相對便宜」的股。⏳ 估值河流圖還在做，做好後開放。', min: 1, max: 2, step: 1, def: 2, unit: '', disabled: true },
+  { key: 'fut', title: '有股票期貨', desc: '期交所所有個股期貨的標的（一般 2,000 股或小型 100 股都算）。有期貨才好放空與避險。', check: true },
+  { key: 'mini', title: '有小型股票期貨', desc: '契約是 100 股（一般股票期貨 2,000 股），只有約 47 檔高價股有 —— 小資金也能玩高價股。有小型的一定也有一般的。', check: true },
+  { key: 'exdispo', title: '排除處置股', desc: '把處置中和明天起處置（交易所已公告、下一個交易日開始分盤）的股拿掉。「創高黑龍」預設有勾。', check: true },
+];
+const SCR_PRESETS = [
+  { name: '創高黑龍', p: { score: 10, exdispo: 1, k: 'black', kmin: -10, kmax: 3 } },
+  { name: '強勢紅K', p: { score: 12, k: 'red', kmin: 5 } },
+  { name: '法人認養', p: { inst3: 5, inst5: 10 } },
+  { name: 'ETF 共識', p: { etf: 3 } },
+  { name: '籌碼暴增', p: { chip: 5 } },
+  { name: '處置黑龍', p: { dispo: 5, k: 'black' } },
+  { name: '期貨黑龍', p: { score: 10, fut: 1, k: 'black' } },
+  { name: '奇貨可居', p: { score: 10, etf: 1, fut: 1 } },
+  { name: '雙劍出擊', p: { sword: 60 } },
+  { name: '河流便宜', p: { score: 10, river: 2 } },
+];
+const scrState = { on: {}, val: {}, k: 'any', kmin: '', kmax: '', preset: '', date: '', data: null, loading: false, error: '', sortKey: 'score', sortDir: -1, open: true, stock: null, stockCode: '' };
+SCR_CARDS.forEach((c) => { scrState.val[c.key] = c.def; });
+scrState.on.score = true; scrState.on.exdispo = true; scrState.k = 'black'; scrState.kmin = '-10'; scrState.kmax = '3';   // 進來先是創高黑龍那組（莊爸頁面也是）
+scrState.preset = '創高黑龍';
+const scrPct = (v, digits) => v === null || v === undefined ? '—' : ((v > 0 ? '+' : '') + (+v).toFixed(digits === undefined ? 2 : digits) + '%');
+const scrCls = (v) => v === null || v === undefined ? '' : (v > 0 ? 'scr-up' : (v < 0 ? 'scr-dn' : ''));
+function scrCount(){ return SCR_CARDS.filter((c) => !c.disabled && scrState.on[c.key]).length + ((scrState.k !== 'any' || scrState.kmin !== '' || scrState.kmax !== '') ? 1 : 0); }
+function scrQuery(){
+  const q = new URLSearchParams();
+  SCR_CARDS.forEach((c) => {
+    if (c.disabled || !scrState.on[c.key]) return;
+    q.set(c.key, c.check ? '1' : String(scrState.val[c.key]));
+  });
+  if (scrState.k !== 'any') q.set('k', scrState.k);
+  if (scrState.kmin !== '') q.set('kmin', scrState.kmin);
+  if (scrState.kmax !== '') q.set('kmax', scrState.kmax);
+  if (scrState.date) q.set('date', scrState.date);
+  return q.toString();
+}
+async function scrRun(){
+  scrState.loading = true; scrState.error = '';
+  renderScreener();
+  try {
+    const res = await fetch('/api/screener?' + scrQuery());
+    const d = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((d && d.detail) || ('HTTP ' + res.status));
+    scrState.data = d;
+  } catch (e){
+    scrState.error = e.message || String(e);
+  } finally {
+    scrState.loading = false;
+    renderScreener();
+  }
+}
+function scrApplyPreset(name){
+  const ps = SCR_PRESETS.find((x) => x.name === name);
+  if (!ps) return;
+  scrState.on = {}; scrState.k = 'any'; scrState.kmin = ''; scrState.kmax = '';
+  SCR_CARDS.forEach((c) => { scrState.val[c.key] = c.def; });
+  Object.entries(ps.p).forEach(([k, v]) => {
+    if (k === 'k') scrState.k = v;
+    else if (k === 'kmin' || k === 'kmax') scrState[k] = String(v);
+    else { scrState.on[k] = true; if (typeof v === 'number' && !(SCR_CARDS.find((c) => c.key === k) || {}).check) scrState.val[k] = v; }
+  });
+  scrState.preset = name;
+  if (ps.p.river){ scrState.data = null; scrState.error = '「河流便宜」要用估值河流圖，河流圖做好後開放。'; renderScreener(); return; }
+  scrRun();
+}
+function scrCardHtml(c){
+  const on = !!scrState.on[c.key];
+  let h = '<div class="scr-card' + (on ? ' on' : '') + (c.disabled ? ' off' : '') + '"><label class="scr-ct"><input type="checkbox" data-scr-on="' + c.key + '"' + (on ? ' checked' : '') + (c.disabled ? ' disabled' : '') + '> ' + c.title + '</label>' +
+    '<div class="scr-cd">' + c.desc + '</div>';
+  if (!c.check){
+    const v = scrState.val[c.key];
+    const shown = c.key === 'river' ? (v >= 2 ? '便宜以下' : '只要特價') : (v + c.unit);
+    h += '<div class="scr-sl"><input type="range" min="' + c.min + '" max="' + c.max + '" step="' + c.step + '" value="' + v + '" data-scr-val="' + c.key + '"' + (c.disabled ? ' disabled' : '') + '><b>' + shown + '</b></div>';
+  }
+  return h + '</div>';
+}
+function scrKCardHtml(){
+  const on = scrState.k !== 'any' || scrState.kmin !== '' || scrState.kmax !== '';
+  const kb = (k, label) => '<button type="button" class="scr-kb' + (scrState.k === k ? ' on' : '') + '" data-scr-k="' + k + '">' + label + '</button>';
+  return '<div class="scr-card' + (on ? ' on' : '') + '"><div class="scr-ct">自己打造 K 棒</div><div class="scr-cd">挑當天的 K 棒長相：顏色看收盤與開盤，幅度跟昨天收盤比。例：收黑但只跌 2% 以內、或收紅漲 5% 以上。</div>' +
+    '<div class="scr-kr">' + kb('any', '不限') + kb('red', '🔴 紅K') + kb('black', '⚫ 黑K') + '</div>' +
+    '<div class="scr-kr">漲跌幅 <input type="number" step="0.5" placeholder="不限" value="' + wlEsc(scrState.kmin) + '" data-scr-kn="kmin"> % ～ <input type="number" step="0.5" placeholder="不限" value="' + wlEsc(scrState.kmax) + '" data-scr-kn="kmax"> %</div></div>';
+}
+function scrChips(p){
+  const out = [];
+  if (!p) return '';
+  if (p.score !== null) out.push('均線分數 ≥ ' + p.score + ' 分');
+  if (p.chip !== null) out.push('籌碼暴增 ≥ ' + p.chip + '%');
+  if (p.etf !== null) out.push('ETF 持有 ≥ ' + p.etf + ' 家');
+  if (p.inst3 !== null) out.push('法人3日累積 ≥ ' + p.inst3 + '%');
+  if (p.inst5 !== null) out.push('法人5日累積 ≥ ' + p.inst5 + '%');
+  if (p.sword !== null) out.push('雙劍出擊 前 ' + p.sword + ' 名');
+  if (p.dispo !== null) out.push('處置倒數 ≤ ' + p.dispo + ' 天');
+  if (p.fut) out.push('股票期貨');
+  if (p.mini) out.push('小型股期');
+  if (p.exdispo) out.push('排除處置');
+  if (p.k !== 'any' || p.kmin !== null || p.kmax !== null){
+    out.push('K棒' + (p.k === 'red' ? ' 紅K' : (p.k === 'black' ? ' 黑K' : '')) + (p.kmin !== null || p.kmax !== null ? ' ・ ' + (p.kmin !== null ? p.kmin + '%' : '不限') + ' ~ ' + (p.kmax !== null ? p.kmax + '%' : '不限') : ''));
+  }
+  return out.map((t) => '<span class="scr-chip">' + t + '</span>').join('');
+}
+function scrSortRows(rows){
+  const k = scrState.sortKey, dir = scrState.sortDir;
+  const val = (r) => {
+    if (k === 'inst3' || k === 'inst5') return r[k] ? r[k].pct : null;
+    if (k === 'sword') return r.maHits && r.chipHits ? r.maHits + r.chipHits : null;
+    return r[k];
+  };
+  return rows.slice().sort((a, b) => {
+    const x = val(a), y = val(b);
+    if (x === y) return (b.score || 0) - (a.score || 0) || (a.code > b.code ? 1 : -1);
+    if (x === null || x === undefined) return 1;
+    if (y === null || y === undefined) return -1;
+    return (x > y ? 1 : -1) * dir;
+  });
+}
+function scrTableHtml(d){
+  const p = d.params || {};
+  const th = (key, label, active) => '<th class="sortable' + (active ? ' act' : '') + '" data-scr-sort="' + key + '">' + label + (scrState.sortKey === key ? (scrState.sortDir < 0 ? ' ▼' : ' ▲') : '') + '</th>';
+  const kActive = p.k !== 'any' || p.kmin !== null || p.kmax !== null;
+  let h = '<div class="ma-wrap scr-wrap"><table class="ma-table scr-table"><thead><tr>' + th('code', '代號') + '<th>股名</th><th>族群</th>' +
+    th('score', '均線分數', p.score !== null) + th('chip', '籌碼暴增', p.chip !== null) + th('sword', '⚔ 雙劍', p.sword !== null) + th('etf', 'ETF 家數', p.etf !== null) +
+    th('dispo', '處置倒數', p.dispo !== null || p.exdispo) + '<th>河流區</th><th class="' + (p.fut || p.mini ? 'act' : '') + '">股期</th>' +
+    th('inst3', '法人3日%', p.inst3 !== null) + th('inst5', '法人5日%', p.inst5 !== null) + th('chg', 'K棒', kActive) +
+    th('d1', 'D+1%') + th('d1h', 'D+1 高%') + th('d2', 'D+2%') + th('perf', '目前績效%') + '</tr></thead><tbody>';
+  scrSortRows(d.rows).forEach((r) => {
+    const inst = (x) => x ? '<span class="' + (x.buy ? 'scr-up' : 'scr-dn') + '">' + (x.buy ? '✓ ' : '') + x.pct + '%</span>' : '—';
+    h += '<tr class="scr-row' + (scrState.picked === r.code ? ' hl' : '') + '" data-scr-row="' + wlEsc(r.code) + '"><td class="code">' + wlEsc(r.code) + '</td>' +
+      '<td>' + wlEsc(r.name) + ' ' + wlStarHtml(r.code, r.name) + '</td><td>' + (r.grp ? '<span class="scr-grp">' + wlEsc(r.grp) + '</span>' : '—') + '</td>' +
+      '<td class="ma-hot">' + (r.score === null ? '—' : r.score) + '</td>' +
+      '<td class="' + (r.chip === null ? '' : (r.chipOn ? 'scr-chip-on ' : 'scr-chip-off ') + scrCls(r.chip)) + '">' + (r.chip === null ? '—' : (r.chip > 0 ? '+' : '') + r.chip + '%') + '</td>' +
+      '<td>' + (r.maHits && r.chipHits ? '<span class="scr-sword">均' + r.maHits + ' 籌' + r.chipHits + '</span>' : '—') + '</td>' +
+      '<td>' + (r.etf ? r.etf + ' 家' : '—') + '</td>' +
+      '<td>' + (r.dispo !== null ? '<span class="scr-lock">🔒' + r.dispo + '天</span>' : (r.upcoming ? '<span class="scr-lock next">明天起</span>' : '—')) + '</td>' +
+      '<td>—</td><td>' + (r.futLabel ? '<span class="scr-fut' + (r.mini ? ' mini' : '') + '">' + r.futLabel + '</span>' : '—') + '</td>' +
+      '<td>' + inst(r.inst3) + '</td><td>' + inst(r.inst5) + '</td>' +
+      '<td>' + (r.k === 'red' ? '🔴' : (r.k === 'black' ? '⚫' : '➖')) + ' <span class="' + scrCls(r.chg) + '">' + scrPct(r.chg) + '</span></td>' +
+      '<td class="' + scrCls(r.d1) + '">' + scrPct(r.d1) + '</td><td class="' + scrCls(r.d1h) + '">' + scrPct(r.d1h) + '</td>' +
+      '<td class="' + scrCls(r.d2) + '">' + scrPct(r.d2) + '</td><td class="' + scrCls(r.perf) + '">' + scrPct(r.perf) + '</td></tr>';
+  });
+  return h + '</tbody></table></div>';
+}
+function scrResultHtml(){
+  if (scrState.loading && !scrState.data) return '<div class="ma-legend">篩選中…</div>';
+  if (scrState.error) return '<div class="ma-err">' + wlEsc(scrState.error) + '</div>';
+  const d = scrState.data;
+  if (!d) return '<div class="ma-legend">勾好條件按「開始篩選」，或點上面「一鍵套用」。</div>';
+  let h = '<div class="scr-head"><b>符合名單</b>' + (scrState.preset ? '<span class="scr-badge">' + wlEsc(scrState.preset) + '</span>' : '') +
+    '<span>' + d.count + ' 檔符合・資料日 ' + d.date + (scrState.loading ? '・更新中…' : '') + '</span>' + scrChips(d.params) + '</div>';
+  h += d.latestDate
+    ? '<div class="scr-info">📈 這批是 <b>' + d.date + '</b> 的名單，後面有 ' + d.next.length + ' 個交易日的表現：D+1＝' + (d.next[0] || '—') + (d.next[1] ? '、D+2＝' + d.next[1] : '') + '，目前績效算到 ' + d.latestDate + ' 收盤。</div>'
+    : '<div class="scr-info">📈 這批是 <b>' + d.date + '</b> 的名單，還沒有事後績效 —— 要等下一個交易日收完盤才會出現 D+1；想馬上看績效，改用上面的「回測指定日」挑一天更早的。</div>';
+  h += d.rows.length ? scrTableHtml(d) : '<div class="ma-legend">沒有同時符合的股票，放寬一點條件再試。</div>';
+  h += '<div class="ma-legend">⚔ 雙劍＝兩張「常客榜」的上榜次數 —— 均＝近 20 個交易日有幾天擠進均線分數前十名，籌＝近 9 週有幾週擠進籌碼暴增榜前十名；只上一張榜的顯示「—」。' +
+    '🔒 處置倒數＝還要關幾個交易日（迄日當天＝1，下一個交易日出關）；「明天起」＝交易所已公告、下一個交易日開始處置。' +
+    '法人 3 日／5 日%＝期間三大法人買賣超張數 ÷ 同期成交量；✓＝期間累積是買超。' +
+    '籌碼暴增：粗體＝有進雷達買超榜（>4），淡色＝沒上榜但實際的籌碼%（集保用資料日之前最近一週' + (d.chipWeek ? '：' + d.chipWeek : '') + '）。' +
+    'K棒：🔴＝收盤高於開盤、⚫＝收盤低於開盤，旁邊是跟前一天收盤比的漲跌幅（可能收黑但還是漲）。D+1／D+2＝資料日之後的收盤漲跌；D+1 高%＝隔天盤中最高相對資料日收盤；目前績效＝資料日收盤一路算到最新收盤。價格用還原日K。' +
+    '股期：期＝有股票期貨、小期＝有小型股票期貨（' + (d.futSource || '') + '）。點任一列，下面的個股研究就帶出那一檔。</div>';
+  return h;
+}
+function renderScreener(){
+  const box = document.getElementById('scrBody');
+  if (!box) return;
+  const dates = (scrState.data && scrState.data.dates) || [];
+  const dateSel = '<select data-scr-date="1"><option value="">📅 回測指定日…（最新）</option>' + dates.slice().reverse().slice(1).map((x) => '<option value="' + x + '"' + (scrState.date === x ? ' selected' : '') + '>' + x + '</option>').join('') + '</select>';
+  box.innerHTML = '<div class="ma-sec scr-sec"><h3 class="scr-toggle" data-scr-toggle="1">' + (scrState.open ? '▾' : '▸') + ' 系統選股・條件選股 <small>勾要用的條件、拉一下門檻，選出同時符合的名單；點名單任一列看那檔完整資料</small></h3>' +
+    (scrState.open
+      ? '<div class="ma-note">🕐 每個交易日收盤、日K進來整表後更新 —— 條件來自均線分數、籌碼週報、主動式 ETF 持股與法人買賣超，所以跟著它們一起更新；名單上方會標出實際的資料日。條件勾越多，名單越少、也越嚴格。</div>' +
+        '<div class="scr-grid">' + SCR_CARDS.slice(0, 8).map(scrCardHtml).join('') + SCR_CARDS.slice(8).map(scrCardHtml).join('') + scrKCardHtml() + '</div>' +
+        '<div class="scr-presets">一鍵套用 ' + SCR_PRESETS.map((x) => '<button type="button" class="scr-pre' + (scrState.preset === x.name ? ' on' : '') + '" data-scr-preset="' + wlEsc(x.name) + '">' + x.name + '</button>').join('') + '</div>' +
+        '<div class="scr-actions"><button type="button" class="scr-go" data-scr-go="1">開始篩選</button>' + dateSel +
+        '<button type="button" class="scr-btn" disabled title="盤中用 12:00 即時價篩選，之後再做">⏱ 盤中（12:00）</button>' +
+        '<button type="button" class="scr-btn" data-scr-clear="1">清除條件</button><span class="ma-legend" style="margin:0">已勾 ' + scrCount() + ' 個條件</span></div>' +
+        scrResultHtml()
+      : '') + '</div>';
+}
+function scrStockCardHtml(code){
+  const s = scrState.stock;
+  if (!s || scrState.stockCode !== code || !s.row) return '';
+  const r = s.row;
+  const cell = (k, v) => '<div class="scr-fact"><small>' + k + '</small><b>' + v + '</b></div>';
+  const inst = (x) => x ? (x.buy ? '✓ ' : '') + x.pct + '%' : '—';
+  return '<div class="bl-section bl-launch">🔎 選股系統彙整・' + s.date + ' 收盤</div><div class="scr-facts">' +
+    cell('均線分數', r.score === null ? '—' : r.score + ' 分') + cell('籌碼暴增', r.chip === null ? '—' : (r.chip > 0 ? '+' : '') + r.chip + '%' + (r.chipOn ? '（上榜）' : '')) +
+    cell('雙劍', r.maHits && r.chipHits ? '均' + r.maHits + ' 籌' + r.chipHits : (r.maHits ? '均' + r.maHits : (r.chipHits ? '籌' + r.chipHits : '—'))) +
+    cell('主動式 ETF', r.etf ? r.etf + ' 家持有' : '—') + cell('處置', r.dispo !== null ? '🔒 還關 ' + r.dispo + ' 天' : (r.upcoming ? '明天起處置' : '—')) +
+    cell('股票期貨', r.futLabel || '—') + cell('法人 3 日', inst(r.inst3)) + cell('法人 5 日', inst(r.inst5)) +
+    cell('K棒', (r.k === 'red' ? '🔴 紅K ' : (r.k === 'black' ? '⚫ 黑K ' : '')) + scrPct(r.chg)) + '</div>';
+}
+async function scrLoadStock(code){
+  if (!code || scrState.stockCode === code && scrState.stock) return;
+  scrState.stockCode = code; scrState.stock = null;
+  try {
+    const res = await fetch('/api/screener-stock?code=' + encodeURIComponent(code));
+    if (res.ok) scrState.stock = await res.json();
+  } catch (_){ /* 拿不到就不顯示 */ }
+  if (dgState.code === code && !document.getElementById('diagModal').hidden) renderDiag();
+}
+document.getElementById('scrBody').addEventListener('click', (e) => {
+  const t = e.target;
+  if (t.closest('.wl-star')) return;
+  if (t.closest('[data-scr-toggle]')){ scrState.open = !scrState.open; renderScreener(); return; }
+  const pre = t.closest('[data-scr-preset]');
+  if (pre){ scrApplyPreset(pre.dataset.scrPreset); return; }
+  if (t.closest('[data-scr-go]')){ scrState.preset = ''; scrRun(); return; }
+  if (t.closest('[data-scr-clear]')){ scrState.on = {}; scrState.k = 'any'; scrState.kmin = ''; scrState.kmax = ''; scrState.preset = ''; renderScreener(); return; }
+  const kb = t.closest('[data-scr-k]');
+  if (kb){ scrState.k = kb.dataset.scrK; scrState.preset = ''; renderScreener(); return; }
+  const th = t.closest('[data-scr-sort]');
+  if (th){ const k = th.dataset.scrSort; if (scrState.sortKey === k) scrState.sortDir = -scrState.sortDir; else { scrState.sortKey = k; scrState.sortDir = k === 'code' ? 1 : -1; } renderScreener(); return; }
+  const row = t.closest('[data-scr-row]');
+  if (row){
+    scrState.picked = row.dataset.scrRow;
+    dgRun(row.dataset.scrRow);
+    renderScreener();
+    const target = document.getElementById('diagBody');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+});
+document.getElementById('scrBody').addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.dataset.scrOn){ scrState.on[t.dataset.scrOn] = t.checked; scrState.preset = ''; renderScreener(); return; }
+  if (t.dataset.scrKn){ scrState[t.dataset.scrKn] = t.value.trim(); scrState.preset = ''; return; }
+  if (t.dataset.scrDate !== undefined && t.matches('select')){ scrState.date = t.value; scrRun(); }
+});
+document.getElementById('scrBody').addEventListener('input', (e) => {
+  const t = e.target;
+  if (!t.dataset.scrVal) return;
+  scrState.val[t.dataset.scrVal] = +t.value;
+  scrState.on[t.dataset.scrVal] = true;
+  scrState.preset = '';
+  const card = SCR_CARDS.find((c) => c.key === t.dataset.scrVal);
+  const b = t.parentNode.querySelector('b');
+  if (b && card) b.textContent = card.key === 'river' ? (+t.value >= 2 ? '便宜以下' : '只要特價') : (t.value + card.unit);
+  const box = t.closest('.scr-card'); if (box) box.classList.add('on');
+  const cb = box && box.querySelector('input[type=checkbox]'); if (cb) cb.checked = true;
+});
 function openDiagPanel(code){
   document.getElementById('diagModal').hidden = false;
+  renderScreener();
+  if (!scrState.data && !scrState.loading && !scrState.error) scrRun();   // 第一次打開：先跑預設的創高黑龍那組
   if (code) dgRun(code); else renderDiag();
 }
 function closeDiagPanel(){ document.getElementById('diagModal').hidden = true; }
