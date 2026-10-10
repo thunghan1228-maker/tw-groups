@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 11:39:45";
+const BUILD_STAMP = "2026-10-10 12:00:07";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5674,9 +5674,9 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
 // 後端 /api/chip-radar：集保股權分散表（每週五結算）算「大戶手上的股票變多還是變少」。
 // x＝（這週 400 張以上大戶持股股數 − 上週）÷ 這週總股數 ×100；籌碼%＝3√x（大戶增加）或 x（減少）——跟莊爸截圖逐一比對過。
 // 個股查詢 /api/chip-radar-stock（九週軌跡、同族群、三大法人）；迷你 K 線用 /api/bars1d。
-const RD_WINDOWS = [16, 8, 4];
-const RD_TOPS = [15, 30, 50];
-let radarState = { listWeek: '', window: 16, top: 15, group: '', code: '', query: '', expanded: {}, kOpen: {}, scrollTo: '' };
+const RD_WINDOWS = [0, 6, 4];      // 0＝全部（06/18 起，跟莊爸的「全部／近 6 週／近 4 週」一樣）
+const RD_TOPS = [10, 15, 20, 30];
+let radarState = { listWeek: '', window: 0, top: 15, group: '', code: '', query: '', expanded: {}, kOpen: {}, scrollTo: '' };
 let radarData = null, radarLoading = false, radarFailedAt = 0, radarLoadedAt = 0, radarError = '';
 const radarStockCache = {}, radarStockLoading = {}, radarStockFailedAt = {}, radarStockError = {};
 const rdBarsCache = {}, rdBarsLoading = {}, rdBarsFailed = {};
@@ -5692,10 +5692,15 @@ function rdPct(v, digits){
   return (Number(t) > 0 ? '+' : '') + t + '%';
 }
 const rdMd = (d) => (d ? String(d).slice(5, 10).replace('-', '/') : '');
-// 那週總股數變動（增資、減資、轉換公司債）：增資照算（跟莊爸一樣）；總股數減少 ≥5%（減資、股份轉換）後端不列入排行
+// 那週總股數變動（增資、減資、轉換公司債）：增資照算（跟莊爸一樣）；總股數減少 ≥5% 而且籌碼% 絕對值 ≥15（減資、股份轉換）後端不列入排行
 function rdCapTag(v, excluded){
   if (!rdHas(v)) return '';
   return '<span class="rd-cap" title="那週總股數' + (v > 0 ? '增加' : '減少') + ' ' + Math.abs(v) + '%（增資、減資或轉換公司債），籌碼% 有一部分是股本變動造成的' + (excluded ? '；減資／股份轉換，不列入排行' : '') + '"><span class="rd-cap-long">股本' + (v > 0 ? '+' : '') + v + '%' + (excluded ? '・不列入' : '') + '</span><span class="rd-cap-short">股</span></span>';
+}
+// 上一週集保沒有這檔（減資、停止過戶那週集保不出資料），改跟更早那週比
+function rdVsTag(vs){
+  if (!vs) return '';
+  return '<span class="rd-cap" title="上一週集保沒有這檔的資料（減資、停止過戶），這週改跟 ' + rdMdShort(vs) + ' 比"><span class="rd-cap-long">比 ' + rdMdShort(vs) + '</span><span class="rd-cap-short">比</span></span>';
 }
 const rdMdShort = (d) => (d ? Number(String(d).slice(5, 7)) + '/' + Number(String(d).slice(8, 10)) : '');
 function rdMa(score){
@@ -5841,7 +5846,7 @@ function rdTrailHtml(trail){
       (rdHas(t.capital) ? '<span class="rd-cap" style="margin:0 3px 0 0">股' + (t.excluded ? '✕' : '') + '</span>' : '') + (rdHas(v) ? (v === 0 ? '0%' : rdPct(v)) : '—') + '</span>' +
       (t.rank ? '<span class="rd-circle">' + t.rank + '</span>' : '<span></span>') + '</div>';
   }).join('') + '<div class="rd-note">近 ' + rows.length + ' 週籌碼增減（新→舊）・紅＝週增、綠＝週減・<span class="rd-circle" style="width:14px;height:14px;font-size:9px">n</span>＝當週買超榜名次（前 10）' +
-    (rows.some((t) => rdHas(t.capital)) ? '・<span class="rd-cap" style="margin:0">股</span>＝那週股本有變動（✕＝減資或股份轉換、總股數少 5% 以上，不列入排行）' : '') + '</div>';
+    (rows.some((t) => rdHas(t.capital)) ? '・<span class="rd-cap" style="margin:0">股</span>＝那週股本有變動（✕＝減資或股份轉換、總股數少 5% 以上而且籌碼% 超過 ±15，不列入排行）' : '') + '</div>';
 }
 function rdInstHtml(inst){
   if (!inst || ((!inst.weeks || !inst.weeks.length) && (!inst.days || !inst.days.length))){
@@ -5904,7 +5909,7 @@ function rdSearchHtml(){
 function rdListRows(rows, side){
   if (!rows.length) return '<div class="rd-empty-list">這週沒有' + (side === 'buy' ? '籌碼% ≥ 4' : '籌碼% ≤ −1.5') + ' 的股票。</div>';
   const max = Math.max(0.01, ...rows.map((r) => Math.abs(r.chip)));
-  return rows.map((r) => '<div class="rd-lrow" data-rd-code="' + r.code + '"><span class="rd-c">' + r.code + '</span><span class="rd-n">' + rdEsc(r.name) + (r.star ? '<span class="rd-star" title="連續兩週上榜">★</span>' : '') + rdCapTag(r.capital) + '</span>' +
+  return rows.map((r) => '<div class="rd-lrow" data-rd-code="' + r.code + '"><span class="rd-c">' + r.code + '</span><span class="rd-n">' + rdEsc(r.name) + (r.star ? '<span class="rd-star" title="連續兩週上榜">★</span>' : '') + rdCapTag(r.capital) + rdVsTag(r.vs) + '</span>' +
     '<span class="rd-bar"><i class="' + (side === 'buy' ? 'up' : 'down') + '" style="width:' + Math.min(100, Math.abs(r.chip) / max * 100).toFixed(1) + '%"></i></span>' +
     '<span class="rd-val ' + (side === 'buy' ? 'rd-up' : 'rd-down') + '">' + rdPct(rdHas(r.chip1) ? r.chip1 : r.chip, 1) + '</span>' + rdMa(r.score) + '</div>').join('');
 }
@@ -5918,10 +5923,11 @@ function rdListsHtml(d){
     '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-down">▼ 賣超榜（' + pick.sell.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.sell, 'sell') + '</div>' +
     '</div></section>';
 }
-// 累積榜：後端給 16 週每週前十名的格子（舊到新），這裡照選的週數加總
+// 累積榜：後端給「全部」（06/18 起，allWeeks 週；不足 16 週時給 16 週）每週前十名的格子（舊到新），這裡照選的週數加總；n＝0 是全部
+function rdCumAll(cum){ return Math.min(cum.allWeeks || cum.dates.length, cum.dates.length); }
 function rdCumRows(d, n){
   const cum = d.cumulative || { dates: [], rows: [] };
-  const k = Math.min(n, cum.dates.length);
+  const k = Math.min(n || rdCumAll(cum), cum.dates.length);
   const dates = cum.dates.slice(cum.dates.length - k);
   const rows = [];
   (cum.rows || []).forEach((r) => {
@@ -5941,7 +5947,8 @@ function rdCumHtml(d){
   const res = rdCumRows(d, radarState.window);
   const k = res.weeks;
   const shown = res.rows.slice(0, radarState.top);
-  const winOpts = RD_WINDOWS.filter((w, i) => i === 0 || w < cum.dates.length).map((w) => '<option value="' + w + '"' + (w === radarState.window ? ' selected' : '') + '>' + (w >= cum.dates.length ? '全部 ' + cum.dates.length + ' 週' : '近 ' + w + ' 週') + '</option>').join('');
+  const all = rdCumAll(cum);
+  const winOpts = RD_WINDOWS.filter((w) => w === 0 || w < all).map((w) => '<option value="' + w + '"' + (w === radarState.window ? ' selected' : '') + '>' + (w === 0 ? '全部 ' + all + ' 週' : '近 ' + w + ' 週') + '</option>').join('');
   const topOpts = RD_TOPS.map((t) => '<option value="' + t + '"' + (t === radarState.top ? ' selected' : '') + '>前 ' + t + ' 檔</option>').join('');
   const body = shown.map((x, i) => {
     const r = x.r, open = !!radarState.expanded[r.code];
@@ -5957,7 +5964,7 @@ function rdCumHtml(d){
     }
     return html;
   }).join('');
-  return '<section><div class="rd-sec-title">上榜累積榜<small>近 ' + k + ' 週（集保結算 ' + rdMd(res.dates[0]) + ' ～ ' + rdMd(res.dates[res.dates.length - 1]) + '）・擠進當週買超榜前十名幾次</small></div>' +
+  return '<section><div class="rd-sec-title">上榜累積榜<small>' + (radarState.window ? '近 ' : '全部 ') + k + ' 週（集保結算 ' + rdMd(res.dates[0]) + ' ～ ' + rdMd(res.dates[res.dates.length - 1]) + '）・擠進當週買超榜前十名幾次</small></div>' +
     '<div class="rd-ctl"><label>回看 <select class="rd-select" id="rdWindow">' + winOpts + '</select></label><label>列出 <select class="rd-select" id="rdTop">' + topOpts + '</select></label></div>' +
     '<div class="rd-legend"><span class="rd-cell gold"><span>08/14</span><b>4</b><span>+7.97%</span></span><span>← 結算週<br>← 當週買超榜名次（只列到第 10）<br>← 當週籌碼增減</span><span>點任一列展開逐週格子：金色＝那週擠進前十，白色＝沒進榜。</span></div>' +
     (shown.length ? '<div class="rd-scroll"><table class="rd-table"><thead><tr><th></th><th>股號</th><th>股名</th><th>進榜次數<small>共 ' + k + ' 週</small></th><th>占比</th><th>近 4 週</th><th>均線分數</th><th>平均籌碼%</th><th>分數</th><th>最佳名次</th><th>族群</th></tr></thead><tbody>' + body + '</tbody></table></div>' : '<div class="rd-empty-list">這段期間沒有資料。</div>') +
@@ -6020,7 +6027,7 @@ function radarHtml(){
     '<p>籌碼暴增代表主力在收貨、把股票買進口袋——也就是主力進場，若再搭配型態，有機會續強；反過來變少，就是主力在鬆手。<b class="rd-up">紅色是增加</b>、<b class="rd-down">綠色是減少</b>。</p>' +
     '<p>連續兩週上榜、而且同族群其他股票也一起增加，是最值得盯的組合。⭐＝連續兩週上榜——主力不是買一週就走，是連著兩週都在收。</p>' +
     '<p>籌碼%：x＝（這週 400 張以上大戶持股 − 上週）÷ 這週總股數 ×100；大戶增加顯示 3×√x（小幅增加也看得出來）、減少照原樣（跟莊爸的算法一樣）。每列最後的方塊＝均線分數（滿分 15，每個交易日收盤後更新）：12 分以上實心金＝位置最強、8～11 半填、7 以下只描邊。</p>' +
-    '<p>那週有增資、減資的（總股數變動）名單上標<span class="rd-cap">股本±x%</span>：增資照算（跟莊爸一樣，例如佳大 9/24 私募）；減資或股份轉換（總股數少 5% 以上）大戶股數會跟著縮水，不列入排行。</p></div>';
+    '<p>那週有增資、減資的（總股數變動）名單上標<span class="rd-cap">股本±x%</span>：增資照算（跟莊爸一樣，例如佳大 9/24 私募）；減資或股份轉換（總股數少 5% 以上）而且籌碼% 超過 ±15 的，是大戶股數跟著縮水造成的，不列入排行；籌碼% 不大的照列（跟莊爸一樣，例如方土霖 10/08 減資 10%、−8.6%）。上一週集保沒有這檔（減資、停止過戶那週集保不出資料）就改跟更早一週比，名單上標<span class="rd-cap">比 9/24</span>。累積榜的「全部」跟莊爸一樣從 06/18 那週算起。</p></div>';
   if (!d){
     return '<div class="rd-wrap">' + head + '<div class="signal-empty"><div class="se-title">' + (radarError ? '讀取失敗' : '讀取中…') + '</div><div class="se-sub">' + rdEsc(radarError || '正在抓集保週資料。') + '</div></div></div>';
   }
@@ -6086,7 +6093,7 @@ document.getElementById('chipsBody').addEventListener('input', (e) => {
 });
 document.getElementById('chipsBody').addEventListener('change', (e) => {
   if (!e.target) return;
-  if (e.target.id === 'rdWindow'){ radarState.window = Number(e.target.value) || 16; renderChips(); }
+  if (e.target.id === 'rdWindow'){ radarState.window = Number(e.target.value) || 0; renderChips(); }
   if (e.target.id === 'rdTop'){ radarState.top = Number(e.target.value) || 15; renderChips(); }
 });
 
@@ -8368,7 +8375,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 11:39:45';
+const BUILD_STAMP = '2026-10-10 12:00:07';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

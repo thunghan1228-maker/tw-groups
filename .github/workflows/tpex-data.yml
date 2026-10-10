@@ -209,7 +209,7 @@ jobs:
                   index = json.load(open('tpex/tdcc-index.json', encoding='utf-8'))
               except Exception:
                   index = []
-              index = sorted(set(index) | {day}, reverse=True)[:30]   # 雷達要 16 週累積＋8 週可切（後端留 26 週）
+              index = sorted(set(index) | {day}, reverse=True)[:60]   # 籌碼週報累積榜「全部」最多一年（後端留 60 週）
               json.dump(index, open('tpex/tdcc-index.json', 'w', encoding='utf-8'))
           except Exception as e:
               print('tdcc failed', type(e).__name__, e)
