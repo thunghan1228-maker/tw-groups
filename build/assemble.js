@@ -490,6 +490,10 @@ export default {
       // 營收成長榜的查個股營收（每個月的年增、公布日、隔日漲跌），60 秒快取
       return await proxyHanstockBars("/api/hub/revenue/stock" + url.search, 60);
     }
+    if (url.pathname === "/api/chip-weekly") {
+      // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);
+    }
     if (url.pathname === "/api/chip-radar-stock") {
       // 籌碼暴增雷達的個股查詢（九週軌跡、同族群、三大法人），60 秒快取
       return await proxyHanstockBars("/api/hub/chip-radar/stock" + url.search, 60);
