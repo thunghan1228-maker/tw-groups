@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 15:14:39";
+const BUILD_STAMP = "2026-10-10 15:36:53";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -9150,7 +9150,7 @@ const SCR_CARDS = [
   { key: 'etf', title: '主動式 ETF 持有 ≥', desc: '五檔主動式 ETF 最新持股中，有幾檔同時持有它', min: 1, max: 5, step: 1, def: 1, unit: ' 家' },
   { key: 'inst3', title: '法人 3 日累積買超・估量 ≥', desc: '近 3 個交易日三大法人合計是買超，且累積買超張數 ÷ 3 日成交量', min: 0, max: 40, step: 1, def: 5, unit: '%' },
   { key: 'inst5', title: '法人 5 日累積買超・估量 ≥', desc: '近一週（5 個交易日）三大法人合計是買超，且累積買超張數 ÷ 5 日成交量', min: 0, max: 40, step: 1, def: 10, unit: '%' },
-  { key: 'sword', title: '⚔ 雙劍出擊・兩張榜各取前', desc: '均線常客 ∩ 籌碼常客 —— 兩張榜都排得進去才算。均線常客：近 20 個交易日每天取均線分數前 10 名，誰上榜次數多；籌碼常客：近 9 週每週取籌碼暴增榜前 10 名，誰進榜次數多。一張看技術位置一直待在前段、一張看大戶一直在收 —— 兩把劍同時指向同一檔，才叫雙劍出擊。', min: 10, max: 60, step: 5, def: 60, unit: ' 名' },
+  { key: 'sword', title: '⚔ 雙劍出擊・兩張榜各取前', desc: '均線常客 ∩ 籌碼常客 —— 兩張榜都排得進去才算。均線常客：近 20 個交易日每天取均線分數前 10 名，誰上榜次數多；籌碼常客：近 9 週每週取籌碼暴增榜前 10 名，誰進榜次數多。一張看技術位置一直待在前段、一張看大戶一直在收 —— 兩把劍同時指向同一檔，才叫雙劍出擊。', min: 10, max: 60, step: 5, def: 20, unit: ' 名' },   // 2026-10-10 使用者：預設改前 20 名（原本照莊爸 60）
   { key: 'dispo', title: '處置股倒數 ≤', desc: '目前還在處置中、而且快出關的股。倒數＝還要關幾個交易日（迄日當天＝1，下一個交易日出關）。只扣週末與國定假日，碰到颱風假會少算一兩天。', min: 1, max: 10, step: 1, def: 5, unit: ' 天' },
   { key: 'river', title: '河流圖位置 ≤', desc: '照估值河流圖（本站版）的目前位置挑「股價回到相對便宜」的股：1＝只要特價（含跌破）、2＝便宜以下。虧損或獲利太薄（算不出河道）的一律不符合。', min: 1, max: 2, step: 1, def: 2, unit: '' },
   { key: 'fut', title: '有股票期貨', desc: '期交所所有個股期貨的標的（一般 2,000 股或小型 100 股都算）。有期貨才好放空與避險。', check: true },
@@ -9166,7 +9166,7 @@ const SCR_PRESETS = [
   { name: '處置黑龍', p: { dispo: 5, k: 'black' } },
   { name: '期貨黑龍', p: { score: 10, fut: 1, k: 'black' } },
   { name: '奇貨可居', p: { score: 10, etf: 1, fut: 1 } },
-  { name: '雙劍出擊', p: { sword: 60 } },
+  { name: '雙劍出擊', p: { sword: 20 } },   // 2026-10-10 使用者：前 60 太寬（均1 籌2 也進得來），改前 20
   { name: '河流便宜', p: { score: 10, river: 2 } },
 ];
 const scrState = { on: {}, val: {}, k: 'any', kmin: '', kmax: '', preset: '', date: '', data: null, loading: false, error: '', sortKey: 'score', sortDir: -1, open: true, stock: null, stockCode: '' };
@@ -9421,7 +9421,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 15:14:39';
+const BUILD_STAMP = '2026-10-10 15:36:53';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

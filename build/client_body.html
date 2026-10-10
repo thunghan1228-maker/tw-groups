@@ -9083,7 +9083,7 @@ const SCR_CARDS = [
   { key: 'etf', title: '主動式 ETF 持有 ≥', desc: '五檔主動式 ETF 最新持股中，有幾檔同時持有它', min: 1, max: 5, step: 1, def: 1, unit: ' 家' },
   { key: 'inst3', title: '法人 3 日累積買超・估量 ≥', desc: '近 3 個交易日三大法人合計是買超，且累積買超張數 ÷ 3 日成交量', min: 0, max: 40, step: 1, def: 5, unit: '%' },
   { key: 'inst5', title: '法人 5 日累積買超・估量 ≥', desc: '近一週（5 個交易日）三大法人合計是買超，且累積買超張數 ÷ 5 日成交量', min: 0, max: 40, step: 1, def: 10, unit: '%' },
-  { key: 'sword', title: '⚔ 雙劍出擊・兩張榜各取前', desc: '均線常客 ∩ 籌碼常客 —— 兩張榜都排得進去才算。均線常客：近 20 個交易日每天取均線分數前 10 名，誰上榜次數多；籌碼常客：近 9 週每週取籌碼暴增榜前 10 名，誰進榜次數多。一張看技術位置一直待在前段、一張看大戶一直在收 —— 兩把劍同時指向同一檔，才叫雙劍出擊。', min: 10, max: 60, step: 5, def: 60, unit: ' 名' },
+  { key: 'sword', title: '⚔ 雙劍出擊・兩張榜各取前', desc: '均線常客 ∩ 籌碼常客 —— 兩張榜都排得進去才算。均線常客：近 20 個交易日每天取均線分數前 10 名，誰上榜次數多；籌碼常客：近 9 週每週取籌碼暴增榜前 10 名，誰進榜次數多。一張看技術位置一直待在前段、一張看大戶一直在收 —— 兩把劍同時指向同一檔，才叫雙劍出擊。', min: 10, max: 60, step: 5, def: 20, unit: ' 名' },   // 2026-10-10 使用者：預設改前 20 名（原本照莊爸 60）
   { key: 'dispo', title: '處置股倒數 ≤', desc: '目前還在處置中、而且快出關的股。倒數＝還要關幾個交易日（迄日當天＝1，下一個交易日出關）。只扣週末與國定假日，碰到颱風假會少算一兩天。', min: 1, max: 10, step: 1, def: 5, unit: ' 天' },
   { key: 'river', title: '河流圖位置 ≤', desc: '照估值河流圖（本站版）的目前位置挑「股價回到相對便宜」的股：1＝只要特價（含跌破）、2＝便宜以下。虧損或獲利太薄（算不出河道）的一律不符合。', min: 1, max: 2, step: 1, def: 2, unit: '' },
   { key: 'fut', title: '有股票期貨', desc: '期交所所有個股期貨的標的（一般 2,000 股或小型 100 股都算）。有期貨才好放空與避險。', check: true },
@@ -9099,7 +9099,7 @@ const SCR_PRESETS = [
   { name: '處置黑龍', p: { dispo: 5, k: 'black' } },
   { name: '期貨黑龍', p: { score: 10, fut: 1, k: 'black' } },
   { name: '奇貨可居', p: { score: 10, etf: 1, fut: 1 } },
-  { name: '雙劍出擊', p: { sword: 60 } },
+  { name: '雙劍出擊', p: { sword: 20 } },   // 2026-10-10 使用者：前 60 太寬（均1 籌2 也進得來），改前 20
   { name: '河流便宜', p: { score: 10, river: 2 } },
 ];
 const scrState = { on: {}, val: {}, k: 'any', kmin: '', kmax: '', preset: '', date: '', data: null, loading: false, error: '', sortKey: 'score', sortDir: -1, open: true, stock: null, stockCode: '' };
