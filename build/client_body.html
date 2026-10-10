@@ -2271,7 +2271,30 @@ let currentChart = {
   code: null, name: null, tf: 'daily', bars: null, force: null, macd: null, kd: null,
   maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, hoverIndex: null,
   viewStart: 0, viewCount: null, isRealBars: false, requestToken: 0, dailyBars: null,
+  defOn: (() => { try { return localStorage.getItem('chartDefOn') !== '0'; } catch (_){ return true; } })(),   // 日線的明日防守線
 };
+// 日線的明日防守線（2026-10-10 使用者：個股研究日線圖的「明日 紅半／三日低／月線」也畫到 K 線圖的日線）
+// 算法跟後端 stock_checkup.defense_lines 的「明日值」一樣：三日低＝含今天的近三日最低；月線＝含今天的 20 日收盤平均；
+// 紅半＝近三日最高與最低的中點，只在三日振幅 ≥10% 而且收盤站在中點之上 1% 以上時才列。盤中最後一根是即時K，收盤後才定案。
+function chartDefenseLines(allBars){
+  const n = allBars ? allBars.length : 0;
+  if (n < 3) return [];
+  const close = allBars[n - 1].close;
+  let hi3 = -Infinity, lo3 = Infinity;
+  for (let i = n - 3; i < n; i++){ hi3 = Math.max(hi3, allBars[i].high); lo3 = Math.min(lo3, allBars[i].low); }
+  const out = [];
+  if (lo3 > 0){
+    const mid = (hi3 + lo3) / 2;
+    if ((hi3 / lo3 - 1) * 100 >= 10 && close >= mid * 1.01) out.push({ label: '紅半', v: mid, dash: [10, 3, 2, 3] });
+    out.push({ label: '三日低', v: lo3, dash: [4, 3] });
+  }
+  if (n >= 20){
+    let sum = 0;
+    for (let i = n - 20; i < n; i++) sum += allBars[i].close;
+    out.push({ label: '月線', v: sum / 20, dash: [8, 4] });
+  }
+  return out;
+}
 
 // 五分鐘K盤中訊號符號／顏色／白話解釋；規格來源見HANSTOCK策略定義備份文件。
 // side='bull'畫在K棒上方，side='bear'畫在下方；顏色比照文件原本的符號顏色。
@@ -2474,6 +2497,8 @@ function drawChart(){
     maSeries[idx].forEach((v) => { if (v != null){ lo = Math.min(lo, v); hi = Math.max(hi, v); } });
   });
   if (vwapSeries) vwapSeries.forEach((v) => { lo = Math.min(lo, v); hi = Math.max(hi, v); });
+  const defLines = (currentChart.tf === 'daily' && currentChart.defOn && vStart + vCount >= allBars.length) ? chartDefenseLines(allBars) : [];
+  defLines.forEach((d) => { lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); });
   const range = (hi - lo) || 1;
   lo -= range * 0.06; hi += range * 0.06;
 
@@ -2592,6 +2617,39 @@ function drawChart(){
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
     ctx.stroke();
+  }
+
+  // 明日防守線：虛線橫跨整張圖；左端寫名稱＋價位（不擋最新幾根K棒），右邊價格軸放紅框價位
+  if (defLines.length){
+    ctx.save();
+    const DEF = '#e6675f';
+    const tags = defLines.map((d) => ({ ...d, y: yAt(d.v) })).sort((a, b) => a.y - b.y);
+    let prevTag = -Infinity;
+    tags.forEach((t) => { t.ty = Math.max(t.y, prevTag + 15); prevTag = t.ty; });   // 三個價位太近時標籤往下錯開
+    const over = tags.length ? tags[tags.length - 1].ty - (cssH - padBottom - 8) : 0;
+    if (over > 0) tags.forEach((t) => { t.ty -= over; });
+    tags.forEach((t) => {
+      ctx.strokeStyle = DEF; ctx.globalAlpha = 0.95; ctx.lineWidth = 1.3; ctx.setLineDash(t.dash);
+      ctx.beginPath(); ctx.moveTo(PAD.left, t.y); ctx.lineTo(cssW - PAD.right, t.y); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+      const text = '明日 ' + t.label + ' ' + t.v.toFixed(2);
+      ctx.font = 'bold 10px -apple-system, sans-serif';
+      const tw = ctx.measureText(text).width + 8;
+      const ly = t.ty - 8;
+      ctx.fillStyle = 'rgba(18,16,15,0.78)';
+      ctx.fillRect(PAD.left + 2, ly - 7, tw, 14);
+      ctx.fillStyle = DEF; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(text, PAD.left + 6, ly);
+      const tagY = Math.max(padTop, Math.min(cssH - padBottom - 14, t.ty - 7));
+      ctx.fillStyle = 'rgba(18,16,15,0.92)';
+      ctx.fillRect(cssW - PAD.right + 1, tagY, PAD.right - 2, 14);
+      ctx.strokeStyle = DEF; ctx.lineWidth = 1;
+      ctx.strokeRect(cssW - PAD.right + 1.5, tagY + 0.5, PAD.right - 3, 13);
+      ctx.fillStyle = DEF; ctx.textAlign = 'center';
+      ctx.font = '10px -apple-system, sans-serif';
+      ctx.fillText(t.v.toFixed(2), cssW - PAD.right / 2, tagY + 7);
+    });
+    ctx.restore();
   }
 
   ctx.fillStyle = '#a89c8f';
@@ -2908,7 +2966,9 @@ function updateMaLegend(absIndex){
   el.innerHTML = currentChart.maLines.filter((ma) => ma.on).map((ma) => {
     const v = computeMA(allBars, ma.period)[idx];
     return '<span class="ma-legend-item" style="color:' + ma.color + '">MA' + ma.period + (v != null ? ' ' + v.toFixed(2) : '') + '</span>';
-  }).join('');
+  }).join('') + (currentChart.tf === 'daily' && currentChart.defOn
+    ? chartDefenseLines(allBars).map((d) => '<span class="ma-legend-item" style="color:#e6675f">明日' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('')
+    : '');
 }
 function updateChartTooltipAt(clientX, clientY){
   const canvas = document.getElementById('klineCanvas');
@@ -3010,6 +3070,12 @@ function renderSettingsPanel(){
       '<input class="ind-width" type="number" min="0.5" max="8" step="0.5" value="' + currentChart.vwapWidth + '" data-kind="vwap-width"><span class="ind-w-label">px</span>' +
     '</div>';
   }
+  if (currentChart.tf === 'daily'){
+    rows += '<div class="ind-row">' +
+      '<label class="ind-vis"><input type="checkbox" data-kind="def-on" ' + (currentChart.defOn ? 'checked' : '') + '><span class="ind-dot" style="background:#e6675f"></span></label>' +
+      '<span class="ind-label">明日防守線</span><span class="ind-fixed">紅半／三日低／月線</span>' +
+    '</div>';
+  }
   wrap.innerHTML = rows;
   wrap.querySelectorAll('input').forEach((inp) => {
     inp.addEventListener('input', onSettingsChange);
@@ -3025,6 +3091,12 @@ function onSettingsChange(e){
   else if (kind === 'vwap-on') currentChart.vwapOn = t.checked;
   else if (kind === 'vwap-color'){ currentChart.vwapColor = t.value; t.closest('.ind-row').querySelector('.ind-dot').style.background = t.value; }
   else if (kind === 'vwap-width') currentChart.vwapWidth = Math.max(0.5, parseFloat(t.value) || 3);
+  else if (kind === 'def-on'){
+    currentChart.defOn = t.checked;
+    try { localStorage.setItem('chartDefOn', t.checked ? '1' : '0'); } catch (_){}
+    redrawAll();
+    return;
+  }
   drawChart();
 }
 
