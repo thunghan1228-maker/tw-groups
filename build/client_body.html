@@ -884,6 +884,81 @@
   .mc-card dt{color:var(--muted);}
   .mc-card dd{margin:0;}
   .mc-foot{font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:10px;line-height:1.7;}
+  /* 新手教學 */
+  .guide-btn{color:var(--text);}
+  .guide-btn.pulse{animation:gdPulse 1.6s ease-in-out 4;border-color:#f59e0b;}
+  @keyframes gdPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0);}50%{box-shadow:0 0 0 4px rgba(245,158,11,.45);}}
+  .gd-inner{max-width:980px;}
+  .gd-tag{display:inline-block;border:1px solid var(--up);color:var(--up);font-size:12px;font-weight:800;border-radius:4px;padding:2px 10px;margin-top:4px;letter-spacing:2px;}
+  .gd-title{font-size:28px;font-weight:900;color:var(--up);margin:10px 0 6px;}
+  .gd-lead{font-size:14px;line-height:1.8;color:var(--muted);margin:0 0 8px;}
+  .gd-h{font-size:19px;font-weight:900;border-left:4px solid var(--up);padding-left:10px;margin:22px 0 10px;}
+  .gd-grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+  .gd-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .gd-step,.gd-card,.gd-tool{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.7;min-width:0;}
+  .gd-step p,.gd-tool p{margin:4px 0 0;color:var(--muted);}
+  .gd-step b{display:block;font-size:15px;margin-top:6px;}
+  .gd-n{display:inline-flex;width:24px;height:24px;border-radius:50%;background:#f5b301;color:#1a1a1a;font-weight:900;align-items:center;justify-content:center;font-size:13px;}
+  .gd-time{display:flex;flex-direction:column;gap:6px;}
+  .gd-tr{display:grid;grid-template-columns:130px minmax(0,1fr);gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.7;}
+  .gd-tr b{color:#f59e0b;}
+  .gd-sub{margin:0 0 8px;color:var(--muted);}
+  .gd-htabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .gd-ol{margin:6px 0;padding-left:22px;font-size:14px;line-height:1.9;}
+  .gd-tip{border-left:3px solid #f59e0b;background:var(--panel-2);padding:6px 10px;border-radius:0 6px 6px 0;margin-top:8px;}
+  .gd-tt{font-size:16px;font-weight:900;color:var(--up);display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+  .gd-tt i{font-style:normal;font-size:11px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 8px;}
+  .gd-tool ul,.gd-ul{margin:8px 0 10px;padding-left:18px;color:var(--text);}
+  .gd-tool{display:flex;flex-direction:column;}
+  .gd-go{margin-top:auto;align-self:flex-start;background:linear-gradient(#ffd34d,#f5b301);color:#1a1a1a;border:none;border-radius:8px;padding:6px 14px;font-weight:900;cursor:pointer;font-family:inherit;font-size:13px;}
+  .gd-card b.up{color:var(--up);}
+  .gd-card b.down{color:var(--down);}
+  .gd-faq{display:flex;flex-direction:column;}
+  .gd-qa{border-bottom:1px solid var(--line);padding:10px 2px;}
+  .gd-qa b{font-size:14px;}
+  .gd-qa p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.7;}
+  .gd-end{border:1px solid var(--line);border-left:4px solid var(--up);border-radius:10px;padding:10px 14px;margin-top:18px;font-size:13px;line-height:1.7;}
+  .gd-end p{margin:4px 0 0;color:var(--muted);}
+  @media (max-width: 640px){
+    .gd-grid3,.gd-grid2{grid-template-columns:minmax(0,1fr);}
+    .gd-tr{grid-template-columns:minmax(0,1fr);gap:2px;}
+    .gd-title{font-size:23px;}
+  }
+  /* 研究室：內部人 */
+  .in-search{display:flex;gap:6px;margin:6px 0 10px;}
+  .in-search input{flex:1;min-width:0;max-width:280px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:14px;font-family:inherit;}
+  #inMonth{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-family:inherit;}
+  .in-row{display:grid;grid-template-columns:minmax(150px,1.2fr) 120px minmax(0,3fr);gap:6px 12px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px;}
+  .in-row:hover{background:var(--panel-2);}
+  .in-stk{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .in-stk b{font-size:14px;}
+  .in-grp{font-style:normal;font-size:11px;border:1px solid #a78bfa;color:#a78bfa;border-radius:5px;padding:0 5px;margin-left:5px;}
+  .in-combo{font-style:normal;font-size:11px;font-weight:800;border-radius:5px;padding:0 6px;margin-left:5px;color:#fff;}
+  .in-combo.up{background:var(--up);}
+  .in-combo.down{background:var(--down);}
+  .in-net{font-weight:900;font-size:15px;text-align:right;line-height:1.25;}
+  .in-net small{display:block;font-size:12px;font-weight:700;}
+  .in-net.up{color:var(--up);}
+  .in-net.down{color:var(--down);}
+  .in-sub{display:flex;flex-wrap:wrap;gap:2px 12px;color:var(--muted);align-items:center;}
+  .in-sub b{color:var(--text);}
+  .in-sub b.up{color:var(--up);}
+  .in-sub b.down{color:var(--down);}
+  .in-q{background:none;border:1px solid var(--line);color:#60a5fa;border-radius:6px;padding:0 8px;cursor:pointer;font-size:12px;font-family:inherit;margin-left:auto;}
+  .in-tbl{overflow-x:auto;margin-top:6px;}
+  .in-tbl table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap;}
+  .in-tbl th,.in-tbl td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;}
+  .in-tbl th:first-child,.in-tbl td:first-child{text-align:left;}
+  .in-tbl th{color:var(--muted);font-weight:700;}
+  .in-tbl td.up{color:var(--up);}
+  .in-tbl td.down{color:var(--down);}
+  .in-people,.in-weeks{margin-top:8px;font-size:13px;line-height:1.7;}
+  .in-weeks{display:flex;flex-wrap:wrap;gap:4px 12px;}
+  .in-weeks > b{flex-basis:100%;}
+  @media (max-width: 640px){
+    .in-row{grid-template-columns:minmax(0,1fr) auto;}
+    .in-sub{grid-column:1 / -1;}
+  }
   /* 研究室：資金保護傘 */
   .fu-umb{display:flex;gap:14px;align-items:flex-start;border-radius:12px;padding:12px 14px;margin:6px 0 10px;border:1px solid var(--line);}
   .fu-umb.bull{border-color:rgba(230,103,95,.5);background:rgba(230,103,95,.07);}
@@ -1923,6 +1998,7 @@
     <div class="market-strength-bar" id="otcStrengthBox"></div>
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
+      <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照莊爸新手教學頁） -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
   </div>
@@ -2048,6 +2124,15 @@
       <button class="cm-icon-btn" id="hwClose" aria-label="關閉">✕</button>
     </div>
     <div id="hwBody"></div>
+  </div>
+</div>
+<div class="chips-modal" id="guideModal" hidden>
+  <div class="chips-inner gd-inner" id="guideInner">
+    <div class="chips-head">
+      <div><div class="chips-title">新手教學</div><div class="chips-sub">第一次來的人看這頁；每個工具都可以按「去看看」直接打開。</div></div>
+      <button class="cm-icon-btn" id="guideClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="guideBody"></div>
   </div>
 </div>
 <!-- 2026-10-10 使用者：照莊爸「國際大事行事曆」（zhuang.tw/calendar）做，放進下方導覽列第 15 顆「研究室」 -->
@@ -11581,10 +11666,129 @@ document.getElementById('hwBody').addEventListener('change', (e) => {
   renderHomework();
 });
 
+// ---- 新手教學（2026-10-10 使用者：照莊爸「新手教學・第一次來，看這頁就好」做本站版）----
+// 右上角「📖 新手教學」打開；工具卡片的「去看看」直接幫你打開那個工具（等於按下方導覽列那顆）。
+const GUIDE_TOOLS = [
+  { t: '⚠ 盤中訊號中心', open: 'signal', tags: ['盤中', '每 15 秒'], d: '右上角紫色按鈕。盤中所有即時訊號都在這裡，一個分頁一種：誰在發動、誰被大戶狂買、哪個族群最強最弱。',
+    b: ['今日即時多／空：所有多方、空方訊號依時間排好，最新的在最上面', '醞釀／發動：均線分數高、整理完的股票（醞釀），一衝過箱頂就跳「發動」，網頁開著會響鈴通知',
+      '盤中 333、精選十大多空族群、所有族群綜合表：一眼看哪些族群在漲、族群裡誰最強', '盤中大戶力、四項精選、主力翻多／翻空、特大買賣單、刀劍空(32)、創高黑龍、1+2多：各種訊號分開看',
+      '最後一頁「訊號教學」把每個訊號的條件寫清楚'] },
+  { t: '自選股', label: '自選股', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
+    b: ['換手機或電腦用「同步碼」就能帶過去', '一鍵健診：持股的防守價、明日紅半／三日低／月線一次算好', '各列表看到喜歡的股票，點「☆」就加進來'] },
+  { t: '個股訊號追蹤', label: '個股盤中訊號追蹤', tags: ['盤中'], d: '只看你自選股今天出現了哪些訊號，不用在一堆名單裡找。',
+    b: ['自選股一出現新訊號就提醒（網頁要開著）', '點股票直接開 K 線圖'] },
+  { t: '飆股雷達', label: '飆股雷達', tags: ['盤中', '固定時點'], d: '15 個選股邏輯（穿山鱷龍、黑龍短沖、黑飛舞、飛龍戰法）在固定時間點自動掃全市場，把符合的名單抓出來。',
+    b: ['盤中與收盤各掃一次，到時間進來看就好，不用自己設定', '名單只是「符合條件」，不是買賣指令'] },
+  { t: '每日功課', label: '每日功課', tags: ['盤中', '自動'], d: '空觀察／當沖多／多觀察三份功課，系統自己把刀劍空、即將入獄、出獄、賽馬、河流、族群名次這幾份清單交叉比對，只留下該盯的那幾檔。',
+    b: ['不用貼名單，盤中跟著首頁報價每 20 秒重算', '多觀察挑三個族群看位置；防守價（三日低、月線）自動帶出來'] },
+  { t: '籌碼日報', label: '籌碼日報', tags: ['盤後'], d: '收盤後的一份整理：今日摘要、產業、籌碼、技術、均線轉強、處置動態，還有主動式 ETF 持股雷達、營收面精選。',
+    b: ['可以回看之前的日子', '主動式 ETF 雷達：五檔主動式 ETF 每天買賣什麼、連續同向、資金潮汐', '營收面精選：當月營收大增、均線分數夠、成交值夠的前 10 檔'] },
+  { t: '盤後籌碼排行', label: '今日盤後籌碼排行', tags: ['盤後', '每週'], d: '看大戶手上的股票變多還是變少：籌碼暴增雷達、法人連買、主力大單、放空籌碼，還有每週的籌碼週報。',
+    b: ['集保大戶資料每週五更新一次', '可以跟醞釀／發動交叉看'] },
+  { t: '均線分數排行', label: '均線分數排行', tags: ['盤後'], d: '幫每一檔打均線分數（滿分 15）：分數越高，代表位置越強、均線排得越整齊。',
+    b: ['全市場前 60 名、昨天名次、連續上榜幾天', '族群平均分數排行：看哪一整群底子最硬', '打代號可以查單一檔'] },
+  { t: '創高黑龍（自動）', label: '創高黑龍', tags: ['盤後', '12:00 暫定'], d: '收盤後依均線分數＋收黑 K 挑出名單，附上過去績效回測；中午 12:00 先給一份暫定名單。',
+    b: ['12:00 暫定名單用盤中報價算，收盤後以正式名單為準', '回測看隔天各種出場方式的勝率'] },
+  { t: '創高黑選股（手動）', label: '創高黑選股', tags: ['盤後', '模擬'], d: '自己設定模組參數挑股，模擬帳戶照規則分批加減碼，看實際跑起來的績效。',
+    b: ['13:20 提醒今天要做的動作', '每一檔沒買的都寫清楚原因'] },
+  { t: '每日持股健診', label: '健診', tags: ['盤後'], d: '輸入你的持股，看每一檔現在的狀態與明天要守的價位。',
+    b: ['防守線：明日紅半、三日低、月線', '同時看籌碼、營收、本益比'] },
+  { t: '選股・個股研究', label: '問診', tags: ['盤後'], d: '條件選股（勾條件、拉門檻一次篩出來）＋個股問診（打代號一頁看完這檔的均線、族群、籌碼、營收、估值）。',
+    b: ['選股條件越多，名單越少、越嚴格', '個股問診會給一句結論和明天要守的價'] },
+  { t: '營收成長榜', label: '營收成長榜', tags: ['每月'], d: '每月 10 號前公司陸續公布上個月營收，這裡把全市場排好：誰年增最多、公布後股價怎麼反應。',
+    b: ['一天更新三次，公布日自動記下來', '可以查單一檔的每月營收'] },
+  { t: '處置監獄', label: '處置監獄', tags: ['盤後'], d: '哪些股票被關（處置）、什麼時候出獄、哪些快被關（嫌疑名單）。被處置的股票要分盤撮合，進出很不順，事先知道比較好。',
+    b: ['一週出獄時間表、今日入獄、嫌疑名單門檻', '打代號查前科：以前被關過幾次'] },
+  { t: '估值河流圖', label: '估值河流圖', tags: ['盤後'], d: '把股價放進本益比河道裡，看現在是便宜、合理還是貴。',
+    b: ['河道四區＋分水嶺', '「均線分數 ≥10 × 便宜區」清單：位置強又不貴的'] },
+  { t: '研究室', label: '研究室', tags: ['大方向'], d: '盤勢以外的大方向，三個分頁：',
+    b: ['🌐 國際大事行事曆：非農、CPI、聯準會……台灣時間幾點公布、前值預期公布值，附名詞小學堂', '🛡 資金保護傘：融資水位、加權／櫃買是否跌破月線季線，合成「收傘／備傘／半開／全開」',
+      '👥 內部人：董監、經理人每月加碼減碼，疊上 400 張大戶比'] },
+];
+const GUIDE_FAQ = [
+  ['資料多久更新一次？', '盤中報價、訊號每 15 秒更新；盤後資料（法人、處置、融資、營收、集保）在官方公布後自動抓進來，各工具頁面上都有寫資料日期。休市日不更新，沿用上一個交易日。'],
+  ['為什麼有的地方寫「資料蒐集中」或「還沒有資料」？', '剛開盤、剛更新程式，或官方還沒公布（例如營收月初、集保週五晚上）。等一下再看就會有。'],
+  ['通知要怎麼開？', '右上角「提醒開啟」，第一次會問要不要允許通知。網頁要開著才收得到，關掉就沒有。'],
+  ['手機可以用嗎？', '可以。下方導覽列在手機上排成上下兩排；表格太寬可以左右滑。也可以把網站放到手機桌面（看上面「放到手機桌面」）。'],
+  ['自選股換手機會不見嗎？', '自選股存在這台瀏覽器；到自選股面板拿「同步碼」，在另一台輸入就會同步過去。'],
+  ['分數高、籌碼暴增、出現訊號，是不是就可以買？', '不是。這些數字描述的是「現在的狀態」，不是買賣指令。什麼時候進、什麼時候出、放多少部位，要自己判斷，盈虧自負。'],
+];
+const guideState = { home: 'ios' };
+function guideHtml(){
+  const step = (n, t, d) => '<div class="gd-step"><span class="gd-n">' + n + '</span><b>' + t + '</b><p>' + d + '</p></div>';
+  const homeTabs = [['ios', '🍎 iPhone（Safari）'], ['ioschrome', '🌐 iPhone（Chrome）'], ['android', '🤖 Android（Chrome）']];
+  const homeSteps = {
+    ios: ['用 Safari 打開 <b>tw-groups.judystock.workers.dev</b>', '點下方（或網址列旁）的「分享」按鈕（方框加向上箭頭）', '往下滑，點「加入主畫面」', '名字可以改短一點，點右上角「新增」'],
+    ioschrome: ['用 Chrome 打開網站', '點網址列右邊的「分享」按鈕', '點「加入主畫面」（找不到就往下滑、點「編輯動作」把它加進來）', '點「新增」'],
+    android: ['用 Chrome 打開網站', '點右上角「⋮」選單', '點「加到主畫面」或「安裝應用程式」', '點「新增」，桌面就會多一個圖示'],
+  };
+  let html = '<div class="gd-tag">新手教學</div><h2 class="gd-title">第一次來，看這頁就好</h2>' +
+    '<p class="gd-lead">這裡把原本要自己一個網站一個網站翻的資料——盤中即時報價、族群強弱、籌碼、營收、處置、國際大事——整理成一眼看得懂的表。<br>不用先懂技術名詞，照下面三步走就能用。</p>';
+  html += '<h3 class="gd-h">三步驟開始</h3><div class="gd-grid3">' +
+    step(1, '首頁看族群強弱', '首頁依族群平均漲跌排好，「強勢／弱勢」切換；點族群卡片看裡面每一檔，每 15 秒自動更新。') +
+    step(2, '右上角打代號開 K 線圖', '輸入代號或名稱（例如 2330 或 台積電）按 Enter，就開 5 分 K；圖上可以切 1 分、日線，看主力、KD、明天要守的價。') +
+    step(3, '下方導覽列找工具', '15 個工具都在最下面（手機排成兩排）。盤中看右上角紫色「⚠ 盤中訊號」，盤後看籌碼日報、排行。') + '</div>';
+  html += '<h3 class="gd-h">一天怎麼用</h3><div class="gd-time">' + [
+    ['盤前', '研究室看今晚有沒有國際大事、資金保護傘是不是撐開；籌碼日報看昨天的整理；每日功課看今天要盯誰。'],
+    ['盤中 09:00～13:30', '首頁看族群強弱、⚠ 盤中訊號看誰在發動；自選股、個股訊號追蹤盯自己的股票。'],
+    ['12:00', '創高黑龍出今日暫定名單。'],
+    ['13:20', '創高黑選股提醒今天要做的動作。'],
+    ['收盤後', '盤後籌碼排行、均線分數排行、籌碼日報、創高黑龍正式名單陸續出來；晚上處置監獄、法人、融資（約 21:40）更新。'],
+    ['週末', '盤後籌碼排行的籌碼週報（集保週五資料）、研究室看下週行事曆。'],
+  ].map(([w, t]) => '<div class="gd-tr"><b>' + w + '</b><span>' + t + '</span></div>').join('') + '</div>';
+  html += '<h3 class="gd-h">📱 放到手機桌面，一點就開</h3><div class="gd-card"><p class="gd-sub">把網站加到手機主畫面，以後像 App 一樣一點就開，不用再找網址。</p>' +
+    '<div class="gd-htabs">' + homeTabs.map(([k, l]) => '<button type="button" class="chart-tab' + (guideState.home === k ? ' active' : '') + '" data-gd-home="' + k + '">' + l + '</button>').join('') + '</div>' +
+    '<ol class="gd-ol">' + homeSteps[guideState.home].map((s) => '<li>' + s + '</li>').join('') + '</ol>' +
+    '<div class="gd-tip">💡 從 LINE 點連結進來的，網頁是開在 LINE 裡面，沒辦法加到桌面——先點右上角選單，選「用瀏覽器開啟」，再照上面做。</div></div>';
+  html += '<h3 class="gd-h">每個工具看什麼</h3><div class="gd-grid2">' + GUIDE_TOOLS.map((x, i) =>
+    '<div class="gd-tool"><div class="gd-tt">' + x.t + x.tags.map((g) => '<i>' + g + '</i>').join('') + '</div><p>' + x.d + '</p><ul>' + x.b.map((s) => '<li>' + s + '</li>').join('') + '</ul>' +
+    '<button type="button" class="gd-go" data-gd-open="' + i + '">去看看 →</button></div>').join('') + '</div>';
+  html += '<h3 class="gd-h">K 線圖小技巧</h3><div class="gd-card"><ul class="gd-ul">' +
+    '<li>任何列表點股票名稱或代號，都會開這檔的 K 線圖；圖上的搜尋框可以直接換股票。</li>' +
+    '<li>上方切 5 分／1 分／日線；⚙ 設定可以開關均線、VWAP、明天防守線（明日紅半、三日低、月線，只在日線）。</li>' +
+    '<li>下面的副圖是主力買賣力（1 分線另有 5 分 KD）；滑過去會顯示那一根的開高低收、量、主力張數。</li>' +
+    '<li>圖上的小符號是各種盤中訊號出現的位置，滑過去看是哪一種。</li></ul></div>';
+  html += '<h3 class="gd-h">紅色綠色代表什麼</h3><div class="gd-grid2"><div class="gd-card"><b class="up">紅色</b>＝漲、增加、買超、偏多。台股習慣紅色是漲，跟美股相反。</div>' +
+    '<div class="gd-card"><b class="down">綠色</b>＝跌、減少、賣超、偏空。</div></div>';
+  html += '<h3 class="gd-h">常見問題</h3><div class="gd-faq">' + GUIDE_FAQ.map(([q, a]) => '<div class="gd-qa"><b>' + q + '</b><p>' + a + '</p></div>').join('') + '</div>';
+  html += '<div class="gd-end"><b>這些數字怎麼用在真正的進出場？</b><p>工具只負責把資料整理好，判斷還是要靠自己的方法與紀律：先想好停損防守價、部位大小，再進場。</p></div>' +
+    '<div class="mc-foot">本頁只說明工具怎麼操作，不構成投資建議；投資有風險，盈虧自負。</div>';
+  return html;
+}
+function openGuidePanel(){
+  document.getElementById('guideModal').hidden = false;
+  document.getElementById('guideBody').innerHTML = guideHtml();
+  document.getElementById('guideInner').scrollTop = 0;
+  try { localStorage.setItem('guideSeen', '1'); } catch (_){}
+}
+function closeGuidePanel(){ document.getElementById('guideModal').hidden = true; }
+document.getElementById('guideBtn').addEventListener('click', openGuidePanel);
+document.getElementById('guideClose').addEventListener('click', closeGuidePanel);
+document.getElementById('guideModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeGuidePanel(); });
+document.getElementById('guideBody').addEventListener('click', (e) => {
+  const home = e.target.closest('[data-gd-home]');
+  if (home){ guideState.home = home.dataset.gdHome; const top = document.getElementById('guideInner').scrollTop; document.getElementById('guideBody').innerHTML = guideHtml(); document.getElementById('guideInner').scrollTop = top; return; }
+  const go = e.target.closest('[data-gd-open]');
+  if (!go) return;
+  const tool = GUIDE_TOOLS[Number(go.dataset.gdOpen)];
+  closeGuidePanel();
+  if (tool.open === 'signal'){ const b = document.getElementById('signalBadgeBtn'); if (b) b.click(); return; }
+  const btn = document.querySelector('#toolbarBottom .tb-btn[data-label="' + tool.label + '"]');
+  if (btn) btn.click();
+});
+(() => {   // 第一次來的人提示一下新手教學在哪
+  let seen = '1';
+  try { seen = localStorage.getItem('guideSeen'); } catch (_){}
+  if (!seen){
+    const b = document.getElementById('guideBtn');
+    if (b) b.classList.add('pulse');
+    setTimeout(() => { try { showToast('第一次來？點右上角「📖 新手教學」'); } catch (_){} }, 2500);
+  }
+})();
 // ---- 研究室：國際大事行事曆（2026-10-10 使用者：照莊爸 zhuang.tw/calendar 做，含名詞小學堂）----
 // 後端 /api/macro-calendar：TradingView 經濟日曆（美／中／日／歐）每小時更新公布值，加台指期結算、美股季度結算、公司法說。
 // 版面照莊爸：頁首更新時間 → 下一件大事倒數 → 全部／★★ 以上／只看大事篩選 → 依週分段的事件（前值／預期／公布）→ 小學堂。
-const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘']];
+const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘'], ['insider', '👥 內部人']];
 const MC_FLAGS = { US: '🇺🇸', CN: '🇨🇳', JP: '🇯🇵', EU: '🇪🇺', TW: '🇹🇼' };
 const MC_FILTERS = [['all', '全部'], ['2', '★★ 以上'], ['3', '只看大事 ★★★']];
 const labState = { tab: (() => { try { const t = localStorage.getItem('labTab'); return LAB_TABS.some((x) => x[0] === t) ? t : 'cal'; } catch (_){ return 'cal'; } })(), timer: null };
@@ -11773,15 +11977,98 @@ function fuHtml(){
   html += '<div class="mc-foot">' + wlEsc(d.rule || '') + '<br>融資是散戶借錢買股票的總額：越高代表市場越熱、也越容易在下跌時被追繳斷頭；但融資高不代表馬上會跌，要搭配指數有沒有跌破月線一起看。本頁只是整理公開數據，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
   return html;
 }
+// ---- 研究室：內部人（2026-10-10 使用者：照莊爸「內部人研究室」做，上市櫃全部）----
+// 後端 /api/insider：觀測站內部人持股異動月報（董監／經理人／大股東），疊上集保 400 張大戶比近 4 週變化。
+const inState = { data: null, month: null, loading: false, error: null, loadedAt: 0, query: null, queryLoading: false, queryError: null };
+async function inLoad(force){
+  if (inState.loading || (inState.data && !force && Date.now() - inState.loadedAt < 30 * 60e3)) return;
+  inState.loading = true; inState.error = null;
+  renderLab();
+  try {
+    const r = await fetch('/api/insider' + (inState.month ? '?month=' + encodeURIComponent(inState.month) : ''), { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status === 404 ? '後端還沒有這個功能（HanStock PR 合併部署後就會有）' : 'HTTP ' + r.status);
+    inState.data = await r.json();
+    inState.loadedAt = Date.now();
+  } catch (err){ inState.error = String((err && err.message) || err); }
+  inState.loading = false;
+  renderLab();
+}
+async function inQuery(code){
+  code = String(code || '').trim().toUpperCase();
+  if (!/^[0-9A-Z]{4,6}$/.test(code)){ inState.queryError = '請輸入股票代號（4～6 碼）'; renderLab(); return; }
+  inState.queryLoading = true; inState.queryError = null;
+  renderLab();
+  try {
+    const r = await fetch('/api/insider-stock?code=' + encodeURIComponent(code), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    inState.query = await r.json();
+  } catch (err){ inState.queryError = String((err && err.message) || err); }
+  inState.queryLoading = false;
+  renderLab();
+  const card = document.getElementById('inQueryCard'); if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function inLots(shares){ return shares === null || shares === undefined ? '—' : fuSigned(Math.round(shares / 1000), 0, ' 張'); }
+function inAmt(v){ return v === null || v === undefined ? '—' : fuSigned(v, 2, ' 億'); }
+function inCls(v){ return v > 0 ? 'up' : v < 0 ? 'down' : ''; }
+function inRow(x, mode){
+  const c = x.central;
+  const big = x.big400 ? '<span>400 張大戶 <b>' + x.big400.pct + '%</b>' + (x.big400.chg4w !== null && x.big400.chg4w !== undefined ? '（4 週 <b class="' + inCls(x.big400.chg4w) + '">' + fuSigned(x.big400.chg4w, 2, '') + '</b>）' : '') + '</span>' : '';
+  const parts = mode === 'central'
+    ? '<span>集中市場 買 ' + fuNum(Math.round(c.buy / 1000)) + ' 張・賣 ' + fuNum(Math.round(c.sell / 1000)) + ' 張</span>' + (c.otherNet ? '<span>其他原因 ' + inLots(c.otherNet) + '</span>' : '')
+    : '<span>董監 ' + inLots(x.dirNet) + '</span>' + (x.mgrNet ? '<span>經理人 ' + inLots(x.mgrNet) + '</span>' : '') + (x.bigNet ? '<span>大股東 ' + inLots(x.bigNet) + '</span>' : '') +
+      (c && c.net ? '<span>其中集中市場 <b class="' + inCls(c.net) + '">' + inLots(c.net) + '</b></span>' : '');
+  const net = mode === 'central' ? c.net : x.net, amt = mode === 'central' ? c.amount : x.amount;
+  return '<div class="in-row" data-in-code="' + x.code + '" data-in-name="' + wlEsc(x.name || '') + '"><div class="in-stk"><b>' + x.code + '</b> ' + wlEsc((x.name || '').replace(/股份有限.*|股份.*$/, '')) +
+    (x.group ? '<i class="in-grp">' + wlEsc(x.group) + '</i>' : '') + (x.combo ? '<i class="in-combo ' + (x.combo === '雙買' ? 'up' : 'down') + '">' + x.combo + '</i>' : '') + '</div>' +
+    '<div class="in-net ' + inCls(net) + '">' + inLots(net) + '<small>' + inAmt(amt) + '</small></div>' +
+    '<div class="in-sub">' + parts + (x.dirPct !== null && x.dirPct !== undefined ? '<span>董監持股 ' + x.dirPct + '%' + (x.dirPctChg ? '（' + fuSigned(x.dirPctChg, 2, '') + '）' : '') + '</span>' : '') + big +
+    '<button type="button" class="in-q" data-in-query="' + x.code + '">逐月 ›</button></div></div>';
+}
+function inQueryHtml(){
+  if (inState.queryLoading) return '<div class="race-note" id="inQueryCard">查詢中…</div>';
+  if (inState.queryError) return '<div class="race-note" id="inQueryCard">' + wlEsc(inState.queryError) + '</div>';
+  const q = inState.query;
+  if (!q) return '';
+  if (q.status !== 'ok') return '<div class="race-note" id="inQueryCard">' + wlEsc(q.message || '查無資料') + '</div>';
+  const rows = q.history.map((h) => '<tr><td>' + h.month.replace('-', '/') + '</td><td class="' + inCls(h.dirNet) + '">' + inLots(h.dirNet) + '</td><td class="' + inCls(h.mgrNet) + '">' + (h.mgrNet === null ? '—' : inLots(h.mgrNet)) + '</td>' +
+    '<td class="' + inCls(h.bigNet) + '">' + (h.bigNet === null ? '—' : inLots(h.bigNet)) + '</td><td>' + (h.central ? '買 ' + fuNum(Math.round(h.central.buy / 1000)) + '／賣 ' + fuNum(Math.round(h.central.sell / 1000)) : '—') + '</td>' +
+    '<td class="' + inCls(h.amount) + '">' + inAmt(h.amount) + '</td><td>' + (h.dirPct ?? '—') + '%</td></tr>').join('');
+  const people = (q.history.find((h) => h.central && h.central.people && h.central.people.length) || {}).central;
+  const weeks = q.big400 && q.big400.weeks ? q.big400.weeks.slice(-8) : [];
+  return '<div class="fu-card" id="inQueryCard"><div class="fu-ct">' + q.code + ' ' + wlEsc((q.name || '').replace(/股份有限.*|股份.*$/, '')) + (q.group ? ' <i class="in-grp">' + wlEsc(q.group) + '</i>' : '') +
+    ' <button type="button" class="chart-tab" data-in-chart="' + q.code + '">開K線圖</button></div>' +
+    '<div class="in-tbl"><table><thead><tr><th>月份</th><th>董監</th><th>經理人</th><th>大股東</th><th>集中市場（張）</th><th>估算金額</th><th>董監持股</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    (people ? '<div class="in-people"><b>集中市場明細</b>' + people.people.slice(0, 10).map((p) => '<div>' + wlEsc(p[0]) + ' ' + wlEsc(p[1]) + '：' + (p[2] ? '買 ' + fuNum(Math.round(p[2] / 1000)) + ' 張 ' : '') + (p[4] ? '賣 ' + fuNum(Math.round(p[4] / 1000)) + ' 張 ' : '') + (p[3] || p[5] ? '其他 ' + inLots(p[3] - p[5]) : '') + '</div>').join('') + '</div>' : '') +
+    (weeks.length ? '<div class="in-weeks"><b>400 張大戶持股比（每週）</b>' + weeks.map((w) => '<span>' + mcMd(w.d) + ' <b>' + w.p + '%</b></span>').join('') + '</div>' : '') + '</div>';
+}
+function inHtml(){
+  const d = inState.data;
+  const search = '<div class="in-search"><input id="inQ" type="text" inputmode="numeric" placeholder="查個股：輸入代號，例如 3037" value="' + wlEsc((inState.query && inState.query.code) || '') + '"><button type="button" class="chart-tab" data-in-go="1">查</button></div>';
+  if (!d) return search + (inState.error ? '<div class="race-note">讀取失敗：' + wlEsc(inState.error) + ' <button type="button" class="chart-tab" data-in-reload="1">重試</button></div>' : '<div class="race-note">讀取中…</div>') + inQueryHtml();
+  if (d.status !== 'ok') return search + '<div class="race-note">' + wlEsc(d.message || '還沒有資料') + '</div>' + inQueryHtml();
+  const pub = d.published || {}, s = d.summary;
+  let html = '<div class="mc-meta">資料月份 <select id="inMonth">' + d.months.map((m) => '<option value="' + m + '"' + (m === d.month ? ' selected' : '') + '>' + m.replace('-', ' 年 ') + ' 月</option>').join('') + '</select>' +
+    '・觀測站資料日期 上市 ' + wlEsc(pub.sii || '—') + '／上櫃 ' + wlEsc(pub.otc || '—') + '・每月 15 日申報、約第三週出來</div>' + search + inQueryHtml();
+  html += '<div class="fu-grid2"><div class="fu-card"><div class="fu-ct">內部人淨買進</div><div class="fu-big up">' + s.buy.count + ' <small>家</small></div><div class="fu-line">估算 <b class="up">' + inAmt(s.buy.amount) + '</b>（上市 ' + s.tseBuy.count + '・上櫃 ' + s.otcBuy.count + '）</div></div>' +
+    '<div class="fu-card"><div class="fu-ct">內部人淨賣出</div><div class="fu-big down">' + s.sell.count + ' <small>家</small></div><div class="fu-line">估算 <b class="down">' + inAmt(s.sell.amount) + '</b>（上市 ' + s.tseSell.count + '・上櫃 ' + s.otcSell.count + '）</div></div></div>';
+  if (!d.hasPrev) html += '<div class="sw-rule">這是鏡像裡最早的月份，沒有上個月可比：只算董監增減，經理人、大股東不算。</div>';
+  const sec = (title, sub, list, mode) => '<h3 class="mc-h">' + title + ' <small>' + sub + '</small></h3>' + (list.length ? list.map((x) => inRow(x, mode)).join('') : '<div class="race-note">這個月沒有</div>');
+  html += sec('💰 集中市場真金白銀買進', '內部人在市場上自己掏錢買（查了 ' + d.detailCount + ' 家異動最大的明細）', d.centralBuys, 'central');
+  html += sec('📈 內部人加碼最多', '董監＋經理人淨增加，依估算金額排（含贈與、信託等其他原因）', d.buys, 'all');
+  html += sec('💸 集中市場賣出', '內部人在市場上賣出', d.centralSells, 'central');
+  html += sec('📉 內部人減碼最多', '董監＋經理人淨減少', d.sells, 'all');
+  html += '<div class="mc-foot">' + wlEsc(d.rule || '') + '<br>內部人買不代表一定會漲、賣也可能只是繳稅或資金規劃；要搭配股價位置與大戶動向一起看。本頁只是整理公開申報資料，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
+  return html;
+}
 function renderLab(){
   const body = document.getElementById('labBody');
   if (!body || document.getElementById('labModal').hidden) return;
   const pastOpen = !!body.querySelector('details.mc-pastweek[open]');
   body.innerHTML = '<div class="hw-tabs">' + LAB_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (labState.tab === k ? ' active' : '') + '" data-lab-tab="' + k + '">' + label + '</button>').join('') + '</div>' +
-    (labState.tab === 'fund' ? fuHtml() : mcCalendarHtml());
+    (labState.tab === 'fund' ? fuHtml() : labState.tab === 'insider' ? inHtml() : mcCalendarHtml());
   if (pastOpen){ const det = body.querySelector('details.mc-pastweek'); if (det) det.open = true; }
 }
-function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else mcLoad(false); }
+function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else if (labState.tab === 'insider') inLoad(false); else mcLoad(false); }
 function openLabPanel(){
   document.getElementById('labModal').hidden = false;
   renderLab();
@@ -11796,11 +12083,26 @@ function openLabPanel(){
 function closeLabPanel(){ document.getElementById('labModal').hidden = true; clearInterval(labState.timer); }
 document.getElementById('labClose').addEventListener('click', closeLabPanel);
 document.getElementById('labModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeLabPanel(); });
+document.getElementById('labBody').addEventListener('change', (e) => {
+  const sel = e.target.closest('#inMonth');
+  if (sel){ inState.month = sel.value; inLoad(true); }
+});
+document.getElementById('labBody').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'inQ'){ e.preventDefault(); inQuery(e.target.value); }
+});
 document.getElementById('labBody').addEventListener('click', (e) => {
   const t = e.target;
   const tab = t.closest('[data-lab-tab]');
   if (tab){ labState.tab = tab.dataset.labTab; try { localStorage.setItem('labTab', labState.tab); } catch (_){} renderLab(); labLoad(); return; }
   if (t.closest('[data-fu-reload]')){ fuLoad(true); return; }
+  if (t.closest('[data-in-reload]')){ inLoad(true); return; }
+  if (t.closest('[data-in-go]')){ const box = document.getElementById('inQ'); inQuery(box ? box.value : ''); return; }
+  const inq = t.closest('[data-in-query]');
+  if (inq){ inQuery(inq.dataset.inQuery); return; }
+  const inc = t.closest('[data-in-chart]');
+  if (inc){ openStockChart(inc.dataset.inChart, ''); return; }
+  const inr = t.closest('[data-in-code]');
+  if (inr){ openStockChart(inr.dataset.inCode, inr.dataset.inName); return; }
   const flt = t.closest('[data-mc-flt]');
   if (flt){ mcState.filter = flt.dataset.mcFlt; try { localStorage.setItem('mcFilter', mcState.filter); } catch (_){} renderLab(); return; }
   if (t.closest('[data-mc-reload]')){ mcLoad(true); return; }

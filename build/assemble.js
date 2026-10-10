@@ -542,6 +542,14 @@ export default {
       // 資金保護傘（2026-10-10 使用者，放進「研究室」）：融資水位＋加權／櫃買多空轉折，後端每天晚上更新，10 分鐘快取
       return await proxyHanstockBars("/api/hub/fund-umbrella", 600);
     }
+    if (url.pathname === "/api/insider") {
+      // 內部人研究室（2026-10-10 使用者，放進「研究室」）：觀測站內部人持股異動月報，每月更新一次，30 分鐘快取
+      return await proxyHanstockBars("/api/hub/insider" + url.search, 1800);
+    }
+    if (url.pathname === "/api/insider-stock") {
+      // 個股內部人逐月紀錄，30 分鐘快取
+      return await proxyHanstockBars("/api/hub/insider/stock" + url.search, 1800);
+    }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);
