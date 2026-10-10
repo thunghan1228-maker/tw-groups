@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 12:36:19";
+const BUILD_STAMP = "2026-10-10 12:45:37";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -36,14 +36,17 @@ const GROUPS = [
   {"name":"鴻家軍","stocks":[{"code":"3062","name":"建漢"},{"code":"3498","name":"陽程"},{"code":"5243","name":"乙盛-KY"},{"code":"3092","name":"鴻碩"},{"code":"2328","name":"廣宇"},{"code":"2354","name":"鴻準"},{"code":"2317","name":"鴻海"}]},
   {"name":"台塑四寶","stocks":[{"code":"6505","name":"台塑化"},{"code":"1301","name":"台塑"},{"code":"1303","name":"南亞"},{"code":"1326","name":"台化"}]},
   {"name":"AI","stocks":[{"code":"3231","name":"緯創"},{"code":"2356","name":"英業達"},{"code":"2376","name":"技嘉"},{"code":"2382","name":"廣達"},{"code":"2377","name":"微星"}]},
-  {"name":"彬彬","stocks":[{"code":"3379","name":"彬台"},{"code":"3022","name":"威強電"},{"code":"1569","name":"濱川"},{"code":"2328","name":"廣宇"}]},
+  {"name":"彬彬","stocks":[{"code":"3379","name":"彬台"},{"code":"1569","name":"濱川"},{"code":"2328","name":"廣宇"}]},
   {"name":"IP","stocks":[{"code":"3443","name":"創意"},{"code":"3661","name":"世芯-KY"},{"code":"6533","name":"晶心科"},{"code":"3228","name":"金麗科"},{"code":"3529","name":"力旺"},{"code":"8227","name":"巨有科技"},{"code":"6643","name":"M31"},{"code":"6415","name":"矽力-KY"}]},
   {"name":"AI眼鏡","stocks":[{"code":"6237","name":"驊訊"},{"code":"6672","name":"騰輝電子-KY"},{"code":"6742","name":"澤米"},{"code":"3294","name":"英濟"},{"code":"3645","name":"達邁"},{"code":"6456","name":"GIS-KY"}]},
   {"name":"面板","stocks":[{"code":"2409","name":"友達"},{"code":"6116","name":"彩晶"},{"code":"3481","name":"群創"}]},
   {"name":"扇形封裝","stocks":[{"code":"3580","name":"友威科"},{"code":"3535","name":"晶彩科"},{"code":"3663","name":"鑫科"},{"code":"8064","name":"東捷"}]},
   {"name":"千元","stocks":[{"code":"3324","name":"雙鴻"},{"code":"5289","name":"宜鼎"},{"code":"1519","name":"華城"},{"code":"3529","name":"力旺"},{"code":"3017","name":"奇鋐"},{"code":"6781","name":"AES-KY"},{"code":"6805","name":"富世達"},{"code":"2454","name":"聯發科"},{"code":"3665","name":"貿聯-KY"},{"code":"2404","name":"漢唐"},{"code":"2368","name":"金像電"},{"code":"6442","name":"光聖"},{"code":"8299","name":"群聯"},{"code":"2308","name":"台達電"},{"code":"3008","name":"大立光"},{"code":"6510","name":"精測"},{"code":"2383","name":"台光電"},{"code":"3443","name":"創意"},{"code":"3163","name":"波若威"},{"code":"3653","name":"健策"},{"code":"6187","name":"萬潤"},{"code":"3491","name":"昇達科"},{"code":"6223","name":"旺矽"}]},
   {"name":"太陽能","stocks":[{"code":"6477","name":"安集"},{"code":"2406","name":"國碩"},{"code":"3576","name":"聯合再生"},{"code":"6443","name":"元晶"},{"code":"3686","name":"達能"},{"code":"6244","name":"茂迪"},{"code":"3691","name":"碩禾"}]},
-  {"name":"電零組","stocks":[{"code":"3597","name":"映興"},{"code":"6156","name":"松上"},{"code":"2413","name":"環科"},{"code":"3689","name":"湧德"},{"code":"2431","name":"聯昌"},{"code":"3015","name":"全漢"},{"code":"6134","name":"萬旭"},{"code":"3605","name":"宏致"},{"code":"3078","name":"僑威"},{"code":"6913","name":"鴻呈"},{"code":"4912","name":"聯德控股-KY"}]}
+  {"name":"電零組","stocks":[{"code":"3597","name":"映興"},{"code":"6156","name":"松上"},{"code":"2413","name":"環科"},{"code":"3689","name":"湧德"},{"code":"2431","name":"聯昌"},{"code":"3015","name":"全漢"},{"code":"6134","name":"萬旭"},{"code":"3605","name":"宏致"},{"code":"3078","name":"僑威"},{"code":"6913","name":"鴻呈"},{"code":"4912","name":"聯德控股-KY"}]},
+  {"name":"化學二","stocks":[{"code":"4720","name":"德淵"},{"code":"1718","name":"中纖"},{"code":"1714","name":"和桐"},{"code":"1709","name":"和益"},{"code":"4707","name":"磐亞"},{"code":"1409","name":"新纖"},{"code":"1708","name":"東鹼"}]},
+  {"name":"小光電","stocks":[{"code":"3128","name":"昇銳"},{"code":"8072","name":"陞泰"},{"code":"5489","name":"彩富"},{"code":"3434","name":"哲固"},{"code":"3356","name":"奇偶"},{"code":"3297","name":"杭特"},{"code":"5251","name":"天鉞電"}]},
+  {"name":"鋼鐵","stocks":[{"code":"2027","name":"大成鋼"},{"code":"2025","name":"千興"},{"code":"2023","name":"燁輝"},{"code":"2014","name":"中鴻"},{"code":"2022","name":"聚亨"},{"code":"8415","name":"大國鋼"},{"code":"2038","name":"海光"},{"code":"2034","name":"允強"},{"code":"2007","name":"燁興"},{"code":"2009","name":"第一銅"},{"code":"2032","name":"新鋼"},{"code":"2028","name":"威致"},{"code":"2020","name":"美亞"},{"code":"2033","name":"佳大"},{"code":"1605","name":"華新"},{"code":"2030","name":"彰源"}]}
 ];
 const ALL_CODES = [...new Set(GROUPS.flatMap((g) => g.stocks.map((s) => s.code)))];
 
@@ -1589,7 +1592,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="chips-head">
       <div>
         <div class="chips-title">盤後籌碼排行</div>
-        <div class="chips-sub">籌碼週報＝集保週資料的大戶增減（每週五結算）；其他分頁是主力大單（永豐逐筆算的大單淨額）＋三大法人買賣超（證交所、櫃買中心公開資料），每個交易日收盤後更新，只列 44 個族群的股票，點股票可開K線圖。</div>
+        <div class="chips-sub">籌碼週報＝集保週資料的大戶增減（每週五結算）；其他分頁是主力大單（永豐逐筆算的大單淨額）＋三大法人買賣超（證交所、櫃買中心公開資料），每個交易日收盤後更新，只列 47 個族群的股票，點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="chipsClose" aria-label="關閉">✕</button>
     </div>
@@ -8590,7 +8593,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 12:36:19';
+const BUILD_STAMP = '2026-10-10 12:45:37';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
