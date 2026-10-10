@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: tpex-data-branch
+  group: data-branch-mops-conference   # 各自排隊：共用一個群組時 GitHub 只留一個等待中，會互相取消（2026-10-10）
   cancel-in-progress: false
 
 jobs:
