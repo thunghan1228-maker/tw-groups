@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 16:44:03";
+const BUILD_STAMP = "2026-10-10 16:50:42";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -989,6 +989,21 @@ const HTML_PAGE = `<!DOCTYPE html>
     .gd-tr{grid-template-columns:minmax(0,1fr);gap:2px;}
     .gd-title{font-size:23px;}
   }
+  /* 個股研究補強：產業白話、季報 */
+  .pf-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:6px 0 12px;font-size:13px;line-height:1.7;}
+  .pf-ind{margin-bottom:6px;}
+  .pf-tag{display:inline-block;font-size:11px;font-weight:800;border:1px solid var(--line);color:var(--muted);border-radius:5px;padding:0 6px;margin-right:6px;}
+  .pf-tag.grp{border-color:#a78bfa;color:#a78bfa;}
+  .pf-g{margin:6px 0 8px;}
+  .pf-g p,.pf-p{margin:4px 0;}
+  .pf-sub{font-size:12px;color:var(--muted);margin-top:6px;}
+  .pf-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+  .pf-chip{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .pf-chip:hover{border-color:#a78bfa;}
+  .pf-sum{margin-bottom:6px;}
+  .pf-sum b.up,.pf-card td .up,.pf-card td b.up{color:var(--up);}
+  .pf-sum b.down,.pf-card td .down,.pf-card td b.down{color:var(--down);}
+  .pf-note{font-size:12px;color:var(--muted);margin-top:6px;}
   /* 研究室：內部人 */
   .in-search{display:flex;gap:6px;margin:6px 0 10px;}
   .in-search input{flex:1;min-width:0;max-width:280px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:14px;font-family:inherit;}
@@ -9501,6 +9516,55 @@ function dgSearchHtml(){
   return '<div class="dg-search"><input class="dg-in" id="dgInput" placeholder="股號或股名，例 2330" value="' + (dgState.code || '') + '"><button class="chart-tab chips-btn active" id="dgRun">🩺 問診</button>' +
     (dgState.recent.length ? '<span class="dg-recent">最近：' + dgState.recent.map((x) => '<span class="ck-tag dg-link" data-code="' + x.code + '"><b>' + x.code + '</b>' + (x.name || '') + '</span>').join('') + '</span>' : '') + '</div>';
 }
+// ---- 個股研究補強（2026-10-10 使用者：照莊爸「個股快查」補上產業白話介紹、同業、季報）----
+// 後端 /api/stock-profile：族群／官方產業別白話介紹、同族群與同產業公司、近 8 季季報、近四季 EPS 與本益比。
+const pfState = {};
+async function pfLoad(code){
+  if (!code || pfState[code]) return;
+  pfState[code] = { loading: true };
+  try {
+    const r = await fetch('/api/stock-profile?code=' + encodeURIComponent(code));
+    if (!r.ok) throw new Error(r.status === 404 ? '後端還沒有這個功能（HanStock PR 合併部署後就會有）' : 'HTTP ' + r.status);
+    pfState[code] = { data: await r.json() };
+  } catch (err){ pfState[code] = { error: String((err && err.message) || err), at: Date.now() }; setTimeout(() => { if (pfState[code] && pfState[code].error) delete pfState[code]; }, 30000); }
+  if (!document.getElementById('diagModal').hidden && dgState.code === code) renderDiag();
+}
+function pfChips(list){ return '<div class="pf-chips">' + list.map((m) => '<button type="button" class="pf-chip" data-pf-code="' + m.code + '">' + m.code + ' ' + wlEsc(m.name || '') + '</button>').join('') + '</div>'; }
+function pfIndustryHtml(code){
+  pfLoad(code);
+  const st = pfState[code] || {};
+  const head = '<div class="bl-section bl-brew">🏭 這家公司在做什麼・同族群／同產業</div>';
+  if (st.loading) return head + '<div class="race-note">讀取中…</div>';
+  if (st.error) return head + '<div class="race-note">讀取失敗：' + wlEsc(st.error) + '</div>';
+  const d = st.data;
+  if (!d || d.status !== 'ok') return head + '<div class="race-note">沒有這檔的產業資料</div>';
+  let html = '<div class="pf-card">';
+  if (d.industry) html += '<div class="pf-ind"><span class="pf-tag">官方產業別</span><b>' + wlEsc(d.industry) + '</b>' + (d.market ? '・' + (d.market === 'TSE' ? '上市' : '上櫃') : '') + '</div>';
+  d.groups.forEach((g) => {
+    html += '<div class="pf-g"><div class="pf-gt"><span class="pf-tag grp">本站族群</span><b>' + wlEsc(g.group) + '</b></div>' + (g.text ? '<p>' + wlEsc(g.text) + '</p>' : '') +
+      (g.members.length ? '<div class="pf-sub">同族群（點了換成那一檔）</div>' + pfChips(g.members) : '') + '</div>';
+  });
+  if (!d.groups.length && d.industryText) html += '<p class="pf-p">' + wlEsc(d.industryText) + '</p>';
+  if (d.peers.length) html += '<div class="pf-sub">同產業其他公司（' + wlEsc(d.industry || '') + '）</div>' + pfChips(d.peers);
+  return head + html + '</div>';
+}
+function pfQuarterHtml(code){
+  const st = pfState[code] || {};
+  const head = '<div class="bl-section bl-launch">📊 季報（單季）</div>';
+  if (st.loading || st.error) return '';
+  const d = st.data;
+  if (!d || !d.quarters || !d.quarters.length) return head + '<div class="race-note">還沒有這檔的季報資料' + (d && d.errors && d.errors.length ? '（' + wlEsc(d.errors.join('；')) + '）' : '') + '</div>';
+  const pct = (v) => v === null || v === undefined ? '—' : v.toFixed(1) + '%';
+  const yoy = (v, turn) => turn ? '<b class="' + (turn === '轉盈' ? 'up' : 'down') + '">' + turn + '</b>' : v === null || v === undefined ? '—' : '<span class="' + (v >= 0 ? 'up' : 'down') + '">' + (v > 0 ? '+' : '') + v.toFixed(1) + '%</span>';
+  const rows = d.quarters.map((q) => '<tr><td>' + q.label + '</td><td>' + (q.revenue === null ? '—' : fuNum(q.revenue, 1)) + '</td><td>' + yoy(q.revYoY) + '</td><td>' + pct(q.gross) + '</td><td>' + pct(q.op) + '</td><td>' + pct(q.net) + '</td>' +
+    '<td><b>' + (q.eps === null || q.eps === undefined ? '—' : q.eps.toFixed(2)) + '</b></td><td>' + yoy(q.epsYoY, q.epsTurn) + '</td></tr>').join('');
+  const g = d.quarters.slice(0, 2);
+  const trend = g.length === 2 && g[0].gross !== null && g[1].gross !== null ? (g[0].gross >= g[1].gross ? '毛利率比上一季<b class="up">提高 ' + (g[0].gross - g[1].gross).toFixed(1) + ' 個百分點</b>' : '毛利率比上一季<b class="down">下降 ' + (g[1].gross - g[0].gross).toFixed(1) + ' 個百分點</b>') : '';
+  return head + '<div class="pf-card"><div class="pf-sum">近四季 EPS <b>' + (d.ttmEps === null || d.ttmEps === undefined ? '—' : d.ttmEps.toFixed(2)) + '</b> 元' +
+    (d.close ? '・收盤 ' + d.close + '（' + mcMd(d.closeDate) + '）' : '') + (d.pe ? '・本益比 <b>' + d.pe + '</b> 倍' : d.ttmEps !== null && d.ttmEps <= 0 ? '・近四季虧損，本益比不適用' : '') + (trend ? '・' + trend : '') + '</div>' +
+    '<div class="in-tbl"><table><thead><tr><th>季別</th><th>營收（億）</th><th>營收年增</th><th>毛利率</th><th>營益率</th><th>淨利率</th><th>EPS</th><th>EPS 年增</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="pf-note">毛利率＝賣東西本身賺幾成；營益率＝再扣掉管銷研發；淨利率＝最後真正賺到的（含業外）。年增是跟去年同一季比；去年同季 EPS 太小時不算百分比。金融股沒有毛利率、營益率。</div></div>';
+}
 function renderDiag(){
   const body = document.getElementById('diagBody');
   ensureDiag();
@@ -9523,9 +9587,11 @@ function renderDiag(){
   html += dgHeaderHtml(data);
   scrLoadStock(s.code);
   html += scrStockCardHtml(s.code);
+  html += pfIndustryHtml(s.code);   // 2026-10-10 使用者：產業白話＋同業
   html += '<div class="bl-section bl-launch">🛡 防守線・出場與停損依據</div>' + dgDefenseHtml(s.def);
   html += '<div class="bl-section bl-brew">📈 日線圖・' + s.code + ' ' + (s.name || '') + '・K棒＋均線＋明日防守線（近 60 個交易日）</div>' + dgCandlesHtml(data.bars, s.def, 60);
   html += '<div class="bl-section bl-launch">📋 七科問診</div>' + dgSubjectsHtml(s);
+  html += pfQuarterHtml(s.code);    // 2026-10-10 使用者：季報
   html += dgSiblingsHtml(data);
   html += dgTopHtml(data);
   html += dgTodayHtml(data);
@@ -9791,6 +9857,8 @@ document.getElementById('diagClose').addEventListener('click', closeDiagPanel);
 document.getElementById('diagModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDiagPanel(); });
 document.getElementById('diagBody').addEventListener('click', (e) => {
   if (e.target.closest('#dgRun')){ dgRun((document.getElementById('dgInput') || {}).value || ''); return; }
+  const pfc = e.target.closest('[data-pf-code]');
+  if (pfc){ dgRun(pfc.dataset.pfCode); return; }
   const fbtn = e.target.closest('.dg-fbtn');
   if (fbtn){ dgState.filter = fbtn.dataset.filter; renderDiag(); return; }
   const chart = e.target.closest('#dgChartBtn');
@@ -9811,7 +9879,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 16:44:03';
+const BUILD_STAMP = '2026-10-10 16:50:42';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -14039,6 +14107,10 @@ export default {
     if (url.pathname === "/api/insider-stock") {
       // 個股內部人逐月紀錄，30 分鐘快取
       return await proxyHanstockBars("/api/hub/insider/stock" + url.search, 1800);
+    }
+    if (url.pathname === "/api/stock-profile") {
+      // 個股研究補強（2026-10-10 使用者）：產業白話、同業、季報；季報一季才變一次，1 小時快取
+      return await proxyHanstockBars("/api/hub/stock-profile" + url.search, 3600);
     }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取

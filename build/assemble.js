@@ -550,6 +550,10 @@ export default {
       // 個股內部人逐月紀錄，30 分鐘快取
       return await proxyHanstockBars("/api/hub/insider/stock" + url.search, 1800);
     }
+    if (url.pathname === "/api/stock-profile") {
+      // 個股研究補強（2026-10-10 使用者）：產業白話、同業、季報；季報一季才變一次，1 小時快取
+      return await proxyHanstockBars("/api/hub/stock-profile" + url.search, 3600);
+    }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);
