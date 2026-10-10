@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 13:28:05";
+const BUILD_STAMP = "2026-10-10 13:48:30";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -276,14 +276,24 @@ const HTML_PAGE = `<!DOCTYPE html>
   .ssb-go-btn:hover{background:var(--accent);color:var(--bg);}
 
   /* 底部工具列 */
-  body{padding-bottom:56px;}
+  :root{--tb-h:56px;}   /* 工具列實際高度，由程式量好寫回來（兩排時會變高） */
+  body{padding-bottom:var(--tb-h);}
   .toolbar-bottom{position:fixed;left:0;right:0;bottom:0;display:flex;background:#6b5541;border-top:1px solid #8a6f57;z-index:50;overflow-x:auto;}
   .tb-btn{flex:1 1 0;min-width:84px;background:none;border:none;border-right:1px solid rgba(255,255,255,0.16);color:#fff;font-size:11px;font-weight:700;padding:9px 4px 8px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;}
   .tb-btn:last-child{border-right:none;}
   .tb-btn:hover{background:rgba(255,255,255,0.14);color:#fff;}
   .tb-sub{white-space:nowrap;}
   .tb-icon{width:20px;height:20px;border-radius:6px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;}
-  .toast{position:fixed;left:50%;bottom:72px;transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
+  /* 2026-10-10 使用者：手機版跟 iPad 版下方導覽列分成兩排，上面五顆、下面六顆（不用左右滑）。
+     30 欄格線：上排每顆佔 6 欄、下排每顆佔 5 欄；iPad 橫放比較寬，用觸控螢幕判斷一起涵蓋。 */
+  @media (max-width: 1024px), (hover: none) and (pointer: coarse){
+    :root{--tb-h:112px;}
+    .toolbar-bottom{display:grid;grid-template-columns:repeat(30,minmax(0,1fr));overflow-x:visible;}
+    .toolbar-bottom .tb-btn{min-width:0;grid-column:span 5;padding:8px 2px 7px;text-wrap:balance;}
+    .toolbar-bottom .tb-btn:nth-child(-n+5){grid-column:span 6;border-bottom:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom .tb-btn:nth-child(5){border-right:none;}
+  }
+  .toast{position:fixed;left:50%;bottom:calc(var(--tb-h) + 16px);transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
   /* 版本戳記（右上角小字）與「有新版本」提示：加到主畫面的網頁沒有重新整理鈕，靠這個知道自己在跑哪一版。 */
   #buildStamp{position:fixed;top:calc(env(safe-area-inset-top,0px) + 2px);right:6px;font-size:10px;line-height:1;color:var(--muted);opacity:.75;z-index:120;pointer-events:none;font-variant-numeric:tabular-nums;white-space:nowrap;}
   #updateBanner{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);transform:translateX(-50%);z-index:121;background:#e6675f;color:#fff;border:0;border-radius:999px;font-size:14px;font-weight:800;padding:10px 18px;box-shadow:0 6px 20px rgba(0,0,0,.5);cursor:pointer;font-family:inherit;white-space:nowrap;}
@@ -321,7 +331,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   body.chart-maximized{overflow:hidden;}
   .chart-float.minimized{display:none;}
   /* 最小化的 K 線視窗縮成底部托盤的小標籤，點一下復原 */
-  #chartTray{position:fixed;left:8px;right:8px;bottom:62px;z-index:103;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none;}
+  #chartTray{position:fixed;left:8px;right:8px;bottom:calc(var(--tb-h) + 6px);z-index:103;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none;}
   #chartTray button{pointer-events:auto;background:var(--panel);border:1px solid var(--accent);color:var(--text);border-radius:8px;font-size:12px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,0.5);}
   #chartTray button:hover{background:var(--accent);color:var(--bg);}
   /* K 線圖標題列下方：這檔的可交易條件與處置狀態 */
@@ -8599,7 +8609,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 13:28:05';
+const BUILD_STAMP = '2026-10-10 13:48:30';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11030,6 +11040,15 @@ setInterval(() => {
   if (document.getElementById('revModal').hidden || document.visibilityState === 'hidden') return;
   rvLoad(rvState.data && rvState.data.month);
 }, 600000);
+(function(){
+  // 下方導覽列手機／iPad 是兩排，字換行時高度會變：量實際高度寫進 --tb-h，內容底部留白跟提示框位置跟著走
+  const tb = document.getElementById('toolbarBottom');
+  if (!tb) return;
+  const setH = () => { if (tb.offsetHeight) document.documentElement.style.setProperty('--tb-h', tb.offsetHeight + 'px'); };
+  if (window.ResizeObserver) new ResizeObserver(setH).observe(tb);
+  else window.addEventListener('resize', setH);
+  setH();
+})();
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '自選股'){ openWatchPanel(); return; }        // 2026-10-05 使用者：自選股
