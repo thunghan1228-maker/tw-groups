@@ -2,7 +2,8 @@
 # 公開資訊觀測站「董事、監察人、經理人及百分之十以上大股東股權異動彙總表」（IRB110，上市、上櫃各一份，每月 15 日申報截止後
 # 約第三週出來）：每家公司董監本月增加／減少股數、董監／經理人／10% 大股東持股。董監增減包含贈與、信託等，
 # 要分出「集中市場買賣（真金白銀）」得看個別公司的「內部人持股異動事後申報表」（query6_1）——只對當月異動最大的公司查
-# （上市、上櫃各取股數最多 30 家＋佔股本比例最高 30 家），推到 data 分支 tpex/insider-YYYY-MM.json，再戳後端拉回去。
+# （2026-10-10 擴大到所有有異動的公司，扣掉配股後至少一張；每次最多查 900 家，沒查完的下次接著查），推到 data 分支
+# tpex/insider-YYYY-MM.json，再戳後端拉回去。
 # 觀測站擋 HanStock 的正式站主機，GitHub 的 runner 抓得到。月報資料日期沒變就不重抓明細。
 name: MOPS insider mirror
 
@@ -145,12 +146,17 @@ jobs:
           extra = [m.strip() for m in (os.environ.get('EXTRA_MONTHS') or '').split(',') if re.fullmatch(r'\d{4}-\d{2}', m.strip())]
           want_detail = (os.environ.get('DETAIL') or 'true').lower() != 'false'
           os.makedirs('tpex', exist_ok=True)
+          DETAIL_BUDGET = int(os.environ.get('DETAIL_BUDGET') or '900')   # 每次最多查幾家明細（每家約 1.2 秒）
 
           def load(month):
               path = f'tpex/insider-{month}.json'
               return json.load(open(path, encoding='utf-8')) if os.path.exists(path) else None
 
-          for month in sorted(set(targets + extra)):
+          # 已經存的月份裡，明細還沒查完的也接著查（每次最多 DETAIL_BUDGET 家，新的月份先查）
+          pending = [f[8:15] for f in os.listdir('tpex') if f.startswith('insider-20') and f.endswith('.json')
+                     and not (load(f[8:15]) or {}).get('detailDone')]
+          budget = DETAIL_BUDGET
+          for month in sorted(set(targets + extra + pending), reverse=True):
               year, mon = map(int, month.split('-'))
               roc = year - 1911
               rows, pubs = [], {}
@@ -167,47 +173,47 @@ jobs:
                   continue
               old = load(month)
               force = (os.environ.get('FORCE') or 'false').lower() == 'true'
-              if old and old.get('published') == pubs and (old.get('detail') or not want_detail) and not force:
-                  print(month, '沒變，跳過')
+              if old and old.get('published') == pubs and (old.get('detailDone') or not want_detail) and not force:
+                  print(month, '沒變、明細也查完了，跳過')
                   continue
               pm = f'{(year if mon > 1 else year - 1):04d}-{(mon - 1 if mon > 1 else 12):02d}'
               before = {r[0]: r for r in ((load(pm) or {}).get('rows') or [])}
-              out = {'month': month, 'fetched': stamp, 'published': pubs,
+              same = old and old.get('published') == pubs
+              out = {'month': month, 'fetched': stamp if not same else old.get('fetched', stamp), 'published': pubs,
                      'fields': ['code', 'name', 'market', 'issued', 'dirInc', 'dirDec', 'dirHold', 'dirPct', 'mgrHold', 'bigHold'],
-                     'rows': rows, 'detail': (old or {}).get('detail') or {}}
+                     'rows': rows, 'detail': (old or {}).get('detail') or {}, 'detailMiss': (old or {}).get('detailMiss') or []}
               if want_detail:
-                  picked = []
-                  for market in ('TSE', 'OTC'):
-                      cand = []
-                      for r in rows:
-                          if r[2] != market:
-                              continue
-                          net = (r[4] or 0) - (r[5] or 0)
-                          b = before.get(r[0])
-                          if b and r[8] is not None and b[8] is not None:
-                              net += r[8] - b[8]
-                          if b and r[3] and b[3] and abs(r[3] / b[3] - 1) >= 0.0005:
-                              # 配股／減資：上月董監＋經理人持股 × 股本變動比例不算買賣；只扣同方向、最多扣到實際變動（現增時內部人沒動不算賣）
-                              ratio = r[3] / b[3] - 1
-                              expected = ((b[6] or 0) + (b[8] or 0)) * ratio
-                              net -= min(max(net, 0), expected) if ratio > 0 else max(min(net, 0), expected)
-                          if abs(net) < 1000:
-                              continue
-                          cand.append((r[0], abs(net), abs(net) / r[3] if r[3] else 0))
-                      by_shares = [c[0] for c in sorted(cand, key=lambda c: -c[1])[:30]]
-                      by_pct = [c[0] for c in sorted(cand, key=lambda c: -c[2])[:30]]
-                      picked += list(dict.fromkeys(by_shares + by_pct))
-                  todo = [c for c in picked if c not in out['detail']]
-                  print(month, '查明細', len(todo), '/', len(picked))
-                  for i, code in enumerate(todo):
+                  # 2026-10-10 使用者：明細擴大到所有有異動的公司（扣掉配股／減資後至少一張），異動大的先查
+                  cand = []
+                  for r in rows:
+                      net = (r[4] or 0) - (r[5] or 0)
+                      b = before.get(r[0])
+                      if b and r[8] is not None and b[8] is not None:
+                          net += r[8] - b[8]
+                      if b and r[3] and b[3] and abs(r[3] / b[3] - 1) >= 0.0005:
+                          # 配股／減資：上月董監＋經理人持股 × 股本變動比例不算買賣；只扣同方向、最多扣到實際變動（現增時內部人沒動不算賣）
+                          ratio = r[3] / b[3] - 1
+                          expected = ((b[6] or 0) + (b[8] or 0)) * ratio
+                          net -= min(max(net, 0), expected) if ratio > 0 else max(min(net, 0), expected)
+                      if abs(net) >= 1000 or (r[4] or 0) >= 1000 or (r[5] or 0) >= 1000:
+                          cand.append((r[0], abs(net)))
+                  picked = [c[0] for c in sorted(cand, key=lambda c: -c[1])]
+                  todo = [c for c in picked if c not in out['detail'] and c not in out['detailMiss']]
+                  print(month, '查明細', min(len(todo), budget), '/', len(todo), '（候選', len(picked), '）')
+                  for i, code in enumerate(todo[:budget]):
                       d = detail(code, roc, mon)
                       if d is not None:
                           out['detail'][code] = d
-                      time.sleep(1.2)
-                      if i % 20 == 19:
+                      else:
+                          out['detailMiss'].append(code)
+                      time.sleep(1.1)
+                      if i % 50 == 49:
                           print('  ', i + 1, '家')
+                  budget -= min(len(todo), budget)
+                  out['candidates'] = len(picked)
+                  out['detailDone'] = all(c in out['detail'] or c in out['detailMiss'] for c in picked)
               json.dump(out, open(f'tpex/insider-{month}.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
-              print(month, 'rows', len(rows), 'detail', len(out['detail']))
+              print(month, 'rows', len(rows), 'detail', len(out['detail']), 'done', out.get('detailDone'), '剩餘額度', budget)
           months = sorted({f[8:15] for f in os.listdir('tpex') if f.startswith('insider-') and f.endswith('.json') and f[8:15][:2] == '20'}, reverse=True)
           json.dump({'months': months, 'updated': stamp}, open('tpex/insider-index.json', 'w', encoding='utf-8'), separators=(',', ':'))
           PY
