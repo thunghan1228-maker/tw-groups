@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 16:01:17";
+const BUILD_STAMP = "2026-10-10 16:03:53";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7347,6 +7347,22 @@ function hlRowHead(r){
     '<td>' + hlN(r.hits20, 0) + '</td><td>' + hlN(r.val5, 1) + '</td><td>' + hlPrice(r.entry) + '</td><td>' + hlPrice(r.lowK) + '</td><td>' + hlN(r.target, 2) + '</td>';
 }
 const hlHead = () => '<th class="l">代號</th><th class="l">股名</th><th class="l">族群</th><th class="hl-use">均線分數</th><th>族群平均</th><th>週籌碼%</th><th>當天漲跌</th><th>20日>8%</th><th>5日均值(億)</th><th>進場(收盤)</th><th>黑K低</th><th>停利價</th>';
+// ⏱ 今日暫定名單（12:00）（2026-10-10 使用者：照莊爸創高黑龍・績效分析做）：今天 12:00 用證交所即時報價組今天的K棒，
+// 套跟上面同一組參數；只給名單與條件、不算停利價；收盤後整表重算，就以 ④ 今日名單為準（後端那時就不再給）。
+function hlNoonHtml(data){
+  const n = data.noon;
+  if (!n) return '';
+  const sc = (v) => (v === null || v === undefined ? '—' : v);
+  const rows = (n.rows || []).map((r) => '<tr class="hl-row" data-code="' + r.code + '" data-name="' + (r.name || '') + '"><td class="l"><b>' + r.code + '</b></td><td class="l">' + (r.name || '') + '</td><td class="l">' + (r.group || '—') + '</td>' +
+    '<td class="hl-use">' + sc(r.score2) + '</td><td>' + hlN(r.groupAvg2, 1) + '</td><td class="' + dirClass(r.weekPct || 0) + '">' + swPct(r.weekPct) + '</td>' +
+    '<td>' + (r.k === 'black' ? '⚫ 黑K' : r.k === 'red' ? '🔴 紅K' : '平') + '</td><td class="' + dirClass(r.changePct || 0) + '">' + swPct(r.changePct) + '</td><td>' + hlPrice(r.price) + '</td>' +
+    '<td>' + hlN(r.hits20, 0) + '</td><td>' + hlN(r.val5, 1) + '</td></tr>').join('');
+  return '<div class="bl-section bl-brew">⏱ 今日暫定名單（12:00）・' + swMmdd(n.date) + '(' + hlWd(n.date) + ') ' + n.at + ' 盤中快照套上面同一組參數（' + n.count + ' 檔）</div>' +
+    '<div class="sw-rule">今天 12:00 用證交所即時報價（' + n.quotes + ' 檔）組今天到 12:00 的K棒，接在歷史日K後面算均線分數、K棒、漲跌幅等；只給名單與條件、不給停利價。' +
+    '<b>收盤後整表重算，就以 ④ 今日名單為準</b>（這一區會自動消失）。點一列開K線圖。</div>' +
+    (rows ? '<div class="hl-scroll"><table class="hl-table"><thead><tr><th class="l">代號</th><th class="l">股名</th><th class="l">族群</th><th class="hl-use">均線分數</th><th>族群平均</th><th>週籌碼%</th><th>K棒</th><th>12:00 漲跌</th><th>12:00 價</th><th>20日>8%</th><th>5日均值(億)</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+      : '<div class="race-note">12:00 沒有符合參數的股票</div>');
+}
 function hlTodayHtml(data){
   const t = data.today || {}, rows = t.rows || [], live = hlLiveInfo(t.date);
   const cell = (r) => {
@@ -7389,7 +7405,7 @@ function swingHeilongHtml(){
   if (data.status !== 'ok') return head + '<div class="signal-empty"><div class="se-title">還沒有黑龍名單</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
   const dates = data.dates || [], w = data.window || {}, c = data.collector || {};
   const basis = '<div class="sw-basis">資料到 ' + swMmdd(data.date) + '(' + hlWd(data.date) + ') 收盤・表內 ' + dates.length + ' 個交易日（' + swMmdd(dates[0]) + '～' + swMmdd(data.date) + '）・這次看' + (w.days ? '近 ' + w.days + ' 天' : '近 60 天') + '＝' + swMmdd(w.from) + ' 起，可回測 ' + (w.backtestDays || 0) + ' 天・整理時間 ' + (c.builtAt ? String(c.builtAt).slice(5, 16).replace('T', ' ') : '—') + '</div>';
-  return head + basis + hlBurstHtml(data) + hlMethodsHtml(data) + hlTodayHtml(data) + hlDailyHtml(data) +
+  return head + basis + hlBurstHtml(data) + hlMethodsHtml(data) + hlNoonHtml(data) + hlTodayHtml(data) + hlDailyHtml(data) +
     '<div class="bl-section bl-launch">⑥ 口徑與注意</div><ol class="hl-rules">' + (data.rules || []).map((r) => '<li>' + r + '</li>').join('') + '</ol>';
 }
 function swingSectionHtml(data){
@@ -9516,7 +9532,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 16:01:17';
+const BUILD_STAMP = '2026-10-10 16:03:53';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
