@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 17:14:03";
+const BUILD_STAMP = "2026-10-10 17:35:04";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1079,6 +1079,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .fu-chart .fu-lg-tx{fill:var(--text);}
   .fu-chart .fu-lg-ma{fill:#f59e0b;font-weight:700;}   /* 2026-10-10 使用者：月線圖例要跟黃色虛線同色 */
   .fu-chart .fu-lg-m{fill:var(--up);}
+  .fu-chart .fu-lg-o{fill:#f0a35e;}
+  .fu-chart .fu-marea2{fill:rgba(240,163,94,.30);stroke:#f0a35e;stroke-width:1;}
   .fu-crash{display:grid;grid-template-columns:90px minmax(0,1fr);gap:10px;padding:8px 6px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.65;}
   .fu-cd{display:flex;flex-direction:column;}
   .fu-cd b{font-size:15px;}
@@ -9882,7 +9884,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 17:14:03';
+const BUILD_STAMP = '2026-10-10 17:35:04';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -12068,40 +12070,48 @@ function fuChartSvg(series){
   if (!series || series.length < 30) return '';
   const W = 640, H = 300, L = 8, R = 56, top1 = 10, h1 = 170, top2 = 200, h2 = 80;
   const n = series.length, x = (i) => L + (W - L - R) * i / (n - 1);
-  const t = series.map((p) => p.t), m = series.map((p) => p.m);
+  const t = series.map((p) => p.t), mt = series.map((p) => p.m);
+  const hasOtc = series.some((p) => p.mo !== null && p.mo !== undefined);
+  const m = series.map((p) => (p.m === null || p.m === undefined) ? null : p.m + (hasOtc ? (p.mo || 0) : 0));   // 有上櫃就畫上市＋上櫃合計
   const ma20 = t.map((_, i) => i >= 19 ? t.slice(i - 19, i + 1).reduce((a, b) => a + b, 0) / 20 : null);
   const tMin = Math.min(...t), tMax = Math.max(...t);
-  const mv = m.filter((v) => v !== null), mMin = Math.min(...mv), mMax = Math.max(...mv);
+  const mv = m.filter((v) => v !== null), mMax = Math.max(...mv), mMin = hasOtc ? Math.min(...mt.filter((v) => v !== null)) * 0.9 : Math.min(...mv);
   const yT = (v) => top1 + h1 * (1 - (v - tMin) / ((tMax - tMin) || 1));
   const yM = (v) => top2 + h2 * (1 - (v - mMin) / ((mMax - mMin) || 1));
   const path = (arr, y) => arr.map((v, i) => v === null ? null : (x(i).toFixed(1) + ',' + y(v).toFixed(1))).filter(Boolean).join(' ');
   let months = '', last = '';
   series.forEach((p, i) => { const mo = p.d.slice(0, 7); if (mo !== last){ last = mo; if (i > 3) months += '<line x1="' + x(i).toFixed(1) + '" y1="' + top1 + '" x2="' + x(i).toFixed(1) + '" y2="' + (top2 + h2) + '" class="fu-grid"/><text x="' + (x(i) + 2).toFixed(1) + '" y="' + (top2 + h2 + 12) + '" class="fu-ax">' + Number(mo.slice(5)) + '月</text>'; } });
-  const mArea = 'M' + x(0).toFixed(1) + ',' + (top2 + h2) + ' L' + path(m, yM).replace(/ /g, ' L') + ' L' + x(n - 1).toFixed(1) + ',' + (top2 + h2) + ' Z';
+  const area = (arr) => 'M' + x(0).toFixed(1) + ',' + (top2 + h2) + ' L' + path(arr, (v) => Math.min(top2 + h2, yM(v))).replace(/ /g, ' L') + ' L' + x(n - 1).toFixed(1) + ',' + (top2 + h2) + ' Z';
+  const mArea = (hasOtc ? '<path d="' + area(m) + '" class="fu-marea2"/>' : '') + '<path d="' + area(mt) + '" class="fu-marea"/>';
   return '<svg class="fu-chart" viewBox="0 0 ' + W + ' ' + (H + 16) + '" preserveAspectRatio="xMidYMid meet">' + months +
     '<polyline points="' + path(ma20, yT) + '" class="fu-ma"/><polyline points="' + path(t, yT) + '" class="fu-tx"/>' +
     '<text x="' + (W - R + 4) + '" y="' + (yT(tMax) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(tMax) + '</text><text x="' + (W - R + 4) + '" y="' + (yT(tMin) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(tMin) + '</text>' +
-    '<path d="' + mArea + '" class="fu-marea"/>' +
+    mArea +
     '<text x="' + (W - R + 4) + '" y="' + (yM(mMax) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(mMax) + '億</text><text x="' + (W - R + 4) + '" y="' + (yM(mMin) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(mMin) + '億</text>' +
     '<text x="' + (L + 4) + '" y="' + (top1 + 12) + '" class="fu-lg"><tspan class="fu-lg-tx">— 加權指數</tspan>　<tspan class="fu-lg-ma">┄ 月線</tspan></text>' +
-    '<text x="' + (L + 4) + '" y="' + (top2 + 12) + '" class="fu-lg fu-lg-m">■ 上市融資餘額</text></svg>';
+    '<text x="' + (L + 4) + '" y="' + (top2 + 12) + '" class="fu-lg"><tspan class="fu-lg-m">■ 上市融資</tspan>' + (hasOtc ? '　<tspan class="fu-lg-o">■ 上櫃融資（疊在上面，頂端＝合計）</tspan>' : '') + '</text></svg>';
 }
 function fuHtml(){
   const d = fuState.data;
   if (!d) return fuState.error ? '<div class="race-note">讀取失敗：' + wlEsc(fuState.error) + ' <button type="button" class="chart-tab" data-fu-reload="1">重試</button></div>' : '<div class="race-note">讀取中…</div>';
   if (d.status !== 'ok') return '<div class="race-note">' + wlEsc(d.message || '還沒有資料') + (d.error ? '：' + wlEsc(d.error) : '') + '</div>';
   const u = d.umbrella, m = d.margin;
-  let html = '<div class="mc-meta">資料日 <b>' + mcMd(d.asOf) + '</b>・證交所融資餘額每天晚上公布，21:40 後更新 <button type="button" class="mc-reload" data-fu-reload="1" title="重新整理">↻</button></div>';
+  let html = '<div class="mc-meta">資料日 <b>' + mcMd(d.asOf) + '</b>・證交所、櫃買融資餘額每天晚上公布，21:40 後更新 <button type="button" class="mc-reload" data-fu-reload="1" title="重新整理">↻</button></div>';
   html += '<div class="fu-umb ' + u.tone + '"><div class="fu-ui">' + u.icon + '</div><div><div class="fu-un">保護傘：' + u.name + ' <small>' + u.score + ' 點</small></div>' +
     '<div class="fu-ua">' + wlEsc(u.advice) + '</div>' +
     (u.reasons.length ? '<ul class="fu-ur">' + u.reasons.map((r) => '<li>' + wlEsc(r.text) + '</li>').join('') + '</ul>' : '<div class="fu-ua">加權、櫃買都在月線上，融資沒有過熱。</div>') + '</div></div>';
   html += '<div class="fu-grid2">' + fuIndexCard('加權指數', d.taiex, 0) + fuIndexCard('櫃買指數', d.tpex, 2) + '</div>';
-  const newHigh = m.vsHigh !== null && m.vsHigh >= 0;
-  html += '<div class="fu-card"><div class="fu-ct">上市融資餘額</div><div class="fu-big">' + fuNum(m.balance, 1) + ' <small>億</small></div>' +
-    '<div class="fu-line">日 <b class="' + (m.d1 >= 0 ? 'up' : 'down') + '">' + fuSigned(m.d1, 1, ' 億') + '</b>・週 <b class="' + (m.d5 >= 0 ? 'up' : 'down') + '">' + fuSigned(m.d5, 1, ' 億') + '</b>・月 <b class="' + (m.d20 >= 0 ? 'up' : 'down') + '">' + fuSigned(m.d20, 1, ' 億') + '（' + fuSigned(m.d20Pct, 1, '%') + '）</b></div>' +
-    '<div class="fu-line">三年百分位 <b>' + m.percentile + '%</b>' + (newHigh ? '・<b class="up">2020 年以來新高</b>' : '・2020 年以來最高 ' + fuNum(m.high, 1) + ' 億（' + m.highDate.slice(0, 7).replace('-', '/') + '），還差 ' + fuNum(m.high - m.balance, 1) + ' 億') + '</div>' +
-    '<div class="fu-line">融券 ' + fuNum(m.shortUnits) + ' 張・券資比 ' + (m.shortRatio ?? '—') + '%</div>' +
-    (d.diverge ? '<div class="fu-div ' + d.diverge.tone + '">' + wlEsc(d.diverge.text) + '</div>' : '') + '</div>';
+  const marginCard = (title, mm, note) => {
+    if (!mm) return '<div class="fu-card"><div class="fu-ct">' + title + '</div><div class="race-note">' + (note || '資料還沒進來') + '</div></div>';
+    const newHigh = mm.vsHigh !== null && mm.vsHigh >= 0, since = mm.since ? mm.since.slice(0, 4) : '2020';
+    return '<div class="fu-card"><div class="fu-ct">' + title + (mm.date !== d.asOf ? ' <small class="fu-sub">（' + mcMd(mm.date) + '）</small>' : '') + '</div><div class="fu-big">' + fuNum(mm.balance, 1) + ' <small>億</small></div>' +
+      '<div class="fu-line">日 <b class="' + (mm.d1 >= 0 ? 'up' : 'down') + '">' + fuSigned(mm.d1, 1, ' 億') + '</b>・週 <b class="' + (mm.d5 >= 0 ? 'up' : 'down') + '">' + fuSigned(mm.d5, 1, ' 億') + '</b>・月 <b class="' + (mm.d20 >= 0 ? 'up' : 'down') + '">' + fuSigned(mm.d20, 1, ' 億') + '（' + fuSigned(mm.d20Pct, 1, '%') + '）</b></div>' +
+      '<div class="fu-line">三年百分位 <b>' + mm.percentile + '%</b>' + (newHigh ? '・<b class="up">' + since + ' 年以來新高</b>' : '・' + since + ' 年以來最高 ' + fuNum(mm.high, 1) + ' 億（' + mm.highDate.slice(0, 7).replace('-', '/') + '），還差 ' + fuNum(mm.high - mm.balance, 1) + ' 億') + '</div>' +
+      '<div class="fu-line">融券 ' + fuNum(mm.shortUnits) + ' 張・券資比 ' + (mm.shortRatio ?? '—') + '%</div></div>';
+  };
+  html += '<div class="fu-grid2">' + marginCard('上市融資餘額', m) + marginCard('上櫃融資餘額', d.otcMargin, '上櫃融資鏡像還沒進來（櫃買中心每晚公布）') + '</div>';
+  if (d.otcMargin) html += '<div class="fu-line">上市＋上櫃合計 <b>' + fuNum(m.balance + d.otcMargin.balance, 1) + ' 億</b>' + (d.hotLabel === '上市＋上櫃融資' && d.hotPct !== null && d.hotPct !== undefined ? '，一個月 <b class="' + (d.hotPct >= 0 ? 'up' : 'down') + '">' + fuSigned(d.hotPct, 1, '%') + '</b>' : '') + '</div>';
+  if (d.diverge) html += '<div class="fu-div ' + d.diverge.tone + '">' + wlEsc(d.diverge.text) + '</div>';
   html += '<div class="fu-card">' + fuChartSvg(d.series) + '</div>';
   if (d.crashes && d.crashes.length){
     html += '<h3 class="mc-h">歷次崩盤前的融資高點 <small>現在的融資跟每一次崩盤前比</small></h3>';
@@ -12110,7 +12120,8 @@ function fuHtml(){
       return '<div class="fu-crash"><div class="fu-cd"><b>' + c.peakDate.slice(0, 7).replace('-', '/') + '</b><small>' + c.days + ' 個交易日</small></div>' +
         '<div class="fu-cm"><div>加權 ' + fuNum(c.peak) + ' → ' + fuNum(c.trough) + '（' + mcMd(c.troughDate) + '）<b class="down">' + c.drop + '%</b>' + (c.recovered ? '' : ' <span class="fu-state bear">還沒回來</span>') + '</div>' +
         '<div>崩盤前融資高點 <b>' + fuNum(c.marginPeak, 1) + ' 億</b>（' + (c.marginPeakDate ? mcMd(c.marginPeakDate) : '—') + '）→ 低點時 ' + fuNum(c.marginTrough, 1) + ' 億（' + (c.marginDrop ?? '—') + '%）</div>' +
-        '<div class="fu-gap ' + (over ? 'up' : '') + '">' + (c.gap === null ? '' : over ? '現在已經超過 ' + fuNum(c.gap, 1) + ' 億（+' + c.gapPct + '%）' : '現在還差 ' + fuNum(-c.gap, 1) + ' 億追平（' + c.gapPct + '%）') + '</div></div></div>';
+        '<div class="fu-gap ' + (over ? 'up' : '') + '">' + (c.gap === null ? '' : over ? '現在已經超過 ' + fuNum(c.gap, 1) + ' 億（+' + c.gapPct + '%）' : '現在還差 ' + fuNum(-c.gap, 1) + ' 億追平（' + c.gapPct + '%）') + '</div>' +
+        (c.otcMarginPeak ? '<div>上櫃融資崩盤前高點 <b>' + fuNum(c.otcMarginPeak, 1) + ' 億</b>：<span class="fu-gap ' + (c.otcGap >= 0 ? 'up' : '') + '">' + (c.otcGap >= 0 ? '現在已經超過 ' + fuNum(c.otcGap, 1) + ' 億（+' + c.otcGapPct + '%）' : '現在還差 ' + fuNum(-c.otcGap, 1) + ' 億（' + c.otcGapPct + '%）') + '</span></div>' : '') + '</div></div>';
     }).join('');
   }
   html += '<div class="mc-foot">' + wlEsc(d.rule || '') + '<br>融資是散戶借錢買股票的總額：越高代表市場越熱、也越容易在下跌時被追繳斷頭；但融資高不代表馬上會跌，要搭配指數有沒有跌破月線一起看。本頁只是整理公開數據，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
