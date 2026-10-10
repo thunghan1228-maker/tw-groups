@@ -62,8 +62,11 @@ jobs:
               except ValueError:
                   return None
 
-          got = 0
+          got, t0 = 0, time.time()
           for i, d in enumerate(days):
+              if time.time() - t0 > 40 * 60:      # 工作流程 50 分鐘上限：跑 40 分鐘就先存，下次接著補
+                  print('時間到，先存，下次接著補（還差', len(days) - i, '天）')
+                  break
               url = f'https://www.tpex.org.tw/www/zh-tw/margin/balance?date={d.year}%2F{d.month:02d}%2F{d.day:02d}&response=json'
               payload = None
               for attempt in range(3):
