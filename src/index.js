@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 17:35:04";
+const BUILD_STAMP = "2026-10-10 17:42:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -928,6 +928,19 @@ const HTML_PAGE = `<!DOCTYPE html>
   .mc-tag{font-size:11px;background:#f59e0b;color:#1a1a1a;border-radius:5px;padding:0 6px;font-weight:800;}
   .mc-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.55;}
   .mc-note{color:var(--text);font-weight:700;}
+  .mc-tag.mine{background:#a855f7;color:#fff;}
+  .mc-cos{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+  .mc-co{font-family:inherit;font-size:12px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer;white-space:nowrap;}
+  .mc-co small{color:var(--muted);margin-left:3px;}
+  .mc-co.big{border-color:#f59e0b;}
+  .mc-co.own{font-weight:800;}
+  .mc-co.mine{background:#a855f7;border-color:#a855f7;color:#fff;font-weight:800;}
+  .mc-co.mine small{color:#f3e8ff;}
+  .mc-more{margin-top:4px;font-size:12px;}
+  .mc-more summary{cursor:pointer;color:#60a5fa;}
+  .mc-mine{background:rgba(168,85,247,.12);border:1px solid #a855f7;border-radius:10px;padding:8px 10px;margin:0 0 8px;font-size:13px;line-height:1.7;}
+  .mc-mine b{color:#a855f7;}
+  .mc-mine span{display:inline-block;margin-right:12px;white-space:nowrap;}
   .mc-gl{background:none;border:none;color:#60a5fa;cursor:pointer;font-size:12px;padding:0 2px;font-family:inherit;white-space:nowrap;}
   .mc-inds{margin-top:5px;display:flex;flex-direction:column;gap:3px;}
   .mc-ind{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;font-size:13px;background:var(--panel);border-radius:7px;padding:4px 8px;}
@@ -9884,7 +9897,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 17:35:04';
+const BUILD_STAMP = '2026-10-10 17:42:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11973,6 +11986,25 @@ function mcWhenHtml(e){
   const span = e.until ? mcMd(e.date) + '–' + mcMd(e.until) : mcMd(e.date);
   return '<div class="mc-when"><b>' + span + '</b><small>' + mcWd(e.date) + (e.until ? '起' : '') + '</small><span class="mc-time">' + (e.time || '整天') + '</span></div>';
 }
+function mcCoChip(c){
+  const mine = wlHas(c.code);
+  return '<button type="button" class="mc-co' + (mine ? ' mine' : c.stars >= 2 ? ' big' : '') + (c.invited ? '' : ' own') + '" data-mc-co="' + wlEsc(c.code) + '" data-mc-name="' + wlEsc(c.name) + '"' +
+    ' title="' + wlEsc([c.invited ? '受邀參加券商論壇' : '公司自辦法說', c.place, c.summary].filter(Boolean).join('・')) + '">' + (mine ? '⭐' : '') + (c.invited ? '' : '📢') + wlEsc(c.code) + ' ' + wlEsc(c.name) +
+    (c.time ? '<small>' + wlEsc(c.time) + '</small>' : '') + (c.until ? '<small>至 ' + mcMd(c.until) + '</small>' : '') + '</button>';
+}
+function mcCompaniesHtml(e){
+  // 法說會 N 家：自選股（紫）→ 股期標的（橘框）先列，其他的收在「其他 N 家」裡
+  const list = e.companies || [];
+  if (list.length <= 14) return '<div class="mc-cos">' + list.map(mcCoChip).join('') + '</div>';
+  const front = list.filter((c) => wlHas(c.code)).concat(list.filter((c) => !wlHas(c.code) && c.stars >= 2)).slice(0, 30);
+  const rest = list.filter((c) => !front.includes(c));
+  return (front.length ? '<div class="mc-cos">' + front.map(mcCoChip).join('') + '</div>' : '') +
+    (rest.length ? '<details class="mc-more" data-mc-calls="' + wlEsc(e.id) + '"><summary>' + (front.length ? '其他 ' : '全部 ') + rest.length + ' 家</summary><div class="mc-cos">' + rest.map(mcCoChip).join('') + '</div></details>' : '');
+}
+function mcMineCount(e){
+  if (e.companies) return e.companies.filter((c) => wlHas(c.code)).length;
+  return e.code && wlHas(e.code) ? 1 : 0;
+}
 function mcEventHtml(e, gloss, now){
   const g = gloss[e.key];
   const past = mcWhen(e) + (e.time ? 0 : 864e5) <= now;
@@ -11984,13 +12016,29 @@ function mcEventHtml(e, gloss, now){
       '<span>公布 <b class="' + cls + '">' + wlEsc(x.actual ?? (past ? '待更新' : '—')) + '</b></span>' +
       (x.vs ? '<i class="mc-vs ' + cls + '">' + x.vs + '</i>' : '') + '</div>';
   }).join('');
-  const notes = (e.notes || []).filter(Boolean);
+  const notes = e.companies ? [] : (e.notes || []).filter(Boolean);
+  const mine = mcMineCount(e);
   return '<div class="mc-ev s' + e.stars + (past && !today ? ' past' : '') + (today ? ' today' : '') + '">' + mcWhenHtml(e) +
     '<div class="mc-main"><div class="mc-title"><span class="mc-flag">' + (MC_FLAGS[e.country] || '🌐') + '</span><b>' + wlEsc(e.zh) + '</b>' +
-    (e.period ? '<span class="mc-per">' + wlEsc(e.period) + '</span>' : '') + mcStars(e.stars) + (today ? '<span class="mc-tag">今天</span>' : '') + '</div>' +
+    (e.period ? '<span class="mc-per">' + wlEsc(e.period) + '</span>' : '') + mcStars(e.stars) + (today ? '<span class="mc-tag">今天</span>' : '') +
+    (mine ? '<span class="mc-tag mine">自選' + (e.companies ? ' ' + mine + ' 家' : '') + '</span>' : '') + '</div>' +
     '<div class="mc-desc">' + (g ? wlEsc(g.gist) : '') + (notes.length ? ' <span class="mc-note">' + notes.map(wlEsc).join('・') + '</span>' : '') +
     (g ? ' <button type="button" class="mc-gl" data-mc-gl="' + e.key + '">📖 ' + wlEsc(g.term) + '</button>' : '') + '</div>' +
-    (inds ? '<div class="mc-inds">' + inds + '</div>' : '') + '</div></div>';
+    (inds ? '<div class="mc-inds">' + inds + '</div>' : '') + (e.companies ? mcCompaniesHtml(e) : '') + '</div></div>';
+}
+function mcMineHtml(d){
+  // 自選股接下來的法說（觀測站公告），放在頁首
+  const today = mcToday(), seen = new Set(), rows = [];
+  d.events.forEach((e) => (e.companies || []).forEach((c) => {
+    if ((c.until || e.date) < today || !wlHas(c.code) || seen.has(c.code + e.date)) return;
+    seen.add(c.code + e.date);
+    rows.push({ date: e.date, c });
+  }));
+  if (!rows.length) return '';
+  rows.sort((a, b) => (a.date + a.c.time).localeCompare(b.date + b.c.time));
+  return '<div class="mc-mine">⭐ <b>你的自選股法說</b>　' + rows.slice(0, 20).map((r) => '<span>' + mcMd(r.date) + '（' + mcWd(r.date).slice(1) + '）' +
+    (r.c.time ? r.c.time + ' ' : '') + '<button type="button" class="mc-co mine" data-mc-co="' + wlEsc(r.c.code) + '" data-mc-name="' + wlEsc(r.c.name) + '">' +
+    wlEsc(r.c.code) + ' ' + wlEsc(r.c.name) + '</button></span>').join('') + '</div>';
 }
 function mcCalendarHtml(){
   const d = mcState.data;
@@ -12003,6 +12051,7 @@ function mcCalendarHtml(){
   const updated = d.updatedAt ? d.updatedAt.slice(5, 10).replace('-', '/') + ' ' + d.updatedAt.slice(11, 16) : '—';
   let html = '<div class="mc-meta">資料更新 <b>' + updated + '</b>・登記到 <b>' + mcMd(d.to) + '</b>・公布值每小時更新・時間都是台灣時間' +
     ' <button type="button" class="mc-reload" data-mc-reload="1" title="重新整理">↻</button></div>';
+  html += mcMineHtml(d);
   if (next){
     const before = upcoming.filter((e) => e !== next && e.stars >= 2 && mcWhen(e) < mcWhen(next));
     const g = gloss[next.key];
@@ -12013,10 +12062,10 @@ function mcCalendarHtml(){
       (before.length ? '<div class="mc-nb">在它之前：' + before.slice(0, 8).map((e) => '<span>' + mcMd(e.date) + ' ' + (e.time || '') + ' ' + wlEsc(e.zh) + '</span>').join('') + '</div>' : '') + '</div>';
   }
   html += '<div class="mc-flts">' + MC_FILTERS.map(([k, label]) => '<button type="button" class="chart-tab' + (mcState.filter === k ? ' active' : '') + '" data-mc-flt="' + k + '">' + label + '</button>').join('') + '</div>';
-  html += '<h3 class="mc-h">① 行事曆 <small>依週排列，紅底＝★★★ 大事；數字公布後約一小時內補上</small></h3>';
+  html += '<h3 class="mc-h">① 行事曆 <small>依週排列，紅底＝★★★ 大事；數字公布後約一小時內補上；法說會每天一筆：📢＝公司自辦（多半是公布季報），其他是受邀參加券商論壇；紫色＝你的自選股、橘框＝股期標的，點代號開K線圖</small></h3>';
   const thisMon = mcMonday(today);
   const weeks = {};
-  d.events.filter((e) => e.stars >= min).forEach((e) => { (weeks[mcMonday(e.date)] = weeks[mcMonday(e.date)] || []).push(e); });
+  d.events.filter((e) => e.stars >= min || (min === 2 && mcMineCount(e))).forEach((e) => { (weeks[mcMonday(e.date)] = weeks[mcMonday(e.date)] || []).push(e); });
   Object.keys(weeks).sort().forEach((mon) => {
     const diff = Math.round((Date.parse(mon) - Date.parse(thisMon)) / (7 * 864e5));
     const name = diff === -1 ? '上週' : diff === 0 ? '本週' : diff === 1 ? '下週' : diff === 2 ? '下下週' : '';
@@ -12035,7 +12084,7 @@ function mcCalendarHtml(){
     [['誰公布', k.who], ['什麼時候', k.when], ['怎麼讀', k.read], ['為什麼要看', k.why]].filter((r) => r[1]).map((r) => '<dt>' + r[0] + '</dt><dd>' + wlEsc(r[1]) + '</dd>').join('') +
     '</dl></div>').join('') + '</div>').join('');
   html += '<div class="mc-foot">日期與時間以各主管機關、公司的正式公告為準，遇到延期或臨時變動會在下一次更新時修正。「預期」是公布前市場調查的預估值，「公布」在數據出來後約一小時內補上；' +
-    '「高於／低於預期」只是比兩個數字的大小，不代表好壞。公司法說、財報標「慣例時間」的，以公司公告為準。本頁只是把公開行事曆整理成白話，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
+    '「高於／低於預期」只是比兩個數字的大小，不代表好壞。法說會來自公開資訊觀測站「法人說明會一覽表」（上市＋上櫃，每天早晚更新），只會有公司已經公告的；財報標「慣例時間」的，以公司公告為準。本頁只是把公開行事曆整理成白話，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
   return html;
 }
 // ---- 研究室：資金保護傘（2026-10-10 使用者：照莊爸課程講的「融資水位＋加權／櫃買多空轉折」做成一頁）----
@@ -12214,9 +12263,11 @@ function renderLab(){
   const body = document.getElementById('labBody');
   if (!body || document.getElementById('labModal').hidden) return;
   const pastOpen = !!body.querySelector('details.mc-pastweek[open]');
+  const callsOpen = [...body.querySelectorAll('details[data-mc-calls][open]')].map((x) => x.dataset.mcCalls);
   body.innerHTML = '<div class="hw-tabs">' + LAB_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (labState.tab === k ? ' active' : '') + '" data-lab-tab="' + k + '">' + label + '</button>').join('') + '</div>' +
     (labState.tab === 'fund' ? fuHtml() : labState.tab === 'insider' ? inHtml() : mcCalendarHtml());
   if (pastOpen){ const det = body.querySelector('details.mc-pastweek'); if (det) det.open = true; }
+  body.querySelectorAll('details[data-mc-calls]').forEach((x) => { if (callsOpen.includes(x.dataset.mcCalls)) x.open = true; });
 }
 function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else if (labState.tab === 'insider') inLoad(false); else mcLoad(false); }
 function openLabPanel(){
@@ -12256,6 +12307,8 @@ document.getElementById('labBody').addEventListener('click', (e) => {
   const flt = t.closest('[data-mc-flt]');
   if (flt){ mcState.filter = flt.dataset.mcFlt; try { localStorage.setItem('mcFilter', mcState.filter); } catch (_){} renderLab(); return; }
   if (t.closest('[data-mc-reload]')){ mcLoad(true); return; }
+  const co = t.closest('[data-mc-co]');
+  if (co){ openStockChart(co.dataset.mcCo, co.dataset.mcName); return; }
   const gl = t.closest('[data-mc-gl]');
   if (gl){
     const card = document.getElementById('mcg-' + gl.dataset.mcGl);
