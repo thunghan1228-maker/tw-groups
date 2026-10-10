@@ -490,6 +490,18 @@ export default {
       // 營收成長榜的查個股營收（每個月的年增、公布日、隔日漲跌），60 秒快取
       return await proxyHanstockBars("/api/hub/revenue/stock" + url.search, 60);
     }
+    if (url.pathname === "/api/ma-rank") {
+      // 均線分數排行（2026-10-10 使用者：照莊爸 zhuang.tw/ma 做）：個股分數前 60＋族群分數前十大，收盤後才變，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/ma-rank" + url.search, 300);
+    }
+    if (url.pathname === "/api/ma-rank-hits") {
+      // 均線分數排行的前十名常客（近 N 天每天取前 K 名，同分全算），5 分鐘快取
+      return await proxyHanstockBars("/api/hub/ma-rank/hits" + url.search, 300);
+    }
+    if (url.pathname === "/api/ma-rank-q") {
+      // 均線分數查詢（股號→所屬族群全部成員；或族群名），60 秒快取
+      return await proxyHanstockBars("/api/hub/ma-rank/q" + url.search, 60);
+    }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);

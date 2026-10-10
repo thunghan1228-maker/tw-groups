@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 13:48:30";
+const BUILD_STAMP = "2026-10-10 14:12:45";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -284,14 +284,14 @@ const HTML_PAGE = `<!DOCTYPE html>
   .tb-btn:hover{background:rgba(255,255,255,0.14);color:#fff;}
   .tb-sub{white-space:nowrap;}
   .tb-icon{width:20px;height:20px;border-radius:6px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;}
-  /* 2026-10-10 使用者：手機版跟 iPad 版下方導覽列分成兩排，上面五顆、下面六顆（不用左右滑）。
-     30 欄格線：上排每顆佔 6 欄、下排每顆佔 5 欄；iPad 橫放比較寬，用觸控螢幕判斷一起涵蓋。 */
+  /* 2026-10-10 使用者：手機版跟 iPad 版下方導覽列分成兩排（不用左右滑）；加了「均線分數排行」之後上下各 6 顆。
+     iPad 橫放比較寬，用觸控螢幕判斷一起涵蓋。 */
   @media (max-width: 1024px), (hover: none) and (pointer: coarse){
     :root{--tb-h:112px;}
-    .toolbar-bottom{display:grid;grid-template-columns:repeat(30,minmax(0,1fr));overflow-x:visible;}
-    .toolbar-bottom .tb-btn{min-width:0;grid-column:span 5;padding:8px 2px 7px;text-wrap:balance;}
-    .toolbar-bottom .tb-btn:nth-child(-n+5){grid-column:span 6;border-bottom:1px solid rgba(255,255,255,0.16);}
-    .toolbar-bottom .tb-btn:nth-child(5){border-right:none;}
+    .toolbar-bottom{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));overflow-x:visible;}
+    .toolbar-bottom .tb-btn{min-width:0;padding:8px 2px 7px;text-wrap:balance;}
+    .toolbar-bottom .tb-btn:nth-child(-n+6){border-bottom:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom .tb-btn:nth-child(6){border-right:none;}
   }
   .toast{position:fixed;left:50%;bottom:calc(var(--tb-h) + 16px);transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
   /* 版本戳記（右上角小字）與「有新版本」提示：加到主畫面的網頁沒有重新整理鈕，靠這個知道自己在跑哪一版。 */
@@ -1011,6 +1011,58 @@ const HTML_PAGE = `<!DOCTYPE html>
   .rv-table td.pink{background:rgba(236,72,153,.10);} .rv-table td.mint{background:rgba(22,163,74,.10);}
   .rv-table th.pink{background:#db2777;} .rv-table th.mint{background:#15803d;}
   .rv-table small{display:block;font-size:10px;color:var(--muted);}
+  /* 2026-10-10 使用者：均線分數排行（照莊爸 zhuang.tw/ma） */
+  .ma-stamp{font-size:12px;color:var(--muted);margin:2px 0 8px;}
+  .ma-note{font-size:12px;background:rgba(245,179,1,.12);border:1px solid rgba(245,179,1,.45);border-radius:10px;padding:5px 12px;display:inline-block;margin-bottom:8px;}
+  .ma-intro{border-left:4px solid #b91c1c;background:var(--panel);padding:8px 12px;font-size:13px;line-height:1.8;margin:6px 0 10px;border-radius:0 8px 8px 0;}
+  .ma-intro b{color:#dc2626;}
+  .ma-sec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:12px 0;}
+  .ma-sec h3{margin:0 0 6px;font-size:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  .ma-sec h3 small{font-size:12px;font-weight:400;color:var(--muted);}
+  .ma-pill{font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--muted);}
+  .ma-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0;font-size:12px;}
+  .ma-tools select,.ma-q input{background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:13px;}
+  .ma-vbtn{background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .ma-vbtn.on{background:#f5b301;border-color:#f5b301;color:#1a1a1a;font-weight:700;}
+  .ma-vsum{margin-left:auto;font-size:12px;color:var(--muted);}
+  .ma-q{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0;}
+  .ma-q input{width:220px;font-size:15px;padding:7px 10px;}
+  .ma-q button{background:#f5b301;color:#1a1a1a;border:none;border-radius:8px;padding:8px 16px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .ma-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .ma-table{border-collapse:collapse;font-size:13px;width:100%;}
+  .ma-table th{font-size:12px;color:var(--muted);font-weight:700;padding:6px 6px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:center;}
+  .ma-table th small{display:block;font-weight:400;font-size:10px;}
+  .ma-table th.sortable{cursor:pointer;}
+  .ma-table td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap;}
+  .ma-table tr.hl td{background:rgba(245,179,1,.16);}
+  .ma-table .rk{color:var(--muted);font-size:12px;}
+  .ma-table .code{color:#dc2626;font-weight:700;cursor:pointer;letter-spacing:.04em;}
+  .ma-table .nm{cursor:pointer;}
+  .ma-table .grpl{cursor:pointer;color:var(--text);}
+  .ma-table .grpl:hover,.ma-table .code:hover,.ma-table .nm:hover{text-decoration:underline;}
+  .ma-ball{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-weight:800;font-size:13px;}
+  .ma-ball.hi{background:#f5b301;color:#3b2500;} .ma-ball.md{border:1.5px solid #b45309;color:#b45309;} .ma-ball.lo{border:1px solid var(--line);color:var(--muted);}
+  .ma-ex.on{color:#dc2626;font-weight:700;}
+  .ma-lamps{display:inline-flex;flex-direction:column;gap:2px;}
+  .ma-lamps span{display:inline-flex;gap:2px;}
+  .ma-lamps i{font-style:normal;font-size:9.5px;font-weight:700;min-width:16px;padding:0 2px;border-radius:3px;border:1px solid var(--line);color:var(--muted);line-height:14px;}
+  .ma-lamps .ma-on i.on{background:#f5b301;border-color:#f5b301;color:#3b2500;}
+  .ma-lamps .ma-hi i.on{background:#f43f5e;border-color:#f43f5e;color:#fff;}
+  .ma-up{color:#dc2626;font-size:12px;} .ma-dn{color:#16a34a;font-size:12px;}
+  .ma-new{background:#f43f5e;color:#fff;border-radius:4px;padding:0 6px;font-size:11px;font-weight:800;}
+  .ma-hot{color:#dc2626;font-weight:700;}
+  .ma-bar{display:inline-block;height:8px;border-radius:99px;background:linear-gradient(90deg,#f59e0b,#fcd34d);vertical-align:middle;}
+  .ma-gbar{width:160px;height:9px;border-radius:99px;background:var(--panel-2);overflow:hidden;display:inline-block;vertical-align:middle;}
+  .ma-gbar span{display:block;height:100%;background:linear-gradient(90deg,#f59e0b,#fcd34d);}
+  .ma-r5.hot{color:#dc2626;font-weight:700;} .ma-r5.cold{color:#16a34a;}
+  .ma-hrow{cursor:pointer;} .ma-hrow.open td{background:rgba(245,179,1,.10);}
+  .ma-tl{display:flex;flex-wrap:wrap;gap:4px;padding:6px 0;justify-content:flex-start;}
+  .ma-tl i{font-style:normal;display:inline-flex;flex-direction:column;align-items:center;border:1px solid var(--line);border-radius:6px;padding:2px 5px;font-size:10px;color:var(--muted);min-width:40px;}
+  .ma-tl i b{font-size:13px;color:var(--text);}
+  .ma-tl i.on{background:#fcd34d;border-color:#f5b301;color:#3b2500;} .ma-tl i.on b{color:#3b2500;}
+  .ma-legend{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.7;}
+  .ma-err{color:#dc2626;padding:10px 0;}
+  @media (max-width: 640px){ .ma-q input{width:100%;} .ma-vsum{margin-left:0;width:100%;} .ma-gbar{width:70px;} }
   .rv-scroll{overflow-x:auto;max-width:100%;}
   .rv-tables > .rv-scroll{min-width:0;}
   .rv-note{font-size:12px;color:var(--muted);line-height:1.6;margin:4px 0;}
@@ -1681,6 +1733,19 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div id="revBody"></div>
   </div>
 </div>
+<!-- 2026-10-10 使用者：照莊爸「均線分數排行 滿分 15」（zhuang.tw/ma）做（下方導覽列「均線分數排行」，手機／iPad 放上排第 6 顆） -->
+<div class="chips-modal" id="maModal" hidden>
+  <div class="chips-inner" id="maInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">均線分數排行　滿分 15</div>
+        <div class="chips-sub">一檔一檔給分，分數高的排前面。個股分數前 60、前十名常客、族群分數前十大；點股號／股名開K線圖，點族群名查整個族群。</div>
+      </div>
+      <button class="cm-icon-btn" id="maClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="maBody"></div>
+  </div>
+</div>
 <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式（下方導覽列「創高黑選股」），跟創高黑龍分開放 -->
 <div class="chips-modal" id="pickerModal" hidden>
   <div class="chips-inner" id="pickerInner">
@@ -1811,6 +1876,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   <!-- 2026-09-26 使用者：下方導覽列的「三角收斂」「隔日沖大單籌碼」不用再留著（本來就是開發中的空位）；2026-09-28 再拿掉「個股研究中心」；
        2026-10-05 再拿掉「每週籌碼分析」（開發中的空位）。「個股訊號追蹤」拿掉後使用者又要加回來，要放自選股的今日訊號與提醒。 -->
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
+  <button class="tb-btn" data-label="均線分數排行"><span class="tb-icon">均</span>均線分數排行</button>  <!-- 2026-10-10 使用者：加第 12 顆，放上排，上下各 6 顆 -->
   <button class="tb-btn" data-label="籌碼日報"><span class="tb-icon">日</span>籌碼日報</button>  <!-- 2026-10-10 使用者：下午報改名「籌碼日報」 -->
   <button class="tb-btn" data-label="創高黑龍"><span class="tb-icon">龍</span><span>創高黑龍<span class="tb-sub">（自動）</span></span></button>  <!-- 2026-10-04 使用者：黑龍回測從下午報分離成獨立面板；2026-10-05 名字後面加（自動），跟創高黑選股（手動）分開 -->
   <button class="tb-btn" data-label="創高黑選股"><span class="tb-icon">選</span><span>創高黑選股<span class="tb-sub">（手動）</span></span></button>  <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式；2026-10-05 名字後面加（手動） -->
@@ -8609,7 +8675,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 13:48:30';
+const BUILD_STAMP = '2026-10-10 14:12:45';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11040,6 +11106,285 @@ setInterval(() => {
   if (document.getElementById('revModal').hidden || document.visibilityState === 'hidden') return;
   rvLoad(rvState.data && rvState.data.month);
 }, 600000);
+// ---- 均線分數排行（2026-10-10 使用者：照莊爸 zhuang.tw/ma「均線分數排行 滿分 15」做）----
+// 分數＝官網式 15 分（站上 5/10/20/60/120/240 均線＋創 5/10/20/60/120/360 日新高＋多頭排列 3 分），後端黑龍表收盤後算好。
+// 排法跟莊爸一樣：總分高→低，同分先比 12 項本體分，再照股號；「昨天名次」的箭頭跟依總分的名次比，不跟切換後的列序比。
+const MA_W = [5, 10, 20, 60, 120, 240], MA_HW = [5, 10, 20, 60, 120, 360];
+const maState = { data: null, loading: false, error: null, date: '', view: 'sum', sortKey: 'sum', sortDir: -1,
+  hits: null, hitsLoading: false, hitsError: null, hitDays: 20, hitTop: 10, hitShow: 20, hitDate: '', hitOpen: -1,
+  q: null, qLoading: false, qError: null, qText: '' };
+const maMd = (d) => d ? String(d).slice(5).replace('-', '/') : '';
+const maNum = (v) => v === null || v === undefined ? '' : String(+(+v).toFixed(2));
+async function maFetch(url){
+  const res = await fetch(url);
+  let d = null;
+  try { d = await res.json(); } catch (_){ d = null; }
+  if (!res.ok) throw new Error((d && d.detail) || ('HTTP ' + res.status));
+  return d;
+}
+async function maLoad(){
+  if (maState.loading) return;
+  maState.loading = true;
+  if (!document.getElementById('maModal').hidden) renderMa();
+  try {
+    maState.data = await maFetch('/api/ma-rank' + (maState.date ? '?date=' + encodeURIComponent(maState.date) : ''));
+    maState.error = null;
+  } catch (e){
+    maState.error = e.message || String(e);
+  } finally {
+    maState.loading = false;
+    if (!document.getElementById('maModal').hidden) renderMa();
+  }
+}
+async function maHitsLoad(){
+  maState.hitsLoading = true;
+  maState.hitOpen = -1;
+  maRenderHits();
+  try {
+    const qs = '?days=' + maState.hitDays + '&top=' + maState.hitTop + '&show=' + maState.hitShow + (maState.hitDate ? '&date=' + encodeURIComponent(maState.hitDate) : '');
+    maState.hits = await maFetch('/api/ma-rank-hits' + qs);
+    maState.hitsError = null;
+  } catch (e){
+    maState.hitsError = e.message || String(e);
+  } finally {
+    maState.hitsLoading = false;
+    maRenderHits();
+  }
+}
+async function maQuery(v){
+  v = String(v || '').trim();
+  maState.qText = v;
+  if (!v){ maState.q = null; maState.qError = null; maRenderQuery(); return; }
+  maState.qLoading = true;
+  maRenderQuery();
+  try {
+    const isCode = /^[0-9]{4,6}[A-Za-z]?$/.test(v);
+    maState.q = await maFetch('/api/ma-rank-q?' + (isCode ? 'code=' : 'group=') + encodeURIComponent(v));
+    maState.q.isCode = isCode;
+    maState.qError = null;
+  } catch (e){
+    maState.q = null;
+    maState.qError = e.message || String(e);
+  } finally {
+    maState.qLoading = false;
+    maRenderQuery();
+  }
+}
+function maLamps(arr, windows, cls){
+  return '<span class="' + cls + '">' + windows.map((w, i) => '<i class="' + (arr && arr[i] ? 'on' : '') + '">' + w + '</i>').join('') + '</span>';
+}
+function maBall(n){
+  if (n === null || n === undefined) return '—';
+  return '<span class="ma-ball ' + (n >= 15 * 0.75 ? 'hi' : (n >= 15 * 0.4 ? 'md' : 'lo')) + '">' + n + '</span>';
+}
+function maPrevCell(p, cur){
+  if (p === null || p === undefined) return '<td>—</td>';
+  const d = p - cur;
+  return '<td>' + p + (d > 0 ? ' <span class="ma-up">▲' + d + '</span>' : (d < 0 ? ' <span class="ma-dn">▼' + (-d) + '</span>' : '')) + '</td>';
+}
+function maIsNew(r){ return r.prev === null || r.prev === undefined || r.prev > ((maState.data && maState.data.top) || 60); }
+function maStreakCell(r){
+  const n = r.streak || 0;
+  if (maIsNew(r)) return '<td><span class="ma-new">NEW</span></td>';
+  if (n >= 5) return '<td class="ma-hot">🔥 ' + n + ' 天</td>';
+  return '<td>' + (n > 0 ? n + ' 天' : '—') + '</td>';
+}
+function maGroupLinks(label){
+  if (!label) return '—';
+  return label.split('/').map((g) => '<span class="grpl" data-ma-group="' + wlEsc(g) + '">' + wlEsc(g) + '</span>').join('/');
+}
+function maStockTable(rows, hl, withPrev){
+  const k = maState.sortKey, arrow = (key) => withPrev && maState.view === 'sum' && k === key ? (maState.sortDir < 0 ? ' ▼' : ' ▲') : '';
+  const sortable = (key, label) => withPrev ? '<th class="sortable" data-ma-sort="' + key + '">' + label + arrow(key) + '</th>' : '<th>' + label + '</th>';
+  let h = '<div class="ma-wrap"><table class="ma-table"><thead><tr><th></th>' + sortable('code', '股號') + '<th>股名</th>' +
+    sortable('sum', '總分') + sortable('total', '分數') + '<th title="排列加分：MA20>MA60、MA60>MA120、MA120>MA350 各 1 分">排列</th>' +
+    '<th title="上排：站上 5/10/20/60/120/240 日均線（金色）；下排：創 5/10/20/60/120/360 日新高（紅色，收盤口徑）">均線<small>下排 創新高</small></th>' +
+    sortable('close', '收盤') + '<th>族群</th>' +
+    (withPrev ? '<th>昨天名次<small>' + maMd(maState.data && maState.data.prevDate) + '</small></th><th title="連續幾個交易日都在前 60 名">連續上榜</th>' : '') +
+    '</tr></thead><tbody>';
+  rows.forEach((r, i) => {
+    h += '<tr class="' + (hl && r.code === hl ? 'hl' : '') + '"><td class="rk">' + (i + 1) + '</td>' +
+      '<td class="code" data-ma-chart="' + wlEsc(r.code) + '" data-ma-name="' + wlEsc(r.name) + '">' + wlEsc(r.code) + '</td>' +
+      '<td><span class="nm" data-ma-chart="' + wlEsc(r.code) + '" data-ma-name="' + wlEsc(r.name) + '">' + wlEsc(r.name) + '</span> ' + wlStarHtml(r.code, r.name) + '</td>' +
+      '<td>' + maBall(r.sum) + '</td><td>' + r.total + '</td>' +
+      '<td class="ma-ex' + (r.extra ? ' on' : '') + '">' + (r.extra ? '+' + r.extra : '0') + '</td>' +
+      '<td><span class="ma-lamps">' + maLamps(r.ma, MA_W, 'ma-on') + maLamps(r.hi, MA_HW, 'ma-hi') + '</span></td>' +
+      '<td>' + maNum(r.close) + '</td><td>' + maGroupLinks(r.grp) + '</td>' +
+      (withPrev ? maPrevCell(r.prev, r._rk || (i + 1)) + maStreakCell(r) : '') + '</tr>';
+  });
+  return h + '</tbody></table></div>';
+}
+function maViewRows(){
+  const base = ((maState.data && maState.data.stocks) || []).map((r, i) => Object.assign({}, r, { _rk: i + 1 }));   // 後端已照總分排好
+  const v = maState.view;
+  let rows = base;
+  const nHot = base.filter((r) => (r.streak || 0) >= 5).length, nNew = base.filter(maIsNew).length;
+  let sum = '🔥 連續 5 天以上 ' + nHot + ' 檔・🆕 新進榜 ' + nNew + ' 檔';
+  if (v === 'up'){
+    rows = base.filter((r) => r.prev !== null && r.prev !== undefined).sort((a, b) => ((b.prev - b._rk) - (a.prev - a._rk)) || (a._rk - b._rk));
+    sum = '跟昨天比進步最多的排前面（昨天沒有名次的不列）';
+  } else if (v === 'streak'){
+    rows = base.slice().sort((a, b) => ((b.streak || 0) - (a.streak || 0)) || (a._rk - b._rk));
+    sum = '🔥 連續 5 天以上：' + nHot + ' 檔';
+  } else if (v === 'new'){
+    rows = base.filter(maIsNew);
+    sum = '今天新進前 60 名：' + nNew + ' 檔';
+  } else if (v === 'allma'){
+    rows = base.filter((r) => (r.ma || []).length === 6 && r.ma.every(Boolean));
+    sum = '六條均線全站上：' + rows.length + ' 檔';
+  } else if (maState.sortKey !== 'sum' || maState.sortDir !== -1){
+    const key = maState.sortKey, dir = maState.sortDir;
+    rows = base.slice().sort((a, b) => {
+      let x = a[key], y = b[key];
+      if (key === 'code'){ x = +x || 0; y = +y || 0; }
+      if (x === y) return a._rk - b._rk;
+      return (x > y ? 1 : -1) * dir;
+    });
+  }
+  return { rows, sum };
+}
+function maGroupTable(gs){
+  if (!gs || !gs.length) return '<div class="ma-legend">這天沒有族群分數。</div>';
+  const max = Math.max.apply(null, gs.map((g) => g.avg)) || 1;
+  let h = '<div class="ma-wrap"><table class="ma-table"><thead><tr><th></th><th>族群</th><th>平均分</th><th></th><th>檔數</th><th>族內最高</th>' +
+    '<th title="本站族群成員當天平均漲跌幅排序（第 1 名＝當天漲最多的族群）">族群漲幅排名<small>' + maMd(maState.data.date) + '</small></th>' +
+    '<th>昨天名次<small>' + maMd(maState.data.prevDate) + '</small></th></tr></thead><tbody>';
+  gs.forEach((g, i) => {
+    h += '<tr><td class="rk">' + (i + 1) + '</td><td><span class="grpl code" data-ma-group="' + wlEsc(g.name) + '">' + wlEsc(g.name) + '</span></td>' +
+      '<td class="ma-hot">' + g.avg.toFixed(2) + '</td><td><span class="ma-gbar"><span style="width:' + (g.avg / max * 100).toFixed(1) + '%"></span></span></td>' +
+      '<td>' + g.n + '</td><td>' + maBall(g.max) + '</td><td>' + (g.chgRank ? '第 ' + g.chgRank + ' 名' : '—') + '</td>' + maPrevCell(g.prev, i + 1) + '</tr>';
+  });
+  return h + '</tbody></table></div>';
+}
+function maHitsHtml(){
+  const opt = (vals, cur, fmt) => vals.map((v) => '<option value="' + v + '"' + (+cur === v ? ' selected' : '') + '>' + fmt(v) + '</option>').join('');
+  const d = maState.hits;
+  const dates = (d && d.dates) || (maState.data && maState.data.dates) || [];
+  let h = '<div class="ma-sec" id="maHitsSec"><h3>前十名常客 <small>近 N 個交易日，擠進前十名幾次</small>' +
+    '<select data-ma-hit="hitDate">' + dates.slice().reverse().map((x) => '<option value="' + x + '"' + ((maState.hitDate || (d && d.to)) === x ? ' selected' : '') + '>' + maMd(x) + '</option>').join('') + '</select></h3>' +
+    '<div class="ma-tools">回看 <select data-ma-hit="hitDays">' + opt([10, 20, 40, 60], maState.hitDays, (v) => v + ' 個交易日') + '</select>' +
+    '每天取 <select data-ma-hit="hitTop">' + opt([5, 10, 20, 30], maState.hitTop, (v) => '前 ' + v + ' 名') + '</select>' +
+    '列出 <select data-ma-hit="hitShow">' + opt([20, 30, 50], maState.hitShow, (v) => '前 ' + v + ' 檔') + '</select></div>' +
+    '<div class="ma-legend">點任一列掀開逐日格子：每格是「日期／當天全市場第幾名／當天分數」—— <b style="color:#b45309">金色</b>＝那天有上榜，白色＝掉出去了。</div>';
+  if (maState.hitsLoading && !d) return h + '<div class="ma-legend">統計中…</div></div>';
+  if (maState.hitsError) return h + '<div class="ma-err">讀不到：' + wlEsc(maState.hitsError) + '</div></div>';
+  if (!d) return h + '</div>';
+  const mx = Math.max.apply(null, d.rows.map((r) => r.hits)) || 1;
+  h += '<div class="ma-wrap"><table class="ma-table"><thead><tr><th></th><th>股號</th><th>股名</th><th>上榜次數<small>共 ' + d.ndays + ' 天</small></th><th>占比</th><th>近 5 日</th>' +
+    '<th>分數<small>' + maMd(d.to) + '</small></th><th>名次<small>' + maMd(d.to) + '</small></th><th>族群</th></tr></thead><tbody>';
+  d.rows.forEach((r, i) => {
+    const r5 = r.r5 >= 4 ? 'hot' : (r.r5 === 0 ? 'cold' : '');
+    h += '<tr class="ma-hrow' + (maState.hitOpen === i ? ' open' : '') + '" data-ma-hrow="' + i + '"><td class="rk">' + (i + 1) + (maState.hitOpen === i ? ' ▾' : ' ▸') + '</td>' +
+      '<td class="code" data-ma-chart="' + wlEsc(r.code) + '" data-ma-name="' + wlEsc(r.name) + '">' + wlEsc(r.code) + '</td><td>' + wlEsc(r.name) + ' ' + wlStarHtml(r.code, r.name) + '</td>' +
+      '<td class="ma-hot">' + r.hits + '</td><td><span class="ma-bar" style="width:' + Math.round(r.hits / mx * 54) + 'px"></span> ' + Math.round(r.hits / d.ndays * 100) + '%</td>' +
+      '<td><span class="ma-r5 ' + r5 + '">' + r.r5 + '/5</span></td><td>' + (r.sum === null ? '—' : r.sum) + '</td><td>' + (r.rank === null ? '—' : r.rank) + '</td>' +
+      '<td>' + maGroupLinks(r.grp) + '</td></tr>';
+    if (maState.hitOpen === i){
+      h += '<tr><td colspan="9"><div class="ma-tl">' + (r.trail || []).map((x) => '<i class="' + (x[3] ? 'on' : '') + '">' + maMd(x[0]) +
+        '<b>' + (x[1] === null ? '—' : x[1]) + '</b>' + (x[2] === null ? '—' : x[2] + ' 分') + '</i>').join('') + '</div></td></tr>';
+    }
+  });
+  h += '</tbody></table></div><div class="ma-legend">「近 5 日」那欄是重點：上榜次數多、但近 5 日 0/5 的，是「前一陣子很強、現在已經掉下來」；次數多又 5/5 的才是「一路都在、現在還在」。' +
+    '同分並列時一律全部算上榜（滿分只有 15 分，常常十幾檔同分，照名次硬切會變成股號小的佔便宜）。</div>';
+  return h + '</div>';
+}
+function maQueryHtml(){
+  let h = '<div class="ma-sec" id="maQSec"><h3>查詢（均線分數）</h3><div class="ma-q"><input id="maQ" placeholder="輸入股號或族群名，例 2330、記憶體" value="' + wlEsc(maState.qText) + '">' +
+    '<button type="button" data-ma-go="1">查詢</button></div>' +
+    '<div class="ma-legend">輸入股號：列出那檔所屬族群的全部成員（依分數排，查的那檔標色）；輸入族群名：列出那個族群。分數是最近一個收盤的，盤中不會變。</div>';
+  if (maState.qLoading) h += '<div class="ma-legend">查詢中…</div>';
+  else if (maState.qError) h += '<div class="ma-err">' + wlEsc(maState.qError) + '</div>';
+  else if (maState.q){
+    const q = maState.q;
+    const ranks = (q.groups || []).filter((g) => g.chgRank).map((g) => g.name + ' 漲幅第 ' + g.chgRank + ' 名').join('・');
+    h += '<div class="ma-tools"><b>' + wlEsc(q.group || '') + '</b><span class="ma-legend" style="margin:0">' + (ranks ? ranks + '・' : '') + q.rows.length + ' 檔・依均線分數排序・<b>' + maMd(q.date) + ' 收盤</b>的分數' +
+      ((q.missing || []).length ? '・沒有分數（日K不足）：' + q.missing.map((m) => wlEsc(m.name)).join('、') : '') + '</span></div>' +
+      maStockTable(q.rows, q.isCode ? String(q.code || '').toUpperCase() : null, false);
+  }
+  return h + '</div>';
+}
+function maRenderHits(){
+  const sec = document.getElementById('maHitsSec');
+  if (sec) sec.outerHTML = maHitsHtml();
+}
+function maRenderQuery(){
+  const sec = document.getElementById('maQSec');
+  if (sec) sec.outerHTML = maQueryHtml();
+}
+function renderMa(){
+  const body = document.getElementById('maBody');
+  if (!body) return;
+  const d = maState.data;
+  if (!d){
+    body.innerHTML = maState.error ? '<div class="ma-err">讀不到均線分數排行：' + wlEsc(maState.error) + '</div>' : '<div class="ma-legend">載入中…</div>';
+    return;
+  }
+  const scrollTop = document.getElementById('maInner').scrollTop;
+  const vb = (v, label) => '<button type="button" class="ma-vbtn' + (maState.view === v ? ' on' : '') + '" data-ma-view="' + v + '">' + label + '</button>';
+  const view = maViewRows();
+  const dateSel = '<select data-ma-date="1">' + (d.dates || []).slice().reverse().map((x) => '<option value="' + x + '"' + (x === d.date ? ' selected' : '') + '>' + maMd(x) + '</option>').join('') + '</select>';
+  body.innerHTML =
+    '<div class="ma-stamp">資料日 ' + d.date + '・族群成員 ' + d.n + ' 檔已計分' + (d.updated ? '・更新 ' + String(d.updated).slice(0, 16).replace('T', ' ') : '') +
+      (maState.loading ? '・讀取中…' : '') + '</div>' +
+    '<div class="ma-note">🕐 每個交易日收盤、日K進來整表後更新 —— 收完盤才是當天完整的數字；上面「資料日」就是這份分數算到哪一天。</div>' +
+    '<div class="ma-intro">這頁幫每一檔股票<b>打分數，滿分 15 分</b>。分數越高，代表這檔股票<b>現在的位置越強、走勢站得越穩</b>；分數低不代表不好，多半是還在整理、或是已經走弱。分數講的是「<b>位置強不強</b>」，不是買賣點。</div>' +
+    maQueryHtml() +
+    '<div class="ma-sec"><h3>個股分數前 ' + (d.top || 60) + ' <small>全部族群成員，總分高→低（點欄位可以自己重排）</small><span class="ma-pill">選股日期 ' + maMd(d.date) + '</span>' + dateSel + '</h3>' +
+    '<div class="ma-tools">排名方式 ' + vb('sum', '依總分') + vb('up', '名次進步') + vb('streak', '連續上榜') + vb('new', '新進榜') + vb('allma', '站上全部均線') +
+    '<span class="ma-vsum">' + view.sum + '</span></div>' +
+    (view.rows.length ? maStockTable(view.rows, null, true) : '<div class="ma-legend">沒有符合的股票。</div>') +
+    '<div class="ma-legend">燈號：上排六格＝站上 5/10/20/60/120/240 日均線（金色），下排六格＝創 5/10/20/60/120/360 日新高（紅色，最近 3 天的最高收盤比那個天期內更早的都高，平手不算）。' +
+    '總分＝分數（站上＋新高，滿分 12）＋排列（20 日線在 60 日線上、60 在 120 上、120 在 350 上各 1 分）。同總分先比分數、再照股號。連續上榜＝連續幾個交易日都在前 60 名；昨天不在前 60 名掛 NEW。</div></div>' +
+    maHitsHtml() +
+    '<div class="ma-sec"><h3>族群分數前十大 <small>族內平均分</small><span class="ma-pill">選股日期 ' + maMd(d.date) + '</span></h3>' + maGroupTable(d.groups) +
+    '<div class="ma-legend">平均分＝族群內有分數的成員當天均線分數平均（千元是價格帶分類，不列）。族群漲幅排名＝本站族群成員當天平均漲跌幅排序（第 1 名＝當天漲最多），跟均線分數各看一面：' +
+    '漲幅看當天的動能、均線分數看長期位置的強弱 —— 兩邊都靠前的族群是「今天有表現、底子也硬」；只有漲幅前面、分數後面的，多半是低基期反彈。</div></div>' +
+    '<div class="ma-legend">分數只是「位置與強弱」的客觀描述，不是買賣建議；實際進出場請搭配自己的策略與風險控制。</div>';
+  document.getElementById('maInner').scrollTop = scrollTop;
+}
+function openMaPanel(){
+  document.getElementById('maModal').hidden = false;
+  renderMa();
+  maLoad();
+  if (!maState.hits && !maState.hitsLoading) maHitsLoad();
+}
+function closeMaPanel(){ document.getElementById('maModal').hidden = true; }
+document.getElementById('maClose').addEventListener('click', closeMaPanel);
+document.getElementById('maModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeMaPanel(); });
+document.getElementById('maBody').addEventListener('click', (e) => {
+  const t = e.target;
+  if (t.closest('.wl-star')) return;
+  const chart = t.closest('[data-ma-chart]');
+  if (chart){ openStockChart(chart.dataset.maChart, chart.dataset.maName); return; }
+  const grp = t.closest('[data-ma-group]');
+  if (grp){ maQuery(grp.dataset.maGroup); const sec = document.getElementById('maQSec'); if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  if (t.closest('[data-ma-go]')){ maQuery((document.getElementById('maQ') || {}).value); return; }
+  const v = t.closest('[data-ma-view]');
+  if (v){ maState.view = v.dataset.maView; maState.sortKey = 'sum'; maState.sortDir = -1; renderMa(); return; }
+  const th = t.closest('[data-ma-sort]');
+  if (th){
+    const k = th.dataset.maSort;
+    if (maState.view === 'sum' && maState.sortKey === k) maState.sortDir = -maState.sortDir;
+    else { maState.sortKey = k; maState.sortDir = k === 'code' ? 1 : -1; }
+    maState.view = 'sum';
+    renderMa();
+    return;
+  }
+  const hr = t.closest('[data-ma-hrow]');
+  if (hr){ const i = +hr.dataset.maHrow; maState.hitOpen = maState.hitOpen === i ? -1 : i; maRenderHits(); }
+});
+document.getElementById('maBody').addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.dataset.maDate){ maState.date = t.value; maLoad(); return; }
+  if (t.dataset.maHit){
+    const k = t.dataset.maHit;
+    maState[k] = k === 'hitDate' ? t.value : +t.value;
+    maHitsLoad();
+  }
+});
+document.getElementById('maBody').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'maQ') maQuery(e.target.value);
+});
 (function(){
   // 下方導覽列手機／iPad 是兩排，字換行時高度會變：量實際高度寫進 --tb-h，內容底部留白跟提示框位置跟著走
   const tb = document.getElementById('toolbarBottom');
@@ -11055,6 +11400,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '飆股雷達'){ openGrailPanel(); return; }     // 2026-10-07 使用者：照莊爸 App 的飆股雷達
     if (btn.dataset.label === '處置監獄'){ openJailPanel(); return; }     // 2026-10-09 使用者：照莊爸處置監獄頁
     if (btn.dataset.label === '營收成長榜'){ openRevenuePanel(); return; }  // 2026-10-09 使用者：照莊爸每月營收成長榜
+    if (btn.dataset.label === '均線分數排行'){ openMaPanel(); return; }     // 2026-10-10 使用者：照莊爸均線分數排行（zhuang.tw/ma）
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '籌碼日報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」；2026-10-10 再改名「籌碼日報」
@@ -11638,6 +11984,18 @@ export default {
     if (url.pathname === "/api/revenue-stock") {
       // 營收成長榜的查個股營收（每個月的年增、公布日、隔日漲跌），60 秒快取
       return await proxyHanstockBars("/api/hub/revenue/stock" + url.search, 60);
+    }
+    if (url.pathname === "/api/ma-rank") {
+      // 均線分數排行（2026-10-10 使用者：照莊爸 zhuang.tw/ma 做）：個股分數前 60＋族群分數前十大，收盤後才變，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/ma-rank" + url.search, 300);
+    }
+    if (url.pathname === "/api/ma-rank-hits") {
+      // 均線分數排行的前十名常客（近 N 天每天取前 K 名，同分全算），5 分鐘快取
+      return await proxyHanstockBars("/api/hub/ma-rank/hits" + url.search, 300);
+    }
+    if (url.pathname === "/api/ma-rank-q") {
+      // 均線分數查詢（股號→所屬族群全部成員；或族群名），60 秒快取
+      return await proxyHanstockBars("/api/hub/ma-rank/q" + url.search, 60);
     }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
