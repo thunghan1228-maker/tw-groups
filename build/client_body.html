@@ -222,14 +222,14 @@
   .tb-sub{white-space:nowrap;}
   .tb-icon{width:20px;height:20px;border-radius:6px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;}
   /* 2026-10-10 使用者：手機版跟 iPad 版下方導覽列分成兩排（不用左右滑）；加了「均線分數排行」之後上下各 6 顆，
-     再加第 13 顆「估值河流圖」放下排最後 → 上 6 下 7（42 欄格線：上排每顆 7 欄、下排每顆 6 欄）。
+     再加第 13 顆「估值河流圖」放下排最後 → 上 6 下 7；第 14 顆「每日功課」放上排 → 上下各 7（42 欄格線每顆 6 欄）。
      iPad 橫放比較寬，用觸控螢幕判斷一起涵蓋。 */
   @media (max-width: 1024px), (hover: none) and (pointer: coarse){
     :root{--tb-h:112px;}
     .toolbar-bottom{display:grid;grid-template-columns:repeat(42,minmax(0,1fr));overflow-x:visible;}
     .toolbar-bottom .tb-btn{min-width:0;grid-column:span 6;padding:8px 2px 7px;text-wrap:balance;}
-    .toolbar-bottom .tb-btn:nth-child(-n+6){grid-column:span 7;border-bottom:1px solid rgba(255,255,255,0.16);}
-    .toolbar-bottom .tb-btn:nth-child(6){border-right:none;}
+    .toolbar-bottom .tb-btn:nth-child(-n+7){border-bottom:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom .tb-btn:nth-child(7){border-right:none;}
   }
   .toast{position:fixed;left:50%;bottom:calc(var(--tb-h) + 16px);transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
   /* 版本戳記（右上角小字）與「有新版本」提示：加到主畫面的網頁沒有重新整理鈕，靠這個知道自己在跑哪一版。 */
@@ -781,6 +781,58 @@
   .sw-etf-kind{font-size:13px;font-weight:700;margin:8px 0 2px;color:var(--muted);}
   .sw-drow.etf{border-left-color:#7c3aed;}
   .sw-drow.rev{border-left-color:#f59e0b;}
+  /* 每日功課（2026-10-10 使用者：照莊爸空觀察／當沖多／多觀察功課做自動版） */
+  .hw-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 8px;}
+  .hw-stamp{font-size:12px;color:var(--muted);margin-left:auto;}
+  .hw-flts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
+  .hw-flt.on{background:#7c3aed;color:#fff;border-color:#7c3aed;}
+  .hw-list{display:flex;flex-direction:column;gap:4px;margin:6px 0;}
+  .hw-row{display:grid;grid-template-columns:22px minmax(64px,0.9fr) 38px minmax(90px,1.2fr) minmax(0,2fr) 64px;gap:6px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:13px;cursor:pointer;min-width:0;}
+  .hw-row.hot{border-left:4px solid #f59e0b;}
+  .hw-row:hover,.hw-wrow:hover{background:var(--panel-2);}
+  .hw-lv{text-align:center;}
+  .hw-grp{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hw-grp small{color:var(--muted);margin-left:2px;}
+  .hw-ma{font-size:12px;color:#f59e0b;font-weight:700;}
+  .hw-stk{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hw-tags{display:flex;flex-wrap:wrap;gap:3px;min-width:0;}
+  .hw-tags i{font-style:normal;font-size:11px;border-radius:5px;padding:1px 6px;border:1px solid var(--line);white-space:nowrap;}
+  .hw-tags i.down{border-color:rgba(95,174,111,.6);color:var(--down);}
+  .hw-tags i.up{border-color:rgba(230,103,95,.6);color:var(--up);}
+  .hw-tags i.jail{border-color:#f59e0b;color:#f59e0b;}
+  .hw-tags i.out{border-color:#60a5fa;color:#60a5fa;}
+  .hw-tags i.grp{border-color:#a78bfa;color:#a78bfa;}
+  .hw-pct{text-align:right;font-weight:800;white-space:nowrap;}
+  .hw-more{margin:6px 0;}
+  .hw-more summary{cursor:pointer;font-size:13px;color:var(--muted);}
+  .hw-picks{display:flex;flex-wrap:wrap;gap:6px 12px;margin:6px 0 10px;font-size:13px;}
+  .hw-picks select{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:3px 6px;font-family:inherit;font-size:13px;max-width:200px;}
+  .hw-gblock{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:8px 0;}
+  .hw-ghead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;}
+  .hw-ghead b{font-size:16px;}
+  .hw-ghead small{color:var(--muted);font-size:12px;}
+  .hw-play{margin-left:auto;font-size:13px;font-weight:800;color:#f59e0b;}
+  .hw-playnote{font-size:12px;color:var(--muted);margin:2px 0 6px;}
+  .hw-wrow{display:grid;grid-template-columns:62px minmax(80px,1.3fr) 64px 60px 92px 92px minmax(0,1.4fr);gap:6px;align-items:center;padding:5px 2px;border-top:1px solid var(--line);font-size:13px;cursor:pointer;}
+  .hw-zone{font-size:12px;white-space:nowrap;}
+  .hw-zone.bull{color:var(--up);}
+  .hw-zone.bear{color:var(--down);}
+  .hw-px{text-align:right;}
+  .hw-def{font-size:11px;color:var(--muted);line-height:1.3;}
+  .hw-brk{color:var(--down);font-weight:700;}
+  .hw-warn{color:#f59e0b;font-weight:700;}
+  .hw-ok{color:var(--muted);}
+  .hw-extra{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hw-sep{font-size:11px;color:var(--muted);text-align:center;letter-spacing:1px;padding:2px 0;}
+  @media (max-width: 640px){
+    .hw-row{grid-template-columns:20px minmax(0,1fr) 54px;grid-template-areas:"lv stk pct" "lv grp grp" "lv tags tags";row-gap:2px;}
+    .hw-row .hw-lv{grid-area:lv;} .hw-row .hw-stk{grid-area:stk;} .hw-row .hw-pct{grid-area:pct;}
+    .hw-row .hw-grp{grid-area:grp;} .hw-row .hw-tags{grid-area:tags;}
+    .hw-row .hw-ma{grid-area:grp;justify-self:end;}
+    .hw-wrow{grid-template-columns:52px minmax(0,1fr) 58px;grid-template-areas:"zone stk pct" "px def st" "ex ex ex";row-gap:2px;}
+    .hw-wrow .hw-zone{grid-area:zone;} .hw-wrow .hw-stk{grid-area:stk;} .hw-wrow .hw-pct{grid-area:pct;}
+    .hw-wrow .hw-px{grid-area:px;text-align:left;} .hw-wrow .hw-def{grid-area:def;} .hw-wrow .hw-st{grid-area:st;text-align:right;} .hw-wrow .hw-extra{grid-area:ex;}
+  }
   .sw-rev-flag{font-size:12px;font-weight:700;margin-left:4px;}
   .sw-verdict.bad{background:#b91c1c;}
   /* 主動式ETF持股雷達（2026-10-10 使用者：照莊爸 zhuang.tw/etf 做，併進籌碼日報） */
@@ -1871,6 +1923,19 @@
   </div>
 </div>
 <!-- 2026-10-10 使用者：照莊爸「估值河流圖」（zhuang.tw/river）做本站版（下方導覽列第 13 顆「估值河流圖」） -->
+<!-- 2026-10-10 使用者：照莊爸空觀察／當沖多／多觀察功課做自動版（不用貼清單），下方導覽列第 14 顆「每日功課」 -->
+<div class="chips-modal" id="hwModal" hidden>
+  <div class="chips-inner" id="hwInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">每日功課（自動版）</div>
+        <div class="chips-sub">系統自己把刀劍空、即將入獄、出獄、賽馬多、河流多、馬火多、族群名次這幾份清單交叉比對，只留下該盯的那幾檔；多觀察挑三個族群看位置與防守。盤中跟著首頁報價重算。</div>
+      </div>
+      <button class="cm-icon-btn" id="hwClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="hwBody"></div>
+  </div>
+</div>
 <div class="chips-modal" id="rivModal" hidden>
   <div class="chips-inner" id="rivInner">
     <div class="chips-head">
@@ -2015,6 +2080,7 @@
        2026-10-05 再拿掉「每週籌碼分析」（開發中的空位）。「個股訊號追蹤」拿掉後使用者又要加回來，要放自選股的今日訊號與提醒。 -->
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
   <button class="tb-btn" data-label="均線分數排行"><span class="tb-icon">均</span>均線分數排行</button>  <!-- 2026-10-10 使用者：加第 12 顆，放上排，上下各 6 顆 -->
+  <button class="tb-btn" data-label="每日功課"><span class="tb-icon">課</span>每日功課</button>  <!-- 2026-10-10 使用者：第 14 顆「每日功課」（空觀察／當沖多／多觀察自動版），放上排 → 上下各 7 顆 -->
   <button class="tb-btn" data-label="籌碼日報"><span class="tb-icon">日</span>籌碼日報</button>  <!-- 2026-10-10 使用者：下午報改名「籌碼日報」 -->
   <button class="tb-btn" data-label="創高黑龍"><span class="tb-icon">龍</span><span>創高黑龍<span class="tb-sub">（自動）</span></span></button>  <!-- 2026-10-04 使用者：黑龍回測從下午報分離成獨立面板；2026-10-05 名字後面加（自動），跟創高黑選股（手動）分開 -->
   <button class="tb-btn" data-label="創高黑選股"><span class="tb-icon">選</span><span>創高黑選股<span class="tb-sub">（手動）</span></span></button>  <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式；2026-10-05 名字後面加（手動） -->
@@ -11152,6 +11218,241 @@ setInterval(() => {
   if (day < 1 || day > 5 || minutes < 8 * 60 + 30 || minutes > 18 * 60 + 30) return;
   grLoad(false);
 }, 90000);
+// ---- 每日功課（2026-10-10 使用者：照莊爸「空觀察／當沖多／多觀察功課」做自動版，不用貼清單）----
+// 莊爸的三頁是學員把 LINE 與機器人回的清單貼進去交叉比對；這些清單我們系統本來就算得出來，這裡直接自動交叉：
+// 空觀察＝刀劍空(32) ∩ 即將入獄（處置監獄嫌疑名單）∩ 今天出獄 ∩ 做空族群（昨天漲最多的族群）；
+// 當沖多＝賽馬多(33) ∩ 河流多(34) ∩ 馬火多(30) ∩ 族群在多方區；多觀察＝挑三個族群，看每檔位置、漲幅、有沒有破三日低／月線。
+// 盤中的名單跟盤中333 同一份（race333Model，首頁即時報價）；防守價是前一天收盤算好的（/api/checkup）。
+const hwState = { tab: 'short', filters: { band: false, ma7: false, hideHold: true, over6: true }, picks: null, def: {}, defKey: '', defLoading: false, timer: 0 };
+const HW_TABS = [['short', '🔪 空觀察'], ['long', '🐎 當沖多'], ['watch', '🔥 多觀察']];
+try { const saved = JSON.parse(localStorage.getItem('hwPicks') || 'null'); if (Array.isArray(saved)) hwState.picks = saved.slice(0, 3); } catch (_){}
+const hwPct = (v) => (v === null || v === undefined || !Number.isFinite(v) ? '—' : (v > 0 ? '+' : '') + v.toFixed(2) + '%');
+function hwGroupsRanked(){
+  if (!lastData || !Array.isArray(lastData.groups)) return [];
+  return lastData.groups.filter((g) => g.name !== '股期標的').slice().sort((a, b) => b.avgChange - a.avgChange);
+}
+function hwQuote(code){
+  for (const g of (lastData && lastData.groups) || []){
+    const s = g.stocks.find((x) => x.code === code);
+    if (s) return s;
+  }
+  return null;
+}
+function hwMaScore(code, price){
+  const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[code] : null;
+  return info && price > 0 ? maScoreFromSums(info, price, brewLaunchData.rules) : null;
+}
+function hwRankMark(rank, total){
+  if (!rank || !total) return '';
+  return rank <= Math.ceil(total / 3) ? '🔺' : (rank > total - Math.ceil(total / 3) ? '🔰' : '');
+}
+function hwRowHtml(o){
+  const hot = o.hot !== undefined ? o.hot : o.hits >= 2;
+  const lv = o.lv || (o.hits >= 4 ? '⭐' : o.hits === 3 ? '🔥' : o.hits === 2 ? '✅' : '・');
+  return '<div class="hw-row' + (hot ? ' hot' : '') + '" data-hw-code="' + wlEsc(o.code) + '" data-hw-name="' + wlEsc(o.name || '') + '">' +
+    '<span class="hw-lv">' + lv + '</span>' +
+    '<span class="hw-grp">' + (o.group ? wlEsc(o.group) + (o.rank ? '<small>(' + o.rank + ')' + hwRankMark(o.rank, o.total) + '</small>' : '') : '—') + '</span>' +
+    '<span class="hw-ma">' + (o.ma === null || o.ma === undefined ? '—' : '均' + o.ma) + '</span>' +
+    '<span class="hw-stk"><b>' + wlEsc(o.code) + '</b> ' + wlEsc(o.name || '') + '</span>' +
+    '<span class="hw-tags">' + o.tags.map((t) => '<i class="' + (t.cls || '') + '">' + t.text + '</i>').join('') + '</span>' +
+    '<span class="hw-pct ' + (o.pct === null ? '' : dirClass(o.pct)) + '">' + hwPct(o.pct) + '</span></div>';
+}
+function hwListHtml(list, emptyText){
+  if (!list.length) return '<div class="race-note">' + emptyText + '</div>';
+  const isHot = (o) => (o.hot !== undefined ? o.hot : o.hits >= 2);
+  const top = list.filter(isHot), rest = list.filter((o) => !isHot(o));
+  return (top.length ? '<div class="hw-list">' + top.map(hwRowHtml).join('') + '</div>' : '<div class="race-note">沒有被兩份以上清單同時點名的</div>') +
+    (rest.length ? '<details class="hw-more"><summary>只出現在一份清單的 ' + rest.length + ' 檔（先放旁邊）</summary><div class="hw-list">' + rest.map(hwRowHtml).join('') + '</div></details>' : '');
+}
+// 🔪 空觀察
+function hwShortHtml(){
+  const m = race333Model();
+  const jd = jlState.data;
+  const ranked = hwGroupsRanked(), total = ranked.length, rankOf = new Map(ranked.map((g, i) => [g.name, i + 1]));
+  const items = new Map();
+  const add = (code, name, tag, group) => {
+    let o = items.get(code);
+    if (!o){
+      const q = hwQuote(code);
+      o = { code, name: name || (q && q.name) || '', group: group || null, pct: q && Number.isFinite(q.changePercent) ? q.changePercent : null, price: q ? q.price : null, tags: [], kinds: new Set() };
+      items.set(code, o);
+    }
+    if (group && !o.group) o.group = group;
+    if (!o.kinds.has(tag.kind)){ o.kinds.add(tag.kind); o.tags.push(tag); }
+  };
+  if (m){
+    m.bladeLower.forEach((r) => add(r.code, r.name, { kind: 'blade', text: '刀劍空' + bladeBadge(r), cls: 'down' }, r.groupName));
+    m.bladeUpper.forEach((r) => add(r.code, r.name, { kind: 'blade', text: '刀劍空・多方打少', cls: 'down' }, r.groupName));
+  }
+  if (jd && jd.status === 'ok'){
+    (jd.suspects || []).forEach((s) => add(s.code, s.name, { kind: 'jail', text: s.high ? '即將入獄・高機率' : '即將入獄', cls: 'jail' }));
+    const today = taipeiDateStr(Date.now());
+    const day = (jd.weeks || []).flatMap((w) => w.days || []).find((d) => d.date === today) || (jd.weeks || []).flatMap((w) => w.days || []).find((d) => d.date === jd.nextDay);
+    if (day) (day.stocks || []).forEach((s) => add(s.code, s.name, { kind: 'out', text: day.date === today ? '今天出獄' : jlMd(day.date) + ' 出獄', cls: 'out' }));
+  }
+  const shortSet = new Set(m ? m.shortGroups.map((g) => g.name) : []);
+  const list = Array.from(items.values()).map((o) => {
+    if (!o.group){ const q = (lastData.groups || []).find((g) => g.name !== '股期標的' && g.stocks.some((s) => s.code === o.code)); if (q) o.group = q.name; }
+    if (o.group && shortSet.has(o.group)) o.tags.push({ kind: 'grp', text: '做空族群', cls: 'grp' }), o.kinds.add('grp');
+    o.rank = o.group ? rankOf.get(o.group) || null : null; o.total = total;
+    o.hits = o.kinds.size; o.ma = hwMaScore(o.code, o.price);
+    return o;
+  }).sort((a, b) => b.hits - a.hits || (b.rank || 0) - (a.rank || 0) || (a.pct ?? 0) - (b.pct ?? 0));
+  const notes = [];
+  if (!m) notes.push('盤中名單（刀劍空、族群名次）等首頁即時報價進來才有');
+  else if (!m.bladeLower.length && !m.bladeUpper.length) notes.push('刀劍空現在是空的（開盤後才會出現，盤中隨時變）');
+  if (!jd) notes.push('處置監獄資料讀取中');
+  return '<div class="sw-rule">自動交叉這幾份清單，<b>同時出現在越多份的越優先</b>：<b>刀劍空(32)</b>（盤中隨時變，跟盤中訊號中心同一份）・<b>即將入獄</b>（處置監獄嫌疑名單，明天門檻見處置監獄）・<b>出獄</b>（今天恢復正常交易）・<b>做空族群</b>（昨天漲最多的族群）。' +
+    '族群後面的數字＝今天族群名次，<b>🔰 越後面越安全</b>、🔺 太前面就慢一點再打（族群還很強）。點一列開K線圖。</div>' +
+    (notes.length ? '<div class="race-note">' + notes.join('；') + '</div>' : '') +
+    hwListHtml(list, '目前沒有任何一份清單有股票') +
+    '<div class="sw-quote">重疊越多 → 越優先；只出現一次的先放旁邊。停損 2～3%，市場有風險，進出自己判斷</div>';
+}
+// 🐎 當沖多
+function hwLongHtml(){
+  const m = race333Model();
+  if (!m) return raceNotReadyHtml();
+  const f = hwState.filters;
+  const ranked = hwGroupsRanked(), total = ranked.length, half = Math.ceil(total / 2);
+  const bullGroups = new Set(ranked.filter((g, i) => i < half && g.avgChange > 0).map((g) => g.name));   // 族群在多方區：排名前半、平均漲
+  const items = new Map();
+  const add = (r, kind, text) => {
+    let o = items.get(r.code);
+    if (!o){ o = { code: r.code, name: r.name, group: r.groupName, rank: r.groupRank, total, pct: r.pct, price: r.price, limitUp: r.limitUp, tags: [], kinds: new Set() }; items.set(r.code, o); }
+    if (!o.kinds.has(kind)){ o.kinds.add(kind); o.tags.push({ kind, text, cls: 'up' }); }
+  };
+  m.horses.forEach((r, i) => add(r, 'horse', '賽 ' + (i + 1)));
+  m.rivers.concat(m.riverOver).forEach((r, i) => add(r, 'river', '河 ' + (i + 1)));
+  m.fires.concat(m.fireLocked).forEach((r, i) => add(r, 'fire', '火 ' + (i + 1)));
+  let list = Array.from(items.values()).filter((o) => bullGroups.has(o.group) && !o.limitUp);   // 族群在多方區才留；漲停股絕不當正解
+  // 族群多方是必要條件（上面已經擋掉），不算進交集次數：三份清單（賽／河／火）中幾份
+  list.forEach((o) => { o.hits = o.kinds.size; o.hot = o.hits >= 2; o.lv = o.hits >= 3 ? '⭐' : o.hits === 2 ? '🔥' : '・'; o.tags.push({ kind: 'grp', text: '族群多方', cls: 'grp' }); o.ma = hwMaScore(o.code, o.price); });
+  if (f.band) list = list.filter((o) => o.pct >= 2 && o.pct <= 6);
+  if (f.ma7) list = list.filter((o) => o.ma !== null && o.ma >= 7);
+  if (f.hideHold) list = list.filter((o) => o.pct <= 7);
+  if (f.over6) list = list.filter((o) => o.pct <= 6);
+  const perGroup = {};
+  list.forEach((o) => { perGroup[o.group] = (perGroup[o.group] || 0) + 1; });
+  list = list.filter((o) => perGroup[o.group] >= 2);   // 同族群至少兩檔才成立
+  list.sort((a, b) => b.hits - a.hits || a.rank - b.rank || b.pct - a.pct);
+  const chip = (key, label) => '<button type="button" class="chart-tab chips-btn hw-flt' + (f[key] ? ' on' : '') + '" data-hw-flt="' + key + '">' + (f[key] ? '✓ ' : '') + label + '</button>';
+  return '<div class="sw-rule">自動交叉 <b>賽馬多(33)・河流多(34)・馬火多(30)・族群在多方區</b>（跟盤中333 同一份），被越多份點名的排越前面：⭐ 三份都有・🔥 中兩份（只中一份的收在最下面）。' +
+    '內建：族群在多方區（今天族群排名前半、平均上漲）才留、<b>同族群至少兩檔才成立</b>、漲停股絕不當正解。標籤後面的數字＝在那份清單的名次。點一列開K線圖。</div>' +
+    '<div class="hw-flts">' + chip('band', '2～6% 只看進場帶') + chip('ma7', '均線 ≥ 7') + chip('hideHold', '續抱不追（>7%）藏起來') + chip('over6', '過 6% 不追') + '</div>' +
+    hwListHtml(list, '目前沒有符合的（族群在多方區、同族群至少兩檔）') +
+    '<div class="sw-quote">先看族群再看個股・停損 2～3%、獲利 4～6% 分批收割・交集多不代表會漲，只代表這幾份清單今天剛好都提到它</div>';
+}
+// 🔥 多觀察
+async function hwLoadDef(codes){
+  const key = codes.slice().sort().join(',');
+  if (!key || hwState.defKey === key || hwState.defLoading) return;
+  hwState.defLoading = true;
+  try {
+    const res = await fetch('/api/checkup?codes=' + encodeURIComponent(key));
+    if (res.ok){
+      const d = await res.json();
+      (d.rows || []).forEach((r) => { hwState.def[r.code] = r; });
+      hwState.defKey = key;
+    }
+  } catch (_){ /* 下次再試 */ } finally {
+    hwState.defLoading = false;
+    if (!document.getElementById('hwModal').hidden) renderHomework();
+  }
+}
+function hwWatchHtml(){
+  const ranked = hwGroupsRanked();
+  if (!ranked.length) return raceNotReadyHtml();
+  const total = ranked.length;
+  let picks = (hwState.picks || []).filter((n) => ranked.some((g) => g.name === n));
+  if (!picks.length) picks = ranked.slice(0, 3).map((g) => g.name);
+  while (picks.length < 3 && ranked.length > picks.length){ const g = ranked.find((x) => !picks.includes(x.name)); if (!g) break; picks.push(g.name); }
+  const opts = (sel) => ranked.map((g, i) => '<option value="' + wlEsc(g.name) + '"' + (g.name === sel ? ' selected' : '') + '>' + (i + 1) + '. ' + wlEsc(g.name) + ' ' + hwPct(g.avgChange) + '</option>').join('');
+  const groups = picks.map((n) => ranked.find((g) => g.name === n)).filter(Boolean);
+  hwLoadDef(groups.flatMap((g) => g.stocks.map((s) => s.code)));
+  const block = (g) => {
+    const rank = ranked.indexOf(g) + 1;
+    const play = g.avgChange >= 3 ? ['🔥 噴出等黑', '噴出來的不追，等黑K再加碼'] : g.avgChange >= 0 ? ['🛒 收盤分批買黑', '收盤買黑分批，防守月線或三日低'] : ['🛒 拉回分批買黑', '等拉回再分批，防守月線或三日低'];
+    const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined).slice().sort((a, b) => b.changePercent - a.changePercent);
+    const cut = Math.ceil(valid.length / 3);
+    let lastZone = null;
+    const rows = valid.map((s, i) => {
+      const zone = i < cut && s.changePercent > 0 ? 'bull' : (i >= valid.length - cut && s.changePercent < 0 ? 'bear' : 'mid');
+      const d = hwState.def[s.code], def = d && d.def;
+      const price = Number(s.price);
+      let state = '<span class="muted">—</span>';
+      if (def){
+        if (def.low3T && price < def.low3T) state = '<span class="hw-brk">🔴 破三日低</span>';
+        else if (def.ma20T && price < def.ma20T) state = '<span class="hw-warn">🟡 破月線</span>';
+        else state = '<span class="hw-ok">✓ 守住</span>';
+      }
+      let sep = '';
+      if (lastZone === 'bull' && zone !== 'bull') sep = '<div class="hw-sep">------↑(多方)↑------</div>';
+      if (zone === 'bear' && lastZone !== 'bear') sep += '<div class="hw-sep">------↓(空方)↓------</div>';
+      lastZone = zone;
+      return sep + '<div class="hw-wrow" data-hw-code="' + wlEsc(s.code) + '" data-hw-name="' + wlEsc(s.name || '') + '">' +
+        '<span class="hw-zone ' + zone + '">' + (zone === 'bull' ? '🔺 多方' : zone === 'bear' ? '🔽 空方' : '─ 中間') + '</span>' +
+        '<span class="hw-stk"><b>' + wlEsc(s.code) + '</b> ' + wlEsc(s.name || '') + '</span>' +
+        '<span class="hw-pct ' + dirClass(s.changePercent) + '">' + hwPct(s.changePercent) + '</span>' +
+        '<span class="hw-px">' + (price > 0 ? price : '—') + '</span>' +
+        '<span class="hw-def">三日低 ' + (def && def.low3T ? def.low3T : '—') + '<br>月線 ' + (def && def.ma20T ? def.ma20T : '—') + '</span>' +
+        '<span class="hw-st">' + state + '</span>' +
+        '<span class="hw-extra">' + (d ? '均' + (d.score2 ?? '—') + (d.chip && d.chip.weekPct !== null && d.chip.weekPct !== undefined ? '・籌' + (d.chip.weekPct > 0 ? '+' : '') + d.chip.weekPct + '%' : '') + (d.fund && d.fund.pe ? '・PE ' + d.fund.pe : '') : '') + '</span></div>';
+    }).join('');
+    return '<div class="hw-gblock"><div class="hw-ghead"><b>' + wlEsc(g.name) + '</b><small>族排 ' + rank + '/' + total + '・平均 ' + hwPct(g.avgChange) + '</small><span class="hw-play" title="' + play[1] + '">' + play[0] + '</span></div>' +
+      '<div class="hw-playnote">' + play[1] + '</div>' + rows + '</div>';
+  };
+  return '<div class="sw-rule">挑三個重點族群（預設＝今天族群排名前三，換了會記在這台瀏覽器），每檔一列：<b>位置</b>（族內前 1/3 且上漲＝多方、後 1/3 且下跌＝空方）・漲幅・現價，再對<b>三日低／月線</b>（前一天收盤算好的明日防守價，盤中不會動）看有沒有破。' +
+    '族群那一列標打法：平均漲 ≥3%＝🔥 噴出等黑、0～3%＝🛒 收盤分批買黑、下跌＝🛒 拉回分批買黑。右邊是均線分數（內定）、集保大戶週增、本益比。點一列開K線圖。</div>' +
+    '<div class="hw-picks">' + [0, 1, 2].map((i) => '<label>族群 ' + (i + 1) + ' <select data-hw-pick="' + i + '">' + opts(picks[i]) + '</select></label>').join('') + '</div>' +
+    (hwState.defLoading && !Object.keys(hwState.def).length ? '<div class="race-note">防守價讀取中…</div>' : '') +
+    groups.map(block).join('') +
+    '<div class="sw-quote">表格是分類歸檔，不是投資建議；停損防守三日低或月線，進出自己判斷、盈虧自負</div>';
+}
+function renderHomework(){
+  const body = document.getElementById('hwBody');
+  if (!body) return;
+  const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const html = hwState.tab === 'short' ? hwShortHtml() : hwState.tab === 'long' ? hwLongHtml() : hwWatchHtml();
+  const open = Array.from(body.querySelectorAll('details.hw-more[open]')).length > 0;
+  body.innerHTML = '<div class="hw-tabs">' + HW_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (hwState.tab === k ? ' active' : '') + '" data-hw-tab="' + k + '">' + label + '</button>').join('') +
+    '<span class="hw-stamp">' + stamp + ' 更新・盤中每 20 秒跟著首頁報價重算</span></div>' + html;
+  if (open){ const d = body.querySelector('details.hw-more'); if (d) d.open = true; }
+}
+function openHomeworkPanel(){
+  document.getElementById('hwModal').hidden = false;
+  refreshGroupDailyChanges(false);
+  refreshBrewLaunch(false);
+  if (!jlState.data) jlLoad();
+  renderHomework();
+  clearInterval(hwState.timer);
+  hwState.timer = setInterval(() => { if (document.getElementById('hwModal').hidden){ clearInterval(hwState.timer); return; } renderHomework(); }, 20000);
+}
+function closeHomeworkPanel(){ document.getElementById('hwModal').hidden = true; clearInterval(hwState.timer); }
+document.getElementById('hwClose').addEventListener('click', closeHomeworkPanel);
+document.getElementById('hwModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeHomeworkPanel(); });
+document.getElementById('hwBody').addEventListener('click', (e) => {
+  const t = e.target;
+  const tab = t.closest('[data-hw-tab]');
+  if (tab){ hwState.tab = tab.dataset.hwTab; renderHomework(); return; }
+  const flt = t.closest('[data-hw-flt]');
+  if (flt){ hwState.filters[flt.dataset.hwFlt] = !hwState.filters[flt.dataset.hwFlt]; renderHomework(); return; }
+  if (t.closest('summary') || t.closest('select')) return;
+  const row = t.closest('[data-hw-code]');
+  if (row){
+    openStockChart(row.dataset.hwCode, row.dataset.hwName);
+  }
+});
+document.getElementById('hwBody').addEventListener('change', (e) => {
+  const sel = e.target.closest('[data-hw-pick]');
+  if (!sel) return;
+  const ranked = hwGroupsRanked();
+  const cur = (hwState.picks && hwState.picks.length === 3 ? hwState.picks.slice() : ranked.slice(0, 3).map((g) => g.name));
+  cur[Number(sel.dataset.hwPick)] = sel.value;
+  hwState.picks = cur;
+  try { localStorage.setItem('hwPicks', JSON.stringify(cur)); } catch (_){}
+  renderHomework();
+});
+
 // ---- 處置監獄（2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」zhuang.tw/prison 做一模一樣的）----
 // 後端 /api/jail：證交所／櫃買公開的注意股、處置股公告（上市直抓、上櫃走鏡像），每天晚上公告出來後更新。
 // 段落照莊爸頁面的順序：前科查詢、一週出獄時間表、犯罪集團、今日入獄、嫌疑名單（明天門檻＋可複製文字）、今日第一次第一款、
@@ -12362,7 +12663,8 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '處置監獄'){ openJailPanel(); return; }     // 2026-10-09 使用者：照莊爸處置監獄頁
     if (btn.dataset.label === '營收成長榜'){ openRevenuePanel(); return; }  // 2026-10-09 使用者：照莊爸每月營收成長榜
     if (btn.dataset.label === '均線分數排行'){ openMaPanel(); return; }     // 2026-10-10 使用者：照莊爸均線分數排行（zhuang.tw/ma）
-    if (btn.dataset.label === '估值河流圖'){ openRiverPanel(); return; }   // 2026-10-10 使用者：估值河流圖（本站版）
+    if (btn.dataset.label === '估值河流圖'){ openRiverPanel(); return; }
+    if (btn.dataset.label === '每日功課'){ openHomeworkPanel(); return; }   // 2026-10-10 使用者：空觀察／當沖多／多觀察功課自動版   // 2026-10-10 使用者：估值河流圖（本站版）
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '籌碼日報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」；2026-10-10 再改名「籌碼日報」
