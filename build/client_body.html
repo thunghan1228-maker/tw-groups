@@ -781,6 +781,125 @@
   .sw-etf-kind{font-size:13px;font-weight:700;margin:8px 0 2px;color:var(--muted);}
   .sw-drow.etf{border-left-color:#7c3aed;}
   .sw-verdict.bad{background:#b91c1c;}
+  /* 主動式ETF持股雷達（2026-10-10 使用者：照莊爸 zhuang.tw/etf 做，併進籌碼日報） */
+  .er-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:8px 0;}
+  .er-sub{font-size:14px;}
+  .er-sub b{font-size:15px;}
+  .er-asof{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;}
+  .er-asof select{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:3px 6px;font-family:inherit;font-size:13px;}
+  .er-note{font-size:12px;color:var(--muted);}
+  .er-funds{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:8px 0 4px;}
+  .er-fund{display:flex;flex-direction:column;gap:1px;background:var(--panel);border:1px solid var(--line);border-top:3px solid #7c3aed;border-radius:10px;padding:7px 10px;cursor:pointer;min-width:0;}
+  .er-fund:hover{background:var(--panel-2);}
+  .er-fund.on{box-shadow:0 0 0 2px #7c3aed inset;}
+  .er-fund > b{font-size:15px;color:#a78bfa;}
+  .er-fund .nm{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .er-fund .kv{font-size:12px;color:var(--muted);}
+  .er-fund .kv b{color:var(--text);}
+  .er-fund .kv b.up{color:var(--up);}
+  .er-fund .kv b.down{color:var(--down);}
+  .er-sec{margin:18px 0 6px;font-size:18px;font-weight:800;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;}
+  .er-sec small{font-size:12px;font-weight:400;color:var(--muted);}
+  .er-ename{color:#e6675f;}
+  .er-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;}
+  .er-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0;}
+  .er-card h4{margin:0 0 6px;font-size:15px;}
+  .er-card.buy h4{color:var(--up);}
+  .er-card.sell h4{color:var(--down);}
+  .er-trow,.er-orow,.er-rrow{display:grid;gap:6px;align-items:center;padding:6px 2px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;min-width:0;}
+  .er-trow:last-child,.er-orow:last-child,.er-rrow:last-child{border-bottom:none;}
+  .er-trow:hover,.er-orow:hover,.er-rrow:hover{background:var(--panel-2);}
+  .er-trow{grid-template-columns:20px 42px minmax(0,1fr) auto 72px 38px;}
+  .er-orow{grid-template-columns:20px 44px 42px minmax(0,1fr) 72px minmax(0,1.4fr);}
+  .er-rrow{grid-template-columns:42px minmax(56px,1fr) minmax(40px,1.4fr) 92px;}
+  .er-trow .rk,.er-orow .rk{color:var(--muted);text-align:center;font-size:12px;}
+  .er-trow .cd,.er-orow .cd,.er-rrow .cd{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px;}
+  .er-trow .nm,.er-orow .nm,.er-rrow .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .er-trow .amt,.er-orow .amt{font-weight:800;text-align:right;white-space:nowrap;}
+  .er-trow .lot{font-size:12px;text-align:right;white-space:nowrap;}
+  .er-trow .fd{font-size:11px;border:1px solid var(--line);border-radius:999px;text-align:center;color:var(--muted);white-space:nowrap;}
+  .er-orow .amt{color:var(--up);}
+  .er-nb{border-radius:999px;font-size:12px;font-weight:800;padding:1px 0;text-align:center;border:1px solid var(--accent);color:var(--accent);}
+  .er-nb.hi{border-color:#f59e0b;color:#f59e0b;}
+  .er-nb.full{background:#f59e0b;border-color:#f59e0b;color:#1a1c1f;}
+  .er-wt{display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-end;}
+  .er-wt i{font-style:normal;font-size:11px;border:1px solid rgba(124,58,237,.55);background:rgba(124,58,237,.14);border-radius:4px;padding:0 4px;}
+  .er-bar{height:8px;background:var(--panel-2);border-radius:999px;overflow:hidden;}
+  .er-fill{height:100%;border-radius:999px;}
+  .er-fill.up{background:var(--up);}
+  .er-fill.dn{background:var(--down);}
+  .er-fill.wt{background:linear-gradient(90deg,#7c3aed,#475569);}
+  .er-rv{text-align:right;font-weight:800;font-size:13px;line-height:1.2;white-space:nowrap;}
+  .er-rv small{display:block;font-size:10.5px;color:var(--muted);font-weight:400;}
+  .er-basis{font-size:12px;color:var(--muted);margin:6px 0;}
+  .er-basis b{color:var(--text);}
+  .er-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:6px 0;}
+  .er-stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0;}
+  .er-stat .k{font-size:12px;color:var(--muted);}
+  .er-stat .v{font-size:20px;font-weight:800;white-space:nowrap;}
+  .er-stat .v.gold{color:#f59e0b;}
+  .er-stat .v.up{color:var(--up);}
+  .er-stat .v.down{color:var(--down);}
+  .er-stat .s{font-size:11px;color:var(--muted);}
+  .er-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
+  .er-tab{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:5px 10px;font-family:inherit;font-size:13px;cursor:pointer;}
+  .er-tab b{color:#a78bfa;}
+  .er-tab.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
+  .er-tab.on b{color:#fff;}
+  .er-q{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 8px;}
+  .er-q input{flex:1 1 200px;min-width:0;max-width:320px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:14px;}
+  .er-shead{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-bottom:6px;}
+  .er-shead b{font-size:17px;}
+  .er-shead small{flex-basis:100%;font-size:12px;color:var(--muted);}
+  .er-hold{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;}
+  .er-hcard{display:flex;flex-direction:column;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:6px 9px;font-size:13px;min-width:0;}
+  .er-hcard b{font-size:17px;}
+  .er-hcard small{font-size:11px;color:var(--muted);}
+  .er-hcard.zero{opacity:.55;}
+  .er-xwrap{overflow-x:auto;margin:8px 0;border:1px solid var(--line);border-radius:10px;}
+  .er-xtab{border-collapse:collapse;font-size:12px;width:100%;}
+  .er-xtab th,.er-xtab td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;}
+  .er-xtab th{background:var(--panel-2);font-weight:800;}
+  .er-xtab th small,.er-xtab td small{display:block;font-size:10.5px;color:var(--muted);font-weight:400;}
+  .er-xtab .d{text-align:left;}
+  .er-xtab td.nil{color:var(--muted);text-align:center;}
+  .er-xtab td.up{color:var(--up);font-weight:700;}
+  .er-xtab td.down{color:var(--down);font-weight:700;}
+  .er-xtab .tot{font-weight:800;}
+  .er-tide-top{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:14px;margin:2px 0 6px;}
+  .er-pins{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px;}
+  .er-pin{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-family:inherit;font-size:12px;cursor:pointer;}
+  .er-pin.on{border-color:#ffd94d;box-shadow:0 0 0 1px #ffd94d inset;}
+  .er-tide-wrap{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:10px;align-items:start;}
+  .er-tide-main{min-width:0;}
+  .er-tide-svg{width:100%;height:auto;display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;}
+  .er-tide-ctl{display:flex;gap:6px;align-items:stretch;margin:6px 0;}
+  .er-days{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:4px;}
+  .er-day{position:relative;border:1px solid var(--line);border-radius:8px;padding:3px 2px;font-size:11px;text-align:center;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;}
+  .er-day .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(124,58,237,.22);}
+  .er-day span{position:relative;white-space:nowrap;}
+  .er-day.on{border-color:#7c3aed;}
+  .er-side{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13px;min-width:0;}
+  .er-tst{font-weight:800;margin:4px 0;}
+  .er-tsr{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:6px;padding:3px 0;cursor:pointer;border-bottom:1px solid var(--line);}
+  .er-tsr.sel{background:rgba(255,217,77,.12);}
+  .er-tsr .rk{color:var(--muted);font-size:11px;}
+  .er-tsr .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;}
+  .er-tsr .nm i{font-style:normal;font-size:11px;color:var(--muted);margin-left:4px;font-weight:400;}
+  .er-tdet{font-size:13px;margin:4px 0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;}
+  .er-tqrow{flex-basis:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(56px,1fr));gap:4px;}
+  .er-tqrow span{display:flex;flex-direction:column;align-items:center;border:1px solid var(--line);border-radius:8px;padding:2px;}
+  .er-tqrow small{font-size:11px;color:var(--muted);}
+  @media (max-width: 760px){
+    .er-tide-wrap{grid-template-columns:1fr;}
+    .er-orow{grid-template-columns:20px 44px 42px minmax(0,1fr) 72px;}
+    .er-orow .er-wt{grid-column:2 / -1;justify-content:flex-start;}
+  }
+  @media (max-width: 420px){
+    .er-two{grid-template-columns:1fr;}
+    .er-trow{grid-template-columns:18px 38px minmax(0,1fr) auto 62px 34px;gap:4px;font-size:12px;}
+    .er-rrow{grid-template-columns:38px minmax(52px,1fr) minmax(30px,1fr) 84px;gap:4px;}
+  }
   /* 飆股雷達（2026-10-07 使用者：照莊爸 App 的飆股雷達做）：聖杯分組、邏輯卡片、時間點膠囊、名單 */
   .gr-controls{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:2px 0 8px;font-size:13px;}
   .gr-controls select{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:3px 6px;font-family:inherit;font-size:13px;}
@@ -6418,10 +6537,10 @@ document.getElementById('chipsBody').addEventListener('change', (e) => {
 // ---- 波段日報（2026-09-26 使用者：照「波段精選日報」的樣子做，第一階段用現有資料）----
 // 後端每個交易日收盤後整理一份（/api/swing-report），以資料基準日為鍵保存；這裡照日期切換、五個段落顯示。
 const SWING_SECTIONS = [
-  { key: 'summary', label: '今日摘要' }, { key: 'disposition', label: '處置動態' }, { key: 'etf', label: '主動式基金' }, { key: 'groups', label: '產業觀察' },
+  { key: 'summary', label: '今日摘要' }, { key: 'disposition', label: '處置動態' }, { key: 'etf', label: '主動式ETF持股雷達' }, { key: 'groups', label: '產業觀察' },
   { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '體質轉強' },
 ];   // 2026-10-04 使用者：黑龍回測搬到獨立面板（下方導覽列「創高黑龍」）
-let swingState = { section: 'summary', date: '', groupsLimit: 12, etfOpen: {} };   // etfOpen: 主動式基金各檔展開全部
+let swingState = { section: 'summary', date: '', groupsLimit: 12 };
 const swingCache = {};      // date('' = 最新) -> payload
 const swingLoading = {};
 const swingFailedAt = {};
@@ -6551,62 +6670,347 @@ function swingLastWeekHtml(data){
     '<div class="sw-cards">' + picks.map(swingLastWeekCardHtml).join('') + '</div>' +
     '<div class="sw-quote">榜單不是拿來追的，是拿來驗證：守住月線的才算籌碼有效</div>';
 }
-// 主動式基金五檔（2026-09-26 第三階段）：每檔跟前一份比出新增／加碼／減碼／刪除，再看五檔有沒有同步
-const ETF_ROW_LIMIT = 6;
-const swLotsPlain = (v) => Math.round(Math.abs(v || 0)).toLocaleString('en-US') + ' 張';   // 不帶正負號、不縮成萬張
-function swingEtfRowHtml(r, kind){
-  const delta = r.deltaLots || 0;
-  const move = (kind === 'new' ? '新增 ' : kind === 'removed' ? '出清 ' : delta >= 0 ? '加碼 ' : '減碼 ') + swLotsPlain(delta);
-  const cls = kind === 'new' || (kind === 'increased') ? 'up' : 'down';
-  const shares = kind === 'removed' ? swLotsPlain(r.prevShares / 1000) + ' → 0' : (r.prevShares ? swLotsPlain(r.prevShares / 1000) + ' → ' : '') + swLotsPlain(r.shares / 1000);
-  return '<div class="sw-drow etf" data-code="' + r.code + '" data-name="' + (r.name || '') + '" role="button" tabindex="0">' +
-    '<b class="sw-dcode">' + r.code + '</b><span class="sw-dname">' + (r.name || '') + '</span><span class="sw-dgroup">' + (r.group || '—') + '</span>' +
-    '<span class="sw-dextra"><b class="' + cls + '">' + move + '</b><span class="muted">・持股 ' + shares + (swHas(r.weight) && kind !== 'removed' ? '・權重 ' + Number(r.weight).toFixed(2) + '%' : '') + '</span></span></div>';
+// ---- 主動式ETF持股雷達（2026-10-10 使用者：照莊爸 zhuang.tw/etf 做，併進籌碼日報，原「主動式基金」分頁改名）----
+// 後端 /api/etf-radar（五檔合計、共同持有、資金潮汐）、/api/etf-radar-fund（單檔四區塊）、/api/etf-radar-stock（個股 × 全部 ETF）。
+const ER_FUNDS = [['00981A', '主動統一台股增長'], ['00403A', '主動統一升級50'], ['00991A', '主動復華未來50'], ['00982A', '主動群益台灣強棒'], ['00992A', '主動群益科技創新']];
+const erState = { asof: null, fund: '00981A', ov: {}, fd: {}, busy: {}, err: {}, q: '', track: null, trackBusy: false, trackErr: '' };
+const erTide = { data: null, key: '', t: 0, playing: true, sel: null, raf: 0, last: null, hold: 0, pending: false, sideKey: '' };
+function erAsof(){ return erState.asof !== null ? erState.asof : (swingState.date || ''); }
+const erNum = (n, d) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 });
+const erSgn = (n, d) => (n > 0 ? '+' : '') + erNum(n, d);
+const erLots = (sh) => (sh || 0) / 1000;
+const erAmt = (a, d) => a === null || a === undefined ? '—' : (a > 0 ? '+' : '') + Number(a).toFixed(d === undefined ? 2 : d) + ' 億';
+function erVisible(){ return !document.getElementById('swingModal').hidden && swingState.section === 'etf'; }
+async function erLoad(kind, key, url){
+  const k = kind + '|' + key;
+  if (erState[kind][key] || erState.busy[k] || erState.err[k]) return;
+  erState.busy[k] = true;
+  try {
+    const res = await fetch(url);
+    let d = null;
+    try { d = await res.json(); } catch (_){ d = null; }
+    if (!res.ok) throw new Error((d && d.detail) || ('HTTP ' + res.status));
+    erState[kind][key] = d;
+  } catch (e){
+    erState.err[k] = e.message || String(e);
+  } finally {
+    delete erState.busy[k];
+  }
+  if (erVisible()) renderSwing();
 }
-function swingEtfBlockHtml(e){
-  const open = !!swingState.etfOpen[e.code];
-  const c = e.counts || {};
-  const head = '<div class="bl-section bl-launch">' + e.code + ' ' + e.name + '<span class="sw-etf-issuer">' + (e.issuer || '') + '</span>・' + swMmdd(e.date) +
-    (e.prevDate ? ' 比 ' + swMmdd(e.prevDate) + '：新增 ' + c.new + '／加碼 ' + c.increased + '／減碼 ' + c.decreased + '／刪除 ' + c.removed : '・還沒有前一份可比') + '</div>';
-  const info = '<div class="sw-rule">持股 ' + e.holdings + ' 檔' + (swHas(e.nav) ? '・規模 ' + (e.nav / 1e8).toFixed(0) + ' 億' : '') +
-    (swHas(e.unitsDelta) && e.unitsDelta !== 0 ? '・受益單位 ' + (e.unitsDelta > 0 ? '增 ' : '減 ') + (Math.abs(e.unitsDelta) / 1e4).toFixed(0) + ' 萬（' + (e.unitsDelta > 0 ? '有人申購' : '有人贖回') + '）' : '') +
-    (e.top && e.top.length ? '・前五大：' + e.top.slice(0, 5).map((t) => t.name + ' ' + (swHas(t.weight) ? Number(t.weight).toFixed(1) + '%' : '')).join('、') : '') + '</div>';
-  if (!e.prevDate) return head + info;
-  const kinds = [['new', '新增'], ['increased', '加碼'], ['decreased', '減碼'], ['removed', '刪除']];
-  let hidden = 0;
-  const lists = kinds.map(([k, label]) => {
-    const rows = e[k] || [];
-    if (!rows.length) return '';
-    const shown = open ? rows : rows.slice(0, ETF_ROW_LIMIT);
-    hidden += rows.length - shown.length;
-    return '<div class="sw-etf-kind">' + label + '（' + rows.length + '）</div><div class="sw-dlist">' + shown.map((r) => swingEtfRowHtml(r, k)).join('') + '</div>';
+function erRetryHtml(kind, key){
+  const msg = erState.err[kind + '|' + key];
+  return msg ? '<div class="race-note">讀取失敗：' + wlEsc(msg) + ' <button type="button" class="chart-tab chips-btn" data-er-retry="' + kind + '|' + key + '">重試</button></div>' : '<div class="race-note">載入中…</div>';
+}
+// 五檔合計：今天／一週加碼、出貨前十（依金額）
+function erTopRows(list, cls, none){
+  if (!list || !list.length) return '<div class="race-note">' + none + '</div>';
+  return list.map((r, i) => {
+    const fd = (r.funds || []).map((f) => f.c + ' ' + erSgn(f.lots) + ' 張').join('、');
+    return '<div class="er-trow" data-er-stock="' + wlEsc(r.code) + '" title="' + wlEsc(fd) + '"><span class="rk">' + (i + 1) + '</span><span class="cd">' + wlEsc(r.code) + '</span>' +
+      '<span class="nm">' + wlEsc(r.name) + '</span><span class="amt ' + cls + '">' + erAmt(r.amount) + '</span><span class="lot ' + cls + '">' + erSgn(r.lots) + ' 張</span>' +
+      '<span class="fd">' + (r.funds || []).length + ' 檔</span></div>';
   }).join('');
-  const total = kinds.reduce((n, [k]) => n + ((e[k] || []).length), 0);
-  return head + info + (total ? lists : '<div class="race-note">這一天持股沒有變動</div>') +
-    (hidden > 0 || (open && total > ETF_ROW_LIMIT) ? '<div class="chips-more"><button class="chart-tab chips-btn sw-etf-more" data-etf="' + e.code + '">' + (open ? '收合' : '展開全部（還有 ' + hidden + ' 檔）') + '</button></div>' : '');
 }
-function swingEtfSyncHtml(title, cls, rows, verb){
-  return '<div class="bl-section ' + cls + '">' + title + '（' + rows.length + '）</div>' +
-    (rows.length ? '<div class="sw-dlist">' + rows.map((r) => '<div class="sw-drow etf" data-code="' + r.code + '" data-name="' + (r.name || '') + '" role="button" tabindex="0">' +
-      '<b class="sw-dcode">' + r.code + '</b><span class="sw-dname">' + (r.name || '') + '</span><span class="sw-dgroup">' + (r.group || '—') + '</span>' +
-      '<span class="sw-dextra"><b class="' + (r.deltaLots >= 0 ? 'up' : 'down') + '">' + r.count + ' 檔同步' + verb + ' ' + swLots(Math.abs(r.deltaLots)) + '</b><span class="muted">・' +
-      (r.etfs || []).map((x) => x.name + ' ' + swLots(x.deltaLots)).join('、') + '</span></span></div>').join('') + '</div>' : '<div class="race-note">沒有兩檔以上同步' + verb + '的股票</div>');
+function erOwnRows(list, total){
+  if (!list || !list.length) return '<div class="race-note">還沒有持股資料</div>';
+  return list.map((r, i) => '<div class="er-orow" data-er-stock="' + wlEsc(r.code) + '" title="' + wlEsc((r.funds || []).map((f) => f.c + ' ' + f.rate.toFixed(2) + '%').join('、')) + '">' +
+    '<span class="rk">' + (i + 1) + '</span><span class="er-nb' + (r.n >= total ? ' full' : (r.n >= 3 ? ' hi' : '')) + '">' + r.n + ' 檔</span><span class="cd">' + wlEsc(r.code) + '</span>' +
+    '<span class="nm">' + wlEsc(r.name) + '</span><span class="amt">' + (r.amount === null ? '—' : r.amount.toFixed(1) + ' 億') + '</span>' +
+    '<span class="er-wt">' + (r.funds || []).map((f) => '<i title="' + f.c + '">' + f.rate.toFixed(1) + '%</i>').join('') + '</span></div>').join('');
 }
-function swingEtfHtml(data){
-  const ae = data.activeEtf, rules = data.rules || {};
-  const head = '<div class="sw-rule">' + (rules.activeEtf || '五檔規模最大的台股主動式基金每日持股變化') + '。</div>';
-  if (ae === undefined) return head + '<div class="race-note">這一份是主動式基金接入前整理的，沒有持股資料</div>';
-  if (!ae) return head + '<div class="race-note">還沒有主動式基金的持股資料（排程主機每個交易日晚上抓各投信公告）</div>';
-  const etfs = ae.etfs || [], sync = ae.sync || {};
-  const tiles = '<div class="sw-tiles">' + etfs.map((e) => '<div class="sw-tile etf"><b>' + e.code + '</b><span>' + e.name + '</span><span>' +
-    (e.prevDate ? '加碼 ' + ((e.counts || {}).new + (e.counts || {}).increased) + '・減碼 ' + ((e.counts || {}).decreased + (e.counts || {}).removed) : '持股 ' + e.holdings + ' 檔') + '</span></div>').join('') + '</div>';
-  return head + '<div class="sw-basis">資料日 ' + swMmdd(ae.date) + '・' + etfs.length + ' 檔有資料' + (ae.missing && ae.missing.length ? '・缺 ' + ae.missing.join('、') : '') + (ae.withPrev < etfs.length ? '・' + (etfs.length - ae.withPrev) + ' 檔還沒有前一份可比' : '') + '</div>' +
-    tiles +
-    swingEtfSyncHtml('五檔同步加碼', 'bl-launch', sync.buy || [], '加碼') +
-    swingEtfSyncHtml('五檔同步減碼', 'bl-brew', sync.sell || [], '減碼') +
-    '<div class="sw-quote">五檔一起加碼的，才算主動式基金的共識；單檔進出多半是換股</div>' +
-    etfs.map(swingEtfBlockHtml).join('');
+// 單檔的列：股號 股名 [長條] 值
+function erRow(r, max, mode){
+  const v = mode === 'wt' ? r.rate : r.delta;
+  const w = max ? Math.max(2, Math.round(Math.abs(v) / max * 100)) : 2;
+  const dir = mode === 'wt' ? 'wt' : (v >= 0 ? 'up' : 'dn');
+  let val, sub;
+  if (mode === 'wt'){ val = r.rate.toFixed(2) + '%'; sub = erNum(erLots(r.share)) + ' 張'; }
+  else { val = erSgn(erLots(r.delta)) + ' 張'; sub = (r.moves ? '連' + r.moves + '次・' + r.span + '日' : (r.act || '')) + '<br>→ ' + erNum(erLots(r.now)) + ' 張'; }
+  return '<div class="er-rrow" data-er-stock="' + wlEsc(r.code) + '"><span class="cd">' + wlEsc(r.code) + '</span><span class="nm">' + wlEsc(r.name) + '</span>' +
+    '<div class="er-bar"><div class="er-fill ' + dir + '" style="width:' + w + '%"></div></div>' +
+    '<span class="er-rv' + (mode === 'wt' ? '' : (v >= 0 ? ' up' : ' down')) + '">' + val + '<small>' + sub + '</small></span></div>';
 }
+function erCard(title, cls, rows, mode, empty){
+  rows = rows || [];
+  const max = rows.reduce((m, r) => Math.max(m, Math.abs(mode === 'wt' ? r.rate : r.delta)), 0);
+  return '<div class="er-card ' + cls + '"><h4>' + title + '</h4>' + (rows.length ? rows.map((r) => erRow(r, max, mode)).join('') : '<div class="race-note">' + empty + '</div>') + '</div>';
+}
+function erStat(k, v, cls, s){ return '<div class="er-stat"><div class="k">' + k + '</div><div class="v ' + (cls || '') + '">' + v + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + '</div>'; }
+function erFundHtml(){
+  const asof = erAsof(), code = erState.fund, key = code + '|' + asof;
+  erLoad('fd', key, '/api/etf-radar-fund?code=' + code + (asof ? '&date=' + encodeURIComponent(asof) : ''));
+  const tabs = '<div class="er-tabs">' + ER_FUNDS.map(([c, n]) => '<button type="button" class="er-tab' + (c === code ? ' on' : '') + '" data-er-fund="' + c + '"><b>' + c + '</b> ' + n + '</button>').join('') + '</div>';
+  const d = erState.fd[key];
+  if (!d) return tabs + erRetryHtml('fd', key);
+  const nm = '<span class="er-ename">（' + d.code + ' ' + wlEsc(d.name) + '）</span>';
+  const flow = d.unitsDelta || 0;
+  const diff = d.diff || [], fl = d.flow || { rows: [] }, sk = d.streak || { up: [], dn: [] };
+  return tabs +
+    '<div class="er-basis">資料日 <b>' + d.date + '</b>（對比 ' + (d.prev || '—') + '）｜歷史庫 ' + d.ndays + ' 天 ' + d.span[0] + ' ~ ' + d.span[1] + '｜來源：' + wlEsc(d.issuer || '投信') + '官方 PCF' + (d.fallback ? '（備援整理站）' : '') + '</div>' +
+    '<div class="er-stats">' + erStat('基金規模', erNum((d.nav || 0) / 1e8) + ' 億', 'gold') + erStat('每單位淨值', d.unitNav === null ? '—' : erNum(d.unitNav, 2)) + erStat('持股檔數', d.holdings + ' 檔') +
+    erStat('當日申贖', d.unitsDelta === null ? '—' : erSgn(flow / 1e4) + ' 萬單位', flow > 0 ? 'up' : (flow < 0 ? 'down' : ''), d.unitsDelta === null ? '還沒有前一份可比' : (flow > 0 ? '有人申購・資金流入' : (flow < 0 ? '有人贖回・資金流出' : '無變動'))) + '</div>' +
+    '<div class="er-sec">最新一日動作 <small>' + d.date + ' 對比 ' + (d.prev || '—') + '｜' + diff.length + ' 檔有動作，其餘 ' + Math.max(0, d.holdings - diff.filter((r) => r.now).length) + ' 檔按兵不動 ' + nm + '</small></div>' +
+    '<div class="er-two">' + erCard('▲ 加碼／新進', 'buy', diff.filter((r) => r.delta > 0), 'diff', d.prev ? '這天沒有加碼動作' : '還沒有前一份可比') + erCard('▼ 減碼／清空', 'sell', diff.filter((r) => r.delta < 0), 'diff', d.prev ? '這天沒有減碼動作' : '還沒有前一份可比') + '</div>' +
+    '<div class="er-sec">近 5 日累計流向 <small>' + (fl.from || '—') + ' → ' + (fl.to || '') + ' 累計・拉長看方向，濾掉單日雜訊 ' + nm + '</small></div>' +
+    '<div class="er-two">' + erCard('▲ 五日淨加碼', 'buy', fl.rows.filter((r) => r.delta > 0), 'diff', '—') + erCard('▼ 五日淨減碼', 'sell', fl.rows.filter((r) => r.delta < 0), 'diff', '—') + '</div>' +
+    '<div class="er-sec">連續同向動作 <small>同方向連 2 次以上、且最新一日還在進行（次數 ≠ 天數，ETF 常整週不動） ' + nm + '</small></div>' +
+    '<div class="er-two">' + erCard('⭐ 連續加碼中', 'buy', sk.up, 'diff', '目前沒有連續加碼的股票') + erCard('⚠️ 連續減碼中', 'sell', sk.dn, 'diff', '目前沒有連續減碼的股票') + '</div>' +
+    '<div class="er-sec">持股權重榜 <small>前 20 大・佔基金淨值 % ' + nm + '</small></div>' +
+    erCard('持股權重前 20', 'wt', d.top, 'wt', '—');
+}
+// 個股 × 全部主動式 ETF
+async function erTrackQuery(q){
+  q = String(q || '').trim();
+  if (!q) return;
+  erState.q = q; erState.trackBusy = true; erState.trackErr = '';
+  renderSwing();
+  try {
+    const res = await fetch('/api/etf-radar-stock?q=' + encodeURIComponent(q));
+    let d = null;
+    try { d = await res.json(); } catch (_){ d = null; }
+    if (!res.ok) throw new Error((d && d.detail) || ('HTTP ' + res.status));
+    erState.track = d;
+  } catch (e){
+    erState.track = null; erState.trackErr = e.message || String(e);
+  } finally {
+    erState.trackBusy = false;
+    if (erVisible()){
+      renderSwing();
+      const el = document.getElementById('erTrack');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+}
+function erTrackHtml(){
+  if (erState.trackBusy) return '<div class="race-note">查 ' + wlEsc(erState.q) + ' 在全部主動式 ETF 的進出紀錄…</div>';
+  if (erState.trackErr) return '<div class="race-note">' + wlEsc(erState.trackErr) + '</div>';
+  const j = erState.track;
+  if (!j) return '';
+  const cols = j.funds || [];
+  const holds = cols.map((f) => {
+    const h = j.hold[f.code] || { share: 0, rate: 0, date: '' }, c = h.cost || {};
+    let cost = '';
+    if (c.avg && h.share) cost = '<small>成本 ' + erNum(c.avg, 2) + ' → ' + (j.closeDate || '').slice(5).replace('-', '/') + ' 收盤 ' + erNum(c.price, 2) + '</small><span class="' + (c.pnl >= 0 ? 'up' : 'down') + '">' + (c.pnl >= 0 ? '+' : '') + c.pnl + '%</span>';
+    if (c.realized) cost += '<small>已實現 ' + erSgn(c.realized / 1e4) + ' 萬</small>';
+    return '<div class="er-hcard' + (h.share ? '' : ' zero') + '"><small>' + f.code + ' ' + wlEsc(f.name) + '</small><b>' + erNum(erLots(h.share)) + ' 張</b><small>權重 ' + (h.rate || 0) + '%・' + (h.date || '') + '</small>' + cost + '</div>';
+  }).join('');
+  const MAX = 150;
+  const body = (j.rows || []).slice(0, MAX).map((r) => '<tr><td class="d">' + r.date + '</td>' + cols.map((f) => {
+    const c = r.cells[f.code];
+    if (!c) return '<td class="nil">·</td>';
+    return '<td class="' + (c.delta > 0 ? 'up' : 'down') + '">' + erSgn(erLots(c.delta)) + '<small>' + c.act + ' → ' + erNum(erLots(c.now)) + '</small></td>';
+  }).join('') + '<td class="tot ' + (r.total > 0 ? 'up' : (r.total < 0 ? 'down' : '')) + '">' + erSgn(erLots(r.total)) + '</td></tr>').join('');
+  return '<div class="er-card er-trk"><div class="er-shead"><b>' + wlEsc(j.code) + ' ' + wlEsc(j.name || '') + '</b> ' + wlStarHtml(j.code, j.name) +
+    '<button type="button" class="chart-tab chips-btn" data-er-chart="' + wlEsc(j.code) + '" data-name="' + wlEsc(j.name || '') + '">📈 K線圖</button>' +
+    '<small>目前被 ' + j.held + ' 檔主動式 ETF 持有・最近 3 個月共 ' + (j.rows || []).length + ' 個有動作的交易日</small></div><div class="er-hold">' + holds + '</div></div>' +
+    ((j.rows || []).length ? '<div class="er-xwrap"><table class="er-xtab"><thead><tr><th class="d">日期</th>' + cols.map((f) => '<th>' + f.code + '<small>' + wlEsc(f.name) + '</small></th>').join('') + '<th class="tot">合計</th></tr></thead><tbody>' + body + '</tbody></table></div>' : '') +
+    '<div class="sw-rule">單位：張；只列「至少一檔 ETF 有動作」的日子，新→舊，「·」＝當天沒動。<b>成本</b>＝每次增減用當日收盤價算的移動加權平均（PCF 不公布成交價，只能這樣估；起點是我們開始收資料那天的收盤）。<b>收盤</b>＝' + (j.closeDate || '') + ' 的收盤價，不是即時報價。' +
+    ((j.rows || []).length > MAX ? '資料共 ' + j.rows.length + ' 天，這裡只顯示最近 ' + MAX + ' 天。' : '') + '</div>';
+}
+// 資金潮汐：泡泡＝個股（五檔合計），X＝這一週累計金額、Y＝力道（當日−前一日），自動循環播放
+function erTideHtml(o){
+  const t = o.tide || {};
+  if (!(t.stocks || []).length || (t.days || []).length < 2){ erTide.data = null; return '<div class="race-note">資料還不夠，潮汐畫不出來</div>'; }
+  if (erTide.key !== o.date || erTide.data !== t){
+    t.stocks.forEach((s) => { s.mom = s.daily.map((v, k) => (k ? v - s.daily[k - 1] : v)); });
+    if (erTide.key !== o.date){ erTide.t = 0; erTide.playing = true; erTide.sel = null; erTide.hold = 0; erTide.pending = false; }
+    erTide.key = o.date; erTide.data = t; erTide.sideKey = '';
+  }
+  const last = t.days.length - 1;
+  const rows = t.stocks.map((s) => ({ code: s.code, name: s.name, cum: s.cum[last] || 0 }));
+  const pins = rows.filter((r) => r.cum > 0).sort((a, b) => b.cum - a.cum).slice(0, 3).concat(rows.filter((r) => r.cum < 0).sort((a, b) => a.cum - b.cum).slice(0, 3));
+  return '<div class="er-tide-top"><span>🌊 當日加碼王：<b id="erTideBuy" class="up">—</b></span><span>🏝 當日出貨王：<b id="erTideSell" class="down">—</b></span></div>' +
+    '<div class="er-pins">' + pins.map((r) => '<button type="button" class="er-pin' + (erTide.sel === r.code ? ' on' : '') + '" data-er-pin="' + wlEsc(r.code) + '">' + wlEsc(r.name) + ' <b class="' + (r.cum >= 0 ? 'up' : 'down') + '">' + erSgn(r.cum, 1) + '</b></button>').join('') + '</div>' +
+    '<div class="er-tide-wrap"><div class="er-tide-main"><svg id="erTideSvg" class="er-tide-svg" viewBox="0 0 640 420" preserveAspectRatio="xMidYMid meet"></svg>' +
+    '<div class="er-tide-ctl"><button type="button" class="chart-tab chips-btn" data-er-tide="play">' + (erTide.playing ? '⏸' : '▶') + '</button><div class="er-days" id="erTideDays">' +
+    t.days.map((d, i) => {
+      const tot = t.stocks.reduce((a, s) => a + (s.daily[i] || 0), 0);
+      return '<div class="er-day" data-er-day="' + i + '"><div class="fill"></div><span>' + d.slice(5).replace('-', '/') + '</span><span class="' + (tot >= 0 ? 'up' : 'down') + '">' + erSgn(tot, 1) + ' 億</span></div>';
+    }).join('') + '</div></div><div id="erTideDetail"></div></div><div class="er-side" id="erTideSide"></div></div>' +
+    '<div class="sw-rule">往右＝這一週累計加碼越多、往左＝出貨越多；往上＝力道在增強（當日比前一日買更多）。紅＝加速加碼、黃＝續買但放緩、紫＝出貨收斂、綠＝加速出貨。' +
+    '泡泡＝個股（五檔合計），自動循環播放整週；點泡泡或上面的按鈕只看那一檔走過的路，點日期跳到那一天。金額＝增減張數 × 最新收盤價；兩軸為壓縮尺度，大小資金同框可讀。</div>';
+}
+function erTideStart(){
+  if (!erTide.data || !document.getElementById('erTideSvg')) return;
+  erTide.sideKey = '';     // 整頁重畫過，右欄是新的空殼
+  erTideRender();
+  if (!erTide.raf){ erTide.last = null; erTide.raf = requestAnimationFrame(erTideLoop); }
+}
+function erTideLoop(ts){
+  if (!erVisible() || !erTide.data || !document.getElementById('erTideSvg')){ erTide.raf = 0; return; }
+  erTide.raf = requestAnimationFrame(erTideLoop);
+  if (erTide.last === null) erTide.last = ts;
+  const dt = Math.min(0.2, (ts - erTide.last) / 1000);
+  erTide.last = ts;
+  if (!erTide.playing || ts < erTide.hold) return;
+  if (erTide.pending){ erTide.pending = false; erTide.t = 0; }
+  const last = erTide.data.days.length - 1;
+  erTide.t += dt * 0.55;
+  if (erTide.t >= last){ erTide.t = last; erTide.hold = ts + 2400; erTide.pending = true; }
+  erTideRender();
+}
+function erTideRender(){
+  const svg = document.getElementById('erTideSvg'), T = erTide.data;
+  if (!svg || !T) return;
+  // 畫布跟著實際寬度走（手機 640 寬縮下去字會太小）：380～640
+  const W = Math.round(Math.max(380, Math.min(640, svg.clientWidth || 640))), H = Math.round(W * 0.66), cx = W / 2, cy = H / 2;
+  if (svg.getAttribute('viewBox') !== '0 0 ' + W + ' ' + H) svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  const UP = '#ff5f7a', DN = '#3ddc97', SLOW = '#ffb84d', GRY = '#a992d9', GOLD = '#ffd94d';
+  const INK = getComputedStyle(document.body).color || '#f1ece6';
+  const di = Math.min(Math.round(erTide.t), T.days.length - 1);
+  let xm = 2, ym = 1;
+  T.stocks.forEach((s) => { s.cum.forEach((v) => { xm = Math.max(xm, Math.abs(v) * 1.12); }); s.mom.forEach((v) => { ym = Math.max(ym, Math.abs(v) * 1.2); }); });
+  const sq = (v, m) => { const r = Math.pow(Math.abs(v) / m, 0.34); return (v < 0 ? -1 : 1) * Math.min(1, r); };
+  const X = (v) => cx + sq(v, xm) * (W / 2 - 40), Y = (v) => cy - sq(v, ym) * (H / 2 - 34);
+  const lerp = (arr, t) => { const k = Math.floor(t); if (k >= arr.length - 1) return arr[arr.length - 1]; return arr[k] + (arr[k + 1] - arr[k]) * (t - k); };
+  const col = (x, y) => (x >= 0 ? (y >= 0 ? UP : SLOW) : (y >= 0 ? GRY : DN));
+  let s = '<rect x="' + cx + '" y="0" width="' + cx + '" height="' + cy + '" fill="' + UP + '" opacity="0.06"/><rect x="' + cx + '" y="' + cy + '" width="' + cx + '" height="' + cy + '" fill="' + SLOW + '" opacity="0.06"/>' +
+    '<rect x="0" y="0" width="' + cx + '" height="' + cy + '" fill="' + GRY + '" opacity="0.05"/><rect x="0" y="' + cy + '" width="' + cx + '" height="' + cy + '" fill="' + DN + '" opacity="0.06"/>' +
+    '<line x1="0" x2="' + W + '" y1="' + cy + '" y2="' + cy + '" stroke="#7c3aed" stroke-width="1"/><line x1="' + cx + '" x2="' + cx + '" y1="0" y2="' + H + '" stroke="#7c3aed" stroke-width="1"/>' +
+    '<text x="' + (W - 10) + '" y="22" font-size="15" font-weight="900" fill="' + UP + '" text-anchor="end">加速加碼 🌊</text><text x="' + (W - 10) + '" y="' + (H - 10) + '" font-size="15" font-weight="900" fill="' + SLOW + '" text-anchor="end">續買但放緩</text>' +
+    '<text x="10" y="22" font-size="15" font-weight="900" fill="' + GRY + '">出貨收斂</text><text x="10" y="' + (H - 10) + '" font-size="15" font-weight="900" fill="' + DN + '">加速出貨 🏝</text>' +
+    '<text x="' + (W - 10) + '" y="' + (cy - 6) + '" font-size="11" fill="' + GRY + '" text-anchor="end">← 累計出貨｜累計加碼（億）→</text><text x="' + (cx + 6) + '" y="14" font-size="11" fill="' + GRY + '">力道增強 ↑</text>' +
+    '<text x="' + cx + '" y="' + (cy - 14) + '" font-size="44" font-weight="900" fill="' + INK + '" opacity="0.08" text-anchor="middle">' + (T.days[di] || '').slice(5).replace('-', '/') + '</text>';
+  const labels = [];
+  T.stocks.forEach((st) => {
+    const isSel = erTide.sel === st.code;
+    if (erTide.sel && !isSel) return;     // 選了一檔就只畫那一檔和它走過的路
+    const x = lerp(st.cum, erTide.t), y = lerp(st.mom, erTide.t), px = X(x), py = Y(y);
+    if (isSel){
+      const pts = [];
+      for (let k = 0; k <= Math.floor(erTide.t); k++) pts.push([X(st.cum[k]), Y(st.mom[k])]);
+      pts.push([px, py]);
+      if (pts.length > 1) s += '<path d="' + pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') + '" fill="none" stroke="' + GOLD + '" stroke-width="2.4"/>' +
+        pts.slice(0, -1).map((p) => '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3" fill="' + GOLD + '"/>').join('');
+    }
+    const c = col(x, y), r = Math.min(26, 8 + Math.sqrt(Math.abs(x)) * 2.2);
+    s += '<circle data-er-bubble="' + st.code + '" cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + c + '" fill-opacity="0.82" stroke="' + (isSel ? GOLD : 'rgba(0,0,0,.45)') + '" stroke-width="' + (isSel ? 3 : 1) + '" style="cursor:pointer"/>';
+    if (isSel || Math.abs(x) >= xm * 0.05 || Math.abs(x) >= 2.5) labels.push({ px, py, r, txt: st.name + ' ', val: erSgn(x, 1), c });
+  });
+  const placed = [];
+  labels.forEach((L) => {
+    const w = L.txt.length * 12 + L.val.length * 7 + 8;
+    const cands = [L.py - L.r - 6, L.py + L.r + 14, L.py + L.r + 28, L.py - L.r - 20];
+    let ty = cands[0];
+    for (const cd of cands){
+      if (!placed.some((p) => Math.abs(p.x - L.px) < (p.w + w) / 2 && Math.abs(p.y - cd) < 14)){ ty = cd; break; }
+    }
+    placed.push({ x: L.px, y: ty, w });
+    s += '<text x="' + L.px.toFixed(1) + '" y="' + ty.toFixed(1) + '" font-size="12" font-weight="800" text-anchor="middle" fill="' + INK + '" pointer-events="none">' + wlEsc(L.txt) + '<tspan fill="' + L.c + '">' + L.val + '</tspan></text>';
+  });
+  svg.innerHTML = s;
+  let bk = null, sk = null;
+  T.stocks.forEach((st) => {
+    const v = st.daily[di] || 0;
+    if (v > 0 && (!bk || v > bk.v)) bk = { n: st.name, v };
+    if (v < 0 && (!sk || v < sk.v)) sk = { n: st.name, v };
+  });
+  const tb = document.getElementById('erTideBuy'), ts2 = document.getElementById('erTideSell');
+  if (tb) tb.textContent = bk ? bk.n + ' ' + erSgn(bk.v, 1) + ' 億' : '—';
+  if (ts2) ts2.textContent = sk ? sk.n + ' ' + erSgn(sk.v, 1) + ' 億' : '—';
+  document.querySelectorAll('#erTideDays .er-day').forEach((c, i) => {
+    c.classList.toggle('on', i === di);
+    c.querySelector('.fill').style.width = (i < erTide.t ? (i + 1 <= erTide.t ? 100 : (erTide.t - i) * 100) : 0) + '%';
+  });
+  document.querySelectorAll('.er-pin').forEach((b) => b.classList.toggle('on', b.dataset.erPin === erTide.sel));
+  const side = document.getElementById('erTideSide'), detail = document.getElementById('erTideDetail');
+  const sideKey = di + '|' + erTide.sel;
+  if (!side || erTide.sideKey === sideKey) return;
+  erTide.sideKey = sideKey;
+  const rows = T.stocks.map((st) => ({ code: st.code, name: st.name, cum: st.cum[di] || 0 }));
+  const row = (r, i) => '<div class="er-tsr' + (erTide.sel === r.code ? ' sel' : '') + '" data-er-pin="' + wlEsc(r.code) + '"><span class="rk">' + (i + 1) + '</span><span class="nm">' + wlEsc(r.name) + '<i>' + wlEsc(r.code) + '</i></span><span class="' + (r.cum >= 0 ? 'up' : 'down') + '">' + erSgn(r.cum, 1) + ' 億</span></div>';
+  const top = rows.filter((r) => r.cum > 0).sort((a, b) => b.cum - a.cum).slice(0, 5), bot = rows.filter((r) => r.cum < 0).sort((a, b) => a.cum - b.cum).slice(0, 5);
+  const dlab = (T.days[di] || '').slice(5).replace('-', '/');
+  side.innerHTML = '<div class="er-tst up">▲ 本週累計加碼（至 ' + dlab + '）</div>' + (top.length ? top.map(row).join('') : '<div class="race-note">還沒有淨加碼的</div>') +
+    '<div class="er-tst down">▼ 本週累計出貨</div>' + (bot.length ? bot.map(row).join('') : '<div class="race-note">還沒有淨出貨的</div>');
+  const ws = erTide.sel ? T.stocks.find((st) => st.code === erTide.sel) : null;
+  if (detail) detail.innerHTML = ws ? '<div class="er-tdet"><b>📈 ' + wlEsc(ws.name) + ' ' + wlEsc(ws.code) + ' 這週走過的路</b>・本週累計 <b class="' + (ws.cum[ws.cum.length - 1] >= 0 ? 'up' : 'down') + '">' + erSgn(ws.cum[ws.cum.length - 1], 1) + ' 億</b>（五檔合計）' +
+    '<button type="button" class="chart-tab chips-btn" data-er-stock="' + wlEsc(ws.code) + '">查進出紀錄</button><button type="button" class="chart-tab chips-btn" data-er-pin="' + wlEsc(ws.code) + '">👁 看全部</button><div class="er-tqrow">' +
+    T.days.map((d, i) => '<span><small>' + d.slice(5).replace('-', '/') + '</small><b class="' + ((ws.daily[i] || 0) >= 0 ? 'up' : 'down') + '">' + erSgn(ws.daily[i] || 0, 1) + '</b></span>').join('') + '</div></div>' : '';
+}
+function erTidePick(code){
+  if (!erTide.data) return;
+  if (erTide.sel === code){ erTide.sel = null; erTide.playing = true; }
+  else { erTide.sel = code; erTide.playing = false; erTide.t = erTide.data.days.length - 1; erTide.pending = false; }
+  const pb = document.querySelector('[data-er-tide="play"]');
+  if (pb) pb.textContent = erTide.playing ? '⏸' : '▶';
+  erTide.sideKey = '';
+  erTideRender();
+}
+function swingEtfRadarHtml(){
+  const asof = erAsof(), key = asof || 'latest';
+  erLoad('ov', key, '/api/etf-radar' + (asof ? '?date=' + encodeURIComponent(asof) : ''));
+  const intro = '<div class="sw-rule">這頁看的是「<b>基金經理人昨天買了什麼、賣了什麼</b>」。主動式 ETF 依規定每天要公告完整持股，動作全部攤在陽光下 —— 這裡收的是規模前五大的台股主動式 ETF（統一／復華／群益）。' +
+    '<span class="up">紅色是加碼</span>、<span class="down">綠色是減碼</span>；連續幾天往同一個方向做，代表法人的錢正在持續進來（或持續退出）。</div>';
+  const o = erState.ov[key];
+  if (!o) return intro + erRetryHtml('ov', key);
+  if (o.status !== 'ok') return intro + '<div class="race-note">' + wlEsc(o.reason || '還沒有主動式 ETF 的持股資料') + '</div>';
+  const n = o.nFunds;
+  const head = '<div class="er-head"><div class="er-sub">資料日 <b>' + o.date + '</b>・' + n + ' 檔主動式 ETF 合計 <b>' + erNum(o.totalNav) + ' 億</b>' + (o.missing.length ? '・缺 ' + o.missing.join('、') : '') + '</div>' +
+    '<label class="er-asof">📅 回測 <select id="erAsof"><option value="">最新</option>' + (o.dates || []).map((d) => '<option value="' + d + '"' + (asof === d ? ' selected' : '') + '>' + d.slice(5).replace('-', '/') + '</option>').join('') + '</select></label>' +
+    '<small class="er-note">整頁（五檔合計、潮汐、各檔動作、權重榜）都會變成那一天・投信晚上公告後更新</small></div>';
+  const funds = '<div class="er-funds">' + (o.funds || []).map((f) => '<div class="er-fund' + (f.code === erState.fund ? ' on' : '') + '" data-er-fund="' + f.code + '" role="button" tabindex="0"><b>' + f.code + '</b><span class="nm">' + wlEsc(f.name) + '</span>' +
+    '<span class="kv">規模 <b>' + erNum((f.nav || 0) / 1e8) + ' 億</b></span><span class="kv">淨值 <b>' + (f.unitNav === null ? '—' : erNum(f.unitNav, 2)) + '</b>・' + f.holdings + ' 檔</span>' +
+    '<span class="kv">申贖 <b class="' + ((f.unitsDelta || 0) > 0 ? 'up' : ((f.unitsDelta || 0) < 0 ? 'down' : '')) + '">' + (f.unitsDelta === null ? '—' : erSgn(f.unitsDelta / 1e4) + ' 萬') + '</b></span></div>').join('') + '</div>';
+  const track = '<div class="er-sec" id="erTrack">🔎 個股 × 全部主動式 ETF <small>輸入股號，看每一檔 ETF 什麼時候買它、什麼時候賣它</small></div>' +
+    '<div class="er-q"><input id="erQ" placeholder="股號或股名，例：2330 或 金像電" value="' + wlEsc(erState.q) + '" autocomplete="off"><button type="button" class="chart-tab chips-btn" data-er-go="1">查進出紀錄</button>' +
+    '<small class="er-note">或直接點下面任一列的股票</small></div>' + erTrackHtml();
+  const full = o.fullCount;
+  return intro + head + funds + track +
+    '<div class="er-sec">今天五檔合計 <small>加碼／出貨最多的前十大・' + o.date + '・' + o.todayFunds + ' 檔 ETF 有前一份可比</small></div>' +
+    '<div class="er-two"><div class="er-card buy"><h4>▲ 加碼最多 前十大</h4>' + erTopRows(o.buy, 'up', '今天沒有加碼的') + '</div><div class="er-card sell"><h4>▼ 出貨最多 前十大</h4>' + erTopRows(o.sell, 'down', '今天沒有出貨的') + '</div></div>' +
+    '<div class="sw-rule">五檔主動式 ETF 當天的增減<b>加總</b>後排名，<b>依金額排序</b>（張數不能直接比 —— 便宜的股票幾千張也不過幾億）。金額＝增減張數 × 當日收盤價。滑過可看是哪幾檔 ETF 在買賣，點一下查它的進出紀錄。湊不滿十名就只列得出幾名（主動式 ETF 不是每天大搬風）。</div>' +
+    '<div class="er-sec">這一週五檔合計 <small>一週內加碼／減碼最多的前十大・' + (o.wfrom || '—') + ' → ' + o.wto + '</small></div>' +
+    '<div class="er-two"><div class="er-card buy"><h4>▲ 一週加碼最多 前十大</h4>' + erTopRows(o.wbuy, 'up', '這一週沒有淨加碼的') + '</div><div class="er-card sell"><h4>▼ 一週減碼最多 前十大</h4>' + erTopRows(o.wsell, 'down', '這一週沒有淨減碼的') + '</div></div>' +
+    '<div class="sw-rule">往回 5 個資料日（≈ 一週），<b>只比頭尾兩天的持股</b>：週中買了又賣掉的會互相抵銷，剩下的才是這一週真正加／減的部位 —— 看的是方向，比單日穩。同樣依金額排序。</div>' +
+    '<div class="er-sec">🌊 資金潮汐 <small>一週的加碼／出貨動畫・' + (o.tide && o.tide.days && o.tide.days.length ? o.tide.days[0].slice(5).replace('-', '/') + ' → ' + o.tide.days[o.tide.days.length - 1].slice(5).replace('-', '/') : '') + '</small></div>' + erTideHtml(o) +
+    '<div class="er-sec">最多人共同持有 <small>幾檔 ETF 一起抱同一檔股票・' + n + ' 檔全持有的有 ' + full + ' 檔</small></div>' +
+    '<div class="er-card own">' + erOwnRows(o.common, n) + '</div>' +
+    '<div class="sw-rule">先看<b>幾檔 ETF 同時持有</b>，同票數再比合計金額。' + n + ' 檔都持有＝主動式 ETF 之間<b>共識最高</b>的股票；只有一檔持有的就是那位經理人自己的偏好。右邊的百分比是<b>各檔基金給它的權重</b>（佔該基金淨值），滑過可看是哪幾檔。</div>' +
+    '<div class="er-sec">各檔明細 <small>點上面的 ETF 卡片或下面的頁籤切換</small></div>' + erFundHtml();
+}
+function erOpenChart(code, name){
+  if (!useFloatingCharts()){
+    document.getElementById('swingModal').classList.add('behind-chart');
+    document.getElementById('signalModal').classList.add('behind-chart');
+  }
+  openStockChart(code, name);
+}
+// 籌碼日報面板裡的雷達事件（委派；回傳 true＝已處理）
+function erHandleClick(e){
+  const t = e.target;
+  if (t.closest('.wl-star')) return true;
+  const retry = t.closest('[data-er-retry]');
+  if (retry){ delete erState.err[retry.dataset.erRetry]; renderSwing(); return true; }
+  const ch = t.closest('[data-er-chart]');
+  if (ch){ erOpenChart(ch.dataset.erChart, ch.dataset.name); return true; }
+  if (t.closest('[data-er-go]')){ erTrackQuery((document.getElementById('erQ') || {}).value); return true; }
+  const fd = t.closest('[data-er-fund]');
+  if (fd){ erState.fund = fd.dataset.erFund; renderSwing(); return true; }
+  const pb = t.closest('[data-er-tide="play"]');
+  if (pb){
+    erTide.playing = !erTide.playing; pb.textContent = erTide.playing ? '⏸' : '▶';
+    if (erTide.playing && erTide.data && erTide.t >= erTide.data.days.length - 1){ erTide.t = 0; erTide.pending = false; }
+    return true;
+  }
+  const day = t.closest('[data-er-day]');
+  if (day){ erTide.t = +day.dataset.erDay; erTide.pending = false; erTide.hold = 0; erTideRender(); return true; }
+  const pin = t.closest('[data-er-pin], [data-er-bubble]');
+  if (pin){ erTidePick(pin.dataset.erPin || pin.getAttribute('data-er-bubble')); return true; }
+  const st = t.closest('[data-er-stock]');
+  if (st){ erTrackQuery(st.dataset.erStock); return true; }
+  return false;
+}
+document.getElementById('swingBody').addEventListener('change', (e) => {
+  if (e.target && e.target.id === 'erAsof'){ erState.asof = e.target.value; renderSwing(); }
+});
+document.getElementById('swingBody').addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'erQ') erState.q = e.target.value;
+});
+document.getElementById('swingBody').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target && e.target.id === 'erQ') erTrackQuery(e.target.value);
+});
 // 處置動態一列：明日起處置／明日出獄／處置中／觀察名單（出獄 ≤5 個交易日）
 function swingDispoReason(e){
   // 券商來的處置原因是一整段公告文，只留前 80 字，完整的放在 hover 提示
@@ -6839,7 +7243,7 @@ function swingSectionHtml(data){
       '<div class="sw-tile"><b>' + (t.disposition || 0) + '</b><span>處置中(檔)</span></div>' +
       '<div class="sw-tile"><b>' + (t.upcoming || 0) + '</b><span>明日起處置(檔)</span></div>' +
       '<div class="sw-tile"><b>' + (t.releasing || 0) + '</b><span>明日出獄(檔)</span></div>' +
-      (data.activeEtf ? '<div class="sw-tile"><b>' + (t.etfSyncBuy || 0) + '</b><span>主動式基金同步加碼(檔)</span></div>' : '') + '</div>' +
+      (data.activeEtf ? '<div class="sw-tile"><b>' + (t.etfSyncBuy || 0) + '</b><span>主動式ETF同步加碼(檔)</span></div>' : '') + '</div>' +
       '<ol class="sw-summary">' + (data.summary || []).map((line) => '<li>' + line + '</li>').join('') + '</ol>' +
       '<div class="sw-quote">先看族群再看個股：族群沒翻，個股只能算單兵</div>';
   }
@@ -6855,7 +7259,7 @@ function swingSectionHtml(data){
       block('觀察名單・出獄 5 個交易日內', 'bl-brew', d.watch || [], 'watch', '沒有剛出獄的股票') +
       '<div class="sw-quote">出獄不等於能追：先看有沒有站回月線、法人有沒有回來</div>';
   }
-  if (sec === 'etf') return swingEtfHtml(data);
+  if (sec === 'etf') return swingEtfRadarHtml();
   if (sec === 'groups'){
     const groups = data.groups || [];
     const shown = groups.slice(0, swingState.groupsLimit);
@@ -6894,7 +7298,7 @@ function swingSectionHtml(data){
     '<div class="sw-quote">' + quote + '</div>' +
     (sec === 'chips' ? swingLastWeekHtml(data) : '');
 }
-const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。本益比、月營收年增、集保 400 張以上大戶週籌碼、處置動態與上一週籌碼對照每個交易日收盤後更新；主動式基金五檔的持股在各投信晚上公告後更新。</div>';
+const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。本益比、月營收年增、集保 400 張以上大戶週籌碼、處置動態與上一週籌碼對照每個交易日收盤後更新；主動式 ETF 五檔的持股在各投信晚上公告後更新。</div>';
 function renderSwing(){
   const tabs = document.getElementById('swingTabs');
   tabs.innerHTML = SWING_SECTIONS.map((sc) => '<button class="chart-tab signal-tab' + (swingState.section === sc.key ? ' active' : '') + '" data-section="' + sc.key + '">' + sc.label + '</button>').join('');
@@ -6908,7 +7312,13 @@ function renderSwing(){
     body.innerHTML = swingDatePillsHtml(data) + '<div class="signal-empty"><div class="se-title">' + (swingState.date ? '那一天沒有報告' : '還沒有籌碼日報') + '</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
     return;
   }
+  const focusQ = document.activeElement && document.activeElement.id === 'erQ';
   body.innerHTML = swingDatePillsHtml(data) + swingBasisHtml(data) + swingSectionHtml(data) + SWING_FOOT;
+  if (swingState.section === 'etf'){
+    erTideStart();
+    const q = focusQ && document.getElementById('erQ');
+    if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+  }
 }
 function openSwingPanel(){
   document.getElementById('swingModal').hidden = false;
@@ -6925,10 +7335,9 @@ document.getElementById('swingTabs').addEventListener('click', (e) => {
 });
 document.getElementById('swingBody').addEventListener('click', (e) => {
   const day = e.target.closest('.sw-date-btn');
-  if (day){ swingState.date = day.dataset.date || ''; swingState.groupsLimit = 12; renderSwing(); return; }
+  if (day){ swingState.date = day.dataset.date || ''; swingState.groupsLimit = 12; erState.asof = null; renderSwing(); return; }
   if (e.target.closest('#swingMoreGroups')){ swingState.groupsLimit += 12; renderSwing(); return; }
-  const more = e.target.closest('.sw-etf-more');
-  if (more){ swingState.etfOpen[more.dataset.etf] = !swingState.etfOpen[more.dataset.etf]; renderSwing(); return; }
+  if (swingState.section === 'etf' && erHandleClick(e)) return;
   const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code]');
   if (card){
     if (!useFloatingCharts()){

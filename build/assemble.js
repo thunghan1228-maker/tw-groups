@@ -522,6 +522,18 @@ export default {
       // 估值河流圖的「均線≥10 × 便宜區」清單，5 分鐘快取
       return await proxyHanstockBars("/api/hub/river/ma10" + url.search, 300);
     }
+    if (url.pathname === "/api/etf-radar") {
+      // 主動式ETF持股雷達（2026-10-10 使用者：照莊爸 zhuang.tw/etf 做，併進籌碼日報）：五檔合計、共同持有、資金潮汐；投信晚上公告後才變，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/etf-radar" + url.search, 300);
+    }
+    if (url.pathname === "/api/etf-radar-fund") {
+      // 主動式ETF持股雷達的單一檔：最新一日、近 5 日、連續同向、權重榜，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/etf-radar/fund" + url.search, 300);
+    }
+    if (url.pathname === "/api/etf-radar-stock") {
+      // 個股 × 全部主動式 ETF 的進出紀錄，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/etf-radar/stock" + url.search, 300);
+    }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);
