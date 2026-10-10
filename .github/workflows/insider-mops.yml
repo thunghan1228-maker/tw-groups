@@ -146,7 +146,8 @@ jobs:
           extra = [m.strip() for m in (os.environ.get('EXTRA_MONTHS') or '').split(',') if re.fullmatch(r'\d{4}-\d{2}', m.strip())]
           want_detail = (os.environ.get('DETAIL') or 'true').lower() != 'false'
           os.makedirs('tpex', exist_ok=True)
-          DETAIL_BUDGET = int(os.environ.get('DETAIL_BUDGET') or '900')   # 每次最多查幾家明細（每家約 1.2 秒）
+          DETAIL_BUDGET = int(os.environ.get('DETAIL_BUDGET') or '900')   # 每次最多查幾家明細（每家約 1.2～4 秒）
+          T0, TIME_BUDGET = time.time(), 38 * 60    # 跑 38 分鐘就停（工作流程 50 分鐘上限），沒查完的下次接著查
 
           def load(month):
               path = f'tpex/insider-{month}.json'
@@ -200,16 +201,23 @@ jobs:
                   picked = [c[0] for c in sorted(cand, key=lambda c: -c[1])]
                   todo = [c for c in picked if c not in out['detail'] and c not in out['detailMiss']]
                   print(month, '查明細', min(len(todo), budget), '/', len(todo), '（候選', len(picked), '）')
+                  done_n = 0
                   for i, code in enumerate(todo[:budget]):
+                      if time.time() - T0 > TIME_BUDGET:
+                          print('  時間到，查了', done_n, '家，下次接著查')
+                          budget = 0
+                          break
                       d = detail(code, roc, mon)
                       if d is not None:
                           out['detail'][code] = d
                       else:
                           out['detailMiss'].append(code)
+                      done_n += 1
                       time.sleep(1.1)
-                      if i % 50 == 49:
-                          print('  ', i + 1, '家')
-                  budget -= min(len(todo), budget)
+                      if i % 100 == 99:
+                          print('  ', i + 1, '家，', int(time.time() - T0), '秒')
+                          json.dump(out, open(f'tpex/insider-{month}.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))   # 中途先存
+                  budget = max(0, budget - done_n)
                   out['candidates'] = len(picked)
                   out['detailDone'] = all(c in out['detail'] or c in out['detailMiss'] for c in picked)
               json.dump(out, open(f'tpex/insider-{month}.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
