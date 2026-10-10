@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 14:49:00";
+const BUILD_STAMP = "2026-10-10 14:58:55";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -286,13 +286,14 @@ const HTML_PAGE = `<!DOCTYPE html>
   .tb-btn:hover{background:rgba(255,255,255,0.14);color:#fff;}
   .tb-sub{white-space:nowrap;}
   .tb-icon{width:20px;height:20px;border-radius:6px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;}
-  /* 2026-10-10 使用者：手機版跟 iPad 版下方導覽列分成兩排（不用左右滑）；加了「均線分數排行」之後上下各 6 顆。
+  /* 2026-10-10 使用者：手機版跟 iPad 版下方導覽列分成兩排（不用左右滑）；加了「均線分數排行」之後上下各 6 顆，
+     再加第 13 顆「估值河流圖」放下排最後 → 上 6 下 7（42 欄格線：上排每顆 7 欄、下排每顆 6 欄）。
      iPad 橫放比較寬，用觸控螢幕判斷一起涵蓋。 */
   @media (max-width: 1024px), (hover: none) and (pointer: coarse){
     :root{--tb-h:112px;}
-    .toolbar-bottom{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));overflow-x:visible;}
-    .toolbar-bottom .tb-btn{min-width:0;padding:8px 2px 7px;text-wrap:balance;}
-    .toolbar-bottom .tb-btn:nth-child(-n+6){border-bottom:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom{display:grid;grid-template-columns:repeat(42,minmax(0,1fr));overflow-x:visible;}
+    .toolbar-bottom .tb-btn{min-width:0;grid-column:span 6;padding:8px 2px 7px;text-wrap:balance;}
+    .toolbar-bottom .tb-btn:nth-child(-n+6){grid-column:span 7;border-bottom:1px solid rgba(255,255,255,0.16);}
     .toolbar-bottom .tb-btn:nth-child(6){border-right:none;}
   }
   .toast{position:fixed;left:50%;bottom:calc(var(--tb-h) + 16px);transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
@@ -1107,6 +1108,30 @@ const HTML_PAGE = `<!DOCTYPE html>
   .scr-fact{border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--panel);}
   .scr-fact small{display:block;font-size:11px;color:var(--muted);} .scr-fact b{font-size:14px;}
   @media (max-width: 900px){ .scr-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  /* 2026-10-10 使用者：估值河流圖（本站版，照莊爸 zhuang.tw/river） */
+  .riv-card .riv-hd{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:16px;}
+  .riv-zone{border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;color:#fff;margin-left:auto;}
+  .ma-table .riv-zone{margin-left:0;}
+  .z0{background:#0e7490;color:#fff;} .z1{background:#1490c8;color:#fff;} .z2{background:#4db8dc;color:#0b2530;} .z3{background:#c5aee6;color:#2a1645;} .z4{background:#8f6bd0;color:#fff;} .z5{background:#6d28d9;color:#fff;}
+  .riv-nums{display:flex;gap:22px;margin:8px 0;} .riv-nums small{display:block;font-size:11px;color:var(--muted);} .riv-nums b{font-size:20px;}
+  .riv-p{color:#f43f5e;}
+  .riv-span{display:flex;gap:6px;margin:6px 0;}
+  .riv-svg{width:100%;height:260px;display:block;background:var(--panel-2);border-radius:8px;}
+  .riv-grid{stroke:var(--line);stroke-width:1;} .riv-tick{fill:var(--muted);font-size:11px;}
+  .riv-shed{fill:none;stroke:#f5b301;stroke-width:2.2;stroke-dasharray:7 5;} .riv-price{fill:none;stroke:#f43f5e;stroke-width:2.2;stroke-linejoin:round;}
+  .riv-dot{fill:#f43f5e;} .riv-step{stroke:var(--muted);stroke-dasharray:3 4;opacity:.6;}
+  .riv-lg{display:inline-block;width:18px;height:0;border-top:3px solid #f43f5e;vertical-align:middle;} .riv-lg.shed{border-top:3px dashed #f5b301;}
+  .riv-body{display:grid;grid-template-columns:200px minmax(0,1fr);gap:14px;margin-top:10px;align-items:start;}
+  .riv-lad{position:relative;border-radius:10px;overflow:visible;}
+  .riv-row{display:flex;justify-content:space-between;align-items:center;padding:0 10px;height:62px;font-weight:700;}
+  .riv-row:first-child{border-radius:10px 10px 0 0;} .riv-row:nth-child(4){border-radius:0 0 10px 10px;}
+  .riv-row small{font-weight:600;font-size:12px;}
+  .riv-mark{position:absolute;left:-4px;right:-4px;height:0;border-top:2.5px solid #f43f5e;}
+  .riv-mark b{position:absolute;right:0;top:-18px;font-size:11px;background:#f43f5e;color:#fff;border-radius:4px;padding:0 5px;}
+  .riv-sum{font-size:14px;margin-bottom:6px;}
+  .riv-howbar{display:flex;border-radius:10px;overflow:hidden;margin:6px 0;} .riv-howbar span{flex:1;text-align:center;padding:8px 0;font-weight:700;}
+  .riv-howbar span.z2{border-right:3px dashed #f5b301;}
+  @media (max-width: 640px){ .riv-body{grid-template-columns:minmax(0,1fr);} .riv-svg{height:220px;} .riv-nums{gap:14px;} }
   @media (max-width: 560px){ .scr-grid{gap:6px;} .scr-card{padding:8px;} .scr-ct{font-size:13px;} .scr-cd{font-size:10.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;} .scr-sl b{min-width:44px;font-size:13px;} .scr-kr input{width:52px;} }
   .rv-scroll{overflow-x:auto;max-width:100%;}
   .rv-tables > .rv-scroll{min-width:0;}
@@ -1791,6 +1816,19 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div id="maBody"></div>
   </div>
 </div>
+<!-- 2026-10-10 使用者：照莊爸「估值河流圖」（zhuang.tw/river）做本站版（下方導覽列第 13 顆「估值河流圖」） -->
+<div class="chips-modal" id="rivModal" hidden>
+  <div class="chips-inner" id="rivInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">估值河流圖（本站版）</div>
+        <div class="chips-sub">輸入股號或股名，看這檔股票現在的價格落在哪一區：特價・便宜・貴・昂貴。分水嶺＝近 4 季 EPS × 同族群本益比中位數。</div>
+      </div>
+      <button class="cm-icon-btn" id="rivClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="rivBody"></div>
+  </div>
+</div>
 <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式（下方導覽列「創高黑選股」），跟創高黑龍分開放 -->
 <div class="chips-modal" id="pickerModal" hidden>
   <div class="chips-inner" id="pickerInner">
@@ -1929,6 +1967,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   <button class="tb-btn" data-label="健診"><span class="tb-icon">診</span>每日持股健診</button>  <!-- 2026-09-28 使用者：鈕的名字改成「每日持股健診」 -->
   <button class="tb-btn" data-label="問診"><span class="tb-icon">研</span>選股・個股研究</button>  <!-- 2026-09-28 使用者：鈕的名字改成「個股研究」；2026-10-10 併進系統選股，改「選股・個股研究」 -->
   <button class="tb-btn" data-label="個股盤中訊號追蹤"><span class="tb-icon">追</span>個股訊號追蹤</button>
+  <button class="tb-btn" data-label="估值河流圖"><span class="tb-icon">河</span>估值河流圖</button>  <!-- 2026-10-10 使用者：第 13 顆「估值河流圖」（本站版） -->
 </div>
 
 <div class="signal-modal" id="signalModal" hidden>
@@ -8704,7 +8743,7 @@ const SCR_CARDS = [
   { key: 'inst5', title: '法人 5 日累積買超・估量 ≥', desc: '近一週（5 個交易日）三大法人合計是買超，且累積買超張數 ÷ 5 日成交量', min: 0, max: 40, step: 1, def: 10, unit: '%' },
   { key: 'sword', title: '⚔ 雙劍出擊・兩張榜各取前', desc: '均線常客 ∩ 籌碼常客 —— 兩張榜都排得進去才算。均線常客：近 20 個交易日每天取均線分數前 10 名，誰上榜次數多；籌碼常客：近 9 週每週取籌碼暴增榜前 10 名，誰進榜次數多。一張看技術位置一直待在前段、一張看大戶一直在收 —— 兩把劍同時指向同一檔，才叫雙劍出擊。', min: 10, max: 60, step: 5, def: 60, unit: ' 名' },
   { key: 'dispo', title: '處置股倒數 ≤', desc: '目前還在處置中、而且快出關的股。倒數＝還要關幾個交易日（迄日當天＝1，下一個交易日出關）。只扣週末與國定假日，碰到颱風假會少算一兩天。', min: 1, max: 10, step: 1, def: 5, unit: ' 天' },
-  { key: 'river', title: '河流圖位置 ≤', desc: '照估值河流圖的目前位置挑「股價回到相對便宜」的股。⏳ 估值河流圖還在做，做好後開放。', min: 1, max: 2, step: 1, def: 2, unit: '', disabled: true },
+  { key: 'river', title: '河流圖位置 ≤', desc: '照估值河流圖（本站版）的目前位置挑「股價回到相對便宜」的股：1＝只要特價（含跌破）、2＝便宜以下。虧損或獲利太薄（算不出河道）的一律不符合。', min: 1, max: 2, step: 1, def: 2, unit: '' },
   { key: 'fut', title: '有股票期貨', desc: '期交所所有個股期貨的標的（一般 2,000 股或小型 100 股都算）。有期貨才好放空與避險。', check: true },
   { key: 'mini', title: '有小型股票期貨', desc: '契約是 100 股（一般股票期貨 2,000 股），只有約 47 檔高價股有 —— 小資金也能玩高價股。有小型的一定也有一般的。', check: true },
   { key: 'exdispo', title: '排除處置股', desc: '把處置中和明天起處置（交易所已公告、下一個交易日開始分盤）的股拿掉。「創高黑龍」預設有勾。', check: true },
@@ -8766,7 +8805,6 @@ function scrApplyPreset(name){
     else { scrState.on[k] = true; if (typeof v === 'number' && !(SCR_CARDS.find((c) => c.key === k) || {}).check) scrState.val[k] = v; }
   });
   scrState.preset = name;
-  if (ps.p.river){ scrState.data = null; scrState.error = '「河流便宜」要用估值河流圖，河流圖做好後開放。'; renderScreener(); return; }
   scrRun();
 }
 function scrCardHtml(c){
@@ -8797,6 +8835,7 @@ function scrChips(p){
   if (p.inst5 !== null) out.push('法人5日累積 ≥ ' + p.inst5 + '%');
   if (p.sword !== null) out.push('雙劍出擊 前 ' + p.sword + ' 名');
   if (p.dispo !== null) out.push('處置倒數 ≤ ' + p.dispo + ' 天');
+  if (p.river !== null && p.river !== undefined) out.push('河流 ' + (p.river >= 2 ? '便宜以下' : '只要特價'));
   if (p.fut) out.push('股票期貨');
   if (p.mini) out.push('小型股期');
   if (p.exdispo) out.push('排除處置');
@@ -8826,7 +8865,7 @@ function scrTableHtml(d){
   const kActive = p.k !== 'any' || p.kmin !== null || p.kmax !== null;
   let h = '<div class="ma-wrap scr-wrap"><table class="ma-table scr-table"><thead><tr>' + th('code', '代號') + '<th>股名</th><th>族群</th>' +
     th('score', '均線分數', p.score !== null) + th('chip', '籌碼暴增', p.chip !== null) + th('sword', '⚔ 雙劍', p.sword !== null) + th('etf', 'ETF 家數', p.etf !== null) +
-    th('dispo', '處置倒數', p.dispo !== null || p.exdispo) + '<th>河流區</th><th class="' + (p.fut || p.mini ? 'act' : '') + '">股期</th>' +
+    th('dispo', '處置倒數', p.dispo !== null || p.exdispo) + th('river', '河流區', p.river !== null && p.river !== undefined) + '<th class="' + (p.fut || p.mini ? 'act' : '') + '">股期</th>' +
     th('inst3', '法人3日%', p.inst3 !== null) + th('inst5', '法人5日%', p.inst5 !== null) + th('chg', 'K棒', kActive) +
     th('d1', 'D+1%') + th('d1h', 'D+1 高%') + th('d2', 'D+2%') + th('perf', '目前績效%') + '</tr></thead><tbody>';
   scrSortRows(d.rows).forEach((r) => {
@@ -8838,7 +8877,7 @@ function scrTableHtml(d){
       '<td>' + (r.maHits && r.chipHits ? '<span class="scr-sword">均' + r.maHits + ' 籌' + r.chipHits + '</span>' : '—') + '</td>' +
       '<td>' + (r.etf ? r.etf + ' 家' : '—') + '</td>' +
       '<td>' + (r.dispo !== null ? '<span class="scr-lock">🔒' + r.dispo + '天</span>' : (r.upcoming ? '<span class="scr-lock next">明天起</span>' : '—')) + '</td>' +
-      '<td>—</td><td>' + (r.futLabel ? '<span class="scr-fut' + (r.mini ? ' mini' : '') + '">' + r.futLabel + '</span>' : '—') + '</td>' +
+      '<td>' + (r.riverName ? '<span class="riv-zone ' + RV_ZCLS[r.river] + '">' + r.riverName + '</span>' : '—') + '</td><td>' + (r.futLabel ? '<span class="scr-fut' + (r.mini ? ' mini' : '') + '">' + r.futLabel + '</span>' : '—') + '</td>' +
       '<td>' + inst(r.inst3) + '</td><td>' + inst(r.inst5) + '</td>' +
       '<td>' + (r.k === 'red' ? '🔴' : (r.k === 'black' ? '⚫' : '➖')) + ' <span class="' + scrCls(r.chg) + '">' + scrPct(r.chg) + '</span></td>' +
       '<td class="' + scrCls(r.d1) + '">' + scrPct(r.d1) + '</td><td class="' + scrCls(r.d1h) + '">' + scrPct(r.d1h) + '</td>' +
@@ -8891,7 +8930,7 @@ function scrStockCardHtml(code){
     cell('均線分數', r.score === null ? '—' : r.score + ' 分') + cell('籌碼暴增', r.chip === null ? '—' : (r.chip > 0 ? '+' : '') + r.chip + '%' + (r.chipOn ? '（上榜）' : '')) +
     cell('雙劍', r.maHits && r.chipHits ? '均' + r.maHits + ' 籌' + r.chipHits : (r.maHits ? '均' + r.maHits : (r.chipHits ? '籌' + r.chipHits : '—'))) +
     cell('主動式 ETF', r.etf ? r.etf + ' 家持有' : '—') + cell('處置', r.dispo !== null ? '🔒 還關 ' + r.dispo + ' 天' : (r.upcoming ? '明天起處置' : '—')) +
-    cell('股票期貨', r.futLabel || '—') + cell('法人 3 日', inst(r.inst3)) + cell('法人 5 日', inst(r.inst5)) +
+    cell('股票期貨', r.futLabel || '—') + cell('河流區', r.riverName || '—') + cell('法人 3 日', inst(r.inst3)) + cell('法人 5 日', inst(r.inst5)) +
     cell('K棒', (r.k === 'red' ? '🔴 紅K ' : (r.k === 'black' ? '⚫ 黑K ' : '')) + scrPct(r.chg)) + '</div>';
 }
 async function scrLoadStock(code){
@@ -8973,7 +9012,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 14:49:00';
+const BUILD_STAMP = '2026-10-10 14:58:55';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11404,6 +11443,177 @@ setInterval(() => {
   if (document.getElementById('revModal').hidden || document.visibilityState === 'hidden') return;
   rvLoad(rvState.data && rvState.data.month);
 }, 600000);
+// ---- 估值河流圖・本站版（2026-10-10 使用者：照莊爸 zhuang.tw/river 做；他的分水嶺公式推不出來，先做本站版）----
+// 分水嶺＝近 4 季 EPS × 同族群本益比中位數；四區照莊爸比例（×0.618／0.8／1.2／1.382）。後端 /api/river 算好，這裡畫圖。
+const RV_ZONES = ['跌破特價', '特價', '便宜', '貴', '昂貴', '超昂貴'];
+const RV_ZCLS = ['z0', 'z1', 'z2', 'z3', 'z4', 'z5'];
+const rivState = { q: '', data: null, loading: false, error: '', span: 3, list: null, ma10: null };
+const rivFmt = (x, d) => x === null || x === undefined ? '—' : Number(x).toLocaleString('zh-TW', { minimumFractionDigits: d === undefined ? 2 : d, maximumFractionDigits: d === undefined ? 2 : d });
+async function rivFetch(url){
+  const res = await fetch(url);
+  let d = null;
+  try { d = await res.json(); } catch (_){ d = null; }
+  if (!res.ok) throw new Error((d && d.detail) || ('HTTP ' + res.status));
+  return d;
+}
+async function rivQuery(q){
+  q = String(q || '').trim();
+  if (!q) return;
+  rivState.q = q; rivState.loading = true; rivState.error = '';
+  renderRiver();
+  try {
+    rivState.data = await rivFetch('/api/river?q=' + encodeURIComponent(q));
+  } catch (e){
+    rivState.data = null; rivState.error = e.message || String(e);
+  } finally {
+    rivState.loading = false;
+    renderRiver();
+  }
+}
+async function rivLoadSide(){
+  try { if (!rivState.list) rivState.list = (await rivFetch('/api/river-list')).stocks || []; } catch (_){ rivState.list = []; }
+  try { if (!rivState.ma10) rivState.ma10 = await rivFetch('/api/river-ma10'); } catch (e){ rivState.ma10 = { error: e.message || String(e) }; }
+  renderRiver();
+}
+function rivChartSvg(st){
+  const c = st.chart;
+  if (!c || !c.dates || !c.dates.length) return '<div class="ma-legend">沒有日K可以畫。</div>';
+  const N = c.dates.length;
+  let i0 = 0;
+  if (rivState.span < 99 && N > 1){
+    const cut = new Date(c.dates[N - 1] + 'T00:00:00'); cut.setMonth(cut.getMonth() - rivState.span);
+    const cs = cut.toISOString().slice(0, 10);
+    while (i0 < N - 2 && c.dates[i0] < cs) i0++;
+  }
+  const B = c.bands, W = 640, H = 260, L = 8, R = 46, T = 8, BM = 24;
+  let lo = Infinity, hi = -Infinity;
+  for (let i = i0; i < N; i++){
+    lo = Math.min(lo, c.close[i], B[0][i] === null ? Infinity : B[0][i]);
+    hi = Math.max(hi, c.close[i], B[4][i] === null ? -Infinity : B[4][i]);
+  }
+  const pad = (hi - lo) * 0.07 || 1; lo = Math.max(0, lo - pad); hi += pad;
+  const n = Math.max(1, N - 1 - i0);
+  const X = (i) => L + (i - i0) / n * (W - L - R), Y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - BM);
+  const fills = ['rgba(20,144,200,.42)', 'rgba(121,207,232,.38)', 'rgba(197,174,230,.40)', 'rgba(143,107,208,.48)'];
+  let svg = '<svg class="riv-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">';
+  for (let t = 0; t <= 4; t++){
+    const v = lo + (hi - lo) * t / 4, y = Y(v);
+    svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '" class="riv-grid"/><text x="' + (W - R + 6) + '" y="' + (y + 4).toFixed(1) + '" class="riv-tick">' + Math.round(v) + '</text>';
+  }
+  for (let b = 0; b < 4; b++){
+    let run = [];
+    const flush = () => {
+      if (run.length > 1){
+        const top = run.map((k) => X(k).toFixed(1) + ',' + Y(B[b + 1][k]).toFixed(1));
+        const bot = run.slice().reverse().map((k) => X(k).toFixed(1) + ',' + Y(B[b][k]).toFixed(1));
+        svg += '<polygon points="' + top.concat(bot).join(' ') + '" fill="' + fills[b] + '"/>';
+      }
+      run = [];
+    };
+    for (let i = i0; i < N; i++){ if (B[b][i] !== null && B[b + 1][i] !== null) run.push(i); else flush(); }
+    flush();
+  }
+  const pathOf = (arr) => { let d = '', pen = false; for (let i = i0; i < N; i++){ if (arr[i] === null){ pen = false; continue; } d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(arr[i]).toFixed(1); pen = true; } return d; };
+  svg += '<path d="' + pathOf(B[2]) + '" class="riv-shed"/>';
+  svg += '<path d="' + pathOf(c.close) + '" class="riv-price"/>';
+  svg += '<circle cx="' + X(N - 1).toFixed(1) + '" cy="' + Y(c.close[N - 1]).toFixed(1) + '" r="3.6" class="riv-dot"/>';
+  svg += '<text x="' + L + '" y="' + (H - 6) + '" class="riv-tick">' + c.dates[i0].slice(5).replace('-', '/') + '</text><text x="' + (W - R) + '" y="' + (H - 6) + '" class="riv-tick" text-anchor="end">' + c.dates[N - 1].slice(5).replace('-', '/') + '</text>';
+  (c.steps || []).forEach((sp) => {
+    const k = c.dates.indexOf(sp.start);
+    if (k <= i0 || k < 0) return;
+    svg += '<line x1="' + X(k).toFixed(1) + '" x2="' + X(k).toFixed(1) + '" y1="' + T + '" y2="' + (H - BM) + '" class="riv-step"/>';
+  });
+  return svg + '</svg>';
+}
+function rivLadderHtml(st){
+  const b = st.bounds, names = ['昂貴', '貴', '便宜', '特價'], cls = ['z4', 'z3', 'z2', 'z1'];
+  const rows = [[b[3], b[4]], [b[2], b[3]], [b[1], b[2]], [b[0], b[1]]];
+  const p = st.price, edges = [b[4], b[3], b[2], b[1], b[0]];
+  let frac;
+  if (p >= b[4]) frac = 0; else if (p <= b[0]) frac = 1;
+  else { let seg = 3; for (let j = 0; j < 4; j++){ if (p <= edges[j] && p >= edges[j + 1]){ seg = j; break; } } frac = (seg + (edges[seg] - p) / (edges[seg] - edges[seg + 1])) / 4; }
+  return '<div class="riv-lad">' + names.map((nm, i) => '<div class="riv-row ' + cls[i] + '"><span>' + nm + '</span><small>' + rivFmt(rows[i][0], 0) + '～' + rivFmt(rows[i][1], 0) + '</small></div>').join('') +
+    '<div class="riv-mark" style="top:' + (frac * 100).toFixed(1) + '%"><b>' + rivFmt(p) + '</b></div></div>';
+}
+function rivFundHtml(st){
+  const f = st.fund || {};
+  const cell = (k, v) => '<div class="scr-fact"><small>' + k + '</small><b>' + v + '</b></div>';
+  let h = '<div class="scr-facts">' + cell('本益比（近 4 季）', st.pe === null ? '虧損' : rivFmt(st.pe, 1)) + cell('股價淨值比', st.pbr ? rivFmt(st.pbr, 2) : '—') +
+    cell('近 4 季 EPS 合計', st.eps4 !== undefined ? rivFmt(st.eps4) : '—') + cell('每股淨值', st.bps ? rivFmt(st.bps) : '—') +
+    cell('參考本益比', (st.ref ? rivFmt(st.ref, 2) + ' 倍' : '—') + '<small>' + wlEsc(st.refGroup || '') + (st.refGroup === '全市場' ? '中位數' : '族群中位數') + '</small>') + '</div>';
+  if ((f.rev || []).length){
+    h += '<div class="ma-legend">近月營收（億）' + (f.ytd !== null && f.ytd !== undefined ? '・今年累計 <span class="' + (f.ytd >= 0 ? 'scr-up' : 'scr-dn') + '">' + (f.ytd >= 0 ? '+' : '') + f.ytd + '%</span>' : '') + '：' +
+      f.rev.map((r) => r.ym + ' <b>' + r.rev + '</b>' + (r.yoy !== null && r.yoy !== undefined ? ' <span class="' + (r.yoy >= 0 ? 'scr-up' : 'scr-dn') + '">' + (r.yoy >= 0 ? '+' : '') + r.yoy + '%</span>' : '')).join('　') + '</div>';
+  }
+  return h;
+}
+function rivCardHtml(){
+  if (rivState.loading) return '<div class="ma-legend">查詢中…</div>';
+  if (rivState.error) return '<div class="ma-err">' + wlEsc(rivState.error) + '</div>';
+  const d = rivState.data;
+  if (!d) return '<div class="ma-legend">輸入股號或股名查這檔股票現在落在哪一區。</div>';
+  const st = d.stock;
+  let h = '<div class="ma-sec riv-card"><div class="riv-hd"><b>' + wlEsc(st.code) + ' ' + wlEsc(st.name) + '</b> ' + wlStarHtml(st.code, st.name) +
+    '<span class="ma-legend" style="margin:0">' + wlEsc(st.group || '族群外') + '・' + (st.priceDate || '') + ' 收</span>';
+  if (st.noVal){
+    return h + '</div><div class="ma-legend">' + (st.why === 'thin' ? '這檔目前獲利太薄（本益比超過 200 倍）—— 股價反映的不是當期獲利，用本益比畫價值區間沒有參考性。' : '這檔目前虧損或資料不足，算不出價值區間。') + '</div>' + rivFundHtml(st) + '</div>';
+  }
+  h += '<span class="riv-zone ' + RV_ZCLS[st.zone] + '">' + RV_ZONES[st.zone] + '・距分水嶺 ' + (st.dist > 0 ? '+' : '') + st.dist + '%</span></div>' +
+    '<div class="riv-nums"><div><small>股價</small><b class="riv-p">' + rivFmt(st.price) + '</b></div><div><small>分水嶺</small><b>' + rivFmt(st.s, 1) + '</b></div><div><small>目前位置</small><b>' + RV_ZONES[st.zone] + '</b></div></div>' +
+    '<div class="riv-span">' + [[3, '三個月'], [6, '六個月'], [99, '長時間']].map((o) => '<button type="button" class="ma-vbtn' + (rivState.span === o[0] ? ' on' : '') + '" data-riv-span="' + o[0] + '">' + o[1] + '</button>').join('') + '</div>' +
+    rivChartSvg(st) +
+    '<div class="ma-legend"><span class="riv-lg price"></span>股價　<span class="riv-lg shed"></span>分水嶺　河道由下往上：特價／便宜／貴／昂貴（直虛線＝新一季財報，河道跟著跳）</div>' +
+    '<div class="riv-body">' + rivLadderHtml(st) + '<div class="riv-info"><div class="riv-sum">現在 <b class="riv-p">' + rivFmt(st.price) + '</b>・位置 <b>' + RV_ZONES[st.zone] + '</b>・距分水嶺 <b>' + (st.dist > 0 ? '+' : '') + st.dist + '%</b></div>' + rivFundHtml(st) +
+    '<div class="ma-legend">區間每天收盤後重算，會隨公司每季體質（近 4 季 EPS）與族群本益比變動。</div></div></div></div>';
+  return h;
+}
+function rivMa10Html(){
+  const m = rivState.ma10;
+  if (!m) return '<div class="ma-legend">載入中…</div>';
+  if (m.error) return '<div class="ma-err">' + wlEsc(m.error) + '</div>';
+  if (!m.rows.length) return '<div class="ma-legend">今天沒有符合的股票。</div>';
+  return '<div class="ma-wrap"><table class="ma-table"><thead><tr><th></th><th>股票</th><th>族群</th><th>均線分數</th><th>收盤</th><th>目前位置</th><th>距分水嶺</th></tr></thead><tbody>' +
+    m.rows.map((r, i) => '<tr class="scr-row" data-riv-q="' + wlEsc(r.code) + '"><td class="rk">' + (i + 1) + '</td><td><span class="code">' + wlEsc(r.code) + '</span> ' + wlEsc(r.name) + '</td><td>' + wlEsc(r.group || '—') + '</td>' +
+      '<td class="ma-hot">' + r.score + '</td><td>' + rivFmt(r.price) + '</td><td><span class="riv-zone ' + RV_ZCLS[r.zone] + '">' + r.zoneName + '</span></td><td class="scr-dn">' + r.dist + '%</td></tr>').join('') +
+    '</tbody></table></div>';
+}
+function renderRiver(){
+  const body = document.getElementById('rivBody');
+  if (!body) return;
+  const keep = document.activeElement && document.activeElement.id === 'rivQ' ? document.activeElement.value : null;
+  body.innerHTML =
+    '<div class="ma-note">🕐 每日收盤後更新・本站版：分水嶺＝近 4 季 EPS × 同族群本益比中位數（莊爸的公式不公開，位置可能跟他差一格）</div>' +
+    '<div class="ma-q"><input id="rivQ" list="rivList" placeholder="輸入股號或股名，例：2492 或 華新科" value="' + wlEsc(keep !== null ? keep : rivState.q) + '"><button type="button" data-riv-go="1">查詢</button>' +
+    ['2492 華新科', '2408 南亞科', '2327 國巨'].map((x) => '<button type="button" class="scr-pre" data-riv-q="' + x.split(' ')[0] + '">' + x + '</button>').join('') + '</div>' +
+    '<datalist id="rivList">' + (rivState.list || []).map((s) => '<option value="' + wlEsc(s.code) + '">' + wlEsc(s.name) + '</option>').join('') + '</datalist>' +
+    rivCardHtml() +
+    '<div class="ma-sec"><h3>這張圖怎麼看？</h3><div class="riv-howbar"><span class="z1">特價</span><span class="z2">便宜</span><span class="z3">貴</span><span class="z4">昂貴</span></div>' +
+    '<div class="ma-legend">中間虛線＝分水嶺：股價在分水嶺之下，代表相對它的同族群偏便宜；之上代表偏貴。紅線是股價，彩色河道由下而上是特價 → 便宜 → 貴 → 昂貴；' +
+    '河道會隨公司每季體質（近 4 季 EPS）上下移動 —— 同樣的股價，體質變好時會從「貴」變「便宜」。四區＝分水嶺 ×0.618／×0.8／×1.2／×1.382（低於 0.618 倍＝跌破特價、高於 1.382 倍＝超昂貴）。' +
+    '虧損或本益比超過 200 倍的不畫。</div></div>' +
+    '<div class="ma-sec"><h3>⭐ 均線分數 ≥10 × 便宜區 <small>' + ((rivState.ma10 && rivState.ma10.date) || '') + ' 收盤・共 ' + ((rivState.ma10 && rivState.ma10.count) || 0) + ' 檔</small></h3>' + rivMa10Html() +
+    '<div class="ma-legend">體質強（均線分數，滿分 15）又站在便宜側（特價、跌破特價也算）的族群股票，依均線分數高到低、再依離分水嶺遠到近。點一列查那一檔。僅為條件篩選教學，非投資建議。</div></div>';
+}
+function openRiverPanel(){
+  document.getElementById('rivModal').hidden = false;
+  renderRiver();
+  rivLoadSide();
+}
+function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
+document.getElementById('rivClose').addEventListener('click', closeRiverPanel);
+document.getElementById('rivModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeRiverPanel(); });
+document.getElementById('rivBody').addEventListener('click', (e) => {
+  const t = e.target;
+  if (t.closest('.wl-star')) return;
+  if (t.closest('[data-riv-go]')){ rivQuery((document.getElementById('rivQ') || {}).value); return; }
+  const q = t.closest('[data-riv-q]');
+  if (q){ rivQuery(q.dataset.rivQ); document.getElementById('rivInner').scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  const sp = t.closest('[data-riv-span]');
+  if (sp){ rivState.span = +sp.dataset.rivSpan; renderRiver(); }
+});
+document.getElementById('rivBody').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'rivQ') rivQuery(e.target.value);
+});
 // ---- 均線分數排行（2026-10-10 使用者：照莊爸 zhuang.tw/ma「均線分數排行 滿分 15」做）----
 // 分數＝官網式 15 分（站上 5/10/20/60/120/240 均線＋創 5/10/20/60/120/360 日新高＋多頭排列 3 分），後端黑龍表收盤後算好。
 // 排法跟莊爸一樣：總分高→低，同分先比 12 項本體分，再照股號；「昨天名次」的箭頭跟依總分的名次比，不跟切換後的列序比。
@@ -11699,6 +11909,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '處置監獄'){ openJailPanel(); return; }     // 2026-10-09 使用者：照莊爸處置監獄頁
     if (btn.dataset.label === '營收成長榜'){ openRevenuePanel(); return; }  // 2026-10-09 使用者：照莊爸每月營收成長榜
     if (btn.dataset.label === '均線分數排行'){ openMaPanel(); return; }     // 2026-10-10 使用者：照莊爸均線分數排行（zhuang.tw/ma）
+    if (btn.dataset.label === '估值河流圖'){ openRiverPanel(); return; }   // 2026-10-10 使用者：估值河流圖（本站版）
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '籌碼日報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」；2026-10-10 再改名「籌碼日報」
@@ -12302,6 +12513,18 @@ export default {
     if (url.pathname === "/api/screener-stock") {
       // 選股系統的個股完整彙整，3 分鐘快取
       return await proxyHanstockBars("/api/hub/screener/stock" + url.search, 180);
+    }
+    if (url.pathname === "/api/river") {
+      // 估值河流圖（2026-10-10 使用者：照莊爸 zhuang.tw/river 做，先做本站版）：查個股位置＋河道歷史，收盤後才變，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/river" + url.search, 300);
+    }
+    if (url.pathname === "/api/river-list") {
+      // 估值河流圖的股票清單（查詢建議用），5 分鐘快取
+      return await proxyHanstockBars("/api/hub/river/list" + url.search, 300);
+    }
+    if (url.pathname === "/api/river-ma10") {
+      // 估值河流圖的「均線≥10 × 便宜區」清單，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/river/ma10" + url.search, 300);
     }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取

@@ -510,6 +510,18 @@ export default {
       // 選股系統的個股完整彙整，3 分鐘快取
       return await proxyHanstockBars("/api/hub/screener/stock" + url.search, 180);
     }
+    if (url.pathname === "/api/river") {
+      // 估值河流圖（2026-10-10 使用者：照莊爸 zhuang.tw/river 做，先做本站版）：查個股位置＋河道歷史，收盤後才變，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/river" + url.search, 300);
+    }
+    if (url.pathname === "/api/river-list") {
+      // 估值河流圖的股票清單（查詢建議用），5 分鐘快取
+      return await proxyHanstockBars("/api/hub/river/list" + url.search, 300);
+    }
+    if (url.pathname === "/api/river-ma10") {
+      // 估值河流圖的「均線≥10 × 便宜區」清單，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/river/ma10" + url.search, 300);
+    }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);
