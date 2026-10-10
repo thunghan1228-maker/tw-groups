@@ -1545,7 +1545,7 @@
   <div class="chips-inner" id="swingInner">
     <div class="chips-head">
       <div>
-        <div class="chips-title">下午報</div>
+        <div class="chips-title">籌碼日報</div>
         <div class="chips-sub">隔天盤前讀：籌碼、技術、均線三面向各挑最多 5 檔，附防守價與風險提示；每個交易日收盤後整理，法人資料齊了會再更新，可回看近 10 個交易日。點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="swingClose" aria-label="關閉">✕</button>
@@ -1625,7 +1625,7 @@
     <div class="chips-head">
       <div>
         <div class="chips-title">每日持股健診</div>
-        <div class="chips-sub">貼上手上的股票，每檔算基本面／籌碼面／技術面三個 0～100 分再合成綜合，附明天的防守價（三日低／月線／紅半）與判定。收盤後跟下午報一起更新，非即時報價。點股票可開K線圖。</div>
+        <div class="chips-sub">貼上手上的股票，每檔算基本面／籌碼面／技術面三個 0～100 分再合成綜合，附明天的防守價（三日低／月線／紅半）與判定。收盤後跟籌碼日報一起更新，非即時報價。點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="checkupClose" aria-label="關閉">✕</button>
     </div>
@@ -1637,7 +1637,7 @@
     <div class="chips-head">
       <div>
         <div class="chips-title">個股問診</div>
-        <div class="chips-sub">打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。收盤後跟下午報一起更新，非即時報價。</div>
+        <div class="chips-sub">打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。收盤後跟籌碼日報一起更新，非即時報價。</div>
       </div>
       <button class="cm-icon-btn" id="diagClose" aria-label="關閉">✕</button>
     </div>
@@ -1736,7 +1736,7 @@
   <!-- 2026-09-26 使用者：下方導覽列的「三角收斂」「隔日沖大單籌碼」不用再留著（本來就是開發中的空位）；2026-09-28 再拿掉「個股研究中心」；
        2026-10-05 再拿掉「每週籌碼分析」（開發中的空位）。「個股訊號追蹤」拿掉後使用者又要加回來，要放自選股的今日訊號與提醒。 -->
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
-  <button class="tb-btn" data-label="下午報"><span class="tb-icon">午</span>下午報</button>
+  <button class="tb-btn" data-label="籌碼日報"><span class="tb-icon">日</span>籌碼日報</button>  <!-- 2026-10-10 使用者：下午報改名「籌碼日報」 -->
   <button class="tb-btn" data-label="創高黑龍"><span class="tb-icon">龍</span><span>創高黑龍<span class="tb-sub">（自動）</span></span></button>  <!-- 2026-10-04 使用者：黑龍回測從下午報分離成獨立面板；2026-10-05 名字後面加（自動），跟創高黑選股（手動）分開 -->
   <button class="tb-btn" data-label="創高黑選股"><span class="tb-icon">選</span><span>創高黑選股<span class="tb-sub">（手動）</span></span></button>  <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式；2026-10-05 名字後面加（手動） -->
   <button class="tb-btn" data-label="健診"><span class="tb-icon">診</span>每日持股健診</button>  <!-- 2026-09-28 使用者：鈕的名字改成「每日持股健診」 -->
@@ -3205,7 +3205,7 @@ function closeStockChart(){
   }
   document.getElementById('chartModal').hidden = true;
   document.body.style.overflow = '';
-  // 若是從訊號中心／盤後籌碼排行／下午報／健診／問診點進來的，關圖後讓它們回到最上層。
+  // 若是從訊號中心／盤後籌碼排行／籌碼日報／健診／問診點進來的，關圖後讓它們回到最上層。
   document.querySelectorAll('.behind-chart').forEach((el) => el.classList.remove('behind-chart'));
 }
 
@@ -6746,7 +6746,7 @@ function renderSwing(){
     return;
   }
   if (data.status !== 'ok'){
-    body.innerHTML = swingDatePillsHtml(data) + '<div class="signal-empty"><div class="se-title">' + (swingState.date ? '那一天沒有報告' : '還沒有下午報') + '</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
+    body.innerHTML = swingDatePillsHtml(data) + '<div class="signal-empty"><div class="se-title">' + (swingState.date ? '那一天沒有報告' : '還沒有籌碼日報') + '</div><div class="se-sub">' + (data.reason || '第一個交易日收盤後會開始整理。') + '</div></div>';
     return;
   }
   body.innerHTML = swingDatePillsHtml(data) + swingBasisHtml(data) + swingSectionHtml(data) + SWING_FOOT;
@@ -8396,7 +8396,7 @@ function dgSubjectsHtml(s){
   const above = dgAboveList(s);
   return '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">科目</th><th class="l">目前</th><th class="l">族內</th><th class="l">近期走勢</th></tr></thead><tbody>' +
     row('均線分數', 'ma', (swHas(s.score2) ? '<b>' + s.score2 + '</b>/15' : '—') + '<div class="dg-sub">' + (above ? '站上 ' + above + ' 日線' : '沒站上任何均線') + '</div>', swHas(s.groupAvg2) ? '族群平均 ' + s.groupAvg2 : '—', dgSpark(h.score10, { note: '近 10 日分數' })) +
-    row('族群名次', 'grp', s.group ? (s.groupSrank ? '強度榜第 <b>' + s.groupSrank + '</b>' : '—') + (s.groupCloseRank ? '<div class="dg-sub">收盤排名第 ' + s.groupCloseRank + '（下午報）</div>' : '') : '沒有歸在任何族群', s.group ? (swHas(s.groupStrength) ? '族群強度 ' + s.groupStrength : '—') : '—', '<span class="muted">—</span>') +
+    row('族群名次', 'grp', s.group ? (s.groupSrank ? '強度榜第 <b>' + s.groupSrank + '</b>' : '—') + (s.groupCloseRank ? '<div class="dg-sub">收盤排名第 ' + s.groupCloseRank + '（籌碼日報）</div>' : '') : '沒有歸在任何族群', s.group ? (swHas(s.groupStrength) ? '族群強度 ' + s.groupStrength : '—') : '—', '<span class="muted">—</span>') +
     row('個股族內名次', 'pos', s.groupRank ? '第 <b>' + s.groupRank + '</b>/' + s.groupN + '<div class="dg-sub">今日 ' + swPct(s.chgPct, 2) + '</div>' : '—', '—', '<span class="muted">—</span>') +
     row('籌碼暴增', 'chip', swHas(c.weekPct) ? '<b>' + swPct(c.weekPct, 2) + '</b><div class="dg-sub">' + (c.tdccDate ? swMmdd(c.tdccDate) + ' 週' : '') + (c.weeks > 0 ? '・連 ' + c.weeks + ' 週增' : '') + (swHas(c.bigPct) ? '・大戶持股 ' + c.bigPct + '%' : '') + '</div>' : '還沒有集保週增資料' + (swHas(c.bigPct) ? '<div class="dg-sub">大戶持股 ' + c.bigPct + '%（' + swMmdd(c.tdccDate) + '）</div>' : ''), '—', dgSpark(h.chip8, { bars: true, zero: true, note: '近 8 週增減', fmt: (v) => swPct(v, 1) })) +
     row('本益比', 'pe', swHas(f.pe) ? '<b>' + f.pe + '</b><div class="dg-sub">' + (f.pe < 15 ? '便宜' : f.pe < 30 ? '合理' : f.pe < 50 ? '偏貴' : '貴') + (f.peDate ? '・' + swMmdd(f.peDate) : '') + '</div>' : '—', '—', dgSpark(h.pe8, { note: '近 8 天本益比' })) +
@@ -8426,7 +8426,7 @@ function dgTopHtml(data){
     '<td>' + (g.cnt || {})['強勢'] + ' / ' + (g.cnt || {})['中等'] + ' / ' + (g.cnt || {})['弱勢'] + '</td><td>' + g.strength + '</td><td>' + (g.rank || '—') + '</td></tr>').join('');
   return '<div class="bl-section bl-launch">🏆 族群強度榜前 10 族</div>' +
     '<div class="hl-scroll"><table class="ck-table"><thead><tr><th>#</th><th class="l">族群</th><th>檔數</th><th class="l">代表股（七科總分）</th><th>強 / 中 / 弱</th><th>強度</th><th>收盤排名</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    '<div class="sw-rule">族群強度＝每族七科總分最高的前 3 檔平均；收盤排名＝下午報當天族群平均漲跌幅的名次。點代表股可換該股問診。</div>';
+    '<div class="sw-rule">族群強度＝每族七科總分最高的前 3 檔平均；收盤排名＝籌碼日報當天族群平均漲跌幅的名次。點代表股可換該股問診。</div>';
 }
 const DG_FILTERS = [['all', '全部'], ['near', '🐉 即將穿惡'], ['hold', '✅ 守住'], ['ma', '🌙 破月線'], ['both', '💥 雙破'], ['half', '🔻 破紅半'], ['hashalf', '🚩 有紅半']];
 function dgFilterOk(r){
@@ -8494,7 +8494,7 @@ function renderDiag(){
     return;
   }
   const s = data.stock;
-  html += '<div class="sw-basis">' + swMmdd(data.date) + ' 收盤資料・整理時間 ' + (data.collector && data.collector.builtAt ? String(data.collector.builtAt).slice(5, 16).replace('T', ' ') : '—') + '・每個交易日收盤後跟下午報一起更新，非即時報價</div>';
+  html += '<div class="sw-basis">' + swMmdd(data.date) + ' 收盤資料・整理時間 ' + (data.collector && data.collector.builtAt ? String(data.collector.builtAt).slice(5, 16).replace('T', ' ') : '—') + '・每個交易日收盤後跟籌碼日報一起更新，非即時報價</div>';
   html += dgHeaderHtml(data);
   html += '<div class="bl-section bl-launch">🛡 防守線・出場與停損依據</div>' + dgDefenseHtml(s.def);
   html += '<div class="bl-section bl-brew">📈 日線圖・' + s.code + ' ' + (s.name || '') + '・K棒＋均線＋明日防守線（近 60 個交易日）</div>' + dgCandlesHtml(data.bars, s.def, 60);
@@ -10973,7 +10973,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '營收成長榜'){ openRevenuePanel(); return; }  // 2026-10-09 使用者：照莊爸每月營收成長榜
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
-    if (btn.dataset.label === '下午報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」
+    if (btn.dataset.label === '籌碼日報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」；2026-10-10 再改名「籌碼日報」
     if (btn.dataset.label === '創高黑龍'){ openHeilongPanel(); return; } // 2026-10-04 使用者：黑龍回測獨立面板
     if (btn.dataset.label === '創高黑選股'){ openPickerPanel(); return; } // 2026-10-04 使用者：創高黑選股
     if (btn.dataset.label === '健診'){ openCheckupPanel(); return; }    // 2026-09-28 使用者：每日持股健診
