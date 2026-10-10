@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 16:09:34";
+const BUILD_STAMP = "2026-10-10 16:24:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -287,14 +287,16 @@ const HTML_PAGE = `<!DOCTYPE html>
   .tb-sub{white-space:nowrap;}
   .tb-icon{width:20px;height:20px;border-radius:6px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;}
   /* 2026-10-10 使用者：手機版跟 iPad 版下方導覽列分成兩排（不用左右滑）；加了「均線分數排行」之後上下各 6 顆，
-     再加第 13 顆「估值河流圖」放下排最後 → 上 6 下 7；第 14 顆「每日功課」放上排 → 上下各 7（42 欄格線每顆 6 欄）。
+     再加第 13 顆「估值河流圖」放下排最後 → 上 6 下 7；第 14 顆「每日功課」放上排 → 上下各 7（42 欄格線每顆 6 欄）；
+     第 15 顆「研究室」放上排最後 → 上 8 下 7（56 欄格線：上排每顆 7 欄、下排每顆 8 欄，兩排都剛好滿）。
      iPad 橫放比較寬，用觸控螢幕判斷一起涵蓋。 */
   @media (max-width: 1024px), (hover: none) and (pointer: coarse){
     :root{--tb-h:112px;}
-    .toolbar-bottom{display:grid;grid-template-columns:repeat(42,minmax(0,1fr));overflow-x:visible;}
-    .toolbar-bottom .tb-btn{min-width:0;grid-column:span 6;padding:8px 2px 7px;text-wrap:balance;}
-    .toolbar-bottom .tb-btn:nth-child(-n+7){border-bottom:1px solid rgba(255,255,255,0.16);}
-    .toolbar-bottom .tb-btn:nth-child(7){border-right:none;}
+    .toolbar-bottom{display:grid;grid-template-columns:repeat(56,minmax(0,1fr));overflow-x:visible;}
+    .toolbar-bottom .tb-btn{min-width:0;grid-column:span 7;padding:8px 2px 7px;text-wrap:balance;}
+    .toolbar-bottom .tb-btn:nth-child(n+9){grid-column:span 8;}
+    .toolbar-bottom .tb-btn:nth-child(-n+8){border-bottom:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom .tb-btn:nth-child(8){border-right:none;}
   }
   .toast{position:fixed;left:50%;bottom:calc(var(--tb-h) + 16px);transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
   /* 版本戳記（右上角小字）與「有新版本」提示：加到主畫面的網頁沒有重新整理鈕，靠這個知道自己在跑哪一版。 */
@@ -887,6 +889,72 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hw-brk{color:var(--down);font-weight:700;}
   .hw-warn{color:#f59e0b;font-weight:700;}
   .hw-ok{color:var(--muted);}
+  /* 研究室：國際大事行事曆（2026-10-10 使用者：照莊爸 zhuang.tw/calendar） */
+  .mc-meta{font-size:12px;color:var(--muted);margin:2px 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
+  .mc-meta b{color:var(--text);}
+  .mc-reload{background:none;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:0 7px;cursor:pointer;font-size:13px;margin-left:4px;}
+  .mc-next{border:1px solid rgba(230,103,95,.55);background:rgba(230,103,95,.08);border-radius:12px;padding:10px 14px;margin:6px 0 10px;}
+  .mc-nl{font-size:12px;color:var(--up);font-weight:800;letter-spacing:1px;}
+  .mc-nc{font-size:26px;font-weight:900;color:var(--up);line-height:1.3;}
+  .mc-nc small{font-size:13px;margin-left:6px;color:var(--muted);font-weight:700;}
+  .mc-nt{font-size:16px;margin-top:2px;}
+  .mc-nw{font-size:13px;color:var(--muted);margin-top:2px;}
+  .mc-ng{font-size:13px;margin-top:6px;line-height:1.6;}
+  .mc-nb{font-size:12px;color:var(--muted);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;}
+  .mc-nb span{border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:var(--text);white-space:nowrap;}
+  .mc-flts{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+  .mc-h{font-size:17px;margin:16px 0 6px;}
+  .mc-h small{font-size:12px;color:var(--muted);font-weight:400;margin-left:6px;}
+  .mc-week{margin:8px 0 12px;}
+  .mc-wh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:6px 2px;border-bottom:2px solid var(--line);margin-bottom:4px;cursor:default;}
+  summary.mc-wh{cursor:pointer;}
+  .mc-wh b{font-size:15px;}
+  .mc-wh small{font-size:12px;color:var(--muted);}
+  .mc-ev{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;padding:8px 8px;border-bottom:1px solid var(--line);}
+  .mc-ev.s3{background:rgba(230,103,95,.09);border-left:3px solid var(--up);}
+  .mc-ev.past{opacity:.72;}
+  .mc-ev.today{box-shadow:inset 0 0 0 1px #f59e0b;}
+  .mc-when{display:flex;flex-direction:column;line-height:1.3;}
+  .mc-when b{font-size:15px;}
+  .mc-when small{font-size:12px;color:var(--muted);}
+  .mc-time{font-size:13px;font-weight:800;color:#f59e0b;margin-top:2px;}
+  .mc-main{min-width:0;}
+  .mc-title{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;}
+  .mc-title b{font-size:15px;}
+  .mc-flag{font-size:15px;}
+  .mc-per{font-size:11px;border:1px solid var(--line);border-radius:5px;padding:0 6px;color:var(--muted);white-space:nowrap;}
+  .mc-stars{color:#f59e0b;font-size:12px;letter-spacing:1px;white-space:nowrap;}
+  .mc-stars i{font-style:normal;color:var(--line);}
+  .mc-tag{font-size:11px;background:#f59e0b;color:#1a1a1a;border-radius:5px;padding:0 6px;font-weight:800;}
+  .mc-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.55;}
+  .mc-note{color:var(--text);font-weight:700;}
+  .mc-gl{background:none;border:none;color:#60a5fa;cursor:pointer;font-size:12px;padding:0 2px;font-family:inherit;white-space:nowrap;}
+  .mc-inds{margin-top:5px;display:flex;flex-direction:column;gap:3px;}
+  .mc-ind{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;font-size:13px;background:var(--panel);border-radius:7px;padding:4px 8px;}
+  .mc-ind .mc-il{min-width:120px;font-weight:700;}
+  .mc-ind span{white-space:nowrap;color:var(--muted);}
+  .mc-ind b{color:var(--text);}
+  .mc-ind b.up,.mc-vs.up{color:var(--up);}
+  .mc-ind b.down,.mc-vs.down{color:var(--down);}
+  .mc-vs{font-style:normal;font-size:11px;font-weight:800;border:1px solid currentColor;border-radius:5px;padding:0 6px;white-space:nowrap;}
+  .mc-gcat{font-size:14px;font-weight:800;color:var(--accent);margin:14px 0 6px;}
+  .mc-ggrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .mc-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;scroll-margin:60px;}
+  .mc-card.flash{animation:mcFlash 1.6s ease;}
+  @keyframes mcFlash{0%,40%{box-shadow:0 0 0 3px #f59e0b;}100%{box-shadow:0 0 0 0 transparent;}}
+  .mc-ct{font-size:16px;font-weight:800;}
+  .mc-ce{font-size:11px;color:var(--muted);margin-bottom:6px;}
+  .mc-cg{border-left:3px solid var(--up);background:var(--panel-2);padding:6px 10px;border-radius:0 6px 6px 0;font-size:13px;line-height:1.6;margin-bottom:6px;}
+  .mc-card dl{display:grid;grid-template-columns:76px minmax(0,1fr);gap:4px 8px;margin:0;font-size:12.5px;line-height:1.55;}
+  .mc-card dt{color:var(--muted);}
+  .mc-card dd{margin:0;}
+  .mc-foot{font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:10px;line-height:1.7;}
+  @media (max-width: 640px){
+    .mc-ev{grid-template-columns:58px minmax(0,1fr);gap:8px;padding:8px 4px;}
+    .mc-ggrid{grid-template-columns:minmax(0,1fr);}
+    .mc-ind .mc-il{min-width:0;flex-basis:100%;}
+    .mc-nc{font-size:22px;}
+  }
   .hw-extra{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .hw-sep{font-size:11px;color:var(--muted);text-align:center;letter-spacing:1px;padding:2px 0;}
   @media (max-width: 640px){
@@ -2003,6 +2071,19 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div id="hwBody"></div>
   </div>
 </div>
+<!-- 2026-10-10 使用者：照莊爸「國際大事行事曆」（zhuang.tw/calendar）做，放進下方導覽列第 15 顆「研究室」 -->
+<div class="chips-modal" id="labModal" hidden>
+  <div class="chips-inner" id="labInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">研究室</div>
+        <div class="chips-sub">盤勢以外的大方向：國際大事什麼時候公布、公布了多少，名詞看不懂就點 📖 到小學堂。時間一律是台灣時間。</div>
+      </div>
+      <button class="cm-icon-btn" id="labClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="labBody"></div>
+  </div>
+</div>
 <div class="chips-modal" id="rivModal" hidden>
   <div class="chips-inner" id="rivInner">
     <div class="chips-head">
@@ -2148,6 +2229,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
   <button class="tb-btn" data-label="均線分數排行"><span class="tb-icon">均</span>均線分數排行</button>  <!-- 2026-10-10 使用者：加第 12 顆，放上排，上下各 6 顆 -->
   <button class="tb-btn" data-label="每日功課"><span class="tb-icon">課</span>每日功課</button>  <!-- 2026-10-10 使用者：第 14 顆「每日功課」（空觀察／當沖多／多觀察自動版），放上排 → 上下各 7 顆 -->
+  <button class="tb-btn" data-label="研究室"><span class="tb-icon">室</span>研究室</button>  <!-- 2026-10-10 使用者：第 15 顆「研究室」（國際大事行事曆＋名詞小學堂，之後放資金保護傘、內部人），放上排 → 上 8 下 7 -->
   <button class="tb-btn" data-label="籌碼日報"><span class="tb-icon">日</span>籌碼日報</button>  <!-- 2026-10-10 使用者：下午報改名「籌碼日報」 -->
   <button class="tb-btn" data-label="創高黑龍"><span class="tb-icon">龍</span><span>創高黑龍<span class="tb-sub">（自動）</span></span></button>  <!-- 2026-10-04 使用者：黑龍回測從下午報分離成獨立面板；2026-10-05 名字後面加（自動），跟創高黑選股（手動）分開 -->
   <button class="tb-btn" data-label="創高黑選股"><span class="tb-icon">選</span><span>創高黑選股<span class="tb-sub">（手動）</span></span></button>  <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式；2026-10-05 名字後面加（手動） -->
@@ -9598,7 +9680,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 16:09:34';
+const BUILD_STAMP = '2026-10-10 16:24:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11520,6 +11602,158 @@ document.getElementById('hwBody').addEventListener('change', (e) => {
   renderHomework();
 });
 
+// ---- 研究室：國際大事行事曆（2026-10-10 使用者：照莊爸 zhuang.tw/calendar 做，含名詞小學堂）----
+// 後端 /api/macro-calendar：TradingView 經濟日曆（美／中／日／歐）每小時更新公布值，加台指期結算、美股季度結算、公司法說。
+// 版面照莊爸：頁首更新時間 → 下一件大事倒數 → 全部／★★ 以上／只看大事篩選 → 依週分段的事件（前值／預期／公布）→ 小學堂。
+const LAB_TABS = [['cal', '🌐 國際大事行事曆']];
+const MC_FLAGS = { US: '🇺🇸', CN: '🇨🇳', JP: '🇯🇵', EU: '🇪🇺', TW: '🇹🇼' };
+const MC_FILTERS = [['all', '全部'], ['2', '★★ 以上'], ['3', '只看大事 ★★★']];
+const labState = { tab: 'cal', timer: null };
+const mcState = { data: null, loading: false, error: null, loadedAt: 0,
+  filter: (() => { try { return localStorage.getItem('mcFilter') || 'all'; } catch (_){ return 'all'; } })() };
+async function mcLoad(force){
+  if (mcState.loading || (mcState.data && !force && Date.now() - mcState.loadedAt < 30 * 60e3)) return;
+  mcState.loading = true; mcState.error = null;
+  renderLab();
+  try {
+    const r = await fetch('/api/macro-calendar', { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status === 404 ? '後端還沒有這個功能（HanStock PR 合併部署後就會有）' : 'HTTP ' + r.status);
+    mcState.data = await r.json();
+    mcState.loadedAt = Date.now();
+  } catch (err){ mcState.error = String((err && err.message) || err); }
+  mcState.loading = false;
+  renderLab();
+}
+function mcWhen(e){ return Date.parse(e.date + 'T' + (e.time || '00:00') + ':00+08:00'); }
+function mcToday(){ return new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10); }
+function mcShift(iso, days){ const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + days); return d.toISOString().slice(0, 10); }
+function mcMonday(iso){ const wd = (new Date(iso + 'T00:00:00Z').getUTCDay() + 6) % 7; return mcShift(iso, -wd); }
+function mcMd(iso){ const p = String(iso || '').split('-'); return p.length === 3 ? Number(p[1]) + '/' + Number(p[2]) : '—'; }
+function mcWd(iso){ return '週' + '日一二三四五六'[new Date(iso + 'T00:00:00Z').getUTCDay()]; }
+function mcStars(n){ return '<span class="mc-stars" title="' + n + ' 星（★★★＝大事）">' + '★'.repeat(n) + '<i>' + '★'.repeat(3 - n) + '</i></span>'; }
+function mcCountdown(e){
+  const ms = mcWhen(e) - Date.now();
+  if (ms <= 0) return '進行中';
+  const days = Math.round((Date.parse(e.date) - Date.parse(mcToday())) / 864e5);
+  if (days <= 0){
+    const h = Math.floor(ms / 3600e3), m = Math.floor((ms % 3600e3) / 60e3);
+    return h > 0 ? h + ' 小時 ' + m + ' 分後' : Math.max(1, m) + ' 分鐘後';
+  }
+  return days === 1 ? '明天' : days + ' 天後';
+}
+function mcGloss(){
+  const map = {};
+  ((mcState.data && mcState.data.glossary) || []).forEach((c) => c.cards.forEach((k) => { map[k.key] = k; }));
+  return map;
+}
+function mcWhenHtml(e){
+  const span = e.until ? mcMd(e.date) + '–' + mcMd(e.until) : mcMd(e.date);
+  return '<div class="mc-when"><b>' + span + '</b><small>' + mcWd(e.date) + (e.until ? '起' : '') + '</small><span class="mc-time">' + (e.time || '整天') + '</span></div>';
+}
+function mcEventHtml(e, gloss, now){
+  const g = gloss[e.key];
+  const past = mcWhen(e) + (e.time ? 0 : 864e5) <= now;
+  const today = e.date === mcToday() || (e.until && e.date <= mcToday() && mcToday() <= e.until);
+  const inds = (e.indicators || []).map((x) => {
+    const cls = x.vs === '高於預期' ? 'up' : x.vs === '低於預期' ? 'down' : '';
+    return '<div class="mc-ind"><span class="mc-il">' + wlEsc(x.label) + '</span>' +
+      '<span>前值 <b>' + wlEsc(x.previous ?? '—') + '</b></span><span>預期 <b>' + wlEsc(x.forecast ?? '—') + '</b></span>' +
+      '<span>公布 <b class="' + cls + '">' + wlEsc(x.actual ?? (past ? '待更新' : '—')) + '</b></span>' +
+      (x.vs ? '<i class="mc-vs ' + cls + '">' + x.vs + '</i>' : '') + '</div>';
+  }).join('');
+  const notes = (e.notes || []).filter(Boolean);
+  return '<div class="mc-ev s' + e.stars + (past && !today ? ' past' : '') + (today ? ' today' : '') + '">' + mcWhenHtml(e) +
+    '<div class="mc-main"><div class="mc-title"><span class="mc-flag">' + (MC_FLAGS[e.country] || '🌐') + '</span><b>' + wlEsc(e.zh) + '</b>' +
+    (e.period ? '<span class="mc-per">' + wlEsc(e.period) + '</span>' : '') + mcStars(e.stars) + (today ? '<span class="mc-tag">今天</span>' : '') + '</div>' +
+    '<div class="mc-desc">' + (g ? wlEsc(g.gist) : '') + (notes.length ? ' <span class="mc-note">' + notes.map(wlEsc).join('・') + '</span>' : '') +
+    (g ? ' <button type="button" class="mc-gl" data-mc-gl="' + e.key + '">📖 ' + wlEsc(g.term) + '</button>' : '') + '</div>' +
+    (inds ? '<div class="mc-inds">' + inds + '</div>' : '') + '</div></div>';
+}
+function mcCalendarHtml(){
+  const d = mcState.data;
+  if (!d) return mcState.error ? '<div class="race-note">讀取失敗：' + wlEsc(mcState.error) + ' <button type="button" class="chart-tab" data-mc-reload="1">重試</button></div>' : '<div class="race-note">讀取中…</div>';
+  if (!d.events || !d.events.length) return '<div class="race-note">還沒有資料（後端剛部署時約 2 分鐘後會抓第一次）' + (d.error ? '：' + wlEsc(d.error) : '') + '</div>';
+  const now = Date.now(), today = mcToday(), gloss = mcGloss();
+  const min = mcState.filter === '3' ? 3 : mcState.filter === '2' ? 2 : 1;
+  const upcoming = d.events.filter((e) => mcWhen(e) >= now - 60e3);
+  const next = upcoming.find((e) => e.stars >= 3);
+  const updated = d.updatedAt ? d.updatedAt.slice(5, 10).replace('-', '/') + ' ' + d.updatedAt.slice(11, 16) : '—';
+  let html = '<div class="mc-meta">資料更新 <b>' + updated + '</b>・登記到 <b>' + mcMd(d.to) + '</b>・公布值每小時更新・時間都是台灣時間' +
+    ' <button type="button" class="mc-reload" data-mc-reload="1" title="重新整理">↻</button></div>';
+  if (next){
+    const before = upcoming.filter((e) => e !== next && e.stars >= 2 && mcWhen(e) < mcWhen(next));
+    const g = gloss[next.key];
+    html += '<div class="mc-next"><div class="mc-nl">下一件大事</div><div class="mc-nc">' + mcCountdown(next) + '<small>公布</small></div>' +
+      '<div class="mc-nt">' + (MC_FLAGS[next.country] || '') + ' <b>' + wlEsc(next.zh) + '</b>' + (next.period ? ' <span class="mc-per">' + wlEsc(next.period) + '</span>' : '') + ' ' + mcStars(next.stars) + '</div>' +
+      '<div class="mc-nw">' + mcMd(next.date) + '（' + mcWd(next.date).slice(1) + '）' + (next.time || '整天') + (next.notes && next.notes.length ? '・' + next.notes.map(wlEsc).join('・') : '') + '</div>' +
+      (g ? '<div class="mc-ng">' + wlEsc(g.gist) + '</div>' : '') +
+      (before.length ? '<div class="mc-nb">在它之前：' + before.slice(0, 8).map((e) => '<span>' + mcMd(e.date) + ' ' + (e.time || '') + ' ' + wlEsc(e.zh) + '</span>').join('') + '</div>' : '') + '</div>';
+  }
+  html += '<div class="mc-flts">' + MC_FILTERS.map(([k, label]) => '<button type="button" class="chart-tab' + (mcState.filter === k ? ' active' : '') + '" data-mc-flt="' + k + '">' + label + '</button>').join('') + '</div>';
+  html += '<h3 class="mc-h">① 行事曆 <small>依週排列，紅底＝★★★ 大事；數字公布後約一小時內補上</small></h3>';
+  const thisMon = mcMonday(today);
+  const weeks = {};
+  d.events.filter((e) => e.stars >= min).forEach((e) => { (weeks[mcMonday(e.date)] = weeks[mcMonday(e.date)] || []).push(e); });
+  Object.keys(weeks).sort().forEach((mon) => {
+    const diff = Math.round((Date.parse(mon) - Date.parse(thisMon)) / (7 * 864e5));
+    const name = diff === -1 ? '上週' : diff === 0 ? '本週' : diff === 1 ? '下週' : diff === 2 ? '下下週' : '';
+    if (diff < -1) return;
+    const range = mcMd(mon) + '（一）– ' + mcMd(mcShift(mon, 6)) + '（日）';
+    const body = weeks[mon].map((e) => mcEventHtml(e, gloss, now)).join('');
+    const head = '<b>' + (name || range) + '</b>' + (name ? '<small>' + range + '</small>' : '') + '<small>' + weeks[mon].length + ' 件</small>';
+    html += diff === -1
+      ? '<details class="mc-week mc-pastweek"><summary class="mc-wh">' + head + '<small>（點開看公布值）</small></summary>' + body + '</details>'
+      : '<div class="mc-week"><div class="mc-wh">' + head + '</div>' + body + '</div>';
+  });
+  html += '<h3 class="mc-h" id="mcGlossTop">② 小學堂 <small>這些名詞到底在講什麼</small></h3>';
+  html += ((d.glossary) || []).map((c) => '<div class="mc-gcat">' + c.icon + ' ' + wlEsc(c.name) + '</div><div class="mc-ggrid">' + c.cards.map((k) =>
+    '<div class="mc-card" id="mcg-' + k.key + '"><div class="mc-ct">' + wlEsc(k.term) + '</div><div class="mc-ce">' + wlEsc(k.en || '') + '</div>' +
+    '<div class="mc-cg">' + wlEsc(k.gist) + '</div><dl>' +
+    [['誰公布', k.who], ['什麼時候', k.when], ['怎麼讀', k.read], ['為什麼要看', k.why]].filter((r) => r[1]).map((r) => '<dt>' + r[0] + '</dt><dd>' + wlEsc(r[1]) + '</dd>').join('') +
+    '</dl></div>').join('') + '</div>').join('');
+  html += '<div class="mc-foot">日期與時間以各主管機關、公司的正式公告為準，遇到延期或臨時變動會在下一次更新時修正。「預期」是公布前市場調查的預估值，「公布」在數據出來後約一小時內補上；' +
+    '「高於／低於預期」只是比兩個數字的大小，不代表好壞。公司法說、財報標「慣例時間」的，以公司公告為準。本頁只是把公開行事曆整理成白話，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
+  return html;
+}
+function renderLab(){
+  const body = document.getElementById('labBody');
+  if (!body || document.getElementById('labModal').hidden) return;
+  const pastOpen = !!body.querySelector('details.mc-pastweek[open]');
+  body.innerHTML = '<div class="hw-tabs">' + LAB_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (labState.tab === k ? ' active' : '') + '" data-lab-tab="' + k + '">' + label + '</button>').join('') + '</div>' +
+    mcCalendarHtml();
+  if (pastOpen){ const det = body.querySelector('details.mc-pastweek'); if (det) det.open = true; }
+}
+function openLabPanel(){
+  document.getElementById('labModal').hidden = false;
+  renderLab();
+  mcLoad(false);
+  clearInterval(labState.timer);
+  labState.timer = setInterval(() => {   // 每分鐘更新倒數；超過 30 分鐘重抓一次（後端每小時更新公布值）
+    if (document.getElementById('labModal').hidden){ clearInterval(labState.timer); return; }
+    renderLab();
+    mcLoad(false);
+  }, 60e3);
+}
+function closeLabPanel(){ document.getElementById('labModal').hidden = true; clearInterval(labState.timer); }
+document.getElementById('labClose').addEventListener('click', closeLabPanel);
+document.getElementById('labModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeLabPanel(); });
+document.getElementById('labBody').addEventListener('click', (e) => {
+  const t = e.target;
+  const tab = t.closest('[data-lab-tab]');
+  if (tab){ labState.tab = tab.dataset.labTab; renderLab(); return; }
+  const flt = t.closest('[data-mc-flt]');
+  if (flt){ mcState.filter = flt.dataset.mcFlt; try { localStorage.setItem('mcFilter', mcState.filter); } catch (_){} renderLab(); return; }
+  if (t.closest('[data-mc-reload]')){ mcLoad(true); return; }
+  const gl = t.closest('[data-mc-gl]');
+  if (gl){
+    const card = document.getElementById('mcg-' + gl.dataset.mcGl);
+    if (card){
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+    }
+  }
+});
+
 // ---- 處置監獄（2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」zhuang.tw/prison 做一模一樣的）----
 // 後端 /api/jail：證交所／櫃買公開的注意股、處置股公告（上市直抓、上櫃走鏡像），每天晚上公告出來後更新。
 // 段落照莊爸頁面的順序：前科查詢、一週出獄時間表、犯罪集團、今日入獄、嫌疑名單（明天門檻＋可複製文字）、今日第一次第一款、
@@ -12731,6 +12965,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '營收成長榜'){ openRevenuePanel(); return; }  // 2026-10-09 使用者：照莊爸每月營收成長榜
     if (btn.dataset.label === '均線分數排行'){ openMaPanel(); return; }     // 2026-10-10 使用者：照莊爸均線分數排行（zhuang.tw/ma）
     if (btn.dataset.label === '估值河流圖'){ openRiverPanel(); return; }
+    if (btn.dataset.label === '研究室'){ openLabPanel(); return; }        // 2026-10-10 使用者：國際大事行事曆（照莊爸 zhuang.tw/calendar）
     if (btn.dataset.label === '每日功課'){ openHomeworkPanel(); return; }   // 2026-10-10 使用者：空觀察／當沖多／多觀察功課自動版   // 2026-10-10 使用者：估值河流圖（本站版）
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
@@ -13359,6 +13594,10 @@ export default {
     if (url.pathname === "/api/etf-radar-stock") {
       // 個股 × 全部主動式 ETF 的進出紀錄，5 分鐘快取
       return await proxyHanstockBars("/api/hub/etf-radar/stock" + url.search, 300);
+    }
+    if (url.pathname === "/api/macro-calendar") {
+      // 國際大事行事曆（2026-10-10 使用者：照莊爸 zhuang.tw/calendar 做，放進「研究室」）：後端每小時更新公布值，10 分鐘快取
+      return await proxyHanstockBars("/api/hub/macro-calendar", 600);
     }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取

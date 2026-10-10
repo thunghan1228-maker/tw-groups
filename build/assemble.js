@@ -534,6 +534,10 @@ export default {
       // 個股 × 全部主動式 ETF 的進出紀錄，5 分鐘快取
       return await proxyHanstockBars("/api/hub/etf-radar/stock" + url.search, 300);
     }
+    if (url.pathname === "/api/macro-calendar") {
+      // 國際大事行事曆（2026-10-10 使用者：照莊爸 zhuang.tw/calendar 做，放進「研究室」）：後端每小時更新公布值，10 分鐘快取
+      return await proxyHanstockBars("/api/hub/macro-calendar", 600);
+    }
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);
