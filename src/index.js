@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 13:13:34";
+const BUILD_STAMP = "2026-10-10 13:17:06";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12,7 +12,7 @@ const GROUPS = [
   {"name":"玻璃基板","stocks":[{"code":"3149","name":"正達"},{"code":"3673","name":"TPK-KY"},{"code":"8027","name":"鈦昇"},{"code":"8064","name":"東捷"},{"code":"6207","name":"雷科"}]},
   {"name":"重電","stocks":[{"code":"1519","name":"華城"},{"code":"1513","name":"中興電"},{"code":"1529","name":"樂事綠能"},{"code":"1514","name":"亞力"},{"code":"1503","name":"士電"}]},
   {"name":"神盾","stocks":[{"code":"6243","name":"迅杰"},{"code":"6462","name":"神盾"},{"code":"8054","name":"安國"},{"code":"6684","name":"安格"},{"code":"6695","name":"芯鼎"},{"code":"3041","name":"揚智"}]},
-  {"name":"小電腦","stocks":[{"code":"6558","name":"興能高"},{"code":"3323","name":"加百裕"},{"code":"1569","name":"濱川"},{"code":"3211","name":"順達"},{"code":"6781","name":"AES-KY"},{"code":"5309","name":"系統電"},{"code":"4931","name":"新盛力"}]},
+  {"name":"小電腦","stocks":[{"code":"6558","name":"興能高"},{"code":"3323","name":"加百裕"},{"code":"3211","name":"順達"},{"code":"6781","name":"AES-KY"},{"code":"5309","name":"系統電"},{"code":"4931","name":"新盛力"}]},
   {"name":"PCB","stocks":[{"code":"4958","name":"臻鼎-KY"},{"code":"3037","name":"欣興"},{"code":"3189","name":"景碩"},{"code":"8046","name":"南電"}]},
   {"name":"小電組","stocks":[{"code":"6234","name":"高僑"},{"code":"6191","name":"精成科"},{"code":"2368","name":"金像電"},{"code":"8074","name":"鉅橡"},{"code":"3715","name":"定穎投控"},{"code":"6290","name":"良維"},{"code":"5340","name":"建榮"},{"code":"2316","name":"楠梓電"},{"code":"5498","name":"凱崴"},{"code":"1802","name":"台玻"},{"code":"1815","name":"富喬"},{"code":"6274","name":"台燿"},{"code":"2383","name":"台光電"},{"code":"4989","name":"榮科"},{"code":"8021","name":"尖點"},{"code":"5475","name":"德宏"},{"code":"8358","name":"金居"},{"code":"6213","name":"聯茂"},{"code":"5439","name":"高技"},{"code":"3167","name":"大量"}]},
   {"name":"特化","stocks":[{"code":"4763","name":"材料-KY"},{"code":"4768","name":"晶呈科技"},{"code":"4770","name":"上品"},{"code":"4772","name":"台特化"},{"code":"4722","name":"國精化"}]},
@@ -8599,7 +8599,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 13:13:34';
+const BUILD_STAMP = '2026-10-10 13:17:06';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
