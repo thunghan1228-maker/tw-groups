@@ -1011,6 +1011,9 @@
   .fu-chart .fu-grid{stroke:var(--line);stroke-width:1;}
   .fu-chart .fu-ax{fill:var(--muted);font-size:11px;}
   .fu-chart .fu-lg{fill:var(--muted);font-size:11px;}
+  .fu-chart .fu-lg-tx{fill:var(--text);}
+  .fu-chart .fu-lg-ma{fill:#f59e0b;font-weight:700;}   /* 2026-10-10 使用者：月線圖例要跟黃色虛線同色 */
+  .fu-chart .fu-lg-m{fill:var(--up);}
   .fu-crash{display:grid;grid-template-columns:90px minmax(0,1fr);gap:10px;padding:8px 6px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.65;}
   .fu-cd{display:flex;flex-direction:column;}
   .fu-cd b{font-size:15px;}
@@ -12013,7 +12016,8 @@ function fuChartSvg(series){
     '<text x="' + (W - R + 4) + '" y="' + (yT(tMax) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(tMax) + '</text><text x="' + (W - R + 4) + '" y="' + (yT(tMin) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(tMin) + '</text>' +
     '<path d="' + mArea + '" class="fu-marea"/>' +
     '<text x="' + (W - R + 4) + '" y="' + (yM(mMax) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(mMax) + '億</text><text x="' + (W - R + 4) + '" y="' + (yM(mMin) + 4).toFixed(1) + '" class="fu-ax">' + fuNum(mMin) + '億</text>' +
-    '<text x="' + (L + 4) + '" y="' + (top1 + 12) + '" class="fu-lg">— 加權指數　┄ 月線</text><text x="' + (L + 4) + '" y="' + (top2 + 12) + '" class="fu-lg">■ 上市融資餘額</text></svg>';
+    '<text x="' + (L + 4) + '" y="' + (top1 + 12) + '" class="fu-lg"><tspan class="fu-lg-tx">— 加權指數</tspan>　<tspan class="fu-lg-ma">┄ 月線</tspan></text>' +
+    '<text x="' + (L + 4) + '" y="' + (top2 + 12) + '" class="fu-lg fu-lg-m">■ 上市融資餘額</text></svg>';
 }
 function fuHtml(){
   const d = fuState.data;
