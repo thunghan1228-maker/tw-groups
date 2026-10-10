@@ -19,6 +19,10 @@ on:
         description: "要不要查集中市場明細（true／false）"
         required: false
         default: "true"
+      force:
+        description: "月報沒變也重挑一次要查明細的公司（true／false；已查過的不重查）"
+        required: false
+        default: "false"
 
 permissions:
   contents: write
@@ -39,6 +43,7 @@ jobs:
         env:
           EXTRA_MONTHS: ${{ inputs.months }}
           DETAIL: ${{ inputs.detail || 'true' }}
+          FORCE: ${{ inputs.force || 'false' }}
         run: |
           python3 - <<'PY'
           import html, json, os, re, time, urllib.error, urllib.request
@@ -161,7 +166,8 @@ jobs:
                   print('還沒有', month)
                   continue
               old = load(month)
-              if old and old.get('published') == pubs and (old.get('detail') or not want_detail):
+              force = (os.environ.get('FORCE') or 'false').lower() == 'true'
+              if old and old.get('published') == pubs and (old.get('detail') or not want_detail) and not force:
                   print(month, '沒變，跳過')
                   continue
               pm = f'{(year if mon > 1 else year - 1):04d}-{(mon - 1 if mon > 1 else 12):02d}'
@@ -180,8 +186,12 @@ jobs:
                           b = before.get(r[0])
                           if b and r[8] is not None and b[8] is not None:
                               net += r[8] - b[8]
-                          if net:
-                              cand.append((r[0], abs(net), abs(net) / r[3] if r[3] else 0))
+                          if b and r[3] and b[3] and abs(r[3] / b[3] - 1) >= 0.0005:
+                              # 配股／減資：上月董監＋經理人持股 × 股本變動比例不算買賣
+                              net -= ((b[6] or 0) + (b[8] or 0)) * (r[3] / b[3] - 1)
+                          if abs(net) < 1000:
+                              continue
+                          cand.append((r[0], abs(net), abs(net) / r[3] if r[3] else 0))
                       by_shares = [c[0] for c in sorted(cand, key=lambda c: -c[1])[:30]]
                       by_pct = [c[0] for c in sorted(cand, key=lambda c: -c[2])[:30]]
                       picked += list(dict.fromkeys(by_shares + by_pct))
