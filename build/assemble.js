@@ -550,6 +550,10 @@ export default {
       // 個股內部人逐月紀錄，30 分鐘快取
       return await proxyHanstockBars("/api/hub/insider/stock" + url.search, 1800);
     }
+    if (url.pathname === "/api/watch-digest") {
+      // 自選股一頁看完（2026-10-10 使用者）：內部人、下次法說、季報摘要；季報補抓中會帶 r= 時間戳避開快取
+      return await proxyHanstockBars("/api/hub/watch-digest" + url.search, 120);
+    }
     if (url.pathname === "/api/stock-profile") {
       // 個股研究補強（2026-10-10 使用者）：產業白話、同業、季報；季報一季才變一次，1 小時快取
       return await proxyHanstockBars("/api/hub/stock-profile" + url.search, 3600);

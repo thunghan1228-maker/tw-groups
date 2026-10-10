@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-10 17:42:12";
+const BUILD_STAMP = "2026-10-10 17:47:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1790,6 +1790,9 @@ const HTML_PAGE = `<!DOCTYPE html>
     /* 盤後籌碼：族群、法人今日、防守收起來，其他可以左右滑 */
     .wl-table.v-chips{min-width:600px;}
     .wl-table.v-chips tr > :nth-child(3),.wl-table.v-chips tr > :nth-child(5),.wl-table.v-chips tr > :nth-child(12){display:none;}
+    /* 一頁看完：左右滑，現價、集中市場收起來 */
+    .wl-table.v-digest{min-width:620px;}
+    .wl-table.v-digest tr > :nth-child(3),.wl-table.v-digest tr > :nth-child(5){display:none;}
     .wl-edit label{flex-basis:100%;}
     .wl-table .chips-flag,.wl-table .sig-eligibility,.wl-table .wl-op[data-op="up"],.wl-table .wl-op[data-op="down"]{display:none;}
     .wl-table .wl-name{display:inline-block;max-width:5.5em;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;margin-right:0;}
@@ -1813,7 +1816,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .wl-def{line-height:1.35;font-size:12.5px;}
   .wl-warn{display:inline-block;background:var(--down);color:#fff;border-radius:6px;padding:0 6px;font-weight:800;}
   .wl-streak{font-size:11.5px;font-weight:700;}
-  .wl-table.v-chips td,.wl-table.v-pnl td{line-height:1.35;}
+  .wl-table.v-chips td,.wl-table.v-pnl td,.wl-table.v-digest td{line-height:1.35;}
+  .wl-table.v-digest th small{font-weight:400;color:var(--muted);}
+  .wl-dg-sub{color:var(--muted);font-size:11.5px;}
+  .wl-dg-own{color:#f59e0b;font-weight:800;font-size:12px;}
   .wl-star{background:none;border:none;cursor:pointer;color:#8b8178;font-size:15px;padding:0 3px;line-height:1;vertical-align:middle;font-family:inherit;}
   .wl-star:hover{color:#f5b301;}
   .wl-star.on{color:#f5b301;}
@@ -8184,7 +8190,7 @@ const WL_GROUP_INDEX = (() => {
 function wlEmpty(){ return { groups: [{ id: 'g1', name: '自選', items: [] }], settings: {} }; }
 let wl = { key: '', data: wlEmpty(), version: 0, active: 'g1', sort: 'manual', queue: [], busy: false, loading: false,
   error: '', notice: '', syncedAt: null, extra: {}, extraAt: 0, showKey: false, retryTimer: null, timers: [],
-  view: 'live', sortPnl: 'manual', sortChips: 'manual', editing: null, editDraft: null };
+  view: 'live', sortPnl: 'manual', sortChips: 'manual', sortDigest: 'manual', editing: null, editDraft: null };
 function wlEsc(s){
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
@@ -8205,6 +8211,7 @@ function wlReadLocal(){
     wl.view = localStorage.getItem('watchView') || 'live';
     wl.sortPnl = localStorage.getItem('watchSortPnl') || 'manual';
     wl.sortChips = localStorage.getItem('watchSortChips') || 'manual';
+    wl.sortDigest = localStorage.getItem('watchSortDigest') || 'manual';
   } catch (e) { /* 讀不到就用預設 */ }
   wlNormalize();
 }
@@ -8215,6 +8222,7 @@ function wlSavePrefs(){
   try {
     localStorage.setItem('watchSort', wl.sort); localStorage.setItem('watchActive', wl.active); localStorage.setItem('watchView', wl.view);
     localStorage.setItem('watchSortPnl', wl.sortPnl); localStorage.setItem('watchSortChips', wl.sortChips);
+    localStorage.setItem('watchSortDigest', wl.sortDigest);
   } catch (e) { /* 存不了就算了 */ }
 }
 wlReadLocal();
@@ -8477,6 +8485,11 @@ function renderWatchTable(){
     el.innerHTML = '<div class="signal-empty"><div class="se-title">這組還沒有股票</div><div class="se-sub">在上面輸入代號或名稱加入；首頁、盤中333、醞釀／發動、K線圖等名稱旁的 ☆ 也可以直接加入。</div></div>';
     return;
   }
+  if (wl.view === 'digest'){
+    wlEnsureDigest(false);
+    el.innerHTML = wlDigestHtml(g);
+    return;
+  }
   if (wl.view === 'pnl' || wl.view === 'chips'){
     wlEnsureCheckup();
     el.innerHTML = wl.view === 'pnl' ? wlPnlHtml(g) : wlChipsHtml(g);
@@ -8534,13 +8547,14 @@ function renderWatchTable(){
 // ---- 第三階段（2026-10-05 使用者）：持股損益、盤後籌碼、一鍵健診
 // 持股損益：每檔可填成本均價、張數（跟著同步碼存）；損益＝現價賣掉的預估淨額－買進花的錢，預設扣手續費（折數可改）＋證交稅。
 // 盤後籌碼：跟「每日持股健診」同一份 /api/checkup（收盤後整理）：法人、主力、大戶週增、創高天數、防守線，加上醞釀／發動。
-const WL_VIEWS = [['live', '即時報價'], ['pnl', '持股損益'], ['chips', '盤後籌碼']];
+const WL_VIEWS = [['live', '即時報價'], ['pnl', '持股損益'], ['chips', '盤後籌碼'], ['digest', '一頁看完']];
 const WL_VIEW_SORTS = {
   live: WL_SORTS,
   pnl: [['manual', '自訂順序'], ['ret', '報酬率'], ['pnl', '損益'], ['today', '今日損益'], ['pct', '漲跌幅']],
   chips: [['manual', '自訂順序'], ['inst5', '法人5日'], ['mf5', '主力5日'], ['week', '大戶週增'], ['hilen', '創高天數'], ['overall', '健診綜合']],
+  digest: [['manual', '自訂順序'], ['insider', '內部人'], ['big', '大戶4週'], ['call', '法說最近'], ['eps', '近四季EPS'], ['pe', '本益比低'], ['epsyoy', 'EPS年增']],
 };
-const WL_SORT_FIELD = { live: 'sort', pnl: 'sortPnl', chips: 'sortChips' };
+const WL_SORT_FIELD = { live: 'sort', pnl: 'sortPnl', chips: 'sortChips', digest: 'sortDigest' };
 const WL_VIEW_FOOT = {
   live: '報價：族群表裡的股票跟首頁同一份（15 秒更新）；族群表外的股票另外向證交所抓，沒有盤中大戶力、均線分數、融資券等標籤。' +
     '點代號或名稱開K線圖；首頁、盤中333、醞釀／發動、健診、K線圖名稱旁的 ☆ 也能直接加入（加到目前這組），★ 再點一下移除。',
@@ -8550,6 +8564,11 @@ const WL_VIEW_FOOT = {
   chips: '盤後資料跟「每日持股健診」同一份，每個交易日收盤後整理。法人＝三大法人買賣超、主力＝主力大單買賣超（張），下面一行是連續買超／賣超幾天；' +
     '大戶週增＝集保大戶持股比例的週變化（連幾週增加）；創高天數＝今天收盤是近幾日最高收盤（20 以上就是創 20 日新高）；' +
     '醞釀／發動跟訊號中心同一份（盤中即時）；健診＝綜合分數，照你在每日持股健診設的面向與權重。',
+  digest: '一頁看完：內部人＝董監＋經理人那個月淨增減（張，已扣配股／減資），下面是前兩個月，「連增／連減」是連續幾個月同方向；' +
+    '集中市場＝內部人真的在市場上買賣的張數（有查明細的公司才有）。大戶4週＝集保 400 張以上持股比近 4 週變化（百分點），內部人買＋大戶增＝雙買。' +
+    '下次法說＝公開資訊觀測站已公告、還沒結束的最近一場，📢 公司自辦（多半是公布季報），「論壇」是受邀參加券商論壇。' +
+    '近四季EPS＝最近四季 EPS 加總；本益比＝現價 ÷ 近四季 EPS（虧損不算）；最新一季＝最近一季 EPS、跟去年同季比（去年同季太小就不算百分比）、營收年增。' +
+    '內部人月報每月約第三週出來；季報第一次打開會一批一批補抓，幾秒後自動補齊。',
 };
 function wlViewSort(){ return wl[WL_SORT_FIELD[wl.view] || 'sort'] || 'manual'; }
 function wlViewsHtml(){
@@ -8772,6 +8791,109 @@ function wlChipsHtml(g){
   return wlCkNote() + '<div class="wl-table-wrap"><table class="wl-table v-chips"><thead><tr><th class="l">代號</th><th class="l">名稱</th><th class="l">族群</th>' +
     '<th>收盤' + (d ? '(' + d + ')' : '') + '</th><th>法人今日</th><th>法人5日</th><th>主力5日</th><th>大戶週增</th><th>創高天數</th><th class="l">醞釀／發動</th><th>健診</th><th class="l">明天防守</th></tr></thead><tbody>' +
     body + '</tbody></table></div>';
+}
+// ---- 自選股一頁看完（2026-10-10 使用者第 3 項之 4）：內部人動向、下次法說、近四季 EPS／本益比 ----
+// /api/watch-digest 一次給整份自選股；季報沒快取的後端每次補抓幾檔，pending 還有就 1.5 秒後再要一次（網址帶時間戳避開快取）。
+let wlDg = { key: '', data: null, at: 0, loading: false, error: '', byCode: {}, round: 0, timer: null };
+async function wlEnsureDigest(force){
+  const codes = wlCheckupCodes(), key = codes.join(',');
+  if (!key) return;
+  if (wlDg.key !== key){
+    clearTimeout(wlDg.timer);
+    wlDg = { key, data: null, at: 0, loading: false, error: '', byCode: {}, round: 0, timer: null };
+  }
+  const fresh = wlDg.data && !(wlDg.data.pending || []).length && Date.now() - wlDg.at < 600000;
+  const recentFail = wlDg.error && Date.now() - wlDg.at < 30000;
+  if (wlDg.loading || (!force && (fresh || recentFail || wlDg.timer))) return;
+  wlDg.loading = true;
+  try {
+    const res = await fetch('/api/watch-digest?codes=' + encodeURIComponent(key) + (wlDg.round ? '&r=' + Date.now() : ''));
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || !data.status) throw new Error(res.status === 404 ? '後端還沒有這個功能（HanStock PR 合併部署後就會有）' : (data && (data.detail || data.error)) || ('HTTP ' + res.status));
+    if (wlDg.key !== key) return;
+    wlDg.data = data; wlDg.error = ''; wlDg.byCode = {};
+    for (const r of data.rows || []) wlDg.byCode[r.code] = r;
+    if ((data.pending || []).length && wlDg.round < 30){
+      wlDg.round++;
+      wlDg.timer = setTimeout(() => { wlDg.timer = null; wlEnsureDigest(true); }, 1500);
+    }
+  } catch (e) {
+    if (wlDg.key === key) wlDg.error = String((e && e.message) || e);
+  } finally {
+    if (wlDg.key === key){ wlDg.loading = false; wlDg.at = Date.now(); }
+  }
+  if (wl.view === 'digest') renderWatchTable();
+}
+function wlDgCallDays(c){ return c ? Math.round((Date.parse(c.date) - Date.parse(mcToday())) / 864e5) : null; }
+function wlDgPrice(code, fin){
+  const q = wlQuoteMap()[code];
+  return q && Number(q.price) > 0 ? Number(q.price) : fin && fin.close ? fin.close : null;
+}
+function wlDgPe(code, fin){
+  const price = wlDgPrice(code, fin);
+  return fin && fin.ttmEps > 0 && price ? price / fin.ttmEps : null;
+}
+function wlDigestHtml(g){
+  const d = wlDg.data;
+  if (!d) return '<div class="wl-hint">' + (wlDg.error ? '讀不到（' + wlEsc(wlDg.error) + '），30 秒後再試' : '讀取中…（內部人、法說、季報）') + '</div>';
+  const rows = g.items.map((it, idx) => ({ it, idx, r: wlDg.byCode[it.code] || null }));
+  wlSortRows(rows, wl.sortDigest, (x) => {
+    const r = x.r || {}, ins = r.insider || {}, fin = r.fin || {}, key = wl.sortDigest;
+    if (key === 'insider') return ins.amount !== null && ins.amount !== undefined ? ins.amount : ins.netLots !== undefined ? ins.netLots / 1e4 : null;
+    if (key === 'big') return ins.big400 ? ins.big400.chg4w : null;
+    if (key === 'call'){ const n = wlDgCallDays(r.call); return n === null ? null : -n; }
+    if (key === 'eps') return fin.ttmEps;
+    if (key === 'pe'){ const pe = wlDgPe(x.it.code, fin); return pe === null ? null : -pe; }
+    if (key === 'epsyoy') return fin.epsTurn === '轉盈' ? 1e6 : fin.epsTurn === '轉虧' ? -1e6 : fin.epsYoY;
+    return null;
+  });
+  const lots = (v) => (v === null || v === undefined ? '<span class="flat">—</span>' : '<span class="' + (v > 0 ? 'up' : v < 0 ? 'down' : 'flat') + '">' + (v > 0 ? '+' : '') + v.toLocaleString('en-US') + '</span>');
+  const body = rows.map(({ it, r }) => {
+    const code = it.code, known = wlNameOf(code, it), name = known !== code ? known : (r && r.name) || (r && r.insider && r.insider.name) || code;
+    const ins = r && r.insider, fin = r && r.fin, call = r && r.call;
+    const price = wlDgPrice(code, fin), pe = wlDgPe(code, fin);
+    let insCell = '<span class="flat">—</span>', cenCell = '<span class="flat">—</span>', bigCell = '<span class="flat">—</span>';
+    if (ins && ins.month){
+      const prev = (ins.months || []).slice(1).map((m) => Number(m.month.slice(5)) + '月 ' + (m.netLots > 0 ? '+' : '') + m.netLots.toLocaleString('en-US')).join('・');
+      insCell = lots(ins.netLots) + (ins.amount ? '<small class="wl-dg-sub"> ' + (ins.amount > 0 ? '+' : '') + ins.amount + '億</small>' : '') +
+        (Math.abs(ins.streak || 0) >= 2 ? '<br><span class="wl-streak ' + (ins.streak > 0 ? 'up' : 'down') + '">連' + (ins.streak > 0 ? '增 ' : '減 ') + Math.abs(ins.streak) + ' 月</span>' : '') +
+        (prev ? '<br><small class="wl-dg-sub">' + prev + '</small>' : '');
+      cenCell = ins.detail ? lots(ins.centralLots) : '<span class="flat" title="這個月沒查到集中市場明細">—</span>';
+    }
+    if (ins && ins.big400){
+      const c = ins.big400.chg4w;
+      bigCell = (c === null || c === undefined ? '<span class="flat">—</span>' : '<span class="' + (c > 0 ? 'up' : c < 0 ? 'down' : 'flat') + '">' + (c > 0 ? '+' : '') + c.toFixed(2) + '</span>') +
+        '<br><small class="wl-dg-sub">' + ins.big400.pct.toFixed(1) + '%</small>' + (ins.combo ? ' <span class="trk-badge ' + (ins.combo === '雙買' ? 'bull' : 'bear') + '">' + ins.combo + '</span>' : '');
+    }
+    let callCell = '<span class="flat">—</span>';
+    if (call){
+      const n = wlDgCallDays(call);
+      callCell = '<b>' + mcMd(call.date) + '</b>（' + mcWd(call.date).slice(1) + '）' + (call.time ? ' ' + wlEsc(call.time) : '') + (call.until ? '<small class="wl-dg-sub"> 至 ' + mcMd(call.until) + '</small>' : '') +
+        '<br>' + (call.invited ? '<span class="wl-dg-sub">論壇</span>' : '<span class="wl-dg-own">📢 自辦</span>') +
+        ' <small class="wl-dg-sub">' + (n <= 0 ? (n === 0 ? '今天' : '進行中') : n + ' 天後') + '</small>';
+    }
+    let qCell = '<span class="flat">' + (r && r.finError ? '抓不到' : wlDg.data.pending && wlDg.data.pending.includes(code) ? '補抓中…' : '—') + '</span>';
+    if (fin && fin.quarter){
+      const yoy = fin.epsTurn ? '<span class="' + (fin.epsTurn === '轉盈' ? 'up' : 'down') + '">' + fin.epsTurn + '</span>'
+        : fin.epsYoY !== null && fin.epsYoY !== undefined ? '<span class="' + (fin.epsYoY > 0 ? 'up' : fin.epsYoY < 0 ? 'down' : 'flat') + '">年增 ' + (fin.epsYoY > 0 ? '+' : '') + fin.epsYoY + '%</span>' : '';
+      qCell = '<small class="wl-dg-sub">' + fin.quarter + '</small> <b>' + (fin.eps ?? '—') + '</b>' + (yoy ? '<br>' + yoy : '') +
+        (fin.revYoY !== null && fin.revYoY !== undefined ? ' <small class="wl-dg-sub">營收 ' + (fin.revYoY > 0 ? '+' : '') + fin.revYoY + '%</small>' : '');
+    }
+    const ttm = fin && fin.ttmEps !== null && fin.ttmEps !== undefined ? '<span class="' + (fin.ttmEps < 0 ? 'down' : '') + '">' + fin.ttmEps.toFixed(2) + '</span>' : (fin ? '<span class="flat">—</span>' : qCell.includes('補抓') ? '' : '<span class="flat">—</span>');
+    return '<tr data-code="' + code + '" data-name="' + wlEsc(name) + '">' +
+      '<td class="l wl-stock">' + code + '</td><td class="l wl-stock"><span class="wl-name">' + wlEsc(name) + '</span></td>' +
+      '<td>' + (price ? price.toFixed(2) : '<span class="flat">—</span>') + '</td>' +
+      '<td>' + insCell + '</td><td>' + cenCell + '</td><td>' + bigCell + '</td>' +
+      '<td class="l">' + callCell + '</td>' +
+      '<td>' + ttm + '</td><td>' + (pe ? pe.toFixed(1) : '<span class="flat">—</span>') + '</td>' +
+      '<td class="l">' + qCell + '</td></tr>';
+  }).join('');
+  const pending = (d.pending || []).length;
+  const im = d.insiderMonth ? Number(d.insiderMonth.slice(5)) + ' 月' : '';
+  return (pending ? '<div class="wl-hint">季報補抓中，還差 ' + pending + ' 檔，會自動補齊…</div>' : '') +
+    '<div class="wl-table-wrap"><table class="wl-table v-digest"><thead><tr><th class="l">代號</th><th class="l">名稱</th><th>現價</th>' +
+    '<th>內部人' + (im ? '(' + im + ')' : '') + '<br><small>張</small></th><th>集中市場<br><small>張</small></th><th>大戶4週<br><small>百分點</small></th>' +
+    '<th class="l">下次法說</th><th>近四季<br>EPS</th><th>本益比</th><th class="l">最新一季</th></tr></thead><tbody>' + body + '</tbody></table></div>';
 }
 function wlSendToCheckup(){
   const g = wlGroup(), codes = g.items.map((it) => it.code);
@@ -9897,7 +10019,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-10 17:42:12';
+const BUILD_STAMP = '2026-10-10 17:47:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -14175,6 +14297,10 @@ export default {
     if (url.pathname === "/api/insider-stock") {
       // 個股內部人逐月紀錄，30 分鐘快取
       return await proxyHanstockBars("/api/hub/insider/stock" + url.search, 1800);
+    }
+    if (url.pathname === "/api/watch-digest") {
+      // 自選股一頁看完（2026-10-10 使用者）：內部人、下次法說、季報摘要；季報補抓中會帶 r= 時間戳避開快取
+      return await proxyHanstockBars("/api/hub/watch-digest" + url.search, 120);
     }
     if (url.pathname === "/api/stock-profile") {
       // 個股研究補強（2026-10-10 使用者）：產業白話、同業、季報；季報一季才變一次，1 小時快取
