@@ -1,0 +1,212 @@
+# 內部人持股異動月報鏡像（研究室「內部人」，2026-10-10 使用者：照莊爸「內部人研究室」做）。
+# 公開資訊觀測站「董事、監察人、經理人及百分之十以上大股東股權異動彙總表」（IRB110，上市、上櫃各一份，每月 15 日申報截止後
+# 約第三週出來）：每家公司董監本月增加／減少股數、董監／經理人／10% 大股東持股。董監增減包含贈與、信託等，
+# 要分出「集中市場買賣（真金白銀）」得看個別公司的「內部人持股異動事後申報表」（query6_1）——只對當月異動最大的公司查
+# （上市、上櫃各取股數最多 30 家＋佔股本比例最高 30 家），推到 data 分支 tpex/insider-YYYY-MM.json，再戳後端拉回去。
+# 觀測站擋 HanStock 的正式站主機，GitHub 的 runner 抓得到。月報資料日期沒變就不重抓明細。
+name: MOPS insider mirror
+
+on:
+  schedule:
+    - cron: "40 12 * * *"   # 20:40 台北，每天看一次月報出來了沒
+  workflow_dispatch:
+    inputs:
+      months:
+        description: "另外補抓哪些月份（YYYY-MM，逗號分隔）"
+        required: false
+        default: ""
+      detail:
+        description: "要不要查集中市場明細（true／false）"
+        required: false
+        default: "true"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tpex-data-branch
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data
+      - name: 抓 IRB110 月報＋異動大的公司明細
+        env:
+          EXTRA_MONTHS: ${{ inputs.months }}
+          DETAIL: ${{ inputs.detail || 'true' }}
+        run: |
+          python3 - <<'PY'
+          import html, json, os, re, time, urllib.error, urllib.request
+          from datetime import datetime, timedelta, timezone
+          tw = timezone(timedelta(hours=8))
+          now = datetime.now(tw)
+          stamp = now.isoformat(timespec='minutes')
+          UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36'
+
+          def get(url):
+              for attempt in range(4):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': UA}), timeout=90) as r:
+                          return r.read()
+                  except urllib.error.HTTPError as e:
+                      if e.code == 404:
+                          return b''
+                      print('retry', url, e)
+                  except Exception as e:
+                      print('retry', url, type(e).__name__, e)
+                  time.sleep(5 * (attempt + 1))
+              raise RuntimeError(url)
+
+          def post_json(url, body):
+              data = json.dumps(body).encode()
+              req = urllib.request.Request(url, data=data, headers={'User-Agent': UA, 'Content-Type': 'application/json',
+                                                                    'Origin': 'https://mops.twse.com.tw', 'Referer': 'https://mops.twse.com.tw/mops/'})
+              for attempt in range(3):
+                  try:
+                      with urllib.request.urlopen(req, timeout=60) as r:
+                          return json.load(r)
+                  except Exception as e:
+                      print('retry', body.get('companyId'), type(e).__name__, e)
+                      time.sleep(4 * (attempt + 1))
+              return None
+
+          def num(text):
+              text = re.sub(r'<[^>]+>', '', text).replace(',', '').replace('&nbsp;', '').strip()
+              try:
+                  return float(text)
+              except ValueError:
+                  return None
+
+          TR = re.compile(r'<tr[^>]*>(.*?)</tr>', re.S | re.I)
+          TD = re.compile(r'<td[^>]*>(.*?)</td>', re.S | re.I)
+          HEAD = re.compile(r'^\s*([0-9]{4}[0-9A-Z]{0,2})\s*(.*)$')
+          PUB = re.compile(r'資\s*料\s*日\s*期\s*:\s*([\d/]+)')
+
+          def parse(text, market):
+              rows = []
+              for m in TR.finditer(text):
+                  cells = TD.findall(m.group(1))
+                  if len(cells) != 8:
+                      continue
+                  first = html.unescape(re.sub(r'<[^>]+>', '', cells[0])).strip()
+                  h = HEAD.match(first)
+                  if not h:
+                      continue
+                  vals = [num(c) for c in cells[1:]]
+                  if vals[0] is None:
+                      continue
+                  # 代號、名稱、市場、發行股數、董監增加、董監減少、董監持股、董監持股比、經理人持股、10% 大股東持股
+                  rows.append([h.group(1), h.group(2).strip(), market] + vals)
+              pub = PUB.search(text)
+              return rows, (pub.group(1) if pub else None)
+
+          def detail(code, roc, mon):
+              """內部人持股異動事後申報表：集中市場買進／賣出、其他原因增減（同一人多種身分只算一次）。"""
+              res = post_json('https://mops.twse.com.tw/mops/api/query6_1',
+                              {'companyId': code, 'dataType': '2', 'month': str(mon), 'year': str(roc), 'subsidiaryCompanyId': ''})
+              if not res or res.get('code') != 200 or not isinstance(res.get('result'), dict):
+                  return None
+              data = res['result'].get('data') or []
+              seen, people = set(), []
+              tot = {'buyC': 0, 'buyO': 0, 'sellC': 0, 'sellO': 0}
+              last_name = ''
+              for r in data:
+                  if not isinstance(r, list) or len(r) < 19:
+                      continue
+                  title, name = str(r[0]), str(r[1]).strip()
+                  if name:
+                      last_name = name
+                  who = name or (last_name + '（配偶及未成年子女）')
+                  n = [num(str(x)) or 0 for x in r[3:19]]
+                  key = (who, tuple(n))
+                  if key in seen:
+                      continue
+                  seen.add(key)
+                  # r[3] 選任時、r[4] 上月持股 … r[8] 增加(集中)、r[9] 增加(其他)、r[13] 減少(集中)、r[14] 減少(其他)、r[18] 本月持股
+                  buyC, buyO, sellC, sellO = num(str(r[8])) or 0, num(str(r[9])) or 0, num(str(r[13])) or 0, num(str(r[14])) or 0
+                  tot['buyC'] += buyC; tot['buyO'] += buyO; tot['sellC'] += sellC; tot['sellO'] += sellO
+                  if buyC or buyO or sellC or sellO:
+                      people.append([re.sub(r'本人$', '', title), who, buyC, buyO, sellC, sellO, num(str(r[18])) or 0])
+              return {**tot, 'people': people[:30], 'month': res['result'].get('month')}
+
+          last = now.date().replace(day=1) - timedelta(days=1)
+          prev = last.replace(day=1) - timedelta(days=1)
+          targets = [f'{last.year:04d}-{last.month:02d}', f'{prev.year:04d}-{prev.month:02d}']
+          extra = [m.strip() for m in (os.environ.get('EXTRA_MONTHS') or '').split(',') if re.fullmatch(r'\d{4}-\d{2}', m.strip())]
+          want_detail = (os.environ.get('DETAIL') or 'true').lower() != 'false'
+          os.makedirs('tpex', exist_ok=True)
+
+          def load(month):
+              path = f'tpex/insider-{month}.json'
+              return json.load(open(path, encoding='utf-8')) if os.path.exists(path) else None
+
+          for month in sorted(set(targets + extra)):
+              year, mon = map(int, month.split('-'))
+              roc = year - 1911
+              rows, pubs = [], {}
+              for market, folder in (('TSE', 'sii'), ('OTC', 'otc')):
+                  raw = get(f'https://siis.twse.com.tw/publish/{folder}/{roc}IRB110_{mon:02d}.HTM')
+                  got, pub = parse(raw.decode('cp950', errors='replace'), market) if raw else ([], None)
+                  rows += got
+                  if pub:
+                      pubs[folder] = pub
+                  print(month, folder, 'rows', len(got), '資料日期', pub)
+                  time.sleep(1.5)
+              if not rows:
+                  print('還沒有', month)
+                  continue
+              old = load(month)
+              if old and old.get('published') == pubs and (old.get('detail') or not want_detail):
+                  print(month, '沒變，跳過')
+                  continue
+              pm = f'{(year if mon > 1 else year - 1):04d}-{(mon - 1 if mon > 1 else 12):02d}'
+              before = {r[0]: r for r in ((load(pm) or {}).get('rows') or [])}
+              out = {'month': month, 'fetched': stamp, 'published': pubs,
+                     'fields': ['code', 'name', 'market', 'issued', 'dirInc', 'dirDec', 'dirHold', 'dirPct', 'mgrHold', 'bigHold'],
+                     'rows': rows, 'detail': (old or {}).get('detail') or {}}
+              if want_detail:
+                  picked = []
+                  for market in ('TSE', 'OTC'):
+                      cand = []
+                      for r in rows:
+                          if r[2] != market:
+                              continue
+                          net = (r[4] or 0) - (r[5] or 0)
+                          b = before.get(r[0])
+                          if b and r[8] is not None and b[8] is not None:
+                              net += r[8] - b[8]
+                          if net:
+                              cand.append((r[0], abs(net), abs(net) / r[3] if r[3] else 0))
+                      by_shares = [c[0] for c in sorted(cand, key=lambda c: -c[1])[:30]]
+                      by_pct = [c[0] for c in sorted(cand, key=lambda c: -c[2])[:30]]
+                      picked += list(dict.fromkeys(by_shares + by_pct))
+                  todo = [c for c in picked if c not in out['detail']]
+                  print(month, '查明細', len(todo), '/', len(picked))
+                  for i, code in enumerate(todo):
+                      d = detail(code, roc, mon)
+                      if d is not None:
+                          out['detail'][code] = d
+                      time.sleep(1.2)
+                      if i % 20 == 19:
+                          print('  ', i + 1, '家')
+              json.dump(out, open(f'tpex/insider-{month}.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+              print(month, 'rows', len(rows), 'detail', len(out['detail']))
+          months = sorted({f[8:15] for f in os.listdir('tpex') if f.startswith('insider-') and f.endswith('.json') and f[8:15][:2] == '20'}, reverse=True)
+          json.dump({'months': months, 'updated': stamp}, open('tpex/insider-index.json', 'w', encoding='utf-8'), separators=(',', ':'))
+          PY
+      - name: 推到 data 分支
+        run: |
+          git config user.name "insider-mirror"
+          git config user.email "insider-mirror@users.noreply.github.com"
+          git add tpex/insider-*.json
+          git commit -m "內部人持股異動月報鏡像 $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "沒有變動"; exit 0; }
+          for i in 1 2 3 4; do git pull --rebase origin data && git push && break; sleep $((i * 5)); done
+      - name: 戳後端立刻拉回去
+        run: |
+          curl -sS -X POST --max-time 170 "https://hanstock-production-b872.up.railway.app/api/hub/insider/collect" -o /tmp/ins.json -w "HTTP %{http_code}\n" || true
+          head -c 1500 /tmp/ins.json; echo
