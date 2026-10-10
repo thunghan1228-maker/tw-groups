@@ -224,14 +224,14 @@
   /* 2026-10-10 使用者：手機版跟 iPad 版下方導覽列分成兩排（不用左右滑）；加了「均線分數排行」之後上下各 6 顆，
      再加第 13 顆「估值河流圖」放下排最後 → 上 6 下 7；第 14 顆「每日功課」放上排 → 上下各 7（42 欄格線每顆 6 欄）；
      第 15 顆「研究室」放上排最後 → 上 8 下 7（56 欄格線：上排每顆 7 欄、下排每顆 8 欄，兩排都剛好滿）。
+     2026-10-10 使用者：iPad／手機改成 3 排、每排 5 顆（15 顆剛好排滿，按鈕比較寬、字不用擠成三行）。
      iPad 橫放比較寬，用觸控螢幕判斷一起涵蓋。 */
   @media (max-width: 1024px), (hover: none) and (pointer: coarse){
-    :root{--tb-h:112px;}
-    .toolbar-bottom{display:grid;grid-template-columns:repeat(56,minmax(0,1fr));overflow-x:visible;}
-    .toolbar-bottom .tb-btn{min-width:0;grid-column:span 7;padding:8px 2px 7px;text-wrap:balance;}
-    .toolbar-bottom .tb-btn:nth-child(n+9){grid-column:span 8;}
-    .toolbar-bottom .tb-btn:nth-child(-n+8){border-bottom:1px solid rgba(255,255,255,0.16);}
-    .toolbar-bottom .tb-btn:nth-child(8){border-right:none;}
+    :root{--tb-h:150px;}
+    .toolbar-bottom{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow-x:visible;}
+    .toolbar-bottom .tb-btn{min-width:0;padding:7px 2px 6px;text-wrap:balance;}
+    .toolbar-bottom .tb-btn:nth-child(-n+10){border-bottom:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom .tb-btn:nth-child(5n){border-right:none;}
   }
   .toast{position:fixed;left:50%;bottom:calc(var(--tb-h) + 16px);transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
   /* 版本戳記（右上角小字）與「有新版本」提示：加到主畫面的網頁沒有重新整理鈕，靠這個知道自己在跑哪一版。 */
@@ -11777,7 +11777,7 @@ const GUIDE_FAQ = [
   ['資料多久更新一次？', '盤中報價、訊號每 15 秒更新；盤後資料（法人、處置、融資、營收、集保）在官方公布後自動抓進來，各工具頁面上都有寫資料日期。休市日不更新，沿用上一個交易日。'],
   ['為什麼有的地方寫「資料蒐集中」或「還沒有資料」？', '剛開盤、剛更新程式，或官方還沒公布（例如營收月初、集保週五晚上）。等一下再看就會有。'],
   ['通知要怎麼開？', '右上角「提醒開啟」，第一次會問要不要允許通知。網頁要開著才收得到，關掉就沒有。'],
-  ['手機可以用嗎？', '可以。下方導覽列在手機上排成上下兩排；表格太寬可以左右滑。也可以把網站放到手機桌面（看上面「放到手機桌面」）。'],
+  ['手機可以用嗎？', '可以。下方導覽列在手機、平板上排成三排、每排五顆；表格太寬可以左右滑。也可以把網站放到手機桌面（看上面「放到手機桌面」）。'],
   ['自選股換手機會不見嗎？', '自選股存在這台瀏覽器；到自選股面板拿「同步碼」，在另一台輸入就會同步過去。'],
   ['分數高、籌碼暴增、出現訊號，是不是就可以買？', '不是。這些數字描述的是「現在的狀態」，不是買賣指令。什麼時候進、什麼時候出、放多少部位，要自己判斷，盈虧自負。'],
 ];
@@ -11795,7 +11795,7 @@ function guideHtml(){
   html += '<h3 class="gd-h">三步驟開始</h3><div class="gd-grid3">' +
     step(1, '首頁看族群強弱', '首頁依族群平均漲跌排好，「強勢／弱勢」切換；點族群卡片看裡面每一檔，每 15 秒自動更新。') +
     step(2, '右上角打代號開 K 線圖', '輸入代號或名稱（例如 2330 或 台積電）按 Enter，就開 5 分 K；圖上可以切 1 分、日線，看主力、KD、明天要守的價。') +
-    step(3, '下方導覽列找工具', '15 個工具都在最下面（手機排成兩排）。盤中看右上角紫色「⚠ 盤中訊號」，盤後看籌碼日報、排行。') + '</div>';
+    step(3, '下方導覽列找工具', '15 個工具都在最下面（手機、平板排成三排、每排五顆）。盤中看右上角紫色「⚠ 盤中訊號」，盤後看籌碼日報、排行。') + '</div>';
   html += '<h3 class="gd-h">一天怎麼用</h3><div class="gd-time">' + [
     ['盤前', '研究室看今晚有沒有國際大事、資金保護傘是不是撐開；籌碼日報看昨天的整理；每日功課看今天要盯誰。'],
     ['盤中 09:00～13:30', '首頁看族群強弱、⚠ 盤中訊號看誰在發動；自選股、個股訊號追蹤盯自己的股票。'],
