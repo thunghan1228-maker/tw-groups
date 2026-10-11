@@ -287,7 +287,7 @@ async function proxyHanstockPost(pathname, request) {
   });
 }
 
-const USAGE_SAMPLE_RATE = 0.05; // 每20個請求抽樣寫入1次KV，避免超過KV免費方案每天1000次寫入上限
+const USAGE_SAMPLE_RATE = 0.01; // 每100個請求抽樣寫入1次KV；0.05 時一天約 1 萬次請求就用掉 KV 免費寫入上限的一半（2026-10-11 Cloudflare 警告信）
 const USAGE_BUCKET_MINUTES = 15;
 const DEFAULT_USAGE_ANOMALY_THRESHOLD = 5000; // 每15分鐘估計請求數超過這個值才發警報；可用環境變數USAGE_ANOMALY_THRESHOLD覆蓋
 
