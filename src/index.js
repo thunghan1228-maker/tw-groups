@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 23:57:41";
+const BUILD_STAMP = "2026-10-13 00:01:35";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1316,6 +1316,24 @@ const HTML_PAGE = `<!DOCTYPE html>
   .gr-list tr.gone .gr-name b,.gr-list tr.gone .gr-name small{text-decoration:line-through;}
   .gr-none{font-size:12px;color:var(--muted);padding:4px 2px;}
   .gr-up{color:var(--up);} .gr-down{color:var(--down);}
+  /* 2026-10-12 使用者：照莊爸飆股雷達最上面的「最新一輪」摘要（波段、隔日沖各一塊，每個邏輯一行列出代號名稱） */
+  .gr-latest{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:2px 0 10px;}
+  .gr-latest-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;}
+  .gr-latest-head b{font-size:15px;color:#ef4444;}
+  .gr-latest-head small{font-size:12px;color:var(--muted);}
+  .gr-latest-kind{border-left:3px solid #60a5fa;background:rgba(96,165,250,.08);border-radius:8px;padding:6px 8px;margin-top:6px;}
+  .gr-latest-kind.overnight{border-left-color:#f59e0b;background:rgba(245,158,11,.08);}
+  .gr-latest-kh{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+  .gr-latest-at{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--text);}
+  .gr-latest-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;padding:5px 0;border-top:1px dashed var(--line);}
+  .gr-latest-kh + .gr-latest-row{border-top:none;}
+  .gr-latest-name{background:none;border:0;padding:0;color:var(--text);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+  .gr-latest-name:hover{text-decoration:underline;}
+  .gr-latest-n{font-size:13px;color:#ef4444;font-weight:800;}
+  .gr-latest-none{font-size:12px;color:var(--muted);}
+  .gr-chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:1px 8px;background:var(--panel-2);color:var(--text);cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .gr-chip small{color:var(--muted);margin-right:3px;font-size:11px;}
+  .gr-chip:hover{border-color:#eab308;}
   @media(max-width:640px){ .gr-grid{grid-template-columns:1fr;} .gr-list .gr-mcap{display:none;} }
   /* 處置監獄（2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」做）：說明框、出獄週表、犯罪集團、入獄／嫌疑卡片、門檻、前科查詢 */
   .jl-meta{font-size:12px;color:var(--muted);margin:2px 0 6px;}
@@ -10475,7 +10493,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 23:57:41';
+const BUILD_STAMP = '2026-10-13 00:01:35';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -12163,10 +12181,36 @@ function grCard(logic, runs, closeSlot){
   else if (!rows.length && !gone.length) body = '<div class="gr-none">' + rdEsc(sel) + ' 這一輪 ' + (run.n ? '篩選後' : '') + '沒有股票</div>';
   else body = '<table class="gr-list"><thead><tr><th class="l">股票</th><th class="r">價</th><th class="r">漲跌</th><th class="r">量(張)</th><th class="r">均線</th><th class="r gr-mcap">市值</th></tr></thead><tbody>'
     + rows.map((s) => rowHtml(s, false)).join('') + gone.map((s) => rowHtml(s, true)).join('') + '</tbody></table>';
-  return '<div class="gr-card"><div class="gr-card-head"><b>' + rdEsc(logic.name) + '</b><span class="gr-kind ' + kindCls + '">' + rdEsc(logic.kind) + '</span>'
+  return '<div class="gr-card" id="gr-card-' + logic.key + '"><div class="gr-card-head"><b>' + rdEsc(logic.name) + '</b><span class="gr-kind ' + kindCls + '">' + rdEsc(logic.kind) + '</span>'
     + '<button class="gr-info" data-gr-info="' + logic.key + '">條件</button><span class="gr-cal">' + cal + '</span></div>'
     + (grState.info[logic.key] ? '<div class="gr-desc">' + rdEsc(logic.desc) + '</div>' : '')
     + '<div class="gr-slots">' + pills + '</div>' + body + '</div>';
+}
+// 2026-10-12 使用者：最上面加「最新一輪」摘要（照莊爸飆股雷達）：波段、隔日沖各取今天算到的最後一個時間點，
+// 每個邏輯一行列出那一輪的股票（跟下面卡片一樣套用族群／均線／成交量篩選）；點邏輯名稱跳到那張卡、點股票開K線。
+function grLatestHtml(data, runs, closeSlot){
+  const logicsInOrder = (data.saints || []).flatMap((saint) => (data.logics || []).filter((l) => l.saintId === saint.id));
+  const blocks = [['波段', 'swing'], ['隔日沖', 'overnight']].map(([kind, cls]) => {
+    const logics = logicsInOrder.filter((l) => l.kind === kind);
+    if (!logics.length) return '';
+    const slots = grSlots(logics[0], closeSlot);
+    const slot = slots.slice().reverse().find((s) => logics.some((l) => runs[l.key] && runs[l.key][s]));
+    if (!slot) return '';
+    const d = data.date || '';
+    const at = d ? swMmdd(d) + '（' + '日一二三四五六'[new Date(d + 'T00:00:00').getDay()] + '）・' + slot : slot;
+    const rows = logics.map((l) => {
+      const run = runs[l.key] && runs[l.key][slot];
+      const stocks = run ? run.stocks.filter((x) => grPass(l, x)) : [];
+      return '<div class="gr-latest-row"><button class="gr-latest-name" data-gr-jump="' + l.key + '" data-gr-jump-slot="' + rdEsc(slot) + '">' + rdEsc(l.name) + '</button>'
+        + (!run ? '<span class="gr-latest-none">這一輪沒算到</span>'
+          : stocks.length ? '<span class="gr-latest-n">' + stocks.length + ' 檔</span>'
+            + stocks.map((x) => '<button class="gr-chip" data-code="' + rdEsc(x.c) + '" data-name="' + rdEsc(x.n) + '"><small>' + rdEsc(x.c) + '</small>' + rdEsc(x.n) + '</button>').join('')
+          : '<span class="gr-latest-none">無</span>')
+        + '</div>';
+    }).join('');
+    return '<div class="gr-latest-kind ' + cls + '"><div class="gr-latest-kh"><span class="gr-kind ' + cls + '">' + kind + '</span><span class="gr-latest-at">' + rdEsc(at) + '</span></div>' + rows + '</div>';
+  }).join('');
+  return blocks ? '<div class="gr-latest"><div class="gr-latest-head"><b>最新一輪</b><small>點邏輯名稱跳到那張卡、點股票開K線</small></div>' + blocks + '</div>' : '';
 }
 function grSelect(key, options, value){
   return '<select data-gr-filter="' + key + '">' + options.map(([v, label]) => '<option value="' + v + '"' + (String(v) === String(value) ? ' selected' : '') + '>' + label + '</option>').join('') + '</select>';
@@ -12203,6 +12247,7 @@ function renderGrail(){
   const waiting = data.nextSlot && !Object.keys(runs).length
     ? '<div class="race-note">今天的時間點還沒到：隔日沖 ' + rdEsc(kindTimes('隔日沖')) + '；波段 ' + rdEsc(kindTimes('波段')) + '、收盤。下一輪 ' + rdEsc(data.nextSlot) + '，到了會自己更新；要看昨天的名單請切日期。</div>' : '';
   body.innerHTML = controls + waiting + (grState.error ? '<div class="race-note">更新失敗（' + rdEsc(grState.error) + '），先顯示上一次的資料</div>' : '')
+    + grLatestHtml(data, runs, data.closeSlot || '收盤')
     + (sections || '<div class="race-note">這一天沒有符合的股票</div>');
 }
 function openGrailPanel(){
@@ -12220,6 +12265,16 @@ document.getElementById('grailBody').addEventListener('click', (e) => {
   const info = t.closest('[data-gr-info]');
   if (info){ grState.info[info.dataset.grInfo] = !grState.info[info.dataset.grInfo]; renderGrail(); return; }
   if (t.closest('[data-gr-refresh]')){ grLoad(true); return; }
+  const jump = t.closest('[data-gr-jump]');
+  if (jump){
+    grState.sel[jump.dataset.grJump] = jump.dataset.grJumpSlot;
+    renderGrail();
+    const card = document.getElementById('gr-card-' + jump.dataset.grJump);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+  const chip = t.closest('.gr-chip');
+  if (chip){ openStockChart(chip.dataset.code, chip.dataset.name); return; }
   const row = t.closest('tr.gr-row');
   if (row) openStockChart(row.dataset.code, row.dataset.name);
 });
