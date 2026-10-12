@@ -246,7 +246,7 @@
   .launch-alert-close{flex:0 0 auto;width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,.22);border:0;color:#fff;font-size:18px;font-weight:800;line-height:1;cursor:pointer;font-family:inherit;}
   .launch-alert-close:hover{background:rgba(255,255,255,.34);}
   .launch-alert-body{margin-top:8px;font-size:15px;font-weight:600;line-height:1.6;}
-  /* 盤中觀察股跳窗（2026-10-12 使用者：11:30／12:00／12:30／13:00 像發動一樣跳出來） */
+  /* 形態觀察股跳窗（2026-10-12 使用者：11:30／12:00／12:30／13:00 像發動一樣跳出來） */
   .launch-alert.obs-alert{background:#4c1d95;max-width:min(94vw,680px);width:min(94vw,680px);z-index:211;}
   .obs-alert .launch-alert-body{max-height:min(70vh,640px);overflow:auto;font-weight:500;font-size:14px;}
   .obs-tools{display:flex;gap:6px;align-items:center;}
@@ -2447,9 +2447,9 @@
       <ul>
         <li><b>今日即時多</b>：彙整多方向訊號的即時清單：盤中大戶力多、四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單，依發生時間新到舊排序。也包含十大多族群裡大戶力 ≥ +10% 的股票（訊號寫「十大多族群」）。今日強勢股裡大戶力 ≥ +10% 的也會進來（訊號寫「今日強勢股」）。</li>
         <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（沒有發生時間，只有今天有），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。也包含十大空族群裡大戶力 ≤ −10% 的股票（訊號寫「十大空族群」）。今日弱勢股裡大戶力 ≤ −10% 的也會進來（訊號寫「今日弱勢股」）。</li>
-        <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。⭐＝這族今天也有出現在盤中觀察股（通常是比較強勢的族群）、👀＝這檔在盤中觀察股名單裡。均線分數是收盤算好的，現價、漲跌、大戶力是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
+        <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。⭐＝這族今天也有出現在形態觀察股（通常是比較強勢的族群）、👀＝這檔在形態觀察股名單裡。均線分數是收盤算好的，現價、漲跌、大戶力是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
         <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面；按「大戶力 ≤ −10%」只看大戶在賣的。</li>
-        <li><b>盤中觀察股</b>：55 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
+        <li><b>形態觀察股</b>：55 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
         <li><b>發動</b>、<b>醞釀</b>（2026-10-12 拆成兩個分頁，發動在左、醞釀在右，今天／昨天／前天切換兩頁共用；日期列後面的「盤中大戶力≥10%」只看今天盤中大戶力 ≥ +10% 的，兩頁各自記）：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。今天曾經發動的股票也會列進今日即時多（訊號寫「🚀 發動」，時間＝第一次發動）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
         <li><b>十大多族群</b>（原精選十大多空族群的多方）：今天漲幅前10大族群，各取大戶力最強的前5檔個股；按「大戶力≥10%」只看大戶力 ≥ +10% 的。</li>
         <li><b>十大空族群</b>（原精選十大多空族群的空方）：今天跌幅前10大族群，各取大戶力最負（賣超）的前5檔個股，名次從最弱的數；按「大戶力≤-10%」只看大戶力 ≤ −10% 的。</li>
@@ -2683,7 +2683,7 @@ let currentChart = {
   d123On: (() => { try { return localStorage.getItem('chartD123On') !== '0'; } catch (_){ return true; } })(),   // 日線的 123 黑龍進場點
   d123: null,
 };
-const D123_COLOR = { 1: '#dc2626', 2: '#d97706' };   // 123 黑龍：紅＝區1、黃＝區2（K線圖、問診圖、盤中觀察股共用）
+const D123_COLOR = { 1: '#dc2626', 2: '#d97706' };   // 123 黑龍：紅＝區1、黃＝區2（K線圖、問診圖、形態觀察股共用）
 // 盤中：今天如果收成創高黑龍的黑K，會是這一波第幾次進場、區幾（ck＝/api/checkup 那一列，high＝今天到目前的最高價）
 function d123Today(ck, high, today){
   const dd = ck && ck.d123;
@@ -4220,12 +4220,12 @@ async function renderOtcStrengthWidget(){
 // 使用者 2026-09-24：族群大戶力／族群綜合表／盤中333 這三個移到今日即時後面（原本排在後段）。
 // 2026-09-30 使用者：醞釀／發動要排第二個位置，在今日即時右邊，方便盯著看；其餘順序不變。
 const SIGNAL_KINDS = [
-  // 2026-10-12 使用者：今日即時多第一、今日即時空第二，接著今日強勢股、今日弱勢股、盤中觀察股，後面不變
+  // 2026-10-12 使用者：今日即時多第一、今日即時空第二，接著今日強勢股、今日弱勢股、形態觀察股，後面不變
   { key: 'now', label: '今日即時多' },      // 2026-10-04 使用者：拆成多／空兩頁，多方向留在這裡
   { key: 'nowBear', label: '今日即時空' },  // 2026-10-04 使用者：刀劍空＋盤中大戶力空＋四項精選強空＋主力翻空＋盤中特大賣單集中這一頁
   { key: 'strongStocks', label: '今日強勢股' },   // 2026-10-12 使用者：族群分數前十大＋均線分數高
   { key: 'weakStocks', label: '今日弱勢股' },     // 2026-10-12 使用者：倒過來，族群分數倒數十名＋均線分數低，放強勢股旁邊
-  { key: 'obsWatch', label: '盤中觀察股' },   // 2026-10-12 使用者：盤中觀察股放進訊號中心
+  { key: 'obsWatch', label: '形態觀察股' },   // 2026-10-12 使用者：盤中觀察股放進訊號中心；2026-10-13 改名「形態觀察股」
   // 2026-10-12 使用者：醞釀／發動拆成兩個分頁；同日晚上：發動放左邊、醞釀放右邊
   { key: 'launchOnly', label: '發動' },
   { key: 'brewOnly', label: '醞釀' },
@@ -8453,7 +8453,7 @@ function wlSavePrefs(){
 }
 wlReadLocal();
 function wlGroup(){ return wl.data.groups.find((g) => g.id === wl.active) || wl.data.groups[0]; }
-// 盤中觀察股自動帶進來的四組（id obs1～obs4）不算「已在自選股」：☆ 照舊、★ 移除也不動它們
+// 形態觀察股自動帶進來的四組（id obs1～obs4）不算「已在自選股」：☆ 照舊、★ 移除也不動它們
 function wlIsAuto(g){ return /^obs\d$/.test(String(g && g.id)); }
 function wlHas(code){ return wl.data.groups.some((g) => !wlIsAuto(g) && g.items.some((it) => it.code === code)); }
 function wlTargetGroup(){ const g = wlGroup(); return wlIsAuto(g) ? (wl.data.groups.find((x) => !wlIsAuto(x)) || g) : g; }
@@ -8696,7 +8696,7 @@ function renderWatch(){
     '<div class="wl-add"><input type="text" id="wlAddInput" autocomplete="off" placeholder="輸入代號或名稱加入「' + wlEsc(wlTargetGroup().name) + '」，可一次貼多檔：2330 2317 3707">' +
     '<button class="wl-btn primary" id="wlAddBtn">加入</button></div>' +
     (wl.addNote ? '<div class="wl-hint">' + wlEsc(wl.addNote) + '</div>' : '') +
-    (wlIsAuto(g) ? '<div class="wl-hint">這組是「盤中觀察股」自動帶進來的：盤中 ' + OBS_SLOTS.join('、') + ' 每個時段換成當下的名單（觀察股列幾檔這裡就幾檔），' +
+    (wlIsAuto(g) ? '<div class="wl-hint">這組是「形態觀察股」自動帶進來的：盤中 ' + OBS_SLOTS.join('、') + ' 每個時段換成當下的名單（觀察股列幾檔這裡就幾檔），' +
       '手動加的下次會被換掉；備註＝哪個時段、符號（★強 ☆中上 ●發動過 ▲相對高檔 ✗三K低 ▼跌 5% ↑紅但在月線下）。</div>' : '') +
     wlViewsHtml() +
     '<div class="wl-sorts">排序 ' + (WL_VIEW_SORTS[wl.view] || WL_SORTS).map((s) => '<button class="wl-sort' + (wlViewSort() === s[0] ? ' active' : '') + '" data-sort="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>' +
@@ -10627,9 +10627,9 @@ function checkLaunchNotifications(){
   return fresh;
 }
 // ---- 今日強勢股／今日弱勢股（2026-10-12 使用者）----
-// 「族群分數加上盤中觀察股有出現的，通常都是比較強勢的族群，再從裡面挑均線分數高的，勝率自然就會好一點」：
+// 「族群分數加上形態觀察股有出現的，通常都是比較強勢的族群，再從裡面挑均線分數高的，勝率自然就會好一點」：
 // 強勢股＝族群分數前十大（族內平均均線分數，跟均線分數排行同一套）裡、均線分數 ≥12 的股票；弱勢股倒過來＝倒數十名裡 ≤3 的。
-// 均線分數是後端收盤算好的（/api/ma-strength），現價、漲跌用首頁即時報價；⭐＝這族今天也在盤中觀察股、👀＝這檔在盤中觀察股。
+// 均線分數是後端收盤算好的（/api/ma-strength），現價、漲跌用首頁即時報價；⭐＝這族今天也在形態觀察股、👀＝這檔在形態觀察股。
 const stState = { strong: null, weak: null, loading: {}, at: {}, error: {},
   // 大戶力篩選（2026-10-12 使用者：強勢股多一個「大戶力 ≥10%」按鈕、弱勢股多一個「大戶力 ≤ −10%」），記在這台電腦
   hfOnly: (() => { try { return JSON.parse(localStorage.getItem('stHfOnly') || '{}') || {}; } catch (_){ return {}; } })() };
@@ -10655,7 +10655,7 @@ function stPanelHtml(side){
   const groupHasObs = (name) => { const g = GROUPS.find((x) => x.name === name); return !!g && g.stocks.some((st) => obsCodes.has(st.code)); };
   const rule = strong ? '族群分數前十大（族內平均均線分數）裡，均線分數 ≥' + d.rule.min + ' 的股票' : '族群分數倒數十名裡，均線分數 ≤' + d.rule.max + ' 的股票';
   let h = '<div class="race-note">' + rule + '・均線分數＝' + swMmdd(d.date) + ' 收盤（滿分 15，每天收盤後更新）・現價、漲跌是即時的・' +
-    (strong ? '⭐＝這族今天也有出現在盤中觀察股（通常是比較強勢的族群）・' : '') + '👀＝這檔在盤中觀察股名單裡・大戶力＝盤中大單淨額 ÷ 累計成交額・點一列開K線圖</div>' +
+    (strong ? '⭐＝這族今天也有出現在形態觀察股（通常是比較強勢的族群）・' : '') + '👀＝這檔在形態觀察股名單裡・大戶力＝盤中大單淨額 ÷ 累計成交額・點一列開K線圖</div>' +
     // 欄位名稱（2026-10-12 使用者：大戶力、漲跌幅、漲跌、成交價）
     '<div class="signal-row signal-col-labels st-row"><span class="sig-code"></span><span class="sig-name"><b>名稱</b></span><span class="st-score-h"><b>均線</b></span>' +
     '<button type="button" class="chart-tab chips-btn st-hf-btn' + (hfOnly ? ' active' : '') + '" data-st-hf="' + side + '" title="只看大戶力' + (strong ? '大於等於 +' : '小於等於 −') + ST_HF_MIN + '% 的股票（再按一次全部顯示）">' +
@@ -11194,7 +11194,7 @@ async function refresh(){
     groupsLastError = '';
     lastData = carryMissingQuotes(data);
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
-    try { obsTick(); } catch (e) { /* 盤中觀察股跳窗失敗不影響畫面 */ }
+    try { obsTick(); } catch (e) { /* 形態觀察股跳窗失敗不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
     // 2026-10-06 使用者：刀劍空一直顯示「族群行情還沒載入」——開盤前後首頁報價要 10 幾秒，報價回來後只有醞釀／發動會馬上重畫，
@@ -12242,7 +12242,7 @@ setInterval(() => {
 // 當沖多＝賽馬多(33) ∩ 河流多(34) ∩ 馬火多(30) ∩ 族群在多方區；多觀察＝挑三個族群，看每檔位置、漲幅、有沒有破三日低／月線。
 // 盤中的名單跟盤中333 同一份（race333Model，首頁即時報價）；防守價是前一天收盤算好的（/api/checkup）。
 const hwState = { tab: 'short', filters: { band: false, ma7: false, hideHold: true, over6: true }, picks: null, def: {}, defKey: '', defLoading: false, timer: 0 };
-const HW_TABS = [['short', '🔪 空觀察'], ['long', '🐎 當沖多'], ['watch', '🔥 多觀察'], ['obs', '⏰ 盤中觀察股']];
+const HW_TABS = [['short', '🔪 空觀察'], ['long', '🐎 當沖多'], ['watch', '🔥 多觀察'], ['obs', '⏰ 形態觀察股']];
 try { const saved = JSON.parse(localStorage.getItem('hwPicks') || 'null'); if (Array.isArray(saved)) hwState.picks = saved.slice(0, 3); } catch (_){}
 const hwPct = (v) => (v === null || v === undefined || !Number.isFinite(v) ? '—' : (v > 0 ? '+' : '') + v.toFixed(2) + '%');
 function hwGroupsRanked(){
@@ -12475,7 +12475,7 @@ document.getElementById('hwBody').addEventListener('change', (e) => {
   renderHomework();
 });
 
-// ---- 盤中觀察股（2026-10-12 使用者：照「收盤觀察股（莊爸系統選股）」做一份，盤中 10:30～13:15 七個時段像發動一樣跳出來）----
+// ---- 形態觀察股（2026-10-12 使用者：照「收盤觀察股（莊爸系統選股）」做一份，盤中 10:30～13:15 七個時段像發動一樣跳出來）----
 // 觀察池（2026-10-12 使用者：倒推莊爸 10/12 收盤觀察股 59 檔，族群用本站全部 56 個族群、股票照規則自己挑）：
 // 56 個族群的股票裡，近 10 個交易日被「創高黑龍」系統選過至少 2 次（官網均線分數 ≥ 10、收黑、漲跌 −10%～+3%）、而且本站均線分數 ≥ 15（使用者 12:40 定案）。
 // 黑龍那 10 天的名單收盤後才會變，一天算一次存在這台電腦；跳出那一刻用即時報價分五類：
@@ -12651,7 +12651,7 @@ function obsWarnings(rep){
   if (d5.length) w.push('⚠️今天大黑K（跌 5% 以上）：' + d5.join('/'));
   return w;
 }
-function obsTitle(rep){ return String(rep.date).slice(5).replace('-', '/') + ' ' + (rep.slot || obsNowHm()) + ' 盤中觀察股（系統選股）'; }
+function obsTitle(rep){ return String(rep.date).slice(5).replace('-', '/') + ' ' + (rep.slot || obsNowHm()) + ' 形態觀察股（系統選股）'; }
 const OBS_SYMBOLS = '①②③區1／區2＝123 黑龍：收黑就是這一波第幾次進場（區1 可積極加碼、區2 等突破再加碼） ★＝持股健診「強」 ☆＝「中上」 ●＝今天發動過 ▲＝黑龍系統相對高檔，打少跑快 ✗三K低＝跌破三K低（防守失守） ▼＝今天跌 5% 以上 ↑＝今天紅但還沒站回月線';
 function obsText(rep){
   const out = [obsTitle(rep), '', '符號說明', OBS_SYMBOLS, ''];
@@ -12761,7 +12761,7 @@ async function obsRun(slot, popup){
     obsRerender();
   }
 }
-// 盤中觀察股自動進自選股（2026-10-12 使用者：【1】～【4】四類各設一個分組，盤中跳出來的時候自動換成當下名單，
+// 形態觀察股自動進自選股（2026-10-12 使用者：【1】～【4】四類各設一個分組，盤中跳出來的時候自動換成當下名單，
 // 觀察股列多少檔這裡就多少檔；【5】有點深不放）。分組沒有就建在最後面；內容跟上次一樣就不動，免得一直同步。
 const OBS_WL_GROUPS = [[1, 'obs1', '⏰黑K・黑龍符合'], [2, 'obs2', '⏰今天噴出'], [3, 'obs3', '⏰已噴在高檔'], [4, 'obs4', '⏰右肩打底']];
 function obsSyncWatchlist(rep){
@@ -14544,7 +14544,7 @@ document.getElementById('signalTabsBar').addEventListener('click', (e) => {
   renderSignalCenter();
 });
 document.getElementById('signalBody').addEventListener('click', (e) => {
-  // 盤中觀察股分頁（跟每日功課同一份）
+  // 形態觀察股分頁（跟每日功課同一份）
   if (e.target.closest('[data-obs-run]')){ obsRun(null, false); return; }
   if (e.target.closest('[data-obs-copy]')){ obsCopy(); return; }
   const obsStk = e.target.closest('[data-obs-code]');
