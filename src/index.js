@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 12:28:33";
+const BUILD_STAMP = "2026-10-12 12:37:14";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -10038,7 +10038,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 12:28:33';
+const BUILD_STAMP = '2026-10-12 12:37:14';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11969,7 +11969,7 @@ document.getElementById('hwBody').addEventListener('change', (e) => {
 
 // ---- 盤中觀察股（2026-10-12 使用者：照「收盤觀察股（莊爸系統選股）」做一份，盤中 11:30／12:00／12:30／13:00 像發動一樣跳出來）----
 // 觀察池（2026-10-12 使用者：倒推莊爸 10/12 收盤觀察股 59 檔，族群用本站全部 56 個族群、股票照規則自己挑）：
-// 56 個族群的股票裡，近 10 個交易日被「創高黑龍」系統選過（官網均線分數 ≥ 10、收黑、漲跌 −10%～+3%）、而且本站均線分數 ≥ 14。
+// 56 個族群的股票裡，近 10 個交易日被「創高黑龍」系統選過至少 2 次（官網均線分數 ≥ 10、收黑、漲跌 −10%～+3%）、而且本站均線分數 ≥ 15（使用者 12:40 定案）。
 // 黑龍那 10 天的名單收盤後才會變，一天算一次存在這台電腦；跳出那一刻用即時報價分五類：
 // 【5】有點深＝跌破月線（昨天還在月線上的標「今天剛破月線」）；【2】今天噴出＝漲 5% 以上或漲停；
 // 【1】黑K出現・黑龍系統符合＝現價低於開盤、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低；【3】已噴在高檔＝高於月線 10% 以上；【4】右肩打底＝其他月線上的。
@@ -11989,7 +11989,7 @@ function obsNowHm(){ return new Date(Date.now() + 8 * 3600000).toISOString().sli
 function obsMarks(x){
   return (x.star || '') + (x.lit ? '●' : '') + (x.high ? '▲' : '') + (x.brk3 ? '✗三K低' : '') + (x.drop5 ? '▼' : '') + (x.reb ? '↑' : '') + (x.dispo ? '(處置)' : '');
 }
-const OBS_POOL_DAYS = 10, OBS_POOL_MIN_SCORE = 14;
+const OBS_POOL_DAYS = 10, OBS_POOL_MIN_SCORE = 15, OBS_POOL_MIN_HITS = 2;   // 2026-10-12 使用者：黑龍至少 2 次、均線分數 15
 const OBS_DRAGON_Q = 'score=10&k=black&kmin=-10&kmax=3';
 async function obsJson(url){
   const r = await fetch(url);
@@ -12019,7 +12019,7 @@ async function obsBatched(codes, size, fn){
 async function obsBuild(slot){
   const dragon = await obsDragonHits();
   const inGroups = new Set(ALL_CODES);
-  const cand = Object.keys(dragon.hits).filter((c) => inGroups.has(c));
+  const cand = Object.keys(dragon.hits).filter((c) => inGroups.has(c) && dragon.hits[c] >= OBS_POOL_MIN_HITS);
   if (!cand.length) throw new Error('近 10 天創高黑龍名單還沒有資料');
   const ckParts = await obsBatched(cand, 120, (b) => obsJson('/api/checkup?codes=' + encodeURIComponent(b.join(','))));
   const ckBy = {};
@@ -12027,7 +12027,7 @@ async function obsBuild(slot){
   ckParts.forEach((ck) => { ckDate = ckDate || ck.date; (ck.rows || []).forEach((r) => { ckBy[r.code] = r; }); });
   const pool = cand.filter((c) => ckBy[c] && (ckBy[c].score || 0) >= OBS_POOL_MIN_SCORE)
     .map((c) => ({ code: c, name: ckBy[c].name, grp: WL_GROUP_INDEX[c] ? WL_GROUP_INDEX[c].group : ckBy[c].group }));
-  if (!pool.length) throw new Error('沒有股票符合（近 10 天黑龍選過＋均線分數 ≥ 14）');
+  if (!pool.length) throw new Error('沒有股票符合（近 10 天黑龍選過至少 2 次＋均線分數 ≥ 15）');
   const qParts = await obsBatched(pool.map((p) => p.code), 200, (b) => obsJson('/api/watch-quotes?codes=' + encodeURIComponent(b.join(','))));
   const quotes = {};
   let quoteTime = null;
@@ -12164,7 +12164,7 @@ function obsBodyHtml(rep){
   }
   h += '<div class="obs-warn">' + obsWarnings(rep).map(wlEsc).join('<br>') + '</div>';
   h += '<div class="obs-sym" style="margin-top:8px">觀察池＝本站 ' + GROUPS.length + ' 個族群裡，近 10 個交易日（' + wlEsc(String(rep.hitsFrom || '').slice(5)) + '～' + wlEsc(String(rep.hitsTo || '').slice(5)) +
-    '）被創高黑龍系統選過、而且均線分數 ≥ 14 的股，共 ' + rep.items.length + ' 檔；現價是證交所行情 ' + wlEsc(rep.quoteTime || '') + '；三K低、月線、健診是 ' + wlEsc(String(rep.ckDate || '').slice(5)) + ' 收盤算的。' +
+    '）被創高黑龍系統選過至少 2 次、而且均線分數 ≥ 15 的股，共 ' + rep.items.length + ' 檔；現價是證交所行情 ' + wlEsc(rep.quoteTime || '') + '；三K低、月線、健診是 ' + wlEsc(String(rep.ckDate || '').slice(5)) + ' 收盤算的。' +
     (rep.missing.length ? '沒抓到報價：' + wlEsc(rep.missing.join('、')) : '') + '點股票開 K 線圖。</div>';
   return h;
 }
