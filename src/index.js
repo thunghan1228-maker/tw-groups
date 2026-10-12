@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 01:13:03";
+const BUILD_STAMP = "2026-10-13 01:18:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -641,10 +641,24 @@ const HTML_PAGE = `<!DOCTYPE html>
      （外層 .sig-tabs-wrap 當容器量寬度；視窗拉窄、手機、另一螢幕的獨立視窗都會自己換成 5／4／3 個一排，一樣對齊）。 */
   .sig-tabs-wrap{container-type:inline-size;margin-bottom:10px;}
   .signal-modal-inner.collapsed .sig-tabs-wrap{display:none;}
-  #signalTabsBar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:0;align-items:stretch;}
-  #signalModalInner #signalTabsBar .signal-tab{padding:7px 4px;text-align:center;min-width:0;}
-  @container (min-width: 560px){ #signalTabsBar{grid-template-columns:repeat(4,minmax(0,1fr));} }
-  @container (min-width: 760px){ #signalTabsBar{grid-template-columns:repeat(5,minmax(0,1fr));} }
+  /* 2026-10-13 使用者：手機、iPad（比較窄）一排 4 格，多空一樣上下成對——第 1 排即時多／強勢股／十大多族群／特大買單、第 2 排正下方是空方；
+     第 3 排大戶力多／四項精選強多／主力翻多、第 4 排正下方是空方；其他分頁照順序補進空格、接在後面。電腦版（寬）一排 7 格照 SIGNAL_KINDS 順序。 */
+  #signalTabsBar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:0;align-items:stretch;}
+  #signalModalInner #signalTabsBar .signal-tab{padding:7px 3px;text-align:center;min-width:0;}
+  #signalTabsBar .signal-tab[data-kind="now"]{grid-area:1/1;} #signalTabsBar .signal-tab[data-kind="strongStocks"]{grid-area:1/2;}
+  #signalTabsBar .signal-tab[data-kind="groupHolderBull"]{grid-area:1/3;} #signalTabsBar .signal-tab[data-kind="bigBuy"]{grid-area:1/4;}
+  #signalTabsBar .signal-tab[data-kind="nowBear"]{grid-area:2/1;} #signalTabsBar .signal-tab[data-kind="weakStocks"]{grid-area:2/2;}
+  #signalTabsBar .signal-tab[data-kind="groupHolderBear"]{grid-area:2/3;} #signalTabsBar .signal-tab[data-kind="bigSell"]{grid-area:2/4;}
+  #signalTabsBar .signal-tab[data-kind="bigHolderForceBull"]{grid-area:3/1;} #signalTabsBar .signal-tab[data-kind="fourGateBuy"]{grid-area:3/2;}
+  #signalTabsBar .signal-tab[data-kind="mainForceFlipBull"]{grid-area:3/3;}
+  #signalTabsBar .signal-tab[data-kind="bigHolderForceBear"]{grid-area:4/1;} #signalTabsBar .signal-tab[data-kind="fourGateSell"]{grid-area:4/2;}
+  #signalTabsBar .signal-tab[data-kind="mainForceFlipBear"]{grid-area:4/3;}
+  /* 手機（窄）：一格只有七十幾 px，字縮一點、數字固定放第二行，六個字的名稱（盤中特大買單）才不會被拆成兩行 */
+  @container (max-width: 559px){
+    #signalTabsBar{gap:4px;}
+    #signalModalInner #signalTabsBar .signal-tab{font-size:12px;letter-spacing:-.3px;padding:6px 2px;line-height:1.3;}
+    #signalTabsBar .signal-tab .sig-count{display:block;width:fit-content;margin:2px auto 0;}
+  }
   /* 2026-10-13 使用者：今日即時多改紅底白字、今日即時空改綠底白字（只有這兩格）；選到時邊框白、外圈同色 */
   #signalTabsBar .signal-tab[data-kind="now"]{background:#dc2626;border-color:#dc2626;color:#fff;}
   #signalTabsBar .signal-tab[data-kind="now"]:hover{background:#b91c1c;border-color:#b91c1c;color:#fff;}
@@ -653,7 +667,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   #signalTabsBar .signal-tab[data-kind="nowBear"]:hover{background:#166534;border-color:#166534;color:#fff;}
   #signalTabsBar .signal-tab[data-kind="nowBear"].active{background:#22c55e;border-color:#fff;color:#fff;box-shadow:0 0 0 2px #15803d;}
   #signalTabsBar .signal-tab[data-kind="now"] .sig-count,#signalTabsBar .signal-tab[data-kind="nowBear"] .sig-count{background:rgba(255,255,255,.25);color:#fff;}
-  @container (min-width: 1040px){ #signalTabsBar{grid-template-columns:repeat(7,minmax(0,1fr));} #signalModalInner #signalTabsBar .signal-tab{font-size:16px;white-space:nowrap;} }
+  @container (min-width: 1040px){ #signalTabsBar{grid-template-columns:repeat(7,minmax(0,1fr));} #signalTabsBar .signal-tab[data-kind]{grid-area:auto;} #signalModalInner #signalTabsBar .signal-tab{font-size:16px;white-space:nowrap;} }
   /* 盤後籌碼排行（2026-09-25 使用者：底部「盤後籌碼排行」先做） */
   .chips-modal{position:fixed;inset:0;z-index:102;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:10px;}
   .chips-modal[hidden]{display:none;}
@@ -10641,7 +10655,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 01:13:03';
+const BUILD_STAMP = '2026-10-13 01:18:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
