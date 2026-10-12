@@ -570,6 +570,15 @@
   /* 分頁按鈕列墊一塊灰底（2026-09-24 使用者：背景白白的，加灰色底色跳脫出層次感）：
      深灰標題列 → 灰底分頁列 → 淺色分頁按鈕，三層分得出來。 */
   .signal-tabs-bar{flex-wrap:wrap;background:#c4c8cf;padding:8px;border-radius:10px;}
+  /* 2026-10-13 使用者：訊號中心分頁按鈕排成格子、上下對齊（電腦版一排 7 個）。照訊號中心的寬度決定一排幾個
+     （外層 .sig-tabs-wrap 當容器量寬度；視窗拉窄、手機、另一螢幕的獨立視窗都會自己換成 5／4／3 個一排，一樣對齊）。 */
+  .sig-tabs-wrap{container-type:inline-size;margin-bottom:10px;}
+  .signal-modal-inner.collapsed .sig-tabs-wrap{display:none;}
+  #signalTabsBar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:0;align-items:stretch;}
+  #signalModalInner #signalTabsBar .signal-tab{padding:7px 4px;text-align:center;min-width:0;}
+  @container (min-width: 560px){ #signalTabsBar{grid-template-columns:repeat(4,minmax(0,1fr));} }
+  @container (min-width: 760px){ #signalTabsBar{grid-template-columns:repeat(5,minmax(0,1fr));} }
+  @container (min-width: 1040px){ #signalTabsBar{grid-template-columns:repeat(7,minmax(0,1fr));} }
   /* 盤後籌碼排行（2026-09-25 使用者：底部「盤後籌碼排行」先做） */
   .chips-modal{position:fixed;inset:0;z-index:102;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:10px;}
   .chips-modal[hidden]{display:none;}
@@ -2465,7 +2474,7 @@
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選強多／四項精選強空／1+2多／創高黑龍／主力翻多／主力翻空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日或開盤前 08:45 今天還沒有訊號時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
       </ul>
     </div>
-    <div class="chart-tabs signal-tabs-bar" id="signalTabsBar"></div>
+    <div class="sig-tabs-wrap"><div class="chart-tabs signal-tabs-bar" id="signalTabsBar"></div></div>
     <div class="signal-body" id="signalBody"></div>
   </div>
 </div>
