@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 01:08:11";
+const BUILD_STAMP = "2026-10-13 01:09:45";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2020,6 +2020,11 @@ const HTML_PAGE = `<!DOCTYPE html>
   .signal-row .sig-label.hf-tier{flex:0 0 12.5em;text-align:left;}
   /* 均線分數欄（2026-10-08 使用者：特大買賣單、大戶力、四項精選、1+2多、創高黑龍、主力翻多空都加均線分數）：族群後面固定寬 */
   .signal-row .sig-ma{flex:0 0 3.2em;text-align:center;white-space:nowrap;}
+  /* 盤中特大買單／賣單的盤中大戶力欄（2026-10-13）：訊號欄固定寬，大戶力那欄上下才對齊 */
+  .signal-row.sig-with-hold .sig-label{flex:0 0 9.6em;text-align:center;box-sizing:border-box;}
+  .signal-row.sig-with-hold .sig-hold{flex:0 0 5.6em;text-align:center;white-space:nowrap;}
+  .signal-row .sig-hold .hold-pill{display:inline-block;font-size:15px;font-weight:800;color:#fff;border-radius:6px;padding:2px 8px;min-width:4.4em;text-align:center;}
+  .signal-row .sig-hold .hold-pill.up{background:#d64545;} .signal-row .sig-hold .hold-pill.down{background:#1f8a4c;}
   .signal-row .sig-ma .race-ma-val{font-weight:800;color:var(--muted);}
   .signal-row .sig-ma .race-ma-val.hi{color:var(--up);}
   .signal-row .sig-ma .race-ma-none{color:var(--muted);}
@@ -4753,7 +4758,7 @@ const LARGE_ORDER_TOOLTIPS = {
   '主力累計翻空': 'A～D同步：主力累計淨額由正翻負(零軸)、1分K收盤跌破VWAP，兩者5分鐘內發生；主力淨額率 ≤ -20%、量比 ≥ 1.5×',
   '主力累計強勢翻空': 'A～D同步：主力累計淨額由正翻負(零軸)、1分K收盤跌破VWAP，兩者5分鐘內發生；主力淨額率 ≤ -40%、量比 ≥ 3×',
 };
-function signalEventRowHtml(ev, view){
+function signalEventRowHtml(ev, view, holder){
   const labelCls = ev.isBuy != null
     ? (ev.isBuy ? ' sig-bull' : ' sig-bear')
     : (/[買多]/.test(ev.label) ? ' sig-bull' : /[賣空]/.test(ev.label) ? ' sig-bear' : '');
@@ -4763,13 +4768,14 @@ function signalEventRowHtml(ev, view){
   const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
   const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '';
   const labelTitle = LARGE_ORDER_TOOLTIPS[ev.label] || '';
-  return '<div class="signal-row" data-code="' + ev.code + '" data-name="' + ev.name + '">' +
+  return '<div class="signal-row' + (holder ? ' sig-with-hold' : '') + '" data-code="' + ev.code + '" data-name="' + ev.name + '">' +
     '<span class="sig-time">' + ev.time + '</span>' +
     '<span class="sig-code">' + ev.code + '</span>' +
     '<span class="sig-name">' + ev.name + '</span>' +
     (group ? '<span class="sig-group">' + group + '</span>' : '<span class="sig-group sig-group-empty"></span>') +
     sigMaCellHtml(ev.code, view) +
     '<span class="sig-label' + labelCls + '"' + (labelTitle ? ' title="' + labelTitle + '"' : '') + '>' + ev.label + '</span>' +
+    (holder ? sigHolderCellHtml(ev.code, holder) : '') +
     priceCols +
     signalNoteHtml(ev.code, ev.note) +
   '</div>';
@@ -4863,19 +4869,35 @@ function d123SignalTags(codes, view){
   });
   return out;
 }
-function signalRowsHtml(events, view){
+function signalRowsHtml(events, view, opts){
   if (!events.length){
     if (view && view.isPast) return '<div class="signal-empty"><div class="se-title">那一天沒有這類訊號</div><div class="se-sub">' + view.date + ' 的紀錄裡沒有符合這個分頁的訊號。</div></div>';
     return '<div class="signal-empty"><div class="se-title">目前沒有符合條件的訊號' + (signalDataIsReal ? '' : '（示範資料）') + '</div>' +
       '<div class="se-sub">' + (signalDataIsReal ? '全市場掃描中，符合條件才會出現。' : '後端暫時連不上，先用示範資料展示介面。') + '</div></div>';
   }
-  return signalColLabelsHtml() + '<div class="signal-list">' + events.map((ev) => signalEventRowHtml(ev, view)).join('') + '</div>';
+  const holder = opts && opts.holder ? sigHolderMap(view) : null;
+  return signalColLabelsHtml(!!holder) + '<div class="signal-list">' + events.map((ev) => signalEventRowHtml(ev, view, holder)).join('') + '</div>';
+}
+// 2026-10-13 使用者：盤中特大買單／賣單在「訊號」後面加一欄盤中大戶力，只放百分比、不放金額。
+// 今天（含開盤前沿用的上一個交易日）用首頁那份大戶力排行；看昨天／前天用那天的排行（還沒抓到先顯示「…」）。
+function sigHolderMap(view){
+  const date = view && view.date;
+  if (view && view.isPast){
+    if (!holderHistoryRanking[date]){ ensureHolderHistory(date); return new Map(); }
+    return new Map(holderHistoryRanking[date].map((r) => [r.code, r]));
+  }
+  return new Map((mainForceRanking || []).map((r) => [r.code, r]));
+}
+function sigHolderCellHtml(code, holder){
+  const h = holder.get(code), v = h ? h.strengthPct : null;
+  if (v === null || v === undefined) return '<span class="sig-hold"><span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span></span>';
+  return '<span class="sig-hold"><span class="hold-pill ' + (v > 0 ? 'up' : 'down') + '" title="盤中大戶力（大單淨額÷累計成交額）">' + (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%</span></span>';
 }
 // 訊號列表的欄位標題（2026-10-08 使用者加均線分數欄時一起加，數字才知道是什麼）
-function signalColLabelsHtml(){
-  return '<div class="signal-row signal-col-labels"><span class="sig-time"><b>時間</b></span><span class="sig-code"></span>' +
+function signalColLabelsHtml(withHolder){
+  return '<div class="signal-row signal-col-labels' + (withHolder ? ' sig-with-hold' : '') + '"><span class="sig-time"><b>時間</b></span><span class="sig-code"></span>' +
     '<span class="sig-name"><b>名稱</b></span><span class="sig-group"><b>族群</b></span><span class="sig-ma"><b>均線分數</b></span>' +
-    '<span class="sig-label"><b>訊號</b></span>' +
+    '<span class="sig-label"><b>訊號</b></span>' + (withHolder ? '<span class="sig-hold"><b>盤中大戶力</b></span>' : '') +
     '<span class="srow-right"><span class="spct"><b>漲跌幅</b></span><span class="schg"><b>漲跌</b></span><span class="sprice"><b>成交價</b></span></span></div>';
 }
 // 每一列的均線分數（5/10/20/60/120/240 日線兩兩比較 15 組，跟盤中333 同一套）：今天用現價當今天收盤即時算；
@@ -10614,7 +10636,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 01:08:11';
+const BUILD_STAMP = '2026-10-13 01:09:45';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11000,7 +11022,7 @@ function renderSignalCenter(){
     } else if (active === 'bigBuy' || active === 'bigSell'){
       const all = view.events.filter((e) => e.tabs.includes(active));
       const events = filterLargeOrderEvents(all);
-      inner = bigOrderFilterBarHtml(all.length, events.length) + signalRowsHtml(events, view);
+      inner = bigOrderFilterBarHtml(all.length, events.length) + signalRowsHtml(events, view, { holder: true });
     } else inner = signalRowsHtml(view.events.filter((e) => e.tabs.includes(active)), view);
     replaceSignalHtml(body, key, sigDayBarHtml() + sigDayNoteHtml(view) + inner);
   } else {
