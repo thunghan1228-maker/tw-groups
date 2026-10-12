@@ -227,8 +227,9 @@ jobs:
           git config user.name "etf-mirror"
           git config user.email "etf-mirror@users.noreply.github.com"
           git add tpex
-          git commit -m "主動式 ETF 持股鏡像 $(date -u +%Y-%m-%dT%H:%MZ)" || echo "沒有變動"
-          git push
+          git commit -m "主動式 ETF 持股鏡像 $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "沒有變動"; exit 0; }
+          # 別的鏡像（上櫃處置、報價…）可能同時推了 data 分支：先拉最新的再推，最多試 4 次（2026-10-12 手動補跑時撞到被拒）
+          ok=0; for i in 1 2 3 4; do git pull --rebase origin data && git push && { ok=1; break; }; sleep $((i * 5)); done; [ "$ok" = 1 ]
       - name: 戳後端立刻拉回去
         run: |
           curl -sS -X POST --max-time 170 "https://hanstock-production-b872.up.railway.app/api/hub/etf/collect" -o /tmp/etf.json -w "HTTP %{http_code}\n" || true
