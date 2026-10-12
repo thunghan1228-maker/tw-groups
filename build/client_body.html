@@ -1905,6 +1905,7 @@
   .st-row .st-hf{display:inline-block;font-size:15px;font-weight:800;color:#fff;border-radius:6px;padding:3px 8px;min-width:4.6em;text-align:center;}
   .st-row .st-hf.up{background:#d64545;} .st-row .st-hf.down{background:#1f8a4c;}
   .signal-row.st-row .srow-right{margin-left:16px;}
+  .signal-row.signal-col-labels.st-row b{font-size:15px;}   /* 2026-10-13 使用者：今日強勢股／弱勢股欄位名稱放大 1.5 倍（10px → 15px） */
   .d123-tag.r1{background:#dc2626;} .d123-tag.r2{background:#d97706;} .d123-tag.full{background:#6b7280;}
   .dg-lines li{border-bottom:1px dashed var(--line);padding:2px 0;}
   .dg-lines b{color:#e6675f;}
@@ -10775,12 +10776,12 @@ function stPanelHtml(side){
   const groupHasObs = (name) => { const g = GROUPS.find((x) => x.name === name); return !!g && g.stocks.some((st) => obsCodes.has(st.code)); };
   const rule = strong ? '族群分數前十大（族內平均均線分數）裡，均線分數 ≥' + d.rule.min + ' 的股票' : '族群分數倒數十名裡，均線分數 ≤' + d.rule.max + ' 的股票';
   let h = '<div class="race-note">' + rule + '・均線分數＝' + swMmdd(d.date) + ' 收盤（滿分 15，每天收盤後更新）・現價、漲跌是即時的・' +
-    (strong ? '⭐＝這族今天也有出現在形態觀察股（通常是比較強勢的族群）・' : '') + '👀＝這檔在形態觀察股名單裡・大戶力＝盤中大單淨額 ÷ 累計成交額・點一列開K線圖</div>' +
-    // 欄位名稱（2026-10-12 使用者：大戶力、漲跌幅、漲跌、成交價）
+    (strong ? '⭐＝這族今天也有出現在形態觀察股（通常是比較強勢的族群）・' : '') + '👀＝這檔在形態觀察股名單裡・盤中大戶力＝盤中大單淨額 ÷ 累計成交額・點一列開K線圖</div>' +
+    // 欄位名稱（2026-10-12 使用者：大戶力、漲跌幅、漲跌、成交價；2026-10-13 字放大 1.5 倍、大戶力改「盤中大戶力」）
     '<div class="signal-row signal-col-labels st-row"><span class="sig-code"></span><span class="sig-name"><b>名稱</b></span><span class="st-score-h"><b>均線</b></span>' +
-    '<button type="button" class="chart-tab chips-btn st-hf-btn' + (hfOnly ? ' active' : '') + '" data-st-hf="' + side + '" title="只看大戶力' + (strong ? '大於等於 +' : '小於等於 −') + ST_HF_MIN + '% 的股票（再按一次全部顯示）">' +
-      '大戶力 ' + (strong ? '≥ +' : '≤ −') + ST_HF_MIN + '%</button>' +
-    '<span class="st-holder"><b>大戶力</b></span><div class="srow-right"><span class="spct"><b>漲跌幅</b></span><span class="schg"><b>漲跌</b></span><span class="sprice"><b>成交價</b></span></div></div>';
+    '<button type="button" class="chart-tab chips-btn st-hf-btn' + (hfOnly ? ' active' : '') + '" data-st-hf="' + side + '" title="只看盤中大戶力' + (strong ? '大於等於 +' : '小於等於 −') + ST_HF_MIN + '% 的股票（再按一次全部顯示）">' +
+      '盤中大戶力 ' + (strong ? '≥ +' : '≤ −') + ST_HF_MIN + '%</button>' +
+    '<span class="st-holder"><b>盤中大戶力</b></span><div class="srow-right"><span class="spct"><b>漲跌幅</b></span><span class="schg"><b>漲跌</b></span><span class="sprice"><b>成交價</b></span></div></div>';
   const holderByCode = new Map((mainForceRanking || []).map((r) => [r.code, r]));
   const hfPass = (code) => { const h = holderByCode.get(code), v = h ? h.strengthPct : null; return v !== null && v !== undefined && (strong ? v >= ST_HF_MIN : v <= -ST_HF_MIN); };
   let shown = 0;
