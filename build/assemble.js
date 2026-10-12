@@ -653,6 +653,14 @@ export default {
         return Response.json({ status: "error", error: String(err), ranking: [] }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/holder-timeline") {
+      // 盤中大戶力每檔第一次進名單的時間（2026-10-13 使用者：早上進過名單、後來掉出去的要補回來），60 秒快取
+      try {
+        return await proxyHanstockBars("/api/hub/main-force/holder-timeline" + url.search, 60);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), stocks: {} }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/kline-backfill-status") {
       // 收盤後校正（用歷史K棒重算今天的12空／1+2多／創高黑龍）的狀態，給訊號中心那三個分頁顯示。
       try {

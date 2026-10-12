@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 01:18:24";
+const BUILD_STAMP = "2026-10-13 01:25:19";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2034,6 +2034,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .signal-row .sig-label.hf-tier{flex:0 0 12.5em;text-align:left;}
   /* 均線分數欄（2026-10-08 使用者：特大買賣單、大戶力、四項精選、1+2多、創高黑龍、主力翻多空都加均線分數）：族群後面固定寬 */
   .signal-row .sig-ma{flex:0 0 3.2em;text-align:center;white-space:nowrap;}
+  .signal-row.hf-faded{opacity:.82;}
+  .signal-row .sig-label.hf-faded-label{background:#e5e7eb;color:#374151;padding:2px 8px;border-radius:6px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hf-faded-head{margin-top:16px;}
   /* 盤中特大買單／賣單的盤中大戶力欄（2026-10-13）：訊號欄固定寬，大戶力那欄上下才對齊 */
   .signal-row.sig-with-hold .sig-label{flex:0 0 9.6em;text-align:center;box-sizing:border-box;}
   .signal-row.sig-with-hold .sig-hold,.signal-row.sig-hold-r .sig-hold{flex:0 0 5.6em;text-align:center;white-space:nowrap;}
@@ -5051,18 +5054,67 @@ function tradingEligibilityTagsHtml(r){
   if (!tags.length) return '';
   return '<span class="sig-eligibility">' + tags.map((t) => t.startsWith('<span') ? t : '<span>' + t + '</span>').join('') + '</span>';
 }
+// ---- 盤中大戶力：每檔第一次進名單的時間（2026-10-13 使用者：只剩收盤那一刻 13:20 的名單，早上的都不見了）----
+// 後端 /api/holder-timeline：累計大單淨量第一次 ≥ ±500 張的時間、那時的大戶力%、最高（最低）大戶力%、收盤（現在）還在不在。
+// 今天盤中每 60 秒重抓；往日抓一次。後端還沒更新（404）就照舊顯示「更新」時間。
+const holderTimelineData = {}, holderTimelineAt = {}, holderTimelineLoading = {};
+function ensureHolderTimeline(date){
+  if (!date || holderTimelineLoading[date]) return;
+  const live = date === twTodayStr() && !mainForceRankingInfo.heldFrom;
+  if (holderTimelineAt[date] && (!live || Date.now() - holderTimelineAt[date] < 60000)) return;
+  holderTimelineLoading[date] = true;
+  fetch('/api/holder-timeline?trade_date=' + encodeURIComponent(date)).then((res) => (res.ok ? res.json() : null)).then((data) => {
+    if (data && data.status === 'ok' && data.stocks) holderTimelineData[date] = data.stocks;
+  }).catch(() => {}).finally(() => {
+    holderTimelineAt[date] = Date.now();
+    delete holderTimelineLoading[date];
+    try { if (!document.getElementById('signalModal').hidden) renderSignalCenter(); } catch (_){}
+  });
+}
+function holderTimelineFor(date){ ensureHolderTimeline(date); return holderTimelineData[date] || null; }
+const hmOf = (ts) => new Date(ts).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+// 排行列帶上第一次進名單的時間（side＝bull／bear）
+function withHolderFirstTs(rows, timeline, side){
+  if (!timeline) return rows;
+  return rows.map((r) => { const t = timeline[r.code] && timeline[r.code][side]; return t ? Object.assign({}, r, { firstTs: t.firstTs, peakPct: t.peakPct, peakTs: t.peakTs }) : r; });
+}
+// 曾進名單、現在（收盤）已不在的：一列一檔，時間＝第一次進名單
+function holderFadedHtml(timeline, side, currentRows, view){
+  if (!timeline) return '';
+  const cur = new Set(currentRows.map((r) => r.code));
+  const rankByCode = new Map((view.ranking || []).map((r) => [r.code, r]));
+  const rows = Object.entries(timeline).filter(([code, t]) => t[side] && !cur.has(code))
+    .map(([code, t]) => ({ code, t: t[side], now: rankByCode.get(code) })).sort((a, b) => b.t.firstTs - a.t.firstTs);
+  if (!rows.length) return '';
+  const bull = side === 'bull';
+  return '<div class="bl-section bl-fallen hf-faded-head">曾進名單、' + (view.isPast || view.held ? '收盤' : '現在') + '已不在・' + rows.length + ' 檔</div>' +
+    '<div class="race-sub">盤中曾經累計大單' + (bull ? '買超' : '賣超') + ' 500 張以上、後來' + (bull ? '賣回' : '買回') + '掉出名單的。時間＝第一次進名單；最' + (bull ? '高' : '低') + '＝那段時間大戶力最' + (bull ? '強' : '弱') + '的時候。</div>' +
+    '<div class="signal-list">' + rows.map(({ code, t, now }) => {
+      const name = (now && now.name && now.name !== code ? now.name : null) || lookupStockName(code);
+      const quote = viewStockQuote(code, view);
+      const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
+      const pct = (v) => (v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%');
+      const nowText = now && now.strengthPct !== null && now.strengthPct !== undefined ? '・' + (view.isPast || view.held ? '收盤' : '現在') + ' ' + pct(now.strengthPct) : '';
+      return '<div class="signal-row hf-faded" data-code="' + code + '" data-name="' + name + '">' +
+        '<span class="sig-time" title="第一次進名單的時間">' + hmOf(t.firstTs) + '</span><span class="sig-code">' + code + '</span><span class="sig-name">' + name + '</span>' +
+        '<span class="sig-group">' + lookupStockGroup(code) + '</span>' + sigMaCellHtml(code, view) +
+        '<span class="sig-label hf-tier hf-faded-label" title="進名單時 ' + pct(t.firstPct) + '；最' + (bull ? '高' : '低') + ' ' + pct(t.peakPct) + '（' + hmOf(t.peakTs) + '）' + nowText + '">曾進名單・最' + (bull ? '高' : '低') + ' ' + pct(t.peakPct) + '</span>' +
+        (quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '') + '</div>';
+    }).join('') + '</div>';
+}
 function rankingRowHtml(r, view){
   const past = !!(view && view.isPast);
   const backendName = r.name && r.name !== r.code ? r.name : null;
   const name = backendName || lookupStockName(r.code);
-  const timeLabel = r.lastTs ? new Date(r.lastTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
+  const shownTs = r.firstTs || r.lastTs;
+  const timeLabel = shownTs ? new Date(shownTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
   const group = lookupStockGroup(r.code);
   // 看昨天／前天或沿用上一個交易日時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價。
   const quote = viewStockQuote(r.code, view);
   const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
   const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '';
   return '<div class="signal-row" data-code="' + r.code + '" data-name="' + name + '">' +
-      '<span class="sig-time" title="主力副圖最後更新到' + timeLabel + '；大戶力%是今天開盤到現在整天累加，不是只算這個時間點以後">' + timeLabel + '</span>' +
+      '<span class="sig-time" title="' + (r.firstTs ? '第一次進名單（累計大單淨量 ≥ 500 張）' + timeLabel + (r.peakPct !== null && r.peakPct !== undefined ? '；那一邊最強 ' + (r.peakPct > 0 ? '+' : '') + Number(r.peakPct).toFixed(1) + '%（' + hmOf(r.peakTs) + '）' : '') : '主力副圖最後更新到' + timeLabel) + '；大戶力%是今天開盤到現在整天累加，不是只算這個時間點以後">' + timeLabel + '</span>' +
       '<span class="sig-code">' + r.code + '</span>' +
       '<span class="sig-name">' + name + '</span>' +
       '<span class="sig-group">' + group + '</span>' +
@@ -5075,8 +5127,10 @@ function rankingRowHtml(r, view){
 }
 // 欄位標題（2026-09-24 使用者：漲跌幅／漲跌／成交價沒有標題，大戶力買賣標籤也要對齊）：
 // 跟資料列共用.signal-row同一套固定欄寬規則，標題才會真的跟下面資料對齊。
-function rankingColLabelsHtml(){
-  return '<div class="signal-row signal-col-labels"><span class="sig-time" title="這檔主力副圖最後更新到幾點；大戶力%是當天開盤到現在整天累加，不是只算這個時間點以後"><b>更新</b></span><span class="sig-code"></span>' +
+function rankingColLabelsHtml(firstMode){
+  return '<div class="signal-row signal-col-labels">' + (firstMode
+    ? '<span class="sig-time" title="第一次進名單（累計大單淨量 ≥ 500 張）的時間；大戶力%是當天開盤到現在整天累加"><b>進名單</b></span>'
+    : '<span class="sig-time" title="這檔主力副圖最後更新到幾點；大戶力%是當天開盤到現在整天累加，不是只算這個時間點以後"><b>更新</b></span>') + '<span class="sig-code"></span>' +
     '<span class="sig-name"><b>名稱</b></span><span class="sig-group"><b>族群</b></span><span class="sig-ma"><b>均線分數</b></span>' +
     '<span class="sig-label hf-tier"><b>大戶力</b></span>' +
     '<span class="srow-right"><span class="spct"><b>漲跌幅</b></span><span class="schg"><b>漲跌</b></span><span class="sprice"><b>成交價</b></span></span></div>';
@@ -5087,7 +5141,7 @@ function rankingRowsHtml(rows, view){
     return '<div class="signal-empty"><div class="se-title">目前沒有符合條件的排行資料</div>' +
       '<div class="se-sub">' + (past ? '那一天沒有主力資料，或沒有達門檻的個股。' : signalDataIsReal ? '今日主力資料尚未累積或尚無達門檻個股。' : '後端暫時連不上，稍後再試。') + '</div></div>';
   }
-  return rankingColLabelsHtml() + '<div class="signal-list">' + rows.map((r) => rankingRowHtml(r, view)).join('') + '</div>';
+  return rankingColLabelsHtml(rows.some((r) => r.firstTs)) + '<div class="signal-list">' + rows.map((r) => rankingRowHtml(r, view)).join('') + '</div>';
 }
 function nowTabRowsHtml(events, rankingRows, view){
   if (!events.length && !rankingRows.length) return signalRowsHtml([], view);
@@ -10655,7 +10709,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 01:18:24';
+const BUILD_STAMP = '2026-10-13 01:25:19';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -10998,9 +11052,13 @@ function renderSignalCenter(){
     // 昨天／前天的日期清單來自 group-daily-changes，三個大戶力分頁都要確保它有抓。
     refreshGroupDailyChanges(false);
     const view = holderView();
-    const rows = bigHolderRowsFrom(view.ranking, active === 'bigHolderForceBull' ? 'bull' : 'bear');
+    const side = active === 'bigHolderForceBull' ? 'bull' : 'bear';
+    const timeline = view.date ? holderTimelineFor(view.date) : null;   // 2026-10-13：時間＝第一次進名單，掉出去的另列
+    const rows = withHolderFirstTs(bigHolderRowsFrom(view.ranking, side), timeline, side);
     replaceSignalHtml(body, active, holderDayBarHtml() + holderPastNoteHtml(view) +
-      (view.loading || view.unavailable ? holderEmptyHtml(view, '', '') : rankingRowsHtml(rows, view)));
+      (view.loading || view.unavailable ? holderEmptyHtml(view, '', '')
+        : (timeline ? '<div class="race-note">時間＝這檔第一次進名單（累計大單淨量 ≥ 500 張）的時間；排序照累計大單淨量。早上進過、後來掉出去的列在最下面「曾進名單」。</div>' : '') +
+          rankingRowsHtml(rows, view) + holderFadedHtml(timeline, side, rows, view)));
   } else if (active === 'race333'){
     refreshGroupDailyChanges(false);
     replaceSignalHtml(body, 'race333', race333Html());
@@ -15528,6 +15586,14 @@ export default {
         return await proxyHanstockBars("/api/hub/main-force/ranking" + url.search, 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), ranking: [] }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/holder-timeline") {
+      // 盤中大戶力每檔第一次進名單的時間（2026-10-13 使用者：早上進過名單、後來掉出去的要補回來），60 秒快取
+      try {
+        return await proxyHanstockBars("/api/hub/main-force/holder-timeline" + url.search, 60);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), stocks: {} }, { status: 502 });
       }
     }
     if (url.pathname === "/api/kline-backfill-status") {
