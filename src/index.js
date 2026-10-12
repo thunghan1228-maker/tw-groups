@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 20:43:03";
+const BUILD_STAMP = "2026-10-12 20:50:33";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1914,6 +1914,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .mv-one{border-left:3px solid #7c3aed;background:rgba(124,58,237,.08);padding:6px 10px;margin-top:8px;font-weight:700;border-radius:6px;}
   .mv-more{margin-top:6px;font-size:13px;} .mv-more summary{cursor:pointer;color:#7c3aed;}
   .mv-foot{font-size:11.5px;color:var(--muted);margin-top:6px;}
+  .mv-src{font-size:12px;margin-top:4px;} .mv-src a{color:inherit;}
   .dg-lines li{border-bottom:1px dashed var(--line);padding:2px 0;}
   .dg-lines b{color:#e6675f;}
   .dg-chart{margin:8px 0;}
@@ -9786,7 +9787,7 @@ function pfQuarterHtml(code){
 // ---- 今天在漲／跌什麼（2026-10-12 使用者：照莊爸問診的「今天在漲什麼」，盤中十點後大漲大跌，問診會有新的資料）----
 // 交易日 10:00 後（收盤後也留著）在問診最上面整理：盤中走勢（開高低、早盤殺低再拉漲停…）、同族群有沒有一起動、
 // 當天新聞標題（Google 新聞各家媒體＋鉅亨、公司公告，/api/move-news）、要留意的地方（均線、營收、法人、本益比、近 5 日漲幅）、
-// 後面看什麼（今天的三日低、月線）跟一句話。原因是照這些資料自動整理的，不是 AI 摘要。
+// 後面看什麼（今天的三日低、月線）跟一句話。先照規則整理；後端有設 Claude 金鑰時，主要原因／要留意／一句話換成 AI 讀新聞標題整理的（/api/move-why）。
 const mvState = {};
 const MV_BIG_UP = 3, MV_BIG_DOWN = -3;
 async function mvLoad(code, name, force){
@@ -9818,6 +9819,24 @@ setInterval(() => {
   mvLoad(d.stock.code, d.stock.name || '');
 }, 60000);
 const mvLots = (v) => swLots(Math.abs(v)).replace('+', '');   // 「賣超 929 張」：方向寫在字上，數字不帶正負號
+// AI 整理（2026-10-12 使用者：照莊爸「題材＝AI 整理新聞」）：大漲大跌、新聞讀完才送一次；同一個漲跌區間（每 2%）＋同一組新聞不重送。
+// 後端沒設金鑰回 disabled，就維持規則整理。
+async function mvAiLoad(code, payload){
+  const st = mvState[code] || (mvState[code] = {});
+  const key = Math.floor((payload.pct + 100) / 2) + '|' + (payload.limitUp ? 1 : 0) + (payload.limitDown ? 1 : 0) + '|' + payload.news.map((x) => x.title).join('|');
+  if (st.aiKey === key) return;
+  st.aiKey = key;
+  st.ai = { status: 'loading', prev: st.ai && st.ai.status === 'ok' ? st.ai : null };
+  try {
+    const r = await fetch('/api/move-why', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+    const body = await r.json().catch(() => null);
+    st.ai = body && body.status ? body : { status: 'error', reason: 'HTTP ' + r.status };
+  } catch (e){
+    st.ai = { status: 'error', reason: String((e && e.message) || e) };
+  }
+  if (st.ai.status === 'error') setTimeout(() => { if (st.aiKey === key && st.ai.status === 'error') st.aiKey = null; }, 120000);   // 出錯 2 分鐘後可以再試
+  if (!document.getElementById('diagModal').hidden && dgState.code === code) renderDiag();
+}
 function mvTw(iso){ const d = new Date(Date.parse(iso) + 8 * 3600000).toISOString(); return { day: d.slice(0, 10), hm: d.slice(11, 16), md: d.slice(5, 10).replace('-', '/') }; }
 function mvGroupMove(code, up){
   // 首頁即時報價：這檔所在的族群（不含股期標的）裡，除了它自己的平均漲跌、漲停／漲跌 5% 以上的；大漲挑最強那族、大跌挑最弱那族
@@ -9916,18 +9935,37 @@ function mvHtml(data){
   else if (down) one = (news.length || notices.length ? '有新聞（看上面標題）' : '沒有新的壞消息') + (path ? '，' + path.split('，')[0] : '') + (aligned ? '，族群一起走弱' : '') + (next ? '；' + next.split(' → ')[1] : '');
   else one = '今天沒什麼大動作（' + pf(pct) + '）' + (news.length ? '，有 ' + news.length + ' 則新聞可以看' : '');
   const title = up ? '今天在漲什麼' : down ? '今天在跌什麼' : '今天沒什麼大動作';
+  if ((up || down) && st.newsAt) mvAiLoad(code, {
+    code, name: s.name || '', date: today, pct, price: q.price, limitUp: !!q.limitUp, limitDown: !!q.limitDown, path,
+    group: grp ? { name: grp.name, avg: Math.round(grp.avg * 10) / 10, movers: (grp.lim.length ? grp.lim : grp.hot).slice(0, 6).map((x) => x.name || x.code) } : null,
+    background: warn.concat(next ? [next] : []),
+    news: fresh.slice(0, 15).map((x) => ({ title: x.title, source: x.source, time: mvTw(x.time).md + ' ' + mvTw(x.time).hm })),
+  });
+  const aiSt = st.ai || {}, ai = aiSt.status === 'ok' ? aiSt.summary : (aiSt.prev && aiSt.prev.summary) || null;
+  const useAi = (up || down) && ai && ai.reasons && ai.reasons.length;
   const ul = (list) => '<ul>' + list.map((x) => '<li>' + x + '</li>').join('') + '</ul>';
-  let html = '<div class="mv-box' + (up ? ' up' : down ? ' down' : '') + '"><div class="mv-title">📰 ' + title + '<span class="mv-tag">盤中自動整理</span><button type="button" class="wl-btn" data-mv-refresh="' + code + '">↻ 更新</button></div>' + head;
+  const tag = useAi ? 'AI 整理新聞' : '盤中自動整理';
+  let html = '<div class="mv-box' + (up ? ' up' : down ? ' down' : '') + '"><div class="mv-title">📰 ' + title + '<span class="mv-tag">' + tag + '</span>' +
+    (aiSt.status === 'loading' ? '<span class="muted">AI 整理中…</span>' : '') + '<button type="button" class="wl-btn" data-mv-refresh="' + code + '">↻ 更新</button></div>' + head;
   if (up || down){
-    html += '<div class="mv-h ' + (up ? 'hot' : 'cool') + '">' + (up ? '🔥 主要原因' : '📉 可能原因') + '</div>' + ul(why);
-    if (warn.length) html += '<div class="mv-h warn">' + (up ? '⚠️ 要留意' : '🔎 前幾天背景') + '</div>' + ul(warn);
+    const reasons = useAi ? ai.reasons.map(wlEsc) : why;
+    const cautions = useAi ? (ai.cautions.length ? ai.cautions : warn).map(wlEsc) : warn;
+    html += '<div class="mv-h ' + (up ? 'hot' : 'cool') + '">' + (up ? '🔥 主要原因' : '📉 可能原因') + '</div>' + ul(reasons);
+    if (cautions.length) html += '<div class="mv-h warn">' + (up ? '⚠️ 要留意' : '🔎 前幾天背景') + '</div>' + ul(cautions);
     if (next) html += '<div class="mv-h">👀 後面看什麼</div>' + ul([next]);
+    if (useAi && fresh.length){
+      const bySrc = new Map();
+      fresh.forEach((x) => { if (!bySrc.has(x.source)) bySrc.set(x.source, x); });
+      html += '<div class="mv-src muted">新聞出處：' + [...bySrc.values()].slice(0, 6).map((x) => '<a href="' + wlEsc(x.url) + '" target="_blank" rel="noopener">' + wlEsc(x.source) + '</a>').join('・') + '</div>';
+    }
   } else if (news.length || notices.length) html += ul(notices.concat(news).slice(0, 4).map(link));
-  html += '<div class="mv-one">一句話：' + one + '</div>';
-  const others = (up || down) ? fresh.filter((x) => !why.some((w) => w.includes(wlEsc(x.title)))) : [];
-  if (others.length) html += '<details class="mv-more"><summary>其他新聞 ' + others.length + ' 則</summary>' + ul(others.map(link)) + '</details>';
+  html += '<div class="mv-one">一句話：' + (useAi && ai.oneLine ? wlEsc(ai.oneLine) : one) + '</div>';
+  const others = (up || down) ? fresh.filter((x) => useAi || !why.some((w) => w.includes(wlEsc(x.title)))) : [];
+  if (others.length) html += '<details class="mv-more"><summary>' + (useAi ? '新聞標題 ' : '其他新聞 ') + others.length + ' 則</summary>' + ul(others.map(link)) + '</details>';
   if (st.newsError) html += '<div class="muted">新聞讀取失敗：' + wlEsc(st.newsError) + '</div>';
-  return html + '<div class="mv-foot">依盤中報價、同族群漲跌、當天新聞標題（Google 新聞、鉅亨、公開資訊觀測站公告）自動整理，不是 AI 摘要；新聞整理僅供參考，不構成投資建議。</div></div>';
+  if ((up || down) && (aiSt.status === 'cap' || aiSt.status === 'error' || aiSt.status === 'refused')) html += '<div class="muted">AI 整理' + (aiSt.status === 'cap' ? '今天到上限了' : '沒成功') + '，先用規則整理。</div>';
+  return html + '<div class="mv-foot">' + (useAi ? '原因、要留意、一句話由 AI（Claude）讀當天新聞標題與盤中資料整理，可能有誤；' : '依盤中報價、同族群漲跌、當天新聞標題（Google 新聞、鉅亨、公開資訊觀測站公告）自動整理；') +
+    '後面看什麼照三日低、月線算。新聞整理僅供參考，不構成投資建議。</div></div>';
 }
 function renderDiag(){
   const body = document.getElementById('diagBody');
@@ -10246,7 +10284,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 20:43:03';
+const BUILD_STAMP = '2026-10-12 20:50:33';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15136,6 +15174,15 @@ export default {
         return new Response(JSON.stringify({ quotes: out, quoteDate: quotes.__meta.quoteDate, quoteTime: quotes.__meta.quoteTime }), { headers });
       } catch (e) {
         return new Response(JSON.stringify({ error: String(e && e.message || e) }), { status: 502, headers });
+      }
+    }
+    if (url.pathname === "/api/move-why") {
+      // 個股問診「今天在漲／跌什麼」的 AI 整理（2026-10-12 使用者）：盤中事實＋新聞標題轉給後端，後端有設金鑰才會整理
+      if (request.method !== "POST") return Response.json({ status: "error", error: "要用 POST" }, { status: 405 });
+      try {
+        return await proxyHanstockPost("/api/hub/move-why", request);
+      } catch (err) {
+        return Response.json({ status: "error", reason: String(err) }, { status: 502 });
       }
     }
     if (url.pathname === "/api/move-news") {
