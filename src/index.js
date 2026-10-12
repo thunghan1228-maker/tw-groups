@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 23:24:48";
+const BUILD_STAMP = "2026-10-12 23:31:28";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6129,8 +6129,8 @@ function brewOverlapHtml(mode, part){
       : '<div class="bl-section bl-brew">醞釀（整理）' + laterName + '、' + earlierName + '都有・' + brew.rows.length + ' 檔</div>' +
         (brew.rows.length ? brewPastTableHtml('brew', brew.rows, { prevLabel: earlier.label, prev: brew.prev }) : '<div class="race-note">沒有兩天都醞釀的股票</div>'));
 }
-function brewPastDayHtml(part){
-  const date = brewViewDate();
+function brewPastDayHtml(part, dateOverride){
+  const date = dateOverride || brewViewDate();
   if (!date) return '<div class="signal-empty"><div class="se-title">還沒有那一天的紀錄</div><div class="se-sub">後端每個交易日都會留下醞釀名單與發動紀錄，上線前幾天的用日K回推；資料還沒進來時稍後再看。</div></div>';
   const day = brewHistoryDay(date);
   const launchRows = brewLaunchByStock(day.launch);
@@ -6191,6 +6191,11 @@ function brewLaunchHtml(part){
   if (typeof brewDayOffset === 'string') return brewDayBarHtml() + brewOverlapHtml(brewDayOffset, part);
   if (brewDayOffset > 0) return brewDayBarHtml() + brewPastDayHtml(part);
   const m = brewLaunchModel();
+  // 首頁即時報價還沒到（例如晚上證交所抓不回來）：先顯示後端記下的今天紀錄，不要整頁空白（2026-10-12 使用者：訊號怎麼不見了）
+  if (!m && brewSessionDate() && brewHistoryData && brewHistoryData.days && brewHistoryData.days[brewSessionDate()]){
+    return brewDayBarHtml() + '<div class="race-note">首頁即時報價還沒載入' + (groupsLastError ? '（' + wlEsc(groupsLastError) + '）' : '') +
+      '，先顯示後端記下的 ' + String(brewSessionDate()).slice(5).replace('-', '/') + ' 紀錄；報價進來後會換成即時的。</div>' + brewPastDayHtml(part, brewSessionDate());
+  }
   if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div><div class="se-sub">還沒拿到證交所的即時報價（剛打開頁面、或第一次抓報價失敗），幾秒後會自動重抓，拿到就會出現。' +
     (groupsLastError ? '<br>上次失敗原因：' + wlEsc(groupsLastError) : '') + '</div></div>';
   const r = m.rules;
@@ -10458,7 +10463,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 23:24:48';
+const BUILD_STAMP = '2026-10-12 23:31:28';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -10737,7 +10742,12 @@ function renderSignalCenter(){
     if (key === 'strongStocks' || key === 'weakStocks'){ const d = stState[key === 'strongStocks' ? 'strong' : 'weak']; return d ? d.count : null; }
     if (key === 'bigHolderForceBull') return bigHolderRowsFrom(mainForceRanking, 'bull').length;
     if (key === 'bigHolderForceBear') return bigHolderRowsFrom(mainForceRanking, 'bear').length;
-    if (key === 'brewOnly' || key === 'launchOnly'){ const bm = brewLaunchModel(); return bm ? (key === 'brewOnly' ? bm.brewCount : bm.launchCount) : null; }
+    if (key === 'brewOnly' || key === 'launchOnly'){
+      const bm = brewLaunchModel();
+      if (bm) return key === 'brewOnly' ? bm.brewCount : bm.launchCount;
+      const rec = brewSessionDate() && brewHistoryData && brewHistoryData.days ? brewHistoryData.days[brewSessionDate()] : null;   // 報價還沒到：用後端今天的紀錄
+      return rec ? (key === 'brewOnly' ? rec.brew.length : brewLaunchByStock(rec.launch).length) : null;
+    }
     if (key === 'bigBuy' || key === 'bigSell') return filterLargeOrderEvents(currentEvents.filter((e) => e.tabs.includes(key))).length;
     return currentEvents.filter((e) => e.tabs.includes(key)).length;
   };
@@ -14786,8 +14796,12 @@ async function fetchQuotesFromBackend(codes, timeoutMs) {
 // 背景再抓，各執行環境都拿同一份。先問後端（4 秒），後端失敗或缺超過一成才走原本的（自己打證交所、再拿後端補）。
 // 自選股、創高黑提醒要開高低，照舊用 fetchQuotes。
 async function fetchGroupQuotes(codes) {
+  // 收盤後／盤前（台北時間平日 08:25～13:45 以外、週末）：後端快取放長了，但冷的時候重抓要 10 秒左右，
+  // 晚上自己打證交所又常抓不回來（2026-10-12 晚上首頁報價一直等 20 秒），所以多等後端一點（12 秒）
+  const tw = new Date(Date.now() + 8 * 3600000), minutes = tw.getUTCHours() * 60 + tw.getUTCMinutes(), wd = tw.getUTCDay();
+  const inSession = wd >= 1 && wd <= 5 && minutes >= 8 * 60 + 25 && minutes <= 13 * 60 + 45;
   try {
-    const quotes = await fetchQuotesFromBackend(codes, 4000);
+    const quotes = await fetchQuotesFromBackend(codes, inSession ? 4000 : 12000);
     if ((quotes.__meta.missing || 0) <= codes.length / 10) {
       quotes.__meta.source = "hub";      // 正常來源（前端不標示）；"backend" 留給證交所直連失敗時的備援
       return quotes;

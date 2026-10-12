@@ -161,8 +161,12 @@ async function fetchQuotesFromBackend(codes, timeoutMs) {
 // 背景再抓，各執行環境都拿同一份。先問後端（4 秒），後端失敗或缺超過一成才走原本的（自己打證交所、再拿後端補）。
 // 自選股、創高黑提醒要開高低，照舊用 fetchQuotes。
 async function fetchGroupQuotes(codes) {
+  // 收盤後／盤前（台北時間平日 08:25～13:45 以外、週末）：後端快取放長了，但冷的時候重抓要 10 秒左右，
+  // 晚上自己打證交所又常抓不回來（2026-10-12 晚上首頁報價一直等 20 秒），所以多等後端一點（12 秒）
+  const tw = new Date(Date.now() + 8 * 3600000), minutes = tw.getUTCHours() * 60 + tw.getUTCMinutes(), wd = tw.getUTCDay();
+  const inSession = wd >= 1 && wd <= 5 && minutes >= 8 * 60 + 25 && minutes <= 13 * 60 + 45;
   try {
-    const quotes = await fetchQuotesFromBackend(codes, 4000);
+    const quotes = await fetchQuotesFromBackend(codes, inSession ? 4000 : 12000);
     if ((quotes.__meta.missing || 0) <= codes.length / 10) {
       quotes.__meta.source = "hub";      // 正常來源（前端不標示）；"backend" 留給證交所直連失敗時的備援
       return quotes;

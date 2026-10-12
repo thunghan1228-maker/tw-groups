@@ -6062,8 +6062,8 @@ function brewOverlapHtml(mode, part){
       : '<div class="bl-section bl-brew">醞釀（整理）' + laterName + '、' + earlierName + '都有・' + brew.rows.length + ' 檔</div>' +
         (brew.rows.length ? brewPastTableHtml('brew', brew.rows, { prevLabel: earlier.label, prev: brew.prev }) : '<div class="race-note">沒有兩天都醞釀的股票</div>'));
 }
-function brewPastDayHtml(part){
-  const date = brewViewDate();
+function brewPastDayHtml(part, dateOverride){
+  const date = dateOverride || brewViewDate();
   if (!date) return '<div class="signal-empty"><div class="se-title">還沒有那一天的紀錄</div><div class="se-sub">後端每個交易日都會留下醞釀名單與發動紀錄，上線前幾天的用日K回推；資料還沒進來時稍後再看。</div></div>';
   const day = brewHistoryDay(date);
   const launchRows = brewLaunchByStock(day.launch);
@@ -6124,6 +6124,11 @@ function brewLaunchHtml(part){
   if (typeof brewDayOffset === 'string') return brewDayBarHtml() + brewOverlapHtml(brewDayOffset, part);
   if (brewDayOffset > 0) return brewDayBarHtml() + brewPastDayHtml(part);
   const m = brewLaunchModel();
+  // 首頁即時報價還沒到（例如晚上證交所抓不回來）：先顯示後端記下的今天紀錄，不要整頁空白（2026-10-12 使用者：訊號怎麼不見了）
+  if (!m && brewSessionDate() && brewHistoryData && brewHistoryData.days && brewHistoryData.days[brewSessionDate()]){
+    return brewDayBarHtml() + '<div class="race-note">首頁即時報價還沒載入' + (groupsLastError ? '（' + wlEsc(groupsLastError) + '）' : '') +
+      '，先顯示後端記下的 ' + String(brewSessionDate()).slice(5).replace('-', '/') + ' 紀錄；報價進來後會換成即時的。</div>' + brewPastDayHtml(part, brewSessionDate());
+  }
   if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div><div class="se-sub">還沒拿到證交所的即時報價（剛打開頁面、或第一次抓報價失敗），幾秒後會自動重抓，拿到就會出現。' +
     (groupsLastError ? '<br>上次失敗原因：' + wlEsc(groupsLastError) : '') + '</div></div>';
   const r = m.rules;
@@ -10670,7 +10675,12 @@ function renderSignalCenter(){
     if (key === 'strongStocks' || key === 'weakStocks'){ const d = stState[key === 'strongStocks' ? 'strong' : 'weak']; return d ? d.count : null; }
     if (key === 'bigHolderForceBull') return bigHolderRowsFrom(mainForceRanking, 'bull').length;
     if (key === 'bigHolderForceBear') return bigHolderRowsFrom(mainForceRanking, 'bear').length;
-    if (key === 'brewOnly' || key === 'launchOnly'){ const bm = brewLaunchModel(); return bm ? (key === 'brewOnly' ? bm.brewCount : bm.launchCount) : null; }
+    if (key === 'brewOnly' || key === 'launchOnly'){
+      const bm = brewLaunchModel();
+      if (bm) return key === 'brewOnly' ? bm.brewCount : bm.launchCount;
+      const rec = brewSessionDate() && brewHistoryData && brewHistoryData.days ? brewHistoryData.days[brewSessionDate()] : null;   // 報價還沒到：用後端今天的紀錄
+      return rec ? (key === 'brewOnly' ? rec.brew.length : brewLaunchByStock(rec.launch).length) : null;
+    }
     if (key === 'bigBuy' || key === 'bigSell') return filterLargeOrderEvents(currentEvents.filter((e) => e.tabs.includes(key))).length;
     return currentEvents.filter((e) => e.tabs.includes(key)).length;
   };
