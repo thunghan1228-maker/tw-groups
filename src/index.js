@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 22:29:38";
+const BUILD_STAMP = "2026-10-12 22:34:54";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1926,6 +1926,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .st-score{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:22px;border-radius:999px;background:#f5c542;color:#3b2a00;font-weight:800;font-size:12px;margin:0 6px;}
   .st-score.weak{background:#cfe9d8;color:#14532d;}
   .st-score-h{display:inline-block;min-width:26px;margin:0 6px;text-align:center;}
+  .st-hf-btn{margin-left:14px;font-size:12px;padding:3px 10px;}
   .st-row .st-holder{flex:0 0 7em;margin-left:auto;text-align:right;white-space:nowrap;overflow:hidden;}
   .st-row .st-holder .sig-label{font-size:11px;padding:2px 6px;display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.25;gap:1px;}
   .st-row .st-holder .hf-amt{font-size:.82em;font-weight:600;opacity:.92;}
@@ -2490,8 +2491,8 @@ const HTML_PAGE = `<!DOCTYPE html>
     </div>
     <div class="signal-help" id="signalHelp" hidden>
       <ul>
-        <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。⭐＝這族今天也有出現在盤中觀察股（通常是比較強勢的族群）、👀＝這檔在盤中觀察股名單裡。均線分數是收盤算好的，現價、漲跌是即時的。</li>
-        <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面。</li>
+        <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。⭐＝這族今天也有出現在盤中觀察股（通常是比較強勢的族群）、👀＝這檔在盤中觀察股名單裡。均線分數是收盤算好的，現價、漲跌、大戶力是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
+        <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面；按「大戶力 ≤ −10%」只看大戶在賣的。</li>
         <li><b>盤中觀察股</b>：55 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
         <li><b>今日即時多</b>：彙整多方向訊號的即時清單：盤中大戶力多、四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單，依發生時間新到舊排序。</li>
         <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（沒有發生時間，只有今天有），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。</li>
@@ -10389,7 +10390,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 22:29:38';
+const BUILD_STAMP = '2026-10-12 22:34:54';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -10593,7 +10594,10 @@ function checkLaunchNotifications(){
 // 「族群分數加上盤中觀察股有出現的，通常都是比較強勢的族群，再從裡面挑均線分數高的，勝率自然就會好一點」：
 // 強勢股＝族群分數前十大（族內平均均線分數，跟均線分數排行同一套）裡、均線分數 ≥12 的股票；弱勢股倒過來＝倒數十名裡 ≤3 的。
 // 均線分數是後端收盤算好的（/api/ma-strength），現價、漲跌用首頁即時報價；⭐＝這族今天也在盤中觀察股、👀＝這檔在盤中觀察股。
-const stState = { strong: null, weak: null, loading: {}, at: {}, error: {} };
+const stState = { strong: null, weak: null, loading: {}, at: {}, error: {},
+  // 大戶力篩選（2026-10-12 使用者：強勢股多一個「大戶力 ≥10%」按鈕、弱勢股多一個「大戶力 ≤ −10%」），記在這台電腦
+  hfOnly: (() => { try { return JSON.parse(localStorage.getItem('stHfOnly') || '{}') || {}; } catch (_){ return {}; } })() };
+const ST_HF_MIN = 10;
 function stLoad(side){
   if (stState.loading[side] || (stState[side] && Date.now() - stState.at[side] < 5 * 60000)) return;
   if (stState.error[side] && Date.now() - stState.error[side].at < 30000) return;
@@ -10608,7 +10612,7 @@ function stLoad(side){
 }
 function stPanelHtml(side){
   stLoad(side);
-  const d = stState[side], strong = side === 'strong';
+  const d = stState[side], strong = side === 'strong', hfOnly = !!stState.hfOnly[side];
   if (!d) return '<div class="signal-empty"><div class="se-title">' + (stState.error[side] ? '讀取失敗：' + wlEsc(stState.error[side].msg) : '讀取中…') + '</div></div>';
   const obsItems = (obsState.report && obsState.report.items) || [];
   const obsCodes = new Set(obsItems.map((x) => x.code));
@@ -10618,14 +10622,22 @@ function stPanelHtml(side){
     (strong ? '⭐＝這族今天也有出現在盤中觀察股（通常是比較強勢的族群）・' : '') + '👀＝這檔在盤中觀察股名單裡・大戶力＝盤中大單淨額 ÷ 累計成交額・點一列開K線圖</div>' +
     // 欄位名稱（2026-10-12 使用者：大戶力、漲跌幅、漲跌、成交價）
     '<div class="signal-row signal-col-labels st-row"><span class="sig-code"></span><span class="sig-name"><b>名稱</b></span><span class="st-score-h"><b>均線</b></span>' +
+    '<button type="button" class="chart-tab chips-btn st-hf-btn' + (hfOnly ? ' active' : '') + '" data-st-hf="' + side + '" title="只看大戶力' + (strong ? '大於等於 +' : '小於等於 −') + ST_HF_MIN + '% 的股票（再按一次全部顯示）">' +
+      '大戶力 ' + (strong ? '≥ +' : '≤ −') + ST_HF_MIN + '%</button>' +
     '<span class="st-holder"><b>大戶力</b></span><div class="srow-right"><span class="spct"><b>漲跌幅</b></span><span class="schg"><b>漲跌</b></span><span class="sprice"><b>成交價</b></span></div></div>';
   const holderByCode = new Map((mainForceRanking || []).map((r) => [r.code, r]));
+  const hfPass = (code) => { const h = holderByCode.get(code), v = h ? h.strengthPct : null; return v !== null && v !== undefined && (strong ? v >= ST_HF_MIN : v <= -ST_HF_MIN); };
+  let shown = 0;
   d.groups.forEach((g) => {
+    const rows = hfOnly ? g.rows.filter((r) => hfPass(r.code)) : g.rows;
+    if (hfOnly && !rows.length) return;   // 篩大戶力時，沒有符合的族群整組不列
+    shown += rows.length;
     const star = strong && groupHasObs(g.name);
     h += '<div class="st-ghead' + (strong ? '' : ' weak') + '"><span>' + (strong ? '第 ' + g.rank + ' 名' : '倒數第 ' + (d.groupCount - g.rank + 1) + ' 名') + '・<b>' + wlEsc(g.name) + '</b>' + (star ? ' ⭐' : '') + '</span>' +
-      '<span class="muted">平均 ' + g.avg + '・' + g.n + ' 檔・' + (strong ? '≥' + d.rule.min : '≤' + d.rule.max) + ' 分 ' + g.rows.length + ' 檔</span></div>';
-    if (!g.rows.length){ h += '<div class="race-note">這族沒有符合的股票</div>'; return; }
-    h += '<div class="signal-list">' + g.rows.map((r) => {
+      '<span class="muted">平均 ' + g.avg + '・' + g.n + ' 檔・' + (strong ? '≥' + d.rule.min : '≤' + d.rule.max) + ' 分 ' + g.rows.length + ' 檔' +
+      (hfOnly ? '・大戶力' + (strong ? '≥+' : '≤−') + ST_HF_MIN + '% ' + rows.length + ' 檔' : '') + '</span></div>';
+    if (!rows.length){ h += '<div class="race-note">這族沒有符合的股票</div>'; return; }
+    h += '<div class="signal-list">' + rows.map((r) => {
       const q = getStockQuote(r.code);
       const chg = q ? q.price - q.price / (1 + q.changePercent / 100) : 0;
       const hf = holderByCode.get(r.code);
@@ -10637,6 +10649,7 @@ function stPanelHtml(side){
     }).join('') + '</div>';
   });
   if (!d.count) h += '<div class="race-note">今天沒有符合的股票</div>';
+  else if (hfOnly && !shown) h += '<div class="race-note">目前沒有大戶力' + (strong ? '≥ +' : '≤ −') + ST_HF_MIN + '% 的股票（大戶力盤中才有，開盤後會陸續出現）</div>';
   return h;
 }
 function renderSignalCenter(){
@@ -14507,6 +14520,14 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
     bigOrderFilters[f] = !bigOrderFilters[f];
     if (bigOrderFilters[f] && BIG_ORDER_EXCLUSIVE[f]) bigOrderFilters[BIG_ORDER_EXCLUSIVE[f]] = false;  // 最大／最新二選一
     try { localStorage.setItem('bigOrderFilters', JSON.stringify(bigOrderFilters)); } catch (err) { /* 記不住就算了 */ }
+    renderSignalCenter();
+    return;
+  }
+  const stHf = e.target.closest('[data-st-hf]');
+  if (stHf){
+    const side = stHf.dataset.stHf;
+    stState.hfOnly[side] = !stState.hfOnly[side];
+    try { localStorage.setItem('stHfOnly', JSON.stringify(stState.hfOnly)); } catch (_){}
     renderSignalCenter();
     return;
   }
