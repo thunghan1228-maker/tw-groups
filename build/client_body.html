@@ -2502,7 +2502,7 @@
         <li><b>盤中特大買單／賣單</b>：同一秒內大單連續敲進／倒出（同秒合計 ≥100 張或 ≥3,000 萬，觸發時大戶力要同向）；合計 ≥300 張或 ≥5,000 萬標「瞬間特大」。訊號很多時用上方篩選鈕縮減（可同時開幾個）：只看特大單、金額≥1億、族群前10名（族群同步漲幅／跌幅前 10 名）、每檔只留最大一筆（同一檔一天觸發好幾次，只留到目前為止金額最大的，之後有更大的會換成新的）、每檔只留最新一筆（只留最近發生的那筆，看誰剛剛有大單進來；跟最大一筆二選一）；分頁上的數字會跟著篩選變。</li>
         <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。每列最前面的時間是「這檔主力副圖最後更新到幾點」，不是「資料只算到這個時間點」——大戶力%一直都是當天開盤到現在整天累加；越接近收盤，越多股票這欄會顯示接近的時間（因為大家幾乎都還在更新），不代表比較早的資料不見了。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
-        <li><b>主力翻多／主力翻空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
+        <li><b>主力翻多／主力翻空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。<b>近30分主力翻多／翻空</b>（2026-10-13 加，跟累計翻多空列在同一頁、照時間排）：累計翻多空看開盤到現在的累計，越晚越難翻，所以多半出現在 09:05～09:45；近30分看「前 30 分鐘 vs 近 30 分鐘」的主力大單——前 30 分鐘主力淨賣（淨額佔主力買賣 ≥ 10%）、近 30 分鐘轉成淨買（≥ 50 張、≥ 1,000 萬元、佔近 30 分鐘主力買賣 ≥ 20%，主力買賣合計 ≥ 200 張）＝翻多，反過來＝翻空；最早 10:00 才有，也會列進今日即時多／空。</li>
         <li><b>形態觀察股</b>：55 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
         <li><b>發動</b>、<b>醞釀</b>（2026-10-12 拆成兩個分頁，發動在左、醞釀在右，今天／昨天／前天切換兩頁共用；日期列後面的「盤中大戶力≥10%」只看盤中大戶力 ≥ +10% 的，昨天／前天照那天收盤時的大戶力，兩頁各自記）：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。今天發動過的股票也會列進今日即時多（時間＝第一次發動）：現在還站在箱頂上寫「🚀 發動」、發動過又跌回箱頂下寫「↩ 曾發動」（2026-10-13 分開標）；開盤前跟其他分頁一樣沿用最近交易日到 08:45，用那天收盤分。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看，發動分兩段：<b>發動</b>＝那天收盤還站在箱頂上、<b>曾發動</b>＝盤中發動過但收盤跌回箱頂下（箱頂旁邊標那天收盤）；今天盤中曾發動、現在回落的股票也會列在「曾發動」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。<b>排序</b>：個股名單預設照盤中大戶力排，值大的在上、小的在下，沒有大戶力資料的排最後。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
@@ -5008,6 +5008,33 @@ function ensureHolderTimeline(date){
   });
 }
 function holderTimelineFor(date){ ensureHolderTimeline(date); return holderTimelineData[date] || null; }
+// ---- 近 30 分鐘主力翻多／翻空（2026-10-13 使用者）：前 30 分鐘主力淨賣、近 30 分鐘轉淨買＝翻多，反過來翻空 ----
+// 後端 /api/window-flips；放進主力翻多／翻空分頁和今日即時多／空。今天盤中每 60 秒重抓，往日抓一次；後端沒更新（404）就是空的。
+const windowFlipData = {}, windowFlipAt = {}, windowFlipLoading = {};
+function ensureWindowFlips(date){
+  if (!date || windowFlipLoading[date]) return;
+  const live = date === twTodayStr() && !mainForceRankingInfo.heldFrom;
+  if (windowFlipAt[date] && (!live || Date.now() - windowFlipAt[date] < 60000)) return;
+  windowFlipLoading[date] = true;
+  fetch('/api/window-flips?trade_date=' + encodeURIComponent(date)).then((res) => (res.ok ? res.json() : null)).then((data) => {
+    if (data && data.status === 'ok' && Array.isArray(data.events)) windowFlipData[date] = data.events;
+  }).catch(() => {}).finally(() => {
+    windowFlipAt[date] = Date.now();
+    delete windowFlipLoading[date];
+    try { if (!document.getElementById('signalModal').hidden) renderSignalCenter(); } catch (_){}
+  });
+}
+function windowFlipEvents(date, side){
+  ensureWindowFlips(date);
+  const bull = side === 'bull';
+  const lots = (v) => (v > 0 ? '+' : '') + Number(v).toLocaleString() + ' 張';
+  return (windowFlipData[date] || []).filter((e) => e.side === side).map((e) => ({
+    tabs: [bull ? 'mainForceFlipBull' : 'mainForceFlipBear', bull ? 'now' : 'nowBear'], ts: e.ts, time: hmOf(e.ts),
+    code: e.code, name: e.name && e.name !== e.code ? e.name : lookupStockName(e.code), label: bull ? '近30分主力翻多' : '近30分主力翻空', isBuy: bull,
+    note: '前30分主力 ' + lots(e.prevNet) + '（' + (e.prevRatio > 0 ? '+' : '') + e.prevRatio + '%）→ 近30分 ' + lots(e.curNet) + '（' + (e.curRatio > 0 ? '+' : '') + e.curRatio + '%）｜近30分淨額 ' +
+      fmtAmountWan(e.curNetAmount) + (e.cumStrengthPct !== null && e.cumStrengthPct !== undefined ? '｜當時累計大戶力 ' + (e.cumStrengthPct > 0 ? '+' : '') + Number(e.cumStrengthPct).toFixed(1) + '%' : ''),
+  }));
+}
 const hmOf = (ts) => new Date(ts).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
 // 排行列帶上第一次進名單的時間（side＝bull／bear）
 function withHolderFirstTs(rows, timeline, side){
@@ -5096,7 +5123,7 @@ function nowTabRowsHtml(events, rankingRows, view){
 // 區塊放最上面，只有今天有）＋盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單（依發生時間新到舊合併排序，
 // 跟多的那頁同一套）；兩頁內容完全不重複。
 function nowBearTabHtml(view){
-  const events = view.events.filter((e) => e.tabs.includes('nowBear')).concat(view.isPast ? [] : ghfSignalEvents(ghfTodayView(), 'down').concat(stSignalEvents('weak')));   // 十大空族群、今日弱勢股（2026-10-12）
+  const events = view.events.filter((e) => e.tabs.includes('nowBear')).concat(windowFlipEvents(view.date, 'bear'), view.isPast ? [] : ghfSignalEvents(ghfTodayView(), 'down').concat(stSignalEvents('weak')));   // 十大空族群、今日弱勢股（2026-10-12）；近30分主力翻空（2026-10-13）
   const rows = view.rankingRows.filter((r) => !holderRowIsBull(r));
   let blade = '';
   if (!view.isPast){
@@ -10917,8 +10944,9 @@ function renderSignalCenter(){
   const currentEvents = sigCurrentEvents();  // 休市日／開盤前沿用上一個交易日的訊號，數字才不會全部是 0
   const countFor = (key) => {
     // 2026-10-04 使用者：今日即時拆成多／空兩頁，各自只算自己那一邊的訊號＋大戶力列。
-    if (key === 'now') return currentEvents.filter((e) => e.tabs.includes('now')).length + bigHolderRowsFrom(mainForceRanking, 'bull').length + ghfSignalEvents(ghfTodayView(), 'up').length + stSignalEvents('strong').length + launchSignalEvents().length;
-    if (key === 'nowBear') return currentEvents.filter((e) => e.tabs.includes('nowBear')).length + bigHolderRowsFrom(mainForceRanking, 'bear').length + ghfSignalEvents(ghfTodayView(), 'down').length + stSignalEvents('weak').length;
+    if (key === 'now') return currentEvents.filter((e) => e.tabs.includes('now')).length + bigHolderRowsFrom(mainForceRanking, 'bull').length + ghfSignalEvents(ghfTodayView(), 'up').length + stSignalEvents('strong').length + launchSignalEvents().length + windowFlipEvents(sigCurrentDate(), 'bull').length;
+    if (key === 'nowBear') return currentEvents.filter((e) => e.tabs.includes('nowBear')).length + bigHolderRowsFrom(mainForceRanking, 'bear').length + ghfSignalEvents(ghfTodayView(), 'down').length + stSignalEvents('weak').length + windowFlipEvents(sigCurrentDate(), 'bear').length;
+    if (key === 'mainForceFlipBull' || key === 'mainForceFlipBear') return currentEvents.filter((e) => e.tabs.includes(key)).length + windowFlipEvents(sigCurrentDate(), key === 'mainForceFlipBull' ? 'bull' : 'bear').length;   // 含近30分主力翻多／翻空
     if (key === 'history' || key === 'race333' || key === 'bladeShort' || key === 'groupHolderBull' || key === 'groupHolderBear' || key === 'groupCombinedBoard') return null;
     if (key === 'obsWatch') return obsState.report ? obsState.report.items.length : null;
     if (key === 'strongStocks' || key === 'weakStocks'){ const d = stState[key === 'strongStocks' ? 'strong' : 'weak']; return d ? d.count : null; }
@@ -11022,7 +11050,7 @@ function renderSignalCenter(){
     let inner;
     if (view.unavailable) inner = holderEmptyHtml(view, '', '');
     else if (view.loading && !view.events.length) inner = sigLoadingHtml(view);
-    else if (active === 'now') inner = nowTabRowsHtml(view.events.filter((e) => e.tabs.includes('now')).concat(view.isPast ? [] : ghfSignalEvents(ghfTodayView(), 'up').concat(stSignalEvents('strong'), launchSignalEvents())), view.rankingRows.filter(holderRowIsBull), view);
+    else if (active === 'now') inner = nowTabRowsHtml(view.events.filter((e) => e.tabs.includes('now')).concat(windowFlipEvents(view.date, 'bull'), view.isPast ? [] : ghfSignalEvents(ghfTodayView(), 'up').concat(stSignalEvents('strong'), launchSignalEvents())), view.rankingRows.filter(holderRowIsBull), view);
     else if (active === 'nowBear') inner = nowBearTabHtml(view);
     else if (DEDICATED_KLINE_TABS.has(active)){
       refreshKlineBackfillStatus();
@@ -11036,7 +11064,9 @@ function renderSignalCenter(){
       const all = view.events.filter((e) => e.tabs.includes(active));
       const events = filterLargeOrderEvents(all);
       inner = bigOrderFilterBarHtml(all.length, events.length) + signalRowsHtml(events, view, { holder: true });
-    } else inner = signalRowsHtml(view.events.filter((e) => e.tabs.includes(active)), view,
+    } else inner = signalRowsHtml(view.events.filter((e) => e.tabs.includes(active))
+        .concat(active === 'mainForceFlipBull' || active === 'mainForceFlipBear' ? windowFlipEvents(view.date, active === 'mainForceFlipBull' ? 'bull' : 'bear') : [])
+        .sort((a, b) => (b.ts || 0) - (a.ts || 0)), view,
       // 2026-10-13 使用者：四項精選也加盤中大戶力（放漲跌幅左邊）；主力翻多／翻空也加（放訊號右邊，跟特大買賣單一樣）
       active === 'fourGateBuy' || active === 'fourGateSell' ? { holder: 'right' }
         : active === 'mainForceFlipBull' || active === 'mainForceFlipBear' ? { holder: true } : null);
