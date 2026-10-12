@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 13:12:39";
+const BUILD_STAMP = "2026-10-12 14:15:25";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -10054,7 +10054,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 13:12:39';
+const BUILD_STAMP = '2026-10-12 14:15:25';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -12025,17 +12025,17 @@ async function obsJson(url){
   return d;
 }
 async function obsDragonHits(){
-  // 近 10 個交易日每天的創高黑龍名單 → {代號: 出現次數}；依資料日存在這台電腦，一天只抓一次
+  // 近 11 個交易日每天的創高黑龍名單（今天用最近 10 天、上一個交易日的名單用再往前一天起算的 10 天）；依資料日存在這台電腦，一天只抓一次
   const latest = await obsJson('/api/screener?' + OBS_DRAGON_Q);
-  const dates = (latest.dates || []).filter((d) => d <= latest.date).slice(-OBS_POOL_DAYS);
+  const dates = (latest.dates || []).filter((d) => d <= latest.date).slice(-(OBS_POOL_DAYS + 1));
   let cached = null;
-  try { cached = JSON.parse(localStorage.getItem('obsDragon') || 'null'); } catch (_){}
-  if (cached && cached.latest === latest.date && cached.days === dates.length) return cached;
+  try { cached = JSON.parse(localStorage.getItem('obsDragon2') || 'null'); } catch (_){}
+  if (cached && cached.latest === latest.date && cached.dates && cached.dates.length === dates.length) return cached;
   const lists = await Promise.all(dates.map((d) => d === latest.date ? latest : obsJson('/api/screener?' + OBS_DRAGON_Q + '&date=' + d)));
-  const hits = {};
-  lists.forEach((l) => (l.rows || []).forEach((r) => { hits[r.code] = (hits[r.code] || 0) + 1; }));
-  const out = { latest: latest.date, days: dates.length, from: dates[0], hits };
-  try { localStorage.setItem('obsDragon', JSON.stringify(out)); } catch (_){}
+  const days = {}, names = {};
+  lists.forEach((l, i) => { days[dates[i]] = (l.rows || []).map((r) => { names[r.code] = r.name; return r.code; }); });
+  const out = { latest: latest.date, dates, days, names };
+  try { localStorage.setItem('obsDragon2', JSON.stringify(out)); } catch (_){}
   return out;
 }
 async function obsBatched(codes, size, fn){
@@ -12043,25 +12043,45 @@ async function obsBatched(codes, size, fn){
   for (let i = 0; i < codes.length; i += size) parts.push(codes.slice(i, i + size));
   return Promise.all(parts.map(fn));
 }
+function obsCat(v){
+  // 五類：【5】破月線 →【2】噴出 →【1】黑K黑龍 →【3】高檔 →【4】右肩打底
+  if (v.below) return 5;
+  if ((v.pct !== null && v.pct >= 5) || v.limitUp) return 2;
+  if (v.black && v.score >= 10 && v.pct !== null && v.pct <= 3 && !v.brk3) return 1;
+  if (v.dist20 !== null && v.dist20 >= 0.10) return 3;
+  return 4;
+}
+function obsCloseState(c){
+  // 上一個交易日收盤時的狀態（checkup 的 Y 線＝那天適用的月線／三K低）
+  const d = c.def || {}, close = Number(c.close), open = Number(c.open), pct = Number.isFinite(Number(c.chgPct)) ? Number(c.chgPct) : null;
+  const ma20 = d.ma20Y || null, low3 = d.low3Y || null;
+  const st = { below: !!(ma20 && close < ma20), brk3: !!(low3 && close < low3), black: !!(open && close < open), pct, score: c.score || 0,
+    limitUp: pct !== null && pct >= 9.5, dist20: ma20 ? close / ma20 - 1 : null };
+  st.cat = obsCat(st);
+  return st;
+}
 async function obsBuild(slot){
   const dragon = await obsDragonHits();
   const inGroups = new Set(ALL_CODES);
-  const cand = Object.keys(dragon.hits).filter((c) => inGroups.has(c) && dragon.hits[c] >= OBS_POOL_MIN_HITS);
+  const count = (ds) => { const h = {}; ds.forEach((d) => (dragon.days[d] || []).forEach((c) => { h[c] = (h[c] || 0) + 1; })); return h; };
+  const nowDates = dragon.dates.slice(-OBS_POOL_DAYS), prevDates = dragon.dates.length > OBS_POOL_DAYS ? dragon.dates.slice(0, OBS_POOL_DAYS) : null;
+  const hitsNow = count(nowDates), hitsPrev = prevDates ? count(prevDates) : null;
+  const okNow = (c) => inGroups.has(c) && (hitsNow[c] || 0) >= OBS_POOL_MIN_HITS;
+  const okPrev = (c) => !!hitsPrev && inGroups.has(c) && (hitsPrev[c] || 0) >= OBS_POOL_MIN_HITS;
+  const cand = [...new Set([...Object.keys(hitsNow), ...Object.keys(hitsPrev || {})])].filter((c) => okNow(c) || okPrev(c));
   if (!cand.length) throw new Error('近 10 天創高黑龍名單還沒有資料');
   const ckParts = await obsBatched(cand, 120, (b) => obsJson('/api/checkup?codes=' + encodeURIComponent(b.join(','))));
   const ckBy = {};
   let ckDate = null;
   ckParts.forEach((ck) => { ckDate = ckDate || ck.date; (ck.rows || []).forEach((r) => { ckBy[r.code] = r; }); });
-  const pool = cand.filter((c) => ckBy[c] && (ckBy[c].score || 0) >= OBS_POOL_MIN_SCORE)
+  const scoreOk = (c) => ckBy[c] && (ckBy[c].score || 0) >= OBS_POOL_MIN_SCORE;
+  const pool = cand.filter((c) => okNow(c) && scoreOk(c))
     .map((c) => ({ code: c, name: ckBy[c].name, grp: WL_GROUP_INDEX[c] ? WL_GROUP_INDEX[c].group : ckBy[c].group }));
   if (!pool.length) throw new Error('沒有股票符合（近 10 天黑龍選過至少 2 次＋均線分數 ≥ 15）');
   const qParts = await obsBatched(pool.map((p) => p.code), 200, (b) => obsJson('/api/watch-quotes?codes=' + encodeURIComponent(b.join(','))));
   const quotes = {};
   let quoteTime = null;
   qParts.forEach((q) => { Object.assign(quotes, q.quotes || {}); if (q.quoteTime && (!quoteTime || q.quoteTime > quoteTime)) quoteTime = q.quoteTime; });
-  const ck = { date: ckDate };
-  const qd = { quoteTime };
-  const hits = { from: dragon.from, to: dragon.latest };
   const lit = new Set();
   try { (brewHistoryDay(brewSessionDate()).launch || []).forEach((x) => lit.add(x.code)); } catch (_){}
   try { const bm = brewLaunchModel(); if (bm) bm.launchBlocks.flatMap((b) => b.rows).forEach((r) => lit.add(r.code)); } catch (_){}
@@ -12079,24 +12099,44 @@ async function obsBuild(slot){
     const below = !!(ma20 && price < ma20);
     const label = c.scores && c.scores.overallLabel;
     const f = stockFlags[p.code];
+    const prev = obsCloseState(c);
     const x = {
-      code: p.code, name: c.name || p.name, grp: p.grp || c.group || '其他', hits: dragon.hits[p.code] || 0,
-      price, pct, score, below,
+      code: p.code, name: c.name || p.name, grp: p.grp || c.group || '其他', hits: hitsNow[p.code] || 0,
+      price, pct, score, below, limitUp: !!(q && q.limitUp),
       black: !!(open && price < open), brk3: !!(low3 && price < low3),
       star: label === '強' ? '★' : label === '中上' ? '☆' : '',
       lit: lit.has(p.code), high: !!(ma20 && ma60 && price / ((ma20 + ma60) / 2) - 1 >= 0.30),
       drop5: pct !== null && pct <= -5, reb: pct !== null && pct > 0 && below,
       dispo: !!(f && f.disposition), dist20: ma20 ? price / ma20 - 1 : null,
-      newBreak: below && Number(c.close) >= Number(d.ma20Y || 0),
+      newBreak: below && !prev.below, brk3Twice: false, prevCat: prev.cat,
     };
-    if (below) x.cat = 5;
-    else if ((pct !== null && pct >= 5) || (q && q.limitUp)) x.cat = 2;
-    else if (x.black && score >= 10 && pct !== null && pct <= 3 && !x.brk3) x.cat = 1;
-    else if (x.dist20 !== null && x.dist20 >= 0.10) x.cat = 3;
-    else x.cat = 4;
+    x.brk3Twice = x.brk3 && prev.brk3;
+    x.cat = obsCat(x);
     items.push(x);
   });
-  return { date: twTodayStr(), slot, at: Date.now(), quoteTime: (qd && qd.quoteTime) || null, ckDate: ck && ck.date, items, missing, hitsFrom: hits.from, hitsTo: hits.to };
+  // 跟上一個交易日的名單比（使用者：照「跟 10/8 名單比」，移出原因照那天收盤判定）
+  let cmp = null;
+  if (hitsPrev){
+    const inNow = new Set(pool.map((p) => p.code));
+    const prevPool = cand.filter((c) => okPrev(c) && scoreOk(c));
+    const inPrev = new Set(prevPool);
+    const why = (c) => {
+      const st = obsCloseState(ckBy[c]);
+      const r = [];
+      if (st.below) r.push('破月線');
+      if (st.brk3) r.push('破三K低');
+      if (st.pct !== null && st.pct <= -5) r.push('大黑' + st.pct.toFixed(1) + '%');
+      if (!r.length) r.push((hitsNow[c] || 0) < OBS_POOL_MIN_HITS ? '近 10 天黑龍剩 ' + (hitsNow[c] || 0) + ' 次' : '均線分數 ' + ckBy[c].score);
+      return r.join('+');
+    };
+    cmp = {
+      label: String(ckDate || dragon.latest).slice(5).replace('-', '/'),
+      added: items.filter((x) => !inPrev.has(x.code)).map((x) => x.code + x.name),
+      removed: prevPool.filter((c) => !inNow.has(c)).map((c) => c + (ckBy[c].name || dragon.names[c] || '') + '(' + why(c) + ')'),
+      moved: items.filter((x) => inPrev.has(x.code) && x.prevCat !== x.cat).map((x) => x.code + x.name + '【' + x.prevCat + '→' + x.cat + '】'),
+    };
+  }
+  return { date: twTodayStr(), slot, at: Date.now(), quoteTime, ckDate, items, missing, hitsFrom: nowDates[0], hitsTo: dragon.latest, cmp };
 }
 function obsGroupLines(list){
   // 同族群放同一行：「族群 代號名稱符號／代號名稱符號」
@@ -12104,26 +12144,6 @@ function obsGroupLines(list){
   list.forEach((x) => { if (!by.has(x.grp)) by.set(x.grp, []); by.get(x.grp).push(x); });
   const order = [...by.keys()].sort((a, b) => (a === '其他') - (b === '其他'));
   return order.map((g) => [g, by.get(g)]);
-}
-function obsCompare(rep){
-  // 跟上一次（同一天上一個時段；沒有就是上一個交易日最後一次）比：類別有變的、新進／移出觀察池的
-  let prev = null;
-  try { prev = JSON.parse(localStorage.getItem('obsLast') || 'null'); } catch (_){}
-  if (!prev || !prev.cats || (prev.date === rep.date && prev.slot === rep.slot)) return prev && prev.cmp ? prev.cmp : null;
-  const now = new Map(rep.items.map((x) => [x.code, x]));
-  const moved = [], added = [], removed = [];
-  rep.items.forEach((x) => {
-    const was = prev.cats[x.code];
-    if (was === undefined) added.push(x.code + x.name);
-    else if (was !== x.cat) moved.push(x.code + x.name + '【' + was + '→' + x.cat + '】');
-  });
-  Object.keys(prev.cats).forEach((code) => { if (!now.has(code) && !rep.missing.some((m) => m.startsWith(code))) removed.push(code + (prev.names && prev.names[code] || '')); });
-  return { label: (prev.date === rep.date ? '' : String(prev.date).slice(5).replace('-', '/') + ' ') + (prev.slot || ''), moved, added, removed };
-}
-function obsSave(rep){
-  const cats = {}, names = {};
-  rep.items.forEach((x) => { cats[x.code] = x.cat; names[x.code] = x.name; });
-  try { localStorage.setItem('obsLast', JSON.stringify({ date: rep.date, slot: rep.slot, cats, names, cmp: rep.cmp })); } catch (_){}
 }
 function obsWarnings(rep){
   const by = (fn) => rep.items.filter(fn).map((x) => x.name);
@@ -12136,7 +12156,7 @@ function obsWarnings(rep){
   if (deep.length) w.push('⚠️' + deep.join('/') + ' 有點深慢慢來要打底確認');
   const nb = by((x) => x.cat === 5 && x.newBreak);
   if (nb.length) w.push('⚠️今天剛破月線：' + nb.join('/'));
-  const b3 = by((x) => x.brk3);
+  const b3 = rep.items.filter((x) => x.brk3).map((x) => x.name + (x.brk3Twice ? '（連兩天）' : ''));
   if (b3.length) w.push('⚠️跌破三K低（防守失守）：' + b3.join('/'));
   const d5 = by((x) => x.drop5);
   if (d5.length) w.push('⚠️今天大黑K（跌 5% 以上）：' + d5.join('/'));
@@ -12161,10 +12181,10 @@ function obsText(rep){
     out.push('');
   });
   if (rep.cmp && (rep.cmp.moved.length || rep.cmp.added.length || rep.cmp.removed.length)){
-    out.push('【跟 ' + rep.cmp.label + ' 比】');
-    if (rep.cmp.moved.length) out.push('換類 ' + rep.cmp.moved.join('/'));
+    out.push('【跟 ' + rep.cmp.label + ' 名單比】（移出原因照 ' + rep.cmp.label + ' 收盤判定）');
     if (rep.cmp.added.length) out.push('新增 ' + rep.cmp.added.join('/'));
     if (rep.cmp.removed.length) out.push('移出 ' + rep.cmp.removed.join('/'));
+    if (rep.cmp.moved.length) out.push('換類（跟 ' + rep.cmp.label + ' 收盤比） ' + rep.cmp.moved.join('/'));
     out.push('');
   }
   return out.concat(obsWarnings(rep)).join('\\n');
@@ -12185,10 +12205,10 @@ function obsBodyHtml(rep){
     } else h += lines(list);
   });
   if (rep.cmp && (rep.cmp.moved.length || rep.cmp.added.length || rep.cmp.removed.length)){
-    h += '<div class="obs-cat">【跟 ' + wlEsc(rep.cmp.label) + ' 比】</div>' +
-      (rep.cmp.moved.length ? '<div class="obs-line">換類 ' + wlEsc(rep.cmp.moved.join(' / ')) + '</div>' : '') +
+    h += '<div class="obs-cat">【跟 ' + wlEsc(rep.cmp.label) + ' 名單比】<small>移出原因照 ' + wlEsc(rep.cmp.label) + ' 收盤判定</small></div>' +
       (rep.cmp.added.length ? '<div class="obs-line">新增 ' + wlEsc(rep.cmp.added.join(' / ')) + '</div>' : '') +
-      (rep.cmp.removed.length ? '<div class="obs-line">移出 ' + wlEsc(rep.cmp.removed.join(' / ')) + '</div>' : '');
+      (rep.cmp.removed.length ? '<div class="obs-line">移出 ' + wlEsc(rep.cmp.removed.join(' / ')) + '</div>' : '') +
+      (rep.cmp.moved.length ? '<div class="obs-line">換類（跟 ' + wlEsc(rep.cmp.label) + ' 收盤比） ' + wlEsc(rep.cmp.moved.join(' / ')) + '</div>' : '');
   }
   h += '<div class="obs-warn">' + obsWarnings(rep).map(wlEsc).join('<br>') + '</div>';
   h += '<div class="obs-sym" style="margin-top:8px">觀察池＝本站 ' + GROUPS.length + ' 個族群裡，近 10 個交易日（' + wlEsc(String(rep.hitsFrom || '').slice(5)) + '～' + wlEsc(String(rep.hitsTo || '').slice(5)) +
@@ -12235,8 +12255,6 @@ async function obsRun(slot, popup){
   obsRerender();
   try {
     const rep = await obsBuild(slot);
-    rep.cmp = obsCompare(rep);
-    obsSave(rep);
     obsState.report = rep;
     if (popup){
       obsShowPopup(rep);
