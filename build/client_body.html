@@ -345,6 +345,8 @@
   .bl-section.bl-launch{background:#c0392b;}
   .bl-section.bl-brew{background:#0f766e;}
   .bl-section.bl-fallen{background:#7c2d12;}
+  .bl-close{display:block;font-size:11px;white-space:nowrap;line-height:1.2;}
+  .bl-close.up{color:#c0392b;} .bl-close.down{color:#15803d;}
   .bl-backfill-note{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:8px;font-weight:700;margin:8px 0;}
   .race-head{font-weight:800;font-size:14px;color:#fff;margin:6px 0 4px;}
   .race-sub{font-size:11px;color:var(--muted);margin-bottom:6px;}
@@ -2461,7 +2463,7 @@
         <li><b>十大多族群</b>（原精選十大多空族群的多方）：今天漲幅前10大族群，各取大戶力最強的前5檔個股；按「大戶力≥10%」只看大戶力 ≥ +10% 的。</li>
         <li><b>十大空族群</b>（原精選十大多空族群的空方）：今天跌幅前10大族群，各取大戶力最負（賣超）的前5檔個股，名次從最弱的數；按「大戶力≤-10%」只看大戶力 ≤ −10% 的。</li>
         <li><b>形態觀察股</b>：55 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
-        <li><b>發動</b>、<b>醞釀</b>（2026-10-12 拆成兩個分頁，發動在左、醞釀在右，今天／昨天／前天切換兩頁共用；日期列後面的「盤中大戶力≥10%」只看今天盤中大戶力 ≥ +10% 的，兩頁各自記）：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。今天曾經發動的股票也會列進今日即時多（訊號寫「🚀 發動」，時間＝第一次發動）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
+        <li><b>發動</b>、<b>醞釀</b>（2026-10-12 拆成兩個分頁，發動在左、醞釀在右，今天／昨天／前天切換兩頁共用；日期列後面的「盤中大戶力≥10%」只看今天盤中大戶力 ≥ +10% 的，兩頁各自記）：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。今天發動過的股票也會列進今日即時多（時間＝第一次發動）：現在還站在箱頂上寫「🚀 發動」、發動過又跌回箱頂下寫「↩ 曾發動」（2026-10-13 分開標）；開盤前跟其他分頁一樣沿用最近交易日到 08:45，用那天收盤分。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看，發動分兩段：<b>發動</b>＝那天收盤還站在箱頂上、<b>曾發動</b>＝盤中發動過但收盤跌回箱頂下（箱頂旁邊標那天收盤）；今天盤中曾發動、現在回落的股票也會列在「曾發動」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。<b>排序</b>：個股名單預設照盤中大戶力排，值大的在上、小的在下，沒有大戶力資料的排最後。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
         <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
         <li><b>盤中特大買單／賣單</b>：同一秒內大單連續敲進／倒出（同秒合計 ≥100 張或 ≥3,000 萬，觸發時大戶力要同向）；合計 ≥300 張或 ≥5,000 萬標「瞬間特大」。訊號很多時用上方篩選鈕縮減（可同時開幾個）：只看特大單、金額≥1億、族群前10名（族群同步漲幅／跌幅前 10 名）、每檔只留最大一筆（同一檔一天觸發好幾次，只留到目前為止金額最大的，之後有更大的會換成新的）、每檔只留最新一筆（只留最近發生的那筆，看誰剛剛有大單進來；跟最大一筆二選一）；分頁上的數字會跟著篩選變。</li>
@@ -5530,11 +5532,26 @@ function stSignalEvents(side){
   return out;
 }
 // 今天曾經發動的股票都放進今日即時多（2026-10-12 使用者）：後端記下的發動紀錄＋現在盤中正在發動的，一檔一列，時間＝第一次發動
+// 2026-10-13 使用者：發動和曾經發動要分開標——現在（或那天收盤）還站在箱頂上＝「🚀 發動」，發動過又跌回箱頂下＝「↩ 曾發動」。
+// 開盤前跟訊號中心其他分頁一樣沿用最近交易日（brewHeldLaunchDate），用那天收盤分。
 function launchSignalEvents(){
   if (!brewLaunchData) return [];
-  let rows;
-  try { rows = brewTodayRows().launch; } catch (_){ return []; }
+  let rows, stateOf;
+  try {
+    const held = brewHeldLaunchDate();
+    if (held){
+      rows = brewLaunchByStock(brewHistoryDay(held).launch);
+      stateOf = (r) => brewCloseState(r, held);
+    } else {
+      rows = brewTodayRows().launch;
+      const m = brewLaunchModel();
+      const live = m ? new Set(m.launchBlocks.flatMap((b) => b.rows.map((x) => x.code))) : null;
+      const quoted = brewQuotedCodes();
+      stateOf = (r) => (!live ? null : live.has(r.code) ? 'launch' : quoted.has(r.code) ? 'fallen' : null);
+    }
+  } catch (_){ return []; }
   return rows.map((r) => {
+    const fallen = stateOf(r) === 'fallen';
     const t = r.recordedAt ? Date.parse(r.recordedAt) : NaN;
     const parts = [];
     if (r.group) parts.push(r.group);
@@ -5542,7 +5559,7 @@ function launchSignalEvents(){
     if (r.launchCount > 1) parts.push('發動 ' + r.launchCount + ' 次');
     if (r.brewing) parts.push('醞釀→發動');
     return { tabs: ['now'], ts: Number.isFinite(t) ? t : Date.now(), time: Number.isFinite(t) ? fmtTime(r.recordedAt) : '盤中',
-      code: r.code, name: r.name || lookupStockName(r.code), label: '🚀 發動', isBuy: true, note: parts.join('・') };
+      code: r.code, name: r.name || lookupStockName(r.code), label: fallen ? '↩ 曾發動' : '🚀 發動', isBuy: true, note: parts.join('・') };
   });
 }
 function ghfTodayView(){   // 今日即時多／空只看今天（不跟著族群分頁的「昨天／前天」切）
@@ -5947,6 +5964,39 @@ async function refreshBrewHistory(force){
   }
 }
 function brewSessionDate(){ return brewLaunchData ? brewLaunchData.session : null; }
+// 2026-10-13 使用者：發動和曾經發動要分開。某一天的發動照那天收盤分：收盤還站在箱頂上＝發動、盤中發動過但收盤跌回箱頂下＝曾發動。
+// 收盤價：後端日K進來後紀錄帶 dayClose／closeAbove；還沒有的話，首頁報價剛好是那天收盤（休市／開盤前沿用）就用首頁的；都沒有＝還不知道（null）。
+let brewQuoteMapFor = null, brewQuoteMap = new Map();
+function brewQuotePrice(code){
+  if (brewQuoteMapFor !== lastData){
+    brewQuoteMap = new Map();
+    ((lastData && lastData.groups) || []).forEach((g) => (g.stocks || []).forEach((st) => { if (Number(st.price) > 0) brewQuoteMap.set(st.code, Number(st.price)); }));
+    brewQuoteMapFor = lastData;
+  }
+  return brewQuoteMap.get(code);
+}
+function brewDayClose(r, date){
+  if (r.dayClose !== undefined && r.dayClose !== null) return Number(r.dayClose);
+  const closeQuotes = lastData && lastData.quoteDate === date && (lastData.heldClose || String(lastData.quoteTime || '') >= '13:30');
+  return closeQuotes ? (brewQuotePrice(r.code) || null) : null;
+}
+function brewCloseState(r, date){
+  if (r.eod) return 'launch';   // 收盤回推的本來就是收盤仍符合
+  if (typeof r.closeAbove === 'boolean') return r.closeAbove ? 'launch' : 'fallen';
+  const px = brewDayClose(r, date);
+  if (!px || !(Number(r.boxHigh) > 0)) return null;
+  return px > Number(r.boxHigh) ? 'launch' : 'fallen';
+}
+// 開盤前（訊號中心還在沿用上一個交易日、今天還沒有任何發動）：發動分頁「今天」先顯示最近交易日的發動，08:45 跟其他分頁一起換成今天
+function brewHeldLaunchDate(){
+  const session = brewSessionDate();
+  const held = sigCurrentDate();
+  if (!session || !held || held >= session) return null;
+  if (brewHistoryDay(session).launch.length) return null;
+  const m = brewLaunchModel();
+  if (m && m.launchCount) return null;
+  return brewHistoryDay(held).launch.length ? held : null;
+}
 function brewPastDates(){
   const session = brewSessionDate();
   const dates = brewHistoryData && Array.isArray(brewHistoryData.dates) ? brewHistoryData.dates : [];
@@ -6023,7 +6073,7 @@ function brewPastLaunchRowHtml(r, opts){
     '<td class="combo-holder">' + raceHolderCellHtml(r) + '</td>' +
     '<td class="combo-pct ' + cls + '">' + (r.changePct === null || r.changePct === undefined ? '—' : limitPriceHtml(r, fmt(r.changePct) + '%')) + '</td>' +
     '<td class="combo-price ' + cls + '">' + limitPriceHtml(r, num2(r.price)) + '</td>' +
-    '<td class="bl-box">' + num2(r.boxHigh) + (r.brewing ? ' <span class="bl-tag">醞釀→發動</span>' : '') + '</td>' +
+    '<td class="bl-box">' + num2(r.boxHigh) + (r.closePx ? ' <small class="bl-close' + (r.closePx > Number(r.boxHigh) ? ' up' : ' down') + '">收 ' + num2(r.closePx) + '</small>' : '') + (r.brewing ? ' <span class="bl-tag">醞釀→發動</span>' : '') + '</td>' +
     '</tr>';
 }
 function brewPastBrewRowHtml(r, opts){
@@ -6098,6 +6148,23 @@ function brewOverlapHtml(mode, part){
       : '<div class="bl-section bl-brew">醞釀（整理）' + laterName + '、' + earlierName + '都有・' + brew.rows.length + ' 檔</div>' +
         (brew.rows.length ? brewPastTableHtml('brew', brew.rows, { prevLabel: earlier.label, prev: brew.prev }) : '<div class="race-note">沒有兩天都醞釀的股票</div>'));
 }
+// 往日發動分兩段：發動（收盤還站在箱頂上）、曾發動（盤中發動過、收盤跌回箱頂下）；收盤價還沒進來的另列一段
+function brewPastLaunchSplitHtml(launchRows, date){
+  const groups = { launch: [], fallen: [], unknown: [] };
+  launchRows.forEach((r) => {
+    const close = brewDayClose(r, date);
+    groups[brewCloseState(r, date) || 'unknown'].push(Object.assign({}, r, { closePx: r.eod ? null : close }));
+  });
+  if (groups.unknown.length === launchRows.length){
+    return '<div class="bl-section bl-launch">發動（突破）・' + launchRows.length + ' 檔</div>' +
+      '<div class="race-note">那天的收盤價還沒進來，先不分發動／曾發動（日K進來後會自動分開）。</div>' + brewPastTableHtml('launch', launchRows);
+  }
+  return '<div class="bl-section bl-launch">發動（收盤還站在箱頂上）・' + groups.launch.length + ' 檔</div>' +
+      (groups.launch.length ? brewPastTableHtml('launch', groups.launch) : '<div class="race-note">那天發動的股票收盤都跌回箱頂下了</div>') +
+    '<div class="bl-section bl-fallen">曾發動（盤中發動過、收盤跌回箱頂下）・' + groups.fallen.length + ' 檔</div>' +
+      (groups.fallen.length ? brewPastTableHtml('launch', groups.fallen) : '<div class="race-note">沒有發動後又跌回箱頂下的</div>') +
+    (groups.unknown.length ? '<div class="bl-section bl-fallen">收盤價還沒進來・' + groups.unknown.length + ' 檔</div>' + brewPastTableHtml('launch', groups.unknown) : '');
+}
 function brewPastDayHtml(part, dateOverride){
   const date = dateOverride || brewViewDate();
   if (!date) return '<div class="signal-empty"><div class="se-title">還沒有那一天的紀錄</div><div class="se-sub">後端每個交易日都會留下醞釀名單與發動紀錄，上線前幾天的用日K回推；資料還沒進來時稍後再看。</div></div>';
@@ -6108,8 +6175,7 @@ function brewPastDayHtml(part, dateOverride){
   return '<div class="race-sub">' + mmdd + ' 的紀錄（後端每日保存）：發動＝那天盤中第一次符合發動條件的時間與價格（一檔一列，×N＝那天回落又重新發動、總共發動 N 次）；醞釀＝那天盤前算出來的醞釀名單。' +
     (eod ? '發動時間寫「收盤」的＝那天沒有盤中紀錄（保存功能上線前，或那天程式沒在跑），用收盤價回推：收盤過箱頂、收盤均線分數>10、全天周轉率≥5% 或量≥5 日均量 1.5 倍；盤中曾發動又回落的補不回來。' : '') + '</div>' +
     (part === 'launch'
-      ? '<div class="bl-section bl-launch">發動（突破）・' + launchRows.length + ' 檔</div>' +
-        (launchRows.length ? brewPastTableHtml('launch', launchRows) : '<div class="race-note">那天沒有股票發動</div>')
+      ? (launchRows.length ? brewPastLaunchSplitHtml(launchRows, date) : '<div class="bl-section bl-launch">發動（突破）・0 檔</div><div class="race-note">那天沒有股票發動</div>')
       : '<div class="bl-section bl-brew">醞釀（整理）・' + day.brew.length + ' 檔</div>' +
         (day.brew.length ? brewPastTableHtml('brew', day.brew) : '<div class="race-note">那天沒有醞釀名單紀錄</div>'));
 }
@@ -6147,7 +6213,7 @@ function brewFallenTodayHtml(m){
     return '<div class="bl-section bl-fallen">今天曾發動・已全部隱藏（' + all.length + ' 檔）</div>' +
       '<div class="race-note">紀錄還在，明天切到「昨天」還是查得到。' + restoreBtn + '</div>' + unknownNote;
   }
-  return '<div class="bl-section bl-fallen">今天曾發動・' + rows.length + ' 檔</div>' +
+  return '<div class="bl-section bl-fallen">曾發動（今天發動過、現在跌回箱頂下）・' + rows.length + ' 檔</div>' +
     '<div class="race-sub">回落後訊號不會消失，這裡永遠找得到；按右邊「全部隱藏」只是這台瀏覽器不再顯示，紀錄還在，明天用「昨天」查得到。' +
     '<button class="chart-tab chips-btn bl-dismiss-btn" data-codes="' + rows.map((r) => r.code).join(',') + '">全部隱藏</button></div>' +
     brewPastTableHtml('launch', rows) + (hiddenCount ? '<div class="race-note">' + restoreBtn + '</div>' : '') + unknownNote;
@@ -6160,6 +6226,11 @@ function brewLaunchHtml(part){
   const hfPastNote = brewHf[part] ? '<div class="race-note">盤中大戶力篩選只看今天盤中（昨天／前天的紀錄沒有大戶力），這裡照樣全部列出。</div>' : '';
   if (typeof brewDayOffset === 'string') return brewDayBarHtml(part) + hfPastNote + brewOverlapHtml(brewDayOffset, part);
   if (brewDayOffset > 0) return brewDayBarHtml(part) + hfPastNote + brewPastDayHtml(part);
+  const held = part === 'launch' ? brewHeldLaunchDate() : null;
+  if (held){
+    return brewDayBarHtml(part) + '<div class="race-note">還沒開盤，先顯示最近交易日 ' + String(held).slice(5).replace('-', '/') +
+      ' 的發動（跟訊號中心其他分頁一樣沿用到 08:45；開盤後換成今天的即時發動）。</div>' + brewPastDayHtml('launch', held);
+  }
   const m = brewLaunchModel();
   // 首頁即時報價還沒到（例如晚上證交所抓不回來）：先顯示後端記下的今天紀錄，不要整頁空白（2026-10-12 使用者：訊號怎麼不見了）
   if (!m && brewSessionDate() && brewHistoryData && brewHistoryData.days && brewHistoryData.days[brewSessionDate()]){
@@ -10716,6 +10787,7 @@ function renderSignalCenter(){
     if (key === 'strongStocks' || key === 'weakStocks'){ const d = stState[key === 'strongStocks' ? 'strong' : 'weak']; return d ? d.count : null; }
     if (key === 'bigHolderForceBull') return bigHolderRowsFrom(mainForceRanking, 'bull').length;
     if (key === 'bigHolderForceBear') return bigHolderRowsFrom(mainForceRanking, 'bear').length;
+    if (key === 'launchOnly' && brewHeldLaunchDate()) return brewLaunchByStock(brewHistoryDay(brewHeldLaunchDate()).launch).length;
     if (key === 'brewOnly' || key === 'launchOnly'){
       const bm = brewLaunchModel();
       if (bm) return key === 'brewOnly' ? bm.brewCount : bm.launchCount;
