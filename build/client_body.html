@@ -1855,6 +1855,11 @@
   .mv-foot{font-size:11.5px;color:var(--muted);margin-top:6px;}
   /* 123 黑龍標記（2026-10-12） */
   .d123-tag{display:inline-block;font-size:11px;font-weight:800;color:#fff;border-radius:999px;padding:0 6px;margin:0 3px;line-height:1.5;font-style:normal;white-space:nowrap;}
+  /* 今日強勢股／弱勢股（2026-10-12） */
+  .st-ghead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;margin:12px 0 4px;padding:4px 8px;border-left:4px solid #dc2626;background:rgba(220,38,38,.07);border-radius:6px;}
+  .st-ghead.weak{border-left-color:#2f9e5b;background:rgba(47,158,91,.08);}
+  .st-score{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:22px;border-radius:999px;background:#f5c542;color:#3b2a00;font-weight:800;font-size:12px;margin:0 6px;}
+  .st-score.weak{background:#cfe9d8;color:#14532d;}
   .d123-tag.r1{background:#dc2626;} .d123-tag.r2{background:#d97706;} .d123-tag.full{background:#6b7280;}
   .dg-lines li{border-bottom:1px dashed var(--line);padding:2px 0;}
   .dg-lines b{color:#e6675f;}
@@ -2413,6 +2418,8 @@
     </div>
     <div class="signal-help" id="signalHelp" hidden>
       <ul>
+        <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。⭐＝這族今天也有出現在盤中觀察股（通常是比較強勢的族群）、👀＝這檔在盤中觀察股名單裡。均線分數是收盤算好的，現價、漲跌是即時的。</li>
+        <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面。</li>
         <li><b>盤中觀察股</b>：55 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
         <li><b>今日即時多</b>：彙整多方向訊號的即時清單：盤中大戶力多、四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單，依發生時間新到舊排序。</li>
         <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（沒有發生時間，只有今天有），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。</li>
@@ -4182,6 +4189,8 @@ async function renderOtcStrengthWidget(){
 // 使用者 2026-09-24：族群大戶力／族群綜合表／盤中333 這三個移到今日即時後面（原本排在後段）。
 // 2026-09-30 使用者：醞釀／發動要排第二個位置，在今日即時右邊，方便盯著看；其餘順序不變。
 const SIGNAL_KINDS = [
+  { key: 'strongStocks', label: '今日強勢股' },   // 2026-10-12 使用者：族群分數前十大＋均線分數高，排第一個（盤中觀察股左邊）
+  { key: 'weakStocks', label: '今日弱勢股' },     // 2026-10-12 使用者：倒過來，族群分數倒數十名＋均線分數低，放強勢股旁邊
   { key: 'obsWatch', label: '盤中觀察股' },   // 2026-10-12 使用者：盤中觀察股放進訊號中心，排第一個（今日即時多左邊）
   { key: 'now', label: '今日即時多' },      // 2026-10-04 使用者：拆成多／空兩頁，多方向留在這裡
   { key: 'nowBear', label: '今日即時空' },  // 2026-10-04 使用者：刀劍空＋盤中大戶力空＋四項精選強空＋主力翻空＋盤中特大賣單集中這一頁
@@ -10505,6 +10514,50 @@ function checkLaunchNotifications(){
   }
   return fresh;
 }
+// ---- 今日強勢股／今日弱勢股（2026-10-12 使用者）----
+// 「族群分數加上盤中觀察股有出現的，通常都是比較強勢的族群，再從裡面挑均線分數高的，勝率自然就會好一點」：
+// 強勢股＝族群分數前十大（族內平均均線分數，跟均線分數排行同一套）裡、均線分數 ≥12 的股票；弱勢股倒過來＝倒數十名裡 ≤3 的。
+// 均線分數是後端收盤算好的（/api/ma-strength），現價、漲跌用首頁即時報價；⭐＝這族今天也在盤中觀察股、👀＝這檔在盤中觀察股。
+const stState = { strong: null, weak: null, loading: {}, at: {}, error: {} };
+function stLoad(side){
+  if (stState.loading[side] || (stState[side] && Date.now() - stState.at[side] < 5 * 60000)) return;
+  if (stState.error[side] && Date.now() - stState.error[side].at < 30000) return;
+  stState.loading[side] = true;
+  fetch('/api/ma-strength?side=' + side).then((r) => r.json().then((d) => ({ ok: r.ok, d }))).then(({ ok, d }) => {
+    if (ok && d && d.status === 'ok'){ stState[side] = d; stState.at[side] = Date.now(); stState.error[side] = null; }
+    else stState.error[side] = { at: Date.now(), msg: (d && (d.detail || d.error)) || '後端還沒有這個功能（HanStock PR 合併部署後就會有）' };
+  }).catch((e) => { stState.error[side] = { at: Date.now(), msg: String((e && e.message) || e) }; }).finally(() => {
+    stState.loading[side] = false;
+    try { if (!document.getElementById('signalModal').hidden && /^(strong|weak)Stocks$/.test(signalCenterState.activeTab)) renderSignalCenter(); } catch (_){}
+  });
+}
+function stPanelHtml(side){
+  stLoad(side);
+  const d = stState[side], strong = side === 'strong';
+  if (!d) return '<div class="signal-empty"><div class="se-title">' + (stState.error[side] ? '讀取失敗：' + wlEsc(stState.error[side].msg) : '讀取中…') + '</div></div>';
+  const obsItems = (obsState.report && obsState.report.items) || [];
+  const obsCodes = new Set(obsItems.map((x) => x.code));
+  const groupHasObs = (name) => { const g = GROUPS.find((x) => x.name === name); return !!g && g.stocks.some((st) => obsCodes.has(st.code)); };
+  const rule = strong ? '族群分數前十大（族內平均均線分數）裡，均線分數 ≥' + d.rule.min + ' 的股票' : '族群分數倒數十名裡，均線分數 ≤' + d.rule.max + ' 的股票';
+  let h = '<div class="race-note">' + rule + '・均線分數＝' + swMmdd(d.date) + ' 收盤（滿分 15，每天收盤後更新）・現價、漲跌是即時的・' +
+    (strong ? '⭐＝這族今天也有出現在盤中觀察股（通常是比較強勢的族群）・' : '') + '👀＝這檔在盤中觀察股名單裡・點一列開K線圖</div>';
+  d.groups.forEach((g) => {
+    const star = strong && groupHasObs(g.name);
+    h += '<div class="st-ghead' + (strong ? '' : ' weak') + '"><span>' + (strong ? '第 ' + g.rank + ' 名' : '倒數第 ' + (d.groupCount - g.rank + 1) + ' 名') + '・<b>' + wlEsc(g.name) + '</b>' + (star ? ' ⭐' : '') + '</span>' +
+      '<span class="muted">平均 ' + g.avg + '・' + g.n + ' 檔・' + (strong ? '≥' + d.rule.min : '≤' + d.rule.max) + ' 分 ' + g.rows.length + ' 檔</span></div>';
+    if (!g.rows.length){ h += '<div class="race-note">這族沒有符合的股票</div>'; return; }
+    h += '<div class="signal-list">' + g.rows.map((r) => {
+      const q = getStockQuote(r.code);
+      const chg = q ? q.price - q.price / (1 + q.changePercent / 100) : 0;
+      return '<div class="signal-row" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '">' +
+        '<span class="sig-code">' + r.code + '</span><span class="sig-name">' + wlEsc(r.name) + (obsCodes.has(r.code) ? ' 👀' : '') + '</span>' +
+        '<span class="st-score' + (strong ? '' : ' weak') + '" title="均線分數（' + swMmdd(d.date) + ' 收盤）">' + r.sum + '</span>' +
+        (q ? stockValueColsHtml(q.price, chg, q.changePercent) : '<span class="muted">收 ' + ckPrice(r.close) + '</span>') + '</div>';
+    }).join('') + '</div>';
+  });
+  if (!d.count) h += '<div class="race-note">今天沒有符合的股票</div>';
+  return h;
+}
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
   refreshBrewLaunch(false);
@@ -10515,6 +10568,7 @@ function renderSignalCenter(){
     if (key === 'nowBear') return currentEvents.filter((e) => e.tabs.includes('nowBear')).length + bigHolderRowsFrom(mainForceRanking, 'bear').length;
     if (key === 'history' || key === 'race333' || key === 'bladeShort' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
     if (key === 'obsWatch') return obsState.report ? obsState.report.items.length : null;
+    if (key === 'strongStocks' || key === 'weakStocks'){ const d = stState[key === 'strongStocks' ? 'strong' : 'weak']; return d ? d.count : null; }
     if (key === 'bigHolderForceBull') return bigHolderRowsFrom(mainForceRanking, 'bull').length;
     if (key === 'bigHolderForceBear') return bigHolderRowsFrom(mainForceRanking, 'bear').length;
     if (key === 'brewLaunch'){ const bm = brewLaunchModel(); return bm ? bm.brewCount + '/' + bm.launchCount : null; }
@@ -10524,9 +10578,9 @@ function renderSignalCenter(){
   // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
   const PURPLE_TAB_KEYS = new Set(['obsWatch', 'now', 'groupHolderForce', 'groupCombinedBoard', 'race333', 'brewLaunch']);  // 2026-09-24 使用者：醞釀／發動也紫紅色；2026-09-26：盤中大戶力改回黑字；2026-10-08：今日即時多也紫色
   // 2026-10-04 使用者：「空」方向另外三個分頁(盤中大戶力空／四項精選強空／主力翻空)也改綠色，跟刀劍空、盤中特大賣單一致。
-  const GREEN_TAB_KEYS = new Set(['nowBear', 'bladeShort', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear']);  // 2026-10-04：今日即時空也綠字
+  const GREEN_TAB_KEYS = new Set(['weakStocks', 'nowBear', 'bladeShort', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear']);  // 2026-10-04：今日即時空也綠字
   // 2026-10-08 使用者：多方六個分頁字都改紅色、顏色一樣（盤中特大買單原本桃紅色也改成這個紅）。
-  const RED_TAB_KEYS = new Set(['bigBuy', 'bigHolderForceBull', 'fourGateBuy', 'combo12Bull', 'blackDragon', 'mainForceFlipBull']);
+  const RED_TAB_KEYS = new Set(['strongStocks', 'bigBuy', 'bigHolderForceBull', 'fourGateBuy', 'combo12Bull', 'blackDragon', 'mainForceFlipBull']);
   const tabsHtml = SIGNAL_KINDS.map((k) => {
     const count = countFor(k.key);
     return '<button class="chart-tab signal-tab' + (signalCenterState.activeTab === k.key ? ' active' : '') + (PURPLE_TAB_KEYS.has(k.key) ? ' signal-tab-purple' : '') + (GREEN_TAB_KEYS.has(k.key) ? ' signal-tab-green' : '') + (RED_TAB_KEYS.has(k.key) ? ' signal-tab-red' : '') + '" data-kind="' + k.key + '">' +
@@ -10593,6 +10647,8 @@ function renderSignalCenter(){
   } else if (active === 'brewLaunch'){
     refreshBrewHistory(false);
     replaceSignalHtml(body, 'brewLaunch', brewLaunchHtml());
+  } else if (active === 'strongStocks' || active === 'weakStocks'){
+    replaceSignalHtml(body, active + ':' + (stState.at.strong || 0) + ':' + (stState.at.weak || 0), stPanelHtml(active === 'strongStocks' ? 'strong' : 'weak'));
   } else if (active === 'obsWatch'){
     if (!obsState.report && !obsState.loading && !obsState.error) obsRun(null, false);
     replaceSignalHtml(body, 'obsWatch', obsPanelHtml());

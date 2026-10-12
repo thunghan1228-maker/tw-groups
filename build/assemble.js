@@ -701,6 +701,10 @@ export default {
       // 均線分數排行（2026-10-10 使用者：照莊爸 zhuang.tw/ma 做）：個股分數前 60＋族群分數前十大，收盤後才變，5 分鐘快取
       return await proxyHanstockBars("/api/hub/ma-rank" + url.search, 300);
     }
+    if (url.pathname === "/api/ma-strength") {
+      // 今日強勢股／弱勢股（2026-10-12 使用者）：族群分數前十大（倒數十名）裡均線分數高（低）的股票，收盤後才變，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/ma-rank/strength" + url.search, 300);
+    }
     if (url.pathname === "/api/ma-rank-hits") {
       // 均線分數排行的前十名常客（近 N 天每天取前 K 名，同分全算），5 分鐘快取
       return await proxyHanstockBars("/api/hub/ma-rank/hits" + url.search, 300);
