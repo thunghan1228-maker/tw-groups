@@ -809,15 +809,6 @@ export default {
         return new Response(JSON.stringify({ error: String(e && e.message || e) }), { status: 502, headers });
       }
     }
-    if (url.pathname === "/api/move-why") {
-      // 個股問診「今天在漲／跌什麼」的 AI 整理（2026-10-12 使用者）：盤中事實＋新聞標題轉給後端，後端有設金鑰才會整理
-      if (request.method !== "POST") return Response.json({ status: "error", error: "要用 POST" }, { status: 405 });
-      try {
-        return await proxyHanstockPost("/api/hub/move-why", request);
-      } catch (err) {
-        return Response.json({ status: "error", reason: String(err) }, { status: 502 });
-      }
-    }
     if (url.pathname === "/api/move-news") {
       // 個股問診「今天在漲／跌什麼」的新聞（2026-10-12 使用者）
       const code = String(url.searchParams.get("code") || "").trim().toUpperCase();
