@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 14:15:25";
+const BUILD_STAMP = "2026-10-12 16:17:17";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7105,7 +7105,8 @@ function swingCardHtml(x, opts){
   const health = opts && opts.health && x.health !== null && x.health !== undefined ? '<span class="sw-health">體質 ' + x.health + '/7</span>' : '';
   const scoreText = x.score === null || x.score === undefined ? '—' : (x.prevScore !== null && x.prevScore !== undefined && x.prevScore !== x.score ? x.prevScore + '→<b>' + x.score + '</b>' : '<b>' + x.score + '</b>');
   const instText = x.inst5 === null || x.inst5 === undefined ? '法人 5 日 —'
-    : '法人 5 日 <span class="' + dirClass(x.inst5) + '">' + swLots(x.inst5) + (x.inst5Pct !== null && x.inst5Pct !== undefined ? '（股本 ' + swPct(x.inst5Pct, 1) + '）' : '') + '</span>' +
+    : '法人 5 日 <span class="' + dirClass(x.inst5) + '">' + swLots(x.inst5) + (swHas(x.inst5VolPct) || swHas(x.inst5Pct) ? '（' +
+        [swHas(x.inst5VolPct) ? '佔量 ' + swPct(x.inst5VolPct, 1) : '', swHas(x.inst5Pct) ? '股本 ' + swPct(x.inst5Pct, 1) : ''].filter(Boolean).join('・') + '）' : '') + '</span>' +
       (x.instStreak > 0 ? '・連買 ' + x.instStreak + ' 天' : x.instStreak < 0 ? '・連賣 ' + (-x.instStreak) + ' 天' : '');
   const mfText = x.mf5 === null || x.mf5 === undefined ? '' : '・主力 5 日 <span class="' + dirClass(x.mf5) + '">' + swLots(x.mf5) + '</span>' + (x.mfStreak > 0 ? '（連買 ' + x.mfStreak + ' 天）' : x.mfStreak < 0 ? '（連賣 ' + (-x.mfStreak) + ' 天）' : '');
   return '<div class="sw-card' + (opts && opts.green ? ' green' : '') + '" data-code="' + x.code + '" data-name="' + x.name + '" role="button" tabindex="0">' +
@@ -7113,10 +7114,19 @@ function swingCardHtml(x, opts){
     '<div class="sw-group">' + (x.group || '—') + (x.hot ? '<span class="sw-hot">熱門族</span>' : '') + '</div>' +
     '<div class="sw-pill">' + x.tag + '</div>' + health +
     '<div class="sw-line">收 ' + num2(x.close) + ' <span class="' + dirClass(x.changePct || 0) + '">' + swPct(x.changePct, 1) + '</span>' + (x.aboveMa20Pct !== null && x.aboveMa20Pct !== undefined ? '<span class="muted">・月線之' + (x.aboveMa20Pct >= 0 ? '上 ' : '下 ') + Math.abs(x.aboveMa20Pct).toFixed(1) + '%</span>' : '') + '</div>' +
+    (opts && opts.extra ? opts.extra : '') +
     '<div class="sw-line">' + instText + mfText + '・均線 ' + scoreText + '</div>' +
+    swingRadarLineHtml(x) +
     swingFundLineHtml(x) +
     '<div class="sw-def">防守 <b>月線 ' + num2(x.defense.ma20) + '</b> / <b>三日低 ' + num2(x.defense.threeDayLow) + '</b></div>' +
     risks + '</div>';
+}
+// 籌碼雷達那一週的籌碼%（2026-10-12 使用者：照莊爸卡片「籌碼 +5.6%（集保10/8週, 連4週, 榜第9）」）
+function swingRadarLineHtml(x){
+  const r = x.radar;
+  if (!r) return '';
+  return '<div class="sw-line">籌碼 <b class="' + dirClass(r.chip) + '">' + swPct(r.chip, 1) + '</b><span class="muted">（集保 ' + swMmdd(r.week) + ' 週' +
+    (r.streak > 0 ? '・連 ' + r.streak + ' 週' : '') + (r.rank ? '・暴增榜第 ' + r.rank + (r.listSize ? '／' + r.listSize : '') : '') + '）</span></div>';
 }
 function swingGroupCardHtml(g){
   const cold = g.aboveRatio < 0.5 && g.inst5 <= 0;
@@ -7519,9 +7529,18 @@ function swingRevenueHtml(data, rules){
       (swHas(x.prevYoy) ? '・上月年增 ' + swPct(x.prevYoy, 1) : '') + '・營收 ' + (swHas(x.revYi) ? x.revYi + ' 億' : '—') +
       '・均線 <b>' + x.score + '</b>・收 ' + x.close + '・成交值 ' + x.turnoverYi + ' 億' + (x.announce ? '・' + (x.known ? swMmdd(x.announce) + ' 公布' : swMmdd(x.announce) + ' 前已公布') : '') + '</span></span></div>';
   };
-  return '<div class="sw-rule">' + (rules.revenue ? rules.revenue + '。' : '') + '點一列開K線圖。</div>' +
+  // 莊爸的營收面卡片：年增、月增、累計，下面跟籌碼面一樣的均線、法人、籌碼、本益比、防守價
+  const revCard = (x) => {
+    const flag = (x.accel ? '<span class="sw-rev-flag up">🚀 加速</span>' : (x.decel ? '<span class="sw-rev-flag down">🐢 放緩</span>' : '')) + (x.warn ? '<span class="sw-rev-flag down">⚠️</span>' : '');
+    const extra = '<div class="sw-line"><b class="up">' + mon + ' 月營收年增 ' + swPct(x.yoy, 1) + '</b>' + flag + '<span class="muted">・月增 ' + swPct(x.mom, 1) + '・累計年增 ' + swPct(x.cumYoy, 1) +
+      (swHas(x.prevYoy) ? '・上月年增 ' + swPct(x.prevYoy, 1) : '') + '・營收 ' + (swHas(x.revYi) ? x.revYi + ' 億' : '—') + '・成交值 ' + x.turnoverYi + ' 億' +
+      (x.announce ? '・' + (x.known ? swMmdd(x.announce) + ' 公布' : swMmdd(x.announce) + ' 前已公布') : '') + '</span></div>';
+    return swingCardHtml(x.card, { extra });
+  };
+  return '<div class="sw-rule">' + (rules.revenue ? rules.revenue + '。' : '') + '點一檔開K線圖。熱門族＝籌碼雷達族群排名前 5；防守價＝' + swMmdd(data.date) + ' 收盤的月線與最近三天最低價，下一個交易日適用。</div>' +
     '<div class="bl-section bl-launch">營收面精選・' + mon + ' 月營收・截至 ' + swMmdd(r.asOf) + ' 公布 ' + r.published + ' 檔，年增 ≥' + r.rule.yoy + '% ' + r.yoyHigh + ' 檔；依年增挑，均線分數 ≥' + r.rule.score + '、成交值 ≥' + (r.rule.turnoverYi * 10000).toLocaleString('en-US') + ' 萬 共 ' + r.qualified + ' 檔' + (r.picks.length < r.qualified ? '，列前 ' + r.picks.length + ' 檔' : '') + '</div>' +
-    (r.picks.length ? '<div class="sw-dlist">' + r.picks.map(row).join('') + '</div>' : '<div class="race-note">目前沒有同時符合三個條件的股票（每月 1～10 號陸續公布，越接近 10 號越多）</div>') +
+    (r.picks.length ? (r.picks.every((x) => x.card) ? '<div class="sw-cards">' + r.picks.map(revCard).join('') + '</div>' : '<div class="sw-dlist">' + r.picks.map(row).join('') + '</div>')
+      : '<div class="race-note">目前沒有同時符合三個條件的股票（每月 1～10 號陸續公布，越接近 10 號越多）</div>') +
     '<div class="sw-quote">營收是體質，均線是位置：營收爆發又站得穩的，才是波段的料</div>';
 }
 // 處置動態一列：明日起處置／明日出獄／處置中／觀察名單（出獄 ≤5 個交易日）
@@ -7817,7 +7836,9 @@ function swingSectionHtml(data){
   }
   const list = picks[sec] || [];
   const title = sec === 'chips' ? '籌碼面精選' : '技術面精選';
-  const sub = sec === 'chips' ? '大戶週增、法人連買、主力連買優先・候選 ' + (counts.chips || 0) + ' 檔，列前 ' + list.length + ' 檔'
+  const rd = data.radar;
+  const sub = sec === 'chips' ? (rd ? '籌碼暴增榜（集保 ' + swMmdd(rd.week) + ' 週，' + rd.buy + ' 檔）前 ' + rd.pool + ' 名・熱門族（' + (rd.hot || []).join('、') + '）・法人 5 日買超・連續增加週數多的優先' : '大戶週增、法人連買、主力連買優先') +
+      '・候選 ' + (counts.chips || 0) + ' 檔，列前 ' + list.length + ' 檔'
     : '真穿月線 ' + (counts.tech || 0) + ' 檔；剛站上未達門檻 ' + (counts.techNear || 0) + ' 檔不列';
   const skipped = sec === 'tech' ? (data.techSkipped || []).map((x) => x.name + '（' + x.why + '）').join('、') : '';
   const quote = sec === 'chips' ? '籌碼是候選名單，型態確認再進' : '站上月線第一天，防守就是月線本身';
@@ -8262,7 +8283,10 @@ function wlSavePrefs(){
 }
 wlReadLocal();
 function wlGroup(){ return wl.data.groups.find((g) => g.id === wl.active) || wl.data.groups[0]; }
-function wlHas(code){ return wl.data.groups.some((g) => g.items.some((it) => it.code === code)); }
+// 盤中觀察股自動帶進來的四組（id obs1～obs4）不算「已在自選股」：☆ 照舊、★ 移除也不動它們
+function wlIsAuto(g){ return /^obs\\d$/.test(String(g && g.id)); }
+function wlHas(code){ return wl.data.groups.some((g) => !wlIsAuto(g) && g.items.some((it) => it.code === code)); }
+function wlTargetGroup(){ const g = wlGroup(); return wlIsAuto(g) ? (wl.data.groups.find((x) => !wlIsAuto(x)) || g) : g; }
 function wlCount(data){ return (data || wl.data).groups.reduce((n, g) => n + g.items.length, 0); }
 function wlNewGroupId(data){
   let i = data.groups.length + 1;
@@ -8414,7 +8438,7 @@ function wlAddCodes(entries, groupId){
   wlFetchExtra(true);
 }
 function wlRemoveEverywhere(code){
-  wlMutate((data) => { for (const g of data.groups) g.items = g.items.filter((it) => it.code !== code); });
+  wlMutate((data) => { for (const g of data.groups) if (!wlIsAuto(g)) g.items = g.items.filter((it) => it.code !== code); });
 }
 function wlLearnNames(){
   // 族群外的股票第一次抓到股名就存進清單，其他電腦不用再查
@@ -8499,9 +8523,11 @@ function renderWatch(){
   if (!body) return;
   const g = wlGroup();
   body.innerHTML = wlSyncHtml() + wlTabsHtml() +
-    '<div class="wl-add"><input type="text" id="wlAddInput" autocomplete="off" placeholder="輸入代號或名稱加入「' + wlEsc(g.name) + '」，可一次貼多檔：2330 2317 3707">' +
+    '<div class="wl-add"><input type="text" id="wlAddInput" autocomplete="off" placeholder="輸入代號或名稱加入「' + wlEsc(wlTargetGroup().name) + '」，可一次貼多檔：2330 2317 3707">' +
     '<button class="wl-btn primary" id="wlAddBtn">加入</button></div>' +
     (wl.addNote ? '<div class="wl-hint">' + wlEsc(wl.addNote) + '</div>' : '') +
+    (wlIsAuto(g) ? '<div class="wl-hint">這組是「盤中觀察股」自動帶進來的：盤中 ' + OBS_SLOTS.join('、') + ' 每個時段換成當下的名單（觀察股列幾檔這裡就幾檔），' +
+      '手動加的下次會被換掉；備註＝哪個時段、符號（★強 ☆中上 ●發動過 ▲相對高檔 ✗三K低 ▼跌 5% ↑紅但在月線下）。</div>' : '') +
     wlViewsHtml() +
     '<div class="wl-sorts">排序 ' + (WL_VIEW_SORTS[wl.view] || WL_SORTS).map((s) => '<button class="wl-sort' + (wlViewSort() === s[0] ? ' active' : '') + '" data-sort="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>' +
     '<div id="wlTable"></div>' +
@@ -8977,7 +9003,7 @@ function wlSubmitAdd(){
   const input = document.getElementById('wlAddInput');
   const { found, unknown } = wlParseInput(input ? input.value : '');
   wl.addNote = unknown.length ? '找不到：' + unknown.join('、') + '（族群表外的股票請直接打代號）' : '';
-  if (found.length) wlAddCodes(found, wlGroup().id);
+  if (found.length) wlAddCodes(found, wlTargetGroup().id);   // 正在看自動那四組時，加到第一個自己的分組
   renderWatch();
   const again = document.getElementById('wlAddInput');
   if (again){ again.value = unknown.join(' '); again.focus(); }
@@ -9144,11 +9170,11 @@ document.addEventListener('click', (e) => {
   const code = star.dataset.code;
   if (!code) return;
   if (wlHas(code)){
-    const names = wl.data.groups.filter((g) => g.items.some((it) => it.code === code)).map((g) => g.name);
+    const names = wl.data.groups.filter((g) => !wlIsAuto(g) && g.items.some((it) => it.code === code)).map((g) => g.name);
     wlRemoveEverywhere(code);
     showToast('已從自選股「' + names.join('、') + '」移除 ' + (star.dataset.name || code));
   } else {
-    const g = wlGroup();
+    const g = wlTargetGroup();
     wlAddCodes([{ code, name: star.dataset.name || '' }], g.id);
     showToast('已加入自選股「' + g.name + '」：' + (star.dataset.name || code));
   }
@@ -10054,7 +10080,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 14:15:25';
+const BUILD_STAMP = '2026-10-12 16:17:17';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -12256,6 +12282,7 @@ async function obsRun(slot, popup){
   try {
     const rep = await obsBuild(slot);
     obsState.report = rep;
+    try { obsSyncWatchlist(rep); } catch (e){ console.warn('obs → 自選股', e); }
     if (popup){
       obsShowPopup(rep);
       if (alertsEnabled) launchBeep();
@@ -12270,6 +12297,23 @@ async function obsRun(slot, popup){
     obsState.loading = false;
     obsRerender();
   }
+}
+// 盤中觀察股自動進自選股（2026-10-12 使用者：【1】～【4】四類各設一個分組，盤中跳出來的時候自動換成當下名單，
+// 觀察股列多少檔這裡就多少檔；【5】有點深不放）。分組沒有就建在最後面；內容跟上次一樣就不動，免得一直同步。
+const OBS_WL_GROUPS = [[1, 'obs1', '⏰黑K・黑龍符合'], [2, 'obs2', '⏰今天噴出'], [3, 'obs3', '⏰已噴在高檔'], [4, 'obs4', '⏰右肩打底']];
+function obsSyncWatchlist(rep){
+  const today = twTodayStr(), at = rep.slot || obsNowHm();
+  const want = OBS_WL_GROUPS.map(([cat, id, name]) => [id, name, obsGroupLines(rep.items.filter((x) => x.cat === cat)).flatMap(([, xs]) => xs)
+    .map((x) => ({ code: x.code, note: at + (obsMarks(x) ? ' ' + obsMarks(x) : ''), addedAt: today }))]);
+  const sig = (items) => items.map((it) => it.code + '|' + (it.note || '')).join(',');
+  if (want.every(([id, , items]) => { const g = wl.data.groups.find((x) => x.id === id); return g && sig(g.items) === sig(items); })) return;
+  wlMutate((data) => {
+    for (const [id, name, items] of want){
+      let g = data.groups.find((x) => x.id === id);
+      if (!g){ g = { id, name, items: [] }; data.groups.push(g); }
+      g.items = items.map((it) => ({ ...it }));
+    }
+  });
 }
 function obsRerender(){
   if (!document.getElementById('hwModal').hidden && hwState.tab === 'obs') renderHomework();
@@ -12298,6 +12342,7 @@ function obsCopy(){
 function obsPanelHtml(){
   const rep = obsState.report;
   let h = '<div class="obs-panel"><div class="race-note">盤中 ' + OBS_SLOTS.join('、') + ' 會自動跳出來（網頁要開著；跟發動提醒一樣）。這裡可以隨時重算一次。' +
+    '【1】～【4】每次算完也會放進自選股的四個分組（⏰黑K・黑龍符合／⏰今天噴出／⏰已噴在高檔／⏰右肩打底）。' +
     ' <button type="button" class="chart-tab" data-obs-run="1">' + (obsState.loading ? '計算中…' : '↻ 現在算一次') + '</button>' +
     (rep ? ' <button type="button" class="chart-tab" data-obs-copy="1">📋 複製文字</button>' : '') + '</div>';
   if (obsState.error) h += '<div class="race-note">算不出來：' + wlEsc(obsState.error) + '</div>';
