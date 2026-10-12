@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-11 10:42:10";
+const BUILD_STAMP = "2026-10-12 09:41:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -10019,7 +10019,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-11 10:42:10';
+const BUILD_STAMP = '2026-10-12 09:41:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13798,8 +13798,13 @@ const CHUNK_SIZE = 80;
 // /api/groups 最近一份結果（2026-10-06 使用者：開盤時首頁報價要 10 幾秒，刀劍空、盤中333 一直顯示「還沒載入」）：
 // 同一個 worker 執行環境裡 8 秒內再有人要（主畫面、釘選視窗、另一個螢幕、另一台電腦），直接給這一份，
 // 不用每個視窗各自再去證交所抓一次。只存抓成功的結果；失敗不存。
+// 2026-10-12（週一盤中實測）：每個請求幾乎都落在不同的執行環境，8 秒共用幾乎沒命中，/api/groups 每次都直接打證交所
+// 499 檔（7 段），盤中要 2～15 秒。改成「先給舊的、背景抓新的」：60 秒內的結果直接回，超過 8 秒就在背景重抓
+// （同一時間只抓一份）；首頁每 15 秒輪詢，拿到的報價最多晚一輪，但不用每次等證交所。
 let groupsMemo = null;
+let groupsInflight = null;
 const GROUPS_MEMO_MS = 8000;
+const GROUPS_STALE_MS = 60000;
 
 function chunk(arr, size) {
   const out = [];
@@ -13996,6 +14001,63 @@ async function fetchSessionClose() {
   return data && data.status === "ok" ? data : null;
 }
 
+async function buildGroupsBody() {
+  // 休市日（週末、假日）與交易日 08:45 前，後端 session-close 說要暫留（held）時，用上一個交易日的
+  // 日K收盤取代 TWSE 即時報價：2026-10-04（週日）TWSE 跑測試盤，即時報價不是 0 就是測試用的假價
+  // （鴻海 276 漲停），首頁跟盤中333／刀劍空／醞釀發動全跟著亂。快照裡沒有的股票照舊用即時報價；
+  // 快照抓不到就整個照舊；TWSE 整批失敗但有暫留快照時照樣回資料。
+  const [quotesResult, sessionResult] = await Promise.allSettled([fetchQuotes(ALL_CODES), fetchSessionClose()]);
+  const sessionClose = sessionResult.status === "fulfilled" ? sessionResult.value : null;
+  const held = !!(sessionClose && sessionClose.held && sessionClose.session && sessionClose.stocks);
+  if (quotesResult.status === "rejected" && !held) throw quotesResult.reason;
+  const quotes = quotesResult.status === "fulfilled" ? quotesResult.value : {};
+  const closeOf = (code) => {
+    const c = held ? sessionClose.stocks[code] : null;
+    return c && Number.isFinite(c.close) && c.close > 0 && Number.isFinite(c.pct) ? c : null;
+  };
+  const groups = GROUPS.map((g) => {
+    const stocks = g.stocks.map((s) => {
+      const c = closeOf(s.code);
+      if (c) {
+        return { code: s.code, name: s.name, price: c.close, changePercent: c.pct, limitUp: !!c.limitUp, limitDown: !!c.limitDown, volume: Number.isFinite(c.volume) ? c.volume : null };
+      }
+      return {
+        code: s.code,
+        name: s.name,
+        price: quotes[s.code]?.price ?? null,
+        changePercent: quotes[s.code]?.changePercent ?? 0,
+        limitUp: quotes[s.code]?.limitUp ?? false,
+        limitDown: quotes[s.code]?.limitDown ?? false,
+        volume: quotes[s.code]?.volume ?? null
+      };
+    });
+    const valid = stocks.filter((s) => s.price !== null);
+    const avgChange = valid.length ? valid.reduce((sum, s) => sum + s.changePercent, 0) / valid.length : 0;
+    return { name: g.name, avgChange, stocks };
+  });
+  const meta = (quotes && quotes.__meta) || {};
+  const body = JSON.stringify({
+    groups,
+    quoteDate: held ? sessionClose.session : (meta.quoteDate || null),
+    quoteTime: held ? "13:30:00" : (meta.quoteTime || null),
+    heldClose: held ? { session: sessionClose.session, today: sessionClose.today || null } : null,
+    // 這次重抓後還是沒有報價的檔數（休市暫留收盤時不算）；前端多到不正常會標示
+    quoteMissing: held ? 0 : (meta.missing || 0),
+    // 報價來源：mis＝這裡直接抓證交所、backend＝後端代抓、mis+backend＝缺的拿後端補
+    quoteSource: held ? "close" : (meta.source || "mis")
+  });
+  return body;
+}
+
+function refreshGroups() {
+  if (!groupsInflight) {
+    groupsInflight = buildGroupsBody()
+      .then((body) => { groupsMemo = { at: Date.now(), body }; return body; })
+      .finally(() => { groupsInflight = null; });
+  }
+  return groupsInflight;
+}
+
 async function proxyHanstockBars(pathname, cacheSeconds = 20) {
   // 代理到 Railway 上 HanStock 主要服務自己的 Hub API（用 Railway 專屬網址，
   // 不依賴 hanstock.xyz 這個要續約的自訂網域，到期也不受影響）。
@@ -14071,6 +14133,38 @@ async function checkUsageAnomaly(env) {
   const estimatedRequests = parseInt(raw || "0", 10) || 0;
   const threshold = parseInt(env.USAGE_ANOMALY_THRESHOLD, 10) || DEFAULT_USAGE_ANOMALY_THRESHOLD;
   return { key: key, estimatedRequests: estimatedRequests, threshold: threshold, anomalous: estimatedRequests > threshold };
+}
+
+// /api/usage（2026-10-12 使用者：今天開盤要檢查流量）：讀用量監控的抽樣計數，算台灣時間今天每小時的估計請求數。
+// 只讀今天的 bucket（最多 96 個 KV 讀取），結果在同一個執行環境裡留 5 分鐘，不會把 KV 免費讀取額度用掉。
+let usageMemo = null;
+async function usageToday(env) {
+  if (usageMemo && Date.now() - usageMemo.at < 300000) return usageMemo.body;
+  const twNow = new Date(Date.now() + 8 * 3600000);
+  const twDate = twNow.toISOString().slice(0, 10);
+  const startUtc = Date.UTC(twNow.getUTCFullYear(), twNow.getUTCMonth(), twNow.getUTCDate()) - 8 * 3600000;
+  const keys = [];
+  for (let t = startUtc; t <= Date.now(); t += USAGE_BUCKET_MINUTES * 60000) keys.push(usageBucketKey(new Date(t)));
+  const values = await Promise.all(keys.map((k) => env.USAGE_KV.get(k).catch(() => null)));
+  const byHour = {};
+  let total = 0, peak = { at: null, requests: 0 };
+  keys.forEach((k, i) => {
+    const n = parseInt(values[i] || "0", 10) || 0;
+    if (!n) return;
+    const tw = new Date(Date.parse(k.slice(9) + ":00Z") + 8 * 3600000).toISOString();
+    const hour = tw.slice(11, 13);
+    byHour[hour] = (byHour[hour] || 0) + n;
+    total += n;
+    if (n > peak.requests) peak = { at: tw.slice(11, 16), requests: n };
+  });
+  const body = {
+    status: "ok", date: twDate, asOf: twNow.toISOString().slice(11, 16), estimatedRequests: total, byHour, peak15m: peak,
+    sampleRate: USAGE_SAMPLE_RATE, alertThreshold15m: parseInt(env.USAGE_ANOMALY_THRESHOLD, 10) || DEFAULT_USAGE_ANOMALY_THRESHOLD,
+    freePlanDailyLimit: 100000,
+    note: "每 100 個請求抽樣記 1 次再乘回去，是估計值；時間是台灣時間；5 分鐘更新一次"
+  };
+  usageMemo = { at: Date.now(), body };
+  return body;
 }
 
 async function notifyDiscordUsageAnomaly(env, result) {
@@ -14444,62 +14538,30 @@ export default {
         return Response.json({ status: "error", error: String(err), entries: [] }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/usage") {
+      if (!env || !env.USAGE_KV) return Response.json({ status: "missing", message: "沒有綁定 USAGE_KV" });
+      try {
+        return new Response(JSON.stringify(await usageToday(env)), { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" } });
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/version") {
       return new Response(JSON.stringify({ build: BUILD_STAMP }), {
         headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store, must-revalidate" }
       });
     }
     if (url.pathname === "/api/groups") {
-      if (groupsMemo && Date.now() - groupsMemo.at < GROUPS_MEMO_MS) {
-        return new Response(groupsMemo.body, { headers: { "content-type": "application/json", "x-groups-memo": "hit" } });
+      const age = groupsMemo ? Date.now() - groupsMemo.at : Infinity;
+      const memoResp = (state) => new Response(groupsMemo.body, { headers: { "content-type": "application/json", "x-groups-memo": state, "x-groups-age": String(Math.round(age / 1000)) } });
+      if (age < GROUPS_MEMO_MS) return memoResp("hit");
+      if (age < GROUPS_STALE_MS) {
+        ctx.waitUntil(refreshGroups().catch(() => {}));   // 背景抓新的；失敗就下次再抓，舊的照給
+        return memoResp("stale");
       }
       try {
-        // 休市日（週末、假日）與交易日 08:45 前，後端 session-close 說要暫留（held）時，用上一個交易日的
-        // 日K收盤取代 TWSE 即時報價：2026-10-04（週日）TWSE 跑測試盤，即時報價不是 0 就是測試用的假價
-        // （鴻海 276 漲停），首頁跟盤中333／刀劍空／醞釀發動全跟著亂。快照裡沒有的股票照舊用即時報價；
-        // 快照抓不到就整個照舊；TWSE 整批失敗但有暫留快照時照樣回資料。
-        const [quotesResult, sessionResult] = await Promise.allSettled([fetchQuotes(ALL_CODES), fetchSessionClose()]);
-        const sessionClose = sessionResult.status === "fulfilled" ? sessionResult.value : null;
-        const held = !!(sessionClose && sessionClose.held && sessionClose.session && sessionClose.stocks);
-        if (quotesResult.status === "rejected" && !held) throw quotesResult.reason;
-        const quotes = quotesResult.status === "fulfilled" ? quotesResult.value : {};
-        const closeOf = (code) => {
-          const c = held ? sessionClose.stocks[code] : null;
-          return c && Number.isFinite(c.close) && c.close > 0 && Number.isFinite(c.pct) ? c : null;
-        };
-        const groups = GROUPS.map((g) => {
-          const stocks = g.stocks.map((s) => {
-            const c = closeOf(s.code);
-            if (c) {
-              return { code: s.code, name: s.name, price: c.close, changePercent: c.pct, limitUp: !!c.limitUp, limitDown: !!c.limitDown, volume: Number.isFinite(c.volume) ? c.volume : null };
-            }
-            return {
-              code: s.code,
-              name: s.name,
-              price: quotes[s.code]?.price ?? null,
-              changePercent: quotes[s.code]?.changePercent ?? 0,
-              limitUp: quotes[s.code]?.limitUp ?? false,
-              limitDown: quotes[s.code]?.limitDown ?? false,
-              volume: quotes[s.code]?.volume ?? null
-            };
-          });
-          const valid = stocks.filter((s) => s.price !== null);
-          const avgChange = valid.length ? valid.reduce((sum, s) => sum + s.changePercent, 0) / valid.length : 0;
-          return { name: g.name, avgChange, stocks };
-        });
-        const meta = (quotes && quotes.__meta) || {};
-        const body = JSON.stringify({
-          groups,
-          quoteDate: held ? sessionClose.session : (meta.quoteDate || null),
-          quoteTime: held ? "13:30:00" : (meta.quoteTime || null),
-          heldClose: held ? { session: sessionClose.session, today: sessionClose.today || null } : null,
-          // 這次重抓後還是沒有報價的檔數（休市暫留收盤時不算）；前端多到不正常會標示
-          quoteMissing: held ? 0 : (meta.missing || 0),
-          // 報價來源：mis＝這裡直接抓證交所、backend＝後端代抓、mis+backend＝缺的拿後端補
-          quoteSource: held ? "close" : (meta.source || "mis")
-        });
-        groupsMemo = { at: Date.now(), body };
-        return new Response(body, { headers: { "content-type": "application/json" } });
+        const body = await refreshGroups();
+        return new Response(body, { headers: { "content-type": "application/json", "x-groups-memo": "miss" } });
       } catch (err) {
         return Response.json({ error: String(err) }, { status: 502 });
       }
