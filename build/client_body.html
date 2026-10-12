@@ -1864,7 +1864,8 @@
   .st-hf-btn{margin-left:14px;font-size:12px;padding:3px 10px;}
   .st-row .st-holder{flex:0 0 7em;margin-left:auto;text-align:right;white-space:nowrap;overflow:hidden;}
   .st-row .st-holder .sig-label{font-size:11px;padding:2px 6px;display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.25;gap:1px;}
-  .st-row .st-holder .hf-amt{font-size:.82em;font-weight:600;opacity:.92;}
+  .st-row .st-hf{display:inline-block;font-size:15px;font-weight:800;color:#fff;border-radius:6px;padding:3px 8px;min-width:4.6em;text-align:center;}
+  .st-row .st-hf.up{background:#d64545;} .st-row .st-hf.down{background:#1f8a4c;}
   .signal-row.st-row .srow-right{margin-left:16px;}
   .d123-tag.r1{background:#dc2626;} .d123-tag.r2{background:#d97706;} .d123-tag.full{background:#6b7280;}
   .dg-lines li{border-bottom:1px dashed var(--line);padding:2px 0;}
@@ -10577,7 +10578,11 @@ function stPanelHtml(side){
       return '<div class="signal-row st-row" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '">' +
         '<span class="sig-code">' + r.code + '</span><span class="sig-name">' + wlEsc(r.name) + (obsCodes.has(r.code) ? ' 👀' : '') + '</span>' +
         '<span class="st-score' + (strong ? '' : ' weak') + '" title="均線分數（' + swMmdd(d.date) + ' 收盤）">' + r.sum + '</span>' +
-        '<span class="st-holder">' + raceHolderCellHtml({ strengthPct: hf ? hf.strengthPct : null, netAmount: hf ? hf.netAmount : null, holderLabel: hf ? hf.holderLabel : null }) + '</span>' +
+        // 大戶力只放百分比、字大一點（2026-10-12 使用者：金額拿掉）；金額放在滑鼠提示
+        '<span class="st-holder">' + (hf && hf.strengthPct !== null && hf.strengthPct !== undefined
+          ? '<span class="st-hf ' + (hf.strengthPct > 0 ? 'up' : 'down') + '" title="大戶力（大單淨額 ÷ 累計成交額）' + (fmtAmountWan(hf.netAmount) ? '，淨額 ' + fmtAmountWan(hf.netAmount) : '') + '">' +
+            (hf.strengthPct > 0 ? '+' : '') + hf.strengthPct.toFixed(1) + '%</span>'
+          : '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>') + '</span>' +
         (q ? stockValueColsHtml(q.price, chg, q.changePercent) : '<div class="srow-right"><span class="spct flat">—</span><span class="schg flat">—</span><span class="sprice">' + ckPrice(r.close) + '</span></div>') + '</div>';
     }).join('') + '</div>';
   });
