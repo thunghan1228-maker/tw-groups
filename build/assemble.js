@@ -109,17 +109,33 @@ async function fetchQuotes(codes) {
   return await fetchQuotesFromBackend(codes);
 }
 
+// 後端報價中心一次最多 600 檔（2026-10-12 族群表加「其他」後變 650 檔）：每 400 檔一批同時問，批次切法固定，後端各批各自共用快取
+const BACKEND_QUOTE_BATCH = 400;
+async function fetchBackendQuoteBatch(codes, signal) {
+  const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/group-quotes?codes=" + encodeURIComponent(codes.join(",")), {
+    headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
+    signal
+  });
+  if (!resp.ok) throw new Error("後端代抓 HTTP " + resp.status);
+  const data = await resp.json();
+  if (!data || data.status !== "ok" || !data.quotes) throw new Error("後端代抓格式不對");
+  return data;
+}
+
 async function fetchQuotesFromBackend(codes, timeoutMs) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs || 15000);
   let data = null;
   try {
-    const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/group-quotes?codes=" + encodeURIComponent(codes.join(",")), {
-      headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
-      signal: ctrl.signal
-    });
-    if (!resp.ok) throw new Error("後端代抓 HTTP " + resp.status);
-    data = await resp.json();
+    const batches = [];
+    for (let i = 0; i < codes.length; i += BACKEND_QUOTE_BATCH) batches.push(codes.slice(i, i + BACKEND_QUOTE_BATCH));
+    const parts = await Promise.all(batches.map((b) => fetchBackendQuoteBatch(b, ctrl.signal)));
+    data = { status: "ok", quotes: {}, quoteDate: null, quoteTime: null };
+    for (const part of parts) {
+      Object.assign(data.quotes, part.quotes);
+      const stamp = (part.quoteDate || "") + " " + (part.quoteTime || "");
+      if (stamp > (data.quoteDate || "") + " " + (data.quoteTime || "")) { data.quoteDate = part.quoteDate; data.quoteTime = part.quoteTime; }
+    }
   } finally {
     clearTimeout(timer);
   }

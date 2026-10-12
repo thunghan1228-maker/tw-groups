@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 12:11:07";
+const BUILD_STAMP = "2026-10-12 12:28:33";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -54,7 +54,8 @@ const GROUPS = [
   {"name":"便宜電腦","stocks":[{"code":"5386","name":"青雲"},{"code":"3515","name":"華擎"},{"code":"2399","name":"映泰"},{"code":"6150","name":"撼訊"},{"code":"2425","name":"承啟"},{"code":"2465","name":"麗臺"}]},
   {"name":"電通","stocks":[{"code":"3528","name":"安馳"},{"code":"8096","name":"擎亞"},{"code":"6113","name":"亞矽"},{"code":"3036","name":"文曄"},{"code":"6227","name":"茂綸"}]},
   {"name":"口罩","stocks":[{"code":"9919","name":"康那香"},{"code":"1325","name":"恆大"},{"code":"3373","name":"熱映"},{"code":"1732","name":"毛寶"},{"code":"4133","name":"亞諾法"},{"code":"4121","name":"優盛"},{"code":"4142","name":"國光生"},{"code":"6547","name":"高端疫苗"}]},
-  {"name":"汽車零","stocks":[{"code":"1524","name":"耿鼎"},{"code":"1522","name":"堤維西"},{"code":"1319","name":"東陽"},{"code":"2228","name":"劍麟"},{"code":"2204","name":"中華"},{"code":"1568","name":"倉佑"},{"code":"6605","name":"帝寶"},{"code":"1563","name":"巧新"},{"code":"2233","name":"宇隆"},{"code":"2236","name":"百達-KY"}]}
+  {"name":"汽車零","stocks":[{"code":"1524","name":"耿鼎"},{"code":"1522","name":"堤維西"},{"code":"1319","name":"東陽"},{"code":"2228","name":"劍麟"},{"code":"2204","name":"中華"},{"code":"1568","name":"倉佑"},{"code":"6605","name":"帝寶"},{"code":"1563","name":"巧新"},{"code":"2233","name":"宇隆"},{"code":"2236","name":"百達-KY"}]},
+  {"name":"其他","stocks":[{"code":"8431","name":"匯鑽科"},{"code":"3265","name":"台星科"},{"code":"2466","name":"冠西電"},{"code":"3311","name":"閎暉"},{"code":"6282","name":"康舒"},{"code":"4174","name":"浩鼎"},{"code":"5469","name":"瀚宇博"},{"code":"6141","name":"柏承"},{"code":"8932","name":"智通"},{"code":"4927","name":"泰鼎-KY"},{"code":"3708","name":"上緯投控"},{"code":"2457","name":"飛宏"},{"code":"2493","name":"揚博"},{"code":"6877","name":"鏵友益"},{"code":"8069","name":"元太"},{"code":"6133","name":"金橋"},{"code":"2312","name":"金寶"},{"code":"6179","name":"亞通"},{"code":"3628","name":"盈正"},{"code":"8070","name":"長華"},{"code":"3550","name":"聯穎"},{"code":"3002","name":"歐格"},{"code":"6197","name":"佳必琪"},{"code":"2402","name":"毅嘉"},{"code":"2324","name":"仁寶"},{"code":"3059","name":"華晶科"},{"code":"6591","name":"動力-KY"},{"code":"6903","name":"巨漢"},{"code":"3706","name":"神達"},{"code":"3040","name":"遠見"},{"code":"2345","name":"智邦"},{"code":"3004","name":"豐達科"},{"code":"3530","name":"晶相光"},{"code":"5278","name":"尚凡"},{"code":"3380","name":"明泰"},{"code":"3030","name":"德律"},{"code":"5272","name":"笙科"},{"code":"4173","name":"久裕"},{"code":"1466","name":"聚隆"},{"code":"9958","name":"世紀鋼"},{"code":"4566","name":"時碩工業"},{"code":"2497","name":"怡利電"},{"code":"2417","name":"圓剛"},{"code":"9914","name":"美利達"},{"code":"6664","name":"群翊"},{"code":"6739","name":"竹陞科技"},{"code":"5381","name":"光譜"},{"code":"2104","name":"國際中橡"},{"code":"5284","name":"jpp-KY"},{"code":"3047","name":"訊舟"},{"code":"9921","name":"巨大"},{"code":"1725","name":"元禎"},{"code":"6257","name":"矽格"},{"code":"2364","name":"倫飛"},{"code":"5521","name":"工信"},{"code":"8933","name":"愛地雅"},{"code":"2201","name":"裕隆"},{"code":"2889","name":"國票金"},{"code":"6761","name":"穩得"},{"code":"2436","name":"偉詮電"},{"code":"6923","name":"中台"},{"code":"2474","name":"可成"},{"code":"6104","name":"創惟"},{"code":"6741","name":"91APP-KY"},{"code":"3141","name":"晶宏"},{"code":"3712","name":"永崴投控"},{"code":"3305","name":"昇貿"},{"code":"1314","name":"中石化"},{"code":"4549","name":"桓達"},{"code":"3257","name":"虹冠電"},{"code":"3704","name":"合勤控"},{"code":"1733","name":"五鼎"},{"code":"6763","name":"綠界科技"},{"code":"5245","name":"智晶"},{"code":"2208","name":"台船"},{"code":"2331","name":"精英"},{"code":"6205","name":"詮欣"},{"code":"8105","name":"凌巨"},{"code":"2428","name":"興勤"},{"code":"6138","name":"茂達"},{"code":"2392","name":"正崴"},{"code":"6164","name":"華興"},{"code":"2330","name":"台積電"},{"code":"1736","name":"喬山"},{"code":"3049","name":"精金"},{"code":"4577","name":"達航科技"},{"code":"8103","name":"瀚荃"},{"code":"6517","name":"保勝光學"},{"code":"6735","name":"美達科技"},{"code":"2462","name":"良得電"},{"code":"3551","name":"世禾"},{"code":"6919","name":"康霈"},{"code":"8215","name":"明基材"},{"code":"3178","name":"公準"},{"code":"8478","name":"東哥遊艇"},{"code":"6593","name":"台灣銘板"},{"code":"3527","name":"聚積"},{"code":"2329","name":"華泰"},{"code":"3003","name":"健和興"},{"code":"6163","name":"華電網"},{"code":"3615","name":"安可"},{"code":"3354","name":"律勝"},{"code":"3466","name":"德晉"},{"code":"3028","name":"增你強"},{"code":"3444","name":"利機"},{"code":"3564","name":"其陽"},{"code":"5457","name":"宣德"},{"code":"6584","name":"南俊國際"},{"code":"7777","name":"能率亞洲"},{"code":"4551","name":"智伸科"},{"code":"7642","name":"昶瑞機電"},{"code":"2369","name":"菱生"},{"code":"3543","name":"州巧"},{"code":"6933","name":"AMAX-KY"},{"code":"2338","name":"光罩"},{"code":"3306","name":"鼎天"},{"code":"7780","name":"大研生醫"},{"code":"3057","name":"喬鼎"},{"code":"4968","name":"立積"},{"code":"3289","name":"宜特"},{"code":"3537","name":"堡達"},{"code":"8039","name":"台虹"},{"code":"6603","name":"富強鑫"},{"code":"3701","name":"大眾控"},{"code":"2351","name":"順德"},{"code":"6895","name":"宏碩系統"},{"code":"6291","name":"沛亨"},{"code":"8155","name":"博智"},{"code":"6698","name":"旭暉應材"},{"code":"3402","name":"漢科"},{"code":"3694","name":"海華"},{"code":"6275","name":"元山"},{"code":"3094","name":"聯傑"},{"code":"4157","name":"太景-KY"},{"code":"3581","name":"博磊"},{"code":"8045","name":"達運光電"},{"code":"3374","name":"精材"},{"code":"6196","name":"帆宣"},{"code":"6532","name":"瑞耘"},{"code":"6667","name":"信紘科"},{"code":"6139","name":"亞翔"},{"code":"3518","name":"柏騰"},{"code":"2301","name":"光寶科"},{"code":"6588","name":"東典光電"},{"code":"6485","name":"點序"},{"code":"8150","name":"南茂"},{"code":"4939","name":"亞電"},{"code":"4543","name":"萬在"},{"code":"2495","name":"普安"},{"code":"6691","name":"洋基工程"},{"code":"6224","name":"聚鼎"},{"code":"3219","name":"倚強科"},{"code":"4171","name":"瑞基"},{"code":"3577","name":"泓格"}]}
 ];
 const ALL_CODES = [...new Set(GROUPS.flatMap((g) => g.stocks.map((s) => s.code)))];
 
@@ -10037,7 +10038,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 12:11:07';
+const BUILD_STAMP = '2026-10-12 12:28:33';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11967,7 +11968,9 @@ document.getElementById('hwBody').addEventListener('change', (e) => {
 });
 
 // ---- 盤中觀察股（2026-10-12 使用者：照「收盤觀察股（莊爸系統選股）」做一份，盤中 11:30／12:00／12:30／13:00 像發動一樣跳出來）----
-// 觀察池＝均線分數排行近 20 個交易日的常客（每天前 30 名、上榜次數最多的 50 檔）＝最近一路強的股；跳出那一刻用即時報價分五類：
+// 觀察池（2026-10-12 使用者：倒推莊爸 10/12 收盤觀察股 59 檔，族群用本站全部 56 個族群、股票照規則自己挑）：
+// 56 個族群的股票裡，近 10 個交易日被「創高黑龍」系統選過（官網均線分數 ≥ 10、收黑、漲跌 −10%～+3%）、而且本站均線分數 ≥ 14。
+// 黑龍那 10 天的名單收盤後才會變，一天算一次存在這台電腦；跳出那一刻用即時報價分五類：
 // 【5】有點深＝跌破月線（昨天還在月線上的標「今天剛破月線」）；【2】今天噴出＝漲 5% 以上或漲停；
 // 【1】黑K出現・黑龍系統符合＝現價低於開盤、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低；【3】已噴在高檔＝高於月線 10% 以上；【4】右肩打底＝其他月線上的。
 // 符號：★／☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔（現價 ÷（月線＋季線）÷2 − 1 ≥ 30%）、
@@ -11986,17 +11989,52 @@ function obsNowHm(){ return new Date(Date.now() + 8 * 3600000).toISOString().sli
 function obsMarks(x){
   return (x.star || '') + (x.lit ? '●' : '') + (x.high ? '▲' : '') + (x.brk3 ? '✗三K低' : '') + (x.drop5 ? '▼' : '') + (x.reb ? '↑' : '') + (x.dispo ? '(處置)' : '');
 }
+const OBS_POOL_DAYS = 10, OBS_POOL_MIN_SCORE = 14;
+const OBS_DRAGON_Q = 'score=10&k=black&kmin=-10&kmax=3';
+async function obsJson(url){
+  const r = await fetch(url);
+  const d = await r.json().catch(() => null);
+  if (!r.ok || !d) throw new Error((d && (d.detail || d.error)) || ('HTTP ' + r.status));
+  return d;
+}
+async function obsDragonHits(){
+  // 近 10 個交易日每天的創高黑龍名單 → {代號: 出現次數}；依資料日存在這台電腦，一天只抓一次
+  const latest = await obsJson('/api/screener?' + OBS_DRAGON_Q);
+  const dates = (latest.dates || []).filter((d) => d <= latest.date).slice(-OBS_POOL_DAYS);
+  let cached = null;
+  try { cached = JSON.parse(localStorage.getItem('obsDragon') || 'null'); } catch (_){}
+  if (cached && cached.latest === latest.date && cached.days === dates.length) return cached;
+  const lists = await Promise.all(dates.map((d) => d === latest.date ? latest : obsJson('/api/screener?' + OBS_DRAGON_Q + '&date=' + d)));
+  const hits = {};
+  lists.forEach((l) => (l.rows || []).forEach((r) => { hits[r.code] = (hits[r.code] || 0) + 1; }));
+  const out = { latest: latest.date, days: dates.length, from: dates[0], hits };
+  try { localStorage.setItem('obsDragon', JSON.stringify(out)); } catch (_){}
+  return out;
+}
+async function obsBatched(codes, size, fn){
+  const parts = [];
+  for (let i = 0; i < codes.length; i += size) parts.push(codes.slice(i, i + size));
+  return Promise.all(parts.map(fn));
+}
 async function obsBuild(slot){
-  const hitsRes = await fetch('/api/ma-rank-hits?days=20&top=30&show=50');
-  const hits = await hitsRes.json().catch(() => null);
-  const pool = ((hits && hits.rows) || []).map((r) => ({ code: String(r.code), name: r.name, grp: r.grp }));
-  if (!pool.length) throw new Error('均線分數常客名單還沒有資料');
-  const codes = pool.map((p) => p.code).join(',');
-  const [ckRes, qRes] = await Promise.all([fetch('/api/checkup?codes=' + encodeURIComponent(codes)), fetch('/api/watch-quotes?codes=' + encodeURIComponent(codes))]);
-  const ck = await ckRes.json().catch(() => null), qd = await qRes.json().catch(() => null);
+  const dragon = await obsDragonHits();
+  const inGroups = new Set(ALL_CODES);
+  const cand = Object.keys(dragon.hits).filter((c) => inGroups.has(c));
+  if (!cand.length) throw new Error('近 10 天創高黑龍名單還沒有資料');
+  const ckParts = await obsBatched(cand, 120, (b) => obsJson('/api/checkup?codes=' + encodeURIComponent(b.join(','))));
   const ckBy = {};
-  ((ck && ck.rows) || []).forEach((r) => { ckBy[r.code] = r; });
-  const quotes = (qd && qd.quotes) || {};
+  let ckDate = null;
+  ckParts.forEach((ck) => { ckDate = ckDate || ck.date; (ck.rows || []).forEach((r) => { ckBy[r.code] = r; }); });
+  const pool = cand.filter((c) => ckBy[c] && (ckBy[c].score || 0) >= OBS_POOL_MIN_SCORE)
+    .map((c) => ({ code: c, name: ckBy[c].name, grp: WL_GROUP_INDEX[c] ? WL_GROUP_INDEX[c].group : ckBy[c].group }));
+  if (!pool.length) throw new Error('沒有股票符合（近 10 天黑龍選過＋均線分數 ≥ 14）');
+  const qParts = await obsBatched(pool.map((p) => p.code), 200, (b) => obsJson('/api/watch-quotes?codes=' + encodeURIComponent(b.join(','))));
+  const quotes = {};
+  let quoteTime = null;
+  qParts.forEach((q) => { Object.assign(quotes, q.quotes || {}); if (q.quoteTime && (!quoteTime || q.quoteTime > quoteTime)) quoteTime = q.quoteTime; });
+  const ck = { date: ckDate };
+  const qd = { quoteTime };
+  const hits = { from: dragon.from, to: dragon.latest };
   const lit = new Set();
   try { (brewHistoryDay(brewSessionDate()).launch || []).forEach((x) => lit.add(x.code)); } catch (_){}
   try { const bm = brewLaunchModel(); if (bm) bm.launchBlocks.flatMap((b) => b.rows).forEach((r) => lit.add(r.code)); } catch (_){}
@@ -12015,7 +12053,7 @@ async function obsBuild(slot){
     const label = c.scores && c.scores.overallLabel;
     const f = stockFlags[p.code];
     const x = {
-      code: p.code, name: c.name || p.name, grp: c.group || p.grp || (WL_GROUP_INDEX[p.code] ? WL_GROUP_INDEX[p.code].group : '') || '其他',
+      code: p.code, name: c.name || p.name, grp: p.grp || c.group || '其他', hits: dragon.hits[p.code] || 0,
       price, pct, score, below,
       black: !!(open && price < open), brk3: !!(low3 && price < low3),
       star: label === '強' ? '★' : label === '中上' ? '☆' : '',
@@ -12125,8 +12163,8 @@ function obsBodyHtml(rep){
       (rep.cmp.removed.length ? '<div class="obs-line">移出 ' + wlEsc(rep.cmp.removed.join(' / ')) + '</div>' : '');
   }
   h += '<div class="obs-warn">' + obsWarnings(rep).map(wlEsc).join('<br>') + '</div>';
-  h += '<div class="obs-sym" style="margin-top:8px">觀察池＝均線分數排行近 20 個交易日常客（每天前 30 名、上榜最多的 50 檔，' + wlEsc(String(rep.hitsFrom || '').slice(5)) + '～' + wlEsc(String(rep.hitsTo || '').slice(5)) +
-    '）；現價是證交所行情 ' + wlEsc(rep.quoteTime || '') + '；三K低、月線、健診是 ' + wlEsc(String(rep.ckDate || '').slice(5)) + ' 收盤算的。' +
+  h += '<div class="obs-sym" style="margin-top:8px">觀察池＝本站 ' + GROUPS.length + ' 個族群裡，近 10 個交易日（' + wlEsc(String(rep.hitsFrom || '').slice(5)) + '～' + wlEsc(String(rep.hitsTo || '').slice(5)) +
+    '）被創高黑龍系統選過、而且均線分數 ≥ 14 的股，共 ' + rep.items.length + ' 檔；現價是證交所行情 ' + wlEsc(rep.quoteTime || '') + '；三K低、月線、健診是 ' + wlEsc(String(rep.ckDate || '').slice(5)) + ' 收盤算的。' +
     (rep.missing.length ? '沒抓到報價：' + wlEsc(rep.missing.join('、')) : '') + '點股票開 K 線圖。</div>';
   return h;
 }
@@ -14134,17 +14172,33 @@ async function fetchQuotes(codes) {
   return await fetchQuotesFromBackend(codes);
 }
 
+// 後端報價中心一次最多 600 檔（2026-10-12 族群表加「其他」後變 650 檔）：每 400 檔一批同時問，批次切法固定，後端各批各自共用快取
+const BACKEND_QUOTE_BATCH = 400;
+async function fetchBackendQuoteBatch(codes, signal) {
+  const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/group-quotes?codes=" + encodeURIComponent(codes.join(",")), {
+    headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
+    signal
+  });
+  if (!resp.ok) throw new Error("後端代抓 HTTP " + resp.status);
+  const data = await resp.json();
+  if (!data || data.status !== "ok" || !data.quotes) throw new Error("後端代抓格式不對");
+  return data;
+}
+
 async function fetchQuotesFromBackend(codes, timeoutMs) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs || 15000);
   let data = null;
   try {
-    const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/group-quotes?codes=" + encodeURIComponent(codes.join(",")), {
-      headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
-      signal: ctrl.signal
-    });
-    if (!resp.ok) throw new Error("後端代抓 HTTP " + resp.status);
-    data = await resp.json();
+    const batches = [];
+    for (let i = 0; i < codes.length; i += BACKEND_QUOTE_BATCH) batches.push(codes.slice(i, i + BACKEND_QUOTE_BATCH));
+    const parts = await Promise.all(batches.map((b) => fetchBackendQuoteBatch(b, ctrl.signal)));
+    data = { status: "ok", quotes: {}, quoteDate: null, quoteTime: null };
+    for (const part of parts) {
+      Object.assign(data.quotes, part.quotes);
+      const stamp = (part.quoteDate || "") + " " + (part.quoteTime || "");
+      if (stamp > (data.quoteDate || "") + " " + (data.quoteTime || "")) { data.quoteDate = part.quoteDate; data.quoteTime = part.quoteTime; }
+    }
   } finally {
     clearTimeout(timer);
   }
