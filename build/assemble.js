@@ -845,6 +845,10 @@ export default {
       // 每日持股健診（2026-09-28 使用者）：股號清單帶給後端，60 秒快取
       return await proxyHanstockBars("/api/hub/checkup" + url.search, 60);
     }
+    if (url.pathname === "/api/dragon123") {
+      // 123 黑龍戰法（2026-10-12 使用者）：K線圖日線標進場點，後端每天收盤後才會變，快取 5 分鐘
+      return await proxyHanstockBars("/api/hub/dragon123" + url.search, 300);
+    }
     if (url.pathname === "/api/diag") {
       // 個股問診（2026-09-28 使用者）：股號帶給後端，60 秒快取
       return await proxyHanstockBars("/api/hub/diag" + url.search, 60);
