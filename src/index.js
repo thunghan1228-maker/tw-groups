@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 23:31:28";
+const BUILD_STAMP = "2026-10-12 23:37:28";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -566,6 +566,7 @@ const HTML_PAGE = `<!DOCTYPE html>
      族群大戶力／族群綜合表／盤中333三個分頁共用同一套樣式；選取中額外加紫色外框標示，
      不然黑底白字選取前後兩個狀態會分不出哪個正在篩選中。 */
   .hf-filter-btn,.combo-filter-btn,.race333-filter-btn,.bigorder-filter-btn,.bl-day-btn,.sig-day-btn,.chips-btn{background:#000;color:#fff;border-color:#000;}
+  .combo-filter-bar .brew-hf-btn{margin-left:14px;}
   .combo-filter-bar .bl-day-btn[disabled],.combo-filter-bar .sig-day-btn[disabled],.combo-filter-bar .chips-btn[disabled]{opacity:.45;cursor:default;}
   .hf-filter-btn:hover,.combo-filter-btn:hover,.race333-filter-btn:hover,.bigorder-filter-btn:hover{background:#2a2a2a;}
   .hf-filter-btn.active,.combo-filter-btn.active,.race333-filter-btn.active,.bigorder-filter-btn.active,.bl-day-btn.active,.sig-day-btn.active,.chips-btn.active{background:#000;color:#c084fc;border-color:#000;font-weight:800;}  /* 按下去整個字變紫色（2026-09-24 使用者），不用外框 */
@@ -2497,7 +2498,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。⭐＝這族今天也有出現在盤中觀察股（通常是比較強勢的族群）、👀＝這檔在盤中觀察股名單裡。均線分數是收盤算好的，現價、漲跌、大戶力是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
         <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面；按「大戶力 ≤ −10%」只看大戶在賣的。</li>
         <li><b>盤中觀察股</b>：55 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
-        <li><b>醞釀</b>、<b>發動</b>（2026-10-12 拆成兩個分頁，今天／昨天／前天切換兩頁共用）：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。今天曾經發動的股票也會列進今日即時多（訊號寫「🚀 發動」，時間＝第一次發動）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
+        <li><b>醞釀</b>、<b>發動</b>（2026-10-12 拆成兩個分頁，今天／昨天／前天切換兩頁共用；日期列後面的「盤中大戶力≥10%」只看今天盤中大戶力 ≥ +10% 的，兩頁各自記）：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。今天曾經發動的股票也會列進今日即時多（訊號寫「🚀 發動」，時間＝第一次發動）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
         <li><b>十大多族群</b>（原精選十大多空族群的多方）：今天漲幅前10大族群，各取大戶力最強的前5檔個股；按「大戶力≥10%」只看大戶力 ≥ +10% 的。</li>
         <li><b>十大空族群</b>（原精選十大多空族群的空方）：今天跌幅前10大族群，各取大戶力最負（賣超）的前5檔個股，名次從最弱的數；按「大戶力≤-10%」只看大戶力 ≤ −10% 的。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。<b>排序</b>：個股名單預設照盤中大戶力排，值大的在上、小的在下，沒有大戶力資料的排最後。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
@@ -5996,7 +5997,11 @@ function brewViewDate(){
 // 「今天」那顆按鈕改寫成「最近交易日 mm/dd」，才不會以為是今天的行情。
 function brewTodayName(){ const s = brewSessionDate(); return s && s !== twTodayStr() ? '最近交易日' : '今天'; }
 function brewTodayLabel(){ const s = brewSessionDate(); return s && s !== twTodayStr() ? '最近交易日 ' + String(s).slice(5).replace('-', '/') : '今天'; }
-function brewDayBarHtml(){
+// 盤中大戶力 ≥10% 篩選（2026-10-12 使用者：醞釀／發動日期列後面多一個按鈕），兩個分頁各自記；只篩今天盤中（昨天／前天的紀錄沒有大戶力）
+const brewHf = (() => { try { return JSON.parse(localStorage.getItem('brewHf') || '{}') || {}; } catch (_){ return {}; } })();
+const BREW_HF_MIN = 10;
+const brewHfOk = (r) => r && r.strengthPct !== null && r.strengthPct !== undefined && r.strengthPct >= BREW_HF_MIN;
+function brewDayBarHtml(part){
   const past = brewPastDates();
   const mmdd = (d) => (d ? String(d).slice(5).replace('-', '/') : '');
   const btn = (offset, label, date) => '<button class="chart-tab bl-day-btn' + (brewDayOffset === offset ? ' active' : '') + '" data-offset="' + offset + '"' + (date || offset === 0 ? '' : ' disabled') + '>' + label + '</button>';
@@ -6006,6 +6011,7 @@ function brewDayBarHtml(){
     btn(2, '前天' + (past[1] ? ' ' + mmdd(past[1]) : ''), past[1]) +
     btn('x01', brewTodayName() + '∩昨天', past[0]) +
     btn('x12', '昨天∩前天', past[1]) +
+    (part ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (brewHf[part] ? ' active' : '') + '" data-brew-hf="' + part + '" title="只看盤中大戶力 ≥ +' + BREW_HF_MIN + '% 的股票（今天盤中才有；再按一次全部顯示）">盤中大戶力≥' + BREW_HF_MIN + '%</button>' : '') +
     '</div>';
 }
 function brewHistoryDay(date){
@@ -6188,12 +6194,13 @@ function brewLaunchHtml(part){
   if (!brewLaunchData){
     return '<div class="signal-empty"><div class="se-title">' + (part === 'launch' ? '發動' : '醞釀') + '資料讀取中…</div><div class="se-sub">箱子、均線是每天收盤後用日K算好的，再加上即時價量判斷；讀不到的話稍後再試。</div></div>';
   }
-  if (typeof brewDayOffset === 'string') return brewDayBarHtml() + brewOverlapHtml(brewDayOffset, part);
-  if (brewDayOffset > 0) return brewDayBarHtml() + brewPastDayHtml(part);
+  const hfPastNote = brewHf[part] ? '<div class="race-note">盤中大戶力篩選只看今天盤中（昨天／前天的紀錄沒有大戶力），這裡照樣全部列出。</div>' : '';
+  if (typeof brewDayOffset === 'string') return brewDayBarHtml(part) + hfPastNote + brewOverlapHtml(brewDayOffset, part);
+  if (brewDayOffset > 0) return brewDayBarHtml(part) + hfPastNote + brewPastDayHtml(part);
   const m = brewLaunchModel();
   // 首頁即時報價還沒到（例如晚上證交所抓不回來）：先顯示後端記下的今天紀錄，不要整頁空白（2026-10-12 使用者：訊號怎麼不見了）
   if (!m && brewSessionDate() && brewHistoryData && brewHistoryData.days && brewHistoryData.days[brewSessionDate()]){
-    return brewDayBarHtml() + '<div class="race-note">首頁即時報價還沒載入' + (groupsLastError ? '（' + wlEsc(groupsLastError) + '）' : '') +
+    return brewDayBarHtml(part) + '<div class="race-note">首頁即時報價還沒載入' + (groupsLastError ? '（' + wlEsc(groupsLastError) + '）' : '') +
       '，先顯示後端記下的 ' + String(brewSessionDate()).slice(5).replace('-', '/') + ' 紀錄；報價進來後會換成即時的。</div>' + brewPastDayHtml(part, brewSessionDate());
   }
   if (!m) return '<div class="signal-empty"><div class="se-title">首頁行情還在載入…</div><div class="se-sub">還沒拿到證交所的即時報價（剛打開頁面、或第一次抓報價失敗），幾秒後會自動重抓，拿到就會出現。' +
@@ -6208,11 +6215,15 @@ function brewLaunchHtml(part){
     '、盤中累積周轉率≥' + r.turnoverMinPct + '% 或盤中累積量≥5 日均量 ' + r.volumeRatioMin + ' 倍（不換算全天預估）。同族群依均線分數排序，★＝族群裡分數最高。' +
     (r.skipGroups && r.skipGroups.length ? r.skipGroups.join('、') + '不列入。' : '') +
     (skipped && !(bf && !bf.done) ? '另有 ' + skipped + ' 檔日K不足 240 天（新上市等）或停牌沒列入。' : '') + stamp + '</div>' + brewBackfillNoteHtml(bf);
-  const launch = '<div class="bl-section bl-launch">發動（突破）・' + m.launchCount + ' 檔</div>' +
-    (m.launchBlocks.length ? brewLaunchFlatTableHtml(m.launchBlocks.flatMap((b) => b.rows)) : '<div class="race-note">目前沒有股票發動（過箱頂、均線分數、周轉三個條件要同時到）</div>');
-  const brew = '<div class="bl-section bl-brew">醞釀（整理）・' + m.brewCount + ' 檔</div>' +
-    (m.brewBlocks.length ? m.brewBlocks.map((b) => brewLaunchBlockHtml(b, 'brew')).join('') : '<div class="race-note">目前沒有股票符合醞釀條件</div>');
-  return brewDayBarHtml() + note + (part === 'launch' ? launch + brewFallenTodayHtml(m) : brew);
+  const hf = !!brewHf[part], hfText = '・盤中大戶力≥' + BREW_HF_MIN + '% ';
+  const launchRows = m.launchBlocks.flatMap((b) => b.rows).filter((r) => !hf || brewHfOk(r));
+  const brewBlocks = hf ? m.brewBlocks.map((b) => Object.assign({}, b, { rows: b.rows.filter(brewHfOk) })).filter((b) => b.rows.length) : m.brewBlocks;
+  const brewShown = brewBlocks.reduce((n, b) => n + b.rows.length, 0);
+  const launch = '<div class="bl-section bl-launch">發動（突破）・' + m.launchCount + ' 檔' + (hf ? hfText + launchRows.length + ' 檔' : '') + '</div>' +
+    (launchRows.length ? brewLaunchFlatTableHtml(launchRows) : '<div class="race-note">' + (hf && m.launchBlocks.length ? '發動的股票裡目前沒有盤中大戶力≥' + BREW_HF_MIN + '% 的（再按一次按鈕全部顯示）' : '目前沒有股票發動（過箱頂、均線分數、周轉三個條件要同時到）') + '</div>');
+  const brew = '<div class="bl-section bl-brew">醞釀（整理）・' + m.brewCount + ' 檔' + (hf ? hfText + brewShown + ' 檔' : '') + '</div>' +
+    (brewBlocks.length ? brewBlocks.map((b) => brewLaunchBlockHtml(b, 'brew')).join('') : '<div class="race-note">' + (hf && m.brewBlocks.length ? '醞釀的股票裡目前沒有盤中大戶力≥' + BREW_HF_MIN + '% 的（再按一次按鈕全部顯示）' : '目前沒有股票符合醞釀條件') + '</div>');
+  return brewDayBarHtml(part) + note + (part === 'launch' ? launch + brewFallenTodayHtml(m) : brew);
 }
 
 // ---- 盤後籌碼排行（2026-09-25 使用者：底部「盤後籌碼排行」先做，只用免費資料）----
@@ -10463,7 +10474,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 23:31:28';
+const BUILD_STAMP = '2026-10-12 23:37:28';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -14574,6 +14585,14 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
   const sigDayBtn = e.target.closest('.sig-day-btn');
   if (sigDayBtn){
     sigDayOffset = Number(sigDayBtn.dataset.offset) || 0;
+    renderSignalCenter();
+    return;
+  }
+  const brewHfBtn = e.target.closest('[data-brew-hf]');
+  if (brewHfBtn){
+    const part = brewHfBtn.dataset.brewHf;
+    brewHf[part] = !brewHf[part];
+    try { localStorage.setItem('brewHf', JSON.stringify(brewHf)); } catch (_){}
     renderSignalCenter();
     return;
   }
