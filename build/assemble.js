@@ -51,12 +51,12 @@ const serverTail = `const CHUNK_SIZE = 80;
 // 同一個 worker 執行環境裡 8 秒內再有人要（主畫面、釘選視窗、另一個螢幕、另一台電腦），直接給這一份，
 // 不用每個視窗各自再去證交所抓一次。只存抓成功的結果；失敗不存。
 // 2026-10-12（週一盤中實測）：每個請求幾乎都落在不同的執行環境，8 秒共用幾乎沒命中，/api/groups 每次都直接打證交所
-// 499 檔（7 段），盤中要 2～15 秒。改成「先給舊的、背景抓新的」：60 秒內的結果直接回，超過 8 秒就在背景重抓
+// 499 檔（7 段），盤中要 2～15 秒。改成「先給舊的、背景抓新的」：30 秒內的結果直接回，超過 8 秒就在背景重抓
 // （同一時間只抓一份）；首頁每 15 秒輪詢，拿到的報價最多晚一輪，但不用每次等證交所。
 let groupsMemo = null;
 let groupsInflight = null;
 const GROUPS_MEMO_MS = 8000;
-const GROUPS_STALE_MS = 60000;
+const GROUPS_STALE_MS = 30000;   // 超過 30 秒的舊資料就不給了，等這次抓完（首頁 15 秒輪詢，報價最多晚一輪）
 
 function chunk(arr, size) {
   const out = [];
@@ -109,9 +109,9 @@ async function fetchQuotes(codes) {
   return await fetchQuotesFromBackend(codes);
 }
 
-async function fetchQuotesFromBackend(codes, timeoutMs) {
+async function fetchQuotesFromBackend(codes) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), timeoutMs || 15000);
+  const timer = setTimeout(() => ctrl.abort(), 15000);
   let data = null;
   try {
     const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/group-quotes?codes=" + encodeURIComponent(codes.join(",")), {
@@ -138,17 +138,6 @@ async function fetchQuotesFromBackend(codes, timeoutMs) {
     enumerable: false
   });
   return quotes;
-}
-
-// /api/groups 專用（2026-10-12 週一盤中實測）：Worker 自己打證交所 499 檔要 2～15 秒、偶爾一段整段缺（缺 161 檔），
-// 後端代抓是單一主機、同一批代號 10 秒共用一份，各執行環境都拿同一份，實測 0.3 秒、498 檔全有。先問後端，
-// 後端失敗或缺超過一成才走原本的（自己打證交所、再拿後端補）。自選股、創高黑提醒要開高低，照舊用 fetchQuotes。
-async function fetchGroupQuotes(codes) {
-  try {
-    const quotes = await fetchQuotesFromBackend(codes, 6000);
-    if ((quotes.__meta.missing || 0) <= codes.length / 10) return quotes;
-  } catch (err) { /* 後端不行就自己打證交所 */ }
-  return await fetchQuotes(codes);
 }
 
 function mergeBackendQuotes(quotes, backup, codes) {
@@ -269,7 +258,7 @@ async function buildGroupsBody() {
   // 日K收盤取代 TWSE 即時報價：2026-10-04（週日）TWSE 跑測試盤，即時報價不是 0 就是測試用的假價
   // （鴻海 276 漲停），首頁跟盤中333／刀劍空／醞釀發動全跟著亂。快照裡沒有的股票照舊用即時報價；
   // 快照抓不到就整個照舊；TWSE 整批失敗但有暫留快照時照樣回資料。
-  const [quotesResult, sessionResult] = await Promise.allSettled([fetchGroupQuotes(ALL_CODES), fetchSessionClose()]);
+  const [quotesResult, sessionResult] = await Promise.allSettled([fetchQuotes(ALL_CODES), fetchSessionClose()]);
   const sessionClose = sessionResult.status === "fulfilled" ? sessionResult.value : null;
   const held = !!(sessionClose && sessionClose.held && sessionClose.session && sessionClose.stocks);
   if (quotesResult.status === "rejected" && !held) throw quotesResult.reason;
