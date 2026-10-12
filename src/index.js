@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 01:11:36";
+const BUILD_STAMP = "2026-10-13 01:13:03";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2139,6 +2139,8 @@ const HTML_PAGE = `<!DOCTYPE html>
     #signalModalInner .signal-help{font-size:14px;}
     #signalModalInner .chart-tab{font-size:17px;padding:8px 18px;}
     #signalModalInner .sig-count{font-size:13px;}
+    /* 2026-10-13 使用者：訊號列表最上面的欄位名稱（時間、名稱、族群、均線分數、訊號、盤中大戶力、漲跌幅…）放大 1.5 倍 */
+    #signalModalInner .signal-row.signal-col-labels b{font-size:15px;}
     #signalModalInner .signal-history-bar{font-size:16px;}
     /* 2026-09-24 使用者：篇幅多的分頁（盤中大戶力、特大買賣單、族群大戶力、族群綜合表、盤中333）
        名稱與數字再放大 1.2 倍、每一行的間距加大。欄位標籤列跟資料列字級要一樣，em 寬度才會對齊。 */
@@ -10639,7 +10641,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 01:11:36';
+const BUILD_STAMP = '2026-10-13 01:13:03';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11021,7 +11023,7 @@ function renderSignalCenter(){
         const tags = d123SignalTags(evs.map((e) => e.code), view);
         evs = evs.map((e) => (tags[e.code] ? Object.assign({}, e, { label: e.label + d123TagHtml(tags[e.code]) }) : e));
       }
-      inner = (view.isPast ? '' : klineBackfillNoteHtml()) + signalRowsHtml(evs, view);
+      inner = (view.isPast ? '' : klineBackfillNoteHtml()) + signalRowsHtml(evs, view, active === 'blackDragon' ? { holder: 'right' } : null);   // 2026-10-13 使用者：創高黑龍也加盤中大戶力（漲跌幅左邊）
     } else if (active === 'bigBuy' || active === 'bigSell'){
       const all = view.events.filter((e) => e.tabs.includes(active));
       const events = filterLargeOrderEvents(all);

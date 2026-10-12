@@ -2074,6 +2074,8 @@
     #signalModalInner .signal-help{font-size:14px;}
     #signalModalInner .chart-tab{font-size:17px;padding:8px 18px;}
     #signalModalInner .sig-count{font-size:13px;}
+    /* 2026-10-13 使用者：訊號列表最上面的欄位名稱（時間、名稱、族群、均線分數、訊號、盤中大戶力、漲跌幅…）放大 1.5 倍 */
+    #signalModalInner .signal-row.signal-col-labels b{font-size:15px;}
     #signalModalInner .signal-history-bar{font-size:16px;}
     /* 2026-09-24 使用者：篇幅多的分頁（盤中大戶力、特大買賣單、族群大戶力、族群綜合表、盤中333）
        名稱與數字再放大 1.2 倍、每一行的間距加大。欄位標籤列跟資料列字級要一樣，em 寬度才會對齊。 */
@@ -10954,7 +10956,7 @@ function renderSignalCenter(){
         const tags = d123SignalTags(evs.map((e) => e.code), view);
         evs = evs.map((e) => (tags[e.code] ? Object.assign({}, e, { label: e.label + d123TagHtml(tags[e.code]) }) : e));
       }
-      inner = (view.isPast ? '' : klineBackfillNoteHtml()) + signalRowsHtml(evs, view);
+      inner = (view.isPast ? '' : klineBackfillNoteHtml()) + signalRowsHtml(evs, view, active === 'blackDragon' ? { holder: 'right' } : null);   // 2026-10-13 使用者：創高黑龍也加盤中大戶力（漲跌幅左邊）
     } else if (active === 'bigBuy' || active === 'bigSell'){
       const all = view.events.filter((e) => e.tabs.includes(active));
       const events = filterLargeOrderEvents(all);
