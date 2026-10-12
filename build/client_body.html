@@ -580,6 +580,14 @@
   #signalModalInner #signalTabsBar .signal-tab{padding:7px 4px;text-align:center;min-width:0;}
   @container (min-width: 560px){ #signalTabsBar{grid-template-columns:repeat(4,minmax(0,1fr));} }
   @container (min-width: 760px){ #signalTabsBar{grid-template-columns:repeat(5,minmax(0,1fr));} }
+  /* 2026-10-13 使用者：今日即時多改紅底白字、今日即時空改綠底白字（只有這兩格）；選到時邊框白、外圈同色 */
+  #signalTabsBar .signal-tab[data-kind="now"]{background:#dc2626;border-color:#dc2626;color:#fff;}
+  #signalTabsBar .signal-tab[data-kind="now"]:hover{background:#b91c1c;border-color:#b91c1c;color:#fff;}
+  #signalTabsBar .signal-tab[data-kind="now"].active{background:#ef4444;border-color:#fff;color:#fff;box-shadow:0 0 0 2px #dc2626;}
+  #signalTabsBar .signal-tab[data-kind="nowBear"]{background:#15803d;border-color:#15803d;color:#fff;}
+  #signalTabsBar .signal-tab[data-kind="nowBear"]:hover{background:#166534;border-color:#166534;color:#fff;}
+  #signalTabsBar .signal-tab[data-kind="nowBear"].active{background:#22c55e;border-color:#fff;color:#fff;box-shadow:0 0 0 2px #15803d;}
+  #signalTabsBar .signal-tab[data-kind="now"] .sig-count,#signalTabsBar .signal-tab[data-kind="nowBear"] .sig-count{background:rgba(255,255,255,.25);color:#fff;}
   @container (min-width: 1040px){ #signalTabsBar{grid-template-columns:repeat(7,minmax(0,1fr));} #signalModalInner #signalTabsBar .signal-tab{font-size:16px;white-space:nowrap;} }
   /* 盤後籌碼排行（2026-09-25 使用者：底部「盤後籌碼排行」先做） */
   .chips-modal{position:fixed;inset:0;z-index:102;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:10px;}
