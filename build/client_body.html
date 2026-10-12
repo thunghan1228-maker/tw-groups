@@ -10667,7 +10667,9 @@ async function refresh(){
       // 才知道這台電腦的名單（醞釀／發動、盤中333…）少了一批股票，不是它們真的沒動。
       const missing = Number(lastData && lastData.quoteMissing) || 0;
       const carried = Number(lastData && lastData.quoteCarried) || 0;
-      updatedEl.textContent = '報價更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') +
+      // 2026-10-12：附上證交所行情時間；證交所偶爾一兩分鐘都只給舊資料，看這個就知道是那邊卡住
+      const quoteClock = lastData && lastData.quoteTime ? String(lastData.quoteTime).slice(0, 8) : '';
+      updatedEl.textContent = '報價更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + (quoteClock ? '・行情 ' + quoteClock : '') +
         (lastData && lastData.quoteSource === 'backend' ? '（備援來源）' : '') +
         (missing > 10 ? '（⚠ 有 ' + missing + ' 檔這次沒抓到報價' + (carried ? '，' + carried + ' 檔先沿用上一筆' : '') + '）' : '');
     }

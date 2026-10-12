@@ -147,7 +147,10 @@ async function fetchQuotesFromBackend(codes, timeoutMs) {
 async function fetchGroupQuotes(codes) {
   try {
     const quotes = await fetchQuotesFromBackend(codes, 4000);
-    if ((quotes.__meta.missing || 0) <= codes.length / 10) return quotes;
+    if ((quotes.__meta.missing || 0) <= codes.length / 10) {
+      quotes.__meta.source = "hub";      // 正常來源（前端不標示）；"backend" 留給證交所直連失敗時的備援
+      return quotes;
+    }
   } catch (err) { /* 後端不行就自己打證交所 */ }
   return await fetchQuotes(codes);
 }
@@ -307,7 +310,7 @@ async function buildGroupsBody() {
     heldClose: held ? { session: sessionClose.session, today: sessionClose.today || null } : null,
     // 這次重抓後還是沒有報價的檔數（休市暫留收盤時不算）；前端多到不正常會標示
     quoteMissing: held ? 0 : (meta.missing || 0),
-    // 報價來源：mis＝這裡直接抓證交所、backend＝後端代抓、mis+backend＝缺的拿後端補
+    // 報價來源：hub＝後端報價中心（正常）、mis＝這裡直接抓證交所、backend＝直連失敗改後端代抓、mis+backend＝缺的拿後端補
     quoteSource: held ? "close" : (meta.source || "mis")
   });
   return body;
