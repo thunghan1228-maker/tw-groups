@@ -5176,7 +5176,8 @@ function race333Html(){
   const condsNote = '每列下面多一行列出門檻比例（族排、族內、距櫃買%、昨／前天%），之前只寫在這行說明文字裡的數字。';
   return race333FilterBarHtml() + raceOtcBoxHtml(m) +
     // 2026-09-28 使用者：符合條件>7%放最上面，抬頭改「續抱勿追高」（不是「漲幅最高」）；裡面把 33／34 的門檻比例列出來。
-    '<div class="race-block"><div class="race-head">🚀續抱勿追高・賽馬多(33)>7%有 ' + over7 + ' 檔 ' + stamp + '</div>' +
+    // 2026-10-12 使用者：抬頭「續抱勿追高」後面加「追高善設停損」六個字
+    '<div class="race-block"><div class="race-head">🚀續抱勿追高，追高善設停損・賽馬多(33)>7%有 ' + over7 + ' 檔 ' + stamp + '</div>' +
       '<div class="race-sub">「續抱勿追高」＝賽馬多裡漲超過 7% 的（不是可進場名單，已經漲多了）・' + condsNote + '・' + dailyNote + '</div>' +
       (over7 ? raceStockListHtml(m.horses.filter((r) => r.pct > 7), { dates: m.dates, conditions: true, m, both3334: true }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '<div class="race-note">賽馬多裡沒有漲超過 7% 的</div>') + '</div>' +
     '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
