@@ -342,13 +342,22 @@ function refreshGroups() {
 }
 
 // 個股問診「今天在漲／跌什麼」（2026-10-12 使用者：照莊爸問診的「今天在漲什麼」，盤中十點後大漲大跌的股票問診有新的資料）：
-// Google 新聞（近 2 天、標題有股名的，各家媒體）＋鉅亨（代號關鍵字：新聞、公司公告；「盤中速報」只是報價不列）。
+// Yahoo 股市個股新聞 RSS（各家媒體轉載）＋鉅亨（代號、股名兩種關鍵字：新聞、公司公告；「盤中速報」只是報價不列）＋Google 新聞
+// （近 2 天；Google 常擋 Cloudflare 回 503，抓不到就算了）。都只留標題有股名的（公告除外）。
 // 同一則新聞多家轉載只留一則；每檔 10 分鐘快取（同一個執行環境）。
 const moveNewsCache = new Map();
 const MOVE_NEWS_MS = 10 * 60 * 1000;
 function xmlText(v) {
   return String(v || "").replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, "$1").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&").trim();
+}
+function rssItems(xml) {
+  const out = [];
+  for (const m of xml.matchAll(/<item>([\\s\\S]*?)<\\/item>/g)) {
+    const pick = (tag) => { const r = m[1].match(new RegExp("<" + tag + "[^>]*>([\\\\s\\\\S]*?)</" + tag + ">")); return r ? xmlText(r[1]) : ""; };
+    out.push({ title: pick("title"), link: pick("link"), time: Date.parse(pick("pubDate")), source: pick("source") });
+  }
+  return out;
 }
 async function fetchMoveNews(code, name) {
   const key = code + "|" + name;
@@ -357,36 +366,47 @@ async function fetchMoveNews(code, name) {
   const since = Date.now() - 3 * 86400000;
   const base = name.replace(/-(KY|創|DR)$/i, "");
   const items = [], errors = [];
+  const named = (title) => !!base && title.includes(base);
+  const yahoo = async () => {
+    const res = await fetch("https://tw.stock.yahoo.com/rss?s=" + encodeURIComponent(code), { headers: { "user-agent": "Mozilla/5.0" } });
+    if (!res.ok) throw new Error("Yahoo 股市 HTTP " + res.status);
+    for (const x of rssItems(await res.text())) {
+      if (!named(x.title) || !(x.time >= since)) continue;
+      items.push({ title: x.title, source: "Yahoo股市", time: new Date(x.time).toISOString(), url: x.link, kind: "news" });
+    }
+  };
   const google = async () => {
     const q = encodeURIComponent('"' + base + '" when:2d');
     const res = await fetch("https://news.google.com/rss/search?q=" + q + "&hl=zh-TW&gl=TW&ceid=TW:zh-Hant", { headers: { "user-agent": "Mozilla/5.0" } });
     if (!res.ok) throw new Error("Google 新聞 HTTP " + res.status);
-    const xml = await res.text();
-    for (const m of xml.matchAll(/<item>([\\s\\S]*?)<\\/item>/g)) {
-      const pick = (tag) => { const r = m[1].match(new RegExp("<" + tag + "[^>]*>([\\\\s\\\\S]*?)</" + tag + ">")); return r ? xmlText(r[1]) : ""; };
-      const source = pick("source");
-      let title = pick("title");
-      if (source && title.endsWith(" - " + source)) title = title.slice(0, -(source.length + 3));
-      const t = Date.parse(pick("pubDate"));
-      if (!base || !title.includes(base) || !(t >= since)) continue;
-      items.push({ title, source: source || "Google 新聞", time: new Date(t).toISOString(), url: pick("link"), kind: "news" });
+    for (const x of rssItems(await res.text())) {
+      let title = x.title;
+      if (x.source && title.endsWith(" - " + x.source)) title = title.slice(0, -(x.source.length + 3));
+      if (!named(title) || !(x.time >= since)) continue;
+      items.push({ title, source: x.source || "Google 新聞", time: new Date(x.time).toISOString(), url: x.link, kind: "news" });
     }
   };
-  const cnyes = async () => {
-    const res = await fetch("https://ess.api.cnyes.com/ess/api/v1/news/keyword?q=" + encodeURIComponent(code) + "&limit=30&page=1");
+  const seenIds = new Set();
+  const cnyes = async (q, needName) => {
+    const res = await fetch("https://ess.api.cnyes.com/ess/api/v1/news/keyword?q=" + encodeURIComponent(q) + "&limit=30&page=1");
     if (!res.ok) throw new Error("鉅亨 HTTP " + res.status);
     const body = await res.json();
     for (const it of (body && body.data && body.data.items) || []) {
       const t = Number(it.publishAt) * 1000;
       const title = String(it.title || "").replace(/<\\/?mark>/g, "");
-      if (!(t >= since) || /^盤中速報/.test(title)) continue;
+      if (!(t >= since) || /^盤中速報/.test(title) || seenIds.has(it.newsId)) continue;
       const notice = (it.category || []).some((c) => c && c.name === "台股公告");
+      if (needName && !notice && !named(title)) continue;
+      seenIds.add(it.newsId);
       items.push({ title, source: notice ? "公司公告" : "鉅亨", time: new Date(t).toISOString(), url: "https://news.cnyes.com/news/id/" + it.newsId, kind: notice ? "notice" : "news" });
     }
   };
-  await Promise.all([google, cnyes].map((fn) => fn().catch((e) => errors.push(String((e && e.message) || e)))));
+  const jobs = [yahoo, google, () => cnyes(code, false)];
+  if (base) jobs.push(() => cnyes(base, true));
+  await Promise.all(jobs.map((fn) => fn().catch((e) => errors.push(String((e && e.message) || e)))));
   const seen = new Set();
-  const out = items.sort((a, b) => (a.time < b.time ? 1 : -1)).filter((x) => {
+  // 同一則公告 Yahoo 也會轉載：先看公告，留公告那一則
+  const out = items.sort((a, b) => ((a.kind === "notice") !== (b.kind === "notice") ? (a.kind === "notice" ? -1 : 1) : a.time < b.time ? 1 : -1)).filter((x) => {
     const k = x.title.replace(/[\\s\\p{P}\\p{S}]/gu, "").slice(0, 24);
     if (seen.has(k)) return false;
     seen.add(k);

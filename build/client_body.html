@@ -9718,7 +9718,7 @@ function pfQuarterHtml(code){
 }
 // ---- 今天在漲／跌什麼（2026-10-12 使用者：照莊爸問診的「今天在漲什麼」，盤中十點後大漲大跌，問診會有新的資料）----
 // 交易日 10:00 後（收盤後也留著）在問診最上面整理：盤中走勢（開高低、早盤殺低再拉漲停…）、同族群有沒有一起動、
-// 當天新聞標題（Google 新聞各家媒體＋鉅亨、公司公告，/api/move-news）、要留意的地方（均線、營收、法人、本益比、近 5 日漲幅）、
+// 當天新聞標題（Yahoo 股市個股新聞、鉅亨、公司公告，Google 新聞抓得到也算，/api/move-news）、要留意的地方（均線、營收、法人、本益比、近 5 日漲幅）、
 // 後面看什麼（今天的三日低、月線）跟一句話。原因是照這些資料自動整理的，不是 AI 摘要。
 const mvState = {};
 const MV_BIG_UP = 3, MV_BIG_DOWN = -3;
@@ -9860,7 +9860,7 @@ function mvHtml(data){
   const others = (up || down) ? fresh.filter((x) => !why.some((w) => w.includes(wlEsc(x.title)))) : [];
   if (others.length) html += '<details class="mv-more"><summary>其他新聞 ' + others.length + ' 則</summary>' + ul(others.map(link)) + '</details>';
   if (st.newsError) html += '<div class="muted">新聞讀取失敗：' + wlEsc(st.newsError) + '</div>';
-  return html + '<div class="mv-foot">依盤中報價、同族群漲跌、當天新聞標題（Google 新聞、鉅亨、公開資訊觀測站公告）自動整理，不是 AI 摘要；新聞整理僅供參考，不構成投資建議。</div></div>';
+  return html + '<div class="mv-foot">依盤中報價、同族群漲跌、當天新聞標題（Yahoo 股市、鉅亨、公司公告）自動整理，不是 AI 摘要；新聞整理僅供參考，不構成投資建議。</div></div>';
 }
 function renderDiag(){
   const body = document.getElementById('diagBody');
