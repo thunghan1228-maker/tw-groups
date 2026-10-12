@@ -7468,11 +7468,15 @@ function swingRevenueHtml(data, rules){
     const extra = '<div class="sw-line"><b class="up">' + mon + ' 月營收年增 ' + swPct(x.yoy, 1) + '</b>' + flag + '<span class="muted">・月增 ' + swPct(x.mom, 1) + '・累計年增 ' + swPct(x.cumYoy, 1) +
       (swHas(x.prevYoy) ? '・上月年增 ' + swPct(x.prevYoy, 1) : '') + '・營收 ' + (swHas(x.revYi) ? x.revYi + ' 億' : '—') + '・成交值 ' + x.turnoverYi + ' 億' +
       (x.announce ? '・' + (x.known ? swMmdd(x.announce) + ' 公布' : swMmdd(x.announce) + ' 前已公布') : '') + '</span></div>';
-    return swingCardHtml(x.card, { extra });
+    if (x.card) return swingCardHtml(Object.assign({}, x.card, { group: x.card.group || x.group || x.market }), { extra });
+    // 舊報告、或那天沒有日K的：只有營收跟均線
+    return '<div class="sw-card" data-code="' + x.code + '" data-name="' + (x.name || '') + '" role="button" tabindex="0"><div class="sw-code">' + x.code + '</div>' +
+      '<div class="sw-name">' + (x.name || '') + chipsFlagPillsHtml(x.code) + '</div><div class="sw-group">' + (x.group || x.market || '—') + '</div>' + extra +
+      '<div class="sw-line">均線 <b>' + x.score + '</b>・收 ' + x.close + '</div></div>';
   };
   return '<div class="sw-rule">' + (rules.revenue ? rules.revenue + '。' : '') + '點一檔開K線圖。熱門族＝籌碼雷達族群排名前 5；防守價＝' + swMmdd(data.date) + ' 收盤的月線與最近三天最低價，下一個交易日適用。</div>' +
     '<div class="bl-section bl-launch">營收面精選・' + mon + ' 月營收・截至 ' + swMmdd(r.asOf) + ' 公布 ' + r.published + ' 檔，年增 ≥' + r.rule.yoy + '% ' + r.yoyHigh + ' 檔；依年增挑，均線分數 ≥' + r.rule.score + '、成交值 ≥' + (r.rule.turnoverYi * 10000).toLocaleString('en-US') + ' 萬 共 ' + r.qualified + ' 檔' + (r.picks.length < r.qualified ? '，列前 ' + r.picks.length + ' 檔' : '') + '</div>' +
-    (r.picks.length ? (r.picks.every((x) => x.card) ? '<div class="sw-cards">' + r.picks.map(revCard).join('') + '</div>' : '<div class="sw-dlist">' + r.picks.map(row).join('') + '</div>')
+    (r.picks.length ? (r.picks.some((x) => x.card) ? '<div class="sw-cards">' + r.picks.map(revCard).join('') + '</div>' : '<div class="sw-dlist">' + r.picks.map(row).join('') + '</div>')
       : '<div class="race-note">目前沒有同時符合三個條件的股票（每月 1～10 號陸續公布，越接近 10 號越多）</div>') +
     '<div class="sw-quote">營收是體質，均線是位置：營收爆發又站得穩的，才是波段的料</div>';
 }
