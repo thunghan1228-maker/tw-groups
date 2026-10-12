@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 22:00:57";
+const BUILD_STAMP = "2026-10-12 22:25:03";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2980,6 +2980,9 @@ function drawChart(){
   defLines.forEach((d) => { lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); });
   const range = (hi - lo) || 1;
   lo -= range * 0.06; hi += range * 0.06;
+  // 123 黑龍圓圈畫在K棒下面（2026-10-12 使用者），底部多留一點空間
+  const d123Marks = currentChart.tf === 'daily' && currentChart.d123On && currentChart.d123 && currentChart.d123.code === currentChart.code ? currentChart.d123.marks : null;
+  if (d123Marks && Object.keys(d123Marks).length) lo -= range * 0.05;
 
   const xAt = (i) => PAD.left + (plotW * (i + 0.5) / bars.length);
   const yAt = (v) => padTop + plotH * (1 - (v - lo) / (hi - lo));
@@ -3073,17 +3076,17 @@ function drawChart(){
     ctx.fillRect(x - candleW / 2, top, candleW, h);
   });
 
-  // 123 黑龍進場點：K棒上方圓圈寫 1／2／3，紅＝區1、黃＝區2
+  // 123 黑龍進場點：K棒下方圓圈寫 1／2／3，紅＝區1、黃＝區2
   if (currentChart.tf === 'daily' && currentChart.d123On){
     chartD123Load(currentChart.code);
-    const marks = currentChart.d123 && currentChart.d123.code === currentChart.code ? currentChart.d123.marks : {};
+    const marks = d123Marks || {};
     if (Object.keys(marks).length){
       ctx.save();
       const r = Math.max(5, Math.min(8, candleW * 0.9));
       bars.forEach((b, i) => {
         const m = marks[dailyBarDay(b)];
         if (!m) return;
-        const x = xAt(i), cy = Math.max(padTop + r, yAt(b.high) - r - 3);
+        const x = xAt(i), cy = Math.min(cssH - padBottom - r, yAt(b.low) + r + 3);
         ctx.fillStyle = D123_COLOR[m.region] || '#d97706';
         ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.round(r * 1.3) + 'px -apple-system, sans-serif';
@@ -9714,7 +9717,7 @@ function dgCandlesHtml(bars, d, days, d123){
   const shown = all.slice(start);
   const marks = {};
   ((d123 && d123.marks) || []).forEach((m) => { marks[m.date] = m; });
-  const W = Math.max(360, shown.length * 11 + 90), H = 260, L = 8, R = 82, T = Object.keys(marks).length ? 24 : 10, B = 30;
+  const W = Math.max(360, shown.length * 11 + 90), H = 260, L = 8, R = 82, T = 10, B = Object.keys(marks).length ? 44 : 30;
   const levels = d ? [['三日低', d.low3T, '4 3'], ['月線', d.ma20T, '8 4'], ['紅半', d.halfT, '10 3 2 3']].filter((x) => swHas(x[1])) : [];
   let lo = Math.min(...shown.map((b) => b[3])), hi = Math.max(...shown.map((b) => b[2]));
   for (const [, v] of levels){ lo = Math.min(lo, v); hi = Math.max(hi, v); }
@@ -9729,10 +9732,10 @@ function dgCandlesHtml(bars, d, days, d123){
     const top = y(Math.max(b[1], b[4])), bottom = y(Math.min(b[1], b[4]));
     svg += '<line x1="' + x(i).toFixed(1) + '" x2="' + x(i).toFixed(1) + '" y1="' + y(b[2]).toFixed(1) + '" y2="' + y(b[3]).toFixed(1) + '" stroke="' + color + '" stroke-width="1"/>';
     svg += '<rect x="' + (x(i) - cw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + cw.toFixed(1) + '" height="' + Math.max(1, bottom - top).toFixed(1) + '" fill="' + color + '"><title>' + b[0] + ' 開 ' + ckPrice(b[1]) + ' 高 ' + ckPrice(b[2]) + ' 低 ' + ckPrice(b[3]) + ' 收 ' + ckPrice(b[4]) + (b[5] ? ' 量 ' + b[5] : '') + '</title></rect>';
-    if (i % 10 === 0 || i === shown.length - 1) svg += '<text x="' + x(i).toFixed(1) + '" y="' + (H - B + 14) + '" text-anchor="middle" fill="currentColor" fill-opacity=".7">' + String(b[0]).slice(5) + '</text>';
+    if (i % 10 === 0 || i === shown.length - 1) svg += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 16) + '" text-anchor="middle" fill="currentColor" fill-opacity=".7">' + String(b[0]).slice(5) + '</text>';
     const m = marks[String(b[0]).slice(0, 10)];
     if (m){
-      const cy = Math.max(8, y(b[2]) - 10);
+      const cy = Math.min(H - B + 9, y(b[3]) + 10);   // K棒下面（2026-10-12 使用者）
       svg += '<g><title>' + b[0] + ' 123 黑龍第 ' + m.n + ' 次進場・區' + m.region + '（均線分數 ' + m.score + '，創高後第 ' + m.sinceHigh + ' 天）</title>' +
         '<circle cx="' + x(i).toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="7" fill="' + D123_COLOR[m.region] + '"/>' +
         '<text x="' + x(i).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">' + m.n + '</text></g>';
@@ -10381,7 +10384,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 22:00:57';
+const BUILD_STAMP = '2026-10-12 22:25:03';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
