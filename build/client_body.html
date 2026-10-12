@@ -338,6 +338,10 @@
   .bl-tag.warn{background:#d97706;}
   .bl-relaunch{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;padding:0 6px;margin-left:2px;background:#7c3aed;color:#fff;white-space:nowrap;vertical-align:1px;}
   .bl-section{font-weight:800;font-size:15px;color:#fff;border-radius:8px;padding:6px 10px;margin:12px 0 8px;}
+  .dg-chart-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .dg-tf-btns{display:flex;gap:6px;flex-wrap:wrap;}
+  .dg-tf-btn{font:inherit;font-size:13px;font-weight:800;color:#0f5f56;background:#fff;border:0;border-radius:999px;padding:3px 12px;cursor:pointer;}
+  .dg-tf-btn:hover{background:#d8f3ee;}
   .bl-section.bl-launch{background:#c0392b;}
   .bl-section.bl-brew{background:#0f766e;}
   .bl-section.bl-fallen{background:#7c2d12;}
@@ -3822,7 +3826,11 @@ function closeTopChartWindow(){
 }
 function openChartWindow(code, name, tf){
   for (const win of chartWindows.values()){
-    if (win.code === code){ bringChartWindowToFront(win); return win; }  // 同一檔已開著就拉到最前面
+    if (win.code === code){   // 同一檔已開著就拉到最前面；有指定週期（問診的 5 分K／1 分K／日線按鈕）就順便切過去
+      bringChartWindowToFront(win);
+      if (tf){ try { win.iframe.contentWindow.switchTimeframe(tf); } catch (_){ /* 還在載入就算了 */ } }
+      return win;
+    }
   }
   const layer = document.getElementById('chartWindows');
   const id = ++chartWindowSeq;
@@ -9887,7 +9895,10 @@ function renderDiag(){
   html += scrStockCardHtml(s.code);
   html += pfIndustryHtml(s.code);   // 2026-10-10 使用者：產業白話＋同業
   html += '<div class="bl-section bl-launch">🛡 防守線・出場與停損依據</div>' + dgDefenseHtml(s.def);
-  html += '<div class="bl-section bl-brew">📈 日線圖・' + s.code + ' ' + (s.name || '') + '・K棒＋均線＋明日防守線（近 60 個交易日）</div>' + dgCandlesHtml(data.bars, s.def, 60);
+  // 2026-10-12 使用者：標題旁加按鈕直接開K線圖（5 分K／1 分K／日線）
+  const tfBtn = (tf, label) => '<button type="button" class="dg-tf-btn" data-code="' + s.code + '" data-name="' + wlEsc(s.name || '') + '" data-tf="' + tf + '">' + label + '</button>';
+  html += '<div class="bl-section bl-brew dg-chart-head"><span>📈 日線圖・' + s.code + ' ' + (s.name || '') + '・K棒＋均線＋明日防守線（近 60 個交易日）</span>' +
+    '<span class="dg-tf-btns">' + tfBtn('m5', '開啟 5 分K') + tfBtn('m1', '1 分K') + tfBtn('daily', '日線圖') + '</span></div>' + dgCandlesHtml(data.bars, s.def, 60);
   html += '<div class="bl-section bl-launch">📋 七科問診</div>' + dgSubjectsHtml(s);
   html += pfQuarterHtml(s.code);    // 2026-10-10 使用者：季報
   html += dgSiblingsHtml(data);
@@ -10161,13 +10172,13 @@ document.getElementById('diagBody').addEventListener('click', (e) => {
   if (pfc){ dgRun(pfc.dataset.pfCode); return; }
   const fbtn = e.target.closest('.dg-fbtn');
   if (fbtn){ dgState.filter = fbtn.dataset.filter; renderDiag(); return; }
-  const chart = e.target.closest('#dgChartBtn');
+  const chart = e.target.closest('#dgChartBtn, .dg-tf-btn');
   if (chart){
     if (!useFloatingCharts()){
       document.getElementById('diagModal').classList.add('behind-chart');
       document.getElementById('signalModal').classList.add('behind-chart');
     }
-    openStockChart(chart.dataset.code, chart.dataset.name);
+    openStockChart(chart.dataset.code, chart.dataset.name, chart.dataset.tf || undefined);
     return;
   }
   const link = e.target.closest('.dg-link[data-code]');

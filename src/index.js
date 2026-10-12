@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 21:05:54";
+const BUILD_STAMP = "2026-10-12 21:22:17";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -403,6 +403,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bl-tag.warn{background:#d97706;}
   .bl-relaunch{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;padding:0 6px;margin-left:2px;background:#7c3aed;color:#fff;white-space:nowrap;vertical-align:1px;}
   .bl-section{font-weight:800;font-size:15px;color:#fff;border-radius:8px;padding:6px 10px;margin:12px 0 8px;}
+  .dg-chart-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .dg-tf-btns{display:flex;gap:6px;flex-wrap:wrap;}
+  .dg-tf-btn{font:inherit;font-size:13px;font-weight:800;color:#0f5f56;background:#fff;border:0;border-radius:999px;padding:3px 12px;cursor:pointer;}
+  .dg-tf-btn:hover{background:#d8f3ee;}
   .bl-section.bl-launch{background:#c0392b;}
   .bl-section.bl-brew{background:#0f766e;}
   .bl-section.bl-fallen{background:#7c2d12;}
@@ -3889,7 +3893,11 @@ function closeTopChartWindow(){
 }
 function openChartWindow(code, name, tf){
   for (const win of chartWindows.values()){
-    if (win.code === code){ bringChartWindowToFront(win); return win; }  // 同一檔已開著就拉到最前面
+    if (win.code === code){   // 同一檔已開著就拉到最前面；有指定週期（問診的 5 分K／1 分K／日線按鈕）就順便切過去
+      bringChartWindowToFront(win);
+      if (tf){ try { win.iframe.contentWindow.switchTimeframe(tf); } catch (_){ /* 還在載入就算了 */ } }
+      return win;
+    }
   }
   const layer = document.getElementById('chartWindows');
   const id = ++chartWindowSeq;
@@ -9954,7 +9962,10 @@ function renderDiag(){
   html += scrStockCardHtml(s.code);
   html += pfIndustryHtml(s.code);   // 2026-10-10 使用者：產業白話＋同業
   html += '<div class="bl-section bl-launch">🛡 防守線・出場與停損依據</div>' + dgDefenseHtml(s.def);
-  html += '<div class="bl-section bl-brew">📈 日線圖・' + s.code + ' ' + (s.name || '') + '・K棒＋均線＋明日防守線（近 60 個交易日）</div>' + dgCandlesHtml(data.bars, s.def, 60);
+  // 2026-10-12 使用者：標題旁加按鈕直接開K線圖（5 分K／1 分K／日線）
+  const tfBtn = (tf, label) => '<button type="button" class="dg-tf-btn" data-code="' + s.code + '" data-name="' + wlEsc(s.name || '') + '" data-tf="' + tf + '">' + label + '</button>';
+  html += '<div class="bl-section bl-brew dg-chart-head"><span>📈 日線圖・' + s.code + ' ' + (s.name || '') + '・K棒＋均線＋明日防守線（近 60 個交易日）</span>' +
+    '<span class="dg-tf-btns">' + tfBtn('m5', '開啟 5 分K') + tfBtn('m1', '1 分K') + tfBtn('daily', '日線圖') + '</span></div>' + dgCandlesHtml(data.bars, s.def, 60);
   html += '<div class="bl-section bl-launch">📋 七科問診</div>' + dgSubjectsHtml(s);
   html += pfQuarterHtml(s.code);    // 2026-10-10 使用者：季報
   html += dgSiblingsHtml(data);
@@ -10228,13 +10239,13 @@ document.getElementById('diagBody').addEventListener('click', (e) => {
   if (pfc){ dgRun(pfc.dataset.pfCode); return; }
   const fbtn = e.target.closest('.dg-fbtn');
   if (fbtn){ dgState.filter = fbtn.dataset.filter; renderDiag(); return; }
-  const chart = e.target.closest('#dgChartBtn');
+  const chart = e.target.closest('#dgChartBtn, .dg-tf-btn');
   if (chart){
     if (!useFloatingCharts()){
       document.getElementById('diagModal').classList.add('behind-chart');
       document.getElementById('signalModal').classList.add('behind-chart');
     }
-    openStockChart(chart.dataset.code, chart.dataset.name);
+    openStockChart(chart.dataset.code, chart.dataset.name, chart.dataset.tf || undefined);
     return;
   }
   const link = e.target.closest('.dg-link[data-code]');
@@ -10246,7 +10257,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 21:05:54';
+const BUILD_STAMP = '2026-10-12 21:22:17';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
