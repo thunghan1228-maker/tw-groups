@@ -109,9 +109,9 @@ async function fetchQuotes(codes) {
   return await fetchQuotesFromBackend(codes);
 }
 
-async function fetchQuotesFromBackend(codes) {
+async function fetchQuotesFromBackend(codes, timeoutMs) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 15000);
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs || 15000);
   let data = null;
   try {
     const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/group-quotes?codes=" + encodeURIComponent(codes.join(",")), {
@@ -138,6 +138,18 @@ async function fetchQuotesFromBackend(codes) {
     enumerable: false
   });
   return quotes;
+}
+
+// /api/groups 專用（2026-10-12 週一盤中實測）：Worker 自己打證交所 499 檔要 2～15 秒、偶爾一段整段缺（缺 161 檔），
+// 證交所舊主機還會回落後 40～100 秒的資料。後端報價中心（HanStock #258）每檔留最新一筆、5 秒共用、30 秒內先給舊的
+// 背景再抓，各執行環境都拿同一份。先問後端（4 秒），後端失敗或缺超過一成才走原本的（自己打證交所、再拿後端補）。
+// 自選股、創高黑提醒要開高低，照舊用 fetchQuotes。
+async function fetchGroupQuotes(codes) {
+  try {
+    const quotes = await fetchQuotesFromBackend(codes, 4000);
+    if ((quotes.__meta.missing || 0) <= codes.length / 10) return quotes;
+  } catch (err) { /* 後端不行就自己打證交所 */ }
+  return await fetchQuotes(codes);
 }
 
 function mergeBackendQuotes(quotes, backup, codes) {
@@ -258,7 +270,7 @@ async function buildGroupsBody() {
   // 日K收盤取代 TWSE 即時報價：2026-10-04（週日）TWSE 跑測試盤，即時報價不是 0 就是測試用的假價
   // （鴻海 276 漲停），首頁跟盤中333／刀劍空／醞釀發動全跟著亂。快照裡沒有的股票照舊用即時報價；
   // 快照抓不到就整個照舊；TWSE 整批失敗但有暫留快照時照樣回資料。
-  const [quotesResult, sessionResult] = await Promise.allSettled([fetchQuotes(ALL_CODES), fetchSessionClose()]);
+  const [quotesResult, sessionResult] = await Promise.allSettled([fetchGroupQuotes(ALL_CODES), fetchSessionClose()]);
   const sessionClose = sessionResult.status === "fulfilled" ? sessionResult.value : null;
   const held = !!(sessionClose && sessionClose.held && sessionClose.session && sessionClose.stocks);
   if (quotesResult.status === "rejected" && !held) throw quotesResult.reason;
