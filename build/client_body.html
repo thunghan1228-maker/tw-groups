@@ -246,6 +246,23 @@
   .launch-alert-close{flex:0 0 auto;width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,.22);border:0;color:#fff;font-size:18px;font-weight:800;line-height:1;cursor:pointer;font-family:inherit;}
   .launch-alert-close:hover{background:rgba(255,255,255,.34);}
   .launch-alert-body{margin-top:8px;font-size:15px;font-weight:600;line-height:1.6;}
+  /* 盤中觀察股跳窗（2026-10-12 使用者：11:30／12:00／12:30／13:00 像發動一樣跳出來） */
+  .launch-alert.obs-alert{background:#4c1d95;max-width:min(94vw,680px);width:min(94vw,680px);z-index:211;}
+  .obs-alert .launch-alert-body{max-height:min(70vh,640px);overflow:auto;font-weight:500;font-size:14px;}
+  .obs-tools{display:flex;gap:6px;align-items:center;}
+  .obs-tools button{background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:8px;padding:5px 10px;font-weight:800;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;}
+  @media (max-width: 640px){ .obs-alert .launch-alert-head{font-size:16px;} .obs-alert{padding:12px 12px;} }
+  .obs-cat{margin:8px 0 2px;font-weight:800;color:#fde68a;}
+  .obs-cat small{color:#e9d5ff;font-weight:600;margin-left:6px;}
+  .obs-line{line-height:1.75;}
+  .obs-line b{color:#e9d5ff;font-weight:700;margin-right:4px;}
+  .obs-stk{cursor:pointer;white-space:nowrap;border-bottom:1px dotted rgba(255,255,255,.4);}
+  .obs-stk:hover{background:rgba(255,255,255,.12);}
+  .obs-warn{margin-top:8px;line-height:1.6;color:#fef3c7;}
+  .obs-sym{font-size:12px;color:#ddd6fe;line-height:1.5;margin-bottom:4px;}
+  .obs-panel .obs-cat{color:var(--text);}
+  .obs-panel .obs-cat small,.obs-panel .obs-line b,.obs-panel .obs-sym{color:var(--muted);}
+  .obs-panel .obs-warn{color:var(--text);}
   .launch-alert-time{display:inline-block;min-width:2.6em;font-variant-numeric:tabular-nums;font-weight:800;color:#ffd8d3;}
 
   /* 盤中訊號中心：常駐浮動視窗，不擋住底下頁面（不是點開才出現的彈窗） */
@@ -10638,6 +10655,7 @@ async function refresh(){
     groupsLastError = '';
     lastData = carryMissingQuotes(data);
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
+    try { obsTick(); } catch (e) { /* 盤中觀察股跳窗失敗不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
     // 2026-10-06 使用者：刀劍空一直顯示「族群行情還沒載入」——開盤前後首頁報價要 10 幾秒，報價回來後只有醞釀／發動會馬上重畫，
@@ -11648,7 +11666,7 @@ setInterval(() => {
 // 當沖多＝賽馬多(33) ∩ 河流多(34) ∩ 馬火多(30) ∩ 族群在多方區；多觀察＝挑三個族群，看每檔位置、漲幅、有沒有破三日低／月線。
 // 盤中的名單跟盤中333 同一份（race333Model，首頁即時報價）；防守價是前一天收盤算好的（/api/checkup）。
 const hwState = { tab: 'short', filters: { band: false, ma7: false, hideHold: true, over6: true }, picks: null, def: {}, defKey: '', defLoading: false, timer: 0 };
-const HW_TABS = [['short', '🔪 空觀察'], ['long', '🐎 當沖多'], ['watch', '🔥 多觀察']];
+const HW_TABS = [['short', '🔪 空觀察'], ['long', '🐎 當沖多'], ['watch', '🔥 多觀察'], ['obs', '⏰ 盤中觀察股']];
 try { const saved = JSON.parse(localStorage.getItem('hwPicks') || 'null'); if (Array.isArray(saved)) hwState.picks = saved.slice(0, 3); } catch (_){}
 const hwPct = (v) => (v === null || v === undefined || !Number.isFinite(v) ? '—' : (v > 0 ? '+' : '') + v.toFixed(2) + '%');
 function hwGroupsRanked(){
@@ -11836,7 +11854,7 @@ function renderHomework(){
   const body = document.getElementById('hwBody');
   if (!body) return;
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
-  const html = hwState.tab === 'short' ? hwShortHtml() : hwState.tab === 'long' ? hwLongHtml() : hwWatchHtml();
+  const html = hwState.tab === 'short' ? hwShortHtml() : hwState.tab === 'long' ? hwLongHtml() : hwState.tab === 'obs' ? obsPanelHtml() : hwWatchHtml();
   const open = Array.from(body.querySelectorAll('details.hw-more[open]')).length > 0;
   body.innerHTML = '<div class="hw-tabs">' + HW_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (hwState.tab === k ? ' active' : '') + '" data-hw-tab="' + k + '">' + label + '</button>').join('') +
     '<span class="hw-stamp">' + stamp + ' 更新・盤中每 20 秒跟著首頁報價重算</span></div>' + html;
@@ -11857,7 +11875,11 @@ document.getElementById('hwModal').addEventListener('click', (e) => { if (e.targ
 document.getElementById('hwBody').addEventListener('click', (e) => {
   const t = e.target;
   const tab = t.closest('[data-hw-tab]');
-  if (tab){ hwState.tab = tab.dataset.hwTab; renderHomework(); return; }
+  if (tab){ hwState.tab = tab.dataset.hwTab; renderHomework(); if (hwState.tab === 'obs' && !obsState.report && !obsState.loading) obsRun(null, false); return; }
+  if (t.closest('[data-obs-run]')){ obsRun(null, false); return; }
+  if (t.closest('[data-obs-copy]')){ obsCopy(); return; }
+  const ostk = t.closest('[data-obs-code]');
+  if (ostk){ openStockChart(ostk.dataset.obsCode, ostk.dataset.obsName); return; }
   const flt = t.closest('[data-hw-flt]');
   if (flt){ hwState.filters[flt.dataset.hwFlt] = !hwState.filters[flt.dataset.hwFlt]; renderHomework(); return; }
   if (t.closest('summary') || t.closest('select')) return;
@@ -11876,6 +11898,258 @@ document.getElementById('hwBody').addEventListener('change', (e) => {
   try { localStorage.setItem('hwPicks', JSON.stringify(cur)); } catch (_){}
   renderHomework();
 });
+
+// ---- 盤中觀察股（2026-10-12 使用者：照「收盤觀察股（莊爸系統選股）」做一份，盤中 11:30／12:00／12:30／13:00 像發動一樣跳出來）----
+// 觀察池＝均線分數排行近 20 個交易日的常客（每天前 30 名、上榜次數最多的 50 檔）＝最近一路強的股；跳出那一刻用即時報價分五類：
+// 【5】有點深＝跌破月線（昨天還在月線上的標「今天剛破月線」）；【2】今天噴出＝漲 5% 以上或漲停；
+// 【1】黑K出現・黑龍系統符合＝現價低於開盤、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低；【3】已噴在高檔＝高於月線 10% 以上；【4】右肩打底＝其他月線上的。
+// 符號：★／☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔（現價 ÷（月線＋季線）÷2 − 1 ≥ 30%）、
+// ✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。防守線（三K低、月線）是前一個交易日收盤算好的（/api/checkup）。
+const OBS_SLOTS = ['11:30', '12:00', '12:30', '13:00'];
+const OBS_CATS = [
+  [1, '黑K出現・黑龍系統符合', '等到黑了，小量基本單（防守今天黑K低）'],
+  [2, '今天噴出', '等黑再加碼，不追'],
+  [3, '已噴在高檔', '等黑'],
+  [4, '右肩打底', '觀察分批'],
+  [5, '有點深', '慢慢來，要打底確認'],
+];
+const obsState = { report: null, loading: false, error: '', shown: {} };
+try { obsState.shown = JSON.parse(localStorage.getItem('obsShown') || '{}') || {}; } catch (_){}
+function obsNowHm(){ return new Date(Date.now() + 8 * 3600000).toISOString().slice(11, 16); }
+function obsMarks(x){
+  return (x.star || '') + (x.lit ? '●' : '') + (x.high ? '▲' : '') + (x.brk3 ? '✗三K低' : '') + (x.drop5 ? '▼' : '') + (x.reb ? '↑' : '') + (x.dispo ? '(處置)' : '');
+}
+async function obsBuild(slot){
+  const hitsRes = await fetch('/api/ma-rank-hits?days=20&top=30&show=50');
+  const hits = await hitsRes.json().catch(() => null);
+  const pool = ((hits && hits.rows) || []).map((r) => ({ code: String(r.code), name: r.name, grp: r.grp }));
+  if (!pool.length) throw new Error('均線分數常客名單還沒有資料');
+  const codes = pool.map((p) => p.code).join(',');
+  const [ckRes, qRes] = await Promise.all([fetch('/api/checkup?codes=' + encodeURIComponent(codes)), fetch('/api/watch-quotes?codes=' + encodeURIComponent(codes))]);
+  const ck = await ckRes.json().catch(() => null), qd = await qRes.json().catch(() => null);
+  const ckBy = {};
+  ((ck && ck.rows) || []).forEach((r) => { ckBy[r.code] = r; });
+  const quotes = (qd && qd.quotes) || {};
+  const lit = new Set();
+  try { (brewHistoryDay(brewSessionDate()).launch || []).forEach((x) => lit.add(x.code)); } catch (_){}
+  try { const bm = brewLaunchModel(); if (bm) bm.launchBlocks.flatMap((b) => b.rows).forEach((r) => lit.add(r.code)); } catch (_){}
+  const items = [], missing = [];
+  pool.forEach((p) => {
+    const c = ckBy[p.code], q = quotes[p.code];
+    const price = q && Number(q.price) > 0 ? Number(q.price) : null;
+    if (!c || price === null){ missing.push(p.code + p.name); return; }
+    const d = c.def || {}, ma = c.ma || {};
+    const ma20 = d.ma20T || ma['20'] || null, ma60 = ma['60'] || null, low3 = d.low3T || null;
+    const pct = Number.isFinite(Number(q.changePercent)) ? Number(q.changePercent) : null;
+    const open = Number(q.open) > 0 ? Number(q.open) : null;
+    const live = hwMaScore(p.code, price);
+    const score = live !== null && live !== undefined ? live : c.score;
+    const below = !!(ma20 && price < ma20);
+    const label = c.scores && c.scores.overallLabel;
+    const f = stockFlags[p.code];
+    const x = {
+      code: p.code, name: c.name || p.name, grp: c.group || p.grp || (WL_GROUP_INDEX[p.code] ? WL_GROUP_INDEX[p.code].group : '') || '其他',
+      price, pct, score, below,
+      black: !!(open && price < open), brk3: !!(low3 && price < low3),
+      star: label === '強' ? '★' : label === '中上' ? '☆' : '',
+      lit: lit.has(p.code), high: !!(ma20 && ma60 && price / ((ma20 + ma60) / 2) - 1 >= 0.30),
+      drop5: pct !== null && pct <= -5, reb: pct !== null && pct > 0 && below,
+      dispo: !!(f && f.disposition), dist20: ma20 ? price / ma20 - 1 : null,
+      newBreak: below && Number(c.close) >= Number(d.ma20Y || 0),
+    };
+    if (below) x.cat = 5;
+    else if ((pct !== null && pct >= 5) || (q && q.limitUp)) x.cat = 2;
+    else if (x.black && score >= 10 && pct !== null && pct <= 3 && !x.brk3) x.cat = 1;
+    else if (x.dist20 !== null && x.dist20 >= 0.10) x.cat = 3;
+    else x.cat = 4;
+    items.push(x);
+  });
+  return { date: twTodayStr(), slot, at: Date.now(), quoteTime: (qd && qd.quoteTime) || null, ckDate: ck && ck.date, items, missing, hitsFrom: hits.from, hitsTo: hits.to };
+}
+function obsGroupLines(list){
+  // 同族群放同一行：「族群 代號名稱符號／代號名稱符號」
+  const by = new Map();
+  list.forEach((x) => { if (!by.has(x.grp)) by.set(x.grp, []); by.get(x.grp).push(x); });
+  const order = [...by.keys()].sort((a, b) => (a === '其他') - (b === '其他'));
+  return order.map((g) => [g, by.get(g)]);
+}
+function obsCompare(rep){
+  // 跟上一次（同一天上一個時段；沒有就是上一個交易日最後一次）比：類別有變的、新進／移出觀察池的
+  let prev = null;
+  try { prev = JSON.parse(localStorage.getItem('obsLast') || 'null'); } catch (_){}
+  if (!prev || !prev.cats || (prev.date === rep.date && prev.slot === rep.slot)) return prev && prev.cmp ? prev.cmp : null;
+  const now = new Map(rep.items.map((x) => [x.code, x]));
+  const moved = [], added = [], removed = [];
+  rep.items.forEach((x) => {
+    const was = prev.cats[x.code];
+    if (was === undefined) added.push(x.code + x.name);
+    else if (was !== x.cat) moved.push(x.code + x.name + '【' + was + '→' + x.cat + '】');
+  });
+  Object.keys(prev.cats).forEach((code) => { if (!now.has(code) && !rep.missing.some((m) => m.startsWith(code))) removed.push(code + (prev.names && prev.names[code] || '')); });
+  return { label: (prev.date === rep.date ? '' : String(prev.date).slice(5).replace('-', '/') + ' ') + (prev.slot || ''), moved, added, removed };
+}
+function obsSave(rep){
+  const cats = {}, names = {};
+  rep.items.forEach((x) => { cats[x.code] = x.cat; names[x.code] = x.name; });
+  try { localStorage.setItem('obsLast', JSON.stringify({ date: rep.date, slot: rep.slot, cats, names, cmp: rep.cmp })); } catch (_){}
+}
+function obsWarnings(rep){
+  const by = (fn) => rep.items.filter(fn).map((x) => x.name);
+  const w = ['⚠️小量基本單，隔天 905 或 1+2 加碼，噴出後等黑再加碼（參考新手教學）', '⚠️停損防守三K低或五日線'];
+  const hot = by((x) => x.cat === 2), litHot = rep.items.filter((x) => x.cat === 2 && x.lit).map((x) => x.name);
+  if (hot.length) w.push('⚠️' + hot.join('/') + ' 噴出等黑' + (litHot.length ? '（亮燈：' + litHot.join('/') + '）' : ''));
+  const base = by((x) => x.cat === 4);
+  if (base.length) w.push('⚠️' + base.join('/') + ' 右肩打底觀察分批');
+  const deep = by((x) => x.cat === 5 && !x.newBreak);
+  if (deep.length) w.push('⚠️' + deep.join('/') + ' 有點深慢慢來要打底確認');
+  const nb = by((x) => x.cat === 5 && x.newBreak);
+  if (nb.length) w.push('⚠️今天剛破月線：' + nb.join('/'));
+  const b3 = by((x) => x.brk3);
+  if (b3.length) w.push('⚠️跌破三K低（防守失守）：' + b3.join('/'));
+  const d5 = by((x) => x.drop5);
+  if (d5.length) w.push('⚠️今天大黑K（跌 5% 以上）：' + d5.join('/'));
+  return w;
+}
+function obsTitle(rep){ return String(rep.date).slice(5).replace('-', '/') + ' ' + (rep.slot || obsNowHm()) + ' 盤中觀察股（系統選股）'; }
+const OBS_SYMBOLS = '★＝持股健診「強」 ☆＝「中上」 ●＝今天發動過 ▲＝黑龍系統相對高檔，打少跑快 ✗三K低＝跌破三K低（防守失守） ▼＝今天跌 5% 以上 ↑＝今天紅但還沒站回月線';
+function obsText(rep){
+  const out = [obsTitle(rep), '', '符號說明', OBS_SYMBOLS, ''];
+  OBS_CATS.forEach(([n, title, act]) => {
+    const list = rep.items.filter((x) => x.cat === n);
+    out.push('【' + n + '】' + title + ' → ' + act + '（' + list.length + ' 檔）');
+    if (n === 5){
+      [['▼今天剛破月線（昨天還沒破）', list.filter((x) => x.newBreak)], ['▼已破月線（昨天就在月線下）', list.filter((x) => !x.newBreak)]].forEach(([h, l]) => {
+        if (!l.length) return;
+        out.push(h);
+        obsGroupLines(l).forEach(([g, xs]) => out.push(g + ' ' + xs.map((x) => x.code + x.name + obsMarks(x)).join('/')));
+      });
+    } else {
+      obsGroupLines(list).forEach(([g, xs]) => out.push(g + ' ' + xs.map((x) => x.code + x.name + obsMarks(x)).join('/')));
+    }
+    out.push('');
+  });
+  if (rep.cmp && (rep.cmp.moved.length || rep.cmp.added.length || rep.cmp.removed.length)){
+    out.push('【跟 ' + rep.cmp.label + ' 比】');
+    if (rep.cmp.moved.length) out.push('換類 ' + rep.cmp.moved.join('/'));
+    if (rep.cmp.added.length) out.push('新增 ' + rep.cmp.added.join('/'));
+    if (rep.cmp.removed.length) out.push('移出 ' + rep.cmp.removed.join('/'));
+    out.push('');
+  }
+  return out.concat(obsWarnings(rep)).join('\n');
+}
+function obsBodyHtml(rep){
+  const stk = (x) => '<span class="obs-stk" data-obs-code="' + wlEsc(x.code) + '" data-obs-name="' + wlEsc(x.name) + '">' + wlEsc(x.code + x.name + obsMarks(x)) + '</span>';
+  const lines = (list) => obsGroupLines(list).map(([g, xs]) => '<div class="obs-line"><b>' + wlEsc(g) + '</b>' + xs.map(stk).join(' / ') + '</div>').join('');
+  let h = '<div class="obs-sym">' + OBS_SYMBOLS + '</div>';
+  OBS_CATS.forEach(([n, title, act]) => {
+    const list = rep.items.filter((x) => x.cat === n);
+    h += '<div class="obs-cat">【' + n + '】' + title + '<small>→ ' + act + '・' + list.length + ' 檔</small></div>';
+    if (!list.length){ h += '<div class="obs-line">—</div>'; return; }
+    if (n === 5){
+      const a = list.filter((x) => x.newBreak), b = list.filter((x) => !x.newBreak);
+      if (a.length) h += '<div class="obs-line">▼今天剛破月線（昨天還沒破）</div>' + lines(a);
+      if (b.length) h += '<div class="obs-line">▼已破月線（昨天就在月線下）</div>' + lines(b);
+    } else h += lines(list);
+  });
+  if (rep.cmp && (rep.cmp.moved.length || rep.cmp.added.length || rep.cmp.removed.length)){
+    h += '<div class="obs-cat">【跟 ' + wlEsc(rep.cmp.label) + ' 比】</div>' +
+      (rep.cmp.moved.length ? '<div class="obs-line">換類 ' + wlEsc(rep.cmp.moved.join(' / ')) + '</div>' : '') +
+      (rep.cmp.added.length ? '<div class="obs-line">新增 ' + wlEsc(rep.cmp.added.join(' / ')) + '</div>' : '') +
+      (rep.cmp.removed.length ? '<div class="obs-line">移出 ' + wlEsc(rep.cmp.removed.join(' / ')) + '</div>' : '');
+  }
+  h += '<div class="obs-warn">' + obsWarnings(rep).map(wlEsc).join('<br>') + '</div>';
+  h += '<div class="obs-sym" style="margin-top:8px">觀察池＝均線分數排行近 20 個交易日常客（每天前 30 名、上榜最多的 50 檔，' + wlEsc(String(rep.hitsFrom || '').slice(5)) + '～' + wlEsc(String(rep.hitsTo || '').slice(5)) +
+    '）；現價是證交所行情 ' + wlEsc(rep.quoteTime || '') + '；三K低、月線、健診是 ' + wlEsc(String(rep.ckDate || '').slice(5)) + ' 收盤算的。' +
+    (rep.missing.length ? '沒抓到報價：' + wlEsc(rep.missing.join('、')) : '') + '點股票開 K 線圖。</div>';
+  return h;
+}
+let obsDrag = null;
+function obsShowPopup(rep){
+  let el = document.getElementById('obsAlertBox');
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'obsAlertBox';
+    el.className = 'launch-alert obs-alert';
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.launch-alert-close')){ el.remove(); return; }
+      if (e.target.closest('[data-obs-copy]')){ obsCopy(); return; }
+      const s = e.target.closest('[data-obs-code]');
+      if (s) openStockChart(s.dataset.obsCode, s.dataset.obsName);
+    });
+    el.addEventListener('pointerdown', (e) => {
+      if (!e.target.closest('.launch-alert-head') || e.target.closest('button')) return;
+      const rect = el.getBoundingClientRect();
+      obsDrag = { x: e.clientX, y: e.clientY, left: rect.left, top: rect.top };
+      el.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (!obsDrag) return;
+      const pos = clampLaunchAlertPos(el, obsDrag.left + (e.clientX - obsDrag.x), obsDrag.top + (e.clientY - obsDrag.y));
+      el.style.left = pos.left + 'px'; el.style.top = pos.top + 'px'; el.style.transform = 'none';
+    });
+    const stop = () => { obsDrag = null; };
+    el.addEventListener('pointerup', stop);
+    el.addEventListener('pointercancel', stop);
+    document.body.appendChild(el);
+  }
+  el.innerHTML = '<div class="launch-alert-head">⏰ ' + wlEsc(obsTitle(rep)) + '<span class="obs-tools"><button type="button" data-obs-copy="1">📋 複製</button>' +
+    '<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></span></div><div class="launch-alert-body">' + obsBodyHtml(rep) + '</div>';
+}
+async function obsRun(slot, popup){
+  if (obsState.loading) return;
+  obsState.loading = true; obsState.error = '';
+  if (!document.getElementById('hwModal').hidden && hwState.tab === 'obs') renderHomework();
+  try {
+    const rep = await obsBuild(slot);
+    rep.cmp = obsCompare(rep);
+    obsSave(rep);
+    obsState.report = rep;
+    if (popup){
+      obsShowPopup(rep);
+      if (alertsEnabled) launchBeep();
+      if ('Notification' in window && Notification.permission === 'granted'){
+        const n = (k) => rep.items.filter((x) => x.cat === k).length;
+        try { new Notification('⏰ ' + obsTitle(rep), { body: '黑K黑龍 ' + n(1) + '・噴出 ' + n(2) + '・高檔 ' + n(3) + '・右肩打底 ' + n(4) + '・有點深 ' + n(5), tag: 'obs-' + rep.slot, requireInteraction: true }); } catch (_){}
+      }
+    }
+  } catch (e){
+    obsState.error = String((e && e.message) || e);
+  } finally {
+    obsState.loading = false;
+    if (!document.getElementById('hwModal').hidden && hwState.tab === 'obs') renderHomework();
+  }
+}
+function obsTick(){
+  // 交易日盤中（首頁報價是今天的、不是休市暫留收盤）才跳；每個時段一天只跳一次，時段過後 20 分鐘內打開網頁也會補跳
+  if (!lastData || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;
+  const today = twTodayStr(), hm = obsNowHm();
+  const due = OBS_SLOTS.filter((t) => hm >= t && hm < obsAddMin(t, 20)).pop();
+  if (!due) return;
+  const shown = obsState.shown[today] || [];
+  if (shown.includes(due)) return;
+  obsState.shown = { [today]: shown.concat(due) };
+  try { localStorage.setItem('obsShown', JSON.stringify(obsState.shown)); } catch (_){}
+  obsRun(due, true);
+}
+function obsAddMin(hm, m){ const t = Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3)) + m; return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
+function obsCopy(){
+  if (!obsState.report) return;
+  const text = obsText(obsState.report);
+  const done = () => { try { showToast('已複製「' + obsTitle(obsState.report) + '」'); } catch (_){} };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => { prompt('複製下面的文字', text); });
+  else prompt('複製下面的文字', text);
+}
+function obsPanelHtml(){
+  const rep = obsState.report;
+  let h = '<div class="obs-panel"><div class="race-note">盤中 ' + OBS_SLOTS.join('、') + ' 會自動跳出來（網頁要開著；跟發動提醒一樣）。這裡可以隨時重算一次。' +
+    ' <button type="button" class="chart-tab" data-obs-run="1">' + (obsState.loading ? '計算中…' : '↻ 現在算一次') + '</button>' +
+    (rep ? ' <button type="button" class="chart-tab" data-obs-copy="1">📋 複製文字</button>' : '') + '</div>';
+  if (obsState.error) h += '<div class="race-note">算不出來：' + wlEsc(obsState.error) + '</div>';
+  if (rep) h += '<h3 class="mc-h">' + wlEsc(obsTitle(rep)) + '</h3>' + obsBodyHtml(rep);
+  else if (!obsState.loading) h += '<div class="race-note">還沒算過，按「現在算一次」。</div>';
+  return h + '</div>';
+}
 
 // ---- 新手教學（2026-10-10 使用者：照莊爸「新手教學・第一次來，看這頁就好」做本站版）----
 // 右上角「📖 新手教學」打開；工具卡片的「去看看」直接幫你打開那個工具（等於按下方導覽列那顆）。
