@@ -341,6 +341,68 @@ function refreshGroups() {
   return groupsInflight;
 }
 
+// 個股問診「今天在漲／跌什麼」（2026-10-12 使用者：照莊爸問診的「今天在漲什麼」，盤中十點後大漲大跌的股票問診有新的資料）：
+// Google 新聞（近 2 天、標題有股名的，各家媒體）＋鉅亨（代號關鍵字：新聞、公司公告；「盤中速報」只是報價不列）。
+// 同一則新聞多家轉載只留一則；每檔 10 分鐘快取（同一個執行環境）。
+const moveNewsCache = new Map();
+const MOVE_NEWS_MS = 10 * 60 * 1000;
+function xmlText(v) {
+  return String(v || "").replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, "$1").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&").trim();
+}
+async function fetchMoveNews(code, name) {
+  const key = code + "|" + name;
+  const hit = moveNewsCache.get(key);
+  if (hit && Date.now() - hit.at < MOVE_NEWS_MS) return hit.data;
+  const since = Date.now() - 3 * 86400000;
+  const base = name.replace(/-(KY|創|DR)$/i, "");
+  const items = [], errors = [];
+  const google = async () => {
+    const q = encodeURIComponent('"' + base + '" when:2d');
+    const res = await fetch("https://news.google.com/rss/search?q=" + q + "&hl=zh-TW&gl=TW&ceid=TW:zh-Hant", { headers: { "user-agent": "Mozilla/5.0" } });
+    if (!res.ok) throw new Error("Google 新聞 HTTP " + res.status);
+    const xml = await res.text();
+    for (const m of xml.matchAll(/<item>([\\s\\S]*?)<\\/item>/g)) {
+      const pick = (tag) => { const r = m[1].match(new RegExp("<" + tag + "[^>]*>([\\\\s\\\\S]*?)</" + tag + ">")); return r ? xmlText(r[1]) : ""; };
+      const source = pick("source");
+      let title = pick("title");
+      if (source && title.endsWith(" - " + source)) title = title.slice(0, -(source.length + 3));
+      const t = Date.parse(pick("pubDate"));
+      if (!base || !title.includes(base) || !(t >= since)) continue;
+      items.push({ title, source: source || "Google 新聞", time: new Date(t).toISOString(), url: pick("link"), kind: "news" });
+    }
+  };
+  const cnyes = async () => {
+    const res = await fetch("https://ess.api.cnyes.com/ess/api/v1/news/keyword?q=" + encodeURIComponent(code) + "&limit=30&page=1");
+    if (!res.ok) throw new Error("鉅亨 HTTP " + res.status);
+    const body = await res.json();
+    for (const it of (body && body.data && body.data.items) || []) {
+      const t = Number(it.publishAt) * 1000;
+      const title = String(it.title || "").replace(/<\\/?mark>/g, "");
+      if (!(t >= since) || /^盤中速報/.test(title)) continue;
+      const notice = (it.category || []).some((c) => c && c.name === "台股公告");
+      items.push({ title, source: notice ? "公司公告" : "鉅亨", time: new Date(t).toISOString(), url: "https://news.cnyes.com/news/id/" + it.newsId, kind: notice ? "notice" : "news" });
+    }
+  };
+  await Promise.all([google, cnyes].map((fn) => fn().catch((e) => errors.push(String((e && e.message) || e)))));
+  const seen = new Set();
+  const out = items.sort((a, b) => (a.time < b.time ? 1 : -1)).filter((x) => {
+    const k = x.title.replace(/[\\s\\p{P}\\p{S}]/gu, "").slice(0, 24);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  // 公司公告一定留（澄清報導、重大訊息）；新聞最多 12 則
+  const kept = out.filter((x) => x.kind === "notice").slice(0, 5).concat(out.filter((x) => x.kind !== "notice").slice(0, 12))
+    .sort((a, b) => (a.time < b.time ? 1 : -1));
+  const data = { status: "ok", code, name, items: kept, errors, at: new Date().toISOString() };
+  if (kept.length || !errors.length) {
+    if (moveNewsCache.size > 300) moveNewsCache.delete(moveNewsCache.keys().next().value);
+    moveNewsCache.set(key, { at: Date.now(), data });
+  }
+  return data;
+}
+
 async function proxyHanstockBars(pathname, cacheSeconds = 20) {
   // 代理到 Railway 上 HanStock 主要服務自己的 Hub API（用 Railway 專屬網址，
   // 不依賴 hanstock.xyz 這個要續約的自訂網域，到期也不受影響）。
@@ -745,6 +807,18 @@ export default {
         return new Response(JSON.stringify({ quotes: out, quoteDate: quotes.__meta.quoteDate, quoteTime: quotes.__meta.quoteTime }), { headers });
       } catch (e) {
         return new Response(JSON.stringify({ error: String(e && e.message || e) }), { status: 502, headers });
+      }
+    }
+    if (url.pathname === "/api/move-news") {
+      // 個股問診「今天在漲／跌什麼」的新聞（2026-10-12 使用者）
+      const code = String(url.searchParams.get("code") || "").trim().toUpperCase();
+      const name = String(url.searchParams.get("name") || "").trim().slice(0, 20);
+      const headers = { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" };
+      if (!/^[0-9A-Z]{4,6}$/.test(code)) return new Response(JSON.stringify({ status: "error", error: "代號不對" }), { status: 400, headers });
+      try {
+        return new Response(JSON.stringify(await fetchMoveNews(code, name)), { headers });
+      } catch (e) {
+        return new Response(JSON.stringify({ status: "error", error: String((e && e.message) || e) }), { status: 502, headers });
       }
     }
     if (url.pathname === "/api/checkup") {

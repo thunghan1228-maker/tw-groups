@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 16:48:29";
+const BUILD_STAMP = "2026-10-12 20:43:03";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1901,6 +1901,19 @@ const HTML_PAGE = `<!DOCTYPE html>
   .dg-pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:800;color:#fff;background:#6b7280;}
   .dg-pill.strong{background:#b91c1c;}.dg-pill.mid{background:#a16207;}.dg-pill.weak{background:#15803d;}
   .dg-lines{list-style:none;padding:0;margin:6px 0 10px;font-size:14px;line-height:1.8;}
+  /* 今天在漲／跌什麼（2026-10-12） */
+  .mv-box{background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.28);border-radius:12px;padding:10px 14px;margin:8px 0 12px;font-size:14px;line-height:1.65;}
+  .mv-box.up{border-left:4px solid #e6675f;} .mv-box.down{border-left:4px solid #5fae6f;}
+  .mv-wait{color:var(--muted);font-size:13px;}
+  .mv-title{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .mv-tag{font-size:11px;font-weight:700;color:#7c3aed;border:1px solid rgba(124,58,237,.4);border-radius:999px;padding:0 8px;}
+  .mv-px{margin:4px 0 2px;} .mv-px .muted{font-size:12.5px;}
+  .mv-lim{font-size:12px;font-weight:800;border-radius:999px;padding:1px 8px;margin-left:6px;color:#fff;} .mv-lim.up{background:#d64545;} .mv-lim.down{background:#2f9e5b;}
+  .mv-h{font-weight:800;margin-top:6px;} .mv-h.hot{color:#e6675f;} .mv-h.cool{color:#2f9e5b;} .mv-h.warn{color:#c98a14;}
+  .mv-box ul{margin:2px 0 4px;padding-left:20px;} .mv-box a{color:inherit;text-decoration:underline;text-decoration-color:rgba(124,58,237,.5);}
+  .mv-one{border-left:3px solid #7c3aed;background:rgba(124,58,237,.08);padding:6px 10px;margin-top:8px;font-weight:700;border-radius:6px;}
+  .mv-more{margin-top:6px;font-size:13px;} .mv-more summary{cursor:pointer;color:#7c3aed;}
+  .mv-foot{font-size:11.5px;color:var(--muted);margin-top:6px;}
   .dg-lines li{border-bottom:1px dashed var(--line);padding:2px 0;}
   .dg-lines b{color:#e6675f;}
   .dg-chart{margin:8px 0;}
@@ -9770,6 +9783,152 @@ function pfQuarterHtml(code){
     '<div class="in-tbl"><table><thead><tr><th>季別</th><th>營收（億）</th><th>營收年增</th><th>毛利率</th><th>營益率</th><th>淨利率</th><th>EPS</th><th>EPS 年增</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
     '<div class="pf-note">毛利率＝賣東西本身賺幾成；營益率＝再扣掉管銷研發；淨利率＝最後真正賺到的（含業外）。年增是跟去年同一季比；去年同季 EPS 太小時不算百分比。金融股沒有毛利率、營益率。</div></div>';
 }
+// ---- 今天在漲／跌什麼（2026-10-12 使用者：照莊爸問診的「今天在漲什麼」，盤中十點後大漲大跌，問診會有新的資料）----
+// 交易日 10:00 後（收盤後也留著）在問診最上面整理：盤中走勢（開高低、早盤殺低再拉漲停…）、同族群有沒有一起動、
+// 當天新聞標題（Google 新聞各家媒體＋鉅亨、公司公告，/api/move-news）、要留意的地方（均線、營收、法人、本益比、近 5 日漲幅）、
+// 後面看什麼（今天的三日低、月線）跟一句話。原因是照這些資料自動整理的，不是 AI 摘要。
+const mvState = {};
+const MV_BIG_UP = 3, MV_BIG_DOWN = -3;
+async function mvLoad(code, name, force){
+  const st = mvState[code] || (mvState[code] = {});
+  if (st.loading) return;
+  const now = Date.now();
+  const needQ = force || !st.quoteAt || now - st.quoteAt > 60000;
+  const needN = force || !st.newsAt || now - st.newsAt > 5 * 60000;
+  if (!needQ && !needN) return;
+  st.loading = true;
+  try {
+    await Promise.all([
+      needQ ? fetch('/api/watch-quotes?codes=' + encodeURIComponent(code)).then((r) => r.json()).then((q) => {
+        st.quote = q && q.quotes ? q.quotes[code] || null : null; st.quoteDate = q && q.quoteDate; st.quoteTime = q && q.quoteTime; st.quoteAt = Date.now();
+      }).catch(() => { st.quoteAt = Date.now(); }) : null,
+      needN ? fetch('/api/move-news?code=' + encodeURIComponent(code) + '&name=' + encodeURIComponent(name || '')).then((r) => r.json()).then((n) => {
+        st.news = n && n.status === 'ok' ? n : null; st.newsError = n && n.status !== 'ok' ? (n.error || '讀不到') : ''; st.newsAt = Date.now();
+      }).catch((e) => { st.newsError = String((e && e.message) || e); st.newsAt = Date.now(); }) : null,
+    ]);
+  } finally {
+    st.loading = false;
+  }
+  if (!document.getElementById('diagModal').hidden && dgState.code === code) renderDiag();
+}
+// 問診開著的時候，盤中每分鐘更新一次報價（新聞 5 分鐘）
+setInterval(() => {
+  const d = dgState.data, hm = obsNowHm();
+  if (document.getElementById('diagModal').hidden || !d || d.status !== 'ok' || !d.stock || hm < '09:00' || hm > '13:35') return;
+  mvLoad(d.stock.code, d.stock.name || '');
+}, 60000);
+const mvLots = (v) => swLots(Math.abs(v)).replace('+', '');   // 「賣超 929 張」：方向寫在字上，數字不帶正負號
+function mvTw(iso){ const d = new Date(Date.parse(iso) + 8 * 3600000).toISOString(); return { day: d.slice(0, 10), hm: d.slice(11, 16), md: d.slice(5, 10).replace('-', '/') }; }
+function mvGroupMove(code, up){
+  // 首頁即時報價：這檔所在的族群（不含股期標的）裡，除了它自己的平均漲跌、漲停／漲跌 5% 以上的；大漲挑最強那族、大跌挑最弱那族
+  if (!lastData || !Array.isArray(lastData.groups)) return null;
+  let best = null;
+  for (const g of lastData.groups){
+    if (g.name === '股期標的' || !g.stocks.some((x) => x.code === code)) continue;
+    const others = g.stocks.filter((x) => x.code !== code && Number.isFinite(x.changePercent));
+    if (!others.length) continue;
+    const avg = others.reduce((a, x) => a + x.changePercent, 0) / others.length;
+    const hot = others.filter((x) => (up ? x.limitUp || x.changePercent >= 5 : x.limitDown || x.changePercent <= -5)).sort((a, b) => (up ? b.changePercent - a.changePercent : a.changePercent - b.changePercent));
+    const lim = others.filter((x) => (up ? x.limitUp : x.limitDown));
+    const item = { name: g.name, avg, n: others.length, hot, lim };
+    if (!best || (up ? avg > best.avg : avg < best.avg)) best = item;
+  }
+  return best;
+}
+function mvHtml(data){
+  const s = data.stock, code = s.code, today = twTodayStr(), hm = obsNowHm();
+  mvLoad(code, s.name || '');
+  const st = mvState[code] || {}, q = st.quote;
+  if (!q || !(q.price > 0) || st.quoteDate !== today) return '';   // 不是交易日、或還沒拿到今天的報價：不顯示
+  if (hm < '10:00') return '<div class="mv-box mv-wait">📰 今天在漲／跌什麼：10:00 後整理（開盤前半小時波動大，先不下結論）</div>';
+  const prev = q.prevClose || (q.price - (q.change || 0));
+  const pctOf = (v) => (v && prev ? (v / prev - 1) * 100 : null);
+  const pct = Number.isFinite(q.changePercent) ? q.changePercent : pctOf(q.price);
+  const gap = pctOf(q.open), lowP = pctOf(q.low), highP = pctOf(q.high);
+  const up = q.limitUp || pct >= MV_BIG_UP, down = q.limitDown || pct <= MV_BIG_DOWN;
+  const pf = (v) => (v > 0 ? '+' : '') + v.toFixed(1) + '%';
+  // 盤中走勢一句
+  let path = '';
+  if (q.limitUp) path = lowP !== null && lowP <= -2 ? '早盤先殺到 ' + pf(lowP) + ' 再拉上漲停' : gap !== null && gap >= 5 ? '開高直接攻上漲停' : '盤中拉上漲停';
+  else if (q.limitDown) path = gap !== null && gap <= -5 ? '開低直接殺到跌停' : '盤中殺到跌停';
+  else if (up && highP !== null && highP - pct >= 3) path = '最高漲到 ' + pf(highP) + '，被賣回剩 ' + pf(pct) + '（上影線）';
+  else if (up && gap !== null && gap >= 2) path = '跳空開高 ' + pf(gap) + '，一路走高';
+  else if (down && gap !== null && gap <= -2) path = '一開盤就跳空開低 ' + Math.abs(gap).toFixed(1) + '%，' + (lowP !== null && lowP - pct <= -2 ? '盤中最低殺到 ' + pf(lowP) + ' 再收斂' : '盤中沒有再大殺');
+  else if (down && gap !== null && gap > 0) path = '開高走低（開 ' + pf(gap) + '）';
+  else if (down && lowP !== null && lowP - pct <= -2) path = '盤中最低殺到 ' + pf(lowP) + '，收斂到 ' + pf(pct);
+  const status = q.limitUp ? '<span class="mv-lim up">漲停鎖住</span>' : q.limitDown ? '<span class="mv-lim down">跌停鎖住</span>' : '';
+  const head = '<div class="mv-px"><b>' + code + ' ' + wlEsc(s.name || '') + '</b> <b class="' + dirClass(pct) + '">' + ckPrice(q.price) + ' ' + (pct >= 0 ? '▲' : '▼') + Math.abs(pct).toFixed(2) + '%</b>' + status +
+    '<div class="muted">昨收 ' + ckPrice(prev) + (q.open ? '・開 ' + ckPrice(q.open) : '') + (q.low ? '・最低 ' + ckPrice(q.low) : '') + (q.high ? '・最高 ' + ckPrice(q.high) : '') + (path ? '（' + path + '）' : '') +
+    (Number.isFinite(q.volume) ? '・成交 ' + Math.round(q.volume).toLocaleString('en-US') + ' 張' : '') + (st.quoteTime ? '・' + String(st.quoteTime).slice(0, 5) : '') + '</div></div>';
+  // 新聞：昨天收盤（13:30）之後的算「今天的」
+  const items = (st.news && st.news.items) || [];
+  const cut = new Date(Date.parse(today + 'T00:00:00+08:00') - 10.5 * 3600000).toISOString();
+  const fresh = items.filter((x) => x.time >= cut);
+  const notices = fresh.filter((x) => x.kind === 'notice'), news = fresh.filter((x) => x.kind !== 'notice');
+  const link = (x) => '<a href="' + wlEsc(x.url) + '" target="_blank" rel="noopener">' + wlEsc(x.title) + '</a><span class="muted">（' + wlEsc(x.source) + '・' + mvTw(x.time).hm + '）</span>';
+  const grp = mvGroupMove(code, !down);
+  const aligned = grp && (down ? grp.avg <= -2 : grp.avg >= 2);
+  const names = (list) => list.slice(0, 4).map((x) => x.name).join('、');
+  // 原因
+  const why = [];
+  news.slice(0, 3).forEach((x) => why.push('新聞：' + link(x)));
+  notices.forEach((x) => why.push('公司公告：' + link(x)));
+  if (grp){
+    if (aligned) why.push('同族群一起走' + (down ? '弱' : '強') + '：<b>' + grp.name + '</b> 平均 ' + pf(grp.avg) + (grp.lim.length ? '，' + (down ? '跌停 ' : '漲停 ') + names(grp.lim) : grp.hot.length ? '，' + (down ? '跌' : '漲') + ' 5% 以上 ' + names(grp.hot) : ''));
+    else if (up || down) why.push('族群沒有一起' + (down ? '跌' : '漲') + '（<b>' + grp.name + '</b> 平均 ' + pf(grp.avg) + '），比較像個股自己的事');
+  }
+  if (!news.length && !notices.length) why.push('沒有找到今天的新消息' + (aligned ? '，比較像族群資金帶動' : ''));
+  // 要留意／前幾天背景
+  const c = s.chip || {}, f = s.fund || {}, sc = s.score2;
+  const bars = (data.bars || []).filter((b) => b && b.length >= 5);
+  const back = s.date === today ? 6 : 5;
+  const base5 = bars.length >= back ? bars[bars.length - back][4] : null;
+  const pct5 = base5 ? (q.price / base5 - 1) * 100 : null;
+  const warn = [];
+  if (!down){
+    if (swHas(sc) && sc < 8) warn.push('均線分數只有 ' + sc + ' 分，結構還偏弱，是反彈還是轉強要再看');
+    if (swHas(f.yoy) && f.yoy < 0) warn.push('營收 ' + swYm(f.ym) + ' 年增 ' + swPct(f.yoy, 1) + '（衰退中），漲的是題材不是業績');
+    if (swHas(c.inst5) && c.inst5 < 0) warn.push('法人近 5 日賣超 ' + mvLots(c.inst5) + '，要看今天誰在買');
+    if (swHas(f.pe) && f.pe >= 50) warn.push('本益比 ' + f.pe + ' 倍，偏貴');
+    if (pct5 !== null && pct5 >= 15) warn.push('近 5 日已漲 ' + pf(pct5) + '，短線漲多');
+    if (s.disposed) warn.push('處置中（分盤交易）');
+  } else {
+    if (swHas(c.inst5) && c.inst5 < 0) warn.push('法人近 5 日賣超 ' + mvLots(c.inst5) + (swHas(c.instToday) && c.instToday !== 0 ? '，' + swMmdd(s.date) + (c.instToday < 0 ? ' 也賣 ' + mvLots(c.instToday) : ' 轉買 ' + mvLots(c.instToday)) : ''));
+    else if (swHas(c.instToday) && c.instToday < 0) warn.push(swMmdd(s.date) + ' 法人賣超 ' + mvLots(c.instToday));
+    if (s.def && (s.def.brkMa || s.def.brkL3)) warn.push(swMmdd(s.date) + ' 收盤就已跌破' + [s.def.brkL3 ? '三日低' : '', s.def.brkMa ? '月線' : ''].filter(Boolean).join('、'));
+    if (swHas(f.yoy) && f.yoy < 0) warn.push('營收 ' + swYm(f.ym) + ' 年增 ' + swPct(f.yoy, 1) + '（衰退中）');
+    if (pct5 !== null && pct5 <= -10) warn.push('近 5 日已跌 ' + pf(pct5));
+    if (pct5 !== null && pct5 >= 15) warn.push('前面漲多（近 5 日還 ' + pf(pct5) + '），今天是獲利了結');
+  }
+  // 後面看什麼：今天用的三日低／月線（問診資料是昨天收盤的就用「明日值」，是今天收盤的就用「今天用」那欄）
+  const d = s.def;
+  const L3 = d ? (s.date === today ? d.low3Y : d.low3T) : null, MA = d ? (s.date === today ? d.ma20Y : d.ma20T) : null;
+  let next = '';
+  if (swHas(L3) && swHas(MA)){
+    const p = q.price;
+    if (p < L3 && p >= MA) next = '現價 ' + ckPrice(p) + ' 已跌破三日低 ' + ckPrice(L3) + '，還在月線 ' + ckPrice(MA) + ' 上 → 看月線守不守得住';
+    else if (p < L3 && p < MA) next = '三日低 ' + ckPrice(L3) + '、月線 ' + ckPrice(MA) + ' 都破了 → 收盤沒站回就照紀律減碼／出場';
+    else if (p < MA) next = '還在月線 ' + ckPrice(MA) + ' 下、三日低 ' + ckPrice(L3) + ' 守住 → 先看能不能站回月線';
+    else next = '防守：三日低 ' + ckPrice(L3) + '、月線 ' + ckPrice(MA) + (q.limitUp ? '；漲停打開、量放大要小心' : '') + '（收盤跌破任一 → 減碼）';
+  }
+  let one;
+  if (up) one = (q.limitUp ? '漲停' : '大漲') + '：' + (news.length || notices.length ? '有新聞（看上面標題）' : '沒有找到當天新消息') + (aligned ? '，族群一起漲' : grp ? '，族群沒跟' : '') + (warn.length ? '；但' + warn[0].split('，')[0] : '');
+  else if (down) one = (news.length || notices.length ? '有新聞（看上面標題）' : '沒有新的壞消息') + (path ? '，' + path.split('，')[0] : '') + (aligned ? '，族群一起走弱' : '') + (next ? '；' + next.split(' → ')[1] : '');
+  else one = '今天沒什麼大動作（' + pf(pct) + '）' + (news.length ? '，有 ' + news.length + ' 則新聞可以看' : '');
+  const title = up ? '今天在漲什麼' : down ? '今天在跌什麼' : '今天沒什麼大動作';
+  const ul = (list) => '<ul>' + list.map((x) => '<li>' + x + '</li>').join('') + '</ul>';
+  let html = '<div class="mv-box' + (up ? ' up' : down ? ' down' : '') + '"><div class="mv-title">📰 ' + title + '<span class="mv-tag">盤中自動整理</span><button type="button" class="wl-btn" data-mv-refresh="' + code + '">↻ 更新</button></div>' + head;
+  if (up || down){
+    html += '<div class="mv-h ' + (up ? 'hot' : 'cool') + '">' + (up ? '🔥 主要原因' : '📉 可能原因') + '</div>' + ul(why);
+    if (warn.length) html += '<div class="mv-h warn">' + (up ? '⚠️ 要留意' : '🔎 前幾天背景') + '</div>' + ul(warn);
+    if (next) html += '<div class="mv-h">👀 後面看什麼</div>' + ul([next]);
+  } else if (news.length || notices.length) html += ul(notices.concat(news).slice(0, 4).map(link));
+  html += '<div class="mv-one">一句話：' + one + '</div>';
+  const others = (up || down) ? fresh.filter((x) => !why.some((w) => w.includes(wlEsc(x.title)))) : [];
+  if (others.length) html += '<details class="mv-more"><summary>其他新聞 ' + others.length + ' 則</summary>' + ul(others.map(link)) + '</details>';
+  if (st.newsError) html += '<div class="muted">新聞讀取失敗：' + wlEsc(st.newsError) + '</div>';
+  return html + '<div class="mv-foot">依盤中報價、同族群漲跌、當天新聞標題（Google 新聞、鉅亨、公開資訊觀測站公告）自動整理，不是 AI 摘要；新聞整理僅供參考，不構成投資建議。</div></div>';
+}
 function renderDiag(){
   const body = document.getElementById('diagBody');
   ensureDiag();
@@ -9790,6 +9949,7 @@ function renderDiag(){
   const s = data.stock;
   html += '<div class="sw-basis">' + swMmdd(data.date) + ' 收盤資料・整理時間 ' + (data.collector && data.collector.builtAt ? String(data.collector.builtAt).slice(5, 16).replace('T', ' ') : '—') + '・每個交易日收盤後跟籌碼日報一起更新，非即時報價</div>';
   html += dgHeaderHtml(data);
+  html += mvHtml(data);   // 2026-10-12 使用者：盤中十點後大漲大跌，問診多「今天在漲／跌什麼」
   scrLoadStock(s.code);
   html += scrStockCardHtml(s.code);
   html += pfIndustryHtml(s.code);   // 2026-10-10 使用者：產業白話＋同業
@@ -10062,6 +10222,8 @@ document.getElementById('diagClose').addEventListener('click', closeDiagPanel);
 document.getElementById('diagModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDiagPanel(); });
 document.getElementById('diagBody').addEventListener('click', (e) => {
   if (e.target.closest('#dgRun')){ dgRun((document.getElementById('dgInput') || {}).value || ''); return; }
+  const mvr = e.target.closest('[data-mv-refresh]');
+  if (mvr){ const d = dgState.data; mvLoad(mvr.dataset.mvRefresh, d && d.stock ? d.stock.name || '' : '', true); return; }
   const pfc = e.target.closest('[data-pf-code]');
   if (pfc){ dgRun(pfc.dataset.pfCode); return; }
   const fbtn = e.target.closest('.dg-fbtn');
@@ -10084,7 +10246,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 16:48:29';
+const BUILD_STAMP = '2026-10-12 20:43:03';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -12383,7 +12545,7 @@ const GUIDE_TOOLS = [
   { t: '每日持股健診', label: '健診', tags: ['盤後'], d: '輸入你的持股，看每一檔現在的狀態與明天要守的價位。',
     b: ['防守線：明日紅半、三日低、月線', '同時看籌碼、營收、本益比'] },
   { t: '選股・個股研究', label: '問診', tags: ['盤後'], d: '條件選股（勾條件、拉門檻一次篩出來）＋個股問診（打代號一頁看完這檔的均線、族群、籌碼、營收、估值）。',
-    b: ['選股條件越多，名單越少、越嚴格', '個股問診會給一句結論和明天要守的價', '「這家公司在做什麼」用白話講產業，列出同族群、同產業公司（點了就換那一檔）', '季報：近 8 季營收、毛利率、營益率、淨利率、EPS，近四季 EPS 與本益比'] },
+    b: ['選股條件越多，名單越少、越嚴格', '個股問診會給一句結論和明天要守的價', '「這家公司在做什麼」用白話講產業，列出同族群、同產業公司（點了就換那一檔）', '季報：近 8 季營收、毛利率、營益率、淨利率、EPS，近四季 EPS 與本益比', '盤中 10:00 後：今天在漲／跌什麼（盤中走勢、同族群有沒有一起動、當天新聞與公告、要留意的地方、後面看哪條防守線）'] },
   { t: '營收成長榜', label: '營收成長榜', tags: ['每月'], d: '每月 10 號前公司陸續公布上個月營收，這裡把全市場排好：誰年增最多、公布後股價怎麼反應。',
     b: ['一天更新三次，公布日自動記下來', '可以查單一檔的每月營收'] },
   { t: '處置監獄', label: '處置監獄', tags: ['盤後'], d: '哪些股票被關（處置）、什麼時候出獄、哪些快被關（嫌疑名單）。被處置的股票要分盤撮合，進出很不順，事先知道比較好。',
@@ -14508,6 +14670,68 @@ function refreshGroups() {
   return groupsInflight;
 }
 
+// 個股問診「今天在漲／跌什麼」（2026-10-12 使用者：照莊爸問診的「今天在漲什麼」，盤中十點後大漲大跌的股票問診有新的資料）：
+// Google 新聞（近 2 天、標題有股名的，各家媒體）＋鉅亨（代號關鍵字：新聞、公司公告；「盤中速報」只是報價不列）。
+// 同一則新聞多家轉載只留一則；每檔 10 分鐘快取（同一個執行環境）。
+const moveNewsCache = new Map();
+const MOVE_NEWS_MS = 10 * 60 * 1000;
+function xmlText(v) {
+  return String(v || "").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&").trim();
+}
+async function fetchMoveNews(code, name) {
+  const key = code + "|" + name;
+  const hit = moveNewsCache.get(key);
+  if (hit && Date.now() - hit.at < MOVE_NEWS_MS) return hit.data;
+  const since = Date.now() - 3 * 86400000;
+  const base = name.replace(/-(KY|創|DR)$/i, "");
+  const items = [], errors = [];
+  const google = async () => {
+    const q = encodeURIComponent('"' + base + '" when:2d');
+    const res = await fetch("https://news.google.com/rss/search?q=" + q + "&hl=zh-TW&gl=TW&ceid=TW:zh-Hant", { headers: { "user-agent": "Mozilla/5.0" } });
+    if (!res.ok) throw new Error("Google 新聞 HTTP " + res.status);
+    const xml = await res.text();
+    for (const m of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+      const pick = (tag) => { const r = m[1].match(new RegExp("<" + tag + "[^>]*>([\\s\\S]*?)</" + tag + ">")); return r ? xmlText(r[1]) : ""; };
+      const source = pick("source");
+      let title = pick("title");
+      if (source && title.endsWith(" - " + source)) title = title.slice(0, -(source.length + 3));
+      const t = Date.parse(pick("pubDate"));
+      if (!base || !title.includes(base) || !(t >= since)) continue;
+      items.push({ title, source: source || "Google 新聞", time: new Date(t).toISOString(), url: pick("link"), kind: "news" });
+    }
+  };
+  const cnyes = async () => {
+    const res = await fetch("https://ess.api.cnyes.com/ess/api/v1/news/keyword?q=" + encodeURIComponent(code) + "&limit=30&page=1");
+    if (!res.ok) throw new Error("鉅亨 HTTP " + res.status);
+    const body = await res.json();
+    for (const it of (body && body.data && body.data.items) || []) {
+      const t = Number(it.publishAt) * 1000;
+      const title = String(it.title || "").replace(/<\/?mark>/g, "");
+      if (!(t >= since) || /^盤中速報/.test(title)) continue;
+      const notice = (it.category || []).some((c) => c && c.name === "台股公告");
+      items.push({ title, source: notice ? "公司公告" : "鉅亨", time: new Date(t).toISOString(), url: "https://news.cnyes.com/news/id/" + it.newsId, kind: notice ? "notice" : "news" });
+    }
+  };
+  await Promise.all([google, cnyes].map((fn) => fn().catch((e) => errors.push(String((e && e.message) || e)))));
+  const seen = new Set();
+  const out = items.sort((a, b) => (a.time < b.time ? 1 : -1)).filter((x) => {
+    const k = x.title.replace(/[\s\p{P}\p{S}]/gu, "").slice(0, 24);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  // 公司公告一定留（澄清報導、重大訊息）；新聞最多 12 則
+  const kept = out.filter((x) => x.kind === "notice").slice(0, 5).concat(out.filter((x) => x.kind !== "notice").slice(0, 12))
+    .sort((a, b) => (a.time < b.time ? 1 : -1));
+  const data = { status: "ok", code, name, items: kept, errors, at: new Date().toISOString() };
+  if (kept.length || !errors.length) {
+    if (moveNewsCache.size > 300) moveNewsCache.delete(moveNewsCache.keys().next().value);
+    moveNewsCache.set(key, { at: Date.now(), data });
+  }
+  return data;
+}
+
 async function proxyHanstockBars(pathname, cacheSeconds = 20) {
   // 代理到 Railway 上 HanStock 主要服務自己的 Hub API（用 Railway 專屬網址，
   // 不依賴 hanstock.xyz 這個要續約的自訂網域，到期也不受影響）。
@@ -14912,6 +15136,18 @@ export default {
         return new Response(JSON.stringify({ quotes: out, quoteDate: quotes.__meta.quoteDate, quoteTime: quotes.__meta.quoteTime }), { headers });
       } catch (e) {
         return new Response(JSON.stringify({ error: String(e && e.message || e) }), { status: 502, headers });
+      }
+    }
+    if (url.pathname === "/api/move-news") {
+      // 個股問診「今天在漲／跌什麼」的新聞（2026-10-12 使用者）
+      const code = String(url.searchParams.get("code") || "").trim().toUpperCase();
+      const name = String(url.searchParams.get("name") || "").trim().slice(0, 20);
+      const headers = { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" };
+      if (!/^[0-9A-Z]{4,6}$/.test(code)) return new Response(JSON.stringify({ status: "error", error: "代號不對" }), { status: 400, headers });
+      try {
+        return new Response(JSON.stringify(await fetchMoveNews(code, name)), { headers });
+      } catch (e) {
+        return new Response(JSON.stringify({ status: "error", error: String((e && e.message) || e) }), { status: 502, headers });
       }
     }
     if (url.pathname === "/api/checkup") {
