@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-12 13:05:33";
+const BUILD_STAMP = "2026-10-12 13:12:39";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -330,9 +330,18 @@ const HTML_PAGE = `<!DOCTYPE html>
   .obs-stk:hover{background:rgba(255,255,255,.12);}
   .obs-warn{margin-top:8px;line-height:1.6;color:#fef3c7;}
   .obs-sym{font-size:12px;color:#ddd6fe;line-height:1.5;margin-bottom:4px;}
-  .obs-panel .obs-cat{color:#fde68a;}   /* 2026-10-12 使用者：每日功課分頁也跟跳窗一樣，分類標題、族群名稱黃色 */
+  /* 2026-10-12 使用者：每日功課分頁族群名稱黃色、【1】～【5】分類標題紫色（跳窗是紫底，標題維持黃色） */
+  .obs-panel .obs-cat{color:#c084fc;}
   .obs-panel .obs-cat small,.obs-panel .obs-sym{color:var(--muted);}
   .obs-panel .obs-line b{color:#facc15;}
+  /* 訊號中心是淺色底：紫色、黃色、綠色、粉紅都加深，才看得清楚 */
+  #signalBody .obs-panel .obs-cat{color:#7c3aed;}
+  #signalBody .obs-panel .obs-line b{color:#b7791f;}
+  #signalBody .om-red{color:#dc2626;}
+  #signalBody .om-pink{color:#db2777;}
+  #signalBody .om-green{color:#15803d;}
+  #signalBody .om-deep{color:#b91c1c;text-shadow:none;}
+  #signalBody .obs-panel .obs-warn{color:#3f3a36;}
   .obs-panel .obs-warn{color:var(--text);}
   .launch-alert-time{display:inline-block;min-width:2.6em;font-variant-numeric:tabular-nums;font-weight:800;color:#ffd8d3;}
 
@@ -2451,6 +2460,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     </div>
     <div class="signal-help" id="signalHelp" hidden>
       <ul>
+        <li><b>盤中觀察股</b>：55 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。</li>
         <li><b>今日即時多</b>：彙整多方向訊號的即時清單：盤中大戶力多、四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單，依發生時間新到舊排序。</li>
         <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（沒有發生時間，只有今天有），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。</li>
         <li><b>醞釀／發動</b>：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看；今天盤中曾發動、現在回落的股票也會列在「今天曾發動、現在已回落」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
@@ -4154,6 +4164,7 @@ async function renderOtcStrengthWidget(){
 // 使用者 2026-09-24：族群大戶力／族群綜合表／盤中333 這三個移到今日即時後面（原本排在後段）。
 // 2026-09-30 使用者：醞釀／發動要排第二個位置，在今日即時右邊，方便盯著看；其餘順序不變。
 const SIGNAL_KINDS = [
+  { key: 'obsWatch', label: '盤中觀察股' },   // 2026-10-12 使用者：盤中觀察股放進訊號中心，排第一個（今日即時多左邊）
   { key: 'now', label: '今日即時多' },      // 2026-10-04 使用者：拆成多／空兩頁，多方向留在這裡
   { key: 'nowBear', label: '今日即時空' },  // 2026-10-04 使用者：刀劍空＋盤中大戶力空＋四項精選強空＋主力翻空＋盤中特大賣單集中這一頁
   { key: 'brewLaunch', label: '醞釀／發動' },
@@ -10043,7 +10054,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-12 13:05:33';
+const BUILD_STAMP = '2026-10-12 13:12:39';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -10252,6 +10263,7 @@ function renderSignalCenter(){
     if (key === 'now') return currentEvents.filter((e) => e.tabs.includes('now')).length + bigHolderRowsFrom(mainForceRanking, 'bull').length;
     if (key === 'nowBear') return currentEvents.filter((e) => e.tabs.includes('nowBear')).length + bigHolderRowsFrom(mainForceRanking, 'bear').length;
     if (key === 'history' || key === 'race333' || key === 'bladeShort' || key === 'groupHolderForce' || key === 'groupCombinedBoard') return null;
+    if (key === 'obsWatch') return obsState.report ? obsState.report.items.length : null;
     if (key === 'bigHolderForceBull') return bigHolderRowsFrom(mainForceRanking, 'bull').length;
     if (key === 'bigHolderForceBear') return bigHolderRowsFrom(mainForceRanking, 'bear').length;
     if (key === 'brewLaunch'){ const bm = brewLaunchModel(); return bm ? bm.brewCount + '/' + bm.launchCount : null; }
@@ -10259,7 +10271,7 @@ function renderSignalCenter(){
     return currentEvents.filter((e) => e.tabs.includes(key)).length;
   };
   // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
-  const PURPLE_TAB_KEYS = new Set(['now', 'groupHolderForce', 'groupCombinedBoard', 'race333', 'brewLaunch']);  // 2026-09-24 使用者：醞釀／發動也紫紅色；2026-09-26：盤中大戶力改回黑字；2026-10-08：今日即時多也紫色
+  const PURPLE_TAB_KEYS = new Set(['obsWatch', 'now', 'groupHolderForce', 'groupCombinedBoard', 'race333', 'brewLaunch']);  // 2026-09-24 使用者：醞釀／發動也紫紅色；2026-09-26：盤中大戶力改回黑字；2026-10-08：今日即時多也紫色
   // 2026-10-04 使用者：「空」方向另外三個分頁(盤中大戶力空／四項精選強空／主力翻空)也改綠色，跟刀劍空、盤中特大賣單一致。
   const GREEN_TAB_KEYS = new Set(['nowBear', 'bladeShort', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear']);  // 2026-10-04：今日即時空也綠字
   // 2026-10-08 使用者：多方六個分頁字都改紅色、顏色一樣（盤中特大買單原本桃紅色也改成這個紅）。
@@ -10330,6 +10342,9 @@ function renderSignalCenter(){
   } else if (active === 'brewLaunch'){
     refreshBrewHistory(false);
     replaceSignalHtml(body, 'brewLaunch', brewLaunchHtml());
+  } else if (active === 'obsWatch'){
+    if (!obsState.report && !obsState.loading && !obsState.error) obsRun(null, false);
+    replaceSignalHtml(body, 'obsWatch', obsPanelHtml());
   } else if (SIGNAL_DAY_TABS.has(active)){
     refreshGroupDailyChanges(false);  // 昨天／前天的日期清單與那天的收盤價
     const view = sigView();
@@ -12217,7 +12232,7 @@ function obsShowPopup(rep){
 async function obsRun(slot, popup){
   if (obsState.loading) return;
   obsState.loading = true; obsState.error = '';
-  if (!document.getElementById('hwModal').hidden && hwState.tab === 'obs') renderHomework();
+  obsRerender();
   try {
     const rep = await obsBuild(slot);
     rep.cmp = obsCompare(rep);
@@ -12235,8 +12250,12 @@ async function obsRun(slot, popup){
     obsState.error = String((e && e.message) || e);
   } finally {
     obsState.loading = false;
-    if (!document.getElementById('hwModal').hidden && hwState.tab === 'obs') renderHomework();
+    obsRerender();
   }
+}
+function obsRerender(){
+  if (!document.getElementById('hwModal').hidden && hwState.tab === 'obs') renderHomework();
+  try { if (!document.getElementById('signalModal').hidden && signalCenterState.activeTab === 'obsWatch') renderSignalCenter(); } catch (_){}
 }
 function obsTick(){
   // 交易日盤中（首頁報價是今天的、不是休市暫留收盤）才跳；每個時段一天只跳一次，時段過後 20 分鐘內打開網頁也會補跳
@@ -13999,6 +14018,11 @@ document.getElementById('signalTabsBar').addEventListener('click', (e) => {
   renderSignalCenter();
 });
 document.getElementById('signalBody').addEventListener('click', (e) => {
+  // 盤中觀察股分頁（跟每日功課同一份）
+  if (e.target.closest('[data-obs-run]')){ obsRun(null, false); return; }
+  if (e.target.closest('[data-obs-copy]')){ obsCopy(); return; }
+  const obsStk = e.target.closest('[data-obs-code]');
+  if (obsStk){ openStockChart(obsStk.dataset.obsCode, obsStk.dataset.obsName); return; }
   const filterBtn = e.target.closest('.combo-filter-btn');
   if (filterBtn){
     const f = filterBtn.dataset.filter;
