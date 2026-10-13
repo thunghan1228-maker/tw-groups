@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 10:28:46";
+const BUILD_STAMP = "2026-10-13 10:34:58";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1834,6 +1834,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .wl-sync-ops{margin-left:auto;display:inline-flex;gap:6px;flex-wrap:wrap;}
   .wl-key{font-family:monospace;font-size:14px;padding:2px 6px;border-radius:6px;background:var(--bg);}
   .wl-hint{flex-basis:100%;font-size:12px;color:var(--muted);margin:2px 0 6px;}
+  .wl-switch{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding-top:6px;border-top:1px dashed var(--line);}
+  .wl-switch input{flex:1 1 220px;min-width:0;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);font-size:14px;font-family:inherit;}
+  .wl-confirm{border-color:#f59e0b;}
+  .wl-confirm-text{font-size:14px;color:var(--text);}
   .wl-status{font-size:12px;color:var(--muted);}
   .wl-status.ok{color:#4ade80;}
   .wl-status.err{color:#f87171;font-weight:700;}
@@ -9058,17 +9062,58 @@ async function wlLoad(opts){
     if (wl.queue.length) wlFlush();
   }
 }
-function wlSetKey(raw){
+// 2026-10-13 使用者：網站不是一個人在用，自選股不能跟別人混在一起。同步碼就是「誰的清單」，三個保護：
+// (1) 「幫我產生」給一組隨機的碼（不會跟別人撞到）；輸入框的範例碼拿掉（照抄範例的人會共用同一份）。
+// (2) 設碼前先問後端那個碼有沒有清單：有的話先確認「是你自己的嗎」，按「是我的」才載入／合併，
+//     不會在不知情下把這台的股票併進別人的清單、也不會看到別人的清單還以為是自己的。
+// (3) 「換人使用」：同一台電腦換成另一個人的碼，畫面整份換成那個人的清單，不帶上一個人的股票（上一個人的還在雲端）。
+function wlRandomKey(){
+  const chars = 'abcdefghijkmnpqrstuvwxyz23456789';   // 不用 0/o、1/l 這種容易看錯的
+  const buf = new Uint32Array(8);
+  crypto.getRandomValues(buf);
+  return 'hs-' + Array.from(buf, (n) => chars[n % chars.length]).join('');
+}
+function wlSummary(data){
+  const groups = (data && Array.isArray(data.groups) ? data.groups : []).filter((g) => Array.isArray(g.items) && g.items.length && !wlIsAuto(g));
+  return { count: groups.reduce((n, g) => n + g.items.length, 0), names: groups.map((g) => g.name + ' ' + g.items.length + ' 檔') };
+}
+async function wlSetKey(raw, opts){
   const key = String(raw || '').trim().toLowerCase();
+  const replace = !!(opts && opts.replace);
   if (!WL_KEY_RE.test(key)){
     wl.notice = '同步碼要 6～40 個字（英文、數字、中文、底線、減號），不能有空白';
     renderWatch();
     return;
   }
-  wl.key = key; wl.version = 0; wl.notice = ''; wl.error = ''; wl.queue = [];
-  try { localStorage.setItem('watchKey', key); } catch (e) { /* 存不了就算了 */ }
+  if (replace && key === wl.key){ wl.notice = '這就是現在用的同步碼'; renderWatch(); return; }
+  if (replace && (wl.queue.length || wl.busy)){ wl.notice = '這台還有修改正在同步，等幾秒再換'; renderWatch(); return; }
+  wl.notice = ''; wl.probing = true;
   renderWatch();
-  wlLoad({ merge: true });
+  let remote = null;
+  try {
+    const { res, body } = await wlPost('/api/watchlist/load', { key });
+    if (!res.ok || body.status !== 'ok') throw new Error(body.error || ('HTTP ' + res.status));
+    remote = Number(body.version) ? body.data : null;
+  } catch (e) {
+    wl.probing = false;
+    wl.notice = '連不到後端（' + (e && e.message || e) + '），稍後再試';
+    renderWatch();
+    return;
+  }
+  wl.probing = false;
+  const sum = wlSummary(remote);
+  if (sum.count){ wl.pendingKey = { key, replace, sum }; renderWatch(); return; }   // 這個碼已經有清單：先確認是不是自己的
+  wlApplyKey(key, replace);
+}
+function wlApplyKey(key, replace){
+  wl.pendingKey = null; wl.switching = false;
+  if (replace){ wl.data = wlEmpty(); wl.active = 'g1'; }   // 換人：不帶上一個人的股票
+  wl.key = key; wl.version = 0; wl.notice = ''; wl.error = ''; wl.queue = []; wl.showKey = false;
+  try { localStorage.setItem('watchKey', key); } catch (e) { /* 存不了就算了 */ }
+  wlNormalize();
+  wlSaveLocal();
+  wlAfterChange();
+  wlLoad(replace ? {} : { merge: true });
 }
 function wlStopSync(){
   if (!window.confirm('這台電腦不再同步？清單會留在這台，雲端那份不會刪，其他電腦照常同步。')) return;
@@ -9161,21 +9206,37 @@ function wlScoreOf(code, price){
 
 // ---- 畫面
 function wlSyncHtml(){
+  const notice = wl.notice ? '<span class="wl-status err">' + wlEsc(wl.notice) + '</span>' : '';
+  if (wl.probing) return '<div class="wl-sync"><b>同步碼</b><span class="wl-status">檢查同步碼…</span></div>';
+  if (wl.pendingKey){
+    const p = wl.pendingKey, local = wlCount();
+    const mine = p.replace || !local ? '是我的，載入這份' : '是我的，載入並把這台的 ' + local + ' 檔合併進去';
+    return '<div class="wl-sync wl-confirm"><b>確認同步碼</b>' +
+      '<div class="wl-hint wl-confirm-text">這個同步碼雲端已經有一份清單：共 ' + p.sum.count + ' 檔（' + wlEsc(p.sum.names.join('、')) + '）。<b>是你自己的嗎？</b></div>' +
+      '<button class="wl-btn primary" id="wlKeyMine">' + mine + '</button><button class="wl-btn" id="wlKeyNotMine">不是我的，換一個碼</button>' +
+      '<div class="wl-hint">不是你建的，就代表有別人用了同一個碼——按「不是我的」，再按「幫我產生」拿一組新的。</div></div>';
+  }
+  const genHint = '按「幫我產生」會給一組隨機的碼（不會跟別人撞到），記下來，在你的手機、另一台電腦輸入同一組就會同步。';
   if (!wl.key){
     return '<div class="wl-sync"><b>同步碼</b>' +
-      '<input type="text" id="wlKeyInput" maxlength="40" autocomplete="off" placeholder="自己取一個，例如 judy-2026（6～40 字）">' +
-      '<button class="wl-btn primary" id="wlKeySet">開始同步</button>' +
-      (wl.notice ? '<span class="wl-status err">' + wlEsc(wl.notice) + '</span>' : '') +
-      '<div class="wl-hint">還沒設定：清單只存在這台電腦。兩台電腦＋手機都輸入同一個同步碼，就會看到同一份清單（這台已經加的股票會一起帶上去）。' +
-      '同步碼就像密碼，知道的人都能看到、改你的自選股，不要用太簡單的。</div></div>';
+      '<input type="text" id="wlKeyInput" maxlength="40" autocomplete="off" placeholder="按「幫我產生」，或自己取一個不好猜的（6～40 字）">' +
+      '<button class="wl-btn" id="wlKeyGen">幫我產生</button><button class="wl-btn primary" id="wlKeySet">開始同步</button>' + notice +
+      '<div class="wl-hint">還沒設定：清單只存在這台電腦。每個人用自己的同步碼，清單就是各自的，不會跟別人混在一起。' + genHint +
+      '這台已經加的股票會一起帶上去。同步碼就像密碼，知道的人都能看到、改你的自選股，不要給別人。</div></div>';
   }
   const shown = wl.showKey ? wl.key : wl.key.slice(0, 2) + '•••' + wl.key.slice(-1);
   const status = wl.error ? '<span class="wl-status err">' + wlEsc(wl.error) + '</span>'
     : wl.busy || wl.loading ? '<span class="wl-status">同步中…</span>'
     : wl.syncedAt ? '<span class="wl-status ok">✓ 已同步 ' + wl.syncedAt.toLocaleTimeString('zh-TW') + '</span>' : '';
+  const switchRow = wl.switching
+    ? '<div class="wl-switch"><input type="text" id="wlSwitchInput" maxlength="40" autocomplete="off" placeholder="另一個人的同步碼（新的人按「幫我產生」）">' +
+      '<button class="wl-btn" id="wlSwitchGen">幫我產生</button><button class="wl-btn primary" id="wlSwitchGo">換成這個碼</button><button class="wl-btn" id="wlSwitchCancel">取消</button>' + notice +
+      '<div class="wl-hint">換人使用：這台的清單會整份換成那個同步碼的清單，不會帶現在這份的股票；現在這份還留在雲端，輸入原本的碼隨時換回來。' + genHint + '</div></div>'
+    : notice;
   return '<div class="wl-sync"><b>同步碼</b><span class="wl-key">' + wlEsc(shown) + '</span>' +
     '<button class="wl-btn" id="wlKeyShow">' + (wl.showKey ? '隱藏' : '顯示') + '</button>' + status +
-    '<span class="wl-sync-ops"><button class="wl-btn" id="wlSyncNow">立即同步</button><button class="wl-btn" id="wlKeyStop">這台停止同步</button></span></div>';
+    '<span class="wl-sync-ops"><button class="wl-btn" id="wlSyncNow">立即同步</button>' + (wl.switching ? '' : '<button class="wl-btn" id="wlSwitchUser" title="同一台電腦給別人用：換成他的同步碼、看他的清單">換人使用</button>') +
+    '<button class="wl-btn" id="wlKeyStop">這台停止同步</button></span>' + switchRow + '</div>';
 }
 function wlTabsHtml(){
   return '<div class="wl-groups">' + wl.data.groups.map((g) => '<button class="wl-gtab' + (g.id === wl.active ? ' active' : '') + '" data-gid="' + wlEsc(g.id) + '">' +
@@ -9652,10 +9713,10 @@ function wlAfterChange(){
   if (modal && !modal.hidden){
     // 打字中的輸入框不要被重畫掉：只重畫表格跟同步狀態那一列
     const act = document.activeElement;
-    const typing = act && (act.id === 'wlAddInput' || act.id === 'wlKeyInput' || (act.tagName === 'INPUT' && /^(number|text)$/.test(act.type) && !!act.closest('#wlTable')));
+    const typing = act && (act.id === 'wlAddInput' || act.id === 'wlKeyInput' || act.id === 'wlSwitchInput' || (act.tagName === 'INPUT' && /^(number|text)$/.test(act.type) && !!act.closest('#wlTable')));
     if (typing){
       const sync = document.querySelector('#watchBody .wl-sync');
-      if (sync && wl.key) sync.outerHTML = wlSyncHtml();
+      if (sync && wl.key && !sync.contains(act)) sync.outerHTML = wlSyncHtml();
       renderWatchTable();
     } else renderWatch();
   }
@@ -9683,11 +9744,22 @@ document.getElementById('watchBody').addEventListener('keydown', (e) => {
   if (e.target.id === 'wlFeeDisc'){ e.preventDefault(); e.target.blur(); return; }
   if (e.target.id === 'wlAddInput'){ e.preventDefault(); wlSubmitAdd(); }
   else if (e.target.id === 'wlKeyInput'){ e.preventDefault(); wlSetKey(e.target.value); }
+  else if (e.target.id === 'wlSwitchInput'){ e.preventDefault(); wlSetKey(e.target.value, { replace: true }); }
 });
 document.getElementById('watchBody').addEventListener('click', (e) => {
   if (e.target.closest('select, input')) return;
   if (e.target.closest('#wlAddBtn')){ wlSubmitAdd(); return; }
   if (e.target.closest('#wlKeySet')){ wlSetKey((document.getElementById('wlKeyInput') || {}).value); return; }
+  if (e.target.closest('#wlKeyGen') || e.target.closest('#wlSwitchGen')){
+    const input = document.getElementById(e.target.closest('#wlKeyGen') ? 'wlKeyInput' : 'wlSwitchInput');
+    if (input){ input.value = wlRandomKey(); input.select(); }
+    return;
+  }
+  if (e.target.closest('#wlKeyMine')){ const p = wl.pendingKey; if (p) wlApplyKey(p.key, p.replace); return; }
+  if (e.target.closest('#wlKeyNotMine')){ wl.pendingKey = null; wl.notice = '這個碼是別人的，請換一個（可以按「幫我產生」）'; renderWatch(); return; }
+  if (e.target.closest('#wlSwitchUser')){ wl.switching = true; wl.notice = ''; renderWatch(); const i = document.getElementById('wlSwitchInput'); if (i) i.focus(); return; }
+  if (e.target.closest('#wlSwitchCancel')){ wl.switching = false; wl.notice = ''; renderWatch(); return; }
+  if (e.target.closest('#wlSwitchGo')){ wlSetKey((document.getElementById('wlSwitchInput') || {}).value, { replace: true }); return; }
   if (e.target.closest('#wlKeyShow')){ wl.showKey = !wl.showKey; renderWatch(); return; }
   if (e.target.closest('#wlKeyStop')){ wlStopSync(); return; }
   if (e.target.closest('#wlSyncNow')){ wl.error = ''; if (wl.queue.length) wlFlush(); else wlLoad(); renderWatch(); return; }
@@ -10921,7 +10993,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 10:28:46';
+const BUILD_STAMP = '2026-10-13 10:34:58';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13479,6 +13551,7 @@ const GUIDE_FAQ = [
   ['通知要怎麼開？', '右上角「提醒開啟」，第一次會問要不要允許通知。網頁要開著才收得到，關掉就沒有。'],
   ['手機可以用嗎？', '可以。下方導覽列在手機、平板上排成三排、每排五顆；表格太寬可以左右滑。也可以把網站放到手機桌面（看上面「放到手機桌面」）。'],
   ['自選股換手機會不見嗎？', '自選股存在這台瀏覽器；到自選股面板拿「同步碼」，在另一台輸入就會同步過去。'],
+  ['好幾個人用這個網站，自選股會混在一起嗎？', '不會。沒設同步碼時清單只存在自己的瀏覽器；設了同步碼，每個碼是各自的一份。在自選股面板按「幫我產生」拿一組隨機的碼（不會跟別人撞到）；輸入的碼如果雲端已經有清單，會先問「是你自己的嗎」。同一台電腦給別人用，按「換人使用」換成他的碼。'],
   ['分數高、籌碼暴增、出現訊號，是不是就可以買？', '不是。這些數字描述的是「現在的狀態」，不是買賣指令。什麼時候進、什麼時候出、放多少部位，要自己判斷，盈虧自負。'],
 ];
 const guideState = { home: 'ios' };
