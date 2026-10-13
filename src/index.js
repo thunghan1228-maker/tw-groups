@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 11:04:25";
+const BUILD_STAMP = "2026-10-13 11:18:03";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2642,7 +2642,7 @@ function getStockQuote(code){
   if (!lastData) return null;
   for (const g of lastData.groups){
     const s = g.stocks.find((x) => x.code === code);
-    if (s && s.price != null) return { price: s.price, changePercent: s.changePercent };
+    if (s && s.price != null) return { price: s.price, changePercent: s.changePercent, limitUp: !!s.limitUp, limitDown: !!s.limitDown };
   }
   return null;
 }
@@ -4183,7 +4183,7 @@ function openGroupDetail(groupName){
     const changeAmt = price - prevClose;
     return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
       '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + wlStarHtml(s.code, s.name) + '</div>' +
-      stockValueColsHtml(price, changeAmt, s.changePercent) +
+      stockValueColsHtml(price, changeAmt, s.changePercent, s) +
     '</div>';
   }).join('');
   document.getElementById('groupModal').hidden = false;
@@ -4251,7 +4251,8 @@ function fmtAmountWan(n){
 }
 const STOCK_COL_LABELS_HTML = '<div class="stock-col-labels"><span></span><span class="srow-right">' +
   '<span class="spct">漲跌幅</span><span class="schg">漲跌</span><span class="sprice">成交價</span></span></div>';
-function stockValueColsHtml(price, changeAmt, changePercent){
+// lim＝{limitUp, limitDown}（可省略）：漲停的漲跌幅紅底白字、跌停綠底白字（2026-10-13 使用者：每個分頁都要）
+function stockValueColsHtml(price, changeAmt, changePercent, lim){
   // 報價不合理（價格不是正數、漲跌或漲跌幅不是數字）就顯示「—」，不要印出 -100.00%／NaN 這種假數字
   // （2026-10-04 週末 TWSE 測試盤回了成交價 0 的資料，漲跌幅算成 -100%、漲跌推算成 NaN）。
   if (!(price > 0) || !Number.isFinite(changeAmt) || !Number.isFinite(changePercent)){
@@ -4260,7 +4261,7 @@ function stockValueColsHtml(price, changeAmt, changePercent){
   }
   const cls = dirClass(changePercent);
   return '<div class="srow-right">' +
-    '<span class="spct ' + cls + '">' + fmt(changePercent) + '%</span>' +
+    '<span class="spct ' + cls + '">' + limitPriceHtml(lim || {}, fmt(changePercent) + '%') + '</span>' +
     '<span class="schg ' + cls + '">' + (changeAmt > 0 ? '+' : '') + changeAmt.toFixed(2) + '</span>' +
     '<span class="sprice ' + cls + '">' + price.toFixed(2) + '</span>' +
   '</div>';
@@ -4598,7 +4599,18 @@ function holderPastQuote(code, date){
   const pct = num(d.pct);
   if (!Number.isFinite(close) || !Number.isFinite(pct)) return null;
   const change = num(d.change);
-  return { price: close, changePercent: pct, changeAmt: Number.isFinite(change) ? change : close - close / (1 + pct / 100) };
+  const changeAmt = Number.isFinite(change) ? change : close - close / (1 + pct / 100);
+  const lim = twLimitPrices(close - changeAmt);   // 日K沒有漲跌停旗標：用昨收照台股漲跌停規則算
+  return { price: close, changePercent: pct, changeAmt,
+    limitUp: !!lim && close >= lim.up - 1e-6, limitDown: !!lim && close <= lim.down + 1e-6 };
+}
+// 台股漲跌停價（昨收 ±10%，再照那個價位的跳動單位往內取整）；昨收不合理回 null
+function twTick(p){ return p < 10 ? 0.01 : p < 50 ? 0.05 : p < 100 ? 0.1 : p < 500 ? 0.5 : p < 1000 ? 1 : 5; }
+function twLimitPrices(prev){
+  if (!(prev > 0)) return null;
+  const upRaw = prev * 1.1, downRaw = prev * 0.9;
+  const tu = twTick(upRaw), td = twTick(downRaw);
+  return { up: Math.floor(upRaw / tu + 1e-6) * tu, down: Math.ceil(downRaw / td - 1e-6) * td };
 }
 // 訊號列／排行列的成交價、漲跌：看昨天／前天（isPast）或休市日／開盤前沿用上一個交易日（held）時，
 // 用那一天的日K收盤值，不是首頁現在的即時報價（2026-10-04 週日 TWSE 跑測試盤，即時報價不是 0 就是
@@ -4808,7 +4820,7 @@ function signalEventRowHtml(ev, view, holder, holdCls){
   // 看昨天／前天或沿用上一個交易日時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價（跟大戶力分頁一樣）。
   const quote = viewStockQuote(ev.code, view);
   const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
-  const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '';
+  const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent, quote) : '';
   const labelTitle = LARGE_ORDER_TOOLTIPS[ev.label] || '';
   return '<div class="signal-row' + (holder ? holdCls || ' sig-with-hold' : '') + '" data-code="' + ev.code + '" data-name="' + ev.name + '">' +
     '<span class="sig-time">' + ev.time + '</span>' +
@@ -5106,7 +5118,7 @@ function holderFadedHtml(timeline, side, currentRows, view){
         '<span class="sig-group">' + lookupStockGroup(code) + '</span>' + sigMaCellHtml(code, view) +
         '<span class="sig-label hf-faded-label" title="進名單時 ' + pct(t.firstPct) + '；最' + (bull ? '高' : '低') + ' ' + pct(t.peakPct) + '（' + hmOf(t.peakTs) + '）' + nowText + '">曾進名單・最' + (bull ? '高' : '低') + ' ' + pct(t.peakPct) + '</span>' +
         sigHolderCellHtml(code, new Map(now ? [[code, now]] : [])) +   // 盤中大戶力欄＝現在（收盤）的大戶力
-        (quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '') + '</div>';
+        (quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent, quote) : '') + '</div>';
     }).join('') + '</div>';
 }
 function rankingRowsHtml(rows, view){
@@ -5167,7 +5179,7 @@ function holderSignalRowHtml(r, view, side){
     sigMaCellHtml(r.code, view) +
     '<span class="sig-label' + (hot ? (bull ? ' sig-bull' : ' sig-bear') : '') + '" title="大戶力 ' + (bull ? '≥ +' : '≤ -') + HOLDER_HOT_PCT + '% 或有偏' + (bull ? '買／強力買進' : '賣／強力賣出') + '標籤的' + (bull ? '紅底' : '綠底') + '">' + label + '</span>' +
     sigHolderCellHtml(r.code, new Map([[r.code, r]])) +
-    (quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '') +
+    (quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent, quote) : '') +
     signalNoteHtml(r.code, note) +
   '</div>';
 }
@@ -5547,7 +5559,7 @@ function raceStockRowHtml(r, idx, opts){
     (opts && opts.blade ? '<span class="race-l2wrap"><span class="race-flags">' + raceFlagsHtml(r.code) + '</span><span class="race-l2nums">' : '') +
     '<span class="race-line2">' +
     '<span class="race-holder">' + raceHolderCellHtml(r) + '</span>' +
-    '<span class="race-pct ' + cls + '">' + fmt(r.pct) + '%</span>' +
+    '<span class="race-pct ' + cls + '">' + limitPriceHtml(r, fmt(r.pct) + '%') + '</span>' +
     '<span class="race-chg ' + cls + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
     '<span class="race-price ' + cls + '">' + (hasPrice ? limitPriceHtml(r, price.toFixed(2)) : '—') + '</span>' +
     '<span class="race-badge" title="' + dailyTitle + '">' + badge + '</span>' +
@@ -5858,7 +5870,7 @@ function groupHolderForceStockRowHtml(r, idx){
     // （2026-09-24 使用者：手機版最左邊的數字被螢幕截到——這格原本沒有固定寬度，.race-line2在手機版
     // justify-content:flex-end，內容一旦比可用寬度寬，最前面（最左邊）的這格就會被推出畫面外）。
     '<span class="race-holder">' + raceHolderCellHtml(r) + '</span>' +
-    '<span class="race-pct ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' +
+    '<span class="race-pct ' + dirClass(r.pct) + '">' + limitPriceHtml(r, fmt(r.pct) + '%') + '</span>' +
     '<span class="race-chg ' + dirClass(r.pct) + '">' + (hasPrice ? (chg > 0 ? '+' : '') + chg.toFixed(2) : '—') + '</span>' +
     '<span class="race-price ' + dirClass(r.pct) + '">' + (hasPrice ? limitPriceHtml(r, price.toFixed(2)) : '—') + '</span>' +
     '<span class="race-warn-slot">' + (r.isPast ? '' : groupHolderForceWarnPillHtml(r)) + '</span>' +
@@ -6065,7 +6077,7 @@ function groupCombinedBoardRowHtml(r){
     '<td class="combo-code">' + r.code + '</td>' +
     '<td class="combo-name">' + backendName + wlStarHtml(r.code, backendName) + '</td>' +
     '<td class="combo-holder">' + holderText + '</td>' +
-    '<td class="combo-pct ' + cls + '">' + fmt(r.pct) + '%</td>' +
+    '<td class="combo-pct ' + cls + '">' + limitPriceHtml(r, fmt(r.pct) + '%') + '</td>' +
     '<td class="combo-chg ' + cls + '">' + (hasPrice ? (changeAmt > 0 ? '+' : '') + changeAmt.toFixed(2) : '—') + '</td>' +
     '<td class="combo-price ' + cls + '">' + (hasPrice ? limitPriceHtml(r, price.toFixed(2)) : '—') + '</td>' +
     '<td class="combo-disp">' + (r.isPast ? '—' : groupCombinedBoardDispositionCell(r.code)) + '</td>' +
@@ -9324,7 +9336,7 @@ function renderWatchTable(){
       '<td class="l">' + (grp ? '<span class="sig-group">' + wlEsc(grp) + '</span>' : '<span class="flat">—</span>') + '</td>' +
       '<td>' + (WL_GROUP_INDEX[code] ? maScoreCellHtml(code, r.price) : '<span class="flat">—</span>') + '</td>' +
       '<td>' + (r.holder ? raceHolderCellHtml(r.holder) : '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>') + '</td>' +
-      '<td class="' + cls + '">' + (r.pct === null ? '—' : fmt(r.pct) + '%') + '</td>' +
+      '<td class="' + cls + '">' + (r.pct === null ? '—' : limitPriceHtml(limit, fmt(r.pct) + '%')) + '</td>' +
       '<td class="' + cls + '">' + (r.chg === null ? '—' : (r.chg > 0 ? '+' : '') + r.chg.toFixed(2)) + '</td>' +
       '<td class="' + cls + '">' + (r.price === null ? (r.q === null ? '<span class="flat" title="還沒抓到報價">—</span>' : '—') : limitPriceHtml(limit, r.price.toFixed(2))) + '</td>' +
       '<td>' + vol + '</td>' +
@@ -9476,7 +9488,7 @@ function wlPnlHtml(g){
     let html = '<tr data-code="' + code + '" data-name="' + wlEsc(name) + '"' + (editing ? ' class="wl-editing"' : '') + '>' +
       '<td class="l wl-stock">' + code + '</td><td class="l wl-stock"><span class="wl-name">' + wlEsc(name) + '</span></td>' +
       '<td class="' + cls + '">' + (r.price === null ? '—' : limitPriceHtml(limit, r.price.toFixed(2))) + '</td>' +
-      '<td class="' + cls + '">' + (r.pct === null ? '—' : fmt(r.pct) + '%') + '</td>' +
+      '<td class="' + cls + '">' + (r.pct === null ? '—' : limitPriceHtml(limit, fmt(r.pct) + '%')) + '</td>' +
       '<td class="wl-pos" data-field="cost" title="點一下輸入成本均價">' + (Number(r.it.cost) > 0 ? hlPrice(Number(r.it.cost)) : '<span class="wl-note-empty">＋成本</span>') + '</td>' +
       '<td class="wl-pos" data-field="lots" title="點一下輸入張數">' + (Number(r.it.lots) > 0 ? wlLotsText(r.it.lots) : '<span class="wl-note-empty">＋張數</span>') + '</td>' +
       '<td>' + (p ? wlAmount(p.value) : '') + '</td>' +
@@ -11002,7 +11014,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 11:04:25';
+const BUILD_STAMP = '2026-10-13 11:18:03';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11280,7 +11292,7 @@ function stPanelHtml(side){
           ? '<span class="st-hf ' + (hf.strengthPct > 0 ? 'up' : 'down') + '" title="大戶力（大單淨額 ÷ 累計成交額）' + (fmtAmountWan(hf.netAmount) ? '，淨額 ' + fmtAmountWan(hf.netAmount) : '') + '">' +
             (hf.strengthPct > 0 ? '+' : '') + hf.strengthPct.toFixed(1) + '%</span>'
           : '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>') + '</span>' +
-        (q ? stockValueColsHtml(q.price, chg, q.changePercent) : '<div class="srow-right"><span class="spct flat">—</span><span class="schg flat">—</span><span class="sprice">' + ckPrice(r.close) + '</span></div>') + '</div>';
+        (q ? stockValueColsHtml(q.price, chg, q.changePercent, q) : '<div class="srow-right"><span class="spct flat">—</span><span class="schg flat">—</span><span class="sprice">' + ckPrice(r.close) + '</span></div>') + '</div>';
     }).join('') + '</div>';
   });
   if (!d.count) h += '<div class="race-note">今天沒有符合的股票</div>';
@@ -11736,7 +11748,7 @@ function render(){
           const changeAmt = price - prevClose;
           return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
             '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + wlStarHtml(s.code, s.name) + '</div>' +
-            stockValueColsHtml(price, changeAmt, s.changePercent) +
+            stockValueColsHtml(price, changeAmt, s.changePercent, s) +
           '</div>';
         }).join('')
       : '<div class="stock-row"><span class="flat">目前無資料</span></div>';
