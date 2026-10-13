@@ -87,6 +87,7 @@ const CSS = `
     const found = await page.evaluate(({ cap, target }) => {
       let c = document.getElementById('tutCap'); if (!c){ c = document.createElement('div'); c.id = 'tutCap'; document.body.appendChild(c); }
       c.textContent = cap;
+      Object.assign(c.style, { top: '', bottom: '' });   // 預設在下方
       let b = document.getElementById('tutBox');
       const el = target ? document.querySelector(target) : null;
       if (!el){ if (b) b.remove(); return !target; }
@@ -94,13 +95,17 @@ const CSS = `
       const r = el.getBoundingClientRect();
       const top = Math.max(4, r.top - 8), bottom = Math.min(window.innerHeight - 4, r.bottom + 8);
       Object.assign(b.style, { left: Math.max(4, r.left - 8) + 'px', top: top + 'px', width: Math.min(window.innerWidth - 8, r.width + 16) + 'px', height: Math.max(20, bottom - top) + 'px' });
+      // 字幕會蓋住框起來的東西（例如下方工具列中間那幾顆按鈕）：字幕改放上方。大區塊（表格）本來就蓋不完，照舊放下方
+      const cr = c.getBoundingClientRect();
+      const overlap = r.right > cr.left && r.left < cr.right && r.bottom > cr.top && r.top < cr.bottom;
+      if (overlap && r.height < window.innerHeight * 0.4) Object.assign(c.style, { top: '18px', bottom: 'auto' });
       return true;
     }, { cap: sc.cap, target: sc.target || null });
     if (!found) warnings.push('scene ' + i + ' target not found: ' + sc.target);
     timeline.push({ at: (Date.now() - t0) / 1000, dur: sc.dur, audio: sc.audio });
     await page.waitForTimeout(Math.round(sc.dur * 1000) + 450);
   }
-  await page.evaluate(() => { const c = document.getElementById('tutCap'); if (c) c.textContent = '影片裡的數字是錄影那時候的行情，以實際畫面為準'; const b = document.getElementById('tutBox'); if (b) b.remove(); });
+  await page.evaluate(() => { const c = document.getElementById('tutCap'); if (c){ c.textContent = '影片裡的數字是錄影那時候的行情，以實際畫面為準'; Object.assign(c.style, { top: '', bottom: '' }); } const b = document.getElementById('tutBox'); if (b) b.remove(); });
   await page.waitForTimeout(1600);
   const total = (Date.now() - t0) / 1000;
   const raw = await page.video().path();
