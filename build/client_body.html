@@ -319,6 +319,7 @@
   .combo-block + .combo-block,.ghf-block + .ghf-block,.bl-block + .bl-block{border-top:8px double #111;padding-top:10px;}
   /* 2026-10-05 使用者：今日即時空上面的刀劍空(32)跟下面依時間排的訊號列表之間，也用同樣粗細的兩條黑線隔開 */
   .now-bear-blade{border-bottom:8px double #111;padding-bottom:10px;}
+  .now-bear-notes{border-top:8px double #111;padding-top:10px;margin-top:12px;}
   /* 醞釀／發動分頁：沿用族群綜合表的表格樣式，另外給 9 欄的欄寬；發動（2）紅底、醞釀（1）藍綠底的段落標題 */
   .bl-table{min-width:68em;}
   .bl-table col.b-time{width:18%;}
@@ -5104,14 +5105,17 @@ function nowTabRowsHtml(events, rankingRows, view){
 function nowBearTabHtml(view){
   const events = view.events.filter((e) => e.tabs.includes('nowBear')).concat(view.isPast ? [] : ghfSignalEvents(ghfTodayView(), 'down').concat(stSignalEvents('weak')));   // 十大空族群、今日弱勢股（2026-10-12）
   const rows = view.rankingRows.filter((r) => !holderRowIsBull(r));
-  let blade = '';
+  let blade = '', bladeNotes = '';
   if (!view.isPast){
     const m = race333Model();
+    // 2026-10-13 使用者：刀劍空在這頁照出現時間早的在上面、晚的往下排；多方打少、收割區域那兩段文字不是主要的，搬到這頁最下面
     blade = '<div class="race-block now-bear-blade"><div class="race-head">🔪⚔️刀劍空(32)</div>' +
-      '<div class="race-sub">跟「刀劍空(32)」分頁同一份即時名單（只有今天有；昨天／前天沒有紀錄）。下面才是依發生時間排序的空方向訊號。</div>' +
-      (m ? raceBladeListHtml(m) : '<div class="race-note">族群行情還沒載入，刀劍空名單稍後才會出現。</div>') + '</div>';
+      '<div class="race-sub">跟「刀劍空(32)」分頁同一份即時名單（只有今天有；昨天／前天沒有紀錄）。下面才是依發生時間排序的空方向訊號；多方打少、收割區域放在這頁最下面。</div>' +
+      (m ? raceBladeListHtml(m, { oldestFirst: true, noNotes: true }) : '<div class="race-note">族群行情還沒載入，刀劍空名單稍後才會出現。</div>') + '</div>';
+    const notes = m ? raceBladeNotesHtml(m) : '';
+    if (notes) bladeNotes = '<div class="race-block now-bear-notes"><div class="race-sub">刀劍空(32) 只列名字的兩段：</div>' + notes + '</div>';
   }
-  return blade + nowTabRowsHtml(events, rows, view);
+  return blade + nowTabRowsHtml(events, rows, view) + bladeNotes;
 }
 
 // 每5秒的自動更新不要把訊號列表整個砍掉重畫：歷史查詢原本先變成「讀取中…」再填回去，
@@ -5458,22 +5462,33 @@ function bladeRecordSeen(){
     } catch (_){}
   }
 }
-function raceBladeListHtml(m){
+// 多方打少／收割區域：只列名字的兩行（今日即時空那頁放在整頁最下面，刀劍空分頁接在名單下面）
+function raceBladeNotesHtml(m){
   const names = (list) => list.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、');
+  const bladeUpper = race333FilterList(m.bladeUpper);
+  const bladeHarvest = race333FilterList(m.bladeHarvest);
+  return (bladeUpper.length ? '<div class="race-note">多方打少（強族群裡逆勢走弱，空得保守）' + bladeUpper.length + ' 檔：' + names(bladeUpper) + '</div>' : '') +
+    (bladeHarvest.length ? '<div class="race-note">收割區域（已跌 ' + BLADE_HARVEST_PCT + '% 以上或跌停，不追空）' + bladeHarvest.length + ' 檔：' + names(bladeHarvest) + '</div>' : '');
+}
+// opts.oldestFirst：早出現的在上面、新出現的往下排（2026-10-13 使用者：只有今日即時空裡的刀劍空這樣排，刀劍空分頁還是新的在上面）
+// opts.noNotes：不接多方打少／收割區域（今日即時空另外放到整頁最下面）
+function raceBladeListHtml(m, opts){
+  const o = opts || {};
   const seen = bladeSeenMap();
   const holderOrder = race333SortByHolder(race333FilterList(m.bladeLower), true);
   const rankOf = new Map(holderOrder.map((r, i) => [r.code, i]));
-  // 有出現時間的照時間新到舊（同一分鐘照原本的大戶力順序），沒有時間的（今天還沒記到）排最後
+  // 有出現時間的照時間排（同一分鐘照原本的大戶力順序）；沒有時間的（今天還沒記到，等於剛出現）
+  // 新到舊時排最後、舊到新時也排最後（最新的那一端）
   const bladeLower = holderOrder.map((r) => Object.assign({}, r, { seenTs: seen[r.code] || null })).sort((a, b) => {
-    const ta = a.seenTs ? Math.floor(a.seenTs / 60000) : -1, tb = b.seenTs ? Math.floor(b.seenTs / 60000) : -1;
-    return (tb - ta) || (rankOf.get(a.code) - rankOf.get(b.code));
+    const ta = a.seenTs ? Math.floor(a.seenTs / 60000) : (o.oldestFirst ? Infinity : -1);
+    const tb = b.seenTs ? Math.floor(b.seenTs / 60000) : (o.oldestFirst ? Infinity : -1);
+    const byTime = o.oldestFirst ? (ta === tb ? 0 : (ta < tb ? -1 : 1)) : (tb - ta);
+    return byTime || (rankOf.get(a.code) - rankOf.get(b.code));
   });
-  const bladeUpper = race333FilterList(m.bladeUpper);
-  const bladeHarvest = race333FilterList(m.bladeHarvest);
+  const seenNote = '「出現」＝這檔第一次進刀劍空名單的時間（這台電腦開著頁面時記的），' + (o.oldestFirst ? '早出現的在上面、新出現的往下排。' : '新出現的在上面。');
   return '<div class="race-sep">----↓(強空積極)↓----</div>' +
-    (bladeLower.length ? '<div class="race-note">「出現」＝這檔第一次進刀劍空名單的時間（這台電腦開著頁面時記的），新出現的在上面。</div>' + raceColLabelsHtml({ blade: true }) + bladeLower.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone: '🔰', dates: m.dates, conditions: true, m })).join('') : '<div class="race-note">目前沒有符合條件的股票</div>') +
-    (bladeUpper.length ? '<div class="race-note">多方打少（強族群裡逆勢走弱，空得保守）' + bladeUpper.length + ' 檔：' + names(bladeUpper) + '</div>' : '') +
-    (bladeHarvest.length ? '<div class="race-note">收割區域（已跌 ' + BLADE_HARVEST_PCT + '% 以上或跌停，不追空）' + bladeHarvest.length + ' 檔：' + names(bladeHarvest) + '</div>' : '');
+    (bladeLower.length ? '<div class="race-note">' + seenNote + '</div>' + raceColLabelsHtml({ blade: true }) + bladeLower.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone: '🔰', dates: m.dates, conditions: true, m })).join('') : '<div class="race-note">目前沒有符合條件的股票</div>') +
+    (o.noNotes ? '' : raceBladeNotesHtml(m));
 }
 // 盤中333 大戶力篩選（2026-09-24 使用者）：null=不篩選；'up'=只留大戶力≥10%的個股；'down'=只留
 // 大戶力≤-10%的個股；只套用在馬火多/賽馬多/河流多/刀劍空這幾個「個股」名單（30/33/34/32），
