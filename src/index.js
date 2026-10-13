@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 10:34:58";
+const BUILD_STAMP = "2026-10-13 11:00:48";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -311,6 +311,13 @@ const HTML_PAGE = `<!DOCTYPE html>
   .launch-alert-close{flex:0 0 auto;width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,.22);border:0;color:#fff;font-size:18px;font-weight:800;line-height:1;cursor:pointer;font-family:inherit;}
   .launch-alert-close:hover{background:rgba(255,255,255,.34);}
   .launch-alert-body{margin-top:8px;font-size:15px;font-weight:600;line-height:1.6;}
+  /* 2026-10-13 使用者：發動提醒把今天開盤以來全部的發動都列出來（最新的在上），檔數多了可以捲 */
+  #launchAlertBox .launch-alert-body{max-height:min(55vh,460px);overflow:auto;}
+  #launchAlertBox .la-row.la-new{background:rgba(255,255,255,.16);border-radius:6px;padding:0 4px;margin:0 -4px;}
+  #launchAlertBox .la-tag{display:inline-block;font-size:12px;font-weight:800;padding:0 6px;border-radius:999px;margin-left:6px;vertical-align:1px;}
+  #launchAlertBox .la-tag.new{background:#fde047;color:#7c2d12;}
+  #launchAlertBox .la-tag.fallen{background:rgba(255,255,255,.25);color:#fff;}
+  #launchAlertBox .la-tag.times{background:rgba(0,0,0,.22);color:#fff;}
   /* 形態觀察股跳窗（2026-10-12 使用者：11:30／12:00／12:30／13:00 像發動一樣跳出來） */
   .launch-alert.obs-alert{background:#4c1d95;max-width:min(94vw,680px);width:min(94vw,680px);z-index:211;}
   .obs-alert .launch-alert-body{max-height:min(70vh,640px);overflow:auto;font-weight:500;font-size:14px;}
@@ -10993,7 +11000,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 10:34:58';
+const BUILD_STAMP = '2026-10-13 11:00:48';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11108,8 +11115,14 @@ function renderLaunchAlertBox(){
   // （後端有紀錄就用紀錄時間，沒有就用跳出提醒那一刻），後端紀錄晚一點才到也會補上，依這個時間新的在上、舊的在下。
   launchAlertRows.forEach((r) => { if (!r.alertExact){ const ms = launchRecordedMs(r.code); if (ms){ r.alertAt = ms; r.alertExact = true; } } });
   const sorted = launchAlertRows.slice().sort((a, b) => b.alertAt - a.alertAt);
-  el.innerHTML = '<div class="launch-alert-head">🚀 發動<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
-    '<div class="launch-alert-body">' + sorted.map((r) => '<span class="launch-alert-time">' + launchAlertClock(r.alertAt) + '</span> ' + r.code + ' ' + r.name + (r.groupName ? '（' + r.groupName + '）' : '')).join('<br>') + '</div>';
+  // 2026-10-13 使用者：跳出來時，今天開盤以來發動過的也要一起列出來（不只剛跳的那幾檔），最新的在上面；
+  // 剛跳出來的標「新」、現在已經跌回箱頂下的標「曾發動」、同一檔發動好幾次標「×N」。
+  const newCount = sorted.filter((r) => launchAlertNew.has(r.code)).length;
+  el.innerHTML = '<div class="launch-alert-head">🚀 發動・今天 ' + sorted.length + ' 檔' + (newCount ? '（新 ' + newCount + '）' : '') + '<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
+    '<div class="launch-alert-body">' + sorted.map((r) => '<div class="la-row' + (launchAlertNew.has(r.code) ? ' la-new' : '') + '"><span class="launch-alert-time">' + launchAlertClock(r.alertAt) + '</span> ' + r.code + ' ' + r.name + (r.groupName ? '（' + r.groupName + '）' : '') +
+      (launchAlertNew.has(r.code) ? '<span class="la-tag new">新</span>' : '') +
+      (r.launchTimes > 1 ? '<span class="la-tag times">×' + r.launchTimes + '</span>' : '') +
+      (r.live === false ? '<span class="la-tag fallen" title="現在已經跌回箱頂下">曾發動</span>' : '') + '</div>').join('') + '</div>';
 }
 // 這一檔今天最近一次發動的後端紀錄時間（毫秒）；同一檔回落再發動會有好幾筆，提醒對應的是最近這一次。
 function launchRecordedMs(code){
@@ -11128,16 +11141,27 @@ window.addEventListener('resize', () => {
   const pos = clampLaunchAlertPos(el, el.offsetLeft, el.offsetTop);
   el.style.left = pos.left + 'px'; el.style.top = pos.top + 'px';
 });
-function showLaunchAlert(rows){
+let launchAlertNew = new Set();   // 這次跳出來（還沒按掉）新發動的代號，卡片裡標「新」
+// fresh＝剛發動的；all＝今天開盤以來發動過的全部（一檔一列，含已經跌回箱頂下的）
+function showLaunchAlert(fresh, all){
   const now = Date.now();
-  launchAlertRows = launchAlertRows.concat(rows.map((r) => {
+  fresh.forEach((r) => launchAlertNew.add(r.code));
+  const prev = new Map(launchAlertRows.map((r) => [r.code, r]));
+  const counts = {};
+  (brewHistoryDay(brewSessionDate()).launch || []).forEach((x) => { counts[x.code] = (counts[x.code] || 0) + 1; });
+  launchAlertRows = (all && all.length ? all : fresh).map((r) => {
     const ms = launchRecordedMs(r.code) || Date.parse(r.recordedAt) || 0;
-    return Object.assign({}, r, { alertAt: ms || now, alertExact: !!ms });
-  }));
+    const old = prev.get(r.code);
+    return Object.assign({}, r, {
+      alertAt: ms || (old && old.alertAt) || now, alertExact: !!ms || !!(old && old.alertExact),
+      launchTimes: counts[r.code] || 1,
+    });
+  });
   renderLaunchAlertBox();
 }
 function dismissLaunchAlert(){
   launchAlertRows = [];
+  launchAlertNew = new Set();
   renderLaunchAlertBox();
 }
 function launchNotificationBody(r){
@@ -11159,14 +11183,16 @@ function checkLaunchNotifications(){
   // 記錄 brewHistoryDay），造成「列表裡有、提醒卻從來沒跳過」的不一致。改成也跟永久紀錄比對：現在還活著
   // 的用即時資料（比較新鮮，有完整的分數/量比等欄位可以給通知內文用），已經回落的用永久紀錄湊一筆陽春的。
   const liveByCode = new Map(m.launchBlocks.flatMap((b) => b.rows).map((r) => [r.code, r]));
+  const quoted = brewQuotedCodes();
   const recordedByCode = new Map();
   (brewHistoryDay(brewSessionDate()).launch || []).forEach((r) => { if (!recordedByCode.has(r.code)) recordedByCode.set(r.code, r); });
   const toAlertRow = (code) => {
     const live = liveByCode.get(code);
-    if (live) return live;
+    if (live) return Object.assign({}, live, { live: true });
     const rec = recordedByCode.get(code);
     return { code: rec.code, name: rec.name, groupName: rec.group, price: rec.price, pct: rec.changePct, score: rec.score,
-      projTurnoverPct: rec.projTurnoverPct, volRatio: rec.volRatio, recordedAt: rec.recordedAt, live: false,
+      projTurnoverPct: rec.projTurnoverPct, volRatio: rec.volRatio, recordedAt: rec.recordedAt,
+      live: quoted.has(rec.code) ? false : null,   // 抓不到報價的判斷不了有沒有跌回去，不標「曾發動」
       info: { boxHigh: rec.boxHigh, brewing: !!rec.brewing } };
   };
   // 同一檔股票可能同時屬於好幾個官方族群，攤平後會重複；一檔股票只通知一次，不要因為它在兩個族群裡就跳兩次。
@@ -11183,7 +11209,7 @@ function checkLaunchNotifications(){
   saveLaunchNotified();
   if (!alertsEnabled) return fresh;
   launchBeep();
-  showLaunchAlert(fresh);
+  showLaunchAlert(fresh, rows);   // 卡片列出今天全部發動過的（新的標「新」）
   if ('Notification' in window && Notification.permission === 'granted'){
     fresh.forEach((r) => {
       // requireInteraction：使用者 2026-09-29 要求跳出來的通知要停留住，按掉才消失，不要自己不見
@@ -11766,11 +11792,20 @@ function carryMissingQuotes(data){
   data.groups.forEach((g) => {
     let touched = false;
     (g.stocks || []).forEach((st) => {
+      const prev = lastGoodQuotes.get(st.code);
       if (Number(st.price) > 0){
+        // 2026-10-13 使用者：廣寰科漲停鎖死卻顯示開盤價 +6.39%——報價中心偶爾拿不到成交價也拿不到委買委賣，只能退回開盤價。
+        // 成交量沒變＝這段時間沒有新成交，鎖漲停／跌停的價格不可能變：沿用原本的漲停（跌停）價。
+        const sameVolume = prev && st.volume !== null && st.volume !== undefined && Number(st.volume) === Number(prev.volume);
+        if (sameVolume && ((prev.limitUp && !st.limitUp) || (prev.limitDown && !st.limitDown))){
+          Object.assign(st, { price: prev.price, changePercent: prev.changePercent, limitUp: prev.limitUp, limitDown: prev.limitDown });
+          prev.at = now;   // 量一直沒變就一直沿用（鎖死常常好幾十分鐘沒成交）
+          touched = true;
+          return;
+        }
         lastGoodQuotes.set(st.code, { price: st.price, changePercent: st.changePercent, limitUp: st.limitUp, limitDown: st.limitDown, volume: st.volume, at: now });
         return;
       }
-      const prev = lastGoodQuotes.get(st.code);
       if (!prev || now - prev.at > QUOTE_CARRY_MS) return;
       Object.assign(st, { price: prev.price, changePercent: prev.changePercent, limitUp: prev.limitUp, limitDown: prev.limitDown, volume: prev.volume, stale: true });
       carried += 1;
