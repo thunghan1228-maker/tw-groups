@@ -11650,6 +11650,14 @@ function findStockByQuery(query){
 
 let currentTab = 'strong'; // 'strong' | 'weak'
 let lastData = null;
+// 2026-10-13 使用者：弱勢族群 ≥ 28（55 個的一半以上）就自動切到「弱勢」、強勢族群過半就切回「強勢」，不用一直自己點。
+// 只在「過半的是哪一邊」改變時（或剛打開頁面）切一次；中間自己點了另一邊，就照自己點的，等到過半那邊換了才再自動切。
+let homeMajority = null;
+function setHomeTab(tab){
+  currentTab = tab;
+  document.getElementById('tabStrong').classList.toggle('active', tab === 'strong');
+  document.getElementById('tabWeak').classList.toggle('active', tab === 'weak');
+}
 
 function render(){
   const app = document.getElementById('app');
@@ -11659,6 +11667,12 @@ function render(){
   const total = groups.length;
   const strongCount = groups.filter(g => g.avgChange > 0).length;
   const weakCount = total - strongCount;
+  const half = Math.ceil(total / 2);
+  const majority = weakCount >= half ? 'weak' : strongCount >= half ? 'strong' : null;
+  if (majority && majority !== homeMajority){
+    homeMajority = majority;
+    if (currentTab !== majority) setHomeTab(majority);
+  }
 
   const rankedDesc = groups.slice().sort((a,b) => b.avgChange - a.avgChange); // 強→弱
   const rankedAsc = groups.slice().sort((a,b) => a.avgChange - b.avgChange);  // 弱→強
@@ -11838,18 +11852,8 @@ async function refresh(){
   if (openGroupName && !document.getElementById('groupModal').hidden) openGroupDetail(openGroupName);
 }
 
-document.getElementById('tabStrong').addEventListener('click', () => {
-  currentTab = 'strong';
-  document.getElementById('tabStrong').classList.add('active');
-  document.getElementById('tabWeak').classList.remove('active');
-  render();
-});
-document.getElementById('tabWeak').addEventListener('click', () => {
-  currentTab = 'weak';
-  document.getElementById('tabWeak').classList.add('active');
-  document.getElementById('tabStrong').classList.remove('active');
-  render();
-});
+document.getElementById('tabStrong').addEventListener('click', () => { setHomeTab('strong'); render(); });
+document.getElementById('tabWeak').addEventListener('click', () => { setHomeTab('weak'); render(); });
 
 document.getElementById('app').addEventListener('click', (e) => {
   const row = e.target.closest('.stock-row[data-code]');
