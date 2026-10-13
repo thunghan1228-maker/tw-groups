@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 09:33:56";
+const BUILD_STAMP = "2026-10-13 09:46:21";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6247,9 +6247,25 @@ function brewHfApply(part, rows, date){
     const h = map && map.get(r.code);
     return h ? Object.assign({}, r, { strengthPct: h.strengthPct, netAmount: h.netAmount, holderLabel: h.holderLabel }) : r;
   };
-  if (!brewHf[part]) return { rows: map ? rows.map(withHolder) : rows, loading: false };
-  if (!map) return { rows: [], loading: true };
-  return { rows: rows.map(withHolder).filter(brewHfOk), loading: false };
+  if (!brewHf[part]) return { rows: map ? rows.map(withHolder) : rows, others: [], loading: false };
+  if (!map) return { rows: [], others: [], loading: true };
+  const all = rows.map(withHolder);
+  return { rows: all.filter(brewHfOk), others: all.filter((r) => !brewHfOk(r)), loading: false };
+}
+// 2026-10-13 使用者：發動 10 檔只秀 2 檔、醞釀 58 檔也只秀幾檔——開「盤中大戶力≥10%」時，沒過的不要消失，
+// 下面另列一段並寫原因（大戶力不到 10%／沒有大戶力資料）。tableHtml＝那些股票的表格（表格裡有盤中大戶力欄）。
+function brewHfOthersHtml(part, others, tableHtml){
+  if (!others.length) return '';
+  const uniq = [...new Map(others.map((r) => [r.code, r])).values()];
+  const hasPct = (r) => r.strengthPct !== null && r.strengthPct !== undefined;
+  const low = uniq.filter(hasPct), none = uniq.filter((r) => !hasPct(r));
+  const pctText = (r) => (r.strengthPct > 0 ? '+' : '') + Number(r.strengthPct).toFixed(1) + '%';
+  const listed = uniq.length <= 12;   // 檔數少就把名字寫出來，多的只寫檔數（每檔數字看表格的盤中大戶力欄）
+  const reason = (low.length ? '大戶力不到 ' + BREW_HF_MIN + '%：' + (listed ? low.map((r) => r.name + ' ' + pctText(r)).join('、') : low.length + ' 檔') + '。' : '') +
+    (none.length ? '還沒有大戶力數字（那天到現在還沒有大單紀錄，或不在主力追蹤範圍）：' + (listed ? none.map((r) => r.name).join('、') : none.length + ' 檔') + '。' : '') +
+    (listed ? '' : '每檔的數字看表格「盤中大戶力」欄。');
+  return '<div class="bl-section bl-fallen">其他' + (part === 'launch' ? '發動' : '醞釀') + '中・' + uniq.length + ' 檔（盤中大戶力沒到 ' + BREW_HF_MIN + '%，按上面「盤中大戶力≥' + BREW_HF_MIN + '%」關掉就全部合在一起）</div>' +
+    '<div class="race-note">' + reason + '</div>' + tableHtml;
 }
 function brewDayBarHtml(part){
   const past = brewPastDates();
@@ -6375,17 +6391,20 @@ function brewOverlapHtml(mode, part){
   const pick = (kind) => {
     const prev = new Map(byStock(kind, earlier.rows).map((r) => [r.code, r]));
     const both = byStock(kind, later.rows).filter((r) => prev.has(r.code));
-    return { rows: kind === part ? brewHfApply(part, both, later.date).rows : both, prev };   // 大戶力篩選看後面那天
+    const f = kind === part ? brewHfApply(part, both, later.date) : { rows: both, others: [] };   // 大戶力篩選看後面那天
+    return { rows: f.rows, others: f.others, prev };
   };
   const launch = pick('launch'), brew = pick('brew');
   const laterName = later.name, earlierName = earlier.name;
   return '<div class="race-sub">' + later.label + ' ∩ ' + earlier.label + '：兩天都出現的股票。表格數字是' + laterName + '的，「' + earlier.label + '」那欄是前一天的（發動：時間、發動價、漲幅；醞釀：均線分數、收盤）。' +
     '發動＝兩天都符合發動、醞釀＝兩天都在醞釀名單。</div>' +
     (part === 'launch'
-      ? '<div class="bl-section bl-launch">發動（突破）' + laterName + '、' + earlierName + '都有・' + launch.rows.length + ' 檔</div>' +
-        (launch.rows.length ? brewPastTableHtml('launch', launch.rows, { prevLabel: earlier.label, prev: launch.prev }) : '<div class="race-note">沒有兩天都發動的股票</div>')
-      : '<div class="bl-section bl-brew">醞釀（整理）' + laterName + '、' + earlierName + '都有・' + brew.rows.length + ' 檔</div>' +
-        (brew.rows.length ? brewPastTableHtml('brew', brew.rows, { prevLabel: earlier.label, prev: brew.prev }) : '<div class="race-note">沒有兩天都醞釀的股票</div>'));
+      ? '<div class="bl-section bl-launch">發動（突破）' + laterName + '、' + earlierName + '都有・' + (launch.rows.length + launch.others.length) + ' 檔' + (brewHf.launch ? '・盤中大戶力≥' + BREW_HF_MIN + '% ' + launch.rows.length + ' 檔' : '') + '</div>' +
+        (launch.rows.length ? brewPastTableHtml('launch', launch.rows, { prevLabel: earlier.label, prev: launch.prev }) : '<div class="race-note">沒有兩天都發動的股票</div>') +
+        brewHfOthersHtml('launch', launch.others, launch.others.length ? brewPastTableHtml('launch', launch.others, { prevLabel: earlier.label, prev: launch.prev }) : '')
+      : '<div class="bl-section bl-brew">醞釀（整理）' + laterName + '、' + earlierName + '都有・' + (brew.rows.length + brew.others.length) + ' 檔' + (brewHf.brew ? '・盤中大戶力≥' + BREW_HF_MIN + '% ' + brew.rows.length + ' 檔' : '') + '</div>' +
+        (brew.rows.length ? brewPastTableHtml('brew', brew.rows, { prevLabel: earlier.label, prev: brew.prev, holder: true }) : '<div class="race-note">沒有兩天都醞釀的股票</div>') +
+        brewHfOthersHtml('brew', brew.others, brew.others.length ? brewPastTableHtml('brew', brew.others, { prevLabel: earlier.label, prev: brew.prev, holder: true }) : ''));
 }
 // 往日發動分兩段：發動（收盤還站在箱頂上）、曾發動（盤中發動過、收盤跌回箱頂下）；收盤價還沒進來的另列一段
 function brewPastLaunchSplitHtml(launchRows, date){
@@ -6416,14 +6435,16 @@ function brewPastDayHtml(part, dateOverride){
   const brewRows = part === 'launch' ? day.brew : hf.rows;
   const hfNote = brewHf[part]
     ? '<div class="race-note">盤中大戶力≥' + BREW_HF_MIN + '%：用 ' + mmdd + ' 收盤時的盤中大戶力篩，' +
-      (hf.loading ? '讀取 ' + mmdd + ' 的大戶力中…' : '共 ' + (part === 'launch' ? allLaunch.length : day.brew.length) + ' 檔裡有 ' + hf.rows.length + ' 檔') + '（再按一次按鈕全部顯示）。</div>'
+      (hf.loading ? '讀取 ' + mmdd + ' 的大戶力中…' : '共 ' + (part === 'launch' ? allLaunch.length : day.brew.length) + ' 檔裡有 ' + hf.rows.length + ' 檔') + '，沒過的列在下面（再按一次按鈕全部合在一起）。</div>'
     : '';
   return '<div class="race-sub">' + mmdd + ' 的紀錄（後端每日保存）：發動＝那天盤中第一次符合發動條件的時間與價格（一檔一列，×N＝那天回落又重新發動、總共發動 N 次）；醞釀＝那天盤前算出來的醞釀名單。' +
     (eod ? '發動時間寫「收盤」的＝那天沒有盤中紀錄（保存功能上線前，或那天程式沒在跑），用收盤價回推：收盤過箱頂、收盤均線分數>10、全天周轉率≥5% 或量≥5 日均量 1.5 倍；盤中曾發動又回落的補不回來。' : '') + '</div>' + hfNote +
     (part === 'launch'
-      ? (launchRows.length ? brewPastLaunchSplitHtml(launchRows, date) : '<div class="bl-section bl-launch">發動（突破）・0 檔</div><div class="race-note">' + (brewHf.launch && allLaunch.length ? (hf.loading ? '讀取中…' : '那天發動的股票裡沒有盤中大戶力≥' + BREW_HF_MIN + '% 的') : '那天沒有股票發動') + '</div>')
+      ? (launchRows.length ? brewPastLaunchSplitHtml(launchRows, date) : '<div class="bl-section bl-launch">發動（突破）・0 檔</div><div class="race-note">' + (brewHf.launch && allLaunch.length ? (hf.loading ? '讀取中…' : '那天發動的股票裡沒有盤中大戶力≥' + BREW_HF_MIN + '% 的（其他的列在下面）') : '那天沒有股票發動') + '</div>') +
+        brewHfOthersHtml('launch', hf.others, hf.others.length ? brewPastTableHtml('launch', hf.others) : '')
       : '<div class="bl-section bl-brew">醞釀（整理）・' + day.brew.length + ' 檔' + (brewHf.brew ? '・盤中大戶力≥' + BREW_HF_MIN + '% ' + brewRows.length + ' 檔' : '') + '</div>' +
-        (brewRows.length ? brewPastTableHtml('brew', brewRows, { holder: true }) : '<div class="race-note">' + (brewHf.brew && day.brew.length ? (hf.loading ? '讀取中…' : '那天醞釀的股票裡沒有盤中大戶力≥' + BREW_HF_MIN + '% 的') : '那天沒有醞釀名單紀錄') + '</div>'));
+        (brewRows.length ? brewPastTableHtml('brew', brewRows, { holder: true }) : '<div class="race-note">' + (brewHf.brew && day.brew.length ? (hf.loading ? '讀取中…' : '那天醞釀的股票裡沒有盤中大戶力≥' + BREW_HF_MIN + '% 的（其他的列在下面）') : '那天沒有醞釀名單紀錄') + '</div>') +
+        brewHfOthersHtml('brew', hf.others, hf.others.length ? brewPastTableHtml('brew', hf.others, { holder: true }) : ''));
 }
 function brewDismissedKey(){ return 'brewDismissed:' + (brewSessionDate() || ''); }
 function brewDismissedCodes(){
@@ -6469,7 +6490,7 @@ function brewLaunchHtml(part){
   if (!brewLaunchData){
     return '<div class="signal-empty"><div class="se-title">' + (part === 'launch' ? '發動' : '醞釀') + '資料讀取中…</div><div class="se-sub">箱子、均線是每天收盤後用日K算好的，再加上即時價量判斷；讀不到的話稍後再試。</div></div>';
   }
-  const hfPastNote = brewHf[part] && typeof brewDayOffset === 'string' ? '<div class="race-note">盤中大戶力≥' + BREW_HF_MIN + '%：照後面那天收盤時的盤中大戶力篩（再按一次按鈕全部顯示）。</div>' : '';
+  const hfPastNote = brewHf[part] && typeof brewDayOffset === 'string' ? '<div class="race-note">盤中大戶力≥' + BREW_HF_MIN + '%：照後面那天收盤時的盤中大戶力篩，沒過的列在下面（再按一次按鈕全部合在一起）。</div>' : '';
   if (typeof brewDayOffset === 'string') return brewDayBarHtml(part) + hfPastNote + brewOverlapHtml(brewDayOffset, part);
   if (brewDayOffset > 0) return brewDayBarHtml(part) + brewPastDayHtml(part);
   const held = part === 'launch' ? brewHeldLaunchDate() : null;
@@ -6498,11 +6519,15 @@ function brewLaunchHtml(part){
   const hf = !!brewHf[part], hfText = '・盤中大戶力≥' + BREW_HF_MIN + '% ';
   const launchRows = m.launchBlocks.flatMap((b) => b.rows).filter((r) => !hf || brewHfOk(r));
   const brewBlocks = hf ? m.brewBlocks.map((b) => Object.assign({}, b, { rows: b.rows.filter(brewHfOk) })).filter((b) => b.rows.length) : m.brewBlocks;
-  const brewShown = brewBlocks.reduce((n, b) => n + b.rows.length, 0);
-  const launch = '<div class="bl-section bl-launch">發動（突破）・' + m.launchCount + ' 檔' + (hf ? hfText + launchRows.length + ' 檔' : '') + '</div>' +
-    (launchRows.length ? brewLaunchFlatTableHtml(launchRows) : '<div class="race-note">' + (hf && m.launchBlocks.length ? '發動的股票裡目前沒有盤中大戶力≥' + BREW_HF_MIN + '% 的（再按一次按鈕全部顯示）' : '目前沒有股票發動（過箱頂、均線分數、周轉三個條件要同時到）') + '</div>');
+  const brewShown = new Set(brewBlocks.flatMap((b) => b.rows.map((r) => r.code))).size;   // 同一檔可能在好幾個族群各列一次，只算一次
+  const launchOthers = hf ? m.launchBlocks.flatMap((b) => b.rows).filter((r) => !brewHfOk(r)) : [];
+  const brewOtherBlocks = hf ? m.brewBlocks.map((b) => Object.assign({}, b, { rows: b.rows.filter((r) => !brewHfOk(r)) })).filter((b) => b.rows.length) : [];
+  const launch = '<div class="bl-section bl-launch">發動（突破）・' + m.launchCount + ' 檔' + (hf ? hfText + new Set(launchRows.map((r) => r.code)).size + ' 檔' : '') + '</div>' +
+    (launchRows.length ? brewLaunchFlatTableHtml(launchRows) : '<div class="race-note">' + (hf && m.launchBlocks.length ? '發動的股票裡目前沒有盤中大戶力≥' + BREW_HF_MIN + '% 的（其他的列在下面）' : '目前沒有股票發動（過箱頂、均線分數、周轉三個條件要同時到）') + '</div>') +
+    brewHfOthersHtml('launch', launchOthers, launchOthers.length ? brewLaunchFlatTableHtml(launchOthers) : '');
   const brew = '<div class="bl-section bl-brew">醞釀（整理）・' + m.brewCount + ' 檔' + (hf ? hfText + brewShown + ' 檔' : '') + '</div>' +
-    (brewBlocks.length ? brewBlocks.map((b) => brewLaunchBlockHtml(b, 'brew')).join('') : '<div class="race-note">' + (hf && m.brewBlocks.length ? '醞釀的股票裡目前沒有盤中大戶力≥' + BREW_HF_MIN + '% 的（再按一次按鈕全部顯示）' : '目前沒有股票符合醞釀條件') + '</div>');
+    (brewBlocks.length ? brewBlocks.map((b) => brewLaunchBlockHtml(b, 'brew')).join('') : '<div class="race-note">' + (hf && m.brewBlocks.length ? '醞釀的股票裡目前沒有盤中大戶力≥' + BREW_HF_MIN + '% 的（其他的列在下面）' : '目前沒有股票符合醞釀條件') + '</div>') +
+    brewHfOthersHtml('brew', brewOtherBlocks.flatMap((b) => b.rows), brewOtherBlocks.map((b) => brewLaunchBlockHtml(b, 'brew')).join(''));
   return brewDayBarHtml(part) + note + (part === 'launch' ? launch + brewFallenTodayHtml(m) : brew);
 }
 
@@ -10754,7 +10779,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 09:33:56';
+const BUILD_STAMP = '2026-10-13 09:46:21';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
