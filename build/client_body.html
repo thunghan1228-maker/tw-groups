@@ -390,6 +390,13 @@
   /* 盤中333：族群後面加均線分數欄（2026-09-24 使用者），名稱欄改固定寬（太長「…」），族群標籤跟均線分數每一列才會對齊，
      不會像「昇陽半導體」這種長名字把族群標籤往右推；多一欄所以整列最寬放到 1000px，電腦版才不會被擠到換行。 */
   .r333-row,.r333-labels{max-width:1070px !important;}   /* 2026-10-13 前面多一欄「出現」，放寬 70px，電腦版才不會換行 */
+  /* 2026-10-13 使用者（iPad 截圖）：盤中333 欄位標題跟下面數字沒對齊——數字那一群（大戶力／漲跌幅／漲跌／成交價／名次）放不下一行時
+     要不要換到第二行，原本交給瀏覽器自己判斷，iPad Safari 標題列沒換、資料列有換，就錯開了。改成看這個區塊有多寬：
+     不夠一行放完（< 1040px）就標題、資料列一律換到自己的第二行靠右，兩邊一定一樣；寬的電腦版照舊一行。 */
+  #signalModalInner .race-block{container-type:inline-size;}
+  @container (max-width: 1040px){
+    .race-row.r333-row > .race-line2,.race-col-labels.r333-labels > .race-line2{flex:0 0 100%;justify-content:flex-end;margin-left:0;}
+  }
   .race-row.r333-row .race-name,.race-col-labels.r333-labels .race-name{flex:0 0 5.5em;max-width:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   /* 首頁的 .stock-row 是 justify-content:space-between：盤中333 列（也掛 stock-row）換行時，第一行的代號／名稱／族群／均線分數
      會被拉開散到整行，跟欄位標題對不齊；這裡改回靠左排。 */
@@ -431,7 +438,7 @@
   .race-row .race-holder .sig-label .hf-amt{font-size:.82em;font-weight:600;opacity:.92;}
   .race-row .race-holder-none{color:var(--muted);}
   .race-col-labels .race-holder{flex:0 0 6.5em;}
-  .race-col-labels .race-badge-slot{flex:0 0 6.5em;white-space:nowrap;overflow:visible;}
+  .race-col-labels .race-badge-slot{flex:0 0 6.5em;white-space:nowrap;overflow:visible;font-size:14px;}   /* 寬度用 em 算：字級要跟資料列的 .race-badge（14px）一樣，兩邊才一樣寬 */
   /* 2026-09-30 使用者：刀劍空名單多一欄「圖」，明顯可以按（雖然點整列本身就會開K線圖，這裡是額外多一個明顯的按鈕）。 */
   .race-row .race-chart-slot,.race-col-labels .race-chart-slot{flex:0 0 3.8em;text-align:center;}
   .race-row .race-chart-btn{display:inline-block;background:var(--accent);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;white-space:nowrap;}

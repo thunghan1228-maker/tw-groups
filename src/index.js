@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 11:18:03";
+const BUILD_STAMP = "2026-10-13 11:33:49";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -455,6 +455,13 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 盤中333：族群後面加均線分數欄（2026-09-24 使用者），名稱欄改固定寬（太長「…」），族群標籤跟均線分數每一列才會對齊，
      不會像「昇陽半導體」這種長名字把族群標籤往右推；多一欄所以整列最寬放到 1000px，電腦版才不會被擠到換行。 */
   .r333-row,.r333-labels{max-width:1070px !important;}   /* 2026-10-13 前面多一欄「出現」，放寬 70px，電腦版才不會換行 */
+  /* 2026-10-13 使用者（iPad 截圖）：盤中333 欄位標題跟下面數字沒對齊——數字那一群（大戶力／漲跌幅／漲跌／成交價／名次）放不下一行時
+     要不要換到第二行，原本交給瀏覽器自己判斷，iPad Safari 標題列沒換、資料列有換，就錯開了。改成看這個區塊有多寬：
+     不夠一行放完（< 1040px）就標題、資料列一律換到自己的第二行靠右，兩邊一定一樣；寬的電腦版照舊一行。 */
+  #signalModalInner .race-block{container-type:inline-size;}
+  @container (max-width: 1040px){
+    .race-row.r333-row > .race-line2,.race-col-labels.r333-labels > .race-line2{flex:0 0 100%;justify-content:flex-end;margin-left:0;}
+  }
   .race-row.r333-row .race-name,.race-col-labels.r333-labels .race-name{flex:0 0 5.5em;max-width:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   /* 首頁的 .stock-row 是 justify-content:space-between：盤中333 列（也掛 stock-row）換行時，第一行的代號／名稱／族群／均線分數
      會被拉開散到整行，跟欄位標題對不齊；這裡改回靠左排。 */
@@ -496,7 +503,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row .race-holder .sig-label .hf-amt{font-size:.82em;font-weight:600;opacity:.92;}
   .race-row .race-holder-none{color:var(--muted);}
   .race-col-labels .race-holder{flex:0 0 6.5em;}
-  .race-col-labels .race-badge-slot{flex:0 0 6.5em;white-space:nowrap;overflow:visible;}
+  .race-col-labels .race-badge-slot{flex:0 0 6.5em;white-space:nowrap;overflow:visible;font-size:14px;}   /* 寬度用 em 算：字級要跟資料列的 .race-badge（14px）一樣，兩邊才一樣寬 */
   /* 2026-09-30 使用者：刀劍空名單多一欄「圖」，明顯可以按（雖然點整列本身就會開K線圖，這裡是額外多一個明顯的按鈕）。 */
   .race-row .race-chart-slot,.race-col-labels .race-chart-slot{flex:0 0 3.8em;text-align:center;}
   .race-row .race-chart-btn{display:inline-block;background:var(--accent);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;white-space:nowrap;}
@@ -11014,7 +11021,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 11:18:03';
+const BUILD_STAMP = '2026-10-13 11:33:49';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
