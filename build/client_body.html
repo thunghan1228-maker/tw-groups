@@ -11032,10 +11032,12 @@ function renderSignalCenter(){
     const view = holderView();
     const side = active === 'bigHolderForceBull' ? 'bull' : 'bear';
     const timeline = view.date ? holderTimelineFor(view.date) : null;   // 2026-10-13：時間＝第一次進名單，掉出去的另列
-    const rows = withHolderFirstTs(bigHolderRowsFrom(view.ranking, side), timeline, side);
+    // 2026-10-13 使用者：比較晚進名單的放最上面、早的放下面（同一時間照原本的累計大單淨量）
+    const rows = withHolderFirstTs(bigHolderRowsFrom(view.ranking, side), timeline, side)
+      .map((r, i) => [r, i]).sort((a, b) => ((b[0].firstTs || 0) - (a[0].firstTs || 0)) || (a[1] - b[1])).map(([r]) => r);
     replaceSignalHtml(body, active, holderDayBarHtml() + holderPastNoteHtml(view) +
       (view.loading || view.unavailable ? holderEmptyHtml(view, '', '')
-        : (timeline ? '<div class="race-note">時間＝這檔第一次進名單（累計大單淨量 ≥ 500 張）的時間；排序照累計大單淨量。早上進過、後來掉出去的列在最下面「曾進名單」。</div>' : '') +
+        : (timeline ? '<div class="race-note">時間＝這檔第一次進名單（累計大單淨量 ≥ 500 張）的時間；最新進名單的在最上面、越早的越下面（同一時間照累計大單淨量）。早上進過、後來掉出去的列在最下面「曾進名單」。</div>' : '') +
           rankingRowsHtml(rows, view) + holderFadedHtml(timeline, side, rows, view)));
   } else if (active === 'race333'){
     refreshGroupDailyChanges(false);
