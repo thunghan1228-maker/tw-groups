@@ -839,6 +839,16 @@
   .sw-tile{flex:1 1 120px;background:var(--panel);border:1px solid var(--line);border-top:3px solid #e6675f;border-radius:10px;padding:10px 8px;text-align:center;}
   .sw-tile b{display:block;font-size:26px;line-height:1.1;color:#e6675f;font-variant-numeric:tabular-nums;}
   .sw-tile span{font-size:12px;color:var(--muted);}
+  .sw-tiles2{margin-top:-4px;}
+  .sw-tiles:not(.sw-tiles2) .sw-tile{flex-basis:96px;}
+  .sw-open-revenue{color:#e6675f;font-weight:700;}
+  .sw-tile.sm{flex-basis:90px;padding:6px;border-top-width:2px;}
+  .sw-tile.sm b{font-size:18px;}
+  .sw-readhead{font-size:15px;font-weight:800;color:#e6675f;margin:6px 0 0;}
+  .sw-feat{display:inline-block;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:700;margin-left:6px;background:#e6675f;color:#fff;}
+  .sw-feat.brew{background:#7c3aed;}
+  .sw-gcard.featured{box-shadow:0 0 0 1px #e6675f inset;}
+  .sw-gcard.featured.brew{box-shadow:0 0 0 1px #7c3aed inset;}
   .sw-summary{list-style:decimal;padding-left:24px;margin:8px 0 12px;font-size:14px;line-height:1.7;}
   .sw-summary li{margin:4px 0;}
   .sw-quote{border:1px solid var(--line);border-radius:10px;padding:8px 12px;text-align:center;color:#e6675f;font-weight:800;margin:10px 0;}
@@ -7842,7 +7852,9 @@ function swingDatePillsHtml(data){
 function swingBasisHtml(data){
   const b = data.basis || {};
   const inst = b.hasInst ? '法人資料已齊（5 日＝' + (b.instDates || []).slice().reverse().map(swMmdd).join('～') + '）' : '法人資料還沒進來，籌碼相關的判斷等資料齊了會自動更新';
-  return '<div class="sw-basis">資料基準 ' + swMmdd(data.date) + ' 收盤・隔天盤前讀・' + inst + '・主力 5 日＝' + ((b.mfDates || []).length ? (b.mfDates || []).slice().reverse().map(swMmdd).join('～') : '沒有資料') +
+  // 2026-10-13 使用者（照莊爸「10/14(三) 盤前讀・資料基準 10/13 收盤」）
+  const read = data.readDate ? '<div class="sw-readhead">' + swMmdd(data.readDate) + '（' + hlWd(data.readDate) + '）盤前讀・資料基準 ' + swMmdd(data.date) + '（' + hlWd(data.date) + '）收盤</div>' : '';
+  return read + '<div class="sw-basis">資料基準 ' + swMmdd(data.date) + ' 收盤・隔天盤前讀・' + inst + '・主力 5 日＝' + ((b.mfDates || []).length ? (b.mfDates || []).slice().reverse().map(swMmdd).join('～') : '沒有資料') +
     '・個股 ' + (b.stocks || 0) + ' 檔（日K滿 240 天可算均線分數的 ' + (b.withScore || 0) + ' 檔）・' + swingFundBasisText(b) + '・整理時間 ' + String(data.generatedAt || '').slice(11, 16) + '</div>';
 }
 function swingCardHtml(x, opts){
@@ -7875,7 +7887,11 @@ function swingRadarLineHtml(x){
 }
 function swingGroupCardHtml(g){
   const cold = g.aboveRatio < 0.5 && g.inst5 <= 0;
-  return '<div class="sw-gcard' + (cold ? ' cold' : '') + '"><div><span class="sw-gname">' + g.name + '</span><span class="sw-gbadge">收盤排名 ' + g.rank + '</span>' + (g.hot ? '<span class="sw-hot">熱門族</span>' : '') + '</div>' +
+  // 2026-10-13 使用者（照莊爸產業觀察）：精選族群＝資金主軸 3 個＋低檔醞釀 2 個，排在前面；週籌碼＝籌碼雷達熱門族（族裡籌碼% 最高 5 檔平均）
+  const brew = g.featured && g.aboveRatio < 0.5;
+  const feat = g.featured ? '<span class="sw-feat' + (brew ? ' brew' : '') + '">' + (brew ? '低檔醞釀' : '資金主軸') + '</span>' : '';
+  const chip = swHas(g.chipWeek) ? '<div class="sw-gline">週籌碼 <b class="' + dirClass(g.chipWeek) + '">' + swPct(g.chipWeek, 1) + '</b><span class="muted">（籌碼雷達熱門族）</span></div>' : '';
+  return '<div class="sw-gcard' + (cold ? ' cold' : '') + (g.featured ? ' featured' + (brew ? ' brew' : '') : '') + '"><div><span class="sw-gname">' + g.name + '</span>' + feat + '<span class="sw-gbadge">收盤排名 ' + g.rank + '</span>' + (g.hot ? '<span class="sw-hot">熱門族</span>' : '') + '</div>' + chip +
     '<div class="sw-gline">站上月線 <b class="' + (g.aboveRatio >= 0.5 ? 'up' : 'down') + '">' + g.aboveMa20 + '/' + g.members + '</b>　法人 5 日 <b class="' + dirClass(g.inst5) + '">' + swLots(g.inst5) + '</b></div>' +
     '<div class="sw-gline">均線分數平均 <b>' + (g.avgScore === null || g.avgScore === undefined ? '—' : g.avgScore) + '</b>　今天真穿月線 <b>' + g.crossed + '</b> 檔　當天均漲 <b class="' + dirClass(g.avgChange) + '">' + swPct(g.avgChange) + '</b></div>' +
     swingGroupFundHtml(g) +
@@ -8286,11 +8302,27 @@ function swingRevenueHtml(data, rules){
       '<div class="sw-name">' + (x.name || '') + chipsFlagPillsHtml(x.code) + '</div><div class="sw-group">' + (x.group || x.market || '—') + '</div>' + extra +
       '<div class="sw-line">均線 <b>' + x.score + '</b>・收 ' + x.close + '</div></div>';
   };
+  // 2026-10-13 使用者（照莊爸「9 月營收・10/13 公布 1 檔，年增 ≥30% 0 檔」）：先看上一個交易日之後新公布的那批
+  const fresh = swHas(r.newPublished) ? '<div class="bl-section bl-launch">' + mon + ' 月營收・' + (r.since ? swMmdd(r.since) + ' 之後到 ' : '') + swMmdd(r.asOf) + ' 公布 ' + r.newPublished + ' 檔，年增 ≥' + r.rule.yoy + '% ' + r.newYoyHigh + ' 檔' +
+      (r.newQualified ? '；均線分數、成交值也夠的 ' + r.newQualified + ' 檔' : '') + '</div>' +
+    ((r.newPicks || []).length ? '<div class="sw-cards">' + r.newPicks.map(revCard).join('') + '</div>'
+      : '<div class="race-note">' + (r.newPublished ? '這段期間新公布的沒有同時符合年增、均線分數、成交值三個條件的' : '這段期間沒有新公布的公司') + '・完整名單看 <a href="#" class="sw-open-revenue">營收成長榜</a></div>') : '';
   return '<div class="sw-rule">' + (rules.revenue ? rules.revenue + '。' : '') + '點一檔開K線圖。熱門族＝籌碼雷達族群排名前 5；防守價＝' + swMmdd(data.date) + ' 收盤的月線與最近三天最低價，下一個交易日適用。</div>' +
-    '<div class="bl-section bl-launch">營收面精選・' + mon + ' 月營收・截至 ' + swMmdd(r.asOf) + ' 公布 ' + r.published + ' 檔，年增 ≥' + r.rule.yoy + '% ' + r.yoyHigh + ' 檔；依年增挑，均線分數 ≥' + r.rule.score + '、成交值 ≥' + (r.rule.turnoverYi * 10000).toLocaleString('en-US') + ' 萬 共 ' + r.qualified + ' 檔' + (r.picks.length < r.qualified ? '，列前 ' + r.picks.length + ' 檔' : '') + '</div>' +
+    fresh +
+    '<div class="bl-section ' + (fresh ? 'bl-brew' : 'bl-launch') + '">' + (fresh ? '整月累計・' : '營收面精選・') + mon + ' 月營收・截至 ' + swMmdd(r.asOf) + ' 公布 ' + r.published + ' 檔，年增 ≥' + r.rule.yoy + '% ' + r.yoyHigh + ' 檔；依年增挑，均線分數 ≥' + r.rule.score + '、成交值 ≥' + (r.rule.turnoverYi * 10000).toLocaleString('en-US') + ' 萬 共 ' + r.qualified + ' 檔' + (r.picks.length < r.qualified ? '，列前 ' + r.picks.length + ' 檔' : '') + '</div>' +
     (r.picks.length ? (r.picks.some((x) => x.card) ? '<div class="sw-cards">' + r.picks.map(revCard).join('') + '</div>' : '<div class="sw-dlist">' + r.picks.map(row).join('') + '</div>')
       : '<div class="race-note">目前沒有同時符合三個條件的股票（每月 1～10 號陸續公布，越接近 10 號越多）</div>') +
     '<div class="sw-quote">營收是體質，均線是位置：營收爆發又站得穩的，才是波段的料</div>';
+}
+// 籌碼面的觀察名單（2026-10-13 使用者，照莊爸「嘉晶 出獄第 2 天，籌碼 +3.0%」）：出獄 5 個交易日內、籌碼% 是正的
+function swingChipsWatchHtml(data){
+  const list = data.chipsWatch;
+  if (!list) return '';
+  const row = (e) => '<div class="sw-drow" data-code="' + e.code + '" data-name="' + (e.name || '') + '" role="button" tabindex="0">' +
+    '<b class="sw-dcode">' + e.code + '</b><span class="sw-dname">' + (e.name || '') + chipsFlagPillsHtml(e.code) + '</span>' +
+    '<span class="sw-dextra">出獄第 ' + e.daysOut + ' 天・籌碼 <b class="' + dirClass(e.chip) + '">' + swPct(e.chip, 1) + '</b>' + (e.daysOut <= 3 ? '<span class="muted">・依規則觀察三日</span>' : '') + '</span></div>';
+  return '<div class="bl-section bl-brew">觀察名單・出獄 5 個交易日內、籌碼% 為正（' + list.length + '）</div>' +
+    (list.length ? '<div class="sw-dlist">' + list.map(row).join('') + '</div>' : '<div class="race-note">沒有剛出獄、籌碼又在進的股票</div>');
 }
 // 處置動態一列：明日起處置／明日出獄／處置中／觀察名單（出獄 ≤5 個交易日）
 function swingDispoReason(e){
@@ -8308,7 +8340,7 @@ function swingDispoRowHtml(e, kind){
   else if (kind === 'watch') extra = '出獄第 ' + e.daysOut + ' 天' + (e.releaseDay ? '（' + swMmdd(e.releaseDay) + ' 出獄）' : '') + '・處置曾 ' + period;
   else extra = '處置 ' + period + (e.releaseDay ? '・' + swMmdd(e.releaseDay) + ' 出獄' : '') + swingDispoReason(e);
   return '<div class="sw-drow" data-code="' + e.code + '" data-name="' + (e.name || '') + '" role="button" tabindex="0">' +
-    '<b class="sw-dcode">' + e.code + '</b><span class="sw-dname">' + (e.name || '') + chipsFlagPillsHtml(e.code) + '</span><span class="sw-dgroup">' + (e.group || '—') + '</span>' +
+    '<b class="sw-dcode">' + e.code + '</b><span class="sw-dname">' + (e.name || '') + chipsFlagPillsHtml(e.code) + '</span><span class="sw-dgroup">' + (e.group || e.market || '—') + '</span>' +
     '<span class="sw-dextra">' + extra + '</span></div>';
 }
 // ---- 黑龍回測（2026-09-28 使用者：照學員專區「創高黑龍・績效分析」做在下午報裡，參數可以在頁面上調）----
@@ -8533,15 +8565,18 @@ function swingSectionHtml(data){
   const sec = swingState.section, picks = data.picks || {}, counts = data.counts || {}, rules = data.rules || {};
   if (sec === 'summary'){
     const t = data.tiles || {};
+    // 2026-10-13 使用者：前三個照莊爸（今日真穿月線、明日入獄／出獄、問診判強勢），其他的放第二排小一點
+    const tile = (v, label, cls) => '<div class="sw-tile' + (cls ? ' ' + cls : '') + '"><b>' + v + '</b><span>' + label + '</span></div>';
     return '<div class="sw-tiles">' +
-      '<div class="sw-tile"><b>' + (t.crossedQualified || 0) + '</b><span>今日真穿月線(檔)</span></div>' +
-      '<div class="sw-tile"><b>' + (t.bodyJump || 0) + '</b><span>體質轉強(檔)</span></div>' +
-      '<div class="sw-tile"><b>' + (t.chips || 0) + '</b><span>籌碼面候選(檔)</span></div>' +
-      '<div class="sw-tile"><b>' + (t.disposition || 0) + '</b><span>處置中(檔)</span></div>' +
-      '<div class="sw-tile"><b>' + (t.upcoming || 0) + '</b><span>明日起處置(檔)</span></div>' +
-      '<div class="sw-tile"><b>' + (t.releasing || 0) + '</b><span>明日出獄(檔)</span></div>' +
-      (data.activeEtf ? '<div class="sw-tile"><b>' + (t.etfSyncBuy || 0) + '</b><span>主動式ETF同步加碼(檔)</span></div>' : '') +
-      (data.revenue ? '<div class="sw-tile"><b>' + (t.revenue || 0) + '</b><span>營收面精選(檔)</span></div>' : '') + '</div>' +
+      tile(t.crossedQualified || 0, '今日真穿月線(檔)') +
+      tile((t.upcoming || 0) + ' / ' + (t.releasing || 0), '明日入獄 / 出獄(檔)') +
+      tile(t.strong || 0, '問診判強勢(檔)') + '</div>' +
+      '<div class="sw-tiles sw-tiles2">' +
+      tile(t.bodyJump || 0, '體質轉強(檔)', 'sm') +
+      tile(t.chips || 0, '籌碼面候選(檔)', 'sm') +
+      tile((data.disposition && data.disposition.active ? data.disposition.active.length : t.disposition) || 0, '處置中(檔)', 'sm') +
+      (swHas(t.highRisk) ? tile(t.highRisk, '高機率處置(檔)', 'sm') : '') +
+      (data.revenue ? tile(swHas(data.revenue.newPublished) ? data.revenue.newPublished : (t.revenue || 0), swHas(data.revenue.newPublished) ? '營收新公布(檔)' : '營收面精選(檔)', 'sm') : '') + '</div>' +
       '<ol class="sw-summary">' + (data.summary || []).map((line) => '<li>' + line + '</li>').join('') + '</ol>' +
       '<div class="sw-quote">先看族群再看個股：族群沒翻，個股只能算單兵</div>';
   }
@@ -8550,19 +8585,29 @@ function swingSectionHtml(data){
     if (!d) return '<div class="race-note">這一份是處置動態接入前整理的，沒有處置資料</div>';
     const block = (title, cls, list, kind, empty) => '<div class="bl-section ' + cls + '">' + title + '（' + list.length + '）</div>' +
       (list.length ? '<div class="sw-dlist">' + list.map((e) => swingDispoRowHtml(e, kind)).join('') + '</div>' : '<div class="race-note">' + empty + '</div>');
-    return '<div class="sw-rule">' + (rules.disposition || '') + '。下一個交易日＝' + (d.nextTradingDay ? swMmdd(d.nextTradingDay) : '—') + '；只列族群名單內的股票，點一列開K線圖。</div>' +
+    const high = d.high || [];
+    const highRow = (e) => '<div class="sw-drow" data-code="' + e.code + '" data-name="' + (e.name || '') + '" role="button" tabindex="0">' +
+      '<b class="sw-dcode">' + e.code + '</b><span class="sw-dname">' + (e.name || '') + chipsFlagPillsHtml(e.code) + '</span><span class="sw-dgroup">' + (e.group || e.market || '—') + '</span>' +
+      '<span class="sw-dextra">' + (e.status || '') + ((e.lines || []).length ? '<span class="muted">・' + e.lines.join('；') + '</span>' : '') + '</span></div>';
+    return '<div class="sw-rule">' + (rules.disposition || '') + '。下一個交易日＝' + (d.nextTradingDay ? swMmdd(d.nextTradingDay) : '—') +
+      (d.source === 'jail' ? '；全市場，點一列開K線圖。</div>' : '；只列族群名單內的股票，點一列開K線圖。</div>') +
       block('明日起處置', 'bl-launch', d.upcoming || [], 'upcoming', '沒有下一個交易日起處置的股票') +
       block('明日出獄', 'bl-brew', d.releasing || [], 'releasing', '沒有下一個交易日出獄的股票') +
       block('處置中', 'bl-launch', d.active || [], 'active', '目前沒有處置中的股票') +
       block('觀察名單・出獄 5 個交易日內', 'bl-brew', d.watch || [], 'watch', '沒有剛出獄的股票') +
+      (d.high ? '<div class="bl-section bl-launch">高機率處置・明天再觸發就會被關（' + high.length + '）</div>' +
+        (high.length ? '<div class="sw-dlist">' + high.map(highRow).join('') + '</div>' : '<div class="race-note">沒有高機率被處置的嫌疑股（或監獄的資料還不是 ' + swMmdd(data.date) + ' 收盤那份）</div>') : '') +
       '<div class="sw-quote">出獄不等於能追：先看有沒有站回月線、法人有沒有回來</div>';
   }
   if (sec === 'etf') return swingEtfRadarHtml();
   if (sec === 'revenue') return swingRevenueHtml(data, rules);
   if (sec === 'groups'){
-    const groups = data.groups || [];
-    const shown = groups.slice(0, swingState.groupsLimit);
-    return '<div class="sw-rule">族群層數據・' + swMmdd(data.date) + ' 收盤：站上月線檔數＝收盤在 20 日線之上的檔數；法人 5 日＝三大法人最近 5 個交易日合計；收盤排名＝當天平均漲跌幅名次（前 10 名＝熱門族）。</div>' +
+    const all = data.groups || [];
+    const feat = all.filter((g) => g.featured).sort((a, b) => a.featuredOrder - b.featuredOrder);
+    const groups = feat.concat(all.filter((g) => !g.featured));
+    const shown = groups.slice(0, Math.max(swingState.groupsLimit, feat.length));
+    return '<div class="sw-rule">族群層數據・' + swMmdd(data.date) + ' 收盤：站上月線檔數＝收盤在 20 日線之上的檔數；法人 5 日＝三大法人最近 5 個交易日合計；收盤排名＝當天平均漲跌幅名次（前 10 名＝熱門族）。' +
+      (all.some((g) => g.featured) ? '前面標「資金主軸」的＝多數站上月線、法人 5 日買超的前 3 個；「低檔醞釀」＝籌碼雷達熱門族（週籌碼先進）但站上月線不到一半的前 2 個。' : '') + '</div>' +
       '<div class="sw-cards">' + shown.map(swingGroupCardHtml).join('') + '</div>' +
       (groups.length > shown.length ? '<div class="chips-more"><button class="chart-tab chips-btn" id="swingMoreGroups">再顯示 ' + Math.min(12, groups.length - shown.length) + ' 個族群（共 ' + groups.length + ' 個）</button></div>' : '') +
       '<div class="sw-quote">先看族群再看個股：族群沒翻，個股只能算單兵</div>';
@@ -8596,6 +8641,7 @@ function swingSectionHtml(data){
     (rules.fund ? '<div class="sw-rule">' + rules.fund + '。</div>' : '') +
     (skipped ? '<div class="sw-noteBox">略過：' + skipped + '</div>' : '') +
     (list.length ? '<div class="sw-cards">' + list.map((x) => swingCardHtml(x, { green: sec === 'tech' })).join('') + '</div>' : '<div class="race-note">那天沒有符合條件的股票</div>') +
+    (sec === 'chips' ? swingChipsWatchHtml(data) : '') +
     '<div class="sw-quote">' + quote + '</div>' +
     (sec === 'chips' ? swingLastWeekHtml(data) : '');
 }
@@ -8638,6 +8684,7 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
   const day = e.target.closest('.sw-date-btn');
   if (day){ swingState.date = day.dataset.date || ''; swingState.groupsLimit = 12; erState.asof = null; renderSwing(); return; }
   if (e.target.closest('#swingMoreGroups')){ swingState.groupsLimit += 12; renderSwing(); return; }
+  if (e.target.closest('.sw-open-revenue')){ e.preventDefault(); openRevenuePanel(); return; }
   if (swingState.section === 'etf' && erHandleClick(e)) return;
   const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code]');
   if (card){
