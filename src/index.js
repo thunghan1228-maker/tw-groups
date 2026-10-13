@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 21:03:27";
+const BUILD_STAMP = "2026-10-13 21:16:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1083,6 +1083,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .tut-panel-link{margin-left:10px;vertical-align:middle;background:#7c3aed;color:#fff;border:none;border-radius:999px;padding:3px 10px;font:800 12px/1.4 inherit;font-family:inherit;cursor:pointer;white-space:nowrap;}
   .gd-btns{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px;} .gd-btns .gd-go{margin-top:0;}
   .gd-go.gd-vid{background:#7c3aed;color:#fff;}
+  .gd-step .gd-go,.gd-card > .gd-go{margin-top:8px;display:inline-block;}
   .help-video-link{display:inline-block;margin-left:6px;font-size:12px;font-weight:800;color:#7c3aed;cursor:pointer;white-space:nowrap;}
   .gd-tag{display:inline-block;border:1px solid var(--up);color:var(--up);font-size:12px;font-weight:800;border-radius:4px;padding:2px 10px;margin-top:4px;letter-spacing:2px;}
   .gd-title{font-size:28px;font-weight:900;color:var(--up);margin:10px 0 6px;}
@@ -3094,6 +3095,16 @@ function updateChartInfoBar(bars, index){
   el.innerHTML = parts.join(' ');
 }
 
+// 2026-10-13 使用者：扣底（使用者自己的算法，跟一般往前推一根）：今天這根不算，往前數 N 根的那一根
+// （5MA＝含今天倒數第 6 根、20MA＝倒數第 21 根）。日線、5 分鐘看 5MA／20MA，1 分鐘看 5MA／25MA——就是各週期的前兩條均線；
+// 時間軸下方畫跟那條均線同色的向上三角形，均線標示那一列寫扣底值（那一根的收盤）。均線關掉就不畫。
+function chartDeductMarks(allBars){
+  const n = allBars ? allBars.length : 0;
+  return currentChart.maLines.slice(0, 2).filter((ma) => ma.on).map((ma) => {
+    const idx = n - 1 - ma.period;
+    return idx >= 0 ? { period: ma.period, color: ma.color, idx, close: allBars[idx].close } : null;
+  }).filter(Boolean);
+}
 function drawChart(){
   const canvas = document.getElementById('klineCanvas');
   const cssW = canvas.parentElement.clientWidth, cssH = canvas.parentElement.clientHeight;
@@ -3104,7 +3115,8 @@ function drawChart(){
   const { start: vStart, count: vCount } = visibleRange(allBars.length);
   const bars = allBars.slice(vStart, vStart + vCount);
   const cfg = TF_CONFIG[currentChart.tf];
-  const padTop = 10, padBottom = 22;
+  const deductMarks = chartDeductMarks(allBars);
+  const padTop = 10, padBottom = deductMarks.length ? 36 : 22;   // 扣底三角形畫在時間軸文字下面，多留一條
   const plotW = cssW - PAD.left - PAD.right, plotH = cssH - padTop - padBottom;
 
   const maSeries = currentChart.maLines.map((ma) => computeMA(allBars, ma.period).slice(vStart, vStart + vCount));
@@ -3320,6 +3332,19 @@ function drawChart(){
     }
     ctx.fillText(text, xAt(i), cssH - padBottom + 4);
   }
+
+  // 扣底：時間軸下方、跟均線同色的向上三角形（旁邊小字寫是哪一條均線）
+  deductMarks.forEach((m) => {
+    const rel = m.idx - vStart;
+    if (rel < 0 || rel >= bars.length) return;
+    const x = xAt(rel), base = cssH - 2, tip = cssH - 13;
+    ctx.save();
+    ctx.fillStyle = m.color;
+    ctx.beginPath(); ctx.moveTo(x, tip); ctx.lineTo(x - 7, base); ctx.lineTo(x + 7, base); ctx.closePath(); ctx.fill();
+    ctx.font = 'bold 10px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    ctx.fillText(String(m.period), x + 8, base);
+    ctx.restore();
+  });
 
   // 右側價位標籤：滑鼠/手指移到哪一根就跟著顯示那一根的收盤價，沒有移動時預設顯示最後一根的收盤價
   {
@@ -3610,7 +3635,8 @@ function updateMaLegend(absIndex){
   el.innerHTML = currentChart.maLines.filter((ma) => ma.on).map((ma) => {
     const v = computeMA(allBars, ma.period)[idx];
     return '<span class="ma-legend-item" style="color:' + ma.color + '">MA' + ma.period + (v != null ? ' ' + v.toFixed(2) : '') + '</span>';
-  }).join('') + (currentChart.tf === 'daily' && currentChart.defOn
+  }).join('') + chartDeductMarks(allBars).map((m) => '<span class="ma-legend-item" style="color:' + m.color + '" title="扣底：今天不算，往前數 ' + m.period + ' 根的收盤">▲' + m.period + '扣 ' + m.close.toFixed(2) + '</span>').join('') +
+    (currentChart.tf === 'daily' && currentChart.defOn
     ? chartDefenseLines(allBars).map((d) => '<span class="ma-legend-item" style="color:#e6675f">明日' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('')
     : '');
 }
@@ -11069,7 +11095,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 21:03:27';
+const BUILD_STAMP = '2026-10-13 21:16:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13661,25 +13687,31 @@ const GUIDE_FAQ = [
   ['資料多久更新一次？', '盤中報價、訊號每 15 秒更新；盤後資料（法人、處置、融資、營收、集保）在官方公布後自動抓進來，各工具頁面上都有寫資料日期。休市日不更新，沿用上一個交易日。'],
   ['為什麼有的地方寫「資料蒐集中」或「還沒有資料」？', '剛開盤、剛更新程式，或官方還沒公布（例如營收月初、集保週五晚上）。等一下再看就會有。'],
   ['通知要怎麼開？', '右上角「提醒開啟」，第一次會問要不要允許通知。網頁要開著才收得到，關掉就沒有。'],
-  ['手機可以用嗎？', '可以。下方導覽列在手機、平板上排成三排、每排五顆；表格太寬可以左右滑。也可以把網站放到手機桌面（看上面「放到手機桌面」）。'],
+  ['手機可以用嗎？', '可以。下方導覽列在手機、平板上排成三排、每排五顆；表格太寬可以左右滑。也可以把網站放到手機、平板、電腦桌面（看上面「放到手機、平板、電腦桌面」，有影片）。'],
   ['自選股換手機會不見嗎？', '自選股存在這台瀏覽器；到自選股面板拿「同步碼」，在另一台輸入就會同步過去。'],
   ['好幾個人用這個網站，自選股會混在一起嗎？', '不會。沒設同步碼時清單只存在自己的瀏覽器；設了同步碼，每個碼是各自的一份。在自選股面板按「幫我產生」拿一組隨機的碼（不會跟別人撞到）；輸入的碼如果雲端已經有清單，會先問「是你自己的嗎」。同一台電腦給別人用，按「換人使用」換成他的碼。'],
   ['分數高、籌碼暴增、出現訊號，是不是就可以買？', '不是。這些數字描述的是「現在的狀態」，不是買賣指令。什麼時候進、什麼時候出、放多少部位，要自己判斷，盈虧自負。'],
 ];
 const guideState = { home: 'ios' };
 function guideHtml(){
-  const step = (n, t, d) => '<div class="gd-step"><span class="gd-n">' + n + '</span><b>' + t + '</b><p>' + d + '</p></div>';
-  const homeTabs = [['ios', '🍎 iPhone（Safari）'], ['ioschrome', '🌐 iPhone（Chrome）'], ['android', '🤖 Android（Chrome）']];
+  const vid = (key) => '<button type="button" class="gd-go gd-vid" data-gd-video="' + key + '">▶ 看影片</button>';
+  const step = (n, t, d, v) => '<div class="gd-step"><span class="gd-n">' + n + '</span><b>' + t + '</b><p>' + d + '</p>' + (v ? vid(v) : '') + '</div>';
+  // 2026-10-13 使用者：iPad、電腦也要教怎麼放到桌面（含影片）
+  const homeTabs = [['ios', '🍎 iPhone（Safari）'], ['ipad', '🍎 iPad（Safari）'], ['ioschrome', '🌐 iPhone（Chrome）'], ['android', '🤖 Android（Chrome）'], ['pc', '💻 電腦（Chrome／Edge）']];
+  const homeVideo = { ios: 'basic-ios', ipad: 'basic-ios', ioschrome: 'basic-ios', android: 'basic-android', pc: 'basic-pc' };
   const homeSteps = {
     ios: ['用 Safari 打開 <b>tw-groups.judystock.workers.dev</b>', '點下方（或網址列旁）的「分享」按鈕（方框加向上箭頭）', '往下滑，點「加入主畫面」', '名字可以改短一點，點右上角「新增」'],
     ioschrome: ['用 Chrome 打開網站', '點網址列右邊的「分享」按鈕', '點「加入主畫面」（找不到就往下滑、點「編輯動作」把它加進來）', '點「新增」'],
     android: ['用 Chrome 打開網站', '點右上角「⋮」選單', '點「加到主畫面」或「安裝應用程式」', '點「新增」，桌面就會多一個圖示'],
+    ipad: ['用 Safari 打開 <b>tw-groups.judystock.workers.dev</b>', '點網址列右邊的「分享」按鈕（方框加向上箭頭）', '點「加入主畫面」', '名字可以改短一點，點「新增」'],
+    pc: ['用 Chrome 打開網站', '點右上角「⋮」→「投放、儲存及分享」→「建立捷徑…」', '勾「在視窗中開啟」，點「建立」，桌面就多一個圖示（點兩下就開）', '打開後在工作列的圖示按右鍵 →「釘選到工作列」，以後點一下就開',
+      'Edge：右上角「⋯」→「應用程式」→「將此網站安裝為應用程式」', '只想存書籤：按 <b>Ctrl＋D</b>（Mac 是 <b>⌘＋D</b>）'],
   };
   let html = '<div class="gd-tag">新手教學</div><h2 class="gd-title">第一次來，看這頁就好</h2>' +
     '<p class="gd-lead">這裡把原本要自己一個網站一個網站翻的資料——盤中即時報價、族群強弱、籌碼、營收、處置、國際大事——整理成一眼看得懂的表。<br>不用先懂技術名詞，照下面三步走就能用。</p>';
   html += '<h3 class="gd-h">三步驟開始</h3><div class="gd-grid3">' +
-    step(1, '首頁看族群強弱', '首頁依族群平均漲跌排好，「強勢／弱勢」切換；點族群卡片看裡面每一檔，每 15 秒自動更新。') +
-    step(2, '右上角打代號開 K 線圖', '輸入代號或名稱（例如 2330 或 台積電）按 Enter，就開 5 分 K；圖上可以切 1 分、日線，看主力、KD、明天要守的價。') +
+    step(1, '首頁看族群強弱', '首頁依族群平均漲跌排好，「強勢／弱勢」切換；點族群卡片看裡面每一檔，每 15 秒自動更新。', 'basic-home') +
+    step(2, '右上角打代號開 K 線圖', '輸入代號或名稱（例如 2330 或 台積電）按 Enter，就開 5 分 K；圖上可以切 1 分、日線，看主力、KD、明天要守的價。', 'basic-chart') +
     step(3, '下方導覽列找工具', '15 個工具都在最下面（手機、平板排成三排、每排五顆）。盤中看右上角紫色「⚠ 盤中訊號」，盤後看籌碼日報、排行。') + '</div>';
   html += '<h3 class="gd-h">一天怎麼用</h3><div class="gd-time">' + [
     ['盤前', '研究室看今晚有沒有國際大事、資金保護傘是不是撐開；籌碼日報看昨天的整理；每日功課看今天要盯誰。'],
@@ -13689,10 +13721,10 @@ function guideHtml(){
     ['收盤後', '盤後籌碼排行、均線分數排行、籌碼日報、創高黑龍正式名單陸續出來；晚上處置監獄、法人、融資（約 21:40）更新。'],
     ['週末', '盤後籌碼排行的籌碼週報（集保週五資料）、研究室看下週行事曆。'],
   ].map(([w, t]) => '<div class="gd-tr"><b>' + w + '</b><span>' + t + '</span></div>').join('') + '</div>';
-  html += '<h3 class="gd-h">📱 放到手機桌面，一點就開</h3><div class="gd-card"><p class="gd-sub">把網站加到手機主畫面，以後像 App 一樣一點就開，不用再找網址。</p>' +
+  html += '<h3 class="gd-h">📱 放到手機、平板、電腦桌面，一點就開</h3><div class="gd-card"><p class="gd-sub">把網站加到主畫面或電腦桌面，以後像 App 一樣一點就開，不用再找網址。</p>' +
     '<div class="gd-htabs">' + homeTabs.map(([k, l]) => '<button type="button" class="chart-tab' + (guideState.home === k ? ' active' : '') + '" data-gd-home="' + k + '">' + l + '</button>').join('') + '</div>' +
-    '<ol class="gd-ol">' + homeSteps[guideState.home].map((s) => '<li>' + s + '</li>').join('') + '</ol>' +
-    '<div class="gd-tip">💡 從 LINE 點連結進來的，網頁是開在 LINE 裡面，沒辦法加到桌面——先點右上角選單，選「用瀏覽器開啟」，再照上面做。</div></div>';
+    '<ol class="gd-ol">' + homeSteps[guideState.home].map((s) => '<li>' + s + '</li>').join('') + '</ol>' + vid(homeVideo[guideState.home]) +
+    (guideState.home === 'pc' ? '' : '<div class="gd-tip">💡 從 LINE 點連結進來的，網頁是開在 LINE 裡面，沒辦法加到桌面——先點右上角選單，選「用瀏覽器開啟」，再照上面做。</div>') + '</div>';
   html += '<h3 class="gd-h">每個工具看什麼</h3><div class="gd-grid2">' + GUIDE_TOOLS.map((x, i) =>
     '<div class="gd-tool"><div class="gd-tt">' + x.t + x.tags.map((g) => '<i>' + g + '</i>').join('') + '</div><p>' + x.d + '</p><ul>' + x.b.map((s) => '<li>' + s + '</li>').join('') + '</ul>' +
     '<div class="gd-btns"><button type="button" class="gd-go" data-gd-open="' + i + '">去看看 →</button>' +
@@ -13701,7 +13733,8 @@ function guideHtml(){
     '<li>任何列表點股票名稱或代號，都會開這檔的 K 線圖；圖上的搜尋框可以直接換股票。</li>' +
     '<li>上方切 5 分／1 分／日線；⚙ 設定可以開關均線、VWAP、明天防守線（明日紅半、三日低、月線，只在日線）。</li>' +
     '<li>下面的副圖是主力買賣力（1 分線另有 5 分 KD）；滑過去會顯示那一根的開高低收、量、主力張數。</li>' +
-    '<li>圖上的小符號是各種盤中訊號出現的位置，滑過去看是哪一種。</li></ul></div>';
+    '<li>圖上的小符號是各種盤中訊號出現的位置，滑過去看是哪一種。</li>' +
+    '<li>時間軸下面的 ▲ 是扣底：今天這根不算，往前數 5 根、20 根（1 分線是 5 根、25 根）的位置，顏色跟那條均線一樣；均線那一列寫「▲5扣」「▲20扣」的扣底值。</li></ul></div>';
   html += '<h3 class="gd-h">紅色綠色代表什麼</h3><div class="gd-grid2"><div class="gd-card"><b class="up">紅色</b>＝漲、增加、買超、偏多。台股習慣紅色是漲，跟美股相反。</div>' +
     '<div class="gd-card"><b class="down">綠色</b>＝跌、減少、賣超、偏空。</div></div>';
   html += '<h3 class="gd-h">常見問題</h3><div class="gd-faq">' + GUIDE_FAQ.map(([q, a]) => '<div class="gd-qa"><b>' + q + '</b><p>' + a + '</p></div>').join('') + '</div>';
