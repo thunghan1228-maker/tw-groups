@@ -11945,6 +11945,7 @@ document.getElementById('chartModal').addEventListener('click', (e) => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
+  if (!document.getElementById('tutModal').hidden){ tutBack(); return; }   // 影片教學在最上層：先關影片回清單，再關清單
   if (chartWindows.size && closeTopChartWindow()) return;
   if (!document.getElementById('chartModal').hidden) closeStockChart();
   else if (!document.getElementById('groupModal').hidden) closeGroupDetail();
@@ -13675,6 +13676,7 @@ function playTutorial(key){
   const video = document.querySelector('#tutPlayer video');
   try { const p = video.play(); if (p && p.catch) p.catch(() => {}); } catch (_){}
   renderTutorialList();
+  tutCloseLabel();
   document.querySelector('#tutModal .tut-inner').scrollTop = 0;
 }
 // key：直接播哪一支（訊號教學裡的「▶ 看影片」）；沒給就打開清單
@@ -13682,6 +13684,7 @@ async function openTutorialVideos(key){
   document.getElementById('tutModal').hidden = false;
   if (!tutState.current) document.getElementById('tutPlayer').innerHTML = '';
   renderTutorialList();
+  tutCloseLabel();
   await tutLoad();
   renderTutorialList();
   if (key) playTutorial(key);
@@ -13691,9 +13694,27 @@ function closeTutorialVideos(){
   if (video) try { video.pause(); } catch (_){}
   document.getElementById('tutModal').hidden = true;
 }
-document.getElementById('tutClose').addEventListener('click', closeTutorialVideos);
+// 2026-10-13 使用者：看影片時按右上角 ✕，不要整個關掉跳回首頁（要再點進來很麻煩）——先關掉影片、留在影片清單；
+// 清單畫面（沒在播）再按 ✕ 才關掉影片教學。點外面暗的地方、按 Esc 也一樣。
+function tutBack(){
+  const video = document.querySelector('#tutPlayer video');
+  if (!video) return closeTutorialVideos();
+  try { video.pause(); } catch (_){}
+  tutState.current = null;
+  document.getElementById('tutPlayer').innerHTML = '';
+  renderTutorialList();
+  document.querySelector('#tutModal .tut-inner').scrollTop = 0;
+  tutCloseLabel();
+}
+function tutCloseLabel(){
+  const playing = !!document.querySelector('#tutPlayer video');
+  const b = document.getElementById('tutClose');
+  b.title = playing ? '關掉影片，回到影片清單' : '關閉影片教學';
+  b.setAttribute('aria-label', b.title);
+}
+document.getElementById('tutClose').addEventListener('click', tutBack);
 document.getElementById('tutModal').addEventListener('click', (e) => {
-  if (e.target.id === 'tutModal') return closeTutorialVideos();
+  if (e.target.id === 'tutModal') return tutBack();
   const b = e.target.closest('.tut-item[data-tut]');
   if (b) playTutorial(b.dataset.tut);
 });
