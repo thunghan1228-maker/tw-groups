@@ -6,16 +6,44 @@
   cap    字幕（畫面下方大字，比旁白短，抓重點）
   tab    先切到訊號中心這個分頁（signalCenterState.activeTab）
   eval   先在網頁裡執行這段 JS
+  clickPick 先點這個元素（JS 運算式，回傳元素；例如 __tutFind('#swingModal .chart-tab', '籌碼面')）
   click  先點這個元素（CSS 選擇器）
+  pick   紅框框住這個元素（JS 運算式，回傳元素，會捲過去）
   scroll 捲到這個元素
   target 紅框框住這個元素（沒有就不框）
   settle 動作後等幾毫秒再上字幕（預設 900）
+__tutFind(sel, text)：sel 裡面看得到、文字含 text 的元素，取文字最短的（record.js 注入）。
 """
 
 SC = "盤中訊號中心"
 ROW = "#signalBody .signal-row:not(.signal-col-labels)"
 LABELS = "#signalBody .signal-col-labels"
 TAB = '#signalTabsBar .signal-tab[data-kind="{}"]'
+
+TB = "下方工具列"
+CLOSE_ALL = "document.querySelectorAll('.chips-modal').forEach((m) => { m.hidden = true; }); try { closeSignalCenter(); } catch (_) {} window.scrollTo(0, 0)"
+
+
+def tb_btn(label: str) -> str:
+    return f'.toolbar-bottom .tb-btn[data-label="{label}"]'
+
+
+def tb_intro(label: str, say: str, cap: str) -> dict:
+    """第一段：關掉所有視窗，紅框框住下方工具列那顆按鈕。"""
+    return {"say": say, "cap": cap, "eval": CLOSE_ALL, "target": tb_btn(label), "settle": 1200}
+
+
+def tb_open(fn: str, say: str, cap: str, settle: int = 5000, **kw) -> dict:
+    """第二段：打開面板（跟按下工具列那顆一樣）。"""
+    return {"say": say, "cap": cap, "eval": f"{CLOSE_ALL}; {fn}()", "settle": settle, **kw}
+
+
+def find(sel: str, text: str) -> str:
+    return f"__tutFind({sel!r}, {text!r})"
+
+
+def visible(sel: str) -> str:
+    return f"[...document.querySelectorAll({sel!r})].find((e) => e.offsetParent !== null)"
 
 VIDEOS = [
     {
@@ -235,6 +263,259 @@ VIDEOS = [
              "tab": "history", "target": "#signalHistoryDate", "settle": 3000},
             {"say": "如果只是要看昨天或前天，很多分頁上面就有今天、昨天、前天可以直接切，成交價和漲跌幅會換成那一天的收盤。",
              "cap": "看昨天、前天：各分頁上方直接切", "tab": "fourGateBuy", "target": "#signalBody .combo-filter-bar", "settle": 2000},
+        ],
+    },
+]
+
+# 下方工具列 15 顆（2026-10-13 使用者：接著做下方工具列的影片）；旁白照各面板上方的說明、新手教學 GUIDE_TOOLS 寫
+VIDEOS += [
+    {
+        "key": "tb-homework", "title": "每日功課", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("每日功課", "下方工具列的每日功課，是系統自動幫你做好的盯盤功課。", "下方工具列「每日功課」：自動做好的盯盤功課"),
+            tb_open("openHomeworkPanel", "裡面有四個分頁：空觀察、當沖多、多觀察和形態觀察股。系統自己把刀劍空、即將入獄、出獄、賽馬多、河流多、馬火多、族群名次這幾份清單交叉比對，只留下該盯的那幾檔，盤中每二十秒跟著首頁報價重算。",
+                    "四份功課：自動交叉比對清單，盤中每 20 秒重算", target="#hwBody .hw-tabs"),
+            {"say": "空觀察是做空的功課：刀劍空、即將入獄、今天出獄、做空族群，同一檔出現在越多份清單，排越前面。族群後面的數字是今天的族群名次，有新手符號的，族群排越後面越安全；紅色三角形代表族群還很強，慢一點再打。",
+             "cap": "空觀察：重疊越多份越優先；🔰越後面越安全、🔺族群還強", "click": '#hwBody [data-hw-tab="short"]', "target": "#hwBody .sw-rule", "settle": 1500},
+            {"say": "當沖多交叉賽馬多、河流多、馬火多，三份都有的標星星，中兩份的標火。族群要在多方區，也就是今天排名前半、平均上漲，同族群至少兩檔才成立，漲停的不列。",
+             "cap": "當沖多：賽馬、河流、馬火交叉；⭐三份都有、🔥中兩份", "click": '#hwBody [data-hw-tab="long"]', "target": "#hwBody .sw-rule", "settle": 1500},
+            {"say": "上面的按鈕可以只看漲二到六趴的進場帶、只看均線分數七分以上，或把漲超過七趴、六趴的藏起來。",
+             "cap": "篩選：2～6% 進場帶、均線 ≥7、過 7%／6% 不追", "target": "#hwBody .hw-flts"},
+            {"say": "多觀察挑三個重點族群，預設是今天族群排名前三，也可以自己換。每一檔標出在族群裡是多方還是空方，再對照三日低和月線，看有沒有跌破防守價。",
+             "cap": "多觀察：挑 3 個族群，對照三日低／月線防守價", "click": '#hwBody [data-hw-tab="watch"]', "target": "#hwBody .hw-picks", "settle": 3000},
+            {"say": "族群那一列會標打法：平均漲三趴以上是噴出等黑，零到三趴是收盤分批買黑，下跌就是拉回分批買黑。",
+             "cap": "🔥噴出等黑・🛒收盤分批買黑・🛒拉回分批買黑", "target": "#hwBody .hw-ghead"},
+            {"say": "形態觀察股跟盤中訊號中心裡的是同一份，分成五類，訊號中心的影片有詳細介紹。",
+             "cap": "形態觀察股：跟訊號中心同一份", "click": '#hwBody [data-hw-tab="obs"]', "target": "#hwBody .hw-tabs", "settle": 9000},
+        ],
+    },
+    {
+        "key": "tb-swing", "title": "籌碼日報", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("籌碼日報", "籌碼日報是收盤後的一份整理，適合隔天盤前讀。", "「籌碼日報」：收盤後整理、隔天盤前讀"),
+            tb_open("openSwingPanel", "上面一排是分頁：今日摘要、處置動態、主動式ETF持股雷達、營收面、產業觀察、籌碼面、技術面和體質轉強。",
+                    "分頁：摘要、處置、ETF雷達、營收、產業、籌碼、技術、體質", pick=find("#swingModal .chart-tab", "今日摘要") + ".parentElement"),
+            {"say": "下面一排是日期，可以回看最近十個交易日的日報。", "cap": "日期：可回看近 10 個交易日",
+             "pick": find("#swingModal .chart-tab", "最新") + ".parentElement"},
+            {"say": "今日摘要先寫資料基準日，接著是幾個重點數字：今天真正穿過月線的、體質轉強的、籌碼面候選、處置中、明天出獄的；下面一段整理資金主軸在哪些族群、各面向的首選和風險提示。",
+             "cap": "今日摘要：重點數字、資金主軸、各面向首選、風險提示", "pick": find("#swingModal *", "資金主軸")},
+            {"say": "籌碼面、技術面、體質轉強，各挑最多五檔，附上防守價和風險提示，點股票可以開K線圖。",
+             "cap": "籌碼／技術／體質：各挑最多 5 檔，附防守價", "clickPick": find("#swingModal .chart-tab", "籌碼面"), "pick": find("#swingModal .chart-tab", "籌碼面"), "settle": 2500},
+            {"say": "主動式ETF持股雷達，看五檔主動式ETF每天買賣什麼、哪幾檔被同步加碼、連續同向，還有資金潮汐。",
+             "cap": "主動式ETF雷達：五檔主動式ETF每天買賣什麼", "clickPick": find("#swingModal .chart-tab", "主動式ETF"), "pick": find("#swingModal .chart-tab", "主動式ETF"), "settle": 3000},
+            {"say": "營收面精選，挑當月營收大增、均線分數夠、成交值也夠的前十檔。",
+             "cap": "營收面：營收大增＋均線分數夠＋成交值夠的前 10 檔", "clickPick": find("#swingModal .chart-tab", "營收面"), "pick": find("#swingModal .chart-tab", "營收面"), "settle": 2500},
+        ],
+    },
+    {
+        "key": "tb-checkup", "title": "每日持股健診", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("健診", "每日持股健診，把手上的股票貼進來，看每一檔的體質和明天要守的價位。", "「每日持股健診」：持股體質＋明天防守價"),
+            tb_open("openCheckupPanel", "第一步，貼上你的股票清單。股號用斜線、逗號、空白或換行隔開都可以，族群表裡的股票打名字也行。",
+                    "① 貼上股票清單（斜線、逗號、空白、換行都可以）", settle=3000, pick=find("#checkupModal *", "① 貼上你的股票清單")),
+            {"say": "示範一下，按範例帶入幾檔股票，再按開始健診。每一檔會算基本面、籌碼面、技術面三個零到一百分，再合成綜合分數。",
+             "cap": "每檔算基本面／籌碼面／技術面 0～100 分，再合成綜合", "eval": "document.getElementById('ckExample').click()", "click": "#ckRun", "settle": 6000,
+             "pick": visible("#checkupModal table")},
+            {"say": "第二步，勾選要用的面向，勾起來的才算進綜合分數；權重可以自己調，點方塊可以改用那一項排序。",
+             "cap": "② 勾選面向、調權重；點方塊改排序", "pick": find("#checkupModal *", "② 勾選要用的面向")},
+            {"say": "結果每一檔附上明天的防守價：三日低、月線、紅半，還有判定。資料是收盤後跟籌碼日報一起更新，不是即時報價。",
+             "cap": "附明天防守價：三日低、月線、紅半＋判定", "pick": visible("#checkupModal table")},
+            {"say": "清單可以存起來，下次直接選；換裝置的話按複製清單，把整串代號帶過去。",
+             "cap": "💾 存成清單；換裝置按 📋 複製清單", "pick": "document.getElementById('ckSave').parentElement"},
+        ],
+    },
+    {
+        "key": "tb-chips", "title": "盤後籌碼排行", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("今日盤後籌碼排行", "盤後籌碼排行，看大戶手上的股票是變多還是變少。", "「盤後籌碼排行」：大戶手上的股票變多還變少"),
+            tb_open("openChipsPanel", "分頁有籌碼週報、主力大單、外資、投信、自營商、三大法人，還有法人連買、主力大單跟醞釀發動的交叉，以及放空籌碼。",
+                    "週報、主力大單、三大法人、∩醞釀發動、放空籌碼", pick=find("#chipsModal .chart-tab", "籌碼週報") + ".parentElement"),
+            {"say": "籌碼週報用集保的週資料：四百張以上的大戶，這週持股比上週多了總股數的幾趴。每週五結算、週六公布，整個下一週看到的都是同一份。",
+             "cap": "集保 400 張以上大戶的週增減（每週五結算）", "pick": find("#chipsModal .rd-sec-title", "本週籌碼暴增榜")},
+            {"say": "籌碼暴增代表主力在收貨。紅色是增加、綠色是減少，星星是連續兩週上榜；每一列最後的方塊是均線分數，十二分以上是實心金色。",
+             "cap": "紅＝增加、綠＝減少；⭐連兩週上榜；方塊＝均線分數", "pick": visible("#chipsModal .rd-grid2")},
+            {"say": "往下還有上榜累積榜、族群排名比較、連續增排行，和熱門股籌碼分析。",
+             "cap": "往下：累積榜、族群比較、連續增排行、熱門股", "pick": find("#chipsModal .rd-sec-title", "連續增排行")},
+            {"say": "上面的輸入框打股號，可以查那一檔的籌碼軌跡和同族群。", "cap": "打股號：查籌碼軌跡＋族群",
+             "pick": "document.getElementById('rdInput').parentElement"},
+            {"say": "其他分頁是每個交易日收盤後更新的主力大單和三大法人買賣超，只列五十五個族群的股票，點股票可以開K線圖。",
+             "cap": "主力大單、三大法人：每個交易日收盤後更新", "clickPick": find("#chipsModal .chart-tab", "主力大單"), "settle": 8000,
+             "pick": "document.querySelector('#chipsBody .bl-section') || document.querySelector('#chipsBody .signal-empty')"},
+        ],
+    },
+    {
+        "key": "tb-watch", "title": "自選股", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("自選股", "自選股，把常看的股票收起來，分組追蹤。", "「自選股」：常看的股票分組追蹤"),
+            tb_open("openWatchPanel", "在這裡輸入代號或名稱按加入，可以一次貼好幾檔。首頁、盤中三三三、醞釀發動、K線圖名稱旁邊的星星，也可以直接加進來。",
+                    "輸入代號加入；各列表的 ☆ 也能直接加", settle=3000, pick="document.getElementById('wlAddInput').parentElement"),
+            {"say": "加進來以後，可以看即時報價、盤中大戶力、均線分數、漲跌停、處置和注意，還有能不能融資融券、當沖，有沒有股期。",
+             "cap": "即時報價、大戶力、均線分數、處置／注意、融資券／當沖",
+             "eval": "(() => { const i = document.getElementById('wlAddInput'); i.value = '2330 2317 2454 3017 6505'; document.getElementById('wlAddBtn').click(); })()",
+             "settle": 3500, "pick": visible("#watchModal table") + " || document.getElementById('wlAddInput').parentElement"},
+            {"say": "上面一排是分組，按加分組可以新增，也可以改名、刪除；有鬧鐘符號的，是形態觀察股自動帶進來的分組。",
+             "cap": "分組：＋分組、改名、刪除；⏰＝形態觀察股自動分組", "pick": "document.getElementById('wlGroupAdd').parentElement"},
+            {"say": "這一排可以切換：即時報價；持股損益，填成本和張數算損益；盤後籌碼，看法人、主力、大戶、創高天數；或是一頁看完。",
+             "cap": "即時報價／持股損益／盤後籌碼／一頁看完", "pick": find("#watchModal .wl-view", "持股損益") + ".parentElement"},
+            {"say": "排序可以照自訂順序、漲跌幅、盤中大戶力或均線分數；按這組送去健診，就把整組帶去每日持股健診。",
+             "cap": "排序；🩺 這組送去健診", "pick": find("#watchModal .wl-sort", "漲跌幅") + ".parentElement"},
+            {"say": "最上面是同步碼。按幫我產生，會給一組隨機的碼，在手機或另一台電腦輸入同一組，就會看到同一份清單。每個人用自己的碼，不會跟別人混在一起；同步碼就像密碼，不要給別人。",
+             "cap": "同步碼：幫我產生 → 其他裝置輸入同一組；像密碼，不要給別人", "pick": "document.getElementById('wlKeyGen').parentElement"},
+        ],
+    },
+    {
+        "key": "tb-jail", "title": "處置監獄", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("處置監獄", "處置監獄，看哪些股票被處置、什麼時候出獄、哪些快被關。", "「處置監獄」：被關、出獄、快被關"),
+            tb_open("openJailPanel", "一檔股票短期漲跌太兇、週轉太高，交易所會列注意股，累積多次就會被處置，改成分盤集合競價，大約兩分鐘撮合一次，進出很不順。處置期間五個營業日，期滿下一個交易日出獄。",
+                    "處置＝分盤集合競價（約 2 分鐘撮合一次），關 5 個營業日", pick=find("#jailModal *", "什麼是處置")),
+            {"say": "一週出獄時間表，列出每天有哪些股票處置期滿、恢復正常交易，可以看到下週、下下週。", "cap": "🗓 一週出獄時間表",
+             "pick": find("#jailModal .jl-h", "一週出獄時間表")},
+            {"say": "犯罪集團：同一個族群兩檔以上被關、或快被關，代表資金集中在這個題材，整族可能一起關、也一起出獄。", "cap": "🏴 犯罪集團：同族群 ≥2 檔被關＝資金熱區",
+             "pick": find("#jailModal .jl-h", "犯罪集團")},
+            {"say": "今日入獄是今天剛被處置的；嫌疑名單是明天可能被關的，每天更新，寫出明天的門檻。", "cap": "🔒 今日入獄、🔍 嫌疑名單（明天門檻）",
+             "pick": find("#jailModal .jl-h", "嫌疑名單")},
+            {"say": "最上面打股號按查前科，看它以前被關過幾次、最近一次是什麼時候，還有明天會不會達到處置門檻。", "cap": "🔎 查前科：被關幾次、明天判定",
+             "pick": find("#jailModal .jl-h", "個股前科查詢")},
+        ],
+    },
+    {
+        "key": "tb-revenue", "title": "營收成長榜", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("營收成長榜", "營收成長榜。每個月十號以前，公司會陸續公布上個月的營收，這裡把全市場排好。", "「營收成長榜」：每月營收公布後的全市場排行"),
+            tb_open("openRevenuePanel", "上面可以切月份，寫出已經公布幾檔、年增為正的有幾檔，一天更新三次。",
+                    "切月份；已公布幾檔、年增為正幾檔", pick=find("#revModal .rv-mbtn", "營收") + ".parentElement"),
+            {"say": "火箭是年增比上個月加速十個百分點以上，烏龜是放緩十個百分點以上；按這兩顆可以只看火箭或只看烏龜。",
+             "cap": "🚀＝年增加速、🐢＝年增放緩（10 點以上）", "pick": find("#revModal .rv-mark", "火箭") + ".parentElement"},
+            {"say": "族群分析把每個族群年增的中位數排出來，只列年增三成以上的上榜成員。顏色是年增幅度，隔日是公布後下一個交易日的漲跌。",
+             "cap": "🧭 族群分析：族群年增中位數排行；隔日＝公布後隔天漲跌", "pick": "[...document.querySelectorAll('#revModal .rv-h')].find((e) => e.offsetParent !== null && e.textContent.includes('族群分析'))"},
+            {"say": "往下還有多觀察分析、火箭烏龜數據分析、懸賞榜和全部公司總表。", "cap": "往下：多觀察、火箭烏龜、懸賞榜、全部公司",
+             "pick": find("#revModal .rv-h", "懸賞榜")},
+            {"say": "查個股營收，打股號就看到這一檔每個月的年增、月增、累計年增、公布日和公布隔日的漲跌。", "cap": "🔎 查個股營收：每月年增、月增、公布隔日漲跌",
+             "pick": find("#revModal .rv-h", "查個股營收")},
+        ],
+    },
+    {
+        "key": "tb-ma", "title": "均線分數排行", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("均線分數排行", "均線分數排行，幫每一檔股票打分數，滿分十五分。", "「均線分數排行」：每一檔打分數，滿分 15"),
+            tb_open("openMaPanel", "分數越高，代表這檔股票的位置越強、均線排得越整齊；分數低多半是還在整理、或已經走弱。分數講的是位置強不強，不是買賣點。每個交易日收盤後更新。",
+                    "分數高＝位置強、均線排列整齊；不是買賣點", pick=find("#maModal *", "這頁幫每一檔股票打分數")),
+            {"say": "個股分數前六十名，看總分、昨天名次、連續上榜幾天；這一排可以改成名次進步、連續上榜、新進榜，或站上全部均線來排。",
+             "cap": "前 60 名：依總分／名次進步／連續上榜／新進榜", "pick": find("#maModal .ma-vbtn", "依總分") + ".parentElement"},
+            {"say": "表格裡的小方塊是站上了哪幾條均線、創了哪幾個天期的新高，選股日期可以回看之前的排行。",
+             "cap": "方塊：站上哪幾條均線、創哪幾個天期新高", "pick": visible("#maModal table")},
+            {"say": "下面還有前十名常客，看最近誰最常擠進前十名；還有族群分數前十大，看哪一整群的底子最硬。",
+             "cap": "前十名常客、族群分數前十大", "pick": find("#maModal *", "族群分數前十大")},
+            {"say": "上面輸入股號，會列出那一檔所屬族群的全部成員；輸入族群名，就列出那個族群。",
+             "cap": "查詢：打股號或族群名", "pick": "document.getElementById('maQ').parentElement"},
+        ],
+    },
+    {
+        "key": "tb-heilong", "title": "創高黑龍（自動）", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("創高黑龍", "創高黑龍自動版，收盤後依均線分數加上收黑K挑出名單，附上過去的績效回測；中午十二點會先給一份暫定名單。", "「創高黑龍（自動）」：收盤後名單＋績效回測"),
+            tb_open("openHeilongPanel", "第一步是選股參數。官網創高黑龍的預設是均線分數十分以上、收黑K、漲跌幅負十趴到三趴、族群表內；還可以加上週籌碼、族群平均分、成交值這些條件。",
+                    "① 選股參數：預設＝均線分數≥10、黑K、漲跌 −10%～3%", pick=find("#heilongModal *", "① 選股參數")),
+            {"say": "下面設定出場方式：停利三、五、八趴或自訂，跌破黑K最低價停損；回測可以選近十天、二十天、六十天，改完按重新計算。",
+             "cap": "停利、破黑低停損；回測近 10／20／60 天", "pick": "document.getElementById('hlRun').parentElement"},
+            {"say": "按官網創高黑龍預設，就回到原本的參數；調好的參數可以存成我的參數。",
+             "cap": "「官網創高黑龍預設」還原；💾 存成我的參數", "pick": "document.getElementById('hlReset')"},
+            {"say": "下面是回測結果：選股日收盤進場，之後一到三個交易日的盤中最高，還有各種出場方式的勝率和報酬。",
+             "cap": "② 爆發力＋各種出場方式的勝率、報酬", "pick": find("#heilongModal *", "② 爆發力")},
+        ],
+    },
+    {
+        "key": "tb-picker", "title": "創高黑選股（手動）", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("創高黑選股", "創高黑選股手動版，自己設定模組規則挑股，模擬帳戶照規則分批加減碼，看實際跑起來的績效。", "「創高黑選股（手動）」：自己設規則，模擬帳戶跑績效"),
+            tb_open("openPickerPanel", "使用順序是：先在模組設規則，再到選股勾名單，最後在今天看模組照規則怎麼進出。全部是試算，不是買賣建議。",
+                    "① 模組設規則 → ② 選股勾名單 → ③ 今天照規則進出", pick=find("#pickerModal .pk-step", "模組") + ".parentElement"),
+            {"say": "今天這一頁是模擬帳戶：額度、投入、現金、市值和損益，還會跟同樣額度買零零五零比較。",
+             "cap": "模擬帳戶：額度、投入、市值、損益（對照 0050）", "clickPick": find("#pickerModal .chart-tab", "今天"), "pick": find("#pickerModal *", "模組損益"), "settle": 2500},
+            {"say": "已進場的股票列出批數、進場日、報酬，還有減碼線和出場線；觀察中的股票等收黑才買第一批，再收黑加碼，破五日線、十日線減碼出場。",
+             "cap": "① 已進場：減碼線、出場線　② 觀察中：等收黑", "pick": find("#pickerModal *", "① 已進場的股票")},
+            {"say": "每天一點會提醒今天要做的動作，可以按這顆先模擬看看。",
+             "cap": "🔔 下午提醒今天要做的動作", "pick": find("#pickerModal .pk-btn-big", "模擬")},
+            {"say": "選股分頁看每週名單、每日新進和條件池；實績分頁比較各種出場方式的績效。",
+             "cap": "選股：每週名單、每日新進　實績：比較出場方式", "clickPick": find("#pickerModal .chart-tab", "選股"), "pick": find("#pickerModal .chart-tab", "選股") + ".parentElement", "settle": 3000},
+        ],
+    },
+    {
+        "key": "tb-grail", "title": "K棒組合選股", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("K棒組合選股", "K棒組合選股，十五個選股邏輯，在固定的時間點自動掃全市場，把符合的名單抓出來。", "「K棒組合選股」：15 個邏輯定時掃全市場"),
+            tb_open("openGrailPanel", "盤中照各個邏輯的時間點，用證交所即時報價算，收盤後再用官方日K算一次收盤版。到時間進來看就好，不用自己設定。",
+                    "盤中定時用即時報價算，收盤後再算一次", settle=6000, pick=find("#grailModal *", "最新一輪")),
+            {"say": "最新一輪列出每個邏輯選到哪些股票，像波段穿惡、即將突破惡、三日飛龍；點邏輯名稱跳到那張卡片，點股票開K線圖。",
+             "cap": "最新一輪：每個邏輯選到哪些股票", "pick": visible("#grailModal .gr-latest")},
+            {"say": "上面可以選日期回看，也可以用族群、波段均線、隔日沖均線、成交量來篩，或照均線、漲跌、量、市值排序。",
+             "cap": "日期回看；族群、均線、成交量篩選；排序", "pick": visible("#grailModal .gr-controls")},
+            {"say": "每個邏輯旁邊有對答案的結果。名單只是符合條件，不是買賣指令。",
+             "cap": "名單＝符合條件，不是買賣指令", "pick": visible("#grailModal table")},
+        ],
+    },
+    {
+        "key": "tb-diag", "title": "選股・個股研究", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("問診", "選股和個股研究，上面是條件選股，下面是個股研究。", "「選股・個股研究」：條件選股＋個股研究"),
+            tb_open("openDiagPanel", "系統選股：勾要用的條件、拉一下門檻，像均線分數、籌碼暴增、主動式ETF持有、法人買超，選出同時符合的名單。條件勾越多，名單越少、也越嚴格。",
+                    "勾條件、拉門檻，選出同時符合的名單", settle=4000, pick=find("#diagModal *", "均線分數 ≥")),
+            {"say": "懶得自己勾，可以直接按這一排的範本，像創高黑龍、強勢紅K、法人認養、籌碼暴增、河流便宜，一鍵帶入條件。",
+             "cap": "範本一鍵帶入：創高黑龍、法人認養、籌碼暴增…", "pick": find("#diagModal .scr-pre", "創高黑龍") + ".parentElement"},
+            {"say": "按開始篩選，下面就列出符合的股票；點名單任一列，會帶到下面的個股研究。",
+             "cap": "開始篩選 → 點一列帶到個股研究", "clickPick": find("#diagModal .scr-pre", "創高黑龍"), "click": "#diagModal .scr-go", "pick": visible("#diagModal table") + " || document.querySelector('#diagModal .scr-go')", "settle": 4000},
+            {"say": "個股研究打股號，一頁看完這一檔的強弱、七科體檢、三日低月線紅半這些防守線、日線圖、同族群對照、族群強度榜，還有一句結論。",
+             "cap": "個股研究：強弱、七科體檢、防守線、同族對照、結論",
+             "eval": "(() => { const i = document.getElementById('dgInput'); i.value = '2330'; const b = document.getElementById('dgRun'); if (b) b.click(); })()", "pick": "document.getElementById('dgInput').parentElement", "settle": 6000},
+            {"say": "下面還有這家公司在做什麼的白話說明、近八季的財報，盤中十點以後還會整理今天在漲跌什麼。",
+             "cap": "公司在做什麼、近 8 季財報、盤中今天在漲跌什麼", "pick": find("#diagModal *", "在做什麼")},
+        ],
+    },
+    {
+        "key": "tb-track", "title": "個股訊號追蹤", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("個股盤中訊號追蹤", "個股訊號追蹤，只看你的自選股今天出現了哪些訊號，不用在一堆名單裡找。", "「個股訊號追蹤」：只看自選股今天的訊號"),
+            {"say": "上面一排是自選股的分組，跟自選股面板同一份，選一組就只看那一組。", "cap": "分組：跟自選股同一份",
+             # 錄影的瀏覽器是空的自選股：先加幾檔今天有訊號的（只存在錄影的瀏覽器，沒設同步碼不會上傳）
+             "eval": CLOSE_ALL + "; openWatchPanel(); document.getElementById('wlAddInput').value = '1303 6505 2480 3287 3406 6834 1301 8046';"
+                     " document.getElementById('wlAddBtn').click(); document.getElementById('watchModal').hidden = true; openTrackPanel()",
+             "settle": 9000, "pick": find("#trackModal .wl-gtab", "全部") + ".parentElement"},
+            {"say": "現況表列出每一檔的漲跌幅、狀態，像發動中、漲停、盤中大戶偏買、處置股，還有今天出了幾個訊號、最新是哪一個。",
+             "cap": "① 現況：漲跌幅、狀態、今天訊號數、最新訊號", "pick": visible("#trackModal table")},
+            {"say": "今日訊號照時間列出：發動、特大買賣單、四項精選、主力翻多翻空、創高黑龍、一加二多，上面的按鈕可以只看其中一種。",
+             "cap": "② 今日訊號：照時間列，可只看一種", "pick": find("#trackModal .wl-sort", "特大買單") + ".parentElement"},
+            {"say": "提醒可以設到價、跌破均線，自選股一出現新訊號，就跳通知加響聲。網頁要開著才收得到。",
+             "cap": "🔔 提醒：到價、跌破均線、出現訊號（網頁要開著）", "clickPick": find("#trackModal .wl-sort", "提醒"), "pick": find("#trackModal .wl-sort", "提醒"), "settle": 2000},
+        ],
+    },
+    {
+        "key": "tb-river", "title": "估值河流圖", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("估值河流圖", "估值河流圖，把股價放進本益比河道裡，看現在是便宜、合理還是貴。", "「估值河流圖」：現在便宜還是貴"),
+            tb_open("openRiverPanel", "輸入股號或股名，或按下面的範例，就畫出這一檔的河流圖。",
+                    "輸入股號或股名，畫出河流圖", settle=3000, pick="document.getElementById('rivQ').parentElement"),
+            {"say": "紅線是股價，彩色河道由下而上是特價、便宜、貴、昂貴；中間的虛線是分水嶺，等於近四季EPS乘上同族群本益比的中位數。股價在分水嶺下面，代表相對同族群偏便宜。",
+             "cap": "紅線＝股價；河道：特價→便宜→貴→昂貴；虛線＝分水嶺",
+             "clickPick": find("#rivModal .scr-pre", "2492"), "pick": visible("#rivModal svg") + " || " + visible("#rivModal canvas"), "settle": 5000},
+            {"say": "河道會隨公司每季的體質上下移動，同樣的股價，體質變好時會從貴變便宜。虧損或本益比超過兩百倍的不畫。",
+             "cap": "河道跟著每季 EPS 移動；虧損、本益比 >200 不畫", "pick": find("#rivModal *", "這張圖怎麼看")},
+            {"say": "最下面這張清單，是均線分數十分以上、又落在便宜區以下的股票：位置強，價格又不貴。",
+             "cap": "⭐ 均線分數 ≥10 × 便宜區：位置強又不貴", "pick": find("#rivModal *", "均線分數 ≥10 × 便宜區")},
+        ],
+    },
+    {
+        "key": "tb-lab", "title": "研究室", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("研究室", "研究室看的是盤勢以外的大方向，有三個分頁。", "「研究室」：盤勢以外的大方向"),
+            tb_open("openLabPanel", "國際大事行事曆：非農、CPI、聯準會這些數據，台灣時間幾點公布，前值、預期和公布值；最上面寫下一件大事是什麼時候。",
+                    "🌐 國際大事行事曆：台灣時間幾點公布、前值／預期／公布值", pick=find("#labModal *", "下一件大事")),
+            {"say": "行事曆依週排列，紅底是三顆星的大事，數字公布後大約一小時內補上；法說會每天一筆，紫色是你的自選股。名詞看不懂，點書本符號到小學堂。",
+             "cap": "紅底＝★★★大事；紫色＝你的自選股；📖 小學堂", "pick": find("#labModal .mc-h", "① 行事曆")},
+            {"say": "資金保護傘看融資水位、加權指數和櫃買指數有沒有跌破月線、季線，合成收傘、備傘、半開、全開四種狀態。",
+             "cap": "🛡 資金保護傘：收傘／備傘／半開／全開", "clickPick": find("#labModal .chart-tab", "資金保護傘"), "pick": find("#labModal .chart-tab", "資金保護傘") + ".parentElement", "settle": 4000},
+            {"say": "內部人看董監事、經理人每個月加碼還是減碼，疊上四百張大戶的持股比例。",
+             "cap": "👥 內部人：董監、經理人每月加減碼＋400 張大戶比", "clickPick": find("#labModal .chart-tab", "內部人"), "pick": find("#labModal .chart-tab", "內部人") + ".parentElement", "settle": 4000},
         ],
     },
 ]

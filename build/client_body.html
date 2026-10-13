@@ -1006,6 +1006,9 @@
   .tut-item .tut-dur{margin-left:auto;font-size:12px;opacity:.75;white-space:nowrap;}
   .tut-empty{color:var(--muted);padding:12px 2px;}
   .sm-btn.sm-video-btn{background:#7c3aed;border-color:#7c3aed;color:#fff;}
+  .tut-panel-link{margin-left:10px;vertical-align:middle;background:#7c3aed;color:#fff;border:none;border-radius:999px;padding:3px 10px;font:800 12px/1.4 inherit;font-family:inherit;cursor:pointer;white-space:nowrap;}
+  .gd-btns{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px;} .gd-btns .gd-go{margin-top:0;}
+  .gd-go.gd-vid{background:#7c3aed;color:#fff;}
   .help-video-link{display:inline-block;margin-left:6px;font-size:12px;font-weight:800;color:#7c3aed;cursor:pointer;white-space:nowrap;}
   .gd-tag{display:inline-block;border:1px solid var(--up);color:var(--up);font-size:12px;font-weight:800;border-radius:4px;padding:2px 10px;margin-top:4px;letter-spacing:2px;}
   .gd-title{font-size:28px;font-weight:900;color:var(--up);margin:10px 0 6px;}
@@ -13541,39 +13544,39 @@ function obsPanelHtml(){
 // ---- 新手教學（2026-10-10 使用者：照莊爸「新手教學・第一次來，看這頁就好」做本站版）----
 // 右上角「📖 新手教學」打開；工具卡片的「去看看」直接幫你打開那個工具（等於按下方導覽列那顆）。
 const GUIDE_TOOLS = [
-  { t: '⚠ 盤中訊號中心', open: 'signal', tags: ['盤中', '每 15 秒'], d: '右上角紫色按鈕。盤中所有即時訊號都在這裡，一個分頁一種：誰在發動、誰被大戶狂買、哪個族群最強最弱。',
+  { t: '⚠ 盤中訊號中心', open: 'signal', v: 'sc-overview', tags: ['盤中', '每 15 秒'], d: '右上角紫色按鈕。盤中所有即時訊號都在這裡，一個分頁一種：誰在發動、誰被大戶狂買、哪個族群最強最弱。',
     b: ['今日即時多／空：所有多方、空方訊號依時間排好，最新的在最上面', '醞釀／發動：均線分數高、整理完的股票（醞釀），一衝過箱頂就跳「發動」，網頁開著會響鈴通知',
       '盤中 333、十大多族群／十大空族群、所有族群綜合表：一眼看哪些族群在漲、族群裡誰最強', '盤中大戶力、四項精選、主力翻多／翻空、特大買賣單、刀劍空(32)、創高黑龍、1+2多：各種訊號分開看',
       '最後一頁「訊號教學」把每個訊號的條件寫清楚'] },
-  { t: '自選股', label: '自選股', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
+  { t: '自選股', label: '自選股', v: 'tb-watch', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
     b: ['換手機或電腦用「同步碼」就能帶過去', '一鍵健診：持股的防守價、明日紅半／三日低／月線一次算好', '各列表看到喜歡的股票，點「☆」就加進來'] },
-  { t: '個股訊號追蹤', label: '個股盤中訊號追蹤', tags: ['盤中'], d: '只看你自選股今天出現了哪些訊號，不用在一堆名單裡找。',
+  { t: '個股訊號追蹤', label: '個股盤中訊號追蹤', v: 'tb-track', tags: ['盤中'], d: '只看你自選股今天出現了哪些訊號，不用在一堆名單裡找。',
     b: ['自選股一出現新訊號就提醒（網頁要開著）', '點股票直接開 K 線圖'] },
-  { t: 'K棒組合選股', label: 'K棒組合選股', tags: ['盤中', '固定時點'], d: '15 個選股邏輯（穿山鱷龍、黑龍短沖、黑飛舞、飛龍戰法）在固定時間點自動掃全市場，把符合的名單抓出來。',
+  { t: 'K棒組合選股', label: 'K棒組合選股', v: 'tb-grail', tags: ['盤中', '固定時點'], d: '15 個選股邏輯（穿山鱷龍、黑龍短沖、黑飛舞、飛龍戰法）在固定時間點自動掃全市場，把符合的名單抓出來。',
     b: ['盤中與收盤各掃一次，到時間進來看就好，不用自己設定', '名單只是「符合條件」，不是買賣指令'] },
-  { t: '每日功課', label: '每日功課', tags: ['盤中', '自動'], d: '空觀察／當沖多／多觀察三份功課，系統自己把刀劍空、即將入獄、出獄、賽馬、河流、族群名次這幾份清單交叉比對，只留下該盯的那幾檔。',
+  { t: '每日功課', label: '每日功課', v: 'tb-homework', tags: ['盤中', '自動'], d: '空觀察／當沖多／多觀察三份功課，系統自己把刀劍空、即將入獄、出獄、賽馬、河流、族群名次這幾份清單交叉比對，只留下該盯的那幾檔。',
     b: ['不用貼名單，盤中跟著首頁報價每 20 秒重算', '多觀察挑三個族群看位置；防守價（三日低、月線）自動帶出來'] },
-  { t: '籌碼日報', label: '籌碼日報', tags: ['盤後'], d: '收盤後的一份整理：今日摘要、產業、籌碼、技術、均線轉強、處置動態，還有主動式 ETF 持股雷達、營收面精選。',
+  { t: '籌碼日報', label: '籌碼日報', v: 'tb-swing', tags: ['盤後'], d: '收盤後的一份整理：今日摘要、產業、籌碼、技術、均線轉強、處置動態，還有主動式 ETF 持股雷達、營收面精選。',
     b: ['可以回看之前的日子', '主動式 ETF 雷達：五檔主動式 ETF 每天買賣什麼、連續同向、資金潮汐', '營收面精選：當月營收大增、均線分數夠、成交值夠的前 10 檔'] },
-  { t: '盤後籌碼排行', label: '今日盤後籌碼排行', tags: ['盤後', '每週'], d: '看大戶手上的股票變多還是變少：籌碼暴增雷達、法人連買、主力大單、放空籌碼，還有每週的籌碼週報。',
+  { t: '盤後籌碼排行', label: '今日盤後籌碼排行', v: 'tb-chips', tags: ['盤後', '每週'], d: '看大戶手上的股票變多還是變少：籌碼暴增雷達、法人連買、主力大單、放空籌碼，還有每週的籌碼週報。',
     b: ['集保大戶資料每週五更新一次', '可以跟醞釀／發動交叉看'] },
-  { t: '均線分數排行', label: '均線分數排行', tags: ['盤後'], d: '幫每一檔打均線分數（滿分 15）：分數越高，代表位置越強、均線排得越整齊。',
+  { t: '均線分數排行', label: '均線分數排行', v: 'tb-ma', tags: ['盤後'], d: '幫每一檔打均線分數（滿分 15）：分數越高，代表位置越強、均線排得越整齊。',
     b: ['全市場前 60 名、昨天名次、連續上榜幾天', '族群平均分數排行：看哪一整群底子最硬', '打代號可以查單一檔'] },
-  { t: '創高黑龍（自動）', label: '創高黑龍', tags: ['盤後', '12:00 暫定'], d: '收盤後依均線分數＋收黑 K 挑出名單，附上過去績效回測；中午 12:00 先給一份暫定名單。',
+  { t: '創高黑龍（自動）', label: '創高黑龍', v: 'tb-heilong', tags: ['盤後', '12:00 暫定'], d: '收盤後依均線分數＋收黑 K 挑出名單，附上過去績效回測；中午 12:00 先給一份暫定名單。',
     b: ['12:00 暫定名單用盤中報價算，收盤後以正式名單為準', '回測看隔天各種出場方式的勝率'] },
-  { t: '創高黑選股（手動）', label: '創高黑選股', tags: ['盤後', '模擬'], d: '自己設定模組參數挑股，模擬帳戶照規則分批加減碼，看實際跑起來的績效。',
+  { t: '創高黑選股（手動）', label: '創高黑選股', v: 'tb-picker', tags: ['盤後', '模擬'], d: '自己設定模組參數挑股，模擬帳戶照規則分批加減碼，看實際跑起來的績效。',
     b: ['13:20 提醒今天要做的動作', '每一檔沒買的都寫清楚原因'] },
-  { t: '每日持股健診', label: '健診', tags: ['盤後'], d: '輸入你的持股，看每一檔現在的狀態與明天要守的價位。',
+  { t: '每日持股健診', label: '健診', v: 'tb-checkup', tags: ['盤後'], d: '輸入你的持股，看每一檔現在的狀態與明天要守的價位。',
     b: ['防守線：明日紅半、三日低、月線', '同時看籌碼、營收、本益比'] },
-  { t: '選股・個股研究', label: '問診', tags: ['盤後'], d: '條件選股（勾條件、拉門檻一次篩出來）＋個股問診（打代號一頁看完這檔的均線、族群、籌碼、營收、估值）。',
+  { t: '選股・個股研究', label: '問診', v: 'tb-diag', tags: ['盤後'], d: '條件選股（勾條件、拉門檻一次篩出來）＋個股問診（打代號一頁看完這檔的均線、族群、籌碼、營收、估值）。',
     b: ['選股條件越多，名單越少、越嚴格', '個股問診會給一句結論和明天要守的價', '「這家公司在做什麼」用白話講產業，列出同族群、同產業公司（點了就換那一檔）', '季報：近 8 季營收、毛利率、營益率、淨利率、EPS，近四季 EPS 與本益比', '盤中 10:00 後：今天在漲／跌什麼（盤中走勢、同族群有沒有一起動、當天新聞與公告、要留意的地方、後面看哪條防守線）'] },
-  { t: '營收成長榜', label: '營收成長榜', tags: ['每月'], d: '每月 10 號前公司陸續公布上個月營收，這裡把全市場排好：誰年增最多、公布後股價怎麼反應。',
+  { t: '營收成長榜', label: '營收成長榜', v: 'tb-revenue', tags: ['每月'], d: '每月 10 號前公司陸續公布上個月營收，這裡把全市場排好：誰年增最多、公布後股價怎麼反應。',
     b: ['一天更新三次，公布日自動記下來', '可以查單一檔的每月營收'] },
-  { t: '處置監獄', label: '處置監獄', tags: ['盤後'], d: '哪些股票被關（處置）、什麼時候出獄、哪些快被關（嫌疑名單）。被處置的股票要分盤撮合，進出很不順，事先知道比較好。',
+  { t: '處置監獄', label: '處置監獄', v: 'tb-jail', tags: ['盤後'], d: '哪些股票被關（處置）、什麼時候出獄、哪些快被關（嫌疑名單）。被處置的股票要分盤撮合，進出很不順，事先知道比較好。',
     b: ['一週出獄時間表、今日入獄、嫌疑名單門檻', '打代號查前科：以前被關過幾次'] },
-  { t: '估值河流圖', label: '估值河流圖', tags: ['盤後'], d: '把股價放進本益比河道裡，看現在是便宜、合理還是貴。',
+  { t: '估值河流圖', label: '估值河流圖', v: 'tb-river', tags: ['盤後'], d: '把股價放進本益比河道裡，看現在是便宜、合理還是貴。',
     b: ['河道四區＋分水嶺', '「均線分數 ≥10 × 便宜區」清單：位置強又不貴的'] },
-  { t: '研究室', label: '研究室', tags: ['大方向'], d: '盤勢以外的大方向，三個分頁：',
+  { t: '研究室', label: '研究室', v: 'tb-lab', tags: ['大方向'], d: '盤勢以外的大方向，三個分頁：',
     b: ['🌐 國際大事行事曆：非農、CPI、聯準會……台灣時間幾點公布、前值預期公布值，附名詞小學堂', '🛡 資金保護傘：融資水位、加權／櫃買是否跌破月線季線，合成「收傘／備傘／半開／全開」',
       '👥 內部人：董監、經理人每月加碼減碼，疊上 400 張大戶比'] },
 ];
@@ -13615,7 +13618,8 @@ function guideHtml(){
     '<div class="gd-tip">💡 從 LINE 點連結進來的，網頁是開在 LINE 裡面，沒辦法加到桌面——先點右上角選單，選「用瀏覽器開啟」，再照上面做。</div></div>';
   html += '<h3 class="gd-h">每個工具看什麼</h3><div class="gd-grid2">' + GUIDE_TOOLS.map((x, i) =>
     '<div class="gd-tool"><div class="gd-tt">' + x.t + x.tags.map((g) => '<i>' + g + '</i>').join('') + '</div><p>' + x.d + '</p><ul>' + x.b.map((s) => '<li>' + s + '</li>').join('') + '</ul>' +
-    '<button type="button" class="gd-go" data-gd-open="' + i + '">去看看 →</button></div>').join('') + '</div>';
+    '<div class="gd-btns"><button type="button" class="gd-go" data-gd-open="' + i + '">去看看 →</button>' +
+    (x.v ? '<button type="button" class="gd-go gd-vid" data-gd-video="' + x.v + '">▶ 看影片</button>' : '') + '</div></div>').join('') + '</div>';
   html += '<h3 class="gd-h">K 線圖小技巧</h3><div class="gd-card"><ul class="gd-ul">' +
     '<li>任何列表點股票名稱或代號，都會開這檔的 K 線圖；圖上的搜尋框可以直接換股票。</li>' +
     '<li>上方切 5 分／1 分／日線；⚙ 設定可以開關均線、VWAP、明天防守線（明日紅半、三日低、月線，只在日線）。</li>' +
@@ -13694,6 +13698,18 @@ document.getElementById('tutModal').addEventListener('click', (e) => {
   if (b) playTutorial(b.dataset.tut);
 });
 document.getElementById('tutBtn').addEventListener('click', () => openTutorialVideos());
+// 下方工具列每個面板標題旁加「▶ 影片教學」，點了直接播那個工具的影片（影片清單蓋在面板上面，關掉就回到面板）
+const TUT_PANEL_KEYS = { hwModal: 'tb-homework', swingModal: 'tb-swing', checkupModal: 'tb-checkup', chipsModal: 'tb-chips', watchModal: 'tb-watch',
+  jailModal: 'tb-jail', revModal: 'tb-revenue', maModal: 'tb-ma', heilongModal: 'tb-heilong', pickerModal: 'tb-picker', grailModal: 'tb-grail',
+  diagModal: 'tb-diag', trackModal: 'tb-track', rivModal: 'tb-river', labModal: 'tb-lab' };
+Object.entries(TUT_PANEL_KEYS).forEach(([id, key]) => {
+  const title = document.querySelector('#' + id + ' .chips-title');
+  if (!title || title.querySelector('.tut-panel-link')) return;
+  const a = document.createElement('button');
+  a.type = 'button'; a.className = 'tut-panel-link'; a.dataset.tutPlay = key; a.textContent = '▶ 影片教學';
+  a.addEventListener('click', (e) => { e.stopPropagation(); openTutorialVideos(key); });
+  title.appendChild(a);
+});
 document.getElementById('smVideos').addEventListener('click', () => openTutorialVideos());
 
 function openGuidePanel(){
@@ -13709,6 +13725,8 @@ document.getElementById('guideModal').addEventListener('click', (e) => { if (e.t
 document.getElementById('guideBody').addEventListener('click', (e) => {
   const home = e.target.closest('[data-gd-home]');
   if (home){ guideState.home = home.dataset.gdHome; const top = document.getElementById('guideInner').scrollTop; document.getElementById('guideBody').innerHTML = guideHtml(); document.getElementById('guideInner').scrollTop = top; return; }
+  const vid = e.target.closest('[data-gd-video]');
+  if (vid){ closeGuidePanel(); openTutorialVideos(vid.dataset.gdVideo); return; }
   const go = e.target.closest('[data-gd-open]');
   if (!go) return;
   const tool = GUIDE_TOOLS[Number(go.dataset.gdOpen)];

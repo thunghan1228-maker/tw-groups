@@ -135,6 +135,126 @@
    "file": "sc-history.mp4",
    "duration": 30.4,
    "tab": "history"
+  },
+  {
+   "key": "tb-homework",
+   "title": "每日功課",
+   "section": "下方工具列",
+   "file": "tb-homework.mp4",
+   "duration": 167.5,
+   "tab": null
+  },
+  {
+   "key": "tb-swing",
+   "title": "籌碼日報",
+   "section": "下方工具列",
+   "file": "tb-swing.mp4",
+   "duration": 109.9,
+   "tab": null
+  },
+  {
+   "key": "tb-checkup",
+   "title": "每日持股健診",
+   "section": "下方工具列",
+   "file": "tb-checkup.mp4",
+   "duration": 96.0,
+   "tab": null
+  },
+  {
+   "key": "tb-chips",
+   "title": "盤後籌碼排行",
+   "section": "下方工具列",
+   "file": "tb-chips.mp4",
+   "duration": 113.2,
+   "tab": null
+  },
+  {
+   "key": "tb-watch",
+   "title": "自選股",
+   "section": "下方工具列",
+   "file": "tb-watch.mp4",
+   "duration": 122.8,
+   "tab": null
+  },
+  {
+   "key": "tb-jail",
+   "title": "處置監獄",
+   "section": "下方工具列",
+   "file": "tb-jail.mp4",
+   "duration": 96.0,
+   "tab": null
+  },
+  {
+   "key": "tb-revenue",
+   "title": "營收成長榜",
+   "section": "下方工具列",
+   "file": "tb-revenue.mp4",
+   "duration": 87.2,
+   "tab": null
+  },
+  {
+   "key": "tb-ma",
+   "title": "均線分數排行",
+   "section": "下方工具列",
+   "file": "tb-ma.mp4",
+   "duration": 94.4,
+   "tab": null
+  },
+  {
+   "key": "tb-heilong",
+   "title": "創高黑龍（自動）",
+   "section": "下方工具列",
+   "file": "tb-heilong.mp4",
+   "duration": 88.9,
+   "tab": null
+  },
+  {
+   "key": "tb-picker",
+   "title": "創高黑選股（手動）",
+   "section": "下方工具列",
+   "file": "tb-picker.mp4",
+   "duration": 94.2,
+   "tab": null
+  },
+  {
+   "key": "tb-grail",
+   "title": "K棒組合選股",
+   "section": "下方工具列",
+   "file": "tb-grail.mp4",
+   "duration": 81.2,
+   "tab": null
+  },
+  {
+   "key": "tb-diag",
+   "title": "選股・個股研究",
+   "section": "下方工具列",
+   "file": "tb-diag.mp4",
+   "duration": 104.5,
+   "tab": null
+  },
+  {
+   "key": "tb-track",
+   "title": "個股訊號追蹤",
+   "section": "下方工具列",
+   "file": "tb-track.mp4",
+   "duration": 82.1,
+   "tab": null
+  },
+  {
+   "key": "tb-river",
+   "title": "估值河流圖",
+   "section": "下方工具列",
+   "file": "tb-river.mp4",
+   "duration": 81.6,
+   "tab": null
+  },
+  {
+   "key": "tb-lab",
+   "title": "研究室",
+   "section": "下方工具列",
+   "file": "tb-lab.mp4",
+   "duration": 87.0,
+   "tab": null
   }
  ]
 }

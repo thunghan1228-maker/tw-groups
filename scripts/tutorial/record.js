@@ -34,6 +34,14 @@ const CSS = `
   const page = await ctx.newPage();
   const warnings = [];
   page.on('pageerror', (e) => warnings.push('pageerror: ' + String(e).slice(0, 200)));
+  // 用文字找元素：sel 裡面、看得到、文字含 text 的，取文字最短的那個（最貼近那顆按鈕／那個標題）
+  await page.addInitScript(() => {
+    window.__tutFind = (sel, text) => {
+      const all = [...document.querySelectorAll(sel)].filter((e) => e.offsetParent !== null && (e.textContent || '').includes(text));
+      all.sort((a, b) => a.textContent.length - b.textContent.length);
+      return all[0] || null;
+    };
+  });
   await page.addInitScript(() => { try { localStorage.setItem('guideSeen', '1'); localStorage.setItem('brewHf', '{}'); localStorage.setItem('ghfHf', '{}'); localStorage.setItem('stHfOnly', '{}'); localStorage.setItem('bigOrderFilters', '{}'); } catch (_){} });
   await page.goto('http://127.0.0.1:' + port + '/');
   await page.waitForFunction(() => typeof lastData !== 'undefined' && lastData && lastData.groups && !lastData.mock && typeof mainForceRanking !== 'undefined' && mainForceRanking && mainForceRanking.length, null, { timeout: 90000 });
@@ -52,11 +60,25 @@ const CSS = `
   for (const [i, sc] of spec.scenes.entries()){
     if (sc.tab) await page.evaluate((k) => { openSignalCenter(); signalCenterState.activeTab = k; renderSignalCenter(); }, sc.tab);
     if (sc.eval) await page.evaluate(sc.eval);
+    if (sc.clickPick){   // JS 運算式，回傳要點的元素（例如 __tutFind('#swingTabs .signal-tab', '籌碼面')）
+      const ok = await page.evaluate((js) => { let el = null; try { el = eval(js); } catch (_){} if (!el) return false; el.click(); return true; }, sc.clickPick);
+      if (!ok) warnings.push('scene ' + i + ' clickPick not found: ' + sc.clickPick);
+    }
     if (sc.click){
       const ok = await page.evaluate((sel) => { const el = document.querySelector(sel); if (!el) return false; el.click(); return true; }, sc.click);
       if (!ok) warnings.push('scene ' + i + ' click not found: ' + sc.click);
     }
     await page.waitForTimeout(sc.settle || 900);
+    if (sc.pick){   // JS 運算式，回傳要框的元素：標上 data-tutmark，紅框框它（也會捲過去）
+      const ok = await page.evaluate((js) => {
+        document.querySelectorAll('[data-tutmark]').forEach((e) => e.removeAttribute('data-tutmark'));
+        let el = null; try { el = eval(js); } catch (_){}   // 找不到（例如 null.parentElement）當作沒找到，記警告，不要整支中斷
+        if (!el) return false;
+        el.setAttribute('data-tutmark', '1'); el.scrollIntoView({ block: 'center' }); return true;
+      }, sc.pick);
+      if (!ok) warnings.push('scene ' + i + ' pick not found: ' + sc.pick);
+      else { sc.target = '[data-tutmark="1"]'; await page.waitForTimeout(500); }
+    }
     if (sc.scroll){
       const ok = await page.evaluate((sel) => { const el = document.querySelector(sel); if (!el) return false; el.scrollIntoView({ block: 'center' }); return true; }, sc.scroll);
       if (!ok) warnings.push('scene ' + i + ' scroll not found: ' + sc.scroll);
