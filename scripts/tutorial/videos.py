@@ -90,8 +90,8 @@ VIDEOS = [
         "scenes": [
             {"say": "今日強勢股，挑的是族群分數前十大的族群裡，均線分數十二分以上的股票。族群分數就是族群裡每一檔均線分數的平均。",
              "cap": "族群分數前十大裡、均線分數 ≥12 的股票", "tab": "strongStocks", "target": TAB.format("strongStocks"), "settle": 2500},
-            {"say": "每一組標出族群的名次和平均分數；後面有星星，代表這個族群今天也有股票出現在形態觀察股。",
-             "cap": "族群名次、平均分數；⭐＝也在形態觀察股", "target": "#signalBody .st-ghead"},
+            {"say": "每一組標出族群的名次和平均分數；後面有星星，代表這個族群今天也有股票出現在盤中形態觀察股。",
+             "cap": "族群名次、平均分數；⭐＝也在盤中形態觀察股", "target": "#signalBody .st-ghead"},
             {"say": "第一欄時間，是這一次盤中大戶力站上百分之十的時間；還沒站上的寫一槓。均線分數是昨天收盤算好的，現價和大戶力是即時的。",
              "cap": "時間＝這一次大戶力站上 +10% 的時間", "target": "#signalBody .signal-col-labels.st-row"},
             {"say": "按盤中大戶力大於等於百分之十，只看大戶正在買的股票；再按一次就全部顯示。",
@@ -170,9 +170,9 @@ VIDEOS = [
         ],
     },
     {
-        "key": "sc-obs", "title": "形態觀察股", "section": SC, "tab": "obsWatch",
+        "key": "sc-obs", "title": "盤中形態觀察股", "section": SC, "tab": "obsWatch",
         "scenes": [
-            {"say": "形態觀察股：五十五個族群裡，最近十個交易日被創高黑龍選過至少兩次、均線分數十五分的股票，用即時報價分成五類。",
+            {"say": "盤中形態觀察股：五十五個族群裡，最近十個交易日被創高黑龍選過至少兩次、均線分數十五分的股票，用即時報價分成五類。",
              "cap": "近 10 天黑龍 ≥2 次、均線分數 15 的股票，分五類", "tab": "obsWatch", "target": TAB.format("obsWatch"), "settle": 3500},
             {"say": "第一類黑K出現，黑龍系統符合，可以小量布局；第二類今天噴出，等黑再加碼；第三類已經噴在高檔，等黑；第四類右肩打底，觀察分批；第五類跌比較深，慢慢來。",
              "cap": "【1】黑K出現 【2】今天噴出 【3】已噴高檔 【4】右肩打底 【5】有點深", "target": "#signalBody .obs-panel"},
@@ -273,7 +273,7 @@ VIDEOS += [
         "key": "tb-homework", "title": "每日功課", "section": TB, "tab": None,
         "scenes": [
             tb_intro("每日功課", "下方工具列的每日功課，是系統自動幫你做好的盯盤功課。", "下方工具列「每日功課」：自動做好的盯盤功課"),
-            tb_open("openHomeworkPanel", "裡面有四個分頁：空觀察、當沖多、多觀察和形態觀察股。系統自己把刀劍空、即將入獄、出獄、賽馬多、河流多、馬火多、族群名次這幾份清單交叉比對，只留下該盯的那幾檔，盤中每二十秒跟著首頁報價重算。",
+            tb_open("openHomeworkPanel", "裡面有四個分頁：空觀察、當沖多、多觀察和盤中形態觀察股。系統自己把刀劍空、即將入獄、出獄、賽馬多、河流多、馬火多、族群名次這幾份清單交叉比對，只留下該盯的那幾檔，盤中每二十秒跟著首頁報價重算。",
                     "四份功課：自動交叉比對清單，盤中每 20 秒重算", target="#hwBody .hw-tabs"),
             {"say": "空觀察是做空的功課：刀劍空、即將入獄、今天出獄、做空族群，同一檔出現在越多份清單，排越前面。族群後面的數字是今天的族群名次，有新手符號的，族群排越後面越安全；紅色三角形代表族群還很強，慢一點再打。",
              "cap": "空觀察：重疊越多份越優先；🔰越後面越安全、🔺族群還強", "click": '#hwBody [data-hw-tab="short"]', "target": "#hwBody .sw-rule", "settle": 1500},
@@ -285,8 +285,8 @@ VIDEOS += [
              "cap": "多觀察：挑 3 個族群，對照三日低／月線防守價", "click": '#hwBody [data-hw-tab="watch"]', "target": "#hwBody .hw-picks", "settle": 3000},
             {"say": "族群那一列會標打法：平均漲三趴以上是噴出等黑，零到三趴是收盤分批買黑，下跌就是拉回分批買黑。",
              "cap": "🔥噴出等黑・🛒收盤分批買黑・🛒拉回分批買黑", "target": "#hwBody .hw-ghead"},
-            {"say": "形態觀察股跟盤中訊號中心裡的是同一份，分成五類，訊號中心的影片有詳細介紹。",
-             "cap": "形態觀察股：跟訊號中心同一份", "click": '#hwBody [data-hw-tab="obs"]', "target": "#hwBody .hw-tabs", "settle": 9000},
+            {"say": "盤中形態觀察股跟盤中訊號中心裡的是同一份，分成五類，訊號中心的影片有詳細介紹。",
+             "cap": "盤中形態觀察股：跟訊號中心同一份", "click": '#hwBody [data-hw-tab="obs"]', "target": "#hwBody .hw-tabs", "settle": 9000},
         ],
     },
     {
@@ -325,6 +325,20 @@ VIDEOS += [
         ],
     },
     {
+        "key": "tb-grail", "title": "盤中K棒組合選股", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("K棒組合選股", "盤中K棒組合選股，在每日持股健診的右邊。十五個選股邏輯，盤中在固定的時間點自動掃全市場，把符合的名單抓出來。", "「盤中K棒組合選股」：15 個邏輯盤中定時掃全市場"),
+            tb_open("openGrailPanel", "盤中照各個邏輯的時間點，用證交所即時報價算，收盤後再用官方日K算一次收盤版。到時間進來看就好，不用自己設定。",
+                    "盤中定時用即時報價算，收盤後再算一次", settle=6000, pick=find("#grailModal *", "最新一輪")),
+            {"say": "最新一輪列出每個邏輯選到哪些股票，像波段穿惡、即將突破惡、三日飛龍；點邏輯名稱跳到那張卡片，點股票開K線圖。",
+             "cap": "最新一輪：每個邏輯選到哪些股票", "pick": visible("#grailModal .gr-latest")},
+            {"say": "上面可以選日期回看，也可以用族群、波段均線、隔日沖均線、成交量來篩，或照均線、漲跌、量、市值排序。",
+             "cap": "日期回看；族群、均線、成交量篩選；排序", "pick": visible("#grailModal .gr-controls")},
+            {"say": "每個邏輯旁邊有對答案的結果。名單只是符合條件，不是買賣指令。",
+             "cap": "名單＝符合條件，不是買賣指令", "pick": visible("#grailModal table")},
+        ],
+    },
+    {
         "key": "tb-chips", "title": "盤後籌碼排行", "section": TB, "tab": None,
         "scenes": [
             tb_intro("今日盤後籌碼排行", "盤後籌碼排行，看大戶手上的股票是變多還是變少。", "「盤後籌碼排行」：大戶手上的股票變多還變少"),
@@ -353,8 +367,8 @@ VIDEOS += [
              "cap": "即時報價、大戶力、均線分數、處置／注意、融資券／當沖",
              "eval": "(() => { const i = document.getElementById('wlAddInput'); i.value = '2330 2317 2454 3017 6505'; document.getElementById('wlAddBtn').click(); })()",
              "settle": 3500, "pick": visible("#watchModal table") + " || document.getElementById('wlAddInput').parentElement"},
-            {"say": "上面一排是分組，按加分組可以新增，也可以改名、刪除；有鬧鐘符號的，是形態觀察股自動帶進來的分組。",
-             "cap": "分組：＋分組、改名、刪除；⏰＝形態觀察股自動分組", "pick": "document.getElementById('wlGroupAdd').parentElement"},
+            {"say": "上面一排是分組，按加分組可以新增，也可以改名、刪除；有鬧鐘符號的，是盤中形態觀察股自動帶進來的分組。",
+             "cap": "分組：＋分組、改名、刪除；⏰＝盤中形態觀察股自動分組", "pick": "document.getElementById('wlGroupAdd').parentElement"},
             {"say": "這一排可以切換：即時報價；持股損益，填成本和張數算損益；盤後籌碼，看法人、主力、大戶、創高天數；或是一頁看完。",
              "cap": "即時報價／持股損益／盤後籌碼／一頁看完", "pick": find("#watchModal .wl-view", "持股損益") + ".parentElement"},
             {"say": "排序可以照自訂順序、漲跌幅、盤中大戶力或均線分數；按這組送去健診，就把整組帶去每日持股健診。",
@@ -439,20 +453,6 @@ VIDEOS += [
              "cap": "🔔 下午提醒今天要做的動作", "pick": find("#pickerModal .pk-btn-big", "模擬")},
             {"say": "選股分頁看每週名單、每日新進和條件池；實績分頁比較各種出場方式的績效。",
              "cap": "選股：每週名單、每日新進　實績：比較出場方式", "clickPick": find("#pickerModal .chart-tab", "選股"), "pick": find("#pickerModal .chart-tab", "選股") + ".parentElement", "settle": 3000},
-        ],
-    },
-    {
-        "key": "tb-grail", "title": "K棒組合選股", "section": TB, "tab": None,
-        "scenes": [
-            tb_intro("K棒組合選股", "K棒組合選股，十五個選股邏輯，在固定的時間點自動掃全市場，把符合的名單抓出來。", "「K棒組合選股」：15 個邏輯定時掃全市場"),
-            tb_open("openGrailPanel", "盤中照各個邏輯的時間點，用證交所即時報價算，收盤後再用官方日K算一次收盤版。到時間進來看就好，不用自己設定。",
-                    "盤中定時用即時報價算，收盤後再算一次", settle=6000, pick=find("#grailModal *", "最新一輪")),
-            {"say": "最新一輪列出每個邏輯選到哪些股票，像波段穿惡、即將突破惡、三日飛龍；點邏輯名稱跳到那張卡片，點股票開K線圖。",
-             "cap": "最新一輪：每個邏輯選到哪些股票", "pick": visible("#grailModal .gr-latest")},
-            {"say": "上面可以選日期回看，也可以用族群、波段均線、隔日沖均線、成交量來篩，或照均線、漲跌、量、市值排序。",
-             "cap": "日期回看；族群、均線、成交量篩選；排序", "pick": visible("#grailModal .gr-controls")},
-            {"say": "每個邏輯旁邊有對答案的結果。名單只是符合條件，不是買賣指令。",
-             "cap": "名單＝符合條件，不是買賣指令", "pick": visible("#grailModal table")},
         ],
     },
     {

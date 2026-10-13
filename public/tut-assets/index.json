@@ -161,6 +161,14 @@
    "tab": null
   },
   {
+   "key": "tb-grail",
+   "title": "盤中K棒組合選股",
+   "section": "下方工具列",
+   "file": "tb-grail.mp4",
+   "duration": 85.5,
+   "tab": null
+  },
+  {
    "key": "tb-chips",
    "title": "盤後籌碼排行",
    "section": "下方工具列",
@@ -214,14 +222,6 @@
    "section": "下方工具列",
    "file": "tb-picker.mp4",
    "duration": 94.2,
-   "tab": null
-  },
-  {
-   "key": "tb-grail",
-   "title": "K棒組合選股",
-   "section": "下方工具列",
-   "file": "tb-grail.mp4",
-   "duration": 81.2,
    "tab": null
   },
   {
