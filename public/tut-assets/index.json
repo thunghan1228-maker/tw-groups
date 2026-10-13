@@ -1,6 +1,46 @@
 {
  "videos": [
   {
+   "key": "basic-home",
+   "title": "首頁怎麼看",
+   "section": "新手入門",
+   "file": "basic-home.mp4",
+   "duration": 134.4,
+   "tab": null
+  },
+  {
+   "key": "basic-chart",
+   "title": "K線圖怎麼用",
+   "section": "新手入門",
+   "file": "basic-chart.mp4",
+   "duration": 166.3,
+   "tab": null
+  },
+  {
+   "key": "basic-ios",
+   "title": "iPhone／iPad 放到主畫面",
+   "section": "新手入門",
+   "file": "basic-ios.mp4",
+   "duration": 107.5,
+   "tab": null
+  },
+  {
+   "key": "basic-android",
+   "title": "Android 放到主畫面",
+   "section": "新手入門",
+   "file": "basic-android.mp4",
+   "duration": 53.3,
+   "tab": null
+  },
+  {
+   "key": "basic-pc",
+   "title": "電腦建立桌面捷徑",
+   "section": "新手入門",
+   "file": "basic-pc.mp4",
+   "duration": 82.7,
+   "tab": null
+  },
+  {
    "key": "sc-overview",
    "title": "盤中訊號中心怎麼用",
    "section": "盤中訊號中心",

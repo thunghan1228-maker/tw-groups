@@ -6,6 +6,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || '/opt/node22/lib/nod
 const ROOT = path.resolve(__dirname, '..', '..');
 const spec = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const SITE = process.env.TUT_SITE || 'https://tw-groups.judystock.workers.dev';
+const SHOTS = path.join(__dirname, '.cache', 'shots');
 const code = fs.readFileSync(path.join(ROOT, 'src', 'index.js'), 'utf8');
 const { HTML_PAGE } = new Function(code.slice(0, code.indexOf('const CHUNK_SIZE')) + '\nreturn { GROUPS, HTML_PAGE };')();
 const live = (p) => new Promise((resolve, reject) => https.get(SITE + p, { headers: { 'user-agent': 'Mozilla/5.0 tutorial-recorder' } }, (res) => {
@@ -14,6 +15,10 @@ const live = (p) => new Promise((resolve, reject) => https.get(SITE + p, { heade
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   if (url.pathname === '/'){ res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); return res.end(HTML_PAGE); }
+  // 圖解（illus.js）跟錄影前拍的網站截圖（放到主畫面那幾支用）
+  if (url.pathname === '/__tut/illus.js'){ res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8' }); return res.end(fs.readFileSync(path.join(__dirname, 'illus.js'))); }
+  const shot = url.pathname.match(/^\/__tut\/shots\/([a-z]+)\.png$/);
+  if (shot){ const f = path.join(SHOTS, shot[1] + '.png'); if (fs.existsSync(f)){ res.writeHead(200, { 'content-type': 'image/png' }); return res.end(fs.readFileSync(f)); } res.writeHead(404); return res.end(); }
   try { const [st, ct, body] = await live(req.url); res.writeHead(st, { 'content-type': ct }); res.end(body); } catch (e) { res.writeHead(502); res.end('{}'); }
 });
 const CSS = `
@@ -28,6 +33,22 @@ const CSS = `
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;
   const browser = await chromium.launch();
+  const ready = (p) => p.waitForFunction(() => typeof lastData !== 'undefined' && lastData && lastData.groups && !lastData.mock && typeof mainForceRanking !== 'undefined' && mainForceRanking && mainForceRanking.length, null, { timeout: 90000 });
+  if (spec.shots){   // 放到主畫面那幾支：先拍手機、iPad、電腦大小的網站截圖，圖解裡用
+    fs.mkdirSync(SHOTS, { recursive: true });
+    for (const [name, vp, mobile] of [['phone', { width: 390, height: 844 }, true], ['ipad', { width: 820, height: 1180 }, true], ['pc', { width: 1280, height: 980 }, false]]){
+      const c = await browser.newContext({ viewport: vp, isMobile: mobile, hasTouch: mobile, timezoneId: 'Asia/Taipei', locale: 'zh-TW' });
+      const p = await c.newPage();
+      await p.addInitScript(() => { try { localStorage.setItem('guideSeen', '1'); } catch (_){} });
+      await p.goto('http://127.0.0.1:' + port + '/');
+      await ready(p);
+      await p.addStyleTag({ content: '.toast,#toastBox,#obsAlertBox,#launchAlertBox,#tutModal{display:none!important;}' });
+      await p.evaluate(() => { try { closeSignalCenter(); } catch (_){} window.scrollTo(0, 0); });
+      await p.waitForTimeout(2500);
+      await p.screenshot({ path: path.join(SHOTS, name + '.png') });
+      await c.close();
+    }
+  }
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, recordVideo: { dir: path.dirname(spec.out), size: { width: 1280, height: 720 } },
     timezoneId: 'Asia/Taipei', locale: 'zh-TW' });
   const t0 = Date.now();
@@ -41,11 +62,33 @@ const CSS = `
       all.sort((a, b) => a.textContent.length - b.textContent.length);
       return all[0] || null;
     };
+    // K線圖是開在視窗裡的 iframe：__tutIn 找 iframe 裡的元素（點它用）；__tutBoxIn 在外面蓋一個一樣大的透明框（紅框框它用）
+    window.__tutIn = (sel, text) => {
+      const frames = [...document.querySelectorAll('#chartWindows iframe')];
+      const f = frames[frames.length - 1];
+      const doc = f && f.contentDocument;
+      if (!doc) return null;
+      if (!text) return doc.querySelector(sel);
+      const all = [...doc.querySelectorAll(sel)].filter((e) => (e.textContent || '').includes(text));
+      all.sort((a, b) => a.textContent.length - b.textContent.length);
+      return all[0] || null;
+    };
+    window.__tutBoxIn = (sel, text) => {
+      const el = window.__tutIn(sel, text);
+      if (!el) return null;
+      el.scrollIntoView({ block: 'nearest' });
+      const fr = el.ownerDocument.defaultView.frameElement.getBoundingClientRect(), r = el.getBoundingClientRect();
+      let p = document.getElementById('tutProxy');
+      if (!p){ p = document.createElement('div'); p.id = 'tutProxy'; document.body.appendChild(p); }
+      Object.assign(p.style, { position: 'fixed', pointerEvents: 'none', left: (fr.left + r.left) + 'px', top: (fr.top + r.top) + 'px', width: r.width + 'px', height: r.height + 'px' });
+      return p;
+    };
   });
   await page.addInitScript(() => { try { localStorage.setItem('guideSeen', '1'); localStorage.setItem('brewHf', '{}'); localStorage.setItem('ghfHf', '{}'); localStorage.setItem('stHfOnly', '{}'); localStorage.setItem('bigOrderFilters', '{}'); } catch (_){} });
   await page.goto('http://127.0.0.1:' + port + '/');
-  await page.waitForFunction(() => typeof lastData !== 'undefined' && lastData && lastData.groups && !lastData.mock && typeof mainForceRanking !== 'undefined' && mainForceRanking && mainForceRanking.length, null, { timeout: 90000 });
+  await ready(page);
   await page.addStyleTag({ content: CSS });
+  await page.addScriptTag({ url: '/__tut/illus.js' });
   await page.evaluate(() => { try { closeSignalCenter(); } catch (_){} window.scrollTo(0, 0); });
   await page.waitForTimeout(2500);   // 讓訊號、族群資料都進來
   const timeline = [];

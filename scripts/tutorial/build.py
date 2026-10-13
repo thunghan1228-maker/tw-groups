@@ -46,7 +46,7 @@ def build(video: dict) -> dict:
     raw_dir.mkdir(parents=True, exist_ok=True)
     spec_path = CACHE / f"{video['key']}.spec.json"
     out_base = raw_dir / video["key"]
-    spec_path.write_text(json.dumps({"key": video["key"], "title": video["title"], "subtitle": video.get("subtitle"), "out": str(out_base), "scenes": scenes}, ensure_ascii=False))
+    spec_path.write_text(json.dumps({"key": video["key"], "title": video["title"], "subtitle": video.get("subtitle"), "shots": video.get("shots"), "out": str(out_base), "scenes": scenes}, ensure_ascii=False))
     res = subprocess.run(["node", str(HERE / "record.js"), str(spec_path)], capture_output=True, text=True, timeout=900)
     if res.returncode != 0:
         raise RuntimeError(res.stderr[-2000:])
