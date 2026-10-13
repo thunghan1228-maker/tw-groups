@@ -71,21 +71,35 @@ def build(video: dict) -> dict:
             "duration": round(duration(dest), 1), "tab": video.get("tab"), "warnings": tl["warnings"]}
 
 
-def main(keys: list[str]) -> None:
+def write_index(entries: dict) -> int:
+    order = [v["key"] for v in VIDEOS]
+    videos = [entries[k] for k in order if k in entries]
+    (OUT / "index.json").write_text(json.dumps({"videos": videos}, ensure_ascii=False, indent=1) + "\n")
+    return len(videos)
+
+
+def main(args: list[str]) -> None:
+    """不給 key＝全部重錄；--index＝不錄影，把 public/tut-assets 裡已經有的 mp4 登記進清單（容器重啟後補清單用）。"""
     CACHE.mkdir(parents=True, exist_ok=True)
+    OUT.mkdir(parents=True, exist_ok=True)
     index_path = OUT / "index.json"
     existing = {v["key"]: v for v in json.loads(index_path.read_text()).get("videos", [])} if index_path.exists() else {}
+    if "--index" in args:
+        for video in VIDEOS:
+            mp4 = OUT / f"{video['key']}.mp4"
+            if mp4.exists():
+                existing[video["key"]] = {"key": video["key"], "title": video["title"], "section": video["section"], "file": mp4.name,
+                                          "duration": round(duration(mp4), 1), "tab": video.get("tab")}
+        print("index.json:", write_index(existing), "支")
+        return
     for video in VIDEOS:
-        if keys and video["key"] not in keys:
+        if args and video["key"] not in args:
             continue
         info = build(video)
         if info.pop("warnings"):
             print("  注意：", video["key"], "有找不到的元素，看 .cache/raw/*.timeline.json")
         existing[video["key"]] = info
-    order = [v["key"] for v in VIDEOS]
-    videos = [existing[k] for k in order if k in existing]
-    index_path.write_text(json.dumps({"videos": videos}, ensure_ascii=False, indent=1) + "\n")
-    print("index.json:", len(videos), "支")
+        print("index.json:", write_index(existing), "支")   # 每錄完一支就寫，錄到一半中斷也不會白錄
 
 
 if __name__ == "__main__":

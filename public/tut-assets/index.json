@@ -7,6 +7,134 @@
    "file": "sc-overview.mp4",
    "duration": 99.3,
    "tab": null
+  },
+  {
+   "key": "sc-now",
+   "title": "今日即時多／今日即時空",
+   "section": "盤中訊號中心",
+   "file": "sc-now.mp4",
+   "duration": 108.7,
+   "tab": "now"
+  },
+  {
+   "key": "sc-strong",
+   "title": "今日強勢股／今日弱勢股",
+   "section": "盤中訊號中心",
+   "file": "sc-strong.mp4",
+   "duration": 83.2,
+   "tab": "strongStocks"
+  },
+  {
+   "key": "sc-ghf",
+   "title": "十大多族群／十大空族群",
+   "section": "盤中訊號中心",
+   "file": "sc-ghf.mp4",
+   "duration": 51.2,
+   "tab": "groupHolderBull"
+  },
+  {
+   "key": "sc-bigorder",
+   "title": "盤中特大買單／特大賣單",
+   "section": "盤中訊號中心",
+   "file": "sc-bigorder.mp4",
+   "duration": 65.8,
+   "tab": "bigBuy"
+  },
+  {
+   "key": "sc-holder",
+   "title": "盤中大戶力多／大戶力空",
+   "section": "盤中訊號中心",
+   "file": "sc-holder.mp4",
+   "duration": 80.6,
+   "tab": "bigHolderForceBull"
+  },
+  {
+   "key": "sc-fourgate",
+   "title": "四項精選強多／強空",
+   "section": "盤中訊號中心",
+   "file": "sc-fourgate.mp4",
+   "duration": 78.1,
+   "tab": "fourGateBuy"
+  },
+  {
+   "key": "sc-flip",
+   "title": "主力翻多／主力翻空",
+   "section": "盤中訊號中心",
+   "file": "sc-flip.mp4",
+   "duration": 73.1,
+   "tab": "mainForceFlipBull"
+  },
+  {
+   "key": "sc-obs",
+   "title": "形態觀察股",
+   "section": "盤中訊號中心",
+   "file": "sc-obs.mp4",
+   "duration": 58.7,
+   "tab": "obsWatch"
+  },
+  {
+   "key": "sc-launch",
+   "title": "發動",
+   "section": "盤中訊號中心",
+   "file": "sc-launch.mp4",
+   "duration": 67.9,
+   "tab": "launchOnly"
+  },
+  {
+   "key": "sc-brew",
+   "title": "醞釀",
+   "section": "盤中訊號中心",
+   "file": "sc-brew.mp4",
+   "duration": 59.8,
+   "tab": "brewOnly"
+  },
+  {
+   "key": "sc-race333",
+   "title": "盤中333",
+   "section": "盤中訊號中心",
+   "file": "sc-race333.mp4",
+   "duration": 73.9,
+   "tab": "race333"
+  },
+  {
+   "key": "sc-board",
+   "title": "所有族群綜合表",
+   "section": "盤中訊號中心",
+   "file": "sc-board.mp4",
+   "duration": 38.5,
+   "tab": "groupCombinedBoard"
+  },
+  {
+   "key": "sc-combo12",
+   "title": "1+2多",
+   "section": "盤中訊號中心",
+   "file": "sc-combo12.mp4",
+   "duration": 33.2,
+   "tab": "combo12Bull"
+  },
+  {
+   "key": "sc-dragon",
+   "title": "創高黑龍",
+   "section": "盤中訊號中心",
+   "file": "sc-dragon.mp4",
+   "duration": 47.0,
+   "tab": "blackDragon"
+  },
+  {
+   "key": "sc-blade",
+   "title": "刀劍空(32)",
+   "section": "盤中訊號中心",
+   "file": "sc-blade.mp4",
+   "duration": 59.7,
+   "tab": "bladeShort"
+  },
+  {
+   "key": "sc-history",
+   "title": "歷史查詢",
+   "section": "盤中訊號中心",
+   "file": "sc-history.mp4",
+   "duration": 30.4,
+   "tab": "history"
   }
  ]
 }

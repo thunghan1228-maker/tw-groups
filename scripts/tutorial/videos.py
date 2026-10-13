@@ -184,7 +184,7 @@ VIDEOS = [
             {"say": "最上面的續抱勿追高，是賽馬多裡已經漲超過百分之七的，不是進場名單，已經漲多了；這一區早出現的在上面。",
              "cap": "續抱勿追高：漲超過 7%，不追", "target": "#signalBody .race-block"},
             {"say": "下面依序是三邊都有的、賽馬多加河流多、賽馬多、河流多、馬火多。每一列最前面是第一次進這個名單的時間，新出現的在上面；名次欄是盤中大戶力的排名。",
-             "cap": "出現時間（新的在上）；名次＝大戶力排名", "scroll": "#signalBody .race-block:nth-of-type(2)", "target": "#signalBody .race-block:nth-of-type(2) .race-col-labels"},
+             "cap": "出現時間（新的在上）；名次＝大戶力排名", "scroll": "#signalBody .race-block ~ .race-block", "target": "#signalBody .race-block ~ .race-block .race-col-labels"},
             {"say": "每一列下面一行列出門檻：族群排名、族內排名、距櫃買、昨天和前天的漲跌。上面的按鈕可以只看大戶力大於等於百分之十，或小於等於負百分之十。",
              "cap": "第二行：族排、族內、距櫃買、昨／前天％", "target": "#signalBody .race333-filter-btn"},
         ],
