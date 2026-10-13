@@ -382,7 +382,7 @@
   .race-row:has(.race-holder),.race-col-labels:has(.race-holder){max-width:900px;}  /* 盤中333專用（2026-09-24 使用者：壓縮鬆散的空白） */
   /* 盤中333：族群後面加均線分數欄（2026-09-24 使用者），名稱欄改固定寬（太長「…」），族群標籤跟均線分數每一列才會對齊，
      不會像「昇陽半導體」這種長名字把族群標籤往右推；多一欄所以整列最寬放到 1000px，電腦版才不會被擠到換行。 */
-  .r333-row,.r333-labels{max-width:1000px !important;}
+  .r333-row,.r333-labels{max-width:1070px !important;}   /* 2026-10-13 前面多一欄「出現」，放寬 70px，電腦版才不會換行 */
   .race-row.r333-row .race-name,.race-col-labels.r333-labels .race-name{flex:0 0 5.5em;max-width:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   /* 首頁的 .stock-row 是 justify-content:space-between：盤中333 列（也掛 stock-row）換行時，第一行的代號／名稱／族群／均線分數
      會被拉開散到整行，跟欄位標題對不齊；這裡改回靠左排。 */
@@ -2055,6 +2055,10 @@
     /* 盤中333 手機版第二行（大戶力／漲跌幅／漲跌／成交價／名次）：原本 14px＋8px 間距總寬超過螢幕，靠右對齊時最左邊的
        大戶力被切掉；改 12px、6px 間距剛好放得下，標題列的大戶力／名次格子寬度也改成跟資料列一樣。 */
     .r333-row .race-line2,.r333-labels .race-line2{font-size:12px;gap:6px;}
+    /* 2026-10-13 盤中333 前面多一欄「出現」：手機第一行（出現／代號／名稱／族群／均線分數）原本剛好塞滿，間距、名稱、時間各縮一點才放得下 */
+    .race-row.r333-row.r333-seen,.race-col-labels.r333-labels.r333-seen{column-gap:5px;}
+    .r333-seen .race-seen{flex:0 0 2.8em;font-size:12px;}
+    .race-row.r333-row.r333-seen .race-name,.race-col-labels.r333-labels.r333-seen .race-name{flex:0 0 4.8em;}
     .r333-row .race-line2 .race-holder,.r333-labels .race-line2 .race-holder{flex:0 0 6.5em;}
     .r333-row .race-line2 .race-badge,.r333-labels .race-line2 .race-badge-slot{flex:0 0 5em;min-width:0;}
     /* 名次那格：資料列字級 14px，標題列也用 14px 算 5em 才一樣寬；「🚀高於前天收盤%」放不下一行就在格子裡換行，不要把整排撐寬 */
@@ -2509,7 +2513,7 @@
         <li><b>主力翻多／主力翻空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
         <li><b>形態觀察股</b>：55 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
         <li><b>發動</b>、<b>醞釀</b>（2026-10-12 拆成兩個分頁，發動在左、醞釀在右，今天／昨天／前天切換兩頁共用；日期列後面的「盤中大戶力≥10%」只看盤中大戶力 ≥ +10% 的，昨天／前天照那天收盤時的大戶力，兩頁各自記）：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。今天發動過的股票也會列進今日即時多（時間＝第一次發動）：現在還站在箱頂上寫「🚀 發動」、發動過又跌回箱頂下寫「↩ 曾發動」（2026-10-13 分開標）；開盤前跟其他分頁一樣沿用最近交易日到 08:45，用那天收盤分。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看，發動分兩段：<b>發動</b>＝那天收盤還站在箱頂上、<b>曾發動</b>＝盤中發動過但收盤跌回箱頂下（箱頂旁邊標那天收盤）；今天盤中曾發動、現在回落的股票也會列在「曾發動」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
-        <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。<b>排序</b>：個股名單預設照盤中大戶力排，值大的在上、小的在下，沒有大戶力資料的排最後。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
+        <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。<b>排序</b>：每列最前面「出現」＝這檔第一次進那個名單的時間（這台電腦開著頁面時記的，每個名單各記各的），新出現的在上面、早的往下；「名次」欄還是照盤中大戶力排名（👑＝大戶力最強）。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
         <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：09:00 開盤～13:30 收盤（2026-10-05 起，以前 11:00 後才算；第一根 5 分K 也算），5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。每列後面標 123 黑龍：收黑就是這一波第幾次進場（①②③）、區1（紅，可積極加碼）或區2（黃，等突破再加碼）；問診日線圖、K線圖日線也會在進場的那根K棒上畫同樣的圓圈。</li>
@@ -5419,7 +5423,7 @@ function raceColLabelsHtml(opts){
   // 包一層.race-line2，跟資料列一致——手機版塞不下時這一群整個換到下一行，不會被切在畫面外。
   // 族群標籤欄也留一個對應的標題格子，資料列的族群標籤才會跟標題對齊（2026-09-24 使用者）。
   // 族群後面加「均線分數」（2026-09-24 使用者：族群跟盤中大戶力中間那塊空白放均線分數，15 分那個比法）。
-  return '<div class="race-col-labels r333-labels">' + (opts && opts.blade ? '<span class="race-seen"><b>出現</b></span><span class="race-rank-slot"><b>族排</b></span>' : '') + '<span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span><span class="race-star-slot"></span><span class="race-group-label"><b>族群</b></span>' +
+  return '<div class="race-col-labels r333-labels' + (opts && opts.seen && !opts.blade ? ' r333-seen' : '') + '">' + (opts && opts.blade ? '<span class="race-seen"><b>出現</b></span><span class="race-rank-slot"><b>族排</b></span>' : opts && opts.seen ? '<span class="race-seen"><b>出現</b></span>' : '') + '<span class="race-code"><b>代號</b></span><span class="race-name"><b>名稱</b></span><span class="race-star-slot"></span><span class="race-group-label"><b>族群</b></span>' +
     '<span class="race-ma-score"><b>均線分數</b></span>' +
     (opts && opts.blade ? '<span class="race-l2wrap"><span class="race-flags-slot"><b>交易條件</b></span><span class="race-l2nums">' : '') +
     '<span class="race-line2"><span class="race-holder"><b>盤中大戶力</b></span><span><b>漲跌幅</b></span><span><b>漲跌</b></span><span><b>成交價</b></span><span class="race-badge-slot"><b>' + badgeLabel + '</b></span></span>' +
@@ -5442,9 +5446,10 @@ function raceStockRowHtml(r, idx, opts){
   const badge = opts && opts.fire
     ? (r.inGroupRank === 1 ? '👑' : '') + (r.horse ? '🐎' : '') + (r.rocket !== null ? '🚀' + r.rocket.toFixed(1) : '')
     : opts && opts.blade ? bladeBadge(r)
-    : idx === 0 ? '👑' : idx <= 10 ? RACE_NUM[idx] : '';
+    : (r.rankIdx !== undefined ? r.rankIdx : idx) === 0 ? '👑' : (r.rankIdx !== undefined ? r.rankIdx : idx) <= 10 ? RACE_NUM[r.rankIdx !== undefined ? r.rankIdx : idx] : '';
   const rank = opts && opts.blade ? '<span class="race-seen" title="第一次進刀劍空名單的時間">' + (r.seenTs ? new Date(r.seenTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '—') + '</span>' +
-    '<span class="race-rank" title="族群第 ' + r.groupRank + ' 名">' + r.groupRank + (opts.zone || '') + '</span>' : '';
+    '<span class="race-rank" title="族群第 ' + r.groupRank + ' 名">' + r.groupRank + (opts.zone || '') + '</span>'
+    : opts && opts.seen ? '<span class="race-seen" title="第一次進這個名單的時間（這台電腦開著頁面時記的）">' + (r.seenTs ? new Date(r.seenTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '—') + '</span>' : '';
   const dates = (opts && opts.dates) || [];
   const dailyTitle = '現價對昨收 ' + fmt(r.pct) + '%'
     + (r.twoDay !== null && r.twoDay !== undefined ? '，對前天收盤 ' + fmt(r.twoDay) + '%' : '，對前天收盤：沒有昨天的日K')
@@ -5455,7 +5460,7 @@ function raceStockRowHtml(r, idx, opts){
   const price = Number(r.price);
   const hasPrice = Number.isFinite(price);
   const chg = hasPrice ? price - price / (1 + r.pct / 100) : 0;
-  return '<div class="race-row stock-row r333-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' + rank +
+  return '<div class="race-row stock-row r333-row' + (opts && opts.seen && !opts.blade ? ' r333-seen' : '') + '" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' + rank +
     '<span class="race-code">' + r.code + '</span><span class="race-name">' + r.name + star + '</span>' +
     '<span class="race-star-slot">' + wlStarHtml(r.code, r.name) + '</span>' +
     '<span class="sig-group" title="族群第 ' + r.groupRank + ' 名，族內第 ' + r.inGroupRank + ' 名">' + r.groupName + '</span>' +
@@ -5540,6 +5545,49 @@ function bladeRecordSeen(){
       Object.keys(localStorage).filter((k) => k.startsWith('bladeSeen:') && k !== bladeSeenKey()).forEach((k) => localStorage.removeItem(k));   // 只留今天
     } catch (_){}
   }
+}
+// 2026-10-13 使用者：盤中333 每個名單也加「出現」時間（第一次進那個名單幾點幾分），新出現的在上面、早的往下。
+// 跟刀劍空一樣是這台電腦用首頁報價即時算的，時間記在這台瀏覽器、一天一份；每個名單各記各的（同一檔在不同名單出現的時間不一定一樣）。
+// 記的是沒套「大戶力≥10%／≤-10%」篩選的完整名單，篩選開關不影響時間。
+function raceSeenKey(){ return 'raceSeen:' + twTodayStr(); }
+let raceSeenCache = null;
+function raceSeenMap(){
+  if (!raceSeenCache || raceSeenCache.key !== raceSeenKey()){
+    let map = {};
+    try { map = JSON.parse(localStorage.getItem(raceSeenKey()) || '{}') || {}; } catch (_){ map = {}; }
+    raceSeenCache = { key: raceSeenKey(), map };
+  }
+  return raceSeenCache.map;
+}
+function race333SeenLists(m){
+  return { over7: m.horses.filter((r) => r.pct > 7), triple: m.triple, both: m.both, horses: m.horses, rivers: m.rivers, fires: m.fires };
+}
+function raceRecordSeen(){
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的
+  const m = race333Model();
+  if (!m) return;
+  const all = raceSeenMap();
+  const now = Date.now();
+  let changed = false;
+  Object.entries(race333SeenLists(m)).forEach(([key, list]) => {
+    const map = all[key] || (all[key] = {});
+    (list || []).forEach((r) => { if (!map[r.code]){ map[r.code] = now; changed = true; } });
+  });
+  if (changed){
+    try {
+      localStorage.setItem(raceSeenKey(), JSON.stringify(all));
+      Object.keys(localStorage).filter((k) => k.startsWith('raceSeen:') && k !== raceSeenKey()).forEach((k) => localStorage.removeItem(k));   // 只留今天
+    } catch (_){}
+  }
+}
+// 照出現時間排：新出現的在上面（同一分鐘照原本的順序）；還沒記到時間的（剛進來）排最上面。
+// rankIdx＝原本的順序（大戶力排名），「名次」欄照它標，不跟著時間順序變。
+function raceBySeen(list, key){
+  const map = raceSeenMap()[key] || {};
+  return list.map((r, i) => [Object.assign({}, r, { seenTs: map[r.code] || null, rankIdx: i }), i]).sort((a, b) => {
+    const ta = a[0].seenTs ? Math.floor(a[0].seenTs / 60000) : Infinity, tb = b[0].seenTs ? Math.floor(b[0].seenTs / 60000) : Infinity;
+    return ta === tb ? a[1] - b[1] : (ta > tb ? -1 : 1);
+  }).map(([r]) => r);
 }
 // 多方打少／收割區域：只列名字的兩行（今日即時空那頁放在整頁最下面，刀劍空分頁接在名單下面）
 function raceBladeNotesHtml(m){
@@ -5627,26 +5675,26 @@ function race333Html(){
     // 2026-09-28 使用者：符合條件>7%放最上面，抬頭改「續抱勿追高」（不是「漲幅最高」）；裡面把 33／34 的門檻比例列出來。
     // 2026-10-12 使用者：抬頭「續抱勿追高」後面加「追高善設停損」六個字
     '<div class="race-block"><div class="race-head">🚀續抱勿追高，追高善設停損・賽馬多(33)>7%有 ' + over7 + ' 檔 ' + stamp + '</div>' +
-      '<div class="race-sub">「續抱勿追高」＝賽馬多裡漲超過 7% 的（不是可進場名單，已經漲多了）・' + condsNote + '・' + dailyNote + '</div>' +
-      (over7 ? raceStockListHtml(m.horses.filter((r) => r.pct > 7), { dates: m.dates, conditions: true, m, both3334: true }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '<div class="race-note">賽馬多裡沒有漲超過 7% 的</div>') + '</div>' +
+      '<div class="race-sub">「續抱勿追高」＝賽馬多裡漲超過 7% 的（不是可進場名單，已經漲多了）・「出現」＝第一次進這個名單的時間，新出現的在上面・' + condsNote + '・' + dailyNote + '</div>' +
+      (over7 ? raceStockListHtml(raceBySeen(m.horses.filter((r) => r.pct > 7), 'over7'), { seen: true, dates: m.dates, conditions: true, m, both3334: true }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '<div class="race-note">賽馬多裡沒有漲超過 7% 的</div>') + '</div>' +
     '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
-      '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・大戶力高的在上（沒有大戶力資料的排最後）・' + condsNote + '</div>' +
-      raceStockListHtml(triple, { fire: true, dates: m.dates, conditions: true, m, both3334: true }) + '</div>' +
+      '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
+      raceStockListHtml(raceBySeen(triple, 'triple'), { seen: true, fire: true, dates: m.dates, conditions: true, m, both3334: true }) + '</div>' +
     '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
-      '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・大戶力高的在上（沒有大戶力資料的排最後）・' + condsNote + '</div>' +
-      raceStockListHtml(both, { dates: m.dates, conditions: true, m, both3334: true }) + '</div>' +
+      '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
+      raceStockListHtml(raceBySeen(both, 'both'), { seen: true, dates: m.dates, conditions: true, m, both3334: true }) + '</div>' +
     // 2026-09-28 使用者：33／34 各自單獨也要列出來（之前只有跟別的條件合在一起才看得到）。
     '<div class="race-block"><div class="race-head">🐎賽馬多(33) ' + stamp + '</div>' +
-      '<div class="race-sub">族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・現價 ≥ 櫃買%・大戶力高的在上（沒有大戶力資料的排最後）・不限漲幅（超過 7% 的另外放最上面「續抱勿追高」，這裡兩邊都列）・' + condsNote + '</div>' +
-      raceStockListHtml(horses, { dates: m.dates, conditions: true, m, limit: m.horseLimit, limitLabel: '33' }) + '</div>' +
+      '<div class="race-sub">族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・現價 ≥ 櫃買%・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・不限漲幅（超過 7% 的另外放最上面「續抱勿追高」，這裡兩邊都列）・' + condsNote + '</div>' +
+      raceStockListHtml(raceBySeen(horses, 'horses'), { seen: true, dates: m.dates, conditions: true, m, limit: m.horseLimit, limitLabel: '33' }) + '</div>' +
     '<div class="race-block"><div class="race-head">🌊河流多(34) ' + stamp + '</div>' +
-      '<div class="race-sub">族群排名前 ' + m.riverLimit + '（共 ' + m.total + ' 個、比 33 的門檻寬）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・大戶力高的在上（沒有大戶力資料的排最後）・' + condsNote + '</div>' +
-      raceStockListHtml(rivers, { dates: m.dates, conditions: true, m, limit: m.riverLimit, limitLabel: '34' }) +
+      '<div class="race-sub">族群排名前 ' + m.riverLimit + '（共 ' + m.total + ' 個、比 33 的門檻寬）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
+      raceStockListHtml(raceBySeen(rivers, 'rivers'), { seen: true, dates: m.dates, conditions: true, m, limit: m.riverLimit, limitLabel: '34' }) +
       (m.riverOver.length ? '<div class="race-note">漲超過 7% 的另外 ' + m.riverOver.length + ' 檔（不一定符合 33 的門檻，沒算進「續抱勿追高」）：' + m.riverOver.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
       '</div>' +
     '<div class="race-block"><div class="race-head">🐎🚀馬火多(30) ' + stamp + '</div>' +
-      '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔（取漲幅前 ' + FIRE_MAX_ROWS + ' 檔），大戶力高的在上・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字</div>' +
-      raceStockListHtml(fires, { fire: true, dates: m.dates, conditions: true, m, limit: m.fireGroupTop, limitLabel: '30' }) +
+      '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔（取漲幅前 ' + FIRE_MAX_ROWS + ' 檔）・「出現」＝第一次進這個名單的時間，新出現的在上面・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字</div>' +
+      raceStockListHtml(raceBySeen(fires, 'fires'), { seen: true, fire: true, dates: m.dates, conditions: true, m, limit: m.fireGroupTop, limitLabel: '30' }) +
       (fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + fireLocked.length + ' 檔：' + fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
       '</div>';
 }
@@ -11619,6 +11667,7 @@ async function refresh(){
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     try { obsTick(); } catch (e) { /* 形態觀察股跳窗失敗不影響畫面 */ }
     try { bladeRecordSeen(); } catch (e) { /* 刀劍空出現時間記不起來不影響畫面 */ }
+    try { raceRecordSeen(); } catch (e) { /* 盤中333 出現時間記不起來不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
     // 2026-10-06 使用者：刀劍空一直顯示「族群行情還沒載入」——開盤前後首頁報價要 10 幾秒，報價回來後只有醞釀／發動會馬上重畫，
