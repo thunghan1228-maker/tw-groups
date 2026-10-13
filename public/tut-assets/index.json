@@ -21,7 +21,7 @@
    "title": "今日強勢股／今日弱勢股",
    "section": "盤中訊號中心",
    "file": "sc-strong.mp4",
-   "duration": 83.2,
+   "duration": 83.9,
    "tab": "strongStocks"
   },
   {
@@ -66,10 +66,10 @@
   },
   {
    "key": "sc-obs",
-   "title": "形態觀察股",
+   "title": "盤中形態觀察股",
    "section": "盤中訊號中心",
    "file": "sc-obs.mp4",
-   "duration": 58.7,
+   "duration": 59.4,
    "tab": "obsWatch"
   },
   {
@@ -141,7 +141,7 @@
    "title": "每日功課",
    "section": "下方工具列",
    "file": "tb-homework.mp4",
-   "duration": 167.5,
+   "duration": 168.6,
    "tab": null
   },
   {
@@ -181,7 +181,7 @@
    "title": "自選股",
    "section": "下方工具列",
    "file": "tb-watch.mp4",
-   "duration": 122.8,
+   "duration": 123.4,
    "tab": null
   },
   {
