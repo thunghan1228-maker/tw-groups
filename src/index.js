@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 01:59:26";
+const BUILD_STAMP = "2026-10-13 08:52:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2554,6 +2554,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <button class="sm-btn" id="smMoveWindow">⧉ 移到另一螢幕</button>
         <button class="sm-btn" id="smPinWindow" hidden title="開一個永遠浮在最上層的小視窗（可以拖到另一個螢幕），操作別的程式時也不會被蓋住">📌 釘選最上層</button>
         <button class="sm-btn" id="smRecenter">回到中央</button>
+        <button class="sm-btn" id="smMaximize" title="放大到整個畫面（再按一次還原）；標題列連按兩下也可以">⛶ 全螢幕</button>
         <button class="cm-icon-btn" id="smCollapse" aria-label="收合">－</button>
         <button class="cm-icon-btn" id="smClose" aria-label="隱藏">✕</button>
       </div>
@@ -10712,7 +10713,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 01:59:26';
+const BUILD_STAMP = '2026-10-13 08:52:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11115,6 +11116,7 @@ function renderSignalCenter(){
 }
 function positionSignalModal(){
   if (document.body.classList.contains('signal-window-mode')) return;
+  if (signalMaxRestore){ fillSignalModalToViewport(); return; }   // 全螢幕中重新打開：維持全螢幕
   const panel = document.getElementById('signalModalInner');
   // 跟CSS的@media(min-width:768px)斷點(iPad以上視窗放大)手動對齊：這裡
   // 為了置中要用JS算寬高、寫成inline style，inline style會蓋掉CSS的
@@ -11127,7 +11129,31 @@ function positionSignalModal(){
   panel.style.left = Math.max(0, (window.innerWidth - w) / 2) + 'px';
   panel.style.top = Math.max(10, (window.innerHeight - h) / 2) + 'px';
 }
-function recenterSignalModal(){ positionSignalModal(); }
+// 2026-10-13 使用者：訊號中心要能放大到整個畫面（上下左右都拉到邊）。⛶ 全螢幕＝貼滿整個瀏覽器畫面，再按一次還原原本的位置大小。
+let signalMaxRestore = null;
+function setSignalMaxButton(){
+  const b = document.getElementById('smMaximize');
+  if (b) b.textContent = signalMaxRestore ? '🗗 還原大小' : '⛶ 全螢幕';
+}
+function fillSignalModalToViewport(){
+  const panel = document.getElementById('signalModalInner');
+  panel.style.left = '0px'; panel.style.top = '0px';
+  panel.style.width = document.documentElement.clientWidth + 'px'; panel.style.height = window.innerHeight + 'px';
+}
+function toggleSignalMaximize(){
+  if (document.body.classList.contains('signal-window-mode')) return;
+  const panel = document.getElementById('signalModalInner');
+  if (signalMaxRestore){
+    const r = signalMaxRestore;
+    signalMaxRestore = null;
+    panel.style.left = r.left; panel.style.top = r.top; panel.style.width = r.width; panel.style.height = r.height;
+  } else {
+    signalMaxRestore = { left: panel.style.left, top: panel.style.top, width: panel.style.width, height: panel.style.height };
+    fillSignalModalToViewport();
+  }
+  setSignalMaxButton();
+}
+function recenterSignalModal(){ signalMaxRestore = null; setSignalMaxButton(); positionSignalModal(); }
 function openSignalCenter(){
   const datePill = document.getElementById('smDatePill');
   if (datePill) datePill.textContent = '交易日期 ' + twTodayStr().replace(/-/g, '/');
@@ -11230,9 +11256,11 @@ function initSignalWindowChrome(){
     left = Math.max(Math.min(0, slack), Math.min(Math.max(0, slack), left));
     top = Math.max(0, Math.min(window.innerHeight - 40, top));
     panel.style.left = left + 'px'; panel.style.top = top + 'px';
+    if (signalMaxRestore && (dx || dy)){ signalMaxRestore = null; setSignalMaxButton(); }
   });
   head.addEventListener('pointerup', () => { dragging = false; });
   head.addEventListener('pointercancel', () => { dragging = false; });
+  head.addEventListener('dblclick', (e) => { if (!e.target.closest('button')) toggleSignalMaximize(); });
 
   // 2026-09-24 使用者：視窗要能上下左右伸展。CSS 的 resize:both 只有右下角一個把手，這裡在覆蓋層上
   // 另外放 8 個把手（四邊＋四角）貼著視窗邊緣，拖哪一邊就往那一邊放大縮小；把手位置靠
@@ -11267,6 +11295,10 @@ function initSignalWindowChrome(){
         top = r.top + CORNER; height = Math.max(0, r.height - CORNER * 2);
         left = d === 'w' ? r.left - OUT : r.right - IN; width = OUT + IN;
       }
+      // 2026-10-13 使用者：視窗拉到貼齊畫面邊緣後，把手大半在畫面外抓不到、再也拉不動——把手一律留在畫面內
+      const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+      left = Math.max(0, Math.min(vw - width, left));
+      top = Math.max(0, Math.min(vh - height, top));
       h.style.left = left + 'px'; h.style.top = top + 'px';
       h.style.width = width + 'px'; h.style.height = height + 'px';
     });
@@ -11297,6 +11329,7 @@ function initSignalWindowChrome(){
       }
       panel.style.left = left + 'px'; panel.style.top = top + 'px';
       panel.style.width = width + 'px'; panel.style.height = height + 'px';
+      if (signalMaxRestore){ signalMaxRestore = null; setSignalMaxButton(); }
       syncResizeHandles();
     });
     const stop = () => { resizing = null; };
@@ -11310,6 +11343,7 @@ function initSignalWindowChrome(){
   // iPad 直橫切換或瀏覽器變窄後，視窗還是舊的寬度／位置，會凸出畫面左右邊；這時自動重新置中、套用新畫面的預設大小。
   window.addEventListener('resize', () => {
     if (overlay.hidden) return;
+    if (signalMaxRestore){ fillSignalModalToViewport(); return; }   // 全螢幕中：跟著新的畫面大小
     const r = panel.getBoundingClientRect();
     if (r.left < -1 || r.right > document.documentElement.clientWidth + 1) positionSignalModal();
   });
@@ -14934,6 +14968,7 @@ document.getElementById('signalBody').addEventListener('click', (e) => {
 document.getElementById('smClose').addEventListener('click', closeSignalCenter);
 document.getElementById('smCollapse').addEventListener('click', toggleSignalCollapse);
 document.getElementById('smRecenter').addEventListener('click', recenterSignalModal);
+document.getElementById('smMaximize').addEventListener('click', toggleSignalMaximize);
 document.getElementById('smMoveWindow').addEventListener('click', openSignalWindow);
 document.getElementById('smPinWindow').addEventListener('click', toggleSignalPin);
 document.getElementById('smHelp').addEventListener('click', () => {
