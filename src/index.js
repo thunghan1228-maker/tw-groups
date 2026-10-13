@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 10:05:17";
+const BUILD_STAMP = "2026-10-13 10:22:20";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4945,29 +4945,7 @@ function sigMaCellHtml(code, view){
   return '<span class="sig-ma">' + inner + '</span>';
 }
 
-function holderStrengthLabelHtml(r){
-  // strengthPct/holderLabel 是官方大戶力公式（大單淨額÷累計成交額×100%）；
-  // total_amount資料剛接上，尚未累積的舊bar會是null，不是0%。
-  if (r.strengthPct == null) {
-    return '<span class="sig-label hf-tier" title="累計成交額尚未達最低門檻(1億元)，資料還在累積中">大戶力資料累積中</span>';
-  }
-  const pctText = (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%';
-  if (r.holderLabel){
-    const cls = r.holderLabel.indexOf('買') >= 0 ? 'sig-bull' : 'sig-bear';
-    const tierTitle = r.holderLabel === '盤中大戶強力買進' ? '大戶力 ≥ +28%'
-      : r.holderLabel === '盤中大戶偏買' ? '大戶力介於 +12%（含）~ +28%'
-      : r.holderLabel === '盤中大戶強力賣出' ? '大戶力 ≤ -28%'
-      : r.holderLabel === '盤中大戶偏賣' ? '大戶力介於 -28% ~ -12%（含）'
-      : '';
-    return '<span class="sig-label hf-tier ' + cls + '" title="' + tierTitle + '">' + r.holderLabel + ' ' + pctText + '</span>';
-  }
-  // 2026-10-13 使用者：盤中大戶力 ≥ +10% 就要紅底白字（還沒到偏買標籤也一樣）；空方 ≤ -10% 綠底白字
-  const hot = r.strengthPct >= HOLDER_HOT_PCT ? ' sig-bull' : r.strengthPct <= -HOLDER_HOT_PCT ? ' sig-bear' : '';
-  const why = Math.abs(r.strengthPct) >= 12
-    ? '百分比已到 ±12%，但累計成交額不到 1 億或大單淨額不到 3,000 萬，還不算正式的偏買／偏賣'
-    : '還沒到正式訊號門檻 ±12%';
-  return '<span class="sig-label hf-tier' + hot + '" title="' + why + (hot ? '；大戶力 ' + (hot === ' sig-bull' ? '≥ +' : '≤ -') + HOLDER_HOT_PCT + '% 用紅／綠底標出來' : '') + '">大戶力 ' + pctText + '</span>';
-}
+// 2026-10-13 使用者：盤中大戶力 ≥ +10% 紅底白字（還沒到偏買標籤也一樣）；空方 ≤ -10% 綠底白字
 const HOLDER_HOT_PCT = 10;
 // 全族群個股旗標（可融資／可融券／可現股當沖／有股期／處置股）：後端一次回全部，幾分鐘抓一次，
 // 訊號中心每一列、大戶力排行都用同一份標。
@@ -5108,46 +5086,13 @@ function holderFadedHtml(timeline, side, currentRows, view){
       const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
       const pct = (v) => (v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%');
       const nowText = now && now.strengthPct !== null && now.strengthPct !== undefined ? '・' + (view.isPast || view.held ? '收盤' : '現在') + ' ' + pct(now.strengthPct) : '';
-      return '<div class="signal-row hf-faded" data-code="' + code + '" data-name="' + name + '">' +
+      return '<div class="signal-row hf-faded sig-hold-r" data-code="' + code + '" data-name="' + name + '">' +
         '<span class="sig-time" title="第一次進名單的時間">' + hmOf(t.firstTs) + '</span><span class="sig-code">' + code + '</span><span class="sig-name">' + name + '</span>' +
         '<span class="sig-group">' + lookupStockGroup(code) + '</span>' + sigMaCellHtml(code, view) +
-        '<span class="sig-label hf-tier hf-faded-label" title="進名單時 ' + pct(t.firstPct) + '；最' + (bull ? '高' : '低') + ' ' + pct(t.peakPct) + '（' + hmOf(t.peakTs) + '）' + nowText + '">曾進名單・最' + (bull ? '高' : '低') + ' ' + pct(t.peakPct) + '</span>' +
+        '<span class="sig-label hf-faded-label" title="進名單時 ' + pct(t.firstPct) + '；最' + (bull ? '高' : '低') + ' ' + pct(t.peakPct) + '（' + hmOf(t.peakTs) + '）' + nowText + '">曾進名單・最' + (bull ? '高' : '低') + ' ' + pct(t.peakPct) + '</span>' +
+        sigHolderCellHtml(code, new Map(now ? [[code, now]] : [])) +   // 盤中大戶力欄＝現在（收盤）的大戶力
         (quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '') + '</div>';
     }).join('') + '</div>';
-}
-function rankingRowHtml(r, view, holder){
-  const past = !!(view && view.isPast);
-  const backendName = r.name && r.name !== r.code ? r.name : null;
-  const name = backendName || lookupStockName(r.code);
-  const shownTs = r.firstTs || r.lastTs;
-  const timeLabel = shownTs ? new Date(shownTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
-  const group = lookupStockGroup(r.code);
-  // 看昨天／前天或沿用上一個交易日時，成交價／漲跌用那一天的日K收盤值，不是首頁現在的即時報價。
-  const quote = viewStockQuote(r.code, view);
-  const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
-  const priceCols = quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '';
-  return '<div class="signal-row' + (holder ? ' sig-hold-r' : '') + '" data-code="' + r.code + '" data-name="' + name + '">' +
-      '<span class="sig-time" title="' + (r.firstTs ? '第一次進名單（累計大單淨量 ≥ 500 張）' + timeLabel + (r.peakPct !== null && r.peakPct !== undefined ? '；那一邊最強 ' + (r.peakPct > 0 ? '+' : '') + Number(r.peakPct).toFixed(1) + '%（' + hmOf(r.peakTs) + '）' : '') : '主力副圖最後更新到' + timeLabel) + '；大戶力%是今天開盤到現在整天累加，不是只算這個時間點以後">' + timeLabel + '</span>' +
-      '<span class="sig-code">' + r.code + '</span>' +
-      '<span class="sig-name">' + name + '</span>' +
-      '<span class="sig-group">' + group + '</span>' +
-      sigMaCellHtml(r.code, view) +
-      holderStrengthLabelHtml(r) +
-      tradingEligibilityTagsHtml(r) +
-      (past ? '' : flagPillsHtml(r.code, { dispositionOnly: true })) +
-      (holder ? sigHolderCellHtml(r.code, holder) : '') +
-      priceCols +
-    '</div>';
-}
-// 欄位標題（2026-09-24 使用者：漲跌幅／漲跌／成交價沒有標題，大戶力買賣標籤也要對齊）：
-// 跟資料列共用.signal-row同一套固定欄寬規則，標題才會真的跟下面資料對齊。
-function rankingColLabelsHtml(firstMode){
-  return '<div class="signal-row signal-col-labels">' + (firstMode
-    ? '<span class="sig-time" title="第一次進名單（累計大單淨量 ≥ 500 張）的時間；大戶力%是當天開盤到現在整天累加"><b>進名單</b></span>'
-    : '<span class="sig-time" title="這檔主力副圖最後更新到幾點；大戶力%是當天開盤到現在整天累加，不是只算這個時間點以後"><b>更新</b></span>') + '<span class="sig-code"></span>' +
-    '<span class="sig-name"><b>名稱</b></span><span class="sig-group"><b>族群</b></span><span class="sig-ma"><b>均線分數</b></span>' +
-    '<span class="sig-label hf-tier"><b>大戶力</b></span>' +
-    '<span class="srow-right"><span class="spct"><b>漲跌幅</b></span><span class="schg"><b>漲跌</b></span><span class="sprice"><b>成交價</b></span></span></div>';
 }
 function rankingRowsHtml(rows, view){
   const past = !!(view && view.isPast);
@@ -5155,7 +5100,8 @@ function rankingRowsHtml(rows, view){
     return '<div class="signal-empty"><div class="se-title">目前沒有符合條件的排行資料</div>' +
       '<div class="se-sub">' + (past ? '那一天沒有主力資料，或沒有達門檻的個股。' : signalDataIsReal ? '今日主力資料尚未累積或尚無達門檻個股。' : '後端暫時連不上，稍後再試。') + '</div></div>';
   }
-  return rankingColLabelsHtml(rows.some((r) => r.firstTs)) + '<div class="signal-list">' + rows.map((r) => rankingRowHtml(r, view)).join('') + '</div>';
+  // 2026-10-13 使用者：盤中大戶力多／空的排版跟訊號列表一樣（訊號欄＋盤中大戶力欄，交易標籤放第二行）
+  return holderSignalColLabelsHtml(rows.some((r) => r.firstTs)) + '<div class="signal-list">' + rows.map((r) => holderSignalRowHtml(r, view)).join('') + '</div>';
 }
 function nowTabRowsHtml(events, rankingRows, view){
   if (!events.length && !rankingRows.length) return signalRowsHtml([], view);
@@ -5165,12 +5111,54 @@ function nowTabRowsHtml(events, rankingRows, view){
   // 訊號的barTs放在同一個時間軸上比較、排序。
   // 2026-10-13 使用者：今日即時多／空也要欄位標題（盤中大戶力、漲跌幅、漲跌、成交價），漲跌幅左邊多一欄盤中大戶力（只放 %）
   const holder = sigHolderMap(view), holdCls = ' sig-hold-r';
+  const timeline = rankingRows.length && view.date ? holderTimelineFor(view.date) : null;
   const merged = [
     ...events.map((ev) => ({ sortTs: ev.ts || 0, html: signalEventRowHtml(ev, view, holder, holdCls) })),
-    ...rankingRows.map((r) => ({ sortTs: r.lastTs || 0, html: rankingRowHtml(r, view, holder) })),
+    // 大戶力列：時間＝第一次進名單（跟盤中大戶力分頁一樣），排版跟訊號列一樣
+    ...rankingRows.map((r) => {
+      const t = timeline && timeline[r.code] && timeline[r.code][holderRowIsBull(r) ? 'bull' : 'bear'];
+      const row = t ? Object.assign({}, r, { firstTs: t.firstTs, peakPct: t.peakPct, peakTs: t.peakTs }) : r;
+      return { sortTs: row.firstTs || row.lastTs || 0, html: holderSignalRowHtml(row, view) };
+    }),
   ];
   merged.sort((a, b) => b.sortTs - a.sortTs);
   return signalColLabelsHtml(holdCls) + '<div class="signal-list">' + merged.map((m) => m.html).join('') + '</div>';
+}
+// 2026-10-13 使用者：上面這塊的排版跟下面訊號列表一樣——時間｜名稱｜族群｜均線分數｜訊號｜盤中大戶力｜漲跌幅｜漲跌｜成交價，
+// 第二行小字放累計大單、可融資券那些標籤（不擠在同一行把價格推到下一行）。
+function holderAmountText(v){
+  const a = Math.abs(Number(v) || 0);
+  return a >= 1e8 ? (a / 1e8).toFixed(2) + ' 億' : (a / 1e4).toFixed(1) + ' 萬';
+}
+// side＝'bull'／'bear'，沒給就看累計大單淨量的正負（盤中大戶力多／空分頁、今日即時多／空都用這一個）
+function holderSignalRowHtml(r, view, side){
+  const bull = side ? side === 'bull' : holderRowIsBull(r);
+  const name = (r.name && r.name !== r.code ? r.name : null) || lookupStockName(r.code);
+  const ts = r.firstTs || r.lastTs;
+  const time = ts ? hmOf(ts) : '--:--';
+  const group = lookupStockGroup(r.code);
+  const quote = viewStockQuote(r.code, view);
+  const changeAmt = quote ? (Number.isFinite(quote.changeAmt) ? quote.changeAmt : quote.price - quote.price / (1 + quote.changePercent / 100)) : 0;
+  const pct = r.strengthPct, has = pct !== null && pct !== undefined;
+  const hot = !!r.holderLabel || (has && (bull ? pct >= HOLDER_HOT_PCT : pct <= -HOLDER_HOT_PCT));
+  const label = r.holderLabel || (bull ? '盤中大戶力多' : '盤中大戶力空');
+  const note = '累計大單' + (bull ? '淨買 ' : '淨賣 ') + Math.abs(Number(r.netVolume) || 0).toLocaleString('en-US') + ' 張｜約 ' + holderAmountText(r.netAmount) +
+    (r.peakPct !== null && r.peakPct !== undefined && r.peakTs ? '｜最' + (bull ? '高 ' : '低 ') + (r.peakPct > 0 ? '+' : '') + Number(r.peakPct).toFixed(1) + '%（' + hmOf(r.peakTs) + '）' : '');
+  return '<div class="signal-row sig-hold-r" data-code="' + r.code + '" data-name="' + name + '">' +
+    '<span class="sig-time" title="' + (r.firstTs ? '第一次進名單（累計大單淨量 ≥ 500 張）' : '主力副圖最後更新') + '；大戶力%是當天開盤到現在整天累加">' + time + '</span>' +
+    '<span class="sig-code">' + r.code + '</span>' +
+    '<span class="sig-name">' + name + '</span>' +
+    (group ? '<span class="sig-group">' + group + '</span>' : '<span class="sig-group sig-group-empty"></span>') +
+    sigMaCellHtml(r.code, view) +
+    '<span class="sig-label' + (hot ? (bull ? ' sig-bull' : ' sig-bear') : '') + '" title="大戶力 ' + (bull ? '≥ +' : '≤ -') + HOLDER_HOT_PCT + '% 或有偏' + (bull ? '買／強力買進' : '賣／強力賣出') + '標籤的' + (bull ? '紅底' : '綠底') + '">' + label + '</span>' +
+    sigHolderCellHtml(r.code, new Map([[r.code, r]])) +
+    (quote ? stockValueColsHtml(quote.price, changeAmt, quote.changePercent) : '') +
+    signalNoteHtml(r.code, note) +
+  '</div>';
+}
+// 大戶力列的欄位標題：跟訊號列表同一套（firstMode＝時間欄寫「進名單」）
+function holderSignalColLabelsHtml(firstMode){
+  return signalColLabelsHtml(' sig-hold-r').replace('<b>時間</b>', firstMode ? '<b>進名單</b>' : '<b>時間</b>');
 }
 // 2026-10-13 使用者：盤中大戶力多釘在今日即時多最上面（跟今日即時空最上面的刀劍空一樣），時間＝第一次進名單，
 // 早進名單的在上面、新進的往下排；下面的訊號列表就不再混這些列（不重複）。
@@ -5183,7 +5171,7 @@ function nowBullHolderBlockHtml(view, rows){
   const dayText = view.isPast || view.held ? '（' + String(view.date || '').slice(5).replace('-', '/') + ' 的名單）' : '';
   return '<div class="race-block now-bull-holder"><div class="race-head">盤中大戶力多・' + list.length + ' 檔' + dayText + '</div>' +
     '<div class="race-sub">跟「盤中大戶力多」分頁同一份名單（累計大單淨量 ≥ 500 張）。時間＝第一次進名單，早進名單的在上面、新進的往下排；大戶力 ≥ +10% 紅底。下面才是依發生時間排序的多方訊號。</div>' +
-    (list.length ? rankingColLabelsHtml(list.some((r) => r.firstTs)) + '<div class="signal-list">' + list.map((r) => rankingRowHtml(r, view)).join('') + '</div>'
+    (list.length ? holderSignalColLabelsHtml(list.some((r) => r.firstTs)) + '<div class="signal-list">' + list.map((r) => holderSignalRowHtml(r, view, 'bull')).join('') + '</div>'
       : '<div class="race-note">目前沒有累計大單淨買 ≥ 500 張的股票。</div>') + '</div>';
 }
 // 2026-10-04 使用者：「今日即時」拆成多／空兩頁。空的這一頁集中放刀劍空（即時算出來的名單，沒有發生時間，當一個
@@ -5231,23 +5219,94 @@ function signalPinState(el, scroller){
   if (y <= top + scroller.clientHeight * 2 / 3) return { mode: 'line', y: y };
   return { mode: 'keep' };
 }
+// 2026-10-13 使用者：手機／iPad 捲到哪裡就停在哪裡，不要自己跑回最上面。
+// (1) 手指還在滑、或剛滑完還在慣性捲動（1.5 秒內）先不換內容，停下來再換——iOS 在捲動中換內容／設捲動位置會被打斷、跳位置；
+// (2) 換內容時用畫面最上面看得到的那一列股票對齊（換完同一檔還在同一個位置），不是用總高度差去推（下面的區塊變長變短也會被推走）；
+// (3) 記住分頁跟捲到的位置（這個瀏覽器分頁的 sessionStorage），網頁被重新載入（切 App 回來自動更新、iOS 記憶體不足重載）後回到原處。
+let signalTouching = false, signalTouchMoved = false, signalScrollAt = 0, signalProgScrollAt = 0, signalDeferTimer = null, signalSaveTimer = null;
+let signalRestore = null;   // { tab, top, until }：重新載入後要捲回去的位置
+const SIG_VIEW_KEY = 'sigView';
+function signalUserBusy(){ return signalTouching || Date.now() - signalScrollAt < 1500; }
+function setSignalScrollTop(scroller, v){
+  if (!scroller || !Number.isFinite(v) || Math.abs(scroller.scrollTop - v) < 1) return;
+  signalProgScrollAt = Date.now();
+  scroller.scrollTop = v;
+}
+function saveSignalView(){
+  try {
+    const sc = signalScroller();
+    sessionStorage.setItem(SIG_VIEW_KEY, JSON.stringify({ tab: signalCenterState.activeTab, top: sc ? Math.round(sc.scrollTop) : 0, at: Date.now() }));
+  } catch (_){}
+}
+(function(){
+  const inSignal = (t) => t && t.closest && t.closest('#signalModalInner');
+  document.addEventListener('touchstart', (e) => { if (inSignal(e.target)){ signalTouching = true; signalTouchMoved = false; } }, { passive: true, capture: true });
+  document.addEventListener('touchmove', () => { if (signalTouching) signalTouchMoved = true; }, { passive: true, capture: true });
+  const end = () => { if (!signalTouching) return; signalTouching = false; if (signalTouchMoved) signalScrollAt = Date.now(); };
+  document.addEventListener('touchend', end, { passive: true, capture: true });
+  document.addEventListener('touchcancel', end, { passive: true, capture: true });
+  document.addEventListener('click', (e) => { if (inSignal(e.target)) signalScrollAt = 0; }, true);   // 點按鈕＝停下來要看結果，不用再等
+  document.addEventListener('scroll', (e) => {
+    const t = e.target;
+    if (!t || (t.id !== 'signalModalInner' && t.id !== 'signalBody')) return;
+    if (Date.now() - signalProgScrollAt > 150){ signalScrollAt = Date.now(); signalRestore = null; }   // 使用者自己捲的（不是程式設的）
+    clearTimeout(signalSaveTimer);
+    signalSaveTimer = setTimeout(saveSignalView, 300);
+  }, { passive: true, capture: true });
+})();
+function signalAnchor(el, scroller){
+  const top = scroller.getBoundingClientRect().top + scroller.clientTop;
+  const seen = {};
+  for (const n of el.querySelectorAll('[data-code]')){
+    const c = n.dataset.code;
+    seen[c] = (seen[c] || 0) + 1;
+    const r = n.getBoundingClientRect();
+    if (r.height && r.bottom > top + 1) return { code: c, nth: seen[c], y: r.top };
+  }
+  return null;
+}
+function signalFindAnchor(el, a){
+  let k = 0;
+  for (const n of el.querySelectorAll('[data-code]')){ if (n.dataset.code === a.code && ++k === a.nth) return n; }
+  return null;
+}
 function replaceSignalHtml(el, key, html){
   if (!el) return;
   if (signalBodyRendered.key === key && signalBodyRendered.html === html) return;
-  const scroller = signalScroller();
   const sameView = signalBodyRendered.key === key;
+  if (sameView && signalUserBusy()){
+    // 正在滑：這一輪先不換，停下來後再補畫一次
+    if (!signalDeferTimer) signalDeferTimer = setTimeout(() => {
+      signalDeferTimer = null;
+      try { if (!document.getElementById('signalModal').hidden) renderSignalCenter(); } catch (_){}
+    }, 1600);
+    return;
+  }
+  const scroller = signalScroller();
   const prevTop = scroller ? scroller.scrollTop : 0;
   const prevHeight = scroller ? scroller.scrollHeight : 0;
   const pin = scroller && sameView && prevTop > 0 ? signalPinState(el, scroller) : null;
+  const anchor = scroller && sameView && prevTop > 0 && !pin ? signalAnchor(el, scroller) : null;
   el.innerHTML = html;
   if (scroller){
     const line = pin && pin.mode === 'line' ? el.querySelector(SIGNAL_PIN_SELECTOR) : null;
-    if (line) scroller.scrollTop += line.getBoundingClientRect().bottom - pin.y;
-    else if (pin && pin.mode === 'keep') scroller.scrollTop = prevTop;
-    else if (sameView && prevTop > 0) scroller.scrollTop = prevTop + (scroller.scrollHeight - prevHeight);
-    else if (!sameView) scroller.scrollTop = 0;
+    if (line) setSignalScrollTop(scroller, scroller.scrollTop + line.getBoundingClientRect().bottom - pin.y);
+    else if (pin && pin.mode === 'keep') setSignalScrollTop(scroller, prevTop);
+    else if (sameView && prevTop > 0){
+      const n = anchor && signalFindAnchor(el, anchor);
+      setSignalScrollTop(scroller, n ? scroller.scrollTop + n.getBoundingClientRect().top - anchor.y : prevTop + (scroller.scrollHeight - prevHeight));
+    } else if (!sameView) setSignalScrollTop(scroller, 0);
+    // 重新載入後第一次畫到原本那個分頁：捲回原本的位置（內容還在載入、不夠長時，之後幾輪再補，最多 30 秒）
+    if (signalRestore && signalRestore.tab === signalCenterState.activeTab){
+      if (Date.now() > signalRestore.until) signalRestore = null;
+      else {
+        setSignalScrollTop(scroller, Math.min(signalRestore.top, scroller.scrollHeight - scroller.clientHeight));
+        if (scroller.scrollTop >= signalRestore.top - 2) signalRestore = null;
+      }
+    }
   }
   signalBodyRendered = { key: key, html: html };
+  if (!sameView) saveSignalView();
 }
 
 // ---- 盤中打 333：33 賽馬多／34 河流多／188 做多族群／199 做空族群 ----
@@ -10814,7 +10873,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 10:05:17';
+const BUILD_STAMP = '2026-10-13 10:22:20';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15191,6 +15250,14 @@ if (CHART_WINDOW_MODE){
   }
   initSignalWindowChrome();
   updatePinButton();  // 電腦版 Chrome／Edge 才有「📌 釘選最上層」
+  // 網頁被重新載入（切 App 回來自動更新、iOS 記憶體不足重載）：回到原本的分頁跟捲到的位置（3 小時內）
+  try {
+    const sv = JSON.parse(sessionStorage.getItem(SIG_VIEW_KEY) || 'null');
+    if (sv && Date.now() - sv.at < 3 * 3600000 && SIGNAL_KINDS.some((k) => k.key === sv.tab)){
+      signalCenterState.activeTab = sv.tab;
+      if (sv.top > 0) signalRestore = { tab: sv.tab, top: sv.top, until: Date.now() + 30000 };
+    }
+  } catch (_){}
   openSignalCenter(); // 盤中訊號中心預設常駐顯示，不用點才出現；要隱藏就按✕，要收合成小條就按－
 
   refresh();
