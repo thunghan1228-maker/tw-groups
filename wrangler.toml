@@ -11,3 +11,8 @@ id = "d1563f4cd9344a00a60b386c7ce82778"
 
 [triggers]
 crons = ["*/15 * * * *"]
+
+# 教學影片（2026-10-13）：public/tut-assets/*.mp4 跟影片清單 index.json；影片網址 /videos/*.mp4 由 Worker 處理 Range
+[assets]
+directory = "./public"
+binding = "ASSETS"

@@ -549,10 +549,34 @@ async function notifyDiscordUsageAnomaly(env, result) {
   });
 }
 
+// 教學影片（2026-10-13 使用者：訊號教學、下方工具列各功能做影音教學）：mp4 放在 Workers 靜態檔案 public/tut-assets/，
+// 網址用 /videos/<名字>.mp4 經過這裡：iPhone／iPad 的 Safari 播影片一定要 Range（206 分段），靜態檔案有沒有支援文件沒寫，這裡自己切。
+async function serveTutorialVideo(request, env, url) {
+  const name = url.pathname.slice("/videos/".length);
+  if (!/^[a-z0-9_-]{1,60}[.]mp4$/.test(name) || !env.ASSETS) return new Response("not found", { status: 404 });
+  const res = await env.ASSETS.fetch(new Request(new URL("/tut-assets/" + name, url.origin).toString()));
+  if (!res.ok) return new Response("not found", { status: 404 });
+  const buf = await res.arrayBuffer();
+  const size = buf.byteLength;
+  const headers = { "content-type": "video/mp4", "accept-ranges": "bytes", "cache-control": "public, max-age=600" };
+  const head = request.method === "HEAD";
+  const m = /^bytes=([0-9]*)-([0-9]*)$/.exec(String(request.headers.get("range") || "").trim());
+  if (m && (m[1] !== "" || m[2] !== "")) {
+    let start, end;
+    if (m[1] === "") { start = Math.max(0, size - parseInt(m[2], 10)); end = size - 1; }
+    else { start = parseInt(m[1], 10); end = m[2] === "" ? size - 1 : Math.min(parseInt(m[2], 10), size - 1); }
+    if (!(start <= end) || start >= size) return new Response(null, { status: 416, headers: { "content-range": "bytes */" + size } });
+    return new Response(head ? null : buf.slice(start, end + 1), { status: 206,
+      headers: Object.assign({}, headers, { "content-range": "bytes " + start + "-" + end + "/" + size, "content-length": String(end - start + 1) }) });
+  }
+  return new Response(head ? null : buf, { headers: Object.assign({}, headers, { "content-length": String(size) }) });
+}
+
 export default {
   async fetch(request, env, ctx) {
     recordSampledRequest(env, ctx);
     const url = new URL(request.url);
+    if (url.pathname.indexOf("/videos/") === 0) return await serveTutorialVideo(request, env, url);
     let barsRequest = null;
     if (url.pathname.indexOf("/api/bars1m/") === 0) {
       barsRequest = { isOneMin: true, code: url.pathname.slice("/api/bars1m/".length) };

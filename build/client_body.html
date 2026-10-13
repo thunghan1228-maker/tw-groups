@@ -992,6 +992,21 @@
   .guide-btn.pulse{animation:gdPulse 1.6s ease-in-out 4;border-color:#f59e0b;}
   @keyframes gdPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0);}50%{box-shadow:0 0 0 4px rgba(245,158,11,.45);}}
   .gd-inner{max-width:980px;}
+  /* 影片教學（2026-10-13） */
+  .tut-modal{z-index:230;}   /* 蓋過訊號中心（101）、發動／形態觀察股提醒卡片（210／211） */
+  .tut-inner{max-width:1000px;height:auto;max-height:94vh;}
+  #tutPlayer video{width:100%;max-height:62vh;background:#000;border-radius:10px;display:block;}
+  .tut-now{font-size:17px;font-weight:800;margin:8px 2px 4px;color:var(--text);}
+  .tut-sec{font-size:15px;font-weight:800;color:var(--accent);margin:14px 2px 6px;}
+  .tut-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;}
+  .tut-item{display:flex;align-items:center;gap:8px;text-align:left;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);
+    font:600 15px/1.35 inherit;cursor:pointer;font-family:inherit;}
+  .tut-item:hover{border-color:var(--accent);}
+  .tut-item.active{background:#7c3aed;border-color:#7c3aed;color:#fff;}
+  .tut-item .tut-dur{margin-left:auto;font-size:12px;opacity:.75;white-space:nowrap;}
+  .tut-empty{color:var(--muted);padding:12px 2px;}
+  .sm-btn.sm-video-btn{background:#7c3aed;border-color:#7c3aed;color:#fff;}
+  .help-video-link{display:inline-block;margin-left:6px;font-size:12px;font-weight:800;color:#7c3aed;cursor:pointer;white-space:nowrap;}
   .gd-tag{display:inline-block;border:1px solid var(--up);color:var(--up);font-size:12px;font-weight:800;border-radius:4px;padding:2px 10px;margin-top:4px;letter-spacing:2px;}
   .gd-title{font-size:28px;font-weight:900;color:var(--up);margin:10px 0 6px;}
   .gd-lead{font-size:14px;line-height:1.8;color:var(--muted);margin:0 0 8px;}
@@ -2193,7 +2208,8 @@
     <div class="market-strength-bar" id="otcStrengthBox"></div>
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
-      <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照莊爸新手教學頁） -->
+      <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>
+      <button class="alert-toggle guide-btn" id="tutBtn">🎬 影片教學</button>  <!-- 2026-10-13 使用者：訊號教學、工具列各功能的影音教學（女聲旁白＋字幕） -->  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照莊爸新手教學頁） -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
   </div>
@@ -2328,6 +2344,16 @@
       <button class="cm-icon-btn" id="guideClose" aria-label="關閉">✕</button>
     </div>
     <div id="guideBody"></div>
+  </div>
+</div>
+<div class="chips-modal tut-modal" id="tutModal" hidden>
+  <div class="chips-inner tut-inner">
+    <div class="chips-head">
+      <div><div class="chips-title">🎬 影片教學</div><div class="chips-sub">每個功能一支 1～2 分鐘的影片（女聲旁白＋字幕＋紅框標出要看的地方）。影片裡的數字是錄影那時候的行情，以實際畫面為準；文字說明在「? 訊號教學」。</div></div>
+      <button class="cm-icon-btn" id="tutClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="tutPlayer"></div>
+    <div id="tutBody"></div>
   </div>
 </div>
 <!-- 2026-10-10 使用者：照莊爸「國際大事行事曆」（zhuang.tw/calendar）做，放進下方導覽列第 15 顆「研究室」 -->
@@ -2509,6 +2535,7 @@
       <div class="sm-actions">
         <span class="sm-date-pill" id="smDatePill"></span>
         <button class="sm-btn" id="smHelp">? 訊號教學</button>
+        <button class="sm-btn sm-video-btn" id="smVideos" title="每個分頁一支 1～2 分鐘的教學影片（女聲旁白＋字幕）">🎬 影片教學</button>
         <button class="sm-btn" id="smMoveWindow">⧉ 移到另一螢幕</button>
         <button class="sm-btn" id="smPinWindow" hidden title="開一個永遠浮在最上層的小視窗（可以拖到另一個螢幕），操作別的程式時也不會被蓋住">📌 釘選最上層</button>
         <button class="sm-btn" id="smRecenter">回到中央</button>
@@ -2526,7 +2553,7 @@
         <li><b>十大多族群</b>（原精選十大多空族群的多方）：今天漲幅前10大族群，各取大戶力最強的前5檔個股；按「大戶力≥10%」只看大戶力 ≥ +10% 的。</li>
         <li><b>十大空族群</b>（原精選十大多空族群的空方）：今天跌幅前10大族群，各取大戶力最負（賣超）的前5檔個股，名次從最弱的數；按「大戶力≤-10%」只看大戶力 ≤ −10% 的。</li>
         <li><b>盤中特大買單／賣單</b>：同一秒內大單連續敲進／倒出（同秒合計 ≥100 張或 ≥3,000 萬，觸發時大戶力要同向）；合計 ≥300 張或 ≥5,000 萬標「瞬間特大」。訊號很多時用上方篩選鈕縮減（可同時開幾個）：只看特大單、金額≥1億、族群前10名（族群同步漲幅／跌幅前 10 名）、每檔只留最大一筆（同一檔一天觸發好幾次，只留到目前為止金額最大的，之後有更大的會換成新的）、每檔只留最新一筆（只留最近發生的那筆，看誰剛剛有大單進來；跟最大一筆二選一）；分頁上的數字會跟著篩選變。</li>
-        <li><b>盤中大戶力</b>：個股大戶買賣力道明顯轉強或轉弱。每列最前面的時間是「這檔主力副圖最後更新到幾點」，不是「資料只算到這個時間點」——大戶力%一直都是當天開盤到現在整天累加；越接近收盤，越多股票這欄會顯示接近的時間（因為大家幾乎都還在更新），不代表比較早的資料不見了。</li>
+        <li><b>盤中大戶力</b>：盤中大戶力多＝今天開盤到現在累計大單淨買 ≥ 500 張的股票（大單＝單筆 ≥ 20 張的成交），盤中大戶力空＝累計淨賣 ≥ 500 張。每列最前面的時間是「第一次進名單」的時間，最新進名單的在最上面；早上進過、後來掉出去的列在最下面「曾進名單」。大戶力%＝（大單買進金額－大單賣出金額）÷ 今天累計成交金額，整天累加；≥ +10% 紅底、≤ −10% 綠底，累計成交額 ≥ 1 億且大單淨額 ≥ 3,000 萬時，±12% 以上標偏買／偏賣、±28% 以上標強力買進／賣出。第二行小字寫累計淨買（賣）張數、金額、當天最高（低）的大戶力。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
         <li><b>主力翻多／主力翻空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
         <li><b>形態觀察股</b>：55 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
@@ -13601,6 +13628,74 @@ function guideHtml(){
     '<div class="mc-foot">本頁只說明工具怎麼操作，不構成投資建議；投資有風險，盈虧自負。</div>';
   return html;
 }
+// ---- 影片教學（2026-10-13 使用者：訊號教學的文字之外，每個功能一支影音教學；初學者看文字跟影片就懂，不用再口頭解釋）----
+// 影片跟清單放在 Workers 靜態檔案 public/tut-assets/（index.json＋mp4），播放走 /videos/<檔名>（Worker 處理 iPhone 要的 Range）。
+// 影片是 scripts/tutorial 的腳本自動操作網頁錄的（字幕＋紅框＋女聲旁白），畫面改了重跑一次就能全部重錄。
+const tutState = { list: null, loading: false, error: '', current: null };
+async function tutLoad(){
+  if (tutState.list || tutState.loading) return;
+  tutState.loading = true;
+  try {
+    const res = await fetch('/tut-assets/index.json?v=' + encodeURIComponent(BUILD_STAMP), { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    tutState.list = Array.isArray(data.videos) ? data.videos : [];
+    tutState.error = '';
+  } catch (e) {
+    tutState.error = '影片清單讀不到（' + (e && e.message || e) + '）';
+  } finally {
+    tutState.loading = false;
+    if (!document.getElementById('tutModal').hidden) renderTutorialList();
+  }
+}
+function tutFmtDur(sec){ const s = Math.round(Number(sec) || 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function renderTutorialList(){
+  const body = document.getElementById('tutBody');
+  if (!tutState.list){
+    body.innerHTML = '<div class="tut-empty">' + (tutState.error ? wlEsc(tutState.error) : '讀取影片清單中…') + '</div>';
+    return;
+  }
+  if (!tutState.list.length){ body.innerHTML = '<div class="tut-empty">影片製作中，稍後再來看。</div>'; return; }
+  const sections = [];
+  tutState.list.forEach((v) => { let sec = sections.find((x) => x.name === v.section); if (!sec){ sec = { name: v.section, items: [] }; sections.push(sec); } sec.items.push(v); });
+  body.innerHTML = sections.map((sec) => '<div class="tut-sec">' + wlEsc(sec.name || '其他') + '</div><div class="tut-list">' +
+    sec.items.map((v) => '<button type="button" class="tut-item' + (tutState.current === v.key ? ' active' : '') + '" data-tut="' + wlEsc(v.key) + '">▶ ' + wlEsc(v.title) +
+      '<span class="tut-dur">' + tutFmtDur(v.duration) + '</span></button>').join('') + '</div>').join('');
+}
+function playTutorial(key){
+  const v = (tutState.list || []).find((x) => x.key === key);
+  if (!v) return;
+  tutState.current = key;
+  document.getElementById('tutPlayer').innerHTML = '<video controls playsinline preload="metadata" src="/videos/' + encodeURIComponent(v.file) + '"></video>' +
+    '<div class="tut-now">▶ ' + wlEsc(v.title) + '</div>';
+  const video = document.querySelector('#tutPlayer video');
+  try { const p = video.play(); if (p && p.catch) p.catch(() => {}); } catch (_){}
+  renderTutorialList();
+  document.querySelector('#tutModal .tut-inner').scrollTop = 0;
+}
+// key：直接播哪一支（訊號教學裡的「▶ 看影片」）；沒給就打開清單
+async function openTutorialVideos(key){
+  document.getElementById('tutModal').hidden = false;
+  if (!tutState.current) document.getElementById('tutPlayer').innerHTML = '';
+  renderTutorialList();
+  await tutLoad();
+  renderTutorialList();
+  if (key) playTutorial(key);
+}
+function closeTutorialVideos(){
+  const video = document.querySelector('#tutPlayer video');
+  if (video) try { video.pause(); } catch (_){}
+  document.getElementById('tutModal').hidden = true;
+}
+document.getElementById('tutClose').addEventListener('click', closeTutorialVideos);
+document.getElementById('tutModal').addEventListener('click', (e) => {
+  if (e.target.id === 'tutModal') return closeTutorialVideos();
+  const b = e.target.closest('.tut-item[data-tut]');
+  if (b) playTutorial(b.dataset.tut);
+});
+document.getElementById('tutBtn').addEventListener('click', () => openTutorialVideos());
+document.getElementById('smVideos').addEventListener('click', () => openTutorialVideos());
+
 function openGuidePanel(){
   document.getElementById('guideModal').hidden = false;
   document.getElementById('guideBody').innerHTML = guideHtml();
@@ -15345,6 +15440,27 @@ document.getElementById('smPinWindow').addEventListener('click', toggleSignalPin
 document.getElementById('smHelp').addEventListener('click', () => {
   const help = document.getElementById('signalHelp');
   help.hidden = !help.hidden;
+  if (!help.hidden) tutLoad().then(addHelpVideoLinks);
+});
+// 訊號教學每一項後面加「▶ 看影片」（有那支影片才加），點了直接播
+const TUT_HELP_KEYS = { '今日即時多': 'sc-now', '今日即時空': 'sc-now', '今日強勢股': 'sc-strong', '今日弱勢股': 'sc-strong',
+  '十大多族群': 'sc-ghf', '十大空族群': 'sc-ghf', '盤中特大買單／賣單': 'sc-bigorder', '盤中大戶力': 'sc-holder',
+  '四項精選（強多/強空）': 'sc-fourgate', '主力翻多／主力翻空（主力累計翻多／翻空）': 'sc-flip', '形態觀察股': 'sc-obs', '發動': 'sc-launch',
+  '盤中333': 'sc-race333', '所有族群綜合表': 'sc-board', '1+2多': 'sc-combo12', '創高黑龍': 'sc-dragon', '刀劍空(32)': 'sc-blade', '歷史查詢': 'sc-history' };
+function addHelpVideoLinks(){
+  const have = new Set((tutState.list || []).map((v) => v.key));
+  document.querySelectorAll('#signalHelp li').forEach((li) => {
+    const b = li.querySelector('b');
+    const key = b && TUT_HELP_KEYS[b.textContent.trim()];
+    if (!key || !have.has(key) || li.querySelector('.help-video-link')) return;
+    const a = document.createElement('span');
+    a.className = 'help-video-link'; a.dataset.tutPlay = key; a.textContent = '▶ 看影片';
+    b.after(a);
+  });
+}
+document.getElementById('signalHelp').addEventListener('click', (e) => {
+  const a = e.target.closest('.help-video-link[data-tut-play]');
+  if (a) openTutorialVideos(a.dataset.tutPlay);
 });
 document.getElementById('signalModal').addEventListener('click', (e) => {
   if (e.target.id === 'signalModal') closeSignalCenter();
