@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 10:03:33";
+const BUILD_STAMP = "2026-10-13 10:05:17";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -383,7 +383,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 族群跟族群之間畫兩條粗黑線區隔（2026-09-24 使用者：族群綜合表、族群大戶力），第一個族群上面不畫。 */
   .combo-block + .combo-block,.ghf-block + .ghf-block,.bl-block + .bl-block{border-top:8px double #111;padding-top:10px;}
   /* 2026-10-05 使用者：今日即時空上面的刀劍空(32)跟下面依時間排的訊號列表之間，也用同樣粗細的兩條黑線隔開 */
-  .now-bear-blade{border-bottom:8px double #111;padding-bottom:10px;}
+  .now-bear-blade,.now-bull-holder{border-bottom:8px double #111;padding-bottom:10px;}
   .now-bear-notes{border-top:8px double #111;padding-top:10px;margin-top:12px;}
   /* 醞釀／發動分頁：沿用族群綜合表的表格樣式，另外給 9 欄的欄寬；發動（2）紅底、醞釀（1）藍綠底的段落標題 */
   .bl-table{min-width:68em;}
@@ -2564,8 +2564,8 @@ const HTML_PAGE = `<!DOCTYPE html>
     </div>
     <div class="signal-help" id="signalHelp" hidden>
       <ul>
-        <li><b>今日即時多</b>：彙整多方向訊號的即時清單：盤中大戶力多、四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單，依發生時間新到舊排序。也包含十大多族群裡大戶力 ≥ +10% 的股票（訊號寫「十大多族群」）。今日強勢股裡大戶力 ≥ +10% 的也會進來（訊號寫「今日強勢股」）。</li>
-        <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（沒有發生時間，只有今天有），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。也包含十大空族群裡大戶力 ≤ −10% 的股票（訊號寫「十大空族群」）。今日弱勢股裡大戶力 ≤ −10% 的也會進來（訊號寫「今日弱勢股」）。</li>
+        <li><b>今日即時多</b>：彙整多方向訊號的即時清單：最上面一塊是盤中大戶力多的名單（時間＝第一次進名單，早進名單的在上面、新進的往下排），下面是四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單依發生時間新到舊排序。也包含十大多族群裡大戶力 ≥ +10% 的股票（訊號寫「十大多族群」）。今日強勢股裡大戶力 ≥ +10% 的也會進來（訊號寫「今日強勢股」）。</li>
+        <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（時間＝第一次出現，早出現的在上面、新出現的往下排，只有今天有；多方打少、收割區域放在整頁最下面），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。也包含十大空族群裡大戶力 ≤ −10% 的股票（訊號寫「十大空族群」）。今日弱勢股裡大戶力 ≤ −10% 的也會進來（訊號寫「今日弱勢股」）。</li>
         <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。⭐＝這族今天也有出現在形態觀察股（通常是比較強勢的族群）、👀＝這檔在形態觀察股名單裡。均線分數是收盤算好的，現價、漲跌、大戶力是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
         <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面；按「大戶力 ≤ −10%」只看大戶在賣的。</li>
         <li><b>十大多族群</b>（原精選十大多空族群的多方）：今天漲幅前10大族群，各取大戶力最強的前5檔個股；按「大戶力≥10%」只看大戶力 ≥ +10% 的。</li>
@@ -5172,6 +5172,20 @@ function nowTabRowsHtml(events, rankingRows, view){
   merged.sort((a, b) => b.sortTs - a.sortTs);
   return signalColLabelsHtml(holdCls) + '<div class="signal-list">' + merged.map((m) => m.html).join('') + '</div>';
 }
+// 2026-10-13 使用者：盤中大戶力多釘在今日即時多最上面（跟今日即時空最上面的刀劍空一樣），時間＝第一次進名單，
+// 早進名單的在上面、新進的往下排；下面的訊號列表就不再混這些列（不重複）。
+function nowBullHolderBlockHtml(view, rows){
+  const timeline = view.date ? holderTimelineFor(view.date) : null;
+  const list = withHolderFirstTs(rows, timeline, 'bull').map((r, i) => [r, i]).sort((a, b) => {
+    const ta = a[0].firstTs || Infinity, tb = b[0].firstTs || Infinity;   // 還沒有進名單時間的放最下面
+    return (ta === tb ? 0 : (ta < tb ? -1 : 1)) || (a[1] - b[1]);
+  }).map(([r]) => r);
+  const dayText = view.isPast || view.held ? '（' + String(view.date || '').slice(5).replace('-', '/') + ' 的名單）' : '';
+  return '<div class="race-block now-bull-holder"><div class="race-head">盤中大戶力多・' + list.length + ' 檔' + dayText + '</div>' +
+    '<div class="race-sub">跟「盤中大戶力多」分頁同一份名單（累計大單淨量 ≥ 500 張）。時間＝第一次進名單，早進名單的在上面、新進的往下排；大戶力 ≥ +10% 紅底。下面才是依發生時間排序的多方訊號。</div>' +
+    (list.length ? rankingColLabelsHtml(list.some((r) => r.firstTs)) + '<div class="signal-list">' + list.map((r) => rankingRowHtml(r, view)).join('') + '</div>'
+      : '<div class="race-note">目前沒有累計大單淨買 ≥ 500 張的股票。</div>') + '</div>';
+}
 // 2026-10-04 使用者：「今日即時」拆成多／空兩頁。空的這一頁集中放刀劍空（即時算出來的名單，沒有發生時間，當一個
 // 區塊放最上面，只有今天有）＋盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單（依發生時間新到舊合併排序，
 // 跟多的那頁同一套）；兩頁內容完全不重複。
@@ -5207,7 +5221,7 @@ function signalScroller(){
 // 最新的訊號從線的正下方冒出來、舊的往下推，畫面不再跳開。原本的算法是「總高度變多少就往下捲多少」，線下面每多一筆
 // 新訊號，線就被往上推出畫面（少一筆又往下掉）。現在：線在畫面上面 2/3 以內＝固定這條線；線在畫面下面 1/3（主要在看
 // 刀劍空名單）＝維持原本捲到的位置；已經捲過線、在看下面較早的訊號＝照舊固定在正在看的那幾筆。
-const SIGNAL_PIN_SELECTOR = '.now-bear-blade';
+const SIGNAL_PIN_SELECTOR = '.now-bear-blade, .now-bull-holder';   // 今日即時空的刀劍空、今日即時多的盤中大戶力多
 function signalPinState(el, scroller){
   const line = el.querySelector(SIGNAL_PIN_SELECTOR);
   if (!line) return null;
@@ -10800,7 +10814,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 10:03:33';
+const BUILD_STAMP = '2026-10-13 10:05:17';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11179,7 +11193,7 @@ function renderSignalCenter(){
     let inner;
     if (view.unavailable) inner = holderEmptyHtml(view, '', '');
     else if (view.loading && !view.events.length) inner = sigLoadingHtml(view);
-    else if (active === 'now') inner = nowTabRowsHtml(view.events.filter((e) => e.tabs.includes('now')).concat(view.isPast ? [] : ghfSignalEvents(ghfTodayView(), 'up').concat(stSignalEvents('strong'), launchSignalEvents())), view.rankingRows.filter(holderRowIsBull), view);
+    else if (active === 'now') inner = nowBullHolderBlockHtml(view, view.rankingRows.filter(holderRowIsBull)) + nowTabRowsHtml(view.events.filter((e) => e.tabs.includes('now')).concat(view.isPast ? [] : ghfSignalEvents(ghfTodayView(), 'up').concat(stSignalEvents('strong'), launchSignalEvents())), [], view);
     else if (active === 'nowBear') inner = nowBearTabHtml(view);
     else if (DEDICATED_KLINE_TABS.has(active)){
       refreshKlineBackfillStatus();
