@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-13 21:56:57";
+const BUILD_STAMP = "2026-10-13 22:16:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1084,6 +1084,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .gd-btns{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px;} .gd-btns .gd-go{margin-top:0;}
   .gd-go.gd-vid{background:#7c3aed;color:#fff;}
   .gd-step .gd-go,.gd-card > .gd-go{margin-top:8px;display:inline-block;}
+  .chips-gsort{cursor:pointer;white-space:nowrap;} .chips-gsort.on{color:#f87171;}
+  .chips-gcount{display:inline-block;margin-left:4px;font-size:10px;background:#7c3aed;color:#fff;border-radius:999px;padding:0 5px;}
   .help-video-link{display:inline-block;margin-left:6px;font-size:12px;font-weight:800;color:#7c3aed;cursor:pointer;white-space:nowrap;}
   .gd-tag{display:inline-block;border:1px solid var(--up);color:var(--up);font-size:12px;font-weight:800;border-radius:4px;padding:2px 10px;margin-top:4px;letter-spacing:2px;}
   .gd-title{font-size:28px;font-weight:900;color:var(--up);margin:10px 0 6px;}
@@ -6813,7 +6815,7 @@ const CHIPS_MEASURES = [
 ];
 const CHIPS_PAGE = 30;
 let chipsState = { measure: 'radar', side: 'buy', dayIndex: 0, market: 'all', limit: CHIPS_PAGE, inst: 'total', minStreak: 2, list: 'all', mfMinStreak: 1,
-  shortMode: 'inst', shortInst: 'total', shortMin: 2, shortMfMin: 1, shortTech: 'weak', shortFlag: 'all' };
+  shortMode: 'inst', shortInst: 'total', shortMin: 2, shortMfMin: 1, shortTech: 'weak', shortFlag: 'all', shortByGroup: false };
 // 主力大單∩醞釀發動（2026-09-25 使用者：再多一個跟主力大單的交集）：同一套交集，只是「連續」改看主力大單連續買超天數、
 // 欄位改成主力淨額／淨額金額／佔成交額；那天沒有主力大單資料的股票不算。
 const chipsBrewMfMode = () => chipsState.measure === 'mfx';
@@ -6944,11 +6946,22 @@ function chipsBrewSectionHtml(data){
 // /api/brew-launch，只對最新一天準，往日只列籌碼）與「可放空」（可融券／有股期）。
 const CHIPS_SHORT_MODE_LABEL = { inst: '只看法人連賣', mf: '只看主力連賣', both: '法人∩主力連賣' };
 const CHIPS_WEAK_MAX_SCORE = 5;
+// 2026-10-13 使用者：放空籌碼的均線分數欄都是「—」——原本只用醞釀／發動的資料（日期要剛好是那天才有）；
+// 後端 chips-daily 現在每檔附上那天收盤的均線分數（內定 15 分）與是否站上月線，往日也有。
 function chipsTechStocks(data){
+  if (data && data.stocks && Object.values(data.stocks).some((s) => s.score !== null && s.score !== undefined)){
+    const out = {};
+    Object.keys(data.stocks).forEach((code) => {
+      const s = data.stocks[code];
+      if (s.score !== null && s.score !== undefined) out[code] = { score: s.score, belowMa20: s.aboveMa20 === false };
+    });
+    return out;
+  }
   return brewLaunchData && brewLaunchData.stocks && brewLaunchData.asOf && data && brewLaunchData.asOf === data.date ? brewLaunchData.stocks : null;
 }
 function chipsIsWeak(t){
   if (!t) return false;
+  if (t.belowMa20 !== undefined) return Number(t.score) <= CHIPS_WEAK_MAX_SCORE && t.belowMa20;
   const ma20 = t.ma ? Number(t.ma['20']) : NaN;
   return Number(t.score) <= CHIPS_WEAK_MAX_SCORE && Number.isFinite(ma20) && Number(t.prevClose) < ma20;
 }
@@ -6977,6 +6990,14 @@ function chipsShortRows(data){
   rows.sort((a, b) => st.shortMode === 'mf'
     ? (a.mfStreak - b.mfStreak) || ((a.s.mf ? a.s.mf.net : 0) - (b.s.mf ? b.s.mf.net : 0))
     : (a.instStreak - b.instStreak) || ((a.net || 0) - (b.net || 0)));
+  // 2026-10-13 使用者：族群表頭點下去，同族群排在一起，入選檔數多的族群在上面（記憶體 6 檔就全部集中在最上面）；族群內照原本的連賣排序
+  if (st.shortByGroup){
+    const count = {}, first = {};
+    rows.forEach((r, i) => { const g = r.s.group || '—'; count[g] = (count[g] || 0) + 1; if (first[g] === undefined) first[g] = i; });
+    rows.forEach((r, i) => { r.order = i; });
+    rows.sort((a, b) => { const ga = a.s.group || '—', gb = b.s.group || '—'; return (count[gb] - count[ga]) || (first[ga] - first[gb]) || (a.order - b.order); });
+    rows.forEach((r) => { r.groupCount = count[r.s.group || '—']; });
+  }
   return rows;
 }
 function chipsShortRowHtml(r, rank){
@@ -6987,7 +7008,7 @@ function chipsShortRowHtml(r, rank){
   const techCell = t ? '<td class="bl-score">' + t.score + (chipsIsWeak(t) ? '<span class="chips-weak-tag">弱勢</span>' : '') + '</td>' : '<td class="muted">—</td>';
   return '<tr class="combo-row chips-row" data-code="' + r.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
     '<td class="chips-rank">' + rank + '</td><td class="combo-code">' + r.code + '</td><td class="combo-name">' + s.name + wlStarHtml(r.code, s.name) + chipsFlagPillsHtml(r.code) + '</td>' +
-    '<td><span class="sig-group">' + (s.group || '—') + '</span>' + (s.market ? ' <span class="muted">' + (s.market === 'OTC' ? '櫃' : '市') + '</span>' : '') + '</td>' +
+    '<td><span class="sig-group">' + (s.group || '—') + (r.groupCount > 1 ? '<b class="chips-gcount">' + r.groupCount + '</b>' : '') + '</span>' + (s.market ? ' <span class="muted">' + (s.market === 'OTC' ? '櫃' : '市') + '</span>' : '') + '</td>' +
     '<td>' + chipsStreakHtml(r.instStreak) + '</td>' +
     lots('foreign') + lots('trust') + lots('dealer') + lots('total') +
     '<td>' + chipsStreakHtml(r.mfStreak) + '</td>' +
@@ -6999,7 +7020,7 @@ function chipsShortRowHtml(r, rank){
 }
 function chipsShortTableHtml(rows){
   const cls = (key) => (key === chipsState.shortInst ? ' class="chips-active num"' : ' class="num"');
-  const head = '<th>名次</th><th>代號</th><th>名稱</th><th>族群</th><th>法人連賣</th>' +
+  const head = '<th>名次</th><th>代號</th><th>名稱</th><th class="chips-gsort' + (chipsState.shortByGroup ? ' on' : '') + '" data-short-group="1" title="點一下：同族群排在一起、入選多的族群在上面；再點一次回原本排序">族群 ' + (chipsState.shortByGroup ? '▼' : '⇅') + '</th><th>法人連賣</th>' +
     '<th' + cls('foreign') + '>外資</th><th' + cls('trust') + '>投信</th><th' + cls('dealer') + '>自營商</th><th' + cls('total') + '>三大法人</th>' +
     '<th>主力連賣</th><th class="num">主力淨額(張)</th><th class="num">淨額金額</th><th>均線分數</th><th class="num">漲跌幅</th><th class="num">收盤</th>';
   const shown = rows.slice(0, chipsState.limit);
@@ -7031,7 +7052,7 @@ function chipsShortSectionHtml(data){
   const techDesc = st.shortTech === 'weak' ? (tech ? '・弱勢' : '・（那天沒有均線資料，型態不限）') : '';
   const flagDesc = st.shortFlag === 'short' ? '・可融券' : st.shortFlag === 'futures' ? '・有股期' : '';
   const title = '放空籌碼：' + chipsDesc + techDesc + flagDesc + '・' + rows.length + ' 檔';
-  const note = '<div class="race-sub">' + mmdd + '：做空用的籌碼名單。法人連賣＝所選法人連續賣超的交易日數（到 ' + mmdd + ' 為止）；主力連賣＝主力大單連續淨賣超的天數（只算那天有主力大單資料的股票）；弱勢＝均線分數≤' + CHIPS_WEAK_MAX_SCORE + '（5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分）且收盤在月線（20 日線）之下，均線資料只有最新一天有，往日只列籌碼；可融券／有股期＝能用融券或股票期貨放空（停券的不能融券）。排序：連賣天數多的在前，再看賣超張數。</div>';
+  const note = '<div class="race-sub">' + mmdd + '：做空用的籌碼名單。法人連賣＝所選法人連續賣超的交易日數（到 ' + mmdd + ' 為止）；主力連賣＝主力大單連續淨賣超的天數（只算那天有主力大單資料的股票）；均線分數＝那天收盤的均線分數（內定：站上 6 條均線＋創 6 個天期新高＋多頭排列 3 分，滿分 15）；弱勢＝均線分數≤' + CHIPS_WEAK_MAX_SCORE + ' 且收盤在月線（20 日線）之下；可融券／有股期＝能用融券或股票期貨放空（停券的不能融券）。排序：連賣天數多的在前，再看賣超張數。</div>';
   const src = data.sources || {};
   return chipsShortControlsHtml(data) + note + '<div class="bl-section bl-brew">' + title + '</div>' +
     (rows.length ? chipsShortTableHtml(rows) : '<div class="race-note">那天沒有符合的股票' + (!src.TSE && !src.OTC ? '（法人資料還沒進來）' : '') + '</div>');
@@ -7217,6 +7238,7 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
   if (stech){ if (!stech.disabled){ chipsState.shortTech = stech.dataset.stech; chipsState.limit = CHIPS_PAGE; renderChips(); } return; }
   const sflag = e.target.closest('.chips-sflag-btn');
   if (sflag){ chipsState.shortFlag = sflag.dataset.sflag; chipsState.limit = CHIPS_PAGE; renderChips(); return; }
+  if (e.target.closest('[data-short-group]')){ chipsState.shortByGroup = !chipsState.shortByGroup; renderChips(); return; }
   const row = e.target.closest('.chips-row[data-code]');
   if (row){
     // 使用者 2026-09-25（手機截圖）：點代號、名稱沒反應——K線圖視窗（z-index 100）開在面板（102）後面被蓋住。
@@ -11118,7 +11140,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-13 21:56:57';
+const BUILD_STAMP = '2026-10-13 22:16:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
