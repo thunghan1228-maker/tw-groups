@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-14 10:36:14";
+const BUILD_STAMP = "2026-10-14 11:29:13";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -346,6 +346,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .om-deep{color:#ff1f1f;font-weight:900;text-shadow:0 0 1px #ff1f1f;}
   .obs-line b{color:#facc15;font-weight:800;margin-right:4px;}   /* 2026-10-12 使用者：族群名稱改黃色 */
   .obs-stk{cursor:pointer;white-space:nowrap;border-bottom:1px dotted rgba(255,255,255,.4);}
+  /* 2026-10-14 使用者：自選股提醒、發動提醒裡點股票代號或名稱直接開K線圖 */
+  .alert-stk{cursor:pointer;border-bottom:1px dotted rgba(255,255,255,.55);}
+  .alert-stk:hover{background:rgba(255,255,255,.14);border-radius:4px;}
+  .pk-alert.behind-chart,.launch-alert.behind-chart{z-index:98;}
   .obs-stk:hover{background:rgba(255,255,255,.12);}
   .obs-warn{margin-top:8px;line-height:1.6;color:#fef3c7;}
   .obs-sym{font-size:12px;color:#ddd6fe;line-height:1.5;margin-bottom:4px;}
@@ -4288,7 +4292,7 @@ function openStockChart(code, name, tf){
   if (useFloatingCharts()){ openChartWindow(code, name, tf); return; }
   // 手機／iPad 直式：從任何面板點進來，面板一律退到K線圖後面、關圖再回來（2026-10-09 使用者：營收成長榜的「K線圖」按了沒出來
   // ——處置監獄、飆股雷達、營收成長榜沒有自己加 behind-chart，K線圖其實開了但被面板蓋住）
-  document.querySelectorAll('.chips-modal, #signalModal').forEach((el) => el.classList.add('behind-chart'));
+  document.querySelectorAll('.chips-modal, #signalModal, .pk-alert, .launch-alert').forEach((el) => el.classList.add('behind-chart'));
   const overlay = document.getElementById('chartModal');
   const wasHidden = overlay.hidden;
   if (currentChart.code !== code) currentChart.dailyBars = null;  // 換股票：漲跌用的日線快取要重抓
@@ -10369,7 +10373,7 @@ let trkAlertLines = [];
 function trkNotify(list){
   if (!alertsEnabled || trkSetting('trkOn', true) === false) return;
   launchBeep();
-  trkAlertLines = list.map((x) => (x.time ? x.time + ' ' : '') + '<b>' + wlEsc(x.code + ' ' + x.name) + '</b>・' +
+  trkAlertLines = list.map((x) => (x.time ? x.time + ' ' : '') + '<b class="alert-stk" data-alert-code="' + wlEsc(x.code) + '" data-alert-name="' + wlEsc(x.name || '') + '">' + wlEsc(x.code + ' ' + x.name) + '</b>・' +
     (x.bull === true || x.bull === false ? '<span class="' + (x.bull ? 'trk-a-bull' : 'trk-a-bear') + '">' + wlEsc(x.text) + '</span>' : wlEsc(x.text))).concat(trkAlertLines).slice(0, 12);
   let el = document.getElementById('trkAlertBox');
   if (!el){
@@ -11295,7 +11299,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-14 10:36:14';
+const BUILD_STAMP = '2026-10-14 11:29:13';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11378,6 +11382,11 @@ function clampLaunchAlertPos(el, left, top){
 }
 // 2026-10-14 使用者：自選股提醒（跟創高黑龍提醒、發動、形態觀察）跳出的框要能按住標題列拖到畫面別的地方，不要固定在上面；
 // 拖過的位置記在這台瀏覽器，下次再跳出來就在那裡（畫面變小超出去的話會拉回畫面內）。
+document.addEventListener('click', (e) => {
+  const s = e.target.closest && e.target.closest('.alert-stk[data-alert-code]');
+  if (!s || !s.closest('.pk-alert, .launch-alert')) return;
+  openStockChart(s.dataset.alertCode, s.dataset.alertName || '');
+});
 function makeAlertDraggable(el, headSel, key){
   const place = (pos) => { const p = clampLaunchAlertPos(el, pos.left, pos.top); el.style.left = p.left + 'px'; el.style.top = p.top + 'px'; el.style.transform = 'none'; };
   const save = () => {
@@ -11422,7 +11431,7 @@ function renderLaunchAlertBox(){
   // 剛跳出來的標「新」、現在已經跌回箱頂下的標「曾發動」、同一檔發動好幾次標「×N」。
   const newCount = sorted.filter((r) => launchAlertNew.has(r.code)).length;
   el.innerHTML = '<div class="launch-alert-head">🚀 發動・今天 ' + sorted.length + ' 檔' + (newCount ? '（新 ' + newCount + '）' : '') + '<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
-    '<div class="launch-alert-body">' + sorted.map((r) => '<div class="la-row' + (launchAlertNew.has(r.code) ? ' la-new' : '') + '"><span class="launch-alert-time">' + launchAlertClock(r.alertAt) + '</span> ' + r.code + ' ' + r.name + (r.groupName ? '（' + r.groupName + '）' : '') +
+    '<div class="launch-alert-body">' + sorted.map((r) => '<div class="la-row' + (launchAlertNew.has(r.code) ? ' la-new' : '') + '"><span class="launch-alert-time">' + launchAlertClock(r.alertAt) + '</span> <span class="alert-stk" data-alert-code="' + r.code + '" data-alert-name="' + wlEsc(r.name || '') + '">' + r.code + ' ' + r.name + '</span>' + (r.groupName ? '（' + r.groupName + '）' : '') +
       (launchAlertNew.has(r.code) ? '<span class="la-tag new">新</span>' : '') +
       (r.launchTimes > 1 ? '<span class="la-tag times">×' + r.launchTimes + '</span>' : '') +
       (r.live === false ? '<span class="la-tag fallen" title="現在已經跌回箱頂下">曾發動</span>' : '') + '</div>').join('') + '</div>';
