@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-14 09:29:36";
+const BUILD_STAMP = "2026-10-14 09:39:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2020,6 +2020,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .trk-in{width:90px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:13px;font-family:inherit;text-align:right;}
   .trk-chk{display:inline-flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;white-space:nowrap;flex:0 0 auto;}
   .trk-alert{border-color:#f5b301;}
+  .trk-alert .trk-a-bull{color:#ff6b6b;font-weight:700;}   /* 2026-10-14 使用者：多方訊號紅字、空方訊號綠字 */
+  .trk-alert .trk-a-bear{color:#4ade80;font-weight:700;}
   .trk-alert-foot{margin-top:6px;text-align:right;}
   @media (max-width: 640px){ .trk-table{min-width:560px;} }
   .ck-detail td{background:var(--panel-2);white-space:normal;text-align:left;font-size:12px;line-height:1.6;padding:8px 12px;}
@@ -10274,7 +10276,9 @@ function trkCheck(){
       if (st.seen.has(key)) continue;
       st.seen.add(key);
       if (!st.sigCodes.has(e.code) || muted.has(e.code) || trkSetting('trk_' + kind, true) === false) continue;
-      fresh.push({ code: e.code, name: e.name, text: (TRK_KIND_LABEL[kind] || e.label) + (e.label && e.label !== TRK_KIND_LABEL[kind] ? '（' + e.label + '）' : ''), time: trkTime(Number(e.ts)) || e.time, bull: e.isBuy });
+      const kindBull = (TRK_KINDS.find((k) => k.key === kind) || {}).bull;   // 訊號本身有標多空就用它，沒有就看是哪一種訊號
+      fresh.push({ code: e.code, name: e.name, text: (TRK_KIND_LABEL[kind] || e.label) + (e.label && e.label !== TRK_KIND_LABEL[kind] ? '（' + e.label + '）' : ''), time: trkTime(Number(e.ts)) || e.time,
+        bull: kindBull === true || kindBull === false ? kindBull : e.isBuy });
     }
     codes.forEach((c) => st.sigCodes.add(c));
   }
@@ -10325,7 +10329,8 @@ let trkAlertLines = [];
 function trkNotify(list){
   if (!alertsEnabled || trkSetting('trkOn', true) === false) return;
   launchBeep();
-  trkAlertLines = list.map((x) => (x.time ? x.time + ' ' : '') + '<b>' + wlEsc(x.code + ' ' + x.name) + '</b>・' + wlEsc(x.text)).concat(trkAlertLines).slice(0, 12);
+  trkAlertLines = list.map((x) => (x.time ? x.time + ' ' : '') + '<b>' + wlEsc(x.code + ' ' + x.name) + '</b>・' +
+    (x.bull === true || x.bull === false ? '<span class="' + (x.bull ? 'trk-a-bull' : 'trk-a-bear') + '">' + wlEsc(x.text) + '</span>' : wlEsc(x.text))).concat(trkAlertLines).slice(0, 12);
   let el = document.getElementById('trkAlertBox');
   if (!el){
     el = document.createElement('div');
@@ -11250,7 +11255,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-14 09:29:36';
+const BUILD_STAMP = '2026-10-14 09:39:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

@@ -1955,6 +1955,8 @@
   .trk-in{width:90px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:13px;font-family:inherit;text-align:right;}
   .trk-chk{display:inline-flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;white-space:nowrap;flex:0 0 auto;}
   .trk-alert{border-color:#f5b301;}
+  .trk-alert .trk-a-bull{color:#ff6b6b;font-weight:700;}   /* 2026-10-14 使用者：多方訊號紅字、空方訊號綠字 */
+  .trk-alert .trk-a-bear{color:#4ade80;font-weight:700;}
   .trk-alert-foot{margin-top:6px;text-align:right;}
   @media (max-width: 640px){ .trk-table{min-width:560px;} }
   .ck-detail td{background:var(--panel-2);white-space:normal;text-align:left;font-size:12px;line-height:1.6;padding:8px 12px;}
@@ -10207,7 +10209,9 @@ function trkCheck(){
       if (st.seen.has(key)) continue;
       st.seen.add(key);
       if (!st.sigCodes.has(e.code) || muted.has(e.code) || trkSetting('trk_' + kind, true) === false) continue;
-      fresh.push({ code: e.code, name: e.name, text: (TRK_KIND_LABEL[kind] || e.label) + (e.label && e.label !== TRK_KIND_LABEL[kind] ? '（' + e.label + '）' : ''), time: trkTime(Number(e.ts)) || e.time, bull: e.isBuy });
+      const kindBull = (TRK_KINDS.find((k) => k.key === kind) || {}).bull;   // 訊號本身有標多空就用它，沒有就看是哪一種訊號
+      fresh.push({ code: e.code, name: e.name, text: (TRK_KIND_LABEL[kind] || e.label) + (e.label && e.label !== TRK_KIND_LABEL[kind] ? '（' + e.label + '）' : ''), time: trkTime(Number(e.ts)) || e.time,
+        bull: kindBull === true || kindBull === false ? kindBull : e.isBuy });
     }
     codes.forEach((c) => st.sigCodes.add(c));
   }
@@ -10258,7 +10262,8 @@ let trkAlertLines = [];
 function trkNotify(list){
   if (!alertsEnabled || trkSetting('trkOn', true) === false) return;
   launchBeep();
-  trkAlertLines = list.map((x) => (x.time ? x.time + ' ' : '') + '<b>' + wlEsc(x.code + ' ' + x.name) + '</b>・' + wlEsc(x.text)).concat(trkAlertLines).slice(0, 12);
+  trkAlertLines = list.map((x) => (x.time ? x.time + ' ' : '') + '<b>' + wlEsc(x.code + ' ' + x.name) + '</b>・' +
+    (x.bull === true || x.bull === false ? '<span class="' + (x.bull ? 'trk-a-bull' : 'trk-a-bear') + '">' + wlEsc(x.text) + '</span>' : wlEsc(x.text))).concat(trkAlertLines).slice(0, 12);
   let el = document.getElementById('trkAlertBox');
   if (!el){
     el = document.createElement('div');
