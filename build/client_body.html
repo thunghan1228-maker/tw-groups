@@ -1936,6 +1936,10 @@
   .race-row .race-star-slot,.race-col-labels .race-star-slot{flex:0 0 20px;text-align:center;}  /* 要蓋過 .race-col-labels span 的 5em */
   /* 個股訊號追蹤（2026-10-05 使用者） */
   .trk-table{min-width:720px;}
+  .trk-mute{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .trk-mute.off{background:#7f1d1d;border-color:#b91c1c;color:#fff;}
+  .trk-mute.all{font-size:12px;}
+  .trk-table tr.trk-muted td:not(.trk-mute-td){opacity:.45;}
   .trk-badge{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;margin:1px 4px 1px 0;background:#3a3a44;color:#fff;}
   .trk-badge.bull{background:var(--up);}
   .trk-badge.bear{background:var(--down);}
@@ -10087,6 +10091,17 @@ function trkSetting(key, dflt){
   const v = wl.data.settings ? wl.data.settings[key] : undefined;
   return v === undefined ? dflt : v;
 }
+// 2026-10-14 使用者：每檔後面加「關閉訊號」，不想追蹤的那檔按掉就不再跳提醒、今日訊號也不列；表頭一顆按鈕全部關／全部開。
+// 存在自選股清單的設定裡（有同步碼就三台共用）。
+function trkMutedSet(){ return new Set(trkSetting('trkMuted', []) || []); }
+function trkSetMuted(codes, off){
+  wlMutate((data) => {
+    data.settings = data.settings || {};
+    const set = new Set(data.settings.trkMuted || []);
+    codes.forEach((c) => (off ? set.add(c) : set.delete(c)));
+    data.settings.trkMuted = [...set];
+  });
+}
 function trkAllCodes(){
   const s = new Set();
   for (const g of wl.data.groups) for (const it of g.items) s.add(it.code);
@@ -10150,6 +10165,7 @@ function trkCheck(){
   const st = trkLoadState();   // 每次重讀：另一個視窗（訊號中心小視窗）提醒過的這裡就不再跳
   const today = twTodayStr();
   const fresh = [];
+  const muted = trkMutedSet();   // 關閉訊號的：照樣記成看過（重新打開不會補跳舊的），只是不提醒
   // 1) 訊號：今天的訊號資料到了才看。這台第一次看（開網頁）或剛加進自選股的股票，今天已經有的訊號先記成看過、不提醒
   if (signalDataIsReal && sigCurrentDate() === today){
     for (const e of trkSignalEvents()){
@@ -10157,7 +10173,7 @@ function trkCheck(){
       const kind = trkEventKind(e), key = 's|' + e.code + '|' + kind + '|' + e.ts + '|' + (e.label || '');
       if (st.seen.has(key)) continue;
       st.seen.add(key);
-      if (!st.sigCodes.has(e.code) || trkSetting('trk_' + kind, true) === false) continue;
+      if (!st.sigCodes.has(e.code) || muted.has(e.code) || trkSetting('trk_' + kind, true) === false) continue;
       fresh.push({ code: e.code, name: e.name, text: (TRK_KIND_LABEL[kind] || e.label) + (e.label && e.label !== TRK_KIND_LABEL[kind] ? '（' + e.label + '）' : ''), time: trkTime(Number(e.ts)) || e.time, bull: e.isBuy });
     }
     codes.forEach((c) => st.sigCodes.add(c));
@@ -10169,7 +10185,7 @@ function trkCheck(){
       const key = 'l|' + r.code + '|' + r.recordedAt;
       if (st.seen.has(key)) continue;
       st.seen.add(key);
-      if (!st.launchCodes.has(r.code) || trkSetting('trk_launch', true) === false) continue;
+      if (!st.launchCodes.has(r.code) || muted.has(r.code) || trkSetting('trk_launch', true) === false) continue;
       fresh.push({ code: r.code, name: r.name, text: '🚀 發動（' + num2(r.price) + '）', time: fmtTime(r.recordedAt), bull: true });
     }
     codes.forEach((c) => st.launchCodes.add(c));
@@ -10180,7 +10196,7 @@ function trkCheck(){
     const done = new Set();
     let needExtra = false;
     for (const g of wl.data.groups) for (const it of g.items){
-      if (done.has(it.code) || !(it.above || it.below || it.ma)) continue;
+      if (done.has(it.code) || muted.has(it.code) || !(it.above || it.below || it.ma)) continue;
       done.add(it.code);
       if (!WL_GROUP_INDEX[it.code]) needExtra = true;
       const q = quotes[it.code], price = q && Number(q.price) > 0 ? Number(q.price) : null;
@@ -10257,7 +10273,10 @@ function renderTrack(force){
   const codes = trkCodesInView();
   const evDate = sigCurrentDate(), today = twTodayStr();
   const quotes = wlQuoteMap(), holders = wlHolderMap();
-  const timeline = trkTimeline(codes).filter((r) => trk.kind === 'all' || (trk.kind === 'bull' ? r.bull === true : trk.kind === 'bear' ? r.bull === false : r.kind === trk.kind));
+  const muted = trkMutedSet();
+  const tracked = new Set([...codes].filter((c) => !muted.has(c)));
+  const mutedInView = codes.size - tracked.size;
+  const timeline = trkTimeline(tracked).filter((r) => trk.kind === 'all' || (trk.kind === 'bull' ? r.bull === true : trk.kind === 'bear' ? r.bull === false : r.kind === trk.kind));
   // 現況
   const launchCount = new Map(), lastSignal = new Map(), count = new Map();
   for (const r of trkLaunchRecords()) launchCount.set(r.code, (launchCount.get(r.code) || 0) + 1);
@@ -10274,12 +10293,16 @@ function renderTrack(force){
     const it = trkItemOf(code), q = quotes[code] || null, name = wlNameOf(code, it);
     const pct = q && Number.isFinite(Number(q.changePercent)) ? Number(q.changePercent) : null;
     const last = lastSignal.get(code);
-    return '<tr data-code="' + code + '" data-name="' + wlEsc(name) + '"><td class="l wl-stock">' + code + '</td><td class="l wl-stock"><span class="wl-name">' + wlEsc(name) + '</span></td>' +
+    const off = muted.has(code);
+    return '<tr data-code="' + code + '" data-name="' + wlEsc(name) + '"' + (off ? ' class="trk-muted"' : '') + '><td class="l wl-stock">' + code + '</td><td class="l wl-stock"><span class="wl-name">' + wlEsc(name) + '</span></td>' +
       '<td class="' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</td>' +
       '<td class="l">' + (trkStatusBadges(code, q, holders[code], launchCount.get(code) || 0, liveLaunch.has(code), bladeCodes.has(code)) || '<span class="flat">—</span>') + '</td>' +
       '<td>' + (count.get(code) || 0) + '</td>' +
-      '<td class="l">' + (last ? '<span class="muted">' + last.time + '</span> ' + wlEsc(last.label) : '<span class="flat">—</span>') + '</td></tr>';
+      '<td class="l">' + (last ? '<span class="muted">' + last.time + '</span> ' + wlEsc(last.label) : '<span class="flat">—</span>') + '</td>' +
+      '<td class="trk-mute-td"><button type="button" class="trk-mute' + (off ? ' off' : '') + '" data-tmute="' + code + '" title="' + (off ? '這檔目前不提醒、今日訊號不列；按一下重新追蹤' : '這檔不想追蹤的話按掉：不再跳提醒、今日訊號不列') + '">' + (off ? '🔕 已關閉' : '關閉訊號') + '</button></td></tr>';
   }).join('');
+  const allOff = codes.size > 0 && mutedInView === codes.size;
+  const muteAllBtn = '<button type="button" class="trk-mute all' + (allOff ? ' off' : '') + '" data-tmute-all="' + (allOff ? 'on' : 'off') + '" title="' + (allOff ? '這一頁的股票全部重新追蹤' : '這一頁的股票全部關閉訊號') + '">' + (allOff ? '🔔 全部開啟' : '🔕 全部關閉') + '</button>';
   const timelineHtml = timeline.length
     ? '<div class="wl-table-wrap"><table class="wl-table trk-table"><thead><tr><th class="l">時間</th><th class="l">代號</th><th class="l">名稱</th><th class="l">訊號</th><th class="l">說明</th></tr></thead><tbody>' +
       timeline.map((r) => '<tr data-code="' + r.code + '" data-name="' + wlEsc(r.name || '') + '"><td class="l">' + r.time + '</td><td class="l wl-stock">' + r.code + '</td><td class="l wl-stock">' + wlEsc(r.name || r.code) + '</td>' +
@@ -10304,8 +10327,8 @@ function renderTrack(force){
   body.innerHTML =
     '<div class="wl-groups">' + groupChips + '</div>' +
     '<div class="pk-sec">① 現況 <small>' + (evDate !== today ? '今天還沒開盤，訊號顯示 ' + evDate.slice(5).replace('-', '/') + ' 的' : '盤中即時（跟首頁、訊號中心同一份）') + '</small></div>' +
-    '<div class="wl-table-wrap"><table class="wl-table trk-table"><thead><tr><th class="l">代號</th><th class="l">名稱</th><th>漲跌幅</th><th class="l">狀態</th><th>今天訊號</th><th class="l">最新訊號</th></tr></thead><tbody>' + statusRows + '</tbody></table></div>' +
-    '<div class="pk-sec">② 今日訊號 <small>時間新→舊・' + timeline.length + ' 筆</small></div>' +
+    '<div class="wl-table-wrap"><table class="wl-table trk-table"><thead><tr><th class="l">代號</th><th class="l">名稱</th><th>漲跌幅</th><th class="l">狀態</th><th>今天訊號</th><th class="l">最新訊號</th><th>' + muteAllBtn + '</th></tr></thead><tbody>' + statusRows + '</tbody></table></div>' +
+    '<div class="pk-sec">② 今日訊號 <small>時間新→舊・' + timeline.length + ' 筆' + (mutedInView ? '・關閉訊號的 ' + mutedInView + ' 檔不列' : '') + '</small></div>' +
     '<div class="wl-sorts">' + kindChips + '</div>' + timelineHtml +
     '<div class="pk-sec">③ 提醒設定 <small>網頁開著才會跳；同一個條件一天只提醒一次</small></div>' +
     '<div class="wl-sync"><label class="trk-chk"><input type="checkbox" data-tset="trkOn"' + (trkSetting('trkOn', true) !== false ? ' checked' : '') + '><b>自選股提醒</b></label>' +
@@ -10328,6 +10351,10 @@ document.getElementById('trackClose').addEventListener('click', closeTrackPanel)
 document.getElementById('trackModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeTrackPanel(); });
 document.getElementById('trackBody').addEventListener('click', (e) => {
   if (e.target.closest('input, select, label')) return;
+  const mute = e.target.closest('[data-tmute]');
+  if (mute){ const code = mute.dataset.tmute; trkSetMuted([code], !trkMutedSet().has(code)); renderTrack(true); return; }
+  const muteAll = e.target.closest('[data-tmute-all]');
+  if (muteAll){ trkSetMuted([...trkCodesInView()], muteAll.dataset.tmuteAll === 'off'); renderTrack(true); return; }
   const g = e.target.closest('[data-tgroup]');
   if (g){ trk.group = g.dataset.tgroup; renderTrack(); return; }
   const k = e.target.closest('[data-tkind]');
@@ -13805,7 +13832,7 @@ const GUIDE_TOOLS = [
   { t: '自選股', label: '自選股', v: 'tb-watch', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
     b: ['換手機或電腦用「同步碼」就能帶過去', '一鍵健診：持股的防守價、明日紅半／三日低／月線一次算好', '各列表看到喜歡的股票，點「☆」就加進來'] },
   { t: '個股訊號追蹤', label: '個股盤中訊號追蹤', v: 'tb-track', tags: ['盤中'], d: '只看你自選股今天出現了哪些訊號，不用在一堆名單裡找。',
-    b: ['自選股一出現新訊號就提醒（網頁要開著）', '點股票直接開 K 線圖'] },
+    b: ['自選股一出現新訊號就提醒（網頁要開著）', '不想追蹤的那檔按「關閉訊號」就不再跳；表頭「全部關閉」一次關掉', '點股票直接開 K 線圖'] },
   { t: '盤中K棒組合選股', label: 'K棒組合選股', v: 'tb-grail', tags: ['盤中', '固定時點'], d: '15 個選股邏輯（穿山鱷龍、黑龍短沖、黑飛舞、飛龍戰法）在固定時間點自動掃全市場，把符合的名單抓出來。',
     b: ['盤中與收盤各掃一次，到時間進來看就好，不用自己設定', '名單只是「符合條件」，不是買賣指令'] },
   { t: '每日功課', label: '每日功課', v: 'tb-homework', tags: ['盤中', '自動'], d: '空觀察／當沖多／多觀察三份功課，系統自己把刀劍空、即將入獄、出獄、賽馬、河流、族群名次這幾份清單交叉比對，只留下該盯的那幾檔。',
