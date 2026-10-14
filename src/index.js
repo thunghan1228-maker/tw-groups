@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-14 09:16:29";
+const BUILD_STAMP = "2026-10-14 09:25:35";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1946,6 +1946,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .wl-ops{display:inline-flex;gap:4px;justify-content:flex-end;align-items:center;}
   .wl-op{background:none;border:1px solid var(--line);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 6px;font-family:inherit;}
   .wl-op.del:hover{color:#f87171;border-color:#f87171;}
+  .wl-op.mute{white-space:nowrap;}
+  .wl-op.mute.off{background:#7f1d1d;border-color:#b91c1c;color:#fff;}
+  .wl-btn.mute-all.off{background:#7f1d1d;border-color:#b91c1c;color:#fff;}
   .wl-gsel{padding:2px 4px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:12px;max-width:90px;}
   .wl-summary{font-size:13px;color:var(--muted);margin-top:8px;}
   .wl-table .sig-label{font-size:11px;padding:2px 6px;display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.25;gap:1px;}
@@ -9503,6 +9506,7 @@ function renderWatchTable(){
   const manual = wl.sort === 'manual';
   const groupOpts = (cur) => wl.data.groups.map((x) => '<option value="' + wlEsc(x.id) + '"' + (x.id === cur ? ' selected' : '') + '>' + wlEsc(x.name) + '</option>').join('');
   let up = 0, down = 0, flat = 0;
+  const muted = trkMutedSet();   // 2026-10-14 使用者：自選股這頁也能關提醒（跟個股訊號追蹤的「關閉訊號」同一份）
   const body = rows.map((r) => {
     const code = r.it.code, name = wlNameOf(code, r.it), cls = r.pct === null ? 'flat' : dirClass(r.pct);
     if (r.pct !== null){ if (r.pct > 0) up++; else if (r.pct < 0) down++; else flat++; }
@@ -9522,6 +9526,7 @@ function renderWatchTable(){
       '<td class="l wl-note" title="點一下寫備註">' + (r.it.note ? wlEsc(r.it.note) : '<span class="wl-note-empty">＋備註</span>') + '</td>' +
       '<td><span class="wl-ops">' +
         (manual ? '<button class="wl-op" data-op="up" title="往上">▲</button><button class="wl-op" data-op="down" title="往下">▼</button>' : '') +
+        '<button class="wl-op mute' + (muted.has(code) ? ' off' : '') + '" data-op="mute" title="' + (muted.has(code) ? '這檔目前不跳提醒；按一下重新開啟' : '這檔不想收到提醒就按掉（訊號、到價、跌破均線都不跳）') + '">' + (muted.has(code) ? '🔕 已關閉' : '關閉提醒') + '</button>' +
         (wl.data.groups.length > 1 ? '<select class="wl-gsel" title="移到別組">' + groupOpts(g.id) + '</select>' : '') +
         '<button class="wl-op del" data-op="del" title="從這組移除">✕</button></span></td>' +
     '</tr>';
@@ -9561,7 +9566,13 @@ function wlViewSort(){ return wl[WL_SORT_FIELD[wl.view] || 'sort'] || 'manual'; 
 function wlViewsHtml(){
   if (!WL_VIEWS.some((v) => v[0] === wl.view)) wl.view = 'live';
   return '<div class="wl-views">' + WL_VIEWS.map(([k, label]) => '<button class="wl-view' + (wl.view === k ? ' active' : '') + '" data-view="' + k + '">' + label + '</button>').join('') +
-    '<button class="wl-btn" id="wlToCheckup" title="把這組的股票丟進「每日持股健診」">🩺 這組送去健診</button></div>';
+    wlMuteGroupBtnHtml() + '<button class="wl-btn" id="wlToCheckup" title="把這組的股票丟進「每日持股健診」">🩺 這組送去健診</button></div>';
+}
+function wlMuteGroupBtnHtml(){
+  const codes = wlGroup().items.map((it) => it.code);
+  if (!codes.length) return '';
+  const muted = trkMutedSet(), allOff = codes.every((c) => muted.has(c));
+  return '<button class="wl-btn mute-all' + (allOff ? ' off' : '') + '" id="wlMuteGroup" data-off="' + (allOff ? '0' : '1') + '" title="' + (allOff ? '這組全部重新開啟提醒' : '這組的股票全部不跳提醒') + '">' + (allOff ? '🔔 這組全部開啟提醒' : '🔕 這組全部關閉提醒') + '</button>';
 }
 // 盤後資料：整份自選股（最多 120 檔，太多就只抓這一組）一次抓，10 分鐘內不重抓
 let wlCk = { key: '', data: null, at: 0, loading: false, error: '', byCode: {} };
@@ -10002,6 +10013,8 @@ document.getElementById('watchBody').addEventListener('click', (e) => {
   const viewBtn = e.target.closest('.wl-view[data-view]');
   if (viewBtn){ wl.view = viewBtn.dataset.view; wl.editing = null; wlSavePrefs(); renderWatch(); return; }
   if (e.target.closest('#wlToCheckup')){ wlSendToCheckup(); return; }
+  const muteGroup = e.target.closest('#wlMuteGroup');
+  if (muteGroup){ trkSetMuted(wlGroup().items.map((it) => it.code), muteGroup.dataset.off === '1'); renderWatch(); return; }
   const editBtn = e.target.closest('[data-edit]');
   if (editBtn){ wlEditAction(editBtn.dataset.edit); return; }
   const row = e.target.closest('tr[data-code]');
@@ -10016,7 +10029,10 @@ document.getElementById('watchBody').addEventListener('click', (e) => {
   }
   const op = e.target.closest('.wl-op');
   if (op){
-    if (op.dataset.op === 'del'){
+    if (op.dataset.op === 'mute'){
+      trkSetMuted([code], !trkMutedSet().has(code));
+      renderWatch();
+    } else if (op.dataset.op === 'del'){
       wlMutate((data) => { const g = data.groups.find((x) => x.id === gid); if (g) g.items = g.items.filter((it) => it.code !== code); });
     } else {
       const dir = op.dataset.op === 'up' ? -1 : 1;
@@ -11217,7 +11233,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-14 09:16:29';
+const BUILD_STAMP = '2026-10-14 09:25:35';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

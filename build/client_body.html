@@ -1881,6 +1881,9 @@
   .wl-ops{display:inline-flex;gap:4px;justify-content:flex-end;align-items:center;}
   .wl-op{background:none;border:1px solid var(--line);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 6px;font-family:inherit;}
   .wl-op.del:hover{color:#f87171;border-color:#f87171;}
+  .wl-op.mute{white-space:nowrap;}
+  .wl-op.mute.off{background:#7f1d1d;border-color:#b91c1c;color:#fff;}
+  .wl-btn.mute-all.off{background:#7f1d1d;border-color:#b91c1c;color:#fff;}
   .wl-gsel{padding:2px 4px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:12px;max-width:90px;}
   .wl-summary{font-size:13px;color:var(--muted);margin-top:8px;}
   .wl-table .sig-label{font-size:11px;padding:2px 6px;display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.25;gap:1px;}
@@ -9436,6 +9439,7 @@ function renderWatchTable(){
   const manual = wl.sort === 'manual';
   const groupOpts = (cur) => wl.data.groups.map((x) => '<option value="' + wlEsc(x.id) + '"' + (x.id === cur ? ' selected' : '') + '>' + wlEsc(x.name) + '</option>').join('');
   let up = 0, down = 0, flat = 0;
+  const muted = trkMutedSet();   // 2026-10-14 使用者：自選股這頁也能關提醒（跟個股訊號追蹤的「關閉訊號」同一份）
   const body = rows.map((r) => {
     const code = r.it.code, name = wlNameOf(code, r.it), cls = r.pct === null ? 'flat' : dirClass(r.pct);
     if (r.pct !== null){ if (r.pct > 0) up++; else if (r.pct < 0) down++; else flat++; }
@@ -9455,6 +9459,7 @@ function renderWatchTable(){
       '<td class="l wl-note" title="點一下寫備註">' + (r.it.note ? wlEsc(r.it.note) : '<span class="wl-note-empty">＋備註</span>') + '</td>' +
       '<td><span class="wl-ops">' +
         (manual ? '<button class="wl-op" data-op="up" title="往上">▲</button><button class="wl-op" data-op="down" title="往下">▼</button>' : '') +
+        '<button class="wl-op mute' + (muted.has(code) ? ' off' : '') + '" data-op="mute" title="' + (muted.has(code) ? '這檔目前不跳提醒；按一下重新開啟' : '這檔不想收到提醒就按掉（訊號、到價、跌破均線都不跳）') + '">' + (muted.has(code) ? '🔕 已關閉' : '關閉提醒') + '</button>' +
         (wl.data.groups.length > 1 ? '<select class="wl-gsel" title="移到別組">' + groupOpts(g.id) + '</select>' : '') +
         '<button class="wl-op del" data-op="del" title="從這組移除">✕</button></span></td>' +
     '</tr>';
@@ -9494,7 +9499,13 @@ function wlViewSort(){ return wl[WL_SORT_FIELD[wl.view] || 'sort'] || 'manual'; 
 function wlViewsHtml(){
   if (!WL_VIEWS.some((v) => v[0] === wl.view)) wl.view = 'live';
   return '<div class="wl-views">' + WL_VIEWS.map(([k, label]) => '<button class="wl-view' + (wl.view === k ? ' active' : '') + '" data-view="' + k + '">' + label + '</button>').join('') +
-    '<button class="wl-btn" id="wlToCheckup" title="把這組的股票丟進「每日持股健診」">🩺 這組送去健診</button></div>';
+    wlMuteGroupBtnHtml() + '<button class="wl-btn" id="wlToCheckup" title="把這組的股票丟進「每日持股健診」">🩺 這組送去健診</button></div>';
+}
+function wlMuteGroupBtnHtml(){
+  const codes = wlGroup().items.map((it) => it.code);
+  if (!codes.length) return '';
+  const muted = trkMutedSet(), allOff = codes.every((c) => muted.has(c));
+  return '<button class="wl-btn mute-all' + (allOff ? ' off' : '') + '" id="wlMuteGroup" data-off="' + (allOff ? '0' : '1') + '" title="' + (allOff ? '這組全部重新開啟提醒' : '這組的股票全部不跳提醒') + '">' + (allOff ? '🔔 這組全部開啟提醒' : '🔕 這組全部關閉提醒') + '</button>';
 }
 // 盤後資料：整份自選股（最多 120 檔，太多就只抓這一組）一次抓，10 分鐘內不重抓
 let wlCk = { key: '', data: null, at: 0, loading: false, error: '', byCode: {} };
@@ -9935,6 +9946,8 @@ document.getElementById('watchBody').addEventListener('click', (e) => {
   const viewBtn = e.target.closest('.wl-view[data-view]');
   if (viewBtn){ wl.view = viewBtn.dataset.view; wl.editing = null; wlSavePrefs(); renderWatch(); return; }
   if (e.target.closest('#wlToCheckup')){ wlSendToCheckup(); return; }
+  const muteGroup = e.target.closest('#wlMuteGroup');
+  if (muteGroup){ trkSetMuted(wlGroup().items.map((it) => it.code), muteGroup.dataset.off === '1'); renderWatch(); return; }
   const editBtn = e.target.closest('[data-edit]');
   if (editBtn){ wlEditAction(editBtn.dataset.edit); return; }
   const row = e.target.closest('tr[data-code]');
@@ -9949,7 +9962,10 @@ document.getElementById('watchBody').addEventListener('click', (e) => {
   }
   const op = e.target.closest('.wl-op');
   if (op){
-    if (op.dataset.op === 'del'){
+    if (op.dataset.op === 'mute'){
+      trkSetMuted([code], !trkMutedSet().has(code));
+      renderWatch();
+    } else if (op.dataset.op === 'del'){
       wlMutate((data) => { const g = data.groups.find((x) => x.id === gid); if (g) g.items = g.items.filter((it) => it.code !== code); });
     } else {
       const dir = op.dataset.op === 'up' ? -1 : 1;
