@@ -4853,7 +4853,7 @@ function sigDayBarHtml(){
     btn(1, '昨天' + (past[0] ? ' ' + mmdd(past[0]) : ''), past[0]) +
     btn(2, '前天' + (past[1] ? ' ' + mmdd(past[1]) : ''), past[1]) +
     (tab === 'now' || tab === 'nowBear'
-      ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (nowHf[tab] ? ' active' : '') + '" data-now-hf="' + tab + '" title="只看盤中大戶力 ' + (tab === 'now' ? '≥ +' : '≤ -') + HOLDER_HOT_PCT + '% 的股票（上面的大戶力名單跟下面的訊號都套；昨天／前天照那天收盤時的大戶力；再按一次全部顯示）">盤中大戶力' + (tab === 'now' ? '≥' : '≤-') + HOLDER_HOT_PCT + '%</button>'
+      ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (nowHf[tab] ? ' active' : '') + '" data-now-hf="' + tab + '" title="只看盤中大戶力 ' + (tab === 'now' ? '≥ +' : '≤ -') + HOLDER_HOT_PCT + '% 的股票（' + (tab === 'nowBear' ? '大戶力空名單跟訊號都套，最上面的刀劍空名單照原本' : '上面的大戶力名單跟下面的訊號都套') + '；昨天／前天照那天收盤時的大戶力；再按一次全部顯示）">盤中大戶力' + (tab === 'now' ? '≥' : '≤-') + HOLDER_HOT_PCT + '%</button>'
       : '') +
     '</div>';
 }
