@@ -7873,7 +7873,7 @@ document.getElementById('chipsBody').addEventListener('change', (e) => {
 // 後端每個交易日收盤後整理一份（/api/swing-report），以資料基準日為鍵保存；這裡照日期切換、五個段落顯示。
 const SWING_SECTIONS = [
   { key: 'summary', label: '今日摘要' }, { key: 'disposition', label: '處置動態' }, { key: 'etf', label: '主動式ETF持股雷達' }, { key: 'revenue', label: '營收面' }, { key: 'groups', label: '產業觀察' },
-  { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '體質轉強' },
+  { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '體質轉強' }, { key: 'full', label: '均線結構轉強' },   // 2026-10-14 使用者：均線結構轉強獨立一頁，放體質轉強右邊
 ];   // 2026-10-04 使用者：黑龍回測搬到獨立面板（下方導覽列「創高黑龍」）
 let swingState = { section: 'summary', date: '', groupsLimit: 12, groupsAll: false, revAll: false };   // groupsAll／revAll：產業觀察看全部族群、營收面看整月累計
 const swingCache = {};      // date('' = 最新) -> payload
@@ -8701,15 +8701,19 @@ function swingSectionHtml(data){
   }
   if (sec === 'ma'){
     const notes = data.notes || {};
-    const bodyList = picks.body || [], fullList = picks.full || [];
+    const bodyList = picks.body || [];
     const sustained = (notes.sustained || []).map((x) => x.name + '（均線 ' + x.score + '）').join('、');
-    const jumps = (notes.jumpTop || []).map((x) => x.name + ' ' + x.from + '→' + x.to).join('、');
     return '<div class="bl-section bl-launch">體質轉強・問診七科判強勢 ' + (counts.strong || 0) + ' 檔，取均線分數跳升 ≥3 者 ' + (counts.body || 0) + ' 檔，列前 ' + bodyList.length + ' 檔</div>' +
       '<div class="sw-rule">' + (rules.body || '') + '。風險提示：' + (rules.risks || '') + '。</div>' +
       (bodyList.length ? '<div class="sw-cards">' + bodyList.map((x) => swingCardHtml(x)).join('') + '</div>' : '<div class="race-note">那天沒有問診判強勢且均線分數跳升 3 分以上的股票</div>') +
       '<div class="sw-noteBox">續強確認（昨日已強、今日維持）：' + (sustained || '無') + '</div>' +
-      '<div class="sw-quote">跳升＝從弱轉強的第一天，比一直強的更值得記</div>' +
-      '<div class="bl-section bl-brew">均線結構轉強・' + swMmdd(data.date) + ' 收盤新達 15 分 ' + (counts.full || 0) + ' 檔，列前 ' + fullList.length + ' 檔</div>' +
+      '<div class="sw-quote">跳升＝從弱轉強的第一天，比一直強的更值得記</div>';
+  }
+  if (sec === 'full'){
+    const notes = data.notes || {};
+    const fullList = picks.full || [];
+    const jumps = (notes.jumpTop || []).map((x) => x.name + ' ' + x.from + '→' + x.to).join('、');
+    return '<div class="bl-section bl-brew">均線結構轉強・' + swMmdd(data.date) + ' 收盤新達 15 分 ' + (counts.full || 0) + ' 檔，列前 ' + fullList.length + ' 檔</div>' +
       '<div class="sw-rule">' + (rules.full || '') + '。</div>' +
       (fullList.length ? '<div class="sw-cards">' + fullList.map((x) => swingCardHtml(x, { green: true })).join('') + '</div>' : '<div class="race-note">那天沒有新達 15 分的股票</div>') +
       '<div class="sw-noteBox">跳升最多：' + (jumps || '無') + '</div>' +

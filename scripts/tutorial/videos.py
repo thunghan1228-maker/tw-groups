@@ -293,8 +293,8 @@ VIDEOS += [
         "key": "tb-swing", "title": "籌碼日報", "section": TB, "tab": None,
         "scenes": [
             tb_intro("籌碼日報", "籌碼日報是收盤後的一份整理，適合隔天盤前讀。", "「籌碼日報」：收盤後整理、隔天盤前讀"),
-            tb_open("openSwingPanel", "上面一排是分頁：今日摘要、處置動態、主動式ETF持股雷達、營收面、產業觀察、籌碼面、技術面和體質轉強。",
-                    "分頁：摘要、處置、ETF雷達、營收、產業、籌碼、技術、體質", pick=find("#swingModal .chart-tab", "今日摘要") + ".parentElement"),
+            tb_open("openSwingPanel", "上面一排是分頁：今日摘要、處置動態、主動式ETF持股雷達、營收面、產業觀察、籌碼面、技術面、體質轉強和均線結構轉強。",
+                    "分頁：摘要、處置、ETF雷達、營收、產業、籌碼、技術、體質、均線", pick=find("#swingModal .chart-tab", "今日摘要") + ".parentElement"),
             {"say": "下面一排是日期，可以回看最近十個交易日的日報。", "cap": "日期：可回看近 10 個交易日",
              "pick": find("#swingModal .chart-tab", "最新") + ".parentElement"},
             {"say": "今日摘要最上面寫這份是哪一天的盤前讀、用哪一天收盤的資料。三個大數字：今天真正穿過月線的、明天入獄和出獄的、問診判強勢的。",
