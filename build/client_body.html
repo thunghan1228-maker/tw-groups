@@ -11273,7 +11273,14 @@ function clampLaunchAlertPos(el, left, top){
 // 拖過的位置記在這台瀏覽器，下次再跳出來就在那裡（畫面變小超出去的話會拉回畫面內）。
 function makeAlertDraggable(el, headSel, key){
   const place = (pos) => { const p = clampLaunchAlertPos(el, pos.left, pos.top); el.style.left = p.left + 'px'; el.style.top = p.top + 'px'; el.style.transform = 'none'; };
-  try { const saved = JSON.parse(localStorage.getItem(key) || 'null'); if (saved) requestAnimationFrame(() => place(saved)); } catch (_){}
+  const save = () => {
+    const rect = el.getBoundingClientRect();
+    try { localStorage.setItem(key, JSON.stringify({ left: Math.round(rect.left), top: Math.round(rect.top) })); } catch (_){}
+  };
+  // 一跳出來就放到上次的位置（不要先閃在上面正中間）；內容填好後下一格畫面再夾一次，免得寬度變了跑出畫面
+  try { const saved = JSON.parse(localStorage.getItem(key) || 'null'); if (saved){ place(saved); requestAnimationFrame(() => place(saved)); } } catch (_){}
+  // 按 ✕ 關掉的那一刻也記位置（2026-10-14 使用者：關掉後下次跳出來要在最後停的地方；之前拖過但還沒記到的也算）
+  el.addEventListener('click', (e) => { if (e.target.closest('.launch-alert-close, .pk-alert-close') && el.style.left) save(); }, true);
   let drag = null;
   el.addEventListener('pointerdown', (e) => {
     if (!e.target.closest(headSel) || e.target.closest('button')) return;
@@ -11283,12 +11290,7 @@ function makeAlertDraggable(el, headSel, key){
     e.preventDefault();
   });
   el.addEventListener('pointermove', (e) => { if (drag) place({ left: drag.left + (e.clientX - drag.x), top: drag.top + (e.clientY - drag.y) }); });
-  const stop = () => {
-    if (!drag) return;
-    drag = null;
-    const rect = el.getBoundingClientRect();
-    try { localStorage.setItem(key, JSON.stringify({ left: Math.round(rect.left), top: Math.round(rect.top) })); } catch (_){}
-  };
+  const stop = () => { if (!drag) return; drag = null; save(); };
   el.addEventListener('pointerup', stop);
   el.addEventListener('pointercancel', stop);
 }
