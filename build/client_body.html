@@ -291,6 +291,9 @@
   /* 訊號中心是淺色底：紫色、黃色、綠色、粉紅都加深，才看得清楚 */
   #signalBody .obs-panel .obs-cat{color:#7c3aed;}
   #signalBody .obs-panel .obs-line b{color:#b7791f;}
+  /* 2026-10-14 使用者：【1】～【5】分類標題一律紅底白字（跳窗、每日功課、訊號中心都一樣） */
+  .obs-cat.obs-cat-n,.obs-panel .obs-cat.obs-cat-n,#signalBody .obs-panel .obs-cat.obs-cat-n{background:#dc2626;color:#fff;border-radius:6px;padding:3px 8px;display:inline-block;margin:10px 0 4px;}
+  .obs-cat.obs-cat-n small,.obs-panel .obs-cat.obs-cat-n small,#signalBody .obs-panel .obs-cat.obs-cat-n small{color:#fff;opacity:.92;}
   #signalBody .om-red{color:#dc2626;}
   #signalBody .om-pink{color:#db2777;}
   #signalBody .om-green{color:#15803d;}
@@ -13741,7 +13744,7 @@ function obsBodyHtml(rep){
     obsMark('✗三K低') + '＝跌破三K低（防守失守） ' + obsMark('▼') + '＝今天跌 5% 以上 ' + obsMark('↑') + '＝今天紅但還沒站回月線</div>';
   OBS_CATS.forEach(([n, title, act]) => {
     const list = rep.items.filter((x) => x.cat === n);
-    h += '<div class="obs-cat">【' + n + '】' + title + '<small>→ ' + act + '・' + list.length + ' 檔</small></div>';
+    h += '<div class="obs-cat obs-cat-n">【' + n + '】' + title + '<small>→ ' + act + '・' + list.length + ' 檔</small></div>';
     if (!list.length){ h += '<div class="obs-line">—</div>'; return; }
     if (n === 5){
       const a = list.filter((x) => x.newBreak), b = list.filter((x) => !x.newBreak);
