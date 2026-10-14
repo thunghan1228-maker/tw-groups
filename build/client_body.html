@@ -142,6 +142,9 @@
   .chart-tabs{display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap;}
   .ma-legend{display:flex;gap:10px;flex-wrap:wrap;margin-left:6px;font-size:11px;font-variant-numeric:tabular-nums;}
   .ma-legend-item{font-weight:700;white-space:nowrap;}
+  .ma-legend-item.chart-holder{border-radius:6px;padding:0 6px;color:#fff;background:#6b7280;}
+  .ma-legend-item.chart-holder.up{background:#dc2626;}
+  .ma-legend-item.chart-holder.down{background:#16a34a;}
   .chart-tab{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:700;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;transition:background .12s ease,color .12s ease;}
   .chart-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
   .chart-tab.active{color:var(--bg);background:var(--accent);border-color:var(--accent);}
@@ -3603,6 +3606,40 @@ function redrawAll(){
   }
 }
 
+// 2026-10-14 使用者：5 分K（1 分K 也一樣）上面那排 MA、扣底旁邊，加這檔「盤中大戶力」（跟訊號中心同一份：大單淨額÷累計成交額，整天累加）。
+// 主畫面有就用主畫面那份；K線圖開在視窗（iframe）、另開視窗時跟主畫面拿；都拿不到才自己抓（一分鐘最多一次）。
+let chartHolderCache = { rows: null, at: 0, busy: false };
+function chartHolderRow(code){
+  const find = (rows) => (rows || []).find((r) => r && r.code === code) || null;
+  let r = find(mainForceRanking);
+  if (!r){
+    try {
+      const host = window.parent !== window ? window.parent : window.opener;
+      if (host && host !== window && typeof host.wlHolderMap === 'function') r = host.wlHolderMap()[code] || null;
+    } catch (_){}
+  }
+  if (!r){ r = find(chartHolderCache.rows); chartHolderFetch(); }
+  return r;
+}
+async function chartHolderFetch(){
+  if (chartHolderCache.busy || Date.now() - chartHolderCache.at < 60000) return;
+  chartHolderCache.busy = true;
+  try {
+    const res = await fetch('/api/main-force-ranking?limit=1000');
+    const data = res.ok ? await res.json() : null;
+    if (data && Array.isArray(data.ranking)) chartHolderCache.rows = data.ranking;
+  } catch (_){ /* 抓不到就不顯示 */ }
+  chartHolderCache.at = Date.now(); chartHolderCache.busy = false;
+  if (chartHolderCache.rows && chartHolderCache.rows.some((r) => r.code === currentChart.code)) updateMaLegend(currentChart.hoverIndex);
+}
+function chartHolderLegendHtml(){
+  if (currentChart.tf !== 'm5' && currentChart.tf !== 'm1') return '';
+  const r = chartHolderRow(currentChart.code);
+  if (!r || r.strengthPct === null || r.strengthPct === undefined) return '';
+  const amt = fmtAmountWan(r.netAmount);
+  return '<span class="ma-legend-item chart-holder ' + (r.strengthPct > 0 ? 'up' : r.strengthPct < 0 ? 'down' : '') + '" title="' + (r.holderLabel || '盤中大戶力（大單淨額÷累計成交額，開盤到現在整天累加）') + '">盤中大戶力 ' +
+    (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%' + (amt ? '（' + amt + '）' : '') + '</span>';
+}
 function updateMaLegend(absIndex){
   const el = document.getElementById('maLegend');
   if (!el) return;
@@ -3615,7 +3652,7 @@ function updateMaLegend(absIndex){
   }).join('') + chartDeductMarks(allBars).map((m) => '<span class="ma-legend-item" style="color:' + m.color + '" title="扣底：今天不算，往前數 ' + m.period + ' 根的收盤">▲' + m.period + '扣 ' + m.close.toFixed(2) + '</span>').join('') +
     (currentChart.tf === 'daily' && currentChart.defOn
     ? chartDefenseLines(allBars).map((d) => '<span class="ma-legend-item" style="color:#e6675f">明日' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('')
-    : '');
+    : '') + chartHolderLegendHtml();
 }
 function updateChartTooltipAt(clientX, clientY){
   const canvas = document.getElementById('klineCanvas');
