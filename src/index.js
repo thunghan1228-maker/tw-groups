@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-14 09:27:00";
+const BUILD_STAMP = "2026-10-14 09:29:36";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5395,20 +5395,37 @@ function saveSignalView(){
     signalSaveTimer = setTimeout(saveSignalView, 300);
   }, { passive: true, capture: true });
 })();
+// 2026-10-14 使用者（iPhone／iPad 捲到下面看，新訊號一出來畫面又跳走）：原本用「第幾個同代號的列」對齊，同一檔在上面
+// 多一筆新訊號（同一檔一天好幾筆很常見），第幾個就整個錯開、對到別列去。改成用那一列自己的身分（代號＋時間＋訊號名稱，
+// 數字拿掉，大戶力% 會跳動）對齊，記畫面最上面看得到的前 5 列，第一列不見了就用下一列，都找不到才退回舊的算法。
+function signalRowKey(n){
+  const t = n.querySelector('.sig-time'), l = n.querySelector('.sig-label');
+  return n.dataset.code + '|' + (t ? t.textContent : '') + '|' + (l ? l.textContent.replace(/[\\d.,+\\-%]+/g, '') : '');
+}
 function signalAnchor(el, scroller){
   const top = scroller.getBoundingClientRect().top + scroller.clientTop;
-  const seen = {};
+  const seenCode = {}, seenKey = {}, list = [];
+  let first = null;
   for (const n of el.querySelectorAll('[data-code]')){
-    const c = n.dataset.code;
-    seen[c] = (seen[c] || 0) + 1;
+    const c = n.dataset.code, key = signalRowKey(n);
+    seenCode[c] = (seenCode[c] || 0) + 1;
+    seenKey[key] = (seenKey[key] || 0) + 1;
     const r = n.getBoundingClientRect();
-    if (r.height && r.bottom > top + 1) return { code: c, nth: seen[c], y: r.top };
+    if (!r.height || r.bottom <= top + 1) continue;
+    if (!first) first = { code: c, nth: seenCode[c], y: r.top };
+    list.push({ key, nth: seenKey[key], y: r.top });
+    if (list.length >= 5) break;
   }
-  return null;
+  return first ? Object.assign(first, { list }) : null;
 }
 function signalFindAnchor(el, a){
+  const rows = [...el.querySelectorAll('[data-code]')];
+  for (const want of a.list || []){
+    let k = 0;
+    for (const n of rows){ if (signalRowKey(n) === want.key && ++k === want.nth) return { node: n, y: want.y }; }
+  }
   let k = 0;
-  for (const n of el.querySelectorAll('[data-code]')){ if (n.dataset.code === a.code && ++k === a.nth) return n; }
+  for (const n of rows){ if (n.dataset.code === a.code && ++k === a.nth) return { node: n, y: a.y }; }
   return null;
 }
 function replaceSignalHtml(el, key, html){
@@ -5435,7 +5452,7 @@ function replaceSignalHtml(el, key, html){
     else if (pin && pin.mode === 'keep') setSignalScrollTop(scroller, prevTop);
     else if (sameView && prevTop > 0){
       const n = anchor && signalFindAnchor(el, anchor);
-      setSignalScrollTop(scroller, n ? scroller.scrollTop + n.getBoundingClientRect().top - anchor.y : prevTop + (scroller.scrollHeight - prevHeight));
+      setSignalScrollTop(scroller, n ? scroller.scrollTop + n.node.getBoundingClientRect().top - n.y : prevTop + (scroller.scrollHeight - prevHeight));
     } else if (!sameView) setSignalScrollTop(scroller, 0);
     // 重新載入後第一次畫到原本那個分頁：捲回原本的位置（內容還在載入、不夠長時，之後幾輪再補，最多 30 秒）
     if (signalRestore && signalRestore.tab === signalCenterState.activeTab){
@@ -11233,7 +11250,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-14 09:27:00';
+const BUILD_STAMP = '2026-10-14 09:29:36';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

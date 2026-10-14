@@ -5328,20 +5328,37 @@ function saveSignalView(){
     signalSaveTimer = setTimeout(saveSignalView, 300);
   }, { passive: true, capture: true });
 })();
+// 2026-10-14 使用者（iPhone／iPad 捲到下面看，新訊號一出來畫面又跳走）：原本用「第幾個同代號的列」對齊，同一檔在上面
+// 多一筆新訊號（同一檔一天好幾筆很常見），第幾個就整個錯開、對到別列去。改成用那一列自己的身分（代號＋時間＋訊號名稱，
+// 數字拿掉，大戶力% 會跳動）對齊，記畫面最上面看得到的前 5 列，第一列不見了就用下一列，都找不到才退回舊的算法。
+function signalRowKey(n){
+  const t = n.querySelector('.sig-time'), l = n.querySelector('.sig-label');
+  return n.dataset.code + '|' + (t ? t.textContent : '') + '|' + (l ? l.textContent.replace(/[\d.,+\-%]+/g, '') : '');
+}
 function signalAnchor(el, scroller){
   const top = scroller.getBoundingClientRect().top + scroller.clientTop;
-  const seen = {};
+  const seenCode = {}, seenKey = {}, list = [];
+  let first = null;
   for (const n of el.querySelectorAll('[data-code]')){
-    const c = n.dataset.code;
-    seen[c] = (seen[c] || 0) + 1;
+    const c = n.dataset.code, key = signalRowKey(n);
+    seenCode[c] = (seenCode[c] || 0) + 1;
+    seenKey[key] = (seenKey[key] || 0) + 1;
     const r = n.getBoundingClientRect();
-    if (r.height && r.bottom > top + 1) return { code: c, nth: seen[c], y: r.top };
+    if (!r.height || r.bottom <= top + 1) continue;
+    if (!first) first = { code: c, nth: seenCode[c], y: r.top };
+    list.push({ key, nth: seenKey[key], y: r.top });
+    if (list.length >= 5) break;
   }
-  return null;
+  return first ? Object.assign(first, { list }) : null;
 }
 function signalFindAnchor(el, a){
+  const rows = [...el.querySelectorAll('[data-code]')];
+  for (const want of a.list || []){
+    let k = 0;
+    for (const n of rows){ if (signalRowKey(n) === want.key && ++k === want.nth) return { node: n, y: want.y }; }
+  }
   let k = 0;
-  for (const n of el.querySelectorAll('[data-code]')){ if (n.dataset.code === a.code && ++k === a.nth) return n; }
+  for (const n of rows){ if (n.dataset.code === a.code && ++k === a.nth) return { node: n, y: a.y }; }
   return null;
 }
 function replaceSignalHtml(el, key, html){
@@ -5368,7 +5385,7 @@ function replaceSignalHtml(el, key, html){
     else if (pin && pin.mode === 'keep') setSignalScrollTop(scroller, prevTop);
     else if (sameView && prevTop > 0){
       const n = anchor && signalFindAnchor(el, anchor);
-      setSignalScrollTop(scroller, n ? scroller.scrollTop + n.getBoundingClientRect().top - anchor.y : prevTop + (scroller.scrollHeight - prevHeight));
+      setSignalScrollTop(scroller, n ? scroller.scrollTop + n.node.getBoundingClientRect().top - n.y : prevTop + (scroller.scrollHeight - prevHeight));
     } else if (!sameView) setSignalScrollTop(scroller, 0);
     // 重新載入後第一次畫到原本那個分頁：捲回原本的位置（內容還在載入、不夠長時，之後幾輪再補，最多 30 秒）
     if (signalRestore && signalRestore.tab === signalCenterState.activeTab){
