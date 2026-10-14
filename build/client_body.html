@@ -11566,15 +11566,38 @@ function positionSignalModal(){
 let signalMaxRestore = null;
 function setSignalMaxButton(){
   const b = document.getElementById('smMaximize');
-  if (b) b.textContent = signalMaxRestore ? '🗗 還原大小' : '⛶ 全螢幕';
+  if (b) b.textContent = signalMaxRestore || signalWinRestore || document.fullscreenElement ? '🗗 還原大小' : '⛶ 全螢幕';
 }
+// 2026-10-14 使用者：移到另一螢幕（獨立視窗）、釘選視窗裡的 ⛶ 全螢幕原本沒作用。獨立視窗：整個視窗變全螢幕（瀏覽器的全螢幕，按 Esc 也能退出）；
+// 瀏覽器不讓全螢幕的（釘選視窗）：視窗拉到跟螢幕一樣大，再按一次還原原本大小。
+let signalWinRestore = null;
+function toggleSignalWindowMaximize(){
+  if (document.fullscreenElement){ document.exitFullscreen().catch(() => {}); return; }
+  const host = window.parent !== window ? window.parent : window;   // 釘選視窗：iframe 外面那個視窗
+  const resizeHost = () => {
+    try {
+      if (signalWinRestore){
+        const r = signalWinRestore; signalWinRestore = null;
+        host.resizeTo(r.w, r.h); host.moveTo(r.x, r.y);
+      } else {
+        signalWinRestore = { x: host.screenX, y: host.screenY, w: host.outerWidth, h: host.outerHeight };
+        const sc = host.screen || screen;
+        host.moveTo(sc.availLeft || 0, sc.availTop || 0); host.resizeTo(sc.availWidth, sc.availHeight);
+      }
+    } catch (e) { signalWinRestore = null; showToast('這個視窗不能放大，請用視窗右上角的放大鈕'); }
+    setSignalMaxButton();
+  };
+  if (signalWinRestore || host !== window || !document.documentElement.requestFullscreen){ resizeHost(); return; }
+  document.documentElement.requestFullscreen().catch(resizeHost);
+}
+document.addEventListener('fullscreenchange', setSignalMaxButton);
 function fillSignalModalToViewport(){
   const panel = document.getElementById('signalModalInner');
   panel.style.left = '0px'; panel.style.top = '0px';
   panel.style.width = document.documentElement.clientWidth + 'px'; panel.style.height = window.innerHeight + 'px';
 }
 function toggleSignalMaximize(){
-  if (document.body.classList.contains('signal-window-mode')) return;
+  if (document.body.classList.contains('signal-window-mode')){ toggleSignalWindowMaximize(); return; }
   const panel = document.getElementById('signalModalInner');
   if (signalMaxRestore){
     const r = signalMaxRestore;
