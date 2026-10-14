@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-14 09:25:35";
+const BUILD_STAMP = "2026-10-14 09:27:00";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -11233,7 +11233,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-14 09:25:35';
+const BUILD_STAMP = '2026-10-14 09:27:00';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11308,14 +11308,13 @@ let launchAlertRows = [];  // 還沒被按掉的發動提醒；還沒按掉又�
 // 2026-09-30 使用者：卡片擋住後面內容時要能拖到畫面別的地方，不要釘死在正中間。
 // 卡片內容（innerHTML）每次有新發動都會整個重畫，拖曳的事件綁在外層常駐的 el 上（用委派抓 .launch-alert-head），
 // 不會因為重畫把監聽器跟著清掉；位置也是寫在 el 自己的 inline style，重畫 innerHTML 不會動到，所以拖到哪就停在哪。
-let launchAlertDragging = false, launchAlertDragX = 0, launchAlertDragY = 0, launchAlertStartLeft = 0, launchAlertStartTop = 0;
 function clampLaunchAlertPos(el, left, top){
   return {
     left: Math.max(0, Math.min(document.documentElement.clientWidth - el.offsetWidth, left)),
     top: Math.max(0, Math.min(window.innerHeight - 40, top)),
   };
 }
-// 2026-10-14 使用者：自選股提醒（跟創高黑龍提醒）跳出的框要能按住標題列拖到畫面別的地方，不要固定在上面；
+// 2026-10-14 使用者：自選股提醒（跟創高黑龍提醒、發動、形態觀察）跳出的框要能按住標題列拖到畫面別的地方，不要固定在上面；
 // 拖過的位置記在這台瀏覽器，下次再跳出來就在那裡（畫面變小超出去的話會拉回畫面內）。
 function makeAlertDraggable(el, headSel, key){
   const place = (pos) => { const p = clampLaunchAlertPos(el, pos.left, pos.top); el.style.left = p.left + 'px'; el.style.top = p.top + 'px'; el.style.transform = 'none'; };
@@ -11346,24 +11345,8 @@ function renderLaunchAlertBox(){
     el.id = 'launchAlertBox';
     el.className = 'launch-alert';
     el.addEventListener('click', (e) => { if (e.target.closest('.launch-alert-close')) dismissLaunchAlert(); });
-    el.addEventListener('pointerdown', (e) => {
-      if (!e.target.closest('.launch-alert-head') || e.target.closest('.launch-alert-close')) return;
-      launchAlertDragging = true;
-      launchAlertDragX = e.clientX; launchAlertDragY = e.clientY;
-      const rect = el.getBoundingClientRect();
-      launchAlertStartLeft = rect.left; launchAlertStartTop = rect.top;
-      el.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    });
-    el.addEventListener('pointermove', (e) => {
-      if (!launchAlertDragging) return;
-      const pos = clampLaunchAlertPos(el, launchAlertStartLeft + (e.clientX - launchAlertDragX), launchAlertStartTop + (e.clientY - launchAlertDragY));
-      el.style.left = pos.left + 'px'; el.style.top = pos.top + 'px'; el.style.transform = 'none';
-    });
-    const stopLaunchAlertDrag = () => { launchAlertDragging = false; };
-    el.addEventListener('pointerup', stopLaunchAlertDrag);
-    el.addEventListener('pointercancel', stopLaunchAlertDrag);
     document.body.appendChild(el);
+    makeAlertDraggable(el, '.launch-alert-head', 'launchAlertPos');   // 2026-10-14 使用者：✕ 關掉後下次跳出來在最後停留的位置
   }
   // 2026-09-30 使用者：卡片裡也要標出發動時間，最新的排最上面，比較舊的排下面。
   // 2026-10-08 使用者（電腦版截圖三筆都寫 12:12）：原本用 brewWhen，還沒進後端紀錄的「盤中」列會寫「現在幾點」，
@@ -13784,7 +13767,6 @@ function obsBodyHtml(rep){
     (rep.missing.length ? '沒抓到報價：' + wlEsc(rep.missing.join('、')) : '') + '點股票開 K 線圖。</div>';
   return h;
 }
-let obsDrag = null;
 function obsShowPopup(rep){
   let el = document.getElementById('obsAlertBox');
   if (!el){
@@ -13797,22 +13779,8 @@ function obsShowPopup(rep){
       const s = e.target.closest('[data-obs-code]');
       if (s) openStockChart(s.dataset.obsCode, s.dataset.obsName);
     });
-    el.addEventListener('pointerdown', (e) => {
-      if (!e.target.closest('.launch-alert-head') || e.target.closest('button')) return;
-      const rect = el.getBoundingClientRect();
-      obsDrag = { x: e.clientX, y: e.clientY, left: rect.left, top: rect.top };
-      el.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    });
-    el.addEventListener('pointermove', (e) => {
-      if (!obsDrag) return;
-      const pos = clampLaunchAlertPos(el, obsDrag.left + (e.clientX - obsDrag.x), obsDrag.top + (e.clientY - obsDrag.y));
-      el.style.left = pos.left + 'px'; el.style.top = pos.top + 'px'; el.style.transform = 'none';
-    });
-    const stop = () => { obsDrag = null; };
-    el.addEventListener('pointerup', stop);
-    el.addEventListener('pointercancel', stop);
     document.body.appendChild(el);
+    makeAlertDraggable(el, '.launch-alert-head', 'obsAlertPos');
   }
   el.innerHTML = '<div class="launch-alert-head">⏰ ' + wlEsc(obsTitle(rep)) + '<span class="obs-tools"><button type="button" data-obs-copy="1">📋 複製</button>' +
     '<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></span></div><div class="launch-alert-body">' + obsBodyHtml(rep) + '</div>';

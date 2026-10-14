@@ -11241,14 +11241,13 @@ let launchAlertRows = [];  // 還沒被按掉的發動提醒；還沒按掉又�
 // 2026-09-30 使用者：卡片擋住後面內容時要能拖到畫面別的地方，不要釘死在正中間。
 // 卡片內容（innerHTML）每次有新發動都會整個重畫，拖曳的事件綁在外層常駐的 el 上（用委派抓 .launch-alert-head），
 // 不會因為重畫把監聽器跟著清掉；位置也是寫在 el 自己的 inline style，重畫 innerHTML 不會動到，所以拖到哪就停在哪。
-let launchAlertDragging = false, launchAlertDragX = 0, launchAlertDragY = 0, launchAlertStartLeft = 0, launchAlertStartTop = 0;
 function clampLaunchAlertPos(el, left, top){
   return {
     left: Math.max(0, Math.min(document.documentElement.clientWidth - el.offsetWidth, left)),
     top: Math.max(0, Math.min(window.innerHeight - 40, top)),
   };
 }
-// 2026-10-14 使用者：自選股提醒（跟創高黑龍提醒）跳出的框要能按住標題列拖到畫面別的地方，不要固定在上面；
+// 2026-10-14 使用者：自選股提醒（跟創高黑龍提醒、發動、形態觀察）跳出的框要能按住標題列拖到畫面別的地方，不要固定在上面；
 // 拖過的位置記在這台瀏覽器，下次再跳出來就在那裡（畫面變小超出去的話會拉回畫面內）。
 function makeAlertDraggable(el, headSel, key){
   const place = (pos) => { const p = clampLaunchAlertPos(el, pos.left, pos.top); el.style.left = p.left + 'px'; el.style.top = p.top + 'px'; el.style.transform = 'none'; };
@@ -11279,24 +11278,8 @@ function renderLaunchAlertBox(){
     el.id = 'launchAlertBox';
     el.className = 'launch-alert';
     el.addEventListener('click', (e) => { if (e.target.closest('.launch-alert-close')) dismissLaunchAlert(); });
-    el.addEventListener('pointerdown', (e) => {
-      if (!e.target.closest('.launch-alert-head') || e.target.closest('.launch-alert-close')) return;
-      launchAlertDragging = true;
-      launchAlertDragX = e.clientX; launchAlertDragY = e.clientY;
-      const rect = el.getBoundingClientRect();
-      launchAlertStartLeft = rect.left; launchAlertStartTop = rect.top;
-      el.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    });
-    el.addEventListener('pointermove', (e) => {
-      if (!launchAlertDragging) return;
-      const pos = clampLaunchAlertPos(el, launchAlertStartLeft + (e.clientX - launchAlertDragX), launchAlertStartTop + (e.clientY - launchAlertDragY));
-      el.style.left = pos.left + 'px'; el.style.top = pos.top + 'px'; el.style.transform = 'none';
-    });
-    const stopLaunchAlertDrag = () => { launchAlertDragging = false; };
-    el.addEventListener('pointerup', stopLaunchAlertDrag);
-    el.addEventListener('pointercancel', stopLaunchAlertDrag);
     document.body.appendChild(el);
+    makeAlertDraggable(el, '.launch-alert-head', 'launchAlertPos');   // 2026-10-14 使用者：✕ 關掉後下次跳出來在最後停留的位置
   }
   // 2026-09-30 使用者：卡片裡也要標出發動時間，最新的排最上面，比較舊的排下面。
   // 2026-10-08 使用者（電腦版截圖三筆都寫 12:12）：原本用 brewWhen，還沒進後端紀錄的「盤中」列會寫「現在幾點」，
@@ -13717,7 +13700,6 @@ function obsBodyHtml(rep){
     (rep.missing.length ? '沒抓到報價：' + wlEsc(rep.missing.join('、')) : '') + '點股票開 K 線圖。</div>';
   return h;
 }
-let obsDrag = null;
 function obsShowPopup(rep){
   let el = document.getElementById('obsAlertBox');
   if (!el){
@@ -13730,22 +13712,8 @@ function obsShowPopup(rep){
       const s = e.target.closest('[data-obs-code]');
       if (s) openStockChart(s.dataset.obsCode, s.dataset.obsName);
     });
-    el.addEventListener('pointerdown', (e) => {
-      if (!e.target.closest('.launch-alert-head') || e.target.closest('button')) return;
-      const rect = el.getBoundingClientRect();
-      obsDrag = { x: e.clientX, y: e.clientY, left: rect.left, top: rect.top };
-      el.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    });
-    el.addEventListener('pointermove', (e) => {
-      if (!obsDrag) return;
-      const pos = clampLaunchAlertPos(el, obsDrag.left + (e.clientX - obsDrag.x), obsDrag.top + (e.clientY - obsDrag.y));
-      el.style.left = pos.left + 'px'; el.style.top = pos.top + 'px'; el.style.transform = 'none';
-    });
-    const stop = () => { obsDrag = null; };
-    el.addEventListener('pointerup', stop);
-    el.addEventListener('pointercancel', stop);
     document.body.appendChild(el);
+    makeAlertDraggable(el, '.launch-alert-head', 'obsAlertPos');
   }
   el.innerHTML = '<div class="launch-alert-head">⏰ ' + wlEsc(obsTitle(rep)) + '<span class="obs-tools"><button type="button" data-obs-copy="1">📋 複製</button>' +
     '<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></span></div><div class="launch-alert-body">' + obsBodyHtml(rep) + '</div>';
