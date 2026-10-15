@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 21:59:24";
+const BUILD_STAMP = "2026-10-15 22:13:33";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -159,7 +159,6 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-avg{margin-left:auto;font-size:12px;}
   .hr-sep{padding:3px 6px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;}
   .hr-note{padding:8px 10px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);}
-  .hr-foot{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;}
   /* 首頁飆股雷達欄（2026-10-15）：分類標題紅底、族群名黃色，每檔後面帶符號；名稱太長截掉，符號和漲跌幅不截 */
   .hr-obs-cat{padding:4px 8px;font-size:12px;font-weight:800;background:#dc2626;color:#fff;border-top:1px solid var(--line);}
   .hr-obs-cat small{font-weight:600;opacity:.9;}
@@ -168,8 +167,18 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-row.hr-obs .hr-name,.hr-row.hr-obs .hr-code{flex:0 0 auto;overflow:visible;}
   .hr-obs-mk{flex-shrink:0;white-space:nowrap;}
   .hr-obs-mk .d123-tag{margin:0 1px;}
-  .hr-obs-foot{color:#f9a8d4;}   /* 2026-10-15 使用者：飆股雷達說明的字改粉紅色；①②③底色標籤、符號顏色照原本（★☆●紅、▲粉紅、✗三K低▼綠、↑深紅） */
+  /* 首頁最下面的說明表格（2026-10-15 使用者：整段字太亂，改表格）：桌機一排 5 張，窄螢幕自動換行，手機一張一列 */
+  .hr-help{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:8px;margin-top:10px;align-items:start;}
+  .hr-help-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0;}
+  .hr-help-title{padding:6px 10px;background:#4a3d34;font-weight:800;font-size:13px;color:var(--text);}
+  .hr-help-tbl{width:100%;border-collapse:collapse;font-size:12px;line-height:1.5;color:var(--muted);}
+  .hr-help-tbl th{padding:4px 8px;text-align:left;font-weight:700;font-size:11px;color:var(--muted);background:rgba(255,255,255,0.03);white-space:nowrap;}
+  .hr-help-tbl td{padding:4px 8px;border-top:1px solid var(--line);vertical-align:top;}
+  .hr-help-tbl td:first-child{white-space:nowrap;font-weight:700;color:var(--text);}
+  .hr-help-tbl td:nth-child(2):not(:last-child){white-space:nowrap;}
+  .hr-obs-foot .hr-help-tbl,.hr-obs-foot .hr-help-tbl th,.hr-obs-foot .hr-help-tbl td:first-child{color:#f9a8d4;}   /* 2026-10-15 使用者：強勢黑K選股說明的字改粉紅色；①②③底色標籤、符號顏色照原本（★☆●紅、▲粉紅、✗三K低▼綠、↑深紅） */
   .hr-obs-foot .d123-tag{margin:0 2px;}
+  .hr-obs-foot .om{font-size:13px;}
   @media (max-width: 1700px){ .home-rank4{grid-template-columns:repeat(4, minmax(0, 1fr));} }
   @media (max-width: 900px){ .home-rank4{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-grid{grid-template-columns:repeat(3, minmax(0, 1fr));} }
   /* 2026-10-15 使用者：手機版也要看到每列後面的漲跌幅——兩欄照舊，字和間距縮小，名稱太長就截掉，漲跌幅一定留著 */
@@ -6491,11 +6500,34 @@ function homeRank4Html(){
     '</div>' +
     homeObsColHtml() +
     '</div>' +
-    '<div class="hr-foot">188／193／199／177：括號＝今天族群名次（平均漲跌幅，共 ' + h.total + ' 個族群，1 最強）；🔺／🔽＝跟昨天收盤的名次比，升／掉幾名；最右邊是族群平均漲跌幅。' +
-      '188、183 只看固定的 ' + RANK188_GROUPS.size + ' 族（183 在多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票），193、199 只看固定的 ' + KILL193_GROUPS.size + ' 族（193 只列名次有掉的，族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票），177 只列漲幅前 10 大和跌幅前 10 大的族群。' +
-      '點族群看成分股。' +
-      '續抱勿追高（賽馬多漲超過 7%）、30加33加34（馬火多、賽馬多、河流多三份都有的）、賽馬多(33)、河流多(34) 跟訊號中心「盤中333」同一份：每列＝族群名次、代號、名稱、今天漲跌幅，族排前面的在上面，點股票開K線圖。</div>' +
-    homeObsFootHtml();
+    '<div class="hr-help">' + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
+}
+// 首頁最下面的說明（2026-10-15 使用者：一段一段字太亂，整理成表格）：族群排名欄、個股欄、強勢黑K選股、符號各一張
+const hrHelpTable = (title, head, rows, cls) => '<div class="hr-help-card' + (cls ? ' ' + cls : '') + '"><div class="hr-help-title">' + title + '</div><table class="hr-help-tbl">' +
+  (head ? '<thead><tr>' + head.map((x) => '<th>' + x + '</th>').join('') + '</tr></thead>' : '') +
+  '<tbody>' + rows.map((r) => '<tr>' + r.map((x) => '<td>' + x + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+function homeRankFootHtml(total){
+  return hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
+    ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
+    ['多族群排名(183)', '固定 ' + RANK188_GROUPS.size + ' 族', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票'],
+    ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '全部列出'],
+    ['空族群必殺(193)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列名次比昨天掉的；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
+    ['排名比較(177)', '全部 ' + total + ' 族', '只列漲幅前 10 大和跌幅前 10 大'],
+  ]) +
+  hrHelpTable('🔎 族群列怎麼看', ['位置', '意思'], [
+    ['括號數字', '今天族群名次（平均漲跌幅排，共 ' + total + ' 個族群，1 最強）'],
+    ['🔺／🔽', '跟昨天收盤的名次比，升／掉幾名'],
+    ['最右邊 %', '族群平均漲跌幅'],
+    ['點族群', '看成分股'],
+  ]) +
+  hrHelpTable('🐎 個股欄（跟訊號中心「盤中333」同一份）', ['欄位', '列什麼'], [
+    ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
+    ['👑30加33加34', '馬火多、賽馬多、河流多三份都有的'],
+    ['🐎賽馬多(33)', '賽馬多名單'],
+    ['🌊河流多(34)', '河流多名單'],
+    ['每一列', '族群名次、代號、名稱、今天漲跌幅；族排前面的在上面'],
+    ['點股票', '開K線圖'],
+  ]);
 }
 // 首頁最後一欄：飆股雷達（2026-10-15 使用者：「盤中形態觀察股」改名飆股雷達，【1】【2】【3】放到首頁原本 177 的位置；
 // 每檔後面照樣標符號，符號說明寫在首頁最下面）。跟訊號中心「盤中飆股雷達」同一份（obsState.report），
@@ -6530,12 +6562,26 @@ function homeObsColHtml(){
   return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔・' + at + '</span></div>' + body + '</div>';
 }
 function homeObsFootHtml(){
-  const cats = OBS_CATS.filter(([k]) => HOME_OBS_CATS.includes(k)).map(([k, name, act]) => '【' + k + '】' + name + '（' + act + '）').join('、');
-  return '<div class="hr-foot hr-obs-foot">強勢黑K選股：跟訊號中心「強勢黑K選股」同一份，首頁只列 ' + cats + '；盤中（09:00～13:35）每 ' + HOME_OBS_REFRESH_MS / 60000 + ' 分鐘重算一次分類和符號，標題後面的時間＝最後一次算的時間，收盤後就停在那一次；每檔的漲跌幅跟首頁報價一起每 15 秒更新；同族群的排在一起。' +
-    '每檔後面的符號：' + d123TagHtml({ n: 1, region: 1 }) + d123TagHtml({ n: 2, region: 2 }) + '＝123 黑龍，收黑就是這一波第幾次進場（①②③＝第一、二、三次；紅底區1＝可積極加碼、黃底區2＝等突破再加碼）、' +
-    d123TagHtml({ n: 4, full: true }) + '＝這一波已經進場三次，等下一次創新高；' +
-    obsMark('★') + '＝持股健診「強」、' + obsMark('☆') + '＝「中上」、' + obsMark('●') + '＝今天發動過、' + obsMark('▲') + '＝黑龍系統相對高檔，打少跑快、' +
-    obsMark('✗三K低') + '＝跌破三K低（防守失守）、' + obsMark('▼') + '＝今天跌 5% 以上、' + obsMark('↑') + '＝今天紅但還沒站回月線、(處置)＝處置股。點股票開K線圖。</div>';
+  return hrHelpTable('📡 強勢黑K選股（跟訊號中心同一份）', ['分類', '怎麼做'],
+    OBS_CATS.filter(([k]) => HOME_OBS_CATS.includes(k)).map(([k, name, act]) => ['【' + k + '】' + name, act]).concat([
+      ['更新', '盤中（09:00～13:35）每 ' + HOME_OBS_REFRESH_MS / 60000 + ' 分鐘重算分類和符號；收盤後停在最後一次'],
+      ['標題的時間', '最後一次算的時間'],
+      ['漲跌幅', '跟首頁報價一起每 15 秒更新'],
+      ['排序', '同族群的排在一起；點股票開K線圖'],
+    ]), 'hr-obs-foot') +
+  hrHelpTable('🔣 每檔後面的符號', ['符號', '意思'], [
+    [d123TagHtml({ n: 1, region: 1 }) + d123TagHtml({ n: 2, region: 2 }), '123 黑龍：收黑是這一波第幾次進場（①②③＝第一、二、三次）'],
+    ['紅底／黃底', '紅底區1＝可積極加碼；黃底區2＝等突破再加碼'],
+    [d123TagHtml({ n: 4, full: true }), '這一波已經進場三次，等下一次創新高'],
+    [obsMark('★'), '持股健診「強」'],
+    [obsMark('☆'), '持股健診「中上」'],
+    [obsMark('●'), '今天發動過'],
+    [obsMark('▲'), '黑龍系統相對高檔，打少跑快'],
+    [obsMark('✗三K低'), '跌破三K低（防守失守）'],
+    [obsMark('▼'), '今天跌 5% 以上'],
+    [obsMark('↑'), '今天紅但還沒站回月線'],
+    ['(處置)', '處置股'],
+  ], 'hr-obs-foot');
 }
 function bladeShortHtml(){
   const m = race333Model();
@@ -11967,7 +12013,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 21:59:24';
+const BUILD_STAMP = '2026-10-15 22:13:33';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
