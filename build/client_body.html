@@ -6149,17 +6149,17 @@ function homeRank4Html(){
       .map((x) => ({ code: x.code, name: x.name, pct: x.changePercent })).sort((a, b) => b.pct - a.pct);
   };
   const rows188 = h.rows.filter((r) => RANK188_GROUPS.has(r.name));
-  // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／刀劍空(32) 疊在同一欄）、193、199、33、34、188、177
+  // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／199 疊在同一欄）、193、刀劍空(32)、33、34、188、177
   return '<div class="home-rank4">' +
     homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
       homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單（照老師），交集也就沒有' : '') +
-      homeBladeColHtml(m) +
+      homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name)), h.half, '------↓(空方)↓------', '沒有資料') +
     '</div>' +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉', (r) => r.members || [], 'bear') +
-    homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name)), h.half, '------↓(空方)↓------', '沒有資料') +
+    homeBladeColHtml(m) +
     homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
     homeStockColHtml('🌊河流多(34)', m ? m.rivers : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單（照老師）' : '') +
     homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
@@ -12319,7 +12319,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">183・續抱勿追高／30加33加34／刀劍空(32)・193・199・賽馬多(33)・河流多(34)・188・177</div></div>' +
+        '<div class="section-head"><div class="section-title">183・續抱勿追高／30加33加34／199・193・刀劍空(32)・賽馬多(33)・河流多(34)・188・177</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
