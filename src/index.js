@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 21:35:02";
+const BUILD_STAMP = "2026-10-15 21:59:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1628,6 +1628,58 @@ const HTML_PAGE = `<!DOCTYPE html>
   .gr-chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:1px 8px;background:var(--panel-2);color:var(--text);cursor:pointer;font-family:inherit;white-space:nowrap;}
   .gr-chip small{color:var(--muted);margin-right:3px;font-size:11px;}
   .gr-chip:hover{border-color:#eab308;}
+  /* 2026-10-15 使用者：飆股雷達照老師那頁的版面——米色紙底、波段米黃區／隔日沖淡藍區、白色卡片、紅框時點 */
+  .gr-paper{--gp-text:#3b2f27;--gp-muted:#8a7b6c;--gp-line:#e6dccb;--gp-up:#c0392b;--gp-down:#1f8a5b;background:#f6f1e7;color:var(--gp-text);border-radius:12px;padding:12px 14px;}
+  .gr-paper .gr-controls label,.gr-paper .gr-updated,.gr-paper .gr-legend,.gr-paper .gr-alltimes,.gr-paper .race-note{color:var(--gp-muted);}
+  .gr-paper .gr-controls select,.gr-paper .gr-controls button{background:#fff;color:var(--gp-text);border-color:var(--gp-line);}
+  .gr-paper .gr-legend b{color:#9b2c2c;text-decoration:underline dotted;}
+  .gr-paper .gr-jail{background:#c0392b;}
+  .gr-paper .gr-sus{color:#b8681f;border-color:#d9a75c;background:#fff4e2;}
+  .gr-paper .gr-slot{background:#fff;color:var(--gp-muted);border-color:#e0d4c2;border-radius:3px;}
+  .gr-paper .gr-slot.has{border:1px solid #c0392b;color:#7a2a20;}
+  .gr-paper .gr-slot b{color:#c0392b;}
+  .gr-paper .gr-slot.sel{background:#fbe9c6;border-color:#c0392b;color:#7a2a20;}
+  .gr-paper .gr-latest{background:#fffdf8;border:1px solid var(--gp-line);border-radius:14px;padding:12px 14px;box-shadow:0 2px 10px rgba(80,60,40,.08);}
+  .gr-paper .gr-latest-head b{color:#9b2c2c;font-size:16px;}
+  .gr-paper .gr-latest-head small{color:var(--gp-muted);}
+  .gr-paper .gr-latest-kind{border-left:4px solid #9b2c2c;background:#f6ead2;border-radius:2px;padding:8px 10px;}
+  .gr-paper .gr-latest-kind.overnight{border-left-color:#2f4f7f;background:#e3ebf3;}
+  .gr-paper .gr-latest-at{border-color:#d9b98c;background:#fff;color:#6b4a2f;}
+  .gr-paper .gr-latest-row{border-top:1px solid rgba(120,100,80,.15);}
+  .gr-paper .gr-latest-name{color:var(--gp-text);}
+  .gr-paper .gr-latest-n{color:#c0392b;}
+  .gr-paper .gr-latest-none,.gr-paper .gr-none{color:var(--gp-muted);}
+  .gr-paper .gr-chip{background:#fff;border-color:#ddd2c2;color:var(--gp-text);}
+  .gr-paper .gr-chip small{color:var(--gp-text);}
+  .gr-paper .gr-kind{border:0;font-size:14px;font-weight:800;padding:0;}
+  .gr-paper .gr-kind.swing{color:#9b2c2c;} .gr-paper .gr-kind.overnight{color:#2f4f7f;}
+  .gr-paper .gr-sec{border-left:4px solid #9b2c2c;background:#f6ead2;border-radius:2px;padding:12px 14px;}
+  .gr-paper .gr-sec.overnight{border-left-color:#2f4f7f;background:#e3ebf3;}
+  .gr-paper .gr-sec-h{font-family:"Noto Serif TC","Songti TC","PMingLiU",serif;font-size:28px;color:#3a2a1f;}
+  .gr-paper .gr-sec.overnight .gr-sec-h{color:#2f4f7f;}
+  .gr-paper .gr-sec-h small,.gr-paper .gr-saint small{color:var(--gp-muted);}
+  .gr-paper .gr-saint{font-family:"Noto Serif TC","Songti TC","PMingLiU",serif;font-size:19px;color:#2a1f18;}
+  .gr-paper .gr-card{background:#fffdf8;border:1px solid var(--gp-line);border-radius:6px;padding:8px 10px;box-shadow:0 1px 3px rgba(80,60,40,.06);}
+  .gr-paper .gr-title{color:#2a1f18;}
+  .gr-paper .gr-fold,.gr-paper .gr-cal{color:var(--gp-muted);}
+  .gr-paper .gr-info{border-color:#cdbfae;color:var(--gp-muted);background:#fff;}
+  .gr-paper .gr-count{background:#a3271f;}
+  .gr-paper .gr-count.zero{border-color:#e0d4c2;background:#fff;}
+  .gr-paper .gr-at{border-color:#d9b98c;background:#fff;color:#6b4a2f;}
+  .gr-paper .gr-desc{background:#f8f1e4;color:var(--gp-text);}
+  .gr-paper .gr-list th{background:#f8f1e4;color:var(--gp-muted);}
+  .gr-paper .gr-list th.gr-sort.on{color:#c0392b;}
+  .gr-paper .gr-list td{border-top-color:#efe6d8;color:var(--gp-text);}
+  .gr-paper .gr-list tr.gr-row:hover td{background:#fbf5ea;}
+  .gr-paper .gr-code{color:#2a1f18;}
+  .gr-paper .gr-grp{color:#9b2c2c;border-color:#c0392b;background:#fff7f5;}
+  .gr-paper .gr-grp.other{color:var(--gp-muted);border-color:#e0d4c2;background:#fbf8f2;}
+  .gr-paper .gr-ma.hi{background:#f5c242;color:#3a2a1f;} .gr-paper .gr-ma.mid{background:#f6e4f0;color:#8a4a7a;border:1px solid #e9c9df;} .gr-paper .gr-ma.lo{color:var(--gp-muted);border-color:#e0d4c2;background:#fff;}
+  .gr-paper .gr-et{border-color:#d9c7aa;color:#6b4a2f;background:#fff;}
+  .gr-paper .gr-et.new{border-color:#c0392b;color:#c0392b;}
+  .gr-paper .gr-gone{color:#c0392b;}
+  .gr-paper .gr-up{color:var(--gp-up);} .gr-paper .gr-down{color:var(--gp-down);}
+  .gr-paper .gr-foot{font-size:11px;color:var(--gp-muted);border-top:1px solid var(--gp-line);margin-top:12px;padding-top:8px;line-height:1.7;}
   @media(max-width:640px){ .gr-slots{margin-left:0;} .gr-sec-h{font-size:20px;} .gr-cal{display:none;} }
   /* 處置監獄（2026-10-09 使用者：照老師「處置股・出獄與嫌疑名單」做）：說明框、出獄週表、犯罪集團、入獄／嫌疑卡片、門檻、前科查詢 */
   .jl-meta{font-size:12px;color:var(--muted);margin:2px 0 6px;}
@@ -11915,7 +11967,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 21:35:02';
+const BUILD_STAMP = '2026-10-15 21:59:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13689,7 +13741,12 @@ function grSortRows(rows){
     return vb - va;
   });
 }
-function grSlots(logic, closeSlot){ return logic.times.concat([closeSlot]); }
+function grSlots(logic, closeSlot, runs){
+  // 2026-10-15 照老師：卡片上只放時間點（波段 13:00／15:00、隔日沖 12:00／13:20／13:45）；那天盤中都沒算到（往日回推）才顯示「收盤」
+  const intraday = logic.times.filter((t) => runs && runs[t]);
+  return intraday.length || !(runs && runs[closeSlot]) ? logic.times.slice() : logic.times.concat([closeSlot]);
+}
+function grSlotLabel(slot){ return slot === '15:00' ? '15:00 收盤' : slot; }
 // 2026-10-13 使用者（貼老師 K棒組合選股的截圖）：排版照老師——波段／隔日沖兩大區、聖杯小標「N 個邏輯」、
 // 每個邏輯一張整排的卡（▼ 收合、圖示、? 條件、檔數、日期・時間點、右邊時間點按鈕），表格加族群、進榜時間、🩺 問診，
 // 處置中／嫌疑犯標在股名後面（跟處置監獄同一份），掉出去的劃線寫「× 時間 消失」；最上面「最新一輪」也標處置／嫌疑。
@@ -13726,7 +13783,7 @@ function grSortTh(key, label){
   return '<th class="r gr-sort' + (on ? ' on' : '') + '" data-gr-sort="' + key + '">' + label + (on ? ' ▼' : ' ⇅') + '</th>';
 }
 function grCard(logic, runs, closeSlot, date){
-  const slots = grSlots(logic, closeSlot);
+  const slots = grSlots(logic, closeSlot, runs);
   const have = slots.filter((s) => runs && runs[s]);
   let sel = grState.sel[logic.key];
   if (!sel || !(runs && runs[sel])) sel = have.length ? have[have.length - 1] : null;
@@ -13778,7 +13835,7 @@ function grCard(logic, runs, closeSlot, date){
     + '<span class="gr-ico">' + (GR_ICONS[logic.key] || '📊') + '</span><b class="gr-title" data-gr-fold="' + logic.key + '">' + rdEsc(logic.name) + '</b>'
     + '<button class="gr-info" data-gr-info="' + logic.key + '" title="條件">?</button>'
     + '<span class="gr-count' + (rows.length ? '' : ' zero') + '">' + (rows.length ? rows.length + ' 檔' : '') + '</span>'
-    + (sel ? '<span class="gr-at">' + rdEsc(grDayLabel(date)) + '・' + rdEsc(sel) + '</span>' : '')
+    + (sel ? '<span class="gr-at">' + rdEsc(grDayLabel(date)) + '・' + rdEsc(grSlotLabel(sel)) + '</span>' : '')
     + '<span class="gr-cal">' + cal + '</span>'
     + '<span class="gr-slots">' + pills + '</span></div>'
     + (grState.info[logic.key] ? '<div class="gr-desc">' + rdEsc(logic.desc) + '</div>' : '')
@@ -13791,10 +13848,11 @@ function grLatestHtml(data, runs, closeSlot){
   const blocks = GR_KINDS.map(([kind, cls, icon]) => {
     const logics = logicsInOrder.filter((l) => l.kind === kind);
     if (!logics.length) return '';
-    const slots = grSlots(logics[0], closeSlot);
+    const anyRuns = Object.assign({}, ...logics.map((l) => runs[l.key] || {}));
+    const slots = grSlots(logics[0], closeSlot, anyRuns);
     const slot = slots.slice().reverse().find((s) => logics.some((l) => runs[l.key] && runs[l.key][s]));
     if (!slot) return '';
-    const at = grDayLabel(data.date) + '・' + slot;
+    const at = grDayLabel(data.date) + '・' + grSlotLabel(slot);
     const rows = logics.map((l) => {
       const run = runs[l.key] && runs[l.key][slot];
       const stocks = run ? run.stocks.filter((x) => grPass(l, x)) : [];
@@ -13811,7 +13869,8 @@ function grLatestHtml(data, runs, closeSlot){
 }
 // 圖例＋各時間點合計（點一個時間點，全部卡片切到那一輪）
 function grLegendHtml(data, runs, closeSlot){
-  const slots = [...new Set((data.logics || []).flatMap((l) => l.times))].sort().concat([closeSlot]);
+  const intraday = [...new Set((data.logics || []).flatMap((l) => l.times))].sort();
+  const slots = intraday.some((t) => (data.logics || []).some((l) => runs[l.key] && runs[l.key][t])) ? intraday : intraday.concat([closeSlot]);
   const total = (t) => (data.logics || []).reduce((n, l) => n + (runs[l.key] && runs[l.key][t] ? runs[l.key][t].stocks.filter((x) => grPass(l, x)).length : 0), 0);
   const has = (t) => (data.logics || []).some((l) => runs[l.key] && runs[l.key][t]);
   return '<div class="gr-legend"><span class="gr-jail">🔒 處置中</span>＝已經被關，分盤交易中　<span class="gr-sus">⚠ 嫌疑犯</span>＝快被關（再中一次就處置）　'
@@ -13838,7 +13897,7 @@ function renderGrail(){
     + (data && data.nextSlot ? '<span class="gr-updated">下一輪 ' + rdEsc(data.nextSlot) + '</span>' : '')
     + '</div>';
   if (!data){
-    body.innerHTML = controls + '<div class="race-note">' + (grState.error ? '讀不到（' + rdEsc(grState.error) + '），按「重新整理」再試' : '讀取中…') + '</div>';
+    body.innerHTML = '<div class="gr-paper">' + controls + '<div class="race-note">' + (grState.error ? '讀不到（' + rdEsc(grState.error) + '），按「重新整理」再試' : '讀取中…') + '</div></div>';
     return;
   }
   const runs = data.runs || {};
@@ -13859,9 +13918,11 @@ function renderGrail(){
   const kindTimes = (kind) => [...new Set((data.logics || []).filter((l) => l.kind === kind).flatMap((l) => l.times))].sort().join('、');
   const waiting = data.nextSlot && !Object.keys(runs).length
     ? '<div class="race-note">今天的時間點還沒到：隔日沖 ' + rdEsc(kindTimes('隔日沖')) + '；波段 ' + rdEsc(kindTimes('波段')) + '、收盤。下一輪 ' + rdEsc(data.nextSlot) + '，到了會自己更新；要看昨天的名單請切日期。</div>' : '';
-  body.innerHTML = controls + waiting + (grState.error ? '<div class="race-note">更新失敗（' + rdEsc(grState.error) + '），先顯示上一次的資料</div>' : '')
+  body.innerHTML = '<div class="gr-paper">' + controls + waiting + (grState.error ? '<div class="race-note">更新失敗（' + rdEsc(grState.error) + '），先顯示上一次的資料</div>' : '')
     + grLegendHtml(data, runs, closeSlot) + grLatestHtml(data, runs, closeSlot)
-    + (sections || '<div class="race-note">這一天沒有符合的股票</div>');
+    + (sections || '<div class="race-note">這一天沒有符合的股票</div>')
+    + '<div class="gr-foot">名單依各邏輯的時間點抓取：盤中數字是抓取當下的價量，不是收盤定版；收盤後再用官方日K算一次。條件是對照老師的名單反推的近似條件。'
+    + '本頁僅供教學參考，不構成任何投資建議；投資有風險，盈虧自負。</div></div>';
 }
 function openGrailPanel(){
   document.getElementById('grailModal').hidden = false;
