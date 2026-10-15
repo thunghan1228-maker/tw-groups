@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 09:59:11";
+const BUILD_STAMP = "2026-10-15 10:01:42";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -93,8 +93,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .layout{display:flex;gap:14px;padding:8px 16px 32px;align-items:flex-start;flex-wrap:wrap;}
   /* 右欄固定寬度、不再撐滿：兩張個股卡各約 430px，名稱跟數字之間不留大片空白；
      剩下的寬度全部給左欄的六大族群卡。 */
-  .col-left{flex:1 1 360px;min-width:300px;}
-  .col-right{flex:0 1 860px;min-width:320px;max-width:100%;}
+  /* 2026-10-15 使用者：左欄前六大族群縮成最左邊窄窄一欄（1～6 由上往下），右邊六欄族群排名／個股名單佔剩下的寬度。 */
+  .col-left{flex:0 0 180px;min-width:0;}
+  .col-right{flex:1 1 640px;min-width:0;max-width:100%;}
   .section-title{font-size:16px;font-weight:800;margin:2px 0 8px;color:var(--text);}
   .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 8px;}
   .section-head .section-title{margin:0;}
@@ -112,29 +113,33 @@ const HTML_PAGE = `<!DOCTYPE html>
   .stat-label{font-size:12px;color:var(--muted);}
 
   /* 左側：前六大族群。兩欄、由上往下排：第1~3在左欄、第4~6在右欄（2026-10-15 使用者：跟原本右邊各族群前三強／弱個股同一個順序） */
-  .top6-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3, auto);grid-auto-flow:column;gap:10px;}
-  .top6-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;transition:background .12s ease;}
+  .top6-grid{display:grid;grid-template-columns:1fr;gap:6px;}
+  .top6-card{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .12s ease;}
   .top6-card:hover{background:var(--panel-2);}
   .top6-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
-  .top6-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .top6-head{display:flex;align-items:center;gap:8px;min-width:0;}
+  .top6-card .badge{width:24px;height:24px;font-size:13px;}
   .badge{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#241f1a;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .top6-name{font-weight:800;font-size:22px;}
-  .top6-chg{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .top6-name{font-weight:800;font-size:16px;white-space:nowrap;}
+  .top6-chg{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap;}
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成莊爸的 188、193、199、177） */
-  .home-rank4{display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:8px;align-items:start;}
+  .home-rank4{display:grid;grid-template-columns:repeat(6, minmax(0, 1fr));gap:8px;align-items:start;}
   .hr-col{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
   .hr-title{padding:8px 10px;background:#4a3d34;font-weight:800;font-size:15px;color:var(--text);white-space:nowrap;}
-  .hr-row{display:flex;align-items:baseline;gap:4px;padding:5px 10px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;transition:background .12s ease;}
+  .hr-row{display:flex;align-items:baseline;gap:4px;padding:5px 8px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;transition:background .12s ease;}
   .hr-row:hover{background:rgba(201,169,140,0.08);}
   .hr-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
   .hr-name{font-weight:700;}
   .hr-rk{color:var(--muted);}
+  .hr-code{color:var(--muted);font-size:12px;}
   .hr-avg{margin-left:auto;font-size:12px;}
   .hr-sep{padding:3px 6px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;}
   .hr-note{padding:8px 10px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);}
   .hr-foot{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;}
+  @media (max-width: 1400px){ .home-rank4{grid-template-columns:repeat(3, minmax(0, 1fr));} }
   @media (max-width: 900px){ .home-rank4{grid-template-columns:repeat(2, minmax(0, 1fr));} }
+  @media (max-width: 640px){ .col-left{flex:1 1 100%;} }
   @media (max-width: 640px){ .hr-row{padding:5px 8px;} .hr-avg{display:none;} }   /* 手機兩欄放不下漲跌幅，點族群看 */
   /* 右側：各族群前三強／前三弱個股（2026-10-15 起首頁不再用，樣式先留著）。兩欄、由上往下排：第1~3在左欄、第4~6在右欄。 */
   .top-groups-row{display:grid;grid-template-columns:repeat(2, 1fr);grid-template-rows:repeat(3, auto);grid-auto-flow:column;gap:8px;}
@@ -6076,7 +6081,7 @@ function kill193Copy(){
   const text = kill193Text(k);
   (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => showToast('已複製空族群必殺(193)')).catch(() => { window.prompt('複製下面的文字', text); });
 }
-// ---- 首頁右邊四欄（2026-10-15 使用者）：188 多族群排名、193 空族群必殺、199 空族群排名、177 排名比較 ----
+// ---- 首頁右邊六欄（2026-10-15 使用者）：188 多族群排名、193 空族群必殺、199 空族群排名、177 排名比較、賽馬多(33)、河流多(34) ----
 // 都照莊爸的格式「族群-(名次)🔺／🔽名次變化」：名次＝今天平均漲跌幅在全部族群裡的排名（1 最強），變化＝跟昨天收盤的名次比。
 // 莊爸有 67 族、我們 55 族，名次數字會比他小；🐎、🔪、⚔️ 這些族群記號還在對，先不顯示。
 const RANK188_GROUPS = new Set(['光學鏡頭', '軍工', '被動元件', '面板', '二極體', '小電組', '石英', '記憶體', '玻璃基板', '矽晶圓', '聯電股', 'PCB', '台塑四寶']);   // 莊爸 10/15 09:56 那份 188 的 13 族
@@ -6098,6 +6103,16 @@ function homeRankRowHtml(r){
   return '<div class="hr-row" data-group="' + r.name + '" tabindex="0" role="button" title="' + tip + '"><span class="hr-name">' + r.name + '</span><span class="hr-rk">(' + r.rank + ')</span>' + mv +
     '<span class="hr-avg ' + dirClass(r.avg) + '">' + fmt(r.avg) + '%</span></div>';
 }
+function homeStockRowHtml(r){
+  return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button" title="' + r.groupName + '・族排第 ' + r.groupRank + ' 名">' +
+    '<span class="hr-rk">' + r.groupRank + '</span><span class="hr-code">' + r.code + '</span><span class="hr-name">' + r.name + '</span>' +
+    '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span></div>';
+}
+function homeStockColHtml(title, list){
+  const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照莊爸：族排前面的在上面
+  return '<div class="hr-col"><div class="hr-title">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
+    (rows.length ? rows.map(homeStockRowHtml).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
+}
 function homeRankColHtml(title, rows, half, sepLabel, empty){
   let body = '';
   let sepDone = false;
@@ -6114,15 +6129,19 @@ function homeRank4Html(){
   if (!h.hasDaily) return '<div class="hr-note">還沒拿到族群昨天的名次，等一下就會出來。</div>';
   const k = kill193Model();
   const k193 = k ? k.upper.concat(k.lower) : [];
+  const m = race333Model();
   return '<div class="home-rank4">' +
     homeRankColHtml('多族群排名(188)', h.rows.filter((r) => RANK188_GROUPS.has(r.name)), h.half, '------↑(多方)↑------', '沒有資料') +
     homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉') +
     homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name)), h.half, '------↓(空方)↓------', '沒有資料') +
     homeRankColHtml('排名比較(177)', h.rows, h.half, '------↓(空方)↓------', '沒有資料') +
+    homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
+    homeStockColHtml('🌊河流多(34)', m ? m.rivers : []) +
     '</div>' +
     '<div class="hr-foot">照莊爸的 188／193／199／177：括號＝今天族群名次（平均漲跌幅，共 ' + h.total + ' 個族群，1 最強）；🔺／🔽＝跟昨天收盤的名次比，升／掉幾名；最右邊是族群平均漲跌幅。' +
       '188 只看莊爸固定列的 ' + RANK188_GROUPS.size + ' 族，193、199 只看他固定列的 ' + KILL193_GROUPS.size + ' 族（193 只列名次有掉的），177 列全部族群。' +
-      '莊爸有 67 族、我們 55 族，名次數字會比他小。點族群看成分股。</div>';
+      '莊爸有 67 族、我們 55 族，名次數字會比他小。點族群看成分股。' +
+      '賽馬多(33)、河流多(34) 跟訊號中心「盤中333」同一份：每列＝族群名次、代號、名稱、今天漲跌幅，族排前面的在上面，點股票開K線圖。</div>';
 }
 function bladeShortHtml(){
   const m = race333Model();
@@ -11458,7 +11477,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 09:59:11';
+const BUILD_STAMP = '2026-10-15 10:01:42';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -12238,7 +12257,7 @@ function render(){
     '</div>'
   ).join('');
 
-  // 2026-10-15 使用者：右邊原本的「各族群前三強／弱個股」改成 188／193／199／177 四欄（homeRank4Html）；個股點左邊族群卡看。
+  // 2026-10-15 使用者：右邊原本的「各族群前三強／弱個股」改成 188／193／199／177＋賽馬多(33)／河流多(34) 六欄（homeRank4Html）；個股點左邊族群卡看。
 
   // 強勢/弱勢族群統計移到強勢/弱勢分頁正上方（2026-09-24 使用者），不再跟著#app一起
   // 重畫在「各族群前三強個股」標題旁邊——獨立更新到#groupStatBar這個固定位置。
@@ -12257,7 +12276,7 @@ function render(){
         '<div class="top6-grid">' + side6Html + '</div>' +
       '</div>' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">族群排名（188／193／199／177）</div></div>' +
+        '<div class="section-head"><div class="section-title">族群排名（188／193／199／177）・賽馬多(33)・河流多(34)</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -12381,14 +12400,14 @@ document.getElementById('tabStrong').addEventListener('click', () => { setHomeTa
 document.getElementById('tabWeak').addEventListener('click', () => { setHomeTab('weak'); render(); });
 
 document.getElementById('app').addEventListener('click', (e) => {
-  const row = e.target.closest('.stock-row[data-code]');
+  const row = e.target.closest('.stock-row[data-code], .hr-stk[data-code]');
   if (row){ openStockChart(row.dataset.code, row.dataset.name); return; }
   const groupEl = e.target.closest('[data-group]');
   if (groupEl) openGroupDetail(groupEl.dataset.group);
 });
 document.getElementById('app').addEventListener('keydown', (e) => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
-  const row = e.target.closest('.stock-row[data-code]');
+  const row = e.target.closest('.stock-row[data-code], .hr-stk[data-code]');
   if (row){ e.preventDefault(); openStockChart(row.dataset.code, row.dataset.name); return; }
   const groupEl = e.target.closest('[data-group]');
   if (groupEl){ e.preventDefault(); openGroupDetail(groupEl.dataset.group); }
