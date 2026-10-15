@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 18:30:16";
+const BUILD_STAMP = "2026-10-15 18:34:31";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1020,6 +1020,12 @@ const HTML_PAGE = `<!DOCTYPE html>
   .sw-noteBox{border:1px dashed var(--line);border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.6;color:var(--text);margin:8px 0;}
   .sw-foot{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin-top:14px;line-height:1.6;}
   .sw-rule{font-size:12px;color:var(--muted);border-left:3px solid var(--line);padding:4px 10px;margin:8px 0;line-height:1.6;}
+  /* 籌碼日報最上面的外資空單摘要（2026-10-15 使用者） */
+  .sw-fut{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:13px;border:1px solid #8b5cf6;border-radius:10px;padding:6px 10px;margin:8px 0;line-height:1.6;}
+  .sw-fut b{font-variant-numeric:tabular-nums;}
+  .sw-fut b.up{color:var(--up);} .sw-fut b.down{color:var(--down);}
+  .sw-fut .sw-fut-t{font-weight:800;color:#a78bfa;}
+  .sw-fut button{margin-left:auto;}
   /* 第二階段（2026-09-26）：基本面那一行、處置動態的列 */
   .sw-fund{font-size:13px;}
   .sw-dlist{display:flex;flex-direction:column;gap:6px;margin:6px 0 10px;}
@@ -9209,6 +9215,22 @@ function swingSectionHtml(data){
     '<div class="sw-quote">' + quote + '</div>' +
     (sec === 'chips' ? swingLastWeekHtml(data) : '');
 }
+// 籌碼日報最上面一行外資空單摘要（2026-10-15 使用者：收盤後先看籌碼日報，一眼知道外資在期貨、現貨做什麼）；
+// 跟研究室「📉 外資空單」同一份，日報看哪一天就用那一天的數字（序列只有近一年）
+function swingFutStripHtml(data){
+  let d = null;
+  try { fcLoad(false); d = fcState.data; } catch (_){ return ''; }   // fcState 定義在後面（研究室那段）
+  if (!d || d.status !== 'ok') return '';
+  const r = (d.series || []).find((x) => x.d === data.date);
+  if (!r) return '';
+  const b = (v, txt) => '<b class="' + fcCls(v) + '">' + txt + '</b>';
+  return '<div class="sw-fut"><span class="sw-fut-t">📉 外資空單 ' + swMmdd(r.d) + '</span>' +
+    '<span>外資台指 ' + b(r.f, fcSigned(r.f, 0, '')) + '（當日 ' + b(r.fc, fcSigned(r.fc, 0, '')) + '）</span>' +
+    '<span>散戶多空比 小台 ' + b(r.mq, fcSigned(r.mq, 2, '%')) + '・微台 ' + b(r.tq, fcSigned(r.tq, 2, '%')) + '</span>' +
+    (r.pc !== null && r.pc !== undefined ? '<span>P/C <b>' + fuNum(r.pc, 2) + '%</b></span>' : '') +
+    (r.s !== null && r.s !== undefined ? '<span>三大法人現貨 ' + b(r.s, fcSigned(r.s, 2, ' 億')) + '（外資 ' + b(r.sf, fcSigned(r.sf, 2, '')) + '）</span>' : '') +
+    '<button type="button" class="chart-tab" data-sw-fut="1">看圖 ›</button></div>';
+}
 const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。本益比、月營收年增、集保 400 張以上大戶週籌碼、處置動態與上一週籌碼對照每個交易日收盤後更新；主動式 ETF 五檔的持股在各投信晚上公告後更新。</div>';
 function renderSwing(){
   const tabs = document.getElementById('swingTabs');
@@ -9224,7 +9246,7 @@ function renderSwing(){
     return;
   }
   const focusQ = document.activeElement && document.activeElement.id === 'erQ';
-  body.innerHTML = swingDatePillsHtml(data) + swingBasisHtml(data) + swingSectionHtml(data) + SWING_FOOT;
+  body.innerHTML = swingDatePillsHtml(data) + swingFutStripHtml(data) + swingBasisHtml(data) + swingSectionHtml(data) + SWING_FOOT;
   if (swingState.section === 'etf'){
     erTideStart();
     const q = focusQ && document.getElementById('erQ');
@@ -9245,6 +9267,7 @@ document.getElementById('swingTabs').addEventListener('click', (e) => {
   renderSwing();
 });
 document.getElementById('swingBody').addEventListener('click', (e) => {
+  if (e.target.closest('[data-sw-fut]')){ labState.tab = 'fut'; try { localStorage.setItem('labTab', 'fut'); } catch (_){} openLabPanel(); return; }
   const day = e.target.closest('.sw-date-btn');
   if (day){ swingState.date = day.dataset.date || ''; swingState.groupsLimit = 12; swingState.groupsAll = false; swingState.revAll = false; erState.asof = null; renderSwing(); return; }
   if (e.target.closest('#swingMoreGroups')){ if (swingState.groupsAll) swingState.groupsLimit += 12; else swingState.groupsAll = true; renderSwing(); return; }
@@ -11725,7 +11748,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 18:30:16';
+const BUILD_STAMP = '2026-10-15 18:34:31';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -14870,6 +14893,7 @@ async function fcLoad(force){
   } catch (err){ fcState.error = String((err && err.message) || err); }
   fcState.loading = false;
   renderLab();
+  try { if (!document.getElementById('swingModal').hidden) renderSwing(); } catch (_){}   // 籌碼日報最上面也有摘要
 }
 function fcCls(v){ return v > 0 ? 'up' : v < 0 ? 'down' : ''; }
 function fcSigned(v, digits, unit){ return v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + fuNum(v, digits) + (unit || ''); }
