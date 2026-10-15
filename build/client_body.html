@@ -6142,24 +6142,23 @@ function homeRank4Html(){
       .map((x) => ({ code: x.code, name: x.name, pct: x.changePercent })).sort((a, b) => b.pct - a.pct);
   };
   const rows188 = h.rows.filter((r) => RANK188_GROUPS.has(r.name));
-  // 2026-10-15 使用者：順序改成 30加33加34、183、193、199、33、34、177、188；
-  // 第一欄上面再疊「續抱勿追高」（賽馬多(33) 漲超過 7% 的，跟盤中333 同一條），30加33加34 放在它下面（兩份檔數都少）
+  // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／刀劍空(32) 疊在同一欄）、193、199、33、34、188、177
   return '<div class="home-rank4">' +
+    homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
       homeStockColHtml('👑30加33加34', m ? m.triple : []) +
       homeBladeColHtml(m) +
     '</div>' +
-    homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉', (r) => r.members || []) +
     homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name)), h.half, '------↓(空方)↓------', '沒有資料') +
     homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
     homeStockColHtml('🌊河流多(34)', m ? m.rivers : []) +
+    homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
     // 2026-10-15 使用者：177 只列漲幅前 10 大、跌幅前 10 大族群，中間省略，欄位才不會拉那麼長
     homeRankColHtml('排名比較(177)', h.rows.length > 20 ? h.rows.slice(0, 10).concat(h.rows.slice(-10)) : h.rows,
       h.rows.length > 20 ? 10 : h.half, h.rows.length > 20 ? '…… 第 11～' + (h.rows.length - 10) + ' 名 ……' : '------↓(空方)↓------', '沒有資料') +
-    homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
     '</div>' +
     '<div class="hr-foot">照老師的 188／193／199／177：括號＝今天族群名次（平均漲跌幅，共 ' + h.total + ' 個族群，1 最強）；🔺／🔽＝跟昨天收盤的名次比，升／掉幾名；最右邊是族群平均漲跌幅。' +
       '188、183 只看老師固定列的 ' + RANK188_GROUPS.size + ' 族（183 在多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票），193、199 只看他固定列的 ' + KILL193_GROUPS.size + ' 族（193 只列名次有掉的，族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票），177 只列漲幅前 10 大和跌幅前 10 大的族群。' +
@@ -12313,7 +12312,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">續抱勿追高／30加33加34／刀劍空(32)・183・193・199・賽馬多(33)・河流多(34)・177・188</div></div>' +
+        '<div class="section-head"><div class="section-title">183・續抱勿追高／30加33加34／刀劍空(32)・193・199・賽馬多(33)・河流多(34)・188・177</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
