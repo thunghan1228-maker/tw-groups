@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 11:18:04";
+const BUILD_STAMP = "2026-10-15 11:21:45";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6175,6 +6175,21 @@ function homeStockColHtml(title, list){
   return '<div class="hr-col"><div class="hr-title">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
     (rows.length ? rows.map(homeStockRowHtml).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
+// 首頁第一欄最下面的刀劍空(32)（2026-10-15 使用者：放在 30加33加34 下面），照老師的格式分三段：多方打少／強空積極／收割區域，
+// 每列＝族群名次、代號、名稱、漲跌幅，後面 🔪（昨天大漲今天殺）或 ⚔️（前天大漲、跌破前天收盤）；同一段裡族排前面的在上面。
+function homeBladeColHtml(m){
+  if (!m) return '';
+  const mark = (r) => (r.dayBefore !== null && r.dayBefore >= BLADE_PRIOR_RISE && r.twoDay !== null && r.twoDay < 0 && !(r.yesterday !== null && r.yesterday >= BLADE_PRIOR_RISE)) ? '⚔️' : '🔪';
+  const byRank = (a, b) => a.groupRank - b.groupRank || a.pct - b.pct;
+  const row = (r) => '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button" title="' + r.groupName + '・族排第 ' + r.groupRank + ' 名">' +
+    '<span class="hr-rk">' + r.groupRank + '</span><span class="hr-code">' + r.code + '</span><span class="hr-name">' + r.name + '</span>' +
+    '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%' + mark(r) + '</span></div>';
+  const sec = (list) => list.slice().sort(byRank).map(row).join('');
+  const n = m.bladeUpper.length + m.bladeLower.length + m.bladeHarvest.length;
+  return '<div class="hr-col"><div class="hr-title">🔪⚔️刀劍空(32) <span class="hr-rk">' + n + ' 檔</span></div>' +
+    (n ? sec(m.bladeUpper) + '<div class="hr-sep">----↑(多方打少)↑----</div>' + '<div class="hr-sep">----↓(強空積極)↓----</div>' + sec(m.bladeLower) +
+      '<div class="hr-sep">----↓(收割區域)↓----</div>' + sec(m.bladeHarvest) : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
+}
 function homeRankColHtml(title, rows, half, sepLabel, empty, warnOf){
   let body = '';
   let sepDone = false;
@@ -6212,6 +6227,7 @@ function homeRank4Html(){
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
       homeStockColHtml('👑30加33加34', m ? m.triple : []) +
+      homeBladeColHtml(m) +
     '</div>' +
     homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
@@ -11563,7 +11579,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 11:18:04';
+const BUILD_STAMP = '2026-10-15 11:21:45';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -12376,7 +12392,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">續抱勿追高／30加33加34・183・193・199・賽馬多(33)・河流多(34)・177・188</div></div>' +
+        '<div class="section-head"><div class="section-title">續抱勿追高／30加33加34／刀劍空(32)・183・193・199・賽馬多(33)・河流多(34)・177・188</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
