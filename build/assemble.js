@@ -795,6 +795,10 @@ export default {
       // 資金保護傘（2026-10-10 使用者，放進「研究室」）：融資水位＋加權／櫃買多空轉折，後端每天晚上更新，10 分鐘快取
       return await proxyHanstockBars("/api/hub/fund-umbrella", 600);
     }
+    if (url.pathname === "/api/futures-chips") {
+      // 外資空單（2026-10-15 使用者，放進「研究室」）：期交所三大法人期貨／選擇權未平倉、散戶多空比、P/C、三大法人現貨，後端每個交易日 15:40 更新，10 分鐘快取
+      return await proxyHanstockBars("/api/hub/futures-chips", 600);
+    }
     if (url.pathname === "/api/insider") {
       // 內部人研究室（2026-10-10 使用者，放進「研究室」）：觀測站內部人持股異動月報，每月更新一次，30 分鐘快取
       return await proxyHanstockBars("/api/hub/insider" + url.search, 1800);

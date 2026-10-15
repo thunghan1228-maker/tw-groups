@@ -1231,6 +1231,45 @@
   .fu-cd b{font-size:15px;}
   .fu-cd small{color:var(--muted);font-size:12px;}
   .fu-gap{font-weight:800;}
+  /* 研究室：外資空單（2026-10-15 使用者：照老師「外資空單 × 散戶小台・微台 × 加權指數」） */
+  .fc-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 10px;}
+  .fc-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0;}
+  .fc-card.key{border-color:#8b5cf6;box-shadow:0 0 0 1px rgba(139,92,246,.35) inset;}
+  .fc-ct{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fc-big{font-size:21px;font-weight:900;margin:2px 0;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .fc-sub{font-size:12px;color:var(--muted);line-height:1.5;}
+  .fc-sub b{font-weight:800;}
+  .fc-big.up,.fc-sub b.up,.fc-chip b.up,.fc-tip b.up{color:var(--up);}
+  .fc-big.down,.fc-sub b.down,.fc-chip b.down,.fc-tip b.down{color:var(--down);}
+  .fc-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 10px;}
+  .fc-bar .fc-links{margin-left:auto;font-size:12px;display:flex;gap:8px;flex-wrap:wrap;}
+  .fc-bar .fc-links a{color:var(--muted);text-decoration:underline dotted;cursor:pointer;}
+  .fc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .fc-title{font-size:16px;font-weight:900;}
+  .fc-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
+  .fc-now{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums;}
+  .fc-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
+  .fc-chip{border:1px solid var(--line);border-radius:8px;padding:2px 8px;font-size:12px;color:var(--muted);white-space:nowrap;}
+  .fc-chip b{font-size:14px;color:var(--text);margin-left:4px;}
+  .fc-chip.key{border-color:#8b5cf6;}
+  .fc-wrap{position:relative;}
+  .fc-chart{width:100%;height:auto;display:block;touch-action:pan-y;}
+  .fc-chart .fc-grid{stroke:var(--line);stroke-width:1;stroke-dasharray:3 3;}
+  .fc-chart .fc-zero{stroke:var(--muted);stroke-width:1;opacity:.6;}
+  .fc-chart .fc-ax{fill:var(--muted);font-size:11px;}
+  .fc-chart .fc-tx{fill:none;stroke:var(--text);stroke-width:1.6;}
+  .fc-chart .fc-rl{fill:none;stroke:#8b5cf6;stroke-width:1.8;}
+  .fc-chart .fc-ref{stroke:#f59e0b;stroke-width:1;stroke-dasharray:4 3;}
+  .fc-chart .fc-hover{stroke:var(--muted);stroke-width:1;}
+  .fc-tip{position:absolute;top:6px;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:12px;line-height:1.6;
+    box-shadow:0 4px 14px rgba(0,0,0,.35);white-space:nowrap;z-index:2;font-variant-numeric:tabular-nums;}
+  .fc-tip .fc-td{color:#a78bfa;font-weight:800;}
+  .fc-tip span{display:flex;justify-content:space-between;gap:14px;}
+  .fc-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin-top:4px;}
+  .fc-legend i{display:inline-block;width:12px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px;}
+  .fc-legend i.ln{height:2px;vertical-align:3px;}
+  @media (max-width: 1100px){ .fc-cards{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  @media (max-width: 640px){ .fc-cards{grid-template-columns:repeat(2,minmax(0,1fr));} .fc-big{font-size:18px;} .fc-now{font-size:20px;} }
   @media (max-width: 640px){
     .fu-grid2{grid-template-columns:minmax(0,1fr);}
     .fu-crash{grid-template-columns:64px minmax(0,1fr);}
@@ -14300,8 +14339,9 @@ const GUIDE_TOOLS = [
     b: ['一週出獄時間表、今日入獄、嫌疑名單門檻', '打代號查前科：以前被關過幾次'] },
   { t: '估值河流圖', label: '估值河流圖', v: 'tb-river', tags: ['盤後'], d: '把股價放進本益比河道裡，看現在是便宜、合理還是貴。',
     b: ['河道四區＋分水嶺', '「均線分數 ≥10 × 便宜區」清單：位置強又不貴的'] },
-  { t: '研究室', label: '研究室', v: 'tb-lab', tags: ['大方向'], d: '盤勢以外的大方向，三個分頁：',
+  { t: '研究室', label: '研究室', v: 'tb-lab', tags: ['大方向'], d: '盤勢以外的大方向，四個分頁：',
     b: ['🌐 國際大事行事曆：非農、CPI、聯準會……台灣時間幾點公布、前值預期公布值，附名詞小學堂', '🛡 資金保護傘：融資水位、加權／櫃買是否跌破月線季線，合成「收傘／備傘／半開／全開」',
+      '📉 外資空單：外資台指期淨未平倉＋當日增減、外資買權／賣權、散戶小台／微台多空比、P/C、三大法人現貨買賣超（每天 15:40 更新）',
       '👥 內部人：董監、經理人每月加碼減碼，疊上 400 張大戶比'] },
 ];
 const GUIDE_FAQ = [
@@ -14498,7 +14538,7 @@ document.getElementById('guideBody').addEventListener('click', (e) => {
 // ---- 研究室：國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar 做，含名詞小學堂）----
 // 後端 /api/macro-calendar：TradingView 經濟日曆（美／中／日／歐）每小時更新公布值，加台指期結算、美股季度結算、公司法說。
 // 版面照老師：頁首更新時間 → 下一件大事倒數 → 全部／★★ 以上／只看大事篩選 → 依週分段的事件（前值／預期／公布）→ 小學堂。
-const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘'], ['insider', '👥 內部人']];
+const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘'], ['fut', '📉 外資空單'], ['insider', '👥 內部人']];   // 2026-10-15 使用者：外資空單放資金保護傘旁邊
 const MC_FLAGS = { US: '🇺🇸', CN: '🇨🇳', JP: '🇯🇵', EU: '🇪🇺', TW: '🇹🇼' };
 const MC_FILTERS = [['all', '全部'], ['2', '★★ 以上'], ['3', '只看大事 ★★★']];
 const labState = { tab: (() => { try { const t = localStorage.getItem('labTab'); return LAB_TABS.some((x) => x[0] === t) ? t : 'cal'; } catch (_){ return 'cal'; } })(), timer: null };
@@ -14733,6 +14773,185 @@ function fuHtml(){
   html += '<div class="mc-foot">' + wlEsc(d.rule || '') + '<br>融資是散戶借錢買股票的總額：越高代表市場越熱、也越容易在下跌時被追繳斷頭；但融資高不代表馬上會跌，要搭配指數有沒有跌破月線一起看。本頁只是整理公開數據，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
   return html;
 }
+// ---- 研究室：外資空單（2026-10-15 使用者：照老師「外資空單 × 散戶小台・微台 × 加權指數」做，放資金保護傘旁邊）----
+// 後端 /api/futures-chips：期交所三大法人期貨／選擇權未平倉、小台微台全市場未平倉、P/C、證交所三大法人現貨（每個交易日 15:40 更新）。
+// 卡片數字跟老師 10/15 那頁逐一對過；圖可以切 3 個月／6 個月／1 年，滑鼠移到圖上（手機點圖）看當天數字。融資在「資金保護傘」，不重做。
+const FC_RANGES = [[60, '3 個月'], [120, '6 個月'], [250, '1 年']];
+const fcState = { data: null, loading: false, error: null, loadedAt: 0, charts: {},
+  range: (() => { try { const v = Number(localStorage.getItem('fcRange')); return FC_RANGES.some((x) => x[0] === v) ? v : 120; } catch (_){ return 120; } })() };
+async function fcLoad(force){
+  if (fcState.loading || (fcState.data && !force && Date.now() - fcState.loadedAt < 30 * 60e3)) return;
+  fcState.loading = true; fcState.error = null;
+  renderLab();
+  try {
+    const r = await fetch('/api/futures-chips', { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status === 404 ? '後端還沒有這個功能（HanStock PR 合併部署後就會有）' : 'HTTP ' + r.status);
+    fcState.data = await r.json();
+    fcState.loadedAt = Date.now();
+  } catch (err){ fcState.error = String((err && err.message) || err); }
+  fcState.loading = false;
+  renderLab();
+}
+function fcCls(v){ return v > 0 ? 'up' : v < 0 ? 'down' : ''; }
+function fcSigned(v, digits, unit){ return v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + fuNum(v, digits) + (unit || ''); }
+const FC_MAX_POS = 8;   // 圖上最多標幾個月份
+// 通用圖：右軸畫柱狀（bars：一組正紅負綠；多組＝堆疊或並排，各自顏色）或右軸折線（rline），左軸畫加權指數
+function fcChartSvg(key, rows, cfg){
+  if (!rows.length) return '<div class="race-note">還沒有資料</div>';
+  const narrow = window.innerWidth < 640;   // 手機：畫布窄一點，字才不會縮到看不見
+  const W = narrow ? 420 : 720, H = narrow ? 240 : 250, L = narrow ? 44 : 52, R = narrow ? 44 : 56, T = 10, B = 22, pw = W - L - R, ph = H - T - B;
+  const n = rows.length, step = pw / n, xc = (i) => L + (i + 0.5) * step;
+  const bars = cfg.bars || [], mode = cfg.mode || 'single';
+  let bMin = 0, bMax = 0;
+  rows.forEach((r) => {
+    if (mode === 'stack'){
+      let pos = 0, neg = 0;
+      bars.forEach((b) => { const v = r[b.k]; if (v > 0) pos += v; else if (v < 0) neg += v; });
+      bMax = Math.max(bMax, pos); bMin = Math.min(bMin, neg);
+    } else bars.concat(cfg.rline ? [{ k: cfg.rline }] : []).forEach((b) => { const v = r[b.k]; if (v !== null && v !== undefined){ bMax = Math.max(bMax, v); bMin = Math.min(bMin, v); } });
+  });
+  if (cfg.rline && !bars.length){ const vs = rows.map((r) => r[cfg.rline]).filter((v) => v !== null && v !== undefined); bMin = Math.min(...vs) * 0.92; bMax = Math.max(...vs) * 1.05; if (cfg.ref){ bMin = Math.min(bMin, cfg.ref * 0.95); bMax = Math.max(bMax, cfg.ref * 1.05); } }
+  if (bMax === bMin) bMax = bMin + 1;
+  const yB = (v) => T + ph * (bMax - v) / (bMax - bMin);
+  const ts = rows.map((r) => r.t), tMin = Math.min(...ts), tMax = Math.max(...ts), pad = (tMax - tMin) * 0.06 || 1;
+  const yT = (v) => T + ph * (tMax + pad - v) / (tMax - tMin + 2 * pad);
+  let g = '';
+  // 月份分隔線
+  let lastMo = '', marks = [];
+  rows.forEach((r, i) => { const mo = r.d.slice(0, 7); if (mo !== lastMo){ lastMo = mo; if (i > 0) marks.push(i); } });
+  const every = Math.max(1, Math.ceil(marks.length / (narrow ? 5 : FC_MAX_POS)));
+  const near = (i) => marks.some((m, k) => k % every === 0 && Math.abs(m - i) * step < (narrow ? 34 : 40));   // 頭尾日期跟月份標籤太近就不標
+  marks.forEach((i, k) => {
+    const x = (L + i * step).toFixed(1);
+    g += '<line x1="' + x + '" y1="' + T + '" x2="' + x + '" y2="' + (T + ph) + '" class="fc-grid"/>';
+    if (k % every === 0) g += '<text x="' + x + '" y="' + (H - 6) + '" class="fc-ax" text-anchor="middle">' + Number(rows[i].d.slice(5, 7)) + '/' + Number(rows[i].d.slice(8)) + '</text>';
+  });
+  if (!near(0)) g += '<text x="' + L + '" y="' + (H - 6) + '" class="fc-ax">' + Number(rows[0].d.slice(5, 7)) + '/' + Number(rows[0].d.slice(8)) + '</text>';
+  if (!near(n)) g += '<text x="' + (W - R) + '" y="' + (H - 6) + '" class="fc-ax" text-anchor="end">' + Number(rows[n - 1].d.slice(5, 7)) + '/' + Number(rows[n - 1].d.slice(8)) + '</text>';
+  // 柱狀
+  const bw = Math.max(1, step * (mode === 'group' ? 0.42 : 0.72));
+  rows.forEach((r, i) => {
+    if (mode === 'stack'){
+      let pos = 0, neg = 0;
+      bars.forEach((b) => {
+        const v = r[b.k]; if (!v) return;
+        const from = v > 0 ? pos : neg, to = from + v;
+        if (v > 0) pos = to; else neg = to;
+        g += '<rect x="' + (xc(i) - bw / 2).toFixed(2) + '" y="' + Math.min(yB(from), yB(to)).toFixed(2) + '" width="' + bw.toFixed(2) + '" height="' + Math.max(0.5, Math.abs(yB(to) - yB(from))).toFixed(2) + '" fill="' + b.color + '"/>';
+      });
+    } else bars.forEach((b, j) => {
+      const v = r[b.k]; if (v === null || v === undefined) return;
+      const x = mode === 'group' ? xc(i) - bw + j * bw : xc(i) - bw / 2;
+      const fill = b.color || (v >= 0 ? 'var(--up)' : 'var(--down)');
+      g += '<rect x="' + x.toFixed(2) + '" y="' + Math.min(yB(0), yB(v)).toFixed(2) + '" width="' + bw.toFixed(2) + '" height="' + Math.max(0.5, Math.abs(yB(v) - yB(0))).toFixed(2) + '" fill="' + fill + '"' + (b.op ? ' opacity="' + b.op + '"' : '') + '/>';
+    });
+  });
+  if (bars.length) g += '<line x1="' + L + '" y1="' + yB(0).toFixed(1) + '" x2="' + (W - R) + '" y2="' + yB(0).toFixed(1) + '" class="fc-zero"/>';
+  if (cfg.ref !== undefined) g += '<line x1="' + L + '" y1="' + yB(cfg.ref).toFixed(1) + '" x2="' + (W - R) + '" y2="' + yB(cfg.ref).toFixed(1) + '" class="fc-ref"/>';
+  const poly = (k, y) => rows.map((r, i) => r[k] === null || r[k] === undefined ? null : xc(i).toFixed(1) + ',' + y(r[k]).toFixed(1)).filter(Boolean).join(' ');
+  if (cfg.rline) g += '<polyline points="' + poly(cfg.rline, yB) + '" class="fc-rl"/>';
+  g += '<polyline points="' + poly('t', yT) + '" class="fc-tx"/>';
+  // 軸標
+  const fmtB = cfg.axFmt || ((v) => Math.abs(v) >= 1000 ? fuNum(v / 1000, Math.abs(v) >= 10000 ? 0 : 1) + 'k' : fuNum(v));
+  [bMax, (bMax + bMin) / 2, bMin].forEach((v) => { g += '<text x="' + (W - R + 4) + '" y="' + (yB(v) + 4).toFixed(1) + '" class="fc-ax">' + fmtB(v) + '</text>'; });
+  [tMax, (tMax + tMin) / 2, tMin].forEach((v) => { g += '<text x="' + (L - 4) + '" y="' + (yT(v) + 4).toFixed(1) + '" class="fc-ax" text-anchor="end">' + fuNum(v) + '</text>'; });
+  g += '<line class="fc-hover" x1="0" y1="' + T + '" x2="0" y2="' + (T + ph) + '" visibility="hidden"/>';
+  fcState.charts[key] = { rows, cfg, L, pw, n, W };
+  return '<div class="fc-wrap" data-fc-chart="' + key + '"><svg class="fc-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' + g + '</svg><div class="fc-tip" hidden></div></div>';
+}
+function fcTipShow(wrap, clientX){
+  const c = fcState.charts[wrap.dataset.fcChart];
+  if (!c) return;
+  const svg = wrap.querySelector('svg'), box = svg.getBoundingClientRect();
+  const vx = (clientX - box.left) / box.width * c.W;
+  const i = Math.max(0, Math.min(c.n - 1, Math.floor((vx - c.L) / (c.pw / c.n))));
+  const r = c.rows[i], prev = i > 0 ? c.rows[i - 1] : null;
+  const line = svg.querySelector('.fc-hover'), x = c.L + (i + 0.5) * c.pw / c.n;
+  line.setAttribute('x1', x); line.setAttribute('x2', x); line.setAttribute('visibility', 'visible');
+  const tp = prev ? (r.t / prev.t - 1) * 100 : null;
+  const tip = wrap.querySelector('.fc-tip');
+  tip.innerHTML = '<div class="fc-td">' + r.d.replace(/-/g, '/') + '</div><span>加權 <b>' + fuNum(r.t, 2) + (tp === null ? '' : ' <b class="' + fcCls(tp) + '">' + fcSigned(tp, 2, '%') + '</b>') + '</b></span>' +
+    c.cfg.tip.map(([label, fn]) => { const [v, txt] = fn(r); return '<span>' + label + ' <b class="' + fcCls(v) + '">' + txt + '</b></span>'; }).join('');
+  tip.hidden = false;
+  const px = (clientX - box.left), tw = tip.offsetWidth;
+  tip.style.left = Math.max(0, Math.min(box.width - tw, px + 14 + tw > box.width ? px - tw - 14 : px + 14)) + 'px';
+}
+function fcTipHide(wrap){
+  const tip = wrap.querySelector('.fc-tip'), line = wrap.querySelector('.fc-hover');
+  if (tip) tip.hidden = true;
+  if (line) line.setAttribute('visibility', 'hidden');
+}
+function fcCardHtml(title, big, bigCls, sub, key){
+  return '<div class="fc-card' + (key ? ' key' : '') + '"><div class="fc-ct">' + title + '</div><div class="fc-big ' + (bigCls || '') + '">' + big + '</div><div class="fc-sub">' + sub + '</div></div>';
+}
+function fcHtml(){
+  const d = fcState.data;
+  if (!d) return fcState.error ? '<div class="race-note">讀取失敗：' + wlEsc(fcState.error) + ' <button type="button" class="chart-tab" data-fc-reload="1">重試</button></div>' : '<div class="race-note">讀取中…</div>';
+  if (d.status !== 'ok') return '<div class="race-note">' + wlEsc(d.message || '還沒有資料') + (d.error ? '：' + wlEsc(d.error) : '') + '</div>';
+  const c = d.cards;
+  const lots = (x) => fcSigned(x.value, 0, ''), chg = (x) => '增減 <b class="' + fcCls(x.chg) + '">' + fcSigned(x.chg, 0, ' 口') + '</b>';
+  const pct = (x) => fcSigned(x.value, 2, '%'), prevPct = (x) => '前一日 ' + fcSigned(x.prev, 2, '%');
+  let html = '<div class="mc-meta">資料日 <b>' + d.asOf.replace(/-/g, '/') + '（' + mcWd(d.asOf) + '）</b>・每個交易日 15:40 更新（17:40、20:40 補抓）' +
+    (d.updatedAt ? '・更新於 ' + mcMd(d.updatedAt.slice(0, 10)) + ' ' + d.updatedAt.slice(11, 16) : '') + ' <button type="button" class="mc-reload" data-fc-reload="1" title="重新整理">↻</button></div>';
+  html += '<div class="fc-cards">' +
+    fcCardHtml('加權指數', fuNum(c.taiex.value, 2), fcCls(c.taiex.chg), '<b class="' + fcCls(c.taiex.chg) + '">' + fcSigned(c.taiex.chg, 2, '') + '（' + fcSigned(c.taiex.pct, 2, '%') + '）</b>') +
+    fcCardHtml('外資台指淨未平倉', lots(c.txForeign), fcCls(c.txForeign.value), chg(c.txForeign), true) +
+    fcCardHtml('外資買權淨未平倉', lots(c.callForeign), fcCls(c.callForeign.value), chg(c.callForeign)) +
+    fcCardHtml('外資賣權淨未平倉', lots(c.putForeign), fcCls(c.putForeign.value), chg(c.putForeign)) +
+    fcCardHtml('散戶小台淨未平倉', lots(c.mtxRetail), fcCls(c.mtxRetail.value), chg(c.mtxRetail)) +
+    fcCardHtml('散戶微台淨未平倉', lots(c.tmfRetail), fcCls(c.tmfRetail.value), chg(c.tmfRetail)) +
+    fcCardHtml('小台散戶多空比', pct(c.mtxRatio), fcCls(c.mtxRatio.value), prevPct(c.mtxRatio)) +
+    fcCardHtml('微台散戶多空比', pct(c.tmfRatio), fcCls(c.tmfRatio.value), prevPct(c.tmfRatio)) +
+    fcCardHtml('全市場 Put/Call（未平倉）', c.pcRatio.value === null ? '—' : fuNum(c.pcRatio.value, 2) + '%', '', c.pcRatio.prev === null ? (d.pcError ? '期交所暫時抓不到' : '') : '前一日 ' + fuNum(c.pcRatio.prev, 2) + '%') +
+    fcCardHtml('三大法人現貨買賣超', fcSigned(c.spot.total, 2, ' 億'), fcCls(c.spot.total), '外資 <b class="' + fcCls(c.spot.foreign) + '">' + fcSigned(c.spot.foreign, 0, '') + '</b>・投信 <b class="' + fcCls(c.spot.trust) + '">' + fcSigned(c.spot.trust, 0, '') + '</b>・自營 <b class="' + fcCls(c.spot.dealer) + '">' + fcSigned(c.spot.dealer, 0, '') + '</b>') +
+    '</div>';
+  html += '<div class="fc-bar"><span class="fu-sub">區間</span>' + FC_RANGES.map(([n, label]) => '<button type="button" class="chart-tab' + (fcState.range === n ? ' active' : '') + '" data-fc-range="' + n + '">' + label + '</button>').join('') +
+    '<span class="fc-links">' + [['fcTx', '外資台指'], ['fcMtx', '小台'], ['fcTmf', '微台'], ['fcOpt', '外資選擇權'], ['fcPc', 'P/C'], ['fcSpot', '三大法人現貨']].map(([id, t]) => '<a data-fc-jump="' + id + '">' + t + '</a>').join('') + '<a data-lab-tab="fund">融資 → 資金保護傘</a></span></div>';
+  const rows = d.series.slice(-fcState.range);
+  const last = d.series[d.series.length - 1] || {};
+  const lotTxt = (k) => (r) => [r[k], fcSigned(r[k], 0, ' 口')];
+  const pctTxt = (k) => (r) => [r[k], fcSigned(r[k], 2, '%')];
+  const yiTxt = (k) => (r) => [r[k], fcSigned(r[k], 2, ' 億')];
+  const block = (id, title, desc, now, nowCls, chips, svg, legend) => '<div class="fu-card" id="' + id + '"><div class="fc-head"><div><div class="fc-title">' + title + '</div><div class="fc-desc">' + desc + '</div></div>' +
+    '<div class="fc-now ' + (nowCls || '') + '">' + now + '</div></div>' + (chips ? '<div class="fc-chips">' + chips + '</div>' : '') + svg + '<div class="fc-legend">' + legend + '</div></div>';
+  const chip = (label, v, txt, key) => '<span class="fc-chip' + (key ? ' key' : '') + '">' + label + '<b class="' + fcCls(v) + '">' + txt + '</b></span>';
+  const lgTx = '<span><i class="ln" style="background:var(--text)"></i>加權指數（左軸）</span>';
+  const lgPN = (label) => '<span><i style="background:var(--up)"></i>' + label + ' 正</span><span><i style="background:var(--down)"></i>負（右軸）</span>';
+  html += block('fcTx', '外資台指期 淨未平倉', '大台（TX）外資及陸資 多方未平倉 − 空方未平倉（口）；負數＝淨空單。大台 1 口＝小台 4 口＝微台 20 口',
+    fcSigned(c.txForeign.value, 0, ''), fcCls(c.txForeign.value),
+    chip('當日增減', c.txForeign.chg, fcSigned(c.txForeign.chg, 0, ''), true) + chip('投信淨', c.txTrust.value, fcSigned(c.txTrust.value, 0, '')) + chip('自營淨', c.txDealer.value, fcSigned(c.txDealer.value, 0, '')) + '<span class="fc-chip">' + d.asOf.replace(/-/g, '/') + '（最新）</span>',
+    fcChartSvg('tx', rows, { bars: [{ k: 'f' }], tip: [['外資淨', lotTxt('f')], ['增減', lotTxt('fc')], ['投信淨', lotTxt('it')], ['自營淨', lotTxt('dl')]] }),
+    lgTx + lgPN('外資台指淨未平倉'));
+  html += block('fcMtx', '散戶小台 多空比', '散戶淨未平倉＝−（三大法人小台淨未平倉）；多空比＝散戶淨未平倉 ÷ 全市場小台未平倉。散戶越偏多，通常越要小心（反向看）',
+    pct(c.mtxRatio), fcCls(c.mtxRatio.value),
+    chip('散戶淨', c.mtxRetail.value, fcSigned(c.mtxRetail.value, 0, ' 口')) + chip('增減', c.mtxRetail.chg, fcSigned(c.mtxRetail.chg, 0, ' 口')) + chip('前一日', c.mtxRatio.prev, fcSigned(c.mtxRatio.prev, 2, '%')),
+    fcChartSvg('mtx', rows, { bars: [{ k: 'mq' }], axFmt: (v) => fuNum(v, 0) + '%', tip: [['多空比', pctTxt('mq')], ['散戶淨', lotTxt('mr')]] }),
+    lgTx + lgPN('小台散戶多空比'));
+  html += block('fcTmf', '散戶微台 多空比', '跟小台同一套算法（微台 1 口＝大台 1/20）',
+    pct(c.tmfRatio), fcCls(c.tmfRatio.value),
+    chip('散戶淨', c.tmfRetail.value, fcSigned(c.tmfRetail.value, 0, ' 口')) + chip('增減', c.tmfRetail.chg, fcSigned(c.tmfRetail.chg, 0, ' 口')) + chip('前一日', c.tmfRatio.prev, fcSigned(c.tmfRatio.prev, 2, '%')),
+    fcChartSvg('tmf', rows, { bars: [{ k: 'tq' }], axFmt: (v) => fuNum(v, 0) + '%', tip: [['多空比', pctTxt('tq')], ['散戶淨', lotTxt('tr')]] }),
+    lgTx + lgPN('微台散戶多空比'));
+  html += block('fcOpt', '外資選擇權 淨未平倉', '台指選擇權（TXO）外資 買權／賣權 多方未平倉 − 空方未平倉（口）。買權淨多偏多看、賣權淨多偏避險',
+    '', '', chip('買權淨', c.callForeign.value, fcSigned(c.callForeign.value, 0, '')) + chip('增減', c.callForeign.chg, fcSigned(c.callForeign.chg, 0, '')) +
+      chip('賣權淨', c.putForeign.value, fcSigned(c.putForeign.value, 0, '')) + chip('增減', c.putForeign.chg, fcSigned(c.putForeign.chg, 0, '')),
+    fcChartSvg('opt', rows, { mode: 'group', bars: [{ k: 'call', color: '#ef4444' }, { k: 'put', color: '#22c55e' }], tip: [['買權淨', lotTxt('call')], ['賣權淨', lotTxt('put')]] }),
+    lgTx + '<span><i style="background:#ef4444"></i>外資買權淨未平倉</span><span><i style="background:#22c55e"></i>外資賣權淨未平倉（右軸）</span>');
+  html += block('fcPc', '全市場 Put/Call 未平倉比', '期交所臺指選擇權 賣權未平倉 ÷ 買權未平倉。高於 100% 賣權比較多（通常是下方有支撐）、太低代表大家都在追買權',
+    c.pcRatio.value === null ? '—' : fuNum(c.pcRatio.value, 2) + '%', '', chip('前一日', null, c.pcRatio.prev === null ? '—' : fuNum(c.pcRatio.prev, 2) + '%'),
+    fcChartSvg('pc', rows, { rline: 'pc', ref: 100, axFmt: (v) => fuNum(v, 0) + '%', tip: [['P/C', (r) => [null, r.pc === null ? '—' : fuNum(r.pc, 2) + '%']]] }),
+    lgTx + '<span><i class="ln" style="background:#8b5cf6"></i>P/C 未平倉比（右軸）</span><span><i class="ln" style="background:#f59e0b"></i>100%</span>');
+  html += block('fcSpot', '三大法人 現貨買賣超', '證交所上市「三大法人買賣金額統計」（億）。外資含外資自營商、自營商含避險；長條往上＝買超、往下＝賣超',
+    fcSigned(c.spot.total, 2, ' 億'), fcCls(c.spot.total),
+    chip('外資', c.spot.foreign, fcSigned(c.spot.foreign, 2, '')) + chip('投信', c.spot.trust, fcSigned(c.spot.trust, 2, '')) + chip('自營', c.spot.dealer, fcSigned(c.spot.dealer, 2, '')),
+    fcChartSvg('spot', rows, { mode: 'stack', bars: [{ k: 'sf', color: '#8b5cf6' }, { k: 'st', color: '#f59e0b' }, { k: 'sd', color: '#0ea5b7' }],
+      tip: [['合計', yiTxt('s')], ['外資', yiTxt('sf')], ['投信', yiTxt('st')], ['自營', yiTxt('sd')]] }),
+    lgTx + '<span><i style="background:#8b5cf6"></i>外資</span><span><i style="background:#f59e0b"></i>投信</span><span><i style="background:#0ea5b7"></i>自營商（右軸）</span>');
+  html += '<div class="fu-card"><div class="fc-title">融資餘額</div><div class="fc-desc">上市＋上櫃融資水位、日／週／月增減、崩盤前融資高點對照都在「🛡 資金保護傘」。 <button type="button" class="chart-tab" data-lab-tab="fund">去看資金保護傘 ›</button></div></div>';
+  html += '<div class="mc-foot">怎麼看：外資台指淨空單變多（數字更負）＝外資在期貨加碼看空或避險，常跟現貨賣超一起出現；散戶小台／微台多空比越高＝散戶越偏多，通常是反向指標；' +
+    'P/C 未平倉比偏高＝賣權累積多，下方比較有撐。本頁只是整理公開數據，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + (last.d ? '' : '') + '</div>';
+  return html;
+}
 // ---- 研究室：內部人（2026-10-10 使用者：照老師「內部人研究室」做，上市櫃全部）----
 // 後端 /api/insider：觀測站內部人持股異動月報（董監／經理人／大股東），疊上集保 400 張大戶比近 4 週變化。
 const inState = { data: null, month: null, loading: false, error: null, loadedAt: 0, query: null, queryLoading: false, queryError: null };
@@ -14822,11 +15041,11 @@ function renderLab(){
   const pastOpen = !!body.querySelector('details.mc-pastweek[open]');
   const callsOpen = [...body.querySelectorAll('details[data-mc-calls][open]')].map((x) => x.dataset.mcCalls);
   body.innerHTML = '<div class="hw-tabs">' + LAB_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (labState.tab === k ? ' active' : '') + '" data-lab-tab="' + k + '">' + label + '</button>').join('') + '</div>' +
-    (labState.tab === 'fund' ? fuHtml() : labState.tab === 'insider' ? inHtml() : mcCalendarHtml());
+    (labState.tab === 'fund' ? fuHtml() : labState.tab === 'fut' ? fcHtml() : labState.tab === 'insider' ? inHtml() : mcCalendarHtml());
   if (pastOpen){ const det = body.querySelector('details.mc-pastweek'); if (det) det.open = true; }
   body.querySelectorAll('details[data-mc-calls]').forEach((x) => { if (callsOpen.includes(x.dataset.mcCalls)) x.open = true; });
 }
-function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else if (labState.tab === 'insider') inLoad(false); else mcLoad(false); }
+function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else if (labState.tab === 'fut') fcLoad(false); else if (labState.tab === 'insider') inLoad(false); else mcLoad(false); }
 function openLabPanel(){
   document.getElementById('labModal').hidden = false;
   renderLab();
@@ -14845,6 +15064,21 @@ document.getElementById('labBody').addEventListener('change', (e) => {
   const sel = e.target.closest('#inMonth');
   if (sel){ inState.month = sel.value; inLoad(true); }
 });
+// 外資空單的圖：滑鼠移到圖上看當天數字，移開就收
+document.getElementById('labBody').addEventListener('pointermove', (e) => {
+  if (e.pointerType === 'touch') return;
+  const w = e.target.closest('[data-fc-chart]');
+  if (w) fcTipShow(w, e.clientX);
+});
+document.getElementById('labBody').addEventListener('pointerout', (e) => {
+  if (e.pointerType === 'touch') return;   // 手機點一下會接著觸發 pointerout，數字框留著，點圖外面才收
+  const w = e.target.closest('[data-fc-chart]');
+  if (w && !w.contains(e.relatedTarget)) fcTipHide(w);
+});
+document.getElementById('labBody').addEventListener('click', (e) => {
+  const w = e.target.closest('[data-fc-chart]');
+  document.querySelectorAll('#labBody [data-fc-chart]').forEach((x) => { if (x !== w) fcTipHide(x); });
+});
 document.getElementById('labBody').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target.id === 'inQ'){ e.preventDefault(); inQuery(e.target.value); }
 });
@@ -14853,6 +15087,13 @@ document.getElementById('labBody').addEventListener('click', (e) => {
   const tab = t.closest('[data-lab-tab]');
   if (tab){ labState.tab = tab.dataset.labTab; try { localStorage.setItem('labTab', labState.tab); } catch (_){} renderLab(); labLoad(); return; }
   if (t.closest('[data-fu-reload]')){ fuLoad(true); return; }
+  if (t.closest('[data-fc-reload]')){ fcLoad(true); return; }
+  const fcr = t.closest('[data-fc-range]');
+  if (fcr){ fcState.range = Number(fcr.dataset.fcRange); try { localStorage.setItem('fcRange', String(fcState.range)); } catch (_){} renderLab(); return; }
+  const fcj = t.closest('[data-fc-jump]');
+  if (fcj){ const el = document.getElementById(fcj.dataset.fcJump); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  const fcw = t.closest('[data-fc-chart]');
+  if (fcw){ fcTipShow(fcw, e.clientX); return; }   // 手機：點圖看當天數字
   if (t.closest('[data-in-reload]')){ inLoad(true); return; }
   if (t.closest('[data-in-go]')){ const box = document.getElementById('inQ'); inQuery(box ? box.value : ''); return; }
   const inq = t.closest('[data-in-query]');
