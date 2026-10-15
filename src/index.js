@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 11:26:46";
+const BUILD_STAMP = "2026-10-15 11:38:29";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5710,11 +5710,11 @@ function race333Model(){
   const fireGroupTop = Math.max(1, Math.ceil(total / 3));
   const fireBase = rows.filter((r) => r.pct >= FIRE_MIN_PCT && aboveOtc(r) && r.inTopThird && r.groupRank <= fireGroupTop
     && (r.horse || r.rocket !== null) && (r.volume === null || r.volume >= FIRE_MIN_VOLUME)).sort((a, b) => b.pct - a.pct);
-  const fireLocked = otcStrengthLatest && otcStrengthLatest.label === '強空' ? [] : fireBase.filter((r) => r.limitUp || r.pct >= FIRE_MAX_PCT);
-  // 2026-10-15 照老師：櫃買「強空」（跌破五分K 20MA、又跌破第三根五分K低點）時，馬火多(30)、河流多(34) 都不出名單
-  // （他 11:11、11:12、11:23、11:24、11:26 每份都是 0 檔；櫃買只是「空」一把劍時 30、34 照列），賽馬多(33) 照列。
+  const fireLocked = fireBase.filter((r) => r.limitUp || r.pct >= FIRE_MAX_PCT);
+  // 2026-10-15 照老師：櫃買「強空」（跌破五分K 20MA、又跌破第三根五分K低點）時，河流多(34) 不出名單
+  // （他 11:11、11:24、11:26、11:37 強空時都是 0 檔，不是強空時都有）；馬火多(30) 照列（他 11:37 強空時還有大毅），賽馬多(33) 照列。
   const otcStrongBear = !!(otcStrengthLatest && otcStrengthLatest.label === '強空');
-  const fireOpen = otcStrongBear ? [] : fireBase.filter((r) => !(r.limitUp || r.pct >= FIRE_MAX_PCT));  // 符合馬火多全部門檻、買得到的（不限檔數）
+  const fireOpen = fireBase.filter((r) => !(r.limitUp || r.pct >= FIRE_MAX_PCT));  // 符合馬火多全部門檻、買得到的（不限檔數）
   const fires = fireOpen.slice(0, FIRE_MAX_ROWS);
   // 32 刀劍空：今天跌 BLADE_MIN_PCT% 以上（且 ≤ 櫃買%）、族內後 1/3、成交量夠（🔪 就算，不要求 ⚔️）；
   // 跌停鎖死或跌到 BLADE_MAX_PCT% 以上放不到空，跟已跌 BLADE_HARVEST_PCT% 以上的一起放收割區那一行。
@@ -6051,7 +6051,7 @@ function race333Html(){
   const rivers = race333SortByHolder(race333FilterList(m.rivers));
   const condsNote = '每列下面多一行列出門檻比例（族排、族內、距櫃買%、昨／前天%），之前只寫在這行說明文字裡的數字。';
   return race333FilterBarHtml() + raceOtcBoxHtml(m) +
-    (m.otcStrongBear ? '<div class="race-note">櫃買強空（跌破五分K 20MA、也跌破第三根五分K低點），照老師馬火多(30)、河流多(34) 都不出名單，賽馬多(33) 照列。</div>' : '') +
+    (m.otcStrongBear ? '<div class="race-note">櫃買強空（跌破五分K 20MA、也跌破第三根五分K低點），照老師河流多(34) 不出名單；馬火多(30)、賽馬多(33) 照列。</div>' : '') +
     // 2026-09-28 使用者：符合條件>7%放最上面，抬頭改「續抱勿追高」（不是「漲幅最高」）；裡面把 33／34 的門檻比例列出來。
     // 2026-10-12 使用者：抬頭「續抱勿追高」後面加「追高善設停損」六個字
     '<div class="race-block"><div class="race-head">🚀續抱勿追高，追高善設停損・賽馬多(33)>7%有 ' + over7 + ' 檔 ' + stamp + '</div>' +
@@ -6230,7 +6230,7 @@ function homeRank4Html(){
     homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
-      homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，馬火多(30) 不出名單（照老師）' : '') +
+      homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單（照老師），交集也就沒有' : '') +
       homeBladeColHtml(m) +
     '</div>' +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
@@ -11582,7 +11582,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 11:26:46';
+const BUILD_STAMP = '2026-10-15 11:38:29';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
