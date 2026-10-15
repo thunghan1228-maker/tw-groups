@@ -819,6 +819,10 @@ export default {
       // 籌碼週報（2026-10-10 使用者：照老師雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);
     }
+    if (url.pathname === "/api/chip-radar-latest") {
+      // 最新一週每檔籌碼%（2026-10-15 使用者：首頁族群成分股視窗加「本週籌碼%」），集保一週才更新一次，10 分鐘快取
+      return await proxyHanstockBars("/api/hub/chip-radar/latest", 600);
+    }
     if (url.pathname === "/api/chip-radar-stock") {
       // 籌碼暴增雷達的個股查詢（九週軌跡、同族群、三大法人），60 秒快取
       return await proxyHanstockBars("/api/hub/chip-radar/stock" + url.search, 60);

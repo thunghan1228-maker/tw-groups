@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 18:51:27";
+const BUILD_STAMP = "2026-10-15 19:13:11";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7,7 +7,7 @@ const GROUPS = [
   {"name":"矽晶圓","stocks":[{"code":"5483","name":"中美晶"},{"code":"2342","name":"茂矽"},{"code":"3707","name":"漢磊"},{"code":"3016","name":"嘉晶"},{"code":"6488","name":"環球晶"},{"code":"6182","name":"合晶"},{"code":"3532","name":"台勝科"}]},
   {"name":"D電腦","stocks":[{"code":"6166","name":"凌華"},{"code":"6206","name":"飛捷"},{"code":"3022","name":"威強電"},{"code":"3479","name":"安勤"},{"code":"4916","name":"事欣科"},{"code":"6414","name":"樺漢"},{"code":"3213","name":"茂訊"},{"code":"2395","name":"研華"},{"code":"3594","name":"磐儀"}]},
   {"name":"化學","stocks":[{"code":"4716","name":"大立"},{"code":"4711","name":"永純"},{"code":"1708","name":"東鹼"},{"code":"1735","name":"日勝化"},{"code":"1717","name":"長興"},{"code":"1727","name":"中華化"},{"code":"1721","name":"三晃"},{"code":"3430","name":"奇鈦科"},{"code":"1711","name":"永光"},{"code":"4755","name":"三福化"},{"code":"4764","name":"雙鍵"}]},
-  {"name":"軍工","stocks":[{"code":"2634","name":"漢翔"},{"code":"4541","name":"晟田"},{"code":"8383","name":"千附"},{"code":"6928","name":"攸泰科技"},{"code":"8222","name":"寶一"},{"code":"2630","name":"亞航"},{"code":"6753","name":"龍德造船"},{"code":"2231","name":"為升"},{"code":"4572","name":"駐龍"},{"code":"7402","name":"邑錡"},{"code":"4916","name":"事欣科"},{"code":"6829","name":"千附精密"},{"code":"2645","name":"長榮航太"},{"code":"2429","name":"銘旺科"},{"code":"1584","name":"精剛"},{"code":"8033","name":"雷虎"},{"code":"3230","name":"錦明"},{"code":"1810","name":"和成"},{"code":"6477","name":"安集"}]},
+  {"name":"軍工","stocks":[{"code":"2634","name":"漢翔"},{"code":"4541","name":"晟田"},{"code":"8383","name":"千附"},{"code":"6928","name":"攸泰科技"},{"code":"8222","name":"寶一"},{"code":"2630","name":"亞航"},{"code":"6753","name":"龍德造船"},{"code":"2231","name":"為升"},{"code":"4572","name":"駐龍"},{"code":"7402","name":"邑錡"},{"code":"4916","name":"事欣科"},{"code":"6829","name":"千附精密"},{"code":"2645","name":"長榮航太"},{"code":"2429","name":"銘旺科"},{"code":"1584","name":"精剛"},{"code":"8033","name":"雷虎"},{"code":"3230","name":"錦明"},{"code":"1810","name":"和成"}]},
   {"name":"設備股","stocks":[{"code":"8028","name":"昇陽半導體"},{"code":"6438","name":"迅得"},{"code":"1785","name":"光洋科"},{"code":"5443","name":"均豪"},{"code":"2467","name":"志聖"},{"code":"6640","name":"均華"},{"code":"3131","name":"弘塑"},{"code":"3583","name":"辛耘"},{"code":"3455","name":"由田"},{"code":"8064","name":"東捷"},{"code":"6187","name":"萬潤"},{"code":"6207","name":"雷科"}]},
   {"name":"玻璃基板","stocks":[{"code":"3055","name":"蔚華科"},{"code":"3149","name":"正達"},{"code":"6207","name":"雷科"},{"code":"8064","name":"東捷"},{"code":"3673","name":"TPK-KY"},{"code":"8027","name":"鈦昇"}]},
   {"name":"重電","stocks":[{"code":"1519","name":"華城"},{"code":"1513","name":"中興電"},{"code":"1529","name":"樂事綠能"},{"code":"1514","name":"亞力"},{"code":"1503","name":"士電"}]},
@@ -234,6 +234,11 @@ const HTML_PAGE = `<!DOCTYPE html>
   .srow-right .sprice.up{color:var(--up);}
   .srow-right .sprice.down{color:var(--down);}
   .srow-right .svol{width:64px;font-size:12px;font-weight:700;color:var(--muted);}
+  .srow-right .schip{width:76px;font-size:12px;font-weight:700;white-space:nowrap;}   /* 族群成分股視窗：本週籌碼%（2026-10-15） */
+  .srow-right .schip i{font-style:normal;font-size:10px;margin-left:2px;}
+  .srow-right .schip i.up{color:var(--up);} .srow-right .schip i.down{color:var(--down);}
+  .gm-chip-sum{font-size:12px;font-weight:700;color:var(--muted);margin-left:8px;white-space:nowrap;}
+  @media (max-width: 480px){ .gm-list .srow-right:has(.schip) .schg{display:none;} .srow-right .schip{width:66px;} }   /* 手機：多了籌碼一欄，漲跌金額先藏起來 */
   .stock-col-labels{display:flex;justify-content:space-between;align-items:center;padding:4px 12px 0;}
   .stock-col-labels .srow-right span{color:var(--muted);font-size:10px;font-weight:600;}
 
@@ -4477,18 +4482,43 @@ function openGroupDetail(groupName){
   const g = lastData.groups.find((x) => x.name === groupName);
   if (!g) return;
   openGroupName = groupName;
-  document.getElementById('gmTitle').textContent = groupName + '（' + g.stocks.length + ' 檔）';
+  gmChipLoad();
+  const cd = gmChipState.data && gmChipState.data.status === 'ok' ? gmChipState.data : null;
+  // 2026-10-15 使用者：族群成分股視窗加「本週籌碼%」（集保 400 張以上大戶週增減，跟籌碼暴增雷達同一份）；標題後面寫族裡前 5 名平均
+  const chipOf = (code) => (cd && cd.chips[code]) || null;
+  const vals = g.stocks.map((s) => chipOf(s.code)).filter(Boolean).map((c) => c[0]).sort((a, b) => b - a);
+  const top5 = vals.length ? vals.slice(0, 5).reduce((a, b) => a + b, 0) / Math.min(5, vals.length) : null;
+  document.getElementById('gmTitle').innerHTML = wlEsc(groupName) + '（' + g.stocks.length + ' 檔）' +
+    (cd && top5 !== null ? '<span class="gm-chip-sum">本週籌碼前 5 平均 <b class="' + dirClass(top5) + '">' + (top5 > 0 ? '+' : '') + top5.toFixed(2) + '%</b>・' + rdMdShort(cd.week) + ' 週</span>' : '');
+  const chipCell = (code) => {   // 籌碼資料還沒到（或後端還沒有這個 API）就整欄不顯示
+    if (!cd) return '';
+    const c = chipOf(code);
+    if (!c) return '<span class="schip flat">—</span>';
+    const streak = c[1] >= 2 ? '<i class="up">↑' + c[1] + '</i>' : c[1] <= -2 ? '<i class="down">↓' + (-c[1]) + '</i>' : '';
+    return '<span class="schip ' + dirClass(c[0]) + '" title="集保 ' + rdMdShort(cd.week) + ' 週：大戶持股' + (c[0] >= 0 ? '增加' : '減少') +
+      (Math.abs(c[1]) >= 2 ? '，連 ' + Math.abs(c[1]) + ' 週' + (c[1] > 0 ? '增加' : '減少') : '') + (c[2] ? '，買超榜第 ' + c[2] + ' 名' : '') + '">' + (c[0] > 0 ? '+' : '') + c[0].toFixed(2) + '%' + streak + '</span>';
+  };
   const sorted = g.stocks.slice().sort((a, b) => b.changePercent - a.changePercent);
-  document.getElementById('gmList').innerHTML = STOCK_COL_LABELS_HTML + sorted.map((s) => {
+  document.getElementById('gmList').innerHTML = (cd ? STOCK_COL_LABELS_HTML.replace('<span class="spct">漲跌幅</span>', '<span class="schip">本週籌碼</span><span class="spct">漲跌幅</span>') : STOCK_COL_LABELS_HTML) + sorted.map((s) => {
     const price = getBasePrice(s.code);
     const prevClose = price / (1 + s.changePercent / 100);
     const changeAmt = price - prevClose;
     return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
       '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + wlStarHtml(s.code, s.name) + '</div>' +
-      stockValueColsHtml(price, changeAmt, s.changePercent, s) +
+      stockValueColsHtml(price, changeAmt, s.changePercent, s).replace('<div class="srow-right">', '<div class="srow-right">' + chipCell(s.code)) +
     '</div>';
   }).join('');
   document.getElementById('groupModal').hidden = false;
+}
+// 首頁族群成分股視窗的「本週籌碼%」（2026-10-15 使用者）：後端 /api/chip-radar-latest 一次給全部，集保一週才更新一次，抓過 30 分鐘內不重抓
+const gmChipState = { data: null, loading: false, error: null, at: 0 };
+function gmChipLoad(){
+  if (gmChipState.loading || (gmChipState.data && Date.now() - gmChipState.at < 30 * 60e3) || (gmChipState.error && Date.now() - gmChipState.at < 60e3)) return;
+  gmChipState.loading = true;
+  fetch('/api/chip-radar-latest').then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then((d) => { gmChipState.data = d; gmChipState.error = null; })
+    .catch((e) => { gmChipState.error = String((e && e.message) || e); })
+    .finally(() => { gmChipState.loading = false; gmChipState.at = Date.now(); if (openGroupName && !document.getElementById('groupModal').hidden) openGroupDetail(openGroupName); });
 }
 function closeGroupDetail(){
   document.getElementById('groupModal').hidden = true;
@@ -6391,7 +6421,8 @@ const HOME_OBS_CATS = [1, 2, 3];
 const HOME_OBS_REFRESH_MS = 5 * 60 * 1000;
 function homeObsColHtml(){
   const rep = obsState.report;
-  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr());
+  const hm = obsNowHm();   // 只有盤中（09:00～13:35）才每 5 分鐘重算；收盤後停在最後一次（2026-10-15 使用者問多久更新）
+  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && hm >= '09:00' && hm <= '13:35';
   const stale = rep && live && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
   const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > HOME_OBS_REFRESH_MS;
   if (!obsState.loading && ((!rep && !obsState.error) || stale || retry)) setTimeout(() => obsRun(null, false, !!rep), 0);
@@ -6417,7 +6448,7 @@ function homeObsColHtml(){
 }
 function homeObsFootHtml(){
   const cats = OBS_CATS.filter(([k]) => HOME_OBS_CATS.includes(k)).map(([k, name, act]) => '【' + k + '】' + name + '（' + act + '）').join('、');
-  return '<div class="hr-foot hr-obs-foot">飆股雷達：跟訊號中心「盤中飆股雷達」同一份，首頁只列 ' + cats + '；盤中每 ' + HOME_OBS_REFRESH_MS / 60000 + ' 分鐘重算一次，同族群的排在一起。' +
+  return '<div class="hr-foot hr-obs-foot">飆股雷達：跟訊號中心「盤中飆股雷達」同一份，首頁只列 ' + cats + '；盤中（09:00～13:35）每 ' + HOME_OBS_REFRESH_MS / 60000 + ' 分鐘重算一次分類和符號，標題後面的時間＝最後一次算的時間，收盤後就停在那一次；每檔的漲跌幅跟首頁報價一起每 15 秒更新；同族群的排在一起。' +
     '每檔後面的符號：' + d123TagHtml({ n: 1, region: 1 }) + d123TagHtml({ n: 2, region: 2 }) + '＝123 黑龍，收黑就是這一波第幾次進場（①②③＝第一、二、三次；紅底區1＝可積極加碼、黃底區2＝等突破再加碼）、' +
     d123TagHtml({ n: 4, full: true }) + '＝這一波已經進場三次，等下一次創新高；' +
     obsMark('★') + '＝持股健診「強」、' + obsMark('☆') + '＝「中上」、' + obsMark('●') + '＝今天發動過、' + obsMark('▲') + '＝黑龍系統相對高檔，打少跑快、' +
@@ -8301,7 +8332,7 @@ function rwRankingHtml(d){
   const rows = (d.ranking || []).map((g) => '<div class="rw-grow' + (g.together ? ' rw-hit' : '') + '"><span class="rd-muted">' + g.rank + '</span><span class="rw-n">' + rdEsc(g.name) + '</span>' +
     '<span class="' + rdCls(g.avg) + '">' + rdPct(g.avg, 2) + '</span>' + mv(g.move) +
     '<span class="rw-l">' + (g.listed.length ? '籌碼榜上了 ' + g.listed.length + ' 檔：' + g.listed.map((x) => rdEsc(x.name)).join('、') : '<i>本週籌碼榜沒有這族的股票</i>') + '</span></div>').join('');
-  return '<section id="rw-rank"><div class="rd-sec-title">族群排名<small>整族籌碼週增排名（族群裡籌碼% 最高 5 檔平均；千元是價格帶不列）' + (d.prevWeek ? '・名次變化對 ' + rdMdShort(d.prevWeek) + ' 那週' : '') + '</small></div>' +
+  return '<section id="rw-rank"><div class="rd-sec-title">族群排名<small>整族籌碼週增排名（族群裡籌碼% 最高 5 檔平均）' + (d.prevWeek ? '・名次變化對 ' + rdMdShort(d.prevWeek) + ' 那週' : '') + '</small></div>' +
     '<div class="rw-rank">' + rows + '</div><div class="rw-banner">族群排名是「整族在動」，籌碼榜是「有人在收」——紅框＝兩邊對上</div></section>';
 }
 function rwTogetherHtml(d){
@@ -11853,7 +11884,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 18:51:27';
+const BUILD_STAMP = '2026-10-15 19:13:11';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17515,6 +17546,10 @@ export default {
     if (url.pathname === "/api/chip-weekly") {
       // 籌碼週報（2026-10-10 使用者：照老師雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);
+    }
+    if (url.pathname === "/api/chip-radar-latest") {
+      // 最新一週每檔籌碼%（2026-10-15 使用者：首頁族群成分股視窗加「本週籌碼%」），集保一週才更新一次，10 分鐘快取
+      return await proxyHanstockBars("/api/hub/chip-radar/latest", 600);
     }
     if (url.pathname === "/api/chip-radar-stock") {
       // 籌碼暴增雷達的個股查詢（九週軌跡、同族群、三大法人），60 秒快取
