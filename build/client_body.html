@@ -2663,7 +2663,7 @@
         <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：09:00 開盤～13:30 收盤（2026-10-05 起，以前 11:00 後才算；第一根 5 分K 也算），5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。每列後面標 123 黑龍：收黑就是這一波第幾次進場（①②③）、區1（紅，可積極加碼）或區2（黃，等突破再加碼）；問診日線圖、K線圖日線也會在進場的那根K棒上畫同樣的圓圈。</li>
-        <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。今天跌、族內最弱 3 檔、不比櫃買強；🔪（刀）＝現價低於昨收、⚔️（劍）＝也低於前天收盤，只有🔪的也算（2026-10-15 照莊爸）。正式名單（強空積極）最多 15 檔，跌幅深的在前，大戶力最負的在上；多方打少（強族群裡逆勢走弱）和收割區域（已跌 5% 以上，不追空）只列名字。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
+        <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股（2026-10-15 照莊爸改）。只看 199 的 23 族＋188 的 13 族，每族最弱 3 檔、今天跌 2% 以上；而且要嘛是昨天漲 3% 以上、今天殺下來（🔪 刀，還要不比櫃買強），要嘛是前天漲 3% 以上、現價已跌破前天收盤（⚔️ 劍）。正式名單（強空積極）最多 15 檔，跌幅深的在前，大戶力最負的在上；多方打少（族群排名前 20 名裡逆勢走弱）和收割區域（已跌 5% 以上，不追空，不分族群強弱）只列名字。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
         <li><b>空族群必殺(193)</b>：找「名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票（第二版，照莊爸 10/15 的名單推的）。只看莊爸固定列的 23 個族群（資訊、鋼鐵、被動元件、光學鏡頭、航運、D電腦、面板、光電、二極體、矽光子、小電腦、散熱、低軌衛星、小電組、化學二、IP、矽晶圓、記憶體、玻璃基板、PA、台塑四寶、PCB、探針卡）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名，有掉就列。空方線以下＝第 36 名以後（跟莊爸一樣，空方線畫在第 35 名後面）；空方線以上＝排名前半但名次往下掉的。⚠️＝族裡正在刀劍空(32) 名單上的股票，點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選強多／四項精選強空／1+2多／創高黑龍／主力翻多／主力翻空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日或開盤前 08:45 今天還沒有訊號時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
       </ul>
@@ -5509,7 +5509,7 @@ function replaceSignalHtml(el, key, html){
 // 32 刀劍空：馬火多的鏡像。今天下跌、不比櫃買強、族內後 1/3；🔪（刀）＝現價低於昨收、⚔️（劍）＝現價低於前天收盤（數字＝低幾 %），
 //   都沒有就 〰️。門檻跟馬火多對稱（2026-09-23 使用者：名單太長）：今天跌 BLADE_MIN_PCT%～BLADE_MAX_PCT%、不含跌停
 //   鎖死、族內後 1/3、成交量 ≥ BLADE_MIN_VOLUME 張；🔪 就算（2026-10-15 起不再要求 ⚔️，照莊爸）。
-//   正式名單＝強空積極（族群排名後半，方向一致），最多 BLADE_MAX_ROWS 檔、跌幅深的在前；多方打少（族群排名前半，
+//   正式名單＝強空積極（族群排名 20 名以後，方向一致；2026-10-15 前是後半），最多 BLADE_MAX_ROWS 檔、跌幅深的在前；多方打少（族群排名前半，
 //   強族群裡逆勢走弱，空得保守）和收割區域（已經跌 BLADE_HARVEST_PCT% 以上，不追空）只用一行列名字。
 // 族群昨天／前天的平均漲跌幅來自後端日K（/api/group-daily-changes），其餘都是首頁已經有的即時資料。
 let otcStrengthLatest = null;
@@ -5531,6 +5531,7 @@ const BLADE_MIN_PCT = 2;      // 刀劍空：今天至少跌這麼多才算弱
 const BLADE_MAX_PCT = 9.5;    // 刀劍空：跌到這裡以上（或跌停鎖死）放不到空，只在收割區那行列
 const BLADE_MIN_VOLUME = 500; // 刀劍空：成交量（張）低於這個太冷門
 const BLADE_MAX_ROWS = 15;
+const BLADE_PRIOR_RISE = 3;      // 刀劍空：昨天（🔪）或前天（⚔️）要漲這麼多以上，今天殺下來才算（2026-10-15 照莊爸）
 const BLADE_GROUP_WEAKEST = 3;   // 刀劍空：每個族群只看最弱的 3 檔（2026-10-15 照莊爸）    // 刀劍空：正式名單最多列這麼多檔
 const FIRE_MIN_PCT = 2;       // 馬火多：今天至少漲這麼多才算有力道
 const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停鎖死）買不到，另列
@@ -5639,14 +5640,32 @@ function race333Model(){
   // 2026-10-15 使用者貼莊爸 09:07、09:15 兩份：每個族群最多列 3 檔（被動元件＝禾伸堂／天二／國巨、小電組＝台玻／台燿／金像電、
   // 台塑四寶＝台塑／台化／南亞），是「族內最弱 3 檔」不是族內後 1/3（我們的族群大，記憶體 19 檔後 1/3 就有 7 檔）；
   // 收割區也只列族群排名後半的（莊爸的收割區全是弱族群，強族群裡跌深的不列）
-  const bladeBase = rows.filter((r) => r.pct <= -BLADE_MIN_PCT && belowOtc(r) && r.inBottom3
+  // 2026-10-15 第三版（對莊爸 11:01 那份 20 檔：模擬出 17 檔全對、一檔都沒多，少的 3 檔是族裡第 4 弱的）：
+  // ① 只看莊爸固定的族群（199 的 23 族＋188 的 13 族），每族最弱 3 檔；
+  // ② 🔪 刀＝昨天漲 BLADE_PRIOR_RISE% 以上、今天殺下來，還要 ≤ 櫃買%；⚔️ 劍＝前天漲 BLADE_PRIOR_RISE% 以上、現價已跌破前天收盤（不看櫃買，例如長榮）；
+  //    我們之前多列的南亞科、欣興、旺矽、穩懋…昨天都只漲 3% 以內、前天多半在跌，莊爸都沒列；
+  // ③ 收割區不分族群強弱（他 11:01 收割區有族群第 13 名的華新）；多方打少＝族群排名前 horseLimit（20）名。
+  const bladeCand = new Map();
+  ranked.forEach((g, gi) => {
+    if (!KILL193_GROUPS.has(g.name) && !RANK188_GROUPS.has(g.name)) return;
+    const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined).slice().sort((a, b) => b.changePercent - a.changePercent);
+    valid.slice(Math.max(0, valid.length - BLADE_GROUP_WEAKEST)).forEach((s) => {
+      const base = stockRows.get(s.code);
+      if (!base || bladeCand.has(s.code)) return;
+      bladeCand.set(s.code, Object.assign({}, base, { groupName: g.name, groupRank: gi + 1 }));
+    });
+  });
+  const bladeKnife = (r) => r.yesterday !== null && r.yesterday >= BLADE_PRIOR_RISE;
+  const bladeSword = (r) => r.dayBefore !== null && r.dayBefore >= BLADE_PRIOR_RISE && r.twoDay !== null && r.twoDay < 0;
+  const bladeBase = Array.from(bladeCand.values()).filter((r) => r.pct <= -BLADE_MIN_PCT
+    && (!hasDaily || ((bladeKnife(r) || bladeSword(r)) && (bladeSword(r) || belowOtc(r))))
     && (r.volume === null || r.volume >= BLADE_MIN_VOLUME)).sort((a, b) => a.pct - b.pct || a.groupRank - b.groupRank);
-  const bladeHarvest = bladeBase.filter((r) => (r.pct <= -BLADE_HARVEST_PCT || r.pct <= -BLADE_MAX_PCT || r.limitDown) && r.groupRank > half);
+  const bladeHarvest = bladeBase.filter((r) => r.pct <= -BLADE_HARVEST_PCT || r.pct <= -BLADE_MAX_PCT || r.limitDown);
   // 2026-10-15 使用者貼莊爸 09:07 的刀劍空：強空積極 13 檔裡 7 檔只有🔪（低於昨收、還在前天收盤上，例如昨天大漲的新纖），
   // 跟我們算的🔪／⚔️幾乎一樣——莊爸不要求⚔️，只有🔪的也列（每列照舊標🔪／⚔️）
   const bladeLive = bladeBase.filter((r) => !bladeHarvest.includes(r) && r.belowYesterday);
-  const bladeUpper = bladeLive.filter((r) => r.groupRank <= half);                       // 多方打少：只列名字
-  const bladeLower = bladeLive.filter((r) => r.groupRank > half).slice(0, BLADE_MAX_ROWS);  // 強空積極：正式名單
+  const bladeUpper = bladeLive.filter((r) => r.groupRank <= horseLimit);                       // 多方打少：只列名字
+  const bladeLower = bladeLive.filter((r) => r.groupRank > horseLimit).slice(0, BLADE_MAX_ROWS);  // 強空積極：正式名單
   // 33 加 34：兩邊都有的才列（使用者 2026-09-23：只看交集）。
   const riverCodes = new Set(riverAll.filter((r) => r.pct <= 7).map((r) => r.code));
   const both = horses.filter((r) => riverCodes.has(r.code));
@@ -6141,7 +6160,7 @@ function bladeShortHtml(){
   const condsNote = '每列下面多一行列出門檻比例（族排、族內、距櫃買%、昨／前天%）。';
   return race333FilterBarHtml() + raceOtcBoxHtml(m) +
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
-      '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內最弱 3 檔・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・🔪 刀（低於昨收）就算，⚔️ 劍＝也低於前天收盤（數字＝低幾 %）・最多 ' + BLADE_MAX_ROWS + ' 檔（取跌幅前 ' + BLADE_MAX_ROWS + ' 檔），大戶力最負的在上・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字・點列或按「圖」開K線圖</div>' +
+      '<div class="race-sub">只看 199 的 23 族＋188 的 13 族・族內最弱 3 檔・今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%・不含跌停鎖死・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・要嘛昨天漲 ' + BLADE_PRIOR_RISE + '% 以上今天殺下來（🔪 刀，還要 ≤ 櫃買%），要嘛前天漲 ' + BLADE_PRIOR_RISE + '% 以上、現價跌破前天收盤（⚔️ 劍，數字＝低幾 %）・強空積極＝族群排名 ' + (m.horseLimit + 1) + ' 名以後，最多 ' + BLADE_MAX_ROWS + ' 檔（取跌幅前 ' + BLADE_MAX_ROWS + ' 檔），大戶力最負的在上・前面數字＝族群排名・多方打少（族群排名前 ' + m.horseLimit + ' 名）和收割區（跌 ' + BLADE_HARVEST_PCT + '% 以上，不分族群強弱）只列名字・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字・點列或按「圖」開K線圖</div>' +
       raceBladeListHtml(m) + '</div>';
 }
 
