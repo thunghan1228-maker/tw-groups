@@ -46,7 +46,7 @@
   .stat-num{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
   .stat-label{font-size:12px;color:var(--muted);}
 
-  /* 左側：前六大族群。兩欄、由上往下排：第1~3在左欄、第4~6在右欄（2026-10-15 使用者：跟右邊各族群前三強／弱個股同一個順序） */
+  /* 左側：前六大族群。兩欄、由上往下排：第1~3在左欄、第4~6在右欄（2026-10-15 使用者：跟原本右邊各族群前三強／弱個股同一個順序） */
   .top6-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3, auto);grid-auto-flow:column;gap:10px;}
   .top6-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;transition:background .12s ease;}
   .top6-card:hover{background:var(--panel-2);}
@@ -56,7 +56,22 @@
   .top6-name{font-weight:800;font-size:22px;}
   .top6-chg{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
 
-  /* 右側：各族群前三強／前三弱個股。兩欄、由上往下排：第1~3在左欄、第4~6在右欄。 */
+  /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成莊爸的 188、193、199、177） */
+  .home-rank4{display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:8px;align-items:start;}
+  .hr-col{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .hr-title{padding:8px 10px;background:#4a3d34;font-weight:800;font-size:15px;color:var(--text);white-space:nowrap;}
+  .hr-row{display:flex;align-items:baseline;gap:4px;padding:5px 10px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;transition:background .12s ease;}
+  .hr-row:hover{background:rgba(201,169,140,0.08);}
+  .hr-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
+  .hr-name{font-weight:700;}
+  .hr-rk{color:var(--muted);}
+  .hr-avg{margin-left:auto;font-size:12px;}
+  .hr-sep{padding:3px 6px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;}
+  .hr-note{padding:8px 10px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);}
+  .hr-foot{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;}
+  @media (max-width: 900px){ .home-rank4{grid-template-columns:repeat(2, minmax(0, 1fr));} }
+  @media (max-width: 640px){ .hr-row{padding:5px 8px;} .hr-avg{display:none;} }   /* 手機兩欄放不下漲跌幅，點族群看 */
+  /* 右側：各族群前三強／前三弱個股（2026-10-15 起首頁不再用，樣式先留著）。兩欄、由上往下排：第1~3在左欄、第4~6在右欄。 */
   .top-groups-row{display:grid;grid-template-columns:repeat(2, 1fr);grid-template-rows:repeat(3, auto);grid-auto-flow:column;gap:8px;}
   .top-group-col{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
   .top-group-head{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#4a3d34;cursor:pointer;transition:background .12s ease;}
@@ -2635,7 +2650,7 @@
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：09:00 開盤～13:30 收盤（2026-10-05 起，以前 11:00 後才算；第一根 5 分K 也算），5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。每列後面標 123 黑龍：收黑就是這一波第幾次進場（①②③）、區1（紅，可積極加碼）或區2（黃，等突破再加碼）；問診日線圖、K線圖日線也會在進場的那根K棒上畫同樣的圓圈。</li>
         <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。今天跌、族內最弱 3 檔、不比櫃買強；🔪（刀）＝現價低於昨收、⚔️（劍）＝也低於前天收盤，只有🔪的也算（2026-10-15 照莊爸）。正式名單（強空積極）最多 15 檔，跌幅深的在前，大戶力最負的在上；多方打少（強族群裡逆勢走弱）和收割區域（已跌 5% 以上，不追空）只列名字。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
-        <li><b>空族群必殺(193)</b>：找「排名後半、而且名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票（第一版，照莊爸 10/15 的名單推的）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名。空方線以下＝排名後半、名次比昨天掉 5 名以上的族群；空方線以上＝前半但名次往下掉、族裡又有刀劍空股票的。⚠️＝族裡正在刀劍空(32) 名單上的股票，點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
+        <li><b>空族群必殺(193)</b>：找「名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票（第二版，照莊爸 10/15 的名單推的）。只看莊爸固定列的 23 個族群（資訊、鋼鐵、被動元件、光學鏡頭、航運、D電腦、面板、光電、二極體、矽光子、小電腦、散熱、低軌衛星、小電組、化學二、IP、矽晶圓、記憶體、玻璃基板、PA、台塑四寶、PCB、探針卡）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名，有掉就列。空方線以下＝排名後半；空方線以上＝排名前半但名次往下掉的。⚠️＝族裡正在刀劍空(32) 名單上的股票，點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選強多／四項精選強空／1+2多／創高黑龍／主力翻多／主力翻空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日或開盤前 08:45 今天還沒有訊號時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
       </ul>
     </div>
@@ -4488,7 +4503,7 @@ const SIGNAL_KINDS = [
   { key: 'combo12Bull', label: '1+2多' },
   { key: 'blackDragon', label: '創高黑龍' },
   { key: 'bladeShort', label: '刀劍空(32)' },
-  { key: 'kill193', label: '空族群必殺(193)' },   // 2026-10-15 使用者：照莊爸 193 做（第一版，條件用他三份名單推的）
+  { key: 'kill193', label: '空族群必殺(193)' },   // 2026-10-15 使用者：照莊爸 193 做（第二版：只看他 199 的固定 23 族）
   { key: 'history', label: '歷史查詢' },
 ];
 // 5分鐘K策略訊號家族(MA交叉/520/A8空等)只在K線圖上用符號呈現，不進盤中
@@ -5933,9 +5948,16 @@ function race333Html(){
 // 選股邏輯完全不變，還是共用 race333Model() 算出來的 bladeUpper/bladeLower/bladeHarvest，只是單獨一個分頁呈現。
 // ---- 空族群必殺(193)（2026-10-15 使用者：照莊爸的 193，從他 09:03、09:20、09:29 三份名單推出來的第一版）----
 // 「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強）、M＝比昨天收盤的名次掉了幾名（三份名單裡 N−M 整天不變、剛好是昨天名次）。
-// 空方線以下＝排名後半、名次比昨天掉的族群；空方線以上＝前半但名次往下掉、而且族裡有刀劍空股票的（被動元件、化學二）。
+// 空方線以下＝排名後半、名次比昨天掉的族群；空方線以上＝前半但名次往下掉的族群。
+// 第二版（10/15 09:42 起的 199／193 對照）：莊爸的 199、193 只列固定 23 個族群（09:20、09:31、09:42、09:43 每份都一樣，
+// 其他族群就算掉很多名也不列），前半段也不要求族裡有刀劍空股票（09:42 的面板、被動元件都沒有 ⚠️ 照樣列）。
 // ⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少）。莊爸族群旁的 🔪、⚔️0.7 這些記號意思還推不出來，先不做。
-const KILL193_MIN_DROP = 5;   // 莊爸 09:03／09:20／09:29 三份裡掉最少的是 🔽6，掉 1～4 名的族群都沒列
+// 莊爸 67 族裡掉 1～4 名的族群多半沒列（09:42 小電腦🔽3 沒列，09:54 帶 ⚔️ 又列了）。但他多的 12 族今天幾乎都在前段、
+// 昨天在後段，我們 55 族的名次掉得比他少：用他 09:20、09:43、09:54 三份 193 對，門檻 0～2 名三份都沒有多列、
+// 只漏散熱和小電腦（我們算這兩族名次是往上），3 名以上會漏玻璃基板，所以名次有掉（1 名以上）就列。
+const KILL193_MIN_DROP = 1;
+const KILL193_GROUPS = new Set(['資訊', '鋼鐵', '被動元件', '光學鏡頭', '航運', 'D電腦', '面板', '光電', '二極體', '矽光子', '小電腦', '散熱',
+  '低軌衛星', '小電組', '化學二', 'IP', '矽晶圓', '記憶體', '玻璃基板', 'PA', '台塑四寶', 'PCB', '探針卡']);   // 莊爸 199 的固定 23 族
 function kill193Model(){
   const m = race333Model();
   if (!m) return null;
@@ -5951,9 +5973,9 @@ function kill193Model(){
       .sort((a, b) => b.pct - a.pct);
     return { name: g.name, rank: i + 1, prev, drop: prev !== null ? i + 1 - prev : null, avg: g.avgChange, members };
   });
-  const falling = rows.filter((r) => r.drop !== null && r.drop >= KILL193_MIN_DROP);
+  const falling = rows.filter((r) => KILL193_GROUPS.has(r.name) && r.drop !== null && r.drop >= KILL193_MIN_DROP);
   return {
-    upper: falling.filter((r) => r.rank <= half && r.members.length),
+    upper: falling.filter((r) => r.rank <= half),
     lower: falling.filter((r) => r.rank > half),
     half, total: ranked.length, hasDaily: rows.some((r) => r.prev !== null), otcPct: m.otcPct,
   };
@@ -5973,8 +5995,9 @@ function kill193Html(){
     (r.members.length ? '<div class="k193-s">⚠️' + r.members.map((s) => '<span class="k193-stk" data-k193-code="' + s.code + '" data-k193-name="' + s.name + '">' + s.code + s.name +
       ' <span class="down">' + fmt(s.pct) + '%</span></span>').join(' / ') + '</div>' : '');
   return '<div class="race-block"><div class="race-head">空族群必殺(193) ' + stamp + ' <button type="button" class="chart-tab chips-btn" data-k193-copy="1">📋 複製</button></div>' +
-    '<div class="race-sub">第一版（照莊爸 10/15 三份名單推的）：族群名次＝今天平均漲跌幅排名（1 最強，共 ' + k.total + ' 個族群）；🔽＝比昨天收盤的名次掉了幾名。' +
-      '空方線以下＝排名後半（第 ' + (k.half + 1) + ' 名以後）、名次比昨天掉 ' + KILL193_MIN_DROP + ' 名以上的族群；空方線以上＝前半但名次往下掉、族裡又有刀劍空股票的。' +
+    '<div class="race-sub">第二版（照莊爸 10/15 的 193、199 名單推的）：只看莊爸固定列的 ' + KILL193_GROUPS.size + ' 個族群（' + Array.from(KILL193_GROUPS).join('、') + '）。' +
+      '族群名次＝今天平均漲跌幅在全部 ' + k.total + ' 個族群裡的排名（1 最強）；🔽＝比昨天收盤的名次掉了幾名，掉 ' + KILL193_MIN_DROP + ' 名以上才列。' +
+      '空方線以下＝排名後半（第 ' + (k.half + 1) + ' 名以後）；空方線以上＝排名前半但名次往下掉的。' +
       '⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少），點股票開K線圖。莊爸族群旁的 🔪、⚔️ 記號還在對，先不顯示。</div>' +
     (!k.hasDaily ? '<div class="race-note">還沒拿到族群昨天的名次，等一下就會出來。</div>'
       : k.upper.map(grp).join('') + '<div class="race-sep">------↓(空方)↓------</div>' +
@@ -5985,6 +6008,54 @@ function kill193Copy(){
   if (!k) return;
   const text = kill193Text(k);
   (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => showToast('已複製空族群必殺(193)')).catch(() => { window.prompt('複製下面的文字', text); });
+}
+// ---- 首頁右邊四欄（2026-10-15 使用者）：188 多族群排名、193 空族群必殺、199 空族群排名、177 排名比較 ----
+// 都照莊爸的格式「族群-(名次)🔺／🔽名次變化」：名次＝今天平均漲跌幅在全部族群裡的排名（1 最強），變化＝跟昨天收盤的名次比。
+// 莊爸有 67 族、我們 55 族，名次數字會比他小；🐎、🔪、⚔️ 這些族群記號還在對，先不顯示。
+const RANK188_GROUPS = new Set(['光學鏡頭', '軍工', '被動元件', '面板', '二極體', '小電組', '石英', '記憶體', '玻璃基板', '矽晶圓', '聯電股', 'PCB', '台塑四寶']);   // 莊爸 10/15 09:56 那份 188 的 13 族
+function homeRankRows(){
+  if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
+  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+  const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
+  const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
+  const rows = ranked.map((g, i) => {
+    const d = daily[g.name] || {};
+    const prev = Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
+    return { name: g.name, rank: i + 1, prev, drop: prev !== null ? i + 1 - prev : null, avg: g.avgChange };
+  });
+  return { rows, half: Math.ceil(ranked.length / 2), total: ranked.length, hasDaily: rows.some((r) => r.prev !== null) };
+}
+function homeRankRowHtml(r){
+  const mv = r.drop === null ? '' : r.drop > 0 ? '<span class="down">🔽' + r.drop + '</span>' : r.drop < 0 ? '<span class="up">🔺' + (-r.drop) + '</span>' : '<span class="flat">－</span>';
+  const tip = r.prev !== null ? '昨天第 ' + r.prev + ' 名' : '';
+  return '<div class="hr-row" data-group="' + r.name + '" tabindex="0" role="button" title="' + tip + '"><span class="hr-name">' + r.name + '</span><span class="hr-rk">(' + r.rank + ')</span>' + mv +
+    '<span class="hr-avg ' + dirClass(r.avg) + '">' + fmt(r.avg) + '%</span></div>';
+}
+function homeRankColHtml(title, rows, half, sepLabel, empty){
+  let body = '';
+  let sepDone = false;
+  rows.forEach((r) => {
+    if (!sepDone && r.rank > half){ body += '<div class="hr-sep">' + sepLabel + '</div>'; sepDone = true; }
+    body += homeRankRowHtml(r);
+  });
+  if (!rows.length) body = '<div class="hr-note">' + empty + '</div>';
+  return '<div class="hr-col"><div class="hr-title">' + title + '</div>' + body + '</div>';
+}
+function homeRank4Html(){
+  const h = homeRankRows();
+  if (!h) return '<div class="hr-note">族群行情載入中…</div>';
+  if (!h.hasDaily) return '<div class="hr-note">還沒拿到族群昨天的名次，等一下就會出來。</div>';
+  const k = kill193Model();
+  const k193 = k ? k.upper.concat(k.lower) : [];
+  return '<div class="home-rank4">' +
+    homeRankColHtml('多族群排名(188)', h.rows.filter((r) => RANK188_GROUPS.has(r.name)), h.half, '------↑(多方)↑------', '沒有資料') +
+    homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉') +
+    homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name)), h.half, '------↓(空方)↓------', '沒有資料') +
+    homeRankColHtml('排名比較(177)', h.rows, h.half, '------↓(空方)↓------', '沒有資料') +
+    '</div>' +
+    '<div class="hr-foot">照莊爸的 188／193／199／177：括號＝今天族群名次（平均漲跌幅，共 ' + h.total + ' 個族群，1 最強）；🔺／🔽＝跟昨天收盤的名次比，升／掉幾名；最右邊是族群平均漲跌幅。' +
+      '188 只看莊爸固定列的 ' + RANK188_GROUPS.size + ' 族，193、199 只看他固定列的 ' + KILL193_GROUPS.size + ' 族（193 只列名次有掉的），177 列全部族群。' +
+      '莊爸有 67 族、我們 55 族，名次數字會比他小。點族群看成分股。</div>';
 }
 function bladeShortHtml(){
   const m = race333Model();
@@ -12092,7 +12163,6 @@ function render(){
   const isStrong = currentTab === 'strong';
   const side6 = isStrong ? rankedDesc.slice(0, 6) : rankedAsc.slice(0, 6);
   const leftTitle = isStrong ? '漲幅前六大族群' : '跌幅前六大族群';
-  const rankLabel = isStrong ? '強' : '弱';
 
   const side6Html = side6.map((g, idx) =>
     '<div class="top6-card" data-group="' + g.name + '" tabindex="0" role="button">' +
@@ -12101,31 +12171,7 @@ function render(){
     '</div>'
   ).join('');
 
-  const sideGroupsHtml = side6.map((g, idx) => {
-    const sortedStocks = g.stocks
-      .filter(s => s.price !== null)
-      .slice()
-      .sort((a,b) => isStrong ? (b.changePercent - a.changePercent) : (a.changePercent - b.changePercent));
-    const topStocks = sortedStocks.slice(0, 3);
-    const stocksHtml = topStocks.length
-      ? STOCK_COL_LABELS_HTML + topStocks.map(s => {
-          const price = getBasePrice(s.code);
-          const prevClose = price / (1 + s.changePercent / 100);
-          const changeAmt = price - prevClose;
-          return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-            '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + wlStarHtml(s.code, s.name) + '</div>' +
-            stockValueColsHtml(price, changeAmt, s.changePercent, s) +
-          '</div>';
-        }).join('')
-      : '<div class="stock-row"><span class="flat">目前無資料</span></div>';
-
-    return '<div class="top-group-col">' +
-      '<div class="top-group-head" data-group="' + g.name + '" tabindex="0" role="button"><div><span class="top-group-rank">第' + (idx+1) + rankLabel + '</span>' +
-      '<span class="top-group-name">' + g.name + '</span></div>' +
-      '<div class="top-group-chg ' + dirClass(g.avgChange) + '">' + fmt(g.avgChange) + '%</div></div>' +
-      stocksHtml +
-    '</div>';
-  }).join('');
+  // 2026-10-15 使用者：右邊原本的「各族群前三強／弱個股」改成 188／193／199／177 四欄（homeRank4Html）；個股點左邊族群卡看。
 
   // 強勢/弱勢族群統計移到強勢/弱勢分頁正上方（2026-09-24 使用者），不再跟著#app一起
   // 重畫在「各族群前三強個股」標題旁邊——獨立更新到#groupStatBar這個固定位置。
@@ -12144,8 +12190,8 @@ function render(){
         '<div class="top6-grid">' + side6Html + '</div>' +
       '</div>' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">各族群前三' + rankLabel + '個股</div></div>' +
-        '<div class="top-groups-row">' + sideGroupsHtml + '</div>' +
+        '<div class="section-head"><div class="section-title">族群排名（188／193／199／177）</div></div>' +
+        homeRank4Html() +
       '</div>' +
     '</div>';
   // #updatedAt文字由refresh()統一負責(要能反映抓資料成功/失敗、是否過期)，
