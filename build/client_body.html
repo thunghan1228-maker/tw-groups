@@ -1260,45 +1260,76 @@
   .fu-cd b{font-size:15px;}
   .fu-cd small{color:var(--muted);font-size:12px;}
   .fu-gap{font-weight:800;}
-  /* 研究室：外資空單（2026-10-15 使用者：照老師「外資空單 × 散戶小台・微台 × 加權指數」） */
-  .fc-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 10px;}
-  .fc-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0;}
-  .fc-card.key{border-color:#8b5cf6;box-shadow:0 0 0 1px rgba(139,92,246,.35) inset;}
-  .fc-ct{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .fc-big{font-size:21px;font-weight:900;margin:2px 0;font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .fc-sub{font-size:12px;color:var(--muted);line-height:1.5;}
-  .fc-sub b{font-weight:800;}
-  .fc-big.up,.fc-sub b.up,.fc-chip b.up,.fc-tip b.up{color:var(--up);}
-  .fc-big.down,.fc-sub b.down,.fc-chip b.down,.fc-tip b.down{color:var(--down);}
-  .fc-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 10px;}
-  .fc-bar .fc-links{margin-left:auto;font-size:12px;display:flex;gap:8px;flex-wrap:wrap;}
-  .fc-bar .fc-links a{color:var(--muted);text-decoration:underline dotted;cursor:pointer;}
-  .fc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;}
-  .fc-title{font-size:16px;font-weight:900;}
-  .fc-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
-  .fc-now{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums;}
-  .fc-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
-  .fc-chip{border:1px solid var(--line);border-radius:8px;padding:2px 8px;font-size:12px;color:var(--muted);white-space:nowrap;}
-  .fc-chip b{font-size:14px;color:var(--text);margin-left:4px;}
-  .fc-chip.key{border-color:#8b5cf6;}
+  /* 研究室：外資空單（2026-10-15 使用者：照老師「外資空單 × 散戶小台・微台 × 加權指數」做成一模一樣——米色紙底、卡片、每份資料的更新標籤、九張圖、關係統計） */
   .fc-wrap{position:relative;}
   .fc-chart{width:100%;height:auto;display:block;touch-action:pan-y;}
-  .fc-chart .fc-grid{stroke:var(--line);stroke-width:1;stroke-dasharray:3 3;}
-  .fc-chart .fc-zero{stroke:var(--muted);stroke-width:1;opacity:.6;}
-  .fc-chart .fc-ax{fill:var(--muted);font-size:11px;}
-  .fc-chart .fc-tx{fill:none;stroke:var(--text);stroke-width:1.6;}
-  .fc-chart .fc-rl{fill:none;stroke:#8b5cf6;stroke-width:1.8;}
-  .fc-chart .fc-ref{stroke:#f59e0b;stroke-width:1;stroke-dasharray:4 3;}
-  .fc-chart .fc-hover{stroke:var(--muted);stroke-width:1;}
-  .fc-tip{position:absolute;top:6px;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:12px;line-height:1.6;
-    box-shadow:0 4px 14px rgba(0,0,0,.35);white-space:nowrap;z-index:2;font-variant-numeric:tabular-nums;}
-  .fc-tip .fc-td{color:#a78bfa;font-weight:800;}
+  .fc-chart .fc-grid{stroke:#e2d7c6;stroke-width:1;stroke-dasharray:3 3;}
+  .fc-chart .fc-hline{stroke:#efe7da;stroke-width:1;}
+  .fc-chart .fc-zero{stroke:#b9ab99;stroke-width:1;}
+  .fc-chart .fc-ax{fill:#7d6f62;font-size:11px;}
+  .fc-chart .fc-tx{fill:none;stroke:#222;stroke-width:1.6;}
+  .fc-chart .fc-rl{fill:none;stroke:#7b3fe4;stroke-width:1.8;}
+  .fc-chart .fc-ref{stroke:#8a7b6c;stroke-width:1;stroke-dasharray:5 4;}
+  .fc-chart .fc-hover{stroke:#8a7b6c;stroke-width:1;}
+  .fc-tip{position:absolute;top:6px;pointer-events:none;background:#fff;color:#3b2f27;border:1px solid #e6dccb;border-radius:10px;padding:6px 10px;font-size:12px;line-height:1.6;
+    box-shadow:0 4px 14px rgba(0,0,0,.15);white-space:nowrap;z-index:2;font-variant-numeric:tabular-nums;}
+  .fc-tip .fc-td{color:#7b3fe4;font-weight:800;}
   .fc-tip span{display:flex;justify-content:space-between;gap:14px;}
-  .fc-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin-top:4px;}
-  .fc-legend i{display:inline-block;width:12px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px;}
-  .fc-legend i.ln{height:2px;vertical-align:3px;}
-  @media (max-width: 1100px){ .fc-cards{grid-template-columns:repeat(3,minmax(0,1fr));} }
-  @media (max-width: 640px){ .fc-cards{grid-template-columns:repeat(2,minmax(0,1fr));} .fc-big{font-size:18px;} .fc-now{font-size:20px;} }
+  .fc-paper{--fp-line:#e6dccb;--fp-text:#3b2f27;--fp-muted:#8a7b6c;--fp-up:#c0392b;--fp-down:#1f8a5b;--fp-accent:#9b2c2c;
+    background:#f6f1e7;color:var(--fp-text);border-radius:12px;padding:16px;font-family:"Noto Sans TC","PingFang TC",sans-serif;}
+  .fc-paper .up{color:var(--fp-up);} .fc-paper .down{color:var(--fp-down);}
+  .fp-tag{display:inline-block;border:1px solid var(--fp-accent);color:var(--fp-accent);font-size:12px;padding:2px 10px;border-radius:3px;background:#fff;}
+  .fp-h1{font-family:"Noto Serif TC","Songti TC","PMingLiU",serif;font-weight:900;font-size:34px;color:var(--fp-accent);margin:10px 0 10px;letter-spacing:1px;line-height:1.25;}
+  .fp-meta{display:inline-flex;gap:4px;align-items:center;flex-wrap:wrap;border:1px solid #e3c99c;background:#fbf1de;border-radius:999px;padding:3px 12px;font-size:12px;color:var(--fp-muted);}
+  .fp-meta b{color:var(--fp-accent);font-weight:600;}
+  .fc-paper .mc-reload{background:transparent;border:0;color:var(--fp-accent);cursor:pointer;font-size:14px;}
+  .fp-fresh{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px;}
+  .fp-fresh span{border:1px solid var(--fp-line);background:#fff;border-radius:999px;padding:2px 10px;font-size:12px;color:var(--fp-muted);}
+  .fp-fresh span.wait{border-color:#d9a75c;}
+  .fp-fresh b{color:var(--fp-text);font-weight:600;}
+  .fp-hint{font-size:12px;color:var(--fp-muted);margin:4px 0 12px;}
+  .fp-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px;}
+  .fp-card{background:#fffdf8;border:1px solid var(--fp-line);border-radius:10px;padding:10px 12px;min-width:0;position:relative;}
+  .fp-card .fp-ct{font-size:12px;color:var(--fp-text);padding-right:60px;line-height:1.4;}
+  .fp-card .fp-d{position:absolute;top:8px;right:8px;border:1px solid #d9b98c;border-radius:999px;padding:0 8px;font-size:11px;color:#9a6b2f;background:#fff8ec;font-weight:700;}
+  .fp-card .fp-v{font-size:22px;font-weight:500;margin:6px 0 2px;font-variant-numeric:tabular-nums;}
+  .fp-card .fp-s{font-size:11px;color:var(--fp-muted);line-height:1.5;}
+  .fp-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 14px;}
+  .fp-bar button{border:1px solid var(--fp-line);background:#fff;color:var(--fp-text);border-radius:999px;padding:4px 14px;font-size:13px;cursor:pointer;font-family:inherit;}
+  .fp-bar button.on{background:var(--fp-accent);border-color:var(--fp-accent);color:#fff;font-weight:700;}
+  .fp-links{margin-left:auto;display:flex;flex-wrap:wrap;gap:10px;font-size:12px;}
+  .fp-links a{color:var(--fp-text);text-decoration:underline dotted;cursor:pointer;}
+  .fp-box{background:#fffdf8;border:1px solid var(--fp-line);border-radius:14px;padding:14px 16px 10px;margin-bottom:14px;}
+  .fp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+  .fp-title{font-family:"Noto Serif TC","Songti TC","PMingLiU",serif;font-weight:900;font-size:21px;margin-top:12px;color:#1f1915;}
+  .fp-h4{font-size:15px;font-weight:800;margin:16px 0 6px;}
+  .fp-desc{font-size:11px;color:var(--fp-muted);margin-top:2px;}
+  .fp-big{font-size:28px;font-weight:500;font-variant-numeric:tabular-nums;color:#1f1915;}
+  .fp-big.up{color:var(--fp-up);} .fp-big.down{color:var(--fp-down);}
+  .fp-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px;}
+  .fp-chip{display:inline-flex;align-items:stretch;border:1px solid var(--fp-line);border-radius:6px;overflow:hidden;background:#fff;}
+  .fp-chip i{font-style:normal;color:#fff;font-size:10px;line-height:1.15;padding:3px 6px;display:flex;align-items:center;text-align:center;font-weight:700;}
+  .fp-chip b{font-weight:500;font-size:15px;padding:3px 10px;display:flex;align-items:center;font-variant-numeric:tabular-nums;color:#1f1915;}
+  .fp-chip.date{border-color:#c79a5a;}
+  .fp-chip.date b{font-size:12px;color:#9a6b2f;}
+  .fp-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--fp-text);margin-top:2px;}
+  .fp-legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px;}
+  .fp-legend i.ln{height:2px;width:14px;vertical-align:3px;}
+  .fp-scroll{overflow-x:auto;}
+  .fp-rel{width:100%;border-collapse:collapse;font-size:13px;min-width:560px;}
+  .fp-rel th{background:#f8f1e4;color:var(--fp-muted);font-weight:500;text-align:left;padding:6px 8px;font-size:12px;}
+  .fp-rel th.num,.fp-rel td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .fp-rel td{border-bottom:1px solid #efe6d8;padding:7px 8px;vertical-align:middle;}
+  .fp-str{display:inline-block;border:1px solid #d9b98c;border-radius:999px;padding:0 8px;font-size:11px;color:#9a6b2f;white-space:nowrap;}
+  .fp-str.s{border-color:var(--fp-up);color:var(--fp-up);}
+  .fp-cbar{position:relative;display:block;width:90px;height:12px;background:#f3ece0;border-radius:3px;}
+  .fp-cbar.wide{width:140px;}
+  .fp-cbar i{position:absolute;top:0;bottom:0;border-radius:2px;}
+  .fp-cbar::after{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;border-left:1px solid #b9ab99;}
+  .fp-note{background:#f8f1e4;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--fp-text);margin:10px 0 4px;line-height:1.7;}
+  .fp-foot{font-size:11px;color:var(--fp-muted);margin-top:12px;line-height:1.7;border-top:1px solid var(--fp-line);padding-top:10px;}
+  @media (max-width: 1100px){ .fp-cards{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  @media (max-width: 640px){ .fc-paper{padding:10px;} .fp-h1{font-size:24px;} .fp-cards{grid-template-columns:repeat(2,minmax(0,1fr));} .fp-card .fp-v{font-size:18px;} .fp-big{font-size:22px;} .fp-links{margin-left:0;} }
   @media (max-width: 640px){
     .fu-grid2{grid-template-columns:minmax(0,1fr);}
     .fu-crash{grid-template-columns:64px minmax(0,1fr);}
@@ -14935,9 +14966,9 @@ function fuHtml(){
 // ---- 研究室：外資空單（2026-10-15 使用者：照老師「外資空單 × 散戶小台・微台 × 加權指數」做，放資金保護傘旁邊）----
 // 後端 /api/futures-chips：期交所三大法人期貨／選擇權未平倉、小台微台全市場未平倉、P/C、證交所三大法人現貨（每個交易日 15:40 更新）。
 // 卡片數字跟老師 10/15 那頁逐一對過；圖可以切 3 個月／6 個月／1 年，滑鼠移到圖上（手機點圖）看當天數字。融資在「資金保護傘」，不重做。
-const FC_RANGES = [[60, '3 個月'], [120, '6 個月'], [250, '1 年']];
+const FC_RANGES = [[3, '3 個月'], [6, '6 個月'], [12, '1 年']];   // 照日曆月份往回算（老師 10/15 的 6 個月從 4/15 起）
 const fcState = { data: null, loading: false, error: null, loadedAt: 0, charts: {},
-  range: (() => { try { const v = Number(localStorage.getItem('fcRange')); return FC_RANGES.some((x) => x[0] === v) ? v : 120; } catch (_){ return 120; } })() };
+  range: (() => { try { const v = Number(localStorage.getItem('fcRangeM')); return FC_RANGES.some((x) => x[0] === v) ? v : 6; } catch (_){ return 6; } })() };
 async function fcLoad(force){
   if (fcState.loading || (fcState.data && !force && Date.now() - fcState.loadedAt < 30 * 60e3)) return;
   fcState.loading = true; fcState.error = null;
@@ -14955,41 +14986,52 @@ async function fcLoad(force){
 function fcCls(v){ return v > 0 ? 'up' : v < 0 ? 'down' : ''; }
 function fcSigned(v, digits, unit){ return v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + fuNum(v, digits) + (unit || ''); }
 const FC_MAX_POS = 8;   // 圖上最多標幾個月份
-// 通用圖：右軸畫柱狀（bars：一組正紅負綠；多組＝堆疊或並排，各自顏色）或右軸折線（rline），左軸畫加權指數
+const FP_UP = '#c0392b', FP_DOWN = '#1f8a5b', FP_PURPLE = '#7b3fe4', FP_BROWN = '#b07a3a', FP_TEAL = '#2f8fa0';
+// 通用圖（2026-10-15 照老師那頁）：右軸畫柱狀（bars：預設正紅負綠；mode＝stack 堆疊、overlay 疊在一起）或右軸折線（rline），
+// 左軸畫指數（lineKey，預設加權 t）；floor＝柱子不從 0 畫（融資餘額那種），ref＝畫一條虛線（P/C 的 100%）。
 function fcChartSvg(key, rows, cfg){
   if (!rows.length) return '<div class="race-note">還沒有資料</div>';
   const narrow = window.innerWidth < 640;   // 手機：畫布窄一點，字才不會縮到看不見
   const W = narrow ? 420 : 720, H = narrow ? 240 : 250, L = narrow ? 44 : 52, R = narrow ? 44 : 56, T = 10, B = 22, pw = W - L - R, ph = H - T - B;
   const n = rows.length, step = pw / n, xc = (i) => L + (i + 0.5) * step;
-  const bars = cfg.bars || [], mode = cfg.mode || 'single';
+  const bars = cfg.bars || [], mode = cfg.mode || 'single', lineKey = cfg.lineKey || 't';
+  const num = (v) => v !== null && v !== undefined && Number.isFinite(v);
   let bMin = 0, bMax = 0;
+  const vals = [];
   rows.forEach((r) => {
     if (mode === 'stack'){
       let pos = 0, neg = 0;
       bars.forEach((b) => { const v = r[b.k]; if (v > 0) pos += v; else if (v < 0) neg += v; });
-      bMax = Math.max(bMax, pos); bMin = Math.min(bMin, neg);
-    } else bars.concat(cfg.rline ? [{ k: cfg.rline }] : []).forEach((b) => { const v = r[b.k]; if (v !== null && v !== undefined){ bMax = Math.max(bMax, v); bMin = Math.min(bMin, v); } });
+      vals.push(pos, neg);
+    } else bars.concat(cfg.rline ? [{ k: cfg.rline }] : []).forEach((b) => { if (num(r[b.k])) vals.push(r[b.k]); });
   });
-  if (cfg.rline && !bars.length){ const vs = rows.map((r) => r[cfg.rline]).filter((v) => v !== null && v !== undefined); bMin = Math.min(...vs) * 0.92; bMax = Math.max(...vs) * 1.05; if (cfg.ref){ bMin = Math.min(bMin, cfg.ref * 0.95); bMax = Math.max(bMax, cfg.ref * 1.05); } }
+  if (vals.length){ bMin = Math.min(...vals); bMax = Math.max(...vals); }
+  if (cfg.floor){ const sp = (bMax - bMin) || 1; bMin -= sp * 0.35; bMax += sp * 0.08; }
+  else { bMin = Math.min(0, bMin); bMax = Math.max(0, bMax); }
+  if (cfg.ref !== undefined){ bMin = Math.min(bMin, 0); bMax = Math.max(bMax, cfg.ref * 1.1); }
   if (bMax === bMin) bMax = bMin + 1;
   const yB = (v) => T + ph * (bMax - v) / (bMax - bMin);
-  const ts = rows.map((r) => r.t), tMin = Math.min(...ts), tMax = Math.max(...ts), pad = (tMax - tMin) * 0.06 || 1;
+  const base = cfg.floor ? bMin : 0;
+  const ts = rows.map((r) => r[lineKey]).filter(num), tMin = Math.min(...ts), tMax = Math.max(...ts), pad = (tMax - tMin) * 0.06 || 1;
   const yT = (v) => T + ph * (tMax + pad - v) / (tMax - tMin + 2 * pad);
   let g = '';
-  // 月份分隔線
-  let lastMo = '', marks = [];
+  [0.25, 0.5, 0.75].forEach((f) => { g += '<line x1="' + L + '" y1="' + (T + ph * f).toFixed(1) + '" x2="' + (W - R) + '" y2="' + (T + ph * f).toFixed(1) + '" class="fc-hline"/>'; });
+  let lastMo = '';
+  const marks = [];
   rows.forEach((r, i) => { const mo = r.d.slice(0, 7); if (mo !== lastMo){ lastMo = mo; if (i > 0) marks.push(i); } });
   const every = Math.max(1, Math.ceil(marks.length / (narrow ? 5 : FC_MAX_POS)));
-  const near = (i) => marks.some((m, k) => k % every === 0 && Math.abs(m - i) * step < (narrow ? 34 : 40));   // 頭尾日期跟月份標籤太近就不標
+  const near = (i) => marks.some((m, k) => k % every === 0 && Math.abs(m - i) * step < (narrow ? 34 : 40));
+  const md = (d) => Number(d.slice(5, 7)) + '/' + Number(d.slice(8));
   marks.forEach((i, k) => {
     const x = (L + i * step).toFixed(1);
     g += '<line x1="' + x + '" y1="' + T + '" x2="' + x + '" y2="' + (T + ph) + '" class="fc-grid"/>';
-    if (k % every === 0) g += '<text x="' + x + '" y="' + (H - 6) + '" class="fc-ax" text-anchor="middle">' + Number(rows[i].d.slice(5, 7)) + '/' + Number(rows[i].d.slice(8)) + '</text>';
+    if (k % every === 0) g += '<text x="' + x + '" y="' + (H - 6) + '" class="fc-ax" text-anchor="middle">' + md(rows[i].d) + '</text>';
   });
-  if (!near(0)) g += '<text x="' + L + '" y="' + (H - 6) + '" class="fc-ax">' + Number(rows[0].d.slice(5, 7)) + '/' + Number(rows[0].d.slice(8)) + '</text>';
-  if (!near(n)) g += '<text x="' + (W - R) + '" y="' + (H - 6) + '" class="fc-ax" text-anchor="end">' + Number(rows[n - 1].d.slice(5, 7)) + '/' + Number(rows[n - 1].d.slice(8)) + '</text>';
-  // 柱狀
-  const bw = Math.max(1, step * (mode === 'group' ? 0.42 : 0.72));
+  if (!near(0)) g += '<text x="' + L + '" y="' + (H - 6) + '" class="fc-ax">' + md(rows[0].d) + '</text>';
+  if (!near(n)) g += '<text x="' + (W - R) + '" y="' + (H - 6) + '" class="fc-ax" text-anchor="end">' + md(rows[n - 1].d) + '</text>';
+  const bw = Math.max(1, step * 0.66);
+  const fillOf = (b, r, i, v) => typeof b.color === 'function' ? b.color(r, i, v) : (b.color || (v >= 0 ? FP_UP : FP_DOWN));
+  const rect = (x, w, from, to, fill, op) => '<rect x="' + x.toFixed(2) + '" y="' + Math.min(yB(from), yB(to)).toFixed(2) + '" width="' + w.toFixed(2) + '" height="' + Math.max(0.6, Math.abs(yB(to) - yB(from))).toFixed(2) + '" fill="' + fill + '"' + (op ? ' opacity="' + op + '"' : '') + '/>';
   rows.forEach((r, i) => {
     if (mode === 'stack'){
       let pos = 0, neg = 0;
@@ -14997,24 +15039,22 @@ function fcChartSvg(key, rows, cfg){
         const v = r[b.k]; if (!v) return;
         const from = v > 0 ? pos : neg, to = from + v;
         if (v > 0) pos = to; else neg = to;
-        g += '<rect x="' + (xc(i) - bw / 2).toFixed(2) + '" y="' + Math.min(yB(from), yB(to)).toFixed(2) + '" width="' + bw.toFixed(2) + '" height="' + Math.max(0.5, Math.abs(yB(to) - yB(from))).toFixed(2) + '" fill="' + b.color + '"/>';
+        g += rect(xc(i) - bw / 2, bw, from, to, b.color);
       });
     } else bars.forEach((b, j) => {
-      const v = r[b.k]; if (v === null || v === undefined) return;
-      const x = mode === 'group' ? xc(i) - bw + j * bw : xc(i) - bw / 2;
-      const fill = b.color || (v >= 0 ? 'var(--up)' : 'var(--down)');
-      g += '<rect x="' + x.toFixed(2) + '" y="' + Math.min(yB(0), yB(v)).toFixed(2) + '" width="' + bw.toFixed(2) + '" height="' + Math.max(0.5, Math.abs(yB(v) - yB(0))).toFixed(2) + '" fill="' + fill + '"' + (b.op ? ' opacity="' + b.op + '"' : '') + '/>';
+      const v = r[b.k]; if (!num(v)) return;
+      const w = mode === 'overlay' && j > 0 ? bw * 0.6 : bw;
+      g += rect(xc(i) - w / 2, w, base, v, fillOf(b, r, i, v), b.op);
     });
   });
-  if (bars.length) g += '<line x1="' + L + '" y1="' + yB(0).toFixed(1) + '" x2="' + (W - R) + '" y2="' + yB(0).toFixed(1) + '" class="fc-zero"/>';
+  if (bars.length && !cfg.floor) g += '<line x1="' + L + '" y1="' + yB(0).toFixed(1) + '" x2="' + (W - R) + '" y2="' + yB(0).toFixed(1) + '" class="fc-zero"/>';
   if (cfg.ref !== undefined) g += '<line x1="' + L + '" y1="' + yB(cfg.ref).toFixed(1) + '" x2="' + (W - R) + '" y2="' + yB(cfg.ref).toFixed(1) + '" class="fc-ref"/>';
-  const poly = (k, y) => rows.map((r, i) => r[k] === null || r[k] === undefined ? null : xc(i).toFixed(1) + ',' + y(r[k]).toFixed(1)).filter(Boolean).join(' ');
+  const poly = (k, y) => rows.map((r, i) => num(r[k]) ? xc(i).toFixed(1) + ',' + y(r[k]).toFixed(1) : null).filter(Boolean).join(' ');
   if (cfg.rline) g += '<polyline points="' + poly(cfg.rline, yB) + '" class="fc-rl"/>';
-  g += '<polyline points="' + poly('t', yT) + '" class="fc-tx"/>';
-  // 軸標
-  const fmtB = cfg.axFmt || ((v) => Math.abs(v) >= 1000 ? fuNum(v / 1000, Math.abs(v) >= 10000 ? 0 : 1) + 'k' : fuNum(v));
+  g += '<polyline points="' + poly(lineKey, yT) + '" class="fc-tx"/>';
+  const fmtB = cfg.axFmt || ((v) => Math.abs(v) >= 1000 ? (v > 0 ? '+' : '') + fuNum(v / 1000, Math.abs(v) >= 10000 ? 0 : 1) + 'k' : (v > 0 ? '+' : '') + fuNum(v));
   [bMax, (bMax + bMin) / 2, bMin].forEach((v) => { g += '<text x="' + (W - R + 4) + '" y="' + (yB(v) + 4).toFixed(1) + '" class="fc-ax">' + fmtB(v) + '</text>'; });
-  [tMax, (tMax + tMin) / 2, tMin].forEach((v) => { g += '<text x="' + (L - 4) + '" y="' + (yT(v) + 4).toFixed(1) + '" class="fc-ax" text-anchor="end">' + fuNum(v) + '</text>'; });
+  [tMax + pad, (tMax + tMin) / 2, tMin - pad].forEach((v) => { g += '<text x="' + (L - 4) + '" y="' + (yT(v) + 4).toFixed(1) + '" class="fc-ax" text-anchor="end">' + fuNum(v, lineKey === 'o' ? 0 : 0) + '</text>'; });
   g += '<line class="fc-hover" x1="0" y1="' + T + '" x2="0" y2="' + (T + ph) + '" visibility="hidden"/>';
   fcState.charts[key] = { rows, cfg, L, pw, n, W };
   return '<div class="fc-wrap" data-fc-chart="' + key + '"><svg class="fc-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' + g + '</svg><div class="fc-tip" hidden></div></div>';
@@ -15028,9 +15068,10 @@ function fcTipShow(wrap, clientX){
   const r = c.rows[i], prev = i > 0 ? c.rows[i - 1] : null;
   const line = svg.querySelector('.fc-hover'), x = c.L + (i + 0.5) * c.pw / c.n;
   line.setAttribute('x1', x); line.setAttribute('x2', x); line.setAttribute('visibility', 'visible');
-  const tp = prev ? (r.t / prev.t - 1) * 100 : null;
+  const lk = c.cfg.lineKey || 't', lv = r[lk], pv = prev ? prev[lk] : null;
+  const tp = lv && pv ? (lv / pv - 1) * 100 : null;
   const tip = wrap.querySelector('.fc-tip');
-  tip.innerHTML = '<div class="fc-td">' + r.d.replace(/-/g, '/') + '</div><span>加權 <b>' + fuNum(r.t, 2) + (tp === null ? '' : ' <b class="' + fcCls(tp) + '">' + fcSigned(tp, 2, '%') + '</b>') + '</b></span>' +
+  tip.innerHTML = '<div class="fc-td">' + r.d.replace(/-/g, '/') + '</div><span>' + (c.cfg.lineLabel || '加權') + ' <b>' + fuNum(lv, 2) + (tp === null ? '' : ' <b class="' + fcCls(tp) + '">' + fcSigned(tp, 2, '%') + '</b>') + '</b></span>' +
     c.cfg.tip.map(([label, fn]) => { const [v, txt] = fn(r); return '<span>' + label + ' <b class="' + fcCls(v) + '">' + txt + '</b></span>'; }).join('');
   tip.hidden = false;
   const px = (clientX - box.left), tw = tip.offsetWidth;
@@ -15041,75 +15082,174 @@ function fcTipHide(wrap){
   if (tip) tip.hidden = true;
   if (line) line.setAttribute('visibility', 'hidden');
 }
-function fcCardHtml(title, big, bigCls, sub, key){
-  return '<div class="fc-card' + (key ? ' key' : '') + '"><div class="fc-ct">' + title + '</div><div class="fc-big ' + (bigCls || '') + '">' + big + '</div><div class="fc-sub">' + sub + '</div></div>';
+// ---- 關係統計（照老師：跟著上方區間算，相關係數 −1～+1；|r| ≥ 0.6 強、0.3～0.6 中、< 0.3 弱）----
+function fcCorr(xs, ys){
+  const p = [];
+  xs.forEach((x, i) => { const y = ys[i]; if (Number.isFinite(x) && Number.isFinite(y)) p.push([x, y]); });
+  if (p.length < 10) return null;
+  const n = p.length, mx = p.reduce((a, q) => a + q[0], 0) / n, my = p.reduce((a, q) => a + q[1], 0) / n;
+  let sxy = 0, sxx = 0, syy = 0;
+  p.forEach(([x, y]) => { sxy += (x - mx) * (y - my); sxx += (x - mx) ** 2; syy += (y - my) ** 2; });
+  return sxx && syy ? sxy / Math.sqrt(sxx * syy) : null;
 }
+// [名稱, 取 x, 取 y, 正的白話, 負的白話, 是不是拿來猜隔天]
+const FC_RELS = [
+  ['外資台指淨未平倉 vs 加權（水位）', (q) => q.f, (q) => q.t, '正 = 指數越漲、外資淨單越偏多（跟著行情走）', '負 = 指數越漲、外資空單越多 → 多半是現貨避險，不是單純看空'],
+  ['外資淨未平倉 日增減 vs 當日漲跌', (q) => q.fc, (q) => q.ret, '正 = 外資加空的日子多半是跌的日子', '負 = 外資加空的日子反而多半是漲的（逆勢避險）'],
+  ['微台散戶多空比 日增減 vs 當日漲跌', (q) => q.dtq, (q) => q.ret, '正 = 散戶跟著行情追（漲加多、跌加空）', '負 = 跌越多、散戶越去接微台多單（摸底）'],
+  ['小台散戶多空比 日增減 vs 當日漲跌', (q) => q.dmq, (q) => q.ret, '同上，看小台', '同上，看小台'],
+  ['外資現貨買賣超 vs 當日漲跌', (q) => q.sf, (q) => q.ret, '正 = 外資買超的日子多半是漲的日子', '負 = 外資買超的日子反而多半是跌的'],
+  ['外資現貨買賣超 vs 外資台指淨增減', (q) => q.sf, (q) => q.fc, '正 = 現貨買、期貨也同步減空／加多（同向）；負 = 一邊買一邊避險', '正 = 現貨買、期貨也同步減空／加多（同向）；負 = 一邊買一邊避險'],
+  ['上市融資增減 vs 加權當日漲跌', (q) => q.dm, (q) => q.ret, '正 = 漲的日子融資跟著加（追價）；負 = 跌的時候融資反而加（攤平／接刀）', '正 = 漲的日子融資跟著加（追價）；負 = 跌的時候融資反而加（攤平／接刀）'],
+  ['上櫃融資增減 vs 櫃買當日漲跌', (q) => q.dmo, (q) => q.oret, '同上，看櫃買', '同上，看櫃買'],
+  ['上市融資增減 vs 隔日漲跌', (q) => q.dm, (q) => q.nret, '正 = 融資增加後隔天多半漲', '負 = 融資增加後隔天多半跌', true],
+  ['外資淨未平倉 vs 散戶淨（折大台）', (q) => q.f, (q) => q.rb, '正 = 兩邊同方向', '負 = 兩邊站對面在對作'],
+  ['微台散戶多空比 vs 隔日漲跌', (q) => q.tq, (q) => q.nret, '正 = 散戶越偏多、隔天越容易漲', '負 = 散戶越偏多、隔天越容易跌（反指標）', true],
+  ['P/C Ratio vs 隔日漲跌', (q) => q.pc, (q) => q.nret, '正 = P/C 越高、隔天越容易漲', '負 = P/C 越高、隔天越容易跌', true],
+];
+function fcRelHtml(full, from){
+  // 每天要用的衍生值（日漲跌、隔日漲跌、增減、散戶折大台），只看區間內的天
+  const pick = (i, k) => (full[i] && Number.isFinite(full[i][k]) ? full[i][k] : null);
+  const pct = (a, b) => (a !== null && b !== null && b ? (a / b - 1) * 100 : null);
+  const diff = (i, k) => (pick(i, k) !== null && pick(i - 1, k) !== null ? pick(i, k) - pick(i - 1, k) : null);
+  const q = [];
+  for (let i = from; i < full.length; i++){
+    q.push({ f: pick(i, 'f'), t: pick(i, 't'), fc: pick(i, 'fc'), sf: pick(i, 'sf'), tq: pick(i, 'tq'), pc: pick(i, 'pc'), rb: pick(i, 'rb'),
+      ret: pct(pick(i, 't'), pick(i - 1, 't')), oret: pct(pick(i, 'o'), pick(i - 1, 'o')), nret: pct(pick(i + 1, 't'), pick(i, 't')),
+      dtq: diff(i, 'tq'), dmq: diff(i, 'mq'), dm: diff(i, 'm'), dmo: diff(i, 'mo') });
+  }
+  const rows = FC_RELS.map(([name, fx, fy, pos, neg, nextDay]) => {
+    const r = fcCorr(q.map(fx), q.map(fy));
+    if (r === null) return '<tr><td>' + name + '</td><td class="num">—</td><td></td><td></td><td>資料不夠</td></tr>';
+    const a = Math.abs(r), str = a >= 0.6 ? '強' : a >= 0.3 ? '中' : '弱';
+    const text = Math.round(a * 100) < 10 ? (nextDay ? '接近 0 = 拿來猜隔天沒用' : '接近 0 = 兩者沒什麼關係') : r > 0 ? pos : neg;   // 照顯示的兩位小數判斷
+    const w = Math.min(50, a * 50);
+    return '<tr><td>' + name + '</td><td class="num ' + (r > 0.005 ? 'up' : r < -0.005 ? 'down' : '') + '">' + (r >= 0 ? '+' : '−') + Math.abs(r).toFixed(2) + '</td>' +
+      '<td><span class="fp-str' + (str === '強' ? ' s' : '') + '">' + str + '</span></td>' +
+      '<td><span class="fp-cbar"><i style="' + (r >= 0 ? 'left:50%' : 'right:50%') + ';width:' + w.toFixed(1) + '%;background:' + (r >= 0 ? FP_UP : FP_DOWN) + '"></i></span></td><td>' + text + '</td></tr>';
+  }).join('');
+  // 微台散戶多空比分五組 → 之後 5 個交易日加權漲跌
+  const pts = [];
+  for (let i = from; i < full.length - 5; i++){
+    const tq = pick(i, 'tq'), t0 = pick(i, 't'), t5 = pick(i + 5, 't');
+    if (tq !== null && t0 && t5) pts.push({ tq, fwd: (t5 / t0 - 1) * 100 });
+  }
+  let quint = '';
+  if (pts.length >= 25){
+    pts.sort((a, b) => a.tq - b.tq);
+    const size = Math.floor(pts.length / 5);
+    const names = ['最偏空（低 20%）', '偏空', '中間', '偏多', '最偏多（高 20%）'];
+    const groups = names.map((nm, k) => pts.slice(k * size, k === 4 ? pts.length : (k + 1) * size));
+    const stat = groups.map((gp) => ({ lo: gp[0].tq, hi: gp[gp.length - 1].tq, n: gp.length, avg: gp.reduce((a, x) => a + x.fwd, 0) / gp.length, up: gp.filter((x) => x.fwd > 0).length / gp.length * 100 }));
+    const all = pts.reduce((a, x) => a + x.fwd, 0) / pts.length;
+    const mx = Math.max(0.5, ...stat.map((st) => Math.abs(st.avg)));
+    const sg = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + '%';
+    quint = '<h4 class="fp-h4">微台散戶多空比 分五組 → 之後 5 個交易日加權漲跌</h4><div class="fp-scroll"><table class="fp-rel"><thead><tr><th>微台散戶</th><th class="num">多空比範圍</th><th class="num">天數</th><th class="num">5 日後平均</th><th></th><th class="num">上漲機率</th></tr></thead><tbody>' +
+      stat.map((st, k) => '<tr><td>' + names[k] + '</td><td class="num">' + sg(st.lo) + ' ～ ' + sg(st.hi) + '</td><td class="num">' + st.n + '</td>' +
+        '<td class="num ' + fcCls(st.avg) + '">' + fcSigned(st.avg, 2, '%') + '</td>' +
+        '<td><span class="fp-cbar wide"><i style="' + (st.avg >= 0 ? 'left:50%' : 'right:50%') + ';width:' + Math.min(50, Math.abs(st.avg) / mx * 50).toFixed(1) + '%;background:' + (st.avg >= 0 ? FP_UP : FP_DOWN) + '"></i></span></td>' +
+        '<td class="num">' + Math.round(st.up) + '%</td></tr>').join('') + '</tbody></table></div>';
+    const hiAvg = stat[4].avg, loAvg = stat[0].avg;
+    quint += '<div class="fp-note">這段期間不分組的 5 日後平均是 <b class="' + fcCls(all) + '">' + fcSigned(all, 2, '%') + '</b>。散戶最偏多那組 ' + fcSigned(hiAvg, 2, '%') + '、最偏空那組 ' + fcSigned(loAvg, 2, '%') + ' → ' +
+      (hiAvg < loAvg ? '散戶偏多之後比較弱，「散戶當反指標」這段成立。' : '散戶偏多之後沒有比較弱，「散戶當反指標」這段不成立（多頭行情常見）。') + '每組只有幾十天，當參考不要當規則。</div>';
+  }
+  return '<div class="fp-box" id="fcRel"><div class="fp-title">關係統計</div><div class="fp-desc">跟著上方區間算・相關係數 −1 ～ +1；絕對值 ≥ 0.6 強・0.3 ～ 0.6 中・&lt; 0.3 弱</div>' +
+    '<div class="fp-scroll"><table class="fp-rel"><thead><tr><th>關係</th><th class="num">相關</th><th>強弱</th><th></th><th>白話</th></tr></thead><tbody>' + rows + '</tbody></table></div>' + quint + '</div>';
+}
+function fcMd(d){ return d ? Number(d.slice(5, 7)) + '/' + Number(d.slice(8, 10)) : '—'; }
+function fcWdTxt(d){ return '日一二三四五六'[new Date(d + 'T00:00:00Z').getUTCDay()]; }
 function fcHtml(){
   const d = fcState.data;
   if (!d) return fcState.error ? '<div class="race-note">讀取失敗：' + wlEsc(fcState.error) + ' <button type="button" class="chart-tab" data-fc-reload="1">重試</button></div>' : '<div class="race-note">讀取中…</div>';
   if (d.status !== 'ok') return '<div class="race-note">' + wlEsc(d.message || '還沒有資料') + (d.error ? '：' + wlEsc(d.error) : '') + '</div>';
-  const c = d.cards;
-  const lots = (x) => fcSigned(x.value, 0, ''), chg = (x) => '增減 <b class="' + fcCls(x.chg) + '">' + fcSigned(x.chg, 0, ' 口') + '</b>';
-  const pct = (x) => fcSigned(x.value, 2, '%'), prevPct = (x) => '前一日 ' + fcSigned(x.prev, 2, '%');
-  let html = '<div class="mc-meta">資料日 <b>' + d.asOf.replace(/-/g, '/') + '（' + mcWd(d.asOf) + '）</b>・每個交易日 15:40 更新（17:40、20:40 補抓）' +
-    (d.updatedAt ? '・更新於 ' + mcMd(d.updatedAt.slice(0, 10)) + ' ' + d.updatedAt.slice(11, 16) : '') + ' <button type="button" class="mc-reload" data-fc-reload="1" title="重新整理">↻</button></div>';
-  html += '<div class="fc-cards">' +
-    fcCardHtml('加權指數', fuNum(c.taiex.value, 2), fcCls(c.taiex.chg), '<b class="' + fcCls(c.taiex.chg) + '">' + fcSigned(c.taiex.chg, 2, '') + '（' + fcSigned(c.taiex.pct, 2, '%') + '）</b>') +
-    fcCardHtml('外資台指淨未平倉', lots(c.txForeign), fcCls(c.txForeign.value), chg(c.txForeign), true) +
-    fcCardHtml('外資買權淨未平倉', lots(c.callForeign), fcCls(c.callForeign.value), chg(c.callForeign)) +
-    fcCardHtml('外資賣權淨未平倉', lots(c.putForeign), fcCls(c.putForeign.value), chg(c.putForeign)) +
-    fcCardHtml('散戶小台淨未平倉', lots(c.mtxRetail), fcCls(c.mtxRetail.value), chg(c.mtxRetail)) +
-    fcCardHtml('散戶微台淨未平倉', lots(c.tmfRetail), fcCls(c.tmfRetail.value), chg(c.tmfRetail)) +
-    fcCardHtml('小台散戶多空比', pct(c.mtxRatio), fcCls(c.mtxRatio.value), prevPct(c.mtxRatio)) +
-    fcCardHtml('微台散戶多空比', pct(c.tmfRatio), fcCls(c.tmfRatio.value), prevPct(c.tmfRatio)) +
-    fcCardHtml('全市場 Put/Call（未平倉）', c.pcRatio.value === null ? '—' : fuNum(c.pcRatio.value, 2) + '%', '', c.pcRatio.prev === null ? (d.pcError ? '期交所暫時抓不到' : '') : '前一日 ' + fuNum(c.pcRatio.prev, 2) + '%') +
-    fcCardHtml('三大法人現貨買賣超', fcSigned(c.spot.total, 2, ' 億'), fcCls(c.spot.total), '外資 <b class="' + fcCls(c.spot.foreign) + '">' + fcSigned(c.spot.foreign, 0, '') + '</b>・投信 <b class="' + fcCls(c.spot.trust) + '">' + fcSigned(c.spot.trust, 0, '') + '</b>・自營 <b class="' + fcCls(c.spot.dealer) + '">' + fcSigned(c.spot.dealer, 0, '') + '</b>') +
+  const c = d.cards, fresh = d.fresh || {}, latest = fresh.futures || d.asOf;
+  // 全部序列先算好散戶折大台（小台 4 口、微台 20 口＝大台 1 口）
+  const full = d.series.map((r) => Object.assign({}, r, { rb: Number.isFinite(r.mr) && Number.isFinite(r.tr) ? Math.round(r.mr / 4 + r.tr / 20) : null }));
+  const cut = (() => { const t = new Date(latest + 'T00:00:00Z'); t.setUTCMonth(t.getUTCMonth() - fcState.range); return t.toISOString().slice(0, 10); })();
+  const first = full.findIndex((r) => r.d >= cut);
+  const from = first < 0 ? 0 : first, rows = full.slice(from);
+  const last = full[full.length - 1] || {};
+  const badge = (date) => '<span class="fp-d">' + (date && date < latest ? '⏳ ' : '') + fcMd(date) + '</span>';
+  const card = (title, date, big, cls, sub) => '<div class="fp-card"><div class="fp-ct">' + title + '</div>' + badge(date) + '<div class="fp-v ' + (cls || '') + '">' + big + '</div><div class="fp-s">' + sub + '</div></div>';
+  const lots = (x) => fcSigned(x.value, 0, ''), chg = (x) => '增減 ' + fcSigned(x.chg, 0, ' 口');
+  const idx = (x, digits) => x ? card(x === c.tpex ? '櫃買指數' : '加權指數', x.date, fuNum(x.value, digits), fcCls(x.chg), fcSigned(x.chg, 2, '') + '（' + fcSigned(x.pct, 2, '%') + '）') : '';
+  const mcard = (title, m) => m ? card(title, m.date, fuNum(m.value, 2), fcCls(m.d1), '增減 ' + fcSigned(m.d1, 2, ' 億')) : card(title, null, '—', '', '資料還沒進來');
+  const freshItem = (name, date, when) => '<span class="' + (date && date < latest ? 'wait' : '') + '">' + (date && date < latest ? '⏳' : '✅') + ' ' + name + ' <b>' + fcMd(date) + '</b>・' +
+    (date && date < latest ? (when === 'night' ? '今天 21:40 後更新' : '稍後更新') : (when === 'night' ? '每日 21:40 後更新' : '每日 15:40 更新')) + '</span>';
+  let html = '<div class="fc-paper"><span class="fp-tag">期貨籌碼</span>' +
+    '<div class="fp-h1">外資空單 × 散戶小台・微台 × 加權指數</div>' +
+    '<div class="fp-meta">資料日 <b>' + latest.replace(/-/g, '/') + '（' + fcWdTxt(latest) + '）</b>・頁面更新於 <b>' + (d.updatedAt ? fcMd(d.updatedAt.slice(0, 10)) + ' ' + d.updatedAt.slice(11, 16) : '—') + '</b>' +
+    '・每個交易日 15:40 自動更新（17:40、20:40 補抓） <button type="button" class="mc-reload" data-fc-reload="1" title="重新整理">↻</button></div>' +
+    '<div class="fp-fresh">' + freshItem('期貨籌碼', fresh.futures) + freshItem('加權指數', fresh.taiex) + freshItem('櫃買指數', fresh.tpex) + freshItem('三大法人買賣超', fresh.spot) +
+      freshItem('上市融資', fresh.margin, 'night') + freshItem('上櫃融資', fresh.otcMargin, 'night') + '</div>' +
+    '<div class="fp-hint">X 軸只排交易日（假日扣掉、K 棒連續）。滑鼠移到圖上看當天數字（手機點一下）；上方按鈕切 3 個月／6 個月／1 年，所有圖跟統計一起變。</div>';
+  html += '<div class="fp-cards">' +
+    idx(Object.assign({ date: c.taiex.date || latest }, c.taiex), 2) + idx(c.tpex, 2) +
+    mcard('上市融資餘額（億）', c.margin) + mcard('上櫃融資餘額（億）', c.otcMargin) +
+    card('三大法人買賣超（億）', c.spot.date, fcSigned(c.spot.total, 2, ''), fcCls(c.spot.total), '外資 ' + fcSigned(c.spot.foreign, 2, '') + '・投信 ' + fcSigned(c.spot.trust, 2, '') + '・自營 ' + fcSigned(c.spot.dealer, 2, '')) +
+    card('外資台指淨未平倉', latest, lots(c.txForeign), fcCls(c.txForeign.value), chg(c.txForeign)) +
+    card('外資買權淨未平倉', latest, lots(c.callForeign), fcCls(c.callForeign.value), chg(c.callForeign)) +
+    card('外資賣權淨未平倉', latest, lots(c.putForeign), fcCls(c.putForeign.value), chg(c.putForeign)) +
+    card('散戶小台淨未平倉', latest, lots(c.mtxRetail), fcCls(c.mtxRetail.value), chg(c.mtxRetail)) +
+    card('散戶微台淨未平倉', latest, lots(c.tmfRetail), fcCls(c.tmfRetail.value), chg(c.tmfRetail)) +
+    card('小台散戶多空比', latest, fcSigned(c.mtxRatio.value, 2, '%'), fcCls(c.mtxRatio.value), '前一日 ' + fcSigned(c.mtxRatio.prev, 2, '%')) +
+    card('微台散戶多空比', latest, fcSigned(c.tmfRatio.value, 2, '%'), fcCls(c.tmfRatio.value), '前一日 ' + fcSigned(c.tmfRatio.prev, 2, '%')) +
+    card('全市場 Put/Call（未平倉）', latest, c.pcRatio.value === null ? '—' : fuNum(c.pcRatio.value, 2) + '%', '', c.pcRatio.prev === null ? (d.pcError ? '期交所暫時抓不到' : '') : '前一日 ' + fuNum(c.pcRatio.prev, 2) + '%') +
     '</div>';
-  html += '<div class="fc-bar"><span class="fu-sub">區間</span>' + FC_RANGES.map(([n, label]) => '<button type="button" class="chart-tab' + (fcState.range === n ? ' active' : '') + '" data-fc-range="' + n + '">' + label + '</button>').join('') +
-    '<span class="fc-links">' + [['fcTx', '外資台指'], ['fcMtx', '小台'], ['fcTmf', '微台'], ['fcOpt', '外資選擇權'], ['fcPc', 'P/C'], ['fcSpot', '三大法人現貨']].map(([id, t]) => '<a data-fc-jump="' + id + '">' + t + '</a>').join('') + '<a data-lab-tab="fund">融資 → 資金保護傘</a></span></div>';
-  const rows = d.series.slice(-fcState.range);
-  const last = d.series[d.series.length - 1] || {};
-  const lotTxt = (k) => (r) => [r[k], fcSigned(r[k], 0, ' 口')];
-  const pctTxt = (k) => (r) => [r[k], fcSigned(r[k], 2, '%')];
-  const yiTxt = (k) => (r) => [r[k], fcSigned(r[k], 2, ' 億')];
-  const block = (id, title, desc, now, nowCls, chips, svg, legend) => '<div class="fu-card" id="' + id + '"><div class="fc-head"><div><div class="fc-title">' + title + '</div><div class="fc-desc">' + desc + '</div></div>' +
-    '<div class="fc-now ' + (nowCls || '') + '">' + now + '</div></div>' + (chips ? '<div class="fc-chips">' + chips + '</div>' : '') + svg + '<div class="fc-legend">' + legend + '</div></div>';
-  const chip = (label, v, txt, key) => '<span class="fc-chip' + (key ? ' key' : '') + '">' + label + '<b class="' + fcCls(v) + '">' + txt + '</b></span>';
-  const lgTx = '<span><i class="ln" style="background:var(--text)"></i>加權指數（左軸）</span>';
-  const lgPN = (label) => '<span><i style="background:var(--up)"></i>' + label + ' 正</span><span><i style="background:var(--down)"></i>負（右軸）</span>';
-  html += block('fcTx', '外資台指期 淨未平倉', '大台（TX）外資及陸資 多方未平倉 − 空方未平倉（口）；負數＝淨空單。大台 1 口＝小台 4 口＝微台 20 口',
-    fcSigned(c.txForeign.value, 0, ''), fcCls(c.txForeign.value),
-    chip('當日增減', c.txForeign.chg, fcSigned(c.txForeign.chg, 0, ''), true) + chip('投信淨', c.txTrust.value, fcSigned(c.txTrust.value, 0, '')) + chip('自營淨', c.txDealer.value, fcSigned(c.txDealer.value, 0, '')) + '<span class="fc-chip">' + d.asOf.replace(/-/g, '/') + '（最新）</span>',
-    fcChartSvg('tx', rows, { bars: [{ k: 'f' }], tip: [['外資淨', lotTxt('f')], ['增減', lotTxt('fc')], ['投信淨', lotTxt('it')], ['自營淨', lotTxt('dl')]] }),
-    lgTx + lgPN('外資台指淨未平倉'));
-  html += block('fcMtx', '散戶小台 多空比', '散戶淨未平倉＝−（三大法人小台淨未平倉）；多空比＝散戶淨未平倉 ÷ 全市場小台未平倉。散戶越偏多，通常越要小心（反向看）',
-    pct(c.mtxRatio), fcCls(c.mtxRatio.value),
-    chip('散戶淨', c.mtxRetail.value, fcSigned(c.mtxRetail.value, 0, ' 口')) + chip('增減', c.mtxRetail.chg, fcSigned(c.mtxRetail.chg, 0, ' 口')) + chip('前一日', c.mtxRatio.prev, fcSigned(c.mtxRatio.prev, 2, '%')),
-    fcChartSvg('mtx', rows, { bars: [{ k: 'mq' }], axFmt: (v) => fuNum(v, 0) + '%', tip: [['多空比', pctTxt('mq')], ['散戶淨', lotTxt('mr')]] }),
-    lgTx + lgPN('小台散戶多空比'));
-  html += block('fcTmf', '散戶微台 多空比', '跟小台同一套算法（微台 1 口＝大台 1/20）',
-    pct(c.tmfRatio), fcCls(c.tmfRatio.value),
-    chip('散戶淨', c.tmfRetail.value, fcSigned(c.tmfRetail.value, 0, ' 口')) + chip('增減', c.tmfRetail.chg, fcSigned(c.tmfRetail.chg, 0, ' 口')) + chip('前一日', c.tmfRatio.prev, fcSigned(c.tmfRatio.prev, 2, '%')),
-    fcChartSvg('tmf', rows, { bars: [{ k: 'tq' }], axFmt: (v) => fuNum(v, 0) + '%', tip: [['多空比', pctTxt('tq')], ['散戶淨', lotTxt('tr')]] }),
-    lgTx + lgPN('微台散戶多空比'));
-  html += block('fcOpt', '外資選擇權 淨未平倉', '台指選擇權（TXO）外資 買權／賣權 多方未平倉 − 空方未平倉（口）。買權淨多偏多看、賣權淨多偏避險',
-    '', '', chip('買權淨', c.callForeign.value, fcSigned(c.callForeign.value, 0, '')) + chip('增減', c.callForeign.chg, fcSigned(c.callForeign.chg, 0, '')) +
-      chip('賣權淨', c.putForeign.value, fcSigned(c.putForeign.value, 0, '')) + chip('增減', c.putForeign.chg, fcSigned(c.putForeign.chg, 0, '')),
-    fcChartSvg('opt', rows, { mode: 'group', bars: [{ k: 'call', color: '#ef4444' }, { k: 'put', color: '#22c55e' }], tip: [['買權淨', lotTxt('call')], ['賣權淨', lotTxt('put')]] }),
-    lgTx + '<span><i style="background:#ef4444"></i>外資買權淨未平倉</span><span><i style="background:#22c55e"></i>外資賣權淨未平倉（右軸）</span>');
-  html += block('fcPc', '全市場 Put/Call 未平倉比', '期交所臺指選擇權 賣權未平倉 ÷ 買權未平倉。高於 100% 賣權比較多（通常是下方有支撐）、太低代表大家都在追買權',
-    c.pcRatio.value === null ? '—' : fuNum(c.pcRatio.value, 2) + '%', '', chip('前一日', null, c.pcRatio.prev === null ? '—' : fuNum(c.pcRatio.prev, 2) + '%'),
-    fcChartSvg('pc', rows, { rline: 'pc', ref: 100, axFmt: (v) => fuNum(v, 0) + '%', tip: [['P/C', (r) => [null, r.pc === null ? '—' : fuNum(r.pc, 2) + '%']]] }),
-    lgTx + '<span><i class="ln" style="background:#8b5cf6"></i>P/C 未平倉比（右軸）</span><span><i class="ln" style="background:#f59e0b"></i>100%</span>');
-  html += block('fcSpot', '三大法人 現貨買賣超', '證交所上市「三大法人買賣金額統計」（億）。外資含外資自營商、自營商含避險；長條往上＝買超、往下＝賣超',
-    fcSigned(c.spot.total, 2, ' 億'), fcCls(c.spot.total),
-    chip('外資', c.spot.foreign, fcSigned(c.spot.foreign, 2, '')) + chip('投信', c.spot.trust, fcSigned(c.spot.trust, 2, '')) + chip('自營', c.spot.dealer, fcSigned(c.spot.dealer, 2, '')),
-    fcChartSvg('spot', rows, { mode: 'stack', bars: [{ k: 'sf', color: '#8b5cf6' }, { k: 'st', color: '#f59e0b' }, { k: 'sd', color: '#0ea5b7' }],
-      tip: [['合計', yiTxt('s')], ['外資', yiTxt('sf')], ['投信', yiTxt('st')], ['自營', yiTxt('sd')]] }),
-    lgTx + '<span><i style="background:#8b5cf6"></i>外資</span><span><i style="background:#f59e0b"></i>投信</span><span><i style="background:#0ea5b7"></i>自營商（右軸）</span>');
-  html += '<div class="fu-card"><div class="fc-title">融資餘額</div><div class="fc-desc">上市＋上櫃融資水位、日／週／月增減、崩盤前融資高點對照都在「🛡 資金保護傘」。 <button type="button" class="chart-tab" data-lab-tab="fund">去看資金保護傘 ›</button></div></div>';
-  html += '<div class="mc-foot">怎麼看：外資台指淨空單變多（數字更負）＝外資在期貨加碼看空或避險，常跟現貨賣超一起出現；散戶小台／微台多空比越高＝散戶越偏多，通常是反向指標；' +
-    'P/C 未平倉比偏高＝賣權累積多，下方比較有撐。本頁只是整理公開數據，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + (last.d ? '' : '') + '</div>';
+  html += '<div class="fp-bar"><span class="fp-desc" style="margin:0">區間</span>' + FC_RANGES.map(([n, label]) => '<button type="button" class="' + (fcState.range === n ? 'on' : '') + '" data-fc-range="' + n + '">' + label + '</button>').join('') +
+    '<span class="fp-links">' + [['fcTmf', '微台'], ['fcMtx', '小台'], ['fcSpot', '法人現貨'], ['fcMargin', '融資'], ['fcTx', '外資台指'], ['fcVs', '外資×散戶'], ['fcOpt', '外資選擇權'], ['fcPc', 'P/C'], ['fcRel', '關係統計']]
+      .map(([id, t]) => '<a data-fc-jump="' + id + '">' + t + '</a>').join('') + '</span></div>';
+  const chip = (tag, color, txt) => '<span class="fp-chip"><i style="background:' + color + '">' + tag + '</i><b>' + txt + '</b></span>';
+  const dateChip = (date) => '<span class="fp-chip date"><b>' + (date || '').replace(/-/g, '/') + (date === latest ? '（最新）' : '') + '</b></span>';
+  const box = (id, title, desc, big, bigCls, chips, svg, legend) => '<div class="fp-box" id="' + id + '"><div class="fp-head"><div><div class="fp-title">' + title + '</div><div class="fp-desc">' + desc + '</div></div>' +
+    '<div class="fp-big ' + (bigCls || '') + '">' + big + '</div></div><div class="fp-chips">' + chips + '</div>' + svg + '<div class="fp-legend">' + legend + '</div></div>';
+  const lgLine = (label) => '<span><i class="ln" style="background:#222"></i>' + label + '（左軸）</span>';
+  const lgPN = (label) => '<span><i style="background:' + FP_UP + '"></i>' + label + ' 正</span><span><i style="background:' + FP_DOWN + '"></i>負（右軸）</span>';
+  const lotT = (k) => (r) => [r[k], fcSigned(r[k], 0, ' 口')];
+  const pctT = (k) => (r) => [r[k], fcSigned(r[k], 2, '%')];
+  const yiT = (k) => (r) => [r[k], fcSigned(r[k], 2, ' 億')];
+  const pctAx = (v) => (v > 0 ? '+' : '') + fuNum(v, 0) + '%';
+  html += box('fcTmf', '微台散戶多空比', '微型臺指期貨扣掉三大法人之後的部位（視為散戶）；正 = 散戶偏多、負 = 散戶偏空', fcSigned(c.tmfRatio.value, 2, '%'), fcCls(c.tmfRatio.value),
+    chip('散戶<br>多單', FP_UP, fuNum(c.tmfLong)) + chip('散戶<br>空單', FP_DOWN, fuNum(c.tmfShort)) + chip('散戶<br>淨部位', FP_PURPLE, fcSigned(c.tmfRetail.value, 0, '')) + dateChip(latest),
+    fcChartSvg('tmf', rows, { bars: [{ k: 'tq' }], axFmt: pctAx, tip: [['多空比', pctT('tq')], ['散戶多單', (r) => [null, fuNum(r.tl)]], ['散戶空單', (r) => [null, fuNum(r.ts)]], ['散戶淨', lotT('tr')]] }),
+    lgLine('加權指數') + lgPN('微台散戶多空比'));
+  html += box('fcMtx', '小台散戶多空比', '小型臺指期貨（MTX），看法同上', fcSigned(c.mtxRatio.value, 2, '%'), fcCls(c.mtxRatio.value),
+    chip('散戶<br>多單', FP_UP, fuNum(c.mtxLong)) + chip('散戶<br>空單', FP_DOWN, fuNum(c.mtxShort)) + chip('散戶<br>淨部位', FP_PURPLE, fcSigned(c.mtxRetail.value, 0, '')) + dateChip(latest),
+    fcChartSvg('mtx', rows, { bars: [{ k: 'mq' }], axFmt: pctAx, tip: [['多空比', pctT('mq')], ['散戶多單', (r) => [null, fuNum(r.ml)]], ['散戶空單', (r) => [null, fuNum(r.ms)]], ['散戶淨', lotT('mr')]] }),
+    lgLine('加權指數') + lgPN('小台散戶多空比'));
+  html += box('fcSpot', '三大法人 現貨買賣超', '證交所上市「三大法人買賣金額統計」（億元）。外資含外資自營商、自營商含避險；長條往上 = 買超、往下 = 賣超', fcSigned(c.spot.total, 2, ' 億'), fcCls(c.spot.total),
+    chip('外資', FP_PURPLE, fcSigned(c.spot.foreign, 2, '')) + chip('投信', FP_BROWN, fcSigned(c.spot.trust, 2, '')) + chip('自營', FP_TEAL, fcSigned(c.spot.dealer, 2, '')) + dateChip(c.spot.date),
+    fcChartSvg('spot', rows, { mode: 'stack', bars: [{ k: 'sf', color: FP_PURPLE }, { k: 'st', color: FP_BROWN }, { k: 'sd', color: FP_TEAL }], tip: [['合計', yiT('s')], ['外資', yiT('sf')], ['投信', yiT('st')], ['自營', yiT('sd')]] }),
+    lgLine('加權指數') + '<span><i style="background:' + FP_PURPLE + '"></i>外資（右軸）</span><span><i style="background:' + FP_BROWN + '"></i>投信（右軸）</span><span><i style="background:' + FP_TEAL + '"></i>自營商（右軸）</span>');
+  // 融資：柱子＝餘額（比前一天多紅、少綠），左軸是加權／櫃買
+  const upDown = (k) => (r, i) => { const j = full.indexOf(r), p = j > 0 ? full[j - 1][k] : null; return Number.isFinite(p) && r[k] < p ? FP_DOWN : FP_UP; };
+  const mBox = (id, title, desc, m, k, lineKey, lineLabel) => box(id, title, desc, m ? fuNum(m.value, 2) + ' 億' : '—', '',
+    m ? chip('當日<br>增減', FP_PURPLE, fcSigned(m.d1, 2, '')) + chip('近 5 日<br>增減', FP_UP, fcSigned(m.d5, 2, '')) + chip('近 20 日<br>增減', FP_DOWN, fcSigned(m.d20, 2, '')) + dateChip(m.date) : '',
+    fcChartSvg(id, rows.filter((r) => Number.isFinite(r[k])), { floor: true, lineKey, lineLabel, bars: [{ k, color: upDown(k) }], axFmt: (v) => fuNum(v, 0), tip: [['融資餘額', (r) => [null, fuNum(r[k], 2) + ' 億']]] }),
+    lgLine(lineLabel + '指數') + '<span><i style="background:' + FP_UP + '"></i>' + title.split(' ×')[0] + '（右軸）・比前一天增加</span><span><i style="background:' + FP_DOWN + '"></i>減少</span>');
+  html += '<div id="fcMargin"></div>' + mBox('fcMarginT', '上市融資餘額 × 加權指數', '證交所「信用交易統計」融資金額餘額（億元，右軸）；長條 = 當天融資餘額，紅 = 比前一天增加、綠 = 減少', c.margin, 'm', 't', '加權');
+  html += mBox('fcMarginO', '上櫃融資餘額 × 櫃買指數', '櫃買中心「上櫃股票融資融券餘額」融資金額餘額（億元，右軸）；長條紅 = 比前一天增加、綠 = 減少；線 = 櫃買指數（左軸）', c.otcMargin, 'mo', 'o', '櫃買');
+  html += box('fcTx', '外資台指期 淨未平倉', '大台（TX）外資及陸資 多方未平倉 − 空方未平倉（口）；負數 = 淨空單。大台 1 口 = 小台 4 口 = 微台 20 口', fcSigned(c.txForeign.value, 0, ''), fcCls(c.txForeign.value),
+    chip('當日<br>增減', FP_PURPLE, fcSigned(c.txForeign.chg, 0, '')) + chip('投信<br>淨', FP_UP, fcSigned(c.txTrust.value, 0, '')) + chip('自營<br>淨', FP_DOWN, fcSigned(c.txDealer.value, 0, '')) + dateChip(latest),
+    fcChartSvg('tx', rows, { bars: [{ k: 'f' }], tip: [['外資淨', lotT('f')], ['增減', lotT('fc')], ['投信淨', lotT('it')], ['自營淨', lotT('dl')]] }),
+    lgLine('加權指數') + lgPN('外資台指淨未平倉'));
+  const rbNow = last.rb, vsNow = Number.isFinite(c.txForeign.value) && Number.isFinite(rbNow) ? c.txForeign.value + rbNow : null;
+  html += box('fcVs', '外資 × 散戶 對作', '換算成「大台口數」同一把尺：外資台指淨未平倉 vs 散戶小台加微台淨未平倉', fcSigned(vsNow, 0, ''), fcCls(vsNow),
+    chip('外資<br>大台口', FP_PURPLE, fcSigned(c.txForeign.value, 0, '')) + chip('散戶<br>折大台', FP_UP, fcSigned(rbNow, 0, '')) + dateChip(latest),
+    fcChartSvg('vs', rows, { mode: 'overlay', bars: [{ k: 'f', color: FP_PURPLE }, { k: 'rb', color: FP_BROWN }], tip: [['外資（大台口）', lotT('f')], ['散戶（折大台）', lotT('rb')]] }),
+    lgLine('加權指數') + '<span><i style="background:' + FP_PURPLE + '"></i>外資台指淨（大台口）（右軸）</span><span><i style="background:' + FP_BROWN + '"></i>散戶小台＋微台淨（折大台口）（右軸）</span>');
+  html += box('fcOpt', '外資選擇權 買權／賣權 淨未平倉', '臺指選擇權 外資及陸資 買方 − 賣方未平倉（口）。買權正 = 買 Call 偏多；賣權正 = 買 Put 避險／偏空',
+    'C ' + fcSigned(c.callForeign.value, 0, '') + ' / P ' + fcSigned(c.putForeign.value, 0, ''), '',
+    chip('買權<br>增減', FP_UP, fcSigned(c.callForeign.chg, 0, '')) + chip('賣權<br>增減', FP_DOWN, fcSigned(c.putForeign.chg, 0, '')) + dateChip(latest),
+    fcChartSvg('opt', rows, { mode: 'overlay', bars: [{ k: 'put', color: FP_BROWN }, { k: 'call', color: FP_PURPLE }], tip: [['買權淨', lotT('call')], ['賣權淨', lotT('put')]] }),
+    lgLine('加權指數') + '<span><i style="background:' + FP_PURPLE + '"></i>外資買權淨未平倉（右軸）</span><span><i style="background:' + FP_BROWN + '"></i>外資賣權淨未平倉（右軸）</span>');
+  html += box('fcPc', '全市場 Put/Call Ratio', '臺指選擇權 賣權／買權 未平倉比（虛線 = 100%；高於 100% = 賣權比較多）', c.pcRatio.value === null ? '—' : fuNum(c.pcRatio.value, 2) + '%', '',
+    chip('成交量<br>P/C', FP_PURPLE, c.pcVol === null || c.pcVol === undefined ? '—' : fuNum(c.pcVol, 2) + '%') + dateChip(latest),
+    fcChartSvg('pc', rows, { ref: 100, bars: [{ k: 'pc', color: (r) => (r.pc >= 100 ? FP_UP : FP_PURPLE) }], axFmt: (v) => fuNum(v, 0) + '%', tip: [['P/C（未平倉）', (r) => [null, Number.isFinite(r.pc) ? fuNum(r.pc, 2) + '%' : '—']], ['P/C（成交量）', (r) => [null, Number.isFinite(r.pv) ? fuNum(r.pv, 2) + '%' : '—']]] }),
+    lgLine('加權指數') + '<span><i style="background:' + FP_PURPLE + '"></i>P/C Ratio（未平倉）&lt; 100%</span><span><i style="background:' + FP_UP + '"></i>≥ 100%（右軸）</span>');
+  html += fcRelHtml(full, from);
+  html += '<div class="fp-foot">資料：期交所 三大法人期貨未平倉、期貨每日行情（全市場未平倉只算一般盤、排除價差單）、三大法人選擇權買賣權、Put/Call Ratio；證交所 加權指數、三大法人買賣金額統計、信用交易統計；櫃買中心 櫃買指數、上櫃融資融券餘額。<br>' +
+    '統計是過去的關係，不代表之後一定照走；本頁內容為歷史數據整理與教學用途，非投資建議；股市有風險，進出請自行判斷、自負盈虧。</div></div>';
   return html;
 }
 // ---- 研究室：內部人（2026-10-10 使用者：照老師「內部人研究室」做，上市櫃全部）----
@@ -15249,7 +15389,7 @@ document.getElementById('labBody').addEventListener('click', (e) => {
   if (t.closest('[data-fu-reload]')){ fuLoad(true); return; }
   if (t.closest('[data-fc-reload]')){ fcLoad(true); return; }
   const fcr = t.closest('[data-fc-range]');
-  if (fcr){ fcState.range = Number(fcr.dataset.fcRange); try { localStorage.setItem('fcRange', String(fcState.range)); } catch (_){} renderLab(); return; }
+  if (fcr){ fcState.range = Number(fcr.dataset.fcRange); try { localStorage.setItem('fcRangeM', String(fcState.range)); } catch (_){} renderLab(); return; }
   const fcj = t.closest('[data-fc-jump]');
   if (fcj){ const el = document.getElementById(fcj.dataset.fcJump); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   const fcw = t.closest('[data-fc-chart]');
