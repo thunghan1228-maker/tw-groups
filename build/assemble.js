@@ -345,7 +345,7 @@ function refreshGroups() {
   return groupsInflight;
 }
 
-// 個股問診「今天在漲／跌什麼」（2026-10-12 使用者：照莊爸問診的「今天在漲什麼」，盤中十點後大漲大跌的股票問診有新的資料）：
+// 個股問診「今天在漲／跌什麼」（2026-10-12 使用者：照老師問診的「今天在漲什麼」，盤中十點後大漲大跌的股票問診有新的資料）：
 // Yahoo 股市個股新聞 RSS（各家媒體轉載）＋鉅亨（代號、股名兩種關鍵字：新聞、公司公告；「盤中速報」只是報價不列）＋Google 新聞
 // （近 2 天；Google 常擋 Cloudflare 回 503，抓不到就算了）。都只留標題有股名的（公告除外）。
 // 同一則新聞多家轉載只留一則；每檔 10 分鐘快取（同一個執行環境）。
@@ -710,15 +710,15 @@ export default {
       return await proxyHanstockBars("/api/hub/heilong" + url.search, 60);
     }
     if (url.pathname === "/api/chip-radar") {
-      // 籌碼暴增雷達（2026-10-04 使用者：照莊爸 zhuang.tw/radar 做，放在盤後籌碼排行）：集保週資料，5 分鐘快取
+      // 籌碼暴增雷達（2026-10-04 使用者：照老師 zhuang.tw/radar 做，放在盤後籌碼排行）：集保週資料，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar" + url.search, 300);
     }
     if (url.pathname === "/api/grail-radar") {
-      // 飆股雷達（2026-10-07 使用者：照莊爸 App 的飆股雷達做）：紫殺四個聖杯 15 個邏輯照時間點的名單，30 秒快取
+      // 飆股雷達（2026-10-07 使用者：照老師 App 的飆股雷達做）：紫殺四個聖杯 15 個邏輯照時間點的名單，30 秒快取
       return await proxyHanstockBars("/api/hub/grail-radar" + url.search, 30);
     }
     if (url.pathname === "/api/jail") {
-      // 處置監獄（2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」做）：證交所／櫃買注意、處置公告，2 分鐘快取
+      // 處置監獄（2026-10-09 使用者：照老師「處置股・出獄與嫌疑名單」做）：證交所／櫃買注意、處置公告，2 分鐘快取
       return await proxyHanstockBars("/api/hub/jail" + url.search, 120);
     }
     if (url.pathname === "/api/jail-stock") {
@@ -726,7 +726,7 @@ export default {
       return await proxyHanstockBars("/api/hub/jail/stock" + url.search, 60);
     }
     if (url.pathname === "/api/revenue") {
-      // 營收成長榜（2026-10-09 使用者：照莊爸「每月營收成長榜」做）：觀測站每月營收彙總表＋公布日＋隔日漲跌，2 分鐘快取
+      // 營收成長榜（2026-10-09 使用者：照老師「每月營收成長榜」做）：觀測站每月營收彙總表＋公布日＋隔日漲跌，2 分鐘快取
       return await proxyHanstockBars("/api/hub/revenue" + url.search, 120);
     }
     if (url.pathname === "/api/revenue-stock") {
@@ -734,7 +734,7 @@ export default {
       return await proxyHanstockBars("/api/hub/revenue/stock" + url.search, 60);
     }
     if (url.pathname === "/api/ma-rank") {
-      // 均線分數排行（2026-10-10 使用者：照莊爸 zhuang.tw/ma 做）：個股分數前 60＋族群分數前十大，收盤後才變，5 分鐘快取
+      // 均線分數排行（2026-10-10 使用者：照老師 zhuang.tw/ma 做）：個股分數前 60＋族群分數前十大，收盤後才變，5 分鐘快取
       return await proxyHanstockBars("/api/hub/ma-rank" + url.search, 300);
     }
     if (url.pathname === "/api/ma-strength") {
@@ -750,7 +750,7 @@ export default {
       return await proxyHanstockBars("/api/hub/ma-rank/q" + url.search, 60);
     }
     if (url.pathname === "/api/screener") {
-      // 系統選股・條件選股（2026-10-10 使用者：照莊爸選股系統做，併進個股研究）：收盤後才變，3 分鐘快取（不同條件各自快取）
+      // 系統選股・條件選股（2026-10-10 使用者：照老師選股系統做，併進個股研究）：收盤後才變，3 分鐘快取（不同條件各自快取）
       return await proxyHanstockBars("/api/hub/screener" + url.search, 180);
     }
     if (url.pathname === "/api/screener-stock") {
@@ -758,7 +758,7 @@ export default {
       return await proxyHanstockBars("/api/hub/screener/stock" + url.search, 180);
     }
     if (url.pathname === "/api/river") {
-      // 估值河流圖（2026-10-10 使用者：照莊爸 zhuang.tw/river 做，先做本站版）：查個股位置＋河道歷史，收盤後才變，5 分鐘快取
+      // 估值河流圖（2026-10-10 使用者：照老師 zhuang.tw/river 做，先做本站版）：查個股位置＋河道歷史，收盤後才變，5 分鐘快取
       return await proxyHanstockBars("/api/hub/river" + url.search, 300);
     }
     if (url.pathname === "/api/river-list") {
@@ -770,7 +770,7 @@ export default {
       return await proxyHanstockBars("/api/hub/river/ma10" + url.search, 300);
     }
     if (url.pathname === "/api/etf-radar") {
-      // 主動式ETF持股雷達（2026-10-10 使用者：照莊爸 zhuang.tw/etf 做，併進籌碼日報）：五檔合計、共同持有、資金潮汐；投信晚上公告後才變，5 分鐘快取
+      // 主動式ETF持股雷達（2026-10-10 使用者：照老師 zhuang.tw/etf 做，併進籌碼日報）：五檔合計、共同持有、資金潮汐；投信晚上公告後才變，5 分鐘快取
       return await proxyHanstockBars("/api/hub/etf-radar" + url.search, 300);
     }
     if (url.pathname === "/api/etf-radar-fund") {
@@ -782,7 +782,7 @@ export default {
       return await proxyHanstockBars("/api/hub/etf-radar/stock" + url.search, 300);
     }
     if (url.pathname === "/api/macro-calendar") {
-      // 國際大事行事曆（2026-10-10 使用者：照莊爸 zhuang.tw/calendar 做，放進「研究室」）：後端每小時更新公布值，10 分鐘快取
+      // 國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar 做，放進「研究室」）：後端每小時更新公布值，10 分鐘快取
       return await proxyHanstockBars("/api/hub/macro-calendar", 600);
     }
     if (url.pathname === "/api/fund-umbrella") {
@@ -806,7 +806,7 @@ export default {
       return await proxyHanstockBars("/api/hub/stock-profile" + url.search, 3600);
     }
     if (url.pathname === "/api/chip-weekly") {
-      // 籌碼週報（2026-10-10 使用者：照莊爸雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
+      // 籌碼週報（2026-10-10 使用者：照老師雷達頁的「籌碼週報・可回看 4 週」做）：每週一份摘要，5 分鐘快取
       return await proxyHanstockBars("/api/hub/chip-radar/weekly" + url.search, 300);
     }
     if (url.pathname === "/api/chip-radar-stock") {
@@ -814,7 +814,7 @@ export default {
       return await proxyHanstockBars("/api/hub/chip-radar/stock" + url.search, 60);
     }
     if (url.pathname === "/api/picker") {
-      // 創高黑選股（2026-10-04 使用者：照莊爸 App「創高黑」做）：模組參數帶給後端算，60 秒快取
+      // 創高黑選股（2026-10-04 使用者：照老師 App「創高黑」做）：模組參數帶給後端算，60 秒快取
       return await proxyHanstockBars("/api/hub/picker" + url.search, 60);
     }
     if (url.pathname === "/api/picker-live") {

@@ -59,7 +59,7 @@
   .top6-name{font-weight:800;font-size:16px;white-space:nowrap;}
   .top6-chg{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap;}
 
-  /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成莊爸的 188、193、199、177） */
+  /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   .home-rank4{display:grid;grid-template-columns:repeat(8, minmax(0, 1fr));gap:8px;align-items:start;}
   .hr-stack{display:flex;flex-direction:column;gap:8px;min-width:0;}
   .hr-warn{padding:2px 8px 5px 18px;font-size:12px;line-height:1.6;white-space:normal;}
@@ -701,7 +701,7 @@
   #chipsTabs .signal-tab[data-measure="short"]{background:#15803d;border-color:#15803d;color:#fff;}
   #chipsTabs .signal-tab[data-measure="short"]:hover{background:#166534;border-color:#166534;}
   #chipsTabs .signal-tab[data-measure="short"].active{background:#22c55e;border-color:#fff;color:#fff;box-shadow:0 0 0 2px #22c55e;}
-  /* 籌碼暴增雷達（2026-10-04 使用者：照莊爸 zhuang.tw/radar 做，盤後籌碼排行第一個分頁）：集保週資料的大戶增減；
+  /* 籌碼暴增雷達（2026-10-04 使用者：照老師 zhuang.tw/radar 做，盤後籌碼排行第一個分頁）：集保週資料的大戶增減；
      紅＝大戶增加、綠＝減少；金色方塊＝均線分數（12 分以上實心、8～11 半填、7 以下只描邊）；圓圈＝當週買超榜名次 */
   #chipsTabs .signal-tab[data-measure="radar"]{background:#9f1239;border-color:#9f1239;color:#fff;}
   #chipsTabs .signal-tab[data-measure="radar"]:hover{background:#881337;border-color:#881337;}
@@ -935,7 +935,7 @@
   .sw-etf-kind{font-size:13px;font-weight:700;margin:8px 0 2px;color:var(--muted);}
   .sw-drow.etf{border-left-color:#7c3aed;}
   .sw-drow.rev{border-left-color:#f59e0b;}
-  /* 每日功課（2026-10-10 使用者：照莊爸空觀察／當沖多／多觀察功課做自動版） */
+  /* 每日功課（2026-10-10 使用者：照老師空觀察／當沖多／多觀察功課做自動版） */
   .hw-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 8px;}
   .hw-stamp{font-size:12px;color:var(--muted);margin-left:auto;}
   .hw-flts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
@@ -976,7 +976,7 @@
   .hw-brk{color:var(--down);font-weight:700;}
   .hw-warn{color:#f59e0b;font-weight:700;}
   .hw-ok{color:var(--muted);}
-  /* 研究室：國際大事行事曆（2026-10-10 使用者：照莊爸 zhuang.tw/calendar） */
+  /* 研究室：國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar） */
   .mc-meta{font-size:12px;color:var(--muted);margin:2px 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
   .mc-meta b{color:var(--text);}
   .mc-reload{background:none;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:0 7px;cursor:pointer;font-size:13px;margin-left:4px;}
@@ -1230,7 +1230,7 @@
   }
   .sw-rev-flag{font-size:12px;font-weight:700;margin-left:4px;}
   .sw-verdict.bad{background:#b91c1c;}
-  /* 主動式ETF持股雷達（2026-10-10 使用者：照莊爸 zhuang.tw/etf 做，併進籌碼日報） */
+  /* 主動式ETF持股雷達（2026-10-10 使用者：照老師 zhuang.tw/etf 做，併進籌碼日報） */
   .er-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:8px 0;}
   .er-sub{font-size:14px;}
   .er-sub b{font-size:15px;}
@@ -1349,7 +1349,7 @@
     .er-trow{grid-template-columns:18px 38px minmax(0,1fr) auto 62px 34px;gap:4px;font-size:12px;}
     .er-rrow{grid-template-columns:38px minmax(52px,1fr) minmax(30px,1fr) 84px;gap:4px;}
   }
-  /* 飆股雷達（2026-10-07 使用者：照莊爸 App 的飆股雷達做）：聖杯分組、邏輯卡片、時間點膠囊、名單 */
+  /* 飆股雷達（2026-10-07 使用者：照老師 App 的飆股雷達做）：聖杯分組、邏輯卡片、時間點膠囊、名單 */
   .gr-controls{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:2px 0 8px;font-size:13px;}
   .gr-controls select{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:3px 6px;font-family:inherit;font-size:13px;}
   .gr-controls label{display:inline-flex;align-items:center;gap:4px;color:var(--muted);}
@@ -1429,7 +1429,7 @@
   .gr-chip small{color:var(--muted);margin-right:3px;font-size:11px;}
   .gr-chip:hover{border-color:#eab308;}
   @media(max-width:640px){ .gr-slots{margin-left:0;} .gr-sec-h{font-size:20px;} .gr-cal{display:none;} }
-  /* 處置監獄（2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」做）：說明框、出獄週表、犯罪集團、入獄／嫌疑卡片、門檻、前科查詢 */
+  /* 處置監獄（2026-10-09 使用者：照老師「處置股・出獄與嫌疑名單」做）：說明框、出獄週表、犯罪集團、入獄／嫌疑卡片、門檻、前科查詢 */
   .jl-meta{font-size:12px;color:var(--muted);margin:2px 0 6px;}
   .jl-pill{display:inline-block;font-size:12px;border:1px solid var(--line);background:var(--panel-2);border-radius:999px;padding:3px 10px;margin-bottom:8px;color:var(--muted);}
   .jl-box{background:var(--panel);border:1px solid var(--line);border-left:4px solid #b91c1c;border-radius:6px;padding:8px 12px;margin:6px 0;font-size:13px;line-height:1.7;}
@@ -1501,7 +1501,7 @@
   .jl-att span{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:1px 6px;background:var(--panel-2);}
   .jl-foot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:8px;line-height:1.6;}
   @media(max-width:640px){ .jl-days{grid-template-columns:repeat(2,minmax(0,1fr));} .jl-grid{grid-template-columns:1fr;} .jl-table th:nth-child(4),.jl-table td:nth-child(4){display:none;} }
-  /* 營收成長榜（2026-10-09 使用者：照莊爸「每月營收成長榜 學員版」做一模一樣的）：族群卡片、多觀察、火箭烏龜統計、散點圖、懸賞榜、總表 */
+  /* 營收成長榜（2026-10-09 使用者：照老師「每月營收成長榜 學員版」做一模一樣的）：族群卡片、多觀察、火箭烏龜統計、散點圖、懸賞榜、總表 */
   .rv-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:2px 0 4px;}
   .rv-month{font-size:15px;color:var(--muted);}
   .rv-meta{font-size:12px;color:var(--muted);margin:2px 0 8px;line-height:1.6;}
@@ -1558,7 +1558,7 @@
   .rv-table td.pink{background:rgba(236,72,153,.10);} .rv-table td.mint{background:rgba(22,163,74,.10);}
   .rv-table th.pink{background:#db2777;} .rv-table th.mint{background:#15803d;}
   .rv-table small{display:block;font-size:10px;color:var(--muted);}
-  /* 2026-10-10 使用者：均線分數排行（照莊爸 zhuang.tw/ma） */
+  /* 2026-10-10 使用者：均線分數排行（照老師 zhuang.tw/ma） */
   .ma-stamp{font-size:12px;color:var(--muted);margin:2px 0 8px;}
   .ma-note{font-size:12px;background:rgba(245,179,1,.12);border:1px solid rgba(245,179,1,.45);border-radius:10px;padding:5px 12px;display:inline-block;margin-bottom:8px;}
   .ma-intro{border-left:4px solid #b91c1c;background:var(--panel);padding:8px 12px;font-size:13px;line-height:1.8;margin:6px 0 10px;border-radius:0 8px 8px 0;}
@@ -1610,7 +1610,7 @@
   .ma-legend{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.7;}
   .ma-err{color:#dc2626;padding:10px 0;}
   @media (max-width: 640px){ .ma-q input{width:100%;} .ma-vsum{margin-left:0;width:100%;} .ma-gbar{width:70px;} }
-  /* 2026-10-10 使用者：系統選股・條件選股（照莊爸選股系統），放在個股研究面板上面 */
+  /* 2026-10-10 使用者：系統選股・條件選股（照老師選股系統），放在個股研究面板上面 */
   .scr-toggle{cursor:pointer;}
   .scr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:8px 0;}
   .scr-card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--panel-2);display:flex;flex-direction:column;gap:6px;min-width:0;}
@@ -1652,7 +1652,7 @@
   .scr-fact{border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--panel);}
   .scr-fact small{display:block;font-size:11px;color:var(--muted);} .scr-fact b{font-size:14px;}
   @media (max-width: 900px){ .scr-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
-  /* 2026-10-10 使用者：估值河流圖（本站版，照莊爸 zhuang.tw/river） */
+  /* 2026-10-10 使用者：估值河流圖（本站版，照老師 zhuang.tw/river） */
   .riv-card .riv-hd{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:16px;}
   .riv-zone{border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;color:#fff;margin-left:auto;}
   .ma-table .riv-zone{margin-left:0;}
@@ -1718,7 +1718,7 @@
     .rv-tables .rv-table td:first-child{white-space:normal;min-width:110px;}
     .rv-full th:nth-child(3),.rv-full td:nth-child(3),.rv-full th:nth-child(7),.rv-full td:nth-child(7),.rv-full th:nth-child(9),.rv-full td:nth-child(9){display:none;}
   }
-  /* 創高黑選股（2026-10-04 使用者：照莊爸 App「創高黑」做選股程式，跟創高黑龍分開放）：流程列、帳戶卡、持股／觀察／要做清單、模組設定 */
+  /* 創高黑選股（2026-10-04 使用者：照老師 App「創高黑」做選股程式，跟創高黑龍分開放）：流程列、帳戶卡、持股／觀察／要做清單、模組設定 */
   .pk-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 10px;}
   .pk-step{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer;color:var(--text);font-family:inherit;}
   .pk-step b{font-weight:800;}
@@ -2309,7 +2309,7 @@
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>
-      <button class="alert-toggle guide-btn" id="tutBtn">🎬 影片教學</button>  <!-- 2026-10-13 使用者：訊號教學、工具列各功能的影音教學（女聲旁白＋字幕） -->  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照莊爸新手教學頁） -->
+      <button class="alert-toggle guide-btn" id="tutBtn">🎬 影片教學</button>  <!-- 2026-10-13 使用者：訊號教學、工具列各功能的影音教學（女聲旁白＋字幕） -->  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照老師新手教學頁） -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
   </div>
@@ -2372,7 +2372,7 @@
     <div id="heilongBody"></div>
   </div>
 </div>
-<!-- 2026-10-07 使用者：照莊爸 App 的「飆股雷達」做一個（下方導覽列「飆股雷達」），條件我們自己算；同日使用者：說明開頭講來源和「近似條件」那段拿掉 -->
+<!-- 2026-10-07 使用者：照老師 App 的「飆股雷達」做一個（下方導覽列「飆股雷達」），條件我們自己算；同日使用者：說明開頭講來源和「近似條件」那段拿掉 -->
 <div class="chips-modal" id="grailModal" hidden>
   <div class="chips-inner" id="grailInner">
     <div class="chips-head">
@@ -2385,7 +2385,7 @@
     <div id="grailBody"></div>
   </div>
 </div>
-<!-- 2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」zhuang.tw/prison 做一模一樣的（下方導覽列「處置監獄」），資料用證交所／櫃買公開公告 -->
+<!-- 2026-10-09 使用者：照老師「處置股・出獄與嫌疑名單」zhuang.tw/prison 做一模一樣的（下方導覽列「處置監獄」），資料用證交所／櫃買公開公告 -->
 <div class="chips-modal" id="jailModal" hidden>
   <div class="chips-inner" id="jailInner">
     <div class="chips-head">
@@ -2398,7 +2398,7 @@
     <div id="jailBody"></div>
   </div>
 </div>
-<!-- 2026-10-09 使用者：照莊爸「每月營收成長榜 學員版」做一模一樣的（下方導覽列「營收成長榜」），資料用公開資訊觀測站每月營收彙總表 -->
+<!-- 2026-10-09 使用者：照老師「每月營收成長榜 學員版」做一模一樣的（下方導覽列「營收成長榜」），資料用公開資訊觀測站每月營收彙總表 -->
 <div class="chips-modal" id="revModal" hidden>
   <div class="chips-inner" id="revInner">
     <div class="chips-head">
@@ -2411,7 +2411,7 @@
     <div id="revBody"></div>
   </div>
 </div>
-<!-- 2026-10-10 使用者：照莊爸「均線分數排行 滿分 15」（zhuang.tw/ma）做（下方導覽列「均線分數排行」，手機／iPad 放上排第 6 顆） -->
+<!-- 2026-10-10 使用者：照老師「均線分數排行 滿分 15」（zhuang.tw/ma）做（下方導覽列「均線分數排行」，手機／iPad 放上排第 6 顆） -->
 <div class="chips-modal" id="maModal" hidden>
   <div class="chips-inner" id="maInner">
     <div class="chips-head">
@@ -2424,8 +2424,8 @@
     <div id="maBody"></div>
   </div>
 </div>
-<!-- 2026-10-10 使用者：照莊爸「估值河流圖」（zhuang.tw/river）做本站版（下方導覽列第 13 顆「估值河流圖」） -->
-<!-- 2026-10-10 使用者：照莊爸空觀察／當沖多／多觀察功課做自動版（不用貼清單），下方導覽列第 14 顆「每日功課」 -->
+<!-- 2026-10-10 使用者：照老師「估值河流圖」（zhuang.tw/river）做本站版（下方導覽列第 13 顆「估值河流圖」） -->
+<!-- 2026-10-10 使用者：照老師空觀察／當沖多／多觀察功課做自動版（不用貼清單），下方導覽列第 14 顆「每日功課」 -->
 <div class="chips-modal" id="hwModal" hidden>
   <div class="chips-inner" id="hwInner">
     <div class="chips-head">
@@ -2457,7 +2457,7 @@
     <div id="tutBody"></div>
   </div>
 </div>
-<!-- 2026-10-10 使用者：照莊爸「國際大事行事曆」（zhuang.tw/calendar）做，放進下方導覽列第 15 顆「研究室」 -->
+<!-- 2026-10-10 使用者：照老師「國際大事行事曆」（zhuang.tw/calendar）做，放進下方導覽列第 15 顆「研究室」 -->
 <div class="chips-modal" id="labModal" hidden>
   <div class="chips-inner" id="labInner">
     <div class="chips-head">
@@ -2482,7 +2482,7 @@
     <div id="rivBody"></div>
   </div>
 </div>
-<!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式（下方導覽列「創高黑選股」），跟創高黑龍分開放 -->
+<!-- 2026-10-04 使用者：照老師 App「創高黑」做的選股程式（下方導覽列「創高黑選股」），跟創高黑龍分開放 -->
 <div class="chips-modal" id="pickerModal" hidden>
   <div class="chips-inner" id="pickerInner">
     <div class="chips-head">
@@ -2513,7 +2513,7 @@
     <div class="chips-head">
       <div>
         <div class="chips-title">系統選股・個股研究</div>
-        <div class="chips-sub">上面「系統選股」勾條件挑名單（照莊爸選股系統）；下面「個股研究」打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。點名單任一列就帶到下面。收盤後更新，非即時報價。</div>
+        <div class="chips-sub">上面「系統選股」勾條件挑名單（照老師選股系統）；下面「個股研究」打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。點名單任一列就帶到下面。收盤後更新，非即時報價。</div>
       </div>
       <button class="cm-icon-btn" id="diagClose" aria-label="關閉">✕</button>
     </div>
@@ -2610,16 +2610,16 @@
   <button class="tb-btn" data-label="每日功課"><span class="tb-icon">課</span>每日功課</button>  <!-- 2026-10-10 使用者：第 14 顆「每日功課」（空觀察／當沖多／多觀察自動版），放上排 → 上下各 7 顆 -->
   <button class="tb-btn" data-label="籌碼日報"><span class="tb-icon">日</span>籌碼日報</button>  <!-- 2026-10-10 使用者：下午報改名「籌碼日報」 -->
   <button class="tb-btn" data-label="健診"><span class="tb-icon">診</span>每日持股健診</button>  <!-- 2026-09-28 使用者：鈕的名字改成「每日持股健診」 -->
-  <button class="tb-btn" data-label="K棒組合選股"><span class="tb-icon">K</span>盤中K棒組合選股</button>  <!-- 2026-10-07 使用者：照莊爸 App 的飆股雷達做；10/13 改名「K棒組合選股」；10/13 再改「盤中K棒組合選股」、移到第 4 顆（每日持股健診右邊） -->
+  <button class="tb-btn" data-label="K棒組合選股"><span class="tb-icon">K</span>盤中K棒組合選股</button>  <!-- 2026-10-07 使用者：照老師 App 的飆股雷達做；10/13 改名「K棒組合選股」；10/13 再改「盤中K棒組合選股」、移到第 4 顆（每日持股健診右邊） -->
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
   <button class="tb-btn" data-label="自選股"><span class="tb-icon">★</span>自選股</button>
   <!-- 2026-09-26 使用者：下方導覽列的「三角收斂」「隔日沖大單籌碼」不用再留著（本來就是開發中的空位）；2026-09-28 再拿掉「個股研究中心」；
        2026-10-05 再拿掉「每週籌碼分析」（開發中的空位）。「個股訊號追蹤」拿掉後使用者又要加回來，要放自選股的今日訊號與提醒。 -->
-  <button class="tb-btn" data-label="處置監獄"><span class="tb-icon">獄</span>處置監獄</button>  <!-- 2026-10-09 使用者：照莊爸處置監獄頁做 -->
-  <button class="tb-btn" data-label="營收成長榜"><span class="tb-icon">營</span>營收成長榜</button>  <!-- 2026-10-09 使用者：照莊爸每月營收成長榜做 -->
+  <button class="tb-btn" data-label="處置監獄"><span class="tb-icon">獄</span>處置監獄</button>  <!-- 2026-10-09 使用者：照老師處置監獄頁做 -->
+  <button class="tb-btn" data-label="營收成長榜"><span class="tb-icon">營</span>營收成長榜</button>  <!-- 2026-10-09 使用者：照老師每月營收成長榜做 -->
   <button class="tb-btn" data-label="均線分數排行"><span class="tb-icon">均</span>均線分數排行</button>  <!-- 2026-10-10 使用者：加第 12 顆，放上排，上下各 6 顆 -->
   <button class="tb-btn" data-label="創高黑龍"><span class="tb-icon">龍</span><span>創高黑龍<span class="tb-sub">（自動）</span></span></button>  <!-- 2026-10-04 使用者：黑龍回測從下午報分離成獨立面板；2026-10-05 名字後面加（自動），跟創高黑選股（手動）分開 -->
-  <button class="tb-btn" data-label="創高黑選股"><span class="tb-icon">選</span><span>創高黑選股<span class="tb-sub">（手動）</span></span></button>  <!-- 2026-10-04 使用者：照莊爸 App「創高黑」做的選股程式；2026-10-05 名字後面加（手動） -->
+  <button class="tb-btn" data-label="創高黑選股"><span class="tb-icon">選</span><span>創高黑選股<span class="tb-sub">（手動）</span></span></button>  <!-- 2026-10-04 使用者：照老師 App「創高黑」做的選股程式；2026-10-05 名字後面加（手動） -->
   <button class="tb-btn" data-label="問診"><span class="tb-icon">研</span>選股・個股研究</button>  <!-- 2026-09-28 使用者：鈕的名字改成「個股研究」；2026-10-10 併進系統選股，改「選股・個股研究」 -->
   <button class="tb-btn" data-label="個股盤中訊號追蹤"><span class="tb-icon">追</span>個股訊號追蹤</button>
   <button class="tb-btn" data-label="估值河流圖"><span class="tb-icon">河</span>估值河流圖</button>  <!-- 2026-10-10 使用者：第 13 顆「估值河流圖」（本站版） -->
@@ -2659,12 +2659,12 @@
         <li><b>主力翻多／主力翻空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
         <li><b>盤中形態觀察股</b>：67 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
         <li><b>發動</b>、<b>醞釀</b>（2026-10-12 拆成兩個分頁，發動在左、醞釀在右，今天／昨天／前天切換兩頁共用；日期列後面的「盤中大戶力≥10%」只看盤中大戶力 ≥ +10% 的，昨天／前天照那天收盤時的大戶力，兩頁各自記）：老師的選股法，1＝醞釀（整理形態）、2＝發動（突破）。今天發動過的股票也會列進今日即時多（時間＝第一次發動）：現在還站在箱頂上寫「🚀 發動」、發動過又跌回箱頂下寫「↩ 曾發動」（2026-10-13 分開標）；開盤前跟其他分頁一樣沿用最近交易日到 08:45，用那天收盤分。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看，發動分兩段：<b>發動</b>＝那天收盤還站在箱頂上、<b>曾發動</b>＝盤中發動過但收盤跌回箱頂下（箱頂旁邊標那天收盤）；今天盤中曾發動、現在回落的股票也會列在「曾發動」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
-        <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。賽馬多(33) 只看 199 那 23 個族群裡排名前 20 的族群，每族取漲幅前 1/3（不進位，2026-10-15 照莊爸）。<b>排序</b>：每列最前面「出現」＝這檔第一次進那個名單的時間（這台電腦開著頁面時記的，每個名單各記各的），新出現的在上面、早的往下（只有「續抱勿追高」反過來：早出現的在上面、新出現的往下排）；「名次」欄還是照盤中大戶力排名（👑＝大戶力最強）。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
+        <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。賽馬多(33) 只看 199 那 23 個族群裡排名前 20 的族群，每族取漲幅前 1/3（不進位，2026-10-15 照老師）。<b>排序</b>：每列最前面「出現」＝這檔第一次進那個名單的時間（這台電腦開著頁面時記的，每個名單各記各的），新出現的在上面、早的往下（只有「續抱勿追高」反過來：早出現的在上面、新出現的往下排）；「名次」欄還是照盤中大戶力排名（👑＝大戶力最強）。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
         <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：09:00 開盤～13:30 收盤（2026-10-05 起，以前 11:00 後才算；第一根 5 分K 也算），5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。每列後面標 123 黑龍：收黑就是這一波第幾次進場（①②③）、區1（紅，可積極加碼）或區2（黃，等突破再加碼）；問診日線圖、K線圖日線也會在進場的那根K棒上畫同樣的圓圈。</li>
-        <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股（2026-10-15 照莊爸改）。只看 199 的 23 族＋188 的 13 族，每族最弱 3 檔、今天跌 2% 以上；而且要嘛是昨天漲 3% 以上、今天殺下來（🔪 刀，還要不比櫃買強），要嘛是前天漲 3% 以上、現價已跌破前天收盤（⚔️ 劍）。正式名單（強空積極）最多 15 檔，跌幅深的在前，大戶力最負的在上；多方打少（族群排名前 20 名裡逆勢走弱）和收割區域（已跌 5% 以上，不追空，不分族群強弱）只列名字。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
-        <li><b>空族群必殺(193)</b>：找「名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票（第二版，照莊爸 10/15 的名單推的）。只看莊爸固定列的 23 個族群（資訊、鋼鐵、被動元件、光學鏡頭、航運、D電腦、面板、光電、二極體、矽光子、小電腦、散熱、低軌衛星、小電組、化學二、IP、矽晶圓、記憶體、玻璃基板、PA、台塑四寶、PCB、探針卡）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名，有掉就列。空方線以下＝第 36 名以後（跟莊爸一樣，空方線畫在第 35 名後面）；空方線以上＝排名前半但名次往下掉的。⚠️＝族裡正在刀劍空(32) 名單上的股票，點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
+        <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股（2026-10-15 照老師改）。只看 199 的 23 族＋188 的 13 族，每族最弱 3 檔、今天跌 2% 以上；而且要嘛是昨天漲 3% 以上、今天殺下來（🔪 刀，還要不比櫃買強），要嘛是前天漲 3% 以上、現價已跌破前天收盤（⚔️ 劍）。正式名單（強空積極）最多 15 檔，跌幅深的在前，大戶力最負的在上；多方打少（族群排名前 20 名裡逆勢走弱）和收割區域（已跌 5% 以上，不追空，不分族群強弱）只列名字。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
+        <li><b>空族群必殺(193)</b>：找「名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票（第二版，照老師 10/15 的名單推的）。只看老師固定列的 23 個族群（資訊、鋼鐵、被動元件、光學鏡頭、航運、D電腦、面板、光電、二極體、矽光子、小電腦、散熱、低軌衛星、小電組、化學二、IP、矽晶圓、記憶體、玻璃基板、PA、台塑四寶、PCB、探針卡）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名，有掉就列。空方線以下＝第 36 名以後（跟老師一樣，空方線畫在第 35 名後面）；空方線以上＝排名前半但名次往下掉的。⚠️＝族裡正在刀劍空(32) 名單上的股票，點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選強多／四項精選強空／1+2多／創高黑龍／主力翻多／主力翻空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日或開盤前 08:45 今天還沒有訊號時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
       </ul>
     </div>
@@ -4517,7 +4517,7 @@ const SIGNAL_KINDS = [
   { key: 'combo12Bull', label: '1+2多' },
   { key: 'blackDragon', label: '創高黑龍' },
   { key: 'bladeShort', label: '刀劍空(32)' },
-  { key: 'kill193', label: '空族群必殺(193)' },   // 2026-10-15 使用者：照莊爸 193 做（第二版：只看他 199 的固定 23 族）
+  { key: 'kill193', label: '空族群必殺(193)' },   // 2026-10-15 使用者：照老師 193 做（第二版：只看他 199 的固定 23 族）
   { key: 'history', label: '歷史查詢' },
 ];
 // 5分鐘K策略訊號家族(MA交叉/520/A8空等)只在K線圖上用符號呈現，不進盤中
@@ -5508,7 +5508,7 @@ function replaceSignalHtml(el, key, html){
 //   鎖死、族群排名前 1/3、成交量 ≥ FIRE_MIN_VOLUME 張、最多 FIRE_MAX_ROWS 檔；漲停／接近漲停的另列一行。
 // 32 刀劍空：馬火多的鏡像。今天下跌、不比櫃買強、族內後 1/3；🔪（刀）＝現價低於昨收、⚔️（劍）＝現價低於前天收盤（數字＝低幾 %），
 //   都沒有就 〰️。門檻跟馬火多對稱（2026-09-23 使用者：名單太長）：今天跌 BLADE_MIN_PCT%～BLADE_MAX_PCT%、不含跌停
-//   鎖死、族內後 1/3、成交量 ≥ BLADE_MIN_VOLUME 張；🔪 就算（2026-10-15 起不再要求 ⚔️，照莊爸）。
+//   鎖死、族內後 1/3、成交量 ≥ BLADE_MIN_VOLUME 張；🔪 就算（2026-10-15 起不再要求 ⚔️，照老師）。
 //   正式名單＝強空積極（族群排名 20 名以後，方向一致；2026-10-15 前是後半），最多 BLADE_MAX_ROWS 檔、跌幅深的在前；多方打少（族群排名前半，
 //   強族群裡逆勢走弱，空得保守）和收割區域（已經跌 BLADE_HARVEST_PCT% 以上，不追空）只用一行列名字。
 // 族群昨天／前天的平均漲跌幅來自後端日K（/api/group-daily-changes），其餘都是首頁已經有的即時資料。
@@ -5531,8 +5531,8 @@ const BLADE_MIN_PCT = 2;      // 刀劍空：今天至少跌這麼多才算弱
 const BLADE_MAX_PCT = 9.5;    // 刀劍空：跌到這裡以上（或跌停鎖死）放不到空，只在收割區那行列
 const BLADE_MIN_VOLUME = 500; // 刀劍空：成交量（張）低於這個太冷門
 const BLADE_MAX_ROWS = 15;
-const BLADE_PRIOR_RISE = 3;      // 刀劍空：昨天（🔪）或前天（⚔️）要漲這麼多以上，今天殺下來才算（2026-10-15 照莊爸）
-const BLADE_GROUP_WEAKEST = 3;   // 刀劍空：每個族群只看最弱的 3 檔（2026-10-15 照莊爸）    // 刀劍空：正式名單最多列這麼多檔
+const BLADE_PRIOR_RISE = 3;      // 刀劍空：昨天（🔪）或前天（⚔️）要漲這麼多以上，今天殺下來才算（2026-10-15 照老師）
+const BLADE_GROUP_WEAKEST = 3;   // 刀劍空：每個族群只看最弱的 3 檔（2026-10-15 照老師）    // 刀劍空：正式名單最多列這麼多檔
 const FIRE_MIN_PCT = 2;       // 馬火多：今天至少漲這麼多才算有力道
 const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停鎖死）買不到，另列
 const FIRE_MIN_VOLUME = 500;  // 馬火多：成交量（張）低於這個太冷門
@@ -5606,9 +5606,9 @@ function race333Model(){
   const aboveOtc = (r) => otcPct === null || r.pct >= otcPct;
   const horseLimit = Math.max(1, Math.round(total * 20 / 67));  // 原本 67 個族群取前 20（約三成）；2026-10-15 補齊 67 族後就是前 20
   const riverLimit = half;                                       // 前 1/2
-  // 33 賽馬多（2026-10-15 使用者：照莊爸 10:51 的 33 對出來）：只看 199 那 23 族（KILL193_GROUPS）裡族群排名前 horseLimit 的族群，
+  // 33 賽馬多（2026-10-15 使用者：照老師 10:51 的 33 對出來）：只看 199 那 23 族（KILL193_GROUPS）裡族群排名前 horseLimit 的族群，
   // 每族取漲幅前 1/3（不進位：光學鏡頭 13 檔取 4、資訊 21 檔取 7、鋼鐵 16 檔取 5，他那份 16 檔全對），現價 ≥ 櫃買%；
-  // 不再看「昨天漲跌最多的前 1/3 族群」（那條會把資訊擋掉、放進口罩、電腦周邊、遊戲數位，莊爸都沒有）。
+  // 不再看「昨天漲跌最多的前 1/3 族群」（那條會把資訊擋掉、放進口罩、電腦周邊、遊戲數位，老師都沒有）。
   const horses = [];
   const horseSeen = new Set();
   ranked.forEach((g, gi) => {
@@ -5637,13 +5637,13 @@ function race333Model(){
   // 32 刀劍空：今天跌 BLADE_MIN_PCT% 以上（且 ≤ 櫃買%）、族內後 1/3、成交量夠（🔪 就算，不要求 ⚔️）；
   // 跌停鎖死或跌到 BLADE_MAX_PCT% 以上放不到空，跟已跌 BLADE_HARVEST_PCT% 以上的一起放收割區那一行。
   const belowOtc = (r) => otcPct === null || r.pct <= otcPct;
-  // 2026-10-15 使用者貼莊爸 09:07、09:15 兩份：每個族群最多列 3 檔（被動元件＝禾伸堂／天二／國巨、小電組＝台玻／台燿／金像電、
+  // 2026-10-15 使用者貼老師 09:07、09:15 兩份：每個族群最多列 3 檔（被動元件＝禾伸堂／天二／國巨、小電組＝台玻／台燿／金像電、
   // 台塑四寶＝台塑／台化／南亞），是「族內最弱 3 檔」不是族內後 1/3（我們的族群大，記憶體 19 檔後 1/3 就有 7 檔）；
-  // 收割區也只列族群排名後半的（莊爸的收割區全是弱族群，強族群裡跌深的不列）
-  // 2026-10-15 第三版（對莊爸 11:01 那份 20 檔：模擬出 17 檔全對、一檔都沒多，少的 3 檔是族裡第 4 弱的）：
-  // ① 只看莊爸固定的族群（199 的 23 族＋188 的 13 族），每族最弱 3 檔；
+  // 收割區也只列族群排名後半的（老師的收割區全是弱族群，強族群裡跌深的不列）
+  // 2026-10-15 第三版（對老師 11:01 那份 20 檔：模擬出 17 檔全對、一檔都沒多，少的 3 檔是族裡第 4 弱的）：
+  // ① 只看老師固定的族群（199 的 23 族＋188 的 13 族），每族最弱 3 檔；
   // ② 🔪 刀＝昨天漲 BLADE_PRIOR_RISE% 以上、今天殺下來，還要 ≤ 櫃買%；⚔️ 劍＝前天漲 BLADE_PRIOR_RISE% 以上、現價已跌破前天收盤（不看櫃買，例如長榮）；
-  //    我們之前多列的南亞科、欣興、旺矽、穩懋…昨天都只漲 3% 以內、前天多半在跌，莊爸都沒列；
+  //    我們之前多列的南亞科、欣興、旺矽、穩懋…昨天都只漲 3% 以內、前天多半在跌，老師都沒列；
   // ③ 收割區不分族群強弱（他 11:01 收割區有族群第 13 名的華新）；多方打少＝族群排名前 horseLimit（20）名。
   const bladeCand = new Map();
   ranked.forEach((g, gi) => {
@@ -5661,8 +5661,8 @@ function race333Model(){
     && (!hasDaily || ((bladeKnife(r) || bladeSword(r)) && (bladeSword(r) || belowOtc(r))))
     && (r.volume === null || r.volume >= BLADE_MIN_VOLUME)).sort((a, b) => a.pct - b.pct || a.groupRank - b.groupRank);
   const bladeHarvest = bladeBase.filter((r) => r.pct <= -BLADE_HARVEST_PCT || r.pct <= -BLADE_MAX_PCT || r.limitDown);
-  // 2026-10-15 使用者貼莊爸 09:07 的刀劍空：強空積極 13 檔裡 7 檔只有🔪（低於昨收、還在前天收盤上，例如昨天大漲的新纖），
-  // 跟我們算的🔪／⚔️幾乎一樣——莊爸不要求⚔️，只有🔪的也列（每列照舊標🔪／⚔️）
+  // 2026-10-15 使用者貼老師 09:07 的刀劍空：強空積極 13 檔裡 7 檔只有🔪（低於昨收、還在前天收盤上，例如昨天大漲的新纖），
+  // 跟我們算的🔪／⚔️幾乎一樣——老師不要求⚔️，只有🔪的也列（每列照舊標🔪／⚔️）
   const bladeLive = bladeBase.filter((r) => !bladeHarvest.includes(r) && r.belowYesterday);
   const bladeUpper = bladeLive.filter((r) => r.groupRank <= horseLimit);                       // 多方打少：只列名字
   const bladeLower = bladeLive.filter((r) => r.groupRank > horseLimit).slice(0, BLADE_MAX_ROWS);  // 強空積極：正式名單
@@ -5997,18 +5997,18 @@ function race333Html(){
 }
 // 2026-09-30 使用者：「刀劍空(32)」拿出來另外做一個獨立的盤中訊號分頁，不要再放在盤中333裡面混在一起；
 // 選股邏輯完全不變，還是共用 race333Model() 算出來的 bladeUpper/bladeLower/bladeHarvest，只是單獨一個分頁呈現。
-// ---- 空族群必殺(193)（2026-10-15 使用者：照莊爸的 193，從他 09:03、09:20、09:29 三份名單推出來的第一版）----
+// ---- 空族群必殺(193)（2026-10-15 使用者：照老師的 193，從他 09:03、09:20、09:29 三份名單推出來的第一版）----
 // 「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強）、M＝比昨天收盤的名次掉了幾名（三份名單裡 N−M 整天不變、剛好是昨天名次）。
 // 空方線以下＝排名後半、名次比昨天掉的族群；空方線以上＝前半但名次往下掉的族群。
-// 第二版（10/15 09:42 起的 199／193 對照）：莊爸的 199、193 只列固定 23 個族群（09:20、09:31、09:42、09:43 每份都一樣，
+// 第二版（10/15 09:42 起的 199／193 對照）：老師的 199、193 只列固定 23 個族群（09:20、09:31、09:42、09:43 每份都一樣，
 // 其他族群就算掉很多名也不列），前半段也不要求族裡有刀劍空股票（09:42 的面板、被動元件都沒有 ⚠️ 照樣列）。
-// ⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少）。莊爸族群旁的 🔪、⚔️0.7 這些記號意思還推不出來，先不做。
-// 莊爸 67 族裡掉 1～4 名的族群多半沒列（09:42 小電腦🔽3 沒列，09:54 帶 ⚔️ 又列了）。10/15 上午我們還只有 55 族時，他多的 12 族
+// ⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少）。老師族群旁的 🔪、⚔️0.7 這些記號意思還推不出來，先不做。
+// 老師 67 族裡掉 1～4 名的族群多半沒列（09:42 小電腦🔽3 沒列，09:54 帶 ⚔️ 又列了）。10/15 上午我們還只有 55 族時，他多的 12 族
 // 今天在前段、昨天在後段，我們的名次掉得比他少：用他 09:20、09:43、09:54 三份 193 對，門檻 0～2 名三份都沒有多列、
 // 只漏散熱和小電腦（我們算這兩族名次是往上），3 名以上會漏玻璃基板，所以名次有掉（1 名以上）就列。
 const KILL193_MIN_DROP = 1;
 const KILL193_GROUPS = new Set(['資訊', '鋼鐵', '被動元件', '光學鏡頭', '航運', 'D電腦', '面板', '光電', '二極體', '矽光子', '小電腦', '散熱',
-  '低軌衛星', '小電組', '化學二', 'IP', '矽晶圓', '記憶體', '玻璃基板', 'PA', '台塑四寶', 'PCB', '探針卡']);   // 莊爸 199 的固定 23 族
+  '低軌衛星', '小電組', '化學二', 'IP', '矽晶圓', '記憶體', '玻璃基板', 'PA', '台塑四寶', 'PCB', '探針卡']);   // 老師 199 的固定 23 族
 function kill193Model(){
   const m = race333Model();
   if (!m) return null;
@@ -6016,7 +6016,7 @@ function kill193Model(){
   const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
   const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
   const blade = new Map([...m.bladeLower, ...m.bladeHarvest, ...m.bladeUpper].map((r) => [r.code, r]));
-  const half = zbHalf(groups.length);   // 空方線跟莊爸一樣畫在第 35 名後面（67 族）
+  const half = zbHalf(groups.length);   // 空方線跟老師一樣畫在第 35 名後面（67 族）
   const rows = ranked.map((g, i) => {
     const d = daily[g.name] || {};
     const prev = Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
@@ -6046,10 +6046,10 @@ function kill193Html(){
     (r.members.length ? '<div class="k193-s">⚠️' + r.members.map((s) => '<span class="k193-stk" data-k193-code="' + s.code + '" data-k193-name="' + s.name + '">' + s.code + s.name +
       ' <span class="down">' + fmt(s.pct) + '%</span></span>').join(' / ') + '</div>' : '');
   return '<div class="race-block"><div class="race-head">空族群必殺(193) ' + stamp + ' <button type="button" class="chart-tab chips-btn" data-k193-copy="1">📋 複製</button></div>' +
-    '<div class="race-sub">第二版（照莊爸 10/15 的 193、199 名單推的）：只看莊爸固定列的 ' + KILL193_GROUPS.size + ' 個族群（' + Array.from(KILL193_GROUPS).join('、') + '）。' +
+    '<div class="race-sub">第二版（照老師 10/15 的 193、199 名單推的）：只看老師固定列的 ' + KILL193_GROUPS.size + ' 個族群（' + Array.from(KILL193_GROUPS).join('、') + '）。' +
       '族群名次＝今天平均漲跌幅在全部 ' + k.total + ' 個族群裡的排名（1 最強）；🔽＝比昨天收盤的名次掉了幾名，掉 ' + KILL193_MIN_DROP + ' 名以上才列。' +
-      '空方線以下＝第 ' + (k.half + 1) + ' 名以後（跟莊爸一樣畫在第 ' + k.half + ' 名後面）；空方線以上＝前 ' + k.half + ' 名但名次往下掉的。' +
-      '⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少），點股票開K線圖。莊爸族群旁的 🔪、⚔️ 記號還在對，先不顯示。</div>' +
+      '空方線以下＝第 ' + (k.half + 1) + ' 名以後（跟老師一樣畫在第 ' + k.half + ' 名後面）；空方線以上＝前 ' + k.half + ' 名但名次往下掉的。' +
+      '⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少），點股票開K線圖。老師族群旁的 🔪、⚔️ 記號還在對，先不顯示。</div>' +
     (!k.hasDaily ? '<div class="race-note">還沒拿到族群昨天的名次，等一下就會出來。</div>'
       : k.upper.map(grp).join('') + '<div class="race-sep">------↓(空方)↓------</div>' +
         (k.lower.length ? k.lower.map(grp).join('') : '<div class="race-note">排名後半的族群目前名次都沒有比昨天掉</div>')) + '</div>';
@@ -6062,12 +6062,12 @@ function kill193Copy(){
 }
 // ---- 首頁族群排名八欄（2026-10-15 使用者）：188 多族群排名、183 多族群排名（加 ⚠️ 個股）、193 空族群必殺、199 空族群排名、
 // 177 排名比較、30加33加34、賽馬多(33)、河流多(34) ----
-// 都照莊爸的格式「族群-(名次)🔺／🔽名次變化」：名次＝今天平均漲跌幅在全部族群裡的排名（1 最強），變化＝跟昨天收盤的名次比。
-// 2026-10-15 照莊爸補齊 12 族，跟他一樣 67 族；🐎、🔪、⚔️ 這些族群記號還在對，先不顯示。
+// 都照老師的格式「族群-(名次)🔺／🔽名次變化」：名次＝今天平均漲跌幅在全部族群裡的排名（1 最強），變化＝跟昨天收盤的名次比。
+// 2026-10-15 照老師補齊 12 族，跟他一樣 67 族；🐎、🔪、⚔️ 這些族群記號還在對，先不顯示。
 const HOME183_WARN_PCT = 5;   // 183 的 ⚠️：多方線以上的族群裡今天漲 5% 以上的股票（2026-10-15 使用者確認）
-// 莊爸 67 族的多空分界：177／188／193／199 的空方線都畫在第 35 名後面（第 36 名起算空方，2026-10-15 對他 10:50～10:52 四份）
+// 老師 67 族的多空分界：177／188／193／199 的空方線都畫在第 35 名後面（第 36 名起算空方，2026-10-15 對他 10:50～10:52 四份）
 function zbHalf(total){ return Math.round(total * 35 / 67); }
-const RANK188_GROUPS = new Set(['光學鏡頭', '軍工', '被動元件', '面板', '二極體', '小電組', '石英', '記憶體', '玻璃基板', '矽晶圓', '聯電股', 'PCB', '台塑四寶']);   // 莊爸 10/15 09:56 那份 188 的 13 族
+const RANK188_GROUPS = new Set(['光學鏡頭', '軍工', '被動元件', '面板', '二極體', '小電組', '石英', '記憶體', '玻璃基板', '矽晶圓', '聯電股', 'PCB', '台塑四寶']);   // 老師 10/15 09:56 那份 188 的 13 族
 function homeRankRows(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
   const groups = lastData.groups.filter((g) => g.name !== '股期標的');
@@ -6092,7 +6092,7 @@ function homeStockRowHtml(r){
     '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span></div>';
 }
 function homeStockColHtml(title, list){
-  const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照莊爸：族排前面的在上面
+  const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
   return '<div class="hr-col"><div class="hr-title">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
     (rows.length ? rows.map(homeStockRowHtml).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
@@ -6116,7 +6116,7 @@ function homeRank4Html(){
   const k = kill193Model();
   const k193 = k ? k.upper.concat(k.lower) : [];
   const m = race333Model();
-  // 183＝188 同一批 13 族，多方線以上的族群底下列 ⚠️ 個股。莊爸 10/15 10:04 只有軍工 ⚠️2429銘旺科（+7%），
+  // 183＝188 同一批 13 族，多方線以上的族群底下列 ⚠️ 個股。老師 10/15 10:04 只有軍工 ⚠️2429銘旺科（+7%），
   // 10:33 加上光學鏡頭 ⚠️6209今國光（10:02 才 +3.9% 沒列、10:32 +7% 就列），大毅 +4.7%、台表科 +4.7% 都沒列；
   // 他 10:36 的馬火多(30) 沒有銘旺科、卻有大毅和台表科，所以不是 30 的名單，是「族裡漲 5% 以上」（刀劍空收割區跌 5% 的鏡像）。
   const groupByName = new Map(lastData.groups.map((g) => [g.name, g]));
@@ -6145,9 +6145,9 @@ function homeRank4Html(){
       h.rows.length > 20 ? 10 : h.half, h.rows.length > 20 ? '…… 第 11～' + (h.rows.length - 10) + ' 名 ……' : '------↓(空方)↓------', '沒有資料') +
     homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
     '</div>' +
-    '<div class="hr-foot">照莊爸的 188／193／199／177：括號＝今天族群名次（平均漲跌幅，共 ' + h.total + ' 個族群，1 最強）；🔺／🔽＝跟昨天收盤的名次比，升／掉幾名；最右邊是族群平均漲跌幅。' +
-      '188、183 只看莊爸固定列的 ' + RANK188_GROUPS.size + ' 族（183 在多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票），193、199 只看他固定列的 ' + KILL193_GROUPS.size + ' 族（193 只列名次有掉的，族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票），177 只列漲幅前 10 大和跌幅前 10 大的族群。' +
-      '族群跟莊爸一樣 67 族（10/15 補齊）。點族群看成分股。' +
+    '<div class="hr-foot">照老師的 188／193／199／177：括號＝今天族群名次（平均漲跌幅，共 ' + h.total + ' 個族群，1 最強）；🔺／🔽＝跟昨天收盤的名次比，升／掉幾名；最右邊是族群平均漲跌幅。' +
+      '188、183 只看老師固定列的 ' + RANK188_GROUPS.size + ' 族（183 在多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票），193、199 只看他固定列的 ' + KILL193_GROUPS.size + ' 族（193 只列名次有掉的，族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票），177 只列漲幅前 10 大和跌幅前 10 大的族群。' +
+      '族群跟老師一樣 67 族（10/15 補齊）。點族群看成分股。' +
       '續抱勿追高（賽馬多漲超過 7%）、30加33加34（馬火多、賽馬多、河流多三份都有的）、賽馬多(33)、河流多(34) 跟訊號中心「盤中333」同一份：每列＝族群名次、代號、名稱、今天漲跌幅，族排前面的在上面，點股票開K線圖。</div>';
 }
 function bladeShortHtml(){
@@ -7069,7 +7069,7 @@ function brewLaunchHtml(part){
 // 後端 /api/chips-daily：每個交易日收盤後的主力大單淨額（永豐逐筆）＋三大法人買賣超（上市＝證交所 T86，
 // 上櫃＝櫃買中心開放資料經排程主機鏡像），連續買超／賣超天數，收盤與漲跌幅。這裡只做排序、篩選、切日期。
 const CHIPS_MEASURES = [
-  { key: 'radar', label: '籌碼週報' },   // 2026-10-04 使用者：照莊爸 zhuang.tw/radar 做（集保週資料），放第一個；2026-10-10 改名「籌碼週報」
+  { key: 'radar', label: '籌碼週報' },   // 2026-10-04 使用者：照老師 zhuang.tw/radar 做（集保週資料），放第一個；2026-10-10 改名「籌碼週報」
   { key: 'mf', label: '主力大單' }, { key: 'foreign', label: '外資' }, { key: 'trust', label: '投信' },
   { key: 'dealer', label: '自營商' }, { key: 'total', label: '三大法人' }, { key: 'brewx', label: '法人連買∩醞釀發動' },
   { key: 'mfx', label: '主力大單∩醞釀發動' }, { key: 'short', label: '放空籌碼' },
@@ -7513,11 +7513,11 @@ document.getElementById('chipsBody').addEventListener('click', (e) => {
   }
 });
 
-// ---- 籌碼暴增雷達（2026-10-04 使用者：照莊爸 zhuang.tw/radar「籌碼暴增雷達」做，放在盤後籌碼排行第一個分頁）----
+// ---- 籌碼暴增雷達（2026-10-04 使用者：照老師 zhuang.tw/radar「籌碼暴增雷達」做，放在盤後籌碼排行第一個分頁）----
 // 後端 /api/chip-radar：集保股權分散表（每週五結算）算「大戶手上的股票變多還是變少」。
-// x＝（這週 400 張以上大戶持股股數 − 上週）÷ 這週總股數 ×100；籌碼%＝3√x（大戶增加）或 x（減少）——跟莊爸截圖逐一比對過。
+// x＝（這週 400 張以上大戶持股股數 − 上週）÷ 這週總股數 ×100；籌碼%＝3√x（大戶增加）或 x（減少）——跟老師截圖逐一比對過。
 // 個股查詢 /api/chip-radar-stock（九週軌跡、同族群、三大法人）；迷你 K 線用 /api/bars1d。
-const RD_WINDOWS = [0, 6, 4];      // 0＝全部（06/18 起，跟莊爸的「全部／近 6 週／近 4 週」一樣）
+const RD_WINDOWS = [0, 6, 4];      // 0＝全部（06/18 起，跟老師的「全部／近 6 週／近 4 週」一樣）
 const RD_TOPS = [10, 15, 20, 30];
 let radarState = { view: 'radar', rwWeek: '', outOpen: {}, listWeek: '', window: 0, top: 15, group: '', code: '', query: '', expanded: {}, kOpen: {}, scrollTo: '' };
 let radarData = null, radarLoading = false, radarFailedAt = 0, radarLoadedAt = 0, radarError = '';
@@ -7527,7 +7527,7 @@ function rdEsc(s){ return String(s === null || s === undefined ? '' : s).replace
 const rdHas = (v) => v !== null && v !== undefined && Number.isFinite(Number(v));
 const rdCls = (v) => (rdHas(v) ? (v > 0 ? 'rd-up' : (v < 0 ? 'rd-down' : '')) : 'rd-muted');
 function rdPct(v, digits){
-  // 跟莊爸一樣去掉尾巴的 0：+0.6%、+4%、0%
+  // 跟老師一樣去掉尾巴的 0：+0.6%、+4%、0%
   if (!rdHas(v)) return '—';
   let t = Number(v).toFixed(digits === undefined ? 2 : digits);
   if (t.indexOf('.') >= 0) t = t.replace(/0+$/, '').replace(/\.$/, '');
@@ -7535,7 +7535,7 @@ function rdPct(v, digits){
   return (Number(t) > 0 ? '+' : '') + t + '%';
 }
 const rdMd = (d) => (d ? String(d).slice(5, 10).replace('-', '/') : '');
-// 那週總股數變動（增資、減資、轉換公司債）：增資照算（跟莊爸一樣）；總股數減少 ≥5% 而且籌碼% 絕對值 ≥15（減資、股份轉換）後端不列入排行
+// 那週總股數變動（增資、減資、轉換公司債）：增資照算（跟老師一樣）；總股數減少 ≥5% 而且籌碼% 絕對值 ≥15（減資、股份轉換）後端不列入排行
 function rdCapTag(v, excluded){
   if (!rdHas(v)) return '';
   return '<span class="rd-cap" title="那週總股數' + (v > 0 ? '增加' : '減少') + ' ' + Math.abs(v) + '%（增資、減資或轉換公司債），籌碼% 有一部分是股本變動造成的' + (excluded ? '；減資／股份轉換，不列入排行' : '') + '"><span class="rd-cap-long">股本' + (v > 0 ? '+' : '') + v + '%' + (excluded ? '・不列入' : '') + '</span><span class="rd-cap-short">股</span></span>';
@@ -7714,7 +7714,7 @@ function rdInstHtml(inst){
 function rdStockCardHtml(s){
   const market = s.market === 'OTC' ? '上櫃' : (s.market === 'TSE' ? '上市' : '');
   return '<div class="rd-card" id="rdStockCard"><div class="rd-card-head"><span class="rd-name" data-rd-chart="' + s.code + '">' + rdEsc(s.name) + '</span><span class="rd-code">' + s.code + '</span>' +
-    (s.rank ? '<span class="rd-badge">本週榜 <span class="rd-circle">' + s.rank + '</span></span>' : '') + rdMa(s.score) + rdCapTag(s.capital, !!s.excluded) + (s.outside ? '<span class="rd-badge rd-out-badge" title="不在莊爸追蹤的範圍（族群表＋他列過的族群外股票），籌碼% 照算、不進排行">範圍外</span>' : '') +
+    (s.rank ? '<span class="rd-badge">本週榜 <span class="rd-circle">' + s.rank + '</span></span>' : '') + rdMa(s.score) + rdCapTag(s.capital, !!s.excluded) + (s.outside ? '<span class="rd-badge rd-out-badge" title="不在老師追蹤的範圍（族群表＋他列過的族群外股票），籌碼% 照算、不進排行">範圍外</span>' : '') +
     '<span class="rd-big ' + rdCls(s.chip) + '">' + rdPct(s.chip) + '</span></div>' +
     rdKlineBox(s.code, true) + rdTrailHtml(s.trail) +
     '<div class="rd-sec-title" style="font-size:16px;margin-top:12px">三大法人 <small>' + (market ? market + '・' : '') + '張</small></div>' + rdInstHtml(s.inst) + '</div>';
@@ -7748,7 +7748,7 @@ function rdSearchHtml(){
     '<div class="rd-hint">輸入股號帶出「九週籌碼軌跡＋三大法人＋當週族群排名」；名單上的股票點一下也會帶到這裡，點股名或 K 線開大圖。</div>' +
     (result ? '<div style="margin-top:10px">' + result + '</div>' : '') + '</div>';
 }
-// 榜單一位小數用後端給的 chip1（還沒取兩位的值直接取一位，跟莊爸一樣：眾達 6.148 → 6.1，不是 6.15 → 6.2）
+// 榜單一位小數用後端給的 chip1（還沒取兩位的值直接取一位，跟老師一樣：眾達 6.148 → 6.1，不是 6.15 → 6.2）
 function rdListRows(rows, side){
   if (!rows.length) return '<div class="rd-empty-list">這週沒有' + (side === 'buy' ? '籌碼% ≥ 4' : '籌碼% ≤ −1.5') + ' 的股票。</div>';
   const max = Math.max(0.01, ...rows.map((r) => Math.abs(r.chip)));
@@ -7860,7 +7860,7 @@ function rdHotHtml(d){
   }).join('');
   return '<section><div class="rd-sec-title">熱門股籌碼分析<small>本週買超榜前十名＋五大族群第一名</small></div><div class="rd-chips"><span>五大族群第一名</span>' + leaders + '</div><div class="rd-hot">' + cards + '</div></section>';
 }
-// ---- 籌碼週報（2026-10-10 使用者：照莊爸雷達頁上面那顆「籌碼週報・可回看 4 週」做）----
+// ---- 籌碼週報（2026-10-10 使用者：照老師雷達頁上面那顆「籌碼週報・可回看 4 週」做）----
 // 後端 /api/chip-weekly?week=：每週一份——本週摘要、上週榜對帳、族群排名、整族一起動、單獨上榜、賣超；可回看 4 週。
 const rwCache = {}, rwLoading = {}, rwFailedAt = {}, rwError = {};
 async function ensureWeekly(week){
@@ -8003,7 +8003,7 @@ function rwHtml(){
 function rdOutsideHtml(rows, side){
   if (!rows || !rows.length) return '';
   const open = !!radarState.outOpen[side];
-  return '<div class="rd-outside"><button class="rd-outside-btn" data-rd-outside="' + side + '">' + (open ? '▾' : '▸') + ' 另有 ' + rows.length + ' 檔不在莊爸的追蹤範圍（不進排行）</button>' +
+  return '<div class="rd-outside"><button class="rd-outside-btn" data-rd-outside="' + side + '">' + (open ? '▾' : '▸') + ' 另有 ' + rows.length + ' 檔不在老師的追蹤範圍（不進排行）</button>' +
     (open ? '<div class="rd-outside-list">' + rows.map((r) => '<span data-rd-code="' + r.code + '">' + r.code + ' ' + rdEsc(r.name) + ' <b class="' + rdCls(r.chip1) + '">' + rdPct(r.chip1, 1) + '</b></span>').join('') + '</div>' : '') + '</div>';
 }
 function radarHtml(){
@@ -8012,14 +8012,14 @@ function radarHtml(){
   const d = radarData;
   const wbtn = '<button class="rd-weekly-btn" data-rw-view="weekly">📰 籌碼週報<small>' + (d && d.latest ? rdMdShort(d.latest) + ' 結算・' : '') + '可回看 4 週</small></button>';
   const head = '<div><span class="rd-tag">盤後籌碼・互動版</span><div class="rd-headrow"><div class="rd-title">籌碼暴增雷達</div>' + wbtn + '</div>' +
-    '<div class="rd-sub">集保週資料 ' + (d && d.week ? String(d.week).replace(/-/g, '/') : '—') + '（每週五結算）・均線分數 ' + (d && d.scoreDate ? rdMd(d.scoreDate) + ' 收盤' : '—') + (d && d.universe ? '・莊爸的範圍 ' + d.universe + ' 檔' + (d.market ? '（全市場 ' + d.market + ' 檔）' : '') : '') + '</div>' +
+    '<div class="rd-sub">集保週資料 ' + (d && d.week ? String(d.week).replace(/-/g, '/') : '—') + '（每週五結算）・均線分數 ' + (d && d.scoreDate ? rdMd(d.scoreDate) + ' 收盤' : '—') + (d && d.universe ? '・老師的範圍 ' + d.universe + ' 檔' + (d.market ? '（全市場 ' + d.market + ' 檔）' : '') : '') + '</div>' +
     '<div class="rd-pill">ⓘ 每週更新一次——集保在每週五結算、週六公布，整個下一週看到的都是同一份；個股的三大法人是每個交易日收盤後更新。</div></div>';
   const intro = '<div class="rd-intro"><p>這頁看的是「大戶手上的股票變多還是變少」：集保 400 張以上的大戶，這週持股比上週多了（或少了）總股數的幾 %。</p>' +
     '<p>籌碼暴增代表主力在收貨、把股票買進口袋——也就是主力進場，若再搭配型態，有機會續強；反過來變少，就是主力在鬆手。<b class="rd-up">紅色是增加</b>、<b class="rd-down">綠色是減少</b>。</p>' +
     '<p>連續兩週上榜、而且同族群其他股票也一起增加，是最值得盯的組合。⭐＝連續兩週上榜——主力不是買一週就走，是連著兩週都在收。</p>' +
-    '<p>籌碼%：x＝（這週 400 張以上大戶持股 − 上週）÷ 這週總股數 ×100；大戶增加顯示 3×√x（小幅增加也看得出來）、減少照原樣（跟莊爸的算法一樣）。每列最後的方塊＝均線分數（滿分 15，每個交易日收盤後更新）：12 分以上實心金＝位置最強、8～11 半填、7 以下只描邊。</p>' +
-    '<p>範圍跟莊爸一樣：只算他追蹤的股票——族群表＋他名單上出現過的族群外股票（用他 9/18～10/08 四週的籌碼週報對過，買超、賣超一檔不差）。不在範圍內、但籌碼% 過門檻的，列在每張榜下面的「另有 N 檔不在範圍」，點開看得到。</p>' +
-    '<p>那週有增資、減資的（總股數變動）名單上標<span class="rd-cap">股本±x%</span>，增資、減資都照算（跟莊爸一樣，例如佳大 9/24 私募、奇偶 9/18 減資）。上一週集保沒有這檔（減資、停止過戶那週集保不出資料）就改跟更早一週比，名單上標<span class="rd-cap">比 9/24</span>。累積榜的「全部」跟莊爸一樣從 06/18 那週算起。</p></div>';
+    '<p>籌碼%：x＝（這週 400 張以上大戶持股 − 上週）÷ 這週總股數 ×100；大戶增加顯示 3×√x（小幅增加也看得出來）、減少照原樣（跟老師的算法一樣）。每列最後的方塊＝均線分數（滿分 15，每個交易日收盤後更新）：12 分以上實心金＝位置最強、8～11 半填、7 以下只描邊。</p>' +
+    '<p>範圍跟老師一樣：只算他追蹤的股票——族群表＋他名單上出現過的族群外股票（用他 9/18～10/08 四週的籌碼週報對過，買超、賣超一檔不差）。不在範圍內、但籌碼% 過門檻的，列在每張榜下面的「另有 N 檔不在範圍」，點開看得到。</p>' +
+    '<p>那週有增資、減資的（總股數變動）名單上標<span class="rd-cap">股本±x%</span>，增資、減資都照算（跟老師一樣，例如佳大 9/24 私募、奇偶 9/18 減資）。上一週集保沒有這檔（減資、停止過戶那週集保不出資料）就改跟更早一週比，名單上標<span class="rd-cap">比 9/24</span>。累積榜的「全部」跟老師一樣從 06/18 那週算起。</p></div>';
   if (!d){
     return '<div class="rd-wrap">' + head + '<div class="signal-empty"><div class="se-title">' + (radarError ? '讀取失敗' : '讀取中…') + '</div><div class="se-sub">' + rdEsc(radarError || '正在抓集保週資料。') + '</div></div></div>';
   }
@@ -8170,7 +8170,7 @@ function swingDatePillsHtml(data){
 function swingBasisHtml(data){
   const b = data.basis || {};
   const inst = b.hasInst ? '法人資料已齊（5 日＝' + (b.instDates || []).slice().reverse().map(swMmdd).join('～') + '）' : '法人資料還沒進來，籌碼相關的判斷等資料齊了會自動更新';
-  // 2026-10-13 使用者（照莊爸「10/14(三) 盤前讀・資料基準 10/13 收盤」）
+  // 2026-10-13 使用者（照老師「10/14(三) 盤前讀・資料基準 10/13 收盤」）
   const read = data.readDate ? '<div class="sw-readhead">' + swMmdd(data.readDate) + '（' + hlWd(data.readDate) + '）盤前讀・資料基準 ' + swMmdd(data.date) + '（' + hlWd(data.date) + '）收盤</div>' : '';
   return read + '<div class="sw-basis">資料基準 ' + swMmdd(data.date) + ' 收盤・隔天盤前讀・' + inst + '・主力 5 日＝' + ((b.mfDates || []).length ? (b.mfDates || []).slice().reverse().map(swMmdd).join('～') : '沒有資料') +
     '・個股 ' + (b.stocks || 0) + ' 檔（日K滿 240 天可算均線分數的 ' + (b.withScore || 0) + ' 檔）・' + swingFundBasisText(b) + '・整理時間 ' + String(data.generatedAt || '').slice(11, 16) + '</div>';
@@ -8196,7 +8196,7 @@ function swingCardHtml(x, opts){
     '<div class="sw-def">防守 <b>月線 ' + num2(x.defense.ma20) + '</b> / <b>三日低 ' + num2(x.defense.threeDayLow) + '</b></div>' +
     risks + '</div>';
 }
-// 籌碼雷達那一週的籌碼%（2026-10-12 使用者：照莊爸卡片「籌碼 +5.6%（集保10/8週, 連4週, 榜第9）」）
+// 籌碼雷達那一週的籌碼%（2026-10-12 使用者：照老師卡片「籌碼 +5.6%（集保10/8週, 連4週, 榜第9）」）
 function swingRadarLineHtml(x){
   const r = x.radar;
   if (!r) return '';
@@ -8205,7 +8205,7 @@ function swingRadarLineHtml(x){
 }
 function swingGroupCardHtml(g){
   const cold = g.aboveRatio < 0.5 && g.inst5 <= 0;
-  // 2026-10-13 使用者（照莊爸產業觀察）：精選族群＝資金主軸 3 個＋低檔醞釀 2 個，排在前面；週籌碼＝籌碼雷達熱門族（族裡籌碼% 最高 5 檔平均）
+  // 2026-10-13 使用者（照老師產業觀察）：精選族群＝資金主軸 3 個＋低檔醞釀 2 個，排在前面；週籌碼＝籌碼雷達熱門族（族裡籌碼% 最高 5 檔平均）
   const brew = g.featured && g.aboveRatio < 0.5;
   const feat = g.featured ? '<span class="sw-feat' + (brew ? ' brew' : '') + '">' + (brew ? '低檔醞釀' : '資金主軸') + '</span>' : '';
   const chip = swHas(g.chipWeek) ? '<div class="sw-gline">週籌碼 <b class="' + dirClass(g.chipWeek) + '">' + swPct(g.chipWeek, 1) + '</b><span class="muted">（籌碼雷達熱門族）</span></div>' : '';
@@ -8253,7 +8253,7 @@ function swingLastWeekHtml(data){
     '<div class="sw-cards">' + picks.map(swingLastWeekCardHtml).join('') + '</div>' +
     '<div class="sw-quote">榜單不是拿來追的，是拿來驗證：守住月線的才算籌碼有效</div>';
 }
-// ---- 主動式ETF持股雷達（2026-10-10 使用者：照莊爸 zhuang.tw/etf 做，併進籌碼日報，原「主動式基金」分頁改名）----
+// ---- 主動式ETF持股雷達（2026-10-10 使用者：照老師 zhuang.tw/etf 做，併進籌碼日報，原「主動式基金」分頁改名）----
 // 後端 /api/etf-radar（五檔合計、共同持有、資金潮汐）、/api/etf-radar-fund（單檔四區塊）、/api/etf-radar-stock（個股 × 全部 ETF）。
 const ER_FUNDS = [['00981A', '主動統一台股增長'], ['00403A', '主動統一升級50'], ['00991A', '主動復華未來50'], ['00982A', '主動群益台灣強棒'], ['00992A', '主動群益科技創新']];
 const erState = { asof: null, fund: '00981A', ov: {}, fd: {}, busy: {}, err: {}, q: '', track: null, trackBusy: false, trackErr: '' };
@@ -8594,7 +8594,7 @@ document.getElementById('swingBody').addEventListener('input', (e) => {
 document.getElementById('swingBody').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target && e.target.id === 'erQ') erTrackQuery(e.target.value);
 });
-// 營收面精選（2026-10-10 使用者：照莊爸波段精選日報的「營收面精選」做）：當月已公布、年增 ≥30%，依年增挑，均線分數 ≥6、成交值 ≥5,000 萬
+// 營收面精選（2026-10-10 使用者：照老師波段精選日報的「營收面精選」做）：當月已公布、年增 ≥30%，依年增挑，均線分數 ≥6、成交值 ≥5,000 萬
 function swingRevenueHtml(data, rules){
   const r = data.revenue;
   if (r === undefined) return '<div class="race-note">這一份是營收面接入前整理的，沒有營收資料</div>';
@@ -8608,7 +8608,7 @@ function swingRevenueHtml(data, rules){
       (swHas(x.prevYoy) ? '・上月年增 ' + swPct(x.prevYoy, 1) : '') + '・營收 ' + (swHas(x.revYi) ? x.revYi + ' 億' : '—') +
       '・均線 <b>' + x.score + '</b>・收 ' + x.close + '・成交值 ' + x.turnoverYi + ' 億' + (x.announce ? '・' + (x.known ? swMmdd(x.announce) + ' 公布' : swMmdd(x.announce) + ' 前已公布') : '') + '</span></span></div>';
   };
-  // 莊爸的營收面卡片：年增、月增、累計，下面跟籌碼面一樣的均線、法人、籌碼、本益比、防守價
+  // 老師的營收面卡片：年增、月增、累計，下面跟籌碼面一樣的均線、法人、籌碼、本益比、防守價
   const revCard = (x) => {
     const flag = (x.accel ? '<span class="sw-rev-flag up">🚀 加速</span>' : (x.decel ? '<span class="sw-rev-flag down">🐢 放緩</span>' : '')) + (x.warn ? '<span class="sw-rev-flag down">⚠️</span>' : '');
     const extra = '<div class="sw-line"><b class="up">' + mon + ' 月營收年增 ' + swPct(x.yoy, 1) + '</b>' + flag + '<span class="muted">・月增 ' + swPct(x.mom, 1) + '・累計年增 ' + swPct(x.cumYoy, 1) +
@@ -8620,7 +8620,7 @@ function swingRevenueHtml(data, rules){
       '<div class="sw-name">' + (x.name || '') + chipsFlagPillsHtml(x.code) + '</div><div class="sw-group">' + (x.group || x.market || '—') + '</div>' + extra +
       '<div class="sw-line">均線 <b>' + x.score + '</b>・收 ' + x.close + '</div></div>';
   };
-  // 2026-10-13 使用者（照莊爸「9 月營收・10/13 公布 1 檔，年增 ≥30% 0 檔」）：先看上一個交易日之後新公布的那批
+  // 2026-10-13 使用者（照老師「9 月營收・10/13 公布 1 檔，年增 ≥30% 0 檔」）：先看上一個交易日之後新公布的那批
   const fresh = swHas(r.newPublished) ? '<div class="bl-section bl-launch">' + mon + ' 月營收・' + (r.since ? swMmdd(r.since) + ' 之後到 ' : '') + swMmdd(r.asOf) + ' 公布 ' + r.newPublished + ' 檔，年增 ≥' + r.rule.yoy + '% ' + r.newYoyHigh + ' 檔' +
       (r.newQualified ? '；均線分數、成交值也夠的 ' + r.newQualified + ' 檔' : '') + '</div>' +
     ((r.newPicks || []).length ? '<div class="sw-cards">' + r.newPicks.map(revCard).join('') + '</div>'
@@ -8632,7 +8632,7 @@ function swingRevenueHtml(data, rules){
       : '<div class="race-note">目前沒有同時符合三個條件的股票（每月 1～10 號陸續公布，越接近 10 號越多）</div>')) +
     '<div class="sw-quote">營收是體質，均線是位置：營收爆發又站得穩的，才是波段的料</div>';
 }
-// 籌碼面的觀察名單（2026-10-13 使用者，照莊爸「嘉晶 出獄第 2 天，籌碼 +3.0%」）：出獄 5 個交易日內、籌碼% ≥2%
+// 籌碼面的觀察名單（2026-10-13 使用者，照老師「嘉晶 出獄第 2 天，籌碼 +3.0%」）：出獄 5 個交易日內、籌碼% ≥2%
 function swingChipsWatchHtml(data){
   const list = data.chipsWatch;
   if (!list) return '';
@@ -8818,7 +8818,7 @@ function hlRowHead(r){
     '<td>' + hlN(r.hits20, 0) + '</td><td>' + hlN(r.val5, 1) + '</td><td>' + hlPrice(r.entry) + '</td><td>' + hlPrice(r.lowK) + '</td><td>' + hlN(r.target, 2) + '</td>';
 }
 const hlHead = () => '<th class="l">代號</th><th class="l">股名</th><th class="l">族群</th><th class="hl-use">均線分數</th><th>族群平均</th><th>週籌碼%</th><th>當天漲跌</th><th>20日>8%</th><th>5日均值(億)</th><th>進場(收盤)</th><th>黑K低</th><th>停利價</th>';
-// ⏱ 今日暫定名單（12:00）（2026-10-10 使用者：照莊爸創高黑龍・績效分析做）：今天 12:00 用證交所即時報價組今天的K棒，
+// ⏱ 今日暫定名單（12:00）（2026-10-10 使用者：照老師創高黑龍・績效分析做）：今天 12:00 用證交所即時報價組今天的K棒，
 // 套跟上面同一組參數；只給名單與條件、不算停利價；收盤後整表重算，就以 ④ 今日名單為準（後端那時就不再給）。
 function hlNoonHtml(data){
   const n = data.noon;
@@ -8883,7 +8883,7 @@ function swingSectionHtml(data){
   const sec = swingState.section, picks = data.picks || {}, counts = data.counts || {}, rules = data.rules || {};
   if (sec === 'summary'){
     const t = data.tiles || {};
-    // 2026-10-13 使用者：前三個照莊爸（今日真穿月線、明日入獄／出獄、問診判強勢），其他的放第二排小一點
+    // 2026-10-13 使用者：前三個照老師（今日真穿月線、明日入獄／出獄、問診判強勢），其他的放第二排小一點
     const tile = (v, label, cls) => '<div class="sw-tile' + (cls ? ' ' + cls : '') + '"><b>' + v + '</b><span>' + label + '</span></div>';
     return '<div class="sw-tiles">' +
       tile(t.crossedQualified || 0, '今日真穿月線(檔)') +
@@ -10968,7 +10968,7 @@ function dgSearchHtml(){
   return '<div class="dg-search"><input class="dg-in" id="dgInput" placeholder="股號或股名，例 2330" value="' + (dgState.code || '') + '"><button class="chart-tab chips-btn active" id="dgRun">🩺 問診</button>' +
     (dgState.recent.length ? '<span class="dg-recent">最近：' + dgState.recent.map((x) => '<span class="ck-tag dg-link" data-code="' + x.code + '"><b>' + x.code + '</b>' + (x.name || '') + '</span>').join('') + '</span>' : '') + '</div>';
 }
-// ---- 個股研究補強（2026-10-10 使用者：照莊爸「個股快查」補上產業白話介紹、同業、季報）----
+// ---- 個股研究補強（2026-10-10 使用者：照老師「個股快查」補上產業白話介紹、同業、季報）----
 // 後端 /api/stock-profile：族群／官方產業別白話介紹、同族群與同產業公司、近 8 季季報、近四季 EPS 與本益比。
 const pfState = {};
 async function pfLoad(code){
@@ -11017,7 +11017,7 @@ function pfQuarterHtml(code){
     '<div class="in-tbl"><table><thead><tr><th>季別</th><th>營收（億）</th><th>營收年增</th><th>毛利率</th><th>營益率</th><th>淨利率</th><th>EPS</th><th>EPS 年增</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
     '<div class="pf-note">毛利率＝賣東西本身賺幾成；營益率＝再扣掉管銷研發；淨利率＝最後真正賺到的（含業外）。年增是跟去年同一季比；去年同季 EPS 太小時不算百分比。金融股沒有毛利率、營益率。</div></div>';
 }
-// ---- 今天在漲／跌什麼（2026-10-12 使用者：照莊爸問診的「今天在漲什麼」，盤中十點後大漲大跌，問診會有新的資料）----
+// ---- 今天在漲／跌什麼（2026-10-12 使用者：照老師問診的「今天在漲什麼」，盤中十點後大漲大跌，問診會有新的資料）----
 // 交易日 10:00 後（收盤後也留著）在問診最上面整理：盤中走勢（開高低、早盤殺低再拉漲停…）、同族群有沒有一起動、
 // 當天新聞標題（Yahoo 股市個股新聞、鉅亨、公司公告，Google 新聞抓得到也算，/api/move-news）、要留意的地方（均線、營收、法人、本益比、近 5 日漲幅）、
 // 後面看什麼（今天的三日低、月線）跟一句話。原因是照這些資料自動整理的，不是 AI 摘要。
@@ -11201,7 +11201,7 @@ function renderDiag(){
   html += dgCrossHtml(data);
   body.innerHTML = html + ckRulesHtml(data);
 }
-// ---- 系統選股・條件選股（2026-10-10 使用者：照莊爸「選股系統」做，跟個股問診合併在同一個面板）----
+// ---- 系統選股・條件選股（2026-10-10 使用者：照老師「選股系統」做，跟個股問診合併在同一個面板）----
 // 勾條件、拉門檻 → 「開始篩選」列出同時符合的股票；點名單任一列，下面的個股研究就帶出那一檔。條件與後端 /api/screener 一一對應。
 const SCR_CARDS = [
   { key: 'score', title: '均線分數 ≥', desc: '滿分 15：站上 6 條均線＋創 6 個天期新高＋多頭排列加分', min: 0, max: 15, step: 1, def: 10, unit: '' },
@@ -11209,7 +11209,7 @@ const SCR_CARDS = [
   { key: 'etf', title: '主動式 ETF 持有 ≥', desc: '五檔主動式 ETF 最新持股中，有幾檔同時持有它', min: 1, max: 5, step: 1, def: 1, unit: ' 家' },
   { key: 'inst3', title: '法人 3 日累積買超・估量 ≥', desc: '近 3 個交易日三大法人合計是買超，且累積買超張數 ÷ 3 日成交量', min: 0, max: 40, step: 1, def: 5, unit: '%' },
   { key: 'inst5', title: '法人 5 日累積買超・估量 ≥', desc: '近一週（5 個交易日）三大法人合計是買超，且累積買超張數 ÷ 5 日成交量', min: 0, max: 40, step: 1, def: 10, unit: '%' },
-  { key: 'sword', title: '⚔ 雙劍出擊・兩張榜各取前', desc: '均線常客 ∩ 籌碼常客 —— 兩張榜都排得進去才算。均線常客：近 20 個交易日每天取均線分數前 10 名，誰上榜次數多；籌碼常客：近 9 週每週取籌碼暴增榜前 10 名，誰進榜次數多。一張看技術位置一直待在前段、一張看大戶一直在收 —— 兩把劍同時指向同一檔，才叫雙劍出擊。', min: 10, max: 60, step: 5, def: 20, unit: ' 名' },   // 2026-10-10 使用者：預設改前 20 名（原本照莊爸 60）
+  { key: 'sword', title: '⚔ 雙劍出擊・兩張榜各取前', desc: '均線常客 ∩ 籌碼常客 —— 兩張榜都排得進去才算。均線常客：近 20 個交易日每天取均線分數前 10 名，誰上榜次數多；籌碼常客：近 9 週每週取籌碼暴增榜前 10 名，誰進榜次數多。一張看技術位置一直待在前段、一張看大戶一直在收 —— 兩把劍同時指向同一檔，才叫雙劍出擊。', min: 10, max: 60, step: 5, def: 20, unit: ' 名' },   // 2026-10-10 使用者：預設改前 20 名（原本照老師 60）
   { key: 'dispo', title: '處置股倒數 ≤', desc: '目前還在處置中、而且快出關的股。倒數＝還要關幾個交易日（迄日當天＝1，下一個交易日出關）。只扣週末與國定假日，碰到颱風假會少算一兩天。', min: 1, max: 10, step: 1, def: 5, unit: ' 天' },
   { key: 'river', title: '河流圖位置 ≤', desc: '照估值河流圖（本站版）的目前位置挑「股價回到相對便宜」的股：1＝只要特價（含跌破）、2＝便宜以下。虧損或獲利太薄（算不出河道）的一律不符合。', min: 1, max: 2, step: 1, def: 2, unit: '' },
   { key: 'fut', title: '有股票期貨', desc: '期交所所有個股期貨的標的（一般 2,000 股或小型 100 股都算）。有期貨才好放空與避險。', check: true },
@@ -11230,7 +11230,7 @@ const SCR_PRESETS = [
 ];
 const scrState = { on: {}, val: {}, k: 'any', kmin: '', kmax: '', preset: '', date: '', data: null, loading: false, error: '', sortKey: 'score', sortDir: -1, open: true, stock: null, stockCode: '' };
 SCR_CARDS.forEach((c) => { scrState.val[c.key] = c.def; });
-scrState.on.score = true; scrState.on.exdispo = true; scrState.k = 'black'; scrState.kmin = '-10'; scrState.kmax = '3';   // 進來先是創高黑龍那組（莊爸頁面也是）
+scrState.on.score = true; scrState.on.exdispo = true; scrState.k = 'black'; scrState.kmin = '-10'; scrState.kmax = '3';   // 進來先是創高黑龍那組（老師頁面也是）
 scrState.preset = '創高黑龍';
 const scrPct = (v, digits) => v === null || v === undefined ? '—' : ((v > 0 ? '+' : '') + (+v).toFixed(digits === undefined ? 2 : digits) + '%');
 const scrCls = (v) => v === null || v === undefined ? '' : (v > 0 ? 'scr-up' : (v < 0 ? 'scr-dn' : ''));
@@ -12543,7 +12543,7 @@ document.getElementById('alertToggle').addEventListener('click', () => {
     showToast('提醒已關閉');
   }
 });
-// ---- 創高黑選股（2026-10-04 使用者：照莊爸 App「創高黑」做一個選股程式，跟創高黑龍分開放）----
+// ---- 創高黑選股（2026-10-04 使用者：照老師 App「創高黑」做一個選股程式，跟創高黑龍分開放）----
 // 四個分頁：今天（模擬帳戶照模組規則每天進出、今天要做、操作紀錄）、選股（漏斗、每週名單、每日新進、條件池）、
 // 實績（每個每日新進當訊號，各種出場方式的成績）、模組（四段規則）。參數存在這台瀏覽器；名單打勾、設成優先也存在這台。
 // 後端 /api/picker 照參數即時算（收盤後整理好的特徵表：還原日線、內定均線分數、創高天數）。
@@ -13195,11 +13195,11 @@ setInterval(() => {
   try { localStorage.setItem('pickerRemindFired', today); } catch (e) { /* 存不了就算了 */ }
   pkRunReminder(false);
 }, 30000);
-// ---- 飆股雷達（2026-10-07 使用者：照莊爸 App 的飆股雷達做一個，條件我們自己算）----
+// ---- 飆股雷達（2026-10-07 使用者：照老師 App 的飆股雷達做一個，條件我們自己算）----
 // 後端 /api/grail-radar：嗨投資紫殺四個聖杯 15 個邏輯，每個邏輯照固定時間點（盤中證交所即時報價、收盤後官方日K）篩出的名單，每天保存。
 // 卡片上的時間點膠囊：實線＝有名單（數字是檔數）、虛線＝還沒到或沒算到、黃框＝正在看的那一輪；預設看最新一輪。
 // 「新」＝上一輪沒有、這一輪才進來；劃線＝上一輪有、這一輪掉出去。篩選（族群、均線分數、成交量）存在這台瀏覽器。
-const GR_FILTER_DEFAULTS = { group: 'all', maSwing: 0, maOvernight: 0, vol: 0, onlyHits: false, sort: 'chg' };   // 2026-10-13 預設照莊爸：漲跌由高到低
+const GR_FILTER_DEFAULTS = { group: 'all', maSwing: 0, maOvernight: 0, vol: 0, onlyHits: false, sort: 'chg' };   // 2026-10-13 預設照老師：漲跌由高到低
 const GR_SORTS = [['ma', '均線'], ['chg', '漲跌'], ['vol', '量'], ['mcap', '市值']];
 let grFilter = Object.assign({}, GR_FILTER_DEFAULTS);
 try {
@@ -13258,7 +13258,7 @@ function grSortRows(rows){
   });
 }
 function grSlots(logic, closeSlot){ return logic.times.concat([closeSlot]); }
-// 2026-10-13 使用者（貼莊爸 K棒組合選股的截圖）：排版照莊爸——波段／隔日沖兩大區、聖杯小標「N 個邏輯」、
+// 2026-10-13 使用者（貼老師 K棒組合選股的截圖）：排版照老師——波段／隔日沖兩大區、聖杯小標「N 個邏輯」、
 // 每個邏輯一張整排的卡（▼ 收合、圖示、? 條件、檔數、日期・時間點、右邊時間點按鈕），表格加族群、進榜時間、🩺 問診，
 // 處置中／嫌疑犯標在股名後面（跟處置監獄同一份），掉出去的劃線寫「× 時間 消失」；最上面「最新一輪」也標處置／嫌疑。
 const GR_ICONS = { cross2022: '🐊', breakred: '🔥', crossconv: '🌀', fly3: '🐉', flyburst: '💥', flybreak: '🚀', red3: '🔱',
@@ -13493,8 +13493,8 @@ setInterval(() => {
   if (day < 1 || day > 5 || minutes < 8 * 60 + 30 || minutes > 18 * 60 + 30) return;
   grLoad(false);
 }, 90000);
-// ---- 每日功課（2026-10-10 使用者：照莊爸「空觀察／當沖多／多觀察功課」做自動版，不用貼清單）----
-// 莊爸的三頁是學員把 LINE 與機器人回的清單貼進去交叉比對；這些清單我們系統本來就算得出來，這裡直接自動交叉：
+// ---- 每日功課（2026-10-10 使用者：照老師「空觀察／當沖多／多觀察功課」做自動版，不用貼清單）----
+// 老師的三頁是學員把 LINE 與機器人回的清單貼進去交叉比對；這些清單我們系統本來就算得出來，這裡直接自動交叉：
 // 空觀察＝刀劍空(32) ∩ 即將入獄（處置監獄嫌疑名單）∩ 今天出獄 ∩ 做空族群（昨天漲最多的族群）；
 // 當沖多＝賽馬多(33) ∩ 河流多(34) ∩ 馬火多(30) ∩ 族群在多方區；多觀察＝挑三個族群，看每檔位置、漲幅、有沒有破三日低／月線。
 // 盤中的名單跟盤中333 同一份（race333Model，首頁即時報價）；防守價是前一天收盤算好的（/api/checkup）。
@@ -13733,8 +13733,8 @@ document.getElementById('hwBody').addEventListener('change', (e) => {
   renderHomework();
 });
 
-// ---- 形態觀察股（2026-10-12 使用者：照「收盤觀察股（莊爸系統選股）」做一份，盤中 10:30～13:15 七個時段像發動一樣跳出來）----
-// 觀察池（2026-10-12 使用者：倒推莊爸 10/12 收盤觀察股 59 檔，族群用本站全部 56 個族群、股票照規則自己挑）：
+// ---- 形態觀察股（2026-10-12 使用者：照「收盤觀察股（老師系統選股）」做一份，盤中 10:30～13:15 七個時段像發動一樣跳出來）----
+// 觀察池（2026-10-12 使用者：倒推老師 10/12 收盤觀察股 59 檔，族群用本站全部 56 個族群、股票照規則自己挑）：
 // 56 個族群的股票裡，近 10 個交易日被「創高黑龍」系統選過至少 2 次（官網均線分數 ≥ 10、收黑、漲跌 −10%～+3%）、而且本站均線分數 ≥ 15（使用者 12:40 定案）。
 // 黑龍那 10 天的名單收盤後才會變，一天算一次存在這台電腦；跳出那一刻用即時報價分五類：
 // 【5】有點深＝跌破月線（昨天還在月線上的標「今天剛破月線」）；【2】今天噴出＝漲 5% 以上或漲停；
@@ -14136,7 +14136,7 @@ function obsPanelHtml(){
   return h + '</div>';
 }
 
-// ---- 新手教學（2026-10-10 使用者：照莊爸「新手教學・第一次來，看這頁就好」做本站版）----
+// ---- 新手教學（2026-10-10 使用者：照老師「新手教學・第一次來，看這頁就好」做本站版）----
 // 右上角「📖 新手教學」打開；工具卡片的「去看看」直接幫你打開那個工具（等於按下方導覽列那顆）。
 const GUIDE_TOOLS = [
   { t: '⚠ 盤中訊號中心', open: 'signal', v: 'sc-overview', tags: ['盤中', '每 15 秒'], d: '右上角紫色按鈕。盤中所有即時訊號都在這裡，一個分頁一種：誰在發動、誰被大戶狂買、哪個族群最強最弱。',
@@ -14367,9 +14367,9 @@ document.getElementById('guideBody').addEventListener('click', (e) => {
     setTimeout(() => { try { showToast('第一次來？點右上角「📖 新手教學」'); } catch (_){} }, 2500);
   }
 })();
-// ---- 研究室：國際大事行事曆（2026-10-10 使用者：照莊爸 zhuang.tw/calendar 做，含名詞小學堂）----
+// ---- 研究室：國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar 做，含名詞小學堂）----
 // 後端 /api/macro-calendar：TradingView 經濟日曆（美／中／日／歐）每小時更新公布值，加台指期結算、美股季度結算、公司法說。
-// 版面照莊爸：頁首更新時間 → 下一件大事倒數 → 全部／★★ 以上／只看大事篩選 → 依週分段的事件（前值／預期／公布）→ 小學堂。
+// 版面照老師：頁首更新時間 → 下一件大事倒數 → 全部／★★ 以上／只看大事篩選 → 依週分段的事件（前值／預期／公布）→ 小學堂。
 const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘'], ['insider', '👥 內部人']];
 const MC_FLAGS = { US: '🇺🇸', CN: '🇨🇳', JP: '🇯🇵', EU: '🇪🇺', TW: '🇹🇼' };
 const MC_FILTERS = [['all', '全部'], ['2', '★★ 以上'], ['3', '只看大事 ★★★']];
@@ -14516,7 +14516,7 @@ function mcCalendarHtml(){
     '「高於／低於預期」只是比兩個數字的大小，不代表好壞。法說會來自公開資訊觀測站「法人說明會一覽表」（上市＋上櫃，每天早晚更新），只會有公司已經公告的；財報標「慣例時間」的，以公司公告為準。本頁只是把公開行事曆整理成白話，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
   return html;
 }
-// ---- 研究室：資金保護傘（2026-10-10 使用者：照莊爸課程講的「融資水位＋加權／櫃買多空轉折」做成一頁）----
+// ---- 研究室：資金保護傘（2026-10-10 使用者：照老師課程講的「融資水位＋加權／櫃買多空轉折」做成一頁）----
 // 後端 /api/fund-umbrella：上市融資餘額、加權／櫃買日K（FinMind 公開資料），每天晚上更新。
 const fuState = { data: null, loading: false, error: null, loadedAt: 0 };
 async function fuLoad(force){
@@ -14605,7 +14605,7 @@ function fuHtml(){
   html += '<div class="mc-foot">' + wlEsc(d.rule || '') + '<br>融資是散戶借錢買股票的總額：越高代表市場越熱、也越容易在下跌時被追繳斷頭；但融資高不代表馬上會跌，要搭配指數有沒有跌破月線一起看。本頁只是整理公開數據，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
   return html;
 }
-// ---- 研究室：內部人（2026-10-10 使用者：照莊爸「內部人研究室」做，上市櫃全部）----
+// ---- 研究室：內部人（2026-10-10 使用者：照老師「內部人研究室」做，上市櫃全部）----
 // 後端 /api/insider：觀測站內部人持股異動月報（董監／經理人／大股東），疊上集保 400 張大戶比近 4 週變化。
 const inState = { data: null, month: null, loading: false, error: null, loadedAt: 0, query: null, queryLoading: false, queryError: null };
 async function inLoad(force){
@@ -14748,9 +14748,9 @@ document.getElementById('labBody').addEventListener('click', (e) => {
   }
 });
 
-// ---- 處置監獄（2026-10-09 使用者：照莊爸「處置股・出獄與嫌疑名單」zhuang.tw/prison 做一模一樣的）----
+// ---- 處置監獄（2026-10-09 使用者：照老師「處置股・出獄與嫌疑名單」zhuang.tw/prison 做一模一樣的）----
 // 後端 /api/jail：證交所／櫃買公開的注意股、處置股公告（上市直抓、上櫃走鏡像），每天晚上公告出來後更新。
-// 段落照莊爸頁面的順序：前科查詢、一週出獄時間表、犯罪集團、今日入獄、嫌疑名單（明天門檻＋可複製文字）、今日第一次第一款、
+// 段落照老師頁面的順序：前科查詢、一週出獄時間表、犯罪集團、今日入獄、嫌疑名單（明天門檻＋可複製文字）、今日第一次第一款、
 // 前科索引、常見問題。前科查詢不限次數（/api/jail-stock）。
 const jlState = { data: null, loading: false, error: null, query: null, queryCode: '', queryLoading: false };
 async function jlLoad(){
@@ -14947,9 +14947,9 @@ setInterval(() => {
   if (document.getElementById('jailModal').hidden || document.visibilityState === 'hidden') return;
   jlLoad();
 }, 600000);
-// ---- 營收成長榜（2026-10-09 使用者：照莊爸「每月營收成長榜 學員版」做一模一樣的）----
+// ---- 營收成長榜（2026-10-09 使用者：照老師「每月營收成長榜 學員版」做一模一樣的）----
 // 後端 /api/revenue?month=：公開資訊觀測站「每月營業收入彙總表」（排程主機每天 12:30／18:30／23:30 抓），公布日＝我們第一次抓到的日期，
-// 收盤、成交量、公布隔日漲跌用我們的日K。段落照莊爸的順序：查個股營收、族群分析、多觀察分析（我們用自選股）、
+// 收盤、成交量、公布隔日漲跌用我們的日K。段落照老師的順序：查個股營收、族群分析、多觀察分析（我們用自選股）、
 // 火箭烏龜數據分析（全市場統計、散點圖、歷月統計、族群／多觀察 × 隔日、合併完整清單）、懸賞榜、全部公司總表。
 const RV_GROUP_INDEX = (() => {
   const m = {};
@@ -15492,8 +15492,8 @@ setInterval(() => {
   if (document.getElementById('revModal').hidden || document.visibilityState === 'hidden') return;
   rvLoad(rvState.data && rvState.data.month);
 }, 600000);
-// ---- 估值河流圖・本站版（2026-10-10 使用者：照莊爸 zhuang.tw/river 做；他的分水嶺公式推不出來，先做本站版）----
-// 分水嶺＝近 4 季 EPS × 同族群本益比中位數；四區照莊爸比例（×0.618／0.8／1.2／1.382）。後端 /api/river 算好，這裡畫圖。
+// ---- 估值河流圖・本站版（2026-10-10 使用者：照老師 zhuang.tw/river 做；他的分水嶺公式推不出來，先做本站版）----
+// 分水嶺＝近 4 季 EPS × 同族群本益比中位數；四區照老師比例（×0.618／0.8／1.2／1.382）。後端 /api/river 算好，這裡畫圖。
 const RV_ZONES = ['跌破特價', '特價', '便宜', '貴', '昂貴', '超昂貴'];
 const RV_ZCLS = ['z0', 'z1', 'z2', 'z3', 'z4', 'z5'];
 const rivState = { q: '', data: null, loading: false, error: '', span: 3, list: null, ma10: null };
@@ -15631,7 +15631,7 @@ function renderRiver(){
   if (!body) return;
   const keep = document.activeElement && document.activeElement.id === 'rivQ' ? document.activeElement.value : null;
   body.innerHTML =
-    '<div class="ma-note">🕐 每日收盤後更新・本站版：分水嶺＝近 4 季 EPS × 同族群本益比中位數（莊爸的公式不公開，位置可能跟他差一格）</div>' +
+    '<div class="ma-note">🕐 每日收盤後更新・本站版：分水嶺＝近 4 季 EPS × 同族群本益比中位數（老師的公式不公開，位置可能跟他差一格）</div>' +
     '<div class="ma-q"><input id="rivQ" list="rivList" placeholder="輸入股號或股名，例：2492 或 華新科" value="' + wlEsc(keep !== null ? keep : rivState.q) + '"><button type="button" data-riv-go="1">查詢</button>' +
     ['2492 華新科', '2408 南亞科', '2327 國巨'].map((x) => '<button type="button" class="scr-pre" data-riv-q="' + x.split(' ')[0] + '">' + x + '</button>').join('') + '</div>' +
     '<datalist id="rivList">' + (rivState.list || []).map((s) => '<option value="' + wlEsc(s.code) + '">' + wlEsc(s.name) + '</option>').join('') + '</datalist>' +
@@ -15663,9 +15663,9 @@ document.getElementById('rivBody').addEventListener('click', (e) => {
 document.getElementById('rivBody').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target.id === 'rivQ') rivQuery(e.target.value);
 });
-// ---- 均線分數排行（2026-10-10 使用者：照莊爸 zhuang.tw/ma「均線分數排行 滿分 15」做）----
+// ---- 均線分數排行（2026-10-10 使用者：照老師 zhuang.tw/ma「均線分數排行 滿分 15」做）----
 // 分數＝官網式 15 分（站上 5/10/20/60/120/240 均線＋創 5/10/20/60/120/360 日新高＋多頭排列 3 分），後端黑龍表收盤後算好。
-// 排法跟莊爸一樣：總分高→低，同分先比 12 項本體分，再照股號；「昨天名次」的箭頭跟依總分的名次比，不跟切換後的列序比。
+// 排法跟老師一樣：總分高→低，同分先比 12 項本體分，再照股號；「昨天名次」的箭頭跟依總分的名次比，不跟切換後的列序比。
 const MA_W = [5, 10, 20, 60, 120, 240], MA_HW = [5, 10, 20, 60, 120, 360];
 const maState = { data: null, loading: false, error: null, date: '', view: 'sum', sortKey: 'sum', sortDir: -1,
   hits: null, hitsLoading: false, hitsError: null, hitDays: 20, hitTop: 10, hitShow: 20, hitDate: '', hitOpen: -1,
@@ -15954,12 +15954,12 @@ document.getElementById('maBody').addEventListener('keydown', (e) => {
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '自選股'){ openWatchPanel(); return; }        // 2026-10-05 使用者：自選股
-    if (btn.dataset.label === 'K棒組合選股'){ openGrailPanel(); return; }     // 2026-10-07 使用者：照莊爸 App 的飆股雷達
-    if (btn.dataset.label === '處置監獄'){ openJailPanel(); return; }     // 2026-10-09 使用者：照莊爸處置監獄頁
-    if (btn.dataset.label === '營收成長榜'){ openRevenuePanel(); return; }  // 2026-10-09 使用者：照莊爸每月營收成長榜
-    if (btn.dataset.label === '均線分數排行'){ openMaPanel(); return; }     // 2026-10-10 使用者：照莊爸均線分數排行（zhuang.tw/ma）
+    if (btn.dataset.label === 'K棒組合選股'){ openGrailPanel(); return; }     // 2026-10-07 使用者：照老師 App 的飆股雷達
+    if (btn.dataset.label === '處置監獄'){ openJailPanel(); return; }     // 2026-10-09 使用者：照老師處置監獄頁
+    if (btn.dataset.label === '營收成長榜'){ openRevenuePanel(); return; }  // 2026-10-09 使用者：照老師每月營收成長榜
+    if (btn.dataset.label === '均線分數排行'){ openMaPanel(); return; }     // 2026-10-10 使用者：照老師均線分數排行（zhuang.tw/ma）
     if (btn.dataset.label === '估值河流圖'){ openRiverPanel(); return; }
-    if (btn.dataset.label === '研究室'){ openLabPanel(); return; }        // 2026-10-10 使用者：國際大事行事曆（照莊爸 zhuang.tw/calendar）
+    if (btn.dataset.label === '研究室'){ openLabPanel(); return; }        // 2026-10-10 使用者：國際大事行事曆（照老師 zhuang.tw/calendar）
     if (btn.dataset.label === '每日功課'){ openHomeworkPanel(); return; }   // 2026-10-10 使用者：空觀察／當沖多／多觀察功課自動版   // 2026-10-10 使用者：估值河流圖（本站版）
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
