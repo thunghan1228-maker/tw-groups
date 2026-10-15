@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 22:13:33";
+const BUILD_STAMP = "2026-10-16 00:36:31";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12013,7 +12013,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 22:13:33';
+const BUILD_STAMP = '2026-10-16 00:36:31';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17447,7 +17447,9 @@ async function proxyHanstockPost(pathname, request) {
   });
 }
 
-const USAGE_SAMPLE_RATE = 0.01; // 每100個請求抽樣寫入1次KV；0.05 時一天約 1 萬次請求就用掉 KV 免費寫入上限的一半（2026-10-11 Cloudflare 警告信）
+// 每500個請求抽樣寫入1次KV（KV 免費方案一天只能寫 1,000 次）。0.05 時 2026-10-11 收到 Cloudflare 警告信改 0.01；
+// 2026-10-15 一天約 5 萬次請求又用到寫入上限的一半，再降到 0.002（一天 10 萬次請求也只寫 200 次）。
+const USAGE_SAMPLE_RATE = 0.002;
 const USAGE_BUCKET_MINUTES = 15;
 const DEFAULT_USAGE_ANOMALY_THRESHOLD = 5000; // 每15分鐘估計請求數超過這個值才發警報；可用環境變數USAGE_ANOMALY_THRESHOLD覆蓋
 
@@ -17486,15 +17488,18 @@ async function checkUsageAnomaly(env) {
 }
 
 // /api/usage（2026-10-12 使用者：今天開盤要檢查流量）：讀用量監控的抽樣計數，算台灣時間今天每小時的估計請求數。
-// 只讀今天的 bucket（最多 96 個 KV 讀取），結果在同一個執行環境裡留 5 分鐘，不會把 KV 免費讀取額度用掉。
-let usageMemo = null;
-async function usageToday(env) {
-  if (usageMemo && Date.now() - usageMemo.at < 300000) return usageMemo.body;
+// 只讀一天的 bucket（最多 96 個 KV 讀取），結果在同一個執行環境裡留 5 分鐘，不會把 KV 免費讀取額度用掉。
+// ?date=YYYY-MM-DD 看前一天（2026-10-15 KV 警告信：要看昨天到底多少請求）；bucket 只留 2 天。
+let usageMemo = {};
+async function usageToday(env, date) {
   const twNow = new Date(Date.now() + 8 * 3600000);
-  const twDate = twNow.toISOString().slice(0, 10);
-  const startUtc = Date.UTC(twNow.getUTCFullYear(), twNow.getUTCMonth(), twNow.getUTCDate()) - 8 * 3600000;
+  const twDate = date || twNow.toISOString().slice(0, 10);
+  const memo = usageMemo[twDate];
+  if (memo && Date.now() - memo.at < 300000) return memo.body;
+  const startUtc = Date.parse(twDate + "T00:00:00Z") - 8 * 3600000;
+  const endUtc = Math.min(Date.now(), startUtc + 24 * 3600000 - 1);
   const keys = [];
-  for (let t = startUtc; t <= Date.now(); t += USAGE_BUCKET_MINUTES * 60000) keys.push(usageBucketKey(new Date(t)));
+  for (let t = startUtc; t <= endUtc; t += USAGE_BUCKET_MINUTES * 60000) keys.push(usageBucketKey(new Date(t)));
   const values = await Promise.all(keys.map((k) => env.USAGE_KV.get(k).catch(() => null)));
   const byHour = {};
   let total = 0, peak = { at: null, requests: 0 };
@@ -17508,12 +17513,12 @@ async function usageToday(env) {
     if (n > peak.requests) peak = { at: tw.slice(11, 16), requests: n };
   });
   const body = {
-    status: "ok", date: twDate, asOf: twNow.toISOString().slice(11, 16), estimatedRequests: total, byHour, peak15m: peak,
+    status: "ok", date: twDate, asOf: date ? null : twNow.toISOString().slice(11, 16), estimatedRequests: total, byHour, peak15m: peak,
     sampleRate: USAGE_SAMPLE_RATE, alertThreshold15m: parseInt(env.USAGE_ANOMALY_THRESHOLD, 10) || DEFAULT_USAGE_ANOMALY_THRESHOLD,
     freePlanDailyLimit: 100000,
-    note: "每 100 個請求抽樣記 1 次再乘回去，是估計值；時間是台灣時間；5 分鐘更新一次"
+    note: "每 " + Math.round(1 / USAGE_SAMPLE_RATE) + " 個請求抽樣記 1 次再乘回去，是估計值；時間是台灣時間；5 分鐘更新一次"
   };
-  usageMemo = { at: Date.now(), body };
+  usageMemo[twDate] = { at: Date.now(), body };
   return body;
 }
 
@@ -17950,8 +17955,10 @@ export default {
     }
     if (url.pathname === "/api/usage") {
       if (!env || !env.USAGE_KV) return Response.json({ status: "missing", message: "沒有綁定 USAGE_KV" });
+      const day = url.searchParams.get("date");
+      if (day && !/^\d{4}-\d{2}-\d{2}$/.test(day)) return Response.json({ status: "error", error: "date 要 YYYY-MM-DD" }, { status: 422 });
       try {
-        return new Response(JSON.stringify(await usageToday(env)), { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" } });
+        return new Response(JSON.stringify(await usageToday(env, day)), { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" } });
       } catch (err) {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
