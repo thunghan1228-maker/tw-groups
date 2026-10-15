@@ -241,7 +241,13 @@ async function fetchQuotesFromMis(codes) {
         : asks.length && !bids.length ? asks[0]
         : bids.length && asks.length ? (bids[0] + asks[0]) / 2
         : NaN;
-      const fallbackPrice = pos(parseFloat(item.o)) || pos(parseFloat(item.h)) || pos(parseFloat(item.l)) || prevClose;
+      // 2026-10-15 天二科技跌停鎖死整個早上：這盤沒成交、委買委賣也全是 "-"，以前退回開盤價 156 顯示成 -4%（其實 146.5 跌停）。
+      // 沒成交也沒委買委賣、但今天最低＝跌停價（或最高＝漲停價），幾乎一定是鎖在那個價，就用跌停／漲停價。
+      const dayLow = pos(parseFloat(item.l)), dayHigh = pos(parseFloat(item.h));
+      const upPx = pos(parseFloat(item.u)), downPx = pos(parseFloat(item.w));
+      const lockedPrice = Number.isFinite(downPx) && Number.isFinite(dayLow) && Math.abs(dayLow - downPx) < 1e-6 ? downPx
+        : Number.isFinite(upPx) && Number.isFinite(dayHigh) && Math.abs(dayHigh - upPx) < 1e-6 ? upPx : NaN;
+      const fallbackPrice = Number.isFinite(lockedPrice) ? lockedPrice : (pos(parseFloat(item.o)) || pos(parseFloat(item.h)) || pos(parseFloat(item.l)) || prevClose);
       const finalPrice = Number.isFinite(price) ? price : Number.isFinite(quotePrice) ? quotePrice : fallbackPrice;
       if (Number.isFinite(finalPrice) && Number.isFinite(prevClose) && prevClose > 0) {
         // u／w＝當天漲停價／跌停價、v＝累積成交量（張）：盤中333 用來排除已經漲停買不到的股票、
