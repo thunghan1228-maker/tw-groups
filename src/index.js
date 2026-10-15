@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 09:11:39";
+const BUILD_STAMP = "2026-10-15 09:17:39";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2696,7 +2696,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：09:00 開盤～13:30 收盤（2026-10-05 起，以前 11:00 後才算；第一根 5 分K 也算），5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。每列後面標 123 黑龍：收黑就是這一波第幾次進場（①②③）、區1（紅，可積極加碼）或區2（黃，等突破再加碼）；問診日線圖、K線圖日線也會在進場的那根K棒上畫同樣的圓圈。</li>
-        <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。今天跌、族內後 1/3、不比櫃買強；🔪（刀）＝現價低於昨收、⚔️（劍）＝也低於前天收盤，只有🔪的也算（2026-10-15 照莊爸）。正式名單（強空積極）最多 15 檔，跌幅深的在前，大戶力最負的在上；多方打少（強族群裡逆勢走弱）和收割區域（已跌 5% 以上，不追空）只列名字。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
+        <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。今天跌、族內最弱 3 檔、不比櫃買強；🔪（刀）＝現價低於昨收、⚔️（劍）＝也低於前天收盤，只有🔪的也算（2026-10-15 照莊爸）。正式名單（強空積極）最多 15 檔，跌幅深的在前，大戶力最負的在上；多方打少（強族群裡逆勢走弱）和收割區域（已跌 5% 以上，不追空）只列名字。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選強多／四項精選強空／1+2多／創高黑龍／主力翻多／主力翻空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日或開盤前 08:45 今天還沒有訊號時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
       </ul>
     </div>
@@ -5561,7 +5561,8 @@ const BLADE_HARVEST_PCT = 5;  // 刀劍空：跌到這裡以上就算收割區
 const BLADE_MIN_PCT = 2;      // 刀劍空：今天至少跌這麼多才算弱
 const BLADE_MAX_PCT = 9.5;    // 刀劍空：跌到這裡以上（或跌停鎖死）放不到空，只在收割區那行列
 const BLADE_MIN_VOLUME = 500; // 刀劍空：成交量（張）低於這個太冷門
-const BLADE_MAX_ROWS = 15;    // 刀劍空：正式名單最多列這麼多檔
+const BLADE_MAX_ROWS = 15;
+const BLADE_GROUP_WEAKEST = 3;   // 刀劍空：每個族群只看最弱的 3 檔（2026-10-15 照莊爸）    // 刀劍空：正式名單最多列這麼多檔
 const FIRE_MIN_PCT = 2;       // 馬火多：今天至少漲這麼多才算有力道
 const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停鎖死）買不到，另列
 const FIRE_MIN_VOLUME = 500;  // 馬火多：成交量（張）低於這個太冷門
@@ -5616,7 +5617,7 @@ function race333Model(){
       const row = {
         code: s.code, name: s.name, pct: s.changePercent, groupName: g.name, groupRank: rankOf.get(g.name), inGroupRank: i + 1, inTopThird: i < cut,
         groupTotal: valid.length, groupCut: cut,
-        inBottomThird: i >= valid.length - cut, dailyKnown: y !== null || y2 !== null, yesterday: y, dayBefore: y2,
+        inBottomThird: i >= valid.length - cut, inBottom3: i >= valid.length - BLADE_GROUP_WEAKEST, dailyKnown: y !== null || y2 !== null, yesterday: y, dayBefore: y2,
         limitUp: !!s.limitUp, limitDown: !!s.limitDown, volume: Number.isFinite(s.volume) ? s.volume : null,
         price: s.price,
         strengthPct: holderRow ? holderRow.strengthPct : null, netAmount: holderRow ? holderRow.netAmount : null, holderLabel: holderRow ? holderRow.holderLabel : null,
@@ -5648,9 +5649,12 @@ function race333Model(){
   // 32 刀劍空：今天跌 BLADE_MIN_PCT% 以上（且 ≤ 櫃買%）、族內後 1/3、成交量夠（🔪 就算，不要求 ⚔️）；
   // 跌停鎖死或跌到 BLADE_MAX_PCT% 以上放不到空，跟已跌 BLADE_HARVEST_PCT% 以上的一起放收割區那一行。
   const belowOtc = (r) => otcPct === null || r.pct <= otcPct;
-  const bladeBase = rows.filter((r) => r.pct <= -BLADE_MIN_PCT && belowOtc(r) && r.inBottomThird
+  // 2026-10-15 使用者貼莊爸 09:07、09:15 兩份：每個族群最多列 3 檔（被動元件＝禾伸堂／天二／國巨、小電組＝台玻／台燿／金像電、
+  // 台塑四寶＝台塑／台化／南亞），是「族內最弱 3 檔」不是族內後 1/3（我們的族群大，記憶體 19 檔後 1/3 就有 7 檔）；
+  // 收割區也只列族群排名後半的（莊爸的收割區全是弱族群，強族群裡跌深的不列）
+  const bladeBase = rows.filter((r) => r.pct <= -BLADE_MIN_PCT && belowOtc(r) && r.inBottom3
     && (r.volume === null || r.volume >= BLADE_MIN_VOLUME)).sort((a, b) => a.pct - b.pct || a.groupRank - b.groupRank);
-  const bladeHarvest = bladeBase.filter((r) => r.pct <= -BLADE_HARVEST_PCT || r.pct <= -BLADE_MAX_PCT || r.limitDown);
+  const bladeHarvest = bladeBase.filter((r) => (r.pct <= -BLADE_HARVEST_PCT || r.pct <= -BLADE_MAX_PCT || r.limitDown) && r.groupRank > half);
   // 2026-10-15 使用者貼莊爸 09:07 的刀劍空：強空積極 13 檔裡 7 檔只有🔪（低於昨收、還在前天收盤上，例如昨天大漲的新纖），
   // 跟我們算的🔪／⚔️幾乎一樣——莊爸不要求⚔️，只有🔪的也列（每列照舊標🔪／⚔️）
   const bladeLive = bladeBase.filter((r) => !bladeHarvest.includes(r) && r.belowYesterday);
@@ -5682,7 +5686,7 @@ function bladeBadge(r){
 function raceConditionsHtml(r, m, opts){
   const dist = m.otcPct === null ? null : r.pct - m.otcPct;
   const otcPart = dist === null ? '距櫃買 —（尚無資料）' : '距櫃買 ' + (dist >= 0 ? '+' : '') + dist.toFixed(1) + '%';
-  const inGroupPart = '族內第 ' + r.inGroupRank + '/' + r.groupTotal + '（' + (opts && opts.blade ? '後 1/3 內' : '前 1/3 內') + '）';
+  const inGroupPart = '族內第 ' + r.inGroupRank + '/' + r.groupTotal + '（' + (opts && opts.blade ? '最弱 ' + BLADE_GROUP_WEAKEST + ' 檔內' : '前 1/3 內') + '）';
   let groupPart;
   if (opts && opts.blade){
     groupPart = '族排 ' + r.groupRank + '/' + m.total + '（32 門檻：後半，即 >' + m.half + '）';
@@ -5882,7 +5886,7 @@ function raceBladeNotesHtml(m){
   const bladeUpper = race333FilterList(m.bladeUpper);
   const bladeHarvest = race333FilterList(m.bladeHarvest);
   return (bladeUpper.length ? '<div class="race-note">多方打少（強族群裡逆勢走弱，空得保守）' + bladeUpper.length + ' 檔：' + names(bladeUpper) + '</div>' : '') +
-    (bladeHarvest.length ? '<div class="race-note">收割區域（已跌 ' + BLADE_HARVEST_PCT + '% 以上或跌停，不追空）' + bladeHarvest.length + ' 檔：' + names(bladeHarvest) + '</div>' : '');
+    (bladeHarvest.length ? '<div class="race-note">收割區域（族群排名後半裡已跌 ' + BLADE_HARVEST_PCT + '% 以上或跌停，不追空）' + bladeHarvest.length + ' 檔：' + names(bladeHarvest) + '</div>' : '');
 }
 // opts.oldestFirst：早出現的在上面、新出現的往下排（2026-10-13 使用者：只有今日即時空裡的刀劍空這樣排，刀劍空分頁還是新的在上面）
 // opts.noNotes：不接多方打少／收割區域（今日即時空另外放到整頁最下面）
@@ -5997,7 +6001,7 @@ function bladeShortHtml(){
   const condsNote = '每列下面多一行列出門檻比例（族排、族內、距櫃買%、昨／前天%）。';
   return race333FilterBarHtml() + raceOtcBoxHtml(m) +
     '<div class="race-block"><div class="race-head">🔪⚔️刀劍空(32) ' + stamp + '</div>' +
-      '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內後 1/3・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・🔪 刀（低於昨收）就算，⚔️ 劍＝也低於前天收盤（數字＝低幾 %）・最多 ' + BLADE_MAX_ROWS + ' 檔（取跌幅前 ' + BLADE_MAX_ROWS + ' 檔），大戶力最負的在上・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字・點列或按「圖」開K線圖</div>' +
+      '<div class="race-sub">今天跌 ' + BLADE_MIN_PCT + '%～' + BLADE_MAX_PCT + '%（且 ≤ 櫃買%）・不含跌停鎖死・族群排名後半（強空積極）・族內最弱 3 檔・成交量 ≥ ' + BLADE_MIN_VOLUME + ' 張・🔪 刀（低於昨收）就算，⚔️ 劍＝也低於前天收盤（數字＝低幾 %）・最多 ' + BLADE_MAX_ROWS + ' 檔（取跌幅前 ' + BLADE_MAX_ROWS + ' 檔），大戶力最負的在上・前面數字＝族群排名・多方打少（族群排名前半）和收割區只列名字・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字・點列或按「圖」開K線圖</div>' +
       raceBladeListHtml(m) + '</div>';
 }
 
@@ -11321,7 +11325,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 09:11:39';
+const BUILD_STAMP = '2026-10-15 09:17:39';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
