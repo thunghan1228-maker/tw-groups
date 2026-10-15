@@ -579,6 +579,8 @@ BASIC_VIDEOS = [
              "clickPick": "__tutIn('#cmSettingsToggle')", "pick": "__tutBoxIn('#maControls')", "settle": 1500},
             {"say": "下面的副圖是主力買賣力，也就是單筆二十張以上的大單：紅色是買超，綠色是賣超，線是累計。", "cap": "主力買賣力：大單買超紅、賣超綠、累計線",
              "clickPick": "__tutIn('#cmSettingsToggle')", "pick": "__tutBoxIn('#forcePanelWrap')"},
+            {"say": "成交量下面是籌碼暴增近九週：集保四百張以上大戶每週持股增減，紅色增加、綠色減少，最右邊是最新一週，標題寫連幾週增加；不想看可以按收起。",
+             "cap": "籌碼暴增・近 9 週：大戶週增減，紅增綠減；可收起", "pick": "__tutBoxIn('#cmChipBlock')", "settle": 1500},
             {"say": "圖上的輸入框可以直接換另一檔，打完按進入分K；名稱旁的星星，點一下就加進自選股。", "cap": "在圖上直接換股；☆ 加自選股",
              "pick": "__tutBoxIn('#cmQuickSearch')"},
             {"say": "看完按右上角的叉叉關掉。任何列表點股票，也都會打開K線圖。", "cap": "✕ 關掉；任何列表點股票也會開 K 線圖",
