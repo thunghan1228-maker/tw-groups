@@ -68,6 +68,9 @@
   /* 2026-10-15 使用者：只有 193 族群底下的 ⚠️ 個股要綠底白字（跟跌停的綠底白字同一個顏色） */
   .hr-warn.bear .hr-stk{display:inline-block;background:var(--down);color:#fff;border-radius:5px;padding:1px 6px;margin:2px 4px 2px 0;font-weight:700;}
   .hr-warn.bear .hr-stk span{color:#fff;}
+  /* 2026-10-15 使用者：刀劍空(32) 欄的代號＋名稱也綠底白字 */
+  .hr-bear-pill{display:inline-flex;align-items:baseline;gap:4px;background:var(--down);color:#fff;border-radius:5px;padding:1px 6px;font-weight:700;min-width:0;overflow:hidden;}
+  .hr-bear-pill .hr-code,.hr-bear-pill .hr-name{color:#fff;}
   .hr-col{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
   .hr-title{padding:8px 10px;background:#4a3d34;font-weight:800;font-size:15px;color:var(--text);white-space:nowrap;}
   .hr-row{display:flex;align-items:baseline;gap:4px;padding:5px 8px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;transition:background .12s ease;}
@@ -6110,7 +6113,7 @@ function homeBladeColHtml(m){
   const mark = (r) => (r.dayBefore !== null && r.dayBefore >= BLADE_PRIOR_RISE && r.twoDay !== null && r.twoDay < 0 && !(r.yesterday !== null && r.yesterday >= BLADE_PRIOR_RISE)) ? '⚔️' : '🔪';
   const byRank = (a, b) => a.groupRank - b.groupRank || a.pct - b.pct;
   const row = (r) => '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button" title="' + r.groupName + '・族排第 ' + r.groupRank + ' 名">' +
-    '<span class="hr-rk">' + r.groupRank + '</span><span class="hr-code">' + r.code + '</span><span class="hr-name">' + r.name + '</span>' +
+    '<span class="hr-rk">' + r.groupRank + '</span><span class="hr-bear-pill"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + r.name + '</span></span>' +
     '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%' + mark(r) + '</span></div>';
   const sec = (list) => list.slice().sort(byRank).map(row).join('');
   const n = m.bladeUpper.length + m.bladeLower.length + m.bladeHarvest.length;
