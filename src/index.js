@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 12:35:38";
+const BUILD_STAMP = "2026-10-15 12:55:40";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6204,6 +6204,25 @@ function homeBladeColHtml(m){
     (n ? sec(m.bladeUpper) + '<div class="hr-sep">----↑(多方打少)↑----</div>' + '<div class="hr-sep">----↓(強空積極)↓----</div>' + sec(m.bladeLower) +
       '<div class="hr-sep">----↓(收割區域)↓----</div>' + sec(m.bladeHarvest) : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
+// 首頁第一欄最上面的今日強勢股（2026-10-15 使用者：放在 183 上面，訊號中心的分頁照留）：跟訊號中心「今日強勢股」同一份，
+// 族群分數前十大裡均線分數 ≥12、今天沒下跌的；每族一行族群名次，下面列代號、名稱、均線分數、今天漲跌幅。
+function homeStrongColHtml(){
+  stLoad('strong');
+  const d = stState.strong;
+  const title = '<div class="hr-title">⭐今日強勢股';
+  if (!d) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (stState.error.strong ? '讀取失敗' : '讀取中…') + '</div></div>';
+  const groups = stLiveGroups(d, true).filter((g) => g.rows.length);
+  const n = groups.reduce((a, g) => a + g.rows.length, 0);
+  const body = groups.map((g) => '<div class="hr-sep">第 ' + g.rank + ' 名・' + wlEsc(g.name) + '</div>' + g.rows.map((r) => {
+    const q = getStockQuote(r.code);
+    const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
+    return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="均線分數 ' + r.sum + '（' + swMmdd(d.date) + ' 收盤）">' +
+      '<span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span><span class="hr-rk">' + r.sum + '分</span>' +
+      '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span></div>';
+  }).join('')).join('');
+  return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔</span></div>' +
+    (n ? body : '<div class="hr-note">' + (d.count ? '均線分數符合的今天都在跌，先不列' : '今天沒有符合的股票') + '</div>') + '</div>';
+}
 function homeRankColHtml(title, rows, half, sepLabel, empty, warnOf, warnCls){
   let body = '';
   let sepDone = false;
@@ -6237,7 +6256,10 @@ function homeRank4Html(){
   const rows188 = h.rows.filter((r) => RANK188_GROUPS.has(r.name));
   // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／199 疊在同一欄）、193、刀劍空(32)、33、34、188、177
   return '<div class="home-rank4">' +
-    homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
+    '<div class="hr-stack">' +   // 2026-10-15 使用者：第一欄上面加今日強勢股、下面是 183
+      homeStrongColHtml() +
+      homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
+    '</div>' +
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
       homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單，交集也就沒有' : '') +
@@ -11592,7 +11614,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 12:35:38';
+const BUILD_STAMP = '2026-10-15 12:55:40';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -11854,6 +11876,7 @@ function stLoad(side){
   }).catch((e) => { stState.error[side] = { at: Date.now(), msg: String((e && e.message) || e) }; }).finally(() => {
     stState.loading[side] = false;
     try { if (!document.getElementById('signalModal').hidden) renderSignalCenter(); } catch (_){}   // 今日即時多／空也用得到（2026-10-12）
+    if (side === 'strong') { try { render(); } catch (_){} }   // 首頁第一欄也有今日強勢股（2026-10-15）
   });
 }
 function stPanelHtml(side){
@@ -12405,7 +12428,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">183・續抱勿追高／30加33加34／199・193・刀劍空(32)・賽馬多(33)・河流多(34)・188・177</div></div>' +
+        '<div class="section-head"><div class="section-title">今日強勢股／183・續抱勿追高／30加33加34／199・193・刀劍空(32)・賽馬多(33)・河流多(34)・188・177</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';

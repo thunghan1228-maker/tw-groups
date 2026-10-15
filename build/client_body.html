@@ -6125,6 +6125,25 @@ function homeBladeColHtml(m){
     (n ? sec(m.bladeUpper) + '<div class="hr-sep">----↑(多方打少)↑----</div>' + '<div class="hr-sep">----↓(強空積極)↓----</div>' + sec(m.bladeLower) +
       '<div class="hr-sep">----↓(收割區域)↓----</div>' + sec(m.bladeHarvest) : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
+// 首頁第一欄最上面的今日強勢股（2026-10-15 使用者：放在 183 上面，訊號中心的分頁照留）：跟訊號中心「今日強勢股」同一份，
+// 族群分數前十大裡均線分數 ≥12、今天沒下跌的；每族一行族群名次，下面列代號、名稱、均線分數、今天漲跌幅。
+function homeStrongColHtml(){
+  stLoad('strong');
+  const d = stState.strong;
+  const title = '<div class="hr-title">⭐今日強勢股';
+  if (!d) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (stState.error.strong ? '讀取失敗' : '讀取中…') + '</div></div>';
+  const groups = stLiveGroups(d, true).filter((g) => g.rows.length);
+  const n = groups.reduce((a, g) => a + g.rows.length, 0);
+  const body = groups.map((g) => '<div class="hr-sep">第 ' + g.rank + ' 名・' + wlEsc(g.name) + '</div>' + g.rows.map((r) => {
+    const q = getStockQuote(r.code);
+    const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
+    return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="均線分數 ' + r.sum + '（' + swMmdd(d.date) + ' 收盤）">' +
+      '<span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span><span class="hr-rk">' + r.sum + '分</span>' +
+      '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span></div>';
+  }).join('')).join('');
+  return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔</span></div>' +
+    (n ? body : '<div class="hr-note">' + (d.count ? '均線分數符合的今天都在跌，先不列' : '今天沒有符合的股票') + '</div>') + '</div>';
+}
 function homeRankColHtml(title, rows, half, sepLabel, empty, warnOf, warnCls){
   let body = '';
   let sepDone = false;
@@ -6158,7 +6177,10 @@ function homeRank4Html(){
   const rows188 = h.rows.filter((r) => RANK188_GROUPS.has(r.name));
   // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／199 疊在同一欄）、193、刀劍空(32)、33、34、188、177
   return '<div class="home-rank4">' +
-    homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
+    '<div class="hr-stack">' +   // 2026-10-15 使用者：第一欄上面加今日強勢股、下面是 183
+      homeStrongColHtml() +
+      homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
+    '</div>' +
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
       homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單，交集也就沒有' : '') +
@@ -11775,6 +11797,7 @@ function stLoad(side){
   }).catch((e) => { stState.error[side] = { at: Date.now(), msg: String((e && e.message) || e) }; }).finally(() => {
     stState.loading[side] = false;
     try { if (!document.getElementById('signalModal').hidden) renderSignalCenter(); } catch (_){}   // 今日即時多／空也用得到（2026-10-12）
+    if (side === 'strong') { try { render(); } catch (_){} }   // 首頁第一欄也有今日強勢股（2026-10-15）
   });
 }
 function stPanelHtml(side){
@@ -12326,7 +12349,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">183・續抱勿追高／30加33加34／199・193・刀劍空(32)・賽馬多(33)・河流多(34)・188・177</div></div>' +
+        '<div class="section-head"><div class="section-title">今日強勢股／183・續抱勿追高／30加33加34／199・193・刀劍空(32)・賽馬多(33)・河流多(34)・188・177</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
