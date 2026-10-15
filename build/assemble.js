@@ -681,6 +681,31 @@ export default {
         }
       }
     }
+    if (url.pathname === "/api/signal-bundle") {
+      // 2026-10-16 Cloudflare 免費方案一天 10 萬次請求：網頁每 5 秒要盤中訊號＋大戶力排行，原本兩支請求合成這一支。
+      // Worker 去後端抓兩份（跟 /api/intraday-signals、/api/main-force-ranking 一樣不快取），原樣拼成 {"signals":…,"ranking":…}，
+      // 不解析 JSON、不轉字串，省 Worker 的 CPU 時間。
+      const day = url.searchParams.get("trade_date") || "";
+      const limit = parseInt(url.searchParams.get("limit") || "5000", 10);
+      const rankLimit = parseInt(url.searchParams.get("rank_limit") || "1000", 10);
+      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(day) || !(limit > 0) || !(rankLimit > 0)) return Response.json({ status: "error", error: "參數不對" }, { status: 422 });
+      try {
+        const opts = { headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" }, cf: { cacheTtl: 0, cacheEverything: false } };
+        const base = "https://hanstock-production-b872.up.railway.app";
+        const [sig, rank] = await Promise.all([
+          fetch(base + "/api/hub/intraday-signals?trade_date=" + day + "&limit=" + limit, opts),
+          fetch(base + "/api/hub/main-force/ranking?limit=" + rankLimit, opts)
+        ]);
+        if (!sig.ok || !rank.ok) return Response.json({ status: "error", error: "後端回 " + sig.status + "／" + rank.status }, { status: 502 });
+        const parts = [new TextEncoder().encode('{"signals":'), new Uint8Array(await sig.arrayBuffer()), new TextEncoder().encode(',"ranking":'), new Uint8Array(await rank.arrayBuffer()), new TextEncoder().encode("}")];
+        const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+        let at = 0;
+        for (const p of parts) { out.set(p, at); at += p.length; }
+        return new Response(out, { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" } });
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/main-force-ranking") {
       try {
         return await proxyHanstockBars("/api/hub/main-force/ranking" + url.search, 0);

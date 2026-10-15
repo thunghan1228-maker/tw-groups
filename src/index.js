@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 00:36:31";
+const BUILD_STAMP = "2026-10-16 00:42:51";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4958,7 +4958,9 @@ async function fetchRealSignals(dateStr){
   // 砍掉的門檻往後推遲(09:55→09:35)，沒有真正解決。
   const res = await fetch('/api/intraday-signals?trade_date=' + dateStr + '&limit=5000');
   if (!res.ok) throw new Error('intraday-signals http ' + res.status);
-  const data = await res.json();
+  return parseRealSignals(await res.json());
+}
+function parseRealSignals(data){
   if (!data || !Array.isArray(data.signals)) throw new Error('bad payload');
   // 一般5分鐘K策略訊號(MA交叉/520/A8空等)只在K線圖上用符號呈現；只留下
   // 不是這個家族的訊號、以及兩個獨立的「結構性」訊號(1+2多/創高黑龍)。
@@ -5203,12 +5205,30 @@ async function fetchMainForceRanking(){
   // 只抓前200名很容易讓某些族群完全沒有股票入選，跟真正的全市場排行對不起來。
   const res = await fetch('/api/main-force-ranking?limit=1000');
   if (!res.ok) throw new Error('main-force-ranking http ' + res.status);
-  const data = await res.json();
+  return parseMainForceRanking(await res.json());
+}
+function parseMainForceRanking(data){
   if (!data || !Array.isArray(data.ranking)) throw new Error('bad payload');
   mainForceRankingInfo = { tradeDate: data.tradeDate || null, heldFrom: data.heldFrom || null };
   return data.ranking;
 }
 
+// 2026-10-16 Cloudflare 免費方案一天 10 萬次請求（10/15 估計已 6.7 萬次）：每 5 秒的訊號＋大戶力排行原本分兩支打，
+// 合成一支 /api/signal-bundle（Worker 自己去後端抓兩份，回來的內容一模一樣），請求數少一半；合併那支出問題就照舊分兩支抓。
+let signalBundleOffUntil = 0;   // 合併那支失敗後 10 分鐘內直接分兩支抓，不要每 5 秒都多打一次失敗的
+async function fetchSignalsAndRanking(today){
+  if (Date.now() >= signalBundleOffUntil){
+    try {
+      const res = await fetch('/api/signal-bundle?trade_date=' + today + '&limit=5000&rank_limit=1000');
+      if (!res.ok) throw new Error('signal-bundle http ' + res.status);
+      const data = await res.json();
+      return [parseRealSignals(data.signals), parseMainForceRanking(data.ranking)];
+    } catch (e) {
+      signalBundleOffUntil = Date.now() + 10 * 60 * 1000;
+    }
+  }
+  return Promise.all([fetchRealSignals(today), fetchMainForceRanking()]);
+}
 let signalRefreshInFlight = false;
 async function refreshSignalData(){
   if (signalRefreshInFlight) return;
@@ -5216,7 +5236,7 @@ async function refreshSignalData(){
   const today = twTodayStr();
   try {
     try {
-      const [signals, ranking] = await Promise.all([fetchRealSignals(today), fetchMainForceRanking()]);
+      const [signals, ranking] = await fetchSignalsAndRanking(today);
       todaySignalEvents = signals;
       mainForceRanking = ranking;
       mainForceRankingLoaded = true;
@@ -12013,7 +12033,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 00:36:31';
+const BUILD_STAMP = '2026-10-16 00:42:51';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16993,8 +17013,7 @@ if (CHART_WINDOW_MODE){
   setInterval(refreshStockFlags, 300000);
   refreshGroupDailyChanges(true);
   setInterval(() => refreshGroupDailyChanges(false), 600000);
-  renderOtcStrengthWidget();
-  setInterval(renderOtcStrengthWidget, 60000);
+  renderOtcStrengthWidget();   // 之後每次 refresh() 都會順便更新（盤中 15 秒），不另外每分鐘再抓（2026-10-16 省請求數）
   if (location.hash === '#signal-center'){
     document.body.classList.add('signal-window-mode');
   }
@@ -17011,9 +17030,23 @@ if (CHART_WINDOW_MODE){
   openSignalCenter(); // 盤中訊號中心預設常駐顯示，不用點才出現；要隱藏就按✕，要收合成小條就按－
 
   refresh();
-  setInterval(refresh, 15000);
   // 訊號要快：每5秒獨立輪詢(Worker端這幾個API也不快取)，不跟/api/groups綁在一起等。
-  setInterval(refreshSignalData, 5000);
+  // 2026-10-16 Cloudflare 免費方案一天 10 萬次請求：平日 08:30～14:30 照原本 15 秒／5 秒；其他時間報價、訊號都不會變，
+  // 改成 5 分鐘抓一次（10/15 晚上沒開盤還有每小時 2～3 千次請求，多半是開著沒關的頁面）
+  pollWhileMarket(refresh, 15000);
+  pollWhileMarket(refreshSignalData, 5000);
+}
+function marketPollActive(){
+  const t = new Date(Date.now() + 8 * 3600000), day = t.getUTCDay(), hm = t.toISOString().slice(11, 16);
+  return day >= 1 && day <= 5 && hm >= '08:30' && hm < '14:30';
+}
+function pollWhileMarket(fn, ms){
+  let last = Date.now();
+  setInterval(() => {
+    if (!marketPollActive() && Date.now() - last < 5 * 60 * 1000) return;
+    last = Date.now();
+    fn();
+  }, ms);
 }
 </script>
 
@@ -17654,6 +17687,31 @@ export default {
         } catch (err) {
           return Response.json({ status: "error", error: String(err) }, { status: 502 });
         }
+      }
+    }
+    if (url.pathname === "/api/signal-bundle") {
+      // 2026-10-16 Cloudflare 免費方案一天 10 萬次請求：網頁每 5 秒要盤中訊號＋大戶力排行，原本兩支請求合成這一支。
+      // Worker 去後端抓兩份（跟 /api/intraday-signals、/api/main-force-ranking 一樣不快取），原樣拼成 {"signals":…,"ranking":…}，
+      // 不解析 JSON、不轉字串，省 Worker 的 CPU 時間。
+      const day = url.searchParams.get("trade_date") || "";
+      const limit = parseInt(url.searchParams.get("limit") || "5000", 10);
+      const rankLimit = parseInt(url.searchParams.get("rank_limit") || "1000", 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !(limit > 0) || !(rankLimit > 0)) return Response.json({ status: "error", error: "參數不對" }, { status: 422 });
+      try {
+        const opts = { headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" }, cf: { cacheTtl: 0, cacheEverything: false } };
+        const base = "https://hanstock-production-b872.up.railway.app";
+        const [sig, rank] = await Promise.all([
+          fetch(base + "/api/hub/intraday-signals?trade_date=" + day + "&limit=" + limit, opts),
+          fetch(base + "/api/hub/main-force/ranking?limit=" + rankLimit, opts)
+        ]);
+        if (!sig.ok || !rank.ok) return Response.json({ status: "error", error: "後端回 " + sig.status + "／" + rank.status }, { status: 502 });
+        const parts = [new TextEncoder().encode('{"signals":'), new Uint8Array(await sig.arrayBuffer()), new TextEncoder().encode(',"ranking":'), new Uint8Array(await rank.arrayBuffer()), new TextEncoder().encode("}")];
+        const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+        let at = 0;
+        for (const p of parts) { out.set(p, at); at += p.length; }
+        return new Response(out, { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" } });
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
     if (url.pathname === "/api/main-force-ranking") {
