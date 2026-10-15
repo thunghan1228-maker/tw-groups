@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 10:08:51";
+const BUILD_STAMP = "2026-10-15 10:11:53";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"},{"code":"3357","name":"臺慶科"},{"code":"3537","name":"堡達"},{"code":"2428","name":"興勤"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -81,13 +81,13 @@ const HTML_PAGE = `<!DOCTYPE html>
   *{box-sizing:border-box;}
   [hidden]{display:none!important;}
   body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;padding-inline:0;}
-  header{padding:20px 16px 8px;}
+  header{padding:14px 16px 4px;}
   h1{font-size:20px;margin:0 0 4px;text-wrap:balance;}
   .sub{color:var(--muted);font-size:13px;}
   .updated{color:var(--muted);font-size:11px;text-align:center;padding:8px 0 28px;}
   /* 2026-09-24 使用者：搜尋框、櫃買強弱widget移到標題列（跟盤中訊號同一排）；
      強勢/弱勢族群統計移到強勢/弱勢分頁正上方，不再擠在「各族群前三強個股」標題旁邊。 */
-  .stat-bar-row{padding:12px 16px 0;}
+  .stat-bar-row{padding:0;margin-left:auto;flex:0 0 auto;align-self:center;}
   .loading{color:var(--muted);text-align:center;padding:40px 0;}
 
   .layout{display:flex;gap:14px;padding:8px 16px 32px;align-items:flex-start;flex-wrap:wrap;}
@@ -100,8 +100,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .section-head .section-title{margin:0;}
 
   /* 強勢／弱勢 分頁與統計 */
-  .tabs{display:flex;gap:24px;padding:16px 16px 0;align-items:flex-start;flex-wrap:wrap;}
-  .top6-strip{flex:1 1 600px;min-width:0;}
+  .tabs{display:flex;gap:10px 24px;padding:8px 16px 0;align-items:flex-start;flex-wrap:wrap;}
+  .top6-strip{flex:1 1 1000px;min-width:0;}
   .top6-label{font-size:12px;color:var(--muted);margin:0 0 4px;}
   .tab-btn{background:none;border:none;color:var(--muted);font-size:16px;font-weight:800;padding:0 0 10px;cursor:pointer;border-bottom:3px solid transparent;font-family:inherit;transition:color .15s ease,border-color .15s ease;}
   .tab-btn:hover{color:var(--text);}
@@ -294,23 +294,26 @@ const HTML_PAGE = `<!DOCTYPE html>
   .sb-count{background:#fff;color:#5b21b6;border-radius:999px;min-width:28px;padding:1px 9px;text-align:center;font-size:15px;font-weight:800;}
   .alert-toggle{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;}
   .alert-toggle.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
-  .market-strength-bar{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex-wrap:wrap;flex:1 1 360px;max-width:640px;}
-  .ms-badge{font-size:20px;font-weight:900;padding:8px 16px;border-radius:8px;background:var(--panel-2);flex-shrink:0;}
+  /* 2026-10-15 使用者：個股震盪這塊縮小，不用那麼大 */
+  .market-strength-bar{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex-wrap:wrap;flex:1 1 320px;max-width:560px;}
+  .ms-badge{font-size:15px;font-weight:900;padding:4px 10px;border-radius:8px;background:var(--panel-2);flex-shrink:0;}
   .ms-badge.up{color:var(--up);}
   .ms-badge.down{color:var(--down);}
-  .ms-lines{font-size:16px;font-weight:800;color:var(--text);line-height:1.5;}
+  .ms-lines{font-size:13px;font-weight:800;color:var(--text);line-height:1.45;}
   .ms-line.up{color:#ff5a5a;}
   .ms-line.down{color:#3ddc84;}
   .ms-badge.up{color:#ff5a5a;}
   .ms-badge.down{color:#3ddc84;}
-  .ms-updated{font-size:13px;font-weight:700;color:var(--text);opacity:.85;}
+  .ms-updated{font-size:11px;font-weight:700;color:var(--text);opacity:.85;}
 
   /* 股票搜尋 */
-  .stock-search-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex:1 1 260px;max-width:360px;}
-  .stock-search-bar input{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;}
+  /* 2026-10-15 使用者：搜尋框縮小，能輸入就好 */
+  .stock-search-bar{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex:0 1 220px;max-width:240px;}
+  .stock-search-bar input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 8px;font-size:13px;font-family:inherit;}
   .stock-search-bar input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  @media (max-width: 640px){ .stock-search-bar{flex:1 1 100%;max-width:none;} .signal-controls{flex-wrap:wrap;} .signal-controls button{white-space:nowrap;} }   /* 手機：搜尋框佔一行、右上按鈕不要擠成直的 */
   .ssb-hint{color:var(--down);font-size:12px;flex-shrink:0;}
-  .ssb-go-btn{flex-shrink:0;background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:8px;width:36px;height:36px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .ssb-go-btn{flex-shrink:0;background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:8px;width:30px;height:30px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
   .ssb-go-btn:hover{background:var(--accent);color:var(--bg);}
 
   /* 底部工具列 */
@@ -2364,7 +2367,7 @@ const HTML_PAGE = `<!DOCTYPE html>
       <div class="sub">依族群平均漲跌幅排序，每 15 秒自動更新一次</div>
     </div>
     <div class="stock-search-bar">
-      <input type="text" id="stockSearchInput" placeholder="輸入代號或名稱，按 Enter 或點右邊圖示開啟五分鐘K線圖">
+      <input type="text" id="stockSearchInput" placeholder="輸入代號或名稱" title="輸入代號或名稱，按 Enter 或點右邊圖示開啟五分鐘K線圖">
       <button class="ssb-go-btn" id="stockSearchGoBtn" aria-label="開啟K線圖">🔍</button>
       <span class="ssb-hint" id="stockSearchHint" hidden>查無此股票</span>
     </div>
@@ -2377,11 +2380,11 @@ const HTML_PAGE = `<!DOCTYPE html>
     </div>
   </div>
 </header>
-<div class="stat-bar-row" id="groupStatBar"></div>
 <div class="tabs">
   <button class="tab-btn strong active" id="tabStrong">強勢</button>
   <button class="tab-btn weak" id="tabWeak">弱勢</button>
   <div class="top6-strip" id="top6Strip"></div>  <!-- 2026-10-15 使用者：漲幅／跌幅前六大族群搬到最上面、強勢弱勢右邊，橫排 1～6 -->
+  <div class="stat-bar-row" id="groupStatBar"></div>  <!-- 2026-10-15 使用者：強勢／弱勢族群數移到這一列最右邊 -->
 </div>
 <div id="app"><div class="loading">資料讀取中…</div></div>
 <div class="updated" id="updatedAt"></div>
@@ -11493,7 +11496,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 10:08:51';
+const BUILD_STAMP = '2026-10-15 10:11:53';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
