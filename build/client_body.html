@@ -283,6 +283,11 @@
   .obs-stk{cursor:pointer;white-space:nowrap;border-bottom:1px dotted rgba(255,255,255,.4);}
   /* 2026-10-14 使用者：自選股提醒、發動提醒裡點股票代號或名稱直接開K線圖 */
   .alert-stk{cursor:pointer;border-bottom:1px dotted rgba(255,255,255,.55);}
+  .k193-g{font-size:15px;margin:8px 0 2px;}
+  .k193-drop{color:#16a34a;font-weight:800;margin-left:2px;}
+  .k193-avg{font-size:12px;margin-left:8px;}
+  .k193-s{margin:0 0 4px 14px;font-size:14px;line-height:1.7;}
+  .k193-stk{cursor:pointer;border-bottom:1px dotted currentColor;white-space:nowrap;}
   .alert-stk:hover{background:rgba(255,255,255,.14);border-radius:4px;}
   .pk-alert.behind-chart,.launch-alert.behind-chart{z-index:98;}
   .obs-stk:hover{background:rgba(255,255,255,.12);}
@@ -2630,6 +2635,7 @@
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
         <li><b>創高黑龍</b>：09:00 開盤～13:30 收盤（2026-10-05 起，以前 11:00 後才算；第一根 5 分K 也算），5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。每列後面標 123 黑龍：收黑就是這一波第幾次進場（①②③）、區1（紅，可積極加碼）或區2（黃，等突破再加碼）；問診日線圖、K線圖日線也會在進場的那根K棒上畫同樣的圓圈。</li>
         <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。今天跌、族內最弱 3 檔、不比櫃買強；🔪（刀）＝現價低於昨收、⚔️（劍）＝也低於前天收盤，只有🔪的也算（2026-10-15 照莊爸）。正式名單（強空積極）最多 15 檔，跌幅深的在前，大戶力最負的在上；多方打少（強族群裡逆勢走弱）和收割區域（已跌 5% 以上，不追空）只列名字。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
+        <li><b>空族群必殺(193)</b>：找「排名後半、而且名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票（第一版，照莊爸 10/15 的名單推的）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名。空方線以下＝排名後半、名次比昨天掉 5 名以上的族群；空方線以上＝前半但名次往下掉、族裡又有刀劍空股票的。⚠️＝族裡正在刀劍空(32) 名單上的股票，點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選強多／四項精選強空／1+2多／創高黑龍／主力翻多／主力翻空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日或開盤前 08:45 今天還沒有訊號時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
       </ul>
     </div>
@@ -4482,6 +4488,7 @@ const SIGNAL_KINDS = [
   { key: 'combo12Bull', label: '1+2多' },
   { key: 'blackDragon', label: '創高黑龍' },
   { key: 'bladeShort', label: '刀劍空(32)' },
+  { key: 'kill193', label: '空族群必殺(193)' },   // 2026-10-15 使用者：照莊爸 193 做（第一版，條件用他三份名單推的）
   { key: 'history', label: '歷史查詢' },
 ];
 // 5分鐘K策略訊號家族(MA交叉/520/A8空等)只在K線圖上用符號呈現，不進盤中
@@ -5924,6 +5931,61 @@ function race333Html(){
 }
 // 2026-09-30 使用者：「刀劍空(32)」拿出來另外做一個獨立的盤中訊號分頁，不要再放在盤中333裡面混在一起；
 // 選股邏輯完全不變，還是共用 race333Model() 算出來的 bladeUpper/bladeLower/bladeHarvest，只是單獨一個分頁呈現。
+// ---- 空族群必殺(193)（2026-10-15 使用者：照莊爸的 193，從他 09:03、09:20、09:29 三份名單推出來的第一版）----
+// 「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強）、M＝比昨天收盤的名次掉了幾名（三份名單裡 N−M 整天不變、剛好是昨天名次）。
+// 空方線以下＝排名後半、名次比昨天掉的族群；空方線以上＝前半但名次往下掉、而且族裡有刀劍空股票的（被動元件、化學二）。
+// ⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少）。莊爸族群旁的 🔪、⚔️0.7 這些記號意思還推不出來，先不做。
+const KILL193_MIN_DROP = 5;   // 莊爸 09:03／09:20／09:29 三份裡掉最少的是 🔽6，掉 1～4 名的族群都沒列
+function kill193Model(){
+  const m = race333Model();
+  if (!m) return null;
+  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+  const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
+  const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
+  const blade = new Map([...m.bladeLower, ...m.bladeHarvest, ...m.bladeUpper].map((r) => [r.code, r]));
+  const half = m.half;
+  const rows = ranked.map((g, i) => {
+    const d = daily[g.name] || {};
+    const prev = Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
+    const members = g.stocks.filter((s) => blade.has(s.code)).map((s) => ({ code: s.code, name: s.name, pct: s.changePercent }))
+      .sort((a, b) => b.pct - a.pct);
+    return { name: g.name, rank: i + 1, prev, drop: prev !== null ? i + 1 - prev : null, avg: g.avgChange, members };
+  });
+  const falling = rows.filter((r) => r.drop !== null && r.drop >= KILL193_MIN_DROP);
+  return {
+    upper: falling.filter((r) => r.rank <= half && r.members.length),
+    lower: falling.filter((r) => r.rank > half),
+    half, total: ranked.length, hasDaily: rows.some((r) => r.prev !== null), otcPct: m.otcPct,
+  };
+}
+function kill193Text(k){
+  const now = new Date(Date.now() + 8 * 3600000);
+  const head = '空族群必殺(193) ' + twTodayStr().slice(5).replace('-', '/') + ' ' + now.toISOString().slice(11, 16);
+  const line = (r) => r.name + '-(' + r.rank + ')🔽' + r.drop + (r.members.length ? '\n⚠️' + r.members.map((s) => s.code + s.name).join('/') : '');
+  return [head].concat(k.upper.map(line), ['------↓(空方)↓------'], k.lower.map(line)).join('\n');
+}
+function kill193Html(){
+  const k = kill193Model();
+  if (!k) return raceNotReadyHtml();
+  const stamp = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', hour12: false });
+  const grp = (r) => '<div class="k193-g"><b>' + r.name + '</b>-(' + r.rank + ')<span class="k193-drop">🔽' + r.drop + '</span>' +
+    '<span class="muted k193-avg">' + fmt(r.avg) + '%・昨天第 ' + r.prev + ' 名</span></div>' +
+    (r.members.length ? '<div class="k193-s">⚠️' + r.members.map((s) => '<span class="k193-stk" data-k193-code="' + s.code + '" data-k193-name="' + s.name + '">' + s.code + s.name +
+      ' <span class="down">' + fmt(s.pct) + '%</span></span>').join(' / ') + '</div>' : '');
+  return '<div class="race-block"><div class="race-head">空族群必殺(193) ' + stamp + ' <button type="button" class="chart-tab chips-btn" data-k193-copy="1">📋 複製</button></div>' +
+    '<div class="race-sub">第一版（照莊爸 10/15 三份名單推的）：族群名次＝今天平均漲跌幅排名（1 最強，共 ' + k.total + ' 個族群）；🔽＝比昨天收盤的名次掉了幾名。' +
+      '空方線以下＝排名後半（第 ' + (k.half + 1) + ' 名以後）、名次比昨天掉 ' + KILL193_MIN_DROP + ' 名以上的族群；空方線以上＝前半但名次往下掉、族裡又有刀劍空股票的。' +
+      '⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少），點股票開K線圖。莊爸族群旁的 🔪、⚔️ 記號還在對，先不顯示。</div>' +
+    (!k.hasDaily ? '<div class="race-note">還沒拿到族群昨天的名次，等一下就會出來。</div>'
+      : k.upper.map(grp).join('') + '<div class="race-sep">------↓(空方)↓------</div>' +
+        (k.lower.length ? k.lower.map(grp).join('') : '<div class="race-note">排名後半的族群目前名次都沒有比昨天掉</div>')) + '</div>';
+}
+function kill193Copy(){
+  const k = kill193Model();
+  if (!k) return;
+  const text = kill193Text(k);
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => showToast('已複製空族群必殺(193)')).catch(() => { window.prompt('複製下面的文字', text); });
+}
 function bladeShortHtml(){
   const m = race333Model();
   if (!m) return raceNotReadyHtml();
@@ -11567,7 +11629,7 @@ function renderSignalCenter(){
     // 2026-10-04 使用者：今日即時拆成多／空兩頁，各自只算自己那一邊的訊號＋大戶力列。
     if (key === 'now') return currentEvents.filter((e) => e.tabs.includes('now')).length + bigHolderRowsFrom(mainForceRanking, 'bull').length + ghfSignalEvents(ghfTodayView(), 'up').length + stSignalEvents('strong').length + launchSignalEvents().length;
     if (key === 'nowBear') return currentEvents.filter((e) => e.tabs.includes('nowBear')).length + bigHolderRowsFrom(mainForceRanking, 'bear').length + ghfSignalEvents(ghfTodayView(), 'down').length + stSignalEvents('weak').length;
-    if (key === 'history' || key === 'race333' || key === 'bladeShort' || key === 'groupHolderBull' || key === 'groupHolderBear' || key === 'groupCombinedBoard') return null;
+    if (key === 'history' || key === 'race333' || key === 'bladeShort' || key === 'kill193' || key === 'groupHolderBull' || key === 'groupHolderBear' || key === 'groupCombinedBoard') return null;
     if (key === 'obsWatch') return obsState.report ? obsState.report.items.length : null;
     if (key === 'strongStocks' || key === 'weakStocks'){ const d = stState[key === 'strongStocks' ? 'strong' : 'weak']; return d ? d.count : null; }
     if (key === 'bigHolderForceBull') return bigHolderRowsFrom(mainForceRanking, 'bull').length;
@@ -11585,7 +11647,7 @@ function renderSignalCenter(){
   // 使用者 2026-09-24：這三個分頁的分頁字改紫紅色，跟其他分頁的灰白字區隔開來。
   const PURPLE_TAB_KEYS = new Set(['obsWatch', 'now', 'groupCombinedBoard', 'race333', 'brewOnly', 'launchOnly']);  // 2026-09-24 使用者：醞釀／發動也紫紅色；2026-09-26：盤中大戶力改回黑字；2026-10-08：今日即時多也紫色
   // 2026-10-04 使用者：「空」方向另外三個分頁(盤中大戶力空／四項精選強空／主力翻空)也改綠色，跟刀劍空、盤中特大賣單一致。
-  const GREEN_TAB_KEYS = new Set(['weakStocks', 'groupHolderBear', 'nowBear', 'bladeShort', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear']);  // 2026-10-04：今日即時空也綠字
+  const GREEN_TAB_KEYS = new Set(['weakStocks', 'groupHolderBear', 'nowBear', 'bladeShort', 'kill193', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear']);  // 2026-10-04：今日即時空也綠字
   // 2026-10-08 使用者：多方六個分頁字都改紅色、顏色一樣（盤中特大買單原本桃紅色也改成這個紅）。
   const RED_TAB_KEYS = new Set(['strongStocks', 'groupHolderBull', 'bigBuy', 'bigHolderForceBull', 'fourGateBuy', 'combo12Bull', 'blackDragon', 'mainForceFlipBull']);
   const tabsHtml = SIGNAL_KINDS.map((k) => {
@@ -11651,6 +11713,9 @@ function renderSignalCenter(){
   } else if (active === 'bladeShort'){
     refreshGroupDailyChanges(false);
     replaceSignalHtml(body, 'bladeShort', bladeShortHtml());
+  } else if (active === 'kill193'){
+    refreshGroupDailyChanges(false);
+    replaceSignalHtml(body, 'kill193', kill193Html());
   } else if (active === 'groupHolderBull' || active === 'groupHolderBear'){
     refreshGroupDailyChanges(false);
     replaceSignalHtml(body, active, groupHolderForceHtml(active === 'groupHolderBull' ? 'up' : 'down'));
@@ -15751,6 +15816,9 @@ document.getElementById('signalTabsBar').addEventListener('click', (e) => {
   renderSignalCenter();
 });
 document.getElementById('signalBody').addEventListener('click', (e) => {
+  if (e.target.closest('[data-k193-copy]')){ kill193Copy(); return; }
+  const k193 = e.target.closest('[data-k193-code]');
+  if (k193){ openStockChart(k193.dataset.k193Code, k193.dataset.k193Name); return; }
   // 形態觀察股分頁（跟每日功課同一份）
   if (e.target.closest('[data-obs-run]')){ obsRun(null, false); return; }
   if (e.target.closest('[data-obs-day]')){ const b = e.target.closest('[data-obs-day]'); if (!b.disabled) obsSelectDay(Number(b.dataset.obsDay) || 0); return; }
