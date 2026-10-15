@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 18:44:45";
+const BUILD_STAMP = "2026-10-15 18:51:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -972,6 +972,17 @@ const HTML_PAGE = `<!DOCTYPE html>
   .rd-itable th:first-child,.rd-itable td:first-child{text-align:left;}
   .rd-itable td{text-align:right;padding:5px 3px;border-bottom:1px solid rgba(255,255,255,.06);font-variant-numeric:tabular-nums;}
   .rd-sel{outline:1.5px solid #e6675f;background:rgba(230,103,95,.14);border-radius:4px;}
+  /* 2026-10-15 使用者：照老師的籌碼圖——族群前 3 名深紅、其他淡紅；族內前 5 名下面畫「前5名平均」虛線；個股九週改直條圖 */
+  .rd-bar i.up.soft{background:linear-gradient(90deg,#c97b7b,#f0a3a3);}
+  .rd-avg-line{display:flex;align-items:center;gap:6px;font-size:11px;color:#ef4444;margin:2px 0;}
+  .rd-avg-line::after{content:'';flex:1;border-top:1.5px dashed #ef4444;}
+  .rd-trail-chart svg{width:100%;height:auto;display:block;}
+  .rd-trail-chart .cc-ax{fill:var(--muted);font-size:11px;}
+  .rd-trail-chart .cc-v{font-size:11px;font-weight:700;}
+  .rd-trail-sum{font-size:12px;color:var(--muted);margin:4px 0 2px;}
+  .rd-trail-sum b.up{color:var(--up);} .rd-trail-sum b.down{color:var(--down);}
+  details.rd-trail-more{margin-top:4px;font-size:12px;}
+  details.rd-trail-more summary{cursor:pointer;color:var(--muted);}
   .rd-cap{display:inline-block;font-size:10px;line-height:15px;border:1px solid #8b5cf6;color:#c4b5fd;border-radius:4px;padding:0 4px;margin-left:4px;vertical-align:middle;white-space:nowrap;}
   .rd-cap-short{display:none;}
   @media (max-width:640px){ .rd-lrow .rd-cap-long{display:none;} .rd-lrow .rd-cap-short{display:inline;} }
@@ -7860,6 +7871,13 @@ async function ensureRadarStock(code){
 }
 // K線圖下面的籌碼九週（2026-10-15 使用者：照老師個股「籌碼暴增 近9週」柱狀圖）：跟籌碼暴增雷達個股查詢同一份（/api/chip-radar-stock），
 // 集保 400 張以上大戶持股的週增減%，紅＝增加、綠＝減少，最右邊是最新一週（淡底）；標題後面寫連幾週增加／減少。
+// 最新一週往回連續同方向（增加／減少）幾週
+function chipStreak(trail){
+  const latest = trail[0], sign = latest && rdHas(latest.chip) ? Math.sign(latest.chip) : 0;
+  let n = 0;
+  for (const t of trail){ if (sign && rdHas(t.chip) && Math.sign(t.chip) === sign) n++; else break; }
+  return { n, sign };
+}
 const cmChip = { open: (() => { try { return localStorage.getItem('cmChipOpen') !== '0'; } catch (_){ return true; } })() };
 function cmChipSvg(trail){
   const rows = trail.slice().reverse();   // 舊→新
@@ -7893,9 +7911,7 @@ function cmChipRender(){
   const trail = st && Array.isArray(st.trail) ? st.trail.filter((t) => t) : [];
   if (trail.length){
     const latest = trail[0];
-    let streak = 0;
-    const sign = rdHas(latest.chip) ? Math.sign(latest.chip) : 0;
-    for (const t of trail){ if (sign && rdHas(t.chip) && Math.sign(t.chip) === sign) streak++; else break; }
+    const { n: streak, sign } = chipStreak(trail);
     sum.innerHTML = '最新 ' + rdMdShort(latest.date) + ' <b class="' + (latest.chip > 0 ? 'up' : latest.chip < 0 ? 'down' : '') + '">' + (rdHas(latest.chip) ? rdPct(latest.chip) : '—') + '</b>' +
       (streak >= 2 ? '・連 ' + streak + ' 週' + (sign > 0 ? '增加' : '減少') : '') + (st.rank ? '・本週買超榜第 ' + st.rank + ' 名' : '');
   } else sum.textContent = '';
@@ -7998,6 +8014,16 @@ function rdKlineBox(code, open){
   const body = bars ? rdKlineSvg(bars) : '<div class="rd-note">' + (rdBarsFailed[code] ? '日K讀不到' : '讀取中…') + '</div>';
   return '<div class="rd-kbox" data-rd-chart="' + code + '" title="點一下開大圖">' + head + body + '</div>';
 }
+// 個股九週籌碼（2026-10-15 使用者：照老師「籌碼暴增 近9週」改直條圖，跟 K 線圖下面那張同一個畫法）；逐週名次、股本變動收在下面的明細
+function rdTrailChartHtml(trail){
+  const rows = (trail || []).filter((t) => t);
+  if (!rows.some((t) => rdHas(t.chip))) return rdTrailHtml(trail);
+  const latest = rows[0], st = chipStreak(rows);
+  return '<div class="rd-trail-sum">籌碼暴增・近 ' + rows.length + ' 週　最新 ' + rdMdShort(latest.date) + ' <b class="' + (latest.chip > 0 ? 'up' : latest.chip < 0 ? 'down' : '') + '">' + (rdHas(latest.chip) ? rdPct(latest.chip) : '—') + '</b>' +
+    (st.n >= 2 ? '・連 ' + st.n + ' 週' + (st.sign > 0 ? '增加' : '減少') : '') + '</div>' +
+    '<div class="rd-trail-chart">' + cmChipSvg(rows) + '</div>' +
+    '<details class="rd-trail-more"><summary>逐週明細（買超榜名次、股本變動）</summary>' + rdTrailHtml(trail) + '</details>';
+}
 // 九週籌碼軌跡（新→舊），條長照這幾週最大的值
 function rdTrailHtml(trail){
   const rows = (trail || []).filter((t) => t);
@@ -8038,7 +8064,7 @@ function rdStockCardHtml(s){
   return '<div class="rd-card" id="rdStockCard"><div class="rd-card-head"><span class="rd-name" data-rd-chart="' + s.code + '">' + rdEsc(s.name) + '</span><span class="rd-code">' + s.code + '</span>' +
     (s.rank ? '<span class="rd-badge">本週榜 <span class="rd-circle">' + s.rank + '</span></span>' : '') + rdMa(s.score) + rdCapTag(s.capital, !!s.excluded) + (s.outside ? '<span class="rd-badge rd-out-badge" title="不在追蹤範圍（族群表＋另外追蹤的族群外股票），籌碼% 照算、不進排行">範圍外</span>' : '') +
     '<span class="rd-big ' + rdCls(s.chip) + '">' + rdPct(s.chip) + '</span></div>' +
-    rdKlineBox(s.code, true) + rdTrailHtml(s.trail) +
+    rdKlineBox(s.code, true) + rdTrailChartHtml(s.trail) +
     '<div class="rd-sec-title" style="font-size:16px;margin-top:12px">三大法人 <small>' + (market ? market + '・' : '') + '張</small></div>' + rdInstHtml(s.inst) + '</div>';
 }
 function rdGroupCardHtml(s){
@@ -8047,10 +8073,13 @@ function rdGroupCardHtml(s){
   }
   const members = s.groupMembers || [];
   const max = Math.max(0.01, ...members.map((m) => Math.abs(m.chip || 0)));
-  const rows = members.map((m) => '<div class="rd-lrow' + (m.code === s.code ? ' rd-sel' : '') + '" data-rd-code="' + m.code + '"><span class="rd-c">' + m.code + '</span><span class="rd-n">' + rdEsc(m.name) + '</span>' +
+  const rows = members.map((m, i) => '<div class="rd-lrow' + (m.code === s.code ? ' rd-sel' : '') + '" data-rd-code="' + m.code + '"><span class="rd-c">' + m.code + '</span><span class="rd-n">' + rdEsc(m.name) + '</span>' +
     '<span class="rd-bar"><i class="' + (m.chip >= 0 ? 'up' : 'down') + '" style="width:' + Math.min(100, Math.abs(m.chip) / max * 100).toFixed(1) + '%"></i></span>' +
-    '<span class="rd-val ' + rdCls(m.chip) + '">' + rdPct(m.chip) + '</span>' + rdMa(m.score) + '</div>').join('');
+    '<span class="rd-val ' + rdCls(m.chip) + '">' + rdPct(m.chip) + '</span>' + rdMa(m.score) + '</div>' +
+    (i === 4 && members.length > 5 && rdHas(s.groupAvg) ? '<div class="rd-avg-line">前5名平均 ' + rdPct(s.groupAvg) + '</div>' : '')).join('');
+  const pos = members.findIndex((m) => m.code === s.code);
   return '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title">' + rdEsc(s.group) + ' 族群（籌碼暴增）</span>' +
+    (pos >= 0 ? '<span class="rd-date-pill">' + rdEsc(s.name) + ' 族內第 ' + (pos + 1) + '/' + members.length + ' 名</span>' : '') +
     (rdHas(s.groupAvg) ? '<span class="rd-date-pill">前 5 檔平均 ' + rdPct(s.groupAvg) + '</span>' : '') + '</div>' +
     (rows || '<div class="rd-empty-list">這週同族群沒有集保資料。</div>') + '<div class="rd-note">資料週：' + String(s.groupWeek || s.week || '').replace(/-/g, '/') + '</div></div>';
 }
@@ -8145,11 +8174,12 @@ function rdGroupsHtml(d){
   const pick = groups.find((g) => g.name === radarState.group) || top[0];
   const max = Math.max(0.01, ...top.map((g) => Math.abs(g.avg)));
   const left = top.map((g, i) => '<div class="rd-grow' + (g.name === pick.name ? ' active' : '') + '" data-rd-group="' + rdEsc(g.name) + '"><span class="rd-c">' + (i + 1) + '</span><span class="rd-n">' + rdEsc(g.name) + '</span>' +
-    '<span class="rd-bar"><i class="' + (g.avg >= 0 ? 'up' : 'down') + '" style="width:' + Math.min(100, Math.abs(g.avg) / max * 100).toFixed(1) + '%"></i></span><span class="rd-val ' + rdCls(g.avg) + '">' + rdPct(g.avg) + '</span></div>').join('');
+    '<span class="rd-bar"><i class="' + (g.avg >= 0 ? 'up' + (i >= 3 ? ' soft' : '') : 'down') + '" style="width:' + Math.min(100, Math.abs(g.avg) / max * 100).toFixed(1) + '%"></i></span><span class="rd-val ' + rdCls(g.avg) + '">' + rdPct(g.avg) + '</span></div>').join('');
   const mmax = Math.max(0.01, ...pick.members.map((m) => Math.abs(m.chip)));
-  const right = pick.members.map((m) => '<div class="rd-lrow" data-rd-code="' + m.code + '"><span class="rd-c">' + m.code + '</span><span class="rd-n">' + rdEsc(m.name) + (m.rank ? ' <span class="rd-circle">' + m.rank + '</span>' : '') + '</span>' +
+  const right = pick.members.map((m, i) => '<div class="rd-lrow" data-rd-code="' + m.code + '"><span class="rd-c">' + m.code + '</span><span class="rd-n">' + rdEsc(m.name) + (m.rank ? ' <span class="rd-circle">' + m.rank + '</span>' : '') + '</span>' +
     '<span class="rd-bar"><i class="' + (m.chip >= 0 ? 'up' : 'down') + '" style="width:' + Math.min(100, Math.abs(m.chip) / mmax * 100).toFixed(1) + '%"></i></span>' +
-    '<span class="rd-val ' + rdCls(m.chip) + '">' + rdPct(m.chip) + '</span>' + rdMa(m.score) + '</div>').join('');
+    '<span class="rd-val ' + rdCls(m.chip) + '">' + rdPct(m.chip) + '</span>' + rdMa(m.score) + '</div>' +
+    (i === 4 && pick.members.length > 5 ? '<div class="rd-avg-line">前5名平均 ' + rdPct(pick.avg) + '</div>' : '')).join('');
   return '<section><div class="rd-sec-title">族群排名比較<small>週籌碼暴增 前十族群（族群裡籌碼% 最高 5 檔的平均）・' + rdMdShort(d.week) + '</small></div><div class="rd-groups">' +
     '<div class="rd-card">' + left + '<div class="rd-note">點族群名稱，右邊帶出那個族群這週的籌碼排名。</div></div>' +
     '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title">' + rdEsc(pick.name) + ' 當週籌碼排名</span><span class="rd-date-pill">前 5 平均 ' + rdPct(pick.avg) + '・' + pick.count + ' 檔</span></div>' + right + '</div>' +
@@ -11823,7 +11853,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 18:44:45';
+const BUILD_STAMP = '2026-10-15 18:51:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
