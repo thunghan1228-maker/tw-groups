@@ -85,7 +85,15 @@
   .hr-foot{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6;}
   @media (max-width: 1700px){ .home-rank4{grid-template-columns:repeat(4, minmax(0, 1fr));} }
   @media (max-width: 900px){ .home-rank4{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-grid{grid-template-columns:repeat(3, minmax(0, 1fr));} }
-  @media (max-width: 640px){ .hr-row{padding:5px 8px;} .hr-avg{display:none;} }
+  /* 2026-10-15 使用者：手機版也要看到每列後面的漲跌幅——兩欄照舊，字和間距縮小，名稱太長就截掉，漲跌幅一定留著 */
+  @media (max-width: 640px){
+    .hr-row{padding:4px 5px;gap:3px;font-size:12px;}
+    .hr-name{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;}
+    .hr-code,.hr-rk{font-size:11px;flex-shrink:0;}
+    .hr-avg{font-size:11px;flex-shrink:0;}
+    .hr-bear-pill{padding:1px 4px;gap:3px;}
+    .hr-title{font-size:14px;padding:7px 8px;}
+  }
   @media (max-width: 640px){ .top6-grid{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-name{font-size:14px;overflow:hidden;text-overflow:ellipsis;} .top6-chg{font-size:13px;} .top6-card{padding:7px 8px;} }   /* 手機兩欄放不下漲跌幅，點族群看 */
   /* 右側：各族群前三強／前三弱個股（2026-10-15 起首頁不再用，樣式先留著）。兩欄、由上往下排：第1~3在左欄、第4~6在右欄。 */
   .top-groups-row{display:grid;grid-template-columns:repeat(2, 1fr);grid-template-rows:repeat(3, auto);grid-auto-flow:column;gap:8px;}
