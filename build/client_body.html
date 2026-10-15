@@ -2649,7 +2649,7 @@
       <ul>
         <li><b>今日即時多</b>：彙整多方向訊號的即時清單：最上面一塊是盤中大戶力多的名單（時間＝第一次進名單，早進名單的在上面、新進的往下排），下面是四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單依發生時間新到舊排序。也包含十大多族群裡大戶力 ≥ +10% 的股票（訊號寫「十大多族群」）。今日強勢股裡大戶力 ≥ +10% 的也會進來（訊號寫「今日強勢股」）。今天／昨天／前天後面的「盤中大戶力≥10%」按下去只看大戶力 ≥ +10% 的股票（上面的名單跟下面的訊號都套，再按一次全部顯示）；今日即時空同樣有「≤-10%」。</li>
         <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（時間＝第一次出現，早出現的在上面、新出現的往下排，只有今天有；多方打少、收割區域放在整頁最下面），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。也包含十大空族群裡大戶力 ≤ −10% 的股票（訊號寫「十大空族群」）。今日弱勢股裡大戶力 ≤ −10% 的也會進來（訊號寫「今日弱勢股」）。</li>
-        <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。⭐＝這族今天也有出現在盤中形態觀察股（通常是比較強勢的族群）、👀＝這檔在盤中形態觀察股名單裡。均線分數是收盤算好的，現價、漲跌、大戶力是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
+        <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。今天下跌的不列（弱勢股反過來，今天上漲的不列），整族都不符合就不列那一族。⭐＝這族今天也有出現在盤中形態觀察股（通常是比較強勢的族群）、👀＝這檔在盤中形態觀察股名單裡。均線分數是收盤算好的，現價、漲跌、大戶力是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
         <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面；按「大戶力 ≤ −10%」只看大戶在賣的。</li>
         <li><b>十大多族群</b>（原精選十大多空族群的多方）：今天漲幅前10大族群，各取大戶力最強的前5檔個股；按「大戶力≥10%」只看大戶力 ≥ +10% 的。</li>
         <li><b>十大空族群</b>（原精選十大多空族群的空方）：今天跌幅前10大族群，各取大戶力最負（賣超）的前5檔個股，名次從最弱的數；按「大戶力≤-10%」只看大戶力 ≤ −10% 的。</li>
@@ -6250,7 +6250,7 @@ function stSignalEvents(side){
   if (!d) return [];
   const strong = side === 'strong', out = [];
   const holderByCode = new Map((mainForceRanking || []).map((r) => [r.code, r]));
-  d.groups.forEach((g) => g.rows.forEach((r) => {
+  stLiveGroups(d, strong).forEach((g) => g.rows.forEach((r) => {
     const h = holderByCode.get(r.code), v = h ? h.strengthPct : null;
     if (v === null || v === undefined || (strong ? v < ST_HF_MIN : v > -ST_HF_MIN)) return;
     const hot = stHotTimes(r.code, strong), ts = (hot && hot.since) || h.lastTs || 0;   // 時間＝這一次站上 ±10% 的時間（還沒有就用最後更新）
@@ -11704,6 +11704,18 @@ const stState = { strong: null, weak: null, loading: {}, at: {}, error: {},
   // 大戶力篩選（2026-10-12 使用者：強勢股多一個「大戶力 ≥10%」按鈕、弱勢股多一個「大戶力 ≤ −10%」），記在這台電腦
   hfOnly: (() => { try { return JSON.parse(localStorage.getItem('stHfOnly') || '{}') || {}; } catch (_){ return {}; } })() };
 const ST_HF_MIN = 10;
+// 2026-10-15 使用者：「跌那麼多怎麼是強勢第一名」——均線分數是昨天收盤算的（台塑四寶 10/14 大漲、6 條均線全站上，全族 15 分），
+// 今天跌停也還排第一。改成強勢股只列今天沒有下跌的（現價 ≥ 昨收）、弱勢股只列今天沒有上漲的（現價 ≤ 昨收）；
+// 族群名次還是照均線分數，整族都被濾掉就不列那一族。沒有即時報價的先照列。
+function stLiveOk(code, strong){
+  const q = getStockQuote(code);
+  if (!q || !Number.isFinite(q.changePercent)) return true;
+  return strong ? q.changePercent >= 0 : q.changePercent <= 0;
+}
+function stLiveGroups(d, strong){
+  return d.groups.map((g) => Object.assign({}, g, { rows: g.rows.filter((r) => stLiveOk(r.code, strong)) }));
+}
+function stLiveCount(d, strong){ return stLiveGroups(d, strong).reduce((a, g) => a + g.rows.length, 0); }
 function stLoad(side){
   if (stState.loading[side] || (stState[side] && Date.now() - stState.at[side] < 5 * 60000)) return;
   if (stState.error[side] && Date.now() - stState.error[side].at < 30000) return;
@@ -11723,7 +11735,8 @@ function stPanelHtml(side){
   const obsItems = (obsState.report && obsState.report.items) || [];
   const obsCodes = new Set(obsItems.map((x) => x.code));
   const groupHasObs = (name) => { const g = GROUPS.find((x) => x.name === name); return !!g && g.stocks.some((st) => obsCodes.has(st.code)); };
-  const rule = strong ? '族群分數前十大（族內平均均線分數）裡，均線分數 ≥' + d.rule.min + ' 的股票' : '族群分數倒數十名裡，均線分數 ≤' + d.rule.max + ' 的股票';
+  const rule = (strong ? '族群分數前十大（族內平均均線分數）裡，均線分數 ≥' + d.rule.min + ' 的股票' : '族群分數倒數十名裡，均線分數 ≤' + d.rule.max + ' 的股票') +
+    '・今天' + (strong ? '下跌（現價低於昨收）' : '上漲（現價高於昨收）') + '的不列，整族都不符合就不列那一族';
   let h = '<div class="race-note">' + rule + '・均線分數＝' + swMmdd(d.date) + ' 收盤（滿分 15，每天收盤後更新）・現價、漲跌是即時的・' +
     (strong ? '⭐＝這族今天也有出現在盤中形態觀察股（通常是比較強勢的族群）・' : '') + '👀＝這檔在盤中形態觀察股名單裡・盤中大戶力＝盤中大單淨額 ÷ 累計成交額・時間＝這一次大戶力' + (strong ? '站上 +' : '跌破 −') + ST_HF_MIN + '% 的時間（中間跌回去又站回來就從站回來算；現在沒有在 ' + (strong ? '+' : '−') + ST_HF_MIN + '% 以' + (strong ? '上' : '下') + '的寫「—」）・點一列開K線圖</div>' +
     // 欄位名稱（2026-10-12 使用者：大戶力、漲跌幅、漲跌、成交價；2026-10-13 字放大 1.5 倍、大戶力改「盤中大戶力」）
@@ -11734,7 +11747,9 @@ function stPanelHtml(side){
   const holderByCode = new Map((mainForceRanking || []).map((r) => [r.code, r]));
   const hfPass = (code) => { const h = holderByCode.get(code), v = h ? h.strengthPct : null; return v !== null && v !== undefined && (strong ? v >= ST_HF_MIN : v <= -ST_HF_MIN); };
   let shown = 0;
-  d.groups.forEach((g) => {
+  const liveCount = stLiveCount(d, strong);
+  stLiveGroups(d, strong).forEach((g) => {
+    if (!g.rows.length) return;   // 今天整族都在跌（強勢）／都在漲（弱勢）就不列（2026-10-15）
     const rows = hfOnly ? g.rows.filter((r) => hfPass(r.code)) : g.rows;
     if (hfOnly && !rows.length) return;   // 篩大戶力時，沒有符合的族群整組不列
     shown += rows.length;
@@ -11761,7 +11776,7 @@ function stPanelHtml(side){
         (q ? stockValueColsHtml(q.price, chg, q.changePercent, q) : '<div class="srow-right"><span class="spct flat">—</span><span class="schg flat">—</span><span class="sprice">' + ckPrice(r.close) + '</span></div>') + '</div>';
     }).join('') + '</div>';
   });
-  if (!d.count) h += '<div class="race-note">今天沒有符合的股票</div>';
+  if (!liveCount) h += '<div class="race-note">' + (d.count ? '均線分數符合的 ' + d.count + ' 檔今天都在' + (strong ? '跌' : '漲') + '，先不列' : '今天沒有符合的股票') + '</div>';
   else if (hfOnly && !shown) h += '<div class="race-note">目前沒有大戶力' + (strong ? '≥ +' : '≤ −') + ST_HF_MIN + '% 的股票（大戶力盤中才有，開盤後會陸續出現）</div>';
   return h;
 }
@@ -11775,7 +11790,7 @@ function renderSignalCenter(){
     if (key === 'nowBear') return currentEvents.filter((e) => e.tabs.includes('nowBear')).length + bigHolderRowsFrom(mainForceRanking, 'bear').length + ghfSignalEvents(ghfTodayView(), 'down').length + stSignalEvents('weak').length;
     if (key === 'history' || key === 'race333' || key === 'bladeShort' || key === 'kill193' || key === 'groupHolderBull' || key === 'groupHolderBear' || key === 'groupCombinedBoard') return null;
     if (key === 'obsWatch') return obsState.report ? obsState.report.items.length : null;
-    if (key === 'strongStocks' || key === 'weakStocks'){ const d = stState[key === 'strongStocks' ? 'strong' : 'weak']; return d ? d.count : null; }
+    if (key === 'strongStocks' || key === 'weakStocks'){ const d = stState[key === 'strongStocks' ? 'strong' : 'weak']; return d ? stLiveCount(d, key === 'strongStocks') : null; }
     if (key === 'bigHolderForceBull') return bigHolderRowsFrom(mainForceRanking, 'bull').length;
     if (key === 'bigHolderForceBear') return bigHolderRowsFrom(mainForceRanking, 'bear').length;
     if (key === 'launchOnly' && brewHeldLaunchDate()) return brewLaunchByStock(brewHistoryDay(brewHeldLaunchDate()).launch).length;
