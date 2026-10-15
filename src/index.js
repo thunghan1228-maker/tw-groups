@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-15 18:34:31";
+const BUILD_STAMP = "2026-10-15 18:44:45";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -305,6 +305,13 @@ const HTML_PAGE = `<!DOCTYPE html>
   #klineCanvas,#volumeCanvas,#forceCanvas,#macdCanvas,#kdCanvas{display:block;width:100%;height:100%;touch-action:none;}
 
   .ind-panel-block{margin-top:10px;}
+  .cm-chip-sum{font-size:12px;font-weight:700;margin-left:6px;color:var(--muted);}
+  .cm-chip-sum b.up{color:var(--up);} .cm-chip-sum b.down{color:var(--down);}
+  .cm-chip-body svg{width:100%;max-width:900px;height:auto;display:block;margin:0 auto;}
+  .cm-chip-body .cc-ax{fill:var(--muted);font-size:11px;}
+  .cm-chip-body .cc-v{font-size:11px;font-weight:700;}
+  .cm-chip-note{font-size:12px;color:var(--muted);padding:4px 2px;}
+  #cmChipToggle{white-space:nowrap;flex-shrink:0;}
   .ind-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
   .macd-toggle{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:700;padding:3px 12px;border-radius:999px;cursor:pointer;font-family:inherit;}
   .macd-toggle.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
@@ -2735,6 +2742,13 @@ const HTML_PAGE = `<!DOCTYPE html>
       <div class="ind-panel-head"><span class="force-title">成交量</span></div>
       <div class="chart-canvas-wrap volume-wrap"><canvas id="volumeCanvas"></canvas></div>
     </div>
+    <div class="ind-panel-block" id="cmChipBlock">  <!-- 2026-10-15 使用者：K線圖加個股籌碼九週柱狀圖（照老師「籌碼暴增 近9週」） -->
+      <div class="ind-panel-head">
+        <span class="force-title">籌碼暴增・近 9 週 <small class="cm-chip-sum" id="cmChipSum"></small></span>
+        <button class="macd-toggle" id="cmChipToggle" aria-pressed="true">收起</button>
+      </div>
+      <div class="cm-chip-body" id="cmChipBody"></div>
+    </div>
     <div class="ind-panel-block">
       <div class="ind-panel-head">
         <span class="force-title">MACD (12,26,9)</span>
@@ -4419,6 +4433,7 @@ function openStockChart(code, name, tf){
   const cmStar = document.getElementById('cmStar');
   if (cmStar){ cmStar.dataset.code = code; cmStar.dataset.name = name || ''; wlRefreshStars(); }
   renderChartFlags(code);
+  try { cmChipLoad(code); } catch (_){}   // 籌碼九週（2026-10-15）
   if (wasHidden){
     const panel = document.getElementById('chartModalInner');
     overlay.hidden = false;
@@ -7841,7 +7856,67 @@ async function ensureRadarStock(code){
     delete radarStockLoading[code];
   }
   if (radarVisible()) renderChips();
+  try { if (currentChart.code === code) cmChipRender(); } catch (_){}   // K線圖下面的籌碼九週
 }
+// K線圖下面的籌碼九週（2026-10-15 使用者：照老師個股「籌碼暴增 近9週」柱狀圖）：跟籌碼暴增雷達個股查詢同一份（/api/chip-radar-stock），
+// 集保 400 張以上大戶持股的週增減%，紅＝增加、綠＝減少，最右邊是最新一週（淡底）；標題後面寫連幾週增加／減少。
+const cmChip = { open: (() => { try { return localStorage.getItem('cmChipOpen') !== '0'; } catch (_){ return true; } })() };
+function cmChipSvg(trail){
+  const rows = trail.slice().reverse();   // 舊→新
+  const W = window.innerWidth < 640 ? 400 : 640, H = 180, T = 22, B = 38, L = 8, R = 8, n = rows.length, step = (W - L - R) / n, bw = Math.min(56, step * 0.62);
+  const vals = rows.map((t) => (rdHas(t.chip) ? Number(t.chip) : 0));
+  const mx = Math.max(0.5, ...vals.map(Math.abs));
+  const top = Math.max(...vals, 0), bot = Math.min(...vals, 0), span = (top - bot) || mx;
+  const ph = H - T - B, y = (v) => T + ph * (top - v) / span;
+  let g = '<rect x="' + (L + (n - 1) * step).toFixed(1) + '" y="0" width="' + step.toFixed(1) + '" height="' + H + '" fill="rgba(255,255,255,.06)"/>';
+  g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(0).toFixed(1) + '" y2="' + y(0).toFixed(1) + '" stroke="var(--muted)" stroke-width="1" opacity=".6"/>';
+  rows.forEach((t, i) => {
+    const x = L + i * step + step / 2, v = rdHas(t.chip) ? Number(t.chip) : null;
+    if (v !== null && v !== 0){
+      const color = v > 0 ? 'var(--up)' : 'var(--down)';
+      g += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + Math.min(y(0), y(v)).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(1, Math.abs(y(v) - y(0))).toFixed(1) + '" fill="' + color + '"/>';
+    }
+    const ly = v === null ? y(0) - 4 : v >= 0 ? y(v) - 5 : y(v) + 13;
+    g += '<text x="' + x.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" class="cc-v" fill="' + (v === null ? 'var(--muted)' : v > 0 ? 'var(--up)' : v < 0 ? 'var(--down)' : 'var(--muted)') + '">' +
+      (v === null ? '—' : (v > 0 ? '+' : '') + v.toFixed(2)) + '</text>';
+    g += '<text x="' + x.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" class="cc-ax">' + rdMdShort(t.date) + '</text>';
+  });
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近 9 週籌碼增減">' + g + '</svg>';
+}
+function cmChipRender(){
+  const body = document.getElementById('cmChipBody'), sum = document.getElementById('cmChipSum'), btn = document.getElementById('cmChipToggle');
+  if (!body) return;
+  btn.textContent = cmChip.open ? '收起' : '開啟';
+  btn.setAttribute('aria-pressed', cmChip.open ? 'true' : 'false');
+  body.hidden = !cmChip.open;
+  const code = currentChart.code, st = code ? radarStockCache[code] : null;
+  const trail = st && Array.isArray(st.trail) ? st.trail.filter((t) => t) : [];
+  if (trail.length){
+    const latest = trail[0];
+    let streak = 0;
+    const sign = rdHas(latest.chip) ? Math.sign(latest.chip) : 0;
+    for (const t of trail){ if (sign && rdHas(t.chip) && Math.sign(t.chip) === sign) streak++; else break; }
+    sum.innerHTML = '最新 ' + rdMdShort(latest.date) + ' <b class="' + (latest.chip > 0 ? 'up' : latest.chip < 0 ? 'down' : '') + '">' + (rdHas(latest.chip) ? rdPct(latest.chip) : '—') + '</b>' +
+      (streak >= 2 ? '・連 ' + streak + ' 週' + (sign > 0 ? '增加' : '減少') : '') + (st.rank ? '・本週買超榜第 ' + st.rank + ' 名' : '');
+  } else sum.textContent = '';
+  if (!cmChip.open) return;
+  if (!code) { body.innerHTML = ''; return; }
+  if (!st){
+    body.innerHTML = '<div class="cm-chip-note">' + (radarStockError[code] ? '沒有這檔的集保週資料（' + wlEsc(radarStockError[code]) + '）' : '讀取中…') + '</div>';
+    return;
+  }
+  body.innerHTML = trail.some((t) => rdHas(t.chip)) ? cmChipSvg(trail) + '<div class="cm-chip-note">集保 400 張以上大戶持股的週增減%（每週五結算、週六更新），紅＝增加、綠＝減少，淡底＝最新一週；跟「盤後籌碼排行 → 籌碼暴增雷達」同一份。</div>'
+    : '<div class="cm-chip-note">這檔沒有集保週資料（ETF、權證、剛上市的不列）</div>';
+}
+function cmChipLoad(code){
+  cmChipRender();
+  if (cmChip.open) ensureRadarStock(code);
+}
+document.getElementById('cmChipToggle').addEventListener('click', () => {
+  cmChip.open = !cmChip.open;
+  try { localStorage.setItem('cmChipOpen', cmChip.open ? '1' : '0'); } catch (_){}
+  cmChipLoad(currentChart.code);
+});
 async function ensureRdBars(code){
   if (!code || rdBarsCache[code] || rdBarsLoading[code] || rdBarsFailed[code]) return;
   rdBarsLoading[code] = true;
@@ -11748,7 +11823,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-15 18:34:31';
+const BUILD_STAMP = '2026-10-15 18:44:45';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
