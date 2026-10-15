@@ -297,6 +297,8 @@ VIDEOS += [
                     "分頁：摘要、處置、ETF雷達、營收、產業、籌碼、技術、體質、均線", pick=find("#swingModal .chart-tab", "今日摘要") + ".parentElement"),
             {"say": "下面一排是日期，可以回看最近十個交易日的日報。", "cap": "日期：可回看近 10 個交易日",
              "pick": find("#swingModal .chart-tab", "最新") + ".parentElement"},
+            {"say": "紫色框這一行是外資空單摘要：外資台指期淨未平倉和當日增減、散戶小台微台多空比、P/C、三大法人現貨買賣超；按看圖，打開研究室的外資空單。",
+             "cap": "📉 外資空單摘要：外資淨空單、散戶多空比、P/C、現貨；看圖 → 研究室", "pick": "document.querySelector('#swingBody .sw-fut')", "settle": 1500},
             {"say": "今日摘要最上面寫這份是哪一天的盤前讀、用哪一天收盤的資料。三個大數字：今天真正穿過月線的、明天入獄和出獄的、問診判強勢的。",
              "cap": "盤前讀日期；三個大數字：真穿月線、入獄／出獄、判強勢", "pick": "document.querySelector('#swingBody .sw-tiles')"},
             {"say": "下面照六個重點整理：資金主軸在哪些族群、籌碼進來但法人還沒跟的、籌碼面和技術面首選、體質和均線、月營收，最後是風險提示。",
