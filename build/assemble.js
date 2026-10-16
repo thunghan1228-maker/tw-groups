@@ -739,6 +739,14 @@ export default {
         return Response.json({ status: "error", error: String(err), times: [], groups: {} }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/stock-futures-board") {
+      // 股票期貨價格板（2026-10-16，首頁股票期貨排名(155) 照老師用股期價格算、空方線照台指期）：後端永豐 Snapshot，60 秒快取
+      try {
+        return await proxyHanstockBars("/api/hub/stock-futures-board", 60);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), quotes: {}, tx: null }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/group-daily-changes") {
       try {
         // 族群昨天／前天的平均漲跌幅（盤中打 333 用）：來自日K，收盤後才會變，快取 10 分鐘。

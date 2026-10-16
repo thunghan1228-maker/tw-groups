@@ -6550,21 +6550,37 @@ function home283ColHtml(list){
     (list.length ? body + '<div class="hr-sep">-------------------</div><div class="hr-283-note">⚠️注意破惡均下彎打倒數</div>' : '<div class="hr-note">目前沒有族群有漲停</div>') + '</div>';
 }
 // ---- 股票期貨排名(155)（2026-10-16 使用者：首頁新欄位，疊在馬火多(30) 下面）----
-// 照老師 10/16 收盤那份：固定 13 族；每族只算「有股票期貨」的成分股（stockFlags.hasStockFutures）的平均漲跌，
-// 用它在全部（有股期成分股的）族群裡排名次，🔺🔽＝跟昨天同樣算法的名次比，括號裡＝那幾檔的平均漲跌。
-// 對他那份：低軌衛星 1、PCB 3、被動元件 45、光學鏡頭 44（他 46）、矽光子 47（他 48）對得上；矽晶圓、二極體、石英差比較多
-// （可能他的股期清單跟我們不一樣，或用股期本身的價格），還要多幾份再對。「↓(櫃買)↓」線、「⚠️多🚀」意思還不知道，先不放。
-// 10/16 08:47、08:52 那兩份還有 IP（收盤那份沒列），共 14 族；那時股票還沒開盤，他用的是股票期貨的價格，我們先用現股價格算
-const FUT155_GROUPS = ['低軌衛星', 'PCB', '記憶體', 'AI', '矽晶圓', '面板', '二極體', '小電組', '航運', '石英', '被動元件', '光學鏡頭', '矽光子', 'IP'];
+// 對老師 10/15、10/16 的名單：
+// - 用的是股票期貨本身的價格（08:45～09:00 股票還沒開盤就有漲跌）：族裡有股期的成分股，取標準型股期近月的漲跌
+//   （後端 /api/stock-futures-board，永豐 Snapshot、60 秒快取），平均起來在全部有股期成分股的族群裡排名；股期報價還沒到就先用現股價格。
+// - 空方線＝當下台指期的漲跌（10/15 08:48 切在 -1.06%／-1.17% 之間，那天開盤前台指期約 -1.1%）；沒有台指期就照名次比例畫。
+// - 🔺🔽＝跟昨天比（昨天用現股收盤算）；最右邊 %＝那幾檔的平均漲跌。
+// - 族群清單會變：10/16 收盤 13 族、10/16 開盤前多 IP、10/15 開盤前再多探針卡，先放出現過的 15 族。
+//   「↓(櫃買)↓」線、「⚠️多🚀」意思還不知道，先不放。
+const FUT155_GROUPS = ['低軌衛星', 'PCB', '記憶體', 'AI', '矽晶圓', '面板', '二極體', '小電組', '航運', '石英', '被動元件', '光學鏡頭', '矽光子', 'IP', '探針卡'];
+const f155State = { data: null, at: 0, loading: false };
+function f155Load(){
+  if (f155State.loading || Date.now() - f155State.at < 60e3) return;
+  f155State.loading = true;
+  fetch('/api/stock-futures-board').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok') f155State.data = d; })
+    .catch(() => {}).finally(() => { f155State.loading = false; f155State.at = Date.now(); });
+}
 function fut155Model(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups)) return null;
   const sd = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
   const isFut = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].hasStockFutures);
+  const board = f155State.data;
+  const fq = board && board.quotes && Object.keys(board.quotes).length ? board.quotes : null;
+  const pctOf = (st) => {   // 有股期報價用股期漲跌，這檔沒抓到就用現股
+    const q = fq ? fq[st.code] : null;
+    if (q && Number.isFinite(q.changePct)) return q.changePct;
+    return st.price !== null && st.price !== undefined && Number.isFinite(st.changePercent) ? st.changePercent : null;
+  };
   const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
   const today = [], yday = [];
   rankedGroupsOf(lastData.groups).forEach((g) => {
     const fut = g.stocks.filter((st) => isFut(st.code));
-    const now = fut.filter((st) => st.price !== null && st.price !== undefined && Number.isFinite(st.changePercent)).map((st) => st.changePercent);
+    const now = fut.map(pctOf).filter(Number.isFinite);
     if (now.length) today.push({ name: g.name, avg: mean(now) });
     const yv = fut.map((st) => (sd[st.code] && Array.isArray(sd[st.code].pct) ? sd[st.code].pct[0] : null)).filter(Number.isFinite);
     if (yv.length) yday.push({ name: g.name, avg: mean(yv) });
@@ -6577,12 +6593,23 @@ function fut155Model(){
     const rank = rankOf.get(n), prev = yRankOf.has(n) ? yRankOf.get(n) : null;
     return { name: n, rank, prev, drop: prev !== null ? rank - prev : null, avg: avgOf.get(n) };
   }).sort((a, b) => a.rank - b.rank);
-  return { rows, total: today.length, half: Math.round(today.length * 35 / 67) };
+  const tx = fq && board.tx && Number.isFinite(board.tx.changePct) ? board.tx.changePct : null;
+  return { rows, total: today.length, half: Math.round(today.length * 35 / 67), tx, futures: !!fq };
 }
 function home155ColHtml(){
+  f155Load();
   const f = fut155Model();
-  if (!f) return '<div class="hr-col"><div class="hr-title">股票期貨排名(155)</div><div class="hr-note">' + (stockFlags && Object.keys(stockFlags).length ? '沒有資料' : '讀取中…') + '</div></div>';
-  return homeRankColHtml('股票期貨排名(155)', f.rows, f.half, '------↓(空方)↓------', '沒有資料');
+  const title = '<div class="hr-title">股票期貨排名(155)' + (f && !f.futures ? ' <span class="hr-rk" title="股期報價還沒到，先用現股價格算">現股價</span>' : '') + '</div>';
+  if (!f) return '<div class="hr-col">' + title + '<div class="hr-note">' + (stockFlags && Object.keys(stockFlags).length ? '沒有資料' : '讀取中…') + '</div></div>';
+  let body = '', sepDone = false;
+  f.rows.forEach((r) => {
+    if (!sepDone && (f.tx !== null ? r.avg < f.tx : r.rank > f.half)){
+      body += '<div class="hr-sep"' + (f.tx !== null ? ' title="台指期 ' + fmt(f.tx) + '%：比台指期弱的在線下"' : '') + '>------↓(空方)↓------</div>';
+      sepDone = true;
+    }
+    body += homeRankRowHtml(r);
+  });
+  return '<div class="hr-col">' + title + (f.rows.length ? body : '<div class="hr-note">沒有資料</div>') + '</div>';
 }
 function homeStockColHtml(title, list, emptyText){
   const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
@@ -6698,7 +6725,7 @@ function homeRankFootHtml(total){
   return hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
     ['終點戰法空(283)', '族裡有股票亮燈的（千元、小電機不算）', '亮燈＝非處置股盤中最高曾到 ' + Z283_LIT_HIGH + '% 以上、現在還漲 ' + Z283_LIT_PCT + '% 以上；照族群名次排；每族列 👑 族裡漲最多的、🐎 第 2 名（漲 ' + Z283_HORSE_PCT + '% 以上才標）；其他「盤中最高曾漲到 ' + Z283_HIGH_PCT + '% 以上、現在沒翻黑」或「昨天／前天漲過 ' + Z283_PRIOR_RISE + '% 以上、今天跌不到 ' + (-Z283_KNIFE_FLOOR) + '%」的，還在漲標 ⚔️、已轉跌標 🔪；兩檔以上鎖漲停（處置股不算）加註 ⚠️有兩個以上亮燈空小心；整欄最下面固定附註 ⚠️注意破惡均下彎打倒數'],
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
-    ['股票期貨排名(155)', '固定 ' + FUT155_GROUPS.length + ' 族', '疊在馬火多(30) 下面；每族只算有股票期貨的成分股：名次＝這些股票平均漲跌在全部族群裡的排名，🔺🔽 跟昨天比，最右邊 %＝它們的平均漲跌'],
+    ['股票期貨排名(155)', '固定 ' + FUT155_GROUPS.length + ' 族', '疊在馬火多(30) 下面；每族只算有股票期貨的成分股，用股期近月的漲跌（開盤前就有）：名次＝它們平均漲跌在全部族群裡的排名，🔺🔽 跟昨天比，最右邊 %＝平均漲跌；空方線＝台指期漲跌，比台指期弱的在線下；股期報價沒到時標「現股價」'],
     ['多族群排名(183)', '固定 ' + RANK188_GROUPS.size + ' 族', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 2 檔（漲最多的）'],
     ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
     ['空族群必殺(193)', '固定 ' + KILL193_ONLY_GROUPS.size + ' 族', '199 的 ' + KILL193_GROUPS.size + ' 族＋小光電；名次比昨天掉 5 名以上的；掉 1～4 名要有 ⚔️（族裡過半股票低於前天收盤，數字＝比例）才列；🔪＝族群今天平均下跌；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
