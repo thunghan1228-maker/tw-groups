@@ -1,0 +1,75 @@
+{
+ "at": "2026-10-16T23:13:09+08:00",
+ "requests": [
+  {
+   "season": "2026Q4",
+   "market": "sii",
+   "rows": 0
+  },
+  {
+   "season": "2026Q4",
+   "market": "otc",
+   "rows": 0
+  },
+  {
+   "season": "2026Q3",
+   "market": "sii",
+   "rows": 0
+  },
+  {
+   "season": "2026Q3",
+   "market": "otc",
+   "rows": 0
+  },
+  {
+   "season": "2026Q2",
+   "market": "sii",
+   "rows": 1085
+  },
+  {
+   "season": "2026Q2",
+   "market": "otc",
+   "rows": 892
+  },
+  {
+   "season": "2026Q1",
+   "market": "sii",
+   "rows": 1084
+  },
+  {
+   "season": "2026Q1",
+   "market": "otc",
+   "rows": 892
+  },
+  {
+   "season": "2025Q4",
+   "market": "sii",
+   "rows": 1085
+  },
+  {
+   "season": "2025Q4",
+   "market": "otc",
+   "rows": 892
+  },
+  {
+   "season": "2025Q3",
+   "market": "sii",
+   "rows": 1080
+  },
+  {
+   "season": "2025Q3",
+   "market": "otc",
+   "rows": 887
+  },
+  {
+   "season": "2025Q2",
+   "market": "sii",
+   "rows": 1083
+  },
+  {
+   "season": "2025Q2",
+   "market": "otc",
+   "rows": 892
+  }
+ ]
+}
