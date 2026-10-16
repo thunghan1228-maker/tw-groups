@@ -729,6 +729,14 @@ export default {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/group-rank-checkpoints") {
+      // 67 族今天每半小時的族群名次（2026-10-16，老師族群明細最下面「今天23-3-11-24」那排；馬火多(30) 用），60 秒快取
+      try {
+        return await proxyHanstockBars("/api/hub/group-rank-checkpoints" + url.search, 60);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), times: [], groups: {} }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/group-daily-changes") {
       try {
         // 族群昨天／前天的平均漲跌幅（盤中打 333 用）：來自日K，收盤後才會變，快取 10 分鐘。
