@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 09:50:54";
+const BUILD_STAMP = "2026-10-16 09:52:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5844,6 +5844,7 @@ async function refreshGroupDailyChanges(force){
 const RACE_NUM = ['', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 const BLADE_HARVEST_PCT = 5;  // 刀劍空：跌到這裡以上就算收割區
 const BLADE_MAX_PCT = 9.5;    // 刀劍空：跌到這裡以上（或跌停鎖死）放不到空，只在收割區那行列
+const BLADE_BEGINNER_RISE = 5.5;  // 刀劍空：空方段倒數第 4、5 檔，昨天或前天要漲這麼多以上才列（標 🔰）
 const BLADE_MIN_VOLUME = 10;  // 刀劍空：成交量（張）低於這個太冷門（2026-10-16 老師 09:06 就列了量 400 張左右的雷科、嘉基，500 改 100；09:40 又列了量 30～60 張的千興、泰碩，再改 10）
 const BLADE_MAX_ROWS = 15;
 const BLADE_PRIOR_RISE = 3;      // 刀劍空：昨天（🔪）或前天（⚔️）要漲這麼多以上，今天殺下來才算（2026-10-15 照老師）
@@ -5994,16 +5995,18 @@ function race333Model(){
   const bladeInUpper = (r) => r.groupRank <= bladeUpperTo;
   const bladeBase = Array.from(bladeCand.values()).filter((r) => true
     // 多方打少不看櫃買：佳能（光學鏡頭，族排 8～16）跌 2.7～3.3%、沒比櫃買弱，老師 11:38、12:01、12:18、12:34 都列
-    && (!hasDaily || ((bladeKnife(r) || bladeSword(r)) && (bladeSword(r) || bladeInUpper(r) || belowOtc(r))))
+    && (!hasDaily || ((bladeKnife(r) || bladeSword(r)) && (bladeSword(r) || bladeInUpper(r) || belowOtc(r))
+      // 空方段裡倒數第 4、5 檔：前一兩天要大漲過（5.5% 以上）才標 🔰、才列（台燿前天 +4.83% 排倒數第 5 沒標、良維 +9.98% 倒數第 4 標 🔰）
+      && (r.bladePos <= 3 || Math.max(r.yesterday || 0, r.dayBefore || 0) >= BLADE_BEGINNER_RISE)))
     && (r.volume === null || r.volume >= BLADE_MIN_VOLUME)).sort((a, b) => a.pct - b.pct || a.groupRank - b.groupRank);
   const bladeHarvest = bladeBase.filter((r) => r.pct <= -BLADE_HARVEST_PCT || r.pct <= -BLADE_MAX_PCT || r.limitDown);
   // 2026-10-15 使用者貼老師 09:07 的刀劍空：強空積極 13 檔裡 7 檔只有🔪（低於昨收、還在前天收盤上，例如昨天大漲的新纖），
   // 跟我們算的🔪／⚔️幾乎一樣——老師不要求⚔️，只有🔪的也列（每列照舊標🔪／⚔️）
-  // 每列後面的符號：族裡最弱 3 檔標 🔪（昨天大漲）／⚔️（前天大漲、跌破前天收盤），空方段裡其他的標 🔰；
-  // ⚔️ 暫定還要昨天跌 1.5% 以上（德淵昨天只跌 1.35%，在族裡倒數第 2 也一直是 🔰）
+  // 每列後面的符號：族裡最弱 3 檔（處置股也算位置）標 🔪（昨天大漲）／⚔️（前天大漲、跌破前天收盤），空方段裡倒數第 4、5 檔標 🔰
+  // （對老師 09:09～09:50 的族群明細；德淵在化學二倒數第 2 老師卻一直標 🔰，原因還沒找到）
   bladeBase.forEach((r) => {
-    const top3 = r.bladePos <= 3, knife = bladeKnife(r), sword = bladeSword(r) && r.yesterday !== null && r.yesterday <= -1.5;
-    r.bladeMark = top3 && (knife || sword) ? (knife ? '🔪' : '') + (sword ? '⚔️' : '') : '🔰';
+    const knife = bladeKnife(r), sword = bladeSword(r);
+    r.bladeMark = r.bladePos <= 3 && (knife || sword) ? (knife ? '🔪' : '') + (sword ? '⚔️' : '') : '🔰';
   });
   const bladeLive = bladeBase.filter((r) => !bladeHarvest.includes(r));
   const bladeUpper = bladeLive.filter((r) => bladeInUpper(r));                                       // 多方打少
@@ -12060,7 +12063,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 09:50:54';
+const BUILD_STAMP = '2026-10-16 09:52:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
