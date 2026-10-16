@@ -113,6 +113,12 @@
   .hr-jail-card .hr-help-tbl th,.hr-jail-card .hr-help-tbl td{padding:3px 5px;}   /* 2026-10-16 使用者：多了三欄，排緊一點 */
   .hr-jail-card .hr-help-tbl td:nth-child(2){color:var(--text);font-weight:700;white-space:nowrap;max-width:6.5em;overflow:hidden;text-overflow:ellipsis;}
   .hr-jail-card .hr-help-tbl td.jl-tag{color:#fff;font-weight:700;white-space:nowrap;}
+  /* 多了括號日期一欄，卡片寬度不變：字小一號、格子再擠一點，成交價才不會被切掉 */
+  .hr-jail-card .hr-help-tbl{font-size:11px;} .hr-jail-card .hr-help-tbl th{font-size:10px;}
+  .hr-jail-card .hr-help-tbl th,.hr-jail-card .hr-help-tbl td{padding:3px 3px!important;}
+  .hr-jail-card .hr-help-tbl td:first-child{padding-left:6px!important;} .hr-jail-card .hr-help-tbl td:last-child,.hr-jail-card .hr-help-tbl th:last-child{padding-right:6px!important;}
+  .hr-jail-card .hr-help-tbl td:nth-child(2){max-width:4.8em!important;}
+  .hr-jail-card .jl-hold{padding:0 2px!important;} .hr-jail-card .limit-pill{padding:0 2px;}
   .hr-jail-card .hr-help-tbl .jl-n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700;}
   .hr-jail-card .hr-help-tbl td.up{color:var(--up);} .hr-jail-card .hr-help-tbl td.down{color:var(--down);}
   .hr-jail-card .jl-hold{font-style:normal;border-radius:4px;padding:0 4px;} .hr-jail-card .jl-hold.up{color:var(--up);} .hr-jail-card .jl-hold.down{color:var(--down);}
