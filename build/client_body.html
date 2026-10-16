@@ -424,6 +424,7 @@
   .flag-pill{font-size:11px;border-radius:10px;padding:2px 9px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);white-space:nowrap;}
   .flag-pill.off{color:var(--muted);opacity:.7;}
   .gm-hmark{font-size:12px;font-weight:700;white-space:nowrap;color:#fbbf24;flex-shrink:0;}
+  .gm-bmark{color:#4ade80;}   /* 🔪⚔️🔰 的數字用綠字（掉名次） */
   #gmList .srow-left .sname{min-width:2.4em;flex-shrink:0;}   /* 名字至少留兩個字，不被 👑🐎🚀 擠掉 */
   @media (max-width: 640px){ #gmList .srow-left{flex-wrap:wrap;row-gap:0;} .gm-hmark{order:9;flex-basis:100%;font-size:11px;line-height:1.2;} }   /* 手機：符號換到名字下面一行，不壓到籌碼欄 */
   .flag-pill.stop{background:#c2410c;border-color:#c2410c;color:#fff;font-weight:700;opacity:1;}
@@ -4529,6 +4530,37 @@ function groupHorseMarks(g){
   });
   return out;
 }
+// 族群明細的 🔪⚔️🔰（2026-10-16 對老師的族群明細，是 🐎🚀 的反方向：原本前段班突然掉到最後幾名，數字＝掉了幾名）。
+// 族裡倒數 3 檔（處置股也算位置）：🔪N＝昨天漲 BLADE_PRIOR_RISE% 以上、而且昨天在族裡前一半，N＝今天名次減昨天名次；
+// ⚔️N＝前天漲 BLADE_PRIOR_RISE% 以上、前天在族裡前一半，N＝今天名次減前天名次（不用跌破前天收盤：鑫科、台表科都還在前天收盤上也標）。
+// 空方段（bladeZoneSize）裡其他的，或倒數 3 檔但前一兩天在後一半的，昨天或前天漲過 BLADE_BEGINNER_RISE% 以上就標 🔰。
+// 對過：台表科 🔪11⚔️12、大毅 🔪20⚔️20、凱美 ⚔️14、南亞 ⚔️4、聯鈞 ⚔️13、華星光／嘉基 ⚔️20、和益 ⚔️6、鑫科 ⚔️3、台塑／聯亞 🔰；
+// 德淵（化學二倒數第 2，前天 +5.94% 但前天族裡第 4/7 名）老師標 🔰、華夏（前天 +3.4%、第 5/8 名）沒標，也都對得上。
+function groupBladeMarks(g){
+  const out = new Map();
+  const sd = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
+  const priced = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent));
+  const today = priced.slice().sort((a, b) => b.changePercent - a.changePercent);
+  const n = today.length;
+  const rankBy = (idx) => {
+    const w = priced.filter((s) => sd[s.code] && Number.isFinite((sd[s.code].pct || [])[idx]));
+    const srt = w.slice().sort((a, b) => sd[b.code].pct[idx] - sd[a.code].pct[idx]);
+    return { n: w.length, m: new Map(srt.map((s, i) => [s.code, i + 1])) };
+  };
+  const y = rankBy(0), y2 = rankBy(1);
+  today.forEach((s, i) => {
+    const t = i + 1, pos = n - i;
+    if (pos > bladeZoneSize(n)) return;
+    const p = (sd[s.code] && sd[s.code].pct) || [];
+    const ry = y.m.get(s.code), r2 = y2.m.get(s.code);
+    const knife = pos <= 3 && p[0] >= BLADE_PRIOR_RISE && ry && ry <= y.n / 2 ? t - ry : 0;
+    const sword = pos <= 3 && p[1] >= BLADE_PRIOR_RISE && r2 && r2 <= y2.n / 2 ? t - r2 : 0;
+    let mk = (knife > 0 ? '🔪' + knife : '') + (sword > 0 ? '⚔️' + sword : '');
+    if (!mk && Math.max(Number.isFinite(p[0]) ? p[0] : -Infinity, Number.isFinite(p[1]) ? p[1] : -Infinity) >= BLADE_BEGINNER_RISE) mk = '🔰';
+    if (mk) out.set(s.code, { mk, knife, sword, pos, t, ry, r2, y: p[0], y2: p[1] });
+  });
+  return out;
+}
 function openGroupDetail(groupName){
   if (!lastData) return;
   const g = lastData.groups.find((x) => x.name === groupName);
@@ -4558,12 +4590,21 @@ function openGroupDetail(groupName){
     const tip = (x.top === 1 ? '族群第 1 名' : '族群第 2 名') + (x.horse ? '；昨天族裡第 ' + x.ry + ' 名，今天上升 ' + x.horse + ' 名' : '') + (x.rocket ? '；前天族裡第 ' + x.r2 + ' 名，今天上升 ' + x.rocket + ' 名' : '');
     return '<span class="gm-hmark" title="' + tip + '">' + x.mk + '</span>';
   };
+  const bm = groupBladeMarks(g);
+  const bmHtml = (code) => {
+    const x = bm.get(code);
+    if (!x) return '';
+    const pf = (v) => (v > 0 ? '+' : '') + v.toFixed(1) + '%';
+    const tip = '族裡倒數第 ' + x.pos + ' 名' + (x.knife ? '；昨天 ' + pf(x.y) + '、族裡第 ' + x.ry + ' 名，今天掉 ' + x.knife + ' 名' : '') +
+      (x.sword ? '；前天 ' + pf(x.y2) + '、族裡第 ' + x.r2 + ' 名，今天掉 ' + x.sword + ' 名' : '') + (x.mk === '🔰' ? '；昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上' : '');
+    return '<span class="gm-hmark gm-bmark" title="' + tip + '">' + x.mk + '</span>';
+  };
   document.getElementById('gmList').innerHTML = (cd ? STOCK_COL_LABELS_HTML.replace('<span class="spct">漲跌幅</span>', '<span class="schip">本週籌碼</span><span class="spct">漲跌幅</span>') : STOCK_COL_LABELS_HTML) + sorted.map((s) => {
     const price = getBasePrice(s.code);
     const prevClose = price / (1 + s.changePercent / 100);
     const changeAmt = price - prevClose;
     return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-      '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + hmHtml(s.code) + wlStarHtml(s.code, s.name) + '</div>' +
+      '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + hmHtml(s.code) + bmHtml(s.code) + wlStarHtml(s.code, s.name) + '</div>' +
       stockValueColsHtml(price, changeAmt, s.changePercent, s).replace('<div class="srow-right">', '<div class="srow-right">' + chipCell(s.code)) +
     '</div>';
   }).join('');
@@ -5946,11 +5987,12 @@ function race333Model(){
     const zone = bladeZoneSize(priced.length);
     // bladePos＝在族裡倒數第幾（1＝最弱，處置股也算位置）：老師最弱 3 檔標 ⚔️／🔪，空方段裡其他的標 🔰（2026-10-16 對 09:09～09:32 的族群明細）
     const bottom = priced.slice(Math.max(0, priced.length - zone));
+    const gm = groupBladeMarks(g);   // 族群明細同一套 🔪⚔️🔰（每列後面的符號用）
     bottom.forEach((s, j) => {
       if (stockFlags[s.code] && stockFlags[s.code].disposition) return;
       const base = stockRows.get(s.code);
       if (!base || bladeCand.has(s.code)) return;
-      bladeCand.set(s.code, Object.assign({}, base, { groupName: g.name, groupRank: gi + 1, groupAvg: g.avgChange, bladePos: bottom.length - j }));
+      bladeCand.set(s.code, Object.assign({}, base, { groupName: g.name, groupRank: gi + 1, groupAvg: g.avgChange, bladePos: bottom.length - j, bladeGm: gm.get(s.code) || null }));
     });
   });
   // 2026-10-16 使用者貼老師 09:06～09:32：今天漲的也會列（雷科 +1.54%⚔️、巨有科技 +1.59%⚔️、希華 +0.94%⚔️），
@@ -5972,10 +6014,11 @@ function race333Model(){
   // 2026-10-15 使用者貼老師 09:07 的刀劍空：強空積極 13 檔裡 7 檔只有🔪（低於昨收、還在前天收盤上，例如昨天大漲的新纖），
   // 跟我們算的🔪／⚔️幾乎一樣——老師不要求⚔️，只有🔪的也列（每列照舊標🔪／⚔️）
   // 每列後面的符號：族裡最弱 3 檔（處置股也算位置）標 🔪（昨天大漲）／⚔️（前天大漲、跌破前天收盤），空方段裡倒數第 4、5 檔標 🔰
-  // （對老師 09:09～09:50 的族群明細；德淵在化學二倒數第 2 老師卻一直標 🔰，原因還沒找到）
+  // 2026-10-16 符號改用族群明細那套 groupBladeMarks：🔪／⚔️ 還要昨天／前天在族裡前一半（德淵前天第 4/7 名＝後一半，老師一直標 🔰），
+  // ⚔️ 不用跌破前天收盤（老師台表科 +1.98% 就標 🔪⚔️）；誰進名單照舊用上面的 bladeKnife／bladeSword。
   bladeBase.forEach((r) => {
-    const knife = bladeKnife(r), sword = bladeSword(r);
-    r.bladeMark = r.bladePos <= 3 && (knife || sword) ? (knife ? '🔪' : '') + (sword ? '⚔️' : '') : '🔰';
+    const x = r.bladeGm;
+    r.bladeMark = r.bladePos <= 3 && x && (x.knife || x.sword) ? (x.knife ? '🔪' : '') + (x.sword ? '⚔️' : '') : '🔰';
   });
   const bladeLive = bladeBase.filter((r) => !bladeHarvest.includes(r));
   const bladeUpper = bladeLive.filter((r) => bladeInUpper(r));                                       // 多方打少
@@ -6601,10 +6644,13 @@ function homeRankFootHtml(total){
     ['括號數字', '今天族群名次（平均漲跌幅排，共 ' + total + ' 個族群，1 最強）'],
     ['🔺／🔽', '跟昨天收盤的名次比，升／掉幾名'],
     ['最右邊 %', '族群平均漲跌幅'],
-    ['點族群', '看成分股（成分股前兩名後面標 👑🐎🚀）'],
+    ['點族群', '看成分股（前兩名後面標 👑🐎🚀，最後幾名標 🔪⚔️🔰）'],
     ['👑', '族群裡今天第 1 名'],
     ['🐎N（跟昨天比）', '昨天還在族裡後段班（後一半），今天突然衝到族裡前兩名；N＝上升幾名'],
     ['🚀N（跟前天比）', '前天還在族裡後段班，今天突然衝到族裡前兩名；N＝上升幾名'],
+    ['🔪N（跟昨天比）', '昨天漲 ' + BLADE_PRIOR_RISE + '% 以上、在族裡前一半，今天掉到族裡最後 3 名；N＝掉幾名'],
+    ['⚔️N（跟前天比）', '前天漲 ' + BLADE_PRIOR_RISE + '% 以上、在族裡前一半，今天掉到族裡最後 3 名；N＝掉幾名'],
+    ['🔰', '族裡最後幾名（空方段）裡，昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上、但不算 🔪⚔️ 的'],
   ]) +
   hrHelpTable('🐎 個股欄（跟訊號中心「盤中333」同一份）', ['欄位', '列什麼'], [
     ['⭐昨日強勢股', '跟訊號中心「今日強勢股」同一份：族群分數（族內平均均線分數，昨天收盤算的）前 10 名裡，均線分數 ≥12、今天沒跌的股票；「第 N 名・均分」是族群分數名次，不是今天漲幅名次'],
@@ -6620,7 +6666,7 @@ function homeRankFootHtml(total){
     ['看哪些股票', '199 的 ' + KILL193_GROUPS.size + ' 族＋188 的 ' + RANK188_GROUPS.size + ' 族，每族只看「空方段」（照今天漲跌幅排的後段，最多 5 檔）；處置股不列、成交量 ' + BLADE_MIN_VOLUME + ' 張以上；今天漲跌不限'],
     ['🔪 刀', '昨天漲 ' + BLADE_PRIOR_RISE + '% 以上'],
     ['⚔️ 劍', '前天漲 ' + BLADE_PRIOR_RISE + '% 以上，現價已跌破前天收盤'],
-    ['符號怎麼標', '空方段裡最弱的 3 檔（處置股也算位置）標 🔪 或 ⚔️；倒數第 4、5 檔要昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上，才標 🔰、才列進名單'],
+    ['符號怎麼標', '空方段裡最弱的 3 檔（處置股也算位置）標 🔪 或 ⚔️，但昨天（前天）要在族裡前一半，不然標 🔰；倒數第 4、5 檔要昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上，才標 🔰、才列進名單'],
     ['多方打少', '族群前 10 名（名次後面 🔺）：股票弱、族群還強，可以空但量要少，空得保守'],
     ['中間段', '族群第 11～25 名（🔽），兩條線中間那一段'],
     ['強空積極', '族群第 26 名以後（🔰）：族群跟股票都弱，可以空得積極'],
