@@ -1,5 +1,5 @@
 {
- "at": "2026-10-16T23:13:09+08:00",
+ "at": "2026-10-16T23:21:36+08:00",
  "requests": [
   {
    "season": "2026Q4",
@@ -32,44 +32,44 @@
    "rows": 892
   },
   {
-   "season": "2026Q1",
+   "season": "2025Q1",
    "market": "sii",
-   "rows": 1084
+   "rows": 1060
   },
   {
-   "season": "2026Q1",
+   "season": "2025Q1",
    "market": "otc",
-   "rows": 892
+   "rows": 870
   },
   {
-   "season": "2025Q4",
+   "season": "2024Q4",
    "market": "sii",
    "rows": 1085
   },
   {
-   "season": "2025Q4",
+   "season": "2024Q4",
    "market": "otc",
    "rows": 892
   },
   {
-   "season": "2025Q3",
+   "season": "2024Q3",
    "market": "sii",
-   "rows": 1080
+   "rows": 1043
   },
   {
-   "season": "2025Q3",
+   "season": "2024Q3",
    "market": "otc",
-   "rows": 887
+   "rows": 846
   },
   {
-   "season": "2025Q2",
+   "season": "2024Q2",
    "market": "sii",
-   "rows": 1083
+   "rows": 1073
   },
   {
-   "season": "2025Q2",
+   "season": "2024Q2",
    "market": "otc",
-   "rows": 892
+   "rows": 883
   }
  ]
 }
