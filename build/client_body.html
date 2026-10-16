@@ -1900,6 +1900,58 @@
   .riv-howbar{display:flex;border-radius:10px;overflow:hidden;margin:6px 0;} .riv-howbar span{flex:1;text-align:center;padding:8px 0;font-weight:700;}
   .riv-howbar span.z2{border-right:3px dashed #f5b301;}
   @media (max-width: 640px){ .riv-body{grid-template-columns:minmax(0,1fr);} .riv-svg{height:220px;} .riv-nums{gap:14px;} }
+  /* 2026-10-16 使用者：估值河流圖整頁改淺色版（淺咖啡、米色、白底，看起來亮一點），版面照對方的河流圖 */
+  #rivInner{--bg:#f6f1e6;--panel:#fffdf8;--panel-2:#fbf6ec;--line:#e4d6bd;--text:#2b2118;--muted:#8a7660;background:var(--bg);color:var(--text);border-color:#d9c7a6;}
+  #rivInner .chips-head{background:transparent;color:var(--text);padding:4px 2px 0;}
+  #rivInner .chips-title{font-family:"Noto Serif TC","Songti TC",serif;font-size:30px;font-weight:900;color:#a8321f;letter-spacing:1px;}
+  #rivInner .chips-sub{color:#4a3a2a;font-size:13px;}
+  #rivInner .cm-icon-btn{background:#efe5d2;color:#5a4632;border-color:#d9c7a6;}
+  #rivInner .ma-note{background:#fbf3df;border:1px solid #e3cfa5;color:#5a4632;border-radius:999px;}
+  #rivInner .ma-q input{background:#fffdf8;color:var(--text);border:1px solid #d9c7a6;border-radius:10px;}
+  #rivInner .ma-q button{background:#a8321f;color:#fff;border-radius:10px;}
+  #rivInner .scr-pre{background:#f1e6d0;border-color:#d9c3a0;color:#7a4a24;}
+  #rivInner .ma-sec{background:#fffdf8;border:1px solid #e4d6bd;box-shadow:0 1px 3px rgba(120,90,50,.08);}
+  #rivInner .ma-sec h3{color:#a8321f;}
+  #rivInner .ma-vbtn{background:#fffdf8;border-color:#d9c7a6;color:#5a4632;} #rivInner .ma-vbtn.on{background:#a8321f;border-color:#a8321f;color:#fff;}
+  #rivInner .ma-table th{color:#7a6650;border-bottom-color:#e4d6bd;} #rivInner .ma-table td{border-bottom-color:#efe4d0;}
+  #rivInner .scr-row:hover td{background:#fbf1de;}
+  #rivInner .riv-card .riv-hd b{color:#a8321f;font-size:18px;}
+  #rivInner .riv-p{color:#c2185b;} #rivInner .riv-nums b{color:#2b2118;} #rivInner .riv-nums b.riv-p{color:#c2185b;}
+  #rivInner .riv-svg{background:#fffdf8;border:1px solid #efe4d0;}
+  #rivInner .riv-shed{stroke:#a63a2b;} #rivInner .riv-price{stroke:#c2185b;} #rivInner .riv-dot{fill:#c2185b;}
+  #rivInner .riv-lg{border-top-color:#c2185b;} #rivInner .riv-lg.shed{border-top-color:#a63a2b;}
+  #rivInner .riv-mark{border-top-color:#c2185b;} #rivInner .riv-mark b{background:#c2185b;}
+  #rivInner .riv-row.z4{background:#a63a2b;color:#fff;} #rivInner .riv-row.z3{background:#c9a08a;color:#2b2118;}
+  #rivInner .riv-row.z2{background:#7fb8cf;color:#10283a;} #rivInner .riv-row.z1{background:#2e7d9c;color:#fff;}
+  #rivInner .scr-fact{background:#f6eedd;border-color:#e4d3b3;} #rivInner .scr-fact b{color:#2b2118;}
+  #rivInner .ma-err{color:#b91c1c;}
+  /* 內部河流：同族各檔釘在河道上 */
+  .rgm{border-top:1.5px dashed #d9c7a6;margin-top:16px;padding-top:12px;}
+  .rgm-lab{font-size:15px;font-weight:800;margin:0 2px 8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+  .rgm-lab span{font-size:12.5px;color:#8a7660;font-weight:600;}
+  .rgm-map{position:relative;height:420px;border-radius:10px;overflow:hidden;border:1px solid #d9c7a6;}
+  .rgm-band{position:absolute;left:0;right:0;padding:5px 10px;font-size:18px;font-weight:900;letter-spacing:.5px;}
+  .rgm-band span{text-shadow:0 1px 2px rgba(0,0,0,.2);} .rgm-band em{font-style:normal;font-size:13px;font-weight:700;opacity:.9;margin-left:10px;}
+  .rgm-band.b5{background:#7a2518;color:#fff;} .rgm-band.b4{background:#a63a2b;color:#fff;} .rgm-band.b3{background:#c9a08a;color:#123;}
+  .rgm-band.b2{background:#7fb8cf;color:#123;} .rgm-band.b1{background:#2e7d9c;color:#fff;} .rgm-band.b0{background:#1d5a72;color:#fff;}
+  .rgm-shed{position:absolute;left:0;right:0;top:50%;border-top:2px dashed #fff;z-index:1;opacity:.9;}
+  .rgm-shed i{position:absolute;right:8px;top:-14px;font-style:normal;font-size:15px;color:#fff;font-weight:900;background:#3a1d6e;border:1.5px solid #fff;border-radius:999px;padding:1px 10px;line-height:22px;box-shadow:0 1px 4px rgba(0,0,0,.35);}
+  .rgm-pin{display:inline-block;background:#fff;border:1.5px solid #6b17b8;color:#6b17b8;border-radius:999px;font-size:12px;font-weight:800;padding:2px 9px;white-space:nowrap;box-shadow:0 1px 5px rgba(0,0,0,.3);cursor:pointer;line-height:1.25;text-align:center;}
+  .rgm-map .rgm-pin{position:absolute;transform:translate(-50%,-50%);z-index:2;}
+  .rgm-pin small{display:block;font-size:10.5px;font-weight:700;color:#1a1226;}
+  .rgm-pin .fe{font-weight:400;margin-right:3px;font-size:13px;}
+  .rgm-pin.me{background:#d90452;border-color:#d90452;color:#fff;z-index:3;cursor:default;} .rgm-pin.me small{color:#fff;}
+  .rgm-map .rgm-pin.me{transform:translate(-50%,-50%) scale(1.12);}
+  .rgm-pin[data-riv-q]:hover{filter:brightness(.95);box-shadow:0 2px 8px rgba(0,0,0,.35);}
+  .rgm-strip{margin:0 0 8px;border-radius:10px;padding:8px 10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .rgm-sl{font-size:14px;font-weight:900;white-space:nowrap;} .rgm-sl small{display:block;font-size:11px;font-weight:600;}
+  .rgm-sp{display:flex;gap:6px;flex-wrap:wrap;} .rgm-strip .rgm-pin small{display:inline;margin-left:4px;}
+  .rgm-strip.bad{background:#fde3e3;border:1.5px solid #e0474c;} .rgm-strip.bad .rgm-sl{color:#9b1c1c;} .rgm-strip.bad .rgm-sl small{color:#b3443f;}
+  .rgm-strip.bad .rgm-pin{border-color:#c62828;color:#c62828;}
+  .rgm-strip.warn{background:#fff1cc;border:1.5px solid #e0a000;} .rgm-strip.warn .rgm-sl{color:#7a4a00;} .rgm-strip.warn .rgm-sl small{color:#8c6a1f;}
+  .rgm-strip.warn .rgm-pin{border-color:#b26a00;color:#8a5200;}
+  .rgm-note{font-size:12px;color:#8a7660;margin-top:8px;line-height:1.6;}
+  @media (max-width: 640px){ .rgm-map{height:380px;} .rgm-pin{font-size:11px;padding:2px 6px;} .rgm-band{font-size:15px;} .rgm-band em{font-size:11px;margin-left:6px;} }
   @media (max-width: 560px){ .scr-grid{gap:6px;} .scr-card{padding:8px;} .scr-ct{font-size:13px;} .scr-cd{font-size:10.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;} .scr-sl b{min-width:44px;font-size:13px;} .scr-kr input{width:52px;} }
   .rv-scroll{overflow-x:auto;max-width:100%;}
   .rv-tables > .rv-scroll{min-width:0;}
@@ -2700,8 +2752,8 @@
   <div class="chips-inner" id="rivInner">
     <div class="chips-head">
       <div>
-        <div class="chips-title">估值河流圖（本站版）</div>
-        <div class="chips-sub">輸入股號或股名，看這檔股票現在的價格落在哪一區：特價・便宜・貴・昂貴。分水嶺＝近 4 季 EPS × 同族群本益比中位數。</div>
+        <div class="chips-title">估值河流圖</div>
+        <div class="chips-sub">輸入股號或股名，看這檔股票現在的價格落在哪一區：特價・便宜・貴・昂貴。</div>
       </div>
       <button class="cm-icon-btn" id="rivClose" aria-label="關閉">✕</button>
     </div>
@@ -16772,7 +16824,7 @@ function rivChartSvg(st){
   const pad = (hi - lo) * 0.07 || 1; lo = Math.max(0, lo - pad); hi += pad;
   const n = Math.max(1, N - 1 - i0);
   const X = (i) => L + (i - i0) / n * (W - L - R), Y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - BM);
-  const fills = ['rgba(20,144,200,.42)', 'rgba(121,207,232,.38)', 'rgba(197,174,230,.40)', 'rgba(143,107,208,.48)'];
+  const fills = ['rgba(46,125,156,.30)', 'rgba(127,184,207,.32)', 'rgba(196,166,140,.30)', 'rgba(166,58,43,.30)'];   // 2026-10-16 使用者：改淺色版，河道由下往上 特價／便宜／貴／昂貴
   let svg = '<svg class="riv-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">';
   for (let t = 0; t <= 4; t++){
     const v = lo + (hi - lo) * t / 4, y = Y(v);
@@ -16834,7 +16886,7 @@ function rivCardHtml(){
   let h = '<div class="ma-sec riv-card"><div class="riv-hd"><b>' + wlEsc(st.code) + ' ' + wlEsc(st.name) + '</b> ' + wlStarHtml(st.code, st.name) +
     '<span class="ma-legend" style="margin:0">' + wlEsc(st.group || '族群外') + '・' + (st.priceDate || '') + ' 收</span>';
   if (st.noVal){
-    return h + '</div><div class="ma-legend">' + (st.why === 'thin' ? '這檔目前獲利太薄（本益比超過 200 倍）—— 股價反映的不是當期獲利，用本益比畫價值區間沒有參考性。' : '這檔目前虧損或資料不足，算不出價值區間。') + '</div>' + rivFundHtml(st) + '</div>';
+    return h + '</div><div class="ma-legend">' + (st.why === 'thin' ? '這檔目前獲利太薄（本益比超過 200 倍）—— 股價反映的不是當期獲利，用本益比畫價值區間沒有參考性。' : '這檔目前虧損或資料不足，算不出價值區間。') + '</div>' + rivFundHtml(st) + rivGroupMapHtml(st) + '</div>';
   }
   h += '<span class="riv-zone ' + RV_ZCLS[st.zone] + '">' + RV_ZONES[st.zone] + '・距分水嶺 ' + (st.dist > 0 ? '+' : '') + st.dist + '%</span></div>' +
     '<div class="riv-nums"><div><small>股價</small><b class="riv-p">' + rivFmt(st.price) + '</b></div><div><small>分水嶺</small><b>' + rivFmt(st.s, 1) + '</b></div><div><small>目前位置</small><b>' + RV_ZONES[st.zone] + '</b></div></div>' +
@@ -16842,8 +16894,63 @@ function rivCardHtml(){
     rivChartSvg(st) +
     '<div class="ma-legend"><span class="riv-lg price"></span>股價　<span class="riv-lg shed"></span>分水嶺　河道由下往上：特價／便宜／貴／昂貴（直虛線＝新一季財報，河道跟著跳）</div>' +
     '<div class="riv-body">' + rivLadderHtml(st) + '<div class="riv-info"><div class="riv-sum">現在 <b class="riv-p">' + rivFmt(st.price) + '</b>・位置 <b>' + RV_ZONES[st.zone] + '</b>・距分水嶺 <b>' + (st.dist > 0 ? '+' : '') + st.dist + '%</b></div>' + rivFundHtml(st) +
-    '<div class="ma-legend">區間每天收盤後重算，會隨公司每季體質（近 4 季 EPS）與族群本益比變動。</div></div></div></div>';
+    '<div class="ma-legend">區間每天收盤後重算，會隨公司每季體質（近 4 季 EPS）與族群本益比變動。</div></div></div>' + rivGroupMapHtml(st) + '</div>';
   return h;
+}
+// ---- 內部河流（2026-10-16 使用者：同族群各檔照「距分水嶺 %」釘在河道上；水越深越便宜，每一帶配一種魚）----
+// 同族群用同一把 PE 尺（族群本益比中位數，後端 /api/river 的 groupMap），族內可以直接比；跨族群不混排。
+// 縱向＝距分水嶺 %：中間四帶照 0.618～1.382 倍線性落點，超昂貴／跌破特價兩帶對數壓縮；同一帶由左到右＝由貴到便宜，左右只是錯開。
+// 地圖上方兩條：飛魚＝無本益比（虧損／獲利太薄／沒資料）、鯨魚＝偏離分水嶺超過 300%（PE 尺量不了），都不排進河道。
+const RIV_MAP_BANDS = [[5, 0, 14], [4, 14, 18], [3, 32, 18], [2, 50, 18], [1, 68, 18], [0, 86, 14]];   // [區, 上緣 %, 高度 %]
+const RIV_MAP_EDGE = { 4: [1.2, 1.382], 3: [1.0, 1.2], 2: [0.8, 1.0], 1: [0.618, 0.8] };
+const RIV_FISH = { 5: ['🦈', '鯊魚'], 4: ['🐡', '河豚'], 3: ['🐬', '海豚'], 2: ['🏮🐟', '燈籠魚'], 1: ['🦑', '魷魚'], 0: ['🦀', '螃蟹'], ext: ['🐋', '鯨魚'], nv: ['🪽🐟', '飛魚'] };
+function rivMapY(dist, zone){
+  const r = 1 + dist / 100, b = RIV_MAP_BANDS.find((x) => x[0] === zone);
+  if (!b) return 50;
+  let f;
+  if (RIV_MAP_EDGE[zone]){ const e = RIV_MAP_EDGE[zone]; f = (e[1] - r) / (e[1] - e[0]); }
+  else if (zone === 5) f = 1 - Math.min(1, Math.log(Math.max(r / 1.382, 1.0001)) / Math.log(3));
+  else f = Math.min(1, Math.log(0.618 / Math.max(r, 0.05)) / Math.log(3));
+  f = Math.max(0.08, Math.min(0.92, f));   // 釘子貼邊也要整顆露出來
+  return Math.max(9, Math.min(91, b[1] + f * b[2]));
+}
+function rivGroupMapHtml(st){
+  const g = st.groupMap;
+  if (!g || !(g.rows || []).length) return '';
+  const isNum = (v) => typeof v === 'number' && isFinite(v);
+  const nv = g.rows.filter((r) => r.nv || !isNum(r.dist));
+  const ext = g.rows.filter((r) => !r.nv && isNum(r.dist) && Math.abs(r.dist) > 300);
+  const rows = g.rows.filter((r) => !r.nv && isNum(r.dist) && Math.abs(r.dist) <= 300);
+  const pct = (v) => (v > 0 ? '+' : '') + Math.round(v) + '%';
+  const why = { loss: '虧損', thin: '獲利太薄', none: '沒有本益比資料' };
+  const pin = (r, fish, withPct, style) => {
+    const me = r.code === st.code;
+    const tip = r.nv ? why[r.why] || '沒有本益比' : '距分水嶺 ' + pct(r.dist) + (r.weak ? '・⚠ 基準參考弱（本益比 60 倍以上，獲利偏薄）' : '');
+    return '<span class="rgm-pin' + (me ? ' me' : '') + '"' + (me ? '' : ' data-riv-q="' + wlEsc(r.code) + '"') + (style ? ' style="' + style + '"' : '') + ' title="' + wlEsc(tip) + '">' +
+      '<b class="fe">' + fish[0] + '</b>' + wlEsc(r.code) + ' ' + wlEsc(r.name) + (r.weak ? ' ⚠' : '') + (withPct ? '<small>' + pct(r.dist) + '</small>' : '') + '</span>';
+  };
+  const strip = (list, label, sub, withPct, cls, fish) => '<div class="rgm-strip ' + cls + '"><span class="rgm-sl">' + label + '<small>' + sub + '</small></span><div class="rgm-sp">' +
+    list.map((r) => pin(r, fish, withPct)).join('') + '</div></div>';
+  let map = '<div class="rgm-map">' + RIV_MAP_BANDS.map((b) => '<div class="rgm-band b' + b[0] + '" style="top:' + b[1] + '%;height:' + b[2] + '%"><span>' + RV_ZONES[b[0]] + '</span><em>' +
+    RIV_FISH[b[0]][0] + ' ' + RIV_FISH[b[0]][1] + '</em></div>').join('') + '<div class="rgm-shed"><i>分水嶺 0%</i></div>';
+  const byz = {};
+  rows.forEach((r) => { (byz[r.zone] = byz[r.zone] || []).push(r); });   // 後端已經由貴到便宜排好
+  Object.keys(byz).forEach((z) => {
+    const lst = byz[z], k = lst.length;
+    lst.forEach((r, i) => {
+      let y = rivMapY(r.dist, +z);
+      if (k >= 4){ y += i % 2 ? 4 : -4; y = Math.max(9, Math.min(91, y)); }   // 同一帶 4 顆以上高低交錯，不互疊
+      map += pin(r, RIV_FISH[z], true, 'left:' + ((i + 1) / (k + 1) * 100).toFixed(1) + '%;top:' + y.toFixed(1) + '%');
+    });
+  });
+  map += '</div>';
+  const up = (nv.length ? strip(nv, '🪽🐟 飛魚・無本益比', '虧損 / 獲利太薄 / 無基準 —— 跳出水面，沒本益比可游', false, 'bad', RIV_FISH.nv) : '') +
+    (ext.length ? strip(ext, '🐋 鯨魚・偏離逾 300%', '太大隻，PE 尺量不了（剛轉盈 / 獲利基期極小）', true, 'warn', RIV_FISH.ext) : '');
+  return '<div class="rgm"><div class="rgm-lab">🌊 內部河流 —— ' + wlEsc(g.group) + '族<span>' + g.rows.length + ' 檔・上貴下便宜・左右只是錯開・點釘子直接查' +
+    (g.refFrom === '全市場' ? '・這族有本益比的不到 3 檔，用全市場本益比中位數當尺' : '') + '</span></div>' + up + map +
+    '<div class="rgm-note">水越深越便宜：鯊魚 → 河豚 → 海豚 → 燈籠魚 → 魷魚 → 螃蟹。縱向＝距分水嶺 %（超出區間的兩帶對數壓縮）；同一帶由左到右＝由貴到便宜。' +
+    '地圖上方「無本益比」「偏離逾 300%」兩條不排河道（無本益比最差）。紅釘＝本檔。⚠＝基準參考弱（本益比 60 倍以上，獲利偏薄）。同族群用同一把 PE 尺（族群本益比中位數 ' +
+    (g.ref ? rivFmt(g.ref, 1) + ' 倍' : '—') + '），族內可以直接比；跨族群不混排。</div></div>';
 }
 function rivMa10Html(){
   const m = rivState.ma10;
