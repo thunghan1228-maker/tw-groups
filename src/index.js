@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 22:21:31";
+const BUILD_STAMP = "2026-10-16 22:26:10";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6721,7 +6721,8 @@ function home155ColHtml(){
 }
 // ---- 即將入獄／即將出關／已出關（2026-10-16 使用者：照老師的出關日(61)、出獄股(62)；放在首頁最下面說明欄最前面，
 // 跟說明欄一樣是表格，順序即將入獄、即將出關、已出關，只列代號、名稱）----
-// 即將入獄＝已公告、還沒開始關的＋處置監獄的嫌疑名單（明天收盤再符合就關；🔴高機率在前、🟢低機率在後；已經在關的會變延長，不列）；
+// 即將入獄＝未來一週（明天起 5 個交易日）會開始關的：已公告、還沒開始關的＋處置監獄的嫌疑名單（明天收盤再符合就關，後天開始關；
+//   高機率在前、低機率在後；已經在關的會變延長，不列）。交易所前一天晚上才公告，嫌疑名單也只看得到明天，所以一週裡實際只會有前兩天的股；
 // 即將出關＝未來 3 個交易日出關的（老師 61，原名「出關日」）；已出關＝含今天往前 3 個交易日內出關的（老師 62，原名「出獄股」）。
 // 老師 10/16 的 61／62 比處置公告少幾檔（天擎、鈺鎧、巨虹、映興、中茂、耀穎、美德醫療、大眾控、浩鼎、裕慶、旭然、強新、無敵沒列），
 // 處置原因、上市櫃、在不在我們族群都對不起來，規則還不知道，先全部列。
@@ -6739,15 +6740,19 @@ function homeJailModel(){
   const today = twTodayStr();
   const days = (Array.isArray(d.releaseDays) && d.releaseDays.length ? d.releaseDays : (d.weeks || []).flatMap((w) => w.days).filter((x) => !x.closed))
     .slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
-  const soonOut = days.filter((x) => x.date > today).slice(0, 3)
+  const ahead = days.filter((x) => x.date > today);
+  const soonOut = ahead.slice(0, 3)
     .flatMap((x) => x.stocks.map((s) => ({ code: s.code, name: s.name, title: x.md + ' 出關（恢復正常交易）' })));
+  // 即將入獄看未來一週（2026-10-16 使用者）：明天起 5 個交易日——週五看下週一～五、週三看週四～下週二，依此類推
+  const week = ahead.slice(0, 5);
+  const weekEnd = week.length ? week[week.length - 1].date : null;
   const out = days.filter((x) => x.date <= today).slice(-3).reverse()
     .flatMap((x, i) => x.stocks.map((s) => ({ code: s.code, name: s.name, title: x.md + ' 出關，今天是出關第 ' + (i + 1) + ' 天' })));
-  const soonIn = (d.newJail || []).filter((j) => j.start > today)
+  const soonIn = (d.newJail || []).filter((j) => j.start > today && (!weekEnd || j.start <= weekEnd))
     .map((j) => ({ code: j.code, name: j.name, title: '已公告：' + jlMd(j.start) + ' 起處置、' + j.releaseMd + ' 出關' }))
     .concat((d.suspects || []).filter((s) => !s.jailed)   // 後端已經照高機率在前排好
       .map((s) => ({ code: s.code, name: s.name, title: '嫌疑名單：' + s.status + '（明天收盤再符合就關，' + (s.high ? '高' : '低') + '機率）' })));
-  return { soonIn, soonOut, out };
+  return { soonIn, soonOut, out, inRange: week.length ? week[0].md + '～' + week[week.length - 1].md : '' };
 }
 function homeJailHelpHtml(){
   let m = null;
@@ -6757,7 +6762,7 @@ function homeJailHelpHtml(){
     (!m ? '<tr><td colspan="2">讀取中…</td></tr>'
       : list.length ? list.map((x) => '<tr class="hr-stk" data-code="' + x.code + '" data-name="' + wlEsc(x.name) + '" tabindex="0" role="button" title="' + wlEsc(x.title) + '"><td>' + x.code + '</td><td>' + wlEsc(x.name) + '</td></tr>').join('')
       : '<tr><td colspan="2">' + empty + '</td></tr>') + '</tbody></table></div>';
-  return card('🔒 即將入獄', m ? m.soonIn : [], '目前沒有') +
+  return card('🔒 即將入獄' + (m && m.inRange ? ' <small>' + m.inRange + '</small>' : ''), m ? m.soonIn : [], '目前沒有') +
     card('🔓 即將出關', m ? m.soonOut : [], '未來 3 個交易日沒有') +
     card('🎉 已出關', m ? m.out : [], '最近 3 個交易日沒有');
 }
@@ -12399,7 +12404,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 22:21:31';
+const BUILD_STAMP = '2026-10-16 22:26:10';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
