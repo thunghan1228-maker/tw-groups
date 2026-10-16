@@ -6833,14 +6833,14 @@ function homeJailHelpHtml(){
         : list.length ? list.map((x) => row(x, wdHead, n)).join('')
         : '<tr><td colspan="' + n + '">' + empty + '</td></tr>') + '</tbody></table></div>';
   };
-  // 2026-10-16 使用者：三欄由上到下——今日入獄→即將入獄｜即將出關→犯罪集團｜已出關→嫌疑名單
+  // 2026-10-16 使用者：三欄由上到下——今日入獄→即將入獄→嫌疑名單（同一欄疊三張）｜即將出關→犯罪集團｜已出關
   const col = (html) => '<div class="hr-jail-col">' + html + '</div>';
   return col(card('🔒 今日入獄' + (m && m.todayStart ? ' <small>' + jlMd(m.todayStart) + ' 生效・新進處置</small>' : ''), '出關日', m ? m.todayIn : [], '今天沒有新進處置', '處置') +
-      card('🔒 即將入獄' + (m && m.inRange ? ' <small>' + m.inRange + '</small>' : ''), '入獄日', m ? m.soonIn : [], '目前沒有', '星期')) +
+      card('🔒 即將入獄' + (m && m.inRange ? ' <small>' + m.inRange + '</small>' : ''), '入獄日', m ? m.soonIn : [], '目前沒有', '星期') +
+      card('🔍 嫌疑名單' + (m ? ' <small>' + wlEsc(m.nextMd || '') + '(' + wlEsc(m.nextWeekday || '') + ') 收盤再符合就會被關</small>' : ''), '機率', m ? m.suspects : [], '明天沒有一次就會被關的股票', '')) +
     col(card('🔓 即將出關', '出關日', m ? m.soonOut : [], '未來 3 個交易日沒有', '星期') +
       card('🏴 犯罪集團 <small>同族群 2 檔以上被關或即將被關＝資金熱區</small>', '出關日', m ? m.gangs : [], '目前沒有同族群 2 檔以上一起被關', '')) +
-    col(card('🎉 已出關', '第幾天', m ? m.out : [], '最近 3 個交易日沒有', '') +
-      card('🔍 嫌疑名單' + (m ? ' <small>' + wlEsc(m.nextMd || '') + '(' + wlEsc(m.nextWeekday || '') + ') 收盤再符合就會被關</small>' : ''), '機率', m ? m.suspects : [], '明天沒有一次就會被關的股票', ''));
+    col(card('🎉 已出關', '第幾天', m ? m.out : [], '最近 3 個交易日沒有', ''));
 }
 const HOME_334_TOP_GROUPS = 10;   // 首頁河流多(34)、賽馬多(33) 只列族群前幾名（2026-10-16 使用者）
 function homeStockColHtml(title, list, emptyText){
