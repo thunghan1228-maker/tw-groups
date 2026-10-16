@@ -6480,6 +6480,8 @@ function homeRank4Html(){
     // 2026-10-16 使用者：賽馬多(33) 跟 30加33加34 對調——賽馬多疊在續抱勿追高下面，30加33加34 疊在河流多(34) 上面
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
+      // 2026-10-16 使用者：馬火多(30) 放在賽馬多(33) 上面疊在一起；漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
+      homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : []) +
       homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
     '</div>' +
     '<div class="hr-stack">' +
@@ -12836,7 +12838,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・昨日強勢股／183・續抱勿追高／賽馬多(33)・30加33加34／河流多(34)・193／199・刀劍空(32)・188</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・昨日強勢股／183・續抱勿追高／馬火多(30)／賽馬多(33)・30加33加34／河流多(34)・193／199・刀劍空(32)・188</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
