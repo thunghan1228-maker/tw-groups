@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 23:02:39";
+const BUILD_STAMP = "2026-10-16 23:16:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2003,6 +2003,11 @@ const HTML_PAGE = `<!DOCTYPE html>
   #rivInner .riv-row.z2{background:#7fb8cf;color:#10283a;} #rivInner .riv-row.z1{background:#2e7d9c;color:#fff;}
   #rivInner .scr-fact{background:#f6eedd;border-color:#e4d3b3;} #rivInner .scr-fact b{color:#2b2118;}
   #rivInner .ma-err{color:#b91c1c;}
+  .riv-qh{font-size:12px;color:#7a6650;font-weight:700;margin:4px 0 4px;}
+  .riv-qs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
+  .riv-q{border:1px solid #e0cfae;background:#fffdf8;border-radius:8px;padding:3px 9px;font-size:12px;color:#5a4632;} .riv-q b{color:#2b2118;font-size:13px;margin-left:2px;}
+  .riv-mg{font-size:13px;margin:2px 0 6px;color:#5a4632;} .riv-mg b{color:#2b2118;}
+  #rivInner .riv-top td:nth-child(2){text-align:left;} #rivInner .riv-top td:nth-child(n+3){font-variant-numeric:tabular-nums;}
   /* 內部河流：同族各檔釘在河道上 */
   .rgm{border-top:1.5px dashed #d9c7a6;margin-top:16px;padding-top:12px;}
   .rgm-lab{font-size:15px;font-weight:800;margin:0 2px 8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
@@ -12519,7 +12524,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 23:02:39';
+const BUILD_STAMP = '2026-10-16 23:16:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16858,7 +16863,7 @@ setInterval(() => {
 // 分水嶺＝近 4 季 EPS × 同族群本益比中位數；四區照老師比例（×0.618／0.8／1.2／1.382）。後端 /api/river 算好，這裡畫圖。
 const RV_ZONES = ['跌破特價', '特價', '便宜', '貴', '昂貴', '超昂貴'];
 const RV_ZCLS = ['z0', 'z1', 'z2', 'z3', 'z4', 'z5'];
-const rivState = { q: '', data: null, loading: false, error: '', span: 3, list: null, ma10: null };
+const rivState = { q: '', data: null, loading: false, error: '', span: 3, list: null, ma10: null, top: null };
 const rivFmt = (x, d) => x === null || x === undefined ? '—' : Number(x).toLocaleString('zh-TW', { minimumFractionDigits: d === undefined ? 2 : d, maximumFractionDigits: d === undefined ? 2 : d });
 async function rivFetch(url){
   const res = await fetch(url);
@@ -16874,6 +16879,9 @@ async function rivQuery(q){
   renderRiver();
   try {
     rivState.data = await rivFetch('/api/river?q=' + encodeURIComponent(q));
+    // 本週查詢排行：/api/river 有快取，後端看不到每一次，另外記一筆（2026-10-16 使用者）
+    const hitCode = rivState.data && rivState.data.stock && rivState.data.stock.code;
+    if (hitCode) fetch('/api/river-hit?code=' + encodeURIComponent(hitCode)).catch(() => {});
   } catch (e){
     rivState.data = null; rivState.error = e.message || String(e);
   } finally {
@@ -16884,6 +16892,7 @@ async function rivQuery(q){
 async function rivLoadSide(){
   try { if (!rivState.list) rivState.list = (await rivFetch('/api/river-list')).stocks || []; } catch (_){ rivState.list = []; }
   try { if (!rivState.ma10) rivState.ma10 = await rivFetch('/api/river-ma10'); } catch (e){ rivState.ma10 = { error: e.message || String(e) }; }
+  try { rivState.top = await rivFetch('/api/river-top'); } catch (e){ rivState.top = { error: e.message || String(e) }; }
   renderRiver();
 }
 function rivChartSvg(st){
@@ -16950,8 +16959,16 @@ function rivFundHtml(st){
   const f = st.fund || {};
   const cell = (k, v) => '<div class="scr-fact"><small>' + k + '</small><b>' + v + '</b></div>';
   let h = '<div class="scr-facts">' + cell('本益比（近 4 季）', st.pe === null ? '虧損' : rivFmt(st.pe, 1)) + cell('股價淨值比', st.pbr ? rivFmt(st.pbr, 2) : '—') +
-    cell('近 4 季 EPS 合計', st.eps4 !== undefined ? rivFmt(st.eps4) : '—') + cell('每股淨值', st.bps ? rivFmt(st.bps) : '—') +
+    cell('近 4 季 EPS 合計', st.eps4 !== undefined ? rivFmt(st.eps4) + (st.epsFrom === '財報' ? '<small>財報・到 ' + wlEsc(st.epsAsOf || '') + '</small>' : '<small>交易所本益比換算</small>') : '—') + cell('每股淨值', st.bps ? rivFmt(st.bps) : '—') +
     cell('參考本益比', (st.ref ? rivFmt(st.ref, 2) + ' 倍' : '—') + '<small>' + wlEsc(st.refGroup || '') + (st.refGroup === '全市場' ? '中位數' : '族群中位數') + '</small>') + '</div>';
+  // 2026-10-16 使用者：單季 EPS、營益率（觀測站綜合損益表，單季＝這季累計 − 上季累計）
+  if ((st.quarters || []).length){
+    h += '<div class="riv-qh">單季 EPS（元）</div><div class="riv-qs">' + st.quarters.map((q) => '<span class="riv-q">' + wlEsc(q.label) + ' <b class="' + (q.eps < 0 ? 'scr-dn' : '') + '">' +
+      (q.eps === null || q.eps === undefined ? '—' : rivFmt(q.eps)) + '</b></span>').join('') + '</div>';
+  }
+  if ((st.margins || []).length){
+    h += '<div class="riv-mg">營益率 ' + st.margins.map((m) => wlEsc(m.label) + ' <b>' + Number(m.margin).toFixed(1) + '%</b>').join(' → ') + '</div>';
+  }
   if ((f.rev || []).length){
     h += '<div class="ma-legend">近月營收（億）' + (f.ytd !== null && f.ytd !== undefined ? '・今年累計 <span class="' + (f.ytd >= 0 ? 'scr-up' : 'scr-dn') + '">' + (f.ytd >= 0 ? '+' : '') + f.ytd + '%</span>' : '') + '：' +
       f.rev.map((r) => r.ym + ' <b>' + r.rev + '</b>' + (r.yoy !== null && r.yoy !== undefined ? ' <span class="' + (r.yoy >= 0 ? 'scr-up' : 'scr-dn') + '">' + (r.yoy >= 0 ? '+' : '') + Number(r.yoy).toFixed(1) + '%</span>' : '')).join('　') + '</div>';
@@ -17034,6 +17051,24 @@ function rivGroupMapHtml(st){
     '地圖上方「無本益比」「偏離逾 300%」兩條不排河道（無本益比最差）。紅釘＝本檔。⚠＝基準參考弱（本益比 100 倍以上，獲利偏薄）。同族群用同一把 PE 尺（族群本益比中位數 ' +
     (g.ref ? rivFmt(g.ref, 1) + ' 倍' : '—') + '），族內可以直接比；跨族群不混排。</div></div>';
 }
+// 本週查詢排行（2026-10-16 使用者）：近 7 天站上被查最多次的 12 檔，點一列直接查
+function rivTopHtml(){
+  const t = rivState.top;
+  let body;
+  if (!t) body = '<div class="ma-legend">載入中…</div>';
+  else if (t.error) body = '<div class="ma-legend">排行還沒準備好，晚一點再看。</div>';
+  else if (!(t.rows || []).length) body = '<div class="ma-legend">這 7 天還沒有人查過。</div>';
+  else {
+    const lab = (t.rows.find((r) => r.epsLabel) || {}).epsLabel;
+    body = '<div class="ma-wrap"><table class="ma-table riv-top"><thead><tr><th>#</th><th>股票</th><th>收盤</th><th>' + (lab ? wlEsc(lab.slice(2)) + ' ' : '') + 'EPS</th><th>營收年增</th><th>目前位置</th><th>本週查詢</th></tr></thead><tbody>' +
+      t.rows.map((r, i) => '<tr class="scr-row" data-riv-q="' + wlEsc(r.code) + '"><td class="rk">' + (i + 1) + '</td><td><span class="code">' + wlEsc(r.code) + '</span> ' + wlEsc(r.name) + '</td>' +
+        '<td>' + rivFmt(r.price) + '</td><td>' + (r.eps === null || r.eps === undefined ? '—' : rivFmt(r.eps)) + '</td>' +
+        '<td class="' + (r.yoy > 0 ? 'scr-up' : r.yoy < 0 ? 'scr-dn' : '') + '">' + (r.yoy === null || r.yoy === undefined ? '—' : (r.yoy > 0 ? '+' : '') + Number(r.yoy).toFixed(1) + '%') + '</td>' +
+        '<td>' + (r.zone === null || r.zone === undefined ? '<small>算不出</small>' : '<span class="riv-zone ' + RV_ZCLS[r.zone] + '">' + wlEsc(r.zoneName) + '</span>') + '</td>' +
+        '<td><b>' + r.count + '</b> 次</td></tr>').join('') + '</tbody></table></div>';
+  }
+  return '<div class="ma-sec"><h3>🔥 本週查詢排行</h3>' + body + '<div class="ma-legend">近 7 天站上查詢次數統計，點一列直接查。</div></div>';
+}
 function rivMa10Html(){
   const m = rivState.ma10;
   if (!m) return '<div class="ma-legend">載入中…</div>';
@@ -17053,7 +17088,7 @@ function renderRiver(){
     '<div class="ma-q"><input id="rivQ" list="rivList" placeholder="輸入股號或股名，例：2492 或 華新科" value="' + wlEsc(keep !== null ? keep : rivState.q) + '"><button type="button" data-riv-go="1">查詢</button>' +
     ['2492 華新科', '2408 南亞科', '2327 國巨'].map((x) => '<button type="button" class="scr-pre" data-riv-q="' + x.split(' ')[0] + '">' + x + '</button>').join('') + '</div>' +
     '<datalist id="rivList">' + (rivState.list || []).map((s) => '<option value="' + wlEsc(s.code) + '">' + wlEsc(s.name) + '</option>').join('') + '</datalist>' +
-    rivCardHtml() +
+    rivCardHtml() + rivTopHtml() +
     '<div class="ma-sec"><h3>這張圖怎麼看？</h3><div class="riv-howbar"><span class="z1">特價</span><span class="z2">便宜</span><span class="z3">貴</span><span class="z4">昂貴</span></div>' +
     '<div class="ma-legend">中間虛線＝分水嶺：股價在分水嶺之下，代表相對它的同族群偏便宜；之上代表偏貴。紅線是股價，彩色河道由下而上是特價 → 便宜 → 貴 → 昂貴；' +
     '河道會隨公司每季體質（近 4 季 EPS）上下移動 —— 同樣的股價，體質變好時會從「貴」變「便宜」。四區＝分水嶺 ×0.618／×0.8／×1.2／×1.382（低於 0.618 倍＝跌破特價、高於 1.382 倍＝超昂貴）。' +
@@ -18369,6 +18404,16 @@ export default {
     if (url.pathname === "/api/river-list") {
       // 估值河流圖的股票清單（查詢建議用），5 分鐘快取
       return await proxyHanstockBars("/api/hub/river/list" + url.search, 300);
+    }
+    if (url.pathname === "/api/river-hit") {
+      // 估值河流圖每查一檔記一筆（本週查詢排行，2026-10-16 使用者）：/api/river 有快取，後端看不到每一次；不快取
+      const code = String(url.searchParams.get("code") || "").trim().toUpperCase();
+      if (!/^[0-9A-Z]{4,6}$/.test(code)) return Response.json({ status: "error" }, { status: 422 });
+      return await proxyHanstockBars("/api/hub/river/hit?code=" + encodeURIComponent(code), 0);
+    }
+    if (url.pathname === "/api/river-top") {
+      // 估值河流圖的本週查詢排行，1 分鐘快取
+      return await proxyHanstockBars("/api/hub/river/top", 60);
     }
     if (url.pathname === "/api/river-ma10") {
       // 估值河流圖的「均線≥10 × 便宜區」清單，5 分鐘快取

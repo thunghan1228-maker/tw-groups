@@ -819,6 +819,16 @@ export default {
       // 估值河流圖的股票清單（查詢建議用），5 分鐘快取
       return await proxyHanstockBars("/api/hub/river/list" + url.search, 300);
     }
+    if (url.pathname === "/api/river-hit") {
+      // 估值河流圖每查一檔記一筆（本週查詢排行，2026-10-16 使用者）：/api/river 有快取，後端看不到每一次；不快取
+      const code = String(url.searchParams.get("code") || "").trim().toUpperCase();
+      if (!/^[0-9A-Z]{4,6}$/.test(code)) return Response.json({ status: "error" }, { status: 422 });
+      return await proxyHanstockBars("/api/hub/river/hit?code=" + encodeURIComponent(code), 0);
+    }
+    if (url.pathname === "/api/river-top") {
+      // 估值河流圖的本週查詢排行，1 分鐘快取
+      return await proxyHanstockBars("/api/hub/river/top", 60);
+    }
     if (url.pathname === "/api/river-ma10") {
       // 估值河流圖的「均線≥10 × 便宜區」清單，5 分鐘快取
       return await proxyHanstockBars("/api/hub/river/ma10" + url.search, 300);
