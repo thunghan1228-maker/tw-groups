@@ -1,7 +1,7 @@
 # 每季財報（綜合損益表彙總報表）鏡像（估值河流圖用，2026-10-16 使用者：單季 EPS、營益率要跟對方一樣）。
 # 公開資訊觀測站「綜合損益表 彙總報表」（t163sb04）每季一份，上市＋上櫃全部公司的營業收入、營業利益、基本每股盈餘，
 # 都是「今年累計到該季」的數字；單季＝這季累計 − 上季累計（第 1 季就是累計本身），後端自己減。
-# 觀測站擋 HanStock 的正式站主機，GitHub 的 runner 抓得到：抓最近 7 季，已經存過、而且不是最近 2 季的就不重抓（財報公布後不會改），
+# 觀測站擋 HanStock 的正式站主機，GitHub 的 runner 抓得到：抓最近 11 季，已經存過、而且不是最近 2 季的就不重抓（財報公布後不會改），
 # 每季一份存 tpex/fin-YYYYQn.json，清單存 tpex/fin-index.json，每次結果存 tpex/fin-status.json（查錯用）。抓完戳後端立刻拉回去。
 name: MOPS financials mirror
 
@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: data
-      - name: 抓觀測站綜合損益表彙總報表（上市、上櫃，最近 7 季）
+      - name: 抓觀測站綜合損益表彙總報表（上市、上櫃，最近 11 季）
         run: |
           python3 - <<'PY'
           import html, json, os, re, time, urllib.parse, urllib.request
@@ -100,10 +100,10 @@ jobs:
                                     num(rec, ['基本每股盈餘（元）', '基本每股盈餘(元)', '基本每股盈餘'])]
               return rows
 
-          # 最近 7 季（含還沒公布的這一季，沒資料就跳過）
+          # 最近 11 季（含還沒公布的這一季，沒資料就跳過；河道歷史「長時間」要用）
           seasons = []
           y, q = now.year, (now.month - 1) // 3 + 1
-          for _ in range(7):
+          for _ in range(11):
               seasons.append((y, q))
               q -= 1
               if q == 0:
