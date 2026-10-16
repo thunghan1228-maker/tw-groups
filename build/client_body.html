@@ -6636,12 +6636,12 @@ function homeRank4Html(){
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
       homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
     '</div>' +
-    homeStrongColHtml() +
-    // 2026-10-16 使用者：283 疊在 188 上面，這一欄放在昨日強勢股右邊（188 不再放最後）
+    // 2026-10-16 使用者：188 疊到昨日強勢股下面；283 自己一欄，放在右邊
     '<div class="hr-stack">' +
-      home283ColHtml(zone283List(h)) +
+      homeStrongColHtml() +
       homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
     '</div>' +
+    home283ColHtml(zone283List(h)) +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
     '<div class="hr-stack">' +
@@ -6658,7 +6658,7 @@ const hrHelpTable = (title, head, rows, cls) => '<div class="hr-help-card' + (cl
   '<tbody>' + rows.map((r) => '<tr>' + r.map((x) => '<td>' + x + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
 function homeRankFootHtml(total){
   return hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
-    ['終點戰法空(283)', '族裡有股票亮燈的（千元、小電機不算）', '亮燈＝非處置股盤中最高曾到 ' + Z283_LIT_HIGH + '% 以上、現在還漲 ' + Z283_LIT_PCT + '% 以上；照族群名次排，疊在 188 上面；每族列 👑 族裡漲最多的、🐎 第 2 名（漲 ' + Z283_HORSE_PCT + '% 以上才標）；其他「盤中最高曾漲到 ' + Z283_HIGH_PCT + '% 以上、現在沒翻黑」或「昨天／前天漲過 ' + Z283_PRIOR_RISE + '% 以上、今天跌不到 ' + (-Z283_KNIFE_FLOOR) + '%」的，還在漲標 ⚔️、已轉跌標 🔪；兩檔以上鎖漲停（處置股不算）加註 ⚠️有兩個以上亮燈空小心；整欄最下面固定附註 ⚠️注意破惡均下彎打倒數'],
+    ['終點戰法空(283)', '族裡有股票亮燈的（千元、小電機不算）', '亮燈＝非處置股盤中最高曾到 ' + Z283_LIT_HIGH + '% 以上、現在還漲 ' + Z283_LIT_PCT + '% 以上；照族群名次排；每族列 👑 族裡漲最多的、🐎 第 2 名（漲 ' + Z283_HORSE_PCT + '% 以上才標）；其他「盤中最高曾漲到 ' + Z283_HIGH_PCT + '% 以上、現在沒翻黑」或「昨天／前天漲過 ' + Z283_PRIOR_RISE + '% 以上、今天跌不到 ' + (-Z283_KNIFE_FLOOR) + '%」的，還在漲標 ⚔️、已轉跌標 🔪；兩檔以上鎖漲停（處置股不算）加註 ⚠️有兩個以上亮燈空小心；整欄最下面固定附註 ⚠️注意破惡均下彎打倒數'],
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
     ['多族群排名(183)', '固定 ' + RANK188_GROUPS.size + ' 族', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 2 檔（漲最多的）'],
     ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
@@ -12997,7 +12997,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・183・馬火多(30)・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・昨日強勢股・283／188・193／199・刀劍空(32)</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・183・馬火多(30)・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・昨日強勢股／188・283・193／199・刀劍空(32)</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
