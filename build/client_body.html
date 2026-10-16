@@ -60,7 +60,7 @@
   .top6-chg{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap;}
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
-  .home-rank4{display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));gap:8px;align-items:start;}
+  .home-rank4{display:grid;grid-template-columns:repeat(8, minmax(0, 1fr));gap:8px;align-items:start;}
   .hr-stack{display:flex;flex-direction:column;gap:8px;min-width:0;}
   .hr-warn{padding:2px 8px 5px 18px;font-size:12px;line-height:1.6;white-space:normal;}
   .hr-warn .hr-stk{cursor:pointer;margin-right:6px;white-space:nowrap;}
@@ -6477,16 +6477,16 @@ function homeRank4Html(){
       homeStrongColHtml() +
       homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
     '</div>' +
-    // 2026-10-16 使用者：賽馬多(33) 跟 30加33加34 對調——賽馬多疊在續抱勿追高下面，30加33加34 疊在河流多(34) 上面
-    '<div class="hr-stack">' +
-      homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
-      // 2026-10-16 使用者：馬火多(30) 放在賽馬多(33) 上面疊在一起；漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
-      homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : []) +
-      homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
-    '</div>' +
+    // 2026-10-16 使用者：第 3 欄只放續抱勿追高；第 4 欄 30加33加34 疊在河流多(34) 上面；第 5 欄馬火多(30) 疊在賽馬多(33) 上面
+    homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
     '<div class="hr-stack">' +
       homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單，交集也就沒有' : '') +
       homeStockColHtml('🌊河流多(34)', m ? m.rivers : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '') +
+    '</div>' +
+    '<div class="hr-stack">' +
+      // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
+      homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : []) +
+      homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
     '</div>' +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
@@ -12838,7 +12838,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・昨日強勢股／183・續抱勿追高／馬火多(30)／賽馬多(33)・30加33加34／河流多(34)・193／199・刀劍空(32)・188</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・昨日強勢股／183・續抱勿追高・30加33加34／河流多(34)・馬火多(30)／賽馬多(33)・193／199・刀劍空(32)・188</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
