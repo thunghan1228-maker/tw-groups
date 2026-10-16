@@ -6504,10 +6504,7 @@ function homeRank4Html(){
   // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／199 疊在同一欄）、193、刀劍空(32)、33、34、188、177
   return '<div class="home-rank4">' +
     homeObsColHtml() +   // 2026-10-16 使用者：強勢黑K選股排第一欄，在今日強勢股前面
-    '<div class="hr-stack">' +   // 2026-10-15 使用者：第一欄上面加今日強勢股、下面是 183
-      homeStrongColHtml() +
-      homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
-    '</div>' +
+    homeStrongColHtml() +   // 2026-10-16 使用者：183 移到最後一欄 188 上面，這欄只留昨日強勢股
     // 2026-10-16 使用者：第 3 欄只放續抱勿追高；第 4 欄 30加33加34 疊在河流多(34) 上面；第 5 欄馬火多(30) 疊在賽馬多(33) 上面
     // （後來說要把河流多搬到續抱下面，又說取消、首頁先不要動，維持這樣）
     homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
@@ -6528,7 +6525,10 @@ function homeRank4Html(){
     '</div>' +
     homeBladeColHtml(m) +
     // 2026-10-16 使用者：首頁不要 177，只留 188
-    homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
+    '<div class="hr-stack">' +   // 2026-10-16 使用者：最後一欄 183 疊在 188 上面
+      homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
+      homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
+    '</div>' +
     '</div>' +
     '<div class="hr-help">' + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }
@@ -12870,7 +12870,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・昨日強勢股／183・續抱勿追高・30加33加34／河流多(34)・馬火多(30)／賽馬多(33)・193／199・刀劍空(32)・188</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・昨日強勢股・續抱勿追高・30加33加34／河流多(34)・馬火多(30)／賽馬多(33)・193／199・刀劍空(32)・183／188</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
