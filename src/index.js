@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 10:07:07";
+const BUILD_STAMP = "2026-10-16 10:14:42";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -272,6 +272,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chart-info-bar{flex:1;text-align:center;padding:0 8px;font-size:20px;font-weight:700;color:#fff5e0;font-variant-numeric:tabular-nums;}
   .chart-info-bar .cib-item{white-space:nowrap;display:inline-block;margin:0 3px;}
   .cm-actions{display:flex;gap:6px;align-items:center;}
+  .cm-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;cursor:default;}
+  .cm-right .cm-flags{justify-content:flex-end;margin:0;max-width:460px;}
+  .cm-flags[hidden]{display:none;}
   .cm-quick-search{width:120px;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;}
   .cm-quick-search:focus{outline:2px solid var(--accent);outline-offset:1px;}
   .cm-go-btn{flex-shrink:0;background:var(--accent);color:var(--bg);border:1px solid var(--accent);border-radius:8px;height:32px;padding:0 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
@@ -492,6 +495,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .cm-flags{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 8px;}
   .flag-pill{font-size:11px;border-radius:10px;padding:2px 9px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);white-space:nowrap;}
   .flag-pill.off{color:var(--muted);opacity:.7;}
+  .flag-pill.stop{background:#c2410c;border-color:#c2410c;color:#fff;font-weight:700;opacity:1;}
   .flag-pill.futures{color:#93c5fd;border-color:#93c5fd66;}
   .flag-pill.disposition{background:#d4a017;border-color:#d4a017;color:#fff;font-weight:700;}
   .flag-pill.attention{background:#2563eb;border-color:#2563eb;color:#fff;font-weight:700;}
@@ -2416,6 +2420,8 @@ const HTML_PAGE = `<!DOCTYPE html>
        避免搜尋框、進入分K按鈕被壓縮到點不到。 */
     .chart-modal-head{flex-wrap:wrap;row-gap:8px;}
     .cm-actions{width:100%;justify-content:flex-end;}
+    .cm-right{width:100%;}
+    .cm-right .cm-flags{max-width:none;}
     /* 盤中333／族群大戶力的個股列（2026-09-24 使用者：漲跌幅/漲跌/成交價/大戶力手機上被擠到畫面外、
        對不齊）：代號、名稱（跟族群標籤/資格標籤）留在第一行；大戶力／漲跌幅／漲跌／成交價／符號這一群
        (.race-line2) 塞不下第一行剩餘空間時，整組換到自己獨立的第二行、貼齊右邊，不會被切在畫面外，
@@ -2818,15 +2824,18 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="chart-modal-head" id="chartModalHead">
       <div><span class="cm-code" id="cmCode"></span><span class="cm-name" id="cmName"></span><button type="button" class="wl-star" id="cmStar" data-code="" data-name="" title="加入自選股">☆</button><span class="cm-data-badge" id="cmDataBadge" hidden>示範資料</span></div>
       <span class="chart-info-bar" id="chartInfoBar"></span>
-      <div class="cm-actions">
-        <input type="text" class="cm-quick-search" id="cmQuickSearch" placeholder="輸入代號切換">
-        <button class="cm-go-btn" id="cmQuickSearchGoBtn" aria-label="進入分K">進入分K</button>
-        <button class="cm-icon-btn" id="cmSettingsToggle" aria-label="指標設定" aria-pressed="false">⚙</button>
-        <button class="cm-icon-btn" id="cmMax" aria-label="放大／還原視窗" aria-pressed="false">⛶</button>
-        <button class="cm-icon-btn" id="cmClose" aria-label="關閉">✕</button>
+      <div class="cm-right">
+        <div class="cm-actions">
+          <input type="text" class="cm-quick-search" id="cmQuickSearch" placeholder="輸入代號切換">
+          <button class="cm-go-btn" id="cmQuickSearchGoBtn" aria-label="進入分K">進入分K</button>
+          <button class="cm-icon-btn" id="cmSettingsToggle" aria-label="指標設定" aria-pressed="false">⚙</button>
+          <button class="cm-icon-btn" id="cmMax" aria-label="放大／還原視窗" aria-pressed="false">⛶</button>
+          <button class="cm-icon-btn" id="cmClose" aria-label="關閉">✕</button>
+        </div>
+        <!-- 2026-10-16 使用者：個股交易資訊（融資券、停資停券、現股當沖、股期、小型股期）放在右上角切換框下面，日線／5分／1分都看得到 -->
+        <div class="cm-flags" id="cmFlags" hidden></div>
       </div>
     </div>
-    <div class="cm-flags" id="cmFlags" hidden></div>
     <div class="chart-tabs" id="chartTabs">
       <button class="chart-tab" data-tf="daily">日線</button>
       <button class="chart-tab active" data-tf="m5">5分鐘</button>
@@ -5458,12 +5467,14 @@ function renderChartFlags(code){
   if (!el) return;
   const f = code ? stockFlags[code] : null;
   if (!f){ el.innerHTML = ''; el.hidden = true; return; }
-  const yesNo = (value, yes, no) => value == null ? '' : '<span class="flag-pill' + (value ? '' : ' off') + '">' + (value ? yes : no) + '</span>';
+  const yesNo = (value, yes, no, noCls) => value == null ? '' : '<span class="flag-pill' + (value ? '' : ' ' + (noCls || 'off')) + '">' + (value ? yes : no) + '</span>';
   const pills = [
-    yesNo(f.marginable, '可融資', '不可融資'),
-    yesNo(f.shortable, '可融券', '不可融券'),
-    yesNo(f.dayTradeEligible, '可現股當沖', '不可現股當沖'),
+    // 2026-10-16 使用者：不行的寫停資／停券（跟訊號中心一樣），加「小型股期」
+    yesNo(f.marginable, '可融資', '停資', 'stop'),
+    yesNo(f.shortable, '可融券', '停券', 'stop'),
+    yesNo(f.dayTradeEligible, '可現股當沖', '不可當沖', 'stop'),
     '<span class="flag-pill' + (f.hasStockFutures ? ' futures' : ' off') + '">' + (f.hasStockFutures ? '有股期' : '無股期') + '</span>',
+    f.hasMiniStockFutures == null ? '' : '<span class="flag-pill' + (f.hasMiniStockFutures ? ' futures' : ' off') + '">' + (f.hasMiniStockFutures ? '有小型股期' : '無小型股期') + '</span>',
     f.disposition
       ? '<span class="flag-pill disposition" title="' + (f.dispositionReason || '處置股') + '">處置股' + (f.dispositionUntil ? '（至 ' + f.dispositionUntil + '）' : '') + '</span>'
       : '<span class="flag-pill off">非處置</span>',
@@ -6485,7 +6496,7 @@ function homeStrongColHtml(){
   if (!d) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (stState.error.strong ? '讀取失敗' : '讀取中…') + '</div></div>';
   const groups = stLiveGroups(d, true).filter((g) => g.rows.length);
   const n = groups.reduce((a, g) => a + g.rows.length, 0);
-  const body = groups.map((g) => '<div class="hr-sep hr-st-grp">第 ' + g.rank + ' 名・' + wlEsc(g.name) + '</div>' + g.rows.map((r) => {
+  const body = groups.map((g) => '<div class="hr-sep hr-st-grp" title="族群分數＝族內平均均線分數（' + swMmdd(d.date) + ' 收盤算的），不是今天漲幅名次">第 ' + g.rank + ' 名・' + wlEsc(g.name) + (Number.isFinite(g.avg) ? '・均分 ' + g.avg.toFixed(1) : '') + '</div>' + g.rows.map((r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
     return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="均線分數 ' + r.sum + '（' + swMmdd(d.date) + ' 收盤）">' +
@@ -6536,13 +6547,16 @@ function homeRank4Html(){
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
       homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單，交集也就沒有' : '') +
-      homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name)), h.half, '------↓(空方)↓------', '沒有資料') +
     '</div>' +
     // 2026-10-16 使用者：33、34 移到第 3、4 欄，193、32 改到第 5、6 欄
     homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
     homeStockColHtml('🌊河流多(34)', m ? m.rivers : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '') +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
-    homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉', (r) => r.members || [], 'bear') +
+    // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
+    '<div class="hr-stack">' +
+      homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉', (r) => r.members || [], 'bear') +
+      homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name) && r.rank > h.half), h.half, '------↓(空方)↓------', '固定 23 族目前都不在空方') +
+    '</div>' +
     homeBladeColHtml(m) +
     '<div class="hr-stack">' +   // 2026-10-15 使用者：177 移到 188 下面，原本 177 的位置放飆股雷達
       homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
@@ -6561,7 +6575,7 @@ function homeRankFootHtml(total){
   return hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
     ['多族群排名(183)', '固定 ' + RANK188_GROUPS.size + ' 族', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 2 檔（漲最多的）'],
-    ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '全部列出'],
+    ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
     ['空族群必殺(193)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列名次比昨天掉的；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
     ['排名比較(177)', '全部 ' + total + ' 族', '只列漲幅前 10 大和跌幅前 10 大'],
   ]) +
@@ -6572,6 +6586,7 @@ function homeRankFootHtml(total){
     ['點族群', '看成分股'],
   ]) +
   hrHelpTable('🐎 個股欄（跟訊號中心「盤中333」同一份）', ['欄位', '列什麼'], [
+    ['⭐今日強勢股', '族群分數（族內平均均線分數，昨天收盤算的）前 10 名裡，均線分數 ≥12、今天沒跌的股票；「第 N 名・均分」是族群分數名次，不是今天漲幅名次'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
     ['👑30加33加34', '馬火多、賽馬多、河流多三份都有的'],
     ['🐎賽馬多(33)', '賽馬多名單'],
@@ -12076,7 +12091,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 10:07:07';
+const BUILD_STAMP = '2026-10-16 10:14:42';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -12890,7 +12905,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・今日強勢股／183・續抱勿追高／30加33加34／199・賽馬多(33)・河流多(34)・193・刀劍空(32)・188／177</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・今日強勢股／183・續抱勿追高／30加33加34・賽馬多(33)・河流多(34)・193／199・刀劍空(32)・188／177</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
