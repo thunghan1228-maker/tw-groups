@@ -6498,7 +6498,13 @@ const Z283_FOLLOW_PCT = 3;
 const Z283_HIGH_PCT = 5;
 const Z283_PRIOR_RISE = 5.5;
 const Z283_KNIFE_FLOOR = -2;
-const Z283_SKIP = new Set(['千元']);   // 照股價分的族群不看：老師三份 283 都沒有千元，昇達科在千元也是漲停（他的馬火多(30) 有千元 👑🚀20）
+const Z283_SKIP = new Set(['千元', '小電機']);   // 千元（照股價分）、小電機（老師 177 也不印）不看：九份 283 都沒有，昇達科在千元、方土霖在小電機鎖漲停也沒列
+// 族群「亮燈」（2026-10-16 回測老師 10/12～10/16 九份 283）：族裡有非處置股盤中最高曾到 Z283_LIT_HIGH% 以上、而且現在還漲 Z283_LIT_PCT% 以上。
+// 不是只看現在漲停：10/12 康那香最高 9.01%、現在 6.21% 就當 👑；亮燈會熄：富喬 09:35 有列、10:58 從 9.8% 回到 9.4% 以下就拿掉。
+// 處置股不算（映興、騰輝鎖漲停，電零組、AI眼鏡都沒列）。九份合起來族群錯 17 個，原本「現在有漲停」要錯 21 個；
+// 最準的是「最近 30 分鐘內衝到 9% 以上」（錯 14 個），但網站只有今天到目前的最高價，先用這個。
+const Z283_LIT_HIGH = 9.3;
+const Z283_LIT_PCT = 6.5;
 function zone283List(h){
   if (!lastData || !Array.isArray(lastData.groups)) return [];
   const sd = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
@@ -6508,8 +6514,13 @@ function zone283List(h){
     const r = rowOf.get(g.name);
     if (!r || Z283_SKIP.has(g.name)) return;
     const priced = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent)).sort((a, b) => b.changePercent - a.changePercent);
-    const lit = priced.filter((s) => s.limitUp).length;
-    if (!lit) return;
+    const isDisp = (s) => !!(stockFlags[s.code] && stockFlags[s.code].disposition);
+    const hiOf = (s) => {   // 今天到目前最高漲幅；沒有最高價（收盤後、後端代抓的報價）就用現在的漲幅
+      const prevClose = s.price / (1 + s.changePercent / 100);
+      return Number.isFinite(s.high) && s.high > 0 && prevClose > 0 ? (s.high / prevClose - 1) * 100 : s.changePercent;
+    };
+    if (!priced.some((s) => !isDisp(s) && hiOf(s) >= Z283_LIT_HIGH && s.changePercent >= Z283_LIT_PCT)) return;
+    const lit = priced.filter((s) => s.limitUp && !isDisp(s)).length;   // ⚠️有兩個以上亮燈＝現在鎖漲停的（處置股不算）有兩檔以上（九份只差 1 次）
     const stocks = [];
     priced.forEach((s, i) => {
       const p = (sd[s.code] && sd[s.code].pct) || [];
@@ -6531,7 +6542,7 @@ function home283ColHtml(list){
   const stk = (x) => '<div class="hr-row hr-stk hr-283-stk" data-code="' + x.code + '" data-name="' + x.name + '" tabindex="0" role="button">' +
     '<span class="hr-283-mk">' + x.mk + '</span><span class="hr-code">' + x.code + '</span><span class="hr-name">' + x.name + '</span>' +
     '<span class="hr-avg ' + dirClass(x.pct) + '">' + limitPriceHtml(x, fmt(x.pct) + '%') + '</span></div>';
-  const body = list.map((z) => '<div class="hr-row hr-283-grp" data-group="' + z.row.name + '" tabindex="0" role="button" title="族裡漲停 ' + z.lit + ' 檔">' +
+  const body = list.map((z) => '<div class="hr-row hr-283-grp" data-group="' + z.row.name + '" tabindex="0" role="button" title="族裡鎖漲停 ' + z.lit + ' 檔">' +
       '<span class="hr-name">🏰' + z.row.name + '</span><span class="hr-rk">(' + z.row.rank + ')</span><span class="hr-avg ' + dirClass(z.row.avg) + '">' + fmt(z.row.avg) + '%</span></div>' +
     z.stocks.map(stk).join('') +
     (z.lit >= 2 ? '<div class="hr-283-note">⚠️有兩個以上亮燈空小心</div>' : '')).join('');
@@ -6647,7 +6658,7 @@ const hrHelpTable = (title, head, rows, cls) => '<div class="hr-help-card' + (cl
   '<tbody>' + rows.map((r) => '<tr>' + r.map((x) => '<td>' + x + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
 function homeRankFootHtml(total){
   return hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
-    ['終點戰法空(283)', '族裡今天有漲停的（千元不算）', '照族群名次排，疊在 188 上面；每族列 👑 族裡漲最多的、🐎 第 2 名（漲 ' + Z283_HORSE_PCT + '% 以上才標）；其他「盤中最高曾漲到 ' + Z283_HIGH_PCT + '% 以上、現在沒翻黑」或「昨天／前天漲過 ' + Z283_PRIOR_RISE + '% 以上、今天跌不到 ' + (-Z283_KNIFE_FLOOR) + '%」的，還在漲標 ⚔️、已轉跌標 🔪；兩檔以上漲停加註 ⚠️有兩個以上亮燈空小心；整欄最下面固定附註 ⚠️注意破惡均下彎打倒數'],
+    ['終點戰法空(283)', '族裡有股票亮燈的（千元、小電機不算）', '亮燈＝非處置股盤中最高曾到 ' + Z283_LIT_HIGH + '% 以上、現在還漲 ' + Z283_LIT_PCT + '% 以上；照族群名次排，疊在 188 上面；每族列 👑 族裡漲最多的、🐎 第 2 名（漲 ' + Z283_HORSE_PCT + '% 以上才標）；其他「盤中最高曾漲到 ' + Z283_HIGH_PCT + '% 以上、現在沒翻黑」或「昨天／前天漲過 ' + Z283_PRIOR_RISE + '% 以上、今天跌不到 ' + (-Z283_KNIFE_FLOOR) + '%」的，還在漲標 ⚔️、已轉跌標 🔪；兩檔以上鎖漲停（處置股不算）加註 ⚠️有兩個以上亮燈空小心；整欄最下面固定附註 ⚠️注意破惡均下彎打倒數'],
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
     ['多族群排名(183)', '固定 ' + RANK188_GROUPS.size + ' 族', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 2 檔（漲最多的）'],
     ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
