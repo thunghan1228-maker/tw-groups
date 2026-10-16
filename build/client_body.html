@@ -105,6 +105,8 @@
   .hr-help-tbl td{padding:4px 8px;border-top:1px solid var(--line);vertical-align:top;}
   .hr-help-tbl td:first-child{white-space:nowrap;font-weight:700;color:var(--text);}
   .hr-help-tbl td:nth-child(2):not(:last-child){white-space:nowrap;max-width:7em;}
+  .hr-jail-card .hr-help-tbl tr.hr-stk{cursor:pointer;} .hr-jail-card .hr-help-tbl tr.hr-stk:hover td{background:rgba(255,255,255,0.05);}   /* 即將入獄／即將出關／已出關：點股票開K線圖 */
+  .hr-jail-card .hr-help-tbl td:last-child{color:var(--text);font-weight:700;}
   .hr-obs-foot .hr-help-tbl,.hr-obs-foot .hr-help-tbl th,.hr-obs-foot .hr-help-tbl td:first-child{color:#f9a8d4;}   /* 2026-10-15 使用者：強勢黑K選股說明的字改粉紅色；①②③底色標籤、符號顏色照原本（★☆●紅、▲粉紅、✗三K低▼綠、↑深紅） */
   .hr-obs-foot .d123-tag{margin:0 2px;}
   .hr-obs-foot .om{font-size:13px;}
@@ -6626,6 +6628,48 @@ function home155ColHtml(){
   });
   return '<div class="hr-col">' + title + (f.rows.length ? body : '<div class="hr-note">沒有資料</div>') + '</div>';
 }
+// ---- 即將入獄／即將出關／已出關（2026-10-16 使用者：照老師的出關日(61)、出獄股(62)；放在首頁最下面說明欄最前面，
+// 跟說明欄一樣是表格，順序即將入獄、即將出關、已出關，只列代號、名稱）----
+// 即將入獄＝已公告、還沒開始關的＋處置監獄的嫌疑名單（明天收盤再符合就關；🔴高機率在前、🟢低機率在後；已經在關的會變延長，不列）；
+// 即將出關＝未來 3 個交易日出關的（老師 61，原名「出關日」）；已出關＝含今天往前 3 個交易日內出關的（老師 62，原名「出獄股」）。
+// 老師 10/16 的 61／62 比處置公告少幾檔（天擎、鈺鎧、巨虹、映興、中茂、耀穎、美德醫療、大眾控、浩鼎、裕慶、旭然、強新、無敵沒列），
+// 處置原因、上市櫃、在不在我們族群都對不起來，規則還不知道，先全部列。
+// 出關日用後端 /api/jail 的 releaseDays（今天前後各 5 個交易日）；後端還沒給就用週表（週一晚上會少上週四、五出關的）。
+const homeJailState = { at: 0, loading: false };
+function homeJailLoad(){
+  if (homeJailState.loading || jlState.loading || Date.now() - homeJailState.at < 10 * 60e3) return;
+  homeJailState.loading = true;
+  fetch('/api/jail').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok') jlState.data = d; })
+    .catch(() => {}).finally(() => { homeJailState.loading = false; homeJailState.at = Date.now(); });
+}
+function homeJailModel(){
+  const d = jlState.data;
+  if (!d || d.status !== 'ok') return null;
+  const today = twTodayStr();
+  const days = (Array.isArray(d.releaseDays) && d.releaseDays.length ? d.releaseDays : (d.weeks || []).flatMap((w) => w.days).filter((x) => !x.closed))
+    .slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  const soonOut = days.filter((x) => x.date > today).slice(0, 3)
+    .flatMap((x) => x.stocks.map((s) => ({ code: s.code, name: s.name, title: x.md + ' 出關（恢復正常交易）' })));
+  const out = days.filter((x) => x.date <= today).slice(-3).reverse()
+    .flatMap((x, i) => x.stocks.map((s) => ({ code: s.code, name: s.name, title: x.md + ' 出關，今天是出關第 ' + (i + 1) + ' 天' })));
+  const soonIn = (d.newJail || []).filter((j) => j.start > today)
+    .map((j) => ({ code: j.code, name: j.name, title: '已公告：' + jlMd(j.start) + ' 起處置、' + j.releaseMd + ' 出關' }))
+    .concat((d.suspects || []).filter((s) => !s.jailed)   // 後端已經照高機率在前排好
+      .map((s) => ({ code: s.code, name: s.name, title: '嫌疑名單：' + s.status + '（明天收盤再符合就關，' + (s.high ? '高' : '低') + '機率）' })));
+  return { soonIn, soonOut, out };
+}
+function homeJailHelpHtml(){
+  let m = null;
+  try { homeJailLoad(); m = homeJailModel(); } catch (_){ /* 處置監獄那段程式還沒跑到（剛開頁面）就先顯示讀取中 */ }
+  const card = (title, list, empty) => '<div class="hr-help-card hr-jail-card"><div class="hr-help-title">' + title + (m ? ' <small>' + list.length + ' 檔</small>' : '') + '</div>' +
+    '<table class="hr-help-tbl"><thead><tr><th>代號</th><th>名稱</th></tr></thead><tbody>' +
+    (!m ? '<tr><td colspan="2">讀取中…</td></tr>'
+      : list.length ? list.map((x) => '<tr class="hr-stk" data-code="' + x.code + '" data-name="' + wlEsc(x.name) + '" tabindex="0" role="button" title="' + wlEsc(x.title) + '"><td>' + x.code + '</td><td>' + wlEsc(x.name) + '</td></tr>').join('')
+      : '<tr><td colspan="2">' + empty + '</td></tr>') + '</tbody></table></div>';
+  return card('🔒 即將入獄', m ? m.soonIn : [], '目前沒有') +
+    card('🔓 即將出關', m ? m.soonOut : [], '未來 3 個交易日沒有') +
+    card('🎉 已出關', m ? m.out : [], '最近 3 個交易日沒有');
+}
 function homeStockColHtml(title, list, emptyText){
   const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
   return '<div class="hr-col"><div class="hr-title">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
@@ -6730,7 +6774,7 @@ function homeRank4Html(){
     '</div>' +
     homeBladeColHtml(m) +
     '</div>' +
-    '<div class="hr-help">' + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
+    '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }
 // 首頁最下面的說明（2026-10-15 使用者：一段一段字太亂，整理成表格）：族群排名欄、個股欄、強勢黑K選股、符號各一張
 const hrHelpTable = (title, head, rows, cls) => '<div class="hr-help-card' + (cls ? ' ' + cls : '') + '"><div class="hr-help-title">' + title + '</div><table class="hr-help-tbl">' +
