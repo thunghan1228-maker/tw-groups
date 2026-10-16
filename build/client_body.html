@@ -6759,7 +6759,10 @@ function homeJailModel(){
       .map((j) => ({ code: j.code, name: j.name, tag: x.md, wd: x.weekday, title: '已公告：' + x.md + ' 起處置、' + j.releaseMd + ' 出關' }))
       .concat(suspectIn && suspectIn.date === x.date ? (d.suspects || []).filter((s) => !s.jailed)   // 後端已經照高機率在前排好
         .map((s) => ({ code: s.code, name: s.name, tag: x.md, wd: x.weekday, title: '嫌疑名單：' + s.status + '（' + d.nextMd + ' 收盤再符合就關、' + x.md + ' 開始，' + (s.high ? '高' : '低') + '機率）' })) : []);
-    return rows.length ? rows : [none('沒有入獄股', x)];
+    if (rows.length) return rows;
+    // 2026-10-16 使用者：那天真的沒有才寫「沒有入獄股」；嫌疑名單只看得到明天收盤、後天開始關的，再後面的日子要前一天晚上公告才知道
+    return [suspectIn && x.date <= suspectIn.date ? none('沒有入獄股', x)
+      : Object.assign(none('還沒公告', x), { title: x.md + ' 會不會有股票入獄，要等前一個交易日晚上交易所公告才知道' })];
   });
   return { soonIn, soonOut, out, inRange: next3.length ? next3[0].md + '～' + next3[next3.length - 1].md : '' };
 }
