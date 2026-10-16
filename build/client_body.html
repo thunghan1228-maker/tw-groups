@@ -129,7 +129,7 @@
 
   /* 族群成分股彈窗 */
   .group-modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:99;padding:16px;}
-  .group-modal-inner{background:var(--bg);border:1px solid var(--line);border-radius:14px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);}
+  .group-modal-inner{background:var(--bg);border:1px solid var(--line);border-radius:14px;width:100%;max-width:640px;max-height:85vh;overflow-y:auto;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);}
   .group-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;position:sticky;top:0;background:var(--bg);padding-bottom:6px;}
   .gm-title{font-weight:800;font-size:16px;}
   .gm-list{display:flex;flex-direction:column;border-top:1px solid var(--line);}
@@ -175,8 +175,12 @@
   .srow-right .schip{width:76px;font-size:12px;font-weight:700;white-space:nowrap;}   /* 族群成分股視窗：本週籌碼%（2026-10-15） */
   .srow-right .schip i{font-style:normal;font-size:10px;margin-left:2px;}
   .srow-right .schip i.up{color:var(--up);} .srow-right .schip i.down{color:var(--down);}
+  .srow-right .shold{width:66px;font-size:12px;font-weight:700;white-space:nowrap;}   /* 族群成分股視窗：盤中大戶力%（2026-10-16） */
+  .srow-right .shold .hold-pill{font-style:normal;display:inline-block;border-radius:5px;padding:1px 5px;color:var(--text);}
+  .srow-right .shold .hold-pill.up{color:var(--up);} .srow-right .shold .hold-pill.down{color:var(--down);}
+  .srow-right .shold .hold-pill.hot.up{background:#d64545;color:#fff;} .srow-right .shold .hold-pill.hot.down{background:#1f8a4c;color:#fff;}   /* ±10% 以上紅底／綠底白字 */
   .gm-chip-sum{font-size:12px;font-weight:700;color:var(--muted);margin-left:8px;white-space:nowrap;}
-  @media (max-width: 480px){ .gm-list .srow-right:has(.schip) .schg{display:none;} .srow-right .schip{width:66px;} }   /* 手機：多了籌碼一欄，漲跌金額先藏起來 */
+  @media (max-width: 480px){ .gm-list .srow-right:has(.schip) .schg, .gm-list .srow-right:has(.shold) .schg{display:none;} .srow-right .schip{width:62px;} .srow-right .shold{width:56px;} .gm-list .srow-right{gap:5px;} }   /* 手機：多了大戶力、籌碼兩欄，漲跌金額先藏起來 */
   .stock-col-labels{display:flex;justify-content:space-between;align-items:center;padding:4px 12px 0;}
   .stock-col-labels .srow-right span{color:var(--muted);font-size:10px;font-weight:600;}
 
@@ -4601,13 +4605,23 @@ function openGroupDetail(groupName){
       (x.sword ? '；前天 ' + pf(x.y2) + '、族裡第 ' + x.r2 + ' 名，今天掉 ' + x.sword + ' 名' : '') + (x.mk === '🔰' ? '；昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上' : '');
     return '<span class="gm-hmark gm-bmark" title="' + tip + '">' + x.mk + '</span>';
   };
-  document.getElementById('gmList').innerHTML = (cd ? STOCK_COL_LABELS_HTML.replace('<span class="spct">漲跌幅</span>', '<span class="schip">本週籌碼</span><span class="spct">漲跌幅</span>') : STOCK_COL_LABELS_HTML) + sorted.map((s) => {
+  // 2026-10-16 使用者：漲跌幅前面加一欄「盤中大戶力」（跟訊號中心同一份：大單淨額÷累計成交額），本週籌碼搬到最後面（成交價右邊），視窗加寬
+  const holder = wlHolderMap();
+  const holdCell = (code) => {
+    const h = holder[code], v = h ? h.strengthPct : null;
+    if (v === null || v === undefined || !Number.isFinite(Number(v))) return '<span class="shold flat" title="大戶力資料還在累積中或不在追蹤範圍">—</span>';
+    return '<span class="shold"><i class="hold-pill ' + (v > 0 ? 'up' : v < 0 ? 'down' : 'flat') + (Math.abs(v) >= HOLDER_HOT_PCT ? ' hot' : '') + '" title="盤中大戶力（大單淨額÷累計成交額，開盤到現在整天累加）">' +
+      (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%</i></span>';
+  };
+  const labels = STOCK_COL_LABELS_HTML.replace('<span class="spct">漲跌幅</span>', '<span class="shold">盤中大戶力</span><span class="spct">漲跌幅</span>')
+    .replace('<span class="sprice">成交價</span>', '<span class="sprice">成交價</span>' + (cd ? '<span class="schip">本週籌碼</span>' : ''));
+  document.getElementById('gmList').innerHTML = labels + sorted.map((s) => {
     const price = getBasePrice(s.code);
     const prevClose = price / (1 + s.changePercent / 100);
     const changeAmt = price - prevClose;
     return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
       '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + hmHtml(s.code) + bmHtml(s.code) + wlStarHtml(s.code, s.name) + '</div>' +
-      stockValueColsHtml(price, changeAmt, s.changePercent, s).replace('<div class="srow-right">', '<div class="srow-right">' + chipCell(s.code)) +
+      stockValueColsHtml(price, changeAmt, s.changePercent, s).replace('<div class="srow-right">', '<div class="srow-right">' + holdCell(s.code)).replace(/<\/div>$/, chipCell(s.code) + '</div>') +
     '</div>';
   }).join('');
   document.getElementById('groupModal').hidden = false;
@@ -6593,7 +6607,8 @@ function fut155Model(){
     const rank = rankOf.get(n), prev = yRankOf.has(n) ? yRankOf.get(n) : null;
     return { name: n, rank, prev, drop: prev !== null ? rank - prev : null, avg: avgOf.get(n) };
   }).sort((a, b) => a.rank - b.rank);
-  const tx = fq && board.tx && Number.isFinite(board.tx.changePct) ? board.tx.changePct : null;
+  // 夜盤的台指期不拿來切空方線（老師收盤那份照白天盤收盤）；後端收盤後會給 day-close，沒記到才是 night
+  const tx = fq && board.tx && board.tx.session !== 'night' && Number.isFinite(board.tx.changePct) ? board.tx.changePct : null;
   return { rows, total: today.length, half: Math.round(today.length * 35 / 67), tx, futures: !!fq };
 }
 function home155ColHtml(){
@@ -6734,7 +6749,7 @@ function homeRankFootHtml(total){
     ['括號數字', '今天族群名次（平均漲跌幅排，共 ' + total + ' 個族群，1 最強）'],
     ['🔺／🔽', '跟昨天收盤的名次比，升／掉幾名'],
     ['最右邊 %', '族群平均漲跌幅'],
-    ['點族群', '看成分股（前兩名後面標 👑🐎🚀，最後幾名標 🔪⚔️🔰）'],
+    ['點族群', '看成分股（前兩名後面標 👑🐎🚀，最後幾名標 🔪⚔️🔰）；欄位：盤中大戶力（大單淨額÷累計成交額，±10% 以上紅底／綠底）、漲跌幅、漲跌、成交價、本週籌碼（集保 400 張以上大戶週增減）'],
     ['👑', '族群裡今天第 1 名（今天漲 3% 以上才標，🐎🚀 也是）'],
     ['🐎N（跟昨天比）', '昨天還在族裡後段班（後一半），今天突然衝到族裡前兩名；N＝上升幾名'],
     ['🚀N（跟前天比）', '前天還在族裡後段班，今天突然衝到族裡前兩名；N＝上升幾名'],
