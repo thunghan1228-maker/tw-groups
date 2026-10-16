@@ -6413,7 +6413,7 @@ function homeBladeColHtml(m){
 function homeStrongColHtml(){
   stLoad('strong');
   const d = stState.strong;
-  const title = '<div class="hr-title">⭐今日強勢股';
+  const title = '<div class="hr-title">⭐昨日強勢股';   // 2026-10-16 使用者：均線分數是昨天收盤算的，首頁改叫昨日強勢股（訊號中心分頁名稱照舊）
   if (!d) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (stState.error.strong ? '讀取失敗' : '讀取中…') + '</div></div>';
   const groups = stLiveGroups(d, true).filter((g) => g.rows.length);
   const n = groups.reduce((a, g) => a + g.rows.length, 0);
@@ -6507,7 +6507,7 @@ function homeRankFootHtml(total){
     ['點族群', '看成分股'],
   ]) +
   hrHelpTable('🐎 個股欄（跟訊號中心「盤中333」同一份）', ['欄位', '列什麼'], [
-    ['⭐今日強勢股', '族群分數（族內平均均線分數，昨天收盤算的）前 10 名裡，均線分數 ≥12、今天沒跌的股票；「第 N 名・均分」是族群分數名次，不是今天漲幅名次'],
+    ['⭐昨日強勢股', '跟訊號中心「今日強勢股」同一份：族群分數（族內平均均線分數，昨天收盤算的）前 10 名裡，均線分數 ≥12、今天沒跌的股票；「第 N 名・均分」是族群分數名次，不是今天漲幅名次'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
     ['👑30加33加34', '馬火多、賽馬多、河流多三份都有的'],
     ['🐎賽馬多(33)', '賽馬多名單'],
@@ -12827,7 +12827,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・今日強勢股／183・續抱勿追高／30加33加34・賽馬多(33)・河流多(34)・193／199・刀劍空(32)・188／177</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・昨日強勢股／183・續抱勿追高／30加33加34・賽馬多(33)・河流多(34)・193／199・刀劍空(32)・188／177</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
