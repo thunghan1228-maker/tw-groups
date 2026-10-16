@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 22:27:16";
+const BUILD_STAMP = "2026-10-16 22:30:44";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -168,6 +168,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-row.hr-283-stk{border-top:none;padding-top:2px;padding-bottom:2px;padding-left:12px;}
   .hr-283-mk{flex-shrink:0;width:1.4em;}
   .hr-283-note{padding:1px 8px 4px 12px;font-size:12px;color:#fb923c;white-space:normal;}
+  .hr-gpill{display:inline-block;border-radius:4px;padding:0 5px;color:#fff!important;font-weight:800;background:#6b7280;}   /* 2026-10-16 使用者：首頁族群名稱漲紅底白字、跌綠底白字 */
+  .hr-gpill.up{background:#dc2626;} .hr-gpill.down{background:#16a34a;}
+  .hr-obs-grp[data-group],.hr-st-grp[data-group]{cursor:pointer;} .hr-obs-grp[data-group]:hover .hr-gpill,.hr-st-grp[data-group]:hover{filter:brightness(1.15);}
   .hr-st-grp{background:#dc2626;color:#fff;font-weight:800;}   /* 2026-10-16 使用者：今日強勢股的族群名（第 N 名・族群）改紅底 */
   .hr-obs-grp{padding:3px 8px 0;font-size:12px;font-weight:800;color:#facc15;border-top:1px solid var(--line);}
   .hr-row.hr-obs{border-top:none;padding-top:3px;flex-wrap:wrap;row-gap:1px;}
@@ -6585,10 +6588,16 @@ function homeRankRows(){
   });
   return { rows, half: zbHalf(ranked.length), total: ranked.length, hasDaily: rows.some((r) => r.prev !== null) };
 }
+// 首頁族群名稱的底色用：族群今天的平均漲跌（跟族群排名同一個數）；族群表沒有這個名字就回 null
+function homeGroupAvg(name){
+  const g = lastData && Array.isArray(lastData.groups) ? lastData.groups.find((x) => x.name === name) : null;
+  return g && Number.isFinite(g.avgChange) ? g.avgChange : null;
+}
 function homeRankRowHtml(r){
   const mv = r.drop === null ? '' : r.drop > 0 ? '<span class="down">🔽' + r.drop + '</span>' : r.drop < 0 ? '<span class="up">🔺' + (-r.drop) + '</span>' : '<span class="flat">－</span>';
   const tip = r.prev !== null ? '昨天第 ' + r.prev + ' 名' : '';
-  return '<div class="hr-row" data-group="' + r.name + '" tabindex="0" role="button" title="' + tip + '"><span class="hr-name">' + r.name + '</span><span class="hr-rk">(' + r.rank + ')</span>' + mv + (r.swordMark || '') +
+  // 2026-10-16 使用者：族群名稱漲的紅底白字、跌的綠底白字（首頁所有族群名都一樣）
+  return '<div class="hr-row" data-group="' + r.name + '" tabindex="0" role="button" title="' + tip + '"><span class="hr-name hr-gpill ' + dirClass(r.avg) + '">' + r.name + '</span><span class="hr-rk">(' + r.rank + ')</span>' + mv + (r.swordMark || '') +
     '<span class="hr-avg ' + dirClass(r.avg) + '">' + fmt(r.avg) + '%</span></div>';
 }
 function homeStockRowHtml(r){
@@ -6655,7 +6664,7 @@ function home283ColHtml(list){
     '<span class="hr-283-mk">' + x.mk + '</span><span class="hr-code">' + x.code + '</span><span class="hr-name">' + x.name + '</span>' +
     '<span class="hr-avg ' + dirClass(x.pct) + '">' + limitPriceHtml(x, fmt(x.pct) + '%') + '</span></div>';
   const body = list.map((z) => '<div class="hr-row hr-283-grp" data-group="' + z.row.name + '" tabindex="0" role="button" title="族裡鎖漲停 ' + z.lit + ' 檔">' +
-      '<span class="hr-name">🏰' + z.row.name + '</span><span class="hr-rk">(' + z.row.rank + ')</span><span class="hr-avg ' + dirClass(z.row.avg) + '">' + fmt(z.row.avg) + '%</span></div>' +
+      '<span class="hr-name">🏰<span class="hr-gpill ' + dirClass(z.row.avg) + '">' + z.row.name + '</span></span><span class="hr-rk">(' + z.row.rank + ')</span><span class="hr-avg ' + dirClass(z.row.avg) + '">' + fmt(z.row.avg) + '%</span></div>' +
     z.stocks.map(stk).join('') +
     (z.lit >= 2 ? '<div class="hr-283-note">⚠️有兩個以上亮燈空小心</div>' : '')).join('');
   return '<div class="hr-col"><div class="hr-title">🏰終點戰法空(283) <span class="hr-rk">' + list.length + ' 族</span></div>' +
@@ -6825,7 +6834,7 @@ function homeStrongColHtml(){
   if (!d) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (stState.error.strong ? '讀取失敗' : '讀取中…') + '</div></div>';
   const groups = stLiveGroups(d, true).filter((g) => g.rows.length);
   const n = groups.reduce((a, g) => a + g.rows.length, 0);
-  const body = groups.map((g) => '<div class="hr-sep hr-st-grp" title="族群分數＝族內平均均線分數（' + swMmdd(d.date) + ' 收盤算的），不是今天漲幅名次">第 ' + g.rank + ' 名・' + wlEsc(g.name) + (Number.isFinite(g.avg) ? '・均分 ' + g.avg.toFixed(1) : '') + '</div>' + g.rows.map((r) => {
+  const body = groups.map((g) => '<div class="hr-sep hr-st-grp"' + (homeGroupAvg(g.name) !== null ? ' data-group="' + wlEsc(g.name) + '" tabindex="0" role="button"' : '') + ' title="族群分數＝族內平均均線分數（' + swMmdd(d.date) + ' 收盤算的），不是今天漲幅名次；點了看族群成分股">第 ' + g.rank + ' 名・' + wlEsc(g.name) + (Number.isFinite(g.avg) ? '・均分 ' + g.avg.toFixed(1) : '') + '</div>' + g.rows.map((r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
     return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="均線分數 ' + r.sum + '（' + swMmdd(d.date) + ' 收盤）">' +
@@ -6976,7 +6985,11 @@ function homeObsColHtml(){
     n += list.length;
     body += '<div class="hr-obs-cat" title="' + wlEsc(act) + '">【' + k + '】' + wlEsc(name) + ' <small>' + list.length + ' 檔</small></div>';
     if (!list.length){ body += '<div class="hr-note">—</div>'; return; }
-    obsGroupLines(list).forEach(([g, xs]) => { body += '<div class="hr-obs-grp">' + wlEsc(g) + '</div>' + xs.map(row).join(''); });
+    obsGroupLines(list).forEach(([g, xs]) => {
+      const avg = homeGroupAvg(g);   // 「其他」或族群表沒有的就照原本黃字、不能點
+      body += (avg === null ? '<div class="hr-obs-grp">' + wlEsc(g) + '</div>'
+        : '<div class="hr-obs-grp" data-group="' + wlEsc(g) + '" tabindex="0" role="button" title="看族群成分股"><span class="hr-gpill ' + dirClass(avg) + '">' + wlEsc(g) + '</span></div>') + xs.map(row).join('');
+    });
   });
   const at = new Date(rep.at + 8 * 3600000).toISOString().slice(11, 16);
   return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔・' + at + '</span></div>' + body + '</div>';
@@ -12433,7 +12446,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 22:27:16';
+const BUILD_STAMP = '2026-10-16 22:30:44';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
