@@ -99,7 +99,7 @@
   .hr-help-tbl th{padding:4px 8px;text-align:left;font-weight:700;font-size:11px;color:var(--muted);background:rgba(255,255,255,0.03);white-space:nowrap;}
   .hr-help-tbl td{padding:4px 8px;border-top:1px solid var(--line);vertical-align:top;}
   .hr-help-tbl td:first-child{white-space:nowrap;font-weight:700;color:var(--text);}
-  .hr-help-tbl td:nth-child(2):not(:last-child){white-space:nowrap;}
+  .hr-help-tbl td:nth-child(2):not(:last-child){white-space:nowrap;max-width:7em;}
   .hr-obs-foot .hr-help-tbl,.hr-obs-foot .hr-help-tbl th,.hr-obs-foot .hr-help-tbl td:first-child{color:#f9a8d4;}   /* 2026-10-15 使用者：強勢黑K選股說明的字改粉紅色；①②③底色標籤、符號顏色照原本（★☆●紅、▲粉紅、✗三K低▼綠、↑深紅） */
   .hr-obs-foot .d123-tag{margin:0 2px;}
   .hr-obs-foot .om{font-size:13px;}
@@ -6541,7 +6541,7 @@ function homeRankFootHtml(total){
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
     ['多族群排名(183)', '固定 ' + RANK188_GROUPS.size + ' 族', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 2 檔（漲最多的）'],
     ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
-    ['空族群必殺(193)', '固定 ' + KILL193_ONLY_GROUPS.size + ' 族（199 的 ' + KILL193_GROUPS.size + ' 族＋小光電）', '名次比昨天掉 5 名以上的；掉 1～4 名要有 ⚔️（族裡過半股票低於前天收盤，數字＝比例）才列；🔪＝族群今天平均下跌；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
+    ['空族群必殺(193)', '固定 ' + KILL193_ONLY_GROUPS.size + ' 族', '199 的 ' + KILL193_GROUPS.size + ' 族＋小光電；名次比昨天掉 5 名以上的；掉 1～4 名要有 ⚔️（族裡過半股票低於前天收盤，數字＝比例）才列；🔪＝族群今天平均下跌；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
   ]) +
   hrHelpTable('🔎 族群列怎麼看', ['位置', '意思'], [
     ['括號數字', '今天族群名次（平均漲跌幅排，共 ' + total + ' 個族群，1 最強）'],
