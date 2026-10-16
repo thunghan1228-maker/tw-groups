@@ -6554,7 +6554,8 @@ function home283ColHtml(list){
 // 用它在全部（有股期成分股的）族群裡排名次，🔺🔽＝跟昨天同樣算法的名次比，括號裡＝那幾檔的平均漲跌。
 // 對他那份：低軌衛星 1、PCB 3、被動元件 45、光學鏡頭 44（他 46）、矽光子 47（他 48）對得上；矽晶圓、二極體、石英差比較多
 // （可能他的股期清單跟我們不一樣，或用股期本身的價格），還要多幾份再對。「↓(櫃買)↓」線、「⚠️多🚀」意思還不知道，先不放。
-const FUT155_GROUPS = ['低軌衛星', 'PCB', '記憶體', 'AI', '矽晶圓', '面板', '二極體', '小電組', '航運', '石英', '被動元件', '光學鏡頭', '矽光子'];
+// 10/16 08:47、08:52 那兩份還有 IP（收盤那份沒列），共 14 族；那時股票還沒開盤，他用的是股票期貨的價格，我們先用現股價格算
+const FUT155_GROUPS = ['低軌衛星', 'PCB', '記憶體', 'AI', '矽晶圓', '面板', '二極體', '小電組', '航運', '石英', '被動元件', '光學鏡頭', '矽光子', 'IP'];
 function fut155Model(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups)) return null;
   const sd = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
