@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 09:30:18";
+const BUILD_STAMP = "2026-10-16 09:34:58";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5852,6 +5852,7 @@ const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停�
 const FIRE_MIN_VOLUME = 500;  // 馬火多：成交量（張）低於這個太冷門
 const FIRE_MAX_ROWS = 10;     // 馬火多：最多列這麼多檔
 // 族群明細「空方」段的檔數：min(5, round(√n)+1, ⌈n/2⌉)（2026-10-16 對老師 9 個族群明細）
+const bladeRankMark = (rank, total) => rank <= Math.round((total || 67) * 10 / 67) ? '🔺' : rank < Math.round((total || 67) * 26 / 67) ? '🔽' : '🔰';
 const bladeZoneSize = (n) => Math.min(5, Math.round(Math.sqrt(n)) + 1, Math.ceil(n / 2));
 function race333Model(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
@@ -5973,26 +5974,39 @@ function race333Model(){
     // 段的檔數對過 9 族：PCB 4 檔→後 2、玻璃基板 6→3、矽晶圓 7→4、口罩 8→4、航運 10→4、光學鏡頭 13→5、鋼鐵 16→5、小電組 20→5、被動元件 22→5
     const priced = g.stocks.filter((s) => s.price !== null && s.price !== undefined).slice().sort((a, b) => b.changePercent - a.changePercent);
     const zone = bladeZoneSize(priced.length);
-    priced.slice(Math.max(0, priced.length - zone)).filter((s) => !(stockFlags[s.code] && stockFlags[s.code].disposition)).forEach((s) => {
+    // bladePos＝在族裡倒數第幾（1＝最弱，處置股也算位置）：老師最弱 3 檔標 ⚔️／🔪，空方段裡其他的標 🔰（2026-10-16 對 09:09～09:32 的族群明細）
+    const bottom = priced.slice(Math.max(0, priced.length - zone));
+    bottom.forEach((s, j) => {
+      if (stockFlags[s.code] && stockFlags[s.code].disposition) return;
       const base = stockRows.get(s.code);
       if (!base || bladeCand.has(s.code)) return;
-      bladeCand.set(s.code, Object.assign({}, base, { groupName: g.name, groupRank: gi + 1 }));
+      bladeCand.set(s.code, Object.assign({}, base, { groupName: g.name, groupRank: gi + 1, groupAvg: g.avgChange, bladePos: bottom.length - j }));
     });
   });
-  // 2026-10-16 使用者貼老師 09:06～09:11 四份：今天漲的也會列（雷科 +1.54%⚔️、巨有科技 +1.59%⚔️、希華 +0.94%⚔️），
-  // 不要求今天跌 2%、也不要求低於昨收；🔪 才要「今天殺下來」（台表科 -0.83%、今國光 -0.11% 有🔪，今國光還在漲的 09:06 沒列）
-  const bladeKnife = (r) => r.yesterday !== null && r.yesterday >= BLADE_PRIOR_RISE && r.pct < 0;
+  // 2026-10-16 使用者貼老師 09:06～09:32：今天漲的也會列（雷科 +1.54%⚔️、巨有科技 +1.59%⚔️、希華 +0.94%⚔️），
+  // 不要求今天跌 2%、也不要求低於昨收；🔪 也不用今天跌（大毅 +0.70%🔪、台表科 +1.98%🔪⚔️）
+  const bladeKnife = (r) => r.yesterday !== null && r.yesterday >= BLADE_PRIOR_RISE;
   const bladeSword = (r) => r.dayBefore !== null && r.dayBefore >= BLADE_PRIOR_RISE && r.twoDay !== null && r.twoDay < 0;
+  // 三段（2026-10-16 對老師 09:06～09:32）：多方打少＝族群平均贏櫃買%；強空積極＝族群第 26 名以後（67 族）；中間沒標題的一段＝其他
+  const bladeShortFrom = Math.max(1, Math.round(total * 26 / 67));
+  const bladeInUpper = (r) => (otcPct === null ? r.groupRank <= horseLimit : r.groupAvg > otcPct) && r.groupRank < bladeShortFrom;
   const bladeBase = Array.from(bladeCand.values()).filter((r) => true
-    // 多方打少（族群排名前 horseLimit）不看櫃買：佳能（光學鏡頭，族排 8～16）跌 2.7～3.3%、沒比櫃買弱，老師 11:38、12:01、12:18、12:34 都列
-    && (!hasDaily || ((bladeKnife(r) || bladeSword(r)) && (bladeSword(r) || r.groupRank <= horseLimit || belowOtc(r))))
+    // 多方打少不看櫃買：佳能（光學鏡頭，族排 8～16）跌 2.7～3.3%、沒比櫃買弱，老師 11:38、12:01、12:18、12:34 都列
+    && (!hasDaily || ((bladeKnife(r) || bladeSword(r)) && (bladeSword(r) || bladeInUpper(r) || belowOtc(r))))
     && (r.volume === null || r.volume >= BLADE_MIN_VOLUME)).sort((a, b) => a.pct - b.pct || a.groupRank - b.groupRank);
   const bladeHarvest = bladeBase.filter((r) => r.pct <= -BLADE_HARVEST_PCT || r.pct <= -BLADE_MAX_PCT || r.limitDown);
   // 2026-10-15 使用者貼老師 09:07 的刀劍空：強空積極 13 檔裡 7 檔只有🔪（低於昨收、還在前天收盤上，例如昨天大漲的新纖），
   // 跟我們算的🔪／⚔️幾乎一樣——老師不要求⚔️，只有🔪的也列（每列照舊標🔪／⚔️）
+  // 每列後面的符號：族裡最弱 3 檔標 🔪（昨天大漲）／⚔️（前天大漲、跌破前天收盤），空方段裡其他的標 🔰；
+  // ⚔️ 暫定還要昨天跌 1.5% 以上（德淵昨天只跌 1.35%，在族裡倒數第 2 也一直是 🔰）
+  bladeBase.forEach((r) => {
+    const top3 = r.bladePos <= 3, knife = bladeKnife(r), sword = bladeSword(r) && r.yesterday !== null && r.yesterday <= -1.5;
+    r.bladeMark = top3 && (knife || sword) ? (knife ? '🔪' : '') + (sword ? '⚔️' : '') : '🔰';
+  });
   const bladeLive = bladeBase.filter((r) => !bladeHarvest.includes(r));
-  const bladeUpper = bladeLive.filter((r) => r.groupRank <= horseLimit);                       // 多方打少：只列名字
-  const bladeLower = bladeLive.filter((r) => r.groupRank > horseLimit).slice(0, BLADE_MAX_ROWS);  // 強空積極：正式名單
+  const bladeUpper = bladeLive.filter((r) => bladeInUpper(r));                                       // 多方打少
+  const bladeLower = bladeLive.filter((r) => r.groupRank >= bladeShortFrom).slice(0, BLADE_MAX_ROWS); // 強空積極：正式名單
+  const bladeMiddle = bladeLive.filter((r) => !bladeInUpper(r) && r.groupRank < bladeShortFrom);    // 兩條線中間（老師沒標題的那段）
   // 33 加 34：兩邊都有的才列（使用者 2026-09-23：只看交集）。
   const riverCodes = new Set(otcStrongBear ? [] : riverAll.filter((r) => r.pct <= 7).map((r) => r.code));
   const both = horses.filter((r) => riverCodes.has(r.code));
@@ -6000,7 +6014,7 @@ function race333Model(){
   const fireCodes = new Set(fireOpen.map((r) => r.code));
   const triple = both.filter((r) => fireCodes.has(r.code)).sort((a, b) => b.pct - a.pct);
   return {
-    fires, fireLocked, fireGroupTop, bladeUpper, bladeLower, bladeHarvest, both, triple,
+    fires, fireLocked, fireGroupTop, bladeUpper, bladeMiddle, bladeLower, bladeHarvest, both, triple,
     total, half, otcPct, otcLabel: otcStrengthLatest ? otcStrengthLatest.label : null, hasDaily,
     dates: groupDailyChanges && groupDailyChanges.dates ? groupDailyChanges.dates : [],
     horseLimit, riverLimit, horses,
@@ -6010,6 +6024,7 @@ function race333Model(){
   };
 }
 function bladeBadge(r){
+  if (r.bladeMark) return r.bladeMark;
   const marks = (r.belowYesterday ? '🔪' : '') + (r.belowDayBefore !== null ? '⚔️' + r.belowDayBefore.toFixed(1) : '');
   return marks || (r.dailyKnown ? '〰️' : '');  // 有昨天資料但沒更弱＝〰️；沒資料就空白
 }
@@ -6160,7 +6175,7 @@ function bladeRecordSeen(){
   const map = bladeSeenMap();
   let changed = false;
   const now = Date.now();
-  [].concat(m.bladeUpper || [], m.bladeLower || [], m.bladeHarvest || []).forEach((r) => { if (!map[r.code]){ map[r.code] = now; changed = true; } });
+  [].concat(m.bladeUpper || [], m.bladeMiddle || [], m.bladeLower || [], m.bladeHarvest || []).forEach((r) => { if (!map[r.code]){ map[r.code] = now; changed = true; } });
   if (changed){
     try {
       localStorage.setItem(bladeSeenKey(), JSON.stringify(map));
@@ -6244,12 +6259,13 @@ function raceBladeListHtml(m, opts){
     const tb = b.seenTs ? Math.floor(b.seenTs / 60000) : (o.oldestFirst ? Infinity : -1);
     return o.oldestFirst ? (ta === tb ? 0 : (ta < tb ? -1 : 1)) : (tb - ta);
   });
-  const upper = sortSeen(m.bladeUpper), harvest = sortSeen(m.bladeHarvest);
-  const rowsOf = (list, zone) => list.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone, dates: m.dates, conditions: true, m })).join('');
-  const total = upper.length + bladeLower.length + harvest.length;
+  const upper = sortSeen(m.bladeUpper), middle = sortSeen(m.bladeMiddle || []), harvest = sortSeen(m.bladeHarvest);
+  // 族群名次後面的符號照老師：前 10 名 🔺、11～25 名 🔽、26 名以後 🔰，收割區 ♣
+  const rowsOf = (list, zone) => list.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone: zone === '♣' ? '♣' : bladeRankMark(r.groupRank, m.total), dates: m.dates, conditions: true, m })).join('');
+  const total = upper.length + middle.length + bladeLower.length + harvest.length;
   if (!total) return '<div class="race-note">目前沒有符合條件的股票</div>';
   return '<div class="race-note">' + seenNote + '</div>' + raceColLabelsHtml({ blade: true }) +
-    rowsOf(upper, '🔺') + '<div class="race-sep">----↑(多方打少)↑----</div>' +
+    rowsOf(upper, '🔺') + '<div class="race-sep">----↑(多方打少)↑----</div>' + rowsOf(middle, '🔽') +
     '<div class="race-sep">----↓(強空積極)↓----</div>' + rowsOf(bladeLower, '🔰') +
     '<div class="race-sep">----↓(收割區域)↓----</div>' + (harvest.length ? rowsOf(harvest, '♣') : '<div class="race-note">收割區目前沒有</div>');
 }
@@ -6355,7 +6371,7 @@ function kill193Model(){
   const groups = lastData.groups.filter((g) => g.name !== '股期標的');
   const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
   const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
-  const blade = new Map([...m.bladeLower, ...m.bladeHarvest, ...m.bladeUpper].map((r) => [r.code, r]));
+  const blade = new Map([...m.bladeLower, ...m.bladeHarvest, ...m.bladeMiddle, ...m.bladeUpper].map((r) => [r.code, r]));
   const half = zbHalf(groups.length);   // 空方線跟老師一樣畫在第 35 名後面（67 族）
   const rows = ranked.map((g, i) => {
     const d = daily[g.name] || {};
@@ -6440,15 +6456,16 @@ function homeStockColHtml(title, list, emptyText){
 // 每列＝族群名次、代號、名稱、漲跌幅，後面 🔪（昨天大漲今天殺）或 ⚔️（前天大漲、跌破前天收盤）；同一段裡族排前面的在上面。
 function homeBladeColHtml(m){
   if (!m) return '';
-  const mark = (r) => (r.dayBefore !== null && r.dayBefore >= BLADE_PRIOR_RISE && r.twoDay !== null && r.twoDay < 0 && !(r.yesterday !== null && r.yesterday >= BLADE_PRIOR_RISE)) ? '⚔️' : '🔪';
+  const mark = (r) => r.bladeMark || '';
   const byRank = (a, b) => a.groupRank - b.groupRank || b.pct - a.pct;   // 同族群漲幅高的在上面（2026-10-16 照老師）
   const row = (r) => '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button" title="' + r.groupName + '・族排第 ' + r.groupRank + ' 名">' +
-    '<span class="hr-rk">' + r.groupRank + '</span><span class="hr-bear-pill"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + r.name + '</span></span>' +
+    '<span class="hr-rk">' + r.groupRank + (harvestSet.has(r) ? '♣' : bladeRankMark(r.groupRank, m.total)) + '</span><span class="hr-bear-pill"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + r.name + '</span></span>' +
     '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%' + mark(r) + '</span></div>';
+  const harvestSet = new Set(m.bladeHarvest);
   const sec = (list) => list.slice().sort(byRank).map(row).join('');
-  const n = m.bladeUpper.length + m.bladeLower.length + m.bladeHarvest.length;
+  const n = m.bladeUpper.length + m.bladeMiddle.length + m.bladeLower.length + m.bladeHarvest.length;
   return '<div class="hr-col"><div class="hr-title">🔪⚔️刀劍空(32) <span class="hr-rk">' + n + ' 檔</span></div>' +
-    (n ? sec(m.bladeUpper) + '<div class="hr-sep">----↑(多方打少)↑----</div>' + '<div class="hr-sep">----↓(強空積極)↓----</div>' + sec(m.bladeLower) +
+    (n ? sec(m.bladeUpper) + '<div class="hr-sep">----↑(多方打少)↑----</div>' + sec(m.bladeMiddle) + '<div class="hr-sep">----↓(強空積極)↓----</div>' + sec(m.bladeLower) +
       '<div class="hr-sep">----↓(收割區域)↓----</div>' + sec(m.bladeHarvest) : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
 // 首頁第一欄最上面的今日強勢股（2026-10-15 使用者：放在 183 上面，訊號中心的分頁照留）：跟訊號中心「今日強勢股」同一份，
@@ -6512,11 +6529,12 @@ function homeRank4Html(){
       homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單，交集也就沒有' : '') +
       homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name)), h.half, '------↓(空方)↓------', '沒有資料') +
     '</div>' +
+    // 2026-10-16 使用者：33、34 移到第 3、4 欄，193、32 改到第 5、6 欄
+    homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
+    homeStockColHtml('🌊河流多(34)', m ? m.rivers : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '') +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉', (r) => r.members || [], 'bear') +
     homeBladeColHtml(m) +
-    homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
-    homeStockColHtml('🌊河流多(34)', m ? m.rivers : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '') +
     '<div class="hr-stack">' +   // 2026-10-15 使用者：177 移到 188 下面，原本 177 的位置放飆股雷達
       homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
       // 2026-10-15 使用者：177 只列漲幅前 10 大、跌幅前 10 大族群，中間省略，欄位才不會拉那麼長
@@ -11172,7 +11190,7 @@ function renderTrack(force){
   const bm = brewLaunchModel();
   const liveLaunch = new Set(bm ? bm.launchBlocks.flatMap((b) => b.rows).map((r) => r.code) : []);
   let bladeCodes = new Set();
-  try { const m = race333Model(); bladeCodes = new Set(m ? [].concat(m.bladeUpper, m.bladeLower, m.bladeHarvest).map((r) => r.code) : []); } catch (e) { /* 盤中333 算不出來就不標 */ }
+  try { const m = race333Model(); bladeCodes = new Set(m ? [].concat(m.bladeUpper, m.bladeMiddle, m.bladeLower, m.bladeHarvest).map((r) => r.code) : []); } catch (e) { /* 盤中333 算不出來就不標 */ }
   const groupChips = '<button class="wl-gtab' + (trk.group === '*' ? ' active' : '') + '" data-tgroup="*">全部<span class="wl-gcount">' + all.size + '</span></button>' +
     wl.data.groups.map((g) => '<button class="wl-gtab' + (trk.group === g.id ? ' active' : '') + '" data-tgroup="' + wlEsc(g.id) + '">' + wlEsc(g.name) + '<span class="wl-gcount">' + g.items.length + '</span></button>').join('');
   const kindChips = [['all', '全部'], ['bull', '多方'], ['bear', '空方']].concat(TRK_KINDS.map((k) => [k.key, k.label])).concat([['alert', '🔔 提醒']])
@@ -12038,7 +12056,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 09:30:18';
+const BUILD_STAMP = '2026-10-16 09:34:58';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -12852,7 +12870,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">今日強勢股／183・續抱勿追高／30加33加34／199・193・刀劍空(32)・賽馬多(33)・河流多(34)・188／177・強勢黑K選股</div></div>' +
+        '<div class="section-head"><div class="section-title">今日強勢股／183・續抱勿追高／30加33加34／199・賽馬多(33)・河流多(34)・193・刀劍空(32)・188／177・強勢黑K選股</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -14122,6 +14140,7 @@ function hwShortHtml(){
   if (m){
     m.bladeLower.forEach((r) => add(r.code, r.name, { kind: 'blade', text: '刀劍空' + bladeBadge(r), cls: 'down' }, r.groupName));
     m.bladeUpper.forEach((r) => add(r.code, r.name, { kind: 'blade', text: '刀劍空・多方打少', cls: 'down' }, r.groupName));
+    m.bladeMiddle.forEach((r) => add(r.code, r.name, { kind: 'blade', text: '刀劍空' + bladeBadge(r), cls: 'down' }, r.groupName));
     m.bladeHarvest.forEach((r) => add(r.code, r.name, { kind: 'blade', text: '刀劍空・收割區', cls: 'down' }, r.groupName));
   }
   if (jd && jd.status === 'ok'){
@@ -14140,7 +14159,7 @@ function hwShortHtml(){
   }).sort((a, b) => b.hits - a.hits || (b.rank || 0) - (a.rank || 0) || (a.pct ?? 0) - (b.pct ?? 0));
   const notes = [];
   if (!m) notes.push('盤中名單（刀劍空、族群名次）等首頁即時報價進來才有');
-  else if (!m.bladeLower.length && !m.bladeUpper.length) notes.push('刀劍空現在是空的（開盤後才會出現，盤中隨時變）');
+  else if (!m.bladeLower.length && !m.bladeUpper.length && !m.bladeMiddle.length) notes.push('刀劍空現在是空的（開盤後才會出現，盤中隨時變）');
   if (!jd) notes.push('處置監獄資料讀取中');
   return '<div class="sw-rule">自動交叉這幾份清單，<b>同時出現在越多份的越優先</b>：<b>刀劍空(32)</b>（盤中隨時變，跟盤中訊號中心同一份）・<b>即將入獄</b>（處置監獄嫌疑名單，明天門檻見處置監獄）・<b>出獄</b>（今天恢復正常交易）・<b>做空族群</b>（昨天漲最多的族群）。' +
     '族群後面的數字＝今天族群名次，<b>🔰 越後面越安全</b>、🔺 太前面就慢一點再打（族群還很強）。點一列開K線圖。</div>' +
