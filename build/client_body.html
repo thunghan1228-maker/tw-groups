@@ -6842,6 +6842,7 @@ function homeJailHelpHtml(){
     col(card('🎉 已出關', '第幾天', m ? m.out : [], '最近 3 個交易日沒有', '') +
       card('🔍 嫌疑名單' + (m ? ' <small>' + wlEsc(m.nextMd || '') + '(' + wlEsc(m.nextWeekday || '') + ') 收盤再符合就會被關</small>' : ''), '機率', m ? m.suspects : [], '明天沒有一次就會被關的股票', ''));
 }
+const HOME_334_TOP_GROUPS = 10;   // 首頁河流多(34)、賽馬多(33) 只列族群前幾名（2026-10-16 使用者）
 function homeStockColHtml(title, list, emptyText){
   const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
   return '<div class="hr-col"><div class="hr-title">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
@@ -6927,11 +6928,12 @@ function homeRank4Html(){
     '</div>' +
     '<div class="hr-stack">' +
       homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單，交集也就沒有' : '') +
-      homeStockColHtml('🌊河流多(34)', m ? m.rivers : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '') +
+      // 2026-10-16 使用者：首頁的河流多(34)、賽馬多(33) 只列族群名次前 10 名的；訊號中心盤中333 照舊全部列
+      homeStockColHtml('🌊河流多(34)', m ? m.rivers.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
     '</div>' +
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
-      homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
+      homeStockColHtml('🐎賽馬多(33)', m ? m.horses.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
     '</div>' +
     // 2026-10-16 使用者：188 疊到昨日強勢股下面；283 自己一欄，放在右邊
     '<div class="hr-stack">' +
@@ -6978,8 +6980,8 @@ function homeRankFootHtml(total){
     ['⭐昨日強勢股', '跟訊號中心「今日強勢股」同一份：族群分數（族內平均均線分數，昨天收盤算的）前 10 名裡，均線分數 ≥12、今天沒跌的股票；「第 N 名・均分」是族群分數名次，不是今天漲幅名次'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
     ['👑30加33加34', '馬火多、賽馬多、河流多三份都有的'],
-    ['🐎賽馬多(33)', '賽馬多名單'],
-    ['🌊河流多(34)', '河流多名單'],
+    ['🐎賽馬多(33)', '賽馬多名單裡，族群名次前 ' + HOME_334_TOP_GROUPS + ' 名的（訊號中心「盤中333」照舊全部列）'],
+    ['🌊河流多(34)', '河流多名單裡，族群名次前 ' + HOME_334_TOP_GROUPS + ' 名的（訊號中心「盤中333」照舊全部列）'],
     ['每一列', '族群名次、代號、名稱、今天漲跌幅；族排前面的在上面'],
     ['點股票', '開K線圖'],
   ]) +
