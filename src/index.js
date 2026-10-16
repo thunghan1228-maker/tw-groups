@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 11:20:05";
+const BUILD_STAMP = "2026-10-16 12:25:41";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6515,10 +6515,12 @@ function homeStockRowHtml(r){
     '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span></div>';
 }
 // ---- 終點戰法空(283)（2026-10-16 使用者：族裡有漲停（亮燈）的族群就列，兩檔以上漲停的特別標「有兩個以上亮燈」）----
-// 照老師 10:58 那份：族群照名次排；兩檔以上漲停加註「⚠️有兩個以上亮燈空小心」，族群在空方線以下的加註「⚠️注意破惡均下彎打倒數」（他只有矽光子(64) 有，先這樣對）。
+// 照老師 10:58、12:18 兩份：族群照名次排；兩檔以上漲停加註「⚠️有兩個以上亮燈空小心」；整份最下面固定一行「⚠️注意破惡均下彎打倒數」（12:18 那份在分隔線後面，不是跟著某一族）。
+// 12:18 益安打開漲停、生醫就不列了，跟「族裡有漲停才列」對得上。
 // 每族列：👑＝族裡漲最多的；🐎＝第 2 名而且漲 Z283_HORSE_PCT% 以上（他的 🐎 都 7.75% 以上，藥華藥 6.64%、彰源 4.78% 是第 2 名也沒標）；
 // 其他的列「今天漲 Z283_FOLLOW_PCT% 以上」或「昨天／前天漲過 Z283_PRIOR_RISE% 以上、今天跌不到 2%」的，今天還在漲標 ⚔️、已經轉跌標 🔪。
-// 對他 10:58 那份：9 族都對得上（生醫我們沒有這個族群），個股多列新復興、聯發科、凱衛，少列揚明光；立碁 +1.83% 他標 🔪、我們標 ⚔️。
+// 族群兩份都對得上。個股他的名單有黏性（10:58 列過的東捷、宏碁資訊、聯一光 12:18 掉到 2% 左右還在），光看現在漲幅對不準，
+// 這組門檻是兩份合起來錯最少的；立碁兩份都是他標 🔪、我們標 ⚔️（還在小漲）。
 const Z283_HORSE_PCT = 7;
 const Z283_FOLLOW_PCT = 3;
 const Z283_PRIOR_RISE = 5.5;
@@ -6544,7 +6546,7 @@ function zone283List(h){
       else if (s.changePercent >= Z283_FOLLOW_PCT || (prior >= Z283_PRIOR_RISE && s.changePercent >= Z283_KNIFE_FLOOR)) mk = s.changePercent >= 0 ? '⚔️' : '🔪';
       if (mk) stocks.push({ code: s.code, name: s.name, pct: s.changePercent, limitUp: !!s.limitUp, limitDown: !!s.limitDown, mk });
     });
-    out.push({ row: r, lit, bear: r.rank > h.half, stocks });
+    out.push({ row: r, lit, stocks });
   });
   return out.sort((a, b) => a.row.rank - b.row.rank);
 }
@@ -6555,10 +6557,9 @@ function home283ColHtml(list){
   const body = list.map((z) => '<div class="hr-row hr-283-grp" data-group="' + z.row.name + '" tabindex="0" role="button" title="族裡漲停 ' + z.lit + ' 檔">' +
       '<span class="hr-name">🏰' + z.row.name + '</span><span class="hr-rk">(' + z.row.rank + ')</span><span class="hr-avg ' + dirClass(z.row.avg) + '">' + fmt(z.row.avg) + '%</span></div>' +
     z.stocks.map(stk).join('') +
-    (z.lit >= 2 ? '<div class="hr-283-note">⚠️有兩個以上亮燈空小心</div>' : '') +
-    (z.bear ? '<div class="hr-283-note">⚠️注意破惡均下彎打倒數</div>' : '')).join('');
+    (z.lit >= 2 ? '<div class="hr-283-note">⚠️有兩個以上亮燈空小心</div>' : '')).join('');
   return '<div class="hr-col"><div class="hr-title">🏰終點戰法空(283) <span class="hr-rk">' + list.length + ' 族</span></div>' +
-    (list.length ? body : '<div class="hr-note">目前沒有族群有漲停</div>') + '</div>';
+    (list.length ? body + '<div class="hr-sep">-------------------</div><div class="hr-283-note">⚠️注意破惡均下彎打倒數</div>' : '<div class="hr-note">目前沒有族群有漲停</div>') + '</div>';
 }
 function homeStockColHtml(title, list, emptyText){
   const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
@@ -6669,7 +6670,7 @@ const hrHelpTable = (title, head, rows, cls) => '<div class="hr-help-card' + (cl
   '<tbody>' + rows.map((r) => '<tr>' + r.map((x) => '<td>' + x + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
 function homeRankFootHtml(total){
   return hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
-    ['終點戰法空(283)', '族裡今天有漲停的', '照族群名次排，疊在 188 上面；每族列 👑 族裡漲最多的、🐎 第 2 名（漲 ' + Z283_HORSE_PCT + '% 以上才標）；其他「今天漲 ' + Z283_FOLLOW_PCT + '% 以上」或「昨天／前天漲過 ' + Z283_PRIOR_RISE + '% 以上、今天跌不到 ' + (-Z283_KNIFE_FLOOR) + '%」的，還在漲標 ⚔️、已轉跌標 🔪；兩檔以上漲停加註 ⚠️有兩個以上亮燈空小心；族群在空方線以下加註 ⚠️注意破惡均下彎打倒數'],
+    ['終點戰法空(283)', '族裡今天有漲停的', '照族群名次排，疊在 188 上面；每族列 👑 族裡漲最多的、🐎 第 2 名（漲 ' + Z283_HORSE_PCT + '% 以上才標）；其他「今天漲 ' + Z283_FOLLOW_PCT + '% 以上」或「昨天／前天漲過 ' + Z283_PRIOR_RISE + '% 以上、今天跌不到 ' + (-Z283_KNIFE_FLOOR) + '%」的，還在漲標 ⚔️、已轉跌標 🔪；兩檔以上漲停加註 ⚠️有兩個以上亮燈空小心；整欄最下面固定附註 ⚠️注意破惡均下彎打倒數'],
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
     ['多族群排名(183)', '固定 ' + RANK188_GROUPS.size + ' 族', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 2 檔（漲最多的）'],
     ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
@@ -12191,7 +12192,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 11:20:05';
+const BUILD_STAMP = '2026-10-16 12:25:41';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
