@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 21:26:00";
+const BUILD_STAMP = "2026-10-16 21:28:11";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6629,6 +6629,40 @@ function home283ColHtml(list){
   return '<div class="hr-col"><div class="hr-title">🏰終點戰法空(283) <span class="hr-rk">' + list.length + ' 族</span></div>' +
     (list.length ? body + '<div class="hr-sep">-------------------</div><div class="hr-283-note">⚠️注意破惡均下彎打倒數</div>' : '<div class="hr-note">目前沒有族群有漲停</div>') + '</div>';
 }
+// ---- 股票期貨排名(155)（2026-10-16 使用者：首頁新欄位，疊在馬火多(30) 下面）----
+// 照老師 10/16 收盤那份：固定 13 族；每族只算「有股票期貨」的成分股（stockFlags.hasStockFutures）的平均漲跌，
+// 用它在全部（有股期成分股的）族群裡排名次，🔺🔽＝跟昨天同樣算法的名次比，括號裡＝那幾檔的平均漲跌。
+// 對他那份：低軌衛星 1、PCB 3、被動元件 45、光學鏡頭 44（他 46）、矽光子 47（他 48）對得上；矽晶圓、二極體、石英差比較多
+// （可能他的股期清單跟我們不一樣，或用股期本身的價格），還要多幾份再對。「↓(櫃買)↓」線、「⚠️多🚀」意思還不知道，先不放。
+const FUT155_GROUPS = ['低軌衛星', 'PCB', '記憶體', 'AI', '矽晶圓', '面板', '二極體', '小電組', '航運', '石英', '被動元件', '光學鏡頭', '矽光子'];
+function fut155Model(){
+  if (!lastData || lastData.mock || !Array.isArray(lastData.groups)) return null;
+  const sd = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
+  const isFut = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].hasStockFutures);
+  const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+  const today = [], yday = [];
+  rankedGroupsOf(lastData.groups).forEach((g) => {
+    const fut = g.stocks.filter((st) => isFut(st.code));
+    const now = fut.filter((st) => st.price !== null && st.price !== undefined && Number.isFinite(st.changePercent)).map((st) => st.changePercent);
+    if (now.length) today.push({ name: g.name, avg: mean(now) });
+    const yv = fut.map((st) => (sd[st.code] && Array.isArray(sd[st.code].pct) ? sd[st.code].pct[0] : null)).filter(Number.isFinite);
+    if (yv.length) yday.push({ name: g.name, avg: mean(yv) });
+  });
+  if (!today.length) return null;
+  const rankOf = new Map(today.slice().sort((a, b) => b.avg - a.avg).map((x, i) => [x.name, i + 1]));
+  const yRankOf = new Map(yday.slice().sort((a, b) => b.avg - a.avg).map((x, i) => [x.name, i + 1]));
+  const avgOf = new Map(today.map((x) => [x.name, x.avg]));
+  const rows = FUT155_GROUPS.filter((n) => rankOf.has(n)).map((n) => {
+    const rank = rankOf.get(n), prev = yRankOf.has(n) ? yRankOf.get(n) : null;
+    return { name: n, rank, prev, drop: prev !== null ? rank - prev : null, avg: avgOf.get(n) };
+  }).sort((a, b) => a.rank - b.rank);
+  return { rows, total: today.length, half: Math.round(today.length * 35 / 67) };
+}
+function home155ColHtml(){
+  const f = fut155Model();
+  if (!f) return '<div class="hr-col"><div class="hr-title">股票期貨排名(155)</div><div class="hr-note">' + (stockFlags && Object.keys(stockFlags).length ? '沒有資料' : '讀取中…') + '</div></div>';
+  return homeRankColHtml('股票期貨排名(155)', f.rows, f.half, '------↓(空方)↓------', '沒有資料');
+}
 function homeStockColHtml(title, list, emptyText){
   const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
   return '<div class="hr-col"><div class="hr-title">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
@@ -6707,7 +6741,10 @@ function homeRank4Html(){
     homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
     // 2026-10-16 使用者：第 3 欄馬火多(30)；第 4 欄 30加33加34 疊在河流多(34) 上面；第 5 欄續抱勿追高疊在賽馬多(33) 上面
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
-    homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : []) +
+    '<div class="hr-stack">' +   // 2026-10-16 使用者：股票期貨排名(155) 疊在馬火多(30) 下面
+      homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : []) +
+      home155ColHtml() +
+    '</div>' +
     '<div class="hr-stack">' +
       homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單，交集也就沒有' : '') +
       homeStockColHtml('🌊河流多(34)', m ? m.rivers : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '') +
@@ -6740,6 +6777,7 @@ function homeRankFootHtml(total){
   return hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
     ['終點戰法空(283)', '族裡有股票亮燈的（千元、小電機不算）', '亮燈＝非處置股盤中最高曾到 ' + Z283_LIT_HIGH + '% 以上、現在還漲 ' + Z283_LIT_PCT + '% 以上；照族群名次排；每族列 👑 族裡漲最多的、🐎 第 2 名（漲 ' + Z283_HORSE_PCT + '% 以上才標）；其他「盤中最高曾漲到 ' + Z283_HIGH_PCT + '% 以上、現在沒翻黑」或「昨天／前天漲過 ' + Z283_PRIOR_RISE + '% 以上、今天跌不到 ' + (-Z283_KNIFE_FLOOR) + '%」的，還在漲標 ⚔️、已轉跌標 🔪；兩檔以上鎖漲停（處置股不算）加註 ⚠️有兩個以上亮燈空小心；整欄最下面固定附註 ⚠️注意破惡均下彎打倒數'],
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
+    ['股票期貨排名(155)', '固定 ' + FUT155_GROUPS.length + ' 族', '疊在馬火多(30) 下面；每族只算有股票期貨的成分股：名次＝這些股票平均漲跌在全部族群裡的排名，🔺🔽 跟昨天比，最右邊 %＝它們的平均漲跌'],
     ['多族群排名(183)', '固定 ' + RANK188_GROUPS.size + ' 族', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 2 檔（漲最多的）'],
     ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
     ['空族群必殺(193)', '固定 ' + KILL193_ONLY_GROUPS.size + ' 族', '199 的 ' + KILL193_GROUPS.size + ' 族＋小光電；名次比昨天掉 5 名以上的；掉 1～4 名要有 ⚔️（族裡過半股票低於前天收盤，數字＝比例）才列；🔪＝族群今天平均下跌；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
@@ -12263,7 +12301,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 21:26:00';
+const BUILD_STAMP = '2026-10-16 21:28:11';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13077,7 +13115,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・183・馬火多(30)・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・昨日強勢股／188・283・193／199・刀劍空(32)</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・183・馬火多(30)／155・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・昨日強勢股／188・283・193／199・刀劍空(32)</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
