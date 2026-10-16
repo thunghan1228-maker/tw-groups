@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 22:19:40";
+const BUILD_STAMP = "2026-10-16 22:21:31";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -280,6 +280,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chart-modal-head .cm-actions{cursor:default;}
   .cm-code{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;margin-right:8px;}
   .cm-name{font-weight:800;font-size:17px;}
+  .cm-groups{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;max-width:260px;}
+  .cm-groups:empty{display:none;}
+  .cm-group-tag{background:#7c3aed;color:#fff;font-size:12px;font-weight:700;border-radius:5px;padding:1px 7px;white-space:nowrap;}   /* 族群：紫底白字 */
   .cm-data-badge{margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;vertical-align:middle;}
   .chart-info-bar{flex:1;text-align:center;padding:0 8px;font-size:20px;font-weight:700;color:#fff5e0;font-variant-numeric:tabular-nums;}
   .chart-info-bar .cib-item{white-space:nowrap;display:inline-block;margin:0 3px;}
@@ -2838,7 +2841,8 @@ const HTML_PAGE = `<!DOCTYPE html>
 <div class="chart-modal" id="chartModal" hidden>
   <div class="chart-modal-inner" id="chartModalInner">
     <div class="chart-modal-head" id="chartModalHead">
-      <div><span class="cm-code" id="cmCode"></span><span class="cm-name" id="cmName"></span><button type="button" class="wl-star" id="cmStar" data-code="" data-name="" title="加入自選股">☆</button><span class="cm-data-badge" id="cmDataBadge" hidden>示範資料</span></div>
+      <div><div><span class="cm-code" id="cmCode"></span><span class="cm-name" id="cmName"></span><button type="button" class="wl-star" id="cmStar" data-code="" data-name="" title="加入自選股">☆</button><span class="cm-data-badge" id="cmDataBadge" hidden>示範資料</span></div>
+        <div class="cm-groups" id="cmGroups"></div></div>  <!-- 2026-10-16 使用者：股名下面寫這檔屬於哪些族群，紫底白字 -->
       <span class="chart-info-bar" id="chartInfoBar"></span>
       <div class="cm-right">
         <div class="cm-actions">
@@ -4552,6 +4556,11 @@ window.addEventListener('message', (e) => {
   }
 });
 
+// 2026-10-16 使用者：K線圖股名下面列這檔屬於哪些族群（被動元件、記憶體…），紫底白字；股期標的不是產業族群，不列
+function chartGroupTagsHtml(code){
+  return GROUPS.filter((g) => g.name !== '股期標的' && g.stocks.some((s) => s.code === code))
+    .map((g) => '<span class="cm-group-tag">' + String(g.name).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])) + '</span>').join('');
+}
 function openStockChart(code, name, tf){
   if (useFloatingCharts()){ openChartWindow(code, name, tf); return; }
   // 手機／iPad 直式：從任何面板點進來，面板一律退到K線圖後面、關圖再回來（2026-10-09 使用者：營收成長榜的「K線圖」按了沒出來
@@ -4564,6 +4573,8 @@ function openStockChart(code, name, tf){
   currentChart.name = name;
   document.getElementById('cmCode').textContent = code;
   document.getElementById('cmName').textContent = name;
+  const cmGroups = document.getElementById('cmGroups');
+  if (cmGroups) cmGroups.innerHTML = chartGroupTagsHtml(code);
   const cmStar = document.getElementById('cmStar');
   if (cmStar){ cmStar.dataset.code = code; cmStar.dataset.name = name || ''; wlRefreshStars(); }
   renderChartFlags(code);
@@ -12388,7 +12399,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 22:19:40';
+const BUILD_STAMP = '2026-10-16 22:21:31';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

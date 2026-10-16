@@ -202,6 +202,9 @@
   .chart-modal-head .cm-actions{cursor:default;}
   .cm-code{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;margin-right:8px;}
   .cm-name{font-weight:800;font-size:17px;}
+  .cm-groups{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;max-width:260px;}
+  .cm-groups:empty{display:none;}
+  .cm-group-tag{background:#7c3aed;color:#fff;font-size:12px;font-weight:700;border-radius:5px;padding:1px 7px;white-space:nowrap;}   /* 族群：紫底白字 */
   .cm-data-badge{margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;vertical-align:middle;}
   .chart-info-bar{flex:1;text-align:center;padding:0 8px;font-size:20px;font-weight:700;color:#fff5e0;font-variant-numeric:tabular-nums;}
   .chart-info-bar .cib-item{white-space:nowrap;display:inline-block;margin:0 3px;}
@@ -2758,7 +2761,8 @@
 <div class="chart-modal" id="chartModal" hidden>
   <div class="chart-modal-inner" id="chartModalInner">
     <div class="chart-modal-head" id="chartModalHead">
-      <div><span class="cm-code" id="cmCode"></span><span class="cm-name" id="cmName"></span><button type="button" class="wl-star" id="cmStar" data-code="" data-name="" title="加入自選股">☆</button><span class="cm-data-badge" id="cmDataBadge" hidden>示範資料</span></div>
+      <div><div><span class="cm-code" id="cmCode"></span><span class="cm-name" id="cmName"></span><button type="button" class="wl-star" id="cmStar" data-code="" data-name="" title="加入自選股">☆</button><span class="cm-data-badge" id="cmDataBadge" hidden>示範資料</span></div>
+        <div class="cm-groups" id="cmGroups"></div></div>  <!-- 2026-10-16 使用者：股名下面寫這檔屬於哪些族群，紫底白字 -->
       <span class="chart-info-bar" id="chartInfoBar"></span>
       <div class="cm-right">
         <div class="cm-actions">
@@ -4472,6 +4476,11 @@ window.addEventListener('message', (e) => {
   }
 });
 
+// 2026-10-16 使用者：K線圖股名下面列這檔屬於哪些族群（被動元件、記憶體…），紫底白字；股期標的不是產業族群，不列
+function chartGroupTagsHtml(code){
+  return GROUPS.filter((g) => g.name !== '股期標的' && g.stocks.some((s) => s.code === code))
+    .map((g) => '<span class="cm-group-tag">' + String(g.name).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])) + '</span>').join('');
+}
 function openStockChart(code, name, tf){
   if (useFloatingCharts()){ openChartWindow(code, name, tf); return; }
   // 手機／iPad 直式：從任何面板點進來，面板一律退到K線圖後面、關圖再回來（2026-10-09 使用者：營收成長榜的「K線圖」按了沒出來
@@ -4484,6 +4493,8 @@ function openStockChart(code, name, tf){
   currentChart.name = name;
   document.getElementById('cmCode').textContent = code;
   document.getElementById('cmName').textContent = name;
+  const cmGroups = document.getElementById('cmGroups');
+  if (cmGroups) cmGroups.innerHTML = chartGroupTagsHtml(code);
   const cmStar = document.getElementById('cmStar');
   if (cmStar){ cmStar.dataset.code = code; cmStar.dataset.name = name || ''; wlRefreshStars(); }
   renderChartFlags(code);
