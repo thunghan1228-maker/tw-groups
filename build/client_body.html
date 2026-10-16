@@ -6508,17 +6508,18 @@ function homeRank4Html(){
       homeStrongColHtml() +
       homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
     '</div>' +
-    // 2026-10-16 使用者：第 3 欄續抱勿追高／河流多(34)；第 4 欄 30加33加34／馬火多(30)；第 5 欄賽馬多(33)
+    // 2026-10-16 使用者：第 3 欄只放續抱勿追高；第 4 欄 30加33加34 疊在河流多(34) 上面；第 5 欄馬火多(30) 疊在賽馬多(33) 上面
+    // （後來說要把河流多搬到續抱下面，又說取消、首頁先不要動，維持這樣）
+    homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
     '<div class="hr-stack">' +
-      homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
+      homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單，交集也就沒有' : '') +
       homeStockColHtml('🌊河流多(34)', m ? m.rivers : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '') +
     '</div>' +
     '<div class="hr-stack">' +
-      homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單，交集也就沒有' : '') +
       // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
       homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : []) +
+      homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
     '</div>' +
-    homeStockColHtml('🐎賽馬多(33)', m ? m.horses : []) +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
     '<div class="hr-stack">' +
@@ -12869,7 +12870,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・昨日強勢股／183・續抱勿追高／河流多(34)・30加33加34／馬火多(30)・賽馬多(33)・193／199・刀劍空(32)・188</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・昨日強勢股／183・續抱勿追高・30加33加34／河流多(34)・馬火多(30)／賽馬多(33)・193／199・刀劍空(32)・188</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
