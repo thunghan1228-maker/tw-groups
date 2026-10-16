@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 13:37:15";
+const BUILD_STAMP = "2026-10-16 13:46:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -15,6 +15,7 @@ const GROUPS = [
   {"name":"小電腦","stocks":[{"code":"6558","name":"興能高"},{"code":"3323","name":"加百裕"},{"code":"3211","name":"順達"},{"code":"6781","name":"AES-KY"},{"code":"5309","name":"系統電"},{"code":"4931","name":"新盛力"}]},
   {"name":"PCB","stocks":[{"code":"4958","name":"臻鼎-KY"},{"code":"3037","name":"欣興"},{"code":"3189","name":"景碩"},{"code":"8046","name":"南電"}]},
   {"name":"小電組","stocks":[{"code":"6234","name":"高僑"},{"code":"6191","name":"精成科"},{"code":"2368","name":"金像電"},{"code":"8074","name":"鉅橡"},{"code":"3715","name":"定穎投控"},{"code":"6290","name":"良維"},{"code":"5340","name":"建榮"},{"code":"2316","name":"楠梓電"},{"code":"5498","name":"凱崴"},{"code":"1802","name":"台玻"},{"code":"1815","name":"富喬"},{"code":"6274","name":"台燿"},{"code":"2383","name":"台光電"},{"code":"4989","name":"榮科"},{"code":"8021","name":"尖點"},{"code":"5475","name":"德宏"},{"code":"8358","name":"金居"},{"code":"6213","name":"聯茂"},{"code":"5439","name":"高技"},{"code":"3167","name":"大量"}]},
+  {"name":"小電機","stocks":[{"code":"3167","name":"大量"},{"code":"3162","name":"精確"},{"code":"1528","name":"恩德"},{"code":"8027","name":"鈦昇"},{"code":"8107","name":"大億金茂"},{"code":"3379","name":"彬台"},{"code":"4527","name":"方土霖"},{"code":"2230","name":"泰茂"},{"code":"6425","name":"易發"}]},
   {"name":"特化","stocks":[{"code":"4763","name":"材料-KY"},{"code":"4768","name":"晶呈科技"},{"code":"4770","name":"上品"},{"code":"4772","name":"台特化"},{"code":"4722","name":"國精化"}]},
   {"name":"散熱","stocks":[{"code":"3324","name":"雙鴻"},{"code":"3483","name":"力致"},{"code":"6230","name":"尼得科超眾"},{"code":"6125","name":"廣運"},{"code":"3017","name":"奇鋐"},{"code":"3338","name":"泰碩"},{"code":"8996","name":"高力"},{"code":"3653","name":"健策"}]},
   {"name":"PA","stocks":[{"code":"2455","name":"全新"},{"code":"8086","name":"宏捷科"},{"code":"3105","name":"穩懋"}]},
@@ -4588,6 +4589,7 @@ function closeStockChart(){
 }
 
 let openGroupName = null;
+const HORSE_MIN_PCT = 3;   // 👑🐎🚀 要今天漲這麼多以上才標
 // 族群明細的 👑🐎🚀（2026-10-16 老師的說明：「🐎(跟昨天比)🚀(跟前天比) 原本後段班突然跑到前兩名(數字為上升名次)」；👑＝族群第 1 名）。
 // 名次＝這檔在族裡照漲跌幅排第幾；後段班＝昨天（前天）的名次在族裡後一半。對過老師 10/16 十幾份族群明細：勤凱 🐎16、今國光 🚀7、台塑化 🐎4🚀7…都一樣。
 function groupHorseMarks(g){
@@ -4602,6 +4604,7 @@ function groupHorseMarks(g){
   };
   const y = rankBy(0), y2 = rankBy(1);
   today.slice(0, 2).forEach((s, i) => {
+    if (s.changePercent < HORSE_MIN_PCT) return;   // 漲不到 3% 不標（老師二極體強茂 +1.93%、航運萬海 +2.52% 第 1 名都沒標，長榮 +3.31% 就標 👑）
     const t = i + 1, ry = y.m.get(s.code), r2 = y2.m.get(s.code);
     const horse = ry && ry > y.n / 2 ? ry - t : 0, rocket = r2 && r2 > y2.n / 2 ? r2 - t : 0;
     const mk = (t === 1 ? '👑' : '') + (horse > 0 ? '🐎' + horse : '') + (rocket > 0 ? '🚀' + rocket : '');
@@ -5944,9 +5947,13 @@ const FIRE_MAX_ROWS = 10;     // 馬火多：最多列這麼多檔
 // 9～12 檔＝後 1/3（9→3、10→4）、13 檔以上＝後 5 檔（13、16、20、22 都是 5）
 const bladeRankMark = (rank, total) => rank <= Math.round((total || 67) * 10 / 67) ? '🔺' : rank < Math.round((total || 67) * 26 / 67) ? '🔽' : '🔰';
 const bladeZoneSize = (n) => n <= 8 ? Math.ceil(n / 2) : n <= 12 ? Math.ceil(n / 3) : 5;
+// 不算族群排名的族群（2026-10-16 使用者：老師沒有功率半導體（他的是二極體）、散裝（放在航運裡）、金融股）：
+// 族群綜合表、成分股視窗照常看得到，只是族群名次、首頁 183／188／193／199／283、盤中 333、刀劍空、強弱族群數都不算它們。
+const UNRANKED_GROUPS = new Set(['股期標的', '功率半導體', '散裝', '金融股']);
+const rankedGroupsOf = (groups) => groups.filter((g) => !UNRANKED_GROUPS.has(g.name));
 function race333Model(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
-  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+  const groups = rankedGroupsOf(lastData.groups);
   const total = groups.length;
   const half = Math.ceil(total / 2);
   const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
@@ -6471,7 +6478,7 @@ const KILL193_ONLY_GROUPS = new Set([...KILL193_GROUPS, '小光電']);
 function kill193Model(){
   const m = race333Model();
   if (!m) return null;
-  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+  const groups = rankedGroupsOf(lastData.groups);
   const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
   const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
   const stockDaily = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
@@ -6536,7 +6543,7 @@ function zbHalf(total){ return Math.round(total * 35 / 67); }
 const RANK188_GROUPS = new Set(['光學鏡頭', '軍工', '被動元件', '面板', '二極體', '小電組', '石英', '記憶體', '玻璃基板', '矽晶圓', '聯電股', 'PCB', '台塑四寶']);   // 老師 10/15 09:56 那份 188 的 13 族
 function homeRankRows(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
-  const groups = lastData.groups.filter((g) => g.name !== '股期標的');
+  const groups = rankedGroupsOf(lastData.groups);
   const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
   const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
   const rows = ranked.map((g, i) => {
@@ -6731,7 +6738,7 @@ function homeRankFootHtml(total){
     ['🔺／🔽', '跟昨天收盤的名次比，升／掉幾名'],
     ['最右邊 %', '族群平均漲跌幅'],
     ['點族群', '看成分股（前兩名後面標 👑🐎🚀，最後幾名標 🔪⚔️🔰）'],
-    ['👑', '族群裡今天第 1 名'],
+    ['👑', '族群裡今天第 1 名（今天漲 3% 以上才標，🐎🚀 也是）'],
     ['🐎N（跟昨天比）', '昨天還在族裡後段班（後一半），今天突然衝到族裡前兩名；N＝上升幾名'],
     ['🚀N（跟前天比）', '前天還在族裡後段班，今天突然衝到族裡前兩名；N＝上升幾名'],
     ['🔪N（跟昨天比）', '昨天漲 ' + BLADE_PRIOR_RISE + '% 以上、在族裡前一半，今天掉到族裡最後 3 名；N＝掉幾名'],
@@ -12245,7 +12252,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 13:37:15';
+const BUILD_STAMP = '2026-10-16 13:46:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13016,7 +13023,7 @@ function render(){
   const app = document.getElementById('app');
   if (!lastData) return;
 
-  const groups = lastData.groups;
+  const groups = rankedGroupsOf(lastData.groups);   // 強弱族群數、前六大照老師的族群算（功率半導體、散裝、金融股不算）
   const total = groups.length;
   const strongCount = groups.filter(g => g.avgChange > 0).length;
   const weakCount = total - strongCount;
