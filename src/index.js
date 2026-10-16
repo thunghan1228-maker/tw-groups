@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 10:20:36";
+const BUILD_STAMP = "2026-10-16 10:26:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6382,14 +6382,20 @@ function race333Html(){
 // 今天在前段、昨天在後段，我們的名次掉得比他少：用他 09:20、09:43、09:54 三份 193 對，門檻 0～2 名三份都沒有多列、
 // 只漏散熱和小電腦（我們算這兩族名次是往上），3 名以上會漏玻璃基板，所以名次有掉（1 名以上）就列。
 const KILL193_MIN_DROP = 1;
+// 2026-10-16 改（67 族對齊老師後重對）：名次掉 5 名以上才列；掉 1～4 名要族群有 ⚔️（族裡過半的股票現價低於前天收盤）才列。
+// 老師 10:25：航運 🔽4 沒 ⚔️ 不列、化學二 🔽1⚔️0.6 有列；09:14 光學鏡頭 🔽2⚔️0.6 有列；09:25 資訊 🔽1 沒列。
+const KILL193_BIG_DROP = 5;
 const KILL193_GROUPS = new Set(['資訊', '鋼鐵', '被動元件', '光學鏡頭', '航運', 'D電腦', '面板', '光電', '二極體', '矽光子', '小電腦', '散熱',
   '低軌衛星', '小電組', '化學二', 'IP', '矽晶圓', '記憶體', '玻璃基板', 'PA', '台塑四寶', 'PCB', '探針卡']);   // 老師 199 的固定 23 族
+// 193 比 199 多看小光電（2026-10-16 老師 09:08、09:14、09:25、10:25 的 193 都有小光電，199 只有光電沒有小光電）
+const KILL193_ONLY_GROUPS = new Set([...KILL193_GROUPS, '小光電']);
 function kill193Model(){
   const m = race333Model();
   if (!m) return null;
   const groups = lastData.groups.filter((g) => g.name !== '股期標的');
   const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
   const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
+  const stockDaily = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
   const blade = new Map([...m.bladeLower, ...m.bladeHarvest, ...m.bladeMiddle, ...m.bladeUpper].map((r) => [r.code, r]));
   const half = zbHalf(groups.length);   // 空方線跟老師一樣畫在第 35 名後面（67 族）
   const rows = ranked.map((g, i) => {
@@ -6397,9 +6403,15 @@ function kill193Model(){
     const prev = Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
     const members = g.stocks.filter((s) => blade.has(s.code)).map((s) => ({ code: s.code, name: s.name, pct: s.changePercent }))
       .sort((a, b) => b.pct - a.pct);
-    return { name: g.name, rank: i + 1, prev, drop: prev !== null ? i + 1 - prev : null, avg: g.avgChange, members };
+    // 族群的 🔪＝今天平均低於昨收、⚔️＝族裡過半的股票現價低於前天收盤（數字＝比例，全部就寫 all，照老師的寫法）
+    const two = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent) && stockDaily[s.code] && Number.isFinite((stockDaily[s.code].pct || [])[0]))
+      .map((s) => (1 + s.changePercent / 100) * (1 + stockDaily[s.code].pct[0] / 100) - 1);
+    const frac = two.length ? two.filter((x) => x < 0).length / two.length : 0;
+    const sword = frac > 0.5;
+    const swordMark = (g.avgChange < 0 ? '🔪' : '') + (sword ? '⚔️' + (frac >= 1 ? 'all' : frac.toFixed(1)) : '');
+    return { name: g.name, rank: i + 1, prev, drop: prev !== null ? i + 1 - prev : null, avg: g.avgChange, members, sword, swordMark };
   });
-  const falling = rows.filter((r) => KILL193_GROUPS.has(r.name) && r.drop !== null && r.drop >= KILL193_MIN_DROP);
+  const falling = rows.filter((r) => KILL193_ONLY_GROUPS.has(r.name) && r.drop !== null && r.drop >= KILL193_MIN_DROP && (r.drop >= KILL193_BIG_DROP || r.sword));
   return {
     upper: falling.filter((r) => r.rank <= half),
     lower: falling.filter((r) => r.rank > half),
@@ -6421,7 +6433,7 @@ function kill193Html(){
     (r.members.length ? '<div class="k193-s">⚠️' + r.members.map((s) => '<span class="k193-stk" data-k193-code="' + s.code + '" data-k193-name="' + s.name + '">' + s.code + s.name +
       ' <span class="down">' + fmt(s.pct) + '%</span></span>').join(' / ') + '</div>' : '');
   return '<div class="race-block"><div class="race-head">空族群必殺(193) ' + stamp + ' <button type="button" class="chart-tab chips-btn" data-k193-copy="1">📋 複製</button></div>' +
-    '<div class="race-sub">只看固定的 ' + KILL193_GROUPS.size + ' 個族群（' + Array.from(KILL193_GROUPS).join('、') + '）。' +
+    '<div class="race-sub">只看固定的 ' + KILL193_ONLY_GROUPS.size + ' 個族群（' + Array.from(KILL193_ONLY_GROUPS).join('、') + '）。' +
       '族群名次＝今天平均漲跌幅在全部 ' + k.total + ' 個族群裡的排名（1 最強）；🔽＝比昨天收盤的名次掉了幾名，掉 ' + KILL193_MIN_DROP + ' 名以上才列。' +
       '空方線以下＝第 ' + (k.half + 1) + ' 名以後（空方線畫在第 ' + k.half + ' 名後面）；空方線以上＝前 ' + k.half + ' 名但名次往下掉的。' +
       '⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少），點股票開K線圖。</div>' +
@@ -6458,7 +6470,7 @@ function homeRankRows(){
 function homeRankRowHtml(r){
   const mv = r.drop === null ? '' : r.drop > 0 ? '<span class="down">🔽' + r.drop + '</span>' : r.drop < 0 ? '<span class="up">🔺' + (-r.drop) + '</span>' : '<span class="flat">－</span>';
   const tip = r.prev !== null ? '昨天第 ' + r.prev + ' 名' : '';
-  return '<div class="hr-row" data-group="' + r.name + '" tabindex="0" role="button" title="' + tip + '"><span class="hr-name">' + r.name + '</span><span class="hr-rk">(' + r.rank + ')</span>' + mv +
+  return '<div class="hr-row" data-group="' + r.name + '" tabindex="0" role="button" title="' + tip + '"><span class="hr-name">' + r.name + '</span><span class="hr-rk">(' + r.rank + ')</span>' + mv + (r.swordMark || '') +
     '<span class="hr-avg ' + dirClass(r.avg) + '">' + fmt(r.avg) + '%</span></div>';
 }
 function homeStockRowHtml(r){
@@ -6576,7 +6588,7 @@ function homeRankFootHtml(total){
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
     ['多族群排名(183)', '固定 ' + RANK188_GROUPS.size + ' 族', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 2 檔（漲最多的）'],
     ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
-    ['空族群必殺(193)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列名次比昨天掉的；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
+    ['空族群必殺(193)', '固定 ' + KILL193_ONLY_GROUPS.size + ' 族（199 的 ' + KILL193_GROUPS.size + ' 族＋小光電）', '名次比昨天掉 5 名以上的；掉 1～4 名要有 ⚔️（族裡過半股票低於前天收盤，數字＝比例）才列；🔪＝族群今天平均下跌；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
     ['排名比較(177)', '全部 ' + total + ' 族', '只列漲幅前 10 大和跌幅前 10 大'],
   ]) +
   hrHelpTable('🔎 族群列怎麼看', ['位置', '意思'], [
@@ -12092,7 +12104,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 10:20:36';
+const BUILD_STAMP = '2026-10-16 10:26:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
