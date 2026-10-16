@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 23:02:01";
+const BUILD_STAMP = "2026-10-16 23:02:39";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12519,7 +12519,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 23:02:01';
+const BUILD_STAMP = '2026-10-16 23:02:39';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17006,7 +17006,7 @@ function rivGroupMapHtml(st){
   const why = { loss: '虧損', thin: '獲利太薄', none: '沒有本益比資料' };
   const pin = (r, fish, withPct, style) => {
     const me = r.code === st.code;
-    const tip = r.nv ? why[r.why] || '沒有本益比' : '距分水嶺 ' + pct(r.dist) + (r.weak ? '・⚠ 基準參考弱（本益比 60 倍以上，獲利偏薄）' : '');
+    const tip = r.nv ? why[r.why] || '沒有本益比' : '距分水嶺 ' + pct(r.dist) + (r.weak ? '・⚠ 基準參考弱（本益比 100 倍以上，獲利偏薄）' : '');
     return '<span class="rgm-pin' + (me ? ' me' : '') + '"' + (me ? '' : ' data-riv-q="' + wlEsc(r.code) + '"') + (style ? ' style="' + style + '"' : '') + ' title="' + wlEsc(tip) + '">' +
       '<b class="fe">' + fish[0] + '</b>' + wlEsc(r.code) + ' ' + wlEsc(r.name) + (r.weak ? ' ⚠' : '') + (withPct ? '<small>' + pct(r.dist) + '</small>' : '') + '</span>';
   };
@@ -17031,7 +17031,7 @@ function rivGroupMapHtml(st){
   return '<div class="rgm"><div class="rgm-lab">🌊 內部河流 —— ' + wlEsc(g.group) + '族<span>' + g.rows.length + ' 檔・上貴下便宜・左右只是錯開・點釘子直接查' +
     (g.refFrom === '全市場' ? '・這族有本益比的不到 3 檔，用全市場本益比中位數當尺' : '') + '</span></div>' + up + map +
     '<div class="rgm-note">水越深越便宜：鯊魚 → 河豚 → 海豚 → 燈籠魚 → 魷魚 → 螃蟹。縱向＝距分水嶺 %（超出區間的兩帶對數壓縮）；同一帶由左到右＝由貴到便宜。' +
-    '地圖上方「無本益比」「偏離逾 300%」兩條不排河道（無本益比最差）。紅釘＝本檔。⚠＝基準參考弱（本益比 60 倍以上，獲利偏薄）。同族群用同一把 PE 尺（族群本益比中位數 ' +
+    '地圖上方「無本益比」「偏離逾 300%」兩條不排河道（無本益比最差）。紅釘＝本檔。⚠＝基準參考弱（本益比 100 倍以上，獲利偏薄）。同族群用同一把 PE 尺（族群本益比中位數 ' +
     (g.ref ? rivFmt(g.ref, 1) + ' 倍' : '—') + '），族內可以直接比；跨族群不混排。</div></div>';
 }
 function rivMa10Html(){
