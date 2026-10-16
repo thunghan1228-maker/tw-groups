@@ -65,12 +65,13 @@
   .hr-warn{padding:2px 8px 5px 18px;font-size:12px;line-height:1.6;white-space:normal;}
   .hr-warn .hr-stk{cursor:pointer;margin-right:6px;white-space:nowrap;}
   .hr-warn .hr-stk:hover{text-decoration:underline;}
-  /* 2026-10-15 使用者：只有 193 族群底下的 ⚠️ 個股要綠底白字（跟跌停的綠底白字同一個顏色） */
-  .hr-warn.bear .hr-stk{display:inline-block;background:var(--down);color:#fff;border-radius:5px;padding:1px 6px;margin:2px 4px 2px 0;font-weight:700;}
-  .hr-warn.bear .hr-stk span{color:#fff;}
-  /* 2026-10-15 使用者：刀劍空(32) 欄的代號＋名稱也綠底白字 */
-  .hr-bear-pill{display:inline-flex;align-items:baseline;gap:4px;background:var(--down);color:#fff;border-radius:5px;padding:1px 6px;font-weight:700;min-width:0;overflow:hidden;}
-  .hr-bear-pill .hr-code,.hr-bear-pill .hr-name{color:#fff;}
+  /* 2026-10-16 使用者：193 族群底下的 ⚠️ 個股、刀劍空(32) 的代號＋名稱不要綠底了，照今天漲跌：漲紅字、跌綠字，字粗一點 */
+  .hr-warn.bear .hr-stk{display:inline-block;margin:2px 6px 2px 0;font-weight:900;}
+  .hr-warn.bear .hr-stk.up,.hr-warn.bear .hr-stk.up span{color:var(--up);} .hr-warn.bear .hr-stk.down,.hr-warn.bear .hr-stk.down span{color:var(--down);}
+  .hr-bear-pill{display:inline-flex;align-items:baseline;gap:4px;font-weight:900;min-width:0;overflow:hidden;}
+  .hr-bear-pill .hr-name{font-weight:900;}
+  .hr-bear-pill.up .hr-code,.hr-bear-pill.up .hr-name{color:var(--up);} .hr-bear-pill.down .hr-code,.hr-bear-pill.down .hr-name{color:var(--down);}
+  .hr-title.bear{background:#16a34a;color:#fff;} .hr-title.bear .hr-rk{color:#fff;}   /* 2026-10-16 使用者：193／199／刀劍空(32) 抬頭綠底白字 */
   .hr-col{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
   .hr-title{padding:8px 10px;background:#4a3d34;font-weight:800;font-size:15px;color:var(--text);white-space:nowrap;}
   .hr-row{display:flex;align-items:baseline;gap:4px;padding:5px 8px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;transition:background .12s ease;}
@@ -126,7 +127,7 @@
     .hr-name{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;}
     .hr-code,.hr-rk{font-size:11px;flex-shrink:0;}
     .hr-avg{font-size:11px;flex-shrink:0;}
-    .hr-bear-pill{padding:1px 4px;gap:3px;}
+    .hr-bear-pill{gap:3px;}
     .hr-title{font-size:14px;padding:7px 8px;}
   }
   @media (max-width: 640px){ .top6-grid{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-name{font-size:14px;overflow:hidden;text-overflow:ellipsis;} .top6-chg{font-size:13px;} .top6-card{padding:7px 8px;} }   /* 手機兩欄放不下漲跌幅，點族群看 */
@@ -6736,12 +6737,12 @@ function homeBladeColHtml(m){
   const mark = (r) => r.bladeMark || '';
   const byRank = (a, b) => a.groupRank - b.groupRank || b.pct - a.pct;   // 同族群漲幅高的在上面（2026-10-16 照老師）
   const row = (r) => '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button" title="' + r.groupName + '・族排第 ' + r.groupRank + ' 名">' +
-    '<span class="hr-rk">' + r.groupRank + (harvestSet.has(r) ? '♣' : bladeRankMark(r.groupRank, m.total)) + '</span><span class="hr-bear-pill"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + r.name + '</span></span>' +
+    '<span class="hr-rk">' + r.groupRank + (harvestSet.has(r) ? '♣' : bladeRankMark(r.groupRank, m.total)) + '</span><span class="hr-bear-pill ' + dirClass(r.pct) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + r.name + '</span></span>' +
     '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%' + mark(r) + '</span></div>';
   const harvestSet = new Set(m.bladeHarvest);
   const sec = (list) => list.slice().sort(byRank).map(row).join('');
   const n = m.bladeUpper.length + m.bladeMiddle.length + m.bladeLower.length + m.bladeHarvest.length;
-  return '<div class="hr-col"><div class="hr-title">🔪⚔️刀劍空(32) <span class="hr-rk">' + n + ' 檔</span></div>' +
+  return '<div class="hr-col"><div class="hr-title bear">🔪⚔️刀劍空(32) <span class="hr-rk">' + n + ' 檔</span></div>' +
     (n ? sec(m.bladeUpper) + '<div class="hr-sep">----↑(多方打少)↑----</div>' + sec(m.bladeMiddle) + '<div class="hr-sep">----↓(強空積極)↓----</div>' + sec(m.bladeLower) +
       '<div class="hr-sep">----↓(收割區域)↓----</div>' + sec(m.bladeHarvest) : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
@@ -6764,18 +6765,19 @@ function homeStrongColHtml(){
   return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔</span></div>' +
     (n ? body : '<div class="hr-note">' + (d.count ? '均線分數符合的今天都在跌，先不列' : '今天沒有符合的股票') + '</div>') + '</div>';
 }
-function homeRankColHtml(title, rows, half, sepLabel, empty, warnOf, warnCls){
+function homeRankColHtml(title, rows, half, sepLabel, empty, warnOf, warnCls, titleCls){
   let body = '';
   let sepDone = false;
   rows.forEach((r) => {
     if (!sepDone && r.rank > half){ body += '<div class="hr-sep">' + sepLabel + '</div>'; sepDone = true; }
     body += homeRankRowHtml(r);
     const warn = warnOf ? warnOf(r) : [];
-    if (warn.length) body += '<div class="hr-warn' + (warnCls ? ' ' + warnCls : '') + '">⚠️' + warn.map((x) => '<span class="hr-stk" data-code="' + x.code + '" data-name="' + x.name + '" tabindex="0" role="button">' +
+    // 2026-10-16 使用者：193 的 ⚠️ 個股不要綠底了，照漲跌幅漲紅字、跌綠字、字粗一點（warnCls＝bear）
+    if (warn.length) body += '<div class="hr-warn' + (warnCls ? ' ' + warnCls : '') + '">⚠️' + warn.map((x) => '<span class="hr-stk' + (warnCls ? ' ' + dirClass(x.pct) : '') + '" data-code="' + x.code + '" data-name="' + x.name + '" tabindex="0" role="button">' +
       x.code + x.name + ' <span class="' + dirClass(x.pct) + '">' + fmt(x.pct) + '%</span></span>').join(' ') + '</div>';
   });
   if (!rows.length) body = '<div class="hr-note">' + empty + '</div>';
-  return '<div class="hr-col"><div class="hr-title">' + title + '</div>' + body + '</div>';
+  return '<div class="hr-col"><div class="hr-title' + (titleCls ? ' ' + titleCls : '') + '">' + title + '</div>' + body + '</div>';
 }
 function homeRank4Html(){
   const h = homeRankRows();
@@ -6823,8 +6825,8 @@ function homeRank4Html(){
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
     '<div class="hr-stack">' +
-      homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉', (r) => r.members || [], 'bear') +
-      homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name) && r.rank > h.half), h.half, '------↓(空方)↓------', '固定 23 族目前都不在空方') +
+      homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉', (r) => r.members || [], 'bear', 'bear') +   // 2026-10-16 使用者：193／199／32 欄的抬頭綠底白字
+      homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name) && r.rank > h.half), h.half, '------↓(空方)↓------', '固定 23 族目前都不在空方', null, '', 'bear') +
     '</div>' +
     homeBladeColHtml(m) +
     '</div>' +
