@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 22:59:12";
+const BUILD_STAMP = "2026-10-16 23:02:01";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1987,7 +1987,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   #rivInner .ma-note{background:#fbf3df;border:1px solid #e3cfa5;color:#5a4632;border-radius:999px;}
   #rivInner .ma-q input{background:#fffdf8;color:var(--text);border:1px solid #d9c7a6;border-radius:10px;}
   #rivInner .ma-q button{background:#a8321f;color:#fff;border-radius:10px;}
-  #rivInner .scr-pre{background:#f1e6d0;border-color:#d9c3a0;color:#7a4a24;}
+  #rivInner .ma-q button.scr-pre{background:#f1e6d0;border:1px solid #d9c3a0;color:#7a4a24;border-radius:999px;font-weight:700;padding:6px 12px;}
   #rivInner .ma-sec{background:#fffdf8;border:1px solid #e4d6bd;box-shadow:0 1px 3px rgba(120,90,50,.08);}
   #rivInner .ma-sec h3{color:#a8321f;}
   #rivInner .ma-vbtn{background:#fffdf8;border-color:#d9c7a6;color:#5a4632;} #rivInner .ma-vbtn.on{background:#a8321f;border-color:#a8321f;color:#fff;}
@@ -2029,7 +2029,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .rgm-strip.warn{background:#fff1cc;border:1.5px solid #e0a000;} .rgm-strip.warn .rgm-sl{color:#7a4a00;} .rgm-strip.warn .rgm-sl small{color:#8c6a1f;}
   .rgm-strip.warn .rgm-pin{border-color:#b26a00;color:#8a5200;}
   .rgm-note{font-size:12px;color:#8a7660;margin-top:8px;line-height:1.6;}
-  @media (max-width: 640px){ .rgm-map{height:380px;} .rgm-pin{font-size:11px;padding:2px 6px;} .rgm-band{font-size:15px;} .rgm-band em{font-size:11px;margin-left:6px;} }
+  .rgm-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;}
+  @media (max-width: 640px){ .rgm-map{min-width:620px;height:440px;} .rgm-pin{font-size:11px;padding:2px 6px;} .rgm-band{font-size:15px;} .rgm-band em{font-size:11px;margin-left:6px;} }   /* 手機：釘子太擠，地圖固定寬、可以左右滑 */
   @media (max-width: 560px){ .scr-grid{gap:6px;} .scr-card{padding:8px;} .scr-ct{font-size:13px;} .scr-cd{font-size:10.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;} .scr-sl b{min-width:44px;font-size:13px;} .scr-kr input{width:52px;} }
   .rv-scroll{overflow-x:auto;max-width:100%;}
   .rv-tables > .rv-scroll{min-width:0;}
@@ -12518,7 +12519,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 22:59:12';
+const BUILD_STAMP = '2026-10-16 23:02:01';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16953,7 +16954,7 @@ function rivFundHtml(st){
     cell('參考本益比', (st.ref ? rivFmt(st.ref, 2) + ' 倍' : '—') + '<small>' + wlEsc(st.refGroup || '') + (st.refGroup === '全市場' ? '中位數' : '族群中位數') + '</small>') + '</div>';
   if ((f.rev || []).length){
     h += '<div class="ma-legend">近月營收（億）' + (f.ytd !== null && f.ytd !== undefined ? '・今年累計 <span class="' + (f.ytd >= 0 ? 'scr-up' : 'scr-dn') + '">' + (f.ytd >= 0 ? '+' : '') + f.ytd + '%</span>' : '') + '：' +
-      f.rev.map((r) => r.ym + ' <b>' + r.rev + '</b>' + (r.yoy !== null && r.yoy !== undefined ? ' <span class="' + (r.yoy >= 0 ? 'scr-up' : 'scr-dn') + '">' + (r.yoy >= 0 ? '+' : '') + r.yoy + '%</span>' : '')).join('　') + '</div>';
+      f.rev.map((r) => r.ym + ' <b>' + r.rev + '</b>' + (r.yoy !== null && r.yoy !== undefined ? ' <span class="' + (r.yoy >= 0 ? 'scr-up' : 'scr-dn') + '">' + (r.yoy >= 0 ? '+' : '') + Number(r.yoy).toFixed(1) + '%</span>' : '')).join('　') + '</div>';
   }
   return h;
 }
@@ -17011,7 +17012,7 @@ function rivGroupMapHtml(st){
   };
   const strip = (list, label, sub, withPct, cls, fish) => '<div class="rgm-strip ' + cls + '"><span class="rgm-sl">' + label + '<small>' + sub + '</small></span><div class="rgm-sp">' +
     list.map((r) => pin(r, fish, withPct)).join('') + '</div></div>';
-  let map = '<div class="rgm-map">' + RIV_MAP_BANDS.map((b) => '<div class="rgm-band b' + b[0] + '" style="top:' + b[1] + '%;height:' + b[2] + '%"><span>' + RV_ZONES[b[0]] + '</span><em>' +
+  let map = '<div class="rgm-scroll"><div class="rgm-map">' + RIV_MAP_BANDS.map((b) => '<div class="rgm-band b' + b[0] + '" style="top:' + b[1] + '%;height:' + b[2] + '%"><span>' + RV_ZONES[b[0]] + '</span><em>' +
     RIV_FISH[b[0]][0] + ' ' + RIV_FISH[b[0]][1] + '</em></div>').join('') + '<div class="rgm-shed"><i>分水嶺 0%</i></div>';
   const byz = {};
   rows.forEach((r) => { (byz[r.zone] = byz[r.zone] || []).push(r); });   // 後端已經由貴到便宜排好
@@ -17020,10 +17021,11 @@ function rivGroupMapHtml(st){
     lst.forEach((r, i) => {
       let y = rivMapY(r.dist, +z);
       if (k >= 4){ y += i % 2 ? 4 : -4; y = Math.max(9, Math.min(91, y)); }   // 同一帶 4 顆以上高低交錯，不互疊
-      map += pin(r, RIV_FISH[z], true, 'left:' + ((i + 1) / (k + 1) * 100).toFixed(1) + '%;top:' + y.toFixed(1) + '%');
+      const x = Math.max(8, Math.min(92, (i + 1) / (k + 1) * 100 + (+z % 2 ? 5 : -5)));   // 相鄰兩帶左右錯開一點，貼著帶界的釘子才不會疊在一起
+      map += pin(r, RIV_FISH[z], true, 'left:' + x.toFixed(1) + '%;top:' + y.toFixed(1) + '%');
     });
   });
-  map += '</div>';
+  map += '</div></div>';
   const up = (nv.length ? strip(nv, '🪽🐟 飛魚・無本益比', '虧損 / 獲利太薄 / 無基準 —— 跳出水面，沒本益比可游', false, 'bad', RIV_FISH.nv) : '') +
     (ext.length ? strip(ext, '🐋 鯨魚・偏離逾 300%', '太大隻，PE 尺量不了（剛轉盈 / 獲利基期極小）', true, 'warn', RIV_FISH.ext) : '');
   return '<div class="rgm"><div class="rgm-lab">🌊 內部河流 —— ' + wlEsc(g.group) + '族<span>' + g.rows.length + ' 檔・上貴下便宜・左右只是錯開・點釘子直接查' +
