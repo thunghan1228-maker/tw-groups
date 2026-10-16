@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 12:36:02";
+const BUILD_STAMP = "2026-10-16 12:44:56";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6561,13 +6561,17 @@ function homeStockRowHtml(r){
 // 照老師 10:58、12:18 兩份：族群照名次排；兩檔以上漲停加註「⚠️有兩個以上亮燈空小心」；整份最下面固定一行「⚠️注意破惡均下彎打倒數」（12:18 那份在分隔線後面，不是跟著某一族）。
 // 12:18 益安打開漲停、生醫就不列了，跟「族裡有漲停才列」對得上。
 // 每族列：👑＝族裡漲最多的；🐎＝第 2 名而且漲 Z283_HORSE_PCT% 以上（他的 🐎 都 7.75% 以上，藥華藥 6.64%、彰源 4.78% 是第 2 名也沒標）；
-// 其他的列「今天漲 Z283_FOLLOW_PCT% 以上」或「昨天／前天漲過 Z283_PRIOR_RISE% 以上、今天跌不到 2%」的，今天還在漲標 ⚔️、已經轉跌標 🔪。
+// 其他的列「盤中最高曾漲到 Z283_HIGH_PCT% 以上、現在還沒翻黑」或「昨天／前天漲過 Z283_PRIOR_RISE% 以上、今天跌不到 2%」的，今天還在漲標 ⚔️、已經轉跌標 🔪。
+// （2026-10-16 對 10:58、12:18、12:31 三份：他的名單有黏性，東捷、宏碁資訊、聯一光漲幅掉到 2% 左右還在、揚明光翻黑才拿掉，
+//  用「盤中最高」三份合起來錯 16 個，只看現在漲 3% 以上要錯 29 個。沒有盤中最高價時（收盤後、後端代抓的報價）退回「現在漲 Z283_FOLLOW_PCT% 以上」。）
 // 族群兩份都對得上。個股他的名單有黏性（10:58 列過的東捷、宏碁資訊、聯一光 12:18 掉到 2% 左右還在），光看現在漲幅對不準，
 // 這組門檻是兩份合起來錯最少的；立碁兩份都是他標 🔪、我們標 ⚔️（還在小漲）。
 const Z283_HORSE_PCT = 7;
 const Z283_FOLLOW_PCT = 3;
+const Z283_HIGH_PCT = 5;
 const Z283_PRIOR_RISE = 5.5;
 const Z283_KNIFE_FLOOR = -2;
+const Z283_SKIP = new Set(['千元']);   // 照股價分的族群不看：老師三份 283 都沒有千元，昇達科在千元也是漲停（他的馬火多(30) 有千元 👑🚀20）
 function zone283List(h){
   if (!lastData || !Array.isArray(lastData.groups)) return [];
   const sd = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
@@ -6575,7 +6579,7 @@ function zone283List(h){
   const out = [];
   lastData.groups.forEach((g) => {
     const r = rowOf.get(g.name);
-    if (!r) return;
+    if (!r || Z283_SKIP.has(g.name)) return;
     const priced = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent)).sort((a, b) => b.changePercent - a.changePercent);
     const lit = priced.filter((s) => s.limitUp).length;
     if (!lit) return;
@@ -6583,10 +6587,13 @@ function zone283List(h){
     priced.forEach((s, i) => {
       const p = (sd[s.code] && sd[s.code].pct) || [];
       const prior = Math.max(Number.isFinite(p[0]) ? p[0] : -Infinity, Number.isFinite(p[1]) ? p[1] : -Infinity);
+      const prevClose = s.price / (1 + s.changePercent / 100);
+      const hiPct = Number.isFinite(s.high) && s.high > 0 && prevClose > 0 ? (s.high / prevClose - 1) * 100 : null;
+      const follow = hiPct !== null ? hiPct >= Z283_HIGH_PCT && s.changePercent >= 0 : s.changePercent >= Z283_FOLLOW_PCT;
       let mk = '';
       if (i === 0) mk = '👑';
       else if (i === 1 && (s.limitUp || s.changePercent >= Z283_HORSE_PCT)) mk = '🐎';
-      else if (s.changePercent >= Z283_FOLLOW_PCT || (prior >= Z283_PRIOR_RISE && s.changePercent >= Z283_KNIFE_FLOOR)) mk = s.changePercent >= 0 ? '⚔️' : '🔪';
+      else if (follow || (prior >= Z283_PRIOR_RISE && s.changePercent >= Z283_KNIFE_FLOOR)) mk = s.changePercent >= 0 ? '⚔️' : '🔪';
       if (mk) stocks.push({ code: s.code, name: s.name, pct: s.changePercent, limitUp: !!s.limitUp, limitDown: !!s.limitDown, mk });
     });
     out.push({ row: r, lit, stocks });
@@ -6713,7 +6720,7 @@ const hrHelpTable = (title, head, rows, cls) => '<div class="hr-help-card' + (cl
   '<tbody>' + rows.map((r) => '<tr>' + r.map((x) => '<td>' + x + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
 function homeRankFootHtml(total){
   return hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
-    ['終點戰法空(283)', '族裡今天有漲停的', '照族群名次排，疊在 188 上面；每族列 👑 族裡漲最多的、🐎 第 2 名（漲 ' + Z283_HORSE_PCT + '% 以上才標）；其他「今天漲 ' + Z283_FOLLOW_PCT + '% 以上」或「昨天／前天漲過 ' + Z283_PRIOR_RISE + '% 以上、今天跌不到 ' + (-Z283_KNIFE_FLOOR) + '%」的，還在漲標 ⚔️、已轉跌標 🔪；兩檔以上漲停加註 ⚠️有兩個以上亮燈空小心；整欄最下面固定附註 ⚠️注意破惡均下彎打倒數'],
+    ['終點戰法空(283)', '族裡今天有漲停的（千元不算）', '照族群名次排，疊在 188 上面；每族列 👑 族裡漲最多的、🐎 第 2 名（漲 ' + Z283_HORSE_PCT + '% 以上才標）；其他「盤中最高曾漲到 ' + Z283_HIGH_PCT + '% 以上、現在沒翻黑」或「昨天／前天漲過 ' + Z283_PRIOR_RISE + '% 以上、今天跌不到 ' + (-Z283_KNIFE_FLOOR) + '%」的，還在漲標 ⚔️、已轉跌標 🔪；兩檔以上漲停加註 ⚠️有兩個以上亮燈空小心；整欄最下面固定附註 ⚠️注意破惡均下彎打倒數'],
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
     ['多族群排名(183)', '固定 ' + RANK188_GROUPS.size + ' 族', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 2 檔（漲最多的）'],
     ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
@@ -12238,7 +12245,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 12:36:02';
+const BUILD_STAMP = '2026-10-16 12:44:56';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17535,7 +17542,9 @@ async function buildGroupsBody() {
         changePercent: quotes[s.code]?.changePercent ?? 0,
         limitUp: quotes[s.code]?.limitUp ?? false,
         limitDown: quotes[s.code]?.limitDown ?? false,
-        volume: quotes[s.code]?.volume ?? null
+        volume: quotes[s.code]?.volume ?? null,
+        // 今天到目前的最高價（2026-10-16 首頁終點戰法空(283)：盤中曾漲到 5% 以上的才列）；後端代抓那條沒有就是 null
+        high: Number.isFinite(quotes[s.code]?.high) ? quotes[s.code].high : null
       };
     });
     const valid = stocks.filter((s) => s.price !== null);
