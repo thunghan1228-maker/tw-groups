@@ -1925,6 +1925,8 @@
   #rivInner .riv-row.z2{background:#7fb8cf;color:#10283a;} #rivInner .riv-row.z1{background:#2e7d9c;color:#fff;}
   #rivInner .scr-fact{background:#f6eedd;border-color:#e4d3b3;} #rivInner .scr-fact b{color:#2b2118;}
   #rivInner .ma-err{color:#b91c1c;}
+  .riv-kbtn{background:#a8321f;color:#fff;border:none;border-radius:8px;padding:5px 14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 3px rgba(120,50,20,.25);}
+  .riv-kbtn:hover{filter:brightness(1.1);}
   .riv-qh{font-size:12px;color:#7a6650;font-weight:700;margin:4px 0 4px;}
   .riv-qs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
   .riv-q{border:1px solid #e0cfae;background:#fffdf8;border-radius:8px;padding:3px 9px;font-size:12px;color:#5a4632;} .riv-q b{color:#2b2118;font-size:13px;margin-left:2px;}
@@ -16902,7 +16904,9 @@ function rivCardHtml(){
   if (!d) return '<div class="ma-legend">輸入股號或股名查這檔股票現在落在哪一區。</div>';
   const st = d.stock;
   let h = '<div class="ma-sec riv-card"><div class="riv-hd"><b>' + wlEsc(st.code) + ' ' + wlEsc(st.name) + '</b> ' + wlStarHtml(st.code, st.name) +
-    '<span class="ma-legend" style="margin:0">' + wlEsc(st.group || '族群外') + '・' + (st.priceDate || '') + ' 收</span>';
+    '<span class="ma-legend" style="margin:0">' + wlEsc(st.group || '族群外') + '・' + (st.priceDate || '') + ' 收</span>' +
+    // 2026-10-16 使用者：股名旁邊加一顆按鈕，直接開本站的K線圖
+    '<button type="button" class="riv-kbtn" data-riv-chart="' + wlEsc(st.code) + '" data-riv-name="' + wlEsc(st.name) + '">📈 K線圖</button>';
   if (st.noVal){
     return h + '</div><div class="ma-legend">' + (st.why === 'thin' ? '這檔目前獲利太薄（本益比超過 200 倍）—— 股價反映的不是當期獲利，用本益比畫價值區間沒有參考性。' : '這檔目前虧損或資料不足，算不出價值區間。') + '</div>' + rivFundHtml(st) + rivGroupMapHtml(st) + '</div>';
   }
@@ -17039,6 +17043,8 @@ document.getElementById('rivBody').addEventListener('click', (e) => {
   const t = e.target;
   if (t.closest('.wl-star')) return;
   if (t.closest('[data-riv-go]')){ rivQuery((document.getElementById('rivQ') || {}).value); return; }
+  const kb = t.closest('[data-riv-chart]');
+  if (kb){ openStockChart(kb.dataset.rivChart, kb.dataset.rivName); return; }
   const q = t.closest('[data-riv-q]');
   if (q){ rivQuery(q.dataset.rivQ); document.getElementById('rivInner').scrollTo({ top: 0, behavior: 'smooth' }); return; }
   const sp = t.closest('[data-riv-span]');

@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-16 23:49:58";
+const BUILD_STAMP = "2026-10-17 00:02:02";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2003,6 +2003,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   #rivInner .riv-row.z2{background:#7fb8cf;color:#10283a;} #rivInner .riv-row.z1{background:#2e7d9c;color:#fff;}
   #rivInner .scr-fact{background:#f6eedd;border-color:#e4d3b3;} #rivInner .scr-fact b{color:#2b2118;}
   #rivInner .ma-err{color:#b91c1c;}
+  .riv-kbtn{background:#a8321f;color:#fff;border:none;border-radius:8px;padding:5px 14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 3px rgba(120,50,20,.25);}
+  .riv-kbtn:hover{filter:brightness(1.1);}
   .riv-qh{font-size:12px;color:#7a6650;font-weight:700;margin:4px 0 4px;}
   .riv-qs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
   .riv-q{border:1px solid #e0cfae;background:#fffdf8;border-radius:8px;padding:3px 9px;font-size:12px;color:#5a4632;} .riv-q b{color:#2b2118;font-size:13px;margin-left:2px;}
@@ -12524,7 +12526,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-16 23:49:58';
+const BUILD_STAMP = '2026-10-17 00:02:02';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16982,7 +16984,9 @@ function rivCardHtml(){
   if (!d) return '<div class="ma-legend">輸入股號或股名查這檔股票現在落在哪一區。</div>';
   const st = d.stock;
   let h = '<div class="ma-sec riv-card"><div class="riv-hd"><b>' + wlEsc(st.code) + ' ' + wlEsc(st.name) + '</b> ' + wlStarHtml(st.code, st.name) +
-    '<span class="ma-legend" style="margin:0">' + wlEsc(st.group || '族群外') + '・' + (st.priceDate || '') + ' 收</span>';
+    '<span class="ma-legend" style="margin:0">' + wlEsc(st.group || '族群外') + '・' + (st.priceDate || '') + ' 收</span>' +
+    // 2026-10-16 使用者：股名旁邊加一顆按鈕，直接開本站的K線圖
+    '<button type="button" class="riv-kbtn" data-riv-chart="' + wlEsc(st.code) + '" data-riv-name="' + wlEsc(st.name) + '">📈 K線圖</button>';
   if (st.noVal){
     return h + '</div><div class="ma-legend">' + (st.why === 'thin' ? '這檔目前獲利太薄（本益比超過 200 倍）—— 股價反映的不是當期獲利，用本益比畫價值區間沒有參考性。' : '這檔目前虧損或資料不足，算不出價值區間。') + '</div>' + rivFundHtml(st) + rivGroupMapHtml(st) + '</div>';
   }
@@ -17119,6 +17123,8 @@ document.getElementById('rivBody').addEventListener('click', (e) => {
   const t = e.target;
   if (t.closest('.wl-star')) return;
   if (t.closest('[data-riv-go]')){ rivQuery((document.getElementById('rivQ') || {}).value); return; }
+  const kb = t.closest('[data-riv-chart]');
+  if (kb){ openStockChart(kb.dataset.rivChart, kb.dataset.rivName); return; }
   const q = t.closest('[data-riv-q]');
   if (q){ rivQuery(q.dataset.rivQ); document.getElementById('rivInner').scrollTo({ top: 0, behavior: 'smooth' }); return; }
   const sp = t.closest('[data-riv-span]');
