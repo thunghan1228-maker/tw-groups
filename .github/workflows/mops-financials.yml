@@ -1,0 +1,152 @@
+# 每季財報（綜合損益表彙總報表）鏡像（估值河流圖用，2026-10-16 使用者：單季 EPS、營益率要跟對方一樣）。
+# 公開資訊觀測站「綜合損益表 彙總報表」（t163sb04）每季一份，上市＋上櫃全部公司的營業收入、營業利益、基本每股盈餘，
+# 都是「今年累計到該季」的數字；單季＝這季累計 − 上季累計（第 1 季就是累計本身），後端自己減。
+# 觀測站擋 HanStock 的正式站主機，GitHub 的 runner 抓得到：抓最近 7 季，已經存過、而且不是最近 2 季的就不重抓（財報公布後不會改），
+# 每季一份存 tpex/fin-YYYYQn.json，清單存 tpex/fin-index.json，每次結果存 tpex/fin-status.json（查錯用）。抓完戳後端立刻拉回去。
+name: MOPS financials mirror
+
+on:
+  schedule:
+    - cron: "10 11 * * *"   # 19:10 台北（季報公布期間每天晚上看一次）
+  push:
+    branches: [main]
+    paths: [".github/workflows/mops-financials.yml"]   # 改這支程式推上去就馬上跑一次
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-branch-mops-financials
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data
+      - name: 抓觀測站綜合損益表彙總報表（上市、上櫃，最近 7 季）
+        run: |
+          python3 - <<'PY'
+          import html, json, os, re, time, urllib.parse, urllib.request
+          from datetime import datetime, timedelta, timezone
+          tw = timezone(timedelta(hours=8))
+          now = datetime.now(tw)
+          os.makedirs('tpex', exist_ok=True)
+          URL = 'https://mopsov.twse.com.tw/mops/web/ajax_t163sb04'
+          headers = {'User-Agent': 'Mozilla/5.0 (compatible; HanStock-mirror/1.0)', 'Accept-Language': 'zh-TW,zh;q=0.9',
+                     'Content-Type': 'application/x-www-form-urlencoded', 'Referer': 'https://mopsov.twse.com.tw/mops/web/t163sb04'}
+          status = {'at': now.isoformat(timespec='seconds'), 'requests': []}
+
+          def post(market, year, season):
+              data = urllib.parse.urlencode({'encodeURIComponent': 1, 'step': 1, 'firstin': 1, 'off': 1, 'isQuery': 'Y',
+                                             'TYPEK': market, 'year': year - 1911, 'season': f'{season:02d}'}).encode()
+              last = None
+              for attempt in range(4):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(URL, data=data, headers=headers), timeout=90) as r:
+                          text = r.read().decode('utf-8', 'replace')
+                      if '查詢過於頻繁' in text or 'Overrun' in text:
+                          last = 'too-frequent'
+                          time.sleep(20 * (attempt + 1))
+                          continue
+                      return text
+                  except Exception as e:
+                      last = f'{type(e).__name__}: {e}'
+                      print('retry', market, year, season, last)
+                      time.sleep(8 * (attempt + 1))
+              raise RuntimeError(f'{market} {year}Q{season}: {last}')
+
+          TABLE = re.compile(r'<table[^>]*hasBorder[^>]*>(.*?)</table>', re.S | re.I)
+          TR = re.compile(r'<tr[^>]*>(.*?)</tr>', re.S | re.I)
+          CELL = re.compile(r'<t[hd][^>]*>(.*?)</t[hd]>', re.S | re.I)
+
+          def clean(x):
+              return html.unescape(re.sub(r'<[^>]+>', '', x)).replace('\xa0', '').strip()
+
+          def num(rec, keys):
+              for k in keys:
+                  if k in rec:
+                      v = rec[k].replace(',', '').strip()
+                      try:
+                          return float(v)
+                      except ValueError:
+                          return None
+              return None
+
+          def parse(text, market):
+              rows = {}
+              for tbl in TABLE.findall(text):
+                  head = None
+                  for tr in TR.findall(tbl):
+                      cells = [clean(c) for c in CELL.findall(tr)]
+                      if not cells:
+                          continue
+                      if '公司代號' in cells:
+                          head = cells
+                          continue
+                      if not head or len(cells) != len(head):
+                          continue
+                      rec = dict(zip(head, cells))
+                      code = rec.get('公司代號', '').strip().upper()
+                      if not re.fullmatch(r'[0-9A-Z]{4,6}', code):
+                          continue
+                      rows[code] = [rec.get('公司名稱', ''), market,
+                                    num(rec, ['營業收入', '收益', '收入', '淨收益', '營業收入合計']),
+                                    num(rec, ['營業利益（損失）', '營業利益', '營業利益(損失)']),
+                                    num(rec, ['基本每股盈餘（元）', '基本每股盈餘(元)', '基本每股盈餘'])]
+              return rows
+
+          # 最近 7 季（含還沒公布的這一季，沒資料就跳過）
+          seasons = []
+          y, q = now.year, (now.month - 1) // 3 + 1
+          for _ in range(7):
+              seasons.append((y, q))
+              q -= 1
+              if q == 0:
+                  y, q = y - 1, 4
+          recent = set(seasons[:3])   # 最近幾季可能還有公司晚交、更正，每次重抓
+          saved = []
+          for (y, q) in seasons:
+              name = f'tpex/fin-{y}Q{q}.json'
+              if os.path.exists(name) and (y, q) not in recent:
+                  saved.append(f'{y}Q{q}')
+                  continue
+              rows, counts = {}, {}
+              for market in ('sii', 'otc'):
+                  try:
+                      got = parse(post(market, y, q), market)
+                      counts[market] = len(got)
+                      rows.update(got)
+                      status['requests'].append({'season': f'{y}Q{q}', 'market': market, 'rows': len(got)})
+                  except Exception as e:
+                      status['requests'].append({'season': f'{y}Q{q}', 'market': market, 'error': str(e)[:300]})
+                  time.sleep(5)
+              if len(rows) < 300:   # 還沒公布（或抓失敗）的季，不寫檔
+                  if os.path.exists(name):
+                      saved.append(f'{y}Q{q}')
+                  continue
+              out = {'season': f'{y}Q{q}', 'updated': now.isoformat(timespec='seconds'), 'counts': counts,
+                     'fields': ['name', 'market', 'revenue', 'opIncome', 'eps'], 'rows': rows}
+              json.dump(out, open(name, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+              saved.append(f'{y}Q{q}')
+              print(name, counts)
+          index = sorted({f[4:10] for f in os.listdir('tpex') if f.startswith('fin-') and len(f) == 15 and f[8] == 'Q'} | set(saved), reverse=True)
+          json.dump({'updated': now.isoformat(timespec='seconds'), 'seasons': index}, open('tpex/fin-index.json', 'w', encoding='utf-8'), ensure_ascii=False)
+          json.dump(status, open('tpex/fin-status.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+          print(json.dumps(status, ensure_ascii=False)[:3000])
+          PY
+      - name: 推到 data 分支
+        run: |
+          git config user.name "mops-mirror"
+          git config user.email "mops-mirror@users.noreply.github.com"
+          git add tpex/fin-*.json
+          git commit -m "每季財報彙總表鏡像 $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "沒有變動"; exit 0; }
+          for i in 1 2 3 4; do git pull --rebase origin data && git push && break; sleep $((i * 5)); done
+      - name: 戳後端立刻拉回去
+        run: |
+          curl -sS -X POST --max-time 170 "https://hanstock-production-b872.up.railway.app/api/hub/financials/collect" -o /tmp/fin.json -w "HTTP %{http_code}\n" || true
+          head -c 1500 /tmp/fin.json; echo
