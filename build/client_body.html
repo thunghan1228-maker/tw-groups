@@ -85,6 +85,7 @@
   /* 首頁飆股雷達欄（2026-10-15）：分類標題紅底、族群名黃色，每檔後面帶符號；名稱太長截掉，符號和漲跌幅不截 */
   .hr-obs-cat{padding:4px 8px;font-size:12px;font-weight:800;background:#dc2626;color:#fff;border-top:1px solid var(--line);}
   .hr-obs-cat small{font-weight:600;opacity:.9;}
+  .hr-st-grp{background:#dc2626;color:#fff;font-weight:800;}   /* 2026-10-16 使用者：今日強勢股的族群名（第 N 名・族群）改紅底 */
   .hr-obs-grp{padding:3px 8px 0;font-size:12px;font-weight:800;color:#facc15;border-top:1px solid var(--line);}
   .hr-row.hr-obs{border-top:none;padding-top:3px;flex-wrap:wrap;row-gap:1px;}
   .hr-row.hr-obs .hr-name,.hr-row.hr-obs .hr-code{flex:0 0 auto;overflow:visible;}
@@ -6376,7 +6377,7 @@ function homeStrongColHtml(){
   if (!d) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (stState.error.strong ? '讀取失敗' : '讀取中…') + '</div></div>';
   const groups = stLiveGroups(d, true).filter((g) => g.rows.length);
   const n = groups.reduce((a, g) => a + g.rows.length, 0);
-  const body = groups.map((g) => '<div class="hr-sep">第 ' + g.rank + ' 名・' + wlEsc(g.name) + '</div>' + g.rows.map((r) => {
+  const body = groups.map((g) => '<div class="hr-sep hr-st-grp">第 ' + g.rank + ' 名・' + wlEsc(g.name) + '</div>' + g.rows.map((r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
     return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="均線分數 ' + r.sum + '（' + swMmdd(d.date) + ' 收盤）">' +
