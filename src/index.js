@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 00:14:03";
+const BUILD_STAMP = "2026-10-17 00:21:30";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -191,6 +191,11 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-jail-card .hr-help-tbl th,.hr-jail-card .hr-help-tbl td{padding:3px 5px;}   /* 2026-10-16 使用者：多了三欄，排緊一點 */
   .hr-jail-card .hr-help-tbl td:nth-child(2){color:var(--text);font-weight:700;white-space:nowrap;max-width:6.5em;overflow:hidden;text-overflow:ellipsis;}
   .hr-jail-card .hr-help-tbl td.jl-tag,.hr-jail-card .hr-help-tbl td.jl-wd{color:#fff;font-weight:700;white-space:nowrap;}
+  .hr-jail-col{display:flex;flex-direction:column;gap:8px;min-width:0;}
+  .hr-jail-card .jl-new{font-style:normal;font-size:10px;color:#f87171;border:1px solid #f87171;border-radius:4px;padding:0 3px;margin-left:3px;}
+  .hr-jail-card tr.jl-ghead{cursor:pointer;} .hr-jail-card tr.jl-ghead td{padding-top:6px!important;color:var(--text);}
+  .hr-jail-card tr.jl-sub td{color:var(--muted)!important;font-size:10.5px;font-weight:600!important;white-space:normal!important;max-width:none!important;overflow:visible!important;text-overflow:clip!important;line-height:1.45;border-top:none;padding-top:0!important;}
+  .hr-jail-card .jl-prob{font-weight:800;} .hr-jail-card .jl-prob.hi{color:#f87171;} .hr-jail-card .jl-prob.lo{color:#4ade80;}
   .hr-jail-card .hr-help-tbl tr.jl-none td{color:var(--muted);} .hr-jail-card .hr-help-tbl tr.jl-none td.jl-tag{color:#fff;}   /* 那天沒有股票的那一列 */
   /* 多了括號日期一欄，卡片寬度不變：字小一號、格子再擠一點，成交價才不會被切掉 */
   .hr-jail-card .hr-help-tbl{font-size:11px;} .hr-jail-card .hr-help-tbl th{font-size:10px;}
@@ -6844,7 +6849,20 @@ function homeJailModel(){
     return [suspectIn && x.date <= suspectIn.date ? none('沒有入獄股', x)
       : Object.assign(none('還沒公告', x), { title: x.md + ' 會不會有股票入獄，要等前一個交易日晚上交易所公告才知道' })];
   });
-  return { soonIn, soonOut, out, inRange: next3.length ? next3[0].md + '～' + next3[next3.length - 1].md : '' };
+  // 2026-10-16 使用者：處置監獄頁的今日入獄、嫌疑名單、犯罪集團也放首頁（同一份 /api/jail）
+  const todayIn = (d.newJail || []).map((j) => ({ code: j.code, name: j.name, tag: j.releaseMd, wd: /再/.test(j.measure || '') ? '再次' : '首次',
+    title: jlMd(j.start) + ' 起處置・' + (j.minutes ? j.minutes + ' 分盤' : '分盤') + '・' + (j.measure || '') + '・' + j.releaseMd + ' 出關・' + (j.condition || '') }));
+  const lineText = (l) => l.text + (l.kind === 'volume' && l.today !== undefined ? '（今 ' + Number(l.today).toLocaleString() + ' 張' + (l.passed ? ' ✓已過' : '') + '）' : '');
+  const suspects = (d.suspects || []).map((s) => ({ code: s.code, name: s.name, tagHtml: '<span class="jl-prob ' + (s.high ? 'hi' : 'lo') + '">' + (s.high ? '🔴高' : '🟢低') + '</span>',
+    title: s.status, sub: s.status + (s.jailed ? '（關著的會延長）' : '') + '｜明天門檻：' + ((s.lines || []).length ? s.lines.map(lineText).join('；') : s.missingBars ? '今天的日K還沒進來，晚一點算' : '明天再被公布一次注意就會' + (s.jailed ? '延長' : '被關')) }));
+  const gangs = [];
+  (d.gangs || []).forEach((g) => {
+    gangs.push({ groupHead: true, name: g.group, count: g.stocks.length });
+    g.stocks.forEach((x) => gangs.push({ code: x.code, name: x.name, tag: x.releaseMd, isNew: x.new, title: g.group + '・' + x.releaseMd + ' 出關' + (x.new ? '・今天剛進' : '') }));
+  });
+  const todayStart = (d.newJail || []).length ? d.newJail[0].start : d.nextDay;
+  return { soonIn, soonOut, out, todayIn, todayStart, suspects, gangs, nextMd: d.nextMd, nextWeekday: d.nextWeekday,
+    inRange: next3.length ? next3[0].md + '～' + next3[next3.length - 1].md : '' };
 }
 // 2026-10-16 使用者：名稱後面加盤中大戶力、漲跌幅、成交價三欄（卡片寬度不變，排緊一點）。
 // 族群表裡的股票用首頁報價；族群外的（天擎、鈺鎧…）另外問 /api/watch-quotes，一分鐘一次。大戶力跟訊號中心同一份，排行裡沒有就「—」。
@@ -6858,7 +6876,7 @@ function homeJailHelpHtml(){
   let m = null;
   try { homeJailLoad(); m = homeJailModel(); } catch (_){ /* 處置監獄那段程式還沒跑到（剛開頁面）就先顯示讀取中 */ }
   if (m){
-    const miss = [...new Set(m.soonIn.concat(m.soonOut, m.out).filter((x) => !x.empty).map((x) => x.code))].filter((c) => !getStockQuote(c));
+    const miss = [...new Set(m.soonIn.concat(m.soonOut, m.out, m.todayIn, m.suspects, m.gangs).filter((x) => x.code && !x.empty).map((x) => x.code))].filter((c) => !getStockQuote(c));
     if (miss.length && !homeJailState.qLoading && Date.now() - homeJailState.qAt >= 60e3){
       homeJailState.qLoading = true;
       fetch('/api/watch-quotes?codes=' + encodeURIComponent(miss.slice(0, 200).join(','))).then((r) => (r.ok ? r.json() : null))
@@ -6877,24 +6895,32 @@ function homeJailHelpHtml(){
   };
   // 2026-10-16 使用者：名稱後面加一欄括號：即將入獄＝入獄日、即將出關＝出關日、已出關＝出關第幾天（今天出關＝1），白字
   // 2026-10-16 使用者：即將入獄、即將出關的日期後面再加一欄星期幾（一、二、三…）
-  const row = (x, withWd) => {
-    const wd = withWd ? '<td class="jl-wd">' + (x.wd ? '(' + x.wd + ')' : '') + '</td>' : '';
-    return x.empty
-      ? '<tr class="jl-none"><td>—</td><td></td><td class="jl-tag">(' + x.tag + ')</td>' + wd + '<td colspan="3">' + x.name + '</td></tr>'   // 字放後面那三格，名稱欄太窄會被截掉
-      : '<tr class="hr-stk" data-code="' + x.code + '" data-name="' + wlEsc(x.name) + '" tabindex="0" role="button" title="' + wlEsc(x.title) + '"><td>' + x.code + '</td><td>' + wlEsc(x.name) + '</td>' +
-        '<td class="jl-tag">' + (x.tag ? '(' + x.tag + ')' : '') + '</td>' + wd + cols(x.code) + '</tr>';
+  // wdHead：日期後面那一欄的標題（即將入獄／即將出關＝星期、今日入獄＝第幾次處置），空字串＝不要那一欄
+  const row = (x, wdHead, n) => {
+    if (x.groupHead) return '<tr class="jl-ghead" data-group="' + wlEsc(x.name) + '" tabindex="0" role="button" title="看族群成分股"><td colspan="' + n + '"><span class="hr-gpill ' + dirClass(homeGroupAvg(x.name) || 0) + '">' +
+      wlEsc(x.name) + '</span> <b>' + x.count + ' 檔</b></td></tr>';
+    const wd = wdHead ? '<td class="jl-wd">' + (x.wd ? '(' + x.wd + ')' : '') + '</td>' : '';
+    if (x.empty) return '<tr class="jl-none"><td>—</td><td></td><td class="jl-tag">(' + x.tag + ')</td>' + wd + '<td colspan="3">' + x.name + '</td></tr>';   // 字放後面那三格，名稱欄太窄會被截掉
+    return '<tr class="hr-stk" data-code="' + x.code + '" data-name="' + wlEsc(x.name) + '" tabindex="0" role="button" title="' + wlEsc(x.title) + '"><td>' + x.code + '</td><td>' + wlEsc(x.name) +
+      (x.isNew ? '<i class="jl-new">新</i>' : '') + '</td><td class="jl-tag">' + (x.tagHtml || (x.tag ? '(' + x.tag + ')' : '')) + '</td>' + wd + cols(x.code) + '</tr>' +
+      (x.sub ? '<tr class="jl-sub"><td></td><td colspan="' + (n - 1) + '">' + wlEsc(x.sub) + '</td></tr>' : '');
   };
-  const card = (title, tagHead, list, empty, withWd) => {
-    const n = withWd ? 7 : 6;
-    return '<div class="hr-help-card hr-jail-card"><div class="hr-help-title">' + title + (m ? ' <small>' + list.filter((x) => !x.empty).length + ' 檔</small>' : '') + '</div>' +
-      '<table class="hr-help-tbl"><thead><tr><th>代號</th><th>名稱</th><th>' + tagHead + '</th>' + (withWd ? '<th class="jl-wd">星期</th>' : '') + '<th class="jl-n">盤中大戶力</th><th class="jl-n">漲跌幅</th><th class="jl-n">成交價</th></tr></thead><tbody>' +
+  const card = (title, tagHead, list, empty, wdHead) => {
+    const n = wdHead ? 7 : 6;
+    return '<div class="hr-help-card hr-jail-card"><div class="hr-help-title">' + title + (m ? ' <small>' + list.filter((x) => x.code && !x.empty).length + ' 檔</small>' : '') + '</div>' +
+      '<table class="hr-help-tbl"><thead><tr><th>代號</th><th>名稱</th><th>' + tagHead + '</th>' + (wdHead ? '<th class="jl-wd">' + wdHead + '</th>' : '') + '<th class="jl-n">盤中大戶力</th><th class="jl-n">漲跌幅</th><th class="jl-n">成交價</th></tr></thead><tbody>' +
       (!m ? '<tr><td colspan="' + n + '">讀取中…</td></tr>'
-        : list.length ? list.map((x) => row(x, withWd)).join('')
+        : list.length ? list.map((x) => row(x, wdHead, n)).join('')
         : '<tr><td colspan="' + n + '">' + empty + '</td></tr>') + '</tbody></table></div>';
   };
-  return card('🔒 即將入獄' + (m && m.inRange ? ' <small>' + m.inRange + '</small>' : ''), '入獄日', m ? m.soonIn : [], '目前沒有', true) +
-    card('🔓 即將出關', '出關日', m ? m.soonOut : [], '未來 3 個交易日沒有', true) +
-    card('🎉 已出關', '第幾天', m ? m.out : [], '最近 3 個交易日沒有', false);
+  // 2026-10-16 使用者：三欄由上到下——今日入獄→即將入獄｜即將出關→犯罪集團｜已出關→嫌疑名單
+  const col = (html) => '<div class="hr-jail-col">' + html + '</div>';
+  return col(card('🔒 今日入獄' + (m && m.todayStart ? ' <small>' + jlMd(m.todayStart) + ' 生效・新進處置</small>' : ''), '出關日', m ? m.todayIn : [], '今天沒有新進處置', '處置') +
+      card('🔒 即將入獄' + (m && m.inRange ? ' <small>' + m.inRange + '</small>' : ''), '入獄日', m ? m.soonIn : [], '目前沒有', '星期')) +
+    col(card('🔓 即將出關', '出關日', m ? m.soonOut : [], '未來 3 個交易日沒有', '星期') +
+      card('🏴 犯罪集團 <small>同族群 2 檔以上被關或即將被關＝資金熱區</small>', '出關日', m ? m.gangs : [], '目前沒有同族群 2 檔以上一起被關', '')) +
+    col(card('🎉 已出關', '第幾天', m ? m.out : [], '最近 3 個交易日沒有', '') +
+      card('🔍 嫌疑名單' + (m ? ' <small>' + wlEsc(m.nextMd || '') + '(' + wlEsc(m.nextWeekday || '') + ') 收盤再符合就會被關</small>' : ''), '機率', m ? m.suspects : [], '明天沒有一次就會被關的股票', ''));
 }
 function homeStockColHtml(title, list, emptyText){
   const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
@@ -12539,7 +12565,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 00:14:03';
+const BUILD_STAMP = '2026-10-17 00:21:30';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
