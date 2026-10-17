@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 10:21:36";
+const BUILD_STAMP = "2026-10-17 10:34:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6975,6 +6975,37 @@ function homeStockColHtml(title, list, emptyText){
 }
 // 首頁第一欄最下面的刀劍空(32)（2026-10-15 使用者：放在 30加33加34 下面），照老師的格式分三段：多方打少／強空積極／收割區域，
 // 每列＝族群名次、代號、名稱、漲跌幅，後面 🔪（昨天大漲今天殺）或 ⚔️（前天大漲、跌破前天收盤）；同一段裡族排前面的在上面。
+// ---- 刀劍空(31)（2026-10-17 使用者：放在新刀劍空(32) 下面）----
+// 對方說明：「31 尋找盤中符合🔪⚔️個股（偏空）；🔪（跟昨天比）⚔️（跟前天比）＝原本前段班突然跑到倒數兩名，數字為下降名次」。
+// 標記跟族群視窗同一套（groupBladeMarks：🔪N／⚔️N／🔰，10/16 對方 31 的 9 檔符號、數字都一樣）；這裡列每個族群
+// 「倒數兩名」有標記的（跌 BLADE_HARVEST_PCT% 以上的收割區不算名次、不列，處置股不列），照今天漲跌幅高到低排、不分族群。
+// 對方只挑其中一部分（10/16 全市場標到 20 幾檔他列 9 檔），怎麼挑還不知道，先全部列，之後拿他的名單再縮。
+const KILL31_BOTTOM = 2;
+function kill31Model(){
+  if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !groupDailyChanges) return null;
+  const isDisp = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].disposition);
+  const out = new Map();
+  rankedGroupsOf(lastData.groups).forEach((g) => {
+    const bm = groupBladeMarks(g);
+    if (!bm.size) return;
+    g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent) && s.changePercent > -BLADE_HARVEST_PCT)
+      .sort((a, b) => a.changePercent - b.changePercent).slice(0, KILL31_BOTTOM).forEach((s, i) => {
+        const x = bm.get(s.code);
+        if (!x || isDisp(s.code) || out.has(s.code)) return;
+        out.set(s.code, { code: s.code, name: s.name, pct: s.changePercent, mk: x.mk, group: g.name, pos: i + 1, limitUp: s.limitUp, limitDown: s.limitDown,
+          tip: g.name + '・族裡倒數第 ' + (i + 1) + ' 名' + (x.knife ? '・昨天族裡第 ' + x.ry + ' 名' : '') + (x.sword ? '・前天族裡第 ' + x.r2 + ' 名' : '') });
+      });
+  });
+  return [...out.values()].sort((a, b) => b.pct - a.pct);
+}
+function homeKill31ColHtml(){
+  const list = kill31Model();
+  const row = (r) => '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc(r.tip) + '">' +
+    '<span class="hr-bear-pill ' + dirClass(r.pct) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' +
+    '<span class="hr-avg ' + dirClass(r.pct) + '">' + limitPriceHtml(r, fmt(r.pct) + '%') + r.mk + '</span></div>';
+  return '<div class="hr-col"><div class="hr-title bear">🔪⚔️刀劍空(31)' + (list ? ' <span class="hr-rk">' + list.length + ' 檔</span>' : '') + '</div>' +
+    (!list ? '<div class="hr-note">讀取中…</div>' : list.length ? list.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
+}
 function homeBladeColHtml(m){
   if (!m) return '';
   const mark = (r) => r.bladeMark || '';
@@ -7072,7 +7103,10 @@ function homeRank4Html(){
       homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉', (r) => r.members || [], 'bear', 'bear') +   // 2026-10-16 使用者：193／199／32 欄的抬頭綠底白字
       homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name) && r.rank > h.half), h.half, '------↓(空方)↓------', '固定 23 族目前都不在空方', null, '', 'bear') +
     '</div>' +
-    homeBladeColHtml(m) +
+    '<div class="hr-stack">' +   // 2026-10-17 使用者：刀劍空(31) 疊在新刀劍空(32) 下面
+      homeBladeColHtml(m) +
+      homeKill31ColHtml() +
+    '</div>' +
     '</div>' +
     '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }
@@ -7111,7 +7145,13 @@ function homeRankFootHtml(total){
     ['點股票', '開K線圖'],
   ]) +
   // 2026-10-16 使用者：刀劍空的🔰／⚔️、多方打少這些說明也寫到首頁最下面
-  hrHelpTable('🔪⚔️ 刀劍空(32)', ['項目', '說明'], [
+  hrHelpTable('🔪⚔️ 刀劍空(31)', ['項目', '說明'], [
+    ['看哪些股票', '每個族群「倒數兩名」（跌 ' + BLADE_HARVEST_PCT + '% 以上的不算名次、不列；處置股不列），有 🔪⚔️🔰 標記的'],
+    ['🔪N／⚔️N', '原本在族裡前半段，今天跑到倒數；🔪 跟昨天比、⚔️ 跟前天比，N＝下降幾名（跟點族群看到的標記同一套）'],
+    ['🔰', '昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上，但不算前半段'],
+    ['排序', '不分族群，照今天漲跌幅高到低'],
+  ]) +
+  hrHelpTable('🔪⚔️ 新刀劍空(32)', ['項目', '說明'], [
     ['看哪些股票', '199 的 ' + KILL193_GROUPS.size + ' 族＋188 的 ' + RANK188_GROUPS.size + ' 族，每族只看「空方段」（照今天漲跌幅排的後段，最多 5 檔）；處置股不列、成交量 ' + BLADE_MIN_VOLUME + ' 張以上；今天漲跌不限'],
     ['🔪 刀', '昨天漲 ' + BLADE_PRIOR_RISE + '% 以上'],
     ['⚔️ 劍', '前天漲 ' + BLADE_PRIOR_RISE + '% 以上，現價已跌破前天收盤'],
@@ -12612,7 +12652,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 10:21:36';
+const BUILD_STAMP = '2026-10-17 10:34:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13433,7 +13473,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・183・馬火多(30)／155・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・昨日強勢股／188・283・193／199・刀劍空(32)</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・183・馬火多(30)／155・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・昨日強勢股／188・283・193／199・新刀劍空(32)／刀劍空(31)</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
