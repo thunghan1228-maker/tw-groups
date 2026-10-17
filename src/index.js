@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 22:35:12";
+const BUILD_STAMP = "2026-10-17 23:28:20";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12879,7 +12879,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 22:35:12';
+const BUILD_STAMP = '2026-10-17 23:28:20';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13797,6 +13797,7 @@ async function refresh(){
     // 其他靠首頁報價的分頁（刀劍空、盤中333、族群表…）要等下一輪訊號輪詢；改成報價一回來就重畫目前這個分頁。
     try { if (!document.getElementById('signalModal').hidden) renderSignalCenter(); } catch (e) { /* 訊號中心重畫失敗不影響畫面 */ }
     try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
+    try { botRerunCols(); } catch (e) { /* 機器人格子重算失敗不影響畫面 */ }   // 2026-10-17 使用者：機器人格子盤中跟首頁一樣每 15 秒更新
     trkTick();
     lastDataFetchedAt = new Date();
   } catch (e) {
@@ -15575,7 +15576,7 @@ const GUIDE_TOOLS = [
       '盤中 333、十大多族群／十大空族群、所有族群綜合表：一眼看哪些族群在漲、族群裡誰最強', '盤中大戶力、四項精選、主力翻多／翻空、特大買賣單、刀劍空(32)、創高黑龍、1+2多：各種訊號分開看',
       '最後一頁「訊號教學」把每個訊號的條件寫清楚'] },
   { t: '🤖 機器人代碼', open: 'bot', v: 'basic-bot', tags: ['盤中', '盤後'], d: '右上角「🤖 機器人代碼」。打一個代碼就回一份名單（像 LINE 機器人）：族群漲跌排行、重點族群、刀劍空、賽馬、河流、處置、隔日沖、籌碼暴增、國際行情。',
-    b: ['上面一排是全部代碼，點一下就查；也可以打股號（例：2330）或族群名（例：低軌衛星）', '點一個代碼開一格，結果一格一格往右排（最多 10 格，照點的順序）；同一個代碼再點一次就收掉，「全部收掉」一次清空；柱狀圖不顯示，只列名稱跟漲跌幅', '全部代碼的說明一直留在最下面（點代碼直接查）', '關掉再打開，會回到上次最後看的畫面：開著哪幾格、捲到哪、視窗位置大小、有沒有移到另一個螢幕（電腦、手機、iPad 各自記）',
+    b: ['上面一排是全部代碼，點一下就查；也可以打股號（例：2330）或族群名（例：低軌衛星）', '點一個代碼開一格，結果一格一格往右排（最多 10 格，照點的順序）；同一個代碼再點一次就收掉，「全部收掉」一次清空；柱狀圖不顯示，只列名稱跟漲跌幅', '全部代碼的說明一直留在最下面（點代碼直接查）', '盤中跟首頁一樣每 15 秒自動更新，開著的格子都跟著重算', '關掉再打開，會回到上次最後看的畫面：開著哪幾格、捲到哪、視窗位置大小、有沒有移到另一個螢幕（電腦、手機、iPad 各自記）',
       '族群那一條點下去看成分股，股票點下去開 K 線圖', '右上角 ⧉ 移到另一螢幕（可以拖到外接螢幕）、－ 最小化、▢ 最大化、✕ 關閉；標題列拖著走，四邊四角拉大小',
       '每個代碼在做什麼，看下面「🤖 機器人代碼一覽」'] },
   { t: '🔔 今日提醒', open: 'remind', v: 'basic-remind', tags: ['盤後', '每天'], d: '右上角「🔔 今日提醒」。每天晚上的警示股整理成三張表，每天有新資料、第一次打開網頁就自動跳出來；關掉後按這顆再開。',
@@ -17697,11 +17698,25 @@ function dtModel80(){
   return { rows, base, isLive: v.isLive, latest: v.scr.latest };
 }
 let dtRenderTimer = null;
-function botRerunCols(){   // 資料進來：開著的每一格都重算
+// 報價或其他資料進來：開著的每一格都重算，只換內容有變的格子（輸入框打到一半、代碼按鈕、每格捲到哪都不動）
+function botRerunCols(){
   if (!botState.cols.length || document.getElementById('botModal').hidden) return;
   botState.cols.forEach((c) => { c.html = botAnswer(c.cmd) || c.html; });
-  renderBot();
+  const els = [...document.querySelectorAll('#botBody .bot-col')];
+  if (els.length !== botState.cols.length || els.some((el, i) => el.dataset.colKey !== botState.cols[i].key)){ renderBot(); return; }
+  const pend = botState.pendTops;
+  els.forEach((el, i) => {
+    const c = botState.cols[i];
+    if (el._botHtml === c.html) return;
+    const top = el.scrollTop;
+    el.innerHTML = botColX(c.key) + c.html;
+    el._botHtml = c.html;
+    el.scrollTop = top;
+    const want = pend && pend[c.key];
+    if (want && el.scrollHeight - el.clientHeight >= want - 2){ el.scrollTop = want; delete pend[c.key]; }
+  });
 }
+const botColX = (key) => '<button type="button" class="bot-col-x" data-bot-close="' + wlEsc(key) + '" title="收掉這格">✕</button>';
 function botStockGroups(code){
   return rankedGroupsOf(lastData.groups).filter((g) => g.stocks.some((s) => s.code === code));
 }
@@ -18130,11 +18145,11 @@ function renderBot(){
   body.innerHTML = '<div class="bot-q-row"><input id="botQ" placeholder="輸入代碼，例：12、22、2359B2、2359a、70" value="' + wlEsc(keep) + '" autocomplete="off"><button type="button" data-bot-go="1">送出</button></div>' +
     '<div class="bot-chips">' + botCodesSorted().filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip' + (open.has(botNorm(c)) ? ' on' : '') + '" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') +
     (botState.cols.length ? '<button type="button" class="bot-chip bot-chip-clear" data-bot-clear="1" title="開著的格子全部收掉">全部收掉</button>' : '') + '</div>' +
-    (botState.cols.length ? '<div class="bot-cols">' + botState.cols.map((c) => '<div class="bot-col" data-col-key="' + wlEsc(c.key) + '"><button type="button" class="bot-col-x" data-bot-close="' + wlEsc(c.key) + '" title="收掉這格">✕</button>' + c.html + '</div>').join('') + '</div>'
+    (botState.cols.length ? '<div class="bot-cols">' + botState.cols.map((c) => '<div class="bot-col" data-col-key="' + wlEsc(c.key) + '">' + botColX(c.key) + c.html + '</div>').join('') + '</div>'
       : '<div class="bot-cols-hint">點上面的代碼，結果一格一格往右排（最多 10 格）；同一個代碼再點一次就收掉。</div>') +
     botHelpHtml();
   sizeBotCols();
-  body.querySelectorAll('.bot-col').forEach((el) => { if (tops[el.dataset.colKey]) el.scrollTop = tops[el.dataset.colKey]; });
+  body.querySelectorAll('.bot-col').forEach((el, i) => { el._botHtml = botState.cols[i] && botState.cols[i].html; if (tops[el.dataset.colKey]) el.scrollTop = tops[el.dataset.colKey]; });
   // 上次存的捲動位置：資料進來、格子夠長了才捲過去
   const pend = botState.pendTops;
   if (pend) body.querySelectorAll('.bot-col').forEach((el) => {
@@ -18156,6 +18171,7 @@ function botHelpHtml(){
       '<b>一格一格排</b>：點上面的代碼（或在輸入框打代碼、股號、族群名按送出）就開一格，照點的順序往右排，<b>最多 10 格</b>；手機一次看一格，左右滑',
       '<b>收掉</b>：同一個代碼再點一次那格就收掉；格子右上角 ✕ 收單格；「全部收掉」一次清空。開著的代碼按鈕是紫色',
       '<b>點進去看</b>：族群那一條點了看成分股，股票點了開 K 線圖；每格自己上下捲',
+      '<b>自動更新</b>：盤中跟首頁一樣每 15 秒更新，開著的格子都跟著重算；捲到哪、輸入框打到一半都不會被打斷',
       '<b>視窗</b>：右上角 ⧉ 移到另一螢幕（另開一個視窗，可以拖到外接螢幕；那邊按「↩ 移回主畫面」回來）、－ 最小化（縮到下面，點一下還原）、▢ 最大化、✕ 關閉；標題列拖著走，四邊四角都能拉大小',
       '<b>記憶</b>：關掉再打開，會回到上次最後看的畫面——開著哪幾格、捲到哪、視窗位置大小、有沒有放大、有沒有移到另一個螢幕都一樣；電腦、手機、iPad 各自記在自己那台',
     ].map((t) => botLine('・' + t)).join('') + '</div>';
