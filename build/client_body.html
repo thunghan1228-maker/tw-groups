@@ -822,7 +822,8 @@
   /* 盤後籌碼排行（2026-09-25 使用者：底部「盤後籌碼排行」先做） */
   .chips-modal{position:fixed;inset:0;z-index:102;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:10px;}
   .chips-modal[hidden]{display:none;}
-  .chips-modal.behind-chart{z-index:98;}  /* 手機／iPad 直式開K線圖（z-index 100）時退到後面，關圖再回來 */
+  .chips-modal.behind-chart{z-index:98;}
+  .chips-modal.behind-group{z-index:98;}   /* 2026-10-17 使用者：機器人等面板裡點族群名，成分股視窗（z-index 99）要蓋在上面，關掉再回來 */  /* 手機／iPad 直式開K線圖（z-index 100）時退到後面，關圖再回來 */
   .chips-inner{background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(1120px,96vw);height:min(920px,92vh);overflow:auto;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);}
   .chips-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;background:#33333a;color:#fff;padding:10px 12px;border-radius:10px;margin-bottom:10px;}
   .chips-title{font-weight:800;font-size:18px;}
@@ -4771,6 +4772,7 @@ function groupBladeMarks(g){
   return out;
 }
 function openGroupDetail(groupName){
+  document.querySelectorAll('.chips-modal:not([hidden])').forEach((el) => el.classList.add('behind-group'));   // 從機器人等面板點進來：面板先退到後面
   if (!lastData) return;
   const g = lastData.groups.find((x) => x.name === groupName);
   if (!g) return;
@@ -4841,6 +4843,7 @@ function gmChipLoad(){
 }
 function closeGroupDetail(){
   document.getElementById('groupModal').hidden = true;
+  document.querySelectorAll('.behind-group').forEach((el) => el.classList.remove('behind-group'));
   openGroupName = null;
 }
 
