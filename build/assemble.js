@@ -750,7 +750,9 @@ export default {
     if (url.pathname === "/api/group-daily-changes") {
       try {
         // 族群昨天／前天的平均漲跌幅（盤中打 333 用）：來自日K，收盤後才會變，快取 10 分鐘。
-        return await proxyHanstockBars("/api/hub/group-daily-changes", 600);
+        // 前端要 days=4（週末、收盤後要剪掉報價那一天，剩下的還要有昨天、前天）
+        const days = /^[1-9]$/.test(url.searchParams.get("days") || "") ? "?days=" + url.searchParams.get("days") : "";
+        return await proxyHanstockBars("/api/hub/group-daily-changes" + days, 600);
       } catch (err) {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }

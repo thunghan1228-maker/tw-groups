@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 00:39:22";
+const BUILD_STAMP = "2026-10-17 10:06:16";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6031,16 +6031,38 @@ function replaceSignalHtml(el, key, html){
 // 族群昨天／前天的平均漲跌幅來自後端日K（/api/group-daily-changes），其餘都是首頁已經有的即時資料。
 let otcStrengthLatest = null;
 let groupDailyChanges = null;
+let groupDailyRaw = null;
 let groupDailyFetchedAt = 0;
 async function refreshGroupDailyChanges(force){
   if (!force && Date.now() - groupDailyFetchedAt < 600000) return;
   groupDailyFetchedAt = Date.now();
   try {
-    const res = await fetch('/api/group-daily-changes');
+    const res = await fetch('/api/group-daily-changes?days=4');
     if (!res.ok) throw new Error('group-daily-changes http ' + res.status);
     const data = await res.json();
-    if (data && data.status === 'ok' && data.groups) groupDailyChanges = data;
+    if (data && data.status === 'ok' && data.groups){ groupDailyRaw = data; alignGroupDaily(); }
   } catch (e) { /* 抓不到就沿用上一次的 */ }
+}
+// 2026-10-17 使用者（週六刀劍空跟對方差很多）：後端的「昨天」是今天以前最近一天的日K，收盤後日K一進來、
+// 或週末／開盤前，dates[0] 就是首頁報價那一天（10/16）本身，所有「跟昨天／前天比」（🔪⚔️🔰、🐎🚀、193 名次、155 🔺🔽…）
+// 都往前錯一天。這裡照首頁報價的交易日（lastData.quoteDate）把同一天、更晚的日子剪掉，[0] 一定是報價那天的前一個交易日。
+let groupDailyAlignKey = '';
+function alignGroupDaily(){
+  const raw = groupDailyRaw;
+  if (!raw) return;
+  const session = lastData && !lastData.mock && lastData.quoteDate ? String(lastData.quoteDate) : '';
+  const key = (raw.generatedAt || '') + '|' + (raw.dates || []).join(',') + '|' + session;
+  if (key === groupDailyAlignKey && groupDailyChanges) return;
+  groupDailyAlignKey = key;
+  const dates = raw.dates || [];
+  let k = 0;
+  if (session) while (k < dates.length && dates[k] >= session) k++;
+  if (!k){ groupDailyChanges = raw; return; }
+  const cut = (a) => (Array.isArray(a) ? a.slice(k) : a);
+  const groups = {}, stocks = {};
+  Object.entries(raw.groups || {}).forEach(([n, g]) => { groups[n] = { ...g, pct: cut(g.pct), rank: cut(g.rank), members: cut(g.members) }; });
+  Object.entries(raw.stocks || {}).forEach(([c, x]) => { stocks[c] = { ...x, pct: cut(x.pct), close: cut(x.close), change: cut(x.change) }; });
+  groupDailyChanges = { ...raw, dates: dates.slice(k), rankedCount: cut(raw.rankedCount), groups, stocks, shiftedFrom: dates[0] };
 }
 const RACE_NUM = ['', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 const BLADE_HARVEST_PCT = 5;  // 刀劍空：跌到這裡以上就算收割區
@@ -6214,7 +6236,8 @@ function race333Model(){
   // ⚔️ 不用跌破前天收盤（老師台表科 +1.98% 就標 🔪⚔️）；誰進名單照舊用上面的 bladeKnife／bladeSword。
   bladeBase.forEach((r) => {
     const x = r.bladeGm;
-    r.bladeMark = r.bladePos <= 3 && x && (x.knife || x.sword) ? (x.knife ? '🔪' : '') + (x.sword ? '⚔️' : '') : '🔰';
+    // 2026-10-17 照對方 10/17 收盤那份：🔪⚔️ 都符合時只標 🔪（銘旺科、大毅 -6% 都只寫 🔪）
+    r.bladeMark = r.bladePos <= 3 && x && (x.knife || x.sword) ? (x.knife ? '🔪' : '⚔️') : '🔰';
   });
   const bladeLive = bladeBase.filter((r) => !bladeHarvest.includes(r));
   const bladeUpper = bladeLive.filter((r) => bladeInUpper(r));                                       // 多方打少
@@ -6940,7 +6963,7 @@ function homeBladeColHtml(m){
   const harvestSet = new Set(m.bladeHarvest);
   const sec = (list) => list.slice().sort(byRank).map(row).join('');
   const n = m.bladeUpper.length + m.bladeMiddle.length + m.bladeLower.length + m.bladeHarvest.length;
-  return '<div class="hr-col"><div class="hr-title bear">🔪⚔️刀劍空(32) <span class="hr-rk">' + n + ' 檔</span></div>' +
+  return '<div class="hr-col"><div class="hr-title bear">🔪⚔️新刀劍空(32) <span class="hr-rk">' + n + ' 檔</span></div>' +
     (n ? sec(m.bladeUpper) + '<div class="hr-sep">----↑(多方打少)↑----</div>' + sec(m.bladeMiddle) + '<div class="hr-sep">----↓(強空積極)↓----</div>' + sec(m.bladeLower) +
       '<div class="hr-sep">----↓(收割區域)↓----</div>' + sec(m.bladeHarvest) : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
@@ -12567,7 +12590,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 00:39:22';
+const BUILD_STAMP = '2026-10-17 10:06:16';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13455,6 +13478,7 @@ async function refresh(){
     if (!data || !Array.isArray(data.groups)) throw new Error('回來的資料格式不對');
     groupsLastError = '';
     lastData = carryMissingQuotes(data);
+    try { alignGroupDaily(); } catch (e) { /* 對不齊就沿用原本的 */ }
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     try { obsTick(); } catch (e) { /* 盤中形態觀察股跳窗失敗不影響畫面 */ }
     try { bladeRecordSeen(); } catch (e) { /* 刀劍空出現時間記不起來不影響畫面 */ }
@@ -18394,7 +18418,9 @@ export default {
     if (url.pathname === "/api/group-daily-changes") {
       try {
         // 族群昨天／前天的平均漲跌幅（盤中打 333 用）：來自日K，收盤後才會變，快取 10 分鐘。
-        return await proxyHanstockBars("/api/hub/group-daily-changes", 600);
+        // 前端要 days=4（週末、收盤後要剪掉報價那一天，剩下的還要有昨天、前天）
+        const days = /^[1-9]$/.test(url.searchParams.get("days") || "") ? "?days=" + url.searchParams.get("days") : "";
+        return await proxyHanstockBars("/api/hub/group-daily-changes" + days, 600);
       } catch (err) {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
