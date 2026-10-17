@@ -872,7 +872,7 @@ export default {
         "9672": "富邦-員林", "9658": "富邦-建國" };
       const code = String(url.searchParams.get("code") || "").trim().toUpperCase();
       const date = String(url.searchParams.get("date") || "");
-      if (!/^[0-9A-Z]{4,6}$/.test(code) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return Response.json({ status: "error", message: "代號或日期不對" }, { status: 422 });
+      if (!/^[0-9A-Z]{4,6}$/.test(code) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) return Response.json({ status: "error", message: "代號或日期不對" }, { status: 422 });
       const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
       try {
         const r = await fetch("https://fubon-ebrokerdj.fbs.com.tw/z/zc/zco/zco.djhtm?a=" + code + "&e=" + date + "&f=" + date, {
@@ -883,7 +883,7 @@ export default {
         const buf = await r.arrayBuffer();
         let text, named = true;
         try { text = new TextDecoder("big5").decode(buf); } catch (_) { text = new TextDecoder("utf-8").decode(buf); named = false; }
-        const re = /<a href="\/z\/zc\/zco\/zco0\/zco0\.djhtm\?a=\w+&b=(\w+)&BHID=\w+">([^<]+)<\/a><\/TD>\s*<TD[^>]*>([\d,]+)<\/TD>\s*<TD[^>]*>([\d,]+)<\/TD>\s*<TD[^>]*>([\d,]+)<\/TD>\s*<TD[^>]*>([\d.]+)%<\/TD>/g;
+        const re = /<a href="\\/z\\/zc\\/zco\\/zco0\\/zco0\\.djhtm\\?a=\\w+&b=(\\w+)&BHID=\\w+">([^<]+)<\\/a><\\/TD>\\s*<TD[^>]*>([\\d,]+)<\\/TD>\\s*<TD[^>]*>([\\d,]+)<\\/TD>\\s*<TD[^>]*>([\\d,]+)<\\/TD>\\s*<TD[^>]*>([\\d.]+)%<\\/TD>/g;
         const n = (x) => Number(String(x).replace(/,/g, ""));
         const buy = [], sell = [];
         let m, i = 0, vol = 0;
@@ -892,7 +892,7 @@ export default {
           if (!vol && n(m[6]) > 0) vol = Math.round(row.net / (n(m[6]) / 100));
           (i++ % 2 === 0 ? buy : sell).push(row);
         }
-        const upd = /最後更新日：\s*(\d{4})\/(\d{2})\/(\d{2})/.exec(text);
+        const upd = /最後更新日：\\s*(\\d{4})\\/(\\d{2})\\/(\\d{2})/.exec(text);
         return new Response(JSON.stringify({ status: buy.length || sell.length ? "ok" : "empty", code, date, vol, buy, sell,
           updated: upd ? upd[1] + "-" + upd[2] + "-" + upd[3] : null }),
           { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=300" } });
@@ -900,7 +900,7 @@ export default {
     }
     if (url.pathname === "/api/open-vol") {
       // 機器人 813（隔日沖必殺）：今天開盤第一分鐘的成交量（Yahoo 1 分 K 第一根），?syms=2359.TW,6533.TWO（最多 40 檔）
-      const syms = String(url.searchParams.get("syms") || "").split(",").map((x) => x.trim().toUpperCase()).filter((x) => /^[0-9A-Z]{4,6}\.(TW|TWO)$/.test(x)).slice(0, 40);
+      const syms = String(url.searchParams.get("syms") || "").split(",").map((x) => x.trim().toUpperCase()).filter((x) => /^[0-9A-Z]{4,6}\\.(TW|TWO)$/.test(x)).slice(0, 40);
       const one = async (sym) => {
         try {
           const r = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + sym + "?range=1d&interval=1m", {

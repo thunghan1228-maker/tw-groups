@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 11:33:32";
+const BUILD_STAMP = "2026-10-17 11:35:55";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12702,7 +12702,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 11:33:32';
+const BUILD_STAMP = '2026-10-17 11:35:55';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17311,14 +17311,16 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 // 30（🐎🚀）／31（🔪⚔️）／32（新刀劍空）；44＝今天 1+2 多；60／61／62＝處置／即將出關／已出關；70／71／72＝亞洲股市／美國股市／台指期；
 // 84＝本週籌碼暴增排行；股號或族群名＝那個族群的漲幅排行；股號B2＝同族群漲 2% 以上；股號a＝族群前天／昨天／今天名次；股號+3＝那族的 283。
 // 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
-const botState = { history: [], out: [], world: null, worldAt: 0, worldLoading: false };
+const botState = { history: [], out: [], world: null, worldAt: 0, worldLoading: false, cache: {} };
 const BOT_CODES = [
   ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
   ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'],
   ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
-  ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['84', '本週籌碼暴增排行'],
-  ['2359', '股號或族群名：那族漲幅排行'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
+  ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'],
+  ['81', '隔日沖買超排序（每天六點後更新）'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：隔日沖手上張數 ÷ 今天開盤量，> 1 越大越容易出貨'],
+  ['84', '本週籌碼暴增排行'],
+  ['2359', '股號或族群名：那族漲幅排行'], ['2359m', '那檔當天的隔日沖買賣超（2359m1＝前一天，最多 2359m9）'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
 ];
 const botPct = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
 const botStk = (code, name, rest) => '<span class="bot-stk" data-bot-code="' + wlEsc(code) + '" data-bot-name="' + wlEsc(name || '') + '">' + wlEsc(code) + ' ' + wlEsc(name || '') + '</span>' + (rest || '');
@@ -17329,6 +17331,20 @@ function botWorldLoad(){
   botState.worldLoading = true;
   fetch('/api/world-indices').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.rows){ botState.world = d; botState.worldAt = Date.now(); botRerunLast(); } })
     .catch(() => {}).finally(() => { botState.worldLoading = false; });
+}
+// 機器人要另外抓的資料（隔日沖、單檔分點、開盤量）：抓到就重跑最後一個查詢
+function botFetchCache(key, url, ttl){
+  const c = botState.cache;
+  const e = c[key];
+  if (e && (e.loading || Date.now() - e.at < ttl)) return e.data;
+  c[key] = { loading: true, at: Date.now(), data: e ? e.data : null };
+  fetch(url).then((r) => r.json()).then((d) => { c[key] = { at: Date.now(), data: d }; botRerunLast(); })
+    .catch((err) => { c[key] = { at: Date.now(), data: { status: 'error', message: '抓不到資料（' + String((err && err.message) || err).slice(0, 40) + '）' } }; botRerunLast(); });
+  return e ? e.data : null;
+}
+function botNameOf(code){
+  if (lastData && Array.isArray(lastData.groups)) for (const g of lastData.groups){ const s = g.stocks.find((x) => x.code === code); if (s) return s.name; }
+  return '';
 }
 function botRerunLast(){
   if (!botState.history.length || document.getElementById('botModal').hidden) return;
@@ -17388,12 +17404,67 @@ function botAnswer(raw){
     if (q === '62') return wrap('已出關(62)', list(m.out, '最近 3 個交易日沒有'));
     return wrap('處置股(60)', botLine('🔒 今日入獄', 'bot-head') + list(m.todayIn, '沒有') + botLine('🔓 即將出關', 'bot-head') + list(m.soonOut, '沒有') + botLine('🎉 已出關', 'bot-head') + list(m.out, '沒有'));
   }
+  // 8 隔日沖券商籌碼（2026-10-17 使用者）：81／811／813、股號m（m1～m9）。分點與算法照對方 811 名單反推，見 scripts/daytrade_mirror.py
+  let mm = /^([0-9A-Z]{4,6})M(\\d?)$/.exec(q);
+  if (q === '81' || q === '811' || q === '813' || mm){
+    const dt = botFetchCache('dt', '/api/daytrade', 5 * 60e3);
+    if (!dt) return wrap('隔日沖', botLine('讀取中…', 'bot-dim'));
+    if (dt.status !== 'ok') return wrap('隔日沖', botLine(dt.message || '隔日沖資料還沒算好', 'bot-dim'));
+    const day = dt.day, md = (iso) => Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10);
+    const twToday = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+    const n = (v) => Number(v).toLocaleString('zh-TW');
+    if (q === '811'){
+      return wrap('隔日沖買超排序(811) ' + md(day.date), botLine('爆量計算', 'bot-head') +
+        (day.rows.map((r) => botLine((r.two && r.lots ? '⁻' : '') + botStk(r.code, r.name, ' ' + r.pct + '%' + (r.lots ? ' (' + n(r.lots) + '張)' : '')))).join('') || botLine('這天沒有', 'bot-dim')) +
+        botLine('------------', 'bot-sep') + botLine('⁻連兩日入榜', 'bot-dim') + botLine('籌碼每天六點後更新，六點前為前一天資料', 'bot-dim') + botLine('隔天容易出貨，不要追', 'bot-warn'),
+        '隔日沖買超 ÷ 成交量');
+    }
+    if (q === '81'){
+      const rows = day.rows.slice().sort((a, b) => b.net - a.net);
+      return wrap('隔日沖買超排序(81) ' + md(day.date), rows.map((r, i) => botLine((i + 1) + '. ' + botStk(r.code, r.name, ' <b>' + n(r.net) + '張</b> <span class="' + dirClass(r.chg) + '">' + botPct(r.chg) + '</span>')) +
+        botLine(r.brokers.slice(0, 3).map(([b, v]) => wlEsc(b) + ' ' + n(v)).join('、'), 'bot-sub')).join('') || botLine('這天沒有', 'bot-dim'),
+        '漲 9% 以上的族群股・隔日沖分點淨買超張數');
+    }
+    if (q === '813'){
+      const base = dt.dates.find((d) => d < twToday);
+      if (!base) return wrap('隔日沖必殺(813)', botLine('還沒有前一個交易日的隔日沖資料', 'bot-dim'));
+      const got = base === day.date ? dt : botFetchCache('dt|' + base, '/api/daytrade?date=' + base, 3600e3);
+      const bd = got && got.day;
+      if (!bd) return wrap('隔日沖必殺(813)', botLine(got && got.message ? got.message : '讀取中…', 'bot-dim'));
+      const holdList = () => botLine(md(base) + ' 隔日沖手上張數', 'bot-head') + bd.rows.slice().sort((a, b) => b.hold - a.hold).map((r) => botLine(botStk(r.code, r.name, ' ' + n(r.hold) + '張'))).join('');
+      if (!bd.rows.length) return wrap('隔日沖必殺(813)', botLine(md(base) + ' 沒有隔日沖名單', 'bot-dim'));
+      const ov = botFetchCache('ov|' + base + '|' + twToday, '/api/open-vol?syms=' + bd.rows.map((r) => r.code + (r.mkt === 'OTC' ? '.TWO' : '.TW')).join(','), 120e3);
+      if (!ov) return wrap('隔日沖必殺(813)', botLine('讀取開盤量中…', 'bot-dim'));
+      const vols = new Map((ov.rows || []).filter((x) => x.vol && x.time && new Date(Date.parse(x.time) + 8 * 3600e3).toISOString().slice(0, 10) === twToday).map((x) => [x.sym.split('.')[0], x.vol]));
+      if (!vols.size) return wrap('隔日沖必殺(813)', botLine('今天還沒開盤（或休市），開盤 9:01 後再查', 'bot-dim') + holdList());
+      const rows = bd.rows.filter((r) => vols.has(r.code)).map((r) => ({ r, open: vols.get(r.code), ratio: r.hold / Math.max(vols.get(r.code), 1) })).sort((a, b) => b.ratio - a.ratio);
+      return wrap('隔日沖必殺(813) ' + md(twToday) + ' 開盤', rows.map((x) => botLine(botStk(x.r.code, x.r.name, ' <b class="' + (x.ratio > 1 ? 'up' : '') + '">' + x.ratio.toFixed(2) + '</b> <span class="bot-dim">隔日沖 ' + n(x.r.hold) + '張／開盤 ' + n(x.open) + '張</span>'))).join('') +
+        botLine('比例 > 1：隔日沖手上的比開盤量還多，越大越容易出貨', 'bot-warn'), md(base) + ' 隔日沖買超 ÷ 今天開盤第一分鐘量');
+    }
+    // 股號m／m1～m9：那檔那天的隔日沖分點買賣超
+    const k = mm[2] ? Number(mm[2]) : 0, code = mm[1], date = dt.dates[k];
+    const label = code + ' ' + botNameOf(code) + ' 隔日沖買賣超(' + (k ? 'm' + k : 'm') + ')';
+    if (!date) return wrap(label, botLine('只能回查到 m' + (dt.dates.length - 1), 'bot-dim'));
+    const z = botFetchCache('zco|' + code + '|' + date, '/api/zco?code=' + code + '&date=' + date, 10 * 60e3);
+    if (!z) return wrap(label + ' ' + md(date), botLine('讀取中…', 'bot-dim'));
+    if (z.status !== 'ok') return wrap(label + ' ' + md(date), botLine(z.message || '這天沒有這檔的分點資料', 'bot-dim'));
+    const b = z.buy.filter((x) => x.dt), s = z.sell.filter((x) => x.dt);
+    const buySum = b.reduce((a, x) => a + x.net, 0), sellSum = s.reduce((a, x) => a + x.net, 0);
+    const pctOf = (v) => (z.vol ? '（佔成交 ' + Math.round(v / z.vol * 100) + '%）' : '');
+    return wrap(label + ' ' + md(date),
+      botLine('隔日沖買超 <b class="up">' + n(buySum) + '張</b>' + pctOf(buySum) + (sellSum ? '　賣超 <b class="down">' + n(sellSum) + '張</b>' : ''), 'bot-head') +
+      b.map((x) => botLine('🔴 ' + wlEsc(x.name) + '　買 ' + n(x.buy) + '／賣 ' + n(x.sell) + '　<b class="up">+' + n(x.net) + '</b>', 'bot-sub')).join('') +
+      s.map((x) => botLine('🟢 ' + wlEsc(x.name) + '　買 ' + n(x.buy) + '／賣 ' + n(x.sell) + '　<b class="down">-' + n(x.net) + '</b>', 'bot-sub')).join('') +
+      (!b.length && !s.length ? botLine('前 15 名買賣超裡沒有隔日沖分點', 'bot-dim') : '') +
+      botLine('其他買超前幾名：' + z.buy.filter((x) => !x.dt).slice(0, 5).map((x) => wlEsc(x.name) + ' ' + n(x.net)).join('、'), 'bot-dim'),
+      '成交 ' + (z.vol ? n(z.vol) + ' 張' : '—') + '・前 15 名買賣超分點');
+  }
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups)) return wrap(raw, botLine('首頁報價還在載入，等一下再試', 'bot-dim'));
   const h = homeRankRows();
   if (!h) return wrap(raw, botLine('族群行情載入中…', 'bot-dim'));
   const rankLine = (r) => botLine(botGrp(r.name, '-(' + r.rank + ')' + (r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? '🔺' + (-r.drop) : '－') : '') + ' <span class="' + dirClass(r.avg) + '">' + botPct(r.avg) + '</span>'));
   // 1N：族群漲幅排行
-  let mm = /^1([1-9])?$/.exec(q);
+  mm = /^1([1-9])?$/.exec(q);
   if (mm){
     const th = mm[1] ? Number(mm[1]) : 1;
     const byName = new Map(lastData.groups.map((g) => [g.name, g]));
@@ -17516,7 +17587,7 @@ function renderBot(){
   body.innerHTML = '<div class="bot-q-row"><input id="botQ" placeholder="輸入代碼，例：12、22、2359B2、2359a、70" value="' + wlEsc(keep) + '" autocomplete="off"><button type="button" data-bot-go="1">送出</button></div>' +
     '<div class="bot-chips">' + BOT_CODES.filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') + '</div>' +
     (botState.out.length ? botState.out.join('') : '<div class="bot-msg bot-help">' + BOT_CODES.map(([c, d]) => botLine('<b>' + c + '</b>　' + wlEsc(d))).join('') +
-      botLine('8 隔日沖券商（2359m、81、811、813）要券商分點買賣資料：證交所不開放程式抓、免費資料源沒有，暫時沒有。', 'bot-dim') + '</div>');
+      botLine('隔日沖分點：凱基-台北、凱基-城中、富邦證券、統一、群益金鼎、港商野村、國票-敦北法人等 18 個（照對方名單對出來的），資料來源富邦證券主力進出。', 'bot-dim') + '</div>');
 }
 function openBotPanel(){
   document.getElementById('botModal').hidden = false;
@@ -18969,7 +19040,7 @@ export default {
         "9672": "富邦-員林", "9658": "富邦-建國" };
       const code = String(url.searchParams.get("code") || "").trim().toUpperCase();
       const date = String(url.searchParams.get("date") || "");
-      if (!/^[0-9A-Z]{4,6}$/.test(code) || !/^d{4}-d{2}-d{2}$/.test(date)) return Response.json({ status: "error", message: "代號或日期不對" }, { status: 422 });
+      if (!/^[0-9A-Z]{4,6}$/.test(code) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return Response.json({ status: "error", message: "代號或日期不對" }, { status: 422 });
       const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
       try {
         const r = await fetch("https://fubon-ebrokerdj.fbs.com.tw/z/zc/zco/zco.djhtm?a=" + code + "&e=" + date + "&f=" + date, {
@@ -18980,7 +19051,7 @@ export default {
         const buf = await r.arrayBuffer();
         let text, named = true;
         try { text = new TextDecoder("big5").decode(buf); } catch (_) { text = new TextDecoder("utf-8").decode(buf); named = false; }
-        const re = /<a href="/z/zc/zco/zco0/zco0.djhtm?a=w+&b=(w+)&BHID=w+">([^<]+)</a></TD>s*<TD[^>]*>([d,]+)</TD>s*<TD[^>]*>([d,]+)</TD>s*<TD[^>]*>([d,]+)</TD>s*<TD[^>]*>([d.]+)%</TD>/g;
+        const re = /<a href="\/z\/zc\/zco\/zco0\/zco0\.djhtm\?a=\w+&b=(\w+)&BHID=\w+">([^<]+)<\/a><\/TD>\s*<TD[^>]*>([\d,]+)<\/TD>\s*<TD[^>]*>([\d,]+)<\/TD>\s*<TD[^>]*>([\d,]+)<\/TD>\s*<TD[^>]*>([\d.]+)%<\/TD>/g;
         const n = (x) => Number(String(x).replace(/,/g, ""));
         const buy = [], sell = [];
         let m, i = 0, vol = 0;
@@ -18989,7 +19060,7 @@ export default {
           if (!vol && n(m[6]) > 0) vol = Math.round(row.net / (n(m[6]) / 100));
           (i++ % 2 === 0 ? buy : sell).push(row);
         }
-        const upd = /最後更新日：s*(d{4})/(d{2})/(d{2})/.exec(text);
+        const upd = /最後更新日：\s*(\d{4})\/(\d{2})\/(\d{2})/.exec(text);
         return new Response(JSON.stringify({ status: buy.length || sell.length ? "ok" : "empty", code, date, vol, buy, sell,
           updated: upd ? upd[1] + "-" + upd[2] + "-" + upd[3] : null }),
           { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=300" } });
@@ -18997,7 +19068,7 @@ export default {
     }
     if (url.pathname === "/api/open-vol") {
       // 機器人 813（隔日沖必殺）：今天開盤第一分鐘的成交量（Yahoo 1 分 K 第一根），?syms=2359.TW,6533.TWO（最多 40 檔）
-      const syms = String(url.searchParams.get("syms") || "").split(",").map((x) => x.trim().toUpperCase()).filter((x) => /^[0-9A-Z]{4,6}.(TW|TWO)$/.test(x)).slice(0, 40);
+      const syms = String(url.searchParams.get("syms") || "").split(",").map((x) => x.trim().toUpperCase()).filter((x) => /^[0-9A-Z]{4,6}\.(TW|TWO)$/.test(x)).slice(0, 40);
       const one = async (sym) => {
         try {
           const r = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + sym + "?range=1d&interval=1m", {
