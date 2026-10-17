@@ -10,6 +10,8 @@
 - 隔日沖買超＝18 個分點裡「淨買超」的張數加總（淨賣超的不扣）。
 - 一般：% ＝ 隔日沖買超 ÷ 當天成交量；(張數) ＝ 2 × 隔日沖買超。
 - 前一個交易日也在榜（⁻連兩日入榜）：% ＝ (昨＋今隔日沖買超) ÷ (昨＋今成交量)；(張數) ＝ 昨＋今隔日沖買超。
+  今天隔日沖分點沒買也照列（今天算 0）：對過 37 檔「昨天在榜、今天又漲 9% 以上」老師全部有列（3441、3597、2466 今天都沒買）。
+- 證交所標 X（不比價：除權息、減資恢復交易…）的漲跌價差給 0：用前一個交易日收盤補算（6834 天二 10/02 其實鎖漲停）。
 - 排序照「今天單日」的 %；% 不到 8 的不寫張數。
 
 每天一份 data 分支 tpex/daytrade/YYYY-MM-DD.json，清單 tpex/daytrade-index.json。
@@ -68,7 +70,7 @@ def num(text) -> float | None:
 
 
 def twse_quotes(day: date) -> dict[str, dict]:
-    """上市：{代號: {name, close, chg(%), vol(張)}}；休市回空。"""
+    """上市：{代號: {name, close, chg(%), vol(張)}}；休市回空。不比價（漲跌欄 X）的 chg＝None，build 再用前一天收盤補。"""
     payload = json.loads(fetch_text(TWSE_URL.format(d=day.strftime("%Y%m%d"))))
     out = {}
     for t in payload.get("tables") or []:
@@ -78,7 +80,12 @@ def twse_quotes(day: date) -> dict[str, dict]:
         ic, iname, ivol, iclose, isign, idiff = (f.index(x) for x in ("證券代號", "證券名稱", "成交股數", "收盤價", "漲跌(+/-)", "漲跌價差"))
         for r in t.get("data") or []:
             close, diff, vol = num(r[iclose]), num(r[idiff]), num(r[ivol])
-            if close is None or diff is None or not vol:
+            if close is None or not vol:
+                continue
+            if "X" in str(r[isign]):
+                out[str(r[ic]).strip()] = {"name": str(r[iname]).strip(), "close": close, "chg": None, "vol": round(vol / 1000), "mkt": "TSE"}
+                continue
+            if diff is None:
                 continue
             sign = -1 if "-" in str(r[isign]) else 1
             prev = close - sign * diff
@@ -122,12 +129,19 @@ def load_day(data_dir: str, day: str) -> dict | None:
 
 
 def build(data_dir: str, day: date, prev_day: str | None) -> dict | None:
-    quotes = {**tpex_quotes(data_dir, day), **twse_quotes(day)}
+    tw = twse_quotes(day)
+    if prev_day and any(q["chg"] is None for q in tw.values()):
+        before = twse_quotes(date.fromisoformat(prev_day))
+        for c, q in tw.items():
+            if q["chg"] is None and (before.get(c) or {}).get("close"):
+                q["chg"] = round((q["close"] / before[c]["close"] - 1) * 100, 2)
+    quotes = {**tpex_quotes(data_dir, day), **{c: q for c, q in tw.items() if q["chg"] is not None}}
     if len(quotes) < 500:
         return None   # 休市
     prev = load_day(data_dir, prev_day) if prev_day else None
     prev_rows = {r["code"]: r for r in (prev or {}).get("rows") or []}
-    cands = sorted(c for c, q in quotes.items() if re.fullmatch(r"[1-9]\d{3}", c) and q["chg"] >= MIN_CHANGE)
+    # 存託憑證（美德醫療-DR 這種，代號也是 4 碼）不算：對方名單從來沒列過
+    cands = sorted(c for c, q in quotes.items() if re.fullmatch(r"[1-9]\d{3}", c) and q["chg"] >= MIN_CHANGE and not q["name"].endswith("DR"))
     rows = []
     for code in cands:
         q = quotes[code]
@@ -139,10 +153,10 @@ def build(data_dir: str, day: date, prev_day: str | None) -> dict | None:
         time.sleep(1.2)
         mine = [(x["name"], x["net"]) for x in brokers if x["b"] in BRANCHES and x["net"] > 0]
         net = sum(n for _, n in mine)
-        if net <= 0 or not q["vol"]:
+        p = prev_rows.get(code)
+        if not q["vol"] or (net <= 0 and not p):   # 昨天在榜的今天沒買也照列（連兩日入榜）
             continue
         today_pct = net / q["vol"] * 100
-        p = prev_rows.get(code)
         if p:
             pct, lots = (net + p["net"]) / (q["vol"] + p["vol"]) * 100, net + p["net"]
         else:

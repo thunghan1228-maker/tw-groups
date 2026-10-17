@@ -42,8 +42,11 @@ jobs:
           DAYS: ${{ inputs.days }}
         run: |
           RANGE="$DAYS"
-          # 推這支程式上去時（第一次）把這個月 1 號到今天補齊，連兩日入榜才有前一天可比
-          if [ -z "$RANGE" ] && [ "${{ github.event_name }}" = "push" ]; then RANGE="$(TZ=Asia/Taipei date +%Y-%m-01):$(TZ=Asia/Taipei date +%Y-%m-%d)"; fi
+          # 推這支程式上去時，把這個月 1 號前一週到今天重算：1 號那天的連兩日入榜才有上個月最後一個交易日可比（2026-10-17：10/01 少了 9/30）
+          if [ -z "$RANGE" ] && [ "${{ github.event_name }}" = "push" ]; then
+            FIRST="$(TZ=Asia/Taipei date +%Y-%m-01)"
+            RANGE="$(date -d "$FIRST -7 day" +%Y-%m-%d):$(TZ=Asia/Taipei date +%Y-%m-%d)"
+          fi
           python3 main/scripts/daytrade_mirror.py main data $RANGE
       - name: 推到 data 分支
         working-directory: data
