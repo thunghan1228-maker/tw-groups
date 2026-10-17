@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 10:08:19";
+const BUILD_STAMP = "2026-10-17 10:21:36";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5640,16 +5640,22 @@ let stockFlags = {};
 async function refreshStockFlags(){
   try {
     const res = await fetch('/api/stock-flags');
-    if (!res.ok) return;
+    if (!res.ok) throw new Error('stock-flags http ' + res.status);
     const data = await res.json();
     if (data && data.stocks && typeof data.stocks === 'object'){
+      const first = !Object.keys(stockFlags || {}).length;
       stockFlags = data.stocks;
+      if (first){ try { render(); } catch (_){} }   // 首頁 155、刀劍空等等第一次要等它才畫得出來（2026-10-17）
       try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
       if (!document.getElementById('signalModal').hidden) renderSignalCenter();
       if (!document.getElementById('chartModal').hidden) renderChartFlags(currentChart.code);
       if (!document.getElementById('chipsModal').hidden) renderChips();
     }
-  } catch (e) { /* 抓不到就先不標，下一輪再試 */ }
+    else throw new Error('stock-flags 格式不對');
+  } catch (e) {
+    // 抓不到就先不標；一次都還沒抓到就 20 秒後再試（不要等 5 分鐘）
+    if (!Object.keys(stockFlags || {}).length) setTimeout(refreshStockFlags, 20000);
+  }
 }
 function renderChartFlags(code){
   // K 線圖標題列下方：這檔的可交易條件與處置狀態（資料同訊號中心的全族群旗標）。
@@ -6040,8 +6046,18 @@ async function refreshGroupDailyChanges(force){
     const res = await fetch('/api/group-daily-changes?days=4');
     if (!res.ok) throw new Error('group-daily-changes http ' + res.status);
     const data = await res.json();
-    if (data && data.status === 'ok' && data.groups){ groupDailyRaw = data; alignGroupDaily(); }
-  } catch (e) { /* 抓不到就沿用上一次的 */ }
+    if (data && data.status === 'ok' && data.groups){
+      groupDailyRaw = data; alignGroupDaily();
+      // 2026-10-17 使用者「第一次打開都跑不出來，要重新整理」：首頁報價先回來、這份晚到時首頁不會重畫，
+      // 收盤後／週末首頁 5 分鐘才重抓一次 → 排名區整塊空著好幾分鐘。抓到就馬上重畫。
+      try { render(); } catch (_){}
+      return;
+    }
+    throw new Error('group-daily-changes 格式不對');
+  } catch (e) {
+    // 抓不到：還沒有任何一份就 15 秒後再試（不要等 10 分鐘），有舊的就沿用
+    if (!groupDailyRaw){ groupDailyFetchedAt = 0; setTimeout(() => refreshGroupDailyChanges(false), 15000); }
+  }
 }
 // 2026-10-17 使用者（週六刀劍空跟對方差很多）：後端的「昨天」是今天以前最近一天的日K，收盤後日K一進來、
 // 或週末／開盤前，dates[0] 就是首頁報價那一天（10/16）本身，所有「跟昨天／前天比」（🔪⚔️🔰、🐎🚀、193 名次、155 🔺🔽…）
@@ -6781,8 +6797,9 @@ const f155State = { data: null, at: 0, loading: false };
 function f155Load(){
   if (f155State.loading || Date.now() - f155State.at < 60e3) return;
   f155State.loading = true;
-  fetch('/api/stock-futures-board').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok') f155State.data = d; })
-    .catch(() => {}).finally(() => { f155State.loading = false; f155State.at = Date.now(); });
+  fetch('/api/stock-futures-board').then((r) => (r.ok ? r.json() : null)).then((d) => {
+    if (d && d.status === 'ok'){ const first = !f155State.data; f155State.data = d; if (first){ try { render(); } catch (_){} } }   // 第一次抓到就重畫（收盤後首頁 5 分鐘才自己重畫）
+  }).catch(() => {}).finally(() => { f155State.loading = false; f155State.at = Date.now(); });
 }
 function fut155Model(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups)) return null;
@@ -6844,7 +6861,12 @@ function homeJailLoad(){
   if (homeJailState.loading || jlState.loading || Date.now() - homeJailState.at < 10 * 60e3) return;
   homeJailState.loading = true;
   fetch('/api/jail').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok'){ jlState.data = d; try { render(); } catch (_){} } })
-    .catch(() => {}).finally(() => { homeJailState.loading = false; homeJailState.at = Date.now(); });
+    .catch(() => {}).finally(() => {
+      homeJailState.loading = false;
+      // 抓失敗、還沒有資料：30 秒後再試（不要等 10 分鐘），到時候重畫一次就會重抓
+      homeJailState.at = jlState.data ? Date.now() : Date.now() - 10 * 60e3 + 30e3;
+      if (!jlState.data) setTimeout(() => { try { render(); } catch (_){} }, 31000);
+    });
 }
 function homeJailModel(){
   const d = jlState.data;
@@ -7112,7 +7134,7 @@ function homeObsColHtml(){
   const hm = obsNowHm();   // 只有盤中（09:00～13:35）才每 5 分鐘重算；收盤後停在最後一次（2026-10-15 使用者問多久更新）
   const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && hm >= '09:00' && hm <= '13:35';
   const stale = rep && live && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
-  const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > HOME_OBS_REFRESH_MS;
+  const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > (rep ? HOME_OBS_REFRESH_MS : 20000);   // 還沒算出過：20 秒就重試（2026-10-17）
   if (!obsState.loading && ((!rep && !obsState.error) || stale || retry)) setTimeout(() => obsRun(null, false, !!rep), 0);
   const title = '<div class="hr-title">📡強勢黑K選股';
   if (!rep) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (obsState.error ? '算不出來：' + wlEsc(obsState.error) : '計算中…') + '</div></div>';
@@ -12590,7 +12612,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 10:08:19';
+const BUILD_STAMP = '2026-10-17 10:21:36';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13473,7 +13495,9 @@ async function refresh(){
   try {
     // 證交所那邊卡住時 /api/groups 可能好幾十秒才回（2026-10-05 實測 60 秒還沒回），等太久就放棄這一輪
     const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
-    const timer = ctrl ? setTimeout(() => ctrl.abort(), 20000) : null;
+    // 還沒拿到過真的報價（剛打開頁面）就多等一點（60 秒）：原本 20 秒就放棄、4 秒後重來，證交所慢的時候每一輪都等不到，
+    // 只能手動重新整理（2026-10-17 使用者「第一次打開都跑不出來」）
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), lastData && !lastData.mock ? 20000 : 60000) : null;
     let res;
     try { res = await fetch('/api/groups', ctrl ? { signal: ctrl.signal } : undefined); } finally { if (timer) clearTimeout(timer); }
     if (!res.ok){
@@ -15194,6 +15218,7 @@ async function obsRun(slot, popup, quiet){
   } catch (e){
     obsState.error = String((e && e.message) || e);
     obsState.errorAt = Date.now();
+    if (!obsState.report) setTimeout(() => { try { render(); } catch (_){} }, 21000);   // 首頁重畫時會照上面的 20 秒重試（收盤後首頁 5 分鐘才自己重畫）
   } finally {
     obsState.loading = false;
     obsRerender();
