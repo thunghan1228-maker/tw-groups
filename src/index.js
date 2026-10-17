@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 22:08:14";
+const BUILD_STAMP = "2026-10-17 22:13:17";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12878,7 +12878,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 22:08:14';
+const BUILD_STAMP = '2026-10-17 22:13:17';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15573,10 +15573,12 @@ const GUIDE_TOOLS = [
     b: ['今日即時多／空：所有多方、空方訊號依時間排好，最新的在最上面', '醞釀／發動：均線分數高、整理完的股票（醞釀），一衝過箱頂就跳「發動」，網頁開著會響鈴通知',
       '盤中 333、十大多族群／十大空族群、所有族群綜合表：一眼看哪些族群在漲、族群裡誰最強', '盤中大戶力、四項精選、主力翻多／翻空、特大買賣單、刀劍空(32)、創高黑龍、1+2多：各種訊號分開看',
       '最後一頁「訊號教學」把每個訊號的條件寫清楚'] },
-  { t: '🤖 機器人代碼', open: 'bot', tags: ['盤中', '盤後'], d: '右上角「🤖 機器人代碼」。打一個代碼就回一份名單（像 LINE 機器人）：族群漲跌排行、重點族群、刀劍空、賽馬、河流、處置、隔日沖、籌碼暴增、國際行情。',
+  { t: '🤖 機器人代碼', open: 'bot', v: 'basic-bot', tags: ['盤中', '盤後'], d: '右上角「🤖 機器人代碼」。打一個代碼就回一份名單（像 LINE 機器人）：族群漲跌排行、重點族群、刀劍空、賽馬、河流、處置、隔日沖、籌碼暴增、國際行情。',
     b: ['上面一排是全部代碼，點一下就查；也可以打股號（例：2330）或族群名（例：低軌衛星）', '點一個代碼開一格，結果一格一格往右排（最多 10 格，照點的順序）；同一個代碼再點一次就收掉，「全部收掉」一次清空；柱狀圖不顯示，只列名稱跟漲跌幅', '全部代碼的說明一直留在最下面（點代碼直接查）', '關掉再打開，會回到上次最後看的畫面：開著哪幾格、捲到哪、視窗位置大小、有沒有移到另一個螢幕（電腦、手機、iPad 各自記）',
       '族群那一條點下去看成分股，股票點下去開 K 線圖', '右上角 ⧉ 移到另一螢幕（可以拖到外接螢幕）、－ 最小化、▢ 最大化、✕ 關閉；標題列拖著走，四邊四角拉大小',
       '每個代碼在做什麼，看下面「🤖 機器人代碼一覽」'] },
+  { t: '🔔 今日提醒', open: 'remind', v: 'basic-remind', tags: ['盤後', '每天'], d: '右上角「🔔 今日提醒」。每天晚上的警示股整理成三張表，每天有新資料、第一次打開網頁就自動跳出來；關掉後按這顆再開。',
+    b: ['🔓 解鎖：接下來兩個交易日出關、恢復正常交易的', '⚠️ 連續警告：明天再被警告就可能分盤或延長處置，持有的要留意', '🔒 分盤交易：今天新公告的處置股（處置期間、幾分鐘撮合、解鎖日）', '點代號開 K 線圖'] },
   { t: '自選股', label: '自選股', v: 'tb-watch', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
     b: ['換手機或電腦用「同步碼」就能帶過去', '一鍵健診：持股的防守價、明日紅半／三日低／月線一次算好', '各列表看到喜歡的股票，點「☆」就加進來'] },
   { t: '個股訊號追蹤', label: '個股盤中訊號追蹤', v: 'tb-track', tags: ['盤中'], d: '只看你自選股今天出現了哪些訊號，不用在一堆名單裡找。',
@@ -15606,10 +15608,10 @@ const GUIDE_TOOLS = [
     b: ['一週出獄時間表、今日入獄、嫌疑名單門檻', '打代號查前科：以前被關過幾次'] },
   { t: '估值河流圖', label: '估值河流圖', v: 'tb-river', tags: ['盤後'], d: '把股價放進本益比河道裡，看現在是便宜、合理還是貴。',
     b: ['河道四區＋分水嶺', '「均線分數 ≥10 × 便宜區」清單：位置強又不貴的'] },
-  { t: '研究室', label: '研究室', v: 'tb-lab', tags: ['大方向'], d: '盤勢以外的大方向，四個分頁：',
+  { t: '研究室', label: '研究室', v: 'tb-lab', tags: ['大方向'], d: '盤勢以外的大方向，五個分頁：',
     b: ['🌐 國際大事行事曆：非農、CPI、聯準會……台灣時間幾點公布、前值預期公布值，附名詞小學堂', '🛡 資金保護傘：融資水位、加權／櫃買是否跌破月線季線，合成「收傘／備傘／半開／全開」',
       '📉 外資空單：外資台指期淨未平倉＋當日增減、外資買權／賣權、散戶小台／微台多空比、P/C、三大法人現貨買賣超（每天 15:40 更新）',
-      '👥 內部人：董監、經理人每月加碼減碼，疊上 400 張大戶比'] },
+      '👥 內部人：董監、經理人每月加碼減碼，疊上 400 張大戶比', '🎫 抽籤股：可以抽籤的新股、增資股，承銷價、收盤、獲利空間、抽籤日，還有最近的中籤率'] },
 ];
 const GUIDE_FAQ = [
   ['資料多久更新一次？', '盤中報價、訊號每 15 秒更新；盤後資料（法人、處置、融資、營收、集保）在官方公布後自動抓進來，各工具頁面上都有寫資料日期。休市日不更新，沿用上一個交易日。'],
@@ -15762,7 +15764,7 @@ document.getElementById('tutBtn').addEventListener('click', () => openTutorialVi
 // 下方工具列每個面板標題旁加「▶ 影片教學」，點了直接播那個工具的影片（影片清單蓋在面板上面，關掉就回到面板）
 const TUT_PANEL_KEYS = { hwModal: 'tb-homework', swingModal: 'tb-swing', checkupModal: 'tb-checkup', chipsModal: 'tb-chips', watchModal: 'tb-watch',
   jailModal: 'tb-jail', revModal: 'tb-revenue', maModal: 'tb-ma', heilongModal: 'tb-heilong', pickerModal: 'tb-picker', grailModal: 'tb-grail',
-  diagModal: 'tb-diag', trackModal: 'tb-track', rivModal: 'tb-river', labModal: 'tb-lab' };
+  diagModal: 'tb-diag', trackModal: 'tb-track', rivModal: 'tb-river', labModal: 'tb-lab', botModal: 'basic-bot', remindModal: 'basic-remind' };
 Object.entries(TUT_PANEL_KEYS).forEach(([id, key]) => {
   const title = document.querySelector('#' + id + ' .chips-title');
   if (!title || title.querySelector('.tut-panel-link')) return;
@@ -15796,6 +15798,7 @@ document.getElementById('guideBody').addEventListener('click', (e) => {
   closeGuidePanel();
   if (tool.open === 'signal'){ const b = document.getElementById('signalBadgeBtn'); if (b) b.click(); return; }
   if (tool.open === 'bot'){ openBotPanel(); return; }
+  if (tool.open === 'remind'){ openRemindPanel(); return; }
   const btn = document.querySelector('#toolbarBottom .tb-btn[data-label="' + tool.label + '"]');
   if (btn) btn.click();
 });

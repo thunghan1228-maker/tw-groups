@@ -89,7 +89,8 @@ const CSS = `
   await ready(page);
   await page.addStyleTag({ content: CSS });
   await page.addScriptTag({ url: '/__tut/illus.js' });
-  await page.evaluate(() => { try { closeSignalCenter(); } catch (_){} window.scrollTo(0, 0); });
+  // 今日提醒每天第一次會自己跳出來：錄影時不要跳（今日提醒那支自己打開）
+  await page.evaluate(() => { try { window.remindUnseen = () => false; closeRemindPanel(); } catch (_){} try { closeSignalCenter(); } catch (_){} window.scrollTo(0, 0); });
   await page.waitForTimeout(2500);   // 讓訊號、族群資料都進來
   const timeline = [];
   // 片頭（標題卡）
