@@ -110,6 +110,7 @@
   .hr-help-tbl td:first-child{white-space:nowrap;font-weight:700;color:var(--text);}
   .hr-help-tbl td:nth-child(2):not(:last-child){white-space:nowrap;max-width:7em;}
   .hr-help-card.hr-cmp .hr-help-tbl td:nth-child(2),.hr-help-card.hr-cmp .hr-help-tbl td:nth-child(3){white-space:normal;max-width:none;width:43%;}   /* 31／32 比較表：兩欄都換行 */
+  @media (min-width:700px){ .hr-help-card.hr-cmp{grid-column:span 2;} }   /* 比較表兩邊都是長句子：佔兩格寬，不要擠成一條 */
   .hr-jail-card .hr-help-tbl tr.hr-stk{cursor:pointer;} .hr-jail-card .hr-help-tbl tr.hr-stk:hover td{background:rgba(255,255,255,0.05);}   /* 即將入獄／即將出關／已出關：點股票開K線圖 */
   .hr-jail-card .hr-help-tbl th,.hr-jail-card .hr-help-tbl td{padding:3px 5px;}   /* 2026-10-16 使用者：多了三欄，排緊一點 */
   .hr-jail-card .hr-help-tbl td:nth-child(2){color:var(--text);font-weight:700;white-space:nowrap;max-width:6.5em;overflow:hidden;text-overflow:ellipsis;}

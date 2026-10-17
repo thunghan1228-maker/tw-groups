@@ -522,7 +522,8 @@ VIDEOS += [
             tb_open("openLabPanel", "國際大事行事曆：非農、CPI、聯準會這些數據，台灣時間幾點公布，前值、預期和公布值；最上面寫下一件大事是什麼時候。",
                     "🌐 國際大事行事曆：台灣時間幾點公布、前值／預期／公布值", pick=find("#labModal *", "下一件大事")),
             {"say": "行事曆依週排列，紅底是三顆星的大事，數字公布後大約一小時內補上；法說會每天一筆，紫色是你的自選股。名詞看不懂，點書本符號到小學堂。",
-             "cap": "紅底＝★★★大事；紫色＝你的自選股；📖 小學堂", "pick": find("#labModal .mc-h", "① 行事曆")},
+             "cap": "紅底＝★★★大事；紫色＝你的自選股；📖 小學堂", "pick": find("#labModal .mc-h", "① 行事曆"),
+             "eval": "try { ipoLoad(); } catch (_) {}"},   # 抽籤股資料先抓（要好幾秒），錄到那一頁時已經好了
             {"say": "資金保護傘看融資水位、加權指數和櫃買指數有沒有跌破月線、季線，合成收傘、備傘、半開、全開四種狀態。",
              "cap": "🛡 資金保護傘：收傘／備傘／半開／全開", "clickPick": find("#labModal .chart-tab", "資金保護傘"), "pick": find("#labModal .chart-tab", "資金保護傘") + ".parentElement", "settle": 4000},
             {"say": "外資空單看期貨籌碼：上面是加權、櫃買、融資、三大法人、外資台指淨空單、外資買權賣權、散戶小台微台和 P/C 的最新數字，每一項都標資料日期，融資晚上九點四十分以後才更新",
@@ -533,7 +534,7 @@ VIDEOS += [
             {"say": "內部人看董監事、經理人每個月加碼還是減碼，疊上四百張大戶的持股比例。",
              "cap": "👥 內部人：董監、經理人每月加減碼＋400 張大戶比", "clickPick": find("#labModal .chart-tab", "內部人"), "pick": find("#labModal .chart-tab", "內部人") + ".parentElement", "settle": 4000},
             {"say": "抽籤股列出最近可以抽籤的新股和增資股：承銷價、今天收盤、抽中的獲利空間、承銷張數、申購期間和抽籤日；下面是最近兩週的抽籤結果和中籤率。",
-             "cap": "🎫 抽籤股：承銷價、收盤、獲利空間、抽籤日、中籤率", "clickPick": find("#labModal .chart-tab", "抽籤股"), "pick": "document.querySelector('#labBody .ipo-scroll') || document.getElementById('labBody')", "settle": 5000},
+             "cap": "🎫 抽籤股：承銷價、收盤、獲利空間、抽籤日、中籤率", "clickPick": find("#labModal .chart-tab", "抽籤股"), "pick": "document.querySelector('#labBody .ipo-scroll') || document.getElementById('labBody')", "settle": 8000},
         ],
     },
 ]
