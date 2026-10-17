@@ -833,6 +833,22 @@
   .chips-modal.behind-group{z-index:98;}   /* 2026-10-17 使用者：機器人等面板裡點族群名，成分股視窗（z-index 99）要蓋在上面，關掉再回來 */  /* 手機／iPad 直式開K線圖（z-index 100）時退到後面，關圖再回來 */
   .chips-inner{background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(1120px,96vw);height:min(920px,92vh);overflow:auto;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);}
   .chips-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;background:#33333a;color:#fff;padding:10px 12px;border-radius:10px;margin-bottom:10px;}
+  /* 2026-10-17 使用者：機器人面板改成像 Windows 的視窗——右上角 ⧉ 移到另一螢幕、－ 最小化（縮到下面托盤）、▢ 最大化、✕ 關閉；
+     標題列拖著走，四邊四角拉大小；不擋後面的頁面（跟盤中訊號中心一樣） */
+  #botModal{background:none;pointer-events:none;padding:0;}
+  #botModal.bot-front:not(.behind-group):not(.behind-chart){z-index:103;}
+  #botInner{position:absolute;pointer-events:auto;min-width:280px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
+  #botInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
+  .bot-win-acts{display:flex;gap:4px;flex-shrink:0;align-items:center;}
+  .bot-win-acts button{background:#4a4a52;border:1px solid #5d5d66;color:#fff;border-radius:6px;font-size:13px;font-weight:700;min-width:30px;height:28px;padding:0 8px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .bot-win-acts button:hover{background:#62626c;}
+  .bot-win-acts #botClose:hover{background:#e81123;border-color:#e81123;}
+  @media (max-width:767px){ #botPop{display:none;} }
+  body.bot-window-mode{padding-bottom:0;}
+  body.bot-window-mode > *:not(#botModal):not(.chart-modal):not(.group-modal):not(#chartWindows):not(#chartTray):not(#toastBox){display:none!important;}
+  body.bot-window-mode #botInner{left:0!important;top:0!important;width:100%!important;height:100%!important;max-width:none;max-height:none;border:0;border-radius:0;box-shadow:none;}
+  body.bot-window-mode #botInner > .chips-head{cursor:default;border-radius:0;}
+  body.bot-window-mode #botMin{display:none;}
   .chips-title{font-weight:800;font-size:18px;}
   .chips-sub{font-size:12px;color:#d5d5d5;margin-top:2px;}
   .chips-controls{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:8px 0;}
@@ -2828,12 +2844,17 @@
 <!-- 2026-10-17 使用者：機器人代碼面板（照對方 Line 機器人：輸入代碼回名單） -->
 <div class="chips-modal" id="botModal" hidden>
   <div class="chips-inner" id="botInner">
-    <div class="chips-head">
+    <div class="chips-head" id="botHead">
       <div>
         <div class="chips-title">🤖 機器人代碼</div>
         <div class="chips-sub">輸入代碼（或股號、族群名）就回名單：12＝族群漲 2% 以上排行、22＝個股漲 2% 以上排行、2359B2＝同族群漲 2% 以上、2359a＝族群名次變化、70／71／72＝國際行情…下面有全部代碼。</div>
       </div>
-      <button class="cm-icon-btn" id="botClose" aria-label="關閉">✕</button>
+      <div class="bot-win-acts">
+        <button type="button" id="botPop" title="另開一個視窗，可以拖到外接螢幕；再按一次移回主畫面">⧉ 移到另一螢幕</button>
+        <button type="button" id="botMin" title="最小化（縮到下面，點一下還原）" aria-label="最小化">－</button>
+        <button type="button" id="botMax" title="最大化" aria-label="最大化">▢</button>
+        <button type="button" id="botClose" title="關閉" aria-label="關閉">✕</button>
+      </div>
     </div>
     <div id="botBody"></div>
   </div>
@@ -4526,6 +4547,7 @@ function chartEmbedUrl(code, name, tf){
   return location.pathname + '?' + params.toString();
 }
 function bringChartWindowToFront(win){
+  const bot = document.getElementById('botModal'); if (bot) bot.classList.remove('bot-front');
   chartWindowZ += 1;
   win.el.style.zIndex = String(chartWindowZ);
   chartWindows.forEach((w) => w.el.classList.toggle('front', w === win));
@@ -4645,7 +4667,11 @@ window.addEventListener('message', (e) => {
   if (e.data.type === 'hanstockChartClose'){
     chartWindows.forEach((w) => { if (w.iframe.contentWindow === e.source) closeChartWindow(w.id); });
   } else if (e.data.type === 'hanstockBotRun' && typeof e.data.cmd === 'string'){   // 浮動K線圖點「⚡隔日沖」標籤：在主畫面開機器人
-    openBotPanel(); botRun(e.data.cmd.slice(0, 12));
+    botOpenRun(e.data.cmd.slice(0, 12));
+  } else if (e.data.type === 'hanstockBotReturn' && typeof e.data.cmd === 'string'){   // 另開的機器人視窗按「↩ 移回主畫面」
+    botPopWin = null;
+    openBotPanel();
+    if (e.data.cmd) botRun(e.data.cmd.slice(0, 12));
   } else if (e.data.type === 'hanstockChartFocus'){
     chartWindows.forEach((w) => { if (w.iframe.contentWindow === e.source) bringChartWindowToFront(w); });
   }
@@ -4678,7 +4704,7 @@ document.getElementById('cmGroups').addEventListener('click', (e) => {
   const cmd = t.dataset.dtCode + 'm';
   if (CHART_WINDOW_MODE && window.parent !== window){ window.parent.postMessage({ type: 'hanstockBotRun', cmd }, location.origin); return; }
   if (!CHART_WINDOW_MODE) closeStockChart();
-  openBotPanel(); botRun(cmd);
+  botOpenRun(cmd);
 });
 function openStockChart(code, name, tf){
   if (useFloatingCharts()){ openChartWindow(code, name, tf); return; }
@@ -13362,12 +13388,22 @@ async function toggleSignalPin(){
 }
 function initSignalWindowChrome(){
   if (document.body.classList.contains('signal-window-mode')) return;
-  const panel = document.getElementById('signalModalInner');
-  const head = document.getElementById('signalModalHead');
-  let dragging = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
+  attachFloatChrome(document.getElementById('signalModal'), document.getElementById('signalModalInner'), document.getElementById('signalModalHead'), {
+    isMax: () => !!signalMaxRestore,
+    clearMax: () => { signalMaxRestore = null; setSignalMaxButton(); },
+    toggleMax: toggleSignalMaximize,
+    fill: fillSignalModalToViewport,
+    recenter: positionSignalModal,
+  });
+}
+// 浮動視窗的拖曳＋上下左右拉伸（盤中訊號中心、機器人代碼共用）。overlay＝整片透明覆蓋層（放把手），panel＝視窗本體，head＝拖著走的標題列；
+// hooks：isMax／clearMax／toggleMax／fill（貼滿畫面）／recenter（回預設位置）／onEnd（拖完、拉完，可以記住位置）／minH（最矮多高）
+function attachFloatChrome(overlay, panel, head, hooks){
+  const ended = () => { if (hooks.onEnd) hooks.onEnd(); };
+  let dragging = false, moved = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
   head.addEventListener('pointerdown', (e) => {
     if (e.target.closest('button')) return;
-    dragging = true;
+    dragging = true; moved = false;
     startX = e.clientX; startY = e.clientY;
     const rect = panel.getBoundingClientRect();
     startLeft = rect.left; startTop = rect.top;
@@ -13384,17 +13420,17 @@ function initSignalWindowChrome(){
     left = Math.max(Math.min(0, slack), Math.min(Math.max(0, slack), left));
     top = Math.max(0, Math.min(window.innerHeight - 40, top));
     panel.style.left = left + 'px'; panel.style.top = top + 'px';
-    if (signalMaxRestore && (dx || dy)){ signalMaxRestore = null; setSignalMaxButton(); }
+    if (dx || dy) moved = true;
+    if (hooks.isMax() && (dx || dy)) hooks.clearMax();
   });
-  head.addEventListener('pointerup', () => { dragging = false; });
+  head.addEventListener('pointerup', () => { if (dragging && moved) ended(); dragging = false; });
   head.addEventListener('pointercancel', () => { dragging = false; });
-  head.addEventListener('dblclick', (e) => { if (!e.target.closest('button')) toggleSignalMaximize(); });
+  head.addEventListener('dblclick', (e) => { if (!e.target.closest('button')) hooks.toggleMax(); });
 
   // 2026-09-24 使用者：視窗要能上下左右伸展。CSS 的 resize:both 只有右下角一個把手，這裡在覆蓋層上
   // 另外放 8 個把手（四邊＋四角）貼著視窗邊緣，拖哪一邊就往那一邊放大縮小；把手位置靠
   // ResizeObserver／MutationObserver 跟著視窗的移動、縮放、開關走。把手大部分在視窗外側
   // （外 8px、內 2px），不會壓到視窗裡的捲軸跟內容。
-  const overlay = document.getElementById('signalModal');
   const DIRS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
   const OUT = 8, IN = 2, CORNER = 8;
   const handles = DIRS.map((dir) => {
@@ -13431,7 +13467,7 @@ function initSignalWindowChrome(){
       h.style.width = width + 'px'; h.style.height = height + 'px';
     });
   }
-  const MIN_W = 280, MIN_H = 320;
+  const MIN_W = 280, MIN_H = hooks.minH || 320;
   let resizing = null;
   handles.forEach((h) => {
     h.addEventListener('pointerdown', (e) => {
@@ -13457,12 +13493,12 @@ function initSignalWindowChrome(){
       }
       panel.style.left = left + 'px'; panel.style.top = top + 'px';
       panel.style.width = width + 'px'; panel.style.height = height + 'px';
-      if (signalMaxRestore){ signalMaxRestore = null; setSignalMaxButton(); }
+      if (hooks.isMax()) hooks.clearMax();
       syncResizeHandles();
     });
-    const stop = () => { resizing = null; };
+    const stop = () => { if (resizing) ended(); resizing = null; };
     h.addEventListener('pointerup', stop);
-    h.addEventListener('pointercancel', stop);
+    h.addEventListener('pointercancel', () => { resizing = null; });
   });
   new ResizeObserver(syncResizeHandles).observe(panel);
   new MutationObserver(syncResizeHandles).observe(panel, { attributes: true, attributeFilter: ['class', 'style'] });
@@ -13471,9 +13507,9 @@ function initSignalWindowChrome(){
   // iPad 直橫切換或瀏覽器變窄後，視窗還是舊的寬度／位置，會凸出畫面左右邊；這時自動重新置中、套用新畫面的預設大小。
   window.addEventListener('resize', () => {
     if (overlay.hidden) return;
-    if (signalMaxRestore){ fillSignalModalToViewport(); return; }   // 全螢幕中：跟著新的畫面大小
+    if (hooks.isMax()){ hooks.fill(); return; }   // 全螢幕中：跟著新的畫面大小
     const r = panel.getBoundingClientRect();
-    if (r.left < -1 || r.right > document.documentElement.clientWidth + 1) positionSignalModal();
+    if (r.left < -1 || r.right > document.documentElement.clientWidth + 1) hooks.recenter();
   });
   syncResizeHandles();
 }
@@ -17943,16 +17979,148 @@ function renderBot(){
     (botState.out.length ? botState.out.join('') : '<div class="bot-msg bot-help">' + botCodesSorted().map(([c, d]) => botLine('<b>' + c + '</b>　' + wlEsc(d))).join('') +
       botLine('隔日沖分點：凱基-台北、凱基-城中、富邦證券、統一、群益金鼎、港商野村、國票-敦北法人等 18 個（照對方名單對出來的），資料來源富邦證券主力進出。', 'bot-dim') + '</div>');
 }
+// ---- 機器人面板的視窗（2026-10-17 使用者：右上角要有 Windows 視窗的 ✕、最小化、放大；可以拖來拖去、上下左右拉大小，
+// 還能移到另一個視窗——拖到外接螢幕，也能再移回筆電）----
+// ⧉＝另開一個只有機器人的瀏覽器視窗（#bot-panel，帶著目前的代碼過去），主畫面這份收起來；那個視窗裡按「↩ 移回主畫面」就關掉、回主畫面接著用。
+// －＝縮到下面托盤（結果都還在，點一下還原）；▢＝貼滿整個畫面，再按一次還原；位置大小會記住，下次打開在同一個地方。
+const BOT_RECT_KEY = 'botRect';
+let botMaxRestore = null, botTrayPill = null, botPopWin = null;
+function botWindowMode(){ return document.body.classList.contains('bot-window-mode'); }
+function botPopWindow(){ return botPopWin && !botPopWin.closed ? botPopWin : null; }
+function botHashQuery(){ const m = /^#bot-panel=(.+)$/.exec(location.hash); try { return m ? decodeURIComponent(m[1]).slice(0, 12) : ''; } catch (_){ return ''; } }
+function positionBotPanel(){
+  if (botWindowMode()) return;
+  if (botMaxRestore){ fillBotToViewport(); return; }
+  const panel = document.getElementById('botInner');
+  const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+  let r = null;
+  try { r = JSON.parse(localStorage.getItem(BOT_RECT_KEY) || 'null'); } catch (_){}
+  if (!(r && r.w >= 280 && r.h >= 240 && r.x >= 0 && r.y >= 0 && r.x + r.w <= vw && r.y + r.h <= vh)){   // 沒記過、或換了比較小的畫面放不下：置中預設大小
+    const w = Math.min(1120, vw * 0.96), h = Math.min(920, vh * 0.92);
+    r = { x: Math.max(0, (vw - w) / 2), y: Math.max(0, (vh - h) / 2), w, h };
+  }
+  panel.style.left = r.x + 'px'; panel.style.top = r.y + 'px'; panel.style.width = r.w + 'px'; panel.style.height = r.h + 'px';
+}
+function saveBotRect(){
+  if (botMaxRestore || botWindowMode()) return;
+  const r = document.getElementById('botInner').getBoundingClientRect();
+  try { localStorage.setItem(BOT_RECT_KEY, JSON.stringify({ x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) })); } catch (_){}
+}
+function fillBotToViewport(){
+  const panel = document.getElementById('botInner');
+  panel.style.left = '0px'; panel.style.top = '0px';
+  panel.style.width = document.documentElement.clientWidth + 'px'; panel.style.height = window.innerHeight + 'px';
+}
+function setBotMaxButton(){
+  const b = document.getElementById('botMax');
+  if (!b) return;
+  const on = botWindowMode() ? !!(signalWinRestore || document.fullscreenElement) : !!botMaxRestore;
+  b.textContent = on ? '❐' : '▢';
+  b.title = on ? '還原大小' : '最大化';
+}
+document.addEventListener('fullscreenchange', setBotMaxButton);
+function toggleBotMaximize(){
+  if (botWindowMode()){ toggleSignalWindowMaximize(); setBotMaxButton(); return; }   // 另開的視窗：整個瀏覽器視窗放大（跟訊號中心另開的一樣）
+  const panel = document.getElementById('botInner');
+  if (botMaxRestore){
+    const r = botMaxRestore;
+    botMaxRestore = null;
+    panel.style.left = r.left; panel.style.top = r.top; panel.style.width = r.width; panel.style.height = r.height;
+  } else {
+    botMaxRestore = { left: panel.style.left, top: panel.style.top, width: panel.style.width, height: panel.style.height };
+    fillBotToViewport();
+  }
+  setBotMaxButton();
+}
+function botDropTray(){ if (botTrayPill){ botTrayPill.remove(); botTrayPill = null; } }
+function minimizeBotPanel(){
+  document.getElementById('botModal').hidden = true;
+  if (botTrayPill) return;
+  const pill = document.createElement('button');
+  pill.type = 'button';
+  pill.title = '還原機器人代碼';
+  pill.textContent = '▲ 🤖 機器人代碼';
+  pill.addEventListener('click', openBotPanel);
+  document.getElementById('chartTray').appendChild(pill);
+  botTrayPill = pill;
+}
+function closeBotPanel(){
+  if (botWindowMode()){ window.close(); return; }
+  document.getElementById('botModal').hidden = true;
+  botDropTray();
+}
+function popOutBot(){
+  if (botWindowMode()){   // 另開的視窗裡：↩ 移回主畫面
+    const op = window.opener;
+    if (op && !op.closed){ try { op.postMessage({ type: 'hanstockBotReturn', cmd: botState.history[0] || '' }, location.origin); op.focus(); } catch (_){} }
+    window.close();
+    return;
+  }
+  const panel = document.getElementById('botInner');
+  const q = botState.history[0] || '';
+  const w = Math.round(Math.max(480, Math.min(1400, panel.offsetWidth || 900)));
+  const h = Math.round(Math.max(420, Math.min(1000, panel.offsetHeight || 800)));
+  const win = window.open(location.pathname + location.search + '#bot-panel' + (q ? '=' + encodeURIComponent(q) : ''), 'hanstockBot', 'width=' + w + ',height=' + h);
+  if (!win){ showToast('瀏覽器擋住了另開視窗，請允許這個網站開彈出式視窗'); return; }
+  botPopWin = win;
+  win.focus();
+  closeBotPanel();   // 主畫面這份先收起來，不要同時兩份
+}
+// 機器人已經移到另一個視窗：主畫面再點 🤖 或 K 線圖的「⚡隔日沖」標籤，就送到那個視窗去
+function botOpenRun(cmd){
+  const pop = botPopWindow();
+  if (pop){ pop.postMessage({ type: 'hanstockBotRun', cmd }, location.origin); pop.focus(); return; }
+  openBotPanel(); botRun(cmd);
+}
+// ⧉ 另開的機器人視窗：只顯示機器人，帶過來的代碼等族群資料進來再跑（不然會是空的）；主畫面再按 ⧉ 換代碼也會跟著跑
+function startBotWindow(){
+  document.title = '🤖 機器人代碼';
+  const b = document.getElementById('botPop');
+  if (b){ b.textContent = '↩ 移回主畫面'; b.title = '關掉這個視窗，回主畫面接著用'; b.hidden = !window.opener; }
+  openBotPanel();
+  setBotMaxButton();
+  let q = botHashQuery(), tries = 0;
+  const runWhenReady = () => {
+    if (!q) return;
+    if (lastData && lastData.groups && lastData.groups.length){ botRun(q); q = ''; return; }
+    if (++tries < 60) setTimeout(runWhenReady, 500);
+  };
+  runWhenReady();
+  window.addEventListener('hashchange', () => { q = botHashQuery(); tries = 0; runWhenReady(); });
+}
+function initBotWindowChrome(){
+  if (botWindowMode()) return;
+  attachFloatChrome(document.getElementById('botModal'), document.getElementById('botInner'), document.getElementById('botHead'), {
+    isMax: () => !!botMaxRestore,
+    clearMax: () => { botMaxRestore = null; setBotMaxButton(); },
+    toggleMax: toggleBotMaximize,
+    fill: fillBotToViewport,
+    recenter: positionBotPanel,
+    onEnd: saveBotRect,
+    minH: 240,
+  });
+}
 function openBotPanel(){
-  document.getElementById('botModal').hidden = false;
+  const pop = botPopWindow();
+  if (pop){ pop.focus(); return; }
+  const m = document.getElementById('botModal');
+  const wasHidden = m.hidden;
+  m.hidden = false;
+  botDropTray();
+  if (wasHidden) positionBotPanel();
+  if (!botWindowMode()) m.classList.add('bot-front');
   botWorldLoad();
   renderBot();
   const i = document.getElementById('botQ'); if (i) i.focus();
 }
 document.getElementById('botBtn').addEventListener('click', openBotPanel);
-document.getElementById('botClose').addEventListener('click', () => { document.getElementById('botModal').hidden = true; });
+document.getElementById('botClose').addEventListener('click', closeBotPanel);
+document.getElementById('botMin').addEventListener('click', minimizeBotPanel);
+document.getElementById('botMax').addEventListener('click', toggleBotMaximize);
+document.getElementById('botPop').addEventListener('click', popOutBot);
+// 點機器人視窗就跑到最上層（蓋過 K 線浮動視窗）；點 K 線視窗時 bringChartWindowToFront 會把它退回去
+document.getElementById('botInner').addEventListener('pointerdown', () => { if (!botWindowMode()) document.getElementById('botModal').classList.add('bot-front'); }, true);
 document.getElementById('botModal').addEventListener('click', (e) => {
-  if (e.target === e.currentTarget){ e.currentTarget.hidden = true; return; }
   const t = e.target;
   if (t.closest('[data-bot-go]')){ const i = document.getElementById('botQ'); botRun(i ? i.value : ''); if (i) i.value = ''; return; }
   const run = t.closest('[data-bot-run]'); if (run){ botRun(run.dataset.botRun); return; }
@@ -18026,6 +18194,8 @@ function closeRemindPanel(){ document.getElementById('remindModal').hidden = tru
 function remindOnData(){
   remindMarkBtn();
   if (!document.getElementById('remindModal').hidden){ renderRemind(); const d = jlState.data; if (d && d.status === 'ok'){ try { localStorage.setItem(REMIND_SEEN_KEY, d.dataDate); } catch (_){} } return; }
+  // K 線圖小視窗、另開的訊號中心／機器人視窗不跳（看不到，還會被記成已經看過，主畫面就不跳了）
+  if (CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || botWindowMode()) return;
   if (remindUnseen()) openRemindPanel();
 }
 document.getElementById('remindBtn').addEventListener('click', openRemindPanel);
@@ -18531,7 +18701,9 @@ if (CHART_WINDOW_MODE){
   if (location.hash === '#signal-center'){
     document.body.classList.add('signal-window-mode');
   }
+  if (/^#bot-panel(=|$)/.test(location.hash)) document.body.classList.add('bot-window-mode');   // ⧉ 另開的機器人視窗
   initSignalWindowChrome();
+  initBotWindowChrome();
   updatePinButton();  // 電腦版 Chrome／Edge 才有「📌 釘選最上層」
   // 網頁被重新載入（切 App 回來自動更新、iOS 記憶體不足重載）：回到原本的分頁跟捲到的位置（3 小時內）
   try {
@@ -18544,6 +18716,7 @@ if (CHART_WINDOW_MODE){
   openSignalCenter(); // 盤中訊號中心預設常駐顯示，不用點才出現；要隱藏就按✕，要收合成小條就按－
 
   refresh();
+  if (botWindowMode()) startBotWindow();
   // 訊號要快：每5秒獨立輪詢(Worker端這幾個API也不快取)，不跟/api/groups綁在一起等。
   // 2026-10-16 Cloudflare 免費方案一天 10 萬次請求：平日 08:30～14:30 照原本 15 秒／5 秒；其他時間報價、訊號都不會變，
   // 改成 5 分鐘抓一次（10/15 晚上沒開盤還有每小時 2～3 千次請求，多半是開著沒關的頁面）
