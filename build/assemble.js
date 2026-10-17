@@ -918,6 +918,63 @@ export default {
       const rows = await Promise.all(syms.map(one));
       return new Response(JSON.stringify({ status: "ok", rows }), { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=60" } });
     }
+    if (url.pathname === "/api/ipo") {
+      // 研究室「抽籤股」（2026-10-17 使用者：照「警示股與抽籤股整理」的抽籤股那段放研究室）：證交所公開申購公告＋現價算獲利空間；
+      // 新上市櫃（初上市／初上櫃）還沒掛牌，用櫃買興櫃最後成交價，增資用 Yahoo 現價
+      const UA = { "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)", Accept: "application/json" };
+      const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+      const recentCut = new Date(Date.now() + 8 * 3600e3 - 14 * 86400e3).toISOString().slice(0, 10);
+      const iso = (roc) => { const m = /^(\\d{2,3})\\/(\\d{2})\\/(\\d{2})$/.exec(String(roc || "").trim()); return m ? (Number(m[1]) + 1911) + "-" + m[2] + "-" + m[3] : null; };
+      const num = (v) => { const t = String(v ?? "").replace(/,/g, "").trim(); const x = Number(t); return t && Number.isFinite(x) ? x : null; };
+      const KINDS = ["初上市", "初上櫃", "上市增資", "上櫃增資"];
+      try {
+        const r = await fetch("https://www.twse.com.tw/rwd/zh/announcement/publicForm?response=json", { headers: UA, cf: { cacheTtl: 1800, cacheEverything: true } });
+        if (!r.ok) throw new Error("證交所 HTTP " + r.status);
+        const j = await r.json();
+        const f = (j.fields || []).map((x) => String(x).trim());
+        const at = (d, name) => d[f.indexOf(name)];
+        let rows = (j.data || []).map((d) => ({
+          code: String(at(d, "證券代號") || "").trim(), name: String(at(d, "證券名稱") || "").trim(), kind: String(at(d, "發行市場") || "").trim(),
+          draw: iso(at(d, "抽籤日期")), start: iso(at(d, "申購開始日")), end: iso(at(d, "申購結束日")),
+          lots: Math.round((num(at(d, "承銷股數")) || 0) / 1000), price: num(at(d, "承銷價(元)")), actual: num(at(d, "實際承銷價(元)")),
+          list: iso(at(d, "撥券日期(上市、上櫃日期)")), broker: String(at(d, "主辦券商") || "").trim(),
+          qualified: num(at(d, "總合格件")), rate: num(at(d, "中籤率(%)")), cancel: String(at(d, "取消公開抽籤") || "").trim()
+        })).filter((x) => /^\\d{4}$/.test(x.code) && KINDS.includes(x.kind) && ((x.end && x.end >= today) || (x.draw && x.draw >= recentCut)));
+        const esb = {};
+        if (rows.some((x) => x.kind.startsWith("初"))) {
+          try {
+            const e = await fetch("https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics", { headers: UA, cf: { cacheTtl: 600, cacheEverything: true } });
+            if (e.ok) for (const x of await e.json()) esb[String(x.SecuritiesCompanyCode || "").trim()] = x;
+          } catch (_) {}
+        }
+        const yahoo = async (sym) => {
+          try {
+            const y = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + sym + "?range=1d&interval=1d", { headers: UA, cf: { cacheTtl: 600, cacheEverything: true } });
+            if (!y.ok) return null;
+            const m = ((((await y.json()) || {}).chart || {}).result || [])[0];
+            const p = m && m.meta ? Number(m.meta.regularMarketPrice) : NaN;
+            return Number.isFinite(p) ? p : null;
+          } catch (_) { return null; }
+        };
+        rows = await Promise.all(rows.map(async (x) => {
+          let ref = null, refSrc = "";
+          if (x.kind.startsWith("初")) {
+            const e = esb[x.code];
+            ref = e ? num(e.LatestPrice) || num(e.Average) : null;
+            refSrc = ref ? "興櫃" : "";
+            if (!ref && x.end >= today) { ref = await yahoo(x.code + ".TWO"); refSrc = ref ? "興櫃" : ""; }
+          } else if (x.end >= today) {
+            ref = await yahoo(x.code + (x.kind === "上市增資" ? ".TW" : ".TWO"));
+            refSrc = ref ? "收盤" : "";
+          }
+          const base = x.actual || x.price;
+          return { ...x, ref, refSrc, profit: ref && base ? Math.round((ref - base) / base * 1000) / 10 : null };
+        }));
+        rows.sort((a, b) => (a.draw || "").localeCompare(b.draw || "") || a.code.localeCompare(b.code));
+        return new Response(JSON.stringify({ status: "ok", today, rows, generatedAt: new Date().toISOString() }),
+          { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=300" } });
+      } catch (e) { return Response.json({ status: "error", message: String(e && e.message || e).slice(0, 120) }, { status: 502 }); }
+    }
     if (url.pathname === "/api/river-hit") {
       // 估值河流圖每查一檔記一筆（本週查詢排行，2026-10-16 使用者）：/api/river 有快取，後端看不到每一次；不快取
       const code = String(url.searchParams.get("code") || "").trim().toUpperCase();

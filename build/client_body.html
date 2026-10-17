@@ -126,6 +126,7 @@
   .bot-line.bot-sep{color:var(--muted);text-align:left;} .bot-line.bot-warn{color:#fb923c;} .bot-dim{color:var(--muted);}
   #remindInner{max-width:620px;}
   .rm-date{font-size:17px;font-weight:800;margin:2px 0 10px;}
+  .ipo-scroll{overflow-x:auto;} .ipo-scroll .rm-table td,.ipo-scroll .rm-table th{white-space:nowrap;}
   .rm-sec{margin:0 0 14px;} .rm-h{font-weight:800;font-size:14.5px;margin:0 0 4px;} .rm-h small{color:var(--muted);font-weight:600;font-size:11.5px;margin-left:6px;}
   .rm-table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums;}
   .rm-table th{color:var(--muted);font-weight:700;font-size:12px;text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap;}
@@ -15535,7 +15536,7 @@ document.getElementById('guideBody').addEventListener('click', (e) => {
 // ---- 研究室：國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar 做，含名詞小學堂）----
 // 後端 /api/macro-calendar：TradingView 經濟日曆（美／中／日／歐）每小時更新公布值，加台指期結算、美股季度結算、公司法說。
 // 版面照老師：頁首更新時間 → 下一件大事倒數 → 全部／★★ 以上／只看大事篩選 → 依週分段的事件（前值／預期／公布）→ 小學堂。
-const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘'], ['fut', '📉 外資空單'], ['insider', '👥 內部人']];   // 2026-10-15 使用者：外資空單放資金保護傘旁邊
+const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘'], ['fut', '📉 外資空單'], ['insider', '👥 內部人'], ['ipo', '🎫 抽籤股']];   // 2026-10-17 使用者：抽籤股放研究室   // 2026-10-15 使用者：外資空單放資金保護傘旁邊
 const MC_FLAGS = { US: '🇺🇸', CN: '🇨🇳', JP: '🇯🇵', EU: '🇪🇺', TW: '🇹🇼' };
 const MC_FILTERS = [['all', '全部'], ['2', '★★ 以上'], ['3', '只看大事 ★★★']];
 const labState = { tab: (() => { try { const t = localStorage.getItem('labTab'); return LAB_TABS.some((x) => x[0] === t) ? t : 'cal'; } catch (_){ return 'cal'; } })(), timer: null };
@@ -16142,17 +16143,55 @@ function inHtml(){
   html += '<div class="mc-foot">' + wlEsc(d.rule || '') + '<br>內部人買不代表一定會漲、賣也可能只是繳稅或資金規劃；要搭配股價位置與大戶動向一起看。本頁只是整理公開申報資料，不是投資建議。<br>資料來源：' + wlEsc(d.source || '') + '</div>';
   return html;
 }
+// ---- 研究室：抽籤股（2026-10-17 使用者：「警示股與抽籤股整理」的抽籤股那段放研究室）----
+// /api/ipo：證交所公開申購公告，申購中／即將申購的新上市櫃、上市櫃增資，用現價算獲利空間；最近兩週的抽籤結果（中籤率）
+const ipoState = { data: null, loading: false, error: null, loadedAt: 0 };
+async function ipoLoad(force){
+  if (ipoState.loading || (ipoState.data && !force && Date.now() - ipoState.loadedAt < 15 * 60e3)) return;
+  ipoState.loading = true; ipoState.error = null;
+  renderLab();
+  try {
+    const r = await fetch('/api/ipo', { cache: 'no-store' });
+    const d = await r.json();
+    if (d.status !== 'ok') throw new Error(d.message || 'HTTP ' + r.status);
+    ipoState.data = d; ipoState.loadedAt = Date.now();
+  } catch (err){ ipoState.error = String((err && err.message) || err); }
+  ipoState.loading = false;
+  renderLab();
+}
+function ipoHtml(){
+  const d = ipoState.data;
+  if (!d) return ipoState.error ? '<div class="race-note">讀取失敗：' + wlEsc(ipoState.error) + ' <button type="button" class="chart-tab" data-ipo-reload="1">重試</button></div>' : '<div class="race-note">讀取中…</div>';
+  const md = (iso) => (iso ? Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10) : '—');
+  const px = (v) => (v === null || v === undefined ? '—' : Number(v).toLocaleString('zh-TW', { maximumFractionDigits: 2 }));
+  const name = (x) => '<span class="rm-code" data-ipo-code="' + wlEsc(x.code) + '" data-ipo-name="' + wlEsc(x.name) + '">' + wlEsc(x.code) + '</span> ' + wlEsc(x.name);
+  const upRows = d.rows.filter((x) => x.end && x.end >= d.today);
+  const sec = (title, sub, list) => '<h3 class="mc-h">' + title + ' <small>' + sub + '</small></h3>' + (list.length ? '<div class="ipo-scroll"><table class="rm-table"><thead><tr><th>股票</th><th>申購期間</th><th>抽籤日</th><th>承銷價</th><th>承銷張數</th><th>今日收盤</th><th>獲利空間</th><th>撥券日</th></tr></thead><tbody>' +
+    list.map((x) => '<tr><td>' + name(x) + '</td><td>' + md(x.start) + '~' + md(x.end) + '</td><td>' + md(x.draw) + '</td><td>' + px(x.actual || x.price) + '</td><td>' + px(x.lots) + '</td><td>' +
+      px(x.ref) + (x.refSrc === '興櫃' ? '<small class="rm-none">（興櫃）</small>' : '') + '</td><td class="' + (x.profit > 0 ? 'up' : x.profit < 0 ? 'down' : '') + '"><b>' + (x.profit === null ? '—' : (x.profit > 0 ? '+' : '') + x.profit + '%') + '</b></td><td>' + md(x.list) + '</td></tr>').join('') +
+    '</tbody></table></div>' : '<div class="race-note">目前沒有</div>');
+  let html = '<div class="mc-meta">資料：證交所公開申購公告・今天 ' + md(d.today) + ' <button type="button" class="chart-tab" data-ipo-reload="1">重新整理</button></div>';
+  html += sec('🆕 新上市櫃抽籤股', '還沒掛牌，用興櫃最後成交價算', upRows.filter((x) => x.kind.startsWith('初')));
+  html += sec('➕ 上市櫃增資', '用今天收盤價算', upRows.filter((x) => !x.kind.startsWith('初')));
+  const done = d.rows.filter((x) => !(x.end && x.end >= d.today)).sort((a, b) => (b.draw || '').localeCompare(a.draw || ''));
+  html += '<h3 class="mc-h">📋 最近抽籤結果 <small>兩週內</small></h3>' + (done.length ? '<div class="ipo-scroll"><table class="rm-table"><thead><tr><th>股票</th><th>類別</th><th>抽籤日</th><th>承銷價</th><th>合格件數</th><th>中籤率</th><th>撥券日</th></tr></thead><tbody>' +
+    done.map((x) => '<tr><td>' + name(x) + '</td><td>' + wlEsc(x.kind) + '</td><td>' + md(x.draw) + '</td><td>' + px(x.actual || x.price) + '</td><td>' + px(x.qualified) + '</td><td>' +
+      (x.cancel ? wlEsc(x.cancel) : x.rate ? x.rate + '%' : '—') + '</td><td>' + md(x.list) + '</td></tr>').join('') + '</tbody></table></div>' : '<div class="race-note">兩週內沒有</div>');
+  html += '<div class="mc-foot">獲利空間＝（今日收盤 − 承銷價）÷ 承銷價。新上市櫃還沒掛牌，用興櫃最後成交價估；抽中要等撥券日才能賣，這段時間價格會變。每人每檔限申購一件。<br>' +
+    '資料來源：證交所公開申購公告、櫃買中心興櫃行情、Yahoo Finance。只是整理公開資料，不是投資建議。</div>';
+  return html;
+}
 function renderLab(){
   const body = document.getElementById('labBody');
   if (!body || document.getElementById('labModal').hidden) return;
   const pastOpen = !!body.querySelector('details.mc-pastweek[open]');
   const callsOpen = [...body.querySelectorAll('details[data-mc-calls][open]')].map((x) => x.dataset.mcCalls);
   body.innerHTML = '<div class="hw-tabs">' + LAB_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (labState.tab === k ? ' active' : '') + '" data-lab-tab="' + k + '">' + label + '</button>').join('') + '</div>' +
-    (labState.tab === 'fund' ? fuHtml() : labState.tab === 'fut' ? fcHtml() : labState.tab === 'insider' ? inHtml() : mcCalendarHtml());
+    (labState.tab === 'fund' ? fuHtml() : labState.tab === 'fut' ? fcHtml() : labState.tab === 'insider' ? inHtml() : labState.tab === 'ipo' ? ipoHtml() : mcCalendarHtml());
   if (pastOpen){ const det = body.querySelector('details.mc-pastweek'); if (det) det.open = true; }
   body.querySelectorAll('details[data-mc-calls]').forEach((x) => { if (callsOpen.includes(x.dataset.mcCalls)) x.open = true; });
 }
-function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else if (labState.tab === 'fut') fcLoad(false); else if (labState.tab === 'insider') inLoad(false); else mcLoad(false); }
+function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else if (labState.tab === 'fut') fcLoad(false); else if (labState.tab === 'insider') inLoad(false); else if (labState.tab === 'ipo') ipoLoad(false); else mcLoad(false); }
 function openLabPanel(){
   document.getElementById('labModal').hidden = false;
   renderLab();
@@ -16194,6 +16233,9 @@ document.getElementById('labBody').addEventListener('click', (e) => {
   const tab = t.closest('[data-lab-tab]');
   if (tab){ labState.tab = tab.dataset.labTab; try { localStorage.setItem('labTab', labState.tab); } catch (_){} renderLab(); labLoad(); return; }
   if (t.closest('[data-fu-reload]')){ fuLoad(true); return; }
+  if (t.closest('[data-ipo-reload]')){ ipoLoad(true); return; }
+  const ipoc = t.closest('[data-ipo-code]');
+  if (ipoc){ openStockChart(ipoc.dataset.ipoCode, ipoc.dataset.ipoName); return; }
   if (t.closest('[data-fc-reload]')){ fcLoad(true); return; }
   const fcr = t.closest('[data-fc-range]');
   if (fcr){ fcState.range = Number(fcr.dataset.fcRange); try { localStorage.setItem('fcRangeM', String(fcState.range)); } catch (_){} renderLab(); return; }
