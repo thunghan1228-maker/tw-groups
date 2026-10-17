@@ -2961,17 +2961,7 @@
         <canvas id="forceCanvas"></canvas>
       </div>
     </div>
-    <div class="ind-panel-block">
-      <div class="ind-panel-head"><span class="force-title">成交量</span></div>
-      <div class="chart-canvas-wrap volume-wrap"><canvas id="volumeCanvas"></canvas></div>
-    </div>
-    <div class="ind-panel-block" id="cmChipBlock">  <!-- 2026-10-15 使用者：K線圖加個股籌碼九週柱狀圖（照老師「籌碼暴增 近9週」） -->
-      <div class="ind-panel-head">
-        <span class="force-title">籌碼暴增・近 9 週 <small class="cm-chip-sum" id="cmChipSum"></small></span>
-        <button class="macd-toggle" id="cmChipToggle" aria-pressed="true">收起</button>
-      </div>
-      <div class="cm-chip-body" id="cmChipBody"></div>
-    </div>
+    <!-- 2026-10-17 使用者：K線圖下面的順序＝主力買賣力 → MACD → 成交量 → KD → 籌碼暴增（放最下面） -->
     <div class="ind-panel-block">
       <div class="ind-panel-head">
         <span class="force-title">MACD (12,26,9)</span>
@@ -2982,10 +2972,21 @@
       </div>
     </div>
     <div class="ind-panel-block">
+      <div class="ind-panel-head"><span class="force-title">成交量</span></div>
+      <div class="chart-canvas-wrap volume-wrap"><canvas id="volumeCanvas"></canvas></div>
+    </div>
+    <div class="ind-panel-block">
       <div class="ind-panel-head"><span class="force-title">KD (9,3,3)．用5分K計算</span></div>
       <div class="chart-canvas-wrap kd-wrap" id="kdPanelWrap" hidden>
         <canvas id="kdCanvas"></canvas>
       </div>
+    </div>
+    <div class="ind-panel-block" id="cmChipBlock">  <!-- 2026-10-15 使用者：K線圖加個股籌碼九週柱狀圖（照老師「籌碼暴增 近9週」） -->
+      <div class="ind-panel-head">
+        <span class="force-title">籌碼暴增・近 9 週 <small class="cm-chip-sum" id="cmChipSum"></small></span>
+        <button class="macd-toggle" id="cmChipToggle" aria-pressed="true">收起</button>
+      </div>
+      <div class="cm-chip-body" id="cmChipBody"></div>
     </div>
   </div>
 </div>

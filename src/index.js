@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 14:38:19";
+const BUILD_STAMP = "2026-10-17 14:46:08";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3041,17 +3041,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <canvas id="forceCanvas"></canvas>
       </div>
     </div>
-    <div class="ind-panel-block">
-      <div class="ind-panel-head"><span class="force-title">成交量</span></div>
-      <div class="chart-canvas-wrap volume-wrap"><canvas id="volumeCanvas"></canvas></div>
-    </div>
-    <div class="ind-panel-block" id="cmChipBlock">  <!-- 2026-10-15 使用者：K線圖加個股籌碼九週柱狀圖（照老師「籌碼暴增 近9週」） -->
-      <div class="ind-panel-head">
-        <span class="force-title">籌碼暴增・近 9 週 <small class="cm-chip-sum" id="cmChipSum"></small></span>
-        <button class="macd-toggle" id="cmChipToggle" aria-pressed="true">收起</button>
-      </div>
-      <div class="cm-chip-body" id="cmChipBody"></div>
-    </div>
+    <!-- 2026-10-17 使用者：K線圖下面的順序＝主力買賣力 → MACD → 成交量 → KD → 籌碼暴增（放最下面） -->
     <div class="ind-panel-block">
       <div class="ind-panel-head">
         <span class="force-title">MACD (12,26,9)</span>
@@ -3062,10 +3052,21 @@ const HTML_PAGE = `<!DOCTYPE html>
       </div>
     </div>
     <div class="ind-panel-block">
+      <div class="ind-panel-head"><span class="force-title">成交量</span></div>
+      <div class="chart-canvas-wrap volume-wrap"><canvas id="volumeCanvas"></canvas></div>
+    </div>
+    <div class="ind-panel-block">
       <div class="ind-panel-head"><span class="force-title">KD (9,3,3)．用5分K計算</span></div>
       <div class="chart-canvas-wrap kd-wrap" id="kdPanelWrap" hidden>
         <canvas id="kdCanvas"></canvas>
       </div>
+    </div>
+    <div class="ind-panel-block" id="cmChipBlock">  <!-- 2026-10-15 使用者：K線圖加個股籌碼九週柱狀圖（照老師「籌碼暴增 近9週」） -->
+      <div class="ind-panel-head">
+        <span class="force-title">籌碼暴增・近 9 週 <small class="cm-chip-sum" id="cmChipSum"></small></span>
+        <button class="macd-toggle" id="cmChipToggle" aria-pressed="true">收起</button>
+      </div>
+      <div class="cm-chip-body" id="cmChipBody"></div>
     </div>
   </div>
 </div>
@@ -12808,7 +12809,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 14:38:19';
+const BUILD_STAMP = '2026-10-17 14:46:08';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
