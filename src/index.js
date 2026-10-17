@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 12:34:29";
+const BUILD_STAMP = "2026-10-17 13:51:59";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -214,6 +214,24 @@ const HTML_PAGE = `<!DOCTYPE html>
   .rm-new{display:inline-block;background:#dc2626;color:#fff;border-radius:6px;font-size:10.5px;font-weight:800;padding:0 5px;margin-left:4px;vertical-align:1px;}
   .rm-more{margin-top:6px;font-size:12.5px;color:var(--muted);} .rm-more summary{cursor:pointer;}
   #remindBtn.unseen{border-color:#f87171;color:#f87171;}
+  /* 機器人長條圖（2026-10-17 使用者：照對方機器人附的「族群籌碼排名」「族群籌碼」圖）：往右＝正、往左＝負，數字帶正負號，顏色只是輔助 */
+  .bot-chart{margin-top:8px;border:1px solid var(--line);border-radius:10px;padding:10px 12px 8px;background:var(--panel-2);}
+  .bot-chart-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
+  .bot-chart-title{font-weight:800;font-size:15px;} .bot-chart-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .bot-chart-right{text-align:right;font-size:13px;font-weight:800;white-space:nowrap;} .bot-chart-right small{display:block;font-size:11.5px;font-weight:700;color:var(--muted);}
+  .bcr{display:grid;grid-template-columns:2.6em 5.6em minmax(0,1fr);align-items:center;column-gap:6px;font-size:12px;height:22px;border-radius:4px;cursor:default;}
+  .bcr.hl{background:rgba(201,169,140,.2);}
+  .bcr:hover{background:rgba(201,169,140,.12);}
+  .bcr .c{color:var(--muted);font-variant-numeric:tabular-nums;} .bcr .n{text-align:right;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+  .bct{position:relative;height:12px;} .bct .bci{position:absolute;top:0;bottom:0;}
+  .bct .z{position:absolute;top:-5px;bottom:-5px;width:1px;background:var(--muted);opacity:.55;}
+  .bct .b{position:absolute;top:0;height:12px;}
+  .bct .b.pos{background:var(--up);border-radius:0 4px 4px 0;} .bct .b.neg{background:var(--down);border-radius:4px 0 0 4px;}
+  .bct .b.faded{opacity:.5;}
+  .bct .v{position:absolute;top:-2px;font-size:11.5px;line-height:16px;white-space:nowrap;color:var(--text);font-variant-numeric:tabular-nums;}
+  .bc-avg{position:relative;border-top:1px dashed var(--muted);margin:5px 0 5px 8.8em;height:0;}
+  .bc-avg span{position:absolute;left:0;top:-9px;background:var(--panel-2);padding:0 4px;font-size:10.5px;color:var(--muted);}
+  .bot-chart-foot{font-size:10.5px;color:var(--muted);margin-top:6px;}
   .bot-stk,.bot-grp{cursor:pointer;font-weight:700;} .bot-stk:hover,.bot-grp:hover{text-decoration:underline;} .bot-grp{color:#facc15;}
   .hr-jail-card .jl-new{font-style:normal;font-size:10px;color:#f87171;border:1px solid #f87171;border-radius:4px;padding:0 3px;margin-left:3px;}
   .hr-jail-card tr.jl-ghead{cursor:pointer;} .hr-jail-card tr.jl-ghead td{padding-top:6px!important;color:var(--text);}
@@ -12776,7 +12794,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 12:34:29';
+const BUILD_STAMP = '2026-10-17 13:51:59';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17461,6 +17479,28 @@ function botFetchCache(key, url, ttl){
     .catch((err) => { c[key] = { at: Date.now(), data: { status: 'error', message: '抓不到資料（' + String((err && err.message) || err).slice(0, 40) + '）' } }; done(); });
   return e ? e.data : null;
 }
+// 機器人長條圖（照對方機器人附的圖）：rows＝[{c: 左邊小字, n: 名稱, v: 數值%, hl: 反白, faded: 淡色}]；opts.avgAfter＝第幾列下面畫「前 N 名平均」虛線
+function botBarChart(rows, opts){
+  const vals = rows.map((r) => (Number.isFinite(r.v) ? r.v : 0));
+  const maxPos = Math.max(0, ...vals), maxNeg = Math.max(0, ...vals.map((v) => -v));
+  const span = (maxPos + maxNeg) || 1;
+  // 兩邊固定留給數字的寬度（手機上用百分比留不夠，數字會壓到股名或被切掉）
+  const padL = maxNeg > 0 ? 54 : 0, padR = maxPos > 0 ? 58 : 0, usable = 100;
+  const z = usable * maxNeg / span;
+  const fmtV = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
+  const row = (r) => {
+    const v = Number.isFinite(r.v) ? r.v : 0, w = usable * Math.abs(v) / span;
+    const bar = v > 0 ? '<i class="b pos' + (r.faded ? ' faded' : '') + '" style="left:' + z + '%;width:' + w + '%"></i><span class="v" style="left:calc(' + (z + w) + '% + 4px)">' + fmtV(r.v) + '</span>'
+      : v < 0 ? '<i class="b neg' + (r.faded ? ' faded' : '') + '" style="left:' + (z - w) + '%;width:' + w + '%"></i><span class="v" style="right:calc(' + (100 - z + w) + '% + 4px)">' + fmtV(r.v) + '</span>'
+        : '<span class="v" style="left:calc(' + z + '% + 4px)">' + fmtV(r.v) + '</span>';
+    return '<div class="bcr' + (r.hl ? ' hl' : '') + '" title="' + wlEsc((r.c ? r.c + ' ' : '') + r.n + ' ' + fmtV(r.v)) + '"><span class="c">' + wlEsc(r.c || '') + '</span><span class="n">' + wlEsc(r.n) +
+      '</span><span class="bct"><span class="bci" style="left:' + padL + 'px;right:' + padR + 'px"><i class="z" style="left:' + z + '%"></i>' + bar + '</span></span></div>';
+  };
+  const body = rows.map((r, i) => row(r) + (opts.avgAfter && i === opts.avgAfter - 1 && rows.length > opts.avgAfter ? '<div class="bc-avg"><span>' + wlEsc(opts.avgText || '') + '</span></div>' : '')).join('');
+  return '<div class="bot-chart"><div class="bot-chart-head"><div><div class="bot-chart-title">' + wlEsc(opts.title) + '</div><div class="bot-chart-sub">' + wlEsc(opts.sub || '') + '</div></div>' +
+    (opts.right ? '<div class="bot-chart-right">' + wlEsc(opts.right) + (opts.rightSub ? '<small>' + wlEsc(opts.rightSub) + '</small>' : '') + '</div>' : '') + '</div>' + body +
+    (opts.foot ? '<div class="bot-chart-foot">' + wlEsc(opts.foot) + '</div>' : '') + '</div>';
+}
 function botNameOf(code){
   if (lastData && Array.isArray(lastData.groups)) for (const g of lastData.groups){ const s = g.stocks.find((x) => x.code === code); if (s) return s.name; }
   return '';
@@ -17771,11 +17811,16 @@ function botAnswer(raw){
   if (q === '17784'){
     const cd = chipOf();
     if (!cd) return chipWait('排名比較(籌碼暴增)(17784)');
+    // 族群 %＝族裡籌碼暴增前 5 名的平均（2026-10-17 照對方圖下面的說明；小電組 5.01、光學鏡頭 4.55、矽光子 4.25…都一樣）
     const rows = rankedGroupsOf(lastData.groups).map((g) => {
-      const vs = g.stocks.map((x) => cd.chips[x.code]).filter((v) => v && Number.isFinite(v[0])).map((v) => v[0]);
-      return { name: g.name, n: vs.length, avg: vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : NaN };
+      const top = g.stocks.map((x) => cd.chips[x.code]).filter((v) => v && Number.isFinite(v[0])).map((v) => v[0]).sort((a, b) => b - a).slice(0, 5);
+      return { name: g.name, n: top.length, avg: top.length ? top.reduce((a, b) => a + b, 0) / top.length : NaN };
     }).filter((r) => r.n >= 2).sort((a, b) => b.avg - a.avg).slice(0, 10);
-    return wrap('排名比較(籌碼暴增)(17784)', rows.map((r) => botLine(botGrp(r.name, ' ' + chipSpan(r.avg)))).join(''), '族群裡每檔集保大戶週增減的平均・' + rdMdShort(cd.week) + ' 週');
+    const wk = rdMdShort(cd.week);
+    return wrap('排名比較(籌碼暴增)(17784)', rows.map((r) => botLine(botGrp(r.name, ' ' + chipSpan(r.avg)))).join('') +
+      (rows.length ? botBarChart(rows.map((r, i) => ({ c: String(i + 1), n: r.name, v: r.avg, faded: i >= 3 })), { title: '族群籌碼排名', sub: '籌碼暴增 前' + rows.length + '族・' + wk + ' 當週',
+        right: rows[0].name, rightSub: '第 1 名 ' + (rows[0].avg > 0 ? '+' : '') + rows[0].avg.toFixed(2) + '%', foot: '族群 %＝該族籌碼暴增前 5 名平均（集保 400 張以上大戶週增減）' }) : ''),
+      '族群 %＝籌碼暴增前 5 名平均・' + wk + ' 週');
   }
   // 75 股期黑龍、80 隔日沖雙週入榜黑龍：黑龍＝均線分數 ≥ 10、今天收黑K（盤中用即時價：現價 < 開盤）
   if (q === '75' || q === '80'){
@@ -17830,9 +17875,20 @@ function botAnswer(raw){
     if (gs.length){
       const cd = chipOf();
       if (!cd) return chipWait(raw);
-      return wrap(gs.length === 1 ? gs[0].name + ' 族群(籌碼暴增)' : pre + ' 的族群(籌碼暴增)', gs.slice(0, 6).map((g) => (gs.length > 1 ? botLine(botGrp(g.name), 'bot-head') : '') +
-        chipSort(g.stocks.map((x) => ({ code: x.code, name: x.name })), cd).map((x) => botLine(botStk(x.code, x.name, ' ' + chipSpan(x.v)) + (x.code === pre ? ' ◀' : ''))).join('')).join(''),
-        '集保大戶週增減・' + rdMdShort(cd.week) + ' 週');
+      // 每族後面附一張圖（照對方）：查的那檔反白、標族內第幾名；第 5 名下面畫「前 5 名平均」
+      const wk = rdMdShort(cd.week);
+      return wrap(gs.length === 1 ? gs[0].name + ' 族群(籌碼暴增)' : pre + ' 的族群(籌碼暴增)', gs.slice(0, 6).map((g) => {
+        const list = chipSort(g.stocks.map((x) => ({ code: x.code, name: x.name })), cd);
+        const withV = list.filter((x) => Number.isFinite(x.v));
+        const top = withV.slice(0, 5), avg = top.length ? top.reduce((a, x) => a + x.v, 0) / top.length : NaN;
+        const me = list.findIndex((x) => x.code === pre);
+        const sign = (v) => (v > 0 ? '+' : '') + v.toFixed(2) + '%';
+        return (gs.length > 1 ? botLine(botGrp(g.name), 'bot-head') : '') +
+          list.map((x) => botLine(botStk(x.code, x.name, ' ' + chipSpan(x.v)) + (x.code === pre ? ' ◀' : ''))).join('') +
+          botBarChart(list.map((x) => ({ c: x.code, n: x.name, v: x.v, hl: x.code === pre })), { title: g.name + ' 族群籌碼', sub: '籌碼暴增 ' + list.length + '檔・' + wk + ' 當週',
+            right: me >= 0 ? pre + ' ' + list[me].name : '', rightSub: me >= 0 && Number.isFinite(list[me].v) ? '族內第 ' + (me + 1) + '/' + list.length + ' 名 ' + sign(list[me].v) : '',
+            avgAfter: top.length >= 5 ? 5 : 0, avgText: Number.isFinite(avg) ? '前5名平均 ' + sign(avg) : '', foot: '籌碼暴增＝集保 400 張以上大戶週增減%' });
+      }).join(''), '集保大戶週增減・' + wk + ' 週');
     }
   }
   const f = botFindGroups(q);
