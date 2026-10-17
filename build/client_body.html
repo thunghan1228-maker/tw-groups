@@ -4796,6 +4796,20 @@ function groupHorseMarks(g){
   });
   return out;
 }
+// 族群明細的 🔺N（2026-10-17 對老師小電組）：第 3 名以後、今天漲 HORSE_MIN_PCT% 以上、族裡名次比昨天前進的，N＝前進幾名
+// （富喬 🔺2、台玻 🔺10、金像電 🔺2、鉅橡 🔺4 都對；德宏前進 12 名但只漲 2.85% 沒標）。前 2 名照 👑🐎🚀。
+function groupRiseMarks(g){
+  const out = new Map();
+  const sd = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
+  const priced = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent));
+  const w = priced.filter((s) => sd[s.code] && Number.isFinite((sd[s.code].pct || [])[0]));
+  const y = new Map(w.slice().sort((a, b) => sd[b.code].pct[0] - sd[a.code].pct[0]).map((s, i) => [s.code, i + 1]));
+  priced.slice().sort((a, b) => b.changePercent - a.changePercent).forEach((s, i) => {
+    const t = i + 1, ry = y.get(s.code);
+    if (t >= 3 && s.changePercent >= HORSE_MIN_PCT && ry && ry > t) out.set(s.code, { mk: '🔺' + (ry - t), rise: ry - t, t, ry });
+  });
+  return out;
+}
 // 族群明細的 🔪⚔️🔰（2026-10-16 對老師的族群明細，是 🐎🚀 的反方向：原本前段班突然掉到最後幾名，數字＝掉了幾名）。
 // 族裡倒數 3 檔（處置股也算位置）：🔪N＝昨天漲 BLADE_PRIOR_RISE% 以上、而且昨天在族裡前一半，N＝今天名次減昨天名次；
 // ⚔️N＝前天漲 BLADE_PRIOR_RISE% 以上、前天在族裡前一半，N＝今天名次減前天名次（不用跌破前天收盤：鑫科、台表科都還在前天收盤上也標）。
@@ -4817,6 +4831,7 @@ function groupBladeMarks(g){
   today.forEach((s, i) => {
     const t = i + 1, pos = n - i;
     if (pos > bladeZoneSize(n)) return;
+    if (stockFlags && stockFlags[s.code] && stockFlags[s.code].disposition) return;   // 處置股位置照算、但不標（2026-10-17 老師小電組：*6213 聯茂倒數第 2 沒標 ⚔️）
     const p = (sd[s.code] && sd[s.code].pct) || [];
     const ry = y.m.get(s.code), r2 = y2.m.get(s.code);
     const knife = pos <= 3 && p[0] >= BLADE_PRIOR_RISE && ry && ry <= y.n / 2 ? t - ry : 0;
@@ -4850,10 +4865,11 @@ function openGroupDetail(groupName){
       (Math.abs(c[1]) >= 2 ? '，連 ' + Math.abs(c[1]) + ' 週' + (c[1] > 0 ? '增加' : '減少') : '') + (c[2] ? '，買超榜第 ' + c[2] + ' 名' : '') + '">' + (c[0] > 0 ? '+' : '') + c[0].toFixed(2) + '%' + streak + '</span>';
   };
   const sorted = g.stocks.slice().sort((a, b) => b.changePercent - a.changePercent);
-  const hm = groupHorseMarks(g);
+  const hm = groupHorseMarks(g), rm = groupRiseMarks(g);
   const hmHtml = (code) => {
     const x = hm.get(code);
-    if (!x) return '';
+    const r = rm.get(code);
+    if (!x) return r ? '<span class="gm-hmark" title="昨天族裡第 ' + r.ry + ' 名，今天第 ' + r.t + ' 名，前進 ' + r.rise + ' 名">' + r.mk + '</span>' : '';
     const tip = (x.top === 1 ? '族群第 1 名' : '族群第 2 名') + (x.horse ? '；昨天族裡第 ' + x.ry + ' 名，今天上升 ' + x.horse + ' 名' : '') + (x.rocket ? '；前天族裡第 ' + x.r2 + ' 名，今天上升 ' + x.rocket + ' 名' : '');
     return '<span class="gm-hmark" title="' + tip + '">' + x.mk + '</span>';
   };
@@ -6129,7 +6145,7 @@ async function refreshGroupDailyChanges(force){
   if (!force && Date.now() - groupDailyFetchedAt < 600000) return;
   groupDailyFetchedAt = Date.now();
   try {
-    const res = await fetch('/api/group-daily-changes?days=4');
+    const res = await fetch('/api/group-daily-changes?days=6');   // 6 天：族群明細最下面列近 6 日名次（2026-10-17）
     if (!res.ok) throw new Error('group-daily-changes http ' + res.status);
     const data = await res.json();
     if (data && data.status === 'ok' && data.groups){
@@ -17646,15 +17662,33 @@ function botFindGroups(q){
   const exact = all.filter((g) => g.name === q);
   return { code: null, groups: exact.length ? exact : all.filter((g) => g.name.includes(q)) };
 }
+// opts.full：族群明細（打族群名或股號，2026-10-17 照老師小電組那份）——處置股前面加 *、前段班／後段班中間畫「多方」「空方」分隔線、最下面附近幾天的族群名次
 function botGroupBlock(g, h, opts){
   const r = h.rows.find((x) => x.name === g.name);
-  const hm = groupHorseMarks(g), bm = groupBladeMarks(g);
+  const hm = groupHorseMarks(g), rm = groupRiseMarks(g), bm = groupBladeMarks(g);
   const min = opts && Number.isFinite(opts.min) ? opts.min : -Infinity;
+  const full = !!(opts && opts.full);
   const list = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent) && s.changePercent >= min).sort((a, b) => b.changePercent - a.changePercent);
   const mv = r && r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? BOT_UP_IC + (-r.drop) : '') : '';
-  return botLine(botGrpPill(g.name, '-(' + (r ? r.rank : '?') + ')' + mv + ' ' + botPct(g.avgChange), g.avgChange), 'bot-head') +
-    (list.length ? list.map((s) => botLine((opts && opts.me === s.code ? '👉' : '') + botStk(s.code, s.name, ' <span class="' + dirClass(s.changePercent) + '">' + botPct(s.changePercent) + '</span>' +
-      ((hm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '')))).join('') : botLine('（沒有符合的）', 'bot-dim'));
+  const disp = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].disposition);
+  const line = (s) => botLine((opts && opts.me === s.code ? '👉' : '') + (full && disp(s.code) ? '*' : '') + botStk(s.code, s.name, ' <span class="' + dirClass(s.changePercent) + '">' + botPct(s.changePercent) + '</span>' +
+    ((hm.get(s.code) || {}).mk || '') + ((rm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '')));
+  const head = botLine(botGrpPill(g.name, '-(' + (r ? r.rank : '?') + ')' + mv + ' ' + botPct(g.avgChange), g.avgChange) + (full ? ' <span class="bot-dim">' + list.length + ' 檔</span>' : ''), 'bot-head');
+  if (!list.length) return head + botLine('（沒有符合的）', 'bot-dim');
+  if (!full) return head + list.map(line).join('');
+  // 多方段＝前面 bladeZoneSize 檔、空方段＝後面 bladeZoneSize 檔（跟刀劍空同一套：20 檔各 5、13 檔各 5、9 檔各 3…）
+  const n = list.length, zone = bladeZoneSize(n), topEnd = Math.min(zone, n), botStart = Math.max(n - zone, topEnd);
+  let html = head + list.slice(0, topEnd).map(line).join('') + botLine('------↑(多方)↑------', 'bot-sep');
+  if (botStart > topEnd) html += list.slice(topEnd, botStart).map(line).join('');
+  if (botStart < n) html += botLine('------↓(空方)↓------', 'bot-sep') + list.slice(botStart).map(line).join('');
+  // 最下面：近幾個交易日的族群名次（舊→今天），下面一排是那天族群漲（🔺）還是跌（🔽）
+  const d = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups[g.name] : null;
+  if (d && r && Array.isArray(d.rank)){
+    const days = d.rank.map((k, i) => ({ k, p: (d.pct || [])[i] })).filter((x) => Number.isFinite(x.k)).slice(0, 5).reverse().concat([{ k: r.rank, p: g.avgChange }]);
+    html += botLine('------↓(排名)↓------', 'bot-sep') + botLine('近 ' + days.length + ' 日 ' + days.map((x) => x.k).join('-') + ' <span class="bot-dim">（舊→今天）</span>') +
+      botLine(days.map((x) => (x.p > 0 ? '🔺' : x.p < 0 ? '🔽' : '➖')).join(''));
+  }
+  return html;
 }
 function botNorm(raw){
   return String(raw || '').trim().replace(/[０-９Ａ-Ｚａ-ｚ＋－]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[−–—]/g, '-').replace(/\s+/g, '').toUpperCase();
@@ -18005,7 +18039,7 @@ function botAnswer(raw){
     }
   }
   const f = botFindGroups(q);
-  if (f.groups.length) return wrap(f.code ? f.code + ' 的族群漲幅排行' : '族群漲幅排行', f.groups.slice(0, 6).map((g) => botGroupBlock(g, h, { me: f.code })).join(''));
+  if (f.groups.length) return wrap(f.code ? f.code + ' 的族群漲幅排行' : '族群漲幅排行', f.groups.slice(0, 6).map((g) => botGroupBlock(g, h, { me: f.code, full: true })).join(''));
   if (/^[0-9A-Z]{4,6}$/.test(q)) return wrap(raw, botLine(q + ' 沒有綁定在重點族群裡（可以用「選股・個股研究」查這檔的基本資料）', 'bot-dim'));
   return wrap(raw, botLine('看不懂這個代碼，下面有全部代碼', 'bot-dim'));
 }
