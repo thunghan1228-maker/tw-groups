@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 22:33:29";
+const BUILD_STAMP = "2026-10-17 22:35:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12879,7 +12879,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 22:33:29';
+const BUILD_STAMP = '2026-10-17 22:35:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19479,7 +19479,7 @@ async function checkUsageAnomaly(env) {
 // 只讀一天的 bucket（最多 96 個 KV 讀取），結果在同一個執行環境裡留 5 分鐘，不會把 KV 免費讀取額度用掉。
 // ?date=YYYY-MM-DD 看前一天（2026-10-15 KV 警告信：要看昨天到底多少請求）；bucket 只留 2 天。
 let usageMemo = {};
-let ipoMemo = null;   // 抽籤股：同一個 isolate 10 分鐘內直接回（2026-10-17：一次要 25～39 秒，櫃買從 Cloudflare 抓很慢）
+let ipoMemo = null;   // 抽籤股：同一個 isolate 10 分鐘內直接回（2026-10-17：原本一次要 25～39 秒）
 async function usageToday(env, date) {
   const twNow = new Date(Date.now() + 8 * 3600000);
   const twDate = date || twNow.toISOString().slice(0, 10);
@@ -19903,14 +19903,6 @@ export default {
           list: iso(at(d, "撥券日期(上市、上櫃日期)")), broker: String(at(d, "主辦券商") || "").trim(),
           qualified: num(at(d, "總合格件")), rate: num(at(d, "中籤率(%)")), cancel: String(at(d, "取消公開抽籤") || "").trim()
         })).filter((x) => /^\d{4}$/.test(x.code) && KINDS.includes(x.kind) && ((x.end && x.end >= today) || (x.draw && x.draw >= recentCut)));
-        const esb = {};
-        if (rows.some((x) => x.kind.startsWith("初"))) {
-          try {
-            // 櫃買從 Cloudflare 常常要等很久：最多等 5 秒，等不到就改用 Yahoo 的興櫃價
-            const e = await fetch("https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics", { headers: UA, cf: { cacheTtl: 600, cacheEverything: true }, signal: AbortSignal.timeout(5000) });
-            if (e.ok) for (const x of await e.json()) esb[String(x.SecuritiesCompanyCode || "").trim()] = x;
-          } catch (_) {}
-        }
         const yahoo = async (sym) => {
           try {
             const y = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + sym + "?range=1d&interval=1d", { headers: UA, cf: { cacheTtl: 600, cacheEverything: true }, signal: AbortSignal.timeout(5000) });
@@ -19923,10 +19915,9 @@ export default {
         rows = await Promise.all(rows.map(async (x) => {
           let ref = null, refSrc = "";
           if (x.kind.startsWith("初")) {
-            const e = esb[x.code];
-            ref = e ? num(e.LatestPrice) || num(e.Average) : null;
+            // 興櫃價：Yahoo 的 .TWO 跟櫃買興櫃最後成交價一樣（10/17 對過 8 檔），櫃買從 Cloudflare 抓要等 25 秒以上，改用 Yahoo
+            ref = await yahoo(x.code + ".TWO");
             refSrc = ref ? "興櫃" : "";
-            if (!ref && ((x.draw || "") >= today || !Object.keys(esb).length)) { ref = await yahoo(x.code + ".TWO"); refSrc = ref ? "興櫃" : ""; }
           } else if ((x.draw || "") >= today) {
             ref = await yahoo(x.code + (x.kind === "上市增資" ? ".TW" : ".TWO"));
             refSrc = ref ? "收盤" : "";
