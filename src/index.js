@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 11:56:16";
+const BUILD_STAMP = "2026-10-17 12:04:03";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -138,7 +138,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .top6-chg{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap;}
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
-  .home-rank4{display:grid;grid-template-columns:repeat(9, minmax(0, 1fr));gap:8px;align-items:start;}
+  .home-rank4{display:grid;grid-template-columns:repeat(10, minmax(0, 1fr));gap:8px;align-items:start;}
   .hr-stack{display:flex;flex-direction:column;gap:8px;min-width:0;}
   .hr-warn{padding:2px 8px 5px 18px;font-size:12px;line-height:1.6;white-space:normal;}
   .hr-warn .hr-stk{cursor:pointer;margin-right:6px;white-space:nowrap;}
@@ -7057,6 +7057,27 @@ function homeKill31ColHtml(){
   return '<div class="hr-col"><div class="hr-title bear">🔪⚔️刀劍空(31)' + (list ? ' <span class="hr-rk">' + list.length + ' 檔</span>' : '') + '</div>' +
     (!list ? '<div class="hr-note">讀取中…</div>' : list.length ? list.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
+// 首頁第 10 欄：隔日沖必殺(813)／隔日沖黑龍(80)／股期黑龍(75)（2026-10-17 使用者：先把位置做出來，下週拿對方名單校正；跟機器人同一份）
+function homeDaytradeColsHtml(){
+  const md = (iso) => Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10);
+  const note = (t) => '<div class="hr-note">' + wlEsc(t) + '</div>';
+  const col = (title, tip, body, cnt) => '<div class="hr-col"><div class="hr-title bear" title="' + wlEsc(tip) + '">' + title + (cnt !== undefined ? ' <span class="hr-rk">' + cnt + ' 檔</span>' : '') + '</div>' + body + '</div>';
+  const stk = (code, name, right, tip, color) => '<div class="hr-row hr-stk" data-code="' + code + '" data-name="' + wlEsc(name) + '" tabindex="0" role="button"' + (tip ? ' title="' + wlEsc(tip) + '"' : '') + '>' +
+    '<span class="hr-bear-pill ' + color + '"><span class="hr-code">' + code + '</span><span class="hr-name">' + wlEsc(name) + '</span></span><span class="hr-avg ' + color + '">' + right + '</span></div>';
+  const m813 = dtModel813(), m80 = dtModel80(), m75 = dtModel75();
+  let b813;
+  if (m813.wait) b813 = note(m813.wait);
+  else if (!m813.hold.length) b813 = note(md(m813.base) + ' 沒有隔日沖名單');
+  else if (!m813.rows) b813 = note(m813.waitOpen + '；先列 ' + md(m813.base) + ' 隔日沖手上張數') + m813.hold.slice(0, 15).map((r) => stk(r.code, r.name, Number(r.hold).toLocaleString('zh-TW') + '張', '', 'flat')).join('');
+  else b813 = m813.rows.map((x) => stk(x.code, x.name, x.ratio.toFixed(2), md(m813.base) + ' 隔日沖 ' + x.hold + ' 張 ÷ 今天開盤 ' + x.open + ' 張', x.ratio > 1 ? 'up' : 'flat')).join('') || note('沒有');
+  const b80 = m80.wait ? note(m80.wait) : (m80.rows.map((x) => stk(x.code, x.name, fmt(x.chg) + '%' + (x.n > 0 ? '⭐'.repeat(Math.min(x.n, 5)) : ''), md(m80.base) + ' 上 811 名單' + (x.n > 0 ? '，兩週內另外又上榜 ' + x.n + ' 次' : ''), dirClass(x.chg))).join('') || note(md(m80.base) + ' 上榜的今天沒有收黑'));
+  const b75 = m75.wait ? note(m75.wait) : (m75.rows.map((x) => stk(x.code, (x.jailed ? '*' : '') + x.name, fmt(x.chg) + '%', x.jailed ? '處置中' : '', dirClass(x.chg))).join('') || note('目前沒有'));
+  return '<div class="hr-stack">' +
+    col('⚡隔日沖必殺(813)', '前一個交易日隔日沖分點買超 ÷ 今天開盤第一分鐘量；> 1 隔日沖手上的比開盤量多，越大越容易出貨', b813, m813.rows ? m813.rows.length : undefined) +
+    col('🐉隔日沖黑龍(80)', '前兩個交易日上隔日沖 811 名單、今天收黑K而且下跌（均線分數 ≥ 10）；⭐＝兩週內又上榜幾次', b80, m80.rows ? m80.rows.length : undefined) +
+    col('🐉股期黑龍(75)', '有股票期貨、均線分數 ≥ 10、今天收黑K；*＝處置中；槓桿大，防守黑K低點', b75, m75.rows ? m75.rows.length : undefined) +
+  '</div>';
+}
 function homeBladeColHtml(m){
   if (!m) return '';
   const mark = (r) => r.bladeMark || '';
@@ -7158,6 +7179,7 @@ function homeRank4Html(){
       homeBladeColHtml(m) +
       homeKill31ColHtml() +
     '</div>' +
+    homeDaytradeColsHtml() +   // 2026-10-17 使用者：813／80／75 先做在首頁最右邊一欄
     '</div>' +
     '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }
@@ -7212,6 +7234,12 @@ function homeRankFootHtml(total){
     ['強空積極', '族群第 26 名以後（🔰）：族群跟股票都弱，可以空得積極'],
     ['收割區域', '已經跌 ' + BLADE_HARVEST_PCT + '% 以上（♣）：不追空，有空單的考慮收割'],
     ['排序', '族群名次小的在上面，同族群漲幅高的在上面；訊號中心刀劍空分頁是同一份，照出現時間排（新的在上面）'],
+  ]) +
+  // 2026-10-17 使用者：813／80／75 先做在首頁最右邊一欄（跟機器人代碼同一份，下週拿對方名單校正）
+  hrHelpTable('⚡🐉 隔日沖・黑龍欄', ['欄位', '列什麼'], [
+    ['隔日沖必殺(813)', '前一個交易日隔日沖分點（凱基-台北、凱基-城中、富邦證券、統一、港商野村等 18 個）買超的股票，手上張數 ÷ 今天開盤第一分鐘量；> 1（紅字）＝隔日沖手上的比開盤量還多，越大越容易出貨。開盤前先列手上張數'],
+    ['隔日沖黑龍(80)', '前兩個交易日上隔日沖 811 名單、今天收黑K而且下跌（均線分數 ≥ 10），照跌幅排；⭐＝兩週內另外又上榜幾次。盤中用即時價，中午 12 點後看比較準'],
+    ['股期黑龍(75)', '有股票期貨、均線分數 ≥ 10、今天收黑K，照漲跌幅排；名字前面 *＝處置中。槓桿大，防守黑K低點'],
   ]);
 }
 // 首頁最後一欄：飆股雷達（2026-10-15 使用者：「盤中形態觀察股」改名飆股雷達，【1】【2】【3】放到首頁原本 177 的位置；
@@ -12703,7 +12731,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 11:56:16';
+const BUILD_STAMP = '2026-10-17 12:04:03';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13524,7 +13552,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・183・馬火多(30)／155・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・昨日強勢股／188・283・193／199・新刀劍空(32)／刀劍空(31)</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・183・馬火多(30)／155・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・昨日強勢股／188・283・193／199・新刀劍空(32)／刀劍空(31)・隔日沖必殺(813)／隔日沖黑龍(80)／股期黑龍(75)</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -17383,14 +17411,77 @@ function botFetchCache(key, url, ttl){
   const e = c[key];
   if (e && (e.loading || Date.now() - e.at < ttl)) return e.data;
   c[key] = { loading: true, at: Date.now(), data: e ? e.data : null };
-  fetch(url).then((r) => r.json()).then((d) => { c[key] = { at: Date.now(), data: d }; botRerunLast(); })
-    .catch((err) => { c[key] = { at: Date.now(), data: { status: 'error', message: '抓不到資料（' + String((err && err.message) || err).slice(0, 40) + '）' } }; botRerunLast(); });
+  const done = () => { botRerunLast(); clearTimeout(dtRenderTimer); dtRenderTimer = setTimeout(() => { try { render(); } catch (_){} }, 400); };   // 首頁 813／80／75 欄也要重畫
+  fetch(url).then((r) => r.json()).then((d) => { c[key] = { at: Date.now(), data: d }; done(); })
+    .catch((err) => { c[key] = { at: Date.now(), data: { status: 'error', message: '抓不到資料（' + String((err && err.message) || err).slice(0, 40) + '）' } }; done(); });
   return e ? e.data : null;
 }
 function botNameOf(code){
   if (lastData && Array.isArray(lastData.groups)) for (const g of lastData.groups){ const s = g.stocks.find((x) => x.code === code); if (s) return s.name; }
   return '';
 }
+// 隔日沖必殺(813)／隔日沖黑龍(80)／股期黑龍(75)：機器人跟首頁同一份（2026-10-17 使用者：先把首頁位置做出來，下週拿對方名單校正）
+// 回 { wait: 文字 }＝還在讀或沒資料
+function dtTwToday(){ return new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10); }
+function dtModel813(){
+  const dt = botFetchCache('dt', '/api/daytrade', 5 * 60e3);
+  if (!dt) return { wait: '讀取中…' };
+  if (dt.status !== 'ok') return { wait: dt.message || '隔日沖資料還沒算好' };
+  const today = dtTwToday(), base = dt.dates.find((d) => d < today);
+  if (!base) return { wait: '還沒有前一個交易日的隔日沖資料' };
+  const got = base === dt.day.date ? dt : botFetchCache('dt|' + base, '/api/daytrade?date=' + base, 3600e3);
+  const bd = got && got.day;
+  if (!bd) return { wait: got && got.message ? got.message : '讀取中…' };
+  const hold = bd.rows.slice().sort((a, b) => b.hold - a.hold);
+  if (!hold.length) return { base, today, hold, rows: [] };
+  const ov = botFetchCache('ov|' + base + '|' + today, '/api/open-vol?syms=' + bd.rows.map((r) => r.code + (r.mkt === 'OTC' ? '.TWO' : '.TW')).join(','), 120e3);
+  if (!ov) return { base, today, hold, rows: null, waitOpen: '讀取開盤量中…' };
+  const vols = new Map((ov.rows || []).filter((x) => x.vol && x.time && new Date(Date.parse(x.time) + 8 * 3600e3).toISOString().slice(0, 10) === today).map((x) => [x.sym.split('.')[0], x.vol]));
+  if (!vols.size) return { base, today, hold, rows: null, waitOpen: '今天還沒開盤（或休市），開盤 9:01 後才有' };
+  const rows = bd.rows.filter((r) => vols.has(r.code)).map((r) => ({ code: r.code, name: r.name, hold: r.hold, open: vols.get(r.code), ratio: r.hold / Math.max(vols.get(r.code), 1) }))
+    .sort((a, b) => b.ratio - a.ratio);
+  return { base, today, hold, rows };
+}
+// 黑龍＝均線分數 ≥ 10、今天收黑K：盤中（報價日比選股資料新）用即時價（現價 < 開盤），不然用選股那天的收盤
+function dtBlackView(){
+  const scr = botFetchCache('scr10', '/api/screener?score=10', 20 * 60e3);
+  if (!scr) return { wait: '讀取中…' };
+  if (scr.status !== 'ok') return { wait: scr.message || '選股資料抓不到' };
+  const isLive = !!(lastData && lastData.quoteDate && scr.latest && String(lastData.quoteDate) > String(scr.latest));
+  const live = new Map();
+  if (isLive) lastData.groups.forEach((g) => g.stocks.forEach((x) => { if (Number.isFinite(x.price) && Number.isFinite(x.open) && x.open > 0) live.set(x.code, x); }));
+  const kOf = (r) => { const x = live.get(r.code); return x ? { black: x.price < x.open, chg: x.changePercent } : { black: r.k === 'black', chg: r.chg }; };
+  return { scr, isLive, kOf, byCode: new Map(scr.rows.map((r) => [r.code, r])) };
+}
+function dtModel75(){
+  const v = dtBlackView();
+  if (v.wait) return v;
+  const rows = v.scr.rows.filter((r) => r.fut).map((r) => ({ code: r.code, name: r.name, jailed: (r.dispo !== null && r.dispo !== undefined) || !!r.upcoming, ...v.kOf(r) }))
+    .filter((x) => x.black).sort((a, b) => b.chg - a.chg);
+  return { rows, isLive: v.isLive, latest: v.scr.latest };
+}
+// 80：照對方 10/16 那份（8 檔全是前兩個交易日 10/14 上榜的）——看「前兩個交易日」的 811 名單，今天收黑而且下跌；
+// ⭐＝兩週（10 個名單日）內另外又上榜幾次。今天的名單晚上才算好，盤中今天＝dates[0] 的下一個交易日
+function dtModel80(){
+  const v = dtBlackView();
+  if (v.wait) return v;
+  const dt = botFetchCache('dt', '/api/daytrade', 5 * 60e3);
+  if (!dt) return { wait: '讀取中…' };
+  if (dt.status !== 'ok') return { wait: dt.message || '隔日沖資料還沒算好' };
+  const quoteDay = String((lastData && lastData.quoteDate) || '');
+  const base = dt.dates[dt.dates[0] >= quoteDay ? 2 : 1];
+  if (!base) return { wait: '隔日沖名單還不夠兩天' };
+  const times = new Map(), listed = new Map();
+  for (const d of dt.dates.filter((x) => x <= base).slice(0, 10)){
+    const got = d === dt.day.date ? dt : botFetchCache('dt|' + d, '/api/daytrade?date=' + d, 3600e3);
+    if (!got || !got.day) return { wait: '讀取中…' };
+    got.day.rows.forEach((r) => { times.set(r.code, (times.get(r.code) || 0) + 1); if (d === base) listed.set(r.code, r.name); });
+  }
+  const rows = [...listed.keys()].filter((c) => v.byCode.has(c)).map((c) => ({ code: c, name: listed.get(c), n: times.get(c) - 1, ...v.kOf(v.byCode.get(c)) }))
+    .filter((x) => x.black && x.chg < 0).sort((a, b) => b.chg - a.chg);
+  return { rows, base, isLive: v.isLive, latest: v.scr.latest };
+}
+let dtRenderTimer = null;
 function botRerunLast(){
   if (!botState.history.length || document.getElementById('botModal').hidden) return;
   botState.out[0] = botAnswer(botState.history[0]);
@@ -17471,20 +17562,13 @@ function botAnswer(raw){
         '漲 9% 以上的族群股・隔日沖分點淨買超張數');
     }
     if (q === '813'){
-      const base = dt.dates.find((d) => d < twToday);
-      if (!base) return wrap('隔日沖必殺(813)', botLine('還沒有前一個交易日的隔日沖資料', 'bot-dim'));
-      const got = base === day.date ? dt : botFetchCache('dt|' + base, '/api/daytrade?date=' + base, 3600e3);
-      const bd = got && got.day;
-      if (!bd) return wrap('隔日沖必殺(813)', botLine(got && got.message ? got.message : '讀取中…', 'bot-dim'));
-      const holdList = () => botLine(md(base) + ' 隔日沖手上張數', 'bot-head') + bd.rows.slice().sort((a, b) => b.hold - a.hold).map((r) => botLine(botStk(r.code, r.name, ' ' + n(r.hold) + '張'))).join('');
-      if (!bd.rows.length) return wrap('隔日沖必殺(813)', botLine(md(base) + ' 沒有隔日沖名單', 'bot-dim'));
-      const ov = botFetchCache('ov|' + base + '|' + twToday, '/api/open-vol?syms=' + bd.rows.map((r) => r.code + (r.mkt === 'OTC' ? '.TWO' : '.TW')).join(','), 120e3);
-      if (!ov) return wrap('隔日沖必殺(813)', botLine('讀取開盤量中…', 'bot-dim'));
-      const vols = new Map((ov.rows || []).filter((x) => x.vol && x.time && new Date(Date.parse(x.time) + 8 * 3600e3).toISOString().slice(0, 10) === twToday).map((x) => [x.sym.split('.')[0], x.vol]));
-      if (!vols.size) return wrap('隔日沖必殺(813)', botLine('今天還沒開盤（或休市），開盤 9:01 後再查', 'bot-dim') + holdList());
-      const rows = bd.rows.filter((r) => vols.has(r.code)).map((r) => ({ r, open: vols.get(r.code), ratio: r.hold / Math.max(vols.get(r.code), 1) })).sort((a, b) => b.ratio - a.ratio);
-      return wrap('隔日沖必殺(813) ' + md(twToday) + ' 開盤', rows.map((x) => botLine(botStk(x.r.code, x.r.name, ' <b class="' + (x.ratio > 1 ? 'up' : '') + '">' + x.ratio.toFixed(2) + '</b> <span class="bot-dim">隔日沖 ' + n(x.r.hold) + '張／開盤 ' + n(x.open) + '張</span>'))).join('') +
-        botLine('比例 > 1：隔日沖手上的比開盤量還多，越大越容易出貨', 'bot-warn'), md(base) + ' 隔日沖買超 ÷ 今天開盤第一分鐘量');
+      const m = dtModel813();
+      if (m.wait) return wrap('隔日沖必殺(813)', botLine(m.wait, 'bot-dim'));
+      if (!m.hold.length) return wrap('隔日沖必殺(813)', botLine(md(m.base) + ' 沒有隔日沖名單', 'bot-dim'));
+      if (!m.rows) return wrap('隔日沖必殺(813)', botLine(m.waitOpen, 'bot-dim') + botLine(md(m.base) + ' 隔日沖手上張數', 'bot-head') +
+        m.hold.map((r) => botLine(botStk(r.code, r.name, ' ' + n(r.hold) + '張'))).join(''));
+      return wrap('隔日沖必殺(813) ' + md(m.today) + ' 開盤', m.rows.map((x) => botLine(botStk(x.code, x.name, ' <b class="' + (x.ratio > 1 ? 'up' : '') + '">' + x.ratio.toFixed(2) + '</b> <span class="bot-dim">隔日沖 ' + n(x.hold) + '張／開盤 ' + n(x.open) + '張</span>'))).join('') +
+        botLine('比例 > 1：隔日沖手上的比開盤量還多，越大越容易出貨', 'bot-warn'), md(m.base) + ' 隔日沖買超 ÷ 今天開盤第一分鐘量');
     }
     // 股號m／m1～m9：那檔那天的隔日沖分點買賣超
     const k = mm[2] ? Number(mm[2]) : 0, code = mm[1], date = dt.dates[k];
@@ -17632,40 +17716,14 @@ function botAnswer(raw){
   // 75 股期黑龍、80 隔日沖雙週入榜黑龍：黑龍＝均線分數 ≥ 10、今天收黑K（盤中用即時價：現價 < 開盤）
   if (q === '75' || q === '80'){
     const t = q === '75' ? '股期黑龍(75)' : '隔日沖雙周入榜黑龍(80)';
-    const scr = botFetchCache('scr10', '/api/screener?score=10', 20 * 60e3);
-    if (!scr) return wrap(t, botLine('讀取中…', 'bot-dim'));
-    if (scr.status !== 'ok') return wrap(t, botLine(scr.message || '選股資料抓不到', 'bot-dim'));
-    const isLive = !!(lastData.quoteDate && scr.latest && String(lastData.quoteDate) > String(scr.latest));
-    const live = new Map();
-    if (isLive) lastData.groups.forEach((g) => g.stocks.forEach((x) => { if (Number.isFinite(x.price) && Number.isFinite(x.open) && x.open > 0) live.set(x.code, x); }));
-    const kOf = (r) => { const x = live.get(r.code); return x ? { black: x.price < x.open, chg: x.changePercent } : { black: r.k === 'black', chg: r.chg }; };
-    const when = isLive ? stamp + '・即時' : rdMdShort(scr.latest) + ' 收盤';
+    const m = q === '75' ? dtModel75() : dtModel80();
+    if (m.wait) return wrap(t, botLine(m.wait, 'bot-dim'));
+    const when = m.isLive ? stamp + '・即時' : rdMdShort(m.latest) + ' 收盤';
     const pctSpan = (v) => ' <span class="' + dirClass(v) + '">' + botPct(v) + '</span>';
-    if (q === '75'){
-      const rows = scr.rows.filter((r) => r.fut).map((r) => ({ r, ...kOf(r) })).filter((x) => x.black).sort((a, b) => b.chg - a.chg);
-      const jailedMark = (r) => ((r.dispo !== null && r.dispo !== undefined) || r.upcoming ? '*' : '');
-      return wrap(t, (rows.map((x) => botLine(jailedMark(x.r) + botStk(x.r.code, x.r.name, pctSpan(x.chg)))).join('') || botLine('目前沒有', 'bot-dim')) +
-        botLine('------------', 'bot-sep') + botLine('⚠️ *代表處置中', 'bot-dim') + botLine('⚠️ 槓桿大，防守黑K低點', 'bot-warn'), when);
-    }
-    const dt = botFetchCache('dt', '/api/daytrade', 5 * 60e3);
-    if (!dt || dt.status !== 'ok') return wrap(t, botLine(dt && dt.message ? dt.message : '讀取中…', 'bot-dim'));
-    // 照對方 10/16 那份（8 檔全是前兩個交易日 10/14 上榜的）：看「前兩個交易日」的 811 名單，今天收黑而且下跌；
-    // ⭐＝兩週（10 個名單日）內另外又上榜幾次。今天的名單晚上才算好，盤中今天＝dates[0] 的下一個交易日
-    const byCode = new Map(scr.rows.map((r) => [r.code, r]));
-    const quoteDay = String(lastData.quoteDate || '');
-    const base = dt.dates[dt.dates[0] >= quoteDay ? 2 : 1];
-    if (!base) return wrap(t, botLine('隔日沖名單還不夠兩天', 'bot-dim'));
-    const win = dt.dates.filter((d) => d <= base).slice(0, 10);
-    const times = new Map(), listed = new Map();
-    for (const d of win){
-      const got = d === dt.day.date ? dt : botFetchCache('dt|' + d, '/api/daytrade?date=' + d, 3600e3);
-      if (!got || !got.day) return wrap(t, botLine('讀取中…', 'bot-dim'));
-      got.day.rows.forEach((r) => { times.set(r.code, (times.get(r.code) || 0) + 1); if (d === base) listed.set(r.code, r.name); });
-    }
-    const rows = [...listed.keys()].filter((c) => byCode.has(c)).map((c) => ({ code: c, name: listed.get(c), n: times.get(c) - 1, ...kOf(byCode.get(c)) }))
-      .filter((x) => x.black && x.chg < 0).sort((a, b) => b.chg - a.chg);
-    return wrap(t, botLine('跌幅排行', 'bot-head') + (rows.map((x) => botLine(botStk(x.code, x.name, pctSpan(x.chg) + (x.n > 0 ? ' ' + '⭐'.repeat(Math.min(x.n, 10)) : '')))).join('') || botLine('目前沒有', 'bot-dim')) +
-      botLine('------------', 'bot-sep') + botLine(Number(base.slice(5, 7)) + '/' + base.slice(8) + ' 上 811 名單、今天收黑K（均線分數 ≥ 10）', 'bot-dim') + botLine('⭐ 兩週內另外又上榜的次數', 'bot-dim') +
+    if (q === '75') return wrap(t, (m.rows.map((x) => botLine((x.jailed ? '*' : '') + botStk(x.code, x.name, pctSpan(x.chg)))).join('') || botLine('目前沒有', 'bot-dim')) +
+      botLine('------------', 'bot-sep') + botLine('⚠️ *代表處置中', 'bot-dim') + botLine('⚠️ 槓桿大，防守黑K低點', 'bot-warn'), when);
+    return wrap(t, botLine('跌幅排行', 'bot-head') + (m.rows.map((x) => botLine(botStk(x.code, x.name, pctSpan(x.chg) + (x.n > 0 ? ' ' + '⭐'.repeat(Math.min(x.n, 10)) : '')))).join('') || botLine('目前沒有', 'bot-dim')) +
+      botLine('------------', 'bot-sep') + botLine(Number(m.base.slice(5, 7)) + '/' + m.base.slice(8) + ' 上 811 名單、今天收黑K（均線分數 ≥ 10）', 'bot-dim') + botLine('⭐ 兩週內另外又上榜的次數', 'bot-dim') +
       botLine('👍 每天中午 12 點後再查（盤中用即時價看收黑）', 'bot-dim'), when);
   }
   // 股號B2／股號a／股號（或族群名）
