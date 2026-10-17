@@ -114,6 +114,17 @@
   .hr-jail-card .hr-help-tbl td:nth-child(2){color:var(--text);font-weight:700;white-space:nowrap;max-width:6.5em;overflow:hidden;text-overflow:ellipsis;}
   .hr-jail-card .hr-help-tbl td.jl-tag,.hr-jail-card .hr-help-tbl td.jl-wd{color:#fff;font-weight:700;white-space:nowrap;}
   .hr-jail-col{display:flex;flex-direction:column;gap:8px;min-width:0;}
+  /* 機器人代碼面板（2026-10-17） */
+  .bot-q-row{display:flex;gap:6px;margin:4px 0 8px;} .bot-q-row input{flex:1;min-width:0;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:16px;}
+  .bot-q-row button{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .bot-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;} .bot-chip{background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .bot-chip:hover{border-color:#7c3aed;}
+  .bot-msg{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:10px;}
+  .bot-q{display:inline-block;background:#7c3aed;color:#fff;border-radius:10px;padding:2px 10px;font-size:12px;font-weight:800;margin-bottom:4px;}
+  .bot-title{font-weight:800;font-size:15px;margin:2px 0 6px;} .bot-title small{color:var(--muted);font-weight:600;font-size:11px;margin-left:6px;}
+  .bot-line{font-size:13.5px;line-height:1.7;font-variant-numeric:tabular-nums;} .bot-line.bot-head{font-weight:800;margin-top:4px;} .bot-line.bot-sub{padding-left:16px;font-size:12.5px;}
+  .bot-line.bot-sep{color:var(--muted);text-align:left;} .bot-line.bot-warn{color:#fb923c;} .bot-dim{color:var(--muted);}
+  .bot-stk,.bot-grp{cursor:pointer;font-weight:700;} .bot-stk:hover,.bot-grp:hover{text-decoration:underline;} .bot-grp{color:#facc15;}
   .hr-jail-card .jl-new{font-style:normal;font-size:10px;color:#f87171;border:1px solid #f87171;border-radius:4px;padding:0 3px;margin-left:3px;}
   .hr-jail-card tr.jl-ghead{cursor:pointer;} .hr-jail-card tr.jl-ghead td{padding-top:6px!important;color:var(--text);}
   .hr-jail-card tr.jl-sub td{color:var(--muted)!important;font-size:10.5px;font-weight:600!important;white-space:normal!important;max-width:none!important;overflow:visible!important;text-overflow:clip!important;line-height:1.45;border-top:none;padding-top:0!important;}
@@ -2601,6 +2612,7 @@
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>
+      <button class="alert-toggle guide-btn" id="botBtn">🤖 機器人代碼</button>  <!-- 2026-10-17 使用者：照對方 Line 機器人的代碼（12／22／B／a／70…）做一個輸入代碼的面板 -->
       <button class="alert-toggle guide-btn" id="tutBtn">🎬 影片教學</button>  <!-- 2026-10-13 使用者：訊號教學、工具列各功能的影音教學（女聲旁白＋字幕） -->  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照老師新手教學頁） -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
@@ -2760,6 +2772,19 @@
       <button class="cm-icon-btn" id="labClose" aria-label="關閉">✕</button>
     </div>
     <div id="labBody"></div>
+  </div>
+</div>
+<!-- 2026-10-17 使用者：機器人代碼面板（照對方 Line 機器人：輸入代碼回名單） -->
+<div class="chips-modal" id="botModal" hidden>
+  <div class="chips-inner" id="botInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">🤖 機器人代碼</div>
+        <div class="chips-sub">輸入代碼（或股號、族群名）就回名單：12＝族群漲 2% 以上排行、22＝個股漲 2% 以上排行、2359B2＝同族群漲 2% 以上、2359a＝族群名次變化、70／71／72＝國際行情…下面有全部代碼。</div>
+      </div>
+      <button class="cm-icon-btn" id="botClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="botBody"></div>
   </div>
 </div>
 <div class="chips-modal" id="rivModal" hidden>
@@ -4730,7 +4755,7 @@ function gmChipLoad(){
   fetch('/api/chip-radar-latest').then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then((d) => { gmChipState.data = d; gmChipState.error = null; })
     .catch((e) => { gmChipState.error = String((e && e.message) || e); })
-    .finally(() => { gmChipState.loading = false; gmChipState.at = Date.now(); if (openGroupName && !document.getElementById('groupModal').hidden) openGroupDetail(openGroupName); });
+    .finally(() => { gmChipState.loading = false; gmChipState.at = Date.now(); if (openGroupName && !document.getElementById('groupModal').hidden) openGroupDetail(openGroupName); try { botRerunLast(); } catch (_){} });
 }
 function closeGroupDetail(){
   document.getElementById('groupModal').hidden = true;
@@ -6718,7 +6743,7 @@ function f155Load(){
   if (f155State.loading || Date.now() - f155State.at < 60e3) return;
   f155State.loading = true;
   fetch('/api/stock-futures-board').then((r) => (r.ok ? r.json() : null)).then((d) => {
-    if (d && d.status === 'ok'){ const first = !f155State.data; f155State.data = d; if (first){ try { render(); } catch (_){} } }   // 第一次抓到就重畫（收盤後首頁 5 分鐘才自己重畫）
+    if (d && d.status === 'ok'){ const first = !f155State.data; f155State.data = d; if (first){ try { render(); } catch (_){} try { botRerunLast(); } catch (_){} } }   // 第一次抓到就重畫（收盤後首頁 5 分鐘才自己重畫）
   }).catch(() => {}).finally(() => { f155State.loading = false; f155State.at = Date.now(); });
 }
 function fut155Model(){
@@ -6780,7 +6805,7 @@ const homeJailState = { at: 0, loading: false, quotes: {}, qAt: 0, qLoading: fal
 function homeJailLoad(){
   if (homeJailState.loading || jlState.loading || Date.now() - homeJailState.at < 10 * 60e3) return;
   homeJailState.loading = true;
-  fetch('/api/jail').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok'){ jlState.data = d; try { render(); } catch (_){} } })
+  fetch('/api/jail').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok'){ jlState.data = d; try { render(); } catch (_){} try { botRerunLast(); } catch (_){} } })
     .catch(() => {}).finally(() => {
       homeJailState.loading = false;
       // 抓失敗、還沒有資料：30 秒後再試（不要等 10 分鐘），到時候重畫一次就會重抓
@@ -17174,6 +17199,238 @@ function openRiverPanel(){
   rivLoadSide();
 }
 function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
+
+// ---- 機器人代碼（2026-10-17 使用者：照對方 Line 機器人「紫殺」的代碼表做；輸入代碼就回名單）----
+// 1N＝族群漲幅 > N% 排行（1＝>1%）；2N＝個股💎漲幅 > N% 排行（2＝>0%），「22-5」扣掉前 5 檔；177／188／199／193／283／284；
+// 30（🐎🚀）／31（🔪⚔️）／32（新刀劍空）；44＝今天 1+2 多；60／61／62＝處置／即將出關／已出關；70／71／72＝亞洲股市／美國股市／台指期；
+// 84＝本週籌碼暴增排行；股號或族群名＝那個族群的漲幅排行；股號B2＝同族群漲 2% 以上；股號a＝族群前天／昨天／今天名次；股號+3＝那族的 283。
+// 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
+const botState = { history: [], out: [], world: null, worldAt: 0, worldLoading: false };
+const BOT_CODES = [
+  ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'],
+  ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
+  ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'],
+  ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
+  ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['84', '本週籌碼暴增排行'],
+  ['2359', '股號或族群名：那族漲幅排行'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
+];
+const botPct = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
+const botStk = (code, name, rest) => '<span class="bot-stk" data-bot-code="' + wlEsc(code) + '" data-bot-name="' + wlEsc(name || '') + '">' + wlEsc(code) + ' ' + wlEsc(name || '') + '</span>' + (rest || '');
+const botGrp = (name, rest) => '<span class="bot-grp" data-bot-group="' + wlEsc(name) + '">' + wlEsc(name) + '</span>' + (rest || '');
+const botLine = (html, cls) => '<div class="bot-line' + (cls ? ' ' + cls : '') + '">' + html + '</div>';
+function botWorldLoad(){
+  if (botState.worldLoading || (botState.world && Date.now() - botState.worldAt < 60e3)) return;
+  botState.worldLoading = true;
+  fetch('/api/world-indices').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.rows){ botState.world = d; botState.worldAt = Date.now(); botRerunLast(); } })
+    .catch(() => {}).finally(() => { botState.worldLoading = false; });
+}
+function botRerunLast(){
+  if (!botState.history.length || document.getElementById('botModal').hidden) return;
+  botState.out[0] = botAnswer(botState.history[0]);
+  renderBot();
+}
+function botStockGroups(code){
+  return rankedGroupsOf(lastData.groups).filter((g) => g.stocks.some((s) => s.code === code));
+}
+function botFindGroups(q){
+  const all = rankedGroupsOf(lastData.groups);
+  if (/^[0-9A-Z]{4,6}$/.test(q)) return { code: q, groups: botStockGroups(q) };
+  const exact = all.filter((g) => g.name === q);
+  return { code: null, groups: exact.length ? exact : all.filter((g) => g.name.includes(q)) };
+}
+function botGroupBlock(g, h, opts){
+  const r = h.rows.find((x) => x.name === g.name);
+  const hm = groupHorseMarks(g), bm = groupBladeMarks(g);
+  const min = opts && Number.isFinite(opts.min) ? opts.min : -Infinity;
+  const list = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent) && s.changePercent >= min).sort((a, b) => b.changePercent - a.changePercent);
+  const mv = r && r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? '🔺' + (-r.drop) : '') : '';
+  return botLine(botGrp(g.name, '-(' + (r ? r.rank : '?') + ')' + mv + ' <span class="' + dirClass(g.avgChange) + '">' + botPct(g.avgChange) + '</span>'), 'bot-head') +
+    (list.length ? list.map((s) => botLine((opts && opts.me === s.code ? '👉' : '') + botStk(s.code, s.name, ' <span class="' + dirClass(s.changePercent) + '">' + botPct(s.changePercent) + '</span>' +
+      ((hm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '')))).join('') : botLine('（沒有符合的）', 'bot-dim'));
+}
+function botAnswer(raw){
+  const q = String(raw || '').trim().replace(/[０-９Ａ-Ｚａ-ｚ＋－]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/\s+/g, '').toUpperCase();
+  if (!q) return null;
+  const title = (t, sub) => '<div class="bot-title">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
+  const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
+  const wrap = (t, body, sub) => '<div class="bot-msg"><div class="bot-q">' + wlEsc(raw) + '</div>' + title(t, sub || stamp) + body + '</div>';
+  // 不用首頁報價的：國際行情
+  if (q === '70' || q === '71'){
+    botWorldLoad();
+    const w = botState.world;
+    const zone = q === '70' ? 'asia' : 'us';
+    if (!w) return wrap(q === '70' ? '亞洲股市(70)' : '美國股市(71)', botLine('讀取中…', 'bot-dim'));
+    const rows = w.rows.filter((x) => x.zone === zone);
+    return wrap(q === '70' ? '亞洲股市(70)' : '美國股市(71)', rows.map((x) => botLine(wlEsc(x.name) + ' ' + (x.error ? '<span class="bot-dim">' + wlEsc(x.error) + '</span>'
+      : Number(x.price).toLocaleString('zh-TW', { maximumFractionDigits: 2 }) + ' <span class="' + dirClass(x.changePct) + '">' + botPct(x.changePct) + '</span>' +
+        (x.time ? ' <small class="bot-dim">' + new Date(x.time).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) + '</small>' : '')))).join(''),
+      '資料：Yahoo Finance，約晚幾分鐘');
+  }
+  if (q === '72'){
+    f155Load();
+    const tx = f155State.data && f155State.data.tx;
+    if (!tx) return wrap('台指期(72)', botLine('讀取中…', 'bot-dim'));
+    const sess = tx.session === 'night' ? '夜盤' : tx.session === 'day-close' ? '白天盤收盤' : '白天盤';
+    return wrap('台指期(72)', botLine('台指期近月（' + sess + '）' + Number(tx.price).toLocaleString('zh-TW') + ' <span class="' + dirClass(tx.changePct) + '">' +
+      (tx.change > 0 ? '+' : '') + tx.change + '（' + botPct(tx.changePct) + '）</span>') + botLine('時間 ' + wlEsc(String(tx.time || '').slice(5, 16).replace('T', ' ')), 'bot-dim'));
+  }
+  if (q === '60' || q === '61' || q === '62'){
+    const m = homeJailModel();
+    if (!m){ homeJailLoad(); return wrap('處置', botLine('讀取中…', 'bot-dim')); }
+    const list = (rows, t) => rows.filter((x) => !x.empty).map((x) => botLine(botStk(x.code, x.name, ' <span class="bot-dim">(' + wlEsc(x.tag) + ')</span>'))).join('') || botLine(t, 'bot-dim');
+    if (q === '61') return wrap('即將出關(61)', list(m.soonOut, '未來 3 個交易日沒有'));
+    if (q === '62') return wrap('已出關(62)', list(m.out, '最近 3 個交易日沒有'));
+    return wrap('處置股(60)', botLine('🔒 今日入獄', 'bot-head') + list(m.todayIn, '沒有') + botLine('🔓 即將出關', 'bot-head') + list(m.soonOut, '沒有') + botLine('🎉 已出關', 'bot-head') + list(m.out, '沒有'));
+  }
+  if (!lastData || lastData.mock || !Array.isArray(lastData.groups)) return wrap(raw, botLine('首頁報價還在載入，等一下再試', 'bot-dim'));
+  const h = homeRankRows();
+  if (!h) return wrap(raw, botLine('族群行情載入中…', 'bot-dim'));
+  const rankLine = (r) => botLine(botGrp(r.name, '-(' + r.rank + ')' + (r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? '🔺' + (-r.drop) : '－') : '') + ' <span class="' + dirClass(r.avg) + '">' + botPct(r.avg) + '</span>'));
+  // 1N：族群漲幅排行
+  let mm = /^1([1-9])?$/.exec(q);
+  if (mm){
+    const th = mm[1] ? Number(mm[1]) : 1;
+    const byName = new Map(lastData.groups.map((g) => [g.name, g]));
+    const rows = h.rows.filter((r) => r.avg > th);
+    return wrap('族群漲幅 > ' + th + '%（' + rows.length + ' 族）', rows.map((r) => {
+      const g = byName.get(r.name);
+      const top = g ? g.stocks.filter((s) => s.price != null && Number.isFinite(s.changePercent)).sort((a, b) => b.changePercent - a.changePercent)[0] : null;
+      return rankLine(r) + (top ? botLine('👑' + botStk(top.code, top.name, ' <span class="' + dirClass(top.changePercent) + '">' + botPct(top.changePercent) + '</span>'), 'bot-sub') : '');
+    }).join('') || botLine('目前沒有族群漲超過 ' + th + '%', 'bot-dim'));
+  }
+  // 2N[-K]：個股💎漲幅排行
+  mm = /^2([1-9])?(?:-(\d{1,3}))?$/.exec(q);
+  if (mm){
+    const th = mm[1] ? Number(mm[1]) : 0, skip = mm[2] ? Number(mm[2]) : 0;
+    const seen = new Map();
+    rankedGroupsOf(lastData.groups).forEach((g) => g.stocks.forEach((s) => {
+      if (s.price == null || !Number.isFinite(s.changePercent) || s.changePercent <= th) return;
+      if (!seen.has(s.code)) seen.set(s.code, { s, groups: [] });
+      seen.get(s.code).groups.push(g.name);
+    }));
+    const all = [...seen.values()].sort((a, b) => b.s.changePercent - a.s.changePercent);
+    const page = all.slice(skip, skip + 30);
+    return wrap('💎個股漲幅 > ' + th + '%（共 ' + all.length + ' 檔' + (skip ? '，從第 ' + (skip + 1) + ' 檔開始' : '') + '）', page.map((x, i) => botLine((skip + i + 1) + '. 💎' + botStk(x.s.code, x.s.name,
+      ' <span class="' + dirClass(x.s.changePercent) + '">' + limitPriceHtml(x.s, botPct(x.s.changePercent)) + '</span> <span class="bot-dim">' + wlEsc(x.groups.join('/')) + '</span>'))).join('') +
+      (all.length > skip + 30 ? botLine('還有 ' + (all.length - skip - 30) + ' 檔，輸入「' + (mm[1] ? '2' + mm[1] : '2') + '-' + (skip + 30) + '」看後面', 'bot-dim') : '') ||
+      botLine('目前沒有個股漲超過 ' + th + '%', 'bot-dim'));
+  }
+  if (q === '177'){
+    let body = '', sep = false;
+    h.rows.forEach((r) => { if (!sep && r.rank > h.half){ body += botLine('------水平------', 'bot-sep'); sep = true; } body += rankLine(r); });
+    return wrap('重點族群排名(177)', body);
+  }
+  if (q === '188' || q === '199'){
+    const set = q === '188' ? RANK188_GROUPS : KILL193_GROUPS;
+    let body = '', sep = false;
+    h.rows.filter((r) => set.has(r.name)).forEach((r) => { if (!sep && r.rank > h.half){ body += botLine(q === '188' ? '------↑(多方)↑------' : '------↓(空方)↓------', 'bot-sep'); sep = true; } body += rankLine(r); });
+    return wrap(q === '188' ? '多族群排名(188)' : '空族群排名(199)', body);
+  }
+  if (q === '193'){
+    const k = kill193Model();
+    if (!k) return wrap('空族群必殺(193)', botLine('讀取中…', 'bot-dim'));
+    const line = (r) => rankLine({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg }) + (r.members.length ? botLine('⚠️' + r.members.map((x) => botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>')).join('　'), 'bot-sub') : '');
+    return wrap('空族群必殺(193)', k.upper.map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep') + k.lower.map(line).join(''));
+  }
+  if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\+3$/.test(q)){
+    let list = zone283List(h);
+    let t = '終點戰法空(' + (q === '284' ? '284' : '283') + ')';
+    if (q === '284') list = list.filter((z) => KILL193_GROUPS.has(z.row.name));
+    if (q.endsWith('+3')){ const code = q.slice(0, -2); const names = new Set(botStockGroups(code).map((g) => g.name)); list = list.filter((z) => names.has(z.row.name)); t = code + ' 那族的終點戰法空'; }
+    return wrap(t, list.map((z) => botLine('🏰' + botGrp(z.row.name, '(' + z.row.rank + ') <span class="' + dirClass(z.row.avg) + '">' + botPct(z.row.avg) + '</span>'), 'bot-head') +
+      z.stocks.map((x) => botLine(x.mk + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>'))).join('') +
+      (z.lit >= 2 ? botLine('⚠️有兩個以上亮燈空小心', 'bot-warn') : '')).join('') + (list.length ? botLine('⚠️注意破惡均下彎打倒數', 'bot-warn') : botLine('目前沒有族群有亮燈', 'bot-dim')));
+  }
+  const m = race333Model();
+  if (q === '30' || q === '32'){
+    if (!m) return wrap(q, botLine('讀取中…', 'bot-dim'));
+    if (q === '30'){
+      const rows = m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct);
+      return wrap('🐎🚀馬火多(30)', rows.map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>'))).join('') || botLine('目前沒有', 'bot-dim'));
+    }
+    const sec = (l) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '')))).join('');
+    return wrap('🔪⚔️新刀劍空(32)', sec(m.bladeUpper) + botLine('----↑(多方打少)↑----', 'bot-sep') + sec(m.bladeMiddle) + botLine('----↓(強空積極)↓----', 'bot-sep') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest));
+  }
+  if (q === '31'){
+    const list = kill31Model();
+    return wrap('🔪⚔️刀劍空(31)', (list || []).map((r) => botLine(botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk))).join('') || botLine(list ? '目前沒有' : '讀取中…', 'bot-dim'));
+  }
+  if (q === '44'){
+    const ev = sigCurrentEvents().filter((e) => e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull'));
+    const seen = new Set();
+    const rows = ev.filter((e) => !seen.has(e.code) && seen.add(e.code));
+    return wrap('1+2 多・突破黑馬(44)', rows.map((e) => botLine('🐎' + botStk(e.code, e.name, ' <span class="bot-dim">' + wlEsc(e.time || '') + '</span>'))).join('') || botLine('今天還沒有', 'bot-dim'), stamp + '・跟訊號中心「1+2多」同一份');
+  }
+  if (q === '84'){
+    gmChipLoad();
+    const cd = gmChipState.data && gmChipState.data.status === 'ok' ? gmChipState.data : null;
+    if (!cd) return wrap('籌碼暴增(84)', botLine(gmChipState.error ? '籌碼資料暫時抓不到，等一下再試' : '讀取中…', 'bot-dim'));
+    const names = new Map();
+    lastData.groups.forEach((g) => g.stocks.forEach((s) => { if (!names.has(s.code)) names.set(s.code, s.name); }));
+    const rows = Object.entries(cd.chips).filter(([c]) => names.has(c)).sort((a, b) => b[1][0] - a[1][0]).slice(0, 30);
+    return wrap('本週籌碼暴增排行(84)', rows.map(([c, v], i) => botLine((i + 1) + '. ' + botStk(c, names.get(c), ' <span class="' + dirClass(v[0]) + '">' + botPct(v[0]) + '</span>' + (v[1] >= 2 ? ' <span class="bot-dim">連 ' + v[1] + ' 週</span>' : '')))).join(''),
+      '集保 400 張以上大戶週增減・' + rdMdShort(cd.week) + ' 週');
+  }
+  // 股號B2／股號a／股號（或族群名）
+  mm = /^([0-9A-Z]{4,6})B(\d{1,2})$/.exec(q);
+  if (mm){
+    const gs = botStockGroups(mm[1]);
+    if (!gs.length) return wrap(raw, botLine(mm[1] + ' 沒有綁定在重點族群裡', 'bot-dim'));
+    return wrap(mm[1] + ' 同族群漲 ' + mm[2] + '% 以上', gs.map((g) => botGroupBlock(g, h, { min: Number(mm[2]), me: mm[1] })).join(''));
+  }
+  mm = /^([0-9A-Z]{4,6})A$/.exec(q);
+  if (mm){
+    const gs = botStockGroups(mm[1]);
+    if (!gs.length) return wrap(raw, botLine(mm[1] + ' 沒有綁定在重點族群裡', 'bot-dim'));
+    const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
+    return wrap(mm[1] + ' 族群名次變化（前天 → 昨天 → 今天）', gs.map((g) => {
+      const r = h.rows.find((x) => x.name === g.name), d = daily[g.name] || {}, rk = d.rank || [];
+      const y = Number.isFinite(rk[0]) ? rk[0] : null, y2 = Number.isFinite(rk[1]) ? rk[1] : null, t = r ? r.rank : null;
+      const trend = y !== null && t !== null ? (t < y ? '轉強偏多🔺' : t > y ? '轉弱偏空🔽' : '持平') : '';
+      return botLine(botGrp(g.name, '：' + (y2 ?? '—') + ' → ' + (y ?? '—') + ' → <b>' + (t ?? '—') + '</b>　' + trend));
+    }).join(''), '共 ' + h.total + ' 族，1 最強');
+  }
+  const f = botFindGroups(q);
+  if (f.groups.length) return wrap(f.code ? f.code + ' 的族群漲幅排行' : '族群漲幅排行', f.groups.slice(0, 6).map((g) => botGroupBlock(g, h, { me: f.code })).join(''));
+  if (/^[0-9A-Z]{4,6}$/.test(q)) return wrap(raw, botLine(q + ' 沒有綁定在重點族群裡（可以用「選股・個股研究」查這檔的基本資料）', 'bot-dim'));
+  return wrap(raw, botLine('看不懂這個代碼，下面有全部代碼', 'bot-dim'));
+}
+function botRun(cmd){
+  const html = botAnswer(cmd);
+  if (!html) return;
+  botState.history.unshift(String(cmd).trim());
+  botState.out.unshift(html);
+  botState.history = botState.history.slice(0, 8); botState.out = botState.out.slice(0, 8);
+  renderBot();
+}
+function renderBot(){
+  const body = document.getElementById('botBody');
+  if (!body) return;
+  const keep = document.activeElement && document.activeElement.id === 'botQ' ? document.activeElement.value : '';
+  body.innerHTML = '<div class="bot-q-row"><input id="botQ" placeholder="輸入代碼，例：12、22、2359B2、2359a、70" value="' + wlEsc(keep) + '" autocomplete="off"><button type="button" data-bot-go="1">送出</button></div>' +
+    '<div class="bot-chips">' + BOT_CODES.filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') + '</div>' +
+    (botState.out.length ? botState.out.join('') : '<div class="bot-msg bot-help">' + BOT_CODES.map(([c, d]) => botLine('<b>' + c + '</b>　' + wlEsc(d))).join('') +
+      botLine('8 隔日沖券商（2359m、81、811、813）要券商分點買賣資料：證交所不開放程式抓、免費資料源沒有，暫時沒有。', 'bot-dim') + '</div>');
+}
+function openBotPanel(){
+  document.getElementById('botModal').hidden = false;
+  botWorldLoad();
+  renderBot();
+  const i = document.getElementById('botQ'); if (i) i.focus();
+}
+document.getElementById('botBtn').addEventListener('click', openBotPanel);
+document.getElementById('botClose').addEventListener('click', () => { document.getElementById('botModal').hidden = true; });
+document.getElementById('botModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget){ e.currentTarget.hidden = true; return; }
+  const t = e.target;
+  if (t.closest('[data-bot-go]')){ const i = document.getElementById('botQ'); botRun(i ? i.value : ''); if (i) i.value = ''; return; }
+  const run = t.closest('[data-bot-run]'); if (run){ botRun(run.dataset.botRun); return; }
+  const st = t.closest('[data-bot-code]'); if (st){ openStockChart(st.dataset.botCode, st.dataset.botName); return; }
+  const g = t.closest('[data-bot-group]'); if (g){ openGroupDetail(g.dataset.botGroup); }
+});
+document.getElementById('botModal').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target && e.target.id === 'botQ'){ e.preventDefault(); botRun(e.target.value); e.target.value = ''; }
+});
 document.getElementById('rivClose').addEventListener('click', closeRiverPanel);
 document.getElementById('rivModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeRiverPanel(); });
 document.getElementById('rivBody').addEventListener('click', (e) => {
