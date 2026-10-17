@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 12:04:03";
+const BUILD_STAMP = "2026-10-17 12:08:21";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12731,7 +12731,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 12:04:03';
+const BUILD_STAMP = '2026-10-17 12:08:21';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17387,7 +17387,7 @@ const botState = { history: [], out: [], world: null, worldAt: 0, worldLoading: 
 const BOT_CODES = [
   ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
-  ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'],
+  ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'],
   ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖雙週入榜黑龍：前兩個交易日上 811、今天收黑K（⭐＝兩週內又上榜幾次）'],
@@ -17657,6 +17657,25 @@ function botAnswer(raw){
     const sec = (l) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '')))).join('');
     return wrap('🔪⚔️新刀劍空(32)', sec(m.bladeUpper) + botLine('----↑(多方打少)↑----', 'bot-sep') + sec(m.bladeMiddle) + botLine('----↓(強空積極)↓----', 'bot-sep') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest));
   }
+  // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
+  // 最後附櫃買多空（漲跌幅）；34 再附漲 7% 以上沒列的檔數；處置股名字前面 *
+  if (q === '33' || q === '34'){
+    if (!m) return wrap(q, botLine('讀取中…', 'bot-dim'));
+    const jd = jlState.data && jlState.data.status === 'ok' ? jlState.data : null;
+    const jailed = new Set(jd ? (jd.jailedList || []).map((j) => j.code).concat((jd.index || []).filter((x) => x.jailed).map((x) => x.code)) : []);
+    const MEDAL = ['👑', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+    const line = (r, i) => botLine((jailed.has(r.code) ? '*' : '') + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (MEDAL[i] ? ' ' + MEDAL[i] : '')));
+    const otc = m.otcPct === null || m.otcPct === undefined ? '' : botLine('------↓(櫃買)↓------', 'bot-sep') +
+      botLine('⚠️' + (m.otcLabel || '') + (/多/.test(m.otcLabel || '') ? '🚀' : /空/.test(m.otcLabel || '') ? '🔻' : '') + '(' + botPct(m.otcPct).replace('+', '') + ')', 'bot-warn');
+    if (q === '33'){
+      const rows = m.horses.slice().sort((a, b) => b.pct - a.pct);
+      const over = rows.filter((r) => r.pct > 7).length;
+      return wrap('👑👑賽馬多(33)', (rows.map((r, i) => line(r, i) + (over && i === over - 1 && over < rows.length ? botLine('----↑(續抱不追)↑----', 'bot-sep') : '')).join('') || botLine('目前沒有', 'bot-dim')) + otc);
+    }
+    const rows = m.rivers.slice().sort((a, b) => b.pct - a.pct);
+    return wrap('🌊🌊河流多(34)', (rows.map(line).join('') || botLine(m.otcStrongBear ? '櫃買強空，河流多不出名單' : '目前沒有', 'bot-dim')) + otc +
+      (m.riverOver.length ? botLine('⚠️符合條件>7%有 ' + m.riverOver.length + ' 檔', 'bot-warn') : ''));
+  }
   if (q === '31'){
     const list = kill31Model();
     return wrap('🔪⚔️刀劍空(31)', (list || []).map((r) => botLine(botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk))).join('') || botLine(list ? '目前沒有' : '讀取中…', 'bot-dim'));
@@ -17771,13 +17790,18 @@ function botRun(cmd){
   botState.history = botState.history.slice(0, 8); botState.out = botState.out.slice(0, 8);
   renderBot();
 }
+// 代碼照字排（2026-10-17 使用者：照第一個數字的順序，618 排在 61 後面、17784 排在 177 後面，以後新加的也一樣）；2359 開頭的範例放最後
+function botCodesSorted(){
+  const ex = (c) => /^2359/.test(c);
+  return BOT_CODES.filter(([c]) => !ex(c)).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).concat(BOT_CODES.filter(([c]) => ex(c)));
+}
 function renderBot(){
   const body = document.getElementById('botBody');
   if (!body) return;
   const keep = document.activeElement && document.activeElement.id === 'botQ' ? document.activeElement.value : '';
   body.innerHTML = '<div class="bot-q-row"><input id="botQ" placeholder="輸入代碼，例：12、22、2359B2、2359a、70" value="' + wlEsc(keep) + '" autocomplete="off"><button type="button" data-bot-go="1">送出</button></div>' +
-    '<div class="bot-chips">' + BOT_CODES.filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') + '</div>' +
-    (botState.out.length ? botState.out.join('') : '<div class="bot-msg bot-help">' + BOT_CODES.map(([c, d]) => botLine('<b>' + c + '</b>　' + wlEsc(d))).join('') +
+    '<div class="bot-chips">' + botCodesSorted().filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') + '</div>' +
+    (botState.out.length ? botState.out.join('') : '<div class="bot-msg bot-help">' + botCodesSorted().map(([c, d]) => botLine('<b>' + c + '</b>　' + wlEsc(d))).join('') +
       botLine('隔日沖分點：凱基-台北、凱基-城中、富邦證券、統一、群益金鼎、港商野村、國票-敦北法人等 18 個（照對方名單對出來的），資料來源富邦證券主力進出。', 'bot-dim') + '</div>');
 }
 function openBotPanel(){

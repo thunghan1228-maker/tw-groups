@@ -17307,7 +17307,7 @@ const botState = { history: [], out: [], world: null, worldAt: 0, worldLoading: 
 const BOT_CODES = [
   ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
-  ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'],
+  ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'],
   ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖雙週入榜黑龍：前兩個交易日上 811、今天收黑K（⭐＝兩週內又上榜幾次）'],
@@ -17577,6 +17577,25 @@ function botAnswer(raw){
     const sec = (l) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '')))).join('');
     return wrap('🔪⚔️新刀劍空(32)', sec(m.bladeUpper) + botLine('----↑(多方打少)↑----', 'bot-sep') + sec(m.bladeMiddle) + botLine('----↓(強空積極)↓----', 'bot-sep') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest));
   }
+  // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
+  // 最後附櫃買多空（漲跌幅）；34 再附漲 7% 以上沒列的檔數；處置股名字前面 *
+  if (q === '33' || q === '34'){
+    if (!m) return wrap(q, botLine('讀取中…', 'bot-dim'));
+    const jd = jlState.data && jlState.data.status === 'ok' ? jlState.data : null;
+    const jailed = new Set(jd ? (jd.jailedList || []).map((j) => j.code).concat((jd.index || []).filter((x) => x.jailed).map((x) => x.code)) : []);
+    const MEDAL = ['👑', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+    const line = (r, i) => botLine((jailed.has(r.code) ? '*' : '') + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (MEDAL[i] ? ' ' + MEDAL[i] : '')));
+    const otc = m.otcPct === null || m.otcPct === undefined ? '' : botLine('------↓(櫃買)↓------', 'bot-sep') +
+      botLine('⚠️' + (m.otcLabel || '') + (/多/.test(m.otcLabel || '') ? '🚀' : /空/.test(m.otcLabel || '') ? '🔻' : '') + '(' + botPct(m.otcPct).replace('+', '') + ')', 'bot-warn');
+    if (q === '33'){
+      const rows = m.horses.slice().sort((a, b) => b.pct - a.pct);
+      const over = rows.filter((r) => r.pct > 7).length;
+      return wrap('👑👑賽馬多(33)', (rows.map((r, i) => line(r, i) + (over && i === over - 1 && over < rows.length ? botLine('----↑(續抱不追)↑----', 'bot-sep') : '')).join('') || botLine('目前沒有', 'bot-dim')) + otc);
+    }
+    const rows = m.rivers.slice().sort((a, b) => b.pct - a.pct);
+    return wrap('🌊🌊河流多(34)', (rows.map(line).join('') || botLine(m.otcStrongBear ? '櫃買強空，河流多不出名單' : '目前沒有', 'bot-dim')) + otc +
+      (m.riverOver.length ? botLine('⚠️符合條件>7%有 ' + m.riverOver.length + ' 檔', 'bot-warn') : ''));
+  }
   if (q === '31'){
     const list = kill31Model();
     return wrap('🔪⚔️刀劍空(31)', (list || []).map((r) => botLine(botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk))).join('') || botLine(list ? '目前沒有' : '讀取中…', 'bot-dim'));
@@ -17691,13 +17710,18 @@ function botRun(cmd){
   botState.history = botState.history.slice(0, 8); botState.out = botState.out.slice(0, 8);
   renderBot();
 }
+// 代碼照字排（2026-10-17 使用者：照第一個數字的順序，618 排在 61 後面、17784 排在 177 後面，以後新加的也一樣）；2359 開頭的範例放最後
+function botCodesSorted(){
+  const ex = (c) => /^2359/.test(c);
+  return BOT_CODES.filter(([c]) => !ex(c)).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).concat(BOT_CODES.filter(([c]) => ex(c)));
+}
 function renderBot(){
   const body = document.getElementById('botBody');
   if (!body) return;
   const keep = document.activeElement && document.activeElement.id === 'botQ' ? document.activeElement.value : '';
   body.innerHTML = '<div class="bot-q-row"><input id="botQ" placeholder="輸入代碼，例：12、22、2359B2、2359a、70" value="' + wlEsc(keep) + '" autocomplete="off"><button type="button" data-bot-go="1">送出</button></div>' +
-    '<div class="bot-chips">' + BOT_CODES.filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') + '</div>' +
-    (botState.out.length ? botState.out.join('') : '<div class="bot-msg bot-help">' + BOT_CODES.map(([c, d]) => botLine('<b>' + c + '</b>　' + wlEsc(d))).join('') +
+    '<div class="bot-chips">' + botCodesSorted().filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') + '</div>' +
+    (botState.out.length ? botState.out.join('') : '<div class="bot-msg bot-help">' + botCodesSorted().map(([c, d]) => botLine('<b>' + c + '</b>　' + wlEsc(d))).join('') +
       botLine('隔日沖分點：凱基-台北、凱基-城中、富邦證券、統一、群益金鼎、港商野村、國票-敦北法人等 18 個（照對方名單對出來的），資料來源富邦證券主力進出。', 'bot-dim') + '</div>');
 }
 function openBotPanel(){
