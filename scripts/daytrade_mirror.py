@@ -5,7 +5,8 @@
 百分比、張數幾乎都對得上（一般 154 檔 153 檔誤差 10% 內；連兩日入榜 42 檔全對）。
 
 811 算法（照對方名單反推）：
-- 候選：當天漲 9% 以上、而且在我們族群或處置前科名單裡的股票，隔日沖分點有淨買超的。
+- 候選：當天漲 9% 以上的普通股（4 碼，不含 ETF），隔日沖分點有淨買超的。
+  （原本只看我們族群＋處置前科名單，會少掉對方有的時碩工業、昇貿、鎂友益…；2026-10-17 使用者：範圍放寬，可能會多出對方沒列的）
 - 隔日沖買超＝18 個分點裡「淨買超」的張數加總（淨賣超的不扣）。
 - 一般：% ＝ 隔日沖買超 ÷ 當天成交量；(張數) ＝ 2 × 隔日沖買超。
 - 前一個交易日也在榜（⁻連兩日入榜）：% ＝ (昨＋今隔日沖買超) ÷ (昨＋今成交量)；(張數) ＝ 昨＋今隔日沖買超。
@@ -33,7 +34,6 @@ TW = timezone(timedelta(hours=8))
 UA = {"User-Agent": "Mozilla/5.0 (compatible; HanStock-mirror/1.0)", "Accept-Language": "zh-TW,zh;q=0.9"}
 ZCO_URL = "https://fubon-ebrokerdj.fbs.com.tw/z/zc/zco/zco.djhtm?a={code}&e={d}&f={d}"
 TWSE_URL = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date={d}&type=ALLBUT0999&response=json"
-JAIL_URL = "https://tw-groups.judystock.workers.dev/api/jail"
 # 分點代號（網址 b= 的值）→ 名稱
 BRANCHES = {
     "9268": "凱基-台北", "5850": "統一", "1560": "港商野村", "9600": "富邦證券", "9100": "群益金鼎", "9227": "凱基-城中",
@@ -106,19 +106,6 @@ def tpex_quotes(data_dir: str, day: date) -> dict[str, dict]:
     return out
 
 
-def universe(main_dir: str) -> set[str]:
-    """我們的族群股＋處置前科名單（對方名單裡有不少處置、注意股）。"""
-    html = open(os.path.join(main_dir, "build", "tw-groups-draft.html"), encoding="utf-8").read()
-    block = re.search(r"const GROUPS = (\[[\s\S]*?\]);\nconst ALL_CODES", html)
-    codes = set(re.findall(r'"code":"([0-9A-Z]+)"', block.group(1) if block else ""))
-    try:
-        jail = json.loads(fetch_text(JAIL_URL))
-        codes |= {x["code"] for x in jail.get("index") or []}
-    except Exception as exc:  # noqa: BLE001
-        print("處置名單抓不到，只用族群股", exc, file=sys.stderr)
-    return codes
-
-
 def zco(code: str, day: date) -> list[dict]:
     """這檔這天的前 15 買超（side=1）、前 15 賣超（side=-1）分點。"""
     text = fetch_text(ZCO_URL.format(code=code, d=day.isoformat()), "big5")
@@ -134,13 +121,13 @@ def load_day(data_dir: str, day: str) -> dict | None:
     return json.load(open(path, encoding="utf-8")) if os.path.exists(path) else None
 
 
-def build(main_dir: str, data_dir: str, day: date, prev_day: str | None, codes: set[str]) -> dict | None:
+def build(data_dir: str, day: date, prev_day: str | None) -> dict | None:
     quotes = {**tpex_quotes(data_dir, day), **twse_quotes(day)}
     if len(quotes) < 500:
         return None   # 休市
     prev = load_day(data_dir, prev_day) if prev_day else None
     prev_rows = {r["code"]: r for r in (prev or {}).get("rows") or []}
-    cands = sorted(c for c, q in quotes.items() if c in codes and q["chg"] >= MIN_CHANGE)
+    cands = sorted(c for c, q in quotes.items() if re.fullmatch(r"[1-9]\d{3}", c) and q["chg"] >= MIN_CHANGE)
     rows = []
     for code in cands:
         q = quotes[code]
@@ -170,7 +157,7 @@ def build(main_dir: str, data_dir: str, day: date, prev_day: str | None, codes: 
 
 
 def main() -> None:
-    main_dir, data_dir = sys.argv[1], sys.argv[2]
+    _main_dir, data_dir = sys.argv[1], sys.argv[2]   # 第一個參數（main 分支目錄）放寬範圍後用不到，保留給排程的呼叫方式
     today = datetime.now(TW).date()
     if len(sys.argv) > 3:
         a, _, b = sys.argv[3].partition(":")
@@ -181,13 +168,12 @@ def main() -> None:
     index_path = os.path.join(data_dir, "tpex", "daytrade-index.json")
     index = json.load(open(index_path, encoding="utf-8")) if os.path.exists(index_path) else {"dates": []}
     dates = set(index.get("dates") or [])
-    codes = universe(main_dir)
     day = start
     while day <= end:
         if day.weekday() < 5:
             prev_day = max((d for d in dates if d < day.isoformat()), default=None)
             try:
-                out = build(main_dir, data_dir, day, prev_day, codes)
+                out = build(data_dir, day, prev_day)
             except Exception as exc:  # noqa: BLE001
                 print("失敗", day, exc, file=sys.stderr)
                 out = None

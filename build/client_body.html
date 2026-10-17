@@ -17506,7 +17506,7 @@ function botAnswer(raw){
       const rows = day.rows.slice().sort((a, b) => b.net - a.net);
       return wrap('隔日沖買超排序(81) ' + md(day.date), rows.map((r, i) => botLine((i + 1) + '. ' + botStk(r.code, r.name, ' <b>' + n(r.net) + '張</b> <span class="' + dirClass(r.chg) + '">' + botPct(r.chg) + '</span>')) +
         botLine(r.brokers.slice(0, 3).map(([b, v]) => wlEsc(b) + ' ' + n(v)).join('、'), 'bot-sub')).join('') || botLine('這天沒有', 'bot-dim'),
-        '漲 9% 以上的族群股・隔日沖分點淨買超張數');
+        '漲 9% 以上的股票・隔日沖分點淨買超張數');
     }
     if (q === '813'){
       const m = dtModel813();
