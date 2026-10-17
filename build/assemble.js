@@ -821,6 +821,34 @@ export default {
       // 估值河流圖的股票清單（查詢建議用），5 分鐘快取
       return await proxyHanstockBars("/api/hub/river/list" + url.search, 300);
     }
+    if (url.pathname === "/api/world-indices") {
+      // 機器人代碼 70／71（2026-10-17 使用者：照對方機器人「亞洲股市／美國股市」）：Yahoo Finance 公開圖表 API，每檔一個請求、Cloudflare 快取 2 分鐘
+      const LIST = [
+        ["asia", "^TWII", "台股加權"], ["asia", "^N225", "日經 225"], ["asia", "^KS11", "韓國綜合"], ["asia", "^HSI", "香港恒生"],
+        ["asia", "000001.SS", "上證指數"], ["asia", "399001.SZ", "深證成指"], ["asia", "^STI", "新加坡海峽"], ["asia", "^AXJO", "澳洲 200"],
+        ["us", "^DJI", "道瓊工業"], ["us", "^GSPC", "標普 500"], ["us", "^IXIC", "那斯達克"], ["us", "^SOX", "費城半導體"], ["us", "^VIX", "VIX 恐慌指數"],
+        ["us", "YM=F", "道瓊期貨"], ["us", "NQ=F", "那斯達克期貨"], ["us", "ES=F", "標普期貨"],
+      ];
+      const one = async ([zone, sym, name]) => {
+        try {
+          const r = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?range=1d&interval=1d", {
+            headers: { "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)", Accept: "application/json" },
+            cf: { cacheTtl: 120, cacheEverything: true }
+          });
+          if (!r.ok) return { zone, sym, name, error: "HTTP " + r.status };
+          const m = ((((await r.json()) || {}).chart || {}).result || [])[0];
+          const meta = m && m.meta ? m.meta : {};
+          const price = Number(meta.regularMarketPrice), prev = Number(meta.chartPreviousClose ?? meta.previousClose);
+          if (!Number.isFinite(price)) return { zone, sym, name, error: "沒有報價" };
+          const change = Number.isFinite(prev) && prev > 0 ? price - prev : null;
+          return { zone, sym, name, price, change, changePct: change !== null ? (change / prev) * 100 : null,
+            time: Number.isFinite(meta.regularMarketTime) ? new Date(meta.regularMarketTime * 1000).toISOString() : null };
+        } catch (e) { return { zone, sym, name, error: String(e && e.message || e).slice(0, 80) }; }
+      };
+      const rows = await Promise.all(LIST.map(one));
+      return new Response(JSON.stringify({ status: rows.some((x) => !x.error) ? "ok" : "error", rows, generatedAt: new Date().toISOString() }),
+        { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=60" } });
+    }
     if (url.pathname === "/api/river-hit") {
       // 估值河流圖每查一檔記一筆（本週查詢排行，2026-10-16 使用者）：/api/river 有快取，後端看不到每一次；不快取
       const code = String(url.searchParams.get("code") || "").trim().toUpperCase();
