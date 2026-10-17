@@ -16165,15 +16165,17 @@ function ipoHtml(){
   const md = (iso) => (iso ? Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10) : '—');
   const px = (v) => (v === null || v === undefined ? '—' : Number(v).toLocaleString('zh-TW', { maximumFractionDigits: 2 }));
   const name = (x) => '<span class="rm-code" data-ipo-code="' + wlEsc(x.code) + '" data-ipo-name="' + wlEsc(x.name) + '">' + wlEsc(x.code) + '</span> ' + wlEsc(x.name);
-  const upRows = d.rows.filter((x) => x.end && x.end >= d.today);
-  const sec = (title, sub, list) => '<h3 class="mc-h">' + title + ' <small>' + sub + '</small></h3>' + (list.length ? '<div class="ipo-scroll"><table class="rm-table"><thead><tr><th>股票</th><th>申購期間</th><th>抽籤日</th><th>承銷價</th><th>承銷張數</th><th>今日收盤</th><th>獲利空間</th><th>撥券日</th></tr></thead><tbody>' +
-    list.map((x) => '<tr><td>' + name(x) + '</td><td>' + md(x.start) + '~' + md(x.end) + '</td><td>' + md(x.draw) + '</td><td>' + px(x.actual || x.price) + '</td><td>' + px(x.lots) + '</td><td>' +
-      px(x.ref) + (x.refSrc === '興櫃' ? '<small class="rm-none">（興櫃）</small>' : '') + '</td><td class="' + (x.profit > 0 ? 'up' : x.profit < 0 ? 'down' : '') + '"><b>' + (x.profit === null ? '—' : (x.profit > 0 ? '+' : '') + x.profit + '%') + '</b></td><td>' + md(x.list) + '</td></tr>').join('') +
+  // 還沒抽籤的都列上面（申購截止了也還要等抽籤）；抽完的放最近抽籤結果。手機上表格要橫拉，獲利空間放前面
+  const upRows = d.rows.filter((x) => (x.end && x.end >= d.today) || (x.draw && x.draw >= d.today));
+  const sec = (title, sub, list) => '<h3 class="mc-h">' + title + ' <small>' + sub + '</small></h3>' + (list.length ? '<div class="ipo-scroll"><table class="rm-table"><thead><tr><th>股票</th><th>承銷價</th><th>今日收盤</th><th>獲利空間</th><th>承銷張數</th><th>申購期間</th><th>抽籤日</th><th>撥券日</th></tr></thead><tbody>' +
+    list.map((x) => '<tr><td>' + name(x) + '</td><td>' + px(x.actual || x.price) + '</td><td>' + px(x.ref) + (x.refSrc === '興櫃' ? '<small class="rm-none">（興櫃）</small>' : '') + '</td><td class="' +
+      (x.profit > 0 ? 'up' : x.profit < 0 ? 'down' : '') + '"><b>' + (x.profit === null ? '—' : (x.profit > 0 ? '+' : '') + x.profit + '%') + '</b></td><td>' + px(x.lots) + '</td><td>' +
+      md(x.start) + '~' + md(x.end) + (x.end < d.today ? ' <small class="rm-none">已截止</small>' : '') + '</td><td>' + md(x.draw) + '</td><td>' + md(x.list) + '</td></tr>').join('') +
     '</tbody></table></div>' : '<div class="race-note">目前沒有</div>');
   let html = '<div class="mc-meta">資料：證交所公開申購公告・今天 ' + md(d.today) + ' <button type="button" class="chart-tab" data-ipo-reload="1">重新整理</button></div>';
   html += sec('🆕 新上市櫃抽籤股', '還沒掛牌，用興櫃最後成交價算', upRows.filter((x) => x.kind.startsWith('初')));
   html += sec('➕ 上市櫃增資', '用今天收盤價算', upRows.filter((x) => !x.kind.startsWith('初')));
-  const done = d.rows.filter((x) => !(x.end && x.end >= d.today)).sort((a, b) => (b.draw || '').localeCompare(a.draw || ''));
+  const done = d.rows.filter((x) => !upRows.includes(x)).sort((a, b) => (b.draw || '').localeCompare(a.draw || ''));
   html += '<h3 class="mc-h">📋 最近抽籤結果 <small>兩週內</small></h3>' + (done.length ? '<div class="ipo-scroll"><table class="rm-table"><thead><tr><th>股票</th><th>類別</th><th>抽籤日</th><th>承銷價</th><th>合格件數</th><th>中籤率</th><th>撥券日</th></tr></thead><tbody>' +
     done.map((x) => '<tr><td>' + name(x) + '</td><td>' + wlEsc(x.kind) + '</td><td>' + md(x.draw) + '</td><td>' + px(x.actual || x.price) + '</td><td>' + px(x.qualified) + '</td><td>' +
       (x.cancel ? wlEsc(x.cancel) : x.rate ? x.rate + '%' : '—') + '</td><td>' + md(x.list) + '</td></tr>').join('') + '</tbody></table></div>' : '<div class="race-note">兩週內沒有</div>');

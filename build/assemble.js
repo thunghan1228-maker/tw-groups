@@ -962,8 +962,8 @@ export default {
             const e = esb[x.code];
             ref = e ? num(e.LatestPrice) || num(e.Average) : null;
             refSrc = ref ? "興櫃" : "";
-            if (!ref && x.end >= today) { ref = await yahoo(x.code + ".TWO"); refSrc = ref ? "興櫃" : ""; }
-          } else if (x.end >= today) {
+            if (!ref && (x.draw || "") >= today) { ref = await yahoo(x.code + ".TWO"); refSrc = ref ? "興櫃" : ""; }
+          } else if ((x.draw || "") >= today) {
             ref = await yahoo(x.code + (x.kind === "上市增資" ? ".TW" : ".TWO"));
             refSrc = ref ? "收盤" : "";
           }

@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 11:38:47";
+const BUILD_STAMP = "2026-10-17 11:41:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12703,7 +12703,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 11:38:47';
+const BUILD_STAMP = '2026-10-17 11:41:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16245,15 +16245,17 @@ function ipoHtml(){
   const md = (iso) => (iso ? Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10) : '—');
   const px = (v) => (v === null || v === undefined ? '—' : Number(v).toLocaleString('zh-TW', { maximumFractionDigits: 2 }));
   const name = (x) => '<span class="rm-code" data-ipo-code="' + wlEsc(x.code) + '" data-ipo-name="' + wlEsc(x.name) + '">' + wlEsc(x.code) + '</span> ' + wlEsc(x.name);
-  const upRows = d.rows.filter((x) => x.end && x.end >= d.today);
-  const sec = (title, sub, list) => '<h3 class="mc-h">' + title + ' <small>' + sub + '</small></h3>' + (list.length ? '<div class="ipo-scroll"><table class="rm-table"><thead><tr><th>股票</th><th>申購期間</th><th>抽籤日</th><th>承銷價</th><th>承銷張數</th><th>今日收盤</th><th>獲利空間</th><th>撥券日</th></tr></thead><tbody>' +
-    list.map((x) => '<tr><td>' + name(x) + '</td><td>' + md(x.start) + '~' + md(x.end) + '</td><td>' + md(x.draw) + '</td><td>' + px(x.actual || x.price) + '</td><td>' + px(x.lots) + '</td><td>' +
-      px(x.ref) + (x.refSrc === '興櫃' ? '<small class="rm-none">（興櫃）</small>' : '') + '</td><td class="' + (x.profit > 0 ? 'up' : x.profit < 0 ? 'down' : '') + '"><b>' + (x.profit === null ? '—' : (x.profit > 0 ? '+' : '') + x.profit + '%') + '</b></td><td>' + md(x.list) + '</td></tr>').join('') +
+  // 還沒抽籤的都列上面（申購截止了也還要等抽籤）；抽完的放最近抽籤結果。手機上表格要橫拉，獲利空間放前面
+  const upRows = d.rows.filter((x) => (x.end && x.end >= d.today) || (x.draw && x.draw >= d.today));
+  const sec = (title, sub, list) => '<h3 class="mc-h">' + title + ' <small>' + sub + '</small></h3>' + (list.length ? '<div class="ipo-scroll"><table class="rm-table"><thead><tr><th>股票</th><th>承銷價</th><th>今日收盤</th><th>獲利空間</th><th>承銷張數</th><th>申購期間</th><th>抽籤日</th><th>撥券日</th></tr></thead><tbody>' +
+    list.map((x) => '<tr><td>' + name(x) + '</td><td>' + px(x.actual || x.price) + '</td><td>' + px(x.ref) + (x.refSrc === '興櫃' ? '<small class="rm-none">（興櫃）</small>' : '') + '</td><td class="' +
+      (x.profit > 0 ? 'up' : x.profit < 0 ? 'down' : '') + '"><b>' + (x.profit === null ? '—' : (x.profit > 0 ? '+' : '') + x.profit + '%') + '</b></td><td>' + px(x.lots) + '</td><td>' +
+      md(x.start) + '~' + md(x.end) + (x.end < d.today ? ' <small class="rm-none">已截止</small>' : '') + '</td><td>' + md(x.draw) + '</td><td>' + md(x.list) + '</td></tr>').join('') +
     '</tbody></table></div>' : '<div class="race-note">目前沒有</div>');
   let html = '<div class="mc-meta">資料：證交所公開申購公告・今天 ' + md(d.today) + ' <button type="button" class="chart-tab" data-ipo-reload="1">重新整理</button></div>';
   html += sec('🆕 新上市櫃抽籤股', '還沒掛牌，用興櫃最後成交價算', upRows.filter((x) => x.kind.startsWith('初')));
   html += sec('➕ 上市櫃增資', '用今天收盤價算', upRows.filter((x) => !x.kind.startsWith('初')));
-  const done = d.rows.filter((x) => !(x.end && x.end >= d.today)).sort((a, b) => (b.draw || '').localeCompare(a.draw || ''));
+  const done = d.rows.filter((x) => !upRows.includes(x)).sort((a, b) => (b.draw || '').localeCompare(a.draw || ''));
   html += '<h3 class="mc-h">📋 最近抽籤結果 <small>兩週內</small></h3>' + (done.length ? '<div class="ipo-scroll"><table class="rm-table"><thead><tr><th>股票</th><th>類別</th><th>抽籤日</th><th>承銷價</th><th>合格件數</th><th>中籤率</th><th>撥券日</th></tr></thead><tbody>' +
     done.map((x) => '<tr><td>' + name(x) + '</td><td>' + wlEsc(x.kind) + '</td><td>' + md(x.draw) + '</td><td>' + px(x.actual || x.price) + '</td><td>' + px(x.qualified) + '</td><td>' +
       (x.cancel ? wlEsc(x.cancel) : x.rate ? x.rate + '%' : '—') + '</td><td>' + md(x.list) + '</td></tr>').join('') + '</tbody></table></div>' : '<div class="race-note">兩週內沒有</div>');
@@ -19172,8 +19174,8 @@ export default {
             const e = esb[x.code];
             ref = e ? num(e.LatestPrice) || num(e.Average) : null;
             refSrc = ref ? "興櫃" : "";
-            if (!ref && x.end >= today) { ref = await yahoo(x.code + ".TWO"); refSrc = ref ? "興櫃" : ""; }
-          } else if (x.end >= today) {
+            if (!ref && (x.draw || "") >= today) { ref = await yahoo(x.code + ".TWO"); refSrc = ref ? "興櫃" : ""; }
+          } else if ((x.draw || "") >= today) {
             ref = await yahoo(x.code + (x.kind === "上市增資" ? ".TW" : ".TWO"));
             refSrc = ref ? "收盤" : "";
           }
