@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 10:47:09";
+const BUILD_STAMP = "2026-10-17 11:22:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -202,6 +202,17 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bot-title{font-weight:800;font-size:15px;margin:2px 0 6px;} .bot-title small{color:var(--muted);font-weight:600;font-size:11px;margin-left:6px;}
   .bot-line{font-size:13.5px;line-height:1.7;font-variant-numeric:tabular-nums;} .bot-line.bot-head{font-weight:800;margin-top:4px;} .bot-line.bot-sub{padding-left:16px;font-size:12.5px;}
   .bot-line.bot-sep{color:var(--muted);text-align:left;} .bot-line.bot-warn{color:#fb923c;} .bot-dim{color:var(--muted);}
+  #remindInner{max-width:620px;}
+  .rm-date{font-size:17px;font-weight:800;margin:2px 0 10px;}
+  .rm-sec{margin:0 0 14px;} .rm-h{font-weight:800;font-size:14.5px;margin:0 0 4px;} .rm-h small{color:var(--muted);font-weight:600;font-size:11.5px;margin-left:6px;}
+  .rm-table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums;}
+  .rm-table th{color:var(--muted);font-weight:700;font-size:12px;text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .rm-table td{padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .rm-code{cursor:pointer;font-weight:800;color:#a78bfa;} .rm-code:hover{text-decoration:underline;}
+  .rm-red{color:#f87171;font-weight:700;} .rm-none{color:var(--muted);} .rm-warn{color:#fb923c;font-size:12.5px;font-weight:700;margin-top:4px;}
+  .rm-new{display:inline-block;background:#dc2626;color:#fff;border-radius:6px;font-size:10.5px;font-weight:800;padding:0 5px;margin-left:4px;vertical-align:1px;}
+  .rm-more{margin-top:6px;font-size:12.5px;color:var(--muted);} .rm-more summary{cursor:pointer;}
+  #remindBtn.unseen{border-color:#f87171;color:#f87171;}
   .bot-stk,.bot-grp{cursor:pointer;font-weight:700;} .bot-stk:hover,.bot-grp:hover{text-decoration:underline;} .bot-grp{color:#facc15;}
   .hr-jail-card .jl-new{font-style:normal;font-size:10px;color:#f87171;border:1px solid #f87171;border-radius:4px;padding:0 3px;margin-left:3px;}
   .hr-jail-card tr.jl-ghead{cursor:pointer;} .hr-jail-card tr.jl-ghead td{padding-top:6px!important;color:var(--text);}
@@ -2691,6 +2702,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="market-strength-bar" id="otcStrengthBox"></div>
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
+      <button class="alert-toggle guide-btn" id="remindBtn">🔔 今日提醒</button>  <!-- 2026-10-17 使用者：每天第一次打開跳出警示股提醒（解鎖／連續警告／分盤交易），關掉後這裡再開 -->
       <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>
       <button class="alert-toggle guide-btn" id="botBtn">🤖 機器人代碼</button>  <!-- 2026-10-17 使用者：照對方 Line 機器人的代碼（12／22／B／a／70…）做一個輸入代碼的面板 -->
       <button class="alert-toggle guide-btn" id="tutBtn">🎬 影片教學</button>  <!-- 2026-10-13 使用者：訊號教學、工具列各功能的影音教學（女聲旁白＋字幕） -->  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照老師新手教學頁） -->
@@ -2865,6 +2877,19 @@ const HTML_PAGE = `<!DOCTYPE html>
       <button class="cm-icon-btn" id="botClose" aria-label="關閉">✕</button>
     </div>
     <div id="botBody"></div>
+  </div>
+</div>
+<!-- 2026-10-17 使用者：今日提醒（警示股：解鎖、連續警告、分盤交易，表格），每天第一次打開跳出來 -->
+<div class="chips-modal" id="remindModal" hidden>
+  <div class="chips-inner" id="remindInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">🔔 今日提醒</div>
+        <div class="chips-sub">每天有新的警示股資料、第一次打開就會跳出來；關掉後點右上角「🔔 今日提醒」可以再看。點股號開K線圖。</div>
+      </div>
+      <button class="cm-icon-btn" id="remindClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="remindBody"></div>
   </div>
 </div>
 <div class="chips-modal" id="rivModal" hidden>
@@ -6885,7 +6910,7 @@ const homeJailState = { at: 0, loading: false, quotes: {}, qAt: 0, qLoading: fal
 function homeJailLoad(){
   if (homeJailState.loading || jlState.loading || Date.now() - homeJailState.at < 10 * 60e3) return;
   homeJailState.loading = true;
-  fetch('/api/jail').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok'){ jlState.data = d; try { render(); } catch (_){} try { botRerunLast(); } catch (_){} } })
+  fetch('/api/jail').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok'){ jlState.data = d; try { render(); } catch (_){} try { botRerunLast(); } catch (_){} try { remindOnData(); } catch (_){} } })
     .catch(() => {}).finally(() => {
       homeJailState.loading = false;
       // 抓失敗、還沒有資料：30 秒後再試（不要等 10 分鐘），到時候重畫一次就會重抓
@@ -12677,7 +12702,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 10:47:09';
+const BUILD_STAMP = '2026-10-17 11:22:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16298,6 +16323,7 @@ async function jlLoad(){
   } finally {
     jlState.loading = false;
     if (!document.getElementById('jailModal').hidden) renderJail();
+    try { remindMarkBtn(); renderRemind(); } catch (_){}
   }
 }
 async function jlQuery(code){
@@ -17511,6 +17537,80 @@ document.getElementById('botModal').addEventListener('click', (e) => {
 document.getElementById('botModal').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target && e.target.id === 'botQ'){ e.preventDefault(); botRun(e.target.value); e.target.value = ''; }
 });
+// ---- 今日提醒（2026-10-17 使用者：照每天晚上的「警示股」整理，只列股票：哪天解鎖、連續警告、分盤交易，做成表格；
+// 每天有新資料、第一次打開就跳出來，關掉後從右上角「🔔 今日提醒」再開）----
+// 資料跟首頁處置名單同一份（/api/jail）：解鎖＝接下來 2 個交易日出關的；連續警告＝嫌疑名單；分盤交易＝今天新公告處置的。
+const REMIND_SEEN_KEY = 'remindSeen';
+function remindMdW(iso){ return iso ? Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10) + '(' + '日一二三四五六'[new Date(iso + 'T12:00:00+08:00').getUTCDay()] + ')' : ''; }
+function remindMd(iso){ return iso ? Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10) : ''; }
+function remindHtml(){
+  const d = jlState.data;
+  if (!d || d.status !== 'ok') return '<div class="race-note">' + (homeJailState.loading ? '讀取中…' : '資料還沒進來，等一下再開') + '</div>';
+  const code = (x) => '<span class="rm-code" data-rm-code="' + wlEsc(x.code) + '" data-rm-name="' + wlEsc(x.name || '') + '">' + wlEsc(x.code) + '</span>';
+  const table = (head, rows, empty) => '<table class="rm-table"><thead><tr>' + head.map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' +
+    (rows.length ? rows.join('') : '<tr><td class="rm-none" colspan="' + head.length + '">' + empty + '</td></tr>') + '</tbody></table>';
+  let html = '<div class="rm-date">' + d.dataDate.replace(/-/g, '/') + ' 警示股</div>';
+  // 1. 解鎖：資料日之後的 2 個交易日
+  const rel = (d.releaseDays || []).filter((x) => x.date > d.dataDate).slice(0, 2);
+  const relRows = [];
+  rel.forEach((day) => {
+    if (!day.stocks.length){ relRows.push('<tr><td class="rm-red">' + remindMdW(day.date) + '</td><td class="rm-none" colspan="2">沒有解鎖的</td></tr>'); return; }
+    day.stocks.forEach((x, i) => relRows.push('<tr><td class="rm-red">' + (i ? '' : remindMdW(day.date)) + '</td><td>' + code(x) + '</td><td>' + wlEsc(x.name) + '</td></tr>'));
+  });
+  html += '<div class="rm-sec"><div class="rm-h">🔓 解鎖 <small>這天起恢復正常交易</small></div>' + table(['解鎖日', '代號', '名稱'], relRows, '接下來兩個交易日沒有解鎖的') + '</div>';
+  // 2. 連續警告：嫌疑名單（明天再被警告就可能分盤或延長處置）
+  const times = (s) => { const m = /連(\\d+)/.exec(s.status || ''); return m ? Number(m[1]) : 0; };
+  const sus = (d.suspects || []).slice().sort((a, b) => times(b) - times(a) || a.code.localeCompare(b.code));
+  const susRows = sus.map((s) => '<tr><td>' + code(s) + '</td><td>' + wlEsc(s.name) + '</td><td class="rm-red">' + (times(s) ? '連續 ' + times(s) + ' 次警告' : wlEsc(s.status || '')) + '</td><td>' + (s.jailed ? '分盤交易中（' + wlEsc(s.releaseMd || '') + ' 解鎖）' : '') + '</td></tr>');
+  html += '<div class="rm-sec"><div class="rm-h">⚠️ 連續警告</div>' + table(['代號', '名稱', '警告', '現況'], susRows, '沒有') +
+    (susRows.length ? '<div class="rm-warn">⚠️ 以上個股明天再被警告，有可能分盤或延長處置，持有的請留意</div>' : '') + '</div>';
+  // 3. 分盤交易：今天新公告處置的
+  const nj = d.newJail || [];
+  const jRow = (j) => '<tr><td>' + code(j) + (j.new ? '<span class="rm-new">新</span>' : '') + '</td><td>' + wlEsc(j.name) + '</td><td class="rm-red">' + remindMd(j.start) + '~' + remindMd(j.end) + '</td><td>' +
+    (j.minutes ? j.minutes + ' 分分盤' : '分盤') + '</td><td>' + remindMdW(j.release) + '</td></tr>';
+  html += '<div class="rm-sec"><div class="rm-h">🔒 分盤交易 <small>今天新公告的處置股</small></div>' + table(['代號', '名稱', '處置期間', '撮合', '解鎖日'], nj.map(jRow), '今天沒有新公告的處置股');
+  const newCodes = new Set(nj.map((j) => j.code));
+  const others = (d.jailedList || []).filter((j) => !newCodes.has(j.code) && j.release > d.dataDate);
+  if (others.length) html += '<details class="rm-more"><summary>還在分盤交易的其他 ' + others.length + ' 檔</summary>' + table(['代號', '名稱', '處置期間', '撮合', '解鎖日'], others.map((j) => jRow({ ...j, new: false })), '') + '</details>';
+  html += '</div>';
+  return html;
+}
+function remindUnseen(){
+  const d = jlState.data;
+  if (!d || d.status !== 'ok') return false;
+  let seen = null;
+  try { seen = localStorage.getItem(REMIND_SEEN_KEY); } catch (_){}
+  return seen !== d.dataDate;
+}
+function remindMarkBtn(){ const b = document.getElementById('remindBtn'); if (b) b.classList.toggle('unseen', remindUnseen()); }
+function renderRemind(){
+  const body = document.getElementById('remindBody');
+  if (body && !document.getElementById('remindModal').hidden) body.innerHTML = remindHtml();
+}
+function openRemindPanel(){
+  document.getElementById('remindModal').hidden = false;
+  homeJailLoad();
+  renderRemind();
+  document.getElementById('remindInner').scrollTop = 0;
+  const d = jlState.data;
+  if (d && d.status === 'ok'){ try { localStorage.setItem(REMIND_SEEN_KEY, d.dataDate); } catch (_){} }
+  remindMarkBtn();
+}
+function closeRemindPanel(){ document.getElementById('remindModal').hidden = true; }
+// 處置資料一進來：有新的一天還沒看過就跳出來（每份資料只跳一次）；視窗開著就重畫
+function remindOnData(){
+  remindMarkBtn();
+  if (!document.getElementById('remindModal').hidden){ renderRemind(); const d = jlState.data; if (d && d.status === 'ok'){ try { localStorage.setItem(REMIND_SEEN_KEY, d.dataDate); } catch (_){} } return; }
+  if (remindUnseen()) openRemindPanel();
+}
+document.getElementById('remindBtn').addEventListener('click', openRemindPanel);
+document.getElementById('remindClose').addEventListener('click', closeRemindPanel);
+document.getElementById('remindModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget){ closeRemindPanel(); return; }
+  const c = e.target.closest('[data-rm-code]');
+  if (c) openStockChart(c.dataset.rmCode, c.dataset.rmName);
+});
+setTimeout(() => { try { homeJailLoad(); } catch (_){} }, 2000);   // 不在首頁打開的也要抓處置資料，才會跳今日提醒
 document.getElementById('rivClose').addEventListener('click', closeRiverPanel);
 document.getElementById('rivModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeRiverPanel(); });
 document.getElementById('rivBody').addEventListener('click', (e) => {
