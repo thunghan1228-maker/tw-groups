@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 21:40:55";
+const BUILD_STAMP = "2026-10-17 21:45:29";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -202,6 +202,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bot-q{display:inline-block;background:#7c3aed;color:#fff;border-radius:10px;padding:2px 10px;font-size:12px;font-weight:800;margin-bottom:4px;}
   .bot-title{font-weight:800;font-size:15px;margin:2px 0 6px;} .bot-title small{color:var(--muted);font-weight:600;font-size:11px;margin-left:6px;}
   .bot-line{font-size:13.5px;line-height:1.7;font-variant-numeric:tabular-nums;} .bot-line.bot-head{font-weight:800;margin-top:4px;} .bot-line.bot-sub{padding-left:16px;font-size:12.5px;}
+  .bot-help-code{cursor:pointer;color:#c4b5fd;} .bot-help-code:hover{text-decoration:underline;}
   .bot-line.bot-sep{color:var(--muted);text-align:left;} .bot-line.bot-warn{color:#fb923c;} .bot-dim{color:var(--muted);}
   #remindInner{max-width:620px;}
   .rm-date{font-size:17px;font-weight:800;margin:2px 0 10px;}
@@ -1363,6 +1364,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .gd-card b.up{color:var(--up);}
   .gd-card b.down{color:var(--down);}
   .gd-faq{display:flex;flex-direction:column;}
+  .gd-bot-tbl{width:100%;border-collapse:collapse;font-size:13px;} .gd-bot-tbl td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.6;}
+  .gd-bot-tbl td:first-child{width:1%;white-space:nowrap;}
+  .gd-bot-code{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:1px 10px;font-weight:800;font-size:12.5px;cursor:pointer;font-family:inherit;}
+  .gd-bot-code:hover{border-color:#7c3aed;}
   .gd-qa{border-bottom:1px solid var(--line);padding:10px 2px;}
   .gd-qa b{font-size:14px;}
   .gd-qa p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.7;}
@@ -12857,7 +12862,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 21:40:55';
+const BUILD_STAMP = '2026-10-17 21:45:29';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15552,6 +15557,10 @@ const GUIDE_TOOLS = [
     b: ['今日即時多／空：所有多方、空方訊號依時間排好，最新的在最上面', '醞釀／發動：均線分數高、整理完的股票（醞釀），一衝過箱頂就跳「發動」，網頁開著會響鈴通知',
       '盤中 333、十大多族群／十大空族群、所有族群綜合表：一眼看哪些族群在漲、族群裡誰最強', '盤中大戶力、四項精選、主力翻多／翻空、特大買賣單、刀劍空(32)、創高黑龍、1+2多：各種訊號分開看',
       '最後一頁「訊號教學」把每個訊號的條件寫清楚'] },
+  { t: '🤖 機器人代碼', open: 'bot', tags: ['盤中', '盤後'], d: '右上角「🤖 機器人代碼」。打一個代碼就回一份名單（像 LINE 機器人）：族群漲跌排行、重點族群、刀劍空、賽馬、河流、處置、隔日沖、籌碼暴增、國際行情。',
+    b: ['上面一排是全部代碼，點一下就查；也可以打股號（例：2330）或族群名（例：低軌衛星）', '查過的結果疊在上面，全部代碼的說明一直留在最下面（點代碼直接查）',
+      '族群那一條點下去看成分股，股票點下去開 K 線圖', '右上角 ⧉ 移到另一螢幕（可以拖到外接螢幕）、－ 最小化、▢ 最大化、✕ 關閉；標題列拖著走，四邊四角拉大小',
+      '每個代碼在做什麼，看下面「🤖 機器人代碼一覽」'] },
   { t: '自選股', label: '自選股', v: 'tb-watch', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
     b: ['換手機或電腦用「同步碼」就能帶過去', '一鍵健診：持股的防守價、明日紅半／三日低／月線一次算好', '各列表看到喜歡的股票，點「☆」就加進來'] },
   { t: '個股訊號追蹤', label: '個股盤中訊號追蹤', v: 'tb-track', tags: ['盤中'], d: '只看你自選股今天出現了哪些訊號，不用在一堆名單裡找。',
@@ -15618,10 +15627,10 @@ function guideHtml(){
     step(3, '下方導覽列找工具', '15 個工具都在最下面（手機、平板排成三排、每排五顆）。盤中看右上角紫色「⚠ 盤中訊號」，盤後看籌碼日報、排行。') + '</div>';
   html += '<h3 class="gd-h">一天怎麼用</h3><div class="gd-time">' + [
     ['盤前', '研究室看今晚有沒有國際大事、資金保護傘是不是撐開；籌碼日報看昨天的整理；每日功課看今天要盯誰。'],
-    ['盤中 09:00～13:30', '首頁看族群強弱、⚠ 盤中訊號看誰在發動；自選股、個股訊號追蹤盯自己的股票。'],
+    ['盤中 09:00～13:30', '首頁看族群強弱、⚠ 盤中訊號看誰在發動；🤖 機器人代碼打 12、22 一秒看族群、個股漲幅排行；自選股、個股訊號追蹤盯自己的股票。'],
     ['12:00', '創高黑龍出今日暫定名單。'],
     ['13:20', '創高黑選股提醒今天要做的動作。'],
-    ['收盤後', '盤後籌碼排行、均線分數排行、籌碼日報、創高黑龍正式名單陸續出來；晚上處置監獄、法人、融資（約 21:40）更新。'],
+    ['收盤後', '盤後籌碼排行、均線分數排行、籌碼日報、創高黑龍正式名單陸續出來；🤖 機器人 81／811／813 隔日沖名單晚上六點後更新；晚上處置監獄、法人、融資（約 21:40）更新。'],
     ['週末', '盤後籌碼排行的籌碼週報（集保週五資料）、研究室看下週行事曆。'],
   ].map(([w, t]) => '<div class="gd-tr"><b>' + w + '</b><span>' + t + '</span></div>').join('') + '</div>';
   html += '<h3 class="gd-h">📱 放到手機、平板、電腦桌面，一點就開</h3><div class="gd-card"><p class="gd-sub">把網站加到主畫面或電腦桌面，以後像 App 一樣一點就開，不用再找網址。</p>' +
@@ -15632,6 +15641,9 @@ function guideHtml(){
     '<div class="gd-tool"><div class="gd-tt">' + x.t + x.tags.map((g) => '<i>' + g + '</i>').join('') + '</div><p>' + x.d + '</p><ul>' + x.b.map((s) => '<li>' + s + '</li>').join('') + '</ul>' +
     '<div class="gd-btns"><button type="button" class="gd-go" data-gd-open="' + i + '">去看看 →</button>' +
     (x.v ? '<button type="button" class="gd-go gd-vid" data-gd-video="' + x.v + '">▶ 看影片</button>' : '') + '</div></div>').join('') + '</div>';
+  // 2026-10-17 使用者：機器人代碼的說明新手教學也要有
+  html += '<h3 class="gd-h">🤖 機器人代碼一覽</h3><div class="gd-card"><p class="gd-sub">右上角「🤖 機器人代碼」打代碼就回名單；這裡點代碼也會直接打開查。2359 開頭的是範例，換成你要查的股號或族群名。</p>' +
+    '<table class="gd-bot-tbl"><tbody>' + botCodesSorted().map(([c, d]) => '<tr><td><button type="button" class="gd-bot-code" data-gd-bot="' + c + '">' + c + '</button></td><td>' + wlEsc(d) + '</td></tr>').join('') + '</tbody></table></div>';
   html += '<h3 class="gd-h">K 線圖小技巧</h3><div class="gd-card"><ul class="gd-ul">' +
     '<li>任何列表點股票名稱或代號，都會開這檔的 K 線圖；圖上的搜尋框可以直接換股票。</li>' +
     '<li>上方切 5 分／1 分／日線；⚙ 設定可以開關均線、VWAP、明天防守線（明日紅半、三日低、月線，只在日線）。</li>' +
@@ -15760,11 +15772,14 @@ document.getElementById('guideBody').addEventListener('click', (e) => {
   if (home){ guideState.home = home.dataset.gdHome; const top = document.getElementById('guideInner').scrollTop; document.getElementById('guideBody').innerHTML = guideHtml(); document.getElementById('guideInner').scrollTop = top; return; }
   const vid = e.target.closest('[data-gd-video]');
   if (vid){ closeGuidePanel(); openTutorialVideos(vid.dataset.gdVideo); return; }
+  const bc = e.target.closest('[data-gd-bot]');
+  if (bc){ closeGuidePanel(); botOpenRun(bc.dataset.gdBot); return; }
   const go = e.target.closest('[data-gd-open]');
   if (!go) return;
   const tool = GUIDE_TOOLS[Number(go.dataset.gdOpen)];
   closeGuidePanel();
   if (tool.open === 'signal'){ const b = document.getElementById('signalBadgeBtn'); if (b) b.click(); return; }
+  if (tool.open === 'bot'){ openBotPanel(); return; }
   const btn = document.querySelector('#toolbarBottom .tb-btn[data-label="' + tool.label + '"]');
   if (btn) btn.click();
 });
@@ -18056,8 +18071,15 @@ function renderBot(){
   const keep = document.activeElement && document.activeElement.id === 'botQ' ? document.activeElement.value : '';
   body.innerHTML = '<div class="bot-q-row"><input id="botQ" placeholder="輸入代碼，例：12、22、2359B2、2359a、70" value="' + wlEsc(keep) + '" autocomplete="off"><button type="button" data-bot-go="1">送出</button></div>' +
     '<div class="bot-chips">' + botCodesSorted().filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') + '</div>' +
-    (botState.out.length ? botState.out.join('') : '<div class="bot-msg bot-help">' + botCodesSorted().map(([c, d]) => botLine('<b>' + c + '</b>　' + wlEsc(d))).join('') +
-      botLine('隔日沖分點：凱基-台北、凱基-城中、富邦證券、統一、群益金鼎、港商野村、國票-敦北法人等 18 個（照對方名單對出來的），資料來源富邦證券主力進出。', 'bot-dim') + '</div>');
+    botState.out.join('') + botHelpHtml();
+}
+// 全部代碼說明（2026-10-17 使用者：點開 177 之類的功能後說明不要不見，一直排在這頁最下面）；點代碼直接查
+function botHelpHtml(){
+  return '<div class="bot-msg bot-help"><div class="bot-title">📋 全部代碼說明<small>點代碼直接查</small></div>' +
+    botCodesSorted().map(([c, d]) => botLine('<b class="bot-help-code" data-bot-run="' + c + '">' + c + '</b>　' + wlEsc(d))).join('') +
+    botLine('2359 開頭的是範例，換成你要查的股號或族群名（例：2330B2、低軌衛星84）。', 'bot-dim') +
+    botLine('隔日沖分點：凱基-台北、凱基-城中、富邦證券、統一、群益金鼎、港商野村、國票-敦北法人等 18 個（照對方名單對出來的），資料來源富邦證券主力進出。', 'bot-dim') +
+    botLine('視窗：右上角 ⧉ 移到另一螢幕（可以拖到外接螢幕，再按一次移回來）、－ 最小化、▢ 最大化、✕ 關閉；標題列拖著走，四邊四角都能拉大小。', 'bot-dim') + '</div>';
 }
 // ---- 機器人面板的視窗（2026-10-17 使用者：右上角要有 Windows 視窗的 ✕、最小化、放大；可以拖來拖去、上下左右拉大小，
 // 還能移到另一個視窗——拖到外接螢幕，也能再移回筆電）----
