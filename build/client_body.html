@@ -17778,7 +17778,10 @@ function botAnswer(raw){
     const ev = sigCurrentEvents().filter((e) => e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull'));
     const seen = new Set();
     const rows = ev.filter((e) => !seen.has(e.code) && seen.add(e.code));
-    return wrap('1+2 多・突破黑馬(44)', rows.map((e) => botLine('🐎' + botStk(e.code, e.name, ' <span class="bot-dim">' + wlEsc(e.time || '') + '</span>'))).join('') || botLine('今天還沒有', 'bot-dim'), stamp + '・跟訊號中心「1+2多」同一份');
+    // 2026-10-17 使用者：發生時間放最前面，股名後面加漲跌幅（現價的，沒有報價就用訊號那時的）
+    const pctOf = (e) => { const qq = getStockQuote(e.code); const v = qq && Number.isFinite(qq.changePercent) ? qq.changePercent : [e.changePercent, e.pct, e.changePct].find((x) => Number.isFinite(x)); return Number.isFinite(v) ? v : null; };
+    return wrap('1+2 多・突破黑馬(44)', rows.map((e) => { const v = pctOf(e); return botLine('<span class="bot-dim" style="font-variant-numeric:tabular-nums">' + wlEsc(e.time || '--:--') + '</span> 🐎' +
+      botStk(e.code, e.name, v === null ? '' : ' <span class="' + dirClass(v) + '">' + botPct(v) + '</span>')); }).join('') || botLine('今天還沒有', 'bot-dim'), stamp + '・跟訊號中心「1+2多」同一份');
   }
   if (q === '84'){
     gmChipLoad();
