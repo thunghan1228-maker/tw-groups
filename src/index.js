@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 14:46:08";
+const BUILD_STAMP = "2026-10-17 19:20:06";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12809,7 +12809,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 14:46:08';
+const BUILD_STAMP = '2026-10-17 19:20:06';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17463,7 +17463,7 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 // 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
 const botState = { history: [], out: [], world: null, worldAt: 0, worldLoading: false, cache: {} };
 const BOT_CODES = [
-  ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'],
+  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
   ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'],
   ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
@@ -17627,7 +17627,7 @@ function botGroupBlock(g, h, opts){
       ((hm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '')))).join('') : botLine('（沒有符合的）', 'bot-dim'));
 }
 function botAnswer(raw){
-  const q = String(raw || '').trim().replace(/[０-９Ａ-Ｚａ-ｚ＋－]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/\\s+/g, '').toUpperCase();
+  const q = String(raw || '').trim().replace(/[０-９Ａ-Ｚａ-ｚ＋－]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[−–—]/g, '-').replace(/\\s+/g, '').toUpperCase();
   if (!q) return null;
   const title = (t, sub) => '<div class="bot-title">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
   const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
@@ -17724,6 +17724,19 @@ function botAnswer(raw){
       return rankLine(r) + (top ? botLine('👑' + botStk(top.code, top.name, ' <span class="' + dirClass(top.changePercent) + '">' + botPct(top.changePercent) + '</span>'), 'bot-sub') : '');
     }).join('') || botLine('目前沒有族群漲超過 ' + th + '%', 'bot-dim'));
   }
+  // -1N：族群跌幅排行（2026-10-17 使用者：-12＝族群跌 2% 以上、-13＝跌 3% 以上，以此類推；-1＝跌 1% 以上），跌最多的族群在上面，
+  // 每族列族裡跌最多的那檔（🔻），跟 12 的 👑 對稱
+  mm = /^-1([1-9])?$/.exec(q);
+  if (mm){
+    const th = mm[1] ? Number(mm[1]) : 1;
+    const byName = new Map(lastData.groups.map((g) => [g.name, g]));
+    const rows = h.rows.filter((r) => r.avg < -th).sort((a, b) => a.avg - b.avg);
+    return wrap('族群跌幅 > ' + th + '%（' + rows.length + ' 族）', rows.map((r) => {
+      const g = byName.get(r.name);
+      const low = g ? g.stocks.filter((s) => s.price != null && Number.isFinite(s.changePercent)).sort((a, b) => a.changePercent - b.changePercent)[0] : null;
+      return rankLine(r) + (low ? botLine('🔻' + botStk(low.code, low.name, ' <span class="' + dirClass(low.changePercent) + '">' + botPct(low.changePercent) + '</span>'), 'bot-sub') : '');
+    }).join('') || botLine('目前沒有族群跌超過 ' + th + '%', 'bot-dim'));
+  }
   // 2N[-K]：個股💎漲幅排行
   mm = /^2([1-9])?(?:-(\\d{1,3}))?$/.exec(q);
   if (mm){
@@ -17740,6 +17753,23 @@ function botAnswer(raw){
       ' <span class="' + dirClass(x.s.changePercent) + '">' + limitPriceHtml(x.s, botPct(x.s.changePercent)) + '</span> <span class="bot-dim">' + wlEsc(x.groups.join('/')) + '</span>'))).join('') +
       (all.length > skip + 30 ? botLine('還有 ' + (all.length - skip - 30) + ' 檔，輸入「' + (mm[1] ? '2' + mm[1] : '2') + '-' + (skip + 30) + '」看後面', 'bot-dim') : '') ||
       botLine('目前沒有個股漲超過 ' + th + '%', 'bot-dim'));
+  }
+  // -2N[-K]：個股跌幅排行（2026-10-17 使用者：-22＝跌 2% 以上、-24＝跌 4% 以上，以此類推；-2＝跌的全部；-22-5＝扣掉前 5 檔），跌最多的在上面
+  mm = /^-2([1-9])?(?:-(\\d{1,3}))?$/.exec(q);
+  if (mm){
+    const th = mm[1] ? Number(mm[1]) : 0, skip = mm[2] ? Number(mm[2]) : 0;
+    const seen = new Map();
+    rankedGroupsOf(lastData.groups).forEach((g) => g.stocks.forEach((s) => {
+      if (s.price == null || !Number.isFinite(s.changePercent) || s.changePercent >= -th || s.changePercent >= 0) return;
+      if (!seen.has(s.code)) seen.set(s.code, { s, groups: [] });
+      seen.get(s.code).groups.push(g.name);
+    }));
+    const all = [...seen.values()].sort((a, b) => a.s.changePercent - b.s.changePercent);
+    const page = all.slice(skip, skip + 30);
+    return wrap('🔻個股跌幅 > ' + th + '%（共 ' + all.length + ' 檔' + (skip ? '，從第 ' + (skip + 1) + ' 檔開始' : '') + '）', page.map((x, i) => botLine((skip + i + 1) + '. 🔻' + botStk(x.s.code, x.s.name,
+      ' <span class="' + dirClass(x.s.changePercent) + '">' + limitPriceHtml(x.s, botPct(x.s.changePercent)) + '</span> <span class="bot-dim">' + wlEsc(x.groups.join('/')) + '</span>'))).join('') +
+      (all.length > skip + 30 ? botLine('還有 ' + (all.length - skip - 30) + ' 檔，輸入「' + (mm[1] ? '-2' + mm[1] : '-2') + '-' + (skip + 30) + '」看後面', 'bot-dim') : '') ||
+      botLine('目前沒有個股跌超過 ' + th + '%', 'bot-dim'));
   }
   if (q === '177'){
     let body = '', sep = false;
@@ -17953,7 +17983,9 @@ function botRun(cmd){
 // 代碼照字排（2026-10-17 使用者：照第一個數字的順序，618 排在 61 後面、17784 排在 177 後面，以後新加的也一樣）；2359 開頭的範例放最後
 function botCodesSorted(){
   const ex = (c) => /^2359/.test(c);
-  return BOT_CODES.filter(([c]) => !ex(c)).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).concat(BOT_CODES.filter(([c]) => ex(c)));
+  const key = (c) => c.replace(/^-/, '');   // 負的（-12、-22）排在同一個數字的正的前面（2026-10-17 使用者）
+  const cmp = (a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : (a[0] === '-' ? -1 : 1));
+  return BOT_CODES.filter(([c]) => !ex(c)).sort((a, b) => cmp(a[0], b[0])).concat(BOT_CODES.filter(([c]) => ex(c)));
 }
 function renderBot(){
   const body = document.getElementById('botBody');
