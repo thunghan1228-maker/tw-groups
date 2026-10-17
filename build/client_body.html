@@ -120,6 +120,18 @@
   .bot-q-row button{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:800;cursor:pointer;font-family:inherit;}
   .bot-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;} .bot-chip{background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
   .bot-chip:hover{border-color:#7c3aed;}
+  .bot-chip.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}   /* 這個代碼的格子開著（再點一次收掉） */
+  .bot-chip-clear{color:var(--muted);border-style:dashed;}
+  /* 結果格子：最多 10 格往右排，每格 1/10 寬（太窄就左右捲），高度貼齊視窗底部、每格自己上下捲 */
+  .bot-cols{position:relative;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;margin-bottom:10px;height:70vh;}
+  .bot-col{position:relative;flex:0 0 calc((100% - 72px) / 10);min-width:170px;overflow:auto;border-radius:12px;}
+  .bot-col > .bot-msg{margin:0;min-height:100%;box-sizing:border-box;}
+  .bot-col > .bot-msg{padding:8px 9px;} .bot-col .bot-line{font-size:12.5px;line-height:1.6;} .bot-col .bot-title{font-size:13.5px;padding-right:18px;}
+  .bot-col.flash > .bot-msg{border-color:#7c3aed;box-shadow:inset 0 0 0 1px #7c3aed;}
+  .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
+  .bot-col-x:hover{background:#e81123;border-color:#e81123;color:#fff;}
+  .bot-cols-hint{color:var(--muted);font-size:13px;margin:0 2px 10px;}
+  @media (max-width:767px){ .bot-col{flex-basis:84%;} }
   .bot-msg{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:10px;}
   .bot-q{display:inline-block;background:#7c3aed;color:#fff;border-radius:10px;padding:2px 10px;font-size:12px;font-weight:800;margin-bottom:4px;}
   .bot-title{font-weight:800;font-size:15px;margin:2px 0 6px;} .bot-title small{color:var(--muted);font-weight:600;font-size:11px;margin-left:6px;}
@@ -139,6 +151,7 @@
   .rm-more{margin-top:6px;font-size:12.5px;color:var(--muted);} .rm-more summary{cursor:pointer;}
   #remindBtn.unseen{border-color:#f87171;color:#f87171;}
   /* 機器人長條圖（2026-10-17 使用者：照對方機器人附的「族群籌碼排名」「族群籌碼」圖）：往右＝正、往左＝負，數字帶正負號，顏色只是輔助 */
+  #botBody .bot-chart{display:none;}   /* 2026-10-17 使用者：改成一格一格排之後，柱狀圖都不要（84、618、628、17784、2359g、235984），只留名稱跟漲跌幅 */
   .bot-chart{margin-top:8px;border:1px solid var(--line);border-radius:10px;padding:10px 12px 8px;background:var(--panel-2);}
   .bot-chart-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
   .bot-chart-title{font-weight:800;font-size:15px;} .bot-chart-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
@@ -4673,10 +4686,11 @@ window.addEventListener('message', (e) => {
     chartWindows.forEach((w) => { if (w.iframe.contentWindow === e.source) closeChartWindow(w.id); });
   } else if (e.data.type === 'hanstockBotRun' && typeof e.data.cmd === 'string'){   // 浮動K線圖點「⚡隔日沖」標籤：在主畫面開機器人
     botOpenRun(e.data.cmd.slice(0, 12));
-  } else if (e.data.type === 'hanstockBotReturn' && typeof e.data.cmd === 'string'){   // 另開的機器人視窗按「↩ 移回主畫面」
+  } else if (e.data.type === 'hanstockBotReturn' && Array.isArray(e.data.cmds)){   // 另開的機器人視窗按「↩ 移回主畫面」：格子照原樣帶回來
     botPopWin = null;
+    botState.cols = [];
     openBotPanel();
-    if (e.data.cmd) botRun(e.data.cmd.slice(0, 12));
+    e.data.cmds.slice(0, BOT_MAX_COLS).forEach((c) => { if (typeof c === 'string') botRun(c.slice(0, 20)); });
   } else if (e.data.type === 'hanstockChartFocus'){
     chartWindows.forEach((w) => { if (w.iframe.contentWindow === e.source) bringChartWindowToFront(w); });
   }
@@ -4878,7 +4892,7 @@ function gmChipLoad(){
   fetch('/api/chip-radar-latest').then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then((d) => { gmChipState.data = d; gmChipState.error = null; })
     .catch((e) => { gmChipState.error = String((e && e.message) || e); })
-    .finally(() => { gmChipState.loading = false; gmChipState.at = Date.now(); if (openGroupName && !document.getElementById('groupModal').hidden) openGroupDetail(openGroupName); try { botRerunLast(); } catch (_){} });
+    .finally(() => { gmChipState.loading = false; gmChipState.at = Date.now(); if (openGroupName && !document.getElementById('groupModal').hidden) openGroupDetail(openGroupName); try { botRerunCols(); } catch (_){} });
 }
 function closeGroupDetail(){
   document.getElementById('groupModal').hidden = true;
@@ -6885,7 +6899,7 @@ function f155Load(){
   if (f155State.loading || Date.now() - f155State.at < 60e3) return;
   f155State.loading = true;
   fetch('/api/stock-futures-board').then((r) => (r.ok ? r.json() : null)).then((d) => {
-    if (d && d.status === 'ok'){ const first = !f155State.data; f155State.data = d; if (first){ try { render(); } catch (_){} try { botRerunLast(); } catch (_){} } }   // 第一次抓到就重畫（收盤後首頁 5 分鐘才自己重畫）
+    if (d && d.status === 'ok'){ const first = !f155State.data; f155State.data = d; if (first){ try { render(); } catch (_){} try { botRerunCols(); } catch (_){} } }   // 第一次抓到就重畫（收盤後首頁 5 分鐘才自己重畫）
   }).catch(() => {}).finally(() => { f155State.loading = false; f155State.at = Date.now(); });
 }
 function fut155Model(){
@@ -6947,7 +6961,7 @@ const homeJailState = { at: 0, loading: false, quotes: {}, qAt: 0, qLoading: fal
 function homeJailLoad(){
   if (homeJailState.loading || jlState.loading || Date.now() - homeJailState.at < 10 * 60e3) return;
   homeJailState.loading = true;
-  fetch('/api/jail').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok'){ jlState.data = d; try { render(); } catch (_){} try { botRerunLast(); } catch (_){} try { remindOnData(); } catch (_){} } })
+  fetch('/api/jail').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok'){ jlState.data = d; try { render(); } catch (_){} try { botRerunCols(); } catch (_){} try { remindOnData(); } catch (_){} } })
     .catch(() => {}).finally(() => {
       homeJailState.loading = false;
       // 抓失敗、還沒有資料：30 秒後再試（不要等 10 分鐘），到時候重畫一次就會重抓
@@ -15478,7 +15492,7 @@ const GUIDE_TOOLS = [
       '盤中 333、十大多族群／十大空族群、所有族群綜合表：一眼看哪些族群在漲、族群裡誰最強', '盤中大戶力、四項精選、主力翻多／翻空、特大買賣單、刀劍空(32)、創高黑龍、1+2多：各種訊號分開看',
       '最後一頁「訊號教學」把每個訊號的條件寫清楚'] },
   { t: '🤖 機器人代碼', open: 'bot', tags: ['盤中', '盤後'], d: '右上角「🤖 機器人代碼」。打一個代碼就回一份名單（像 LINE 機器人）：族群漲跌排行、重點族群、刀劍空、賽馬、河流、處置、隔日沖、籌碼暴增、國際行情。',
-    b: ['上面一排是全部代碼，點一下就查；也可以打股號（例：2330）或族群名（例：低軌衛星）', '查過的結果疊在上面，全部代碼的說明一直留在最下面（點代碼直接查）',
+    b: ['上面一排是全部代碼，點一下就查；也可以打股號（例：2330）或族群名（例：低軌衛星）', '點一個代碼開一格，結果一格一格往右排（最多 10 格，照點的順序）；同一個代碼再點一次就收掉，「全部收掉」一次清空；柱狀圖不顯示，只列名稱跟漲跌幅', '全部代碼的說明一直留在最下面（點代碼直接查）',
       '族群那一條點下去看成分股，股票點下去開 K 線圖', '右上角 ⧉ 移到另一螢幕（可以拖到外接螢幕）、－ 最小化、▢ 最大化、✕ 關閉；標題列拖著走，四邊四角拉大小',
       '每個代碼在做什麼，看下面「🤖 機器人代碼一覽」'] },
   { t: '自選股', label: '自選股', v: 'tb-watch', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
@@ -17454,7 +17468,7 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 // 30（🐎🚀）／31（🔪⚔️）／32（新刀劍空）；44＝今天 1+2 多；60／61／62＝處置／即將出關／已出關；70／71／72＝亞洲股市／美國股市／台指期；
 // 84＝本週籌碼暴增排行；股號或族群名＝那個族群的漲幅排行；股號B2＝同族群漲 2% 以上；股號a＝族群前天／昨天／今天名次；股號+3＝那族的 283。
 // 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
-const botState = { history: [], out: [], world: null, worldAt: 0, worldLoading: false, cache: {} };
+const botState = { cols: [], world: null, worldAt: 0, worldLoading: false, cache: {} };   // cols＝開著的格子 [{cmd, key, html}]，照點的順序
 const BOT_CODES = [
   ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
@@ -17475,7 +17489,7 @@ const botLine = (html, cls) => '<div class="bot-line' + (cls ? ' ' + cls : '') +
 function botWorldLoad(){
   if (botState.worldLoading || (botState.world && Date.now() - botState.worldAt < 60e3)) return;
   botState.worldLoading = true;
-  fetch('/api/world-indices').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.rows){ botState.world = d; botState.worldAt = Date.now(); botRerunLast(); } })
+  fetch('/api/world-indices').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.rows){ botState.world = d; botState.worldAt = Date.now(); botRerunCols(); } })
     .catch(() => {}).finally(() => { botState.worldLoading = false; });
 }
 // 機器人要另外抓的資料（隔日沖、單檔分點、開盤量）：抓到就重跑最後一個查詢
@@ -17484,7 +17498,7 @@ function botFetchCache(key, url, ttl){
   const e = c[key];
   if (e && (e.loading || Date.now() - e.at < ttl)) return e.data;
   c[key] = { loading: true, at: Date.now(), data: e ? e.data : null };
-  const done = () => { botRerunLast(); try { chartDaytradeTagRefresh(); } catch (_){} clearTimeout(dtRenderTimer); dtRenderTimer = setTimeout(() => { try { render(); } catch (_){} }, 400); };   // 首頁 813／80／75 欄也要重畫
+  const done = () => { botRerunCols(); try { chartDaytradeTagRefresh(); } catch (_){} clearTimeout(dtRenderTimer); dtRenderTimer = setTimeout(() => { try { render(); } catch (_){} }, 400); };   // 首頁 813／80／75 欄也要重畫
   fetch(url).then((r) => r.json()).then((d) => { c[key] = { at: Date.now(), data: d }; done(); })
     .catch((err) => { c[key] = { at: Date.now(), data: { status: 'error', message: '抓不到資料（' + String((err && err.message) || err).slice(0, 40) + '）' } }; done(); });
   return e ? e.data : null;
@@ -17597,9 +17611,9 @@ function dtModel80(){
   return { rows, base, isLive: v.isLive, latest: v.scr.latest };
 }
 let dtRenderTimer = null;
-function botRerunLast(){
-  if (!botState.history.length || document.getElementById('botModal').hidden) return;
-  botState.out[0] = botAnswer(botState.history[0]);
+function botRerunCols(){   // 資料進來：開著的每一格都重算
+  if (!botState.cols.length || document.getElementById('botModal').hidden) return;
+  botState.cols.forEach((c) => { c.html = botAnswer(c.cmd) || c.html; });
   renderBot();
 }
 function botStockGroups(code){
@@ -17621,8 +17635,11 @@ function botGroupBlock(g, h, opts){
     (list.length ? list.map((s) => botLine((opts && opts.me === s.code ? '👉' : '') + botStk(s.code, s.name, ' <span class="' + dirClass(s.changePercent) + '">' + botPct(s.changePercent) + '</span>' +
       ((hm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '')))).join('') : botLine('（沒有符合的）', 'bot-dim'));
 }
+function botNorm(raw){
+  return String(raw || '').trim().replace(/[０-９Ａ-Ｚａ-ｚ＋－]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[−–—]/g, '-').replace(/\s+/g, '').toUpperCase();
+}
 function botAnswer(raw){
-  const q = String(raw || '').trim().replace(/[０-９Ａ-Ｚａ-ｚ＋－]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[−–—]/g, '-').replace(/\s+/g, '').toUpperCase();
+  const q = botNorm(raw);
   if (!q) return null;
   const title = (t, sub) => '<div class="bot-title">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
   const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
@@ -17959,6 +17976,7 @@ function botAnswer(raw){
         const sign = (v) => (v > 0 ? '+' : '') + v.toFixed(2) + '%';
         return (gs.length > 1 ? botLine(botGrp(g.name), 'bot-head') : '') +
           list.map((x) => botLine(botStk(x.code, x.name, ' ' + chipSpan(x.v)) + (x.code === pre ? ' ◀' : ''))).join('') +
+          (top.length >= 5 && Number.isFinite(avg) ? botLine('前 5 名平均 ' + sign(avg), 'bot-dim') : '') +
           botBarChart(list.map((x) => ({ c: x.code, n: x.name, v: x.v, hl: x.code === pre })), { title: g.name + ' 族群籌碼', sub: '籌碼暴增 ' + list.length + '檔・' + wk + ' 當週',
             right: me >= 0 ? pre + ' ' + list[me].name : '', rightSub: me >= 0 && Number.isFinite(list[me].v) ? '族內第 ' + (me + 1) + '/' + list.length + ' 名 ' + sign(list[me].v) : '',
             avgAfter: top.length >= 5 ? 5 : 0, avgText: Number.isFinite(avg) ? '前5名平均 ' + sign(avg) : '', foot: '籌碼暴增＝集保 400 張以上大戶週增減%' });
@@ -17970,13 +17988,40 @@ function botAnswer(raw){
   if (/^[0-9A-Z]{4,6}$/.test(q)) return wrap(raw, botLine(q + ' 沒有綁定在重點族群裡（可以用「選股・個股研究」查這檔的基本資料）', 'bot-dim'));
   return wrap(raw, botLine('看不懂這個代碼，下面有全部代碼', 'bot-dim'));
 }
-function botRun(cmd){
+// 2026-10-17 使用者：結果一格一格往右排（最多 10 格，照點的順序：先點 12 就在第一格、再點 193 在第二格）；
+// 上面的代碼再點一次那格就收掉（toggle）。從輸入框、K 線標籤、新手教學進來的，已經開著就原地重算、閃一下。
+const BOT_MAX_COLS = 10;
+function botRun(cmd, opts){
+  const key = botNorm(cmd);
+  if (!key) return;
+  const i = botState.cols.findIndex((c) => c.key === key);
+  if (i >= 0){
+    if (opts && opts.toggle){ botState.cols.splice(i, 1); renderBot(); return; }
+    botState.cols[i].html = botAnswer(botState.cols[i].cmd) || botState.cols[i].html;
+    renderBot(); botShowCol(key);
+    return;
+  }
+  if (botState.cols.length >= BOT_MAX_COLS){ showToast('最多 10 格，先收掉一格（再點一次那個代碼，或按格子右上角 ✕）'); return; }
   const html = botAnswer(cmd);
   if (!html) return;
-  botState.history.unshift(String(cmd).trim());
-  botState.out.unshift(html);
-  botState.history = botState.history.slice(0, 8); botState.out = botState.out.slice(0, 8);
-  renderBot();
+  botState.cols.push({ cmd: String(cmd).trim(), key, html });
+  renderBot(); botShowCol(key);
+}
+function botColEl(key){ return [...document.querySelectorAll('#botBody .bot-col')].find((el) => el.dataset.colKey === key) || null; }
+function botShowCol(key){   // 新開（或重算）的那格捲進畫面、閃一下
+  const el = botColEl(key);
+  if (!el) return;
+  const box = el.parentElement;
+  if (el.offsetLeft < box.scrollLeft || el.offsetLeft + el.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollLeft = Math.max(0, el.offsetLeft - 8);
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 1200);
+}
+// 格子的高度貼齊視窗底部（每格自己上下捲）；視窗拉大拉小、最大化時跟著變
+function sizeBotCols(){
+  const panel = document.getElementById('botInner'), box = document.querySelector('#botBody .bot-cols');
+  if (!panel || !box) return;
+  const top = box.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop;
+  box.style.height = Math.max(260, panel.clientHeight - top - 14) + 'px';
 }
 // 代碼照字排（2026-10-17 使用者：照第一個數字的順序，618 排在 61 後面、17784 排在 177 後面，以後新加的也一樣）；2359 開頭的範例放最後
 function botCodesSorted(){
@@ -17989,9 +18034,22 @@ function renderBot(){
   const body = document.getElementById('botBody');
   if (!body) return;
   const keep = document.activeElement && document.activeElement.id === 'botQ' ? document.activeElement.value : '';
+  // 重畫前記住每一格捲到哪（資料進來會重畫，不要跳回最上面）
+  const tops = {};
+  body.querySelectorAll('.bot-col').forEach((el) => { tops[el.dataset.colKey] = el.scrollTop; });
+  const oldBox = body.querySelector('.bot-cols');
+  const left = oldBox ? oldBox.scrollLeft : 0;
+  const open = new Set(botState.cols.map((c) => c.key));
   body.innerHTML = '<div class="bot-q-row"><input id="botQ" placeholder="輸入代碼，例：12、22、2359B2、2359a、70" value="' + wlEsc(keep) + '" autocomplete="off"><button type="button" data-bot-go="1">送出</button></div>' +
-    '<div class="bot-chips">' + botCodesSorted().filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') + '</div>' +
-    botState.out.join('') + botHelpHtml();
+    '<div class="bot-chips">' + botCodesSorted().filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip' + (open.has(botNorm(c)) ? ' on' : '') + '" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') +
+    (botState.cols.length ? '<button type="button" class="bot-chip bot-chip-clear" data-bot-clear="1" title="開著的格子全部收掉">全部收掉</button>' : '') + '</div>' +
+    (botState.cols.length ? '<div class="bot-cols">' + botState.cols.map((c) => '<div class="bot-col" data-col-key="' + wlEsc(c.key) + '"><button type="button" class="bot-col-x" data-bot-close="' + wlEsc(c.key) + '" title="收掉這格">✕</button>' + c.html + '</div>').join('') + '</div>'
+      : '<div class="bot-cols-hint">點上面的代碼，結果一格一格往右排（最多 10 格）；同一個代碼再點一次就收掉。</div>') +
+    botHelpHtml();
+  body.querySelectorAll('.bot-col').forEach((el) => { if (tops[el.dataset.colKey]) el.scrollTop = tops[el.dataset.colKey]; });
+  const box = body.querySelector('.bot-cols');
+  if (box) box.scrollLeft = left;
+  sizeBotCols();
 }
 // 全部代碼說明（2026-10-17 使用者：點開 177 之類的功能後說明不要不見，一直排在這頁最下面）；點代碼直接查
 function botHelpHtml(){
@@ -18009,7 +18067,10 @@ const BOT_RECT_KEY = 'botRect';
 let botMaxRestore = null, botTrayPill = null, botPopWin = null;
 function botWindowMode(){ return document.body.classList.contains('bot-window-mode'); }
 function botPopWindow(){ return botPopWin && !botPopWin.closed ? botPopWin : null; }
-function botHashQuery(){ const m = /^#bot-panel=(.+)$/.exec(location.hash); try { return m ? decodeURIComponent(m[1]).slice(0, 12) : ''; } catch (_){ return ''; } }
+function botHashQuery(){   // #bot-panel=12|193|34：帶過來的格子
+  const m = /^#bot-panel=(.+)$/.exec(location.hash);
+  try { return m ? decodeURIComponent(m[1]).split('|').map((x) => x.trim().slice(0, 20)).filter(Boolean).slice(0, BOT_MAX_COLS) : []; } catch (_){ return []; }
+}
 function positionBotPanel(){
   if (botWindowMode()) return;
   if (botMaxRestore){ fillBotToViewport(); return; }
@@ -18018,7 +18079,7 @@ function positionBotPanel(){
   let r = null;
   try { r = JSON.parse(localStorage.getItem(BOT_RECT_KEY) || 'null'); } catch (_){}
   if (!(r && r.w >= 280 && r.h >= 240 && r.x >= 0 && r.y >= 0 && r.x + r.w <= vw && r.y + r.h <= vh)){   // 沒記過、或換了比較小的畫面放不下：置中預設大小
-    const w = Math.min(1120, vw * 0.96), h = Math.min(920, vh * 0.92);
+    const w = vw * 0.96, h = vh * 0.92;   // 結果一格一格往右排（最多 10 格），預設幾乎整個畫面寬
     r = { x: Math.max(0, (vw - w) / 2), y: Math.max(0, (vh - h) / 2), w, h };
   }
   panel.style.left = r.x + 'px'; panel.style.top = r.y + 'px'; panel.style.width = r.w + 'px'; panel.style.height = r.h + 'px';
@@ -18074,19 +18135,20 @@ function closeBotPanel(){
 function popOutBot(){
   if (botWindowMode()){   // 另開的視窗裡：↩ 移回主畫面
     const op = window.opener;
-    if (op && !op.closed){ try { op.postMessage({ type: 'hanstockBotReturn', cmd: botState.history[0] || '' }, location.origin); op.focus(); } catch (_){} }
+    if (op && !op.closed){ try { op.postMessage({ type: 'hanstockBotReturn', cmds: botState.cols.map((c) => c.cmd) }, location.origin); op.focus(); } catch (_){} }
     window.close();
     return;
   }
   const panel = document.getElementById('botInner');
-  const q = botState.history[0] || '';
+  const q = botState.cols.map((c) => c.cmd).join('|');
   const w = Math.round(Math.max(480, Math.min(1400, panel.offsetWidth || 900)));
   const h = Math.round(Math.max(420, Math.min(1000, panel.offsetHeight || 800)));
   const win = window.open(location.pathname + location.search + '#bot-panel' + (q ? '=' + encodeURIComponent(q) : ''), 'hanstockBot', 'width=' + w + ',height=' + h);
   if (!win){ showToast('瀏覽器擋住了另開視窗，請允許這個網站開彈出式視窗'); return; }
   botPopWin = win;
   win.focus();
-  closeBotPanel();   // 主畫面這份先收起來，不要同時兩份
+  botState.cols = [];
+  closeBotPanel();   // 主畫面這份先收起來，不要同時兩份（格子都帶過去了）
 }
 // 機器人已經移到另一個視窗：主畫面再點 🤖 或 K 線圖的「⚡隔日沖」標籤，就送到那個視窗去
 function botOpenRun(cmd){
@@ -18103,8 +18165,8 @@ function startBotWindow(){
   setBotMaxButton();
   let q = botHashQuery(), tries = 0;
   const runWhenReady = () => {
-    if (!q) return;
-    if (lastData && lastData.groups && lastData.groups.length){ botRun(q); q = ''; return; }
+    if (!q.length) return;
+    if (lastData && lastData.groups && lastData.groups.length){ q.forEach((c) => botRun(c)); q = []; return; }
     if (++tries < 60) setTimeout(runWhenReady, 500);
   };
   runWhenReady();
@@ -18145,7 +18207,9 @@ document.getElementById('botInner').addEventListener('pointerdown', () => { if (
 document.getElementById('botModal').addEventListener('click', (e) => {
   const t = e.target;
   if (t.closest('[data-bot-go]')){ const i = document.getElementById('botQ'); botRun(i ? i.value : ''); if (i) i.value = ''; return; }
-  const run = t.closest('[data-bot-run]'); if (run){ botRun(run.dataset.botRun); return; }
+  const run = t.closest('[data-bot-run]'); if (run){ botRun(run.dataset.botRun, { toggle: true }); return; }
+  const x = t.closest('[data-bot-close]'); if (x){ botState.cols = botState.cols.filter((c) => c.key !== x.dataset.botClose); renderBot(); return; }
+  if (t.closest('[data-bot-clear]')){ botState.cols = []; renderBot(); return; }
   const st = t.closest('[data-bot-code]'); if (st){ openStockChart(st.dataset.botCode, st.dataset.botName); return; }
   const g = t.closest('[data-bot-group]'); if (g){ openGroupDetail(g.dataset.botGroup); }
 });
