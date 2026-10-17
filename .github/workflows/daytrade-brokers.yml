@@ -1,0 +1,55 @@
+# 隔日沖券商籌碼鏡像（機器人代碼 81／811／813 用，2026-10-17 使用者）。
+# 富邦證券「主力進出」公開網頁（每檔前 15 名買賣超分點），拿當天漲 9% 以上的族群股／處置股，
+# 算 18 個隔日沖分點的淨買超佔成交量比例；算法照對方 811 名單反推，說明在 main 分支 scripts/daytrade_mirror.py。
+# 每天一份 data 分支 tpex/daytrade/YYYY-MM-DD.json，清單 tpex/daytrade-index.json；Worker /api/daytrade 直接讀。
+name: Daytrade brokers mirror
+
+on:
+  schedule:
+    - cron: "10 10 * * 1-5"   # 18:10 台北（分點資料六點後才齊）
+    - cron: "40 11 * * 1-5"   # 19:40 台北再算一次（早上那次排程晚到或資料還沒齊）
+  push:
+    branches: [main]
+    paths: [".github/workflows/daytrade-brokers.yml", "scripts/daytrade_mirror.py"]
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "日期範圍 YYYY-MM-DD:YYYY-MM-DD（留空＝今天）"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-branch-daytrade
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: main
+      - uses: actions/checkout@v4
+        with:
+          ref: data
+          path: data
+      - name: 算隔日沖分點買超
+        env:
+          DAYS: ${{ inputs.days }}
+        run: |
+          RANGE="$DAYS"
+          # 推這支程式上去時（第一次）把這個月 1 號到今天補齊，連兩日入榜才有前一天可比
+          if [ -z "$RANGE" ] && [ "${{ github.event_name }}" = "push" ]; then RANGE="$(TZ=Asia/Taipei date +%Y-%m-01):$(TZ=Asia/Taipei date +%Y-%m-%d)"; fi
+          python3 main/scripts/daytrade_mirror.py main data $RANGE
+      - name: 推到 data 分支
+        working-directory: data
+        run: |
+          git config user.name "daytrade-mirror"
+          git config user.email "daytrade-mirror@users.noreply.github.com"
+          git add tpex/daytrade tpex/daytrade-index.json
+          git commit -m "隔日沖分點鏡像 $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "沒有變動"; exit 0; }
+          for i in 1 2 3 4; do git pull --rebase origin data && git push && break; sleep $((i * 5)); done

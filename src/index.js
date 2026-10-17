@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 11:22:57";
+const BUILD_STAMP = "2026-10-17 11:33:32";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12702,7 +12702,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 11:22:57';
+const BUILD_STAMP = '2026-10-17 11:33:32';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18945,6 +18945,75 @@ export default {
       const rows = await Promise.all(LIST.map(one));
       return new Response(JSON.stringify({ status: rows.some((x) => !x.error) ? "ok" : "error", rows, generatedAt: new Date().toISOString() }),
         { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=60" } });
+    }
+    if (url.pathname === "/api/daytrade") {
+      // 隔日沖分點（機器人 81／811／813，2026-10-17 使用者）：GitHub 排程 daytrade-brokers 每天算好放 data 分支，這裡直接讀；?date= 指定哪天
+      const RAW = "https://raw.githubusercontent.com/thunghan1228-maker/tw-groups/data/tpex/";
+      const get = async (name, ttl) => { const r = await fetch(RAW + name, { cf: { cacheTtl: ttl, cacheEverything: true } }); return r.ok ? r.json() : null; };
+      try {
+        const index = await get("daytrade-index.json", 300);
+        const dates = (index && index.dates) || [];
+        const want = String(url.searchParams.get("date") || "");
+        const day = dates.includes(want) ? want : dates[0];
+        if (!day) return Response.json({ status: "empty", message: "隔日沖資料還沒算好" });
+        const data = await get("daytrade/" + day + ".json", day === dates[0] ? 300 : 86400);
+        return new Response(JSON.stringify({ status: data ? "ok" : "error", dates, day: data }),
+          { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=120" } });
+      } catch (e) { return Response.json({ status: "error", message: String(e && e.message || e).slice(0, 120) }, { status: 502 }); }
+    }
+    if (url.pathname === "/api/zco") {
+      // 機器人 2359m／m1／m9：某檔某天前 15 名買超、前 15 名賣超分點（富邦證券主力進出公開頁），標出隔日沖分點（組合跟 scripts/daytrade_mirror.py 同一份）
+      const DT = { "9268": "凱基-台北", "5850": "統一", "1560": "港商野村", "9600": "富邦證券", "9100": "群益金鼎", "9227": "凱基-城中",
+        "0037003700390063": "國票-敦北法人", "003700370039005a": "國票-安和", "9200": "凱基", "9300": "華南永昌", "5854": "統一-城中",
+        "9666": "富邦-南屯", "9692": "富邦-嘉義", "0039003600310043": "富邦-南京", "9676": "富邦-仁愛", "9812": "元大-台中",
+        "9672": "富邦-員林", "9658": "富邦-建國" };
+      const code = String(url.searchParams.get("code") || "").trim().toUpperCase();
+      const date = String(url.searchParams.get("date") || "");
+      if (!/^[0-9A-Z]{4,6}$/.test(code) || !/^d{4}-d{2}-d{2}$/.test(date)) return Response.json({ status: "error", message: "代號或日期不對" }, { status: 422 });
+      const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+      try {
+        const r = await fetch("https://fubon-ebrokerdj.fbs.com.tw/z/zc/zco/zco.djhtm?a=" + code + "&e=" + date + "&f=" + date, {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)", "Accept-Language": "zh-TW,zh;q=0.9" },
+          cf: { cacheTtl: date >= today ? 600 : 43200, cacheEverything: true }
+        });
+        if (!r.ok) return Response.json({ status: "error", message: "HTTP " + r.status }, { status: 502 });
+        const buf = await r.arrayBuffer();
+        let text, named = true;
+        try { text = new TextDecoder("big5").decode(buf); } catch (_) { text = new TextDecoder("utf-8").decode(buf); named = false; }
+        const re = /<a href="/z/zc/zco/zco0/zco0.djhtm?a=w+&b=(w+)&BHID=w+">([^<]+)</a></TD>s*<TD[^>]*>([d,]+)</TD>s*<TD[^>]*>([d,]+)</TD>s*<TD[^>]*>([d,]+)</TD>s*<TD[^>]*>([d.]+)%</TD>/g;
+        const n = (x) => Number(String(x).replace(/,/g, ""));
+        const buy = [], sell = [];
+        let m, i = 0, vol = 0;
+        while ((m = re.exec(text))) {
+          const row = { b: m[1], name: DT[m[1]] || (named ? m[2].trim() : m[1]), buy: n(m[3]), sell: n(m[4]), net: n(m[5]), dt: !!DT[m[1]] };
+          if (!vol && n(m[6]) > 0) vol = Math.round(row.net / (n(m[6]) / 100));
+          (i++ % 2 === 0 ? buy : sell).push(row);
+        }
+        const upd = /最後更新日：s*(d{4})/(d{2})/(d{2})/.exec(text);
+        return new Response(JSON.stringify({ status: buy.length || sell.length ? "ok" : "empty", code, date, vol, buy, sell,
+          updated: upd ? upd[1] + "-" + upd[2] + "-" + upd[3] : null }),
+          { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=300" } });
+      } catch (e) { return Response.json({ status: "error", message: String(e && e.message || e).slice(0, 120) }, { status: 502 }); }
+    }
+    if (url.pathname === "/api/open-vol") {
+      // 機器人 813（隔日沖必殺）：今天開盤第一分鐘的成交量（Yahoo 1 分 K 第一根），?syms=2359.TW,6533.TWO（最多 40 檔）
+      const syms = String(url.searchParams.get("syms") || "").split(",").map((x) => x.trim().toUpperCase()).filter((x) => /^[0-9A-Z]{4,6}.(TW|TWO)$/.test(x)).slice(0, 40);
+      const one = async (sym) => {
+        try {
+          const r = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + sym + "?range=1d&interval=1m", {
+            headers: { "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)", Accept: "application/json" },
+            cf: { cacheTtl: 120, cacheEverything: true }
+          });
+          if (!r.ok) return { sym, error: "HTTP " + r.status };
+          const res = ((((await r.json()) || {}).chart || {}).result || [])[0] || {};
+          const ts = res.timestamp || [], q = ((res.indicators || {}).quote || [])[0] || {};
+          const k = (q.volume || []).findIndex((v) => Number.isFinite(v) && v > 0);
+          if (k < 0) return { sym, error: "還沒有成交" };
+          return { sym, time: new Date(ts[k] * 1000).toISOString(), vol: Math.round(q.volume[k] / 1000), open: q.open ? q.open[k] : null };
+        } catch (e) { return { sym, error: String(e && e.message || e).slice(0, 80) }; }
+      };
+      const rows = await Promise.all(syms.map(one));
+      return new Response(JSON.stringify({ status: "ok", rows }), { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=60" } });
     }
     if (url.pathname === "/api/river-hit") {
       // 估值河流圖每查一檔記一筆（本週查詢排行，2026-10-16 使用者）：/api/river 有快取，後端看不到每一次；不快取
