@@ -109,6 +109,7 @@
   .hr-help-tbl td{padding:4px 8px;border-top:1px solid var(--line);vertical-align:top;}
   .hr-help-tbl td:first-child{white-space:nowrap;font-weight:700;color:var(--text);}
   .hr-help-tbl td:nth-child(2):not(:last-child){white-space:nowrap;max-width:7em;}
+  .hr-help-card.hr-cmp .hr-help-tbl td:nth-child(2),.hr-help-card.hr-cmp .hr-help-tbl td:nth-child(3){white-space:normal;max-width:none;width:43%;}   /* 31／32 比較表：兩欄都換行 */
   .hr-jail-card .hr-help-tbl tr.hr-stk{cursor:pointer;} .hr-jail-card .hr-help-tbl tr.hr-stk:hover td{background:rgba(255,255,255,0.05);}   /* 即將入獄／即將出關／已出關：點股票開K線圖 */
   .hr-jail-card .hr-help-tbl th,.hr-jail-card .hr-help-tbl td{padding:3px 5px;}   /* 2026-10-16 使用者：多了三欄，排緊一點 */
   .hr-jail-card .hr-help-tbl td:nth-child(2){color:var(--text);font-weight:700;white-space:nowrap;max-width:6.5em;overflow:hidden;text-overflow:ellipsis;}
@@ -170,6 +171,7 @@
   .bot-gpill.up{background:#dc2626;} .bot-gpill.down{background:#16a34a;}
   .bot-gpill span,.bot-gpill b{color:#fff!important;}
   .bot-gpill:hover{filter:brightness(1.15);}
+  .bot-upic{display:inline-block;width:14px;height:14px;line-height:14px;border-radius:3px;background:#ec4899;color:#fff;font-size:9px;text-align:center;vertical-align:1px;margin:0 1px;}   /* 族群名次上升：粉紅底白三角 */
   .bot-stk,.bot-grp{cursor:pointer;font-weight:700;} .bot-stk:hover,.bot-grp:hover{text-decoration:underline;} .bot-grp{color:#facc15;}
   .hr-jail-card .jl-new{font-style:normal;font-size:10px;color:#f87171;border:1px solid #f87171;border-radius:4px;padding:0 3px;margin-left:3px;}
   .hr-jail-card tr.jl-ghead{cursor:pointer;} .hr-jail-card tr.jl-ghead td{padding-top:6px!important;color:var(--text);}
@@ -7238,6 +7240,21 @@ function homeRankFootHtml(total){
     ['收割區域', '已經跌 ' + BLADE_HARVEST_PCT + '% 以上（♣）：不追空，有空單的考慮收割'],
     ['排序', '族群名次小的在上面，同族群漲幅高的在上面；訊號中心刀劍空分頁是同一份，照出現時間排（新的在上面）'],
   ]) +
+  // 2026-10-17 使用者：31 跟 32 的差別整理成一張比較表，放首頁下面
+  hrHelpTable('🔪⚔️ 刀劍空(31) 跟 新刀劍空(32) 差在哪', ['項目', '刀劍空(31)', '新刀劍空(32)'], [
+    ['一句話', '看「名次掉下來」：原本在族裡前段班，今天突然掉到倒數兩名', '看「之前漲過、今天殺下來」：昨天或前天大漲過，今天跌回來'],
+    ['看哪些族群', '全部族群', '只看固定 ' + (KILL193_GROUPS.size + RANK188_GROUPS.size) + ' 族（199 的 ' + KILL193_GROUPS.size + ' 族＋188 的 ' + RANK188_GROUPS.size + ' 族）'],
+    ['每族挑幾檔', '族裡今天漲跌幅倒數 ' + KILL31_BOTTOM + ' 名', '族裡最弱的「空方段」，最多 5 檔'],
+    ['入選條件', '要有 🔪⚔️🔰 其中一個標記', '最弱 3 檔要有 🔪⚔️（或 🔰）；倒數第 4、5 檔要昨天或前天大漲 ' + BLADE_BEGINNER_RISE + '% 以上才列'],
+    ['🔪 的意思', '🔪N：昨天還在族裡前半段，今天掉到倒數，N＝掉了幾名', '🔪：昨天漲 ' + BLADE_PRIOR_RISE + '% 以上，今天殺下來'],
+    ['⚔️ 的意思', '⚔️N：同上，但是跟前天比', '⚔️：前天漲 ' + BLADE_PRIOR_RISE + '% 以上，現價已跌破前天收盤'],
+    ['🔰 的意思', '昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上，但不算前半段', '符合 🔪⚔️ 的漲幅條件，但昨天（前天）不在族裡前一半'],
+    ['已經跌 ' + BLADE_HARVEST_PCT + '% 以上的', '不算名次、不列', '放到最下面「收割區域」（不追空，有空單考慮收割）'],
+    ['處置股', '不列', '不列'],
+    ['成交量', '不限', BLADE_MIN_VOLUME + ' 張以上'],
+    ['怎麼排', '一張清單，照今天漲跌幅高到低', '分 4 區：多方打少（族群前 10 名）→ 中間段（11～25 名）→ 強空積極（26 名以後）→ 收割區域；同區照族群名次'],
+    ['怎麼用', '強勢股突然轉弱的警示，抓族裡排名的突然變化', '「強空積極」族群跟股票都弱，可以空得積極；「多方打少」族群還強，空少一點'],
+  ], 'hr-cmp') +
   // 2026-10-17 使用者：813／80／75 先做在首頁最右邊一欄（跟機器人代碼同一份，下週拿對方名單校正）
   hrHelpTable('⚡🐉 隔日沖・黑龍欄', ['欄位', '列什麼'], [
     ['隔日沖必殺(813)', '前一個交易日隔日沖分點（凱基-台北、凱基-城中、富邦證券、統一、港商野村等 18 個）買超的股票，手上張數 ÷ 今天開盤第一分鐘量；> 1（紅字）＝隔日沖手上的比開盤量還多，越大越容易出貨。開盤前先列手上張數'],
@@ -17401,6 +17418,7 @@ const BOT_CODES = [
 const botPct = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
 const botStk = (code, name, rest) => '<span class="bot-stk" data-bot-code="' + wlEsc(code) + '" data-bot-name="' + wlEsc(name || '') + '">' + wlEsc(code) + ' ' + wlEsc(name || '') + '</span>' + (rest || '');
 const botGrp = (name, rest) => '<span class="bot-grp" data-bot-group="' + wlEsc(name) + '">' + wlEsc(name) + '</span>' + (rest || '');
+const BOT_UP_IC = '<span class="bot-upic">▲</span>';   // 族群名次上升（取代 🔺，紅底上才看得到）
 const botGrpPill = (name, inner, v) => '<span class="bot-gpill ' + (v > 0 ? 'up' : v < 0 ? 'down' : '') + '" data-bot-group="' + wlEsc(name) + '">' + wlEsc(name) + (inner || '') + '</span>';
 const botLine = (html, cls) => '<div class="bot-line' + (cls ? ' ' + cls : '') + '">' + html + '</div>';
 function botWorldLoad(){
@@ -17547,7 +17565,7 @@ function botGroupBlock(g, h, opts){
   const hm = groupHorseMarks(g), bm = groupBladeMarks(g);
   const min = opts && Number.isFinite(opts.min) ? opts.min : -Infinity;
   const list = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent) && s.changePercent >= min).sort((a, b) => b.changePercent - a.changePercent);
-  const mv = r && r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? '🔺' + (-r.drop) : '') : '';
+  const mv = r && r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? BOT_UP_IC + (-r.drop) : '') : '';
   return botLine(botGrpPill(g.name, '-(' + (r ? r.rank : '?') + ')' + mv + ' ' + botPct(g.avgChange), g.avgChange), 'bot-head') +
     (list.length ? list.map((s) => botLine((opts && opts.me === s.code ? '👉' : '') + botStk(s.code, s.name, ' <span class="' + dirClass(s.changePercent) + '">' + botPct(s.changePercent) + '</span>' +
       ((hm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '')))).join('') : botLine('（沒有符合的）', 'bot-dim'));
@@ -17637,7 +17655,7 @@ function botAnswer(raw){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups)) return wrap(raw, botLine('首頁報價還在載入，等一下再試', 'bot-dim'));
   const h = homeRankRows();
   if (!h) return wrap(raw, botLine('族群行情載入中…', 'bot-dim'));
-  const rankLine = (r) => botLine(botGrpPill(r.name, '-(' + r.rank + ')' + (r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? '🔺' + (-r.drop) : '－') : '') + ' ' + botPct(r.avg), r.avg));
+  const rankLine = (r) => botLine(botGrpPill(r.name, '-(' + r.rank + ')' + (r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? BOT_UP_IC + (-r.drop) : '－') : '') + ' ' + botPct(r.avg), r.avg));
   // 1N：族群漲幅排行
   mm = /^1([1-9])?$/.exec(q);
   if (mm){
