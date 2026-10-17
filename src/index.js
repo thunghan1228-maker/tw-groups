@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-17 23:32:49";
+const BUILD_STAMP = "2026-10-18 00:02:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4792,7 +4792,7 @@ function chartDaytradeTagHtml(code){
   if (!r) return '';
   const md = Number(day.date.slice(5, 7)) + '/' + day.date.slice(8, 10);
   const tip = md + ' 隔日沖分點買超 ' + r.net + ' 張，佔成交 ' + r.pct + '%' + (r.two ? '（連兩日入榜，兩天合計）' : '') + '：' + r.brokers.slice(0, 4).map(([b, v]) => b + ' ' + v).join('、') + '。隔天容易出貨，點了看分點';
-  return '<span class="cm-group-tag cm-dt-tag" data-dt-code="' + code + '" title="' + wlEsc(tip) + '">⚡隔日沖 ' + (r.two ? '⁻' : '') + r.pct + '%・' + md + '</span>';
+  return '<span class="cm-group-tag cm-dt-tag" data-dt-code="' + code + '" title="' + wlEsc(tip) + '">⚡隔日沖 ' + (r.two && r.lots ? '⁻' : '') + r.pct + '%・' + md + '</span>';   // ⁻ 跟老師一樣：有寫張數（8% 以上）才標
 }
 function chartDaytradeTagRefresh(){   // 資料進來才補標籤；內容沒變不要重畫（點標籤的當下被重畫，點擊會落空）
   const el = document.getElementById('cmGroups');
@@ -12895,7 +12895,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-17 23:32:49';
+const BUILD_STAMP = '2026-10-18 00:02:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17757,18 +17757,59 @@ function botGroupBlock(g, h, opts){
   if (!list.length) return head + botLine('（沒有符合的）', 'bot-dim');
   if (!full) return head + list.map(line).join('');
   // 多方段＝前面 bladeZoneSize 檔、空方段＝後面 bladeZoneSize 檔（跟刀劍空同一套：20 檔各 5、13 檔各 5、9 檔各 3…）
+  // 中間沒有股票（散熱 8 檔前 4 後 4）就只畫「空方」那條
   const n = list.length, zone = bladeZoneSize(n), topEnd = Math.min(zone, n), botStart = Math.max(n - zone, topEnd);
-  let html = head + list.slice(0, topEnd).map(line).join('') + botLine('------↑(多方)↑------', 'bot-sep');
-  if (botStart > topEnd) html += list.slice(topEnd, botStart).map(line).join('');
+  let html = head + list.slice(0, topEnd).map(line).join('');
+  if (botStart > topEnd) html += botLine('------↑(多方)↑------', 'bot-sep') + list.slice(topEnd, botStart).map(line).join('');
   if (botStart < n) html += botLine('------↓(空方)↓------', 'bot-sep') + list.slice(botStart).map(line).join('');
-  // 最下面：近幾個交易日的族群名次（舊→今天），下面一排是那天族群漲（🔺）還是跌（🔽）
+  return html + botRankTrail(g, r);
+}
+// 族群明細最下面的「排名」（2026-10-17 對老師 10 個族群明細）：今天 09:05、09:30、10:00、10:30、11:00 的族群名次，第 6 格是 11:00 以後最新的一次
+// （後端 /api/group-rank-checkpoints，每半小時用 5 分 K 算）。箭頭跟上一格比（第一格跟昨天收盤名次比）：名次一樣或前進 🔺；
+// 退步了還在前半段 🔽、掉到後半段（第 32 名以後）🔰——10 個族群 60 格對中 58 格。拿不到就改列近 6 日收盤名次。
+function botRankTrail(g, r){
+  const day = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(0, 10) : '';
+  const cp = day ? botFetchCache('grc|' + day, '/api/group-rank-checkpoints?date=' + day, 60e3) : null;
   const d = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups[g.name] : null;
-  if (d && r && Array.isArray(d.rank)){
-    const days = d.rank.map((k, i) => ({ k, p: (d.pct || [])[i] })).filter((x) => Number.isFinite(x.k)).slice(0, 5).reverse().concat([{ k: r.rank, p: g.avgChange }]);
-    html += botLine('------↓(排名)↓------', 'bot-sep') + botLine('近 ' + days.length + ' 日 ' + days.map((x) => x.k).join('-') + ' <span class="bot-dim">（舊→今天）</span>') +
-      botLine(days.map((x) => (x.p > 0 ? '🔺' : x.p < 0 ? '🔽' : '➖')).join(''));
+  const sep = botLine('------↓(排名)↓------', 'bot-sep');
+  const x = cp && cp.status === 'ok' && cp.groups ? cp.groups[g.name] : null;
+  if (x && Array.isArray(x.ranks) && x.ranks.some(Number.isFinite)){
+    const ranks = x.ranks.slice(0, 5).concat(x.ranks.length > 5 ? [x.ranks[x.ranks.length - 1]] : []).filter(Number.isFinite);
+    const half = Math.floor((cp.groupCount || 65) / 2);
+    let prev = d && Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
+    const arrows = ranks.map((k) => { const a = prev === null || k <= prev ? '🔺' : k >= half ? '🔰' : '🔽'; prev = k; return a; });
+    return sep + botLine('今天' + ranks.join('-')) + botLine(arrows.join(''));
   }
-  return html;
+  if (d && r && Array.isArray(d.rank)){
+    const days = d.rank.map((k, i) => ({ k, p: (d.pct || [])[i] })).filter((y) => Number.isFinite(y.k)).slice(0, 5).reverse().concat([{ k: r.rank, p: g.avgChange }]);
+    return sep + botLine('近 ' + days.length + ' 日 ' + days.map((y) => y.k).join('-') + ' <span class="bot-dim">（舊→今天）</span>') +
+      botLine(days.map((y) => (y.p > 0 ? '🔺' : y.p < 0 ? '🔽' : '➖')).join(''));
+  }
+  return '';
+}
+// 沒有族群的股號（2026-10-17 老師 2330：產業別、漲幅、現價、905 高、昨高，最後寫「此個股沒有族群分類」）
+// 905 高＝今天開盤第一根 5 分 K（09:00～09:05）的高點；昨高＝報價那天的前一個交易日最高（週末查＝週四，老師台積電寫 2450）
+function botStockCard(code, raw, wrap){
+  const q = botFetchCache('wq|' + code, '/api/watch-quotes?codes=' + code, 60e3);
+  const pf = botFetchCache('pf|' + code, '/api/stock-profile?code=' + code, 3600e3);
+  const d1 = botFetchCache('d1|' + code, '/api/bars1d/' + code, 1800e3);
+  const x = q && q.quotes ? q.quotes[code] : null;
+  if (!q || !pf || !d1) return wrap(code, botLine('讀取中…', 'bot-dim'));
+  if (!x || !Number.isFinite(x.price)) return wrap(code, botLine('查不到 ' + code + ' 的報價', 'bot-dim'));
+  const session = String(q.quoteDate || '').slice(0, 10);
+  const today = twTodayStr();
+  const hm = new Date(Date.now() + 8 * 3600e3).toISOString().slice(11, 16);
+  const opened = session === today && hm >= '09:05';
+  const m5 = opened ? botFetchCache('m5|' + code + '|' + today, '/api/bars/' + code, 300e3) : null;
+  const first = m5 && Array.isArray(m5.bars) ? m5.bars.find((b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10) === today) : null;
+  const bars = d1 && Array.isArray(d1.bars) ? d1.bars.filter((b) => String(b.ts).slice(0, 10) < session) : [];
+  const yHigh = bars.length ? bars[bars.length - 1].high : null;
+  const ind = pf && pf.status === 'ok' && pf.industry ? String(pf.industry).replace(/業$/, '') : '';
+  const px = (v) => (Number.isFinite(v) ? Number(v).toFixed(2) : '—');
+  return wrap(code + ' ' + (x.name || pf.name || ''), botLine(botStk(code, x.name || pf.name || '', ind ? ' (' + wlEsc(ind) + ')' : '')) +
+    botLine('漲幅 : <span class="' + dirClass(x.changePercent) + '">' + botPct(x.changePercent) + '</span>') + botLine('現價 : ' + px(x.price)) +
+    botLine('905高 : ' + (!opened ? '今日尚未開盤' : first ? px(first.high) : '讀取中…')) + botLine('昨高 : ' + (Number.isFinite(yHigh) ? +yHigh : '—')) +
+    botLine('-------------------', 'bot-sep') + botLine('⚠️此個股沒有族群分類'));
 }
 function botNorm(raw){
   return String(raw || '').trim().replace(/[０-９Ａ-Ｚａ-ｚ＋－]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[−–—]/g, '-').replace(/\\s+/g, '').toUpperCase();
@@ -18120,7 +18161,7 @@ function botAnswer(raw){
   }
   const f = botFindGroups(q);
   if (f.groups.length) return wrap(f.code ? f.code + ' 的族群漲幅排行' : '族群漲幅排行', f.groups.slice(0, 6).map((g) => botGroupBlock(g, h, { me: f.code, full: true })).join(''));
-  if (/^[0-9A-Z]{4,6}$/.test(q)) return wrap(raw, botLine(q + ' 沒有綁定在重點族群裡（可以用「選股・個股研究」查這檔的基本資料）', 'bot-dim'));
+  if (/^[0-9A-Z]{4,6}$/.test(q)) return botStockCard(q, raw, (t, body) => wrap(t, body, ' '));
   return wrap(raw, botLine('看不懂這個代碼，下面有全部代碼', 'bot-dim'));
 }
 // 2026-10-17 使用者：結果一格一格往右排（最多 10 格，照點的順序：先點 12 就在第一格、再點 193 在第二格）；
