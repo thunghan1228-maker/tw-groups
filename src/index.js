@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 21:35:59";
+const BUILD_STAMP = "2026-10-18 21:41:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -472,6 +472,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .force-panel{margin-top:10px;}
   .force-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px;}
   .force-title{font-size:13px;font-weight:800;color:#fff;}
+  .force-algo{display:inline-flex;border:1px solid #6b6259;border-radius:999px;overflow:hidden;margin-right:auto;margin-left:8px;}
+  .force-algo button{background:transparent;color:#cfc6bc;border:0;padding:1px 10px;font-size:11px;cursor:pointer;font-family:inherit;}
+  .force-algo button.on{background:#8b5cf6;color:#fff;font-weight:700;}
   .force-legend{display:flex;align-items:center;font-size:11px;color:#f1ece6;}
   .fl-dot{width:7px;height:7px;border-radius:2px;display:inline-block;margin-left:8px;margin-right:3px;}
   .fl-dot:first-child{margin-left:0;}
@@ -3364,6 +3367,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="force-panel" id="forcePanelWrap" hidden>
       <div class="force-panel-head">
         <span class="force-title">主力買賣力（大戶）</span>
+        <span class="force-algo" id="forceAlgo"><button type="button" data-force-algo="teacher">老師版</button><button type="button" data-force-algo="single20">單筆 20 張</button></span>
         <span class="force-legend"><span class="fl-dot fl-buy"></span>買超<span class="fl-dot fl-sell"></span>賣超<span class="fl-dot fl-cum"></span>累計</span>
       </div>
       <div class="force-note" id="forceNote">大戶定義：單筆大單逐筆統計</div>
@@ -3909,8 +3913,9 @@ function updateChartInfoBar(bars, index){
     item(ib.fullLabel + (ib.liveNote ? '（' + ib.liveNote + '）' : '')), item('開' + ib.open.toFixed(2)), item('高' + ib.high.toFixed(2)), item('低' + ib.low.toFixed(2)),
     item('量' + Math.round(ib.volume) + '張'), item('漲跌' + change, changeColor), item('收' + ib.close.toFixed(2), changeColor),
   ];
-  if (Number.isFinite(ib.mainNet)){
-    parts.push(item('主力' + (ib.mainNet >= 0 ? '+' : '') + Math.round(ib.mainNet) + '張', ib.mainNet >= 0 ? '#e6675f' : '#5fae6f'));
+  const fnet = barForceNet(ib);
+  if (Number.isFinite(fnet)){
+    parts.push(item((forceAlgo === 'teacher' ? '大戶' : '主力') + (fnet >= 0 ? '+' : '') + Math.round(fnet) + '張', fnet >= 0 ? '#e6675f' : '#5fae6f'));
   }
   el.innerHTML = parts.join(' ');
 }
@@ -4640,8 +4645,31 @@ function tsToBar(b){
     ts: b.ts, open: b.open, high: b.high, low: b.low, close: b.close,
     volume: b.volume ?? 0, label, fullLabel,
     mainNet: b.main_force_available !== false && Number.isFinite(b.main_net_volume) ? b.main_net_volume : null,
+    bigNet: bigNetLots(b.big_buy_amount, b.big_sell_amount, b.close),
   };
 }
+// 2026-10-18 使用者：副圖加切換鈕——老師版（同秒同方向併單 ≥7 張、開盤第一筆算賣）或原本的單筆 ≥20 張；記在這台瀏覽器。
+// 老師版後端只存金額（big_buy_amount／big_sell_amount），用那根 K 的收盤價換成張數，跟單筆 20 張一樣畫「張」。
+let forceAlgo = 'teacher';
+try { if (localStorage.getItem('forceAlgo') === 'single20') forceAlgo = 'single20'; } catch (_){}
+function bigNetLots(buy, sell, close){
+  return Number.isFinite(buy) && Number.isFinite(sell) && close > 0 ? (buy - sell) / (close * 1000) : null;
+}
+function barForceNet(b){ return forceAlgo === 'teacher' ? (b.bigNet ?? null) : (b.mainNet ?? null); }
+function syncForceAlgoBtns(){
+  document.querySelectorAll('#forceAlgo [data-force-algo]').forEach((x) => x.classList.toggle('on', x.dataset.forceAlgo === forceAlgo));
+}
+document.getElementById('forceAlgo').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-force-algo]');
+  if (!btn || btn.dataset.forceAlgo === forceAlgo) return;
+  forceAlgo = btn.dataset.forceAlgo;
+  try { localStorage.setItem('forceAlgo', forceAlgo); } catch (_){}
+  syncForceAlgoBtns();
+  document.getElementById('forceNote').textContent = forceNoteText(!!currentChart.isRealBars);
+  if (currentChart.isRealBars && Array.isArray(currentChart.bars) && currentChart.force) currentChart.force = chartForceSeries(currentChart.bars);
+  redrawAll();
+});
+syncForceAlgoBtns();
 
 async function fetchRealBars(code, tf){
   const path = tf === 'm1' ? ('/api/bars1m/' + code) : ('/api/bars/' + code);
@@ -4656,6 +4684,7 @@ async function fetchRealBars(code, tf){
 let mainForceMinLots = null;
 function forceNoteText(isReal){
   if (!isReal) return '示範資料：後端連不上或這檔還沒有主力資料，先用模擬數字展示介面';
+  if (forceAlgo === 'teacher') return '大戶定義（老師版）：同一秒、同方向的成交併成一筆，滿 7 張算大戶；開盤第一筆一律算大戶賣（永豐逐筆成交，買進為正、賣出為負）。2026-10-19 起才有這份資料，更早的日子請切「單筆 20 張」';
   if (Number.isFinite(mainForceMinLots) && mainForceMinLots > 0) return '大戶定義：單筆成交 ≥ ' + mainForceMinLots + ' 張（永豐逐筆成交即時統計，買進為正、賣出為負）';
   return '大戶定義：單筆大單逐筆統計（永豐逐筆成交即時資料，門檻由後端設定）';
 }
@@ -4671,7 +4700,7 @@ async function fetchMainForceRange(path){
     return new Map(
       data.bars
         .filter((b) => b && Number.isFinite(b.ts) && b.main_force_available !== false && Number.isFinite(b.main_net_volume))
-        .map((b) => [b.ts, b.main_net_volume])
+        .map((b) => [b.ts, { main: b.main_net_volume, buy: b.big_buy_amount, sell: b.big_sell_amount }])
     );
   } catch (e) {
     return new Map();
@@ -4718,11 +4747,13 @@ async function fetchRealBars5Range(code){
   const rangeData = await rangeRes.json();
   if (!rangeData || !Array.isArray(rangeData.bars) || !rangeData.bars.length) throw new Error('bars5range empty');
   triggerMainForceBackfill(code, '5m', rangeData.bars);
-  const todayByTs = new Map(todayBars.map((b) => [b.ts, b.mainNet]));
+  const todayByTs = new Map(todayBars.map((b) => [b.ts, b]));
   return rangeData.bars.map((b) => {
     const bar = tsToBar(b);
-    if (historyForceByTs.has(bar.ts)) bar.mainNet = historyForceByTs.get(bar.ts);
-    if (todayByTs.has(bar.ts)) bar.mainNet = todayByTs.get(bar.ts);
+    const h = historyForceByTs.get(bar.ts);
+    if (h){ bar.mainNet = h.main; const big = bigNetLots(h.buy, h.sell, bar.close); if (big !== null) bar.bigNet = big; }
+    const t = todayByTs.get(bar.ts);
+    if (t){ bar.mainNet = t.mainNet; if (t.bigNet !== null) bar.bigNet = t.bigNet; }
     return bar;
   });
 }
@@ -4738,11 +4769,13 @@ async function fetchRealBars1Range(code){
   const rangeData = await rangeRes.json();
   if (!rangeData || !Array.isArray(rangeData.bars) || !rangeData.bars.length) throw new Error('bars1mrange empty');
   triggerMainForceBackfill(code, '1m', rangeData.bars);
-  const todayByTs = new Map(todayBars.map((b) => [b.ts, b.mainNet]));
+  const todayByTs = new Map(todayBars.map((b) => [b.ts, b]));
   return rangeData.bars.map((b) => {
     const bar = tsToBar(b);
-    if (historyForceByTs.has(bar.ts)) bar.mainNet = historyForceByTs.get(bar.ts);
-    if (todayByTs.has(bar.ts)) bar.mainNet = todayByTs.get(bar.ts);
+    const h = historyForceByTs.get(bar.ts);
+    if (h){ bar.mainNet = h.main; const big = bigNetLots(h.buy, h.sell, bar.close); if (big !== null) bar.bigNet = big; }
+    const t = todayByTs.get(bar.ts);
+    if (t){ bar.mainNet = t.mainNet; if (t.bigNet !== null) bar.bigNet = t.bigNet; }
     return bar;
   });
 }
@@ -4753,7 +4786,7 @@ function dailyBarToBar(b){
   const fullLabel = d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate();
   return {
     ts: b.ts, open: b.open, high: b.high, low: b.low, close: b.close,
-    volume: b.volume ?? 0, label, fullLabel, mainNet: b.mainNet ?? null,
+    volume: b.volume ?? 0, label, fullLabel, mainNet: b.mainNet ?? null, bigNet: b.bigNet ?? null,
   };
 }
 
@@ -4785,11 +4818,13 @@ async function fetchLiveDailyBar(code){
     const day = String((data && data.quoteDate) || '');
     if (!q || !Number.isFinite(q.price) || !Number.isFinite(q.open) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(day)) return null;
     const prices = [q.open, q.price, q.high, q.low].filter(Number.isFinite);
-    const nets = (m5 || []).filter((b) => Number.isFinite(b.mainNet) && taipeiDateStr(typeof b.ts === 'number' ? b.ts : Date.parse(b.ts)) === day);
+    const sameDay = (m5 || []).filter((b) => taipeiDateStr(typeof b.ts === 'number' ? b.ts : Date.parse(b.ts)) === day);
+    const nets = sameDay.filter((b) => Number.isFinite(b.mainNet)), bigs = sameDay.filter((b) => Number.isFinite(b.bigNet));
     const bar = dailyBarToBar({
       ts: day + 'T00:00:00+00:00', open: q.open, high: Math.max(...prices), low: Math.min(...prices), close: q.price,
       volume: Number.isFinite(q.volume) ? q.volume : 0,
       mainNet: nets.length ? nets.reduce((sum, b) => sum + b.mainNet, 0) : null,
+      bigNet: bigs.length ? bigs.reduce((sum, b) => sum + b.bigNet, 0) : null,
     });
     bar.live = true;
     bar.liveNote = '盤中' + (data.quoteTime ? ' ' + String(data.quoteTime).slice(0, 5) : '');
@@ -4813,7 +4848,7 @@ function chartForceSeries(bars){
   // 其他天原本存在的真實數字就會被壓成視覺上的一條平線。
   let cum = 0, cumDate = null;
   return bars.map((b) => {
-    const net = b.mainNet ?? 0;
+    const net = barForceNet(b) ?? 0;
     const d = taipeiDateStr(b.ts);
     if (d !== cumDate) { cum = 0; cumDate = d; }
     cum += net;
@@ -13308,7 +13343,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 21:35:59';
+const BUILD_STAMP = '2026-10-18 21:41:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
