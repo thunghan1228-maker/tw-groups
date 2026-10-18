@@ -3272,7 +3272,9 @@ function getStockQuote(code){
   return null;
 }
 
-const DEFAULT_MA_COLORS = ['#7fb3e0', '#c9a98c', '#b48ee0', '#e0c458', '#6fd0c4'];
+const DEFAULT_MA_COLORS = ['#1a7fe8', '#1fd83a', '#b48ee0', '#e0c458', '#6fd0c4'];
+// 2026-10-18 使用者（5分鐘截圖）：第一條均線（MA5）藍色 2px、第二條（MA20；1分鐘是 MA25）綠色 2.5px，VWAP 黃色 3px；日線、5分、1分都一樣
+const DEFAULT_MA_WIDTHS = [2, 2.5, 1.5, 1.5, 1.5];
 const VWAP_COLOR = '#f2c94c';
 const PAD = { left: 8, right: 54 };
 const TF_CONFIG = {
@@ -4615,7 +4617,7 @@ async function switchTimeframe(tf){
   document.querySelectorAll('.chart-tab').forEach((btn) => btn.classList.toggle('active', btn.dataset.tf === tf));
   const cfg = TF_CONFIG[tf];
   currentChart.maLines = cfg.maPeriods.map((p, idx) => ({
-    period: p, color: DEFAULT_MA_COLORS[idx % DEFAULT_MA_COLORS.length], width: 1.5, on: true,
+    period: p, color: DEFAULT_MA_COLORS[idx % DEFAULT_MA_COLORS.length], width: DEFAULT_MA_WIDTHS[idx] || 1.5, on: true,
   }));
   currentChart.vwapOn = !!cfg.vwap;
   currentChart.vwapColor = VWAP_COLOR;
