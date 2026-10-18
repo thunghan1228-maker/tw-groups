@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 13:26:59";
+const BUILD_STAMP = "2026-10-18 13:36:32";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3276,7 +3276,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="signal-help" id="signalHelp" hidden>
       <ul>
         <li><b>今日即時多</b>：彙整多方向訊號的即時清單：最上面一塊是盤中大戶力多的名單（時間＝第一次進名單，早進名單的在上面、新進的往下排），下面是四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單依發生時間新到舊排序。也包含十大多族群裡大戶力 ≥ +10% 的股票（訊號寫「十大多族群」）。今日強勢股裡大戶力 ≥ +10% 的也會進來（訊號寫「今日強勢股」）。今天／昨天／前天後面的「盤中大戶力≥10%」按下去只看大戶力 ≥ +10% 的股票（上面的名單跟下面的訊號都套，再按一次全部顯示）；今日即時空同樣有「≤-10%」。</li>
-        <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（時間＝第一次出現，早出現的在上面、新出現的往下排，只有今天有；多方打少、強空積極、收割區域三段都列），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。也包含十大空族群裡大戶力 ≤ −10% 的股票（訊號寫「十大空族群」）。今日弱勢股裡大戶力 ≤ −10% 的也會進來（訊號寫「今日弱勢股」）。</li>
+        <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（時間＝第一次出現，不分段、全部照時間排：早出現的在上面、最晚出現的在最下面貼著兩條黑線，只有今天有；前面的 🔺＝多方打少、🔽＝中間段、🔰＝強空積極、♣＝收割區域），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。也包含十大空族群裡大戶力 ≤ −10% 的股票（訊號寫「十大空族群」）。今日弱勢股裡大戶力 ≤ −10% 的也會進來（訊號寫「今日弱勢股」）。</li>
         <li><b>昨日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。今天下跌的不列（弱勢股反過來，今天上漲的不列），整族都不符合就不列那一族。⭐＝這族今天也有出現在強勢黑K選股（通常是比較強勢的族群）、👀＝這檔在強勢黑K選股名單裡。均線分數是收盤算好的，現價、漲跌、大戶力是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
         <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面；按「大戶力 ≤ −10%」只看大戶在賣的。</li>
         <li><b>十大多族群</b>（原精選十大多空族群的多方）：今天漲幅前10大族群，各取大戶力最強的前5檔個股；按「大戶力≥10%」只看大戶力 ≥ +10% 的。</li>
@@ -6186,7 +6186,7 @@ function nowBearTabHtml(view){
     const m = race333Model();
     // 2026-10-13 使用者：刀劍空在這頁照出現時間早的在上面、晚的往下排；多方打少、收割區域那兩段文字不是主要的，搬到這頁最下面
     blade = '<div class="race-block now-bear-blade"><div class="race-head">🔪⚔️刀劍空(32)</div>' +
-      '<div class="race-sub">跟「刀劍空(32)」分頁同一份即時名單（只有今天有；昨天／前天沒有紀錄）。下面才是依發生時間排序的空方向訊號；多方打少、強空積極、收割區域三段都列在這裡。</div>' +
+      '<div class="race-sub">跟「刀劍空(32)」分頁同一份即時名單（只有今天有；昨天／前天沒有紀錄），不分段、照出現時間排：早的在上面、最晚出現的在最下面。兩條黑線下面才是依發生時間排序的空方向訊號。</div>' +
       (m ? raceBladeListHtml(m, { oldestFirst: true, noNotes: true }) : '<div class="race-note">族群行情還沒載入，刀劍空名單稍後才會出現。</div>') + '</div>';
     // 2026-10-15：多方打少、收割區域改成跟強空積極一樣整列列在上面的刀劍空名單裡，最下面不再另外放
   }
@@ -6877,6 +6877,19 @@ function raceBladeListHtml(m, opts){
   const rowsOf = (list, zone) => list.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone: zone === '♣' ? '♣' : bladeRankMark(r.groupRank, m.total), dates: m.dates, conditions: true, m })).join('');
   const total = upper.length + middle.length + bladeLower.length + harvest.length;
   if (!total) return '<div class="race-note">目前沒有符合條件的股票</div>';
+  // 2026-10-18 使用者：今日即時空上面這塊（oldestFirst）不分段，四段合在一起照出現時間排——早的在上面、最晚出現的在最下面
+  // （貼著兩條黑線，接著下面依時間排的訊號）；每列前面照樣標 🔺🔽🔰♣ 看得出是哪一段。刀劍空(32) 分頁照舊分段、新的在上面。
+  if (o.oldestFirst){
+    const seg = [[upper, '🔺'], [middle, '🔽'], [bladeLower, '🔰'], [harvest, '♣']];
+    const all = [];
+    seg.forEach(([list, zone], si) => list.forEach((r, j) => all.push({ r, zone, si, j })));
+    all.sort((a, b) => {
+      const ta = a.r.seenTs ? Math.floor(a.r.seenTs / 60000) : Infinity, tb = b.r.seenTs ? Math.floor(b.r.seenTs / 60000) : Infinity;
+      return (ta === tb ? 0 : (ta < tb ? -1 : 1)) || (a.si - b.si) || (a.j - b.j);
+    });
+    return '<div class="race-note">' + seenNote + '前面的 🔺＝多方打少、🔽＝中間段、🔰＝強空積極、♣＝收割區域。</div>' + raceColLabelsHtml({ blade: true }) +
+      all.map((x, i) => raceStockRowHtml(x.r, i, { blade: true, zone: x.zone === '♣' ? '♣' : bladeRankMark(x.r.groupRank, m.total), dates: m.dates, conditions: true, m })).join('');
+  }
   return '<div class="race-note">' + seenNote + '</div>' + raceColLabelsHtml({ blade: true }) +
     rowsOf(upper, '🔺') + '<div class="race-sep">----↑(多方打少)↑----</div>' + rowsOf(middle, '🔽') +
     '<div class="race-sep">----↓(強空積極)↓----</div>' + rowsOf(bladeLower, '🔰') +
@@ -13122,7 +13135,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 13:26:59';
+const BUILD_STAMP = '2026-10-18 13:36:32';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
