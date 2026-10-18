@@ -129,6 +129,8 @@
   .bot-col > .bot-msg{margin:0;min-height:100%;box-sizing:border-box;}
   .bot-col > .bot-msg{padding:8px 9px;} .bot-col .bot-line{font-size:12.5px;line-height:1.6;} .bot-col .bot-title{font-size:13.5px;padding-right:18px;}
   .bot-col.flash > .bot-msg{border-color:#7c3aed;box-shadow:inset 0 0 0 1px #7c3aed;}
+  /* 2026-10-18 使用者：32 新刀劍空後面多了「回／跑 HH:MM」（照老師刀功課廣播），那格放寬，一檔一行放得下 */
+  .bot-col[data-col-key="32"]{flex-basis:calc((100% - 72px) / 10 * 1.7);min-width:290px;}
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
   .bot-col-x:hover{background:#e81123;border-color:#e81123;color:#fff;}
   .bot-cols-hint{color:var(--muted);font-size:13px;margin:0 2px 10px;}
