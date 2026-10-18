@@ -1490,6 +1490,15 @@
   .mw-pill.gold{border-color:#e0b33a;background:#fef9e7;color:#7c5a00;} .mw-pill.green{background:#dcfce7;color:#166534;} .mw-pill.yellow{background:#fef3c7;color:#92400e;}
   .mw-pill.gray{background:#eceae6;color:#57534e;}
   .mw-sig{text-align:left!important;}
+  /* 刀劍空的跑／回（2026-10-18 使用者：照老師刀功課廣播） */
+  .race-seen .blade-back{display:block;width:max-content;margin:2px 0 0;}
+  .blade-back{display:inline-block;margin-left:4px;background:#2563eb;color:#fff;border-radius:5px;padding:0 5px;font-size:11px;font-weight:800;}
+  .blade-run{display:inline-block;background:#b91c1c;color:#fff;border-radius:5px;padding:0 6px;font-size:11px;font-weight:800;white-space:nowrap;}
+  .race-row.blade-gone{background:rgba(185,28,28,.07);}
+  .race-row.blade-gone .race-code,.race-row.blade-gone .race-name{color:#dc2626;text-decoration:line-through;}
+  .race-row.blade-gone .blade-run{margin-left:auto;}
+  .blade-gone-sep{color:#dc2626;}
+  .bot-gone{color:#dc2626;text-decoration:line-through;}
   /* 2026-10-18 使用者：每日功課整頁的字加粗、顏色加深（太淺看不清楚）；計數列與段位鈕：刀劍空、12空、強空、收割區綠字，多方紅字，中間黑字，
      出獄股、即將入獄維持原色 */
   #hwInner{--text:#1d1410; --muted:#4a3f37; font-weight:600;}
@@ -6884,7 +6893,7 @@ function raceStockRowHtml(r, idx, opts){
     ? (r.inGroupRank === 1 ? '👑' : '') + (r.horse ? '🐎' : '') + (r.rocket !== null ? '🚀' + r.rocket.toFixed(1) : '')
     : opts && opts.blade ? bladeBadge(r)
     : (r.rankIdx !== undefined ? r.rankIdx : idx) === 0 ? '👑' : (r.rankIdx !== undefined ? r.rankIdx : idx) <= 10 ? RACE_NUM[r.rankIdx !== undefined ? r.rankIdx : idx] : '';
-  const rank = opts && opts.blade ? '<span class="race-seen" title="第一次進刀劍空名單的時間">' + (r.seenTs ? new Date(r.seenTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '—') + '</span>' +
+  const rank = opts && opts.blade ? '<span class="race-seen" title="第一次進刀劍空名單的時間">' + (r.seenTs ? new Date(r.seenTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '—') + (r.trackTag || '') + '</span>' +
     '<span class="race-rank" title="族群第 ' + r.groupRank + ' 名">' + r.groupRank + (opts.zone || '') + '</span>'
     : opts && opts.seen ? '<span class="race-seen" title="第一次進這個名單的時間（這台電腦開著頁面時記的）">' + (r.seenTs ? new Date(r.seenTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '—') + '</span>' : '';
   const dates = (opts && opts.dates) || [];
@@ -7036,11 +7045,66 @@ function raceBladeNotesHtml(m){
   return (bladeUpper.length ? '<div class="race-note">多方打少（強族群裡逆勢走弱，空得保守）' + bladeUpper.length + ' 檔：' + names(bladeUpper) + '</div>' : '') +
     (bladeHarvest.length ? '<div class="race-note">收割區域（族群排名後半裡已跌 ' + BLADE_HARVEST_PCT + '% 以上或跌停，不追空）' + bladeHarvest.length + ' 檔：' + names(bladeHarvest) + '</div>' : '');
 }
+// 2026-10-18 使用者：刀劍空(32) 加老師「刀功課廣播」的跑／回——掉出名單的不刪，留著畫紅色刪除線、標「跑 HH:MM」；
+// 掉出去又回來的標「回 HH:MM」。機器人 32、今日即時空、刀劍空分頁三個地方都一樣。時間用今日功課的盤中 5 分鐘紀錄
+// （/api/homework-snapshots，誰的網站開著都會記，大家看到的一樣，跟老師一樣 5 分鐘一格），最後接上現在畫面上這份。
+const bladeTrack = { data: null, at: 0, loading: false };
+function bladeTrackRefresh(){
+  if (bladeTrack.loading || Date.now() - bladeTrack.at < 60e3) return;
+  bladeTrack.loading = true;
+  fetch('/api/homework-snapshots').then((r) => r.json()).then((d) => { if (d && d.status === 'ok') bladeTrack.data = d; })
+    .catch(() => {}).finally(() => { bladeTrack.loading = false; bladeTrack.at = Date.now(); try { sigRefreshViews(); botRerunCols(); } catch (_){} });
+}
+const bladeSlotTs = (date, hm) => Date.parse(date + 'T' + hm + ':00+08:00');
+function bladeTimeline(m){
+  bladeTrackRefresh();
+  const d = bladeTrack.data;
+  if (!m || !d || !lastData || d.date !== lastData.quoteDate) return null;
+  const slots = Object.keys(d.slots || {}).sort();
+  if (!slots.length) return null;
+  const live = [].concat(m.bladeUpper || [], m.bladeMiddle || [], m.bladeLower || [], m.bladeHarvest || []);
+  const nowSlot = lastData.quoteTime ? String(lastData.quoteTime).slice(0, 5) : slots[slots.length - 1];
+  const st = new Map();
+  slots.forEach((slot) => {
+    const inSet = new Map((d.slots[slot].rows || []).map((r) => [r.code, r]));
+    inSet.forEach((r, code) => {
+      const x = st.get(code);
+      if (!x) st.set(code, { code, first: slot, inNow: true, out: null, back: null, row: r });
+      else { if (!x.inNow){ x.back = slot; x.out = null; } x.inNow = true; x.row = r; }
+    });
+    st.forEach((x, code) => { if (x.inNow && !inSet.has(code)){ x.inNow = false; x.out = slot; } });
+  });
+  // 跟畫面上現在這份對齊：現在在名單裡的就是在榜（紀錄裡掉出去的算回來），紀錄說在榜、現在不在的算跑
+  const liveCodes = new Set(live.map((r) => r.code));
+  live.forEach((r) => {
+    const x = st.get(r.code);
+    if (!x) st.set(r.code, { code: r.code, first: nowSlot, inNow: true, out: null, back: null, row: { code: r.code, name: r.name, g: r.groupName, gr: r.groupRank } });
+    else if (!x.inNow){ x.inNow = true; x.back = nowSlot > x.out ? nowSlot : x.out; x.out = null; }
+  });
+  st.forEach((x) => { if (x.inNow && !liveCodes.has(x.code)){ x.inNow = false; x.out = nowSlot; } });
+  return st;
+}
+const bladeBackTag = (x) => (x && x.inNow && x.back ? '<span class="blade-back" title="掉出刀劍空後 ' + x.back + ' 又回來">回 ' + x.back + '</span>' : '');
+// 跑掉的那幾檔：一列，紅色刪除線，標進榜時間跟跑的時間，漲跌照現在報價
+function bladeGoneRowHtml(x){
+  const q = typeof getStockQuote === 'function' ? getStockQuote(x.code) : null;
+  const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : x.row.pct;
+  const name = (q && q.name) || x.row.name || '';
+  return '<div class="race-row stock-row r333-row blade-gone" data-code="' + x.code + '" data-name="' + wlEsc(name) + '" tabindex="0" role="button" title="' + x.first + ' 進刀劍空、' + x.out + ' 掉出去（轉強，要跑）">' +
+    '<span class="race-seen">' + x.first + '</span><span class="race-rank">' + (x.row.gr || '—') + '</span>' +
+    '<span class="race-code">' + x.code + '</span><span class="race-name">' + wlEsc(name) + '</span>' +
+    '<span class="sig-group">' + wlEsc(x.row.g || '') + '</span>' +
+    '<span class="race-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '—') + '</span>' +
+    '<span class="blade-run">跑 ' + x.out + '</span></div>';
+}
 // opts.oldestFirst：早出現的在上面、新出現的往下排（2026-10-13 使用者：只有今日即時空裡的刀劍空這樣排，刀劍空分頁還是新的在上面）
 // opts.noNotes：不接多方打少／收割區域（今日即時空另外放到整頁最下面）
 function raceBladeListHtml(m, opts){
   const o = opts || {};
-  const seen = bladeSeenMap();
+  const tl = bladeTimeline(m);
+  // 出現時間：這台瀏覽器記的跟盤中紀錄（大家共用）取早的那個
+  const seen = Object.assign({}, bladeSeenMap());
+  if (tl) tl.forEach((x, code) => { const ts = bladeSlotTs(lastData.quoteDate, x.first); if (Number.isFinite(ts) && (!seen[code] || ts < seen[code])) seen[code] = ts; });
   const holderOrder = race333SortByHolder(race333FilterList(m.bladeLower), true);
   const rankOf = new Map(holderOrder.map((r, i) => [r.code, i]));
   // 有出現時間的照時間排（同一分鐘照原本的大戶力順序）；沒有時間的（今天還沒記到，等於剛出現）
@@ -7061,26 +7125,31 @@ function raceBladeListHtml(m, opts){
   });
   const upper = sortSeen(m.bladeUpper), middle = sortSeen(m.bladeMiddle || []), harvest = sortSeen(m.bladeHarvest);
   // 族群名次後面的符號照老師：前 10 名 🔺、11～25 名 🔽、26 名以後 🔰，收割區 ♣
-  const rowsOf = (list, zone) => list.map((r, i) => raceStockRowHtml(r, i, { blade: true, zone: zone === '♣' ? '♣' : bladeRankMark(r.groupRank, m.total), dates: m.dates, conditions: true, m })).join('');
+  const tagged = (r) => Object.assign({}, r, { trackTag: tl ? bladeBackTag(tl.get(r.code)) : '' });
+  const rowsOf = (list, zone) => list.map((r, i) => raceStockRowHtml(tagged(r), i, { blade: true, zone: zone === '♣' ? '♣' : bladeRankMark(r.groupRank, m.total), dates: m.dates, conditions: true, m })).join('');
+  const gone = tl ? Array.from(tl.values()).filter((x) => !x.inNow).sort((a, b) => (a.first < b.first ? -1 : a.first > b.first ? 1 : 0)) : [];
+  const goneNote = tl ? '「跑」＝掉出刀劍空的時間（轉強，要跑，紅色刪除線留著看）、「回」＝掉出去又回來的時間；照盤中每 5 分鐘的紀錄。' : '';
   const total = upper.length + middle.length + bladeLower.length + harvest.length;
-  if (!total) return '<div class="race-note">目前沒有符合條件的股票</div>';
+  if (!total && !gone.length) return '<div class="race-note">目前沒有符合條件的股票</div>';
   // 2026-10-18 使用者：今日即時空上面這塊（oldestFirst）不分段，四段合在一起照出現時間排——早的在上面、最晚出現的在最下面
   // （貼著兩條黑線，接著下面依時間排的訊號）；每列前面照樣標 🔺🔽🔰♣ 看得出是哪一段。刀劍空(32) 分頁照舊分段、新的在上面。
   if (o.oldestFirst){
     const seg = [[upper, '🔺'], [middle, '🔽'], [bladeLower, '🔰'], [harvest, '♣']];
     const all = [];
     seg.forEach(([list, zone], si) => list.forEach((r, j) => all.push({ r, zone, si, j })));
+    gone.forEach((x, j) => all.push({ gone: x, r: { seenTs: bladeSlotTs(lastData.quoteDate, x.first) }, si: 9, j }));   // 跑掉的照進榜時間插在中間（跟老師廣播一樣）
     all.sort((a, b) => {
       const ta = a.r.seenTs ? Math.floor(a.r.seenTs / 60000) : Infinity, tb = b.r.seenTs ? Math.floor(b.r.seenTs / 60000) : Infinity;
       return (ta === tb ? 0 : (ta < tb ? -1 : 1)) || (a.si - b.si) || (a.j - b.j);
     });
-    return '<div class="race-note">' + seenNote + '前面的 🔺＝多方打少、🔽＝中間段、🔰＝強空積極、♣＝收割區域。</div>' + raceColLabelsHtml({ blade: true }) +
-      all.map((x, i) => raceStockRowHtml(x.r, i, { blade: true, zone: x.zone === '♣' ? '♣' : bladeRankMark(x.r.groupRank, m.total), dates: m.dates, conditions: true, m })).join('');
+    return '<div class="race-note">' + seenNote + '前面的 🔺＝多方打少、🔽＝中間段、🔰＝強空積極、♣＝收割區域。' + goneNote + '</div>' + raceColLabelsHtml({ blade: true }) +
+      all.map((x, i) => x.gone ? bladeGoneRowHtml(x.gone) : raceStockRowHtml(tagged(x.r), i, { blade: true, zone: x.zone === '♣' ? '♣' : bladeRankMark(x.r.groupRank, m.total), dates: m.dates, conditions: true, m })).join('');
   }
-  return '<div class="race-note">' + seenNote + '</div>' + raceColLabelsHtml({ blade: true }) +
+  return '<div class="race-note">' + seenNote + goneNote + '</div>' + raceColLabelsHtml({ blade: true }) +
     rowsOf(upper, '🔺') + '<div class="race-sep">----↑(多方打少)↑----</div>' + rowsOf(middle, '🔽') +
     '<div class="race-sep">----↓(強空積極)↓----</div>' + rowsOf(bladeLower, '🔰') +
-    '<div class="race-sep">----↓(收割區域)↓----</div>' + (harvest.length ? rowsOf(harvest, '♣') : '<div class="race-note">收割區目前沒有</div>');
+    '<div class="race-sep">----↓(收割區域)↓----</div>' + (harvest.length ? rowsOf(harvest, '♣') : '<div class="race-note">收割區目前沒有</div>') +
+    (gone.length ? '<div class="race-sep blade-gone-sep">----↓(已跑：掉出刀劍空 ' + gone.length + ' 檔)↓----</div>' + gone.map(bladeGoneRowHtml).join('') : '');
 }
 // 盤中333 大戶力篩選（2026-09-24 使用者）：null=不篩選；'up'=只留大戶力≥10%的個股；'down'=只留
 // 大戶力≤-10%的個股；只套用在馬火多/賽馬多/河流多/刀劍空這幾個「個股」名單（30/33/34/32），
@@ -19062,10 +19131,15 @@ function botAnswer(raw){
       return wrap('🐎🚀馬火多(30)', rows.map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>'))).join('') || botLine('目前沒有', 'bot-dim'));
     }
     // 名次後面的記號照老師：族群前 10 名 🔺、到第 25 名 🔽、後面 🔰，收割區域 ♣
-    const sec = (l, harvest) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + (harvest ? '♣' : bladeRankMark(r.groupRank, m.total)) + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '')))).join('');
+    const tl = bladeTimeline(m);
+    const sec = (l, harvest) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + (harvest ? '♣' : bladeRankMark(r.groupRank, m.total)) + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '') + (tl ? bladeBackTag(tl.get(r.code)) : '')))).join('');
+    // 2026-10-18 使用者：掉出名單的留著，紅色刪除線＋「跑 HH:MM」（照老師刀功課廣播）
+    const gone = tl ? Array.from(tl.values()).filter((x) => !x.inNow).sort((a, b) => (a.out < b.out ? -1 : a.out > b.out ? 1 : 0)) : [];
+    const goneLines = gone.length ? botLine('----↓(已跑)↓----', 'bot-sep') + gone.map((x) => { const q = getStockQuote(x.code); const v = q && Number.isFinite(q.changePercent) ? q.changePercent : x.row.pct;
+      return botLine('<span class="bot-gone">' + (x.row.gr || '') + ' ' + botStk(x.code, (q && q.name) || x.row.name || '', Number.isFinite(v) ? ' ' + botPct(v) : '') + '</span> <span class="blade-run">跑 ' + x.out + '</span> <small class="bot-dim">' + x.first + ' 進</small>'); }).join('') : '';
     // 2026-10-18 使用者：強空積極（連同收割區域）搬到最上面，跟 199、193 一樣；後面接多方打少、中間段，每段上面寫段名
     return wrap('🔪⚔️新刀劍空(32)', botLine('----↓(強空積極)↓----', 'bot-sep bot-sep-bear') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest, true) +
-      botLine('----↓(多方打少)↓----', 'bot-sep') + sec(m.bladeUpper) + botLine('----↓(中間段)↓----', 'bot-sep') + sec(m.bladeMiddle));
+      botLine('----↓(多方打少)↓----', 'bot-sep') + sec(m.bladeUpper) + botLine('----↓(中間段)↓----', 'bot-sep') + sec(m.bladeMiddle) + goneLines);
   }
   // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
   // 最後附櫃買多空（漲跌幅）；34 再附漲 7% 以上沒列的檔數；處置股名字前面 *
