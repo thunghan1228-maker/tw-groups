@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 13:39:37";
+const BUILD_STAMP = "2026-10-18 13:46:07";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -576,6 +576,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .k193-avg{font-size:12px;margin-left:8px;}
   .k193-s{margin:0 0 4px 14px;font-size:14px;line-height:1.7;}
   .k193-stk{cursor:pointer;border-bottom:1px dotted currentColor;white-space:nowrap;}
+  .k193-stk.up,.k193-stk.down{font-weight:700;} .k193-stk.up{color:var(--up);} .k193-stk.down{color:var(--down);}
+  .k193-gname{color:#fff;border-radius:6px;padding:1px 7px;background:#6b7280;} .k193-gname.up{background:#dc2626;} .k193-gname.down{background:#15803d;}
   .alert-stk:hover{background:rgba(255,255,255,.14);border-radius:4px;}
   .pk-alert.behind-chart,.launch-alert.behind-chart{z-index:98;}
   .obs-stk:hover{background:rgba(255,255,255,.12);}
@@ -7049,10 +7051,11 @@ function kill193Html(){
   const k = kill193Model();
   if (!k) return raceNotReadyHtml();
   const stamp = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', hour12: false });
-  const grp = (r) => '<div class="k193-g"><b>' + r.name + '</b>-(' + r.rank + ')<span class="k193-drop">🔽' + r.drop + r.swordMark + '</span>' +
+  // 2026-10-18 使用者：族群名稱漲的紅底白字、跌的綠底白字；⚠️ 個股連代號、名稱、漲跌幅一起漲紅字跌綠字（原本漲跌幅一律綠字，千興 +0.37% 也是綠的）
+  const grp = (r) => '<div class="k193-g"><b class="k193-gname ' + dirClass(r.avg) + '">' + r.name + '</b>-(' + r.rank + ')<span class="k193-drop">🔽' + r.drop + r.swordMark + '</span>' +
     '<span class="muted k193-avg">' + fmt(r.avg) + '%・昨天第 ' + r.prev + ' 名</span></div>' +
-    (r.members.length ? '<div class="k193-s">⚠️' + r.members.map((s) => '<span class="k193-stk" data-k193-code="' + s.code + '" data-k193-name="' + s.name + '">' + s.code + s.name +
-      ' <span class="down">' + fmt(s.pct) + '%</span></span>').join(' / ') + '</div>' : '');
+    (r.members.length ? '<div class="k193-s">⚠️' + r.members.map((s) => '<span class="k193-stk ' + dirClass(s.pct) + '" data-k193-code="' + s.code + '" data-k193-name="' + s.name + '">' + s.code + s.name +
+      ' ' + fmt(s.pct) + '%</span>').join(' / ') + '</div>' : '');
   return '<div class="race-block"><div class="race-head">空族群必殺(193) ' + stamp + ' <button type="button" class="chart-tab chips-btn" data-k193-copy="1">📋 複製</button></div>' +
     '<div class="race-sub">只看固定的 ' + KILL193_ONLY_GROUPS.size + ' 個族群（' + Array.from(KILL193_ONLY_GROUPS).join('、') + '）。' +
       '族群名次＝今天平均漲跌幅在全部 ' + k.total + ' 個族群裡的排名（1 最強）；🔽＝比昨天收盤的名次掉了幾名，掉 ' + KILL193_MIN_DROP + ' 名以上才列。' +
@@ -13139,7 +13142,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 13:39:37';
+const BUILD_STAMP = '2026-10-18 13:46:07';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

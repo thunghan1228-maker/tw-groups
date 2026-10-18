@@ -498,6 +498,8 @@
   .k193-avg{font-size:12px;margin-left:8px;}
   .k193-s{margin:0 0 4px 14px;font-size:14px;line-height:1.7;}
   .k193-stk{cursor:pointer;border-bottom:1px dotted currentColor;white-space:nowrap;}
+  .k193-stk.up,.k193-stk.down{font-weight:700;} .k193-stk.up{color:var(--up);} .k193-stk.down{color:var(--down);}
+  .k193-gname{color:#fff;border-radius:6px;padding:1px 7px;background:#6b7280;} .k193-gname.up{background:#dc2626;} .k193-gname.down{background:#15803d;}
   .alert-stk:hover{background:rgba(255,255,255,.14);border-radius:4px;}
   .pk-alert.behind-chart,.launch-alert.behind-chart{z-index:98;}
   .obs-stk:hover{background:rgba(255,255,255,.12);}
@@ -6969,10 +6971,11 @@ function kill193Html(){
   const k = kill193Model();
   if (!k) return raceNotReadyHtml();
   const stamp = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', hour12: false });
-  const grp = (r) => '<div class="k193-g"><b>' + r.name + '</b>-(' + r.rank + ')<span class="k193-drop">🔽' + r.drop + r.swordMark + '</span>' +
+  // 2026-10-18 使用者：族群名稱漲的紅底白字、跌的綠底白字；⚠️ 個股連代號、名稱、漲跌幅一起漲紅字跌綠字（原本漲跌幅一律綠字，千興 +0.37% 也是綠的）
+  const grp = (r) => '<div class="k193-g"><b class="k193-gname ' + dirClass(r.avg) + '">' + r.name + '</b>-(' + r.rank + ')<span class="k193-drop">🔽' + r.drop + r.swordMark + '</span>' +
     '<span class="muted k193-avg">' + fmt(r.avg) + '%・昨天第 ' + r.prev + ' 名</span></div>' +
-    (r.members.length ? '<div class="k193-s">⚠️' + r.members.map((s) => '<span class="k193-stk" data-k193-code="' + s.code + '" data-k193-name="' + s.name + '">' + s.code + s.name +
-      ' <span class="down">' + fmt(s.pct) + '%</span></span>').join(' / ') + '</div>' : '');
+    (r.members.length ? '<div class="k193-s">⚠️' + r.members.map((s) => '<span class="k193-stk ' + dirClass(s.pct) + '" data-k193-code="' + s.code + '" data-k193-name="' + s.name + '">' + s.code + s.name +
+      ' ' + fmt(s.pct) + '%</span>').join(' / ') + '</div>' : '');
   return '<div class="race-block"><div class="race-head">空族群必殺(193) ' + stamp + ' <button type="button" class="chart-tab chips-btn" data-k193-copy="1">📋 複製</button></div>' +
     '<div class="race-sub">只看固定的 ' + KILL193_ONLY_GROUPS.size + ' 個族群（' + Array.from(KILL193_ONLY_GROUPS).join('、') + '）。' +
       '族群名次＝今天平均漲跌幅在全部 ' + k.total + ' 個族群裡的排名（1 最強）；🔽＝比昨天收盤的名次掉了幾名，掉 ' + KILL193_MIN_DROP + ' 名以上才列。' +
