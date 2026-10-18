@@ -17778,8 +17778,9 @@ function botNorm(raw){
 function botAnswer(raw){
   const q = botNorm(raw);
   if (!q) return null;
-  // 2026-10-18 使用者：空方的（負號代碼 -12、-22…）跟隔日沖 811、813 的標題改綠底白字
-  const bear = /^-/.test(q) || q === '811' || q === '813';
+  // 2026-10-18 使用者：空方的（負號代碼 -12、-22…）跟隔日沖 811、813 的標題改綠底白字；
+  // 同一天又加：空族群排名(199)、空族群必殺(193)、新刀劍空(32)、刀劍空(31)，連同終點戰法空(283／284／股號+3)
+  const bear = /^-/.test(q) || ['811', '813', '193', '199', '283', '284', '31', '32'].includes(q) || /^.+\+3$/.test(q);
   const title = (t, sub) => '<div class="bot-title' + (bear ? ' bot-title-bear' : '') + '">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
   const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
   const wrap = (t, body, sub) => '<div class="bot-msg"><div class="bot-q">' + wlEsc(raw) + '</div>' + title(t, sub || stamp) + body + '</div>';
