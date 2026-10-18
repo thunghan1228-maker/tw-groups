@@ -748,6 +748,23 @@ export default {
         return Response.json({ status: "error", error: String(err), items: {} }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/homework-snapshot") {
+      // 今日功課盤中紀錄（2026-10-18）：網站每 5 分鐘把刀劍空名單送後端存一份，回放、刀功課廣播用
+      if (request.method !== "POST") return Response.json({ status: "error", error: "要用 POST" }, { status: 405 });
+      try {
+        return await proxyHanstockPost("/api/hub/homework-snapshot", request);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/homework-snapshots") {
+      // 今日功課某一天的全部 5 分鐘紀錄，30 秒快取
+      try {
+        return await proxyHanstockBars("/api/hub/homework-snapshots" + url.search, 30);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), slots: {} }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/group-rank-checkpoints") {
       // 67 族今天每半小時的族群名次（2026-10-16，老師族群明細最下面「今天23-3-11-24」那排；馬火多(30) 用），60 秒快取
       try {
