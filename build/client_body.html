@@ -9661,8 +9661,8 @@ function rdListsHtml(d){
   const pick = lists.find((w) => w.date === radarState.listWeek) || lists[0];
   const chips = lists.map((w, i) => '<button class="rd-week' + (w.date === pick.date ? ' active' : '') + '" data-rd-week="' + w.date + '">' + (i === 0 && w.date === d.latest ? '本週 ' : '') + rdMdShort(w.date) + '</button>').join('');
   return '<section><div class="rd-sec-title">本週籌碼暴增榜<small>買超・賣超 排序・⭐＝連續兩週上榜</small></div><div class="rd-weeks">' + chips + '</div><div class="rd-grid2">' +
-    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-up">▲ 買超榜（' + pick.buy.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.buy, 'buy') + rdOutsideHtml(pick.outside && pick.outside.buy, 'buy') + '</div>' +
-    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-down">▼ 賣超榜（' + pick.sell.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.sell, 'sell') + rdOutsideHtml(pick.outside && pick.outside.sell, 'sell') + '</div>' +
+    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-up">▲ 買超榜（' + pick.buy.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.buy, 'buy') + rdExcludedHtml(pick.excluded, 'buy') + rdOutsideHtml(pick.outside && pick.outside.buy, 'buy') + '</div>' +
+    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-down">▼ 賣超榜（' + pick.sell.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.sell, 'sell') + rdExcludedHtml(pick.excluded, 'sell') + rdOutsideHtml(pick.outside && pick.outside.sell, 'sell') + '</div>' +
     '</div></section>';
 }
 // 累積榜：後端給「全部」（06/18 起，allWeeks 週；不足 16 週時給 16 週）每週前十名的格子（舊到新），這裡照選的週數加總；n＝0 是全部
@@ -9899,6 +9899,13 @@ function rwHtml(){
     '<b>整族一起動</b>＝同族 2 檔以上同時上買超榜（兄弟姊妹多，佐證多一層）；<b>單獨上榜</b>＝族群裡只有它一檔在榜上。這只是強度分級，不是選股名單。</div>';
   return '<div class="rd-wrap">' + head(sub) + '<div class="rd-weeks">' + weeks + '</div><div class="rw-nav">' + nav + '</div>' + def +
     rwSummaryHtml(d) + rwReconHtml(d) + rwRankingHtml(d) + rwTogetherHtml(d) + rwSingleHtml(d) + rwSellHtml(d) + rwReadHtml() + '</div>';
+}
+// 那週集保只剩 1 名股東的（減資／換股期間）：後端從榜上拿掉、名次照算，這裡註明（跟老師 10/16 信昌電一樣）
+function rdExcludedHtml(rows, side){
+  const list = (rows || []).filter((r) => r.side === side);
+  if (!list.length) return '';
+  return '<div class="rd-note">⚠️ 已排除 ' + list.map((r) => r.code + ' ' + rdEsc(r.name) + '（' + rdPct(r.chip1, 1) + '）').join('、') +
+    '：集保僅 1 名股東（減資／換股／停止過戶期間，股票集中在換發帳戶），籌碼增減失真。</div>';
 }
 function rdOutsideHtml(rows, side){
   if (!rows || !rows.length) return '';

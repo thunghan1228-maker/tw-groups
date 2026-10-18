@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 22:20:54";
+const BUILD_STAMP = "2026-10-18 22:49:50";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -9741,8 +9741,8 @@ function rdListsHtml(d){
   const pick = lists.find((w) => w.date === radarState.listWeek) || lists[0];
   const chips = lists.map((w, i) => '<button class="rd-week' + (w.date === pick.date ? ' active' : '') + '" data-rd-week="' + w.date + '">' + (i === 0 && w.date === d.latest ? '本週 ' : '') + rdMdShort(w.date) + '</button>').join('');
   return '<section><div class="rd-sec-title">本週籌碼暴增榜<small>買超・賣超 排序・⭐＝連續兩週上榜</small></div><div class="rd-weeks">' + chips + '</div><div class="rd-grid2">' +
-    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-up">▲ 買超榜（' + pick.buy.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.buy, 'buy') + rdOutsideHtml(pick.outside && pick.outside.buy, 'buy') + '</div>' +
-    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-down">▼ 賣超榜（' + pick.sell.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.sell, 'sell') + rdOutsideHtml(pick.outside && pick.outside.sell, 'sell') + '</div>' +
+    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-up">▲ 買超榜（' + pick.buy.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.buy, 'buy') + rdExcludedHtml(pick.excluded, 'buy') + rdOutsideHtml(pick.outside && pick.outside.buy, 'buy') + '</div>' +
+    '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title rd-down">▼ 賣超榜（' + pick.sell.length + ' 檔）</span><span class="rd-date-pill">結算日 ' + rdMdShort(pick.date) + '</span></div>' + rdListRows(pick.sell, 'sell') + rdExcludedHtml(pick.excluded, 'sell') + rdOutsideHtml(pick.outside && pick.outside.sell, 'sell') + '</div>' +
     '</div></section>';
 }
 // 累積榜：後端給「全部」（06/18 起，allWeeks 週；不足 16 週時給 16 週）每週前十名的格子（舊到新），這裡照選的週數加總；n＝0 是全部
@@ -9979,6 +9979,13 @@ function rwHtml(){
     '<b>整族一起動</b>＝同族 2 檔以上同時上買超榜（兄弟姊妹多，佐證多一層）；<b>單獨上榜</b>＝族群裡只有它一檔在榜上。這只是強度分級，不是選股名單。</div>';
   return '<div class="rd-wrap">' + head(sub) + '<div class="rd-weeks">' + weeks + '</div><div class="rw-nav">' + nav + '</div>' + def +
     rwSummaryHtml(d) + rwReconHtml(d) + rwRankingHtml(d) + rwTogetherHtml(d) + rwSingleHtml(d) + rwSellHtml(d) + rwReadHtml() + '</div>';
+}
+// 那週集保只剩 1 名股東的（減資／換股期間）：後端從榜上拿掉、名次照算，這裡註明（跟老師 10/16 信昌電一樣）
+function rdExcludedHtml(rows, side){
+  const list = (rows || []).filter((r) => r.side === side);
+  if (!list.length) return '';
+  return '<div class="rd-note">⚠️ 已排除 ' + list.map((r) => r.code + ' ' + rdEsc(r.name) + '（' + rdPct(r.chip1, 1) + '）').join('、') +
+    '：集保僅 1 名股東（減資／換股／停止過戶期間，股票集中在換發帳戶），籌碼增減失真。</div>';
 }
 function rdOutsideHtml(rows, side){
   if (!rows || !rows.length) return '';
@@ -13481,7 +13488,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 22:20:54';
+const BUILD_STAMP = '2026-10-18 22:49:50';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
