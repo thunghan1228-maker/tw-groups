@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 21:51:44";
+const BUILD_STAMP = "2026-10-18 21:58:41";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1568,6 +1568,21 @@ const HTML_PAGE = `<!DOCTYPE html>
   .mw-pill.gold{border-color:#e0b33a;background:#fef9e7;color:#7c5a00;} .mw-pill.green{background:#dcfce7;color:#166534;} .mw-pill.yellow{background:#fef3c7;color:#92400e;}
   .mw-pill.gray{background:#eceae6;color:#57534e;}
   .mw-sig{text-align:left!important;}
+  /* 2026-10-18 使用者：每日功課整頁的字加粗、顏色加深（太淺看不清楚）；計數列與段位鈕：刀劍空、12空、強空、收割區綠字，多方紅字，中間黑字，
+     出獄股、即將入獄維持原色 */
+  #hwInner{--text:#1d1410; --muted:#4a3f37; font-weight:600;}
+  #hwInner b,#hwInner strong,#hwInner th{font-weight:900;}
+  #hwInner .td-count{font-weight:800;}
+  #hwInner .td-count.blade,#hwInner .td-count.blade b,#hwInner .td-count.k12,#hwInner .td-count.k12 b,
+  #hwInner .td-count.bear,#hwInner .td-count.bear b,#hwInner .td-count.harv,#hwInner .td-count.harv b{color:#15803d;}
+  #hwInner .td-count.bull,#hwInner .td-count.bull b{color:#c0392b;}
+  #hwInner .td-count.mid,#hwInner .td-count.mid b{color:var(--text);}
+  #hwInner .td-zbtn{font-weight:800;}
+  #hwInner .td-zbtn.bull{color:#c0392b;} #hwInner .td-zbtn.mid{color:var(--text);} #hwInner .td-zbtn.bear,#hwInner .td-zbtn.harv{color:#15803d;}
+  #hwInner .td-zbtn:not(.on){opacity:.82;}
+  #hwInner .td-rbtn.off{opacity:.6;}
+  #hwInner .td-param,#hwInner .td-gchip,#hwInner .td-rbtn,#hwInner .td-view{font-weight:800;}
+  #hwInner .td-tags i,#hwInner .lg-src,#hwInner .mw-pill,#hwInner .td-chip{font-weight:800;}
   /* 研究室：國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar） */
   .mc-meta{font-size:12px;color:var(--muted);margin:2px 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
   .mc-meta b{color:var(--text);}
@@ -13390,7 +13405,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 21:51:44';
+const BUILD_STAMP = '2026-10-18 21:58:41';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15801,7 +15816,7 @@ function hwTodayHtml(){
   const summary = '<div class="td-sum"><div class="td-sum1">今天要盯的' + (mainRows.length ? '有 <b>' + mainRows.length + '</b> 檔，分佈在 <b>' + hitGroups.size + '</b> 族。' : '目前沒有（開盤後刀劍空才會出現，盤中隨時變）。') + '</div>' +
     (zoneCount ? '<div class="td-sum2">' + zoneCount + '</div>' : '') + '</div>';
   const counts = '<div class="td-counts">' + [
-    ['刀劍空', snap.rows.length + ' 檔'], ['🔵 12空', snap.k12.length + ' 檔', 'k12'],
+    ['刀劍空', snap.rows.length + ' 檔', 'blade'], ['🔵 12空', snap.k12.length + ' 檔', 'k12'],
     ...TD_ZONES.map((z) => [z.name, String(zoneRows[z.key].length), z.cls]),
     ['出獄股', ctx.released.size + ' 檔／' + relBatches.size + ' 批'], ['即將入獄', (ctx.jd ? sus.length : '…') + ' 檔'],
   ].map(([a, b, c]) => '<span class="td-count' + (c ? ' ' + c : '') + '">' + a + ' <b>' + b + '</b></span>').join('') + '</div>';
