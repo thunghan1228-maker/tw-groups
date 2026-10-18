@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 13:16:49";
+const BUILD_STAMP = "2026-10-18 13:26:59";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -974,16 +974,14 @@ const HTML_PAGE = `<!DOCTYPE html>
   #sgtBody .signal-row:not(.st-row) > .sig-label{margin-left:50px;}
   #sgtBody .signal-row:not(.st-row) > .sig-note{order:4;}
   #sgtBody .signal-row:not(.st-row) > .srow-right{margin-left:auto;}
-  .sgt-chip.c-purple{color:#d8b4fe;} .sgt-chip.c-red{color:#fca5a5;} .sgt-chip.c-green{color:#86efac;}
-  .sgt-chip.on{color:#fff;}
+    .sgt-chip.on{color:#fff;}
   .sgt-chip.on2{outline:1px dashed currentColor;outline-offset:-3px;}   /* 開在另一排的分頁 */
   /* 上下兩排（2026-10-18 使用者）：現在點分頁名稱會開在哪一排＝紫色外框那排 */
   .sgt-pane{border:1px solid transparent;border-radius:12px;padding:0 4px;margin-bottom:2px;}
   .sgt-pane.on{border-color:#7c3aed88;}
   .sgt-pane-head{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);padding:3px 4px 4px;}
   .sgt-pane-head b{color:var(--text);font-size:13px;}
-  .sgt-pane.on .sgt-pane-head b{color:#c4b5fd;}
-  .sgt-pane-clear{margin-left:auto;font:inherit;font-size:12px;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:1px 10px;cursor:pointer;}
+    .sgt-pane-clear{margin-left:auto;font:inherit;font-size:12px;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:1px 10px;cursor:pointer;}
   #sgtBody .bot-cols{margin-bottom:2px;}
   #sgtBody .bot-cols.sgt-empty{border:2px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;}
   .sgt-empty-hint{color:var(--muted);font-size:14px;padding:10px;text-align:center;}
@@ -1003,6 +1001,24 @@ const HTML_PAGE = `<!DOCTYPE html>
   #sgtBody .sgt-cell.sgt-drop-l > .bot-col{box-shadow:inset 5px 0 0 #a78bfa;}
   #sgtBody .sgt-cell.sgt-drop-r > .bot-col{box-shadow:inset -5px 0 0 #a78bfa;}
   #sgtBody .bot-cols.sgt-drop-box{border-color:#a78bfa;}
+  /* 2026-10-18 使用者：盤中訊號分頁改成跟原本盤中訊號一樣的白底——同一組淺色變數（格子裡的表格、列、標籤都跟著換色），
+     標題列照舊深灰白字；分頁名稱放在灰底那一條、字照盤中訊號分頁按鈕的紫／紅／綠，今日即時多紅底、今日即時空綠底 */
+  #sgtInner{--bg:#eef0f2; --panel:#e2e4e8; --panel-2:#d7d9de; --line:#c3c6cc; --text:#1a1c1f; --muted:#54585f; --accent:#8a6d3f; --up:#c0392b; --down:#15803d;
+    color:var(--text);background:#dfe2e6;}
+  #sgtBody .bot-col > .bot-msg{background:var(--bg);}
+  #sgtBody .bot-chips{background:#c4c8cf;padding:8px;border-radius:10px;}
+  #sgtBody .sgt-chip{background:var(--panel);border-color:var(--line);color:var(--text);}
+  #sgtBody .sgt-chip.c-purple{color:#d946ef;} #sgtBody .sgt-chip.c-red{color:#dc2626;} #sgtBody .sgt-chip.c-green{color:#15803d;}
+  #sgtBody .sgt-chip[data-sgt-run="now"]{background:#dc2626;border-color:#dc2626;color:#fff;}
+  #sgtBody .sgt-chip[data-sgt-run="nowBear"]{background:#15803d;border-color:#15803d;color:#fff;}
+  #sgtBody .sgt-chip.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
+  #sgtBody .sgt-chip.on[data-sgt-run="now"],#sgtBody .sgt-chip.on[data-sgt-run="nowBear"]{border-color:#fff;box-shadow:0 0 0 2px #7c3aed;}
+  #sgtBody .bot-chip-clear{background:var(--panel);color:var(--muted);}
+  .sgt-pane.on .sgt-pane-head b{color:#7c3aed;}
+  #sgtBody .sgt-cell > .sgt-col-reset{color:#7c3aed;border-color:#7c3aed88;background:var(--panel);}
+  #sgtBody .bot-cols-grip::before{background:#a3a7ae;}
+  #sgtBody .bot-cols-grip::after{background:#c4c8cf;color:#33333a;}
+  #sgtBody .bot-cols-grip:hover::after,#sgtBody .bot-cols-grip:active::after{background:#7c3aed;color:#fff;}
   .sgt-hist-bar{margin:2px 0 8px;font-size:12.5px;color:var(--muted);} .sgt-hist-bar input{background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:2px 6px;}
   body.sigtabs-window-mode{padding-bottom:0;}
   body.sigtabs-window-mode > *:not(#sgtModal):not(.chart-modal):not(.group-modal):not(#chartWindows):not(#chartTray):not(#toastBox){display:none!important;}
@@ -2660,7 +2676,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .signal-row.sig-with-hold .sig-hold,.signal-row.sig-hold-r .sig-hold{flex:0 0 5.6em;text-align:center;white-space:nowrap;}
   .signal-row.sig-hold-r .sig-hold{margin-left:auto;} .signal-row.sig-hold-r .srow-right{margin-left:10px;}
   .signal-row .sig-hold .hold-pill{display:inline-block;font-size:15px;font-weight:800;color:#fff;border-radius:6px;padding:2px 8px;min-width:4.4em;text-align:center;}
-  .signal-row .sig-hold .hold-pill.up{background:#d64545;} .signal-row .sig-hold .hold-pill.down{background:#1f8a4c;}
+  .signal-row .sig-hold .hold-pill.up{background:#d64545;} .signal-row .sig-hold .hold-pill.down{background:#1f8a4c;} .signal-row .sig-hold .hold-pill.flat{background:#9ca3af;}
   .signal-row .sig-ma .race-ma-val{font-weight:800;color:var(--muted);}
   .signal-row .sig-ma .race-ma-val.hi{color:var(--up);}
   .signal-row .sig-ma .race-ma-none{color:var(--muted);}
@@ -3273,7 +3289,7 @@ const HTML_PAGE = `<!DOCTYPE html>
         <li><b>發動</b>、<b>醞釀</b>（2026-10-12 拆成兩個分頁，發動在左、醞釀在右，今天／昨天／前天切換兩頁共用；日期列後面的「盤中大戶力≥10%」只看盤中大戶力 ≥ +10% 的，昨天／前天照那天收盤時的大戶力，兩頁各自記）：選股法：1＝醞釀（整理形態）、2＝發動（突破）。今天發動過的股票也會列進今日即時多（時間＝第一次發動）：現在還站在箱頂上寫「🚀 發動」、發動過又跌回箱頂下寫「↩ 曾發動」（2026-10-13 分開標）；開盤前跟其他分頁一樣沿用最近交易日到 08:45，用那天收盤分。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看，發動分兩段：<b>發動</b>＝那天收盤還站在箱頂上、<b>曾發動</b>＝盤中發動過但收盤跌回箱頂下（箱頂旁邊標那天收盤）；今天盤中曾發動、現在回落的股票也會列在「曾發動」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。賽馬多(33) 只看 199 那 23 個族群裡排名前 20 的族群，每族取漲幅前 1/3（四捨五入：20 檔取 7、8 檔取 3）。河流多(34) 只看 199 的 23 族＋188 的 13 族裡排名前一半的族群，每族取漲幅前 1/3（進位）、今天沒跌、不比櫃買弱，漲 7% 以上的另外算檔數。<b>排序</b>：每列最前面「出現」＝這檔第一次進那個名單的時間（這台電腦開著頁面時記的，每個名單各記各的），新出現的在上面、早的往下（只有「續抱勿追高」反過來：早出現的在上面、新出現的往下排）；「名次」欄還是照盤中大戶力排名（👑＝大戶力最強）。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
         <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
-        <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。</li>
+        <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。「訊號」右邊是那檔的盤中大戶力（大單淨額÷累計成交額）。</li>
         <li><b>創高黑龍</b>：09:00 開盤～13:30 收盤（2026-10-05 起，以前 11:00 後才算；第一根 5 分K 也算），5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。每列後面標 123 黑龍：收黑就是這一波第幾次進場（①②③）、區1（紅，可積極加碼）或區2（黃，等突破再加碼）；問診日線圖、K線圖日線也會在進場的那根K棒上畫同樣的圓圈。</li>
         <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。只看 199 的 23 族＋188 的 13 族，處置股不算，每族只看族內「空方段」（照漲跌幅排的後段，最多 5 檔，例如 4 檔的族群看後 2 檔、7 檔看後 4 檔、13 檔以上看後 5 檔），今天漲跌不限、成交量 10 張以上；而且要嘛是昨天漲 3% 以上（🔪 刀），要嘛是前天漲 3% 以上、現價已跌破前天收盤（⚔️ 劍）。族裡最弱 3 檔標 🔪／⚔️，空方段裡其他的標 🔰。照老師的格式分三段：多方打少（族群前 10 名）、中間段（11～25 名）、強空積極（族群第 26 名以後，最多 15 檔），再加收割區域（已跌 5% 以上，不追空，不分族群強弱，♣）；族群名次後面 🔺＝前 10 名、🔽＝11～25 名、🔰＝26 名以後。跟首頁的刀劍空是同一份名單：首頁照族群名次排，這個分頁照「出現」時間排（新的在上面）。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
         <li><b>空族群必殺(193)</b>：找「名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票。只看固定的 23 個族群（資訊、鋼鐵、被動元件、光學鏡頭、航運、D電腦、面板、光電、二極體、矽光子、小電腦、散熱、低軌衛星、小電組、化學二、IP、矽晶圓、記憶體、玻璃基板、PA、台塑四寶、PCB、探針卡）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名，有掉就列。空方線以下＝第 36 名以後（空方線畫在第 35 名後面）；空方線以上＝排名前半但名次往下掉的。⚠️＝族裡正在刀劍空(32) 名單上的股票，點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
@@ -5894,7 +5910,8 @@ function sigHolderMap(view){
 function sigHolderCellHtml(code, holder){
   const h = holder.get(code), v = h ? h.strengthPct : null;
   if (v === null || v === undefined) return '<span class="sig-hold"><span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span></span>';
-  return '<span class="sig-hold"><span class="hold-pill ' + (v > 0 ? 'up' : 'down') + '" title="盤中大戶力（大單淨額÷累計成交額）">' + (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%</span></span>';
+  const r1 = Math.round(Number(v) * 10) / 10;   // 四捨五入到 0.0% 的畫灰色（不是跌）
+  return '<span class="sig-hold"><span class="hold-pill ' + (r1 > 0 ? 'up' : r1 < 0 ? 'down' : 'flat') + '" title="盤中大戶力（大單淨額÷累計成交額）">' + (r1 > 0 ? '+' : '') + r1.toFixed(1) + '%</span></span>';
 }
 // 訊號列表的欄位標題（2026-10-08 使用者加均線分數欄時一起加，數字才知道是什麼）
 function signalColLabelsHtml(holdCls){
@@ -13105,7 +13122,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 13:16:49';
+const BUILD_STAMP = '2026-10-18 13:26:59';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -13573,7 +13590,8 @@ function signalTabContent(active){
         const tags = d123SignalTags(evs.map((e) => e.code), view);
         evs = evs.map((e) => (tags[e.code] ? Object.assign({}, e, { label: e.label + d123TagHtml(tags[e.code]) }) : e));
       }
-      inner = (view.isPast ? '' : klineBackfillNoteHtml()) + signalRowsHtml(evs, view, active === 'blackDragon' ? { holder: 'right' } : null);   // 2026-10-13 使用者：創高黑龍也加盤中大戶力（漲跌幅左邊）
+      // 2026-10-13 使用者：創高黑龍也加盤中大戶力（漲跌幅左邊）；2026-10-18 使用者：1+2多 也加，放「訊號」右邊（跟特大買賣單一樣）
+      inner = (view.isPast ? '' : klineBackfillNoteHtml()) + signalRowsHtml(evs, view, active === 'blackDragon' ? { holder: 'right' } : { holder: true });
     } else if (active === 'bigBuy' || active === 'bigSell'){
       const all = view.events.filter((e) => e.tabs.includes(active));
       const events = filterLargeOrderEvents(all);
