@@ -7201,8 +7201,10 @@ function home44ColHtml(){
   const row = (e) => { const v = pctOf(e); return '<div class="hr-row hr-stk" data-code="' + wlEsc(e.code) + '" data-name="' + wlEsc(e.name || '') + '" tabindex="0" role="button">' +
     '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(e.time || '--:--') + '</span><span class="hr-code">' + wlEsc(e.code) + '</span><span class="hr-name">' + wlEsc(e.name || '') + '</span>' +
     '<span class="hr-avg ' + (v === null ? 'flat' : dirClass(v)) + '">' + (v === null ? '' : fmt(v) + '%') + '</span></div>'; };
-  return '<div class="hr-col"><div class="hr-title">1+2 多・突破黑馬(44) <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
-    (rows.length ? rows.map(row).join('') : '<div class="hr-note">今天還沒有</div>') + '</div>';
+  // 2026-10-18 使用者：首頁只留最新的 20 筆（小幫手 44 照舊全部列）
+  const latest = rows.slice().sort((a, b) => String(b.time || '').localeCompare(String(a.time || ''))).slice(0, 20);
+  return '<div class="hr-col"><div class="hr-title">1+2 多・突破黑馬(44) <span class="hr-rk">' + (rows.length > 20 ? '最新 20／共 ' : '') + rows.length + ' 檔</span></div>' +
+    (latest.length ? latest.map(row).join('') : '<div class="hr-note">今天還沒有</div>') + '</div>';
 }
 function home12ColHtml(h){
   const byName = new Map(lastData.groups.map((g) => [g.name, g]));
