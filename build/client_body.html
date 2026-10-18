@@ -17938,22 +17938,28 @@ function botAnswer(raw){
       (all.length > skip + 30 ? botLine('還有 ' + (all.length - skip - 30) + ' 檔，輸入「' + (mm[1] ? '-2' + mm[1] : '-2') + '-' + (skip + 30) + '」看後面', 'bot-dim') : '') ||
       botLine('目前沒有個股跌超過 ' + th + '%', 'bot-dim'));
   }
+  // 2026-10-18 使用者：空方那段搬到每一格最上面（199、193：空方段整段；177：綠色（跌）的族群），順序不變，下面再接其他的
   if (q === '177'){
-    let body = '', sep = false;
-    h.rows.forEach((r) => { if (!sep && r.rank > h.half){ body += botLine('------水平------', 'bot-sep'); sep = true; } body += rankLine(r); });
+    const down = h.rows.filter((r) => r.avg < 0), rest = h.rows.filter((r) => !(r.avg < 0));
+    let body = down.length ? botLine('------↓(空方・跌)↓------', 'bot-sep') + down.map(rankLine).join('') + botLine('------------', 'bot-sep') : '', sep = false;
+    rest.forEach((r) => { if (!sep && r.rank > h.half){ body += botLine('------水平------', 'bot-sep'); sep = true; } body += rankLine(r); });
     return wrap('重點族群排名(177)', body);
   }
-  if (q === '188' || q === '199'){
-    const set = q === '188' ? RANK188_GROUPS : KILL193_GROUPS;
+  if (q === '188'){
     let body = '', sep = false;
-    h.rows.filter((r) => set.has(r.name)).forEach((r) => { if (!sep && r.rank > h.half){ body += botLine(q === '188' ? '------↑(多方)↑------' : '------↓(空方)↓------', 'bot-sep'); sep = true; } body += rankLine(r); });
-    return wrap(q === '188' ? '多族群排名(188)' : '空族群排名(199)', body);
+    h.rows.filter((r) => RANK188_GROUPS.has(r.name)).forEach((r) => { if (!sep && r.rank > h.half){ body += botLine('------↑(多方)↑------', 'bot-sep'); sep = true; } body += rankLine(r); });
+    return wrap('多族群排名(188)', body);
+  }
+  if (q === '199'){
+    const rows = h.rows.filter((r) => KILL193_GROUPS.has(r.name));
+    const bear = rows.filter((r) => r.rank > h.half), rest = rows.filter((r) => r.rank <= h.half);
+    return wrap('空族群排名(199)', (bear.length ? botLine('------↓(空方)↓------', 'bot-sep') + bear.map(rankLine).join('') + botLine('------------', 'bot-sep') : '') + rest.map(rankLine).join(''));
   }
   if (q === '193'){
     const k = kill193Model();
     if (!k) return wrap('空族群必殺(193)', botLine('讀取中…', 'bot-dim'));
     const line = (r) => rankLine({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg }) + (r.members.length ? botLine('⚠️' + r.members.map((x) => botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>')).join('　'), 'bot-sub') : '');
-    return wrap('空族群必殺(193)', k.upper.map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep') + k.lower.map(line).join(''));
+    return wrap('空族群必殺(193)', botLine('------↓(空方)↓------', 'bot-sep') + k.lower.map(line).join('') + botLine('------------', 'bot-sep') + k.upper.map(line).join(''));
   }
   if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\+3$/.test(q)){
     let list = zone283List(h);
