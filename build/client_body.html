@@ -209,7 +209,8 @@
   .hr-obs-foot .d123-tag{margin:0 2px;}
   .hr-obs-foot .om{font-size:13px;}
   @media (max-width: 1700px){ .home-rank4{grid-template-columns:repeat(4, minmax(0, 1fr));} }
-  @media (max-width: 900px){ .home-rank4{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-grid{grid-template-columns:repeat(3, minmax(0, 1fr));} }
+  /* 2026-10-18 使用者：手機、iPad 前六大族群改成兩欄直著排——左欄 1、2、3 往下，右欄 4、5、6 */
+  @media (max-width: 900px){ .home-rank4{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-grid{grid-template-columns:repeat(2, minmax(0, 1fr));grid-template-rows:repeat(3, auto);grid-auto-flow:column;} }
   /* 2026-10-15 使用者：手機版也要看到每列後面的漲跌幅——兩欄照舊，字和間距縮小，名稱太長就截掉，漲跌幅一定留著 */
   @media (max-width: 640px){
     .hr-row{padding:4px 5px;gap:3px;font-size:12px;}
@@ -219,7 +220,7 @@
     .hr-bear-pill{gap:3px;}
     .hr-title{font-size:14px;padding:7px 8px;}
   }
-  @media (max-width: 640px){ .top6-grid{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-name{font-size:14px;overflow:hidden;text-overflow:ellipsis;} .top6-chg{font-size:13px;} .top6-card{padding:7px 8px;} }   /* 手機兩欄放不下漲跌幅，點族群看 */
+  @media (max-width: 640px){ .top6-name{font-size:14px;overflow:hidden;text-overflow:ellipsis;} .top6-chg{font-size:13px;} .top6-card{padding:7px 8px;} }   /* 手機兩欄放不下漲跌幅，點族群看 */
   /* 右側：各族群前三強／前三弱個股（2026-10-15 起首頁不再用，樣式先留著）。兩欄、由上往下排：第1~3在左欄、第4~6在右欄。 */
   .top-groups-row{display:grid;grid-template-columns:repeat(2, 1fr);grid-template-rows:repeat(3, auto);grid-auto-flow:column;gap:8px;}
   .top-group-col{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}

@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 10:38:44";
+const BUILD_STAMP = "2026-10-18 11:09:02";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -287,7 +287,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-obs-foot .d123-tag{margin:0 2px;}
   .hr-obs-foot .om{font-size:13px;}
   @media (max-width: 1700px){ .home-rank4{grid-template-columns:repeat(4, minmax(0, 1fr));} }
-  @media (max-width: 900px){ .home-rank4{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-grid{grid-template-columns:repeat(3, minmax(0, 1fr));} }
+  /* 2026-10-18 使用者：手機、iPad 前六大族群改成兩欄直著排——左欄 1、2、3 往下，右欄 4、5、6 */
+  @media (max-width: 900px){ .home-rank4{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-grid{grid-template-columns:repeat(2, minmax(0, 1fr));grid-template-rows:repeat(3, auto);grid-auto-flow:column;} }
   /* 2026-10-15 使用者：手機版也要看到每列後面的漲跌幅——兩欄照舊，字和間距縮小，名稱太長就截掉，漲跌幅一定留著 */
   @media (max-width: 640px){
     .hr-row{padding:4px 5px;gap:3px;font-size:12px;}
@@ -297,7 +298,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     .hr-bear-pill{gap:3px;}
     .hr-title{font-size:14px;padding:7px 8px;}
   }
-  @media (max-width: 640px){ .top6-grid{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-name{font-size:14px;overflow:hidden;text-overflow:ellipsis;} .top6-chg{font-size:13px;} .top6-card{padding:7px 8px;} }   /* 手機兩欄放不下漲跌幅，點族群看 */
+  @media (max-width: 640px){ .top6-name{font-size:14px;overflow:hidden;text-overflow:ellipsis;} .top6-chg{font-size:13px;} .top6-card{padding:7px 8px;} }   /* 手機兩欄放不下漲跌幅，點族群看 */
   /* 右側：各族群前三強／前三弱個股（2026-10-15 起首頁不再用，樣式先留著）。兩欄、由上往下排：第1~3在左欄、第4~6在右欄。 */
   .top-groups-row{display:grid;grid-template-columns:repeat(2, 1fr);grid-template-rows:repeat(3, auto);grid-auto-flow:column;gap:8px;}
   .top-group-col{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
@@ -12935,7 +12936,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 10:38:44';
+const BUILD_STAMP = '2026-10-18 11:09:02';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
