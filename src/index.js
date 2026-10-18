@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 13:36:32";
+const BUILD_STAMP = "2026-10-18 13:39:37";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1011,8 +1011,12 @@ const HTML_PAGE = `<!DOCTYPE html>
   #sgtBody .sgt-chip.c-purple{color:#d946ef;} #sgtBody .sgt-chip.c-red{color:#dc2626;} #sgtBody .sgt-chip.c-green{color:#15803d;}
   #sgtBody .sgt-chip[data-sgt-run="now"]{background:#dc2626;border-color:#dc2626;color:#fff;}
   #sgtBody .sgt-chip[data-sgt-run="nowBear"]{background:#15803d;border-color:#15803d;color:#fff;}
-  #sgtBody .sgt-chip.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
-  #sgtBody .sgt-chip.on[data-sgt-run="now"],#sgtBody .sgt-chip.on[data-sgt-run="nowBear"]{border-color:#fff;box-shadow:0 0 0 2px #7c3aed;}
+  /* 點下去（開著）的分頁：灰底白字（2026-10-18 使用者：原本紫色，改灰色區隔開來；沒開的照原本顏色不動） */
+  #sgtBody .sgt-chip.on,#sgtBody .sgt-chip.on[data-sgt-run="now"],#sgtBody .sgt-chip.on[data-sgt-run="nowBear"]{background:#6b7280;border-color:#6b7280;color:#fff;box-shadow:none;}
+  /* 開在另一排的：淺一點的灰、虛線框 */
+  #sgtBody .sgt-chip.on2,#sgtBody .sgt-chip.on2[data-sgt-run="now"],#sgtBody .sgt-chip.on2[data-sgt-run="nowBear"]{background:#a3a8b0;border:1px dashed #4b5563;color:#fff;outline:none;box-shadow:none;}
+  #sgtBody .bot-q.sgt-q-red{background:#dc2626;} #sgtBody .bot-q.sgt-q-green{background:#15803d;}
+  #sgtBody .bot-q.sgt-q-purple{background:#c026d3;} #sgtBody .bot-q.sgt-q-gray{background:#4b5563;}
   #sgtBody .bot-chip-clear{background:var(--panel);color:var(--muted);}
   .sgt-pane.on .sgt-pane-head b{color:#7c3aed;}
   #sgtBody .sgt-cell > .sgt-col-reset{color:#7c3aed;border-color:#7c3aed88;background:var(--panel);}
@@ -13135,7 +13139,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 13:36:32';
+const BUILD_STAMP = '2026-10-18 13:39:37';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18925,7 +18929,10 @@ const sgtCellBtns = (key) => (sgtSizes()[key] ? '<button type="button" class="bo
   '<button type="button" class="bot-col-x" data-sgt-close="' + key + '" title="收掉這格">✕</button>';
 // 四邊＋右下角的把手（2026-10-18 使用者：每一格上下左右都能拉開、縮小）
 const SGT_RZ_HTML = ['l', 'r', 't', 'b', 'br'].map((d) => '<i class="sgt-rz sgt-rz-' + d + '" data-rz="' + d + '" title="拉著調整這格大小（點兩下回到原來大小）"></i>').join('');
-const sgtColInner = (c) => '<div class="bot-msg"><div class="bot-q sgt-drag" draggable="true" title="按住拖到別的位置（也可以拖到另一排）">' + wlEsc(sgtLabel(c.key)) + '</div>' + c.html + '</div>';
+// 格子左上角的分頁名稱照多空上色（2026-10-18 使用者）：盤中訊號裡紅字的多方分頁（加上今日即時多）紅底白字、綠字的空方分頁綠底白字，
+// 紫字的（發動、醞釀、盤中333…）紫紅底，其他灰底
+const sgtLabelCls = (k) => (k === 'now' || RED_TAB_KEYS.has(k) ? ' sgt-q-red' : GREEN_TAB_KEYS.has(k) ? ' sgt-q-green' : PURPLE_TAB_KEYS.has(k) ? ' sgt-q-purple' : ' sgt-q-gray');
+const sgtColInner = (c) => '<div class="bot-msg"><div class="bot-q sgt-drag' + sgtLabelCls(c.key) + '" draggable="true" title="按住拖到別的位置（也可以拖到另一排）">' + wlEsc(sgtLabel(c.key)) + '</div>' + c.html + '</div>';
 const sgtCellHtml = (c, i) => '<div class="sgt-cell" data-col-key="' + c.key + '" data-pane="' + i + '" style="' + sgtCellStyle(c.key) + '">' +
   '<div class="bot-col" data-col-key="' + c.key + '" data-pane="' + i + '">' + sgtColInner(c) + '</div>' + sgtCellBtns(c.key) + SGT_RZ_HTML + '</div>';
 const sgtPaneTip = (i) => (i === sgtState.active ? '點上面的分頁名稱會開在這排' : '點一下這排，上面的分頁名稱就改開在這排');

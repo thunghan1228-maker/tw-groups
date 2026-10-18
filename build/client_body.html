@@ -933,8 +933,12 @@
   #sgtBody .sgt-chip.c-purple{color:#d946ef;} #sgtBody .sgt-chip.c-red{color:#dc2626;} #sgtBody .sgt-chip.c-green{color:#15803d;}
   #sgtBody .sgt-chip[data-sgt-run="now"]{background:#dc2626;border-color:#dc2626;color:#fff;}
   #sgtBody .sgt-chip[data-sgt-run="nowBear"]{background:#15803d;border-color:#15803d;color:#fff;}
-  #sgtBody .sgt-chip.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
-  #sgtBody .sgt-chip.on[data-sgt-run="now"],#sgtBody .sgt-chip.on[data-sgt-run="nowBear"]{border-color:#fff;box-shadow:0 0 0 2px #7c3aed;}
+  /* 點下去（開著）的分頁：灰底白字（2026-10-18 使用者：原本紫色，改灰色區隔開來；沒開的照原本顏色不動） */
+  #sgtBody .sgt-chip.on,#sgtBody .sgt-chip.on[data-sgt-run="now"],#sgtBody .sgt-chip.on[data-sgt-run="nowBear"]{background:#6b7280;border-color:#6b7280;color:#fff;box-shadow:none;}
+  /* 開在另一排的：淺一點的灰、虛線框 */
+  #sgtBody .sgt-chip.on2,#sgtBody .sgt-chip.on2[data-sgt-run="now"],#sgtBody .sgt-chip.on2[data-sgt-run="nowBear"]{background:#a3a8b0;border:1px dashed #4b5563;color:#fff;outline:none;box-shadow:none;}
+  #sgtBody .bot-q.sgt-q-red{background:#dc2626;} #sgtBody .bot-q.sgt-q-green{background:#15803d;}
+  #sgtBody .bot-q.sgt-q-purple{background:#c026d3;} #sgtBody .bot-q.sgt-q-gray{background:#4b5563;}
   #sgtBody .bot-chip-clear{background:var(--panel);color:var(--muted);}
   .sgt-pane.on .sgt-pane-head b{color:#7c3aed;}
   #sgtBody .sgt-cell > .sgt-col-reset{color:#7c3aed;border-color:#7c3aed88;background:var(--panel);}
@@ -18845,7 +18849,10 @@ const sgtCellBtns = (key) => (sgtSizes()[key] ? '<button type="button" class="bo
   '<button type="button" class="bot-col-x" data-sgt-close="' + key + '" title="收掉這格">✕</button>';
 // 四邊＋右下角的把手（2026-10-18 使用者：每一格上下左右都能拉開、縮小）
 const SGT_RZ_HTML = ['l', 'r', 't', 'b', 'br'].map((d) => '<i class="sgt-rz sgt-rz-' + d + '" data-rz="' + d + '" title="拉著調整這格大小（點兩下回到原來大小）"></i>').join('');
-const sgtColInner = (c) => '<div class="bot-msg"><div class="bot-q sgt-drag" draggable="true" title="按住拖到別的位置（也可以拖到另一排）">' + wlEsc(sgtLabel(c.key)) + '</div>' + c.html + '</div>';
+// 格子左上角的分頁名稱照多空上色（2026-10-18 使用者）：盤中訊號裡紅字的多方分頁（加上今日即時多）紅底白字、綠字的空方分頁綠底白字，
+// 紫字的（發動、醞釀、盤中333…）紫紅底，其他灰底
+const sgtLabelCls = (k) => (k === 'now' || RED_TAB_KEYS.has(k) ? ' sgt-q-red' : GREEN_TAB_KEYS.has(k) ? ' sgt-q-green' : PURPLE_TAB_KEYS.has(k) ? ' sgt-q-purple' : ' sgt-q-gray');
+const sgtColInner = (c) => '<div class="bot-msg"><div class="bot-q sgt-drag' + sgtLabelCls(c.key) + '" draggable="true" title="按住拖到別的位置（也可以拖到另一排）">' + wlEsc(sgtLabel(c.key)) + '</div>' + c.html + '</div>';
 const sgtCellHtml = (c, i) => '<div class="sgt-cell" data-col-key="' + c.key + '" data-pane="' + i + '" style="' + sgtCellStyle(c.key) + '">' +
   '<div class="bot-col" data-col-key="' + c.key + '" data-pane="' + i + '">' + sgtColInner(c) + '</div>' + sgtCellBtns(c.key) + SGT_RZ_HTML + '</div>';
 const sgtPaneTip = (i) => (i === sgtState.active ? '點上面的分頁名稱會開在這排' : '點一下這排，上面的分頁名稱就改開在這排');
