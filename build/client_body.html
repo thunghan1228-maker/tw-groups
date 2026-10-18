@@ -3445,14 +3445,14 @@
         <li><b>十大多族群</b>（原精選十大多空族群的多方）：今天漲幅前10大族群，各取大戶力最強的前5檔個股；按「大戶力≥10%」只看大戶力 ≥ +10% 的。</li>
         <li><b>十大空族群</b>（原精選十大多空族群的空方）：今天跌幅前10大族群，各取大戶力最負（賣超）的前5檔個股，名次從最弱的數；按「大戶力≤-10%」只看大戶力 ≤ −10% 的。</li>
         <li><b>盤中特大買單／賣單</b>：同一秒內大單連續敲進／倒出（同秒合計 ≥100 張或 ≥3,000 萬，觸發時大戶力要同向）；合計 ≥300 張或 ≥5,000 萬標「瞬間特大」。訊號很多時用上方篩選鈕縮減（可同時開幾個）：只看特大單、金額≥1億、族群前10名（族群同步漲幅／跌幅前 10 名）、每檔只留最大一筆（同一檔一天觸發好幾次，只留到目前為止金額最大的，之後有更大的會換成新的）、每檔只留最新一筆（只留最近發生的那筆，看誰剛剛有大單進來；跟最大一筆二選一）；分頁上的數字會跟著篩選變。</li>
-        <li><b>盤中大戶力</b>：盤中大戶力多＝今天開盤到現在累計大單淨買 ≥ 500 張的股票（大單＝單筆 ≥ 20 張的成交），盤中大戶力空＝累計淨賣 ≥ 500 張。每列最前面的時間是「第一次進名單」的時間，最新進名單的在最上面；早上進過、後來掉出去的列在最下面「曾進名單」。大戶力%＝（大單買進金額－大單賣出金額）÷ 今天累計成交金額，整天累加；≥ +10% 紅底、≤ −10% 綠底，累計成交額 ≥ 1 億且大單淨額 ≥ 3,000 萬時，±12% 以上標偏買／偏賣、±28% 以上標強力買進／賣出。第二行小字寫累計淨買（賣）張數、金額、當天最高（低）的大戶力。</li>
+        <li><b>盤中大戶力</b>：2026-10-18 起照老師算法——大戶力%＝今天同一秒、同方向的成交先併成一筆、滿 7 張算大戶，大戶買進金額減大戶賣出金額（開盤第一筆一律算大戶賣），除以近 5 日平均成交值，整天累加（所以越晚累積越大）。盤中大戶力多＝大戶力 ≥ +10% 的股票，盤中大戶力空＝≤ −10%（老師「≤ −10 倒貨重點股」）。每列最前面的時間是「第一次進名單」的時間，最新進名單的在最上面；早上進過、後來掉出去的列在最下面「曾進名單」。≥ +10% 紅底、≤ −10% 綠底；當天成交額 ≥ 1 億且大戶淨額 ≥ 3,000 萬時，±5% 以上標偏買／偏賣、±10% 以上標強力買進／賣出。這功能上線前的日子（沒有老師版資料）照舊算法：單筆 ≥ 20 張算大單，÷ 當天累計成交額，名單門檻是累計淨買（賣）≥ 500 張。</li>
         <li><b>四項精選（強多/強空）</b>：四個條件同時成立才會出現。①分時資金強度：盤中累計大單買進（強多）或賣出（強空）金額達到前日大單淨買超金額的時段門檻（09:00-09:29≥50%／09:30-09:59≥70%／10:00-10:59≥90%／11:00-13:30≥120%，且前日淨買超須大於1億元才有候選資格）；②主力淨額比：當分鐘≥+50%（強多）或≤-50%（強空），且前一分鐘同方向；③VWAP：現價站上（強多）或跌破（強空）VWAP；④首五分鐘：突破（強多）或跌破（強空）開盤前5分鐘（09:00-09:04）K棒高低點。同一檔股票同一方向一天只提示一次，偵測時間09:00-13:30。</li>
         <li><b>主力翻多／主力翻空（主力累計翻多／翻空）</b>：A～D同步濾網，每根1分K收完評估。A主力零軸：當日主力累計淨額（大單買張−賣張）由負翻正（翻空反向）；B VWAP穿越：1分K收盤站上（翻空：跌破）VWAP，A、B要在5分鐘內同時發生且當下仍成立；C主力淨額率：累計淨額÷累計大單總張數 ≥ ±20%；D量比：今日成交量換算整天速度÷前5日平均 ≥ 1.5×。C、D都達強勢門檻（±40%、3×）標「強勢」。每檔每天多空各一次；明細列會寫出零軸、VWAP穿越時間、淨額率、距VWAP、量比、累計張數。</li>
         <li><b>強勢黑K選股</b>：67 個族群裡近 10 個交易日被創高黑龍系統選過至少 2 次、均線分數 ≥ 15 的股，用即時報價分五類：【1】黑K出現・黑龍系統符合（收黑、均線分數 ≥ 10、漲幅 ≤ 3%、沒破三K低）、【2】今天噴出（漲 5% 以上或漲停）、【3】已噴在高檔（高於月線 10% 以上）、【4】右肩打底（其他月線上的）、【5】有點深（跌破月線）。符號：★☆＝持股健診強／中上、●＝今天發動過、▲＝黑龍系統相對高檔、✗三K低＝跌破三K低、▼＝今天跌 5% 以上、↑＝今天紅但還沒站回月線。盤中 10:30、11:00、11:30、12:00、12:30、13:00、13:15 會自動跳出來，這裡可以隨時重算、複製文字；每日功課也有同一份。【1】的股票前面標 123 黑龍：①②③＝收黑就是這一波（創 20 日新高後）第幾次進場，紅色區1（均線分數 ≥13、創高 5 天內）可積極加碼、黃色區2（整理中）等突破再加碼，三次已滿＝等下一次創高。</li>
         <li><b>發動</b>、<b>醞釀</b>（2026-10-12 拆成兩個分頁，發動在左、醞釀在右，今天／昨天／前天切換兩頁共用；日期列後面的「盤中大戶力≥10%」只看盤中大戶力 ≥ +10% 的，昨天／前天照那天收盤時的大戶力，兩頁各自記）：選股法：1＝醞釀（整理形態）、2＝發動（突破）。今天發動過的股票也會列進今日即時多（時間＝第一次發動）：現在還站在箱頂上寫「🚀 發動」、發動過又跌回箱頂下寫「↩ 曾發動」（2026-10-13 分開標）；開盤前跟其他分頁一樣沿用最近交易日到 08:45，用那天收盤分。<b>醞釀</b>以前一個交易日收盤為準：均線分數≥10（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分）、收盤站上月線（20 日線）、近 10 天最高到最低相差≤20%、5/10/20 日線糾結（相差≤4%）；壓力多但突破會很強，適合不盯盤，每天買一點、分批加碼，站穩月線快突破再積極加碼。<b>發動</b>盤中即時判斷：價格衝過箱頂（近 10 天最高價）＝過高、均線分數>10、周轉高（盤中累積周轉率≥5% 或盤中累積量≥5 日均量 1.5 倍，不換算成全天預估量）；買黑拚隔日衝，破黑低要跑快。同族群依均線分數排序，★＝族群裡分數最高（族群多就挑分數最高的）。金融股不列入醞釀／發動（均線分數仍照算，盤中333 看得到）。<b>發動通知</b>：頁面開著時出現新的發動會跳瀏覽器通知並響提示音（右上角「提醒開啟」控制，第一次要允許通知；剛打開頁面時已經在名單上的不會再跳）。網頁要開著才會通知，關掉就收不到。<b>每日保存</b>：後端每個交易日存下醞釀名單與盤中第一次發動的紀錄（時間、價格、分數、周轉），分頁上可切「昨天／前天」看，發動分兩段：<b>發動</b>＝那天收盤還站在箱頂上、<b>曾發動</b>＝盤中發動過但收盤跌回箱頂下（箱頂旁邊標那天收盤）；今天盤中曾發動、現在回落的股票也會列在「曾發動」；同一檔回落又重新發動只列一列（時間＝第一次，×N＝總共發動 N 次，昨天／前天也一樣）；這台電腦當下抓不到報價的股票判斷不了有沒有回落，不算進去，另外列名字。「今天∩昨天」「昨天∩前天」列出連續兩天都出現的股票（兩天都發動、兩天都醞釀各一段），表格多一欄前一天的數字。保存功能上線前的日子、或程式那天沒在跑，後端用那天的日K回推：醞釀名單照當天盤前的算法補，發動只補「收盤時仍符合」的（發動時間欄寫「收盤」），盤中曾發動又回落的補不回來。發動列表名稱下面會標出可融資／可融券／可現股當沖／有股期，跟盤中大戶力排行同一份資料，查不到（不在追蹤範圍等）就不顯示，不是代表沒有。</li>
         <li><b>盤中333</b>：馬火多(30)、賽馬多加河流多(33加34)等多方條件篩出的個股與族群名單（刀劍空(32)已經拆到獨立分頁）。賽馬多(33) 只看 199 那 23 個族群裡排名前 20 的族群，每族取漲幅前 1/3（四捨五入：20 檔取 7、8 檔取 3）。河流多(34) 只看 199 的 23 族＋188 的 13 族裡排名前一半的族群，每族取漲幅前 1/3（進位）、今天沒跌、不比櫃買弱，漲 7% 以上的另外算檔數。<b>排序</b>：每列最前面「出現」＝這檔第一次進那個名單的時間（這台電腦開著頁面時記的，每個名單各記各的），新出現的在上面、早的往下（只有「續抱勿追高」反過來：早出現的在上面、新出現的往下排）；「名次」欄還是照盤中大戶力排名（👑＝大戶力最強）。名單怎麼挑（漲幅前 10 檔等）不變，只改順序。</li>
-        <li><b>所有族群綜合表</b>：大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
-        <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。「訊號」右邊是那檔的盤中大戶力（大單淨額÷累計成交額）。</li>
+        <li><b>所有族群綜合表</b>：大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）跟處置/注意狀態合併顯示，一個族群一個表格；只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票。處置／注意欄：「處置中」是官方處置股名單，藍色「注意股」是交易所已公布的官方注意股（都是官方現成資料）。</li>
+        <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。「訊號」右邊是那檔的盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）。</li>
         <li><b>創高黑龍</b>：09:00 開盤～13:30 收盤（2026-10-05 起，以前 11:00 後才算；第一根 5 分K 也算），5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。每列後面標 123 黑龍：收黑就是這一波第幾次進場（①②③）、區1（紅，可積極加碼）或區2（黃，等突破再加碼）；問診日線圖、K線圖日線也會在進場的那根K棒上畫同樣的圓圈。</li>
         <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。只看 199 的 23 族＋188 的 13 族，處置股不算，每族只看族內「空方段」（照漲跌幅排的後段，最多 5 檔，例如 4 檔的族群看後 2 檔、7 檔看後 4 檔、13 檔以上看後 5 檔），今天漲跌不限、成交量 10 張以上；而且要嘛是昨天漲 3% 以上（🔪 刀），要嘛是前天漲 3% 以上、現價已跌破前天收盤（⚔️ 劍）。族裡最弱 3 檔標 🔪／⚔️，空方段裡其他的標 🔰。照老師的格式分三段：多方打少（族群前 10 名）、中間段（11～25 名）、強空積極（族群第 26 名以後，最多 15 檔），再加收割區域（已跌 5% 以上，不追空，不分族群強弱，♣）；族群名次後面 🔺＝前 10 名、🔽＝11～25 名、🔰＝26 名以後。跟首頁的刀劍空是同一份名單：首頁照族群名次排，這個分頁照「出現」時間排（新的在上面）。掉出名單的不刪：最下面「已跑」一段留著，紅色刪除線、標「跑 HH:MM」（轉強，要跑）；掉出去又回來的在時間下面標「回 HH:MM」（照盤中每 5 分鐘的紀錄，今日即時空、機器人 32 也一樣）。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
         <li><b>空族群必殺(193)</b>：找「名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票。只看固定的 23 個族群（資訊、鋼鐵、被動元件、光學鏡頭、航運、D電腦、面板、光電、二極體、矽光子、小電腦、散熱、低軌衛星、小電組、化學二、IP、矽晶圓、記憶體、玻璃基板、PA、台塑四寶、PCB、探針卡）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名，有掉就列。空方線以下＝第 36 名以後（空方線畫在第 35 名後面），這段排在最上面；空方線以上＝排名前半但名次往下掉的，接在「↓(多方漲)↓」下面。⚠️＝族裡正在刀劍空(32) 名單上的股票，點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
@@ -4442,7 +4442,7 @@ function redrawAll(){
   }
 }
 
-// 2026-10-14 使用者：5 分K（1 分K 也一樣）上面那排 MA、扣底旁邊，加這檔「盤中大戶力」（跟訊號中心同一份：大單淨額÷累計成交額，整天累加）。
+// 2026-10-14 使用者：5 分K（1 分K 也一樣）上面那排 MA、扣底旁邊，加這檔「盤中大戶力」（跟訊號中心同一份：大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣，開盤到現在整天累加）。
 // 主畫面有就用主畫面那份；K線圖開在視窗（iframe）、另開視窗時跟主畫面拿；都拿不到才自己抓（一分鐘最多一次）。
 let chartHolderCache = { rows: null, at: 0, busy: false };
 function chartHolderRow(code){
@@ -4473,7 +4473,7 @@ function chartHolderLegendHtml(){
   const r = chartHolderRow(currentChart.code);
   if (!r || r.strengthPct === null || r.strengthPct === undefined) return '';
   const amt = fmtAmountWan(r.netAmount);
-  return '<span class="ma-legend-item chart-holder ' + (r.strengthPct > 0 ? 'up' : r.strengthPct < 0 ? 'down' : '') + '" title="' + (r.holderLabel || '盤中大戶力（大單淨額÷累計成交額，開盤到現在整天累加）') + '">盤中大戶力 ' +
+  return '<span class="ma-legend-item chart-holder ' + (r.strengthPct > 0 ? 'up' : r.strengthPct < 0 ? 'down' : '') + '" title="' + (r.holderLabel || '盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣，開盤到現在整天累加）') + '">盤中大戶力 ' +
     (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%' + (amt ? '（' + amt + '）' : '') + '</span>';
 }
 function updateMaLegend(absIndex){
@@ -5279,12 +5279,12 @@ function openGroupDetail(groupName){
       (x.sword ? '；前天 ' + pf(x.y2) + '、族裡第 ' + x.r2 + ' 名，今天掉 ' + x.sword + ' 名' : '') + (x.mk === '🔰' ? '；昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上' : '');
     return '<span class="gm-hmark gm-bmark" title="' + tip + '">' + x.mk + '</span>';
   };
-  // 2026-10-16 使用者：漲跌幅前面加一欄「盤中大戶力」（跟訊號中心同一份：大單淨額÷累計成交額），本週籌碼搬到最後面（成交價右邊），視窗加寬
+  // 2026-10-16 使用者：漲跌幅前面加一欄「盤中大戶力」（跟訊號中心同一份：大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣），本週籌碼搬到最後面（成交價右邊），視窗加寬
   const holder = wlHolderMap();
   const holdCell = (code) => {
     const h = holder[code], v = h ? h.strengthPct : null;
     if (v === null || v === undefined || !Number.isFinite(Number(v))) return '<span class="shold flat" title="大戶力資料還在累積中或不在追蹤範圍">—</span>';
-    return '<span class="shold"><i class="hold-pill ' + (v > 0 ? 'up' : v < 0 ? 'down' : 'flat') + (Math.abs(v) >= HOLDER_HOT_PCT ? ' hot' : '') + '" title="盤中大戶力（大單淨額÷累計成交額，開盤到現在整天累加）">' +
+    return '<span class="shold"><i class="hold-pill ' + (v > 0 ? 'up' : v < 0 ? 'down' : 'flat') + (Math.abs(v) >= HOLDER_HOT_PCT ? ' hot' : '') + '" title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣，開盤到現在整天累加）">' +
       (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%</i></span>';
   };
   const labels = STOCK_COL_LABELS_HTML.replace('<span class="spct">漲跌幅</span>', '<span class="shold">盤中大戶力</span><span class="spct">漲跌幅</span>')
@@ -5590,13 +5590,15 @@ let mainForceRankingLoaded = false; // 第一次抓/api/main-force-ranking成功
                                      // 不然新開的彈出視窗(移到另一螢幕)一開始mainForceRanking是[]，族群大戶力／族群
                                      // 綜合表會在抓到資料前先顯示「目前沒有符合條件的個股」，看起來像是壞掉。
 let signalDataIsReal = false;
-const BIG_HOLDER_THRESHOLD = 500; // 累計買賣超達 500 張視為大戶力，跟K線圖大戶定義一致
+const BIG_HOLDER_THRESHOLD = 500; // 舊算法（這功能上線前的日子）：累計買賣超達 500 張視為大戶力
+// 2026-10-18 使用者選「全部改成老師版」：後端回 holderAlgo='teacher' 的，名單門檻改成大戶力 ≥ +10%／≤ −10%（老師「≤-10 倒貨重點」）
+const BIG_HOLDER_PCT = 10;
 // 2026-10-01 使用者：盤中大戶力偏買跟偏賣原本混在同一個列表，要拆成兩個分頁；netVolume（大單淨額）
 // 正負號就是買賣方向，strengthPct／holderLabel是它換算出來的百分比／門檻標籤，符號一定同向，
 // 用netVolume判斷才每一列都有得判斷（strengthPct可能因為資料還在累積是null）。
-const holderRowIsBull = (r) => Number(r.netVolume) >= 0;
+const holderRowIsBull = (r) => (r.holderAlgo === 'teacher' ? Number(r.strengthPct) >= 0 : Number(r.netVolume) >= 0);
 function bigHolderRowsFrom(ranking, dir){
-  const rows = ranking.filter((r) => Math.abs(r.netVolume) >= BIG_HOLDER_THRESHOLD);
+  const rows = ranking.filter((r) => (r.holderAlgo === 'teacher' ? Number.isFinite(r.strengthPct) && Math.abs(r.strengthPct) >= BIG_HOLDER_PCT : Math.abs(r.netVolume) >= BIG_HOLDER_THRESHOLD));
   if (dir === 'bull') return rows.filter(holderRowIsBull);
   if (dir === 'bear') return rows.filter((r) => !holderRowIsBull(r));
   return rows;
@@ -6107,7 +6109,7 @@ function sigHolderCellHtml(code, holder){
   const h = holder.get(code), v = h ? h.strengthPct : null;
   if (v === null || v === undefined) return '<span class="sig-hold"><span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span></span>';
   const r1 = Math.round(Number(v) * 10) / 10;   // 四捨五入到 0.0% 的畫灰色（不是跌）
-  return '<span class="sig-hold"><span class="hold-pill ' + (r1 > 0 ? 'up' : r1 < 0 ? 'down' : 'flat') + '" title="盤中大戶力（大單淨額÷累計成交額）">' + (r1 > 0 ? '+' : '') + r1.toFixed(1) + '%</span></span>';
+  return '<span class="sig-hold"><span class="hold-pill ' + (r1 > 0 ? 'up' : r1 < 0 ? 'down' : 'flat') + '" title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）">' + (r1 > 0 ? '+' : '') + r1.toFixed(1) + '%</span></span>';
 }
 // 訊號列表的欄位標題（2026-10-08 使用者加均線分數欄時一起加，數字才知道是什麼）
 function signalColLabelsHtml(holdCls){
@@ -6242,7 +6244,7 @@ function tradingEligibilityTagsHtml(r){
   return '<span class="sig-eligibility">' + tags.map((t) => t.startsWith('<span') ? t : '<span>' + t + '</span>').join('') + '</span>';
 }
 // ---- 盤中大戶力：每檔第一次進名單的時間（2026-10-13 使用者：只剩收盤那一刻 13:20 的名單，早上的都不見了）----
-// 後端 /api/holder-timeline：累計大單淨量第一次 ≥ ±500 張的時間、那時的大戶力%、最高（最低）大戶力%、收盤（現在）還在不在。
+// 後端 /api/holder-timeline：第一次進名單的時間（老師版＝大戶力第一次 ≥ +10%／≤ −10%；舊算法＝累計大單淨量第一次 ≥ ±500 張）、那時的大戶力%、最高（最低）大戶力%、收盤（現在）還在不在。
 // 今天盤中每 60 秒重抓；往日抓一次。後端還沒更新（404）就照舊顯示「更新」時間。
 const holderTimelineData = {}, holderTimelineAt = {}, holderTimelineLoading = {};
 function ensureHolderTimeline(date){
@@ -6275,7 +6277,7 @@ function holderFadedHtml(timeline, side, currentRows, view){
   if (!rows.length) return '';
   const bull = side === 'bull';
   return '<div class="bl-section bl-fallen hf-faded-head">曾進名單、' + (view.isPast || view.held ? '收盤' : '現在') + '已不在・' + rows.length + ' 檔</div>' +
-    '<div class="race-sub">盤中曾經累計大單' + (bull ? '買超' : '賣超') + ' 500 張以上、後來' + (bull ? '賣回' : '買回') + '掉出名單的。時間＝第一次進名單；最' + (bull ? '高' : '低') + '＝那段時間大戶力最' + (bull ? '強' : '弱') + '的時候。</div>' +
+    '<div class="race-sub">盤中大戶力曾經' + (bull ? '站上 +10%' : '跌破 −10%') + '、後來' + (bull ? '賣回' : '買回') + '掉出名單的。時間＝第一次進名單；最' + (bull ? '高' : '低') + '＝那段時間大戶力最' + (bull ? '強' : '弱') + '的時候。</div>' +
     '<div class="signal-list">' + rows.map(({ code, t, now }) => {
       const name = (now && now.name && now.name !== code ? now.name : null) || lookupStockName(code);
       const quote = viewStockQuote(code, view);
@@ -6341,7 +6343,7 @@ function holderSignalRowHtml(r, view, side){
   const note = '累計大單' + (bull ? '淨買 ' : '淨賣 ') + Math.abs(Number(r.netVolume) || 0).toLocaleString('en-US') + ' 張｜約 ' + holderAmountText(r.netAmount) +
     (r.peakPct !== null && r.peakPct !== undefined && r.peakTs ? '｜最' + (bull ? '高 ' : '低 ') + (r.peakPct > 0 ? '+' : '') + Number(r.peakPct).toFixed(1) + '%（' + hmOf(r.peakTs) + '）' : '');
   return '<div class="signal-row sig-hold-r" data-code="' + r.code + '" data-name="' + name + '">' +
-    '<span class="sig-time" title="' + (r.firstTs ? '第一次進名單（累計大單淨量 ≥ 500 張）' : '主力副圖最後更新') + '；大戶力%是當天開盤到現在整天累加">' + time + '</span>' +
+    '<span class="sig-time" title="' + (r.firstTs ? '第一次進名單（大戶力 ≥ +10% 或 ≤ −10%）' : '主力副圖最後更新') + '；大戶力%是當天開盤到現在整天累加">' + time + '</span>' +
     '<span class="sig-code">' + r.code + '</span>' +
     '<span class="sig-name">' + name + '</span>' +
     (group ? '<span class="sig-group">' + group + '</span>' : '<span class="sig-group sig-group-empty"></span>') +
@@ -6366,9 +6368,9 @@ function nowBullHolderBlockHtml(view, rows){
   }).map(([r]) => r);
   const dayText = view.isPast || view.held ? '（' + String(view.date || '').slice(5).replace('-', '/') + ' 的名單）' : '';
   return '<div class="race-block now-bull-holder"><div class="race-head">盤中大戶力多・' + list.length + ' 檔' + dayText + '</div>' +
-    '<div class="race-sub">跟「盤中大戶力多」分頁同一份名單（累計大單淨量 ≥ 500 張）。時間＝第一次進名單，早進名單的在上面、新進的往下排；大戶力 ≥ +10% 紅底。下面才是依發生時間排序的多方訊號。</div>' +
+    '<div class="race-sub">跟「盤中大戶力多」分頁同一份名單（大戶力 ≥ +10%）。時間＝第一次進名單，早進名單的在上面、新進的往下排；大戶力 ≥ +10% 紅底。下面才是依發生時間排序的多方訊號。</div>' +
     (list.length ? holderSignalColLabelsHtml(list.some((r) => r.firstTs)) + '<div class="signal-list">' + list.map((r) => holderSignalRowHtml(r, view, 'bull')).join('') + '</div>'
-      : '<div class="race-note">目前沒有累計大單淨買 ≥ 500 張的股票。</div>') + '</div>';
+      : '<div class="race-note">目前沒有大戶力 ≥ +10% 的股票。</div>') + '</div>';
 }
 // 2026-10-04 使用者：「今日即時」拆成多／空兩頁。空的這一頁集中放刀劍空（即時算出來的名單，沒有發生時間，當一個
 // 區塊放最上面，只有今天有）＋盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單（依發生時間新到舊合併排序，
@@ -6879,7 +6881,7 @@ function raceHolderCellHtml(r){
   if (r.strengthPct === null || r.strengthPct === undefined) return '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>';
   const amt = fmtAmountWan(r.netAmount);
   // %跟金額改上下兩行（2026-09-24 使用者：不要前後放、金額放下面），各自靠右對齊，萬／億長度不一也整齊。
-  return '<span class="sig-label ' + (r.strengthPct > 0 ? 'sig-bull' : 'sig-bear') + '" title="' + (r.holderLabel || '大戶力（大單淨額÷累計成交額）') + '">' +
+  return '<span class="sig-label ' + (r.strengthPct > 0 ? 'sig-bull' : 'sig-bear') + '" title="' + (r.holderLabel || '大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）') + '">' +
     '<span class="hf-pct">' + (r.strengthPct > 0 ? '+' : '') + r.strengthPct.toFixed(1) + '%</span>' +
     (amt ? '<span class="hf-amt">' + amt + '</span>' : '') + '</span>';
 }
@@ -7574,7 +7576,7 @@ function homeJailHelpHtml(){
   const cols = (code) => {
     const q = homeJailQuote(code), h = holder[code], v = h && Number.isFinite(Number(h.strengthPct)) ? Number(h.strengthPct) : null;
     const hold = v === null ? '<td class="jl-n flat">—</td>'
-      : '<td class="jl-n"><i class="jl-hold ' + dirClass(v) + (Math.abs(v) >= HOLDER_HOT_PCT ? ' hot' : '') + '" title="盤中大戶力（大單淨額÷累計成交額）">' + (v > 0 ? '+' : '') + v.toFixed(1) + '%</i></td>';
+      : '<td class="jl-n"><i class="jl-hold ' + dirClass(v) + (Math.abs(v) >= HOLDER_HOT_PCT ? ' hot' : '') + '" title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）">' + (v > 0 ? '+' : '') + v.toFixed(1) + '%</i></td>';
     if (!q) return hold + '<td class="jl-n flat">—</td><td class="jl-n flat">—</td>';
     const cls = dirClass(q.changePercent);
     return hold + '<td class="jl-n ' + cls + '">' + limitPriceHtml(q, fmt(q.changePercent) + '%') + '</td><td class="jl-n ' + cls + '">' + jlPrice(q.price) + '</td>';
@@ -7846,7 +7848,7 @@ function homeRankFootHtml(total){
     ['括號數字', '今天族群名次（平均漲跌幅排，共 ' + total + ' 個族群，1 最強）'],
     ['🔺／🔽', '跟昨天收盤的名次比，升／掉幾名'],
     ['最右邊 %', '族群平均漲跌幅'],
-    ['點族群', '看成分股（前兩名後面標 👑🐎🚀，最後幾名標 🔪⚔️🔰）；欄位：盤中大戶力（大單淨額÷累計成交額，±10% 以上紅底／綠底）、漲跌幅、漲跌、成交價、本週籌碼（集保 400 張以上大戶週增減）'],
+    ['點族群', '看成分股（前兩名後面標 👑🐎🚀，最後幾名標 🔪⚔️🔰）；欄位：盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣，±10% 以上紅底／綠底）、漲跌幅、漲跌、成交價、本週籌碼（集保 400 張以上大戶週增減）'],
     ['👑', '族群裡今天第 1 名（今天漲 3% 以上才標，🐎🚀 也是）'],
     ['🐎N（跟昨天比）', '昨天還在族裡後段班（後一半），今天突然衝到族裡前兩名；N＝上升幾名'],
     ['🚀N（跟前天比）', '前天還在族裡後段班，今天突然衝到族裡前兩名；N＝上升幾名'],
@@ -8167,13 +8169,13 @@ function groupHolderForceHtml(mode){
   const cards = (up ? m.risingGroups : m.fallingGroups).filter((c) => !on || c.rows.length);
   const note = on ? (up ? '目前只看大戶力≥+10%（偏買）的個股；' : '目前只看大戶力≤-10%（偏賣）的個股；') : '';
   return filterBar + holderPastNoteHtml(view) +
-    '<div class="race-sub">' + note + dayWord + (up ? '漲幅前10大族群，各取大戶力（大單淨額÷累計成交額）最強的前5名個股' : '跌幅前10大族群，各取大戶力最負（賣超）的前5名個股') +
+    '<div class="race-sub">' + note + dayWord + (up ? '漲幅前10大族群，各取大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）最強的前5名個股' : '跌幅前10大族群，各取大戶力最負（賣超）的前5名個股') +
     '。族群依' + dayWord + '平均漲跌幅排名，共 ' + m.total + ' 個族群。' + stamp + '</div>' +
     '<div class="race-sep">------' + (up ? '↑(漲幅前10大族群・大戶力Top5)↑' : '↓(跌幅前10大族群・大戶力Top5)↓') + '------</div>' +
     (cards.length ? cards.map((c) => groupHolderForceCardHtml(c, mode)).join('') : '<div class="race-note">目前沒有符合篩選條件的個股（再點一次按鈕取消篩選）</div>');
 }
 
-// ---- 族群綜合表：把大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併成一個表格，
+// ---- 族群綜合表：把大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）跟處置/注意狀態合併成一個表格，
 // 一個族群一個 block，只列出有大戶力資料或有處置/注意資料的股票 ----
 // 使用者要求：可以只看大戶力>=+10%（偏買）或<=-10%（偏賣）其中一邊，把強弱兩邊分開看。
 // null=兩邊都顯示（預設）；'up'/'down'=只顯示那一邊，再點一次同一個按鈕取消篩選。
@@ -8298,8 +8300,8 @@ function groupCombinedBoardHtml(){
   const scopeNote = view.isPast ? '只列出那一天大戶力≥+10%或≤-10%的股票（處置/注意只有今天的資料）' : '只列出大戶力≥+10%或≤-10%、或有處置/注意資料的股票';
   return filterBar + holderPastNoteHtml(view) +
     (groupCombinedBoardFilter === 'down'
-      ? '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題前的「族排最弱第 N 名」是' + dayWord + '平均漲跌幅由弱到強倒數的名次（第 1 名全體最弱），標題依平均漲跌幅正負分紅/綠，並依跌幅大小排序（跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>'
-      : '<div class="race-sub">大戶力（大單淨額÷累計成交額）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題前的「族排第 N 名」是' + dayWord + '平均漲跌幅在全部族群裡的名次（第 1 名最強，篩選後可能跳號），標題依平均漲跌幅正負分紅/綠，並依漲跌幅排序，共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>') +
+      ? '<div class="race-sub">大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題前的「族排最弱第 N 名」是' + dayWord + '平均漲跌幅由弱到強倒數的名次（第 1 名全體最弱），標題依平均漲跌幅正負分紅/綠，並依跌幅大小排序（跌幅大的族群在前），共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>'
+      : '<div class="race-sub">大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）跟處置/注意狀態合併顯示，一個族群一個表格；' + scopeNote + '。族群標題前的「族排第 N 名」是' + dayWord + '平均漲跌幅在全部族群裡的名次（第 1 名最強，篩選後可能跳號），標題依平均漲跌幅正負分紅/綠，並依漲跌幅排序，共 ' + m.blocks.length + ' 個族群、' + m.total + ' 檔。' + stamp + '</div>') +
     m.blocks.map(groupCombinedBoardBlockHtml).join('');
 }
 
@@ -13676,7 +13678,7 @@ function stPanelHtml(side){
   const rule = (strong ? '族群分數前十大（族內平均均線分數）裡，均線分數 ≥' + d.rule.min + ' 的股票' : '族群分數倒數十名裡，均線分數 ≤' + d.rule.max + ' 的股票') +
     '・今天' + (strong ? '下跌（現價低於昨收）' : '上漲（現價高於昨收）') + '的不列，整族都不符合就不列那一族（週末、連假、開盤前還沒有「今天」，整份照列）';
   let h = '<div class="race-note">' + rule + '・均線分數＝' + swMmdd(d.date) + ' 收盤（滿分 15，每天收盤後更新）・現價、漲跌是即時的・' +
-    (strong ? '⭐＝這族今天也有出現在強勢黑K選股（通常是比較強勢的族群）・' : '') + '👀＝這檔在強勢黑K選股名單裡・盤中大戶力＝盤中大單淨額 ÷ 累計成交額・時間＝這一次大戶力' + (strong ? '站上 +' : '跌破 −') + ST_HF_MIN + '% 的時間（中間跌回去又站回來就從站回來算；現在沒有在 ' + (strong ? '+' : '−') + ST_HF_MIN + '% 以' + (strong ? '上' : '下') + '的寫「—」）・點一列開K線圖</div>' +
+    (strong ? '⭐＝這族今天也有出現在強勢黑K選股（通常是比較強勢的族群）・' : '') + '👀＝這檔在強勢黑K選股名單裡・盤中大戶力＝大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣・時間＝這一次大戶力' + (strong ? '站上 +' : '跌破 −') + ST_HF_MIN + '% 的時間（中間跌回去又站回來就從站回來算；現在沒有在 ' + (strong ? '+' : '−') + ST_HF_MIN + '% 以' + (strong ? '上' : '下') + '的寫「—」）・點一列開K線圖</div>' +
     // 欄位名稱（2026-10-12 使用者：大戶力、漲跌幅、漲跌、成交價；2026-10-13 字放大 1.5 倍、大戶力改「盤中大戶力」）
     '<div class="signal-row signal-col-labels st-row"><span class="sig-time" title="這一次盤中大戶力站上 ' + (strong ? '+' : '−') + ST_HF_MIN + '% 的時間"><b>時間</b></span><span class="sig-code"></span><span class="sig-name"><b>名稱</b></span><span class="st-score-h"><b>均線</b></span>' +
     '<button type="button" class="chart-tab chips-btn st-hf-btn' + (hfOnly ? ' active' : '') + '" data-st-hf="' + side + '" title="只看盤中大戶力' + (strong ? '大於等於 +' : '小於等於 −') + ST_HF_MIN + '% 的股票（再按一次全部顯示）">' +
@@ -13708,7 +13710,7 @@ function stPanelHtml(side){
         '<span class="st-score' + (strong ? '' : ' weak') + '" title="均線分數（' + swMmdd(d.date) + ' 收盤）">' + r.sum + '</span>' +
         // 大戶力只放百分比、字大一點（2026-10-12 使用者：金額拿掉）；金額放在滑鼠提示
         '<span class="st-holder">' + (hf && hf.strengthPct !== null && hf.strengthPct !== undefined
-          ? '<span class="st-hf ' + (hf.strengthPct > 0 ? 'up' : 'down') + '" title="大戶力（大單淨額 ÷ 累計成交額）' + (fmtAmountWan(hf.netAmount) ? '，淨額 ' + fmtAmountWan(hf.netAmount) : '') + '">' +
+          ? '<span class="st-hf ' + (hf.strengthPct > 0 ? 'up' : 'down') + '" title="大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）' + (fmtAmountWan(hf.netAmount) ? '，淨額 ' + fmtAmountWan(hf.netAmount) : '') + '">' +
             (hf.strengthPct > 0 ? '+' : '') + hf.strengthPct.toFixed(1) + '%</span>'
           : '<span class="race-holder-none" title="大戶力資料還在累積中或不在追蹤範圍">—</span>') + '</span>' +
         (q ? stockValueColsHtml(q.price, chg, q.changePercent, q) : '<div class="srow-right"><span class="spct flat">—</span><span class="schg flat">—</span><span class="sprice">' + ckPrice(r.close) + '</span></div>') + '</div>';
@@ -13817,7 +13819,7 @@ function signalTabContent(active){
       .map((r, i) => [r, i]).sort((a, b) => ((b[0].firstTs || 0) - (a[0].firstTs || 0)) || (a[1] - b[1])).map(([r]) => r);
     return sigTabRet(active, holderDayBarHtml() + holderPastNoteHtml(view) +
       (view.loading || view.unavailable ? holderEmptyHtml(view, '', '')
-        : (timeline ? '<div class="race-note">時間＝這檔第一次進名單（累計大單淨量 ≥ 500 張）的時間；最新進名單的在最上面、越早的越下面（同一時間照累計大單淨量）。早上進過、後來掉出去的列在最下面「曾進名單」。</div>' : '') +
+        : (timeline ? '<div class="race-note">時間＝這檔第一次進名單（大戶力 ≥ +10%／≤ −10%）的時間；最新進名單的在最上面、越早的越下面（同一時間照累計大單淨量）。早上進過、後來掉出去的列在最下面「曾進名單」。</div>' : '') +
           rankingRowsHtml(rows, view) + holderFadedHtml(timeline, side, rows, view)));
   } else if (active === 'race333'){
     refreshGroupDailyChanges(false);
@@ -15602,7 +15604,7 @@ function tdRowHtml(row, ctx, snap, opt){
     '<span class="td-tags">' + tdTagsHtml(row.code, ctx, o) + tdBigHtml(row) + '</span>' +
     '<span class="td-pct ' + (Number.isFinite(row.pct) ? dirClass(row.pct) : '') + '">' + hwPct(Number.isFinite(row.pct) ? row.pct : null) + '</span>' +
     (o.remove ? '<button type="button" class="td-x" data-td-unwatch="' + wlEsc(row.code) + '" title="移除">✕</button>'
-      : '<span class="td-mk">' + (row.zone === 'harvest' ? '♣' : (row.mk || '')) + '</span>') + '</div>';
+      : '<span class="td-mk">' + (row.mk || '') + '</span>') + '</div>';   // 右邊放原本的刀劍空記號（收割區也是，老師合晶 65♣ 右邊是 ⚔️）
 }
 // ---- 一份「畫面資料」：盤中由 race333Model 組（送後端存的也是這份），回放由後端紀錄組 ----
 function tdLiveRow(r, zone, big){
@@ -15887,7 +15889,7 @@ function hwTodayHtml(){
         const lit = b || ctx.k12.has(code) || tdState.watch.includes(code);
         const name = (q && q.name) || ((jd && jd.released) || []).find((x) => x.code === code)?.name || '';
         return '<span class="td-rchip' + (b ? ' blade' : lit ? ' lit' : '') + '" data-hw-code="' + wlEsc(code) + '" data-hw-name="' + wlEsc(name) + '">' + wlEsc(code) + ' ' + wlEsc(name) + (g ? ' <small>· ' + wlEsc(g) + '</small>' : '') +
-          (b ? ' <b>' + hwPct(b.pct) + '</b> ' + (b.zone === 'harvest' ? '♣' : (b.mk || '')) : '') + (sp ? (sp.high ? ' 🔒必關' : ' ⚠️') : '') + '</span>';
+          (b ? ' <b>' + hwPct(b.pct) + '</b> ' + (b.mk || '') : '') + (sp ? (sp.high ? ' 🔒必關' : ' ⚠️') : '') + '</span>';
       }).join('') + '</div></div>').join('') : '<div class="td-empty">最近沒有出獄股</div>') +
     '<div class="td-note">亮起來的是今天有進刀劍空（深紅）或在 12空、觀察股裡的（紫框）；灰的表示這批出獄股今天沒動靜。</div></div>';
   const jailCol = (title, list) => '<div class="td-jcol"><div class="td-jhead">' + title + '<small>' + list.length + ' 檔</small></div>' +
