@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 13:12:46";
+const BUILD_STAMP = "2026-10-18 13:16:49";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -216,7 +216,10 @@ const HTML_PAGE = `<!DOCTYPE html>
     background:#3a3a42;color:#d4d4d8;font-size:11.5px;font-weight:700;white-space:nowrap;}
   .bot-cols-grip:hover::before,.bot-cols-grip:active::before{background:#7c3aed;}
   @media (hover:hover) and (pointer:fine){ .bot-cols{cursor:grab;} .bot-cols .bot-stk,.bot-cols .bot-grp,.bot-cols [data-bot-group],.bot-cols .signal-row,.bot-cols .race-row,.bot-cols button{cursor:pointer;} }
-  .bot-cols.panning,.bot-cols.panning *{cursor:grabbing!important;-webkit-user-select:none;user-select:none;} .bot-cols-grip:hover::after,.bot-cols-grip:active::after{background:#7c3aed;color:#fff;}
+  /* 2026-10-18 使用者：拖起來卡——原本「.panning *」把抓手游標套到格子裡每個元素（盤中訊號分頁開 11 格有 5 萬多個），每拖一下都整片重算樣式；
+     改成拖的時候蓋一層透明板顯示抓手（.pan-shield），格子本身的樣式都不動（關選字也會整片重算，改成拖的時候把選到的字清掉） */
+  .pan-shield{position:fixed;inset:0;z-index:2147483000;cursor:grabbing;}
+  .bot-cols-grip:hover::after,.bot-cols-grip:active::after{background:#7c3aed;color:#fff;}
   @media (max-width:767px){ .bot-col{flex-basis:84%;} }
   .bot-msg{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:10px;}
   .bot-q{display:inline-block;background:#7c3aed;color:#fff;border-radius:10px;padding:2px 10px;font-size:12px;font-weight:800;margin-bottom:4px;}
@@ -13102,7 +13105,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 13:12:46';
+const BUILD_STAMP = '2026-10-18 13:16:49';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18504,16 +18507,21 @@ function initColsPan(bodyId){
     if (!pan.moved){
       if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
       pan.moved = true;
-      pan.box.classList.add('panning');
       try { pan.box.setPointerCapture(pan.id); } catch (_){}
+      pan.shield = document.createElement('div');
+      pan.shield.className = 'pan-shield';
+      document.body.appendChild(pan.shield);
+      try { window.getSelection().removeAllRanges(); } catch (_){}
     }
     pan.box.scrollLeft = pan.left - dx;
     if (pan.col) pan.col.scrollTop = pan.top - dy;
+    const sel = window.getSelection && window.getSelection();
+    if (sel && !sel.isCollapsed) sel.removeAllRanges();
     e.preventDefault();
   });
   const end = () => {
     if (!pan) return;
-    if (pan.moved){ swallow = true; setTimeout(() => { swallow = false; }, 0); pan.box.classList.remove('panning'); }
+    if (pan.moved){ swallow = true; setTimeout(() => { swallow = false; }, 0); if (pan.shield) pan.shield.remove(); }
     pan = null;
   };
   body.addEventListener('pointerup', end);
