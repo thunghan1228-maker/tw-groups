@@ -136,6 +136,7 @@
   .bot-msg{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:10px;}
   .bot-q{display:inline-block;background:#7c3aed;color:#fff;border-radius:10px;padding:2px 10px;font-size:12px;font-weight:800;margin-bottom:4px;}
   .bot-title{font-weight:800;font-size:15px;margin:2px 0 6px;} .bot-title small{color:var(--muted);font-weight:600;font-size:11px;margin-left:6px;}
+  .bot-title.bot-title-bear{background:#16a34a;color:#fff;border-radius:6px;padding:3px 8px;margin-right:18px;} .bot-title.bot-title-bear *,.bot-title.bot-title-bear small{color:#fff!important;}   /* 空方／隔日沖標題：綠底白字 */
   .bot-line{font-size:13.5px;line-height:1.7;font-variant-numeric:tabular-nums;} .bot-line.bot-head{font-weight:800;margin-top:4px;} .bot-line.bot-sub{padding-left:16px;font-size:12.5px;}
   .bot-help-code{cursor:pointer;color:#c4b5fd;} .bot-help-code:hover{text-decoration:underline;}
   .bot-line.bot-sep{color:var(--muted);text-align:left;} .bot-line.bot-warn{color:#fb923c;} .bot-dim{color:var(--muted);}
@@ -17738,7 +17739,9 @@ function botNorm(raw){
 function botAnswer(raw){
   const q = botNorm(raw);
   if (!q) return null;
-  const title = (t, sub) => '<div class="bot-title">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
+  // 2026-10-18 使用者：空方的（負號代碼 -12、-22…）跟隔日沖 811、813 的標題改綠底白字
+  const bear = /^-/.test(q) || q === '811' || q === '813';
+  const title = (t, sub) => '<div class="bot-title' + (bear ? ' bot-title-bear' : '') + '">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
   const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
   const wrap = (t, body, sub) => '<div class="bot-msg"><div class="bot-q">' + wlEsc(raw) + '</div>' + title(t, sub || stamp) + body + '</div>';
   // 不用首頁報價的：國際行情
