@@ -17981,7 +17981,9 @@ function botAnswer(raw){
       return wrap('🐎🚀馬火多(30)', rows.map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>'))).join('') || botLine('目前沒有', 'bot-dim'));
     }
     const sec = (l) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '')))).join('');
-    return wrap('🔪⚔️新刀劍空(32)', sec(m.bladeUpper) + botLine('----↑(多方打少)↑----', 'bot-sep') + sec(m.bladeMiddle) + botLine('----↓(強空積極)↓----', 'bot-sep') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest));
+    // 2026-10-18 使用者：強空積極（連同收割區域）搬到最上面，跟 199、193 一樣；後面接多方打少、中間段，每段上面寫段名
+    return wrap('🔪⚔️新刀劍空(32)', botLine('----↓(強空積極)↓----', 'bot-sep') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest) +
+      botLine('----↓(多方打少)↓----', 'bot-sep') + sec(m.bladeUpper) + botLine('----↓(中間段)↓----', 'bot-sep') + sec(m.bladeMiddle));
   }
   // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
   // 最後附櫃買多空（漲跌幅）；34 再附漲 7% 以上沒列的檔數；處置股名字前面 *
