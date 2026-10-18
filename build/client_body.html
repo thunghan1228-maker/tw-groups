@@ -144,6 +144,8 @@
   /* 2026-10-18 使用者：空方格子裡的小標題（811「爆量計算」、813「隔日沖手上張數」…）也綠底白字；本身就是族群紅綠條的不動 */
   .bot-msg.bot-bear .bot-line.bot-head:not(:has(.bot-gpill)){display:inline-block;background:#16a34a;color:#fff;border-radius:5px;padding:1px 8px;margin:4px 0 3px;}
   .bot-msg.bot-bear .bot-line.bot-head:not(:has(.bot-gpill)) *{color:#fff!important;}
+  .bot-title.bot-title-split{background:linear-gradient(90deg,#16a34a 0 50%,#dc2626 50% 100%);color:#fff;border-radius:6px;padding:3px 8px;margin-right:18px;}
+  .bot-title.bot-title-split *,.bot-title.bot-title-split small{color:#fff!important;}
   .bot-title.bot-title-bear{background:#16a34a;color:#fff;border-radius:6px;padding:3px 8px;margin-right:18px;} .bot-title.bot-title-bear *,.bot-title.bot-title-bear small{color:#fff!important;}   /* 空方／隔日沖標題：綠底白字 */
   .bot-line{font-size:13.5px;line-height:1.7;font-variant-numeric:tabular-nums;} .bot-line.bot-head{font-weight:800;margin-top:4px;} .bot-line.bot-sub{padding-left:16px;font-size:12.5px;}
   .bot-help-code{cursor:pointer;color:#c4b5fd;} .bot-help-code:hover{text-decoration:underline;}
@@ -17791,7 +17793,8 @@ function botAnswer(raw){
   // 2026-10-18 使用者：空方的（負號代碼 -12、-22…）跟隔日沖 811、813 的標題改綠底白字；
   // 同一天又加：空族群排名(199)、空族群必殺(193)、新刀劍空(32)、刀劍空(31)，連同終點戰法空(283／284／股號+3)
   const bear = /^-/.test(q) || ['811', '813', '193', '199', '283', '284', '31', '32'].includes(q) || /^.+\+3$/.test(q);
-  const title = (t, sub) => '<div class="bot-title' + (bear ? ' bot-title-bear' : '') + '">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
+  // 177 重點族群排名多空都有：標題左半綠、右半紅，白字（2026-10-18 使用者）
+  const title = (t, sub) => '<div class="bot-title' + (bear ? ' bot-title-bear' : q === '177' ? ' bot-title-split' : '') + '">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
   const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
   const wrap = (t, body, sub) => '<div class="bot-msg' + (bear ? ' bot-bear' : '') + '"><div class="bot-q">' + wlEsc(raw) + '</div>' + title(t, sub || stamp) + body + '</div>';
   // 不用首頁報價的：國際行情
