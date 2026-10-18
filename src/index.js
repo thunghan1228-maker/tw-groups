@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 16:07:45";
+const BUILD_STAMP = "2026-10-18 16:25:22";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -13148,7 +13148,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 16:07:45';
+const BUILD_STAMP = '2026-10-18 16:25:22';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17844,7 +17844,7 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 // 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
 const botState = { cols: [], restored: false, restoring: false, pendTops: null, world: null, worldAt: 0, worldLoading: false, cache: {} };   // cols＝開著的格子 [{cmd, key, html}]，照點的順序
 const BOT_CODES = [
-  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
+  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：老師固定的族群裡，今天衝高 3% 以上、5 分K跌破 20MA 而且 20MA 往下彎的股票（第一版，會比老師多列）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
   ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'],
   ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
@@ -18090,7 +18090,7 @@ function botAnswer(raw){
   if (!q) return null;
   // 2026-10-18 使用者：空方的（負號代碼 -12、-22…）跟隔日沖 811、813 的標題改綠底白字；
   // 同一天又加：空族群排名(199)、空族群必殺(193)、新刀劍空(32)、刀劍空(31)，連同終點戰法空(283／284／股號+3)
-  const bear = /^-/.test(q) || ['811', '813', '193', '199', '283', '284', '31', '32'].includes(q) || /^.+\\+3$/.test(q);
+  const bear = /^-/.test(q) || ['811', '813', '193', '199', '283', '284', '31', '32', '123'].includes(q) || /^.+\\+3$/.test(q);
   // 177 重點族群排名多空都有：標題左半綠、右半紅，白字（2026-10-18 使用者）
   const title = (t, sub) => '<div class="bot-title' + (bear ? ' bot-title-bear' : q === '177' ? ' bot-title-split' : '') + '">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
   const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
@@ -18274,6 +18274,43 @@ function botAnswer(raw){
       (z.lit >= 2 ? botLine('⚠️有兩個以上亮燈空小心', 'bot-warn') : '')).join('') + (list.length ? botLine('⚠️注意破惡均下彎打倒數', 'bot-warn') : botLine('目前沒有族群有亮燈', 'bot-dim')));
   }
   const m = race333Model();
+  // 名單最後附櫃買多空（漲跌幅），33／34／123 共用
+  const otcFoot = () => (!m || m.otcPct === null || m.otcPct === undefined ? '' : botLine('------↓(櫃買)↓------', 'bot-sep') +
+    botLine('⚠️' + (m.otcLabel || '') + (/多/.test(m.otcLabel || '') ? '🚀' : /空/.test(m.otcLabel || '') ? '🔻' : '') + '(' + botPct(m.otcPct).replace('+', '') + ')', 'bot-warn'));
+  // 123 1️⃣2️⃣空（2026-10-18 使用者：照老師 10/13～10/16 三十幾份 123 名單反推的第一版）：老師固定的族群（199 的 23 族＋188 的 13 族）裡，
+  // 今天最高曾衝 3% 以上、5 分K收在 20MA（連前幾天一起算）下面、20MA 往下彎的股票，後端 5 分K引擎每根 K 收完更新。
+  // 進出時間跟老師對得上（站回 20MA 上就拿掉、再跌破又列回來），老師列的抓得到九成六；他還會再挑掉一些（「1」「2」兩個高點
+  // 怎麼判斷還不知道），所以盤中大跌時會比老師多列。照族群名次排（同族漲的在前），跌 5% 以上放收割區域；後面的 🔪⚔️🔰 是族群明細的記號。
+  if (q === '123'){
+    const title = '1️⃣2️⃣空(123)';
+    const k = botFetchCache('kill12', '/api/kill12', 30e3);
+    if (!k) return wrap(title, botLine('讀取中…', 'bot-dim'));
+    if (k.status !== 'ok') return wrap(title, botLine('後端暫時連不上，等一下再試', 'bot-dim'));
+    if (!k.tracked) return wrap(title, botLine('後端今天還沒有 5 分K（盤中 9 點以後、或收盤回補完才有）', 'bot-dim') + otcFoot());
+    const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
+    const quote = new Map();
+    lastData.groups.forEach((g) => g.stocks.forEach((s) => quote.set(s.code, s)));
+    const marksOf = new Map();
+    const rows = [];
+    (k.items || []).forEach((it) => {
+      const gi = ranked.findIndex((g) => (KILL193_GROUPS.has(g.name) || RANK188_GROUPS.has(g.name)) && g.stocks.some((s) => s.code === it.code));
+      if (gi < 0) return;
+      const g = ranked[gi], s = quote.get(it.code);
+      if (!marksOf.has(g.name)) marksOf.set(g.name, groupBladeMarks(g));
+      const bm = marksOf.get(g.name).get(it.code);
+      const pct = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
+      rows.push({ code: it.code, name: (s && s.name) || it.name, rank: gi + 1, pct, mk: bm ? bm.mk : '' });
+    });
+    rows.sort((a, b) => a.rank - b.rank || b.pct - a.pct);
+    const line = (r, harvest) => botLine(r.rank + (harvest ? '♣' : bladeRankMark(r.rank, ranked.length)) + ' ' +
+      botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk));
+    const live = rows.filter((r) => !(r.pct <= -BLADE_HARVEST_PCT)), harvest = rows.filter((r) => r.pct <= -BLADE_HARVEST_PCT);
+    const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
+    return wrap(title, (rows.length ? live.map((r) => line(r)).join('') +
+        (harvest.length ? botLine('----↓(收割區域)↓-----', 'bot-sep') + harvest.map((r) => line(r, true)).join('') : '')
+      : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) + otcFoot(),
+      (when ? '5 分K算到 ' + when + '・' : '') + rows.length + ' 檔');
+  }
   if (q === '30' || q === '32'){
     if (!m) return wrap(q, botLine('讀取中…', 'bot-dim'));
     if (q === '30'){
@@ -18294,8 +18331,7 @@ function botAnswer(raw){
     const jailed = new Set(jd ? (jd.jailedList || []).map((j) => j.code).concat((jd.index || []).filter((x) => x.jailed).map((x) => x.code)) : []);
     const MEDAL = ['👑', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
     const line = (r, i) => botLine((jailed.has(r.code) ? '*' : '') + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (MEDAL[i] ? ' ' + MEDAL[i] : '')));
-    const otc = m.otcPct === null || m.otcPct === undefined ? '' : botLine('------↓(櫃買)↓------', 'bot-sep') +
-      botLine('⚠️' + (m.otcLabel || '') + (/多/.test(m.otcLabel || '') ? '🚀' : /空/.test(m.otcLabel || '') ? '🔻' : '') + '(' + botPct(m.otcPct).replace('+', '') + ')', 'bot-warn');
+    const otc = otcFoot();
     if (q === '33'){
       const rows = m.horses.slice().sort((a, b) => b.pct - a.pct);
       const over = rows.filter((r) => r.pct > 7).length;
@@ -20646,6 +20682,14 @@ export default {
         return await proxyHanstockBars("/api/hub/kline-signals/backfill-today/status", 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/kill12") {
+      // 1️⃣2️⃣空（機器人 123，2026-10-18）：後端 5 分K引擎算好的「今天衝高 3% 以上、收在 20MA 下、20MA 往下彎」名單，30 秒快取
+      try {
+        return await proxyHanstockBars("/api/hub/kill12", 30);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), items: [] }, { status: 502 });
       }
     }
     if (url.pathname === "/api/group-rank-checkpoints") {

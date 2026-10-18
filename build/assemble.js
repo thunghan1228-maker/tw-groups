@@ -732,6 +732,14 @@ export default {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/kill12") {
+      // 1️⃣2️⃣空（機器人 123，2026-10-18）：後端 5 分K引擎算好的「今天衝高 3% 以上、收在 20MA 下、20MA 往下彎」名單，30 秒快取
+      try {
+        return await proxyHanstockBars("/api/hub/kill12", 30);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), items: [] }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/group-rank-checkpoints") {
       // 67 族今天每半小時的族群名次（2026-10-16，老師族群明細最下面「今天23-3-11-24」那排；馬火多(30) 用），60 秒快取
       try {
