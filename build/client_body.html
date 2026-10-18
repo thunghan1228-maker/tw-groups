@@ -874,9 +874,10 @@
   #sgtInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
   /* 盤中訊號分頁（2026-10-18 使用者：每格照那個分頁要放的資料決定寬窄，不是一律十等分，畫面上可能只看到四、五格）：
      寬度在 JS 的 SGT_COL_W；字用小一號（不套盤中訊號電腦版放大的字），欄位才排得下 */
-  #sgtBody .bot-col{flex:0 0 auto;min-width:0;}
+  #sgtBody .sgt-cell{position:relative;flex:0 0 auto;display:flex;flex-direction:column;min-width:160px;min-height:100px;}
+  #sgtBody .sgt-cell > .bot-col{flex:1 1 auto;width:auto;min-width:0;min-height:0;}
   #sgtBody .bot-col > .bot-msg{padding:8px 8px;}
-  @media (max-width:767px){ #sgtBody .bot-col{width:92%!important;} }
+  @media (max-width:767px){ #sgtBody .sgt-cell{width:92%!important;} }
   /* 訊號列一檔排兩行：第 1 行 時間、代號、名稱、族群、均線分數，漲跌幅／漲跌／成交價靠右；第 2 行 訊號、盤中大戶力；
      張數、金額、可融資…那行在最下面。欄位名稱那列一樣排，上下才對得齊。今日強勢股／弱勢股欄位少，一行就放得下，不拆。 */
   #sgtBody .signal-row:not(.st-row){row-gap:4px;column-gap:8px;}
@@ -905,13 +906,21 @@
   #sgtBody .bot-cols{margin-bottom:2px;}
   #sgtBody .bot-cols.sgt-empty{border:2px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;}
   .sgt-empty-hint{color:var(--muted);font-size:14px;padding:10px;text-align:center;}
-  /* 每格右下角可以拉大拉小；格子上面的分頁名稱可以拖 */
-  #sgtBody .bot-col.sgt-cell{resize:both;min-width:180px;min-height:120px;}
-  #sgtBody .bot-col.sgt-cell::-webkit-resizer{background:linear-gradient(135deg,transparent 55%,#a78bfa 55%);border-radius:0 0 10px 0;}
+  /* 每格四邊、右下角拉大小（滑鼠移到邊上會變色）；右上角 ↺ 回到原來大小、✕ 收掉；格子上面的分頁名稱可以拖 */
+  #sgtBody .sgt-cell > .bot-col-x{top:6px;right:8px;z-index:5;}
+  #sgtBody .sgt-cell > .sgt-col-reset{right:40px;color:#c4b5fd;border-color:#7c3aed88;}
+  .sgt-rz{position:absolute;z-index:4;}
+  .sgt-rz-l{left:0;top:12px;bottom:12px;width:7px;cursor:ew-resize;border-radius:12px 0 0 12px;}
+  .sgt-rz-r{right:-7px;top:12px;bottom:12px;width:8px;cursor:ew-resize;}
+  .sgt-rz-t{top:0;left:12px;right:12px;height:6px;cursor:ns-resize;}
+  .sgt-rz-b{bottom:0;left:12px;right:18px;height:7px;cursor:ns-resize;}
+  .sgt-rz-br{right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;background:linear-gradient(135deg,transparent 55%,#a78bfa 55%);border-radius:0 0 12px 0;}
+  .sgt-rz-l:hover,.sgt-rz-r:hover,.sgt-rz-t:hover,.sgt-rz-b:hover{background:#a78bfa88;}
+  .sgt-cell:hover > .sgt-rz-l,.sgt-cell:hover > .sgt-rz-r,.sgt-cell:hover > .sgt-rz-t,.sgt-cell:hover > .sgt-rz-b{background:#a78bfa22;}
   #sgtBody .sgt-drag{cursor:move;}
   #sgtBody .sgt-cell.sgt-dragging{opacity:.4;}
-  #sgtBody .sgt-cell.sgt-drop-l{box-shadow:inset 5px 0 0 #a78bfa;}
-  #sgtBody .sgt-cell.sgt-drop-r{box-shadow:inset -5px 0 0 #a78bfa;}
+  #sgtBody .sgt-cell.sgt-drop-l > .bot-col{box-shadow:inset 5px 0 0 #a78bfa;}
+  #sgtBody .sgt-cell.sgt-drop-r > .bot-col{box-shadow:inset -5px 0 0 #a78bfa;}
   #sgtBody .bot-cols.sgt-drop-box{border-color:#a78bfa;}
   .sgt-hist-bar{margin:2px 0 8px;font-size:12.5px;color:var(--muted);} .sgt-hist-bar input{background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:2px 6px;}
   body.sigtabs-window-mode{padding-bottom:0;}
@@ -2953,7 +2962,7 @@
     <div class="chips-head" id="sgtHead">
       <div>
         <div class="chips-title">📶 盤中訊號分頁</div>
-        <div class="chips-sub">點分頁名稱開一格（再點一次收掉），開在紫色框那一排；上下兩排各自開（每排最多 10 格），點一下哪排就改開在哪排。格子右下角拉大小、按住格子上面的名稱拖到別的位置或另一排，兩排中間的把手拉高度。內容跟盤中訊號一樣，盤中自動更新。</div>
+        <div class="chips-sub">點分頁名稱開一格（再點一次收掉），開在紫色框那一排；上下兩排各自開（每排最多 10 格），點一下哪排就改開在哪排。每格的上下左右四邊、右下角都能拉大拉小，↺ 回到原來大小；按住格子上面的名稱拖到別的位置或另一排，兩排中間的把手拉高度。內容跟盤中訊號一樣，盤中自動更新。</div>
       </div>
       <div class="bot-win-acts">
         <button type="button" id="sgtPop" title="另開一個視窗，可以拖到外接螢幕；再按一次移回主畫面">⧉ 移到另一螢幕</button>
@@ -6484,7 +6493,11 @@ function race333Model(){
   const bladeShortFrom = Math.max(1, Math.round(total * 26 / 67));
   const bladeUpperTo = Math.max(1, Math.round(total * 10 / 67));
   const bladeInUpper = (r) => r.groupRank <= bladeUpperTo;
-  const bladeBase = Array.from(bladeCand.values()).filter((r) => true
+  // 2026-10-18 對老師 10/16 收盤的 32（24 檔）：① 族群前 5 名不列——老師 12 份 32 的多方打少都是族群第 6～10 名，從沒有前 5 名的
+  // （耀登 低軌衛星第 1、良維 小電組第 5 都有 ⚔️，他沒列）；② 族群明細上要有 🔪⚔️🔰 記號才列（groupBladeMarks，跟族群明細同一套；
+  // 華夏、彩晶、鈞寶 在空方段但明細沒記號，老師都沒列）。兩條加上去以後，跟他那 24 檔一模一樣。
+  const bladeTopSkip = Math.max(1, Math.round(total * 5 / 67));
+  const bladeBase = Array.from(bladeCand.values()).filter((r) => r.groupRank > bladeTopSkip && (!hasDaily || r.bladeGm)
     // 多方打少不看櫃買：佳能（光學鏡頭，族排 8～16）跌 2.7～3.3%、沒比櫃買弱，老師 11:38、12:01、12:18、12:34 都列
     && (!hasDaily || ((bladeKnife(r) || bladeSword(r)) && (bladeSword(r) || bladeInUpper(r) || belowOtc(r))
       // 空方段裡倒數第 4、5 檔：前一兩天要大漲過（5.5% 以上）才標 🔰、才列（台燿前天 +4.83% 排倒數第 5 沒標、良維 +9.98% 倒數第 4 標 🔰）
@@ -18140,9 +18153,10 @@ function botAnswer(raw){
       const rows = m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct);
       return wrap('🐎🚀馬火多(30)', rows.map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>'))).join('') || botLine('目前沒有', 'bot-dim'));
     }
-    const sec = (l) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '')))).join('');
+    // 名次後面的記號照老師：族群前 10 名 🔺、到第 25 名 🔽、後面 🔰，收割區域 ♣
+    const sec = (l, harvest) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + (harvest ? '♣' : bladeRankMark(r.groupRank, m.total)) + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '')))).join('');
     // 2026-10-18 使用者：強空積極（連同收割區域）搬到最上面，跟 199、193 一樣；後面接多方打少、中間段，每段上面寫段名
-    return wrap('🔪⚔️新刀劍空(32)', botLine('----↓(強空積極)↓----', 'bot-sep bot-sep-bear') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest) +
+    return wrap('🔪⚔️新刀劍空(32)', botLine('----↓(強空積極)↓----', 'bot-sep bot-sep-bear') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest, true) +
       botLine('----↓(多方打少)↓----', 'bot-sep') + sec(m.bladeUpper) + botLine('----↓(中間段)↓----', 'bot-sep') + sec(m.bladeMiddle));
   }
   // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
@@ -18395,7 +18409,7 @@ function initColsPan(bodyId){
   body.addEventListener('pointerdown', (e) => {
     if (e.pointerType !== 'mouse' || e.button !== 0) return;
     const box = e.target.closest('.bot-cols');
-    if (!box || e.target.closest('button, input, select, textarea, a, .bot-cols-grip, [draggable="true"]')) return;
+    if (!box || e.target.closest('button, input, select, textarea, a, .bot-cols-grip, [draggable="true"], .sgt-rz')) return;
     const col0 = e.target.closest('.bot-col');
     if (col0 && e.target === col0){   // 點在格子本身（捲軸、右下角拉大小的地方），不是內容：不拖
       const r = col0.getBoundingClientRect();
@@ -18785,11 +18799,16 @@ const sgtColW = (key) => SGT_COL_W[key] || 540;
 function sgtSizes(){ const v = botLoad(SGT_SIZE_KEY); return v && typeof v === 'object' ? v : {}; }
 function sgtCellStyle(key){
   const z = sgtSizes()[key] || {};
-  return 'width:' + (z.w >= 160 ? z.w : sgtColW(key)) + 'px' + (z.h >= 100 ? ';height:' + z.h + 'px;align-self:flex-start' : '');
+  return 'width:' + (z.w >= 160 ? z.w : sgtColW(key)) + 'px' + (z.h >= 100 ? ';height:' + z.h + 'px;align-self:flex-start' : '') + (z.y > 0 ? ';margin-top:' + z.y + 'px' : '');
 }
-const sgtColX = (key) => '<button type="button" class="bot-col-x" data-sgt-close="' + key + '" title="收掉這格">✕</button>';
+// 右上角：↺ 回到原來大小（拉過才出現）、✕ 收掉；放在外框上，內容捲下去也看得到
+const sgtCellBtns = (key) => (sgtSizes()[key] ? '<button type="button" class="bot-col-x sgt-col-reset" data-sgt-reset="' + key + '" title="回到原來的大小">↺ 原來大小</button>' : '') +
+  '<button type="button" class="bot-col-x" data-sgt-close="' + key + '" title="收掉這格">✕</button>';
+// 四邊＋右下角的把手（2026-10-18 使用者：每一格上下左右都能拉開、縮小）
+const SGT_RZ_HTML = ['l', 'r', 't', 'b', 'br'].map((d) => '<i class="sgt-rz sgt-rz-' + d + '" data-rz="' + d + '" title="拉著調整這格大小（點兩下回到原來大小）"></i>').join('');
 const sgtColInner = (c) => '<div class="bot-msg"><div class="bot-q sgt-drag" draggable="true" title="按住拖到別的位置（也可以拖到另一排）">' + wlEsc(sgtLabel(c.key)) + '</div>' + c.html + '</div>';
-const sgtCellHtml = (c, i) => '<div class="bot-col sgt-cell" data-col-key="' + c.key + '" data-pane="' + i + '" style="' + sgtCellStyle(c.key) + '">' + sgtColX(c.key) + sgtColInner(c) + '</div>';
+const sgtCellHtml = (c, i) => '<div class="sgt-cell" data-col-key="' + c.key + '" data-pane="' + i + '" style="' + sgtCellStyle(c.key) + '">' +
+  '<div class="bot-col" data-col-key="' + c.key + '" data-pane="' + i + '">' + sgtColInner(c) + '</div>' + sgtCellBtns(c.key) + SGT_RZ_HTML + '</div>';
 const sgtPaneTip = (i) => (i === sgtState.active ? '點上面的分頁名稱會開在這排' : '點一下這排，上面的分頁名稱就改開在這排');
 const sgtEmptyTip = (i) => (i === sgtState.active ? '點上面的分頁名稱，開在這一排（一格一格往右排，最多 10 格）' : '點這裡選這一排，再點上面的分頁名稱；也可以把另一排格子上面的名稱拖過來');
 function renderSgt(){
@@ -18867,7 +18886,7 @@ function sgtRerender(){
     c.html = sgtTabHtml(c.key);
     if (el._html === c.html) return;
     const top = el.scrollTop;
-    el.innerHTML = sgtColX(c.key) + sgtColInner(c);
+    el.innerHTML = sgtColInner(c);
     el._html = c.html;
     el.scrollTop = top;
   });
@@ -18879,11 +18898,12 @@ function sgtRun(key){
   if (cols.length >= SGT_MAX_COLS){ showToast('這一排最多 10 格，先收掉一格（再點一次那個分頁，或按格子右上角 ✕）'); return; }
   cols.push({ key, html: '' });
   renderSgt();
-  const el = [...document.querySelectorAll('#sgtBody .bot-col')].find((x) => x.dataset.colKey === key && +x.dataset.pane === sgtState.active);
+  const el = [...document.querySelectorAll('#sgtBody .sgt-cell')].find((x) => x.dataset.colKey === key && +x.dataset.pane === sgtState.active);
   if (el){
     const box = el.parentElement;
     if (el.offsetLeft + el.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollLeft = Math.max(0, el.offsetLeft - 8);
-    el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1200);
+    const col = el.querySelector('.bot-col');
+    if (col){ col.classList.add('flash'); setTimeout(() => col.classList.remove('flash'), 1200); }
   }
 }
 function sgtSave(){
@@ -19041,7 +19061,8 @@ document.getElementById('sgtBody').addEventListener('click', (e) => {
   const t = e.target;
   const run = t.closest('[data-sgt-run]'); if (run){ sgtRun(run.dataset.sgtRun); return; }
   const x = t.closest('[data-sgt-close]');
-  if (x){ const p = sgtState.panes[+x.closest('.bot-col').dataset.pane]; p.cols = p.cols.filter((c) => c.key !== x.dataset.sgtClose); renderSgt(); return; }
+  if (x){ const p = sgtState.panes[+x.closest('.sgt-cell').dataset.pane]; p.cols = p.cols.filter((c) => c.key !== x.dataset.sgtClose); renderSgt(); return; }
+  const rs = t.closest('[data-sgt-reset]'); if (rs){ sgtResetSize(rs.dataset.sgtReset); return; }
   const clr = t.closest('[data-sgt-clear]');
   if (clr){ const w = clr.dataset.sgtClear; sgtState.panes.forEach((p, i) => { if (w === 'all' || +w === i) p.cols = []; }); renderSgt(); return; }
   if (t.closest('.bot-col')){ signalBodyClick(e); setTimeout(sgtRerender, 0); }   // 格子裡的篩選按鈕、股票列：照盤中訊號處理，這邊也跟著重畫
@@ -19078,36 +19099,62 @@ document.getElementById('sgtBody').addEventListener('pointerdown', (e) => { cons
   body.addEventListener('pointercancel', end);
   body.addEventListener('dblclick', (e) => { const g = e.target.closest('.bot-cols-grip'); if (g){ botStore(keyOf(+g.dataset.pane), null); sizeSgtPanes(); } });
 })();
-// 每格右下角拉大拉小（瀏覽器原生的拉角）：放開時記下寬高；點兩下右下角回到原本大小
+// 每格四邊、右下角拉大小（2026-10-18 使用者）：左右拉寬窄、上下拉高矮（上緣往下拉＝上面空出來、下緣不動），放開時記下來（照分頁記在這台）；
+// 點兩下把手或按 ↺ 回到原來大小
+function sgtResetSize(key){
+  const all = sgtSizes();
+  delete all[key];
+  botStore(SGT_SIZE_KEY, all);
+  renderSgt();
+}
 (function initSgtCellResize(){
   const body = document.getElementById('sgtBody');
-  const inCorner = (el, e) => { const r = el.getBoundingClientRect(); return r.right - e.clientX < 18 && r.bottom - e.clientY < 18; };
   let rz = null;
   body.addEventListener('pointerdown', (e) => {
-    const el = e.target.classList && e.target.classList.contains('sgt-cell') ? e.target : null;
-    if (el && inCorner(el, e)) rz = { el, w: el.offsetWidth, h: el.offsetHeight };
+    const hd = e.target.closest('.sgt-rz');
+    if (!hd || e.button !== 0) return;
+    const cell = hd.closest('.sgt-cell'), box = cell.parentElement;
+    rz = { cell, box, side: hd.dataset.rz, x: e.clientX, y: e.clientY, w: cell.offsetWidth, h: cell.offsetHeight, m: parseFloat(getComputedStyle(cell).marginTop) || 0, left: box.scrollLeft, moved: false };
+    hd.setPointerCapture(e.pointerId);
+    e.preventDefault();
+    e.stopPropagation();
+  });
+  body.addEventListener('pointermove', (e) => {
+    if (!rz) return;
+    const dx = e.clientX - rz.x, dy = e.clientY - rz.y, sd = rz.side, c = rz.cell;
+    if (!rz.moved && Math.abs(dx) < 2 && Math.abs(dy) < 2) return;
+    rz.moved = true;
+    if (sd === 'l' || sd === 'r' || sd === 'br'){
+      const w = Math.max(160, Math.round(sd === 'l' ? rz.w - dx : rz.w + dx));
+      c.style.width = w + 'px';
+      if (sd === 'l') rz.box.scrollLeft = rz.left + (w - rz.w);   // 左緣跟著滑鼠走（右邊不動）
+    }
+    if (sd === 't' || sd === 'b' || sd === 'br'){
+      const room = rz.box.clientHeight;
+      let m = rz.m, h = rz.h;
+      if (sd === 't'){ m = Math.min(Math.max(0, rz.m + dy), rz.m + rz.h - 100); h = rz.h - (m - rz.m); }
+      else h = rz.h + dy;
+      h = Math.max(100, Math.min(room - m, Math.round(h)));
+      c.style.height = h + 'px';
+      c.style.alignSelf = 'flex-start';
+      c.style.marginTop = m ? m + 'px' : '';
+    }
   });
   const end = () => {
     if (!rz) return;
-    const { el, w, h } = rz;
+    const { cell, moved } = rz;
     rz = null;
-    if (el.offsetWidth === w && el.offsetHeight === h) return;
-    const all = sgtSizes();
-    all[el.dataset.colKey] = { w: el.offsetWidth, h: el.offsetHeight };
+    if (!moved) return;
+    const key = cell.dataset.colKey, all = sgtSizes();
+    const m = parseFloat(cell.style.marginTop) || 0;
+    all[key] = { w: cell.offsetWidth };
+    if (cell.style.height){ all[key].h = cell.offsetHeight; if (m) all[key].y = Math.round(m); }
     botStore(SGT_SIZE_KEY, all);
-    // 同一個分頁也開在另一排的話，一起變成一樣大
-    body.querySelectorAll('.sgt-cell[data-col-key="' + el.dataset.colKey + '"]').forEach((x) => { if (x !== el) x.setAttribute('style', sgtCellStyle(el.dataset.colKey)); });
+    renderSgt();   // 同一個分頁開在另一排的也一起變；↺ 按鈕出現
   };
-  window.addEventListener('pointerup', end, true);
-  window.addEventListener('mouseup', end, true);
-  body.addEventListener('dblclick', (e) => {
-    const el = e.target.classList && e.target.classList.contains('sgt-cell') ? e.target : null;
-    if (!el || !inCorner(el, e)) return;
-    const all = sgtSizes();
-    delete all[el.dataset.colKey];
-    botStore(SGT_SIZE_KEY, all);
-    body.querySelectorAll('.sgt-cell[data-col-key="' + el.dataset.colKey + '"]').forEach((x) => x.setAttribute('style', sgtCellStyle(el.dataset.colKey)));
-  });
+  body.addEventListener('pointerup', end);
+  body.addEventListener('pointercancel', end);
+  body.addEventListener('dblclick', (e) => { const hd = e.target.closest('.sgt-rz'); if (hd) sgtResetSize(hd.closest('.sgt-cell').dataset.colKey); });
 })();
 // 格子上面的分頁名稱按住拖：換位置，或拖到另一排
 (function initSgtDrag(){
@@ -19117,7 +19164,7 @@ document.getElementById('sgtBody').addEventListener('pointerdown', (e) => { cons
   const spot = (e) => {
     const box = e.target.closest && e.target.closest('#sgtBody .bot-cols');
     if (!box) return null;
-    const cells = [...box.querySelectorAll(':scope > .bot-col')];
+    const cells = [...box.querySelectorAll(':scope > .sgt-cell')];
     let idx = cells.length;
     for (let i = 0; i < cells.length; i++){ const r = cells[i].getBoundingClientRect(); if (e.clientX < r.left + r.width / 2){ idx = i; break; } }
     return { box, pane: +box.dataset.pane, idx, cells };
@@ -19125,7 +19172,7 @@ document.getElementById('sgtBody').addEventListener('pointerdown', (e) => { cons
   body.addEventListener('dragstart', (e) => {
     const t = e.target.closest && e.target.closest('.sgt-drag');
     if (!t) return;
-    const cell = t.closest('.bot-col');
+    const cell = t.closest('.sgt-cell');
     drag = { pane: +cell.dataset.pane, key: cell.dataset.colKey, cell };
     e.dataTransfer.effectAllowed = 'move';
     try { e.dataTransfer.setData('text/plain', drag.key); e.dataTransfer.setDragImage(cell, 20, 12); } catch (_){}
