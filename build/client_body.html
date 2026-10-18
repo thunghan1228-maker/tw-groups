@@ -17956,13 +17956,13 @@ function botAnswer(raw){
   if (q === '199'){
     const rows = h.rows.filter((r) => KILL193_GROUPS.has(r.name));
     const bear = rows.filter((r) => r.rank > h.half), rest = rows.filter((r) => r.rank <= h.half);
-    return wrap('空族群排名(199)', (bear.length ? botLine('------↓(空方)↓------', 'bot-sep') + bear.map(rankLine).join('') + botLine('------↓(偏多，少打)↓------', 'bot-sep') : '') + rest.map(rankLine).join(''));
+    return wrap('空族群排名(199)', (bear.length ? botLine('------↓(空方)↓------', 'bot-sep') + bear.map(rankLine).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') : '') + rest.map(rankLine).join(''));
   }
   if (q === '193'){
     const k = kill193Model();
     if (!k) return wrap('空族群必殺(193)', botLine('讀取中…', 'bot-dim'));
     const line = (r) => rankLine({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg }) + (r.members.length ? botLine('⚠️' + r.members.map((x) => botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>')).join('　'), 'bot-sub') : '');
-    return wrap('空族群必殺(193)', botLine('------↓(空方)↓------', 'bot-sep') + k.lower.map(line).join('') + botLine('------↓(偏多，少打)↓------', 'bot-sep') + k.upper.map(line).join(''));
+    return wrap('空族群必殺(193)', botLine('------↓(空方)↓------', 'bot-sep') + k.lower.map(line).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') + k.upper.map(line).join(''));
   }
   if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\+3$/.test(q)){
     let list = zone283List(h);
