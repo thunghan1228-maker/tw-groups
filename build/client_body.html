@@ -7129,21 +7129,24 @@ function homeKill31ColHtml(){
     (!list ? '<div class="hr-note">讀取中…</div>' : list.length ? list.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
 // 首頁第 10 欄：22-5（原隔日沖必殺(813)，2026-10-18 換掉）／隔日沖黑龍(80)／股期黑龍(75)（2026-10-17 使用者：先把位置做出來，下週拿對方名單校正；跟機器人同一份）
-function homeDaytradeColsHtml(){
+function homeDaytradeColsHtml(part){
   const md = (iso) => Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10);
   const note = (t) => '<div class="hr-note">' + wlEsc(t) + '</div>';
   const col = (title, tip, body, cnt) => '<div class="hr-col"><div class="hr-title bear" title="' + wlEsc(tip) + '">' + title + (cnt !== undefined ? ' <span class="hr-rk">' + cnt + ' 檔</span>' : '') + '</div>' + body + '</div>';
   const stk = (code, name, right, tip, color) => '<div class="hr-row hr-stk" data-code="' + code + '" data-name="' + wlEsc(name) + '" tabindex="0" role="button"' + (tip ? ' title="' + wlEsc(tip) + '"' : '') + '>' +
     '<span class="hr-bear-pill ' + color + '"><span class="hr-code">' + code + '</span><span class="hr-name">' + wlEsc(name) + '</span></span><span class="hr-avg ' + color + '">' + right + '</span></div>';
-  const m80 = dtModel80(), m75 = dtModel75();
+  const m80 = part === '75' ? null : dtModel80(), m75 = part === '75' ? dtModel75() : null;
+  if (part === '75'){
+    const b75 = m75.wait ? note(m75.wait) : (m75.rows.map((x) => stk(x.code, (x.jailed ? '*' : '') + x.name, fmt(x.chg) + '%', x.jailed ? '處置中' : '', dirClass(x.chg))).join('') || note('目前沒有'));
+    return col('🐉股期黑龍(75)', '有股票期貨、均線分數 ≥ 10、今天收黑K；*＝處置中；槓桿大，防守黑K低點', b75, m75.rows ? m75.rows.length : undefined);
+  }
   const b80 = m80.wait ? note(m80.wait) : (m80.rows.map((x) => stk(x.code, x.name, fmt(x.chg) + '%' + (x.n > 0 ? '⭐'.repeat(Math.min(x.n, 5)) : ''), md(m80.base) + ' 上 811 名單' + (x.n > 0 ? '，兩週內另外又上榜 ' + x.n + ' 次' : ''), dirClass(x.chg))).join('') || note(md(m80.base) + ' 上榜的今天沒有收黑'));
-  const b75 = m75.wait ? note(m75.wait) : (m75.rows.map((x) => stk(x.code, (x.jailed ? '*' : '') + x.name, fmt(x.chg) + '%', x.jailed ? '處置中' : '', dirClass(x.chg))).join('') || note('目前沒有'));
   return '<div class="hr-stack">' +
     home225ColHtml() +   // 2026-10-18 使用者：隔日沖必殺(813) 換成 22-5
     col('🐉隔日沖黑龍(80)', '前兩個交易日上隔日沖 811 名單、今天收黑K而且下跌（均線分數 ≥ 10）；⭐＝兩週內又上榜幾次', b80, m80.rows ? m80.rows.length : undefined) +
-    col('🐉股期黑龍(75)', '有股票期貨、均線分數 ≥ 10、今天收黑K；*＝處置中；槓桿大，防守黑K低點', b75, m75.rows ? m75.rows.length : undefined) +
   '</div>';
 }
+const homeFut75ColHtml = () => homeDaytradeColsHtml('75');   // 2026-10-18 使用者：股期黑龍(75) 移到最右邊 22-35 下面
 function homeBladeColHtml(m){
   if (!m) return '';
   const mark = (r) => r.bladeMark || '';
@@ -7285,7 +7288,7 @@ function homeRank4Html(){
       home12ColHtml(h) +   // 2026-10-18 使用者：新刀劍空(32) 換成 12；199、刀劍空(31) 也從首頁拿掉
     '</div>' +
     homeDaytradeColsHtml() +   // 2026-10-17 使用者：813／80／75 先做在首頁最右邊一欄
-    home225ColHtml(35) +   // 2026-10-18 使用者：22-5 旁邊加一欄 22-35
+    '<div class="hr-stack">' + home225ColHtml(35) + homeFut75ColHtml() + '</div>' +   // 2026-10-18 使用者：22-5 旁邊加一欄 22-35；股期黑龍(75) 疊在 22-35 下面（最右邊一欄最下面）
     '</div>' +
     '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }

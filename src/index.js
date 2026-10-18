@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 10:36:29";
+const BUILD_STAMP = "2026-10-18 10:38:44";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7209,21 +7209,24 @@ function homeKill31ColHtml(){
     (!list ? '<div class="hr-note">讀取中…</div>' : list.length ? list.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
 // 首頁第 10 欄：22-5（原隔日沖必殺(813)，2026-10-18 換掉）／隔日沖黑龍(80)／股期黑龍(75)（2026-10-17 使用者：先把位置做出來，下週拿對方名單校正；跟機器人同一份）
-function homeDaytradeColsHtml(){
+function homeDaytradeColsHtml(part){
   const md = (iso) => Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10);
   const note = (t) => '<div class="hr-note">' + wlEsc(t) + '</div>';
   const col = (title, tip, body, cnt) => '<div class="hr-col"><div class="hr-title bear" title="' + wlEsc(tip) + '">' + title + (cnt !== undefined ? ' <span class="hr-rk">' + cnt + ' 檔</span>' : '') + '</div>' + body + '</div>';
   const stk = (code, name, right, tip, color) => '<div class="hr-row hr-stk" data-code="' + code + '" data-name="' + wlEsc(name) + '" tabindex="0" role="button"' + (tip ? ' title="' + wlEsc(tip) + '"' : '') + '>' +
     '<span class="hr-bear-pill ' + color + '"><span class="hr-code">' + code + '</span><span class="hr-name">' + wlEsc(name) + '</span></span><span class="hr-avg ' + color + '">' + right + '</span></div>';
-  const m80 = dtModel80(), m75 = dtModel75();
+  const m80 = part === '75' ? null : dtModel80(), m75 = part === '75' ? dtModel75() : null;
+  if (part === '75'){
+    const b75 = m75.wait ? note(m75.wait) : (m75.rows.map((x) => stk(x.code, (x.jailed ? '*' : '') + x.name, fmt(x.chg) + '%', x.jailed ? '處置中' : '', dirClass(x.chg))).join('') || note('目前沒有'));
+    return col('🐉股期黑龍(75)', '有股票期貨、均線分數 ≥ 10、今天收黑K；*＝處置中；槓桿大，防守黑K低點', b75, m75.rows ? m75.rows.length : undefined);
+  }
   const b80 = m80.wait ? note(m80.wait) : (m80.rows.map((x) => stk(x.code, x.name, fmt(x.chg) + '%' + (x.n > 0 ? '⭐'.repeat(Math.min(x.n, 5)) : ''), md(m80.base) + ' 上 811 名單' + (x.n > 0 ? '，兩週內另外又上榜 ' + x.n + ' 次' : ''), dirClass(x.chg))).join('') || note(md(m80.base) + ' 上榜的今天沒有收黑'));
-  const b75 = m75.wait ? note(m75.wait) : (m75.rows.map((x) => stk(x.code, (x.jailed ? '*' : '') + x.name, fmt(x.chg) + '%', x.jailed ? '處置中' : '', dirClass(x.chg))).join('') || note('目前沒有'));
   return '<div class="hr-stack">' +
     home225ColHtml() +   // 2026-10-18 使用者：隔日沖必殺(813) 換成 22-5
     col('🐉隔日沖黑龍(80)', '前兩個交易日上隔日沖 811 名單、今天收黑K而且下跌（均線分數 ≥ 10）；⭐＝兩週內又上榜幾次', b80, m80.rows ? m80.rows.length : undefined) +
-    col('🐉股期黑龍(75)', '有股票期貨、均線分數 ≥ 10、今天收黑K；*＝處置中；槓桿大，防守黑K低點', b75, m75.rows ? m75.rows.length : undefined) +
   '</div>';
 }
+const homeFut75ColHtml = () => homeDaytradeColsHtml('75');   // 2026-10-18 使用者：股期黑龍(75) 移到最右邊 22-35 下面
 function homeBladeColHtml(m){
   if (!m) return '';
   const mark = (r) => r.bladeMark || '';
@@ -7365,7 +7368,7 @@ function homeRank4Html(){
       home12ColHtml(h) +   // 2026-10-18 使用者：新刀劍空(32) 換成 12；199、刀劍空(31) 也從首頁拿掉
     '</div>' +
     homeDaytradeColsHtml() +   // 2026-10-17 使用者：813／80／75 先做在首頁最右邊一欄
-    home225ColHtml(35) +   // 2026-10-18 使用者：22-5 旁邊加一欄 22-35
+    '<div class="hr-stack">' + home225ColHtml(35) + homeFut75ColHtml() + '</div>' +   // 2026-10-18 使用者：22-5 旁邊加一欄 22-35；股期黑龍(75) 疊在 22-35 下面（最右邊一欄最下面）
     '</div>' +
     '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }
@@ -12932,7 +12935,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 10:36:29';
+const BUILD_STAMP = '2026-10-18 10:38:44';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
