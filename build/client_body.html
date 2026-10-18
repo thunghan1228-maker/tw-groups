@@ -7128,23 +7128,18 @@ function homeKill31ColHtml(){
   return '<div class="hr-col"><div class="hr-title bear">🔪⚔️刀劍空(31)' + (list ? ' <span class="hr-rk">' + list.length + ' 檔</span>' : '') + '</div>' +
     (!list ? '<div class="hr-note">讀取中…</div>' : list.length ? list.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
-// 首頁第 10 欄：隔日沖必殺(813)／隔日沖黑龍(80)／股期黑龍(75)（2026-10-17 使用者：先把位置做出來，下週拿對方名單校正；跟機器人同一份）
+// 首頁第 10 欄：22-5（原隔日沖必殺(813)，2026-10-18 換掉）／隔日沖黑龍(80)／股期黑龍(75)（2026-10-17 使用者：先把位置做出來，下週拿對方名單校正；跟機器人同一份）
 function homeDaytradeColsHtml(){
   const md = (iso) => Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10);
   const note = (t) => '<div class="hr-note">' + wlEsc(t) + '</div>';
   const col = (title, tip, body, cnt) => '<div class="hr-col"><div class="hr-title bear" title="' + wlEsc(tip) + '">' + title + (cnt !== undefined ? ' <span class="hr-rk">' + cnt + ' 檔</span>' : '') + '</div>' + body + '</div>';
   const stk = (code, name, right, tip, color) => '<div class="hr-row hr-stk" data-code="' + code + '" data-name="' + wlEsc(name) + '" tabindex="0" role="button"' + (tip ? ' title="' + wlEsc(tip) + '"' : '') + '>' +
     '<span class="hr-bear-pill ' + color + '"><span class="hr-code">' + code + '</span><span class="hr-name">' + wlEsc(name) + '</span></span><span class="hr-avg ' + color + '">' + right + '</span></div>';
-  const m813 = dtModel813(), m80 = dtModel80(), m75 = dtModel75();
-  let b813;
-  if (m813.wait) b813 = note(m813.wait);
-  else if (!m813.hold.length) b813 = note(md(m813.base) + ' 沒有隔日沖名單');
-  else if (!m813.rows) b813 = note(m813.waitOpen + '；先列 ' + md(m813.base) + ' 隔日沖手上張數') + m813.hold.slice(0, 15).map((r) => stk(r.code, r.name, Number(r.hold).toLocaleString('zh-TW') + '張', '', 'flat')).join('');
-  else b813 = m813.rows.map((x) => stk(x.code, x.name, x.ratio.toFixed(2), md(m813.base) + ' 隔日沖 ' + x.hold + ' 張 ÷ 今天開盤 ' + x.open + ' 張', x.ratio > 1 ? 'up' : 'flat')).join('') || note('沒有');
+  const m80 = dtModel80(), m75 = dtModel75();
   const b80 = m80.wait ? note(m80.wait) : (m80.rows.map((x) => stk(x.code, x.name, fmt(x.chg) + '%' + (x.n > 0 ? '⭐'.repeat(Math.min(x.n, 5)) : ''), md(m80.base) + ' 上 811 名單' + (x.n > 0 ? '，兩週內另外又上榜 ' + x.n + ' 次' : ''), dirClass(x.chg))).join('') || note(md(m80.base) + ' 上榜的今天沒有收黑'));
   const b75 = m75.wait ? note(m75.wait) : (m75.rows.map((x) => stk(x.code, (x.jailed ? '*' : '') + x.name, fmt(x.chg) + '%', x.jailed ? '處置中' : '', dirClass(x.chg))).join('') || note('目前沒有'));
   return '<div class="hr-stack">' +
-    col('⚡隔日沖必殺(813)', '前一個交易日隔日沖分點買超 ÷ 今天開盤第一分鐘量；> 1 隔日沖手上的比開盤量多，越大越容易出貨', b813, m813.rows ? m813.rows.length : undefined) +
+    home225ColHtml() +   // 2026-10-18 使用者：隔日沖必殺(813) 換成 22-5
     col('🐉隔日沖黑龍(80)', '前兩個交易日上隔日沖 811 名單、今天收黑K而且下跌（均線分數 ≥ 10）；⭐＝兩週內又上榜幾次', b80, m80.rows ? m80.rows.length : undefined) +
     col('🐉股期黑龍(75)', '有股票期貨、均線分數 ≥ 10、今天收黑K；*＝處置中；槓桿大，防守黑K低點', b75, m75.rows ? m75.rows.length : undefined) +
   '</div>';
@@ -7196,12 +7191,50 @@ function homeRankColHtml(title, rows, half, sepLabel, empty, warnOf, warnCls, ti
   if (!rows.length) body = '<div class="hr-note">' + empty + '</div>';
   return '<div class="hr-col"><div class="hr-title' + (titleCls ? ' ' + titleCls : '') + '">' + title + '</div>' + body + '</div>';
 }
+// ---- 首頁 44／12／22-5 欄（2026-10-18 使用者：193 換成 44、新刀劍空(32) 換成 12、隔日沖必殺(813) 換成 22-5；199、31、80、75 留著）----
+// 內容跟小幫手同代碼的格子同一份。
+function home44ColHtml(){
+  const ev = sigCurrentEvents().filter((e) => e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull'));
+  const seen = new Set();
+  const rows = ev.filter((e) => !seen.has(e.code) && seen.add(e.code));
+  const pctOf = (e) => { const qq = getStockQuote(e.code); const v = qq && Number.isFinite(qq.changePercent) ? qq.changePercent : [e.changePercent, e.pct, e.changePct].find((x) => Number.isFinite(x)); return Number.isFinite(v) ? v : null; };
+  const row = (e) => { const v = pctOf(e); return '<div class="hr-row hr-stk" data-code="' + wlEsc(e.code) + '" data-name="' + wlEsc(e.name || '') + '" tabindex="0" role="button">' +
+    '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(e.time || '--:--') + '</span><span class="hr-code">' + wlEsc(e.code) + '</span><span class="hr-name">' + wlEsc(e.name || '') + '</span>' +
+    '<span class="hr-avg ' + (v === null ? 'flat' : dirClass(v)) + '">' + (v === null ? '' : fmt(v) + '%') + '</span></div>'; };
+  return '<div class="hr-col"><div class="hr-title">1+2 多・突破黑馬(44) <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
+    (rows.length ? rows.map(row).join('') : '<div class="hr-note">今天還沒有</div>') + '</div>';
+}
+function home12ColHtml(h){
+  const byName = new Map(lastData.groups.map((g) => [g.name, g]));
+  const rows = h.rows.filter((r) => r.avg > 2);
+  const body = rows.map((r) => {
+    const g = byName.get(r.name);
+    const top = g ? g.stocks.filter((x) => x.price != null && Number.isFinite(x.changePercent)).sort((a, b) => b.changePercent - a.changePercent)[0] : null;
+    return homeRankRowHtml(r) + (top ? '<div class="hr-warn">👑<span class="hr-stk" data-code="' + top.code + '" data-name="' + top.name + '" tabindex="0" role="button">' + top.code + top.name +
+      ' <span class="' + dirClass(top.changePercent) + '">' + fmt(top.changePercent) + '%</span></span></div>' : '');
+  }).join('');
+  return '<div class="hr-col"><div class="hr-title">族群漲幅 &gt; 2%(12) <span class="hr-rk">' + rows.length + ' 族</span></div>' +
+    (body || '<div class="hr-note">目前沒有族群漲超過 2%</div>') + '</div>';
+}
+function home225ColHtml(){
+  const skip = 5, seen = new Map();
+  rankedGroupsOf(lastData.groups).forEach((g) => g.stocks.forEach((x) => {
+    if (x.price == null || !Number.isFinite(x.changePercent) || x.changePercent <= 2) return;
+    if (!seen.has(x.code)) seen.set(x.code, { s: x, groups: [] });
+    seen.get(x.code).groups.push(g.name);
+  }));
+  const all = [...seen.values()].sort((a, b) => b.s.changePercent - a.s.changePercent);
+  const page = all.slice(skip, skip + 30);
+  const row = (x, i) => '<div class="hr-row hr-stk" data-code="' + x.s.code + '" data-name="' + x.s.name + '" tabindex="0" role="button" title="' + wlEsc(x.groups.join('/')) + '">' +
+    '<span class="hr-rk">' + (skip + i + 1) + '</span><span class="hr-code">' + x.s.code + '</span><span class="hr-name">' + x.s.name + '</span>' +
+    '<span class="hr-avg ' + dirClass(x.s.changePercent) + '">' + fmt(x.s.changePercent) + '%</span></div>';
+  return '<div class="hr-col"><div class="hr-title">💎個股漲 &gt; 2%・扣前 5(22-5) <span class="hr-rk">共 ' + all.length + ' 檔</span></div>' +
+    (page.length ? page.map(row).join('') : '<div class="hr-note">' + (all.length ? '漲 2% 以上的不到 6 檔' : '目前沒有個股漲超過 2%') + '</div>') + '</div>';
+}
 function homeRank4Html(){
   const h = homeRankRows();
   if (!h) return '<div class="hr-note">族群行情載入中…</div>';
   if (!h.hasDaily) return '<div class="hr-note">還沒拿到族群昨天的名次，等一下就會出來。</div>';
-  const k = kill193Model();
-  const k193 = k ? k.upper.concat(k.lower) : [];
   const m = race333Model();
   // 183＝188 同一批 13 族，多方線以上的族群底下列 ⚠️ 個股。老師 10/15 10:04 只有軍工 ⚠️2429銘旺科（+7%），
   // 10:33 加上光學鏡頭 ⚠️6209今國光（10:02 才 +3.9% 沒列、10:32 +7% 就列），大毅 +4.7%、台表科 +4.7% 都沒列；
@@ -7243,11 +7276,11 @@ function homeRank4Html(){
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
     '<div class="hr-stack">' +
-      homeRankColHtml('空族群必殺(193)', k193, h.half, '------↓(空方)↓------', '固定 23 族目前名次都沒有比昨天掉', (r) => r.members || [], 'bear', 'bear') +   // 2026-10-16 使用者：193／199／32 欄的抬頭綠底白字
+      home44ColHtml() +   // 2026-10-18 使用者：193 換成 44
       homeRankColHtml('空族群排名(199)', h.rows.filter((r) => KILL193_GROUPS.has(r.name) && r.rank > h.half), h.half, '------↓(空方)↓------', '固定 23 族目前都不在空方', null, '', 'bear') +
     '</div>' +
     '<div class="hr-stack">' +   // 2026-10-17 使用者：刀劍空(31) 疊在新刀劍空(32) 下面
-      homeBladeColHtml(m) +
+      home12ColHtml(h) +   // 2026-10-18 使用者：新刀劍空(32) 換成 12
       homeKill31ColHtml() +
     '</div>' +
     homeDaytradeColsHtml() +   // 2026-10-17 使用者：813／80／75 先做在首頁最右邊一欄
