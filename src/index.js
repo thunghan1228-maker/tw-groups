@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 12:10:48";
+const BUILD_STAMP = "2026-10-18 12:12:58";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -227,7 +227,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bot-title.bot-title-bear{background:#16a34a;color:#fff;border-radius:6px;padding:3px 8px;margin-right:18px;} .bot-title.bot-title-bear *,.bot-title.bot-title-bear small{color:#fff!important;}   /* 空方／隔日沖標題：綠底白字 */
   .bot-line{font-size:13.5px;line-height:1.7;font-variant-numeric:tabular-nums;} .bot-line.bot-head{font-weight:800;margin-top:4px;} .bot-line.bot-sub{padding-left:16px;font-size:12.5px;}
   .bot-help-code{cursor:pointer;color:#c4b5fd;} .bot-help-code:hover{text-decoration:underline;}
-  .bot-line.bot-sep{color:var(--muted);text-align:left;} .bot-line.bot-warn{color:#fb923c;} .bot-dim{color:var(--muted);}
+  .bot-line.bot-sep{color:var(--muted);text-align:left;}
+  .bot-line.bot-sep.bot-sep-bear{color:#22c55e;font-weight:800;}
+  .bot-col .bot-line.bot-sep{white-space:nowrap;overflow:hidden;}   /* 格子窄時分隔線最後的 - 不要掉到第二行 */   /* 2026-10-18 使用者：空方那條（↓(空方)↓、↓(強空積極)↓、↓(空方・跌)↓）粗體綠字 */ .bot-line.bot-warn{color:#fb923c;} .bot-dim{color:var(--muted);}
   #remindInner{max-width:620px;}
   .rm-date{font-size:17px;font-weight:800;margin:2px 0 10px;}
   .ipo-scroll{overflow-x:auto;} .ipo-scroll .rm-table td,.ipo-scroll .rm-table th{white-space:nowrap;}
@@ -12948,7 +12950,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 12:10:48';
+const BUILD_STAMP = '2026-10-18 12:12:58';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17814,7 +17816,7 @@ function botGroupBlock(g, h, opts){
   const n = list.length, zone = bladeZoneSize(n), topEnd = Math.min(zone, n), botStart = Math.max(n - zone, topEnd);
   let html = head + list.slice(0, topEnd).map(line).join('');
   if (botStart > topEnd) html += botLine('------↑(多方)↑------', 'bot-sep') + list.slice(topEnd, botStart).map(line).join('');
-  if (botStart < n) html += botLine('------↓(空方)↓------', 'bot-sep') + list.slice(botStart).map(line).join('');
+  if (botStart < n) html += botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + list.slice(botStart).map(line).join('');
   return html + botRankTrail(g, r);
 }
 // 族群明細最下面的「排名」（2026-10-17 對老師 10 個族群明細）：今天 09:05、09:30、10:00、10:30、11:00 的族群名次，第 6 格是 11:00 以後最新的一次
@@ -18024,7 +18026,7 @@ function botAnswer(raw){
   // 2026-10-18 使用者：空方那段搬到每一格最上面（199、193：空方段整段；177：綠色（跌）的族群），順序不變，下面再接其他的
   if (q === '177'){
     const down = h.rows.filter((r) => r.avg < 0), rest = h.rows.filter((r) => !(r.avg < 0));
-    let body = down.length ? botLine('------↓(空方・跌)↓------', 'bot-sep') + down.map(rankLine).join('') + botLine('------------', 'bot-sep') : '', sep = false;
+    let body = down.length ? botLine('------↓(空方・跌)↓------', 'bot-sep bot-sep-bear') + down.map(rankLine).join('') + botLine('------------', 'bot-sep') : '', sep = false;
     rest.forEach((r) => { if (!sep && r.rank > h.half){ body += botLine('------水平------', 'bot-sep'); sep = true; } body += rankLine(r); });
     return wrap('重點族群排名(177)', body);
   }
@@ -18036,13 +18038,13 @@ function botAnswer(raw){
   if (q === '199'){
     const rows = h.rows.filter((r) => KILL193_GROUPS.has(r.name));
     const bear = rows.filter((r) => r.rank > h.half), rest = rows.filter((r) => r.rank <= h.half);
-    return wrap('空族群排名(199)', (bear.length ? botLine('------↓(空方)↓------', 'bot-sep') + bear.map(rankLine).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') : '') + rest.map(rankLine).join(''));
+    return wrap('空族群排名(199)', (bear.length ? botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + bear.map(rankLine).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') : '') + rest.map(rankLine).join(''));
   }
   if (q === '193'){
     const k = kill193Model();
     if (!k) return wrap('空族群必殺(193)', botLine('讀取中…', 'bot-dim'));
     const line = (r) => rankLine({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg }) + (r.members.length ? botLine('⚠️' + r.members.map((x) => botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>')).join('　'), 'bot-sub') : '');
-    return wrap('空族群必殺(193)', botLine('------↓(空方)↓------', 'bot-sep') + k.lower.map(line).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') + k.upper.map(line).join(''));
+    return wrap('空族群必殺(193)', botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + k.lower.map(line).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') + k.upper.map(line).join(''));
   }
   if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\\+3$/.test(q)){
     let list = zone283List(h);
@@ -18062,7 +18064,7 @@ function botAnswer(raw){
     }
     const sec = (l) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '')))).join('');
     // 2026-10-18 使用者：強空積極（連同收割區域）搬到最上面，跟 199、193 一樣；後面接多方打少、中間段，每段上面寫段名
-    return wrap('🔪⚔️新刀劍空(32)', botLine('----↓(強空積極)↓----', 'bot-sep') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest) +
+    return wrap('🔪⚔️新刀劍空(32)', botLine('----↓(強空積極)↓----', 'bot-sep bot-sep-bear') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest) +
       botLine('----↓(多方打少)↓----', 'bot-sep') + sec(m.bladeUpper) + botLine('----↓(中間段)↓----', 'bot-sep') + sec(m.bladeMiddle));
   }
   // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
