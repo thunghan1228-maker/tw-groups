@@ -499,7 +499,9 @@
   .k193-s{margin:0 0 4px 14px;font-size:14px;line-height:1.7;}
   .k193-stk{cursor:pointer;border-bottom:1px dotted currentColor;white-space:nowrap;}
   .k193-stk.up,.k193-stk.down{font-weight:700;} .k193-stk.up{color:var(--up);} .k193-stk.down{color:var(--down);}
-  .k193-gname{color:#fff;border-radius:6px;padding:1px 7px;background:#6b7280;} .k193-gname.up{background:#dc2626;} .k193-gname.down{background:#15803d;}
+  .k193-gname{color:#fff;border-radius:6px;padding:1px 7px;background:#6b7280;}
+  .race-sep.k193-sep-bear{color:#15803d;font-weight:800;}
+  .race-sub.k193-note{margin-top:12px;} .k193-gname.up{background:#dc2626;} .k193-gname.down{background:#15803d;}
   .alert-stk:hover{background:rgba(255,255,255,.14);border-radius:4px;}
   .pk-alert.behind-chart,.launch-alert.behind-chart{z-index:98;}
   .obs-stk:hover{background:rgba(255,255,255,.12);}
@@ -3218,7 +3220,7 @@
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。「訊號」右邊是那檔的盤中大戶力（大單淨額÷累計成交額）。</li>
         <li><b>創高黑龍</b>：09:00 開盤～13:30 收盤（2026-10-05 起，以前 11:00 後才算；第一根 5 分K 也算），5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。每列後面標 123 黑龍：收黑就是這一波第幾次進場（①②③）、區1（紅，可積極加碼）或區2（黃，等突破再加碼）；問診日線圖、K線圖日線也會在進場的那根K棒上畫同樣的圓圈。</li>
         <li><b>刀劍空(32)</b>：馬火多的鏡像，抓的是弱勢股。只看 199 的 23 族＋188 的 13 族，處置股不算，每族只看族內「空方段」（照漲跌幅排的後段，最多 5 檔，例如 4 檔的族群看後 2 檔、7 檔看後 4 檔、13 檔以上看後 5 檔），今天漲跌不限、成交量 10 張以上；而且要嘛是昨天漲 3% 以上（🔪 刀），要嘛是前天漲 3% 以上、現價已跌破前天收盤（⚔️ 劍）。族裡最弱 3 檔標 🔪／⚔️，空方段裡其他的標 🔰。照老師的格式分三段：多方打少（族群前 10 名）、中間段（11～25 名）、強空積極（族群第 26 名以後，最多 15 檔），再加收割區域（已跌 5% 以上，不追空，不分族群強弱，♣）；族群名次後面 🔺＝前 10 名、🔽＝11～25 名、🔰＝26 名以後。跟首頁的刀劍空是同一份名單：首頁照族群名次排，這個分頁照「出現」時間排（新的在上面）。點列或按「圖」欄可以開該檔的K線圖。每列第二行左邊標出交易條件：可融資／可融券／可現股當沖／有股期，不行的寫停資／停券／不可當沖（橘底），處置股、注意股也會標；某一項還沒查到就不標。</li>
-        <li><b>空族群必殺(193)</b>：找「名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票。只看固定的 23 個族群（資訊、鋼鐵、被動元件、光學鏡頭、航運、D電腦、面板、光電、二極體、矽光子、小電腦、散熱、低軌衛星、小電組、化學二、IP、矽晶圓、記憶體、玻璃基板、PA、台塑四寶、PCB、探針卡）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名，有掉就列。空方線以下＝第 36 名以後（空方線畫在第 35 名後面）；空方線以上＝排名前半但名次往下掉的。⚠️＝族裡正在刀劍空(32) 名單上的股票，點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
+        <li><b>空族群必殺(193)</b>：找「名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票。只看固定的 23 個族群（資訊、鋼鐵、被動元件、光學鏡頭、航運、D電腦、面板、光電、二極體、矽光子、小電腦、散熱、低軌衛星、小電組、化學二、IP、矽晶圓、記憶體、玻璃基板、PA、台塑四寶、PCB、探針卡）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名，有掉就列。空方線以下＝第 36 名以後（空方線畫在第 35 名後面），這段排在最上面；空方線以上＝排名前半但名次往下掉的，接在「↓(多方漲)↓」下面。⚠️＝族裡正在刀劍空(32) 名單上的股票，點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選強多／四項精選強空／1+2多／創高黑龍／主力翻多／主力翻空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日或開盤前 08:45 今天還沒有訊號時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
       </ul>
     </div>
@@ -6976,14 +6978,16 @@ function kill193Html(){
     '<span class="muted k193-avg">' + fmt(r.avg) + '%・昨天第 ' + r.prev + ' 名</span></div>' +
     (r.members.length ? '<div class="k193-s">⚠️' + r.members.map((s) => '<span class="k193-stk ' + dirClass(s.pct) + '" data-k193-code="' + s.code + '" data-k193-name="' + s.name + '">' + s.code + s.name +
       ' ' + fmt(s.pct) + '%</span>').join(' / ') + '</div>' : '');
-  return '<div class="race-block"><div class="race-head">空族群必殺(193) ' + stamp + ' <button type="button" class="chart-tab chips-btn" data-k193-copy="1">📋 複製</button></div>' +
-    '<div class="race-sub">只看固定的 ' + KILL193_ONLY_GROUPS.size + ' 個族群（' + Array.from(KILL193_ONLY_GROUPS).join('、') + '）。' +
+  // 2026-10-18 使用者：空方那段搬到最上面（分隔線綠色粗體字，跟機器人 193 一樣），下面接空方線以上的；說明文字移到最下面
+  const note = '<div class="race-sub k193-note">只看固定的 ' + KILL193_ONLY_GROUPS.size + ' 個族群（' + Array.from(KILL193_ONLY_GROUPS).join('、') + '）。' +
       '族群名次＝今天平均漲跌幅在全部 ' + k.total + ' 個族群裡的排名（1 最強）；🔽＝比昨天收盤的名次掉了幾名，掉 ' + KILL193_MIN_DROP + ' 名以上才列。' +
       '空方線以下＝第 ' + (k.half + 1) + ' 名以後（空方線畫在第 ' + k.half + ' 名後面）；空方線以上＝前 ' + k.half + ' 名但名次往下掉的。' +
-      '⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少），點股票開K線圖。</div>' +
+      '⚠️＝族裡正在刀劍空(32) 名單上的股票（強空積極＋收割區＋多方打少），點股票開K線圖。</div>';
+  return '<div class="race-block"><div class="race-head">空族群必殺(193) ' + stamp + ' <button type="button" class="chart-tab chips-btn" data-k193-copy="1">📋 複製</button></div>' +
     (!k.hasDaily ? '<div class="race-note">還沒拿到族群昨天的名次，等一下就會出來。</div>'
-      : k.upper.map(grp).join('') + '<div class="race-sep">------↓(空方)↓------</div>' +
-        (k.lower.length ? k.lower.map(grp).join('') : '<div class="race-note">排名後半的族群目前名次都沒有比昨天掉</div>')) + '</div>';
+      : '<div class="race-sep k193-sep-bear">------↓(空方)↓------</div>' +
+        (k.lower.length ? k.lower.map(grp).join('') : '<div class="race-note">排名後半的族群目前名次都沒有比昨天掉</div>') +
+        (k.upper.length ? '<div class="race-sep">------↓(多方漲)↓------</div>' + k.upper.map(grp).join('') : '')) + note + '</div>';
 }
 function kill193Copy(){
   const k = kill193Model();
