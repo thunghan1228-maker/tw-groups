@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-18 16:25:22";
+const BUILD_STAMP = "2026-10-18 21:06:41";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1358,6 +1358,100 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hw-brk{color:var(--down);font-weight:700;}
   .hw-warn{color:#f59e0b;font-weight:700;}
   .hw-ok{color:var(--muted);}
+  /* 📋 今日功課（2026-10-18 使用者：照老師「今日功課」頁——段位分區／族群卡、12空、出獄股、即將入獄、段位對照） */
+  .td-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:2px 0 8px;}
+  .td-title{font-size:20px;}
+  .td-head small{color:var(--muted);font-size:12px;}
+  .td-time{background:#8b2c22;color:#fff;border-radius:999px;padding:3px 12px;font-weight:800;font-size:14px;}
+  .td-meta{font-size:12px;color:var(--muted);}
+  .td-otc{border-radius:999px;padding:3px 12px;font-weight:800;font-size:13px;font-style:normal;background:var(--panel-2);}
+  .td-otc.up{background:#fde2e2;color:#b91c1c;} .td-otc.down{background:#34d399;color:#064e3b;}
+  .td-sum{border-left:4px solid #334155;background:var(--panel);border-radius:8px;padding:8px 12px;margin:6px 0;}
+  .td-sum1{font-size:15px;color:#b45309;} .td-sum1 b{font-size:17px;}
+  .td-sum2{font-size:12px;color:var(--muted);margin-top:3px;}
+  .td-counts{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0;}
+  .td-count{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;background:var(--panel);}
+  .td-count b{color:#b45309;}
+  .td-count.hit{border-color:#b91c1c;} .td-count.bull{border-color:#e6675f;} .td-count.mid{border-color:#60a5fa;} .td-count.bear{border-color:#5fae6f;} .td-count.harv{border-color:#14b8a6;}
+  .td-ctrls,.td-params{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:6px 0;}
+  .td-zbtn,.td-view,.td-param{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:3px 11px;font-size:13px;cursor:pointer;font-family:inherit;}
+  .td-zbtn.bull.on{border-color:#e6675f;background:rgba(230,103,95,.14);} .td-zbtn.mid.on{border-color:#60a5fa;background:rgba(96,165,250,.14);}
+  .td-zbtn.bear.on{border-color:#5fae6f;background:rgba(95,174,111,.14);} .td-zbtn.harv.on{border-color:#14b8a6;background:rgba(20,184,166,.14);}
+  .td-zbtn.on:not(.bull):not(.mid):not(.bear):not(.harv){border-color:#f59e0b;background:rgba(245,158,11,.14);}
+  .td-zbtn:not(.on){opacity:.6;}
+  .td-plabel{font-size:12px;color:var(--muted);}
+  .td-param.on.p-big{background:#4c1d95;color:#fff;border-color:#4c1d95;} .td-param.on.p-ma7{background:#d6b44a;color:#1f2937;border-color:#d6b44a;}
+  .td-param.on.p-high3{background:#b7791f;color:#fff;border-color:#b7791f;} .td-param.on.p-max7{background:#166534;color:#fff;border-color:#166534;}
+  .td-param.on.p-all{background:#15803d;color:#fff;border-color:#15803d;}
+  .td-help{margin:4px 0 8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:13px;}
+  .td-help summary{cursor:pointer;color:#b45309;}
+  .td-help p{margin:6px 0;line-height:1.6;}
+  .td-zone{border:1px solid var(--line);border-radius:12px;margin:8px 0;overflow:hidden;background:var(--panel);}
+  .td-zhead{display:flex;flex-wrap:wrap;align-items:center;gap:5px 8px;padding:7px 12px;border-bottom:2px solid var(--line);}
+  .td-zone.bull .td-zhead{background:rgba(230,103,95,.16);border-bottom-color:#e6675f;} .td-zone.mid .td-zhead{background:rgba(96,165,250,.16);border-bottom-color:#60a5fa;}
+  .td-zone.bear .td-zhead{background:rgba(95,174,111,.16);border-bottom-color:#5fae6f;} .td-zone.harv .td-zhead{background:rgba(20,184,166,.14);border-bottom-color:#14b8a6;}
+  .td-zhead b{font-size:15px;}
+  .td-zhead small{color:var(--muted);font-size:11px;}
+  .td-chip{border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:12px;background:var(--panel);}
+  .td-cnt{margin-left:auto;font-size:12px;color:#b45309;font-weight:700;}
+  .td-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:6px 12px;border-top:1px solid var(--line);font-size:13px;cursor:pointer;}
+  .td-row:hover{background:var(--panel-2);}
+  .td-rank{display:inline-block;min-width:38px;text-align:center;border:1.5px solid var(--line);border-radius:6px;padding:0 4px;font-size:12px;font-weight:700;}
+  .td-rank.bull{border-color:#e6675f;color:#e6675f;} .td-rank.mid{border-color:#3b82f6;} .td-rank.bear{border-color:#5fae6f;} .td-rank.harv{border-color:#14b8a6;}
+  .td-grp{font-size:12px;color:var(--muted);min-width:76px;}
+  .td-ma{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;}
+  .td-ma.gold{background:#f6c343;color:#3b2a00;} .td-ma.ring{border:1.5px solid #e0b33a;color:#b7791f;} .td-ma.gray,.td-ma.none{border:1.5px solid var(--line);color:var(--muted);}
+  .td-stk{font-size:14px;white-space:nowrap;} .td-stk b{color:#b45309;}
+  .td-tags{display:flex;flex-wrap:wrap;gap:3px;flex:1 1 160px;min-width:0;}
+  .td-tags i{font-style:normal;font-size:11px;border-radius:5px;padding:1px 6px;border:1px solid var(--line);white-space:nowrap;}
+  .td-tags i.td-k12{background:#38bdf8;color:#05324a;border-color:#38bdf8;font-weight:700;}
+  .td-tags i.td-out{background:#8b2c22;color:#fff;border-color:#8b2c22;} .td-tags i.td-out.d1{background:#b45309;border-color:#b45309;}
+  .td-tags i.td-must{background:#b91c1c;color:#fff;border-color:#b91c1c;font-weight:700;}
+  .td-tags i.td-cond{background:#ede9fe;color:#4c1d95;border-color:#a78bfa;}
+  .td-tags i.td-again{background:linear-gradient(90deg,#fbbf24,#f87171);color:#3b0d0d;border-color:#f87171;font-weight:700;}
+  .td-tags i.td-fut{background:#166534;color:#fff;border-color:#166534;} .td-tags i.td-mini{background:#2563eb;color:#fff;border-color:#2563eb;}
+  .td-tags i.td-nofut{color:var(--muted);}
+  .td-tags i.td-dt{border-color:#f59e0b;color:#f59e0b;}
+  .td-tags i.td-gtag{background:var(--panel-2);}
+  .td-tags i.td-big{font-weight:800;}
+  .td-tags i.td-big.deep{background:#4c1d95;color:#fff;border-color:#4c1d95;} .td-tags i.td-big.neg{background:#ede9fe;color:#4c1d95;border-color:#c4b5fd;}
+  .td-tags i.td-big.pos{background:#fef3c7;color:#92400e;border-color:#fcd34d;} .td-tags i.td-big.hot{background:#d97706;color:#fff;border-color:#d97706;}
+  .td-pct{margin-left:auto;font-weight:800;font-size:15px;white-space:nowrap;}
+  .td-mk{width:22px;text-align:center;}
+  .td-x{background:none;border:0;color:#b91c1c;font-size:15px;cursor:pointer;padding:0 4px;}
+  .td-empty{padding:8px 12px;color:var(--muted);font-size:13px;}
+  .td-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;margin:8px 0;}
+  .td-card{border:1.5px solid #a78bfa;border-radius:12px;background:var(--panel);overflow:hidden;}
+  .td-chead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding:8px 12px;}
+  .td-chead b{font-size:17px;color:#7c3aed;}
+  .td-crank{border:1px solid var(--line);border-radius:999px;padding:0 8px;font-size:13px;}
+  .td-chead small{font-size:11px;color:var(--muted);}
+  .td-gfoot{margin:6px 10px 10px;padding:6px 10px;border:1px dashed #d6b44a;border-radius:8px;font-size:12px;line-height:1.7;background:rgba(214,180,74,.08);}
+  .td-river{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;background:linear-gradient(90deg,#7f1d1d,#b91c1c,#7f1d1d);color:#fff;border-radius:10px;padding:8px 14px;font-size:14px;}
+  .td-river span{opacity:.75;letter-spacing:2px;} .td-river .td-otc{background:transparent;border:1.5px solid #fff;color:#fff;}
+  .td-sec{margin:14px 0;}
+  .td-sec h4{margin:0 0 6px;font-size:17px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;}
+  .td-sec h4 small{font-size:12px;color:var(--muted);font-weight:400;}
+  .td-sec > .td-row{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:3px 0;}
+  .td-badge.k12{background:#38bdf8;color:#05324a;border-radius:6px;padding:2px 10px;font-size:15px;}
+  .td-wadd{display:flex;gap:6px;margin:4px 0 6px;}
+  .td-wadd input{flex:1 1 auto;max-width:320px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-family:inherit;font-size:13px;}
+  .td-wadd button{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:8px;padding:4px 12px;cursor:pointer;font-family:inherit;}
+  .td-batch{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:4px 0;}
+  .td-bhead{font-size:13px;color:#b45309;font-weight:700;margin-bottom:4px;} .td-bhead small{color:var(--muted);font-weight:400;}
+  .td-chips{display:flex;flex-wrap:wrap;gap:4px;}
+  .td-rchip{border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:12px;color:var(--muted);cursor:pointer;}
+  .td-rchip.lit{color:var(--text);border-color:#a78bfa;background:rgba(167,139,250,.12);}
+  .td-rchip.blade{color:#fff;background:#8b2c22;border-color:#8b2c22;}
+  .td-jail{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;}
+  .td-jcol{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .td-jhead{display:flex;justify-content:space-between;align-items:baseline;padding:7px 12px;font-weight:800;font-size:15px;border-bottom:1px solid var(--line);}
+  .td-jhead small{font-weight:400;color:var(--muted);font-size:12px;}
+  .td-note{font-size:12px;color:var(--muted);line-height:1.6;margin:4px 2px;}
+  .td-sop{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel);}
+  .td-sop th,.td-sop td{border:1px solid var(--line);padding:5px 8px;text-align:left;}
+  .td-sop th{background:var(--panel-2);font-weight:700;}
+  @media (max-width:640px){ .td-cards{grid-template-columns:1fr;} .td-grp{min-width:0;} .td-sop{font-size:12px;} }
   /* 研究室：國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar） */
   .mc-meta{font-size:12px;color:var(--muted);margin:2px 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
   .mc-meta b{color:var(--text);}
@@ -13148,7 +13242,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-18 16:25:22';
+const BUILD_STAMP = '2026-10-18 21:06:41';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15210,8 +15304,8 @@ setInterval(() => {
 // 空觀察＝刀劍空(32) ∩ 即將入獄（處置監獄嫌疑名單）∩ 今天出獄 ∩ 做空族群（昨天漲最多的族群）；
 // 當沖多＝賽馬多(33) ∩ 河流多(34) ∩ 馬火多(30) ∩ 族群在多方區；多觀察＝挑三個族群，看每檔位置、漲幅、有沒有破三日低／月線。
 // 盤中的名單跟盤中333 同一份（race333Model，首頁即時報價）；防守價是前一天收盤算好的（/api/checkup）。
-const hwState = { tab: 'short', filters: { band: false, ma7: false, hideHold: true, over6: true }, picks: null, def: {}, defKey: '', defLoading: false, timer: 0 };
-const HW_TABS = [['short', '🔪 空觀察'], ['long', '🐎 當沖多'], ['watch', '🔥 多觀察'], ['obs', '⏰ 強勢黑K選股']];
+const hwState = { tab: 'today', filters: { band: false, ma7: false, hideHold: true, over6: true }, picks: null, def: {}, defKey: '', defLoading: false, timer: 0 };
+const HW_TABS = [['today', '📋 今日功課'], ['short', '🔪 空觀察'], ['long', '🐎 當沖多'], ['watch', '🔥 多觀察'], ['obs', '⏰ 強勢黑K選股']];
 try { const saved = JSON.parse(localStorage.getItem('hwPicks') || 'null'); if (Array.isArray(saved)) hwState.picks = saved.slice(0, 3); } catch (_){}
 const hwPct = (v) => (v === null || v === undefined || !Number.isFinite(v) ? '—' : (v > 0 ? '+' : '') + v.toFixed(2) + '%');
 function hwGroupsRanked(){
@@ -15250,6 +15344,302 @@ function hwListHtml(list, emptyText){
   const top = list.filter(isHot), rest = list.filter((o) => !isHot(o));
   return (top.length ? '<div class="hw-list">' + top.map(hwRowHtml).join('') + '</div>' : '<div class="race-note">沒有被兩份以上清單同時點名的</div>') +
     (rest.length ? '<details class="hw-more"><summary>只出現在一份清單的 ' + rest.length + ' 檔（先放旁邊）</summary><div class="hw-list">' + rest.map(hwRowHtml).join('') + '</div></details>' : '');
+}
+// ---- 📋 今日功課（2026-10-18 使用者：照老師「今日功課」頁——名單 ∩ 刀劍空，分段位寫部位／停損／目標，下面接 12空、出獄即入獄、
+// 出獄股、即將入獄、段位對照）。老師的頁要學員貼四份清單（①名單 ②刀劍空 ③處置預測 ④12空），我們全自動：刀劍空＝race333Model（32）、
+// 12空＝/api/kill12（123）、處置＝/api/jail；大戶%／N億＝/api/big-holder（老師算法：同秒併單 ≥7 張、開盤第一筆算賣、÷ 近 5 日均成交值）。
+// ①名單是哪一份還不知道（使用者也沒看過），先當成「全部刀劍空」，名單外的刀劍空、今天沒中的族群兩段先不出。
+const TD_ZONES = [
+  { key: 'upper', list: 'bladeUpper', name: '多方', icon: '▲', cls: 'bull', pos: '30%（或觀望）', stop: '-1.0% ~ -1.5%', tgt: '-3% ~ -4%' },
+  { key: 'middle', list: 'bladeMiddle', name: '中間', icon: '🔽', cls: 'mid', pos: '50%', stop: '-1.5% ~ -2.0%', tgt: '-4% ~ -6%' },
+  { key: 'lower', list: 'bladeLower', name: '強空', icon: '🔰', cls: 'bear', pos: '100%', stop: '-2.0% ~ -3.0%', tgt: '-7% ~ -9%（續抱可到 -10% 跌停）' },
+  { key: 'harvest', list: 'bladeHarvest', name: '收割區', icon: '♣', cls: 'harv', pos: '不追空', stop: '已到收割區，以回補為主', tgt: '' },
+];
+const TD_PARAMS = [['big', '🟣 大戶≤-10'], ['ma7', '📏 均線≥7'], ['high3', '👑 最高≥3%'], ['max7', '▼ 最大>-7%']];
+const tdState = { zones: { upper: true, middle: true, lower: true, harvest: true }, view: 'zone', params: { big: false, ma7: false, high3: false, max7: false }, dtOnly: false,
+  big: { key: '', at: 0, data: null, loading: false }, watch: [] };
+try { const w = JSON.parse(localStorage.getItem('tdWatch') || '[]'); if (Array.isArray(w)) tdState.watch = w.filter((c) => /^[0-9A-Z]{4,6}$/.test(c)).slice(0, 60); } catch (_){}
+function tdSaveWatch(){ try { localStorage.setItem('tdWatch', JSON.stringify(tdState.watch)); } catch (_){} }
+function tdBigHolder(codes){
+  const key = Array.from(new Set(codes)).sort().join(',');
+  const b = tdState.big;
+  if (key && !b.loading && (b.key !== key || Date.now() - b.at > 30e3)){
+    b.loading = true;
+    fetch('/api/big-holder?codes=' + encodeURIComponent(key)).then((r) => r.json()).then((d) => { if (d && d.status === 'ok') b.data = d; })
+      .catch(() => {}).finally(() => { b.loading = false; b.key = key; b.at = Date.now(); if (!document.getElementById('hwModal').hidden && hwState.tab === 'today') renderHomework(); });
+  }
+  return b.data && b.data.items ? b.data.items : {};
+}
+// 功課日（首頁報價那天）往前算的交易日數，含頭含尾：出獄當天＝第 1 天（老師 10/16 的金居、勤凱標「出獄第 1 天」）
+function tdTradeDays(from, to){
+  if (!from || !to || from > to) return 0;
+  const closed = new Set(((jlState.data && jlState.data.weeks) || []).flatMap((w) => w.days || []).filter((d) => d.closed).map((d) => d.date));
+  let n = 0;
+  for (const d = new Date(from + 'T00:00:00Z'), end = new Date(to + 'T00:00:00Z'); d <= end; d.setUTCDate(d.getUTCDate() + 1)){
+    const s = d.toISOString().slice(0, 10), wd = d.getUTCDay();
+    if (wd !== 0 && wd !== 6 && !closed.has(s)) n++;
+  }
+  return n;
+}
+const tdMd = (date) => (date ? Number(date.slice(5, 7)) + '/' + date.slice(8, 10) : '');
+function tdSuspectTag(sp){
+  if (sp.high) return '<i class="td-must" title="' + wlEsc((sp.lines || []).map((l) => l.text).join('；') || sp.status || '') + '">🔒 必關</i>';
+  const l = (sp.lines || [])[0];
+  if (!l) return '<i class="td-cond">⚠️ 條件關</i>';
+  let text = l.text || '';
+  if (l.kind === 'price'){ const op = /收盤\\s*([<>≥≤])/.exec(text); text = '收盤' + (op ? op[1] : '>') + l.price + ' 會關'; }
+  else if (l.kind === 'volume') text = '量>' + Number(l.lots).toLocaleString() + ' 會爆' + (l.today ? '（今' + Number(l.today).toLocaleString() + '）' : '');
+  return '<i class="td-cond" title="' + wlEsc(l.text || '') + '">⚠️ ' + wlEsc(text) + '</i>';
+}
+function tdCtx(m){
+  const jd = jlState.data && jlState.data.status === 'ok' ? jlState.data : null;
+  const hwDay = lastData && lastData.quoteDate ? String(lastData.quoteDate) : twTodayStr();
+  const released = new Map();
+  ((jd && jd.released) || []).forEach((r) => { const n = tdTradeDays(r.release, hwDay); if (n >= 1 && n <= 6 && !released.has(r.code)) released.set(r.code, n); });
+  const suspects = new Map(((jd && jd.suspects) || []).map((s) => [s.code, s]));
+  const dt = botFetchCache('dt', '/api/daytrade', 5 * 60e3);
+  const dtRows = new Map(dt && dt.status === 'ok' && dt.day ? dt.day.rows.map((r) => [r.code, r]) : []);
+  const k = botFetchCache('kill12', '/api/kill12', 30e3);
+  const k12 = new Map(k && k.status === 'ok' ? (k.items || []).map((it) => [it.code, it]) : []);
+  return { m, jd, hwDay, released, suspects, dt: dtRows, k12, k12Raw: k, big: {} };
+}
+function tdFutTag(code){
+  const f = stockFlags[code];
+  return f && f.hasMiniStockFutures ? '<i class="td-mini">小期</i>' : f && f.hasStockFutures ? '<i class="td-fut">股期</i>' : '<i class="td-nofut">無股期</i>';
+}
+function tdTagsHtml(code, ctx, opt){
+  const t = [];
+  const rel = ctx.released.get(code), sp = ctx.suspects.get(code);
+  if (rel && sp && rel <= 3) t.push('<i class="td-again" title="出獄第 ' + rel + ' 天又被點名要關">⛓ 出獄即入獄</i>');
+  if (ctx.k12.has(code) && !(opt && opt.noK12)) t.push('<i class="td-k12">12空</i>');
+  if (rel) t.push('<i class="td-out' + (rel === 1 ? ' d1' : '') + '">' + (rel === 1 ? '🔓 當天出獄' : '🔑 出獄第 ' + rel + ' 天') + '</i>');
+  if (sp) t.push(tdSuspectTag(sp));
+  t.push(tdFutTag(code));
+  const d = ctx.dt.get(code);
+  if (d) t.push('<i class="td-dt" title="' + tdMd(ctx.dtDate) + ' 隔日沖分點買超 ' + d.net + ' 張，佔成交 ' + d.pct + '%">⚡隔日沖 ' + d.pct + '%</i>');
+  if (opt && opt.group) t.push('<i class="td-gtag">' + wlEsc(opt.group) + '</i>');
+  return t.join('');
+}
+function tdBigHtml(code, ctx){
+  const b = ctx.big[code];
+  if (!b) return '';
+  const n = b.avgAmount ? '<i class="td-n" title="近 5 日平均成交值">' + (b.avgAmount >= 1e8 ? Math.round(b.avgAmount / 1e8) : (b.avgAmount / 1e8).toFixed(1)) + '億</i>' : '';
+  if (b.pct === null || b.pct === undefined) return n;
+  const v = b.pct, cls = v <= -10 ? 'deep' : v < 0 ? 'neg' : v >= 5 ? 'hot' : 'pos';
+  return '<i class="td-big ' + cls + '" title="大戶%：今天同秒併單 ≥7 張的大戶買減大戶賣（開盤第一筆算賣）÷ 近 5 日平均成交值' + (b.complete ? '' : '（今天的資料不完整）') + '">大戶 ' + (v > 0 ? '+' : '') + v + '%' + (b.complete ? '' : '*') + '</i>' + n;
+}
+function tdMaBall(code, price){
+  const v = hwMaScore(code, price);
+  if (v === null) return '<span class="td-ma none" title="均線分讀取中">–</span>';
+  return '<span class="td-ma ' + (v >= 12 ? 'gold' : v >= 6 ? 'ring' : 'gray') + '" title="均線分 ' + v + '（滿分 15）">' + v + '</span>';
+}
+function tdHighPct(r, ctx){
+  const b = ctx.big[r.code], k = ctx.k12.get(r.code);
+  if (b && b.high && r.price > 0 && Number.isFinite(r.pct)) return (b.high / (r.price / (1 + r.pct / 100)) - 1) * 100;
+  return k && Number.isFinite(k.dayHighPct) ? k.dayHighPct : null;
+}
+function tdPass(r, ctx){
+  const p = tdState.params, b = ctx.big[r.code];
+  if (p.big && !(b && b.pct !== null && b.pct !== undefined && b.pct <= -10)) return false;
+  if (p.ma7){ const v = hwMaScore(r.code, r.price); if (!(v !== null && v >= 7)) return false; }
+  if (p.high3){ const h = tdHighPct(r, ctx); if (!(h !== null && h >= 3)) return false; }
+  if (p.max7 && !(r.pct > -7)) return false;
+  if (tdState.dtOnly && !ctx.dt.has(r.code)) return false;
+  return true;
+}
+function tdRankBadge(rank, total, harvest){
+  const mark = harvest ? '♣' : bladeRankMark(rank, total);
+  return '<span class="td-rank ' + (harvest ? 'harv' : mark === '🔺' ? 'bull' : mark === '🔽' ? 'mid' : 'bear') + '">' + rank + (mark === '🔺' ? '▲' : mark) + '</span>';
+}
+function tdRowHtml(r, ctx, opt){
+  const o = opt || {};
+  return '<div class="td-row" data-hw-code="' + wlEsc(r.code) + '" data-hw-name="' + wlEsc(r.name || '') + '">' +
+    tdRankBadge(r.groupRank, ctx.m.total, o.harvest) +
+    (o.showGroup ? '<span class="td-grp">' + wlEsc(r.groupName || '') + ' <small>(' + r.groupRank + ')</small></span>' : '') +
+    tdMaBall(r.code, r.price) +
+    '<span class="td-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name || '') + '</span>' +
+    '<span class="td-tags">' + tdTagsHtml(r.code, ctx, o) + tdBigHtml(r.code, ctx) + '</span>' +
+    '<span class="td-pct ' + dirClass(r.pct) + '">' + hwPct(r.pct) + '</span>' +
+    '<span class="td-mk">' + (o.harvest ? '♣' : (r.bladeMark || '')) + '</span></div>';
+}
+function tdZoneHead(z, n, stamp){
+  return '<div class="td-zhead ' + z.cls + '"><b>' + z.icon + ' ' + z.name + '</b>' +
+    '<span class="td-chip">部位 ' + z.pos + '</span>' + (z.key === 'harvest' ? '<span class="td-chip">' + z.stop + '</span>' : '<span class="td-chip">停損 ' + z.stop + '</span><span class="td-chip">目標 ' + z.tgt + '</span>') +
+    '<small>' + stamp + '</small><span class="td-cnt">' + n + ' 檔</span></div>';
+}
+// 族群卡：帶頭＝族裡漲最多的、最低＝跌最多的（老師卡片下面那兩行）
+function tdGroupFoot(gname){
+  const g = (lastData.groups || []).find((x) => x.name === gname);
+  if (!g) return '';
+  const v = g.stocks.filter((s) => Number.isFinite(s.changePercent)).slice().sort((a, b) => b.changePercent - a.changePercent);
+  if (!v.length) return '';
+  const top = v[0], low = v[v.length - 1];
+  return '<div class="td-gfoot"><div>👑 帶頭 ' + wlEsc(top.code) + ' ' + wlEsc(top.name) + ' <span class="' + dirClass(top.changePercent) + '">' + hwPct(top.changePercent) + '</span>' +
+    (top.changePercent >= 5 ? '　族群強，空弱的（挑倒數）合理' : '　<span class="muted">族群沒有強勢帶頭</span>') + '</div>' +
+    '<div>▼ 最低 ' + wlEsc(low.code) + ' ' + wlEsc(low.name) + ' <span class="' + dirClass(low.changePercent) + '">' + hwPct(low.changePercent) + '</span></div></div>';
+}
+function tdCardsHtml(entries, ctx, stamp, opt){
+  const by = new Map();
+  entries.forEach((e) => { const k = e.r.groupName || '—'; if (!by.has(k)) by.set(k, []); by.get(k).push(e); });
+  const groups = Array.from(by.entries()).sort((a, b) => (a[1][0].r.groupRank || 99) - (b[1][0].r.groupRank || 99));
+  const upTo = Math.max(1, Math.round(ctx.m.total * 10 / 67));
+  let bannerDone = !(opt && opt.banner);
+  const otc = ctx.m.otcLabel || '';
+  return '<div class="td-cards">' + groups.map(([name, list]) => {
+    let banner = '';
+    if (!bannerDone && list[0].r.groupRank > upTo){
+      bannerDone = true;
+      banner = '<div class="td-river"><span>楚河</span><b>↓ ' + (/多/.test(otc) ? '雖然個股為強空區，但櫃買' + wlEsc(otc) + '要尊重' : '以下是族群排名 ' + (upTo + 1) + ' 名以後（中間、強空）') + ' ↓</b><span>漢界</span>' +
+        (ctx.m.otcPct !== null && ctx.m.otcPct !== undefined ? '<i class="td-otc ' + dirClass(ctx.m.otcPct) + '">櫃買 ' + wlEsc(otc) + ' ' + hwPct(ctx.m.otcPct) + '</i>' : '') + '</div>';
+    }
+    const g = (lastData.groups || []).find((x) => x.name === name);
+    const size = g ? g.stocks.length : 0;
+    return banner + '<div class="td-card"><div class="td-chead"><b>' + wlEsc(name) + '</b><span class="td-crank">(' + list[0].r.groupRank + ')</span><small>' + stamp + '</small>' +
+      '<span class="td-cnt">刀劍空 ' + list.length + ' / 族內 ' + size + ' 檔</span></div>' +
+      list.map((e) => tdRowHtml(e.r, ctx, e.opt)).join('') + (opt && opt.noFoot ? '' : tdGroupFoot(name)) + '</div>';
+  }).join('') + '</div>';
+}
+// 12空：後端 /api/kill12 的股票對到老師固定族群裡名次最好的那族（跟機器人 123 同一套）
+function tdK12Entries(ctx){
+  const k = ctx.k12Raw;
+  if (!k || k.status !== 'ok') return null;
+  const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
+  const quote = new Map();
+  lastData.groups.forEach((g) => g.stocks.forEach((s) => quote.set(s.code, s)));
+  const marks = new Map();
+  const out = [];
+  (k.items || []).forEach((it) => {
+    const gi = ranked.findIndex((g) => (KILL193_GROUPS.has(g.name) || RANK188_GROUPS.has(g.name)) && g.stocks.some((s) => s.code === it.code));
+    if (gi < 0) return;
+    const g = ranked[gi], s = quote.get(it.code);
+    if (!marks.has(g.name)) marks.set(g.name, groupBladeMarks(g));
+    const bm = marks.get(g.name).get(it.code);
+    const pct = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
+    const r = { code: it.code, name: (s && s.name) || it.name, pct, price: s ? s.price : it.close, groupName: g.name, groupRank: gi + 1, bladeMark: bm ? bm.mk : '' };
+    out.push({ r, opt: { harvest: pct <= -BLADE_HARVEST_PCT, noK12: true } });
+  });
+  return out.sort((a, b) => a.r.groupRank - b.r.groupRank || b.r.pct - a.r.pct);
+}
+function tdStockRow(code, ctx, extra){
+  const q = hwQuote(code);
+  const name = (q && q.name) || (extra && extra.name) || '';
+  const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
+  return '<div class="td-row td-lite" data-hw-code="' + wlEsc(code) + '" data-hw-name="' + wlEsc(name) + '">' + tdMaBall(code, q ? q.price : null) +
+    '<span class="td-stk"><b>' + wlEsc(code) + '</b> ' + wlEsc(name) + '</span>' +
+    '<span class="td-tags">' + tdTagsHtml(code, ctx, { group: extra && extra.group }) + tdBigHtml(code, ctx) + '</span>' +
+    '<span class="td-pct ' + (pct === null ? '' : dirClass(pct)) + '">' + hwPct(pct) + '</span>' +
+    (extra && extra.remove ? '<button type="button" class="td-x" data-td-unwatch="' + wlEsc(code) + '" title="移除">✕</button>' : '<span class="td-mk"></span>') + '</div>';
+}
+function tdGroupOf(code){
+  const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
+  const g = ranked.find((x) => (KILL193_GROUPS.has(x.name) || RANK188_GROUPS.has(x.name)) && x.stocks.some((s) => s.code === code)) || ranked.find((x) => x.stocks.some((s) => s.code === code));
+  return g ? g.name : '';
+}
+function tdAddWatch(){
+  const el = document.getElementById('tdWatchInput');
+  const codes = String(el ? el.value : '').toUpperCase().split(/[^0-9A-Z]+/).filter((c) => /^[0-9A-Z]{4,6}$/.test(c));
+  if (!codes.length) return;
+  codes.forEach((c) => { if (!tdState.watch.includes(c)) tdState.watch.push(c); });
+  tdState.watch = tdState.watch.slice(0, 60);
+  tdSaveWatch();
+  renderHomework();
+}
+function hwTodayHtml(){
+  const m = race333Model();
+  if (!m) return raceNotReadyHtml();
+  const ctx = tdCtx(m);
+  const dt = botFetchCache('dt', '/api/daytrade', 5 * 60e3);
+  ctx.dtDate = dt && dt.day ? dt.day.date : '';
+  const zoneRows = {};
+  TD_ZONES.forEach((z) => { zoneRows[z.key] = (m[z.list] || []).slice(); });
+  const k12 = tdK12Entries(ctx);
+  const jd = ctx.jd;
+  const allCodes = TD_ZONES.flatMap((z) => zoneRows[z.key].map((r) => r.code)).concat((k12 || []).map((e) => e.r.code), tdState.watch, jd ? (jd.suspects || []).map((s) => s.code) : []);
+  ctx.big = tdBigHolder(allCodes);
+  const stamp = (lastData.quoteTime ? String(lastData.quoteTime).slice(0, 5) : '') + '・自動';
+  const kept = {};
+  TD_ZONES.forEach((z) => { kept[z.key] = zoneRows[z.key].filter((r) => tdPass(r, ctx)).sort((a, b) => b.pct - a.pct); });   // 依跌幅：淺的在上、深的在下（老師預設）
+  const shown = TD_ZONES.filter((z) => tdState.zones[z.key]);
+  const hits = shown.flatMap((z) => kept[z.key]);
+  const hitGroups = new Set(hits.map((r) => r.groupName));
+  const bladeTotal = TD_ZONES.reduce((n, z) => n + zoneRows[z.key].length, 0);
+  // ① 頂部：功課日、處置預測、櫃買
+  const otcCls = /多/.test(m.otcLabel || '') ? 'up' : /空/.test(m.otcLabel || '') ? 'down' : '';
+  const head = '<div class="td-head"><b class="td-title">🔪 今日功課</b><small>刀劍空自動版</small>' +
+    '<span class="td-time">🕐 ' + tdMd(ctx.hwDay) + ' ' + (lastData.quoteTime ? String(lastData.quoteTime).slice(0, 5) : '') + '</span>' +
+    '<span class="td-meta">功課日 ' + tdMd(ctx.hwDay) + (jd ? '・處置預測 ' + wlEsc(jd.nextMd || '') + '（' + wlEsc(jd.nextWeekday || '') + '）' : '') + '</span>' +
+    (m.otcPct !== null && m.otcPct !== undefined ? '<span class="td-otc ' + otcCls + '">櫃買 ' + wlEsc(m.otcLabel || '') + ' ' + hwPct(m.otcPct) + '</span>' : '') + '</div>';
+  // ② 摘要＋計數
+  const zoneCount = shown.filter((z) => kept[z.key].length).map((z) => z.name + ' ' + kept[z.key].length + ' 檔（部位 ' + z.pos + '）').join('、');
+  const summary = '<div class="td-sum"><div class="td-sum1">今天要盯的' + (hits.length ? '有 <b>' + hits.length + '</b> 檔，分佈在 <b>' + hitGroups.size + '</b> 族。' : '目前沒有（開盤後刀劍空才會出現，盤中隨時變）。') + '</div>' +
+    (zoneCount ? '<div class="td-sum2">' + zoneCount + '</div>' : '') + '</div>';
+  const relBatches = new Map();
+  ctx.released.forEach((n, code) => { if (!relBatches.has(n)) relBatches.set(n, []); relBatches.get(n).push(code); });
+  const counts = '<div class="td-counts">' + [
+    ['刀劍空', bladeTotal + ' 檔'], ['12空', (k12 ? k12.length : '…') + ' 檔'], ['符合', hits.length + ' 檔', 'hit'],
+    ...TD_ZONES.map((z) => [z.name, String(kept[z.key].length), z.cls]),
+    ['出獄股', ctx.released.size + ' 檔／' + relBatches.size + ' 批'], ['即將入獄', (jd ? (jd.suspects || []).length : '…') + ' 檔'],
+  ].map(([a, b, c]) => '<span class="td-count' + (c ? ' ' + c : '') + '">' + a + ' <b>' + b + '</b></span>').join('') + '</div>';
+  // ③ 開關：段位、檢視、參數
+  const zoneBox = (z) => '<button type="button" class="td-zbtn ' + z.cls + (tdState.zones[z.key] ? ' on' : '') + '" data-td-zone="' + z.key + '">' + (tdState.zones[z.key] ? '☑' : '☐') + ' ' + z.icon + ' ' + z.name + '</button>';
+  const allOn = TD_PARAMS.every(([k]) => tdState.params[k]);
+  const ctrls = '<div class="td-ctrls">' + TD_ZONES.map(zoneBox).join('') +
+    '<button type="button" class="td-zbtn' + (tdState.dtOnly ? ' on' : '') + '" data-td-dt="1">' + (tdState.dtOnly ? '☑' : '☐') + ' ⚡ 只看隔日沖</button>' +
+    '<button type="button" class="td-view" data-td-view="1">' + (tdState.view === 'zone' ? '🗂 改看族群卡' : '📊 改看段位分區') + '</button></div>' +
+    '<div class="td-params"><span class="td-plabel">參數</span>' + TD_PARAMS.map(([k, label]) => '<button type="button" class="td-param p-' + k + (tdState.params[k] ? ' on' : '') + '" data-td-param="' + k + '">' + label + '</button>').join('') +
+    '<button type="button" class="td-param p-all' + (allOn ? ' on' : '') + '" data-td-param="all">' + (allOn ? '☑' : '☐') + ' 全勾</button></div>' +
+    '<details class="td-help"><summary>💡 開關怎麼看</summary><div>' +
+    '<p><b>段位</b>照族群排名分：前 10 名（▲ 多方，前 5 名強多不列）、11～25 名（🔽 中間）、26 名以後（🔰 強空），今天已跌 5% 以上的放 ♣ 收割區（不追空）。每段上面寫部位、停損、目標（老師的刀劍空 SOP，最下面有段位對照表）。</p>' +
+    '<p><b>大戶%</b>＝今天同秒併單 ≥7 張的大戶買減大戶賣（開盤第一筆算賣）÷ 近 5 日平均成交值；負＝大戶在倒貨，≤ -10（深紫）是倒貨重點股；正＝大戶在買（對空單不利），≥ +5（深黃）是警訊。後面的 N億＝近 5 日平均成交值，看流動性夠不夠。數字後面有 * 是今天的 5 分K不完整（例如中途才開始收）。</p>' +
+    '<p><b>參數</b>：大戶≤-10、均線分≥7（5/10/20/60/120/240 日線兩兩比 15 組）、今天最高曾漲 3% 以上、現在跌幅還沒超過 7%。四個都勾＝老師「刀功課」那份。</p>' +
+    '<p>排名格旁的圓球＝均線分（≥12 金底、6～11 金框、<6 灰）。12空＝機器人 123（衝高後跌破 5 分K 20MA、20MA 下彎）。</p></div></details>';
+  // ④ 主體：段位分區或族群卡
+  let main;
+  if (tdState.view === 'zone'){
+    main = shown.map((z) => '<div class="td-zone ' + z.cls + '">' + tdZoneHead(z, kept[z.key].length, stamp) +
+      (kept[z.key].length ? kept[z.key].map((r) => tdRowHtml(r, ctx, { showGroup: true, harvest: z.key === 'harvest' })).join('') : '<div class="td-empty">目前沒有</div>') + '</div>').join('');
+  } else {
+    const entries = shown.flatMap((z) => kept[z.key].map((r) => ({ r, opt: { harvest: z.key === 'harvest' } })));
+    main = entries.length ? tdCardsHtml(entries, ctx, stamp, { banner: true }) : '<div class="td-empty">目前沒有符合的</div>';
+  }
+  // ⑤ 觀察股
+  const watch = '<div class="td-sec"><h4>⭐ 觀察股 <small>自己加、不限檔數、這台瀏覽器會記住；大戶% 盤中自己抓</small></h4>' +
+    '<div class="td-wadd"><input type="text" id="tdWatchInput" placeholder="股號，可一串：3374/8358/6213" inputmode="numeric"><button type="button" data-td-watch="1">＋ 新增</button></div>' +
+    (tdState.watch.length ? tdState.watch.map((c) => tdStockRow(c, ctx, { remove: true, group: tdGroupOf(c) })).join('') : '<div class="td-empty">還沒有觀察股</div>') + '</div>';
+  // ⑥ 12空
+  const k12Sec = '<div class="td-sec"><h4><span class="td-badge k12">12空</span> <small>機器人 123・跟上面刀劍空分開看；段位照 12空 自己的族群排名</small></h4>' +
+    (k12 === null ? '<div class="td-empty">讀取中…</div>' : !ctx.k12Raw.tracked ? '<div class="td-empty">後端今天還沒有 5 分K（盤中 9 點以後才有）</div>' :
+      k12.length ? tdCardsHtml(k12, ctx, stamp, { noFoot: true }) : '<div class="td-empty">目前沒有衝高後跌破 MA20 下彎的</div>') + '</div>';
+  // ⑦ 出獄即入獄、出獄股、即將入獄
+  const again = jd ? (jd.suspects || []).filter((s) => { const n = ctx.released.get(s.code); return n && n <= 3; }) : [];
+  const againSec = again.length ? '<div class="td-sec"><h4>⛓ 出獄即入獄 <small>剛出獄，又被點名可能再被關</small></h4>' + again.map((s) => tdStockRow(s.code, ctx, { name: s.name, group: tdGroupOf(s.code) })).join('') +
+    '<div class="td-note">處置剛期滿放出來、籌碼還亂，同一天又被列進處置預測名單——前面剛解禁、後面又要上鎖，兩邊夾擊。出獄後 3 天內被關的話條件會再變一次，單獨拉出來提醒，不替它下結論。</div></div>' : '';
+  const bladeByCode = new Map(TD_ZONES.flatMap((z) => zoneRows[z.key].map((r) => [r.code, Object.assign({ harvest: z.key === 'harvest' }, r)])));
+  const relSec = relBatches.size ? '<div class="td-sec"><h4>🔓 出獄股 <small>最近 6 個交易日出獄的；亮起來的是今天有進刀劍空、12空或在觀察股裡的</small></h4>' +
+    Array.from(relBatches.entries()).sort((a, b) => b[0] - a[0]).map(([n, codes]) => '<div class="td-batch"><div class="td-bhead">' + (n === 1 ? '🔓 當天出獄' : '🔑 出獄第 ' + n + ' 天') + ' <small>' + codes.length + ' 檔</small></div><div class="td-chips">' +
+      codes.map((code) => {
+        const b = bladeByCode.get(code), q = hwQuote(code), g = tdGroupOf(code), sp = ctx.suspects.get(code);
+        const lit = b || ctx.k12.has(code) || tdState.watch.includes(code);
+        const name = (q && q.name) || ((jd.released || []).find((x) => x.code === code) || {}).name || '';
+        return '<span class="td-rchip' + (b ? ' blade' : lit ? ' lit' : '') + '" data-hw-code="' + wlEsc(code) + '" data-hw-name="' + wlEsc(name) + '">' + wlEsc(code) + ' ' + wlEsc(name) + (g ? ' <small>· ' + wlEsc(g) + '</small>' : '') +
+          (b ? ' <b>' + hwPct(b.pct) + '</b> ' + (b.harvest ? '♣' : (b.bladeMark || '')) : '') + (sp ? (sp.high ? ' 🔒必關' : ' ⚠️') : '') + '</span>';
+      }).join('') + '</div></div>').join('') + '</div>' : '';
+  const sus = jd ? (jd.suspects || []) : [];
+  const jailCol = (title, list) => '<div class="td-jcol"><div class="td-jhead">' + title + '<small>' + list.length + ' 檔</small></div>' +
+    (list.length ? list.map((s) => tdStockRow(s.code, ctx, { name: s.name, group: tdGroupOf(s.code) })).join('') : '<div class="td-empty">沒有</div>') + '</div>';
+  const jailSec = '<div class="td-sec"><h4>🔒 即將入獄 <small>處置預測・' + (jd ? wlEsc(jd.nextMd || '') + '（' + wlEsc(jd.nextWeekday || '') + '）' : '讀取中') + '</small></h4>' +
+    (jd ? '<div class="td-jail">' + jailCol('高機率會關', sus.filter((s) => s.high)) + jailCol('有機會躲過', sus.filter((s) => !s.high)) + '</div>' +
+      '<div class="td-note">門檻是處置監獄算的（收盤價、成交量過門檻才關），收盤自己再對一下。</div>' : '<div class="td-empty">處置資料讀取中…</div>') + '</div>';
+  // ⑧ 段位對照
+  const sop = '<div class="td-sec"><h4>📐 段位對照 <small>刀劍空 SOP・族群排名強度表</small></h4><table class="td-sop"><thead><tr><th>族群排名</th><th>前綴</th><th>段位</th><th>停損（相對進場）</th><th>停利目標（當日總跌幅）</th><th>部位</th></tr></thead><tbody>' +
+    '<tr><td>1 ~ 5</td><td class="up">▲</td><td class="up">強多</td><td>-1.0% ~ -1.5%</td><td>-3% ~ -4%</td><td>30% 或觀望（刀劍空不列）</td></tr>' +
+    '<tr><td>6 ~ 10</td><td class="up">▲</td><td class="up">多方</td><td>-1.0% ~ -1.5%</td><td>-3% ~ -4%</td><td>30% 或觀望</td></tr>' +
+    '<tr><td>11 ~ 25</td><td>🔽</td><td>中間</td><td>-1.5% ~ -2.0%</td><td>-4% ~ -6%</td><td>50%</td></tr>' +
+    '<tr><td>26 +</td><td>🔰</td><td class="down">強空</td><td>-2.0% ~ -3.0%</td><td>-7% ~ -9%（續抱可到 -10% 跌停）</td><td>100%</td></tr>' +
+    '<tr><td>跌幅 ≤ -5%</td><td>♣</td><td class="down">收割區</td><td colspan="2">已到收割區，以回補為主</td><td>不追空</td></tr></tbody></table>' +
+    '<div class="td-note">名次是 67 族的排法，我們族群數不同時照比例換算。符號：🔓 當天出獄｜🔑 出獄股（其他批）｜🔒 必關｜⚠️ 條件關（收盤過門檻才關）｜12空＝機器人 123。' +
+    '要自己確認的：① 部位還要看族群有沒有帶頭——沒有強勢帶頭時，SOP 部位降 50%（這頁不會自動降）；② 進場時間 09:15 之後。表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
+  return head + summary + counts + ctrls + main + watch + k12Sec + againSec + relSec + jailSec + sop;
 }
 // 🔪 空觀察
 function hwShortHtml(){
@@ -15401,11 +15791,16 @@ function renderHomework(){
   const body = document.getElementById('hwBody');
   if (!body) return;
   const stamp = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
-  const html = hwState.tab === 'short' ? hwShortHtml() : hwState.tab === 'long' ? hwLongHtml() : hwState.tab === 'obs' ? obsPanelHtml() : hwWatchHtml();
+  const html = hwState.tab === 'today' ? hwTodayHtml() : hwState.tab === 'short' ? hwShortHtml() : hwState.tab === 'long' ? hwLongHtml() : hwState.tab === 'obs' ? obsPanelHtml() : hwWatchHtml();
   const open = Array.from(body.querySelectorAll('details.hw-more[open]')).length > 0;
+  const helpOpen = !!body.querySelector('details.td-help[open]');
+  const inp = document.getElementById('tdWatchInput');
+  const keep = inp ? { v: inp.value, f: document.activeElement === inp } : null;   // 每 20 秒重畫不要吃掉打到一半的股號
   body.innerHTML = '<div class="hw-tabs">' + HW_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (hwState.tab === k ? ' active' : '') + '" data-hw-tab="' + k + '">' + label + '</button>').join('') +
     '<span class="hw-stamp">' + stamp + ' 更新・盤中每 20 秒跟著首頁報價重算</span></div>' + html;
   if (open){ const d = body.querySelector('details.hw-more'); if (d) d.open = true; }
+  if (helpOpen){ const d = body.querySelector('details.td-help'); if (d) d.open = true; }
+  if (keep){ const n = document.getElementById('tdWatchInput'); if (n){ n.value = keep.v; if (keep.f) n.focus(); } }
 }
 function openHomeworkPanel(){
   document.getElementById('hwModal').hidden = false;
@@ -15430,11 +15825,30 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
   if (ostk){ openStockChart(ostk.dataset.obsCode, ostk.dataset.obsName); return; }
   const flt = t.closest('[data-hw-flt]');
   if (flt){ hwState.filters[flt.dataset.hwFlt] = !hwState.filters[flt.dataset.hwFlt]; renderHomework(); return; }
+  // 📋 今日功課的開關
+  const tz = t.closest('[data-td-zone]');
+  if (tz){ tdState.zones[tz.dataset.tdZone] = !tdState.zones[tz.dataset.tdZone]; renderHomework(); return; }
+  if (t.closest('[data-td-dt]')){ tdState.dtOnly = !tdState.dtOnly; renderHomework(); return; }
+  if (t.closest('[data-td-view]')){ tdState.view = tdState.view === 'zone' ? 'group' : 'zone'; renderHomework(); return; }
+  const tp = t.closest('[data-td-param]');
+  if (tp){
+    const k = tp.dataset.tdParam;
+    if (k === 'all'){ const on = !TD_PARAMS.every(([x]) => tdState.params[x]); TD_PARAMS.forEach(([x]) => { tdState.params[x] = on; }); }
+    else tdState.params[k] = !tdState.params[k];
+    renderHomework(); return;
+  }
+  if (t.closest('[data-td-watch]')){ tdAddWatch(); return; }
+  const un = t.closest('[data-td-unwatch]');
+  if (un){ tdState.watch = tdState.watch.filter((c) => c !== un.dataset.tdUnwatch); tdSaveWatch(); renderHomework(); return; }
+  if (t.closest('input')) return;
   if (t.closest('summary') || t.closest('select')) return;
   const row = t.closest('[data-hw-code]');
   if (row){
     openStockChart(row.dataset.hwCode, row.dataset.hwName);
   }
+});
+document.getElementById('hwBody').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target && e.target.id === 'tdWatchInput'){ e.preventDefault(); tdAddWatch(); }
 });
 document.getElementById('hwBody').addEventListener('change', (e) => {
   const sel = e.target.closest('[data-hw-pick]');
@@ -15874,7 +16288,7 @@ const GUIDE_TOOLS = [
     b: ['自選股一出現新訊號就提醒（網頁要開著）', '不想追蹤的那檔按「關閉訊號」就不再跳；表頭「全部關閉」一次關掉', '點股票直接開 K 線圖'] },
   { t: '飆股雷達', label: 'K棒組合選股', v: 'tb-grail', tags: ['盤中', '固定時點'], d: '15 個選股邏輯（穿山鱷龍、黑龍短沖、黑飛舞、飛龍戰法）在固定時間點自動掃全市場，把符合的名單抓出來。',
     b: ['盤中與收盤各掃一次，到時間進來看就好，不用自己設定', '名單只是「符合條件」，不是買賣指令'] },
-  { t: '每日功課', label: '每日功課', v: 'tb-homework', tags: ['盤中', '自動'], d: '空觀察／當沖多／多觀察三份功課，系統自己把刀劍空、即將入獄、出獄、賽馬、河流、族群名次這幾份清單交叉比對，只留下該盯的那幾檔。',
+  { t: '每日功課', label: '每日功課', v: 'tb-homework', tags: ['盤中', '自動'], d: '第一頁「今日功課」照老師的刀劍空 SOP 把刀劍空分成多方／中間／強空／收割區（各寫部位、停損、目標），每檔標大戶%、近 5 日均成交值、12空、出獄、處置門檻、股期；後面還有空觀察／當沖多／多觀察，系統自己把刀劍空、即將入獄、出獄、賽馬、河流、族群名次這幾份清單交叉比對，只留下該盯的那幾檔。',
     b: ['不用貼名單，盤中跟著首頁報價每 20 秒重算', '多觀察挑三個族群看位置；防守價（三日低、月線）自動帶出來'] },
   { t: '籌碼日報', label: '籌碼日報', v: 'tb-swing', tags: ['盤後'], d: '收盤後的一份整理：今日摘要、產業、籌碼、技術、均線轉強、處置動態，還有主動式 ETF 持股雷達、營收面精選。',
     b: ['可以回看之前的日子；交易日晚上 9 點後、隔天早上 7 點半再更新一次（處置公告、ETF 持股晚上才齊）', '處置動態看全市場：明日入獄／出獄、處置中、剛出獄觀察、高機率處置',
@@ -20690,6 +21104,14 @@ export default {
         return await proxyHanstockBars("/api/hub/kill12", 30);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), items: [] }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/big-holder") {
+      // 老師版大戶%（2026-10-18：同秒同方向併單 ≥7 張、開盤第一筆算賣、÷ 近 5 日平均成交值），今日功課用，20 秒快取
+      try {
+        return await proxyHanstockBars("/api/hub/big-holder" + url.search, 20);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), items: {} }, { status: 502 });
       }
     }
     if (url.pathname === "/api/group-rank-checkpoints") {

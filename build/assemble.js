@@ -740,6 +740,14 @@ export default {
         return Response.json({ status: "error", error: String(err), items: [] }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/big-holder") {
+      // 老師版大戶%（2026-10-18：同秒同方向併單 ≥7 張、開盤第一筆算賣、÷ 近 5 日平均成交值），今日功課用，20 秒快取
+      try {
+        return await proxyHanstockBars("/api/hub/big-holder" + url.search, 20);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), items: {} }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/group-rank-checkpoints") {
       // 67 族今天每半小時的族群名次（2026-10-16，老師族群明細最下面「今天23-3-11-24」那排；馬火多(30) 用），60 秒快取
       try {
