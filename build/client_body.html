@@ -19380,7 +19380,10 @@ function botAnswer(raw){
     if (tl){
       const liveBy = new Map(), harvestSet = new Set((m.bladeHarvest || []).map((r) => r.code));
       [].concat(m.bladeUpper || [], m.bladeMiddle || [], m.bladeLower || [], m.bladeHarvest || []).forEach((r) => { if (!liveBy.has(r.code)) liveBy.set(r.code, r); });
-      const list = Array.from(tl.values()).sort((a, b) => (a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1));
+      // 2026-10-19 使用者（追加）：「回」的時間最近的排最上面——排序用「最近發生的時間」：回的看回的時間、跑掉的看跑的時間、其他看進榜時間；
+      // 左邊那格還是寫最早進榜時間（照廣播），標籤才寫回／跑的時間。同一時間晚進榜的在上，再照股號
+      const evT = (x) => (x.inNow ? (x.back || x.first) : (x.out || x.first));
+      const list = Array.from(tl.values()).sort((a, b) => (evT(a) > evT(b) ? -1 : evT(a) < evT(b) ? 1 : a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1));
       const bigTxt = (v) => (v > 0 ? '+' : '') + String(Number(v.toFixed(1)));
       const rowHtml = (x) => {
         const r = liveBy.get(x.code), gone = !x.inNow;
@@ -19400,7 +19403,7 @@ function botAnswer(raw){
       };
       const goneCnt = list.filter((x) => !x.inNow).length;
       return wrap('🔪⚔️新刀劍空(32)', (list.map(rowHtml).join('') || botLine('目前沒有', 'bot-dim')) +
-        botLine('時間＝最早進榜（越晚進榜越上面）・跑＝消失（轉強，要跑）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim'),
+        botLine('左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（轉強，要跑）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim'),
         stamp + '・今天 ' + list.length + ' 檔，在榜 ' + (list.length - goneCnt) + '、消失 ' + goneCnt);
     }
     // （盤中紀錄還沒載入時的備用畫面，照原本分段）
