@@ -15859,13 +15859,16 @@ function hwTodayHtml(){
     (viewingToday ? '<button type="button" class="td-rbtn live' + (snap.live ? ' on' : '') + '" data-td-slot="">🟢 最新</button>' : '') +
     slotBtns.map((s) => recSlots.includes(s) ? '<button type="button" class="td-rbtn' + (curSlot === s ? ' on' : '') + '" data-td-slot="' + s + '">' + s + '</button>'
       : '<button type="button" class="td-rbtn off" disabled title="這個時段還沒有紀錄">' + s + '</button>').join('') +
-    (recSlots.length ? '' : '<span class="td-rnote">盤中每 5 分鐘自動記一次（09:05 起），記到的時段鈕才按得下去</span>') + '</div>';
+    (recSlots.length ? '<span class="td-rnote">灰色＝這個時段還沒記到（盤中每 5 分鐘自動記一次，時間到了會自己亮起來）</span>'
+      : '<span class="td-rnote">盤中每 5 分鐘自動記一次（09:05 起），記到的時段鈕才按得下去</span>') + '</div>';
   // ⑤ 族群、參數、說明
   const allOn = TD_PARAMS.every(([k]) => tdState.params[k]);
   const filters = '<div class="td-filters"><div class="td-params"><span class="td-plabel">族群</span>' +
     (groupChips.length ? groupChips.map(([g, gr]) => '<button type="button" class="td-gchip' + (tdState.group === g ? ' on' : '') + '" data-td-group="' + wlEsc(g) + '">' + wlEsc(g) + ' <small>(' + gr + ')</small></button>').join('') : '<span class="td-rnote">—</span>') + '</div>' +
-    '<div class="td-params"><span class="td-plabel">參數</span>' + TD_PARAMS.map(([k, label]) => '<button type="button" class="td-param p-' + k + (tdState.params[k] ? ' on' : '') + '" data-td-param="' + k + '">' + label + '</button>').join('') +
-    '<button type="button" class="td-param p-all' + (allOn ? ' on' : '') + '" data-td-param="all">' + (allOn ? '☑' : '☐') + ' 全勾</button></div></div>' +
+    // 2026-10-19 使用者以為「🟣 大戶≤-10」已經勾了（那顆紫圓點只是圖示），其實沒勾；每顆前面補 ☑／☐，跟上面段位開關一樣
+    '<div class="td-params"><span class="td-plabel">參數</span>' + TD_PARAMS.map(([k, label]) => '<button type="button" class="td-param p-' + k + (tdState.params[k] ? ' on' : '') + '" data-td-param="' + k + '">' + (tdState.params[k] ? '☑ ' : '☐ ') + label + '</button>').join('') +
+    '<button type="button" class="td-param p-all' + (allOn ? ' on' : '') + '" data-td-param="all">' + (allOn ? '☑' : '☐') + ' 全勾</button>' +
+    '<span class="td-rnote">只篩選右邊「刀功課廣播」，下面族群卡不受影響</span></div></div>' +
     '<details class="td-help"><summary>💡 開關怎麼看</summary><div>' +
     '<p><b>大戶%</b>＝今天同秒併單 ≥7 張的大戶買減大戶賣（開盤第一筆算賣）÷ 近 5 日平均成交值。<i class="td-big neg">大戶 %</i> 負＝大戶在倒貨，<i class="td-big deep">≤ -10</i> 深紫＝倒貨重點股；<i class="td-big pos">大戶 +</i> 正＝大戶在買（對空單不利），<i class="td-big hot">≥ +5</i> 深黃＝警訊。<i class="td-n">N億</i>＝近 5 日平均成交值，看流動性夠不夠。數字後面有 * 是今天的 5 分K不完整。</p>' +
     '<p><b>參數</b>決定右邊「刀功課廣播」誰進榜：大戶≤-10、均線分≥7、今天最高曾漲 3% 以上、現在跌幅還沒超過 7%（沒勾的就不看）。主畫面的刀劍空不受參數影響。</p>' +
