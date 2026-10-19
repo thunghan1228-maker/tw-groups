@@ -19155,7 +19155,8 @@ function botAnswer(raw){
     const tl = bladeTimeline(m);
     const sec = (l, harvest) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + (harvest ? '♣' : bladeRankMark(r.groupRank, m.total)) + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '') + (tl ? bladeBackTag(tl.get(r.code)) : '')))).join('');
     // 2026-10-18 使用者：掉出名單的留著，紅色刪除線＋「跑 HH:MM」（照老師刀功課廣播）
-    const gone = tl ? Array.from(tl.values()).filter((x) => !x.inNow).sort((a, b) => (a.out < b.out ? -1 : a.out > b.out ? 1 : 0)) : [];
+    // 2026-10-19 使用者：已跑這段越晚跑的（接近現在）排越上面、早的往下；同一個跑的時間，晚進榜的在上
+    const gone = tl ? Array.from(tl.values()).filter((x) => !x.inNow).sort((a, b) => (a.out > b.out ? -1 : a.out < b.out ? 1 : a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1)) : [];
     const goneLines = gone.length ? botLine('----↓(已跑)↓----', 'bot-sep') + gone.map((x) => { const q = getStockQuote(x.code); const v = q && Number.isFinite(q.changePercent) ? q.changePercent : x.row.pct;
       return botLine('<span class="bot-gone">' + (x.row.gr || '') + ' ' + botStk(x.code, (q && q.name) || x.row.name || '', Number.isFinite(v) ? ' ' + botPct(v) : '') + '</span> <span class="blade-run">跑 ' + x.out + '</span> <small class="bot-dim">' + x.first + ' 進</small>'); }).join('') : '';
     // 2026-10-18 使用者：強空積極（連同收割區域）搬到最上面，跟 199、193 一樣；後面接多方打少、中間段，每段上面寫段名
