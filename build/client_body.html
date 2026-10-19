@@ -1385,6 +1385,13 @@
     --td-serif:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;
     color:var(--text);background:var(--bg);}
   #hwInner > .chips-head{background:var(--panel);color:var(--text);border:1px solid var(--line);}
+  /* 2026-10-19 使用者：每日功課視窗要能上下左右移動、四邊四角拉大小（跟機器人代碼、盤中訊號分頁一樣）：標題列拖著走、點兩下最大化，
+     不擋後面的頁面；位置大小記在這台瀏覽器 */
+  #hwModal{background:none;pointer-events:none;padding:0;}
+  #hwModal.bot-front:not(.behind-group):not(.behind-chart){z-index:103;}
+  #hwInner{position:absolute;pointer-events:auto;min-width:320px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
+  #hwInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
+  .hw-win-acts{display:flex;gap:6px;flex-shrink:0;align-items:flex-start;}
   #hwInner .chips-title{font-family:var(--td-serif);color:#8b2c22;font-weight:900;}
   #hwInner .chips-sub{color:var(--muted);}
   #hwInner .cm-icon-btn{background:var(--panel-2);color:var(--text);border-color:var(--line);}
@@ -3162,12 +3169,12 @@
 <!-- 2026-10-10 使用者：照老師空觀察／當沖多／多觀察功課做自動版（不用貼清單），下方導覽列第 14 顆「每日功課」 -->
 <div class="chips-modal" id="hwModal" hidden>
   <div class="chips-inner" id="hwInner">
-    <div class="chips-head">
+    <div class="chips-head" id="hwHead">
       <div>
         <div class="chips-title">每日功課（自動版）</div>
-        <div class="chips-sub">系統自己把刀劍空、即將入獄、出獄、賽馬多、河流多、馬火多、族群名次這幾份清單交叉比對，只留下該盯的那幾檔；多觀察挑三個族群看位置與防守。盤中跟著首頁報價重算。</div>
+        <div class="chips-sub">系統自己把刀劍空、即將入獄、出獄、賽馬多、河流多、馬火多、族群名次這幾份清單交叉比對，只留下該盯的那幾檔；多觀察挑三個族群看位置與防守。盤中跟著首頁報價重算。<b>標題列拖著走、四邊四角拉大小、點兩下最大化。</b></div>
       </div>
-      <button class="cm-icon-btn" id="hwClose" aria-label="關閉">✕</button>
+      <div class="hw-win-acts"><button class="cm-icon-btn" id="hwMax" title="最大化" aria-label="最大化">▢</button><button class="cm-icon-btn" id="hwClose" aria-label="關閉">✕</button></div>
     </div>
     <div id="hwBody"></div>
   </div>
@@ -4962,7 +4969,7 @@ function chartEmbedUrl(code, name, tf){
   return location.pathname + '?' + params.toString();
 }
 function bringChartWindowToFront(win){
-  ['botModal', 'sgtModal'].forEach((id) => { const el = document.getElementById(id); if (el) el.classList.remove('bot-front'); });
+  ['botModal', 'sgtModal', 'hwModal'].forEach((id) => { const el = document.getElementById(id); if (el) el.classList.remove('bot-front'); });
   chartWindowZ += 1;
   win.el.style.zIndex = String(chartWindowZ);
   chartWindows.forEach((w) => w.el.classList.toggle('front', w === win));
@@ -6800,7 +6807,8 @@ function race333Model(){
   // （耀登 低軌衛星第 1、良維 小電組第 5 都有 ⚔️，他沒列）；② 族群明細上要有 🔪⚔️🔰 記號才列（groupBladeMarks，跟族群明細同一套；
   // 華夏、彩晶、鈞寶 在空方段但明細沒記號，老師都沒列）。兩條加上去以後，跟他那 24 檔一模一樣。
   const bladeTopSkip = Math.max(1, Math.round(total * 5 / 67));
-  const bladeBase = Array.from(bladeCand.values()).filter((r) => r.groupRank > bladeTopSkip && (!hasDaily || r.bladeGm)
+  // 2026-10-19 對老師 11:09、11:21：收割區（已跌 5% 以上或跌停）不看族群名次——他列了小電組（第 1 名）的大量 -5.59% 在收割區
+  const bladeBase = Array.from(bladeCand.values()).filter((r) => (r.groupRank > bladeTopSkip || r.pct <= -BLADE_HARVEST_PCT || r.limitDown) && (!hasDaily || r.bladeGm)
     // 多方打少不看櫃買：佳能（光學鏡頭，族排 8～16）跌 2.7～3.3%、沒比櫃買弱，老師 11:38、12:01、12:18、12:34 都列
     && (!hasDaily || ((bladeKnife(r) || bladeSword(r)) && (bladeSword(r) || bladeInUpper(r) || belowOtc(r))
       // 空方段裡倒數第 4、5 檔：前一兩天要大漲過（5.5% 以上）才標 🔰、才列（台燿前天 +4.83% 排倒數第 5 沒標、良維 +9.98% 倒數第 4 標 🔰）
@@ -7830,10 +7838,11 @@ function homeRank4Html(){
       home44ColHtml() +   // 2026-10-18 使用者：193 換成 44
       home283ColHtml(zone283List(h)) +   // 2026-10-18 使用者：283 疊在 44 下面
     '</div>' +
+    // 2026-10-19 使用者：個股漲 2%（22-5，疊著隔日沖黑龍 80）排到族群漲幅 > 2%（12）前面，兩欄對調
+    homeDaytradeColsHtml() +   // 2026-10-17 使用者：813／80／75 先做在首頁最右邊一欄
     '<div class="hr-stack">' +   // 2026-10-17 使用者：刀劍空(31) 疊在新刀劍空(32) 下面
       home12ColHtml(h) +   // 2026-10-18 使用者：新刀劍空(32) 換成 12；199、刀劍空(31) 也從首頁拿掉
     '</div>' +
-    homeDaytradeColsHtml() +   // 2026-10-17 使用者：813／80／75 先做在首頁最右邊一欄
     '<div class="hr-stack">' + home225ColHtml(35) + homeFut75ColHtml() + '</div>' +   // 2026-10-18 使用者：22-5 旁邊加一欄 22-35；股期黑龍(75) 疊在 22-35 下面（最右邊一欄最下面）
     '</div>' +
     '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
@@ -15504,7 +15513,8 @@ const TD_ZONES = [
 ];
 const TD_FIXED_SLOTS = ['09:05', '09:10', '09:15', '09:20', '09:25', '09:30', '09:35', '09:45', '10:00', '10:15', '10:30', '11:00', '11:30', '12:00', '13:30'];   // 老師回放列的時段
 const TD_PARAMS = [['big', '🟣 大戶≤-10'], ['ma7', '📏 均線≥7'], ['high3', '👑 最高≥3%'], ['max7', '▼ 最大>-7%']];
-const tdState = { zones: { upper: true, middle: true, lower: true, harvest: true }, view: 'group', params: { big: true, ma7: true, high3: true, max7: true }, dtOnly: false,
+const tdState = { zones: { upper: true, middle: true, lower: true, harvest: true }, view: 'group', params: { big: false, ma7: false, high3: false, max7: false }, dtOnly: false,   // 2026-10-19 使用者：預設不要全勾（跟老師一樣，沒勾的名單比較多）
+ 
   group: null, hideGone: false, big: { key: '', at: 0, data: null, loading: false }, watch: [], hold: [],
   rep: { date: null, slot: null, data: null, key: '', at: 0, loading: false } };
 try { const w = JSON.parse(localStorage.getItem('tdWatch') || '[]'); if (Array.isArray(w)) tdState.watch = w.filter((c) => /^[0-9A-Z]{4,6}$/.test(c)).slice(0, 60); } catch (_){}
@@ -16193,8 +16203,79 @@ function renderHomework(){
   if (dtOpen){ const d = body.querySelector('details.td-dtbox'); if (d) d.open = true; }
   if (keep){ const n = document.getElementById('tdWatchInput'); if (n){ n.value = keep.v; if (keep.f) n.focus(); } }
 }
+// ---- 每日功課視窗：拖著標題列走、四邊四角拉大小（2026-10-19 使用者），跟機器人代碼、盤中訊號分頁共用 attachFloatChrome ----
+const HW_RECT_KEY = 'hwRect', HW_MAX_KEY = 'hwMaxed';
+let hwMaxRestore = null;
+function hwFill(){
+  const panel = document.getElementById('hwInner');
+  panel.style.left = '0px'; panel.style.top = '0px';
+  panel.style.width = document.documentElement.clientWidth + 'px'; panel.style.height = window.innerHeight + 'px';
+}
+function hwMaxButton(){
+  const b = document.getElementById('hwMax');
+  if (!b) return;
+  b.textContent = hwMaxRestore ? '❐' : '▢';
+  b.title = hwMaxRestore ? '還原大小' : '最大化';
+}
+function hwPosition(){
+  if (hwMaxRestore){ hwFill(); return; }
+  const panel = document.getElementById('hwInner');
+  const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+  let r = null;
+  try { r = JSON.parse(localStorage.getItem(HW_RECT_KEY) || 'null'); } catch (_){}
+  if (!(r && r.w >= 320 && r.h >= 240 && r.x >= 0 && r.y >= 0 && r.x + r.w <= vw && r.y + r.h <= vh)){   // 沒記過、或換了比較小的畫面放不下：置中，大小跟以前的對話框一樣
+    const w = Math.min(1120, vw * 0.96), h = Math.min(920, vh * 0.92);
+    r = { x: Math.max(0, (vw - w) / 2), y: Math.max(0, (vh - h) / 2), w, h };
+  }
+  panel.style.left = r.x + 'px'; panel.style.top = r.y + 'px'; panel.style.width = r.w + 'px'; panel.style.height = r.h + 'px';
+  let maxed = false;
+  try { maxed = localStorage.getItem(HW_MAX_KEY) === '1'; } catch (_){}
+  if (maxed){   // 上次關掉時是放大的
+    hwMaxRestore = { left: panel.style.left, top: panel.style.top, width: panel.style.width, height: panel.style.height };
+    hwFill();
+  }
+  hwMaxButton();
+}
+function hwSaveRect(){
+  if (hwMaxRestore) return;
+  const r = document.getElementById('hwInner').getBoundingClientRect();
+  try { localStorage.setItem(HW_RECT_KEY, JSON.stringify({ x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) })); } catch (_){}
+}
+function hwToggleMax(){
+  const panel = document.getElementById('hwInner');
+  if (hwMaxRestore){
+    const r = hwMaxRestore;
+    hwMaxRestore = null;
+    panel.style.left = r.left; panel.style.top = r.top; panel.style.width = r.width; panel.style.height = r.height;
+  } else {
+    hwMaxRestore = { left: panel.style.left, top: panel.style.top, width: panel.style.width, height: panel.style.height };
+    hwFill();
+  }
+  try { localStorage.setItem(HW_MAX_KEY, hwMaxRestore ? '1' : '0'); } catch (_){}
+  hwMaxButton();
+}
+attachFloatChrome(document.getElementById('hwModal'), document.getElementById('hwInner'), document.getElementById('hwHead'), {
+  isMax: () => !!hwMaxRestore,
+  clearMax: () => { hwMaxRestore = null; try { localStorage.setItem(HW_MAX_KEY, '0'); } catch (_){} hwMaxButton(); },
+  toggleMax: hwToggleMax,
+  fill: hwFill,
+  recenter: hwPosition,
+  onEnd: hwSaveRect,
+  minH: 240,
+});
+document.getElementById('hwMax').addEventListener('click', hwToggleMax);
+// 點哪個浮動視窗，哪個就跑到最上層（機器人代碼、盤中訊號分頁、每日功課）
+function hwFront(){
+  document.getElementById('hwModal').classList.add('bot-front');
+  ['botModal', 'sgtModal'].forEach((id) => { const el = document.getElementById(id); if (el) el.classList.remove('bot-front'); });
+}
+document.getElementById('hwInner').addEventListener('pointerdown', hwFront, true);
+['botInner', 'sgtInner'].forEach((id) => { const el = document.getElementById(id); if (el) el.addEventListener('pointerdown', () => document.getElementById('hwModal').classList.remove('bot-front'), true); });
 function openHomeworkPanel(){
-  document.getElementById('hwModal').hidden = false;
+  const hwM = document.getElementById('hwModal'), hwWasHidden = hwM.hidden;
+  hwM.hidden = false;
+  if (hwWasHidden) hwPosition();
+  hwFront();
   refreshGroupDailyChanges(false);
   refreshBrewLaunch(false);
   if (!jlState.data) jlLoad();
@@ -16204,7 +16285,6 @@ function openHomeworkPanel(){
 }
 function closeHomeworkPanel(){ document.getElementById('hwModal').hidden = true; clearInterval(hwState.timer); }
 document.getElementById('hwClose').addEventListener('click', closeHomeworkPanel);
-document.getElementById('hwModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeHomeworkPanel(); });
 document.getElementById('hwBody').addEventListener('click', (e) => {
   const t = e.target;
   const tab = t.closest('[data-hw-tab]');
@@ -19036,7 +19116,7 @@ function botAnswer(raw){
       if (!m.rows) return wrap(t, botLine(m.waitOpen, 'bot-dim'));
       // 照老師的格式：🔪 代號 名稱 漲跌% (比例)，後面三行提醒（漲跌、比例照老師把多餘的 0 去掉：-3.7%、(1.1)）
       const trim = (v) => String(Number(v.toFixed(2)));
-      return wrap(t + ' ' + md(m.today) + ' ' + stamp, (m.rows.map((x) => botLine('🔪 ' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + trim(x.pct) + '%</span> <b>(' + trim(x.ratio) + ')</b>'))).join('') || botLine('目前沒有', 'bot-dim')) +
+      return wrap(t + ' ' + stamp, (m.rows.map((x) => botLine('🔪 ' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + trim(x.pct) + '%</span> <b>(' + trim(x.ratio) + ')</b>'))).join('') || botLine('目前沒有', 'bot-dim')) +
         botLine('---------------', 'bot-sep') + botLine('⚠️轉弱或者破開盤再找入場點', 'bot-dim') + botLine('⚠️（比例越高）越易出貨', 'bot-dim') + botLine('⚠️有🔪才可開始找空點', 'bot-dim'),
         md(m.base) + ' 隔日沖名單・開盤量 ÷ 隔日沖手上張數');
     }
