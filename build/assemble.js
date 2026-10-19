@@ -1099,6 +1099,24 @@ export default {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/open-quotes") {
+      // 隔日沖黑龍(80)、股期黑龍(75)（2026-10-19）：要開盤價判斷今天收黑（現價 < 開盤）。首頁 /api/groups 的族群股沒有開盤價，
+      // 名單裡還有不在族群裡的股票；這裡只問 HanStock 後端報價中心（各處共用快取，不直接打證交所），一次最多 200 檔
+      const codes = [...new Set(String(url.searchParams.get("codes") || "").split(",").map((c) => c.trim().toUpperCase()).filter((c) => /^[0-9A-Z]{4,6}$/.test(c)))].slice(0, 200);
+      const headers = { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" };
+      if (!codes.length) return new Response(JSON.stringify({ quotes: {} }), { headers });
+      try {
+        const quotes = await fetchQuotesFromBackend(codes, 8000);
+        const out = {};
+        for (const code of codes) {
+          const q = quotes[code];
+          if (q && Number.isFinite(q.price)) out[code] = { name: q.name || null, price: q.price, open: Number.isFinite(q.open) ? q.open : null, prevClose: Number.isFinite(q.prevClose) ? q.prevClose : null, changePercent: q.changePercent };
+        }
+        return new Response(JSON.stringify({ quotes: out, quoteDate: quotes.__meta.quoteDate, quoteTime: quotes.__meta.quoteTime }), { headers });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: "報價中心抓不到（" + String(e && e.message || e).slice(0, 40) + "）" }), { status: 502, headers });
+      }
+    }
     if (url.pathname === "/api/watch-quotes") {
       // 自選股：族群表以外的股票報價（族群股前端直接用首頁那份 /api/groups）；上市、上櫃都問，附股名；
       // 一次最多 200 檔，不快取
