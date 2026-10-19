@@ -15764,8 +15764,10 @@ function tdBroadcast(seq){
     });
     st.forEach((s, code) => { if (s.inNow && !pass.has(code)){ s.inNow = false; s.out = slot; } });
   });
-  // 2026-10-19 使用者：越晚進榜的排越上面（09:08 在上、09:05 在下）；同一時間照股號
-  return Array.from(st.values()).sort((a, b) => (a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1));
+  // 2026-10-19 使用者：排法跟機器人 32 一樣——最近發生的在最上面：回的看回的時間、跑掉的看跑的時間、其他看進榜時間；
+  // 同一時間晚進榜的在上，再照股號
+  const evT = (x) => (x.inNow ? (x.back || x.first) : (x.out || x.first));
+  return Array.from(st.values()).sort((a, b) => (evT(a) > evT(b) ? -1 : evT(a) < evT(b) ? 1 : a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1));
 }
 function tdBroadcastHtml(seq, snap){
   const list = tdBroadcast(seq);
@@ -15774,23 +15776,23 @@ function tdBroadcastHtml(seq, snap){
   const rows = list.filter((x) => x.inNow || !tdState.hideGone).map((x) => {
     const r = x.row;
     return '<div class="td-brow' + (x.inNow ? '' : ' gone') + '" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(r.name || '') + '">' +
-      '<span class="td-btime">' + x.first + '</span><span class="td-bstk"><s>' + wlEsc(x.code) + ' ' + wlEsc(r.name || '') + '</s>' +
+      '<span class="td-btime">' + x.first + '</span><span class="td-bstk"><s>' + wlEsc(x.code) + ' ' + wlEsc(r.name || '') + '</s>' + (/[🔪⚔️🔰]/u.test(r.mk || '') ? r.mk : '') +
       // 老師廣播股名後面的「期」（有股票期貨）、「持」（打勾持有空單）；在觀察股裡的族群那格寫「⭐ 觀察」
       (stockFlags[x.code] && (stockFlags[x.code].hasStockFutures || stockFlags[x.code].hasMiniStockFutures) ? '<i class="td-bfut">期</i>' : '') +
       (tdState.hold.includes(x.code) ? '<i class="td-bhold">持</i>' : '') + '</span>' +
-      '<span class="td-bgrp">' + (tdState.watch.includes(x.code) ? '⭐ 觀察' : wlEsc(r.g || (r.zone === undefined ? '' : '12空'))) + '</span>' +
+      '<span class="td-bgrp">' + (tdState.watch.includes(x.code) ? '⭐ 觀察' : wlEsc(r.g || (r.zone === undefined ? '' : '12空')) + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, snap.total)) : '')) + '</span>' +
       (r.big !== null && r.big !== undefined ? '<span class="td-bbig' + (r.big <= -10 ? ' deep' : '') + '">' + (r.big > 0 ? '+' : '') + r.big + '</span>' : '<span class="td-bbig">—</span>') +
       '<span class="td-bpct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + hwPct(Number.isFinite(r.pct) ? r.pct : null) + '</span>' +
       (x.inNow ? (x.back ? '<span class="td-bst back">回 ' + x.back + '</span>' : '<span class="td-bst"></span>') : '<span class="td-bst run">跑 ' + x.out + '</span>') + '</div>';
   }).join('');
-  return '<aside class="td-side"><div class="td-shead">📣 🔪 刀功課廣播</div>' +
+  return '<aside class="td-side"><div class="td-shead">📣 🔪 刀劍空(32)功課廣播</div>' +
     '<div class="td-sinfo">' + (snap.live ? '盤中・跟著首頁報價' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
     '<div class="td-sparam">⏸ 跟著上面參數：' + (on.length ? on.join('・') : '（都沒勾＝全部刀劍空）') + '</div>' +
     '<div class="td-scount">今天 <b>' + list.length + '</b> 檔　在榜 ' + inCnt + '　<span class="down">消失 ' + goneCnt + '</span>' +
     '<button type="button" class="td-hide" data-td-hidegone="1">' + (tdState.hideGone ? '👁 顯示消失的' : '🚫 隱藏') + '</button></div>' +
     (seq.length <= 1 && snap.live ? '<div class="td-snote">盤中每 5 分鐘記一次（09:05 起），記到第二次以後才看得出誰跑、誰回來。</div>' : '') +
     (rows || '<div class="td-empty">目前沒有符合參數的</div>') +
-    '<div class="td-snote">時間＝最早進榜（越晚進榜的越上面）・<span class="td-bst run">跑</span> 已消失（轉強，要跑）・<span class="td-bst back">回</span> 掉出去又回榜。點一列開K線圖。</div></aside>';
+    '<div class="td-snote">左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・<span class="td-bst run">跑</span> 已消失（轉強，要跑）・<span class="td-bst back">回</span> 掉出去又回榜。點一列開K線圖。</div></aside>';
 }
 function tdAddWatch(){
   const el = document.getElementById('tdWatchInput');
@@ -15932,10 +15934,10 @@ function hwTodayHtml(){
     // 2026-10-19 使用者以為「🟣 大戶≤-10」已經勾了（那顆紫圓點只是圖示），其實沒勾；每顆前面補 ☑／☐，跟上面段位開關一樣
     '<div class="td-params"><span class="td-plabel">參數</span>' + TD_PARAMS.map(([k, label]) => '<button type="button" class="td-param p-' + k + (tdState.params[k] ? ' on' : '') + '" data-td-param="' + k + '">' + (tdState.params[k] ? '☑ ' : '☐ ') + label + '</button>').join('') +
     '<button type="button" class="td-param p-all' + (allOn ? ' on' : '') + '" data-td-param="all">' + (allOn ? '☑' : '☐') + ' 全勾</button>' +
-    '<span class="td-rnote">只篩選右邊「刀功課廣播」，下面族群卡不受影響</span></div></div>' +
+    '<span class="td-rnote">只篩選右邊「刀劍空(32)功課廣播」，下面族群卡不受影響</span></div></div>' +
     '<details class="td-help"><summary>💡 開關怎麼看</summary><div>' +
     '<p><b>大戶%</b>＝今天同秒併單 ≥7 張的大戶買減大戶賣（開盤第一筆算賣）÷ 近 5 日平均成交值。<i class="td-big neg">大戶 %</i> 負＝大戶在倒貨，<i class="td-big deep">≤ -10</i> 深紫＝倒貨重點股；<i class="td-big pos">大戶 +</i> 正＝大戶在買（對空單不利），<i class="td-big hot">≥ +5</i> 深黃＝警訊。<i class="td-n">N億</i>＝近 5 日平均成交值，看流動性夠不夠。數字後面有 * 是今天的 5 分K不完整。</p>' +
-    '<p><b>參數</b>決定右邊「刀功課廣播」誰進榜：大戶≤-10、均線分≥7、今天最高曾漲 3% 以上、現在跌幅還沒超過 7%（沒勾的就不看）。主畫面的刀劍空不受參數影響。</p>' +
+    '<p><b>參數</b>決定右邊「刀劍空(32)功課廣播」誰進榜：大戶≤-10、均線分≥7、今天最高曾漲 3% 以上、現在跌幅還沒超過 7%（沒勾的就不看）。主畫面的刀劍空不受參數影響。</p>' +
     '<p>☑ 打勾＝我持有空單（整列金框、跨日記住，再點一下解除）。排名格旁的圓球＝均線分（滿分 15：≥12 金底、6～11 金框、<6 灰）。<i class="td-k12">🔵 12空</i>＝機器人 123（衝高後跌破 5 分K 20MA、20MA 下彎）。<i class="td-fut">📈 股期</i>＝有股票期貨可避險。</p>' +
     '<p>段位照族群排名：前 10 名 ▲ 多方（前 5 名強多不列）、11～25 名 🔽 中間、26 名以後 🔰 強空、今天已跌 5% 以上 ♣ 收割區；每段的部位、停損、目標見最下面段位對照。</p></div></details>';
   // ⑥ 主體：族群卡或段位分區
@@ -19377,8 +19379,10 @@ function botAnswer(raw){
     });
     // 2026-10-19 使用者：12空照時間排，最新進名單的在最上面（since＝5 分K 收在 20MA 下、20MA 下彎成立的那根）；同一根再照跌幅大的在上面
     rows.sort((a, b) => b.since - a.since || a.pct - b.pct || a.rank - b.rank);
+    // 2026-10-19 使用者：每列後面顯示進名單的時間（5 分K 判定成立的那根）
+    const sinceTxt = (ts) => (ts ? ' <span style="color:#a78bfa;font-variant-numeric:tabular-nums">' + new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) + '</span>' : '');
     const line = (r, harvest) => botLine(r.rank + (harvest ? '♣' : bladeRankMark(r.rank, ranked.length)) + ' ' +
-      botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk));
+      botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk + sinceTxt(r.since)));
     const live = rows.filter((r) => !(r.pct <= -BLADE_HARVEST_PCT)), harvest = rows.filter((r) => r.pct <= -BLADE_HARVEST_PCT);
     const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
     return wrap(title, (rows.length ? live.map((r) => line(r)).join('') +
