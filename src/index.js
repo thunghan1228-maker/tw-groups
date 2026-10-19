@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 16:11:29";
+const BUILD_STAMP = "2026-10-19 21:39:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1504,13 +1504,12 @@ const HTML_PAGE = `<!DOCTYPE html>
   .td-sparam{margin:8px 10px;padding:6px 10px;background:#ede9fe;color:#4c1d95;border-radius:8px;font-size:12px;}
   .td-scount{display:flex;align-items:center;gap:8px;padding:2px 12px 6px;font-size:13px;} .td-scount b{color:#5b21b6;font-size:16px;}
   .td-hide{margin-left:auto;border:1px solid #f3a3a3;color:#b91c1c;background:transparent;border-radius:999px;padding:1px 9px;font-size:12px;cursor:pointer;font-family:inherit;}
-  .td-brow{display:grid;grid-template-columns:40px minmax(0,1fr) auto;grid-template-areas:"t s p" "t g b" "t st st";gap:0 6px;padding:6px 10px;border-top:1px solid var(--line);cursor:pointer;align-items:center;}
+  .td-brow{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;grid-template-areas:"t s h p" "t g h st";gap:0 8px;padding:6px 10px;border-top:1px solid var(--line);cursor:pointer;align-items:center;}
   .td-brow:hover{background:var(--panel-2);}
   .td-btime{grid-area:t;color:#8b2c22;font-weight:700;font-size:12px;}
   .td-bstk{grid-area:s;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .td-bgrp{grid-area:g;font-size:11px;color:var(--muted);}
-  .td-bbig{grid-area:b;justify-self:end;font-size:11px;font-weight:800;color:#4c1d95;background:#ede9fe;border-radius:5px;padding:0 6px;}
-  .td-bbig.deep{background:#4c1d95;color:#fff;}
+  .td-bh{grid-area:h;justify-self:end;align-self:center;}   /* 2026-10-19 使用者：名字右邊那塊空白放「大戶力」（上面小字、下面數字放大） */
   .td-bpct{grid-area:p;justify-self:end;font-weight:800;}
   .td-bst{grid-area:st;justify-self:end;font-size:11px;}
   .td-bst.run{background:#b91c1c;color:#fff;border-radius:5px;padding:0 6px;font-weight:700;}
@@ -1610,16 +1609,29 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-fallen-tag{display:inline-block;background:#5f6672;color:#fff;border-radius:5px;padding:0 6px;font-size:11px;font-weight:700;vertical-align:1px;margin-left:4px;}
   .hr-row.hr-fallen .hr-rk,.hr-row.hr-fallen .hr-code,.hr-row.hr-fallen .hr-name{color:#fff!important;}
   /* 2026-10-19 使用者：機器人 32 排法照「刀功課廣播」（左邊進榜時間、股號股名下面接族群，右邊漲跌跟大戶%，跑／回標籤），底色顏色照機器人原來的黑底 */
-  .b32-row{display:grid;grid-template-columns:38px minmax(0,1fr) auto;grid-template-areas:"t s p" "t g b" "t st st";gap:0 6px;padding:5px 2px;border-top:1px solid var(--line);align-items:center;cursor:pointer;font-variant-numeric:tabular-nums;}
+  .b32-row{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;grid-template-areas:"t s h p" "t g h st";gap:0 8px;padding:5px 2px;border-top:1px solid var(--line);align-items:center;cursor:pointer;font-variant-numeric:tabular-nums;}
   .b32-row:hover{background:var(--panel-2);}
   .b32-time{grid-area:t;color:#a78bfa;font-weight:700;font-size:12px;}
   .b32-stk{grid-area:s;font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .b32-grp{grid-area:g;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .b32-pct{grid-area:p;justify-self:end;font-weight:800;font-size:12.5px;}
-  .b32-big{grid-area:b;justify-self:end;font-size:11px;font-weight:800;color:#e9d5ff;background:#3b2a6b;border-radius:5px;padding:0 6px;}
-  .b32-big.deep{background:#7c3aed;color:#fff;}
+  .b32-h{grid-area:h;justify-self:end;align-self:center;}
   .b32-tag{grid-area:st;justify-self:end;font-size:11px;font-weight:800;border-radius:5px;padding:0 6px;color:#fff;}
   .b32-tag.run{background:#b91c1c;} .b32-tag.back{background:#2563eb;}
+  /* 2026-10-19 使用者：刀劍空(32)、1️⃣2️⃣空(123)、空族群必殺(193) 都加「大戶力」（盤中大戶力％，跟訊號中心同一份）：
+     ≥ +10% 紅底、≤ −10% 綠底、其餘紅字／綠字；block＝上面小字「大戶力」、下面數字放大（32 兩排那種），inline＝一行 */
+  .hf-tag{display:inline-flex;align-items:baseline;gap:4px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .hf-tag i{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);}
+  .hf-tag b{font-size:13px;font-weight:800;border-radius:5px;padding:0 5px;}
+  .hf-tag.up b{color:#dc2626;} .hf-tag.down b{color:#16a34a;} .hf-tag.flat b,.hf-tag.none b{color:var(--muted);}
+  .hf-tag.hot b{color:#fff;} .hf-tag.hot.up b{background:#dc2626;} .hf-tag.hot.down b{background:#16a34a;}
+  .hf-tag.block{flex-direction:column;align-items:flex-end;gap:0;line-height:1.25;}
+  .hf-tag.block b{font-size:15px;}
+  .b193-m{display:flex;flex-direction:column;margin:0 0 3px;line-height:1.5;}
+  .b193-m .hf-tag{margin-left:22px;}
+  .b193-r1{white-space:nowrap;}
+  .bot-col[data-col-key="193"]{flex-basis:calc((100% - 72px) / 10 * 1.7);min-width:290px;}
+  .bot-col[data-col-key="123"]{flex-basis:calc((100% - 72px) / 10 * 2.1);min-width:370px;}   /* 2026-10-19 使用者：193 個股兩排（名稱代號漲跌幅／大戶力）加寬；123 時間後面多了大戶力也一起加寬 */
   .b32-row.gone{background:rgba(220,38,38,.10);}
   .b32-row.gone .b32-stk{color:#f87171;} .b32-row.gone .b32-stk .bot-stk{text-decoration:line-through;}
   /* 2026-10-18 使用者：每日功課整頁的字加粗、顏色加深（太淺看不清楚）；計數列與段位鈕：刀劍空、12空、強空、收割區綠字，多方紅字，中間黑字，
@@ -6226,6 +6238,19 @@ function signalRowsHtml(events, view, opts){
 }
 // 2026-10-13 使用者：盤中特大買單／賣單在「訊號」後面加一欄盤中大戶力，只放百分比、不放金額。
 // 今天（含開盤前沿用的上一個交易日）用首頁那份大戶力排行；看昨天／前天用那天的排行（還沒抓到先顯示「…」）。
+// 2026-10-19 使用者：刀劍空(32)、1️⃣2️⃣空(123)、空族群必殺(193) 都要看到「大戶力」——盤中大戶力％，首頁那份大戶力排行（mainForceRanking）
+let holderPctSrc = null, holderPctMap = null;
+function holderPctOf(code){
+  if (holderPctSrc !== mainForceRanking){ holderPctSrc = mainForceRanking; holderPctMap = new Map((mainForceRanking || []).map((r) => [r.code, r])); }
+  const h = holderPctMap.get(code), v = h ? Number(h.strengthPct) : NaN;
+  return Number.isFinite(v) ? v : null;
+}
+function holderTagHtml(v, block){
+  const has = v !== null && v !== undefined && Number.isFinite(Number(v));
+  const r1 = has ? Math.round(Number(v) * 10) / 10 : 0;   // 四捨五入到 0.0% 的畫灰色（不是跌）
+  return '<span class="hf-tag ' + (!has ? 'none' : r1 > 0 ? 'up' : r1 < 0 ? 'down' : 'flat') + (has && Math.abs(r1) >= 10 ? ' hot' : '') + (block ? ' block' : '') +
+    '" title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）"><i>大戶力</i><b>' + (has ? (r1 > 0 ? '+' : '') + r1.toFixed(1) + '%' : '—') + '</b></span>';
+}
 function sigHolderMap(view){
   const date = view && view.date;
   if (view && view.isPast){
@@ -13589,7 +13614,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 16:11:29';
+const BUILD_STAMP = '2026-10-19 21:39:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15930,7 +15955,7 @@ function tdBroadcastHtml(seq, snap){
       (stockFlags[x.code] && (stockFlags[x.code].hasStockFutures || stockFlags[x.code].hasMiniStockFutures) ? '<i class="td-bfut">期</i>' : '') +
       (tdState.hold.includes(x.code) ? '<i class="td-bhold">持</i>' : '') + '</span>' +
       '<span class="td-bgrp">' + (tdState.watch.includes(x.code) ? '⭐ 觀察' : wlEsc(r.g || (r.zone === undefined ? '' : '12空')) + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, snap.total)) : '')) + '</span>' +
-      (r.big !== null && r.big !== undefined ? '<span class="td-bbig' + (r.big <= -10 ? ' deep' : '') + '">' + (r.big > 0 ? '+' : '') + r.big + '</span>' : '<span class="td-bbig">—</span>') +
+      '<span class="td-bh">' + holderTagHtml(r.big !== null && r.big !== undefined ? r.big : holderPctOf(x.code), true) + '</span>' +
       '<span class="td-bpct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + hwPct(Number.isFinite(r.pct) ? r.pct : null) + '</span>' +
       (x.inNow ? (x.back ? '<span class="td-bst back">回 ' + x.back + '</span>' : '<span class="td-bst"></span>') : '<span class="td-bst run">跑 ' + x.out + '</span>') + '</div>';
   }).join('');
@@ -19484,7 +19509,7 @@ function botAnswer(raw){
   if (q === '193'){
     const k = kill193Model();
     if (!k) return wrap('空族群必殺(193)', botLine('讀取中…', 'bot-dim'));
-    const line = (r) => rankLine({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark }) + (r.members.length ? botLine('⚠️' + r.members.map((x) => botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>')).join('　'), 'bot-sub') : '');
+    const line = (r) => rankLine({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark }) + (r.members.length ? botLine(r.members.map((x) => '<span class="b193-m"><span class="b193-r1">⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + '</span>' + holderTagHtml(holderPctOf(x.code)) + '</span>').join(''), 'bot-sub b193-wrap') : '');
     return wrap('空族群必殺(193)', botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + k.lower.map(line).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') + k.upper.map(line).join(''));
   }
   if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\\+3$/.test(q)){
@@ -19531,7 +19556,7 @@ function botAnswer(raw){
     // 2026-10-19 使用者：每列後面顯示進名單的時間（5 分K 判定成立的那根）
     const sinceTxt = (ts) => (ts ? ' <span style="color:#a78bfa;font-variant-numeric:tabular-nums">' + new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) + '</span>' : '');
     const line = (r, harvest) => botLine(r.rank + (harvest ? '♣' : bladeRankMark(r.rank, ranked.length)) + ' ' +
-      botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk + sinceTxt(r.since)));
+      botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk + sinceTxt(r.since) + ' ' + holderTagHtml(holderPctOf(r.code))));
     const live = rows.filter((r) => !(r.pct <= -BLADE_HARVEST_PCT)), harvest = rows.filter((r) => r.pct <= -BLADE_HARVEST_PCT);
     const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
     return wrap(title, (rows.length ? live.map((r) => line(r)).join('') +
@@ -19556,7 +19581,6 @@ function botAnswer(raw){
       // 左邊那格還是寫最早進榜時間（照廣播），標籤才寫回／跑的時間。同一時間晚進榜的在上，再照股號
       const evT = (x) => (x.inNow ? (x.back || x.first) : (x.out || x.first));
       const list = Array.from(tl.values()).sort((a, b) => (evT(a) > evT(b) ? -1 : evT(a) < evT(b) ? 1 : a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1));
-      const bigTxt = (v) => (v > 0 ? '+' : '') + String(Number(v.toFixed(1)));
       const rowHtml = (x) => {
         const r = liveBy.get(x.code), gone = !x.inNow;
         const qt = gone ? getStockQuote(x.code) : null;
@@ -19570,7 +19594,7 @@ function botAnswer(raw){
           '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(name) + '</span>' + (r && r.bladeMark ? r.bladeMark : '') + '</span>' +
           '<span class="b32-grp">' + wlEsc(gname) + (grank ? '・' + grank + zone : '') + '</span>' +
           '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
-          (big !== null ? '<span class="b32-big' + (big <= -10 ? ' deep' : '') + '">' + bigTxt(big) + '</span>' : '<span class="b32-big">—</span>') +
+          '<span class="b32-h">' + holderTagHtml(big !== null ? big : holderPctOf(x.code), true) + '</span>' +
           (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + '</div>';
       };
       const goneCnt = list.filter((x) => !x.inNow).length;
@@ -19582,7 +19606,7 @@ function botAnswer(raw){
     // 2026-10-19 使用者：每一段都是時間最近的排最上面（現在 11:35 就排第一、10 點多的往下），不依族群強弱；
     // 時間＝「回」的時間（掉出去又回來），沒有回的用第一次進名單的時間；同一時間才照族群名次
     const evTime = (r) => { const x = tl ? tl.get(r.code) : null; return x ? (x.back || x.first || '') : ''; };
-    const sec = (l, harvest) => l.slice().sort((a, b) => (evTime(a) < evTime(b) ? 1 : evTime(a) > evTime(b) ? -1 : 0) || a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + (harvest ? '♣' : bladeRankMark(r.groupRank, m.total)) + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '') + (tl ? bladeBackTag(tl.get(r.code)) : '')))).join('');
+    const sec = (l, harvest) => l.slice().sort((a, b) => (evTime(a) < evTime(b) ? 1 : evTime(a) > evTime(b) ? -1 : 0) || a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + (harvest ? '♣' : bladeRankMark(r.groupRank, m.total)) + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '') + (tl ? bladeBackTag(tl.get(r.code)) : '') + ' ' + holderTagHtml(Number.isFinite(r.strengthPct) ? r.strengthPct : holderPctOf(r.code))))).join('');
     // 2026-10-18 使用者：掉出名單的留著，紅色刪除線＋「跑 HH:MM」（照老師刀功課廣播）
     // 2026-10-19 使用者：已跑這段越晚跑的（接近現在）排越上面、早的往下；同一個跑的時間，晚進榜的在上
     const gone = tl ? Array.from(tl.values()).filter((x) => !x.inNow).sort((a, b) => (a.out > b.out ? -1 : a.out < b.out ? 1 : a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1)) : [];
