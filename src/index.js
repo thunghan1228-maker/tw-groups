@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 11:34:27";
+const BUILD_STAMP = "2026-10-19 11:38:50";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -13508,7 +13508,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 11:34:27';
+const BUILD_STAMP = '2026-10-19 11:38:50';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19370,7 +19370,10 @@ function botAnswer(raw){
     }
     // 名次後面的記號照老師：族群前 10 名 🔺、到第 25 名 🔽、後面 🔰，收割區域 ♣
     const tl = bladeTimeline(m);
-    const sec = (l, harvest) => l.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + (harvest ? '♣' : bladeRankMark(r.groupRank, m.total)) + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '') + (tl ? bladeBackTag(tl.get(r.code)) : '')))).join('');
+    // 2026-10-19 使用者：每一段都是時間最近的排最上面（現在 11:35 就排第一、10 點多的往下），不依族群強弱；
+    // 時間＝「回」的時間（掉出去又回來），沒有回的用第一次進名單的時間；同一時間才照族群名次
+    const evTime = (r) => { const x = tl ? tl.get(r.code) : null; return x ? (x.back || x.first || '') : ''; };
+    const sec = (l, harvest) => l.slice().sort((a, b) => (evTime(a) < evTime(b) ? 1 : evTime(a) > evTime(b) ? -1 : 0) || a.groupRank - b.groupRank || b.pct - a.pct).map((r) => botLine(r.groupRank + (harvest ? '♣' : bladeRankMark(r.groupRank, m.total)) + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + (r.bladeMark || '') + (tl ? bladeBackTag(tl.get(r.code)) : '')))).join('');
     // 2026-10-18 使用者：掉出名單的留著，紅色刪除線＋「跑 HH:MM」（照老師刀功課廣播）
     // 2026-10-19 使用者：已跑這段越晚跑的（接近現在）排越上面、早的往下；同一個跑的時間，晚進榜的在上
     const gone = tl ? Array.from(tl.values()).filter((x) => !x.inNow).sort((a, b) => (a.out > b.out ? -1 : a.out < b.out ? 1 : a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1)) : [];
@@ -19378,7 +19381,8 @@ function botAnswer(raw){
       return botLine('<span class="bot-gone">' + (x.row.gr || '') + ' ' + botStk(x.code, (q && q.name) || x.row.name || '', Number.isFinite(v) ? ' ' + botPct(v) : '') + '</span> <span class="blade-run">跑 ' + x.out + '</span> <small class="bot-dim">' + x.first + ' 進</small>'); }).join('') : '';
     // 2026-10-18 使用者：強空積極（連同收割區域）搬到最上面，跟 199、193 一樣；後面接多方打少、中間段，每段上面寫段名
     return wrap('🔪⚔️新刀劍空(32)', botLine('----↓(強空積極)↓----', 'bot-sep bot-sep-bear') + sec(m.bladeLower) + botLine('----↓(收割區域)↓----', 'bot-sep') + sec(m.bladeHarvest, true) +
-      botLine('----↓(多方打少)↓----', 'bot-sep') + sec(m.bladeUpper) + botLine('----↓(中間段)↓----', 'bot-sep') + sec(m.bladeMiddle) + goneLines);
+      botLine('----↓(多方打少)↓----', 'bot-sep') + sec(m.bladeUpper) + botLine('----↓(中間段)↓----', 'bot-sep') + sec(m.bladeMiddle) + goneLines,
+      '回＝掉出名單後又回來的時間；跑＝掉出名單的時間；每段時間越近的越上面');
   }
   // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
   // 最後附櫃買多空（漲跌幅）；34 再附漲 7% 以上沒列的檔數；處置股名字前面 *
