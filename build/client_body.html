@@ -3484,7 +3484,7 @@
       <ul>
         <li><b>今日即時多</b>：彙整多方向訊號的即時清單：最上面一塊是盤中大戶力多的名單（時間＝第一次進名單，早進名單的在上面、新進的往下排），下面是四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單依發生時間新到舊排序。也包含十大多族群裡大戶力 ≥ +10% 的股票（訊號寫「十大多族群」）。今日強勢股裡大戶力 ≥ +10% 的也會進來（訊號寫「今日強勢股」）。今天／昨天／前天後面的「盤中大戶力≥10%」按下去只看大戶力 ≥ +10% 的股票（上面的名單跟下面的訊號都套，再按一次全部顯示）；今日即時空同樣有「≤-10%」。</li>
         <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是刀劍空(32)的即時名單（時間＝第一次出現，不分段、全部照時間排：早出現的在上面、最晚出現的在最下面貼著兩條黑線，只有今天有；前面的 🔺＝多方打少、🔽＝中間段、🔰＝強空積極、♣＝收割區域），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。也包含十大空族群裡大戶力 ≤ −10% 的股票（訊號寫「十大空族群」）。今日弱勢股裡大戶力 ≤ −10% 的也會進來（訊號寫「今日弱勢股」）。</li>
-        <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。用今日即時行情篩：今天下跌（現價低於昨收）的不列，盤後也一樣（弱勢股反過來，今天上漲的不列），整族都不符合就不列那一族；週末、連假、開盤前還沒有「今天」，整份照列。⭐＝這族今天也有出現在強勢黑K選股（通常是比較強勢的族群）、👀＝這檔在強勢黑K選股名單裡。均線分數是收盤算好的，現價、漲跌、大戶力是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
+        <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。用今日即時行情篩：今天下跌（現價低於昨收）的不列，盤後也一樣（弱勢股反過來，今天上漲的不列），整族都不符合就不列那一族；週末、連假、開盤前還沒有「今天」，整份照列。⭐＝這族今天也有出現在強勢黑K選股（通常是比較強勢的族群）、👀＝這檔在強勢黑K選股名單裡。盤中均線分數、族群分數、族群名次都用現價當今天收盤即時重算（後端每 45 秒更新一次，新上市日K不足 240 天的算不出）、收盤後整表出來就用正式收盤分數；現價、漲跌、大戶力也是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
         <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面；按「大戶力 ≤ −10%」只看大戶在賣的。</li>
         <li><b>十大多族群</b>（原精選十大多空族群的多方）：今天漲幅前10大族群，各取大戶力最強的前5檔個股；按「大戶力≥10%」只看大戶力 ≥ +10% 的。</li>
         <li><b>十大空族群</b>（原精選十大多空族群的空方）：今天跌幅前10大族群，各取大戶力最負（賣超）的前5檔個股，名次從最弱的數；按「大戶力≤-10%」只看大戶力 ≤ −10% 的。</li>
@@ -7751,10 +7751,10 @@ function homeStrongColHtml(){
   if (!d) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (stState.error.strong ? '讀取失敗' : '讀取中…') + '</div></div>';
   const groups = stLiveGroups(d, true).filter((g) => g.rows.length);
   const n = groups.reduce((a, g) => a + g.rows.length, 0);
-  const body = groups.map((g) => '<div class="hr-sep hr-st-grp"' + (homeGroupAvg(g.name) !== null ? ' data-group="' + wlEsc(g.name) + '" tabindex="0" role="button"' : '') + ' title="族群分數＝族內平均均線分數（' + swMmdd(d.date) + ' 收盤算的），不是今天漲幅名次；點了看族群成分股">第 ' + g.rank + ' 名・' + wlEsc(g.name) + (Number.isFinite(g.avg) ? '・均分 ' + g.avg.toFixed(1) : '') + '</div>' + g.rows.map((r) => {
+  const body = groups.map((g) => '<div class="hr-sep hr-st-grp"' + (homeGroupAvg(g.name) !== null ? ' data-group="' + wlEsc(g.name) + '" tabindex="0" role="button"' : '') + ' title="族群分數＝族內平均均線分數（' + stBasis(d) + ' 算的），不是今天漲幅名次；點了看族群成分股">第 ' + g.rank + ' 名・' + wlEsc(g.name) + (Number.isFinite(g.avg) ? '・均分 ' + g.avg.toFixed(1) : '') + '</div>' + g.rows.map((r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
-    return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="均線分數 ' + r.sum + '（' + swMmdd(d.date) + ' 收盤）">' +
+    return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="均線分數 ' + r.sum + '（' + stBasis(d) + '）">' +
       '<span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span><span class="hr-rk">' + r.sum + '分</span>' +
       '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span></div>';
   }).join('')).join('');
@@ -7934,7 +7934,7 @@ function homeRankFootHtml(total){
   ]) +
   hrHelpTable('🐎 個股欄（跟訊號中心「盤中333」同一份）', ['欄位', '列什麼'], [
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔（疊在今日強勢股上面）'],
-    ['⭐今日強勢股', '跟訊號中心「今日強勢股」同一份：族群分數（族內平均均線分數，最新一天收盤算的）前 10 名裡，均線分數 ≥12、用今日即時行情篩今天沒跌（現價不低於昨收，盤後也一樣）的股票；「第 N 名・均分」是族群分數名次，不是今天漲幅名次'],
+    ['⭐今日強勢股', '跟訊號中心「今日強勢股」同一份：族群分數（族內平均均線分數，盤中用現價當今天收盤即時重算、收盤後用正式收盤）前 10 名裡，均線分數 ≥12、用今日即時行情篩今天沒跌（現價不低於昨收，盤後也一樣）的股票；「第 N 名・均分」是族群分數名次，不是今天漲幅名次'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
     ['👑30加33加34', '馬火多、賽馬多、河流多三份都有的'],
     ['🐎賽馬多(33)', '賽馬多名單裡，族群名次前 ' + HOME_334_TOP_GROUPS + ' 名的（訊號中心「盤中333」照舊全部列）'],
@@ -13737,6 +13737,8 @@ function stLiveOk(code, strong){
 }
 // 2026-10-17 使用者（週六）：「今天下跌的不列」只有在真的有「今天」時才過濾——均線分數是 d.date 收盤算的，
 // 首頁報價的交易日還停在同一天（週末、連假、收盤後、開盤前）就沒有今天，整份名單照列，不要拿那天自己的漲跌去刷掉。
+// 均線分數的依據：盤中（後端回 live）＝用現價當今天收盤即時重算；其他＝那天收盤
+const stBasis = (d) => (d && d.live ? '即時（現價當今天收盤' + (d.asOf ? '，' + String(d.asOf).slice(0, 5) : '') + '）' : swMmdd(d.date) + ' 收盤');
 function stLiveActive(d){
   const q = lastData && !lastData.mock && lastData.quoteDate ? String(lastData.quoteDate) : '';
   if (!q || !d) return false;
@@ -13752,7 +13754,7 @@ function stLiveGroups(d, strong){
 }
 function stLiveCount(d, strong){ return stLiveGroups(d, strong).reduce((a, g) => a + g.rows.length, 0); }
 function stLoad(side){
-  if (stState.loading[side] || (stState[side] && Date.now() - stState.at[side] < 5 * 60000)) return;
+  if (stState.loading[side] || (stState[side] && Date.now() - stState.at[side] < (stState[side].live ? 60e3 : 5 * 60000))) return;
   if (stState.error[side] && Date.now() - stState.error[side].at < 30000) return;
   stState.loading[side] = true;
   fetch('/api/ma-strength?side=' + side).then((r) => r.json().then((d) => ({ ok: r.ok, d }))).then(({ ok, d }) => {
@@ -13773,7 +13775,7 @@ function stPanelHtml(side){
   const groupHasObs = (name) => { const g = GROUPS.find((x) => x.name === name); return !!g && g.stocks.some((st) => obsCodes.has(st.code)); };
   const rule = (strong ? '族群分數前十大（族內平均均線分數）裡，均線分數 ≥' + d.rule.min + ' 的股票' : '族群分數倒數十名裡，均線分數 ≤' + d.rule.max + ' 的股票') +
     '・今天' + (strong ? '下跌（現價低於昨收）' : '上漲（現價高於昨收）') + '的不列，整族都不符合就不列那一族（週末、連假、開盤前還沒有「今天」，整份照列）';
-  let h = '<div class="race-note">' + rule + '・均線分數＝' + swMmdd(d.date) + ' 收盤（滿分 15，每天收盤後更新）・現價、漲跌是即時的・' +
+  let h = '<div class="race-note">' + rule + '・均線分數＝' + stBasis(d) + '（滿分 15；盤中用現價重算、收盤後用正式收盤）・現價、漲跌是即時的・' +
     (strong ? '⭐＝這族今天也有出現在強勢黑K選股（通常是比較強勢的族群）・' : '') + '👀＝這檔在強勢黑K選股名單裡・盤中大戶力＝大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣・時間＝這一次大戶力' + (strong ? '站上 +' : '跌破 −') + ST_HF_MIN + '% 的時間（中間跌回去又站回來就從站回來算；現在沒有在 ' + (strong ? '+' : '−') + ST_HF_MIN + '% 以' + (strong ? '上' : '下') + '的寫「—」）・點一列開K線圖</div>' +
     // 欄位名稱（2026-10-12 使用者：大戶力、漲跌幅、漲跌、成交價；2026-10-13 字放大 1.5 倍、大戶力改「盤中大戶力」）
     '<div class="signal-row signal-col-labels st-row"><span class="sig-time" title="這一次盤中大戶力站上 ' + (strong ? '+' : '−') + ST_HF_MIN + '% 的時間"><b>時間</b></span><span class="sig-code"></span><span class="sig-name"><b>名稱</b></span><span class="st-score-h"><b>均線</b></span>' +
@@ -13803,7 +13805,7 @@ function stPanelHtml(side){
       return '<div class="signal-row st-row" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '">' +
         '<span class="sig-time" title="' + hotTitle + '">' + (hot && hot.since ? hmOf(hot.since) : '—') + '</span>' +
         '<span class="sig-code">' + r.code + '</span><span class="sig-name">' + wlEsc(r.name) + (obsCodes.has(r.code) ? ' 👀' : '') + '</span>' +
-        '<span class="st-score' + (strong ? '' : ' weak') + '" title="均線分數（' + swMmdd(d.date) + ' 收盤）">' + r.sum + '</span>' +
+        '<span class="st-score' + (strong ? '' : ' weak') + '" title="均線分數（' + stBasis(d) + '）">' + r.sum + '</span>' +
         // 大戶力只放百分比、字大一點（2026-10-12 使用者：金額拿掉）；金額放在滑鼠提示
         '<span class="st-holder">' + (hf && hf.strengthPct !== null && hf.strengthPct !== undefined
           ? '<span class="st-hf ' + (hf.strengthPct > 0 ? 'up' : 'down') + '" title="大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）' + (fmtAmountWan(hf.netAmount) ? '，淨額 ' + fmtAmountWan(hf.netAmount) : '') + '">' +
