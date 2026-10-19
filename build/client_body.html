@@ -96,6 +96,7 @@
   .hr-gpill.up{background:#dc2626;} .hr-gpill.down{background:#16a34a;}
   .hr-obs-grp[data-group],.hr-st-grp[data-group]{cursor:pointer;} .hr-obs-grp[data-group]:hover .hr-gpill,.hr-st-grp[data-group]:hover{filter:brightness(1.15);}
   .hr-st-grp{background:#dc2626;color:#fff;font-weight:800;}   /* 2026-10-16 使用者：今日強勢股的族群名（第 N 名・族群）改紅底 */
+  .hr-st-grp.weak{background:#16a34a;}   /* 2026-10-19 使用者：首頁今日弱勢股的族群名綠底（空方） */
   .hr-obs-grp{padding:3px 8px 0;font-size:12px;font-weight:800;color:#facc15;border-top:1px solid var(--line);}
   .hr-row.hr-obs{border-top:none;padding-top:3px;flex-wrap:wrap;row-gap:1px;}
   .hr-row.hr-obs .hr-name,.hr-row.hr-obs .hr-code{flex:0 0 auto;overflow:visible;}
@@ -7709,7 +7710,7 @@ function homeKill31ColHtml(){
   return '<div class="hr-col"><div class="hr-title bear">🔪⚔️刀劍空(31)' + (list ? ' <span class="hr-rk">' + list.length + ' 檔</span>' : '') + '</div>' +
     (!list ? '<div class="hr-note">讀取中…</div>' : list.length ? list.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
-// 首頁第 10 欄：22-5（原隔日沖必殺(813)，2026-10-18 換掉）／隔日沖黑龍(80)／股期黑龍(75)（2026-10-17 使用者：先把位置做出來，下週拿對方名單校正；跟機器人同一份）
+// 首頁第 10 欄：22-5（原隔日沖必殺(813)，2026-10-18 換掉）／隔日沖黑龍(80)／股期黑龍(75)；最右邊一欄 2026-10-19 起是今日弱勢股（原 22-35）＋股期黑龍(75)（2026-10-17 使用者：先把位置做出來，下週拿對方名單校正；跟機器人同一份）
 function homeDaytradeColsHtml(part){
   const md = (iso) => Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10);
   const note = (t) => '<div class="hr-note">' + wlEsc(t) + '</div>';
@@ -7760,6 +7761,25 @@ function homeStrongColHtml(){
   }).join('')).join('');
   return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔</span></div>' +
     (n ? body : '<div class="hr-note">' + (d.count ? '均線分數符合的今天都在跌，先不列' : '今天沒有符合的股票') + '</div>') + '</div>';
+}
+// 首頁今日弱勢股（2026-10-19 使用者：拿掉 22-35 那欄，換成盤中訊號中心的今日弱勢股）：跟訊號中心「今日弱勢股」同一份，
+// 族群分數倒數十名裡均線分數 ≤3、今天沒上漲的（盤中用現價即時重算）；每族一行「倒數第 N 名」，下面列代號、名稱、均線分數、今天漲跌幅
+function homeWeakColHtml(){
+  stLoad('weak');
+  const d = stState.weak;
+  const title = '<div class="hr-title bear">🔻今日弱勢股';
+  if (!d) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (stState.error.weak ? '讀取失敗' : '讀取中…') + '</div></div>';
+  const groups = stLiveGroups(d, false).filter((g) => g.rows.length);
+  const n = groups.reduce((a, g) => a + g.rows.length, 0);
+  const body = groups.map((g) => '<div class="hr-sep hr-st-grp weak"' + (homeGroupAvg(g.name) !== null ? ' data-group="' + wlEsc(g.name) + '" tabindex="0" role="button"' : '') + ' title="族群分數＝族內平均均線分數（' + stBasis(d) + ' 算的），倒數第 N 名；點了看族群成分股">倒數第 ' + (d.groupCount - g.rank + 1) + ' 名・' + wlEsc(g.name) + (Number.isFinite(g.avg) ? '・均分 ' + g.avg.toFixed(1) : '') + '</div>' + g.rows.map((r) => {
+    const q = getStockQuote(r.code);
+    const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
+    return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="均線分數 ' + r.sum + '（' + stBasis(d) + '）">' +
+      '<span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span><span class="hr-rk">' + r.sum + '分</span>' +
+      '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span></div>';
+  }).join('')).join('');
+  return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔</span></div>' +
+    (n ? body : '<div class="hr-note">' + (d.count ? '均線分數符合的今天都在漲，先不列' : '今天沒有符合的股票') + '</div>') + '</div>';
 }
 function homeRankColHtml(title, rows, half, sepLabel, empty, warnOf, warnCls, titleCls){
   let body = '';
@@ -7903,7 +7923,7 @@ function homeRank4Html(){
     '<div class="hr-stack">' +   // 2026-10-17 使用者：刀劍空(31) 疊在新刀劍空(32) 下面
       home12ColHtml(h) +   // 2026-10-18 使用者：新刀劍空(32) 換成 12；199、刀劍空(31) 也從首頁拿掉
     '</div>' +
-    '<div class="hr-stack">' + home225ColHtml(35) + homeFut75ColHtml() + '</div>' +   // 2026-10-18 使用者：22-5 旁邊加一欄 22-35；股期黑龍(75) 疊在 22-35 下面（最右邊一欄最下面）
+    '<div class="hr-stack">' + homeWeakColHtml() + homeFut75ColHtml() + '</div>' +   // 2026-10-19 使用者：22-35 拿掉，換成今日弱勢股；股期黑龍(75) 疊在它下面（最右邊一欄最下面）
     '</div>' +
     '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }
@@ -7980,6 +8000,7 @@ function homeRankFootHtml(total){
     ['隔日沖必殺(813)', '前一個交易日隔日沖 811 名單，今天現價低於開盤價、跌 2.5～4%（跌到 4% 以上不列）、手上 100 張以上的；比例＝今天開盤量（含集合競價）÷ 隔日沖手上張數，≥ 0.7 才列，比例越高越容易出貨。老師盤中常常是空的'],
     ['隔日沖黑龍(80)', '前兩個交易日（今天以前最近兩個名單日）上隔日沖 811 名單、今天收黑K（現價低於開盤）而且下跌，照跌幅小到大排；⭐＝更早以前還上榜過幾次。盤中用即時價，中午 12 點後看比較準'],
     ['股期黑龍(75)', '有股票期貨、均線分數 ≥ 10、今天收黑K，照漲跌幅排；名字前面 *＝處置中。槓桿大，防守黑K低點'],
+    ['🔻今日弱勢股', '跟訊號中心「今日弱勢股」同一份：族群分數（族內平均均線分數，盤中用現價當今天收盤即時重算、收盤後用正式收盤）倒數 10 名裡，均線分數 ≤3、用今日即時行情篩今天沒上漲的股票；「倒數第 N 名」是族群分數名次，不是今天跌幅名次（疊在股期黑龍(75) 上面，原本 22-35 那欄的位置）'],
   ]);
 }
 // 首頁最後一欄：飆股雷達（2026-10-15 使用者：「盤中形態觀察股」改名飆股雷達，【1】【2】【3】放到首頁原本 177 的位置；
@@ -13763,7 +13784,7 @@ function stLoad(side){
   }).catch((e) => { stState.error[side] = { at: Date.now(), msg: String((e && e.message) || e) }; }).finally(() => {
     stState.loading[side] = false;
     try { sigRefreshViews(); } catch (_){}   // 今日即時多／空也用得到（2026-10-12）
-    if (side === 'strong') { try { render(); } catch (_){} }   // 首頁第一欄也有今日強勢股（2026-10-15）
+    if (side === 'strong' || side === 'weak') { try { render(); } catch (_){} }   // 首頁也有今日強勢股（2026-10-15）、今日弱勢股（2026-10-19）
   });
 }
 function stPanelHtml(side){
@@ -14357,7 +14378,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・183／188・馬火多(30)／155・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・發動／今日強勢股・1+2多(44)／283・族群漲幅(12)・22-5／隔日沖黑龍(80)・22-35／股期黑龍(75)</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・183／188・馬火多(30)／155・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・發動／今日強勢股・1+2多(44)／283・族群漲幅(12)・22-5／隔日沖黑龍(80)・今日弱勢股／股期黑龍(75)</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
