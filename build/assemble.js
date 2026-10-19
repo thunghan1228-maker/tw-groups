@@ -1099,6 +1099,26 @@ export default {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/open-volume") {
+      // 隔日沖必殺(813)（2026-10-19）：今天的開盤量＝後端 1 分K 第一根（09:00，永豐逐筆，含開盤集合競價），一次最多 45 檔。
+      // 以前用 Yahoo 1 分K 第一根：沒算集合競價（友威科 146 對 662、大眾控 778 對 2056）、又慢約 20 分鐘，09:15 還顯示「沒開盤」
+      const codes = [...new Set(String(url.searchParams.get("codes") || "").split(",").map((c) => c.trim().toUpperCase()).filter((c) => /^[0-9A-Z]{4,6}$/.test(c)))].slice(0, 45);
+      const headers = { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=60" };
+      const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+      const rows = {};
+      await Promise.all(codes.map(async (code) => {
+        try {
+          // 每檔最多等 8 秒，慢的略過（一檔卡住不要拖住整批）
+          const r = await Promise.race([proxyHanstockBars("/api/hub/bars1m/" + encodeURIComponent(code), 120), new Promise((resolve) => setTimeout(() => resolve(null), 8000))]);
+          if (!r || !r.ok) return;
+          const first = (((await r.json()) || {}).bars || [])[0];
+          if (!first) return;
+          const tw = new Date(Number(first.ts) + 8 * 3600e3).toISOString();
+          if (tw.slice(0, 10) === today && tw.slice(11, 16) === "09:00") rows[code] = { vol: Math.round(Number(first.volume) || 0) };
+        } catch (e) { /* 這檔先略過 */ }
+      }));
+      return new Response(JSON.stringify({ rows, date: today }), { headers });
+    }
     if (url.pathname === "/api/open-quotes") {
       // 隔日沖黑龍(80)、股期黑龍(75)（2026-10-19）：要開盤價判斷今天收黑（現價 < 開盤）。首頁 /api/groups 的族群股沒有開盤價，
       // 名單裡還有不在族群裡的股票；這裡只問 HanStock 後端報價中心（各處共用快取，不直接打證交所），一次最多 200 檔
