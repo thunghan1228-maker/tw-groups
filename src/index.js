@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 12:55:55";
+const BUILD_STAMP = "2026-10-19 13:00:56";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7755,7 +7755,7 @@ function homeStockColHtml(title, list, emptyText){
 // ---- 刀劍空(31)（2026-10-17 使用者：放在新刀劍空(32) 下面）----
 // 對方說明：「31 尋找盤中符合🔪⚔️個股（偏空）；🔪（跟昨天比）⚔️（跟前天比）＝原本前段班突然跑到倒數兩名，數字為下降名次」。
 // 標記跟族群視窗同一套（groupBladeMarks：🔪N／⚔️N／🔰，10/16 對方 31 的 9 檔符號、數字都一樣）；這裡列每個族群
-// 「倒數兩名」有標記的（跌 BLADE_HARVEST_PCT% 以上的收割區不算名次、不列，處置股不列），照今天漲跌幅高到低排、不分族群。
+// 「倒數兩名」有標記的（跌 BLADE_HARVEST_PCT% 以上的收割區不算名次、不列，處置股不列），照今天漲跌幅排（2026-10-19 起跌幅大的在上面）、不分族群。
 // 對方只挑其中一部分（10/16 全市場標到 20 幾檔他列 9 檔），怎麼挑還不知道，先全部列，之後拿他的名單再縮。
 const KILL31_BOTTOM = 2;
 function kill31Model(){
@@ -7774,7 +7774,8 @@ function kill31Model(){
           tip: g.name + '・族裡倒數第 ' + (i + 1) + ' 名' + (x.knife ? '・昨天族裡第 ' + x.ry + ' 名' : '') + (x.sword ? '・前天族裡第 ' + x.r2 + ' 名' : '') });
       });
   });
-  return [...out.values()].sort((a, b) => b.pct - a.pct);
+  // 2026-10-19 使用者：31 跌幅大的排上面（機器人 31、首頁 31 欄都一樣）
+  return [...out.values()].sort((a, b) => a.pct - b.pct);
 }
 function homeKill31ColHtml(){
   const list = kill31Model();
@@ -13547,7 +13548,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 12:55:55';
+const BUILD_STAMP = '2026-10-19 13:00:56';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19391,7 +19392,8 @@ function botAnswer(raw){
   }
   // 2026-10-18 使用者：空方那段搬到每一格最上面（199、193：空方段整段；177：綠色（跌）的族群），順序不變，下面再接其他的
   if (q === '177'){
-    const down = h.rows.filter((r) => r.avg < 0), rest = h.rows.filter((r) => !(r.avg < 0));
+    // 2026-10-19 使用者：空方・跌那段跌幅大的排上面；下面漲的那段本來就是漲幅大的在上面，不動
+    const down = h.rows.filter((r) => r.avg < 0).sort((a, b) => a.avg - b.avg), rest = h.rows.filter((r) => !(r.avg < 0));
     let body = down.length ? botLine('------↓(空方・跌)↓------', 'bot-sep bot-sep-bear') + down.map(rankLine).join('') + botLine('------------', 'bot-sep') : '', sep = false;
     rest.forEach((r) => { if (!sep && r.rank > h.half){ body += botLine('------水平------', 'bot-sep'); sep = true; } body += rankLine(r); });
     return wrap('重點族群排名(177)', body);
@@ -19451,9 +19453,10 @@ function botAnswer(raw){
       const bm = marksOf.get(g.name).get(it.code);
       const pct = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
       if (Number.isFinite(pct) && pct > K12_MAX_PCT) return;
-      rows.push({ code: it.code, name: (s && s.name) || it.name, rank: gi + 1, pct, mk: bm ? bm.mk : '' });
+      rows.push({ code: it.code, name: (s && s.name) || it.name, rank: gi + 1, pct, mk: bm ? bm.mk : '', since: Number(it.since) || 0 });
     });
-    rows.sort((a, b) => a.rank - b.rank || b.pct - a.pct);
+    // 2026-10-19 使用者：12空照時間排，最新進名單的在最上面（since＝5 分K 收在 20MA 下、20MA 下彎成立的那根）；同一根再照跌幅大的在上面
+    rows.sort((a, b) => b.since - a.since || a.pct - b.pct || a.rank - b.rank);
     const line = (r, harvest) => botLine(r.rank + (harvest ? '♣' : bladeRankMark(r.rank, ranked.length)) + ' ' +
       botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk));
     const live = rows.filter((r) => !(r.pct <= -BLADE_HARVEST_PCT)), harvest = rows.filter((r) => r.pct <= -BLADE_HARVEST_PCT);
