@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 11:29:35";
+const BUILD_STAMP = "2026-10-19 11:34:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -164,6 +164,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 首頁飆股雷達欄（2026-10-15）：分類標題紅底、族群名黃色，每檔後面帶符號；名稱太長截掉，符號和漲跌幅不截 */
   .hr-obs-cat{padding:4px 8px;font-size:12px;font-weight:800;background:#7c3aed;color:#fff;border-top:1px solid var(--line);}   /* 2026-10-18 使用者：【1】【2】【3】改紫底白字 */
   .hr-obs-cat small{font-weight:600;opacity:.9;}
+  .hr-obs-sub{padding:3px 8px 0;font-size:12px;font-weight:700;color:#4ade80;border-top:1px solid var(--line);}   /* 2026-10-19 【5】有點深的兩個小標 */
   /* 終點戰法空(283)（2026-10-16）：族群列黃字、底下個股縮排，⚠️ 加註橘字 */
   .hr-283-grp .hr-name{color:#facc15;}
   .hr-row.hr-283-stk{border-top:none;padding-top:2px;padding-bottom:2px;padding-left:12px;}
@@ -8005,8 +8006,9 @@ function homeRankFootHtml(total){
 // 首頁最後一欄：飆股雷達（2026-10-15 使用者：「盤中形態觀察股」改名飆股雷達，【1】【2】【3】放到首頁原本 177 的位置；
 // 每檔後面照樣標符號，符號說明寫在首頁最下面）。跟訊號中心「盤中飆股雷達」同一份（obsState.report），
 // 盤中每 HOME_OBS_REFRESH_MS 重算一次；重算不動自選股的四個 ⏰ 分組（那邊照舊只在 10:30、11:00…跳出來的時段換）。
-const HOME_OBS_CATS = [2, 3, 1];   // 首頁顯示順序（2026-10-16 使用者：今天噴出最上面、已噴在高檔第二、黑K出現放最後）
-const homeObsCats = () => HOME_OBS_CATS.map((k) => OBS_CATS.find(([c]) => c === k)).filter(Boolean);
+const HOME_OBS_CATS = [2, 3, 1, 4, 5];   // 首頁顯示順序（2026-10-16 使用者：今天噴出最上面、已噴在高檔第二、黑K出現第三；2026-10-19 加【4】右肩打底、【5】有點深，接在後面，只放股票）
+const HOME_OBS_FOOT_CATS = [2, 3, 1];     // 首頁最下面的說明表照舊只講前三類（使用者：4、5 的說明、跟上次名單比、移出原因都不用搬過來，留在跳出來的畫面）
+const homeObsCats = (ks = HOME_OBS_CATS) => ks.map((k) => OBS_CATS.find(([c]) => c === k)).filter(Boolean);
 const HOME_OBS_REFRESH_MS = 5 * 60 * 1000;
 function homeObsColHtml(){
   const rep = obsState.report;
@@ -8024,24 +8026,31 @@ function homeObsColHtml(){
       '<span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(x.name) + '</span><span class="hr-obs-mk">' + obsMarksHtml(x) + '</span>' +
       '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span></div>';
   };
+  const listHtml = (list) => obsGroupLines(list).map(([g, xs]) => {
+    const avg = homeGroupAvg(g);   // 「其他」或族群表沒有的就照原本黃字、不能點
+    return (avg === null ? '<div class="hr-obs-grp">' + wlEsc(g) + '</div>'
+      : '<div class="hr-obs-grp" data-group="' + wlEsc(g) + '" tabindex="0" role="button" title="看族群成分股"><span class="hr-gpill ' + dirClass(avg) + '">' + wlEsc(g) + '</span></div>') + xs.map(row).join('');
+  }).join('');
   let body = '', n = 0;
   homeObsCats().forEach(([k, name, act]) => {
     const list = rep.items.filter((x) => x.cat === k);
     n += list.length;
     body += '<div class="hr-obs-cat" title="' + wlEsc(act) + '">【' + k + '】' + wlEsc(name) + ' <small>' + list.length + ' 檔</small></div>';
     if (!list.length){ body += '<div class="hr-note">—</div>'; return; }
-    obsGroupLines(list).forEach(([g, xs]) => {
-      const avg = homeGroupAvg(g);   // 「其他」或族群表沒有的就照原本黃字、不能點
-      body += (avg === null ? '<div class="hr-obs-grp">' + wlEsc(g) + '</div>'
-        : '<div class="hr-obs-grp" data-group="' + wlEsc(g) + '" tabindex="0" role="button" title="看族群成分股"><span class="hr-gpill ' + dirClass(avg) + '">' + wlEsc(g) + '</span></div>') + xs.map(row).join('');
-    });
+    if (k === 5){   // 有點深：跟老師一樣分「今天剛破月線（昨天還沒破）」「已破月線（昨天就在月線下）」兩段
+      [['▼今天剛破月線（昨天還沒破）', list.filter((x) => x.newBreak)], ['▼已破月線（昨天就在月線下）', list.filter((x) => !x.newBreak)]].forEach(([h, l]) => {
+        if (l.length) body += '<div class="hr-obs-sub">' + h + '</div>' + listHtml(l);
+      });
+      return;
+    }
+    body += listHtml(list);
   });
   const at = new Date(rep.at + 8 * 3600000).toISOString().slice(11, 16);
   return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔・' + at + '</span></div>' + body + '</div>';
 }
 function homeObsFootHtml(){
   return hrHelpTable('📡 強勢黑K選股（跟訊號中心同一份）', ['分類', '怎麼做'],
-    homeObsCats().map(([k, name, act]) => ['【' + k + '】' + name, act]).concat([
+    homeObsCats(HOME_OBS_FOOT_CATS).map(([k, name, act]) => ['【' + k + '】' + name, act]).concat([
       ['更新', '盤中（09:00～13:35）每 ' + HOME_OBS_REFRESH_MS / 60000 + ' 分鐘重算分類和符號；收盤後停在最後一次'],
       ['標題的時間', '最後一次算的時間'],
       ['漲跌幅', '跟首頁報價一起每 15 秒更新'],
@@ -13499,7 +13508,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 11:29:35';
+const BUILD_STAMP = '2026-10-19 11:34:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
