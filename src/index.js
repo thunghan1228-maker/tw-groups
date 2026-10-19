@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 12:38:16";
+const BUILD_STAMP = "2026-10-19 12:55:55";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6746,6 +6746,9 @@ const BLADE_MAX_ROWS = 15;
 // 12空(123) 要「今天最高曾漲到」幾 % 以上：後端門檻 3%，老師 10/19 11:05、12:20 的名單都是高點 4.15% 以上（力新 4.15、大綜 4.64、台塑化 4.49、驊宏資 5.6、華經 6.65），
 // 南亞高點 3.09% 他沒列，所以前端再用 4% 擋一次（後端還是 3%）
 const K12_RUSH_MIN = 4;
+// 12:50 老師只列台玻 +0.6%、台塑化、驊宏資；我們多列尖點 +6.3%、精測 +3.2%、有成精密 +1.6%（高點都 ≥ 4%、也都在 5 分K 20MA 下彎）。
+// 三檔多的現在漲幅都比老師最高那檔（+0.6%）高，所以現價漲超過 +1% 的先不列（只有這一份樣本，門檻 1% 是猜的，下次對）
+const K12_MAX_PCT = 1;
 const BLADE_PRIOR_RISE = 3;      // 刀劍空：昨天（🔪）或前天（⚔️）要漲這麼多以上，今天殺下來才算（2026-10-15 照老師）
 const FIRE_MIN_PCT = 2;       // 馬火多：今天至少漲這麼多才算有力道
 const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停鎖死）買不到，另列
@@ -13544,7 +13547,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 12:38:16';
+const BUILD_STAMP = '2026-10-19 12:55:55';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15775,9 +15778,11 @@ function tdLiveSnap(m){
     const gi = ranked.findIndex((g) => (KILL193_GROUPS.has(g.name) || RANK188_GROUPS.has(g.name)) && g.stocks.some((s) => s.code === it.code));
     if (gi < 0) return;
     const g = ranked[gi], s = quote.get(it.code);
+    const pct12 = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
+    if (Number.isFinite(pct12) && pct12 > K12_MAX_PCT) return;
     if (!marks.has(g.name)) marks.set(g.name, groupBladeMarks(g));
     const bm = marks.get(g.name).get(it.code);
-    k12Base.push({ code: it.code, name: (s && s.name) || it.name, pct: s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct, price: s ? s.price : it.close,
+    k12Base.push({ code: it.code, name: (s && s.name) || it.name, pct: pct12, price: s ? s.price : it.close,
       groupName: g.name, groupRank: gi + 1, bladeMark: bm ? bm.mk : '', dayHighPct: it.dayHighPct });
   });
   const zoneRows = TD_ZONES.flatMap((z) => (m[z.list] || []).map((r) => [r, z.key]));
@@ -18935,7 +18940,7 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 // 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
 const botState = { cols: [], restored: false, restoring: false, pendTops: null, world: null, worldAt: 0, worldLoading: false, cache: {} };   // cols＝開著的格子 [{cmd, key, html}]，照點的順序
 const BOT_CODES = [
-  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：老師固定的族群裡，今天衝高 4% 以上、5 分K跌破 20MA 而且 20MA 往下彎的股票（對老師 11:05、12:20 兩份，高點 3.09% 的南亞他沒列）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
+  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：老師固定的族群裡，今天衝高 4% 以上、現價漲幅不超過 1%、5 分K跌破 20MA 而且 20MA 往下彎的股票（對老師 11:05、12:20、12:50 三份：高點 3.09% 的南亞、現在漲 1.6% 以上的尖點、精測、有成精密他都沒列）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
   ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'],
   ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
@@ -19445,6 +19450,7 @@ function botAnswer(raw){
       if (!marksOf.has(g.name)) marksOf.set(g.name, groupBladeMarks(g));
       const bm = marksOf.get(g.name).get(it.code);
       const pct = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
+      if (Number.isFinite(pct) && pct > K12_MAX_PCT) return;
       rows.push({ code: it.code, name: (s && s.name) || it.name, rank: gi + 1, pct, mk: bm ? bm.mk : '' });
     });
     rows.sort((a, b) => a.rank - b.rank || b.pct - a.pct);
