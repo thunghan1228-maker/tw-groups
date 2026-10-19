@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 11:47:31";
+const BUILD_STAMP = "2026-10-19 12:00:38";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1604,6 +1604,19 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row.blade-gone .blade-run{margin-left:auto;}
   .blade-gone-sep{color:#dc2626;}
   .bot-gone{color:#dc2626;text-decoration:line-through;}
+  /* 2026-10-19 使用者：機器人 32 排法照「刀功課廣播」（左邊進榜時間、股號股名下面接族群，右邊漲跌跟大戶%，跑／回標籤），底色顏色照機器人原來的黑底 */
+  .b32-row{display:grid;grid-template-columns:38px minmax(0,1fr) auto;grid-template-areas:"t s p" "t g b" "t st st";gap:0 6px;padding:5px 2px;border-top:1px solid var(--line);align-items:center;cursor:pointer;font-variant-numeric:tabular-nums;}
+  .b32-row:hover{background:var(--panel-2);}
+  .b32-time{grid-area:t;color:#a78bfa;font-weight:700;font-size:12px;}
+  .b32-stk{grid-area:s;font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .b32-grp{grid-area:g;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .b32-pct{grid-area:p;justify-self:end;font-weight:800;font-size:12.5px;}
+  .b32-big{grid-area:b;justify-self:end;font-size:11px;font-weight:800;color:#e9d5ff;background:#3b2a6b;border-radius:5px;padding:0 6px;}
+  .b32-big.deep{background:#7c3aed;color:#fff;}
+  .b32-tag{grid-area:st;justify-self:end;font-size:11px;font-weight:800;border-radius:5px;padding:0 6px;color:#fff;}
+  .b32-tag.run{background:#b91c1c;} .b32-tag.back{background:#2563eb;}
+  .b32-row.gone{background:rgba(220,38,38,.10);}
+  .b32-row.gone .b32-stk{color:#f87171;} .b32-row.gone .b32-stk .bot-stk{text-decoration:line-through;}
   /* 2026-10-18 使用者：每日功課整頁的字加粗、顏色加深（太淺看不清楚）；計數列與段位鈕：刀劍空、12空、強空、收割區綠字，多方紅字，中間黑字，
      出獄股、即將入獄維持原色 */
   #hwInner{--text:#1d1410; --muted:#4a3f37; font-weight:600;}
@@ -13528,7 +13541,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 11:47:31';
+const BUILD_STAMP = '2026-10-19 12:00:38';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19442,6 +19455,35 @@ function botAnswer(raw){
     }
     // 名次後面的記號照老師：族群前 10 名 🔺、到第 25 名 🔽、後面 🔰，收割區域 ♣
     const tl = bladeTimeline(m);
+    // 2026-10-19 使用者：排法照「刀功課廣播」——不分段，一檔一列：左邊最早進榜時間（越晚進榜越上面，同時間照股號）、
+    // 股號股名下面接族群（名次＋🔺🔽🔰♣）、右邊漲跌幅跟大戶%、最下面「跑／回 HH:MM」；跑掉的紅色刪除線夾在裡面照時間排。底色跟顏色照機器人原本的黑底。
+    if (tl){
+      const liveBy = new Map(), harvestSet = new Set((m.bladeHarvest || []).map((r) => r.code));
+      [].concat(m.bladeUpper || [], m.bladeMiddle || [], m.bladeLower || [], m.bladeHarvest || []).forEach((r) => { if (!liveBy.has(r.code)) liveBy.set(r.code, r); });
+      const list = Array.from(tl.values()).sort((a, b) => (a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1));
+      const bigTxt = (v) => (v > 0 ? '+' : '') + String(Number(v.toFixed(1)));
+      const rowHtml = (x) => {
+        const r = liveBy.get(x.code), gone = !x.inNow;
+        const qt = gone ? getStockQuote(x.code) : null;
+        const name = r ? r.name : ((qt && qt.name) || x.row.name || '');
+        const pct = r ? r.pct : (qt && Number.isFinite(qt.changePercent) ? qt.changePercent : x.row.pct);
+        const gname = r ? r.groupName : (x.row.g || ''), grank = r ? r.groupRank : x.row.gr;
+        const zone = r ? (harvestSet.has(x.code) ? '♣' : bladeRankMark(r.groupRank, m.total)) : '';
+        const big = r && Number.isFinite(r.strengthPct) ? r.strengthPct : (Number.isFinite(x.row.big) ? x.row.big : null);
+        return '<div class="b32-row' + (gone ? ' gone' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(name) + '">' +
+          '<span class="b32-time">' + x.first + '</span>' +
+          '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(name) + '</span>' + (r && r.bladeMark ? r.bladeMark : '') + '</span>' +
+          '<span class="b32-grp">' + wlEsc(gname) + (grank ? '・' + grank + zone : '') + '</span>' +
+          '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
+          (big !== null ? '<span class="b32-big' + (big <= -10 ? ' deep' : '') + '">' + bigTxt(big) + '</span>' : '<span class="b32-big">—</span>') +
+          (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + '</div>';
+      };
+      const goneCnt = list.filter((x) => !x.inNow).length;
+      return wrap('🔪⚔️新刀劍空(32)', (list.map(rowHtml).join('') || botLine('目前沒有', 'bot-dim')) +
+        botLine('時間＝最早進榜（越晚進榜越上面）・跑＝消失（轉強，要跑）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim'),
+        stamp + '・今天 ' + list.length + ' 檔，在榜 ' + (list.length - goneCnt) + '、消失 ' + goneCnt);
+    }
+    // （盤中紀錄還沒載入時的備用畫面，照原本分段）
     // 2026-10-19 使用者：每一段都是時間最近的排最上面（現在 11:35 就排第一、10 點多的往下），不依族群強弱；
     // 時間＝「回」的時間（掉出去又回來），沒有回的用第一次進名單的時間；同一時間才照族群名次
     const evTime = (r) => { const x = tl ? tl.get(r.code) : null; return x ? (x.back || x.first || '') : ''; };
