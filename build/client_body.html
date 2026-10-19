@@ -8045,9 +8045,8 @@ function homeRank4Html(){
   return '<div class="home-rank4">' +
     homeObsColHtml() +   // 2026-10-16 使用者：強勢黑K選股排第一欄，在今日強勢股前面
     // 2026-10-16 使用者：183 排第二欄、昨日強勢股排第六欄；2026-10-19 使用者：第二欄換成當沖多（取代 183 的位置），183 搬到今日強勢股下面
-    '<div class="hr-stack">' +   // 2026-10-18 使用者：188 疊到 183 下面（現在疊在當沖多下面）
+    '<div class="hr-stack">' +   // 2026-10-19 使用者：188 搬到賽馬多(33) 下面，這欄只剩當沖多
       homeLongColHtml() +
-      homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
     '</div>' +
     // 2026-10-16 使用者：第 3 欄馬火多(30)；第 4 欄 30加33加34 疊在河流多(34) 上面；第 5 欄續抱勿追高疊在賽馬多(33) 上面
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
@@ -8063,6 +8062,7 @@ function homeRank4Html(){
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
       homeStockColHtml('🐎賽馬多(33)', m ? m.horses.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
+      homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +   // 2026-10-19 使用者：188 排在賽馬多(33) 下面
     '</div>' +
     // 2026-10-16 使用者：188 疊到昨日強勢股下面；283 自己一欄，放在右邊
     '<div class="hr-stack">' +
