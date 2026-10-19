@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 21:54:55";
+const BUILD_STAMP = "2026-10-19 23:34:35";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1312,6 +1312,83 @@ const HTML_PAGE = `<!DOCTYPE html>
   .sw-noteBox{border:1px dashed var(--line);border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.6;color:var(--text);margin:8px 0;}
   .sw-foot{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin-top:14px;line-height:1.6;}
   .sw-rule{font-size:12px;color:var(--muted);border-left:3px solid var(--line);padding:4px 10px;margin:8px 0;line-height:1.6;}
+  /* 籌碼日報（2026-10-19 使用者：版面跟底色照老師「波段精選日報」——米色紙底、紅棕襯線標題、白卡片、一頁往下捲）：
+     跟每日功課、估值河流圖一樣用一組淺色變數蓋掉，裡面舊的卡片、標籤、表格都跟著換 */
+  #swingInner{--bg:#f6f1e7; --panel:#fffdf8; --panel-2:#f3ecdf; --line:#e4d9c6; --text:#3a2c25; --muted:#8a7c6f; --accent:#8b2c22; --up:#c0392b; --down:#1e8a4c;
+    --td-serif:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif; color:var(--text);background:var(--bg);}
+  #swingInner > .chips-head{background:var(--panel);color:var(--text);border:1px solid var(--line);}
+  #swingInner .chips-title{font-family:var(--td-serif);color:#8b2c22;font-weight:900;}
+  #swingInner .chips-sub{color:var(--muted);}
+  #swingInner .cm-icon-btn{background:#efe5d2;color:#5a4632;border-color:#d9c7a6;}
+  #swingInner .signal-tabs-bar{background:transparent;padding:0;}
+  #swingInner .signal-tab{background:#fffdf8;color:#3a2c25;border:1px solid var(--line);border-radius:999px;}
+  #swingInner .signal-tab.active{background:#8b2c22;color:#fff;border-color:#8b2c22;}
+  #swingInner .sp-paper{font-family:"Noto Sans TC","PingFang TC",sans-serif;padding:4px 6px 8px;}
+  .sp-tag{display:inline-block;border:1px solid #9b2c2c;color:#9b2c2c;font-size:13px;padding:3px 14px;border-radius:3px;background:#fff;}
+  .sp-h1{font-family:var(--td-serif);font-weight:900;font-size:44px;color:#8b2c22;margin:12px 0 8px;letter-spacing:1px;line-height:1.2;}
+  .sp-sub{font-size:13.5px;color:#4a3d34;margin:2px 0 8px;line-height:1.7;}
+  .sp-upd{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;font-size:13px;color:#4a3d34;line-height:1.7;margin:0 0 12px;}
+  .sp-sel{border:1px solid #d9c7a6;background:#fffdf8;color:#3a2c25;border-radius:8px;padding:4px 8px;font-size:13px;font-family:inherit;}
+  .sp-nav{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 20px;}
+  .sp-nav a{border:1px solid #d9b9a8;color:#8b2c22;background:#fff;border-radius:999px;padding:5px 16px;font-size:14px;cursor:pointer;}
+  .sp-nav a:hover{background:#8b2c22;color:#fff;}
+  .sp-h2{font-family:var(--td-serif);font-weight:900;font-size:27px;color:#2b1f19;margin:34px 0 10px;scroll-margin-top:8px;}
+  .sp-h2 small{font-family:"Noto Sans TC","PingFang TC",sans-serif;font-size:13px;font-weight:700;color:#6f6258;margin-left:10px;}
+  .sp-info{background:#fffdf8;border:1px solid #e9dfce;border-left:4px solid #3b6aa8;border-radius:8px;padding:7px 12px;font-size:12.5px;color:#5c5047;margin:6px 0 12px;line-height:1.7;}
+  .sp-bul{margin:8px 0 14px;padding-left:24px;font-size:14.5px;line-height:1.9;}
+  .sp-bul b.up{color:#c0392b;} .sp-bul b.down{color:#1e8a4c;}
+  .sp-grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+  .sp-card{background:#fffdf8;border:1px solid #e4d9c6;border-top:3px solid #b03a2e;border-radius:10px;padding:10px 12px;position:relative;min-width:0;}
+  .sp-card .t{font-size:12px;color:#3a2c25;padding-right:54px;line-height:1.4;}
+  .sp-card .d{position:absolute;top:8px;right:8px;border:1px solid #c0392b;color:#c0392b;border-radius:999px;font-size:11px;padding:0 8px;background:#fff;}
+  .sp-card .v{font-size:26px;font-weight:500;margin:8px 0 2px;font-variant-numeric:tabular-nums;}
+  .sp-card .s{font-size:11.5px;color:#8a7c6f;line-height:1.5;}
+  .sp-card .up{color:#c0392b;} .sp-card .down{color:#1e8a4c;}
+  .sp-linkrow{border:1px solid #c0392b;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;background:#fffdf8;font-size:13px;}
+  .sp-linkrow button{background:#a8321f;color:#fff;border-radius:999px;padding:8px 18px;font-weight:700;border:0;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .sp-dgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+  .sp-dcard{background:#fffdf8;border:1px solid #e4d9c6;border-left:4px solid #b03a2e;border-radius:10px;padding:12px 14px;}
+  .sp-dcard.green{border-left-color:#1e8a4c;}
+  .sp-dcard h4{margin:0 0 6px;font-size:16px;color:#b03a2e;font-weight:700;} .sp-dcard.green h4{color:#1e8a4c;}
+  .sp-dcard .nm{font-size:14px;line-height:1.8;color:#3a2c25;}
+  .sp-dcard .nmx{cursor:pointer;} .sp-dcard .nmx:hover{text-decoration:underline;}
+  .sp-dcard .sub{font-size:12px;color:#8a7c6f;margin-top:6px;line-height:1.7;}
+  .sp-etf2{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  .sp-etfh{font-size:16px;font-weight:700;margin:6px 0 4px;} .sp-etfh.up{color:#b03a2e;} .sp-etfh.down{color:#1e8a4c;}
+  .sp-etfrow{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:2px 8px;align-items:baseline;font-size:14px;margin-top:12px;cursor:pointer;}
+  .sp-etfrow .rk{color:#8a7c6f;font-size:13px;} .sp-etfrow .amt{font-weight:600;font-variant-numeric:tabular-nums;}
+  .sp-etfrow.up .amt{color:#c0392b;} .sp-etfrow.down .amt{color:#1e8a4c;}
+  .sp-etfrow .bar{grid-column:2 / 4;display:block;height:7px;border-radius:4px;opacity:.55;}
+  .sp-etfrow.up .bar{background:#c0392b;} .sp-etfrow.down .bar{background:#1e8a4c;}
+  .sp-sumtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0;}
+  .sp-sumtile{background:#fffdf8;border:1px solid #e4d9c6;border-top:3px solid #b03a2e;border-radius:10px;text-align:center;padding:12px 6px;}
+  .sp-sumtile b{display:block;font-family:var(--td-serif);font-size:34px;color:#b03a2e;line-height:1.2;}
+  .sp-sumtile span{font-size:12.5px;color:#5c5047;}
+  .sp-gcard{background:#fffdf8;border:1px solid #e4d9c6;border-left:4px solid #1e8a4c;border-radius:10px;padding:12px 16px;margin:10px 0;}
+  .sp-gcard.cold{border-left-color:#b03a2e;}
+  .sp-gcard .top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .sp-gcard .nm{font-family:var(--td-serif);font-size:22px;font-weight:900;color:#a8321f;}
+  .sp-pill{display:inline-block;border:1px solid #b03a2e;color:#b03a2e;border-radius:999px;padding:1px 12px;font-size:12.5px;margin-left:6px;background:#fff;}
+  .sp-gline{font-size:14px;margin:8px 0 4px;} .sp-gline b.up{color:#c0392b;} .sp-gline b.down{color:#1e8a4c;}
+  .sp-gjudge{font-size:13px;color:#4a3d34;line-height:1.7;}
+  .sp-quote{border:1px solid #e4d9c6;border-radius:10px;text-align:center;padding:10px;color:#a8321f;font-weight:700;background:#fffdf8;margin:12px 0;}
+  .sp-srow{display:grid;grid-template-columns:140px 150px minmax(0,1fr);gap:14px;background:#fffdf8;border:1px solid #e4d9c6;border-left:4px solid #b03a2e;border-radius:10px;padding:12px 16px;margin:10px 0;cursor:pointer;}
+  .sp-srow:hover{background:#fbf6ec;} .sp-srow.green{border-left-color:#1e8a4c;}
+  .sp-code{font-family:var(--td-serif);font-size:26px;font-weight:900;color:#a8321f;line-height:1.1;}
+  .sp-nm{font-size:16px;font-weight:700;margin-top:2px;} .sp-gs{font-size:11.5px;color:#8a7c6f;margin-top:2px;} .sp-hot{color:#b03a2e;}
+  .sp-ppill{display:inline-block;border:1px solid #7c3aed;color:#7c3aed;background:#f4edff;border-radius:999px;padding:2px 12px;font-size:12.5px;font-weight:700;}
+  .sp-px{margin-top:6px;font-size:13.5px;} .sp-mut{color:#8a7c6f;font-size:12px;} .sp-dot{color:#b9ab99;}
+  .sp-srow .c3 .ln{font-size:14px;line-height:1.8;} .sp-srow .c3 b.up{color:#c0392b;} .sp-srow .c3 b.down{color:#1e8a4c;}
+  .sp-risk{color:#b03a2e;font-size:13px;margin-top:2px;}
+  .sp-note{border:1px dashed #d9cdb6;border-radius:8px;padding:8px 12px;font-size:13px;margin:10px 0;color:#4a3d34;background:#fffdf8;line-height:1.7;}
+  .sp-note .nmx{cursor:pointer;} .sp-note .nmx:hover{text-decoration:underline;}
+  .sp-empty{border:1px dashed #d9cdb6;border-radius:8px;padding:10px 14px;font-size:13px;color:#8a7c6f;background:#fffdf8;margin:8px 0;}
+  .sp-more{margin:12px 0;border:1px solid #e4d9c6;border-radius:10px;background:#fffdf8;padding:6px 12px;font-size:13px;}
+  .sp-more > summary{cursor:pointer;color:#6f6258;font-weight:700;padding:4px 0;}
+  .sp-rules p{font-size:12px;color:#6f6258;line-height:1.7;margin:6px 0;}
+  #swingInner .sw-card,#swingInner .sw-gcard,#swingInner .sw-drow,#swingInner .sw-noteBox,#swingInner .sw-quote{background:#fffdf8;color:var(--text);}
+  #swingInner .sw-code,#swingInner .sw-dcode,#swingInner .sw-gname,#swingInner .sw-def b,#swingInner .sw-risk,#swingInner .sw-hot,#swingInner .sw-readhead,#swingInner .sw-quote{color:#a8321f;}
+  @media (max-width:900px){ .sp-grid4{grid-template-columns:repeat(2,minmax(0,1fr));} .sp-dgrid{grid-template-columns:1fr;} .sp-etf2{grid-template-columns:1fr;} .sp-srow{grid-template-columns:1fr;gap:6px;} .sp-h1{font-size:32px;} .sp-sumtiles{gap:8px;} .sp-sumtile b{font-size:26px;} }
   /* 籌碼日報最上面的外資空單摘要（2026-10-15 使用者） */
   .sw-fut{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:13px;border:1px solid #8b5cf6;border-radius:10px;padding:6px 10px;margin:8px 0;line-height:1.6;}
   .sw-fut b{font-variant-numeric:tabular-nums;}
@@ -10218,11 +10295,11 @@ document.getElementById('chipsBody').addEventListener('change', (e) => {
 
 // ---- 波段日報（2026-09-26 使用者：照「波段精選日報」的樣子做，第一階段用現有資料）----
 // 後端每個交易日收盤後整理一份（/api/swing-report），以資料基準日為鍵保存；這裡照日期切換、五個段落顯示。
-const SWING_SECTIONS = [
-  { key: 'summary', label: '今日摘要' }, { key: 'disposition', label: '處置動態' }, { key: 'etf', label: '主動式ETF持股雷達' }, { key: 'revenue', label: '營收面' }, { key: 'groups', label: '產業觀察' },
-  { key: 'chips', label: '籌碼面' }, { key: 'tech', label: '技術面' }, { key: 'ma', label: '體質轉強' }, { key: 'full', label: '均線結構轉強' },   // 2026-10-14 使用者：均線結構轉強獨立一頁，放體質轉強右邊
-];   // 2026-10-04 使用者：黑龍回測搬到獨立面板（下方導覽列「創高黑龍」）
-let swingState = { section: 'summary', date: '', groupsLimit: 12, groupsAll: false, revAll: false };   // groupsAll／revAll：產業觀察看全部族群、營收面看整月累計
+// 2026-10-19 使用者：籌碼日報整個照老師「波段精選日報」做成一頁往下捲（法人期貨、處置動態、ETF 五檔、今日摘要、產業觀察、籌碼面、技術面、體質轉強、均線轉強），
+// 營收面、主動式 ETF 完整雷達留在上面的分頁。2026-10-04 使用者：黑龍回測搬到獨立面板（下方導覽列「創高黑龍」）
+const SWING_SECTIONS = [{ key: 'page', label: '📰 波段精選日報' }, { key: 'etf', label: '主動式ETF持股雷達' }, { key: 'revenue', label: '營收面' }];
+const SWING_PAGE_KEYS = { summary: 'spSummary', disposition: 'spDispo', groups: 'spGroups', chips: 'spChips', tech: 'spTech', ma: 'spBody', full: 'spFull' };   // 舊的分頁代號 → 整頁裡的段落
+let swingState = { section: 'page', date: '', groupsLimit: 12, groupsAll: false, revAll: false };   // groupsAll／revAll：產業觀察看全部族群、營收面看整月累計
 const swingCache = {};      // date('' = 最新) -> payload
 const swingLoading = {};
 const swingFailedAt = {};
@@ -10378,7 +10455,7 @@ const erNum = (n, d) => Number(n || 0).toLocaleString('en-US', { minimumFraction
 const erSgn = (n, d) => (n > 0 ? '+' : '') + erNum(n, d);
 const erLots = (sh) => (sh || 0) / 1000;
 const erAmt = (a, d) => a === null || a === undefined ? '—' : (a > 0 ? '+' : '') + Number(a).toFixed(d === undefined ? 2 : d) + ' 億';
-function erVisible(){ return !document.getElementById('swingModal').hidden && swingState.section === 'etf'; }
+function erVisible(){ return !document.getElementById('swingModal').hidden && (swingState.section === 'etf' || swingState.section === 'page'); }
 async function erLoad(kind, key, url){
   const k = kind + '|' + key;
   if (erState[kind][key] || erState.busy[k] || erState.err[k]) return;
@@ -11100,6 +11177,184 @@ function swingFutStripHtml(data){
     '<button type="button" class="chart-tab" data-sw-fut="1">看圖 ›</button></div>';
 }
 const SWING_FOOT = '<div class="sw-foot">教學與觀念紀錄，依系統既有資料整理，非投資建議；個股僅為型態與數據紀錄，非買賣推介。本益比、月營收年增、集保 400 張以上大戶週籌碼、處置動態與上一週籌碼對照每個交易日收盤後更新；主動式 ETF 五檔的持股在各投信晚上公告後更新。</div>';
+// ---- 籌碼日報整頁（2026-10-19 使用者：版面照老師「波段精選日報」——米色紙底、紅棕襯線標題、白卡片，一整頁往下捲）----
+// 順序照老師：法人期貨快報 → 處置動態 → 主動式 ETF 五檔 → 今日摘要 → 產業觀察 → 籌碼面精選 → 技術面精選 → 體質轉強 → 均線結構轉強 → 回看歷史。
+// 營收面、主動式 ETF 完整雷達另外留在上面的分頁。
+const SP_NAV = [['spFut', '法人期貨'], ['spDispo', '處置動態'], ['spEtf', 'ETF 五檔'], ['spSummary', '今日摘要'], ['spGroups', '產業觀察'], ['spChips', '籌碼面'], ['spTech', '技術面'], ['spBody', '體質轉強'], ['spFull', '均線轉強']];
+const spWd = (d) => (d ? '(週' + hlWd(d) + ')' : '');
+const spNum = (v, d) => (v === null || v === undefined || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }));
+const spSgn = (v, d, unit) => (v === null || v === undefined || !Number.isFinite(Number(v)) ? '—' : (v > 0 ? '+' : '') + spNum(v, d) + (unit || ''));
+const spCls = (v) => (v > 0 ? 'up' : v < 0 ? 'down' : '');
+// 法人期貨快報：跟研究室「外資空單」同一份（/api/futures-chips），日報看哪一天就用那一天的數字
+function spFutHtml(data){
+  let d = null;
+  try { fcLoad(false); d = fcState.data; } catch (_){ return ''; }
+  const head = '<h2 class="sp-h2" id="spFut">法人期貨快報<small>' + swMmdd(data.date) + ' 盤後・外資期貨 × 散戶小台・微台 × 三大法人 × 融資</small></h2>';
+  if (!d || d.status !== 'ok') return head + '<div class="sp-note">' + (fcState.error ? '讀取失敗' : '讀取中…') + '</div>';
+  const rows = d.series || [];
+  const i = rows.findIndex((x) => x.d === data.date);
+  if (i < 0) return head + '<div class="sp-note">這一天沒有期貨籌碼資料（只保留近一年）</div>';
+  const r = rows[i], p = rows[i - 1] || {};
+  const lastWith = (k) => { for (let j = i; j >= 0; j--) if (rows[j][k] !== null && rows[j][k] !== undefined) return rows[j]; return null; };
+  const mr = lastWith('m'), mor = lastWith('mo');
+  const chg = (a, b, k) => (a && b && Number.isFinite(a[k]) && Number.isFinite(b[k]) ? a[k] - b[k] : null);
+  const idxPct = (k) => (Number.isFinite(r[k]) && Number.isFinite(p[k]) && p[k] ? (r[k] / p[k] - 1) * 100 : null);
+  const mChg = mr && rows[rows.indexOf(mr) - 1] ? chg(mr, rows[rows.indexOf(mr) - 1], 'm') : null;
+  const moChg = mor && rows[rows.indexOf(mor) - 1] && Number.isFinite(rows[rows.indexOf(mor) - 1].mo) ? chg(mor, rows[rows.indexOf(mor) - 1], 'mo') : null;
+  // 外資台指淨未平倉在近半年（125 個交易日）裡排第幾空／第幾多
+  const win = rows.slice(Math.max(0, i - 124), i + 1).map((x) => x.f).filter((v) => Number.isFinite(v));
+  const rank = r.f < 0 ? win.filter((v) => v < r.f).length + 1 : win.filter((v) => v > r.f).length + 1;
+  const b = (v, txt) => '<b class="' + spCls(v) + '">' + txt + '</b>';
+  const bullets = '<ol class="sp-bul">' +
+    '<li>外資台指淨未平倉 ' + b(r.f, spSgn(r.f, 0, ' 口')) + ',近半年第 ' + rank + (r.f < 0 ? ' 空' : ' 多') + '</li>' +
+    '<li>微台散戶多空比 ' + b(r.tq, spSgn(r.tq, 2, '%')) + (Number.isFinite(p.tq) ? '(前日 ' + spSgn(p.tq, 2, '%') + ')' : '') + '</li>' +
+    '<li>三大法人現貨 ' + b(r.s, spSgn(r.s, 2, ' 億')) + ',外資 ' + b(r.sf, spSgn(r.sf, 2, ' 億')) + '、投信 ' + b(r.st, spSgn(r.st, 2, ' 億')) + '</li>' +
+    '<li>融資:上市 ' + b(mChg, spSgn(mChg, 2, ' 億')) + '、上櫃 ' + b(moChg, spSgn(moChg, 2, ' 億')) + '</li></ol>';
+  const card = (title, big, bigCls, sub, date) => '<div class="sp-card"><div class="t">' + title + '</div><span class="d">' + swMmdd(date || r.d) + '</span><div class="v ' + (bigCls || '') + '">' + big + '</div><div class="s">' + sub + '</div></div>';
+  const cards = '<div class="sp-grid4">' +
+    card('加權指數', spNum(r.t, 2), '', '漲跌 ' + b(idxPct('t'), spSgn(idxPct('t'), 2, '%'))) +
+    card('櫃買指數', spNum(r.o, 2), '', '漲跌 ' + b(idxPct('o'), spSgn(idxPct('o'), 2, '%'))) +
+    card('三大法人買賣超(億)', spSgn(r.s, 2, ''), spCls(r.s), '外資 ' + spSgn(r.sf, 1, '') + ' · 投信 ' + spSgn(r.st, 1, '') + ' · 自營 ' + spSgn(r.sd, 1, '')) +
+    card('外資台指淨未平倉(口)', spSgn(r.f, 0, ''), spCls(r.f), '較前日 ' + b(r.fc, spSgn(r.fc, 0, ''))) +
+    card('外資選擇權 買權 / 賣權 淨(口)', '<span class="' + spCls(r.call) + '">' + spSgn(r.call, 0, '') + '</span> / <span class="' + spCls(r.put) + '">' + spSgn(r.put, 0, '') + '</span>', '', '買權多 = 偏多;賣權多 = 避險') +
+    card('微台散戶多空比', spSgn(r.tq, 2, '%'), spCls(r.tq), '前日 ' + b(p.tq, spSgn(p.tq, 2, '%'))) +
+    card('小台散戶多空比', spSgn(r.mq, 2, '%'), spCls(r.mq), '前日 ' + b(p.mq, spSgn(p.mq, 2, '%'))) +
+    card('上市融資餘額(億)', mr ? spNum(mr.m, 2) : '—', '', '增減 ' + b(mChg, spSgn(mChg, 2, '')), mr ? mr.d : r.d) +
+    card('上櫃融資餘額(億)', mor ? spNum(mor.mo, 2) : '—', '', mor ? '增減 ' + b(moChg, spSgn(moChg, 2, '')) : '資料還沒進來(晚上 21:40 公布)', mor ? mor.d : r.d) +
+    card('全市場 Put/Call(未平倉)', Number.isFinite(r.pc) ? spNum(r.pc, 2) + '%' : '—', '', '前日 ' + (Number.isFinite(p.pc) ? spNum(p.pc, 2) + '%' : '—')) + '</div>';
+  return head + '<div class="sp-info">📅 期貨 / 選擇權 / 三大法人 / 指數 = ' + swMmdd(r.d) + ' 盤後・融資 = 上市 ' + (mr ? swMmdd(mr.d) : '—') + '、上櫃 ' + (mor ? swMmdd(mor.d) : '—') + '(每晚 21:40 公布)</div>' +
+    bullets + cards +
+    '<div class="sp-linkrow"><span>走勢圖(外資空單 × 散戶多空比 × 加權 · 櫃買 × 融資,近一年)</span><button type="button" data-sw-fut="1">看完整圖表 →</button></div>';
+}
+// 處置動態：三張卡（明日超處置、明日出獄、高機率處置）
+function spDispoHtml(data){
+  const d = data.disposition;
+  const head = '<h2 class="sp-h2" id="spDispo">處置動態<small>' + (d && d.nextTradingDay ? swMmdd(data.date) + ' 公告、' + swMmdd(d.nextTradingDay) + ' 生效;出獄日 = 恢復正常交易第一天' : '') + '</small></h2>';
+  if (!d) return head + '<div class="sp-note">這一份是處置動態接入前整理的，沒有處置資料</div>';
+  const names = (list) => (list.length ? list.map((e) => '<span class="nmx" data-code="' + e.code + '" data-name="' + wlEsc(e.name || '') + '">' + e.code + ' ' + wlEsc(e.name || '') + '</span>').join('、') : '無');
+  const upcoming = d.upcoming || [], releasing = d.releasing || [], high = d.high || [];
+  const periods = {};
+  upcoming.forEach((e) => { const k = (e.end || '—') + '|' + (e.releaseDay || '—'); (periods[k] = periods[k] || []).push(e); });
+  const upSub = Object.keys(periods).map((k) => { const [end, rel] = k.split('|'); return periods[k].map((e) => wlEsc(e.name || e.code)).join('、') + ':分盤至 ' + (end === '—' ? '—' : end) + ',出獄 ' + (rel === '—' ? '—' : rel); }).join('<br>');
+  const card = (title, cls, list, sub) => '<div class="sp-dcard ' + cls + '"><h4>' + title + '</h4><div class="nm">' + names(list) + '</div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+  const more = (d.active || d.watch) ? '<details class="sp-more"><summary>處置中 ' + (d.active || []).length + ' 檔・觀察名單(出獄 5 個交易日內) ' + (d.watch || []).length + ' 檔</summary>' +
+    '<div class="sw-dlist">' + (d.active || []).map((e) => swingDispoRowHtml(e, 'active')).join('') + (d.watch || []).map((e) => swingDispoRowHtml(e, 'watch')).join('') + '</div></details>' : '';
+  return head + '<div class="sp-info">📅 入獄 / 出獄 / 嫌疑 = 監獄 ' + swMmdd(data.date) + ' 盤後帳本・「高機率處置」= 監獄以 ' + swMmdd(data.date) + ' 收盤推算 ' + (d.nextTradingDay ? swMmdd(d.nextTradingDay) : '') + ' 的門檻</div>' +
+    '<div class="sp-dgrid">' +
+    card('明日超處置 ' + upcoming.length + ' 檔', '', upcoming, upSub) +
+    card('明日出獄 ' + releasing.length + ' 檔', 'green', releasing, releasing.length ? '出獄第 1 天,依規則觀察三日' : '') +
+    card('高機率處置', '', high, '') + '</div>' + more;
+}
+// 主動式 ETF 五檔：五檔合計當日增減持，加碼／出貨最多（億）
+function spEtfHtml(data){
+  const asof = erAsof(), key = asof || 'latest';
+  erLoad('ov', key, '/api/etf-radar' + (asof ? '?date=' + encodeURIComponent(asof) : ''));
+  const o = erState.ov[key];
+  const head = '<h2 class="sp-h2" id="spEtf">主動式 ETF 五檔<small>五檔規模最大台股主動式 ETF 當日增減持合計(資料日 ' + (o && o.date ? o.date : '—') + ')</small></h2>';
+  if (!o) return head + '<div class="sp-note">' + (erState.err['ov|' + key] ? '讀取失敗' : '載入中…') + '</div>';
+  if (o.status !== 'ok') return head + '<div class="sp-note">' + wlEsc(o.reason || '還沒有主動式 ETF 的持股資料') + '</div>';
+  const stale = data.date && o.date && o.date < data.date ? '<div class="sp-info">⏳ 這份是 ' + o.date + ' 的持股，' + swMmdd(data.date) + ' 的各投信公告後會自動更新（晚上 21 點後）</div>' : '';
+  const side = (list, cls, title, none) => {
+    const rows = (list || []).filter((r) => Math.abs(r.amount || 0) >= 2).slice(0, 6);   // 老師 10/20：加碼前 6、出貨前 4（出貨沒有更多超過 2 億的）
+    const mx = Math.max.apply(null, rows.map((r) => Math.abs(r.amount || 0)).concat([0.1]));
+    return '<div><div class="sp-etfh ' + cls + '">' + title + '</div>' + (rows.length ? rows.map((r, k) =>
+      '<div class="sp-etfrow ' + cls + '" data-er-stock="' + wlEsc(r.code) + '"><span class="rk">' + (k + 1) + '</span><span class="nm">' + wlEsc(r.code) + ' ' + wlEsc(r.name) + '</span><span class="amt">' + (r.amount > 0 ? '+' : '') + Number(r.amount).toFixed(1) + ' 億</span>' +
+      '<i class="bar" style="width:' + Math.max(4, Math.round(Math.abs(r.amount) / mx * 100)) + '%"></i></div>').join('') : '<div class="sp-note">' + none + '</div>') + '</div>';
+  };
+  return head + stale + '<div class="sp-etf2">' + side(o.buy, 'up', '▲ 加碼最多', '今天沒有加碼 2 億以上的') + side(o.sell, 'down', '▼ 出貨最多', '今天沒有出貨 2 億以上的') + '</div>';
+}
+function spSummaryHtml(data){
+  const t = data.tiles || {};
+  const tile = (v, label) => '<div class="sp-sumtile"><b>' + v + '</b><span>' + label + '</span></div>';
+  return '<h2 class="sp-h2" id="spSummary">今日摘要<small>四面向精選・資料基準 ' + swMmdd(data.date) + ' 收盤</small></h2>' +
+    '<ol class="sp-bul sp-sum">' + (data.summary || []).map((line) => '<li>' + line + '</li>').join('') + '</ol>' +
+    '<div class="sp-sumtiles">' + tile(t.crossedQualified || 0, '今日真穿月線(檔)') + tile((t.upcoming || 0) + ' / ' + (t.releasing || 0), '明日入獄 / 出獄') + tile(t.strong || 0, '問診判強勢(檔)') + '</div>';
+}
+function spGroupHtml(data){
+  const all = data.groups || [];
+  const feat = all.filter((g) => g.featured).sort((a, b) => a.featuredOrder - b.featuredOrder);
+  const shown = swingState.groupsAll || !feat.length ? all.slice(0, Math.max(swingState.groupsLimit, feat.length)) : feat;
+  const b = data.basis || {};
+  const md = swMmdd(data.date);
+  const card = (g) => {
+    const brew = g.featured && g.aboveRatio < 0.5;
+    const peHigh = swHas(g.peAvg) && g.peAvg > 45 ? '本益比偏高,只挑籌碼連續上榜者。' : '';
+    const judge = brew || !g.featured ? g.judge : g.judge.replace('。價值面有支撐', '') + '。' + peHigh;
+    return '<div class="sp-gcard' + (brew || g.aboveRatio < 0.5 ? ' cold' : '') + '"><div class="top"><span class="nm">' + g.name + '</span><span>' +
+      (swHas(g.chipWeek) ? '<span class="sp-pill">籌碼週 ' + swPct(g.chipWeek, 1) + '</span>' : '') + '<span class="sp-pill">收盤排名 ' + g.rank + '</span></span></div>' +
+      '<div class="sp-gline">站上月線 <b class="' + (g.aboveRatio >= 0.5 ? 'up' : 'down') + '">' + g.aboveMa20 + '/' + g.members + '</b>　法人 5 日 <b class="' + spCls(g.inst5) + '">' + swLots(g.inst5) + '</b>' +
+      (swHas(g.revenueYoyMedian) ? '　營收年增中位 <b class="' + spCls(g.revenueYoyMedian) + '">' + swPct(g.revenueYoyMedian, 0) + '</b>' : '') + (swHas(g.peAvg) ? '　PE 均 <b>' + Math.round(g.peAvg) + '</b>' : '') + '</div>' +
+      '<div class="sp-gjudge">' + judge + '</div></div>';
+  };
+  return '<h2 class="sp-h2" id="spGroups">產業觀察<small>族群層數據・' + md + ' 收盤</small></h2>' +
+    '<div class="sp-info">📅 站上月線檔數 / 族群漲幅 = ' + md + ' 收盤・收盤排名 = 當天族群平均漲跌幅名次・籌碼週 = 集保 ' + swMmdd(b.chipWeek || (data.radar && data.radar.week)) + ' 結算週・法人 5 日 = ' +
+    ((b.instDates || []).length ? swMmdd((b.instDates || []).slice(-1)[0]) + '~' + swMmdd(b.instDates[0]) : '—') + '・營收年增中位 = ' + (b.revenueYm ? b.revenueYm.replace('-', ' 年 ') + ' 月' : '—') + '・本益比 = ' + swMmdd(b.peDate) + '</div>' +
+    shown.map(card).join('') +
+    (all.length > shown.length ? '<div class="chips-more"><button class="chart-tab chips-btn" id="swingMoreGroups">' + (feat.length && !swingState.groupsAll ? '看其他族群(共 ' + all.length + ' 個)' : '再顯示 ' + Math.min(12, all.length - shown.length) + ' 個族群(共 ' + all.length + ' 個)') + '</button></div>' : '') +
+    '<div class="sp-quote">先看族群再看個股:族群沒翻,個股只能算單兵</div>';
+}
+function spStockRowHtml(x, green){
+  const r = x.radar;
+  const sc = x.score === null || x.score === undefined ? '—' : (x.prevScore !== null && x.prevScore !== undefined && x.prevScore !== x.score ? '<span class="sp-mut">' + x.prevScore + '</span>→<b class="up">' + x.score + '</b>' : '<b>' + x.score + '</b>');
+  const parts = [];
+  if (r) parts.push('籌碼 <b class="' + spCls(r.chip) + '">' + swPct(r.chip, 1) + '</b><span class="sp-mut">(集保 ' + swMmdd(r.week) + ' 週' + (r.streak > 0 ? ',連 ' + r.streak + ' 週' : '') + (r.rank ? (r.listSize ? '、' + r.listSize + ' 榜第 ' : '、榜第 ') + r.rank : '') + ')</span>');
+  parts.push('均線 ' + sc);
+  parts.push('法人 5 日 ' + (swHas(x.inst5VolPct) ? '<b class="' + spCls(x.inst5) + '">' + swPct(x.inst5VolPct, 1) + '</b>' : '<b class="' + spCls(x.inst5) + '">' + swLots(x.inst5) + '</b>'));
+  if (swHas(x.revenueYoy)) parts.push('營收年增 <b class="' + spCls(x.revenueYoy) + '">' + swPct(x.revenueYoy, 0) + '</b>');
+  if (swHas(x.pe)) parts.push('PE <b>' + Math.round(x.pe) + '</b>');
+  const risks = (x.risks || []).map((t) => '<div class="sp-risk">⚠ ' + t + '</div>').join('');
+  return '<div class="sp-srow' + (green ? ' green' : '') + '" data-code="' + x.code + '" data-name="' + wlEsc(x.name) + '" role="button" tabindex="0">' +
+    '<div class="c1"><div class="sp-code">' + x.code + '</div><div class="sp-nm">' + wlEsc(x.name) + chipsFlagPillsHtml(x.code) + '</div><div class="sp-gs">' + wlEsc(x.group || '—') + (x.hot ? ' <b class="sp-hot">熱門族</b>' : '') + '</div></div>' +
+    '<div class="c2"><span class="sp-ppill">' + x.tag + '</span><div class="sp-px">收 ' + num2(x.close) + ' <span class="' + dirClass(x.changePct || 0) + '">' + swPct(x.changePct, 1) + '</span></div></div>' +
+    '<div class="c3"><div class="ln">' + parts.join('<span class="sp-dot"> · </span>') + '</div><div class="ln">防守 <b class="up">月線 ' + num2(x.defense.ma20) + '</b> / <b class="up">三日低 ' + num2(x.defense.threeDayLow) + '</b></div>' + risks + '</div></div>';
+}
+function spFundInfoHtml(data){
+  const b = data.basis || {};
+  const inst = (b.instDates || []).length ? swMmdd(b.instDates[b.instDates.length - 1]) + '~' + swMmdd(b.instDates[0]) : '—';
+  return '<div class="sp-info">📅 籌碼暴增 = 集保 ' + swMmdd(b.chipWeek || (data.radar && data.radar.week)) + ' 結算週・均線分數 / 收盤 = ' + swMmdd(data.date) + ' 收盤・法人 5 日 = ' + inst + '・營收年增 = ' + (b.revenueYm ? b.revenueYm.replace('-', ' 年 ') + ' 月' : '—') + '・本益比 = ' + swMmdd(b.peDate) + '・防守價 = ' + swMmdd(data.readDate || data.date) + ' 適用</div>';
+}
+function spPickSection(id, title, sub, list, green, empty, tail, data){
+  return '<h2 class="sp-h2" id="' + id + '">' + title + '<small>' + sub + '</small></h2>' + spFundInfoHtml(data) +
+    (list.length ? list.map((x) => spStockRowHtml(x, green)).join('') : '<div class="sp-empty">' + empty + '</div>') + (tail || '');
+}
+function spChipsHtml(data){
+  const picks = (data.picks || {}).chips || [], watch = data.chipsWatch || [];
+  const tail = (watch.length ? '<div class="sp-note">觀察名單(出獄 ≤5 天):' + watch.map((e) => '<span class="nmx" data-code="' + e.code + '" data-name="' + wlEsc(e.name || '') + '">' + e.code + ' ' + wlEsc(e.name || '') + '</span>(出獄第 ' + e.daysOut + ' 天,籌碼 ' + swPct(e.chip, 1) + ')').join('、') + '</div>' : '') +
+    '<div class="sp-quote">籌碼是候選名單,型態確認再進</div>' +
+    '<details class="sp-more"><summary>上一週籌碼那一組・這一週表現</summary>' + swingLastWeekHtml(data) + '</details>';
+  return spPickSection('spChips', '籌碼面精選', '籌碼暴增 = 集保 ' + swMmdd((data.radar && data.radar.week) || '') + ' 結算週(集保大戶 + 分點 + 法人綜合),連續上榜優先', picks, false, '今天沒有符合條件的股票', tail, data);
+}
+function spTechHtml(data){
+  const picks = (data.picks || {}).tech || [], c = data.counts || {};
+  return spPickSection('spTech', '技術面精選', swMmdd(data.date) + ' 收盤站上月線 ≥3%、量 ≥500 張 = 真穿月線 ' + (c.tech || 0) + ' 檔;剛站上未達門檻 ' + (c.techNear || 0) + ' 檔不列', picks, true, '(今日無真穿月線)',
+    '<div class="sp-quote">站上月線第一天,防守就是月線本身</div>', data);
+}
+function spBodyHtml(data){
+  const picks = (data.picks || {}).body || [], n = data.notes || {}, c = data.counts || {};
+  const sus = (n.sustained || []).map((x) => wlEsc(x.name) + '(均線 ' + x.score + ')').join('、');
+  return spPickSection('spBody', '體質轉強', '問診七科(' + swMmdd(data.date) + ' 收盤)判強勢 ' + (c.strong || 0) + ' 檔,取均線分數比前一交易日跳升 ≥3 者', picks, false, '(今日沒有問診判強勢又跳升 3 分以上的股票)',
+    '<div class="sp-note">續強確認(昨日已強、今日維持):' + (sus || '無') + '</div><div class="sp-quote">跳升 = 從弱轉強的第一天,比一直強的更值得記</div>', data);
+}
+function spFullHtml(data){
+  const picks = (data.picks || {}).full || [], n = data.notes || {};
+  const jumps = (n.jumpTop || []).map((x) => wlEsc(x.name) + ' ' + x.from + '→' + x.to).join('、');
+  return spPickSection('spFull', '均線結構轉強', '均線分數滿分 15;' + swMmdd(data.date) + ' 收盤新達 15 分(前一交易日 &lt;15)', picks, true, '(今日沒有新達 15 分的股票)',
+    '<div class="sp-note">跳升最多:' + (jumps || '無') + '</div><div class="sp-quote">滿分不等於能追,看估值與法人有沒有跟</div>', data);
+}
+function swingPageHtml(data){
+  const dates = data.dates || [];
+  const opts = dates.map((d) => '<option value="' + d + '"' + (d === data.date ? ' selected' : '') + '>' + d + spWd(d) + ' 收盤</option>').join('');
+  const rules = data.rules || {};
+  return '<div class="sp-paper"><span class="sp-tag">波段精選</span><h1 class="sp-h1">波段精選日報</h1>' +
+    '<div class="sp-sub">' + (data.readDate ? data.readDate + spWd(data.readDate) + '盤前讀 · ' : '') + '資料基準 ' + data.date + ' 收盤 · 籌碼 / 技術 / 體質 / 均線四面向,每類精選 3~5 檔,附防守價與風險。</div>' +
+    '<div class="sp-upd">🕘 <span>每個交易日收盤後整理(法人、集保、主動式 ETF 持股公告後會再更新);名單為系統既有資料整理,不另抓行情;右側可回看近 10 個交易日。<br>整理時間 ' + String(data.generatedAt || '').slice(5, 16).replace('T', ' ') + '</span>' +
+    '<select id="swingDateSel" class="sp-sel">' + opts + '</select></div>' +
+    '<div class="sp-nav">' + SP_NAV.map((x) => '<a data-sp-go="' + x[0] + '">' + x[1] + '</a>').join('') + '</div>' +
+    spFutHtml(data) + spDispoHtml(data) + spEtfHtml(data) + spSummaryHtml(data) + spGroupHtml(data) + spChipsHtml(data) + spTechHtml(data) + spBodyHtml(data) + spFullHtml(data) +
+    '<h2 class="sp-h2" id="spHist">回看歷史<small>近 10 個交易日</small></h2><div class="sp-note"><select id="swingDateSel2" class="sp-sel">' + opts + '</select> <span class="sp-mut">產生 ' + String(data.generatedAt || '').slice(0, 16).replace('T', ' ') + '</span></div>' +
+    '<details class="sp-more"><summary>資料口徑與判斷規則</summary>' + swingBasisHtml(data) + '<div class="sp-rules">' + ['chips', 'tech', 'body', 'full', 'fund', 'disposition', 'risks'].filter((k) => rules[k]).map((k) => '<p>' + rules[k] + '。</p>').join('') + '</div></details>' +
+    SWING_FOOT + '</div>';
+}
 function renderSwing(){
   const tabs = document.getElementById('swingTabs');
   tabs.innerHTML = SWING_SECTIONS.map((sc) => '<button class="chart-tab signal-tab' + (swingState.section === sc.key ? ' active' : '') + '" data-section="' + sc.key + '">' + sc.label + '</button>').join('');
@@ -11114,7 +11369,10 @@ function renderSwing(){
     return;
   }
   const focusQ = document.activeElement && document.activeElement.id === 'erQ';
-  body.innerHTML = swingDatePillsHtml(data) + swingFutStripHtml(data) + swingBasisHtml(data) + swingSectionHtml(data) + SWING_FOOT;
+  const scroller = document.getElementById('swingInner'), keepTop = scroller ? scroller.scrollTop : 0;
+  if (swingState.section === 'page') body.innerHTML = swingPageHtml(data);
+  else body.innerHTML = swingDatePillsHtml(data) + swingFutStripHtml(data) + swingBasisHtml(data) + swingSectionHtml(data) + SWING_FOOT;
+  if (scroller) scroller.scrollTop = keepTop;   // 資料晚到重畫時不要跳回最上面
   if (swingState.section === 'etf'){
     erTideStart();
     const q = focusQ && document.getElementById('erQ');
@@ -11134,15 +11392,24 @@ document.getElementById('swingTabs').addEventListener('click', (e) => {
   swingState.section = btn.dataset.section;
   renderSwing();
 });
+document.getElementById('swingBody').addEventListener('change', (e) => {
+  const sel = e.target.closest('#swingDateSel, #swingDateSel2');
+  if (!sel) return;
+  swingState.date = sel.value && sel.options[0] && sel.value === sel.options[0].value ? '' : sel.value;
+  swingState.groupsLimit = 12; swingState.groupsAll = false; swingState.revAll = false; erState.asof = null;
+  renderSwing();
+});
 document.getElementById('swingBody').addEventListener('click', (e) => {
+  const go = e.target.closest('[data-sp-go]');
+  if (go){ const el = document.getElementById(go.dataset.spGo); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   if (e.target.closest('[data-sw-fut]')){ labState.tab = 'fut'; try { localStorage.setItem('labTab', 'fut'); } catch (_){} openLabPanel(); return; }
   const day = e.target.closest('.sw-date-btn');
   if (day){ swingState.date = day.dataset.date || ''; swingState.groupsLimit = 12; swingState.groupsAll = false; swingState.revAll = false; erState.asof = null; renderSwing(); return; }
   if (e.target.closest('#swingMoreGroups')){ if (swingState.groupsAll) swingState.groupsLimit += 12; else swingState.groupsAll = true; renderSwing(); return; }
   if (e.target.closest('#swingRevAll')){ swingState.revAll = true; renderSwing(); return; }
   if (e.target.closest('.sw-open-revenue')){ e.preventDefault(); openRevenuePanel(); return; }
-  if (swingState.section === 'etf' && erHandleClick(e)) return;
-  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code]');
+  if ((swingState.section === 'etf' || e.target.closest('.sp-etfrow')) && erHandleClick(e)) return;
+  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code], .sp-srow[data-code], .sp-dcard .nmx[data-code]');
   if (card){
     if (!useFloatingCharts()){
       document.getElementById('swingModal').classList.add('behind-chart');
@@ -13616,7 +13883,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 21:54:55';
+const BUILD_STAMP = '2026-10-19 23:34:35';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
