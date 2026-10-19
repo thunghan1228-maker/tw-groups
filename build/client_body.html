@@ -19191,8 +19191,9 @@ function botAnswer(raw){
       const livePct = (code) => { const hq = getStockQuote(code); const wx = wq && wq.quotes ? wq.quotes[code] : null; const v = hq && Number.isFinite(hq.changePercent) ? hq.changePercent : wx && Number.isFinite(wx.changePercent) ? wx.changePercent : null; return v; };
       const pctOf = (r) => { const v = livePct(r.code); return v !== null ? v : Number.isFinite(r.chg) ? r.chg : null; };   // 抓不到即時報價就用那天的漲跌幅
       return wrap('隔日沖買超排序(811) ' + md(day.date), botLine('爆量計算', 'bot-head') +
-        (day.rows.map((r) => { const v = pctOf(r); return botLine((r.two && r.lots ? '⁻' : '') + (v === null ? '' : '<span class="' + dirClass(v) + '">') + botStk(r.code, r.name, '') + (v === null ? '' : '</span>') +
-          ' ' + r.pct + '%' + (r.lots ? ' (' + n(r.lots) + '張)' : '') + (v === null ? '' : ' <span class="' + dirClass(v) + '">' + botPct(v) + '</span>')); }).join('') || botLine('這天沒有', 'bot-dim')) +
+        // 2026-10-19 使用者：811 照跌幅排，跌越多的越上面（漲的往下、沒報價的最後；同跌幅照原本的爆量比例）
+        (day.rows.map((r) => [r, pctOf(r)]).sort((a, b) => (a[1] === null) - (b[1] === null) || (a[1] === null ? 0 : a[1] - b[1]) || b[0].pct - a[0].pct).map(([r, v]) => botLine((r.two && r.lots ? '⁻' : '') + (v === null ? '' : '<span class="' + dirClass(v) + '">') + botStk(r.code, r.name, '') + (v === null ? '' : '</span>') +
+          ' ' + r.pct + '%' + (r.lots ? ' (' + n(r.lots) + '張)' : '') + (v === null ? '' : ' <span class="' + dirClass(v) + '">' + botPct(v) + '</span>'))).join('') || botLine('這天沒有', 'bot-dim')) +
         botLine('------------', 'bot-sep') + botLine('⁻連兩日入榜', 'bot-dim') + botLine('籌碼每天六點後更新，六點前為前一天資料', 'bot-dim') + botLine('隔天容易出貨，不要追', 'bot-warn'),
         '隔日沖買超 ÷ 成交量');
     }
