@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 23:39:03";
+const BUILD_STAMP = "2026-10-19 23:42:14";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -161,6 +161,20 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-avg{margin-left:auto;font-size:12px;}
   .hr-sep{padding:3px 6px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;}
   .hr-note{padding:8px 10px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);}
+  /* 首頁第二欄：當沖多（2026-10-19 使用者：取代 183 原本的位置；跟每日功課「當沖多」同一份：中四個／中三個／中兩個） */
+  .hr-lsec{padding:4px 8px;font-size:12px;font-weight:800;color:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;}
+  .hr-lsec.h4{background:#b7791f;} .hr-lsec.h3{background:#c2410c;} .hr-lsec.h2{background:#2563eb;} .hr-lsec small{font-weight:600;opacity:.9;}
+  .hr-lrow{display:block;padding:5px 8px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;}
+  .hr-lrow:hover{background:rgba(201,169,140,0.10);} .hr-lrow.lit{background:rgba(220,38,38,.18);}
+  .hr-lrow .l1{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;}
+  .hr-lrow .l1 .hr-name{overflow:hidden;text-overflow:ellipsis;min-width:0;}
+  .hr-lrow .l1 .hr-avg{margin-left:auto;}
+  .hr-lrow .l2{display:flex;flex-wrap:wrap;align-items:center;gap:3px;margin-top:3px;font-size:11px;}
+  .hr-lg-grp{border-radius:4px;padding:0 4px;font-weight:800;font-size:10.5px;background:#6b7280;color:#fff;white-space:nowrap;}
+  .hr-lg-grp.up{background:#dc2626;} .hr-lg-grp.down{background:#4ade80;color:#052e16;}
+  .hr-lg-src{display:inline-flex;gap:4px;font-weight:700;font-size:10.5px;} .hr-lg-src i{font-style:normal;}
+  .hr-lg-src .s1{color:#c084fc;} .hr-lg-src .s2{color:#a78bfa;} .hr-lg-src .s3{color:#2dd4bf;} .hr-lg-src .s4{color:#fbbf24;}
+  .hr-lg-hold{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-weight:700;}
   /* 首頁飆股雷達欄（2026-10-15）：分類標題紅底、族群名黃色，每檔後面帶符號；名稱太長截掉，符號和漲跌幅不截 */
   .hr-obs-cat{padding:4px 8px;font-size:12px;font-weight:800;background:#7c3aed;color:#fff;border-top:1px solid var(--line);}   /* 2026-10-18 使用者：【1】【2】【3】改紫底白字 */
   .hr-obs-cat small{font-weight:600;opacity:.9;}
@@ -7866,6 +7880,33 @@ function homeJailHelpHtml(){
     col(card('🎉 已出關', '第幾天', m ? m.out : [], '最近 3 個交易日沒有', ''));
 }
 const HOME_334_TOP_GROUPS = 10;   // 首頁河流多(34)、賽馬多(33) 只列族群前幾名（2026-10-16 使用者）
+// 首頁第二欄：當沖多（2026-10-19 使用者：放在首頁第二欄、取代 183 原本的位置；183 搬到今日強勢股下面）。
+// 跟每日功課「🔥 當沖多」同一份（lgModel）：① 多功課（收盤觀察股）② 賽馬多 33 ③ 河流多 34 ④ 族群在多方區，兩個以上有交集才列，分中四個／中三個／中兩個。
+function homeLongRowHtml(o){
+  const chip = (k, label, cls) => (o.src[k] ? '<i class="' + cls + '">' + label + (k === 1 ? '' : o.src[k].n) + '</i>' : '');
+  return '<div class="hr-lrow hr-stk' + (o.lit ? ' lit' : '') + '" data-code="' + o.code + '" data-name="' + wlEsc(o.name) + '" tabindex="0" role="button" title="' + wlEsc((o.group || '') + (o.rank ? '・族排第 ' + o.rank + ' 名' : '')) + '">' +
+    '<div class="l1">' + tdMaBall(o.ma) + '<span class="hr-code">' + o.code + '</span><span class="hr-name">' + wlEsc(o.name) + '</span>' +
+    '<span class="hr-avg ' + (Number.isFinite(o.pct) ? dirClass(o.pct) : '') + '">' + (o.lit ? '💡' : '') + (Number.isFinite(o.pct) ? fmt(o.pct) + '%' : '—') + '</span></div>' +
+    '<div class="l2"><span class="hr-lg-grp ' + (o.groupAvg > 0 ? 'up' : 'down') + '">' + wlEsc(o.group || '—') + (o.rank ? '(' + o.rank + ')' : '') + (o.groupAvg > 0 ? '▲' : '▼') + '</span>' +
+    '<span class="hr-lg-src">' + chip(1, '多', 's1') + chip(2, '賽', 's2') + chip(3, '河', 's3') + chip(4, '群', 's4') + '</span>' + (o.holdNo ? '<span class="hr-lg-hold">續抱不追</span>' : '') + (o.limitUp ? '<span class="hr-lg-hold">漲停</span>' : '') + '</div></div>';
+}
+function homeLongColHtml(){
+  const m = race333Model();
+  const head = (n) => '<div class="hr-title">🔥當沖多' + (n === null ? '' : ' <span class="hr-rk">交集 ' + n + ' 檔</span>') + '</div>';
+  if (!m) return '<div class="hr-col">' + head(null) + '<div class="hr-note">讀取中…（33／34 開盤後才有）</div></div>';
+  let model = null;
+  try { model = lgModel(m); } catch (_){ model = null; }
+  if (!model) return '<div class="hr-col">' + head(null) + '<div class="hr-note">讀取中…</div></div>';
+  const rows = model.kept.slice().sort((a, b) => b.hits - a.hits || (b.pct === null || b.pct === undefined ? -99 : b.pct) - (a.pct === null || a.pct === undefined ? -99 : a.pct));
+  const sec = (n, label, cls) => {
+    const l = rows.filter((o) => o.hits === n);
+    return l.length ? '<div class="hr-lsec ' + cls + '"><span>' + label + '</span><small>' + l.length + ' 檔</small></div>' + l.map(homeLongRowHtml).join('') : '';
+  };
+  const multi = rows.filter((o) => o.hits >= 2).length;
+  const body = sec(4, '⭐ 中四個', 'h4') + sec(3, '🔥 中三個', 'h3') + sec(2, '✅ 中兩個', 'h2');
+  return '<div class="hr-col">' + head(multi) + (body || '<div class="hr-note">目前沒有兩個以上來源同時點名的股票</div>') +
+    '<div class="hr-note">中幾個＝被 ① 多功課 ② 賽馬多 ③ 河流多 ④ 族群在多方區 點名幾個；空方族群已濾掉，只中一個的不列</div></div>';
+}
 function homeStockColHtml(title, list, emptyText){
   const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
   return '<div class="hr-col"><div class="hr-title">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
@@ -8083,9 +8124,9 @@ function homeRank4Html(){
   // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／199 疊在同一欄）、193、刀劍空(32)、33、34、188、177
   return '<div class="home-rank4">' +
     homeObsColHtml() +   // 2026-10-16 使用者：強勢黑K選股排第一欄，在今日強勢股前面
-    // 2026-10-16 使用者：183 排第二欄、昨日強勢股排第六欄
-    '<div class="hr-stack">' +   // 2026-10-18 使用者：188 疊到 183 下面
-      homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +
+    // 2026-10-16 使用者：183 排第二欄、昨日強勢股排第六欄；2026-10-19 使用者：第二欄換成當沖多（取代 183 的位置），183 搬到今日強勢股下面
+    '<div class="hr-stack">' +   // 2026-10-18 使用者：188 疊到 183 下面（現在疊在當沖多下面）
+      homeLongColHtml() +
       homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +
     '</div>' +
     // 2026-10-16 使用者：第 3 欄馬火多(30)；第 4 欄 30加33加34 疊在河流多(34) 上面；第 5 欄續抱勿追高疊在賽馬多(33) 上面
@@ -8107,6 +8148,7 @@ function homeRank4Html(){
     '<div class="hr-stack">' +
       homeLaunchColHtml() +   // 2026-10-18 使用者：昨日強勢股上面加發動；188 搬到 183 下面
       homeStrongColHtml() +
+      homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +   // 2026-10-19 使用者：183 放在今日強勢股下面
     '</div>' +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
@@ -13895,7 +13937,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 23:39:03';
+const BUILD_STAMP = '2026-10-19 23:42:14';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
