@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 11:38:50";
+const BUILD_STAMP = "2026-10-19 11:47:31";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1052,6 +1052,14 @@ const HTML_PAGE = `<!DOCTYPE html>
   body.bot-window-mode #botInner{left:0!important;top:0!important;width:100%!important;height:100%!important;max-width:none;max-height:none;border:0;border-radius:0;box-shadow:none;}
   body.bot-window-mode #botInner > .chips-head{cursor:default;border-radius:0;}
   body.bot-window-mode #botMin{display:none;}
+  /* 2026-10-19 使用者：另開的視窗（⧉ 移到另一螢幕）整個最上面是黑的、不顯眼，改成黃底：視窗最上面那條標題列改黃底深字（瀏覽器自己的標題列網頁改不了顏色，
+     所以裡面這條改黃，另外標題前面加 🟨、主題色也設黃）。機器人代碼、盤中訊號分頁、盤中訊號中心另開／釘選的視窗都一樣 */
+  body.popout-yellow .chips-head,body.popout-yellow .signal-modal-head{background:#facc15!important;color:#1f1700!important;border:0!important;}
+  body.popout-yellow .chips-head .chips-title,body.popout-yellow .signal-modal-head .sm-title{color:#1f1700!important;}
+  body.popout-yellow .chips-head .chips-sub,body.popout-yellow .signal-modal-head .sm-sub{color:#4a3a00!important;}
+  body.popout-yellow .bot-win-acts button,body.popout-yellow .signal-modal-head .sm-btn,body.popout-yellow .signal-modal-head .cm-icon-btn{background:#fde68a!important;border:1px solid #a16207!important;color:#1f1700!important;}
+  body.popout-yellow .bot-win-acts button:hover,body.popout-yellow .signal-modal-head .sm-btn:hover,body.popout-yellow .signal-modal-head .cm-icon-btn:hover{background:#fff3b0!important;}
+  body.popout-yellow .signal-modal-head .sm-date-pill{background:#fff3b0!important;color:#1f1700!important;}
   .chips-title{font-weight:800;font-size:18px;}
   .chips-sub{font-size:12px;color:#d5d5d5;margin-top:2px;}
   .chips-controls{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:8px 0;}
@@ -1471,6 +1479,12 @@ const HTML_PAGE = `<!DOCTYPE html>
   #hwInner{position:absolute;pointer-events:auto;min-width:320px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
   #hwInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
   .hw-win-acts{display:flex;gap:6px;flex-shrink:0;align-items:flex-start;}
+  .hw-win-acts #hwPop{font-size:13px;font-weight:700;padding:0 10px;width:auto;white-space:nowrap;}
+  /* ⧉ 另開的每日功課視窗（2026-10-19 使用者：要能移到外接的另一個螢幕）：只顯示每日功課、整個視窗都是它，跟機器人代碼、盤中訊號分頁另開的一樣 */
+  body.hw-window-mode{padding-bottom:0;}
+  body.hw-window-mode > *:not(#hwModal):not(.chart-modal):not(.group-modal):not(#chartWindows):not(#chartTray):not(#toastBox){display:none!important;}
+  body.hw-window-mode #hwInner{left:0!important;top:0!important;width:100%!important;height:100%!important;max-width:none;max-height:none;border:0;border-radius:0;box-shadow:none;}
+  body.hw-window-mode #hwInner > .chips-head{cursor:default;border-radius:0;}
   #hwInner .chips-title{font-family:var(--td-serif);color:#8b2c22;font-weight:900;}
   #hwInner .chips-sub{color:var(--muted);}
   #hwInner .cm-icon-btn{background:var(--panel-2);color:var(--text);border-color:var(--line);}
@@ -3253,9 +3267,9 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="chips-head" id="hwHead">
       <div>
         <div class="chips-title">每日功課（自動版）</div>
-        <div class="chips-sub">系統自己把刀劍空、即將入獄、出獄、賽馬多、河流多、馬火多、族群名次這幾份清單交叉比對，只留下該盯的那幾檔；多觀察挑三個族群看位置與防守。盤中跟著首頁報價重算。<b>標題列拖著走、四邊四角拉大小、點兩下最大化。</b></div>
+        <div class="chips-sub">系統自己把刀劍空、即將入獄、出獄、賽馬多、河流多、馬火多、族群名次這幾份清單交叉比對，只留下該盯的那幾檔；多觀察挑三個族群看位置與防守。盤中跟著首頁報價重算。<b>標題列拖著走、四邊四角拉大小、點兩下最大化；⧉ 可以移到另一個螢幕。</b></div>
       </div>
-      <div class="hw-win-acts"><button class="cm-icon-btn" id="hwMax" title="最大化" aria-label="最大化">▢</button><button class="cm-icon-btn" id="hwClose" aria-label="關閉">✕</button></div>
+      <div class="hw-win-acts"><button class="cm-icon-btn" id="hwPop" title="另開成獨立視窗，可以拖到外接的另一個螢幕；再按一次移回主畫面">⧉ 移到另一螢幕</button><button class="cm-icon-btn" id="hwMax" title="最大化" aria-label="最大化">▢</button><button class="cm-icon-btn" id="hwClose" aria-label="關閉">✕</button></div>
     </div>
     <div id="hwBody"></div>
   </div>
@@ -5177,6 +5191,10 @@ window.addEventListener('message', (e) => {
     sgtState.restored = false;
     botStore(SGT_MODE_KEY, 'inline');
     openSgtPanel();
+  } else if (e.data.type === 'hanstockHwReturn'){   // 另開的每日功課按「↩ 移回主畫面」
+    hwPopWin = null;
+    botStore(HW_MODE_KEY, 'inline');
+    openHomeworkPanel();
   } else if (e.data.type === 'hanstockBotReturn' && Array.isArray(e.data.cmds)){   // 另開的機器人視窗按「↩ 移回主畫面」：格子照原樣帶回來
     botPopWin = null;
     botState.cols = [];
@@ -7526,7 +7544,7 @@ function home283ColHtml(list){
 // 對老師 10/15、10/16 的名單：
 // - 用的是股票期貨本身的價格（08:45～09:00 股票還沒開盤就有漲跌）：族裡有股期的成分股，取標準型股期近月的漲跌
 //   （後端 /api/stock-futures-board，永豐 Snapshot、60 秒快取），平均起來在全部有股期成分股的族群裡排名；股期報價還沒到就先用現股價格。
-// - 空方線＝當下台指期的漲跌（10/15 08:48 切在 -1.06%／-1.17% 之間，那天開盤前台指期約 -1.1%）；沒有台指期就照名次比例畫。
+// - 空方線＝開盤前（09:05 以前）用當下台指期的漲跌（10/15 08:48 切在 -1.06%／-1.17% 之間，那天開盤前台指期約 -1.1%）；盤中照名次比例畫（2026-10-19 老師 11:28、11:38 兩份）。
 // - 🔺🔽＝跟昨天比（昨天用現股收盤算）；最右邊 %＝那幾檔的平均漲跌。
 // - 族群清單會變：10/16 收盤 13 族、10/16 開盤前多 IP、10/15 開盤前再多探針卡，先放出現過的 15 族。
 //   「↓(櫃買)↓」線、「⚠️多🚀」意思還不知道，先不放。
@@ -7568,7 +7586,9 @@ function fut155Model(){
     return { name: n, rank, prev, drop: prev !== null ? rank - prev : null, avg: avgOf.get(n) };
   }).sort((a, b) => a.rank - b.rank);
   // 夜盤的台指期不拿來切空方線（老師收盤那份照白天盤收盤）；後端收盤後會給 day-close，沒記到才是 night
-  const tx = fq && board.tx && board.tx.session !== 'night' && Number.isFinite(board.tx.changePct) ? board.tx.changePct : null;
+  // 2026-10-19 對老師 11:28、11:38 兩份：盤中的空方線不是台指期（當時台指期約 -1.1%，他的線落在 -1.9% 附近，名次大約第 25 名：
+  // 11:28 航運 19 在上、AI 27 在下；11:38 二極體 23 在上、AI 26 在下），跟「照名次比例畫」一樣；台指期只在開盤前（09:05 以前）用（10/15 08:48 那份）
+  const tx = fq && board.tx && board.tx.session !== 'night' && Number.isFinite(board.tx.changePct) && obsNowHm() < '09:05' ? board.tx.changePct : null;
   return { rows, total: today.length, half: Math.round(today.length * 35 / 67), tx, futures: !!fq };
 }
 function home155ColHtml(){
@@ -13508,7 +13528,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 11:38:50';
+const BUILD_STAMP = '2026-10-19 11:47:31';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16300,13 +16320,17 @@ function hwFill(){
   panel.style.left = '0px'; panel.style.top = '0px';
   panel.style.width = document.documentElement.clientWidth + 'px'; panel.style.height = window.innerHeight + 'px';
 }
+function hwWindowMode(){ return document.body.classList.contains('hw-window-mode'); }
 function hwMaxButton(){
   const b = document.getElementById('hwMax');
   if (!b) return;
-  b.textContent = hwMaxRestore ? '❐' : '▢';
-  b.title = hwMaxRestore ? '還原大小' : '最大化';
+  const on = hwWindowMode() ? !!(signalWinRestore || document.fullscreenElement) : !!hwMaxRestore;   // 另開的視窗：整個瀏覽器視窗放大（跟訊號中心另開的一樣）
+  b.textContent = on ? '❐' : '▢';
+  b.title = on ? '還原大小' : '最大化';
 }
+document.addEventListener('fullscreenchange', () => { try { hwMaxButton(); } catch (_){} });
 function hwPosition(){
+  if (hwWindowMode()) return;   // 另開的視窗：CSS 直接鋪滿
   if (hwMaxRestore){ hwFill(); return; }
   const panel = document.getElementById('hwInner');
   const vw = document.documentElement.clientWidth, vh = window.innerHeight;
@@ -16326,11 +16350,12 @@ function hwPosition(){
   hwMaxButton();
 }
 function hwSaveRect(){
-  if (hwMaxRestore) return;
+  if (hwMaxRestore || hwWindowMode()) return;
   const r = document.getElementById('hwInner').getBoundingClientRect();
   try { localStorage.setItem(HW_RECT_KEY, JSON.stringify({ x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) })); } catch (_){}
 }
 function hwToggleMax(){
+  if (hwWindowMode()){ toggleSignalWindowMaximize(); hwMaxButton(); return; }
   const panel = document.getElementById('hwInner');
   if (hwMaxRestore){
     const r = hwMaxRestore;
@@ -16343,16 +16368,55 @@ function hwToggleMax(){
   try { localStorage.setItem(HW_MAX_KEY, hwMaxRestore ? '1' : '0'); } catch (_){}
   hwMaxButton();
 }
-attachFloatChrome(document.getElementById('hwModal'), document.getElementById('hwInner'), document.getElementById('hwHead'), {
-  isMax: () => !!hwMaxRestore,
-  clearMax: () => { hwMaxRestore = null; try { localStorage.setItem(HW_MAX_KEY, '0'); } catch (_){} hwMaxButton(); },
-  toggleMax: hwToggleMax,
-  fill: hwFill,
-  recenter: hwPosition,
-  onEnd: hwSaveRect,
-  minH: 240,
-});
+function initHwChrome(){   // 頁面開頭決定是不是另開視窗（body.hw-window-mode）以後才呼叫；另開的視窗不用拖、不用拉
+  if (hwWindowMode()) return;
+  attachFloatChrome(document.getElementById('hwModal'), document.getElementById('hwInner'), document.getElementById('hwHead'), {
+    isMax: () => !!hwMaxRestore,
+    clearMax: () => { hwMaxRestore = null; try { localStorage.setItem(HW_MAX_KEY, '0'); } catch (_){} hwMaxButton(); },
+    toggleMax: hwToggleMax,
+    fill: hwFill,
+    recenter: hwPosition,
+    onEnd: hwSaveRect,
+    minH: 240,
+  });
+}
 document.getElementById('hwMax').addEventListener('click', hwToggleMax);
+// ⧉ 移到另一螢幕：另開一個獨立視窗（可以拖到外接螢幕、拉大小），主畫面那份先收起來；另開的視窗裡按「↩ 移回主畫面」關掉它、主畫面再打開
+const HW_POP_KEY = 'hwPopRect', HW_MODE_KEY = 'hwMode';
+let hwPopWin = null;
+function hwPopWindow(){ return hwPopWin && !hwPopWin.closed ? hwPopWin : null; }
+function hwWantsPop(){ return !hwWindowMode() && botLoad(HW_MODE_KEY) === 'pop' && window.innerWidth >= 768; }   // 上次是移到另一螢幕用的（電腦寬螢幕）：每日功課直接開在另一個視窗
+function popOutHw(){
+  if (hwWindowMode()){   // 另開的視窗裡：↩ 移回主畫面
+    botStore(HW_MODE_KEY, 'inline');
+    const op = window.opener;
+    if (op && !op.closed){ try { op.postMessage({ type: 'hanstockHwReturn' }, location.origin); op.focus(); } catch (_){} }
+    window.close();
+    return;
+  }
+  const win = window.open(location.pathname + location.search + '#daily-hw', 'hanstockDailyHw', popWindowFeatures(HW_POP_KEY, document.getElementById('hwInner')));
+  if (!win){ showToast('瀏覽器擋住了另開視窗，請允許這個網站開彈出式視窗'); return; }
+  hwPopWin = win;
+  win.focus();
+  botStore(HW_MODE_KEY, 'pop');
+  closeHomeworkPanel();   // 主畫面這份先收起來，不要同時兩份
+}
+function startHwWindow(){
+  document.title = '📋 每日功課';
+  const b = document.getElementById('hwPop');
+  if (b){ b.textContent = '↩ 移回主畫面'; b.title = '關掉這個視窗，回主畫面接著用'; b.hidden = !window.opener; }
+  openHomeworkPanel();
+  hwMaxButton();
+  trackPopGeometry(HW_POP_KEY);
+}
+document.getElementById('hwPop').addEventListener('click', popOutHw);
+// 工具列「每日功課」：另一個視窗已經開著就切過去；上次是用另一個視窗的就直接開在另一個視窗
+function openHomeworkFromToolbar(){
+  const pop = hwPopWindow();
+  if (pop){ pop.focus(); return; }
+  if (hwWantsPop()){ popOutHw(); return; }
+  openHomeworkPanel();
+}
 // 點哪個浮動視窗，哪個就跑到最上層（機器人代碼、盤中訊號分頁、每日功課）
 function hwFront(){
   document.getElementById('hwModal').classList.add('bot-front');
@@ -16361,6 +16425,8 @@ function hwFront(){
 document.getElementById('hwInner').addEventListener('pointerdown', hwFront, true);
 ['botInner', 'sgtInner'].forEach((id) => { const el = document.getElementById(id); if (el) el.addEventListener('pointerdown', () => document.getElementById('hwModal').classList.remove('bot-front'), true); });
 function openHomeworkPanel(){
+  const hwPop = hwPopWindow();
+  if (hwPop){ hwPop.focus(); return; }   // 已經移到另一個視窗：切過去，不要開兩份
   const hwM = document.getElementById('hwModal'), hwWasHidden = hwM.hidden;
   hwM.hidden = false;
   if (hwWasHidden) hwPosition();
@@ -16372,7 +16438,10 @@ function openHomeworkPanel(){
   clearInterval(hwState.timer);
   hwState.timer = setInterval(() => { if (document.getElementById('hwModal').hidden){ clearInterval(hwState.timer); return; } renderHomework(); }, 20000);
 }
-function closeHomeworkPanel(){ document.getElementById('hwModal').hidden = true; clearInterval(hwState.timer); }
+function closeHomeworkPanel(){
+  if (hwWindowMode()){ window.close(); return; }   // 另開的視窗：✕ 關掉整個視窗
+  document.getElementById('hwModal').hidden = true; clearInterval(hwState.timer);
+}
 document.getElementById('hwClose').addEventListener('click', closeHomeworkPanel);
 document.getElementById('hwBody').addEventListener('click', (e) => {
   const t = e.target;
@@ -19072,12 +19141,15 @@ function botGroupBlock(g, h, opts){
   const disp = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].disposition);
   const line = (s) => botLine((opts && opts.me === s.code ? '👉' : '') + (full && disp(s.code) ? '*' : '') + botStk(s.code, s.name, ' <span class="' + dirClass(s.changePercent) + '">' + botPct(s.changePercent) + '</span>' +
     ((hm.get(s.code) || {}).mk || '') + ((rm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '')));
-  const head = botLine(botGrpPill(g.name, '-(' + (r ? r.rank : '?') + ')' + mv + ' ' + botPct(g.avgChange), g.avgChange) + (full ? ' <span class="bot-dim">' + list.length + ' 檔</span>' : ''), 'bot-head');
+  const head = opts && opts.noHead ? '' : botLine(botGrpPill(g.name, '-(' + (r ? r.rank : '?') + ')' + mv + ' ' + botPct(g.avgChange), g.avgChange) + (full ? ' <span class="bot-dim">' + list.length + ' 檔</span>' : ''), 'bot-head');
   if (!list.length) return head + botLine('（沒有符合的）', 'bot-dim');
   if (!full) return head + list.map(line).join('');
   // 多方段＝前面 bladeZoneSize 檔、空方段＝後面 bladeZoneSize 檔（跟刀劍空同一套：20 檔各 5、13 檔各 5、9 檔各 3…）
   // 中間沒有股票（散熱 8 檔前 4 後 4）就只畫「空方」那條
-  const n = list.length, zone = bladeZoneSize(n), topEnd = Math.min(zone, n), botStart = Math.max(n - zone, topEnd);
+  // 2026-10-19 對老師 11:21～11:40 的族群明細（PCB 4＝2／2、散熱 8＝4／4、矽晶圓 7＝多方 3／空方 4、IP 10＝3／3／4、光學鏡頭 13＝5／3／5、被動元件 22＝5／12／5）：
+  // 空方段先分（奇數檔空方多一檔，不是多方多一檔）；多方段 9～12 檔是 floor(n/3)（IP 10 檔老師多方只有 3 檔）
+  const n = list.length, zone = bladeZoneSize(n), botStart = n <= 1 ? n : n - Math.min(zone, n);
+  const topZone = n >= 9 && n <= 12 ? Math.floor(n / 3) : zone, topEnd = Math.min(topZone, botStart);
   let html = head + list.slice(0, topEnd).map(line).join('');
   if (botStart > topEnd) html += botLine('------↑(多方)↑------', 'bot-sep') + list.slice(topEnd, botStart).map(line).join('');
   if (botStart < n) html += botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + list.slice(botStart).map(line).join('');
@@ -19549,6 +19621,12 @@ function botAnswer(raw){
     }
   }
   const f = botFindGroups(q);
+  if (f.groups.length === 1 && !f.code){
+    // 2026-10-19 照老師：第一行「族群名(名次) 日期 時間 收N」（收N＝這族有幾檔），不另外列漲跌幅跟名次變化
+    const g = f.groups[0], r = h.rows.find((x) => x.name === g.name);
+    const cnt = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent)).length;
+    return wrap(g.name + '(' + (r ? r.rank : '?') + ')', botGroupBlock(g, h, { full: true, noHead: true }), stamp + ' 收' + cnt);
+  }
   if (f.groups.length) return wrap(f.code ? f.code + ' 的族群漲幅排行' : '族群漲幅排行', f.groups.slice(0, 6).map((g) => botGroupBlock(g, h, { me: f.code, full: true })).join(''));
   if (/^[0-9A-Z]{4,6}$/.test(q)) return botStockCard(q, raw, (t, body) => wrap(t, body, ' '));
   return wrap(raw, botLine('看不懂這個代碼，下面有全部代碼', 'bot-dim'));
@@ -20832,7 +20910,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '均線分數排行'){ openMaPanel(); return; }     // 2026-10-10 使用者：照老師均線分數排行（zhuang.tw/ma）
     if (btn.dataset.label === '估值河流圖'){ openRiverPanel(); return; }
     if (btn.dataset.label === '研究室'){ openLabPanel(); return; }        // 2026-10-10 使用者：國際大事行事曆（照老師 zhuang.tw/calendar）
-    if (btn.dataset.label === '每日功課'){ openHomeworkPanel(); return; }   // 2026-10-10 使用者：空觀察／當沖多／多觀察功課自動版   // 2026-10-10 使用者：估值河流圖（本站版）
+    if (btn.dataset.label === '每日功課'){ openHomeworkFromToolbar(); return; }   // 2026-10-10 使用者：空觀察／當沖多／多觀察功課自動版   // 2026-10-10 使用者：估值河流圖（本站版）
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
     if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
     if (btn.dataset.label === '籌碼日報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」；2026-10-10 再改名「籌碼日報」
@@ -21018,9 +21096,21 @@ if (CHART_WINDOW_MODE){
   }
   if (/^#bot-panel(=|$)/.test(location.hash)) document.body.classList.add('bot-window-mode');   // ⧉ 另開的機器人視窗
   if (location.hash === '#sig-tabs') document.body.classList.add('sigtabs-window-mode');   // ⧉ 另開的盤中訊號分頁
+  if (location.hash === '#daily-hw') document.body.classList.add('hw-window-mode');   // ⧉ 另開的每日功課
+  if (document.body.classList.contains('signal-window-mode') || document.body.classList.contains('bot-window-mode') || document.body.classList.contains('sigtabs-window-mode') || document.body.classList.contains('hw-window-mode')){
+    // 2026-10-19 使用者：另開的視窗要黃色、比較顯眼——內容最上面那條改黃底（CSS body.popout-yellow）、標題前面加 🟨、主題色設黃
+    document.body.classList.add('popout-yellow');
+    const tc = document.querySelector('meta[name="theme-color"]');
+    if (tc) tc.setAttribute('content', '#facc15');
+    const markTitle = () => { if (!document.title.startsWith('🟨')) document.title = '🟨 ' + document.title; };
+    markTitle();
+    const titleEl = document.querySelector('title');
+    if (titleEl) new MutationObserver(markTitle).observe(titleEl, { childList: true, characterData: true, subtree: true });   // 各視窗之後才設自己的標題，設完再補上 🟨
+  }
   initSignalWindowChrome();
   initBotWindowChrome();
   initSgtChrome();
+  initHwChrome();
   updatePinButton();  // 電腦版 Chrome／Edge 才有「📌 釘選最上層」
   // 網頁被重新載入（切 App 回來自動更新、iOS 記憶體不足重載）：回到原本的分頁跟捲到的位置（3 小時內）
   try {
@@ -21035,6 +21125,7 @@ if (CHART_WINDOW_MODE){
   refresh();
   if (botWindowMode()) startBotWindow();
   if (sgtWindowMode()) startSgtWindow();
+  if (hwWindowMode()) startHwWindow();
   // 訊號要快：每5秒獨立輪詢(Worker端這幾個API也不快取)，不跟/api/groups綁在一起等。
   // 2026-10-16 Cloudflare 免費方案一天 10 萬次請求：平日 08:30～14:30 照原本 15 秒／5 秒；其他時間報價、訊號都不會變，
   // 改成 5 分鐘抓一次（10/15 晚上沒開盤還有每小時 2～3 千次請求，多半是開著沒關的頁面）
