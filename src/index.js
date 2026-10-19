@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 13:09:38";
+const BUILD_STAMP = "2026-10-19 13:18:07";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1604,6 +1604,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .race-row.blade-gone .blade-run{margin-left:auto;}
   .blade-gone-sep{color:#dc2626;}
   .bot-gone{color:#dc2626;text-decoration:line-through;}
+  /* 2026-10-19 使用者：首頁發動欄「曾發動」（發動過又跌回箱頂下）整列灰底、時間／代號／名稱白字，漲跌幅漲紅跌綠照舊 */
+  .hr-row.hr-fallen{background:#5f6672;border-radius:6px;}
+  .hr-row.hr-fallen .hr-rk,.hr-row.hr-fallen .hr-code,.hr-row.hr-fallen .hr-name{color:#fff!important;}
   /* 2026-10-19 使用者：機器人 32 排法照「刀功課廣播」（左邊進榜時間、股號股名下面接族群，右邊漲跌跟大戶%，跑／回標籤），底色顏色照機器人原來的黑底 */
   .b32-row{display:grid;grid-template-columns:38px minmax(0,1fr) auto;grid-template-areas:"t s p" "t g b" "t st st";gap:0 6px;padding:5px 2px;border-top:1px solid var(--line);align-items:center;cursor:pointer;font-variant-numeric:tabular-nums;}
   .b32-row:hover{background:var(--panel-2);}
@@ -7859,7 +7862,10 @@ function homeLaunchColHtml(){
   try { rows = brewTodayRows().launch || []; } catch (_){}
   const clock = (r) => (r.recordedAt ? launchAlertClock(Date.parse(r.recordedAt)) : '盤中');
   const pctOf = (r) => { const qq = getStockQuote(r.code); const v = qq && Number.isFinite(qq.changePercent) ? qq.changePercent : r.changePct; return Number.isFinite(v) ? v : null; };
-  const row = (r) => { const v = pctOf(r); return '<div class="hr-row hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button">' +
+  // 2026-10-19 使用者（截圖圈起聯光通 -6.29%、今國光 +0.25%）：發動過又跌回箱頂下的（訊號中心標「↩ 曾發動」）留在原位置（照時間排），
+  // 整列灰底、時間／代號／名稱白字；漲跌幅照舊漲紅跌綠
+  const stateOf = homeLaunchStateOf();
+  const row = (r) => { const v = pctOf(r), fallen = stateOf(r) === 'fallen'; return '<div class="hr-row hr-stk' + (fallen ? ' hr-fallen' : '') + '" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button"' + (fallen ? ' title="↩ 曾發動：發動過、現在跌回箱頂下"' : '') + '>' +
     '<span class="hr-rk" style="color:#a78bfa">' + clock(r) + '</span><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || '') + '</span>' +
     '<span class="hr-avg ' + (v === null ? 'flat' : dirClass(v)) + '">' + (v === null ? '' : fmt(v) + '%') + '</span></div>'; };
   const latest = rows.slice().sort((a, b) => (b.recordedAt ? Date.parse(b.recordedAt) : Infinity) - (a.recordedAt ? Date.parse(a.recordedAt) : Infinity));   // 有幾檔列幾檔
@@ -7867,6 +7873,17 @@ function homeLaunchColHtml(){
   const label = day && day !== twTodayStr() ? String(day).slice(5).replace('-', '/') + '・' : '';
   return '<div class="hr-col"><div class="hr-title">🚀發動 <span class="hr-rk">' + label + rows.length + ' 檔</span></div>' +
     (latest.length ? latest.map(row).join('') : '<div class="hr-note">' + (brewLaunchData ? '今天還沒有' : '讀取中…') + '</div>') + '</div>';
+}
+// 發動紀錄現在的狀態：'launch'＝還站在箱頂上、'fallen'＝發動過又跌回箱頂下、null＝判斷不了（沒報價等，照原本當發動列）。跟今日即時多的「🚀 發動／↩ 曾發動」同一套
+function homeLaunchStateOf(){
+  try {
+    const held = brewHeldLaunchDate();
+    if (held) return (r) => brewCloseState(r, held);
+    const m = brewLaunchModel();
+    const live = m ? new Set(m.launchBlocks.flatMap((b) => b.rows.map((x) => x.code))) : null;
+    const quoted = brewQuotedCodes();
+    return (r) => (!live ? null : live.has(r.code) ? 'launch' : quoted.has(r.code) ? 'fallen' : null);
+  } catch (_){ return () => null; }
 }
 function home44ColHtml(){
   const ev = sigCurrentEvents().filter((e) => e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull'));
@@ -13548,7 +13565,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 13:09:38';
+const BUILD_STAMP = '2026-10-19 13:18:07';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
