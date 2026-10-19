@@ -8134,7 +8134,7 @@ function homeObsColHtml(){
   const stale = rep && live && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
   const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > (rep ? HOME_OBS_REFRESH_MS : 20000);   // 還沒算出過：20 秒就重試（2026-10-17）
   if (!obsState.loading && ((!rep && !obsState.error) || stale || retry)) setTimeout(() => obsRun(null, false, !!rep), 0);
-  const title = '<div class="hr-title">📡強勢黑K選股';
+  const title = '<div class="hr-title">📡多觀察(等黑K買進)';   // 2026-10-19 使用者：首頁這欄的標題「強勢黑K選股」改叫「多觀察(等黑K買進)」
   if (!rep) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (obsState.error ? '算不出來：' + wlEsc(obsState.error) : '計算中…') + '</div></div>';
   const row = (x) => {
     const q = getStockQuote(x.code);
