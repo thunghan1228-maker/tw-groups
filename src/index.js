@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 13:05:44";
+const BUILD_STAMP = "2026-10-19 13:09:38";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -13548,7 +13548,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 13:05:44';
+const BUILD_STAMP = '2026-10-19 13:09:38';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -14129,6 +14129,18 @@ function openSignalWindow(){
 // 開一個永遠浮在最上層的視窗，裡面用 iframe 放一份「訊號中心」（跟移到另一螢幕同一頁），可以拖到另一個螢幕、拉大小，
 // 下次再開 Chrome 會記得上次的位置。這一頁（主畫面）要開著，關掉或重新整理，釘選視窗也會一起關。
 let signalPipWindow = null;
+// 2026-10-19 使用者：盤中訊號中心預設就是「釘選最上層」、打開預設在「今日即時多」。釘選視窗（Document Picture-in-Picture）要有使用者動作才開得出來，
+// 所以：按「⚠ 盤中訊號」、或打開網頁後第一次點畫面，就自動釘選；按「取消釘選」或把釘選視窗關掉＝以後不要預設釘選（記在這台電腦，再按一次「釘選最上層」就恢復）。
+let sigPageUnloading = false;
+window.addEventListener('beforeunload', () => { sigPageUnloading = true; });
+function sigPinAutoOn(){ try { return localStorage.getItem('sigPinAuto') !== '0'; } catch (_){ return true; } }
+function sigPinAutoSet(on){ try { localStorage.setItem('sigPinAuto', on ? '1' : '0'); } catch (_){} }
+function autoPinSignal(){
+  if (!sigPinAutoOn() || !('documentPictureInPicture' in window) || document.body.classList.contains('signal-window-mode') || document.body.classList.contains('bot-window-mode') ||
+    document.body.classList.contains('sigtabs-window-mode') || document.body.classList.contains('hw-window-mode')) return;
+  if (signalPipWindow && !signalPipWindow.closed) return;
+  toggleSignalPin('auto');
+}
 function updatePinButton(){
   const btn = document.getElementById('smPinWindow');
   if (!btn) return;
@@ -14138,9 +14150,11 @@ function updatePinButton(){
   btn.classList.toggle('on', pinned);
   btn.textContent = pinned ? '📌 取消釘選' : '📌 釘選最上層';
 }
-async function toggleSignalPin(){
-  if (signalPipWindow && !signalPipWindow.closed){ signalPipWindow.close(); return; }
+async function toggleSignalPin(auto){
+  if (signalPipWindow && !signalPipWindow.closed){ sigPinAutoSet(false); signalPipWindow.close(); return; }   // 按「取消釘選」：以後不預設釘選
+  if (auto !== 'auto') sigPinAutoSet(true);
   if (!('documentPictureInPicture' in window)){
+    if (auto === 'auto') return;
     showToast('這個瀏覽器不能釘選在最上層（要電腦版 Chrome 或 Edge），先改用「移到另一螢幕」');
     openSignalWindow();
     return;
@@ -14152,6 +14166,7 @@ async function toggleSignalPin(){
   try {
     pip = await documentPictureInPicture.requestWindow({ width, height });
   } catch (e) {
+    if (auto === 'auto') return;   // 自動釘選開不起來就算了（不跳通知、不另開視窗）
     showToast('釘選視窗開不起來（' + ((e && e.message) || e) + '），先改用「移到另一螢幕」');
     openSignalWindow();
     return;
@@ -14166,6 +14181,7 @@ async function toggleSignalPin(){
   frame.title = '盤中訊號中心';
   pip.document.body.appendChild(frame);
   pip.addEventListener('pagehide', () => {
+    if (signalPipWindow === pip && !sigPageUnloading) sigPinAutoSet(false);   // 自己把釘選視窗關掉（✕）＝不要預設釘選；重新整理主畫面時不算
     if (signalPipWindow === pip) signalPipWindow = null;
     updatePinButton();
     openSignalCenter();          // 釘選視窗關掉：主畫面的訊號中心再出現，不會不見
@@ -14623,7 +14639,12 @@ document.getElementById('cmQuickSearch').addEventListener('keydown', (e) => {
 });
 document.getElementById('cmQuickSearchGoBtn').addEventListener('click', triggerChartQuickSearch);
 
-document.getElementById('signalBadgeBtn').addEventListener('click', openSignalCenter);
+document.getElementById('signalBadgeBtn').addEventListener('click', () => {
+  if (signalPipWindow && !signalPipWindow.closed){ try { signalPipWindow.focus(); } catch (_){} return; }   // 已經釘選了：不要再開第二份，把釘選視窗叫到前面
+  signalCenterState.activeTab = 'now';   // 2026-10-19 使用者：打開預設在今日即時多
+  openSignalCenter();
+  autoPinSignal();
+});
 function syncAlertToggle(){
   const btn = document.getElementById('alertToggle');
   btn.textContent = alertsEnabled ? '提醒開啟' : '提醒關閉';
@@ -21108,7 +21129,7 @@ document.getElementById('smCollapse').addEventListener('click', toggleSignalColl
 document.getElementById('smRecenter').addEventListener('click', recenterSignalModal);
 document.getElementById('smMaximize').addEventListener('click', toggleSignalMaximize);
 document.getElementById('smMoveWindow').addEventListener('click', openSignalWindow);
-document.getElementById('smPinWindow').addEventListener('click', toggleSignalPin);
+document.getElementById('smPinWindow').addEventListener('click', () => toggleSignalPin());
 document.getElementById('smHelp').addEventListener('click', () => {
   const help = document.getElementById('signalHelp');
   help.hidden = !help.hidden;
@@ -21183,12 +21204,16 @@ if (CHART_WINDOW_MODE){
   // 網頁被重新載入（切 App 回來自動更新、iOS 記憶體不足重載）：回到原本的分頁跟捲到的位置（3 小時內）
   try {
     const sv = JSON.parse(sessionStorage.getItem(SIG_VIEW_KEY) || 'null');
-    if (sv && Date.now() - sv.at < 3 * 3600000 && SIGNAL_KINDS.some((k) => k.key === sv.tab)){
+    // 2026-10-19 使用者：打開預設在今日即時多——只有「重新整理」（含 iOS 切回來自動重載）才回到上次的分頁，新開的網頁一律從今日即時多開始
+    const navEntry = (performance.getEntriesByType && performance.getEntriesByType('navigation') || [])[0];
+    if (navEntry && navEntry.type === 'reload' && sv && Date.now() - sv.at < 3 * 3600000 && SIGNAL_KINDS.some((k) => k.key === sv.tab)){
       signalCenterState.activeTab = sv.tab;
       if (sv.top > 0) signalRestore = { tab: sv.tab, top: sv.top, until: Date.now() + 30000 };
     }
   } catch (_){}
   openSignalCenter(); // 盤中訊號中心預設常駐顯示，不用點才出現；要隱藏就按✕，要收合成小條就按－
+  // 預設釘選最上層：釘選視窗要使用者動作才開得出來，打開網頁後第一次點畫面（任何地方）就自動釘選一次
+  if (sigPinAutoOn() && 'documentPictureInPicture' in window) document.addEventListener('pointerdown', () => autoPinSignal(), { once: true, capture: true });
 
   refresh();
   if (botWindowMode()) startBotWindow();
