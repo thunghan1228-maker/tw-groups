@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 21:39:12";
+const BUILD_STAMP = "2026-10-19 21:54:55";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -149,7 +149,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-bear-pill{display:inline-flex;align-items:baseline;gap:4px;font-weight:900;min-width:0;overflow:hidden;}
   .hr-bear-pill .hr-name{font-weight:900;}
   .hr-bear-pill.up .hr-code,.hr-bear-pill.up .hr-name{color:var(--up);} .hr-bear-pill.down .hr-code,.hr-bear-pill.down .hr-name{color:var(--down);}
-  .hr-title.bear{background:#16a34a;color:#fff;} .hr-title.bear .hr-rk{color:#fff;}   /* 2026-10-16 使用者：193／199／刀劍空(32) 抬頭綠底白字 */
+  .hr-title.bear{background:#15803d;color:#fff;} .hr-title.bear .hr-rk{color:#fff;}   /* 2026-10-16 使用者：193／199／刀劍空(32) 抬頭綠底白字 */
   .hr-col{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
   .hr-title{padding:8px 10px;background:#4a3d34;font-weight:800;font-size:15px;color:var(--text);white-space:nowrap;}
   .hr-row{display:flex;align-items:baseline;gap:4px;padding:5px 8px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;transition:background .12s ease;}
@@ -171,10 +171,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-283-mk{flex-shrink:0;width:1.4em;}
   .hr-283-note{padding:1px 8px 4px 12px;font-size:12px;color:#fb923c;white-space:normal;}
   .hr-gpill{display:inline-block;border-radius:4px;padding:0 5px;color:#fff!important;font-weight:800;background:#6b7280;}   /* 2026-10-16 使用者：首頁族群名稱漲紅底白字、跌綠底白字 */
-  .hr-gpill.up{background:#dc2626;} .hr-gpill.down{background:#16a34a;}
+  .hr-gpill.up{background:#dc2626;} .hr-gpill.down{background:#4ade80;color:#052e16!important;}   /* 2026-10-19 使用者：族群條跌的淺綠（配深綠字），欄位抬頭 .hr-title.bear 的綠加深成 #15803d，兩個綠分得開 */
   .hr-obs-grp[data-group],.hr-st-grp[data-group]{cursor:pointer;} .hr-obs-grp[data-group]:hover .hr-gpill,.hr-st-grp[data-group]:hover{filter:brightness(1.15);}
   .hr-st-grp{background:#dc2626;color:#fff;font-weight:800;}   /* 2026-10-16 使用者：今日強勢股的族群名（第 N 名・族群）改紅底 */
-  .hr-st-grp.weak{background:#16a34a;}   /* 2026-10-19 使用者：首頁今日弱勢股的族群名綠底（空方） */
+  .hr-st-grp.weak{background:#4ade80;color:#052e16;} .hr-st-grp.weak *{color:#052e16!important;}   /* 2026-10-19 使用者：首頁今日弱勢股的族群名綠底（空方） */
   .hr-obs-grp{padding:3px 8px 0;font-size:12px;font-weight:800;color:#facc15;border-top:1px solid var(--line);}
   .hr-row.hr-obs{border-top:none;padding-top:3px;flex-wrap:wrap;row-gap:1px;}
   .hr-row.hr-obs .hr-name,.hr-row.hr-obs .hr-code{flex:0 0 auto;overflow:visible;}
@@ -229,11 +229,11 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bot-q{display:inline-block;background:#7c3aed;color:#fff;border-radius:10px;padding:2px 10px;font-size:12px;font-weight:800;margin-bottom:4px;}
   .bot-title{font-weight:800;font-size:15px;margin:2px 0 6px;} .bot-title small{color:var(--muted);font-weight:600;font-size:11px;margin-left:6px;}
   /* 2026-10-18 使用者：空方格子裡的小標題（811「爆量計算」、813「隔日沖手上張數」…）也綠底白字；本身就是族群紅綠條的不動 */
-  .bot-msg.bot-bear .bot-line.bot-head:not(:has(.bot-gpill)){display:inline-block;background:#16a34a;color:#fff;border-radius:5px;padding:1px 8px;margin:4px 0 3px;}
+  .bot-msg.bot-bear .bot-line.bot-head:not(:has(.bot-gpill)){display:inline-block;background:#15803d;color:#fff;border-radius:5px;padding:1px 8px;margin:4px 0 3px;}
   .bot-msg.bot-bear .bot-line.bot-head:not(:has(.bot-gpill)) *{color:#fff!important;}
-  .bot-title.bot-title-split{background:linear-gradient(90deg,#16a34a 0 50%,#dc2626 50% 100%);color:#fff;border-radius:6px;padding:3px 8px;margin-right:18px;}
+  .bot-title.bot-title-split{background:linear-gradient(90deg,#15803d 0 50%,#dc2626 50% 100%);color:#fff;border-radius:6px;padding:3px 8px;margin-right:18px;}
   .bot-title.bot-title-split *,.bot-title.bot-title-split small{color:#fff!important;}
-  .bot-title.bot-title-bear{background:#16a34a;color:#fff;border-radius:6px;padding:3px 8px;margin-right:18px;} .bot-title.bot-title-bear *,.bot-title.bot-title-bear small{color:#fff!important;}   /* 空方／隔日沖標題：綠底白字 */
+  .bot-title.bot-title-bear{background:#15803d;color:#fff;border-radius:6px;padding:3px 8px;margin-right:18px;} .bot-title.bot-title-bear *,.bot-title.bot-title-bear small{color:#fff!important;}   /* 空方／隔日沖標題：綠底白字 */
   .bot-line{font-size:13.5px;line-height:1.7;font-variant-numeric:tabular-nums;} .bot-line.bot-head{font-weight:800;margin-top:4px;} .bot-line.bot-sub{padding-left:16px;font-size:12.5px;}
   .bot-help-code{cursor:pointer;color:#c4b5fd;} .bot-help-code:hover{text-decoration:underline;}
   .bot-line.bot-sep{color:var(--muted);text-align:left;}
@@ -283,8 +283,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bcc-x{text-align:center;font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;}
   /* 2026-10-17 使用者：機器人的族群那一行（名稱、名次、漲跌幅）整條紅底白字（跌綠底），跟首頁族群一樣；點了開成分股 */
   .bot-gpill{display:inline-block;border-radius:5px;padding:1px 7px;color:#fff!important;font-weight:800;background:#6b7280;cursor:pointer;}
-  .bot-gpill.up{background:#dc2626;} .bot-gpill.down{background:#16a34a;}
+  .bot-gpill.up{background:#dc2626;} .bot-gpill.down{background:#4ade80;}
   .bot-gpill span,.bot-gpill b{color:#fff!important;}
+  /* 2026-10-19 使用者：族群那條（綠）跟上面格子標題（綠）顏色一樣分不開——族群條改淺綠（配深綠字），格子標題的綠加深一點點（#15803d） */
+  .bot-gpill.down,.bot-gpill.down span,.bot-gpill.down b{color:#052e16!important;}
   .bot-gpill:hover{filter:brightness(1.15);}
   .bot-upic{display:inline-block;width:14px;height:14px;line-height:14px;border-radius:3px;background:#ec4899;color:#fff;font-size:9px;text-align:center;vertical-align:1px;margin:0 1px;}   /* 族群名次上升：粉紅底白三角 */
   .bot-stk,.bot-grp{cursor:pointer;font-weight:700;} .bot-stk:hover,.bot-grp:hover{text-decoration:underline;} .bot-grp{color:#facc15;}
@@ -13614,7 +13616,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 21:39:12';
+const BUILD_STAMP = '2026-10-19 21:54:55';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
