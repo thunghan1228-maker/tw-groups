@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-20 14:03:07";
+const BUILD_STAMP = "2026-10-20 14:17:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -8138,9 +8138,10 @@ function home12ColHtml(h){
   const rows = h.rows.filter((r) => r.avg > 2);
   const body = rows.map((r) => {
     const g = byName.get(r.name);
-    const top = g ? g.stocks.filter((x) => x.price != null && Number.isFinite(x.changePercent)).sort((a, b) => b.changePercent - a.changePercent)[0] : null;
-    return homeRankRowHtml(r) + (top ? '<div class="hr-warn">👑<span class="hr-stk" data-code="' + top.code + '" data-name="' + top.name + '" tabindex="0" role="button">' + top.code + top.name +
-      ' <span class="' + dirClass(top.changePercent) + '">' + fmt(top.changePercent) + '%</span></span></div>' : '');
+    // 2026-10-20 使用者：每個族群列漲幅前三大的股票（漲最多的在最上面）；族裡不到三檔就有幾檔列幾檔
+    const tops = g ? g.stocks.filter((x) => x.price != null && Number.isFinite(x.changePercent)).sort((a, b) => b.changePercent - a.changePercent).slice(0, 3) : [];
+    return homeRankRowHtml(r) + tops.map((top, i) => '<div class="hr-warn">' + ['👑', '🥈', '🥉'][i] + '<span class="hr-stk" data-code="' + top.code + '" data-name="' + top.name + '" tabindex="0" role="button">' + top.code + top.name +
+      ' <span class="' + dirClass(top.changePercent) + '">' + fmt(top.changePercent) + '%</span></span></div>').join('');
   }).join('');
   return '<div class="hr-col"><div class="hr-title">族群漲幅 &gt; 2%(12) <span class="hr-rk">' + rows.length + ' 族</span></div>' +
     (body || '<div class="hr-note">目前沒有族群漲超過 2%</div>') + '</div>';
@@ -13993,7 +13994,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-20 14:03:07';
+const BUILD_STAMP = '2026-10-20 14:17:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19420,7 +19421,7 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 // 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
 const botState = { cols: [], restored: false, restoring: false, pendTops: null, world: null, worldAt: 0, worldLoading: false, cache: {} };   // cols＝開著的格子 [{cmd, key, html}]，照點的順序
 const BOT_CODES = [
-  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：老師固定的族群裡，今天衝高 4% 以上、現價漲幅不超過 1%、5 分K跌破 20MA 而且 20MA 往下彎的股票（對老師 11:05、12:20、12:50 三份：高點 3.09% 的南亞、現在漲 1.6% 以上的尖點、精測、有成精密他都沒列）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
+  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行，每族列漲幅前三大的股票（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：老師固定的族群裡，今天衝高 3% 以上、現價漲幅不超過 1.55%、5 分K收在 20MA 下面而且 20MA 往下彎的股票；每列最前面是進名單的時間，新的在上面（老師實際還多一條篩選，我們還沒找到，所以比他列得多）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
   ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'],
   ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
@@ -19820,8 +19821,9 @@ function botAnswer(raw){
     const rows = h.rows.filter((r) => r.avg > th);
     return wrap('族群漲幅 > ' + th + '%（' + rows.length + ' 族）', rows.map((r) => {
       const g = byName.get(r.name);
-      const top = g ? g.stocks.filter((s) => s.price != null && Number.isFinite(s.changePercent)).sort((a, b) => b.changePercent - a.changePercent)[0] : null;
-      return rankLine(r) + (top ? botLine('👑' + botStk(top.code, top.name, ' <span class="' + dirClass(top.changePercent) + '">' + botPct(top.changePercent) + '</span>'), 'bot-sub') : '');
+      // 2026-10-20 使用者：每族列漲幅前三大（漲最多的在上面），不到三檔就有幾檔列幾檔
+      const tops = g ? g.stocks.filter((s) => s.price != null && Number.isFinite(s.changePercent)).sort((a, b) => b.changePercent - a.changePercent).slice(0, 3) : [];
+      return rankLine(r) + tops.map((top, i) => botLine(['👑', '🥈', '🥉'][i] + botStk(top.code, top.name, ' <span class="' + dirClass(top.changePercent) + '">' + botPct(top.changePercent) + '</span>'), 'bot-sub')).join('');
     }).join('') || botLine('目前沒有族群漲超過 ' + th + '%', 'bot-dim'));
   }
   // -1N：族群跌幅排行（2026-10-17 使用者：-12＝族群跌 2% 以上、-13＝跌 3% 以上，以此類推；-1＝跌 1% 以上），跌最多的族群在上面，
