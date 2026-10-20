@@ -19850,19 +19850,24 @@ function botAnswer(raw){
       const bm = marksOf.get(g.name).get(it.code);
       const pct = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
       if (Number.isFinite(pct) && pct > K12_MAX_PCT) return;
-      rows.push({ code: it.code, name: (s && s.name) || it.name, rank: gi + 1, pct, mk: bm ? bm.mk : '', since: Number(it.since) || 0 });
+      rows.push({ code: it.code, name: (s && s.name) || it.name, group: g.name, rank: gi + 1, pct, mk: bm ? bm.mk : '', since: Number(it.since) || 0 });
     });
     // 2026-10-19 使用者：12空照時間排，最新進名單的在最上面（since＝5 分K 收在 20MA 下、20MA 下彎成立的那根）；同一根再照跌幅大的在上面
     rows.sort((a, b) => b.since - a.since || a.pct - b.pct || a.rank - b.rank);
-    // 2026-10-19 使用者：每列後面顯示進名單的時間（5 分K 判定成立的那根）
-    const sinceTxt = (ts) => (ts ? ' <span style="color:#a78bfa;font-variant-numeric:tabular-nums">' + new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) + '</span>' : '');
-    const line = (r, harvest) => botLine(r.rank + (harvest ? '♣' : bladeRankMark(r.rank, ranked.length)) + ' ' +
-      botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk + sinceTxt(r.since) + ' ' + holderTagHtml(holderPctOf(r.code))));
+    // 2026-10-20 使用者：進名單的時間（5 分K 判定成立的那根）放最前面，早的在下面、接近現在的在上面——排法跟機器人 32 一樣
+    const sinceHm = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '');
+    const line = (r, harvest) => '<div class="b32-row" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name) + '">' +
+      '<span class="b32-time">' + sinceHm(r.since) + '</span>' +
+      '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name) + '</span>' + r.mk + '</span>' +
+      '<span class="b32-grp">' + wlEsc(r.group) + '・' + r.rank + (harvest ? '♣' : bladeRankMark(r.rank, ranked.length)) + '</span>' +
+      '<span class="b32-pct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + botPct(r.pct) + '</span>' +
+      '<span class="b32-h">' + holderTagHtml(holderPctOf(r.code), true) + '</span></div>';
     const live = rows.filter((r) => !(r.pct <= -BLADE_HARVEST_PCT)), harvest = rows.filter((r) => r.pct <= -BLADE_HARVEST_PCT);
     const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
     return wrap(title, (rows.length ? live.map((r) => line(r)).join('') +
         (harvest.length ? botLine('----↓(收割區域)↓-----', 'bot-sep') + harvest.map((r) => line(r, true)).join('') : '')
-      : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) + otcFoot(),
+      : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
+      (rows.length ? botLine('左邊時間＝進名單的時間（5 分K 判定成立那根）・接近現在的在上面、早的在下面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim') : '') + otcFoot(),
       (when ? '5 分K算到 ' + when + '・' : '') + rows.length + ' 檔');
   }
   if (q === '30' || q === '32'){
