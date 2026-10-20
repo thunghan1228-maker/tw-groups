@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-20 13:23:18";
+const BUILD_STAMP = "2026-10-20 14:03:07";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -8186,6 +8186,7 @@ function homeRank4Html(){
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
     '<div class="hr-stack">' +
       homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
+      home12ColHtml(h) +   // 2026-10-20 使用者：族群漲幅 > 2%（12）搬到續抱勿追高下面、河流多(34) 上面
       // 2026-10-16 使用者：首頁的河流多(34)、賽馬多(33) 只列族群名次前 10 名的；訊號中心盤中333 照舊全部列
       homeStockColHtml('🌊河流多(34)', m ? m.rivers.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
     '</div>' +
@@ -8196,7 +8197,6 @@ function homeRank4Html(){
     '<div class="hr-stack">' +
       homeStockColHtml('👑30加33', m ? m.triple : []) +   // 2026-10-20 使用者：30加33加34 改成 30加33
       homeStockColHtml('🐎賽馬多(33)', m ? m.horses.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
-      homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +   // 2026-10-19 使用者：188 排在賽馬多(33) 下面
     '</div>' +
     // 2026-10-16 使用者：188 疊到昨日強勢股下面；283 自己一欄，放在右邊
     '<div class="hr-stack">' +
@@ -8212,7 +8212,7 @@ function homeRank4Html(){
     '</div>' +
     // 2026-10-19 使用者：個股漲 2%（22-5）排到族群漲幅 > 2%（12）前面；2026-10-20 使用者又對調回來：族群漲幅 > 2%（12，疊著股期黑龍 75、今日弱勢股）放在個股漲 > 2% 的左邊
     '<div class="hr-stack">' +   // 2026-10-17 使用者：刀劍空(31) 疊在新刀劍空(32) 下面
-      home12ColHtml(h) +   // 2026-10-18 使用者：新刀劍空(32) 換成 12；199、刀劍空(31) 也從首頁拿掉
+      homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +   // 2026-10-20 使用者：188 搬到族群漲幅 > 2%（12）原來的位置（倒數第二欄、股期黑龍(75) 上面）
       homeFut75ColHtml() +   // 2026-10-19 使用者：股期黑龍(75) 放到族群漲幅 > 2%（12）下面
       homeWeakColHtml() +   // 2026-10-20 使用者：今日弱勢股從最右邊一欄搬到股期黑龍(75) 下面
     '</div>' +
@@ -8299,8 +8299,8 @@ function homeRankFootHtml(total){
 // 首頁最後一欄：飆股雷達（2026-10-15 使用者：「盤中形態觀察股」改名飆股雷達，【1】【2】【3】放到首頁原本 177 的位置；
 // 每檔後面照樣標符號，符號說明寫在首頁最下面）。跟訊號中心「盤中飆股雷達」同一份（obsState.report），
 // 盤中每 HOME_OBS_REFRESH_MS 重算一次；重算不動自選股的四個 ⏰ 分組（那邊照舊只在 10:30、11:00…跳出來的時段換）。
-const HOME_OBS_CATS = [2, 3, 1, 4, 5];   // 首頁顯示順序（2026-10-16 使用者：今天噴出最上面、已噴在高檔第二、黑K出現第三；2026-10-19 加【4】右肩打底、【5】有點深，接在後面，只放股票）
-const HOME_OBS_FOOT_CATS = [2, 3, 1];     // 首頁最下面的說明表照舊只講前三類（使用者：4、5 的說明、跟上次名單比、移出原因都不用搬過來，留在跳出來的畫面）
+const HOME_OBS_CATS = [1, 2, 3, 4, 5];   // 首頁顯示順序（2026-10-20 使用者：恢復照【1】【2】【3】【4】【5】的順序；原本 2026-10-16 是今天噴出最上面、已噴在高檔第二、黑K出現第三；【4】右肩打底、【5】有點深 2026-10-19 加的，只放股票）
+const HOME_OBS_FOOT_CATS = [1, 2, 3];     // 首頁最下面的說明表照舊只講前三類（使用者：4、5 的說明、跟上次名單比、移出原因都不用搬過來，留在跳出來的畫面）
 const homeObsCats = (ks = HOME_OBS_CATS) => ks.map((k) => OBS_CATS.find(([c]) => c === k)).filter(Boolean);
 const HOME_OBS_REFRESH_MS = 5 * 60 * 1000;
 function homeObsColHtml(){
@@ -13993,7 +13993,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-20 13:23:18';
+const BUILD_STAMP = '2026-10-20 14:03:07';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
