@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-20 21:36:33";
+const BUILD_STAMP = "2026-10-20 21:38:33";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1726,13 +1726,14 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-fallen-tag{display:inline-block;background:#5f6672;color:#fff;border-radius:5px;padding:0 6px;font-size:11px;font-weight:700;vertical-align:1px;margin-left:4px;}
   .hr-row.hr-fallen .hr-rk,.hr-row.hr-fallen .hr-code,.hr-row.hr-fallen .hr-name{color:#fff!important;}
   /* 2026-10-19 使用者：機器人 32 排法照「刀功課廣播」（左邊進榜時間、股號股名下面接族群，右邊漲跌跟大戶%，跑／回標籤），底色顏色照機器人原來的黑底 */
-  .b32-row{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;grid-template-areas:"t s h p" "t g h st";gap:0 8px;padding:5px 2px;border-top:1px solid var(--line);align-items:center;cursor:pointer;font-variant-numeric:tabular-nums;}
+  .b32-row{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;grid-template-areas:"t s h p" "t g h st" "t l l l";gap:0 8px;padding:5px 2px;border-top:1px solid var(--line);align-items:center;cursor:pointer;font-variant-numeric:tabular-nums;}
   .b32-row:hover{background:var(--panel-2);}
   .b32-time{grid-area:t;color:#a78bfa;font-weight:700;font-size:12px;}
   .b32-stk{grid-area:s;font-weight:700;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .b32-grp{grid-area:g;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .b32-pct{grid-area:p;justify-self:end;font-weight:800;font-size:12.5px;}
   .b32-h{grid-area:h;justify-self:end;align-self:center;}
+  .b32-lv{grid-area:l;font-size:11px;color:#fbbf24;font-weight:700;padding-top:1px;}
   .b32-tag{grid-area:st;justify-self:end;font-size:11px;font-weight:800;border-radius:5px;padding:0 6px;color:#fff;}
   .b32-tag.run{background:#b91c1c;} .b32-tag.back{background:#2563eb;}
   /* 2026-10-19 使用者：刀劍空(32)、1️⃣2️⃣空(123)、空族群必殺(193) 都加「大戶力」（盤中大戶力％，跟訊號中心同一份）：
@@ -14002,7 +14003,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-20 21:36:33';
+const BUILD_STAMP = '2026-10-20 21:38:33';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19945,24 +19946,29 @@ function botAnswer(raw){
       const bm = marksOf.get(g.name).get(it.code);
       const pct = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
       if (Number.isFinite(pct) && pct > K12_MAX_PCT) return;
-      rows.push({ code: it.code, name: (s && s.name) || it.name, group: g.name, rank: gi + 1, pct, mk: bm ? bm.mk : '', since: Number(it.since) || 0 });
+      rows.push({ code: it.code, name: (s && s.name) || it.name, group: g.name, rank: gi + 1, pct, mk: bm ? bm.mk : '', since: Number(it.since) || 0,
+        h1: Number.isFinite(it.high1) ? it.high1 : null, h2: Number.isFinite(it.high2) ? it.high2 : null });
     });
     // 2026-10-19 使用者：12空照時間排，最新進名單的在最上面（since＝5 分K 收在 20MA 下、20MA 下彎成立的那根）；同一根再照跌幅大的在上面
     rows.sort((a, b) => b.since - a.since || a.pct - b.pct || a.rank - b.rank);
     // 2026-10-20 使用者：進名單的時間（5 分K 判定成立的那根）放最前面，早的在下面、接近現在的在上面——排法跟機器人 32 一樣
     const sinceHm = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '');
+    // 2026-10-20 使用者：加 1高（停損價）跟 2（破惡後反彈的高，沒過 1高就是可空 ✓）——教學頁「12空:2 不過 1高 + 破惡均下彎」
+    const px2 = (v) => String(Number(Number(v).toFixed(2)));
+    const k12Lv = (r) => (r.h1 === null ? '' : ' <span class="b32-lv" title="1高＝破惡前的最高，當停損價；2＝破惡後反彈的高，沒過 1高就可以空">1高' + px2(r.h1) +
+      (r.h2 === null ? '' : '・2 ' + px2(r.h2) + ' ✓') + '</span>');
     const line = (r, harvest) => '<div class="b32-row" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name) + '">' +
       '<span class="b32-time">' + sinceHm(r.since) + '</span>' +
       '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name) + '</span>' + r.mk + '</span>' +
       '<span class="b32-grp">' + wlEsc(r.group) + '・' + r.rank + (harvest ? '♣' : bladeRankMark(r.rank, ranked.length)) + '</span>' +
       '<span class="b32-pct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + botPct(r.pct) + '</span>' +
-      '<span class="b32-h">' + holderTagHtml(holderPctOf(r.code), true) + '</span></div>';
+      '<span class="b32-h">' + holderTagHtml(holderPctOf(r.code), true) + '</span>' + k12Lv(r) + '</div>';
     const live = rows.filter((r) => !(r.pct <= -BLADE_HARVEST_PCT)), harvest = rows.filter((r) => r.pct <= -BLADE_HARVEST_PCT);
     const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
     return wrap(title, (rows.length ? live.map((r) => line(r)).join('') +
         (harvest.length ? botLine('----↓(收割區域)↓-----', 'bot-sep') + harvest.map((r) => line(r, true)).join('') : '')
       : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
-      (rows.length ? botLine('左邊時間＝進名單的時間（5 分K 判定成立那根）・接近現在的在上面、早的在下面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim') : '') + otcFoot(),
+      (rows.length ? botLine('左邊時間＝進名單的時間（5 分K 判定成立那根）・接近現在的在上面、早的在下面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・1高＝破惡前最高（停損價）・2＝破惡後反彈的高，沒過 1高 ✓可空', 'bot-dim') : '') + otcFoot(),
       (when ? '5 分K算到 ' + when + '・' : '') + rows.length + ' 檔');
   }
   if (q === '30' || q === '32'){
