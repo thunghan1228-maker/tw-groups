@@ -19873,10 +19873,10 @@ function botAnswer(raw){
     rows.sort((a, b) => b.since - a.since || a.pct - b.pct || a.rank - b.rank);
     // 2026-10-20 使用者：進名單的時間（5 分K 判定成立的那根）放最前面，早的在下面、接近現在的在上面——排法跟機器人 32 一樣
     const sinceHm = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '');
-    // 2026-10-20 使用者：加 1高（停損價）跟 2（破惡後反彈的高，沒過 1高就是可空 ✓）——教學頁「12空:2 不過 1高 + 破惡均下彎」
+    // 2026-10-20 使用者：加 1高（停損價）跟 2（破惡後反彈的高，沒過 1高就寫「可空」）——教學頁「12空:2 不過 1高 + 破惡均下彎」
     const px2 = (v) => String(Number(Number(v).toFixed(2)));
     const k12Lv = (r) => (r.h1 === null ? '' : ' <span class="b32-lv" title="1高＝破惡前的最高，當停損價；2＝破惡後反彈的高，沒過 1高就可以空">1高' + px2(r.h1) +
-      (r.h2 === null ? '' : '・2 ' + px2(r.h2) + ' ✓') + '</span>');
+      (r.h2 === null ? '' : '・2 ' + px2(r.h2) + ' 可空') + '</span>');
     const line = (r, harvest) => '<div class="b32-row" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name) + '">' +
       '<span class="b32-time">' + sinceHm(r.since) + '</span>' +
       '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name) + '</span>' + r.mk + '</span>' +
@@ -19888,7 +19888,7 @@ function botAnswer(raw){
     return wrap(title, (rows.length ? live.map((r) => line(r)).join('') +
         (harvest.length ? botLine('----↓(收割區域)↓-----', 'bot-sep') + harvest.map((r) => line(r, true)).join('') : '')
       : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
-      (rows.length ? botLine('左邊時間＝進名單的時間（5 分K 判定成立那根）・接近現在的在上面、早的在下面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・1高＝破惡前最高（停損價）・2＝破惡後反彈的高，沒過 1高 ✓可空', 'bot-dim') : '') + otcFoot(),
+      (rows.length ? botLine('左邊時間＝進名單的時間（5 分K 判定成立那根）・接近現在的在上面、早的在下面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・1高＝破惡前最高（停損價）・2＝破惡後反彈的高，沒過 1高就寫「可空」（可以空）', 'bot-dim') : '') + otcFoot(),
       (when ? '5 分K算到 ' + when + '・' : '') + rows.length + ' 檔');
   }
   if (q === '30' || q === '32'){
