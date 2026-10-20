@@ -8102,19 +8102,19 @@ function homeRank4Html(){
     homeObsColHtml() +   // 2026-10-16 使用者：強勢黑K選股排第一欄，在今日強勢股前面
     // 2026-10-16 使用者：183 排第二欄、昨日強勢股排第六欄；2026-10-19 使用者：第二欄換成當沖多（取代 183 的位置），183 搬到今日強勢股下面
     homeLongColsHtml() +   // 2026-10-20 使用者：當沖多檔數太多，分成兩欄（當沖多1、當沖多2），各跟原本第二欄一樣寬
-    // 2026-10-16 使用者：第 3 欄馬火多(30)；第 4 欄 30加33加34 疊在河流多(34) 上面；第 5 欄續抱勿追高疊在賽馬多(33) 上面
+    // 2026-10-16 使用者：第 4 欄續抱勿追高疊在河流多(34) 上面；第 5 欄馬火多(30)（155 疊在下面）；第 6 欄 30加33 疊在賽馬多(33) 上面（2026-10-20 使用者：30加33 跟續抱勿追高對調，馬火多再移到 30加33 左邊）
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
+    '<div class="hr-stack">' +
+      homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
+      // 2026-10-16 使用者：首頁的河流多(34)、賽馬多(33) 只列族群名次前 10 名的；訊號中心盤中333 照舊全部列
+      homeStockColHtml('🌊河流多(34)', m ? m.rivers.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
+    '</div>' +
     '<div class="hr-stack">' +   // 2026-10-16 使用者：股票期貨排名(155) 疊在馬火多(30) 下面
       homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : []) +
       home155ColHtml() +
     '</div>' +
     '<div class="hr-stack">' +
       homeStockColHtml('👑30加33', m ? m.triple : []) +   // 2026-10-20 使用者：30加33加34 改成 30加33
-      // 2026-10-16 使用者：首頁的河流多(34)、賽馬多(33) 只列族群名次前 10 名的；訊號中心盤中333 照舊全部列
-      homeStockColHtml('🌊河流多(34)', m ? m.rivers.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
-    '</div>' +
-    '<div class="hr-stack">' +
-      homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : []) +
       homeStockColHtml('🐎賽馬多(33)', m ? m.horses.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
       homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +   // 2026-10-19 使用者：188 排在賽馬多(33) 下面
     '</div>' +
