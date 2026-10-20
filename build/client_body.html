@@ -21534,6 +21534,9 @@ document.getElementById('signalTabsBar').addEventListener('click', (e) => {
 });
 // 訊號中心內容裡的按鈕、股票列（盤中訊號分頁的格子也共用這一份，2026-10-18）
 function signalBodyClick(e){
+  // 新刀劍空(32) 的列（機器人 32 同一種排法）：點股號股名或整列，直接開 K 線圖（2026-10-21 使用者）
+  const b32 = e.target.closest('.b32-row[data-bot-code]');
+  if (b32){ openStockChart(b32.dataset.botCode, b32.dataset.botName); return; }
   if (e.target.closest('[data-k193-copy]')){ kill193Copy(); return; }
   const k193 = e.target.closest('[data-k193-code]');
   if (k193){ openStockChart(k193.dataset.k193Code, k193.dataset.k193Name); return; }
