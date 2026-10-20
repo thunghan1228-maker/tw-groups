@@ -15668,7 +15668,7 @@ async function pkRunReminder(manual){
   const title = '創高黑・' + (live ? '13:00 組合提醒（' + when + '）' : '模擬示範（' + pkDay(data.date) + ' 收盤結果）');
   const summary = ['exit', 'reduce', 'buy', 'add'].filter((t) => count(t)).map((t) => ({ exit: '出場', reduce: '減碼', buy: '買進', add: '加碼' })[t] + ' ' + count(t) + ' 檔').join('、') || '沒有要做的事';
   const lines = p.push === 'count' ? [summary, '點開看是哪幾檔、幾批、什麼價位。'] :
-    actions.map((x) => ({ exit: '🟢 出場', reduce: '🔵 減碼', buy: '🔴 買進', add: '🟡 加碼', skip: '⚪ 沒買' })[x.type] + ' ' + x.name + ' ' + x.code + '・' + x.reason + '・' + pkPrice(x.price) + (x.shares ? '・' + Number(x.shares).toLocaleString() + ' 股' : ''));
+    actions.map((x) => ({ exit: '🟢 出場', reduce: '🔵 減碼', buy: '🔴 買進', add: '🟡 加碼', skip: '⚪ 沒買' })[x.type] + ' <b class="alert-stk" data-alert-code="' + wlEsc(x.code) + '" data-alert-name="' + wlEsc(x.name || '') + '">' + wlEsc(x.name + ' ' + x.code) + '</b>・' + wlEsc(x.reason) + '・' + pkPrice(x.price) + (x.shares ? '・' + Number(x.shares).toLocaleString() + ' 股' : ''));
   pkBeep();
   pkShowAlert(title + '・' + summary, lines);
   if ('Notification' in window && Notification.permission === 'granted'){
