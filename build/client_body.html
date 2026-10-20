@@ -19967,7 +19967,7 @@ function botAnswer(raw){
     const sinceHm = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '');
     // 2026-10-20 使用者：加 1高（停損價）跟 2（破惡後反彈的高，沒過 1高就寫「可空」）——教學頁「12空:2 不過 1高 + 破惡均下彎」
     const px2 = (v) => String(Number(Number(v).toFixed(2)));
-    const k12Lv = (r) => (r.h1 === null ? '' : '<span class="b32-lv b32-lv1" title="1高＝破惡前的最高，當停損價">1高 ' + px2(r.h1) + '</span>' +
+    const k12Lv = (r) => (r.h1 === null ? '' : '<span class="b32-lv b32-lv1" title="1高＝破惡前的最高，當停損價">1高 ' + px2(r.h1) + ' 停損</span>' +
       (r.h2 === null ? '' : '<span class="b32-lv b32-lv2" title="2＝破惡後反彈的高，沒過 1高就可以空">2 ' + px2(r.h2) + ' 可空</span>'));
     const line = (r, harvest) => '<div class="b32-row' + (r.h1 === null ? '' : ' k12') + '" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name) + '">' +
       '<span class="b32-time">' + sinceHm(r.since) + '</span>' +
