@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-20 13:08:09";
+const BUILD_STAMP = "2026-10-20 13:09:09";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7121,9 +7121,10 @@ function race333Model(){
   // 33 加 34：兩邊都有的才列（使用者 2026-09-23：只看交集）。
   const riverCodes = new Set(otcStrongBear ? [] : riverAll.filter((r) => r.pct <= 7).map((r) => r.code));
   const both = horses.filter((r) => riverCodes.has(r.code));
-  // 30 加 33 加 34：三邊都有的才列（使用者 2026-09-23）。馬火多這邊用「符合全部門檻」的，不受最多 10 檔限制。
+  // 30 加 33：兩邊都有的才列（使用者 2026-09-23 原本 30 加 33 加 34，2026-10-20 改成不看 34）。馬火多這邊用「符合全部門檻」的，不受最多 10 檔限制。
   const fireCodes = new Set(fireOpen.map((r) => r.code));
-  const triple = both.filter((r) => fireCodes.has(r.code)).sort((a, b) => b.pct - a.pct);
+  // 2026-10-20 使用者：30 加 33 加 34 改成 30 加 33（不看河流多 34）——賽馬多(33) 裡同時符合馬火多(30) 全部門檻的
+  const triple = horses.filter((r) => fireCodes.has(r.code)).sort((a, b) => b.pct - a.pct);
   return {
     fires, fireLocked, fireGroupTop, bladeUpper, bladeMiddle, bladeLower, bladeHarvest, both, triple,
     total, half, otcPct, otcLabel: otcStrengthLatest ? otcStrengthLatest.label : null, hasDaily, bladeShortFrom,
@@ -7151,6 +7152,8 @@ function raceConditionsHtml(r, m, opts){
     const sec = r.groupRank >= m.bladeShortFrom ? '強空積極：第 ' + m.bladeShortFrom + ' 名以後'
       : r.groupRank <= Math.round(m.total * 10 / 67) ? '多方打少：前 ' + Math.round(m.total * 10 / 67) + ' 名' : '中間段：第 ' + (Math.round(m.total * 10 / 67) + 1) + '～' + (m.bladeShortFrom - 1) + ' 名';
     groupPart = '族排 ' + r.groupRank + '/' + m.total + '（' + sec + '）';
+  } else if (opts && opts.both3033){
+    groupPart = '族排 ' + r.groupRank + '/' + m.total + '（33 門檻 ≤' + m.horseLimit + '・30 門檻 ≤' + m.fireGroupTop + '）';
   } else if (opts && opts.both3334){
     groupPart = '族排 ' + r.groupRank + '/' + m.total + '（33 門檻 ≤' + m.horseLimit + '・34 門檻 ≤' + m.riverLimit + '）';
   } else if (opts && opts.limit !== undefined){
@@ -7516,9 +7519,9 @@ function race333Html(){
     '<div class="race-block"><div class="race-head">🚀續抱勿追高，追高善設停損・賽馬多(33)>7%有 ' + over7 + ' 檔 ' + stamp + '</div>' +
       '<div class="race-sub">「續抱勿追高」＝賽馬多裡漲超過 7% 的（不是可進場名單，已經漲多了）・「出現」＝第一次進這個名單的時間，早出現的在上面、新出現的往下排（跟今日即時空的刀劍空一樣）・' + condsNote + '・' + dailyNote + '</div>' +
       (over7 ? raceStockListHtml(raceBySeen(m.horses.filter((r) => r.pct > 7), 'over7', true), { seen: true, dates: m.dates, conditions: true, m, both3334: true }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '<div class="race-note">賽馬多裡沒有漲超過 7% 的</div>') + '</div>' +
-    '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
-      '<div class="race-sub">三邊都有的才列：同時符合 33 加 34 的族群條件（族群前 ' + m.horseLimit + '、漲 0～7%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
-      raceStockListHtml(raceBySeen(triple, 'triple'), { seen: true, fire: true, dates: m.dates, conditions: true, m, both3334: true }) + '</div>' +
+    '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多（30 加 33） ' + stamp + '</div>' +
+      '<div class="race-sub">兩邊都有的才列：同時符合賽馬多 33 的條件（199 那 ' + KILL193_GROUPS.size + ' 族裡族群前 ' + m.horseLimit + '、族內前 1/3、≥ 櫃買%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
+      raceStockListHtml(raceBySeen(triple, 'triple'), { seen: true, fire: true, dates: m.dates, conditions: true, m, both3033: true }) + '</div>' +
     '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
       '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
       raceStockListHtml(raceBySeen(both, 'both'), { seen: true, dates: m.dates, conditions: true, m, both3334: true }) + '</div>' +
@@ -8186,7 +8189,7 @@ function homeRank4Html(){
       home155ColHtml() +
     '</div>' +
     '<div class="hr-stack">' +
-      homeStockColHtml('👑30加33加34', m ? m.triple : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單，交集也就沒有' : '') +
+      homeStockColHtml('👑30加33', m ? m.triple : []) +   // 2026-10-20 使用者：30加33加34 改成 30加33
       // 2026-10-16 使用者：首頁的河流多(34)、賽馬多(33) 只列族群名次前 10 名的；訊號中心盤中333 照舊全部列
       homeStockColHtml('🌊河流多(34)', m ? m.rivers.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
     '</div>' +
@@ -8246,7 +8249,7 @@ function homeRankFootHtml(total){
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔（疊在今日強勢股上面）'],
     ['⭐今日強勢股', '跟訊號中心「今日強勢股」同一份：族群分數（族內平均均線分數，盤中用現價當今天收盤即時重算、收盤後用正式收盤）前 10 名裡，均線分數 ≥12、用今日即時行情篩今天沒跌（現價不低於昨收，盤後也一樣）的股票；「第 N 名・均分」是族群分數名次，不是今天漲幅名次'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
-    ['👑30加33加34', '馬火多、賽馬多、河流多三份都有的'],
+    ['👑30加33', '馬火多(30)、賽馬多(33) 兩份都有的（不看河流多 34）'],
     ['🐎賽馬多(33)', '賽馬多名單裡，族群名次前 ' + HOME_334_TOP_GROUPS + ' 名的（訊號中心「盤中333」照舊全部列）'],
     ['🌊河流多(34)', '河流多名單裡，族群名次前 ' + HOME_334_TOP_GROUPS + ' 名的（訊號中心「盤中333」照舊全部列）'],
     ['每一列', '族群名次、代號、名稱、今天漲跌幅；族排前面的在上面'],
@@ -13990,7 +13993,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-20 13:08:09';
+const BUILD_STAMP = '2026-10-20 13:09:09';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -14860,7 +14863,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・183／188・馬火多(30)／155・30加33加34／河流多(34)・續抱勿追高／賽馬多(33)・發動／今日強勢股・1+2多(44)／283・族群漲幅(12)・22-5／隔日沖黑龍(80)・今日弱勢股／股期黑龍(75)</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・183／188・馬火多(30)／155・30加33／河流多(34)・續抱勿追高／賽馬多(33)・發動／今日強勢股・1+2多(44)／283・族群漲幅(12)・22-5／隔日沖黑龍(80)・今日弱勢股／股期黑龍(75)</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
