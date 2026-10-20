@@ -16203,7 +16203,9 @@ setInterval(tdRecordTick, 60e3);
 function tdBroadcast(seq){
   const st = new Map();
   seq.forEach(([slot, snap]) => {
-    const pool = snap.rows.concat(snap.k12.filter((r) => !snap.rows.some((x) => x.code === r.code)));
+    // 2026-10-20 使用者：刀劍空功課廣播的名單要跟機器人 32 一樣——以前連 12空（123）的股票也併進來（燁興、晶心科只在這邊），
+    // 現在只放刀劍空(32) 那份；12空 在上面自己那一塊看。
+    const pool = snap.rows;
     const pass = new Map(pool.filter(tdPass).map((r) => [r.code, r]));
     pass.forEach((r, code) => {
       const s = st.get(code);
@@ -16221,6 +16223,8 @@ function tdBroadcastHtml(seq, snap){
   const list = tdBroadcast(seq);
   const inCnt = list.filter((x) => x.inNow).length, goneCnt = list.length - inCnt;
   const on = TD_PARAMS.filter(([k]) => tdState.params[k]).map(([, l]) => l.replace(/^\S+\s/, ''));
+  // 盤中的漲跌幅跟機器人 32 一樣用現在的報價（紀錄裡那份最多晚 5 分鐘）；回放才用那個時段的
+  const pctNow = (x) => { const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(x.code) : null; return q && Number.isFinite(q.changePercent) ? q.changePercent : x.row.pct; };
   const rows = list.filter((x) => x.inNow || !tdState.hideGone).map((x) => {
     const r = x.row;
     return '<div class="td-brow' + (x.inNow ? '' : ' gone') + '" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(r.name || '') + '">' +
@@ -16230,7 +16234,7 @@ function tdBroadcastHtml(seq, snap){
       (tdState.hold.includes(x.code) ? '<i class="td-bhold">持</i>' : '') + '</span>' +
       '<span class="td-bgrp">' + (tdState.watch.includes(x.code) ? '⭐ 觀察' : wlEsc(r.g || (r.zone === undefined ? '' : '12空')) + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, snap.total)) : '')) + '</span>' +
       '<span class="td-bh">' + holderTagHtml(r.big !== null && r.big !== undefined ? r.big : holderPctOf(x.code), true) + '</span>' +
-      '<span class="td-bpct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + hwPct(Number.isFinite(r.pct) ? r.pct : null) + '</span>' +
+      '<span class="td-bpct ' + (Number.isFinite(pctNow(x)) ? dirClass(pctNow(x)) : '') + '">' + hwPct(Number.isFinite(pctNow(x)) ? pctNow(x) : null) + '</span>' +
       (x.inNow ? (x.back ? '<span class="td-bst back">回 ' + x.back + '</span>' : '<span class="td-bst"></span>') : '<span class="td-bst run">跑 ' + x.out + '</span>') + '</div>';
   }).join('');
   return '<aside class="td-side"><div class="td-shead">📣 🔪 刀劍空(32)功課廣播</div>' +
@@ -16316,7 +16320,7 @@ function hwTodayHtml(){
   const seq = (rep && (viewingToday ? repDate === live.date : true) ? recSlots : []).filter((s) => !snap.slot || snap.live || s <= snap.slot).map((s) => [s, tdRecSnap(rep.slots[s], repDate, s)]);
   // 盤中才接上即時這份（週末、收盤後首頁停在收盤報價，大戶% 也沒有，接上去會讓全部變成「跑」）
   const liveSession = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr());
-  if (snap.live && (!seq.length || (liveSession && seq[seq.length - 1][0] < snap.slot))) seq.push([snap.slot || '最新', snap]);
+  if (snap.live && (!seq.length || (liveSession && seq[seq.length - 1][0] <= snap.slot))) seq.push([snap.slot || '最新', snap]);   // 同一個 5 分鐘時段也接上即時這份（機器人 32 就是跟畫面上現在這份對齊）
   // ① 統計
   const zoneRows = {};
   TD_ZONES.forEach((z) => { zoneRows[z.key] = snap.rows.filter((r) => r.zone === z.key); });
