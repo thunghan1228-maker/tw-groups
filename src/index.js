@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-20 08:16:00";
+const BUILD_STAMP = "2026-10-20 08:27:37";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5462,6 +5462,14 @@ function groupRiseMarks(g){
 // 2026-10-20 使用者貼老師 10/20 08:07（開盤前）的 31／32：隔天凌晨他把基準往後挪一天——「昨天」＝剛收盤的那天（跟現在是同一份資料，沒有 🔪），
 // 「前天」＝再前一個交易日，所以我們平常的 🔪N（跟前一個交易日比）在他那邊全部變成 ⚔️N（昇達科 ⚔️7／⚔️22、宜鼎 ⚔️17、環科 ⚔️5 數字都一樣），
 // 原本的 ⚔️（跟再前一天比）整批不見（台表科、玉晶光、銘旺科他都沒列）。只有平日開盤前這段（首頁報價是 heldClose、今天比報價日晚）要挪；週末照舊。
+// 刀劍空（31／32）排處置股用的判斷：盤前（日期換了、還沒開盤）老師用的是「昨天收盤時」的狀態，
+// 今天才開始處置的（例如 10/20 08:07 的大量）還不算處置股，照樣在名單裡；開盤後就照官方名單。
+function bladeDisp(code){
+  const f = stockFlags && stockFlags[code];
+  if (!f || !f.disposition) return false;
+  if (f.dispositionStart && bladeRolled() && f.dispositionStart >= lastData.heldClose.today) return false;
+  return true;
+}
 function bladeRolled(){
   const h = lastData && lastData.heldClose;
   if (!h || !h.session || !h.today || h.today <= h.session) return false;
@@ -5484,7 +5492,7 @@ function groupBladeMarks(g){
   today.forEach((s, i) => {
     const t = i + 1, pos = n - i;
     if (pos > bladeZoneSize(n)) return;
-    if (stockFlags && stockFlags[s.code] && stockFlags[s.code].disposition) return;   // 處置股位置照算、但不標（2026-10-17 老師小電組：*6213 聯茂倒數第 2 沒標 ⚔️）
+    if (bladeDisp(s.code)) return;   // 處置股位置照算、但不標（2026-10-17 老師小電組：*6213 聯茂倒數第 2 沒標 ⚔️）
     const p = (sd[s.code] && sd[s.code].pct) || [];
     const ry = y.m.get(s.code), r2 = y2.m.get(s.code);
     const knife0 = pos <= 3 && p[0] >= BLADE_PRIOR_RISE && ry && ry <= y.n / 2 ? t - ry : 0;
@@ -5492,7 +5500,9 @@ function groupBladeMarks(g){
     const knife = rolled ? 0 : knife0, sword = rolled ? knife0 : sword0;
     let mk = (knife > 0 ? '🔪' + knife : '') + (sword > 0 ? '⚔️' + sword : '');
     if (!mk && Math.max(Number.isFinite(p[0]) ? p[0] : -Infinity, rolled || !Number.isFinite(p[1]) ? -Infinity : p[1]) >= BLADE_BEGINNER_RISE) mk = '🔰';
-    if (mk) out.set(s.code, { mk, knife, sword, pos, t, ry, r2, y: p[0], y2: p[1] });
+    // 倒數第 5 檔如果昨天（盤前＝上一個交易日）還在族裡前半段，老師在 🔰 前面寫掉了幾名：瑞軒 🔽15🔰、富采 🔽14🔰（倒數第 4 的邁達特掉 14 名卻只標 🔰，所以只限倒數第 5）
+    const drop = mk === '🔰' && pos === 5 && p[0] >= BLADE_PRIOR_RISE && ry && ry <= y.n / 2 ? t - ry : 0;
+    if (mk) out.set(s.code, { mk, knife, sword, drop, pos, t, ry, r2, y: p[0], y2: p[1] });
   });
   return out;
 }
@@ -6886,7 +6896,7 @@ function fillGroupDailyRanks(gd){
 const RACE_NUM = ['', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 const BLADE_HARVEST_PCT = 5;  // 刀劍空：跌到這裡以上就算收割區
 const BLADE_MAX_PCT = 9.5;    // 刀劍空：跌到這裡以上（或跌停鎖死）放不到空，只在收割區那行列
-const BLADE_BEGINNER_RISE = 5.5;  // 刀劍空：空方段倒數第 4、5 檔，昨天或前天要漲這麼多以上才列（標 🔰）
+const BLADE_BEGINNER_RISE = 5;  // 刀劍空：空方段倒數第 4、5 檔，昨天或前天要漲這麼多以上才列（標 🔰）；2026-10-20 老師 08:07 列了前天 +5.28% 的瑞軒、台燿 +4.83% 沒列 → 門檻 5
 const BLADE_MIN_VOLUME = 10;  // 刀劍空：成交量（張）低於這個太冷門（2026-10-16 老師 09:06 就列了量 400 張左右的雷科、嘉基，500 改 100；09:40 又列了量 30～60 張的千興、泰碩，再改 10）
 const BLADE_MAX_ROWS = 15;
 // 12空(123) 要「今天最高曾漲到」幾 % 以上：後端門檻 3%，老師 10/19 11:05、12:20 的名單都是高點 4.15% 以上（力新 4.15、大綜 4.64、台塑化 4.49、驊宏資 5.6、華經 6.65），
@@ -7052,7 +7062,7 @@ function race333Model(){
     const bottom = priced.slice(Math.max(0, priced.length - zone));
     const gm = groupBladeMarks(g);   // 族群明細同一套 🔪⚔️🔰（每列後面的符號用）
     bottom.forEach((s, j) => {
-      if (stockFlags[s.code] && stockFlags[s.code].disposition) return;
+      if (bladeDisp(s.code)) return;
       const base = stockRows.get(s.code);
       if (!base || bladeCand.has(s.code)) return;
       bladeCand.set(s.code, Object.assign({}, base, { groupName: g.name, groupRank: gi + 1, groupAvg: g.avgChange, bladePos: bottom.length - j, bladeGm: gm.get(s.code) || null }));
@@ -7075,7 +7085,7 @@ function race333Model(){
   const bladeBase = Array.from(bladeCand.values()).filter((r) => (r.groupRank > bladeTopSkip || r.pct <= -BLADE_HARVEST_PCT || r.limitDown) && (!hasDaily || r.bladeGm)
     // 多方打少不看櫃買：佳能（光學鏡頭，族排 8～16）跌 2.7～3.3%、沒比櫃買弱，老師 11:38、12:01、12:18、12:34 都列
     && (!hasDaily || ((bladeKnife(r) || bladeSword(r)) && (bladeSword(r) || bladeInUpper(r) || belowOtc(r))
-      // 空方段裡倒數第 4、5 檔：前一兩天要大漲過（5.5% 以上）才標 🔰、才列（台燿前天 +4.83% 排倒數第 5 沒標、良維 +9.98% 倒數第 4 標 🔰）
+      // 空方段裡倒數第 4、5 檔：前一兩天要大漲過（5% 以上）才標 🔰、才列（台燿前天 +4.83% 排倒數第 5 沒標、良維 +9.98% 倒數第 4 標 🔰）
       && (r.bladePos <= 3 || Math.max(r.yesterday || 0, r.dayBefore || 0) >= BLADE_BEGINNER_RISE)))
     && (r.volume === null || r.volume >= BLADE_MIN_VOLUME)).sort((a, b) => a.pct - b.pct || a.groupRank - b.groupRank);
   const bladeHarvest = bladeBase.filter((r) => r.pct <= -BLADE_HARVEST_PCT || r.pct <= -BLADE_MAX_PCT || r.limitDown);
@@ -7088,6 +7098,11 @@ function race333Model(){
     const x = r.bladeGm;
     // 2026-10-17 照對方 10/17 收盤那份：🔪⚔️ 都符合時只標 🔪（銘旺科、大毅 -6% 都只寫 🔪）
     r.bladeMark = r.bladePos <= 3 && x && (x.knife || x.sword) ? (x.knife ? '🔪' : '⚔️') : '🔰';
+    // 倒數第 4、5 檔：收割區老師標 ♣（禾伸堂 ♣、台玻 ♣15♣），其他段掉很多名的寫 🔽N🔰（瑞軒 🔽15🔰）
+    if (r.bladeMark === '🔰'){
+      const dn = x && x.drop > 0 ? x.drop : 0;
+      r.bladeMark = bladeHarvest.includes(r) ? '♣' + (dn ? dn + '♣' : '') : (dn ? '🔽' + dn + '🔰' : '🔰');
+    }
   });
   const bladeLive = bladeBase.filter((r) => !bladeHarvest.includes(r));
   const bladeUpper = bladeLive.filter((r) => bladeInUpper(r));                                       // 多方打少
@@ -7933,7 +7948,7 @@ function homeStockColHtml(title, list, emptyText){
 const KILL31_BOTTOM = 2;
 function kill31Model(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !groupDailyChanges) return null;
-  const isDisp = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].disposition);
+  const isDisp = bladeDisp;
   const out = new Map();
   rankedGroupsOf(lastData.groups).forEach((g) => {
     const bm = groupBladeMarks(g);
@@ -13950,7 +13965,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-20 08:16:00';
+const BUILD_STAMP = '2026-10-20 08:27:37';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19549,6 +19564,8 @@ function dtModel80(){
   const cands = [...seen.keys()].filter((c) => seen.get(c).some((d) => days.includes(d)));
   const oq = dtOpenQuotes(cands);
   if (oq.wait) return { wait: oq.wait };
+  // 盤前（報價還是昨收、沒有開盤價）看不出誰收黑K：老師 08:08 拿昨天收盤漲跌排，但報價中心盤前沒給前一天的收盤漲幅，與其顯示「目前沒有」不如直接講還沒開盤
+  if (cands.length && !cands.some((c) => { const x = oq.map.get(c); return x && Number.isFinite(x.open) && x.open > 0; })) return { wait: '還沒開盤，開盤後（09:00 起）用「現價低於開盤價」才看得出誰收黑K。' };
   const rows = [];
   cands.forEach((c) => {
     const x = oq.map.get(c);
