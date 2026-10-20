@@ -60,7 +60,13 @@
   .top6-chg{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap;}
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
-  .home-rank4{display:grid;grid-template-columns:repeat(10, minmax(0, 1fr));gap:8px;align-items:start;}
+  /* 2026-10-20 使用者：第 2 欄當沖多的股名被擋住（玉晶…、禾…）→ 加寬；最右邊今日弱勢股縮窄、列距縮緊，空出來的寬度給當沖多 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1fr) minmax(0, 1.45fr) repeat(7, minmax(0, 1fr)) minmax(0, .9fr);gap:8px;align-items:start;}
+  .hr-colw .hr-title{padding:6px 8px;font-size:13px;}
+  .hr-colw .hr-row{padding:3px 5px;gap:3px;font-size:12px;}
+  .hr-colw .hr-code{font-size:11px;} .hr-colw .hr-rk{font-size:10.5px;} .hr-colw .hr-avg{font-size:11.5px;}
+  .hr-colw .hr-name{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;}
+  .hr-colw .hr-sep{padding:2px 4px;font-size:11px;}
   .hr-stack{display:flex;flex-direction:column;gap:8px;min-width:0;}
   .hr-warn{padding:2px 8px 5px 18px;font-size:12px;line-height:1.6;white-space:normal;}
   .hr-warn .hr-stk{cursor:pointer;margin-right:6px;white-space:nowrap;}
@@ -7956,17 +7962,18 @@ function homeWeakColHtml(){
   stLoad('weak');
   const d = stState.weak;
   const title = '<div class="hr-title bear">🔻今日弱勢股';
-  if (!d) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (stState.error.weak ? '讀取失敗' : '讀取中…') + '</div></div>';
+  if (!d) return '<div class="hr-col hr-colw">' + title + '</div><div class="hr-note">' + (stState.error.weak ? '讀取失敗' : '讀取中…') + '</div></div>';
   const groups = stLiveGroups(d, false).filter((g) => g.rows.length);
   const n = groups.reduce((a, g) => a + g.rows.length, 0);
-  const body = groups.map((g) => '<div class="hr-sep hr-st-grp weak"' + (homeGroupAvg(g.name) !== null ? ' data-group="' + wlEsc(g.name) + '" tabindex="0" role="button"' : '') + ' title="族群分數＝族內平均均線分數（' + stBasis(d) + ' 算的），倒數第 N 名；點了看族群成分股">倒數第 ' + (d.groupCount - g.rank + 1) + ' 名・' + wlEsc(g.name) + (Number.isFinite(g.avg) ? '・均分 ' + g.avg.toFixed(1) : '') + '</div>' + g.rows.map((r) => {
+  const body = groups.map((g) => '<div class="hr-sep hr-st-grp weak"' + (homeGroupAvg(g.name) !== null ? ' data-group="' + wlEsc(g.name) + '" tabindex="0" role="button"' : '') + ' title="族群分數＝族內平均均線分數' + (Number.isFinite(g.avg) ? ' ' + g.avg.toFixed(1) : '') + '（' + stBasis(d) + ' 算的），倒數第 N 名；點了看族群成分股">倒數第 ' + (d.groupCount - g.rank + 1) + ' 名・' + wlEsc(g.name) + '</div>' + g.rows.map((r) => {   // 2026-10-20 使用者：欄位縮窄，均分只放在滑鼠提示裡
+
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
     return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="均線分數 ' + r.sum + '（' + stBasis(d) + '）">' +
       '<span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span><span class="hr-rk">' + r.sum + '分</span>' +
       '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span></div>';
   }).join('')).join('');
-  return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔</span></div>' +
+  return '<div class="hr-col hr-colw">' + title + ' <span class="hr-rk">' + n + ' 檔</span></div>' +
     (n ? body : '<div class="hr-note">' + (d.count ? '均線分數符合的今天都在漲，先不列' : '今天沒有符合的股票') + '</div>') + '</div>';
 }
 function homeRankColHtml(title, rows, half, sepLabel, empty, warnOf, warnCls, titleCls){
