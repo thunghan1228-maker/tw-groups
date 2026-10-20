@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-20 21:43:38";
+const BUILD_STAMP = "2026-10-20 21:48:08";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -589,6 +589,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   #launchAlertBox .la-tag.fallen{background:rgba(255,255,255,.25);color:#fff;}
   #launchAlertBox .la-tag.times{background:rgba(0,0,0,.22);color:#fff;}
   /* 形態觀察股跳窗（2026-10-12 使用者：11:30／12:00／12:30／13:00 像發動一樣跳出來） */
+  .launch-alert.k12-alert{background:#047857;top:calc(env(safe-area-inset-top,0px) + 74px);z-index:209;max-width:min(94vw,620px);}
+  #k12AlertBox .launch-alert-head{font-size:18px;}
+  #k12AlertBox .launch-alert-body{max-height:min(55vh,460px);overflow:auto;font-size:14px;}
+  #k12AlertBox .la-row small{display:block;font-weight:600;opacity:.92;}
   .launch-alert.obs-alert{background:#4c1d95;max-width:min(94vw,680px);width:min(94vw,680px);z-index:211;}
   .obs-alert .launch-alert-body{max-height:min(70vh,640px);overflow:auto;font-weight:500;font-size:14px;}
   .obs-tools{display:flex;gap:6px;align-items:center;}
@@ -14003,7 +14007,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-20 21:43:38';
+const BUILD_STAMP = '2026-10-20 21:48:08';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15781,6 +15785,92 @@ setInterval(() => {
   try { localStorage.setItem('pickerRemindFired', today); } catch (e) { /* 存不了就算了 */ }
   pkRunReminder(false);
 }, 30000);
+// ---- 1️⃣2️⃣空「可空」提醒（2026-10-20 使用者：教學頁「12空:2 不過 1高 + 破惡均下彎」——破惡後反彈的 2 出現、沒過 1高 就是可空，要跳出來提醒）----
+// 每分鐘（盤中）看一次 /api/kill12：機器人 123 名單（固定族群、現價漲幅不超過 K12_MAX_PCT）裡，新出現「2」的（high2 有值）跳出綠色卡片＋提示音＋瀏覽器通知；
+// 同一檔同一次破惡（1高 不變）只提醒一次。今天第一次開頁面時，已經是可空的先當作舊的、不跳（名單裡看得到）；之後新出現的才跳，
+// 關掉頁面期間新出現的，下次打開會補跳。
+let k12AlertRows = [];
+let k12AlertSeen = null;   // { date, keys:Set }
+const K12_ALERT_KEY = 'k12AlertSeen';
+function k12AlertLoadSeen(today){
+  if (k12AlertSeen && k12AlertSeen.date === today) return k12AlertSeen;
+  let stored = null;
+  try { stored = JSON.parse(localStorage.getItem(K12_ALERT_KEY) || 'null'); } catch (e) { /* 讀不到就當第一次 */ }
+  k12AlertSeen = stored && stored.date === today ? { date: today, keys: new Set(stored.keys || []), fresh: false } : { date: today, keys: new Set(), fresh: true };
+  return k12AlertSeen;
+}
+function k12AlertSaveSeen(){
+  try { localStorage.setItem(K12_ALERT_KEY, JSON.stringify({ date: k12AlertSeen.date, keys: Array.from(k12AlertSeen.keys) })); } catch (e) { /* 存不了就算了 */ }
+}
+function k12AlertEligible(k){
+  const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
+  const quote = new Map();
+  lastData.groups.forEach((g) => g.stocks.forEach((s) => quote.set(s.code, s)));
+  const out = [];
+  (k.items || []).forEach((it) => {
+    if (!Number.isFinite(it.high1) || !Number.isFinite(it.high2)) return;      // 2 還沒出現
+    if (Number.isFinite(it.dayHighPct) && it.dayHighPct < K12_RUSH_MIN) return;
+    const gi = ranked.findIndex((g) => (KILL193_GROUPS.has(g.name) || RANK188_GROUPS.has(g.name)) && g.stocks.some((s) => s.code === it.code));
+    if (gi < 0) return;
+    const s = quote.get(it.code);
+    const pct = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
+    if (Number.isFinite(pct) && pct > K12_MAX_PCT) return;
+    out.push({ code: it.code, name: (s && s.name) || it.name, group: ranked[gi].name, pct, h1: it.high1, h2: it.high2, key: it.code + '|' + it.high1 });
+  });
+  return out;
+}
+function k12AlertPx(v){ return String(Number(Number(v).toFixed(2))); }
+function renderK12AlertBox(){
+  let el = document.getElementById('k12AlertBox');
+  if (!k12AlertRows.length){ if (el) el.remove(); return; }
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'k12AlertBox'; el.className = 'launch-alert k12-alert';
+    el.addEventListener('click', (e) => { if (e.target.closest('.launch-alert-close')){ k12AlertRows = []; renderK12AlertBox(); } });
+    document.body.appendChild(el);
+    makeAlertDraggable(el, '.launch-alert-head', 'k12AlertPos');
+  }
+  const rows = k12AlertRows.slice().sort((a, b) => b.at - a.at);
+  el.innerHTML = '<div class="launch-alert-head">🔻 1️⃣2️⃣空・可空 ' + rows.length + ' 檔<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
+    '<div class="launch-alert-body">' + rows.map((r) => '<div class="la-row"><span class="launch-alert-time">' + r.time + '</span> <span class="alert-stk" data-alert-code="' + wlEsc(r.code) +
+      '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + r.name) + '</span>（' + wlEsc(r.group) + '）' + botPct(r.pct) +
+      '<small>1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 沒過 1高 → 可空</small></div>').join('') + '</div>';
+}
+async function k12AlertTick(){
+  if (!lastData || !lastData.groups || !lastData.groups.length) return;
+  const now = new Date(Date.now() + 8 * 3600000);
+  const day = now.getUTCDay(), minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  if (day === 0 || day === 6 || minutes < 9 * 60 + 2 || minutes > 13 * 60 + 36) return;
+  let k;
+  try {
+    const res = await fetch('/api/kill12');
+    k = await res.json();
+    if (!res.ok || !k || k.status !== 'ok' || !k.tracked) return;
+  } catch (e) { return; }
+  const today = twTodayStr();
+  if (k.tradeDate && k.tradeDate !== today) return;
+  const seen = k12AlertLoadSeen(today);
+  const rows = k12AlertEligible(k);
+  const fresh = rows.filter((r) => !seen.keys.has(r.key));
+  rows.forEach((r) => seen.keys.add(r.key));
+  const first = seen.fresh; seen.fresh = false;
+  k12AlertSaveSeen();
+  if (first || !fresh.length) return;      // 今天第一次開：現有的當舊的，不跳
+  const time = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
+  fresh.forEach((r) => { r.time = time; r.at = Date.now(); });
+  const have = new Set(fresh.map((r) => r.key));
+  k12AlertRows = fresh.concat(k12AlertRows.filter((r) => !have.has(r.key))).slice(0, 40);
+  renderK12AlertBox();
+  if (alertsEnabled) launchBeep();
+  if ('Notification' in window && Notification.permission === 'granted'){
+    try {
+      new Notification('🔻 1️⃣2️⃣空・可空：' + fresh.slice(0, 4).map((r) => r.code + ' ' + r.name).join('、') + (fresh.length > 4 ? ' 等 ' + fresh.length + ' 檔' : ''),
+        { body: fresh.slice(0, 6).map((r) => r.code + ' ' + r.name + '：1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' → 可空').join('\\n'), tag: 'k12-' + time, requireInteraction: true });
+    } catch (e) { /* 跳不出來就算了 */ }
+  }
+}
+setInterval(k12AlertTick, 60000);
+setTimeout(k12AlertTick, 9000);
 // ---- 飆股雷達（2026-10-07 使用者：照老師 App 的飆股雷達做一個，條件我們自己算）----
 // 後端 /api/grail-radar：嗨投資紫殺四個聖杯 15 個邏輯，每個邏輯照固定時間點（盤中證交所即時報價、收盤後官方日K）篩出的名單，每天保存。
 // 卡片上的時間點膠囊：實線＝有名單（數字是檔數）、虛線＝還沒到或沒算到、黃框＝正在看的那一輪；預設看最新一輪。
