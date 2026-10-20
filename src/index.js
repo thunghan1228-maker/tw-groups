@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-19 23:57:44";
+const BUILD_STAMP = "2026-10-20 08:16:00";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5459,8 +5459,18 @@ function groupRiseMarks(g){
 // 空方段（bladeZoneSize）裡其他的，或倒數 3 檔但前一兩天在後一半的，昨天或前天漲過 BLADE_BEGINNER_RISE% 以上就標 🔰。
 // 對過：台表科 🔪11⚔️12、大毅 🔪20⚔️20、凱美 ⚔️14、南亞 ⚔️4、聯鈞 ⚔️13、華星光／嘉基 ⚔️20、和益 ⚔️6、鑫科 ⚔️3、台塑／聯亞 🔰；
 // 德淵（化學二倒數第 2，前天 +5.94% 但前天族裡第 4/7 名）老師標 🔰、華夏（前天 +3.4%、第 5/8 名）沒標，也都對得上。
+// 2026-10-20 使用者貼老師 10/20 08:07（開盤前）的 31／32：隔天凌晨他把基準往後挪一天——「昨天」＝剛收盤的那天（跟現在是同一份資料，沒有 🔪），
+// 「前天」＝再前一個交易日，所以我們平常的 🔪N（跟前一個交易日比）在他那邊全部變成 ⚔️N（昇達科 ⚔️7／⚔️22、宜鼎 ⚔️17、環科 ⚔️5 數字都一樣），
+// 原本的 ⚔️（跟再前一天比）整批不見（台表科、玉晶光、銘旺科他都沒列）。只有平日開盤前這段（首頁報價是 heldClose、今天比報價日晚）要挪；週末照舊。
+function bladeRolled(){
+  const h = lastData && lastData.heldClose;
+  if (!h || !h.session || !h.today || h.today <= h.session) return false;
+  const wd = new Date(h.today + 'T00:00:00').getDay();
+  return wd >= 1 && wd <= 5;
+}
 function groupBladeMarks(g){
   const out = new Map();
+  const rolled = bladeRolled();
   const sd = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
   const priced = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent));
   const today = priced.slice().sort((a, b) => b.changePercent - a.changePercent);
@@ -5477,10 +5487,11 @@ function groupBladeMarks(g){
     if (stockFlags && stockFlags[s.code] && stockFlags[s.code].disposition) return;   // 處置股位置照算、但不標（2026-10-17 老師小電組：*6213 聯茂倒數第 2 沒標 ⚔️）
     const p = (sd[s.code] && sd[s.code].pct) || [];
     const ry = y.m.get(s.code), r2 = y2.m.get(s.code);
-    const knife = pos <= 3 && p[0] >= BLADE_PRIOR_RISE && ry && ry <= y.n / 2 ? t - ry : 0;
-    const sword = pos <= 3 && p[1] >= BLADE_PRIOR_RISE && r2 && r2 <= y2.n / 2 ? t - r2 : 0;
+    const knife0 = pos <= 3 && p[0] >= BLADE_PRIOR_RISE && ry && ry <= y.n / 2 ? t - ry : 0;
+    const sword0 = pos <= 3 && p[1] >= BLADE_PRIOR_RISE && r2 && r2 <= y2.n / 2 ? t - r2 : 0;
+    const knife = rolled ? 0 : knife0, sword = rolled ? knife0 : sword0;
     let mk = (knife > 0 ? '🔪' + knife : '') + (sword > 0 ? '⚔️' + sword : '');
-    if (!mk && Math.max(Number.isFinite(p[0]) ? p[0] : -Infinity, Number.isFinite(p[1]) ? p[1] : -Infinity) >= BLADE_BEGINNER_RISE) mk = '🔰';
+    if (!mk && Math.max(Number.isFinite(p[0]) ? p[0] : -Infinity, rolled || !Number.isFinite(p[1]) ? -Infinity : p[1]) >= BLADE_BEGINNER_RISE) mk = '🔰';
     if (mk) out.set(s.code, { mk, knife, sword, pos, t, ry, r2, y: p[0], y2: p[1] });
   });
   return out;
@@ -8216,7 +8227,7 @@ function homeRankFootHtml(total){
     ['多方打少', '族群前 10 名（名次後面 🔺）：股票弱、族群還強，可以空但量要少，空得保守'],
     ['中間段', '族群第 11～25 名（🔽），兩條線中間那一段'],
     ['強空積極', '族群第 26 名以後（🔰）：族群跟股票都弱，可以空得積極'],
-    ['收割區域', '已經跌 ' + BLADE_HARVEST_PCT + '% 以上（♣）：不追空，有空單的考慮收割'],
+    ['收割區域（♣ 梅花）', '已經跌 ' + BLADE_HARVEST_PCT + '% 以上（或跌停鎖死放不到空）的股票，名次後面改標 ♣（例如 42♣＝族群第 42 名）：不追空，有空單的考慮回補收割，不分族群強弱'],
     ['排序', '族群名次小的在上面，同族群漲幅高的在上面；訊號中心刀劍空分頁是同一份，照出現時間排（新的在上面）'],
   ]) +
   // 2026-10-17 使用者：31 跟 32 的差別整理成一張比較表，放首頁下面
@@ -8307,6 +8318,8 @@ function homeObsFootHtml(){
     [obsMark('▼'), '今天跌 5% 以上'],
     [obsMark('↑'), '今天紅但還沒站回月線'],
     ['(處置)', '處置股'],
+    ['42♣　中揚光', '♣（梅花）＝收割區：這檔今天已經跌 ' + BLADE_HARVEST_PCT + '% 以上（或跌停鎖死放不到空）。不追空，手上有空單的考慮回補收割。前面的數字＝族群名次，42♣ 就是族群第 42 名'],
+    ['🔺 🔽 🔰', '接在族群名次後面：🔺＝族群前 10 名（多方打少）、🔽＝11～25 名（中間段）、🔰＝26 名以後（強空積極）；跌深的改標 ♣'],
   ], 'hr-obs-foot');
 }
 function bladeShortHtml(){
@@ -13937,7 +13950,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-19 23:57:44';
+const BUILD_STAMP = '2026-10-20 08:16:00';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16289,7 +16302,7 @@ function tdBroadcastHtml(seq, snap){
     '<button type="button" class="td-hide" data-td-hidegone="1">' + (tdState.hideGone ? '👁 顯示消失的' : '🚫 隱藏') + '</button></div>' +
     (seq.length <= 1 && snap.live ? '<div class="td-snote">盤中每 5 分鐘記一次（09:05 起），記到第二次以後才看得出誰跑、誰回來。</div>' : '') +
     (rows || '<div class="td-empty">目前沒有符合參數的</div>') +
-    '<div class="td-snote">左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・<span class="td-bst run">跑</span> 已消失（轉強，要跑）・<span class="td-bst back">回</span> 掉出去又回榜。點一列開K線圖。</div></aside>';
+    '<div class="td-snote">左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・<span class="td-bst run">跑</span> 已消失（轉強，要跑）・<span class="td-bst back">回</span> 掉出去又回榜。名次後面 ♣（梅花）＝收割區（今天已跌 5% 以上，不追空，有空單考慮回補）。點一列開K線圖。</div></aside>';
 }
 function tdAddWatch(){
   const el = document.getElementById('tdWatchInput');
@@ -16485,8 +16498,8 @@ function hwTodayHtml(){
     '<tr><td>6 ~ 10</td><td class="up">▲</td><td class="up">多方</td><td>-1.0% ~ -1.5%</td><td>-3% ~ -4%</td><td>30% 或觀望</td></tr>' +
     '<tr><td>11 ~ 25</td><td>🔽</td><td>中間</td><td>-1.5% ~ -2.0%</td><td>-4% ~ -6%</td><td>50%</td></tr>' +
     '<tr><td>26 +</td><td>🔰</td><td class="down">強空</td><td>-2.0% ~ -3.0%</td><td>-7% ~ -9%（續抱可到 -10% 跌停）</td><td>100%</td></tr>' +
-    '<tr><td>跌幅 ≤ -5%</td><td>♣</td><td class="down">收割區</td><td colspan="2">已到收割區，以回補為主</td><td>不追空</td></tr></tbody></table></div>' +
-    '<div class="td-note">符號：🔓 當天出獄｜🔑 出獄股（其他批）｜🔒 必關｜⚠️ 條件關（收盤過門檻才關）｜🔵 12空（道館 MA20 當沖空也點名；只在 12空 的股，排名／段位取 12空 的）｜排名格旁的圓球＝均線分（滿分 15：≥12 金底、6～11 金框、<6 灰）。<br>' +
+    '<tr><td>跌幅 ≤ -5%</td><td>♣</td><td class="down">收割區（梅花）</td><td colspan="2">今天已跌 5% 以上或跌停鎖死，以回補收割為主</td><td>不追空</td></tr></tbody></table></div>' +
+    '<div class="td-note">符號：🔓 當天出獄｜🔑 出獄股（其他批）｜🔒 必關｜⚠️ 條件關（收盤過門檻才關）｜♣ 梅花＝收割區（今天已跌 5% 以上或跌停鎖死，不追空，有空單考慮回補收割；前面數字＝族群名次，42♣＝第 42 名）｜🔵 12空（道館 MA20 當沖空也點名；只在 12空 的股，排名／段位取 12空 的）｜排名格旁的圓球＝均線分（滿分 15：≥12 金底、6～11 金框、<6 灰）。<br>' +
     '要自己確認的：① 部位還要看族群有沒有帶頭——沒有帶頭時 SOP 部位降 50%（這頁不會自動降）；② 進場時間門檻 09:15 之後（通緝要犯例外）。名次是 67 族的排法，族群數不同時照比例換算。表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
   return dtSec + summary + counts +
     '<div class="td-wrap"><div class="td-main">' + head + ctrls + replay + filters + main + watch + k12Sec + againSec + relSec + jailSec + sop + '</div>' +
