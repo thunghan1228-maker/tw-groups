@@ -60,8 +60,8 @@
   .top6-chg{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap;}
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
-  /* 2026-10-20 使用者：第 2 欄當沖多的股名被擋住（玉晶…、禾…）→ 加寬；最右邊今日弱勢股縮窄、列距縮緊，空出來的寬度給當沖多 */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1fr) minmax(0, 1.45fr) repeat(7, minmax(0, 1fr)) minmax(0, .9fr);gap:8px;align-items:start;}
+  /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1fr) repeat(2, minmax(0, 1.45fr)) repeat(7, minmax(0, 1fr));gap:8px;align-items:start;}
   .hr-colw .hr-title{padding:6px 8px;font-size:13px;}
   .hr-colw .hr-row{padding:3px 5px;gap:3px;font-size:12px;}
   .hr-colw .hr-code{font-size:11px;} .hr-colw .hr-rk{font-size:10.5px;} .hr-colw .hr-avg{font-size:11.5px;}
@@ -7847,22 +7847,36 @@ function homeLongRowHtml(o){
     '<div class="l2"><span class="hr-lg-grp ' + (o.groupAvg > 0 ? 'up' : 'down') + '">' + wlEsc(o.group || '—') + (o.rank ? '(' + o.rank + ')' : '') + (o.groupAvg > 0 ? '▲' : '▼') + '</span>' +
     '<span class="hr-lg-src">' + chip(1, '多', 's1') + chip(2, '賽', 's2') + chip(3, '河', 's3') + chip(4, '群', 's4') + '</span>' + (o.holdNo ? '<span class="hr-lg-hold">續抱不追</span>' : '') + (o.limitUp ? '<span class="hr-lg-hold">漲停</span>' : '') + '</div></div>';
 }
-function homeLongColHtml(){
+// 2026-10-20 使用者：當沖多檔數太多，分成兩欄（當沖多1、當沖多2），都跟原本第二欄一樣寬；照排序前半放第 1 欄、後半放第 2 欄，
+// 中幾個那條標題跨欄時第 2 欄接著寫「（續）」。回傳兩個 .hr-stack（首頁每個 .hr-stack 是一欄）。
+function homeLongColsHtml(){
   const m = race333Model();
-  const head = (n) => '<div class="hr-title">🔥當沖多' + (n === null ? '' : ' <span class="hr-rk">交集 ' + n + ' 檔</span>') + '</div>';
-  if (!m) return '<div class="hr-col">' + head(null) + '<div class="hr-note">讀取中…（33／34 開盤後才有）</div></div>';
+  const head = (n, k) => '<div class="hr-title">🔥當沖多' + k + (n === null ? '' : ' <span class="hr-rk">' + (k === 1 ? '交集 ' + n + ' 檔' : '') + '</span>') + '</div>';
+  const wrap = (a, b) => '<div class="hr-stack">' + a + '</div><div class="hr-stack">' + b + '</div>';
+  const note = '<div class="hr-note">' + '中幾個＝被 ① 多功課 ② 賽馬多 ③ 河流多 ④ 族群在多方區 點名幾個；空方族群已濾掉，只中一個的不列</div>';
+  if (!m) return wrap('<div class="hr-col">' + head(null, 1) + '<div class="hr-note">讀取中…（33／34 開盤後才有）</div></div>', '<div class="hr-col">' + head(null, 2) + '</div>');
   let model = null;
   try { model = lgModel(m); } catch (_){ model = null; }
-  if (!model) return '<div class="hr-col">' + head(null) + '<div class="hr-note">讀取中…</div></div>';
+  if (!model) return wrap('<div class="hr-col">' + head(null, 1) + '<div class="hr-note">讀取中…</div></div>', '<div class="hr-col">' + head(null, 2) + '</div>');
   const rows = model.kept.slice().sort((a, b) => b.hits - a.hits || (b.pct === null || b.pct === undefined ? -99 : b.pct) - (a.pct === null || a.pct === undefined ? -99 : a.pct));
-  const sec = (n, label, cls) => {
-    const l = rows.filter((o) => o.hits === n);
-    return l.length ? '<div class="hr-lsec ' + cls + '"><span>' + label + '</span><small>' + l.length + ' 檔</small></div>' + l.map(homeLongRowHtml).join('') : '';
-  };
   const multi = rows.filter((o) => o.hits >= 2).length;
-  const body = sec(4, '⭐ 中四個', 'h4') + sec(3, '🔥 中三個', 'h3') + sec(2, '✅ 中兩個', 'h2');
-  return '<div class="hr-col">' + head(multi) + (body || '<div class="hr-note">目前沒有兩個以上來源同時點名的股票</div>') +
-    '<div class="hr-note">中幾個＝被 ① 多功課 ② 賽馬多 ③ 河流多 ④ 族群在多方區 點名幾個；空方族群已濾掉，只中一個的不列</div></div>';
+  if (!rows.length) return wrap('<div class="hr-col">' + head(multi, 1) + '<div class="hr-note">目前沒有兩個以上來源同時點名的股票</div>' + note + '</div>', '<div class="hr-col">' + head(multi, 2) + '</div>');
+  const cut = Math.ceil(rows.length / 2);
+  const SECS = [[4, '⭐ 中四個', 'h4'], [3, '🔥 中三個', 'h3'], [2, '✅ 中兩個', 'h2']];
+  // from～to（排序後的第幾檔）這一欄放哪些：每個「中幾個」一條標題＋那幾檔，跨欄的那條在第 2 欄標「（續）」
+  const colBody = (from, to) => {
+    let at = 0, out = '';
+    SECS.forEach(([n, label, cls]) => {
+      const l = rows.filter((o) => o.hits === n), start = at;
+      at += l.length;
+      const part = l.filter((_, k) => start + k >= from && start + k < to);
+      if (!part.length) return;
+      out += '<div class="hr-lsec ' + cls + '"><span>' + label + (start < from ? '（續）' : '') + '</span><small>' + part.length + ' 檔</small></div>' + part.map(homeLongRowHtml).join('');
+    });
+    return out;
+  };
+  return wrap('<div class="hr-col">' + head(multi, 1) + colBody(0, cut) + '</div>',
+    '<div class="hr-col">' + head(multi, 2) + colBody(cut, rows.length) + note + '</div>');
 }
 function homeStockColHtml(title, list, emptyText){
   const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
@@ -8083,9 +8097,7 @@ function homeRank4Html(){
   return '<div class="home-rank4">' +
     homeObsColHtml() +   // 2026-10-16 使用者：強勢黑K選股排第一欄，在今日強勢股前面
     // 2026-10-16 使用者：183 排第二欄、昨日強勢股排第六欄；2026-10-19 使用者：第二欄換成當沖多（取代 183 的位置），183 搬到今日強勢股下面
-    '<div class="hr-stack">' +   // 2026-10-19 使用者：188 搬到賽馬多(33) 下面，這欄只剩當沖多
-      homeLongColHtml() +
-    '</div>' +
+    homeLongColsHtml() +   // 2026-10-20 使用者：當沖多檔數太多，分成兩欄（當沖多1、當沖多2），各跟原本第二欄一樣寬
     // 2026-10-16 使用者：第 3 欄馬火多(30)；第 4 欄 30加33加34 疊在河流多(34) 上面；第 5 欄續抱勿追高疊在賽馬多(33) 上面
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
     '<div class="hr-stack">' +   // 2026-10-16 使用者：股票期貨排名(155) 疊在馬火多(30) 下面
@@ -8119,8 +8131,8 @@ function homeRank4Html(){
     '<div class="hr-stack">' +   // 2026-10-17 使用者：刀劍空(31) 疊在新刀劍空(32) 下面
       home12ColHtml(h) +   // 2026-10-18 使用者：新刀劍空(32) 換成 12；199、刀劍空(31) 也從首頁拿掉
       homeFut75ColHtml() +   // 2026-10-19 使用者：股期黑龍(75) 放到族群漲幅 > 2%（12）下面（倒數第二欄）
+      homeWeakColHtml() +   // 2026-10-20 使用者：今日弱勢股從最右邊一欄搬到股期黑龍(75) 下面
     '</div>' +
-    '<div class="hr-stack">' + homeWeakColHtml() + '</div>' +   // 2026-10-19 使用者：22-35 拿掉，換成今日弱勢股（最右邊一欄）
     '</div>' +
     '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }
