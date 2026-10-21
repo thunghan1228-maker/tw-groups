@@ -3764,7 +3764,7 @@ function generateOHLC(code, tf){
       ts = d.getTime();
     } else {
       ts = timestamps[i];
-      const d = new Date(ts);
+      const d = new Date(ts + (tf === 'm1' ? 60000 : 300000));   // 收盤時間
       label = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
       fullLabel = (d.getMonth() + 1) + '/' + d.getDate() + ' ' + label;
     }
@@ -4825,8 +4825,9 @@ function onSettingsChange(e){
   drawChart();
 }
 
-function tsToBar(b){
-  const d = new Date(b.ts);
+// 2026-10-21 使用者：K 線圖滑鼠移上去、橫軸的時間要寫「收盤時間」（5 分 K 第一根 09:05、1 分 K 第一根 09:01），不是開盤時間（後端的 ts 是那根 K 的開始時間，所以加上一根的長度）
+function tsToBar(b, stepMs){
+  const d = new Date(b.ts + (stepMs || 0));
   const label = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   const fullLabel = (d.getMonth() + 1) + '/' + d.getDate() + ' ' + label;
   return {
@@ -4865,7 +4866,7 @@ async function fetchRealBars(code, tf){
   if (!res.ok) throw new Error('bars http ' + res.status);
   const data = await res.json();
   if (!data || !Array.isArray(data.bars) || !data.bars.length) throw new Error('bars empty');
-  return data.bars.map(tsToBar);
+  return data.bars.map((b) => tsToBar(b, tf === 'm1' ? 60000 : 300000));
 }
 
 // 後端主力大單的真正門檻（單筆成交 ≥ 幾張），從主力副圖 API 帶回來，副圖說明照這個寫，不再寫死示範文字。
@@ -4937,7 +4938,7 @@ async function fetchRealBars5Range(code){
   triggerMainForceBackfill(code, '5m', rangeData.bars);
   const todayByTs = new Map(todayBars.map((b) => [b.ts, b]));
   return rangeData.bars.map((b) => {
-    const bar = tsToBar(b);
+    const bar = tsToBar(b, 300000);
     const h = historyForceByTs.get(bar.ts);
     if (h){ bar.mainNet = h.main; const big = bigNetLots(h.buy, h.sell, bar.close); if (big !== null) bar.bigNet = big; }
     const t = todayByTs.get(bar.ts);
@@ -4959,7 +4960,7 @@ async function fetchRealBars1Range(code){
   triggerMainForceBackfill(code, '1m', rangeData.bars);
   const todayByTs = new Map(todayBars.map((b) => [b.ts, b]));
   return rangeData.bars.map((b) => {
-    const bar = tsToBar(b);
+    const bar = tsToBar(b, 60000);
     const h = historyForceByTs.get(bar.ts);
     if (h){ bar.mainNet = h.main; const big = bigNetLots(h.buy, h.sell, bar.close); if (big !== null) bar.bigNet = big; }
     const t = todayByTs.get(bar.ts);
@@ -4971,7 +4972,7 @@ async function fetchRealBars1Range(code){
 function dailyBarToBar(b){
   const d = new Date(b.ts);
   const label = (d.getMonth() + 1) + '/' + d.getDate();
-  const fullLabel = d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate();
+  const fullLabel = d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' 13:30';   // 日 K 的收盤時間
   return {
     ts: b.ts, open: b.open, high: b.high, low: b.low, close: b.close,
     volume: b.volume ?? 0, label, fullLabel, mainNet: b.mainNet ?? null, bigNet: b.bigNet ?? null,

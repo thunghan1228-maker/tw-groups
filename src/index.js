@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-21 22:31:06";
+const BUILD_STAMP = "2026-10-21 22:34:50";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3844,7 +3844,7 @@ function generateOHLC(code, tf){
       ts = d.getTime();
     } else {
       ts = timestamps[i];
-      const d = new Date(ts);
+      const d = new Date(ts + (tf === 'm1' ? 60000 : 300000));   // 收盤時間
       label = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
       fullLabel = (d.getMonth() + 1) + '/' + d.getDate() + ' ' + label;
     }
@@ -4905,8 +4905,9 @@ function onSettingsChange(e){
   drawChart();
 }
 
-function tsToBar(b){
-  const d = new Date(b.ts);
+// 2026-10-21 使用者：K 線圖滑鼠移上去、橫軸的時間要寫「收盤時間」（5 分 K 第一根 09:05、1 分 K 第一根 09:01），不是開盤時間（後端的 ts 是那根 K 的開始時間，所以加上一根的長度）
+function tsToBar(b, stepMs){
+  const d = new Date(b.ts + (stepMs || 0));
   const label = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   const fullLabel = (d.getMonth() + 1) + '/' + d.getDate() + ' ' + label;
   return {
@@ -4945,7 +4946,7 @@ async function fetchRealBars(code, tf){
   if (!res.ok) throw new Error('bars http ' + res.status);
   const data = await res.json();
   if (!data || !Array.isArray(data.bars) || !data.bars.length) throw new Error('bars empty');
-  return data.bars.map(tsToBar);
+  return data.bars.map((b) => tsToBar(b, tf === 'm1' ? 60000 : 300000));
 }
 
 // 後端主力大單的真正門檻（單筆成交 ≥ 幾張），從主力副圖 API 帶回來，副圖說明照這個寫，不再寫死示範文字。
@@ -5017,7 +5018,7 @@ async function fetchRealBars5Range(code){
   triggerMainForceBackfill(code, '5m', rangeData.bars);
   const todayByTs = new Map(todayBars.map((b) => [b.ts, b]));
   return rangeData.bars.map((b) => {
-    const bar = tsToBar(b);
+    const bar = tsToBar(b, 300000);
     const h = historyForceByTs.get(bar.ts);
     if (h){ bar.mainNet = h.main; const big = bigNetLots(h.buy, h.sell, bar.close); if (big !== null) bar.bigNet = big; }
     const t = todayByTs.get(bar.ts);
@@ -5039,7 +5040,7 @@ async function fetchRealBars1Range(code){
   triggerMainForceBackfill(code, '1m', rangeData.bars);
   const todayByTs = new Map(todayBars.map((b) => [b.ts, b]));
   return rangeData.bars.map((b) => {
-    const bar = tsToBar(b);
+    const bar = tsToBar(b, 60000);
     const h = historyForceByTs.get(bar.ts);
     if (h){ bar.mainNet = h.main; const big = bigNetLots(h.buy, h.sell, bar.close); if (big !== null) bar.bigNet = big; }
     const t = todayByTs.get(bar.ts);
@@ -5051,7 +5052,7 @@ async function fetchRealBars1Range(code){
 function dailyBarToBar(b){
   const d = new Date(b.ts);
   const label = (d.getMonth() + 1) + '/' + d.getDate();
-  const fullLabel = d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate();
+  const fullLabel = d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' 13:30';   // 日 K 的收盤時間
   return {
     ts: b.ts, open: b.open, high: b.high, low: b.low, close: b.close,
     volume: b.volume ?? 0, label, fullLabel, mainNet: b.mainNet ?? null, bigNet: b.bigNet ?? null,
@@ -14059,7 +14060,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-21 22:31:06';
+const BUILD_STAMP = '2026-10-21 22:34:50';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
