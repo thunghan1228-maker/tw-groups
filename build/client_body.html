@@ -8117,7 +8117,7 @@ function home44ColHtml(){
 const homeRedBox = (html) => '<div class="hr-redbox">' + html + '</div>';
 function home12ColHtml(h){
   const byName = new Map(lastData.groups.map((g) => [g.name, g]));
-  const rows = h.rows.filter((r) => r.avg > 2);
+  const rows = h.rows.filter((r) => r.avg > 2 && !RANK183_GROUPS.has(r.name));   // 2026-10-21 使用者：有入選 183 的族群這裡不再列
   const body = rows.map((r) => {
     const g = byName.get(r.name);
     // 2026-10-20 使用者：每個族群列漲幅前三大的股票（漲最多的在最上面）；族裡不到三檔就有幾檔列幾檔
@@ -8126,7 +8126,8 @@ function home12ColHtml(h){
       ' <span class="' + dirClass(top.changePercent) + '">' + fmt(top.changePercent) + '%</span></span></div>').join('');
   }).join('');
   return '<div class="hr-col"><div class="hr-title">族群漲幅 &gt; 2%(12) <span class="hr-rk">' + rows.length + ' 族</span></div>' +
-    (body || '<div class="hr-note">目前沒有族群漲超過 2%</div>') + '</div>';
+    '<div class="hr-note">（排除入選183族群）</div>' +   // 2026-10-21 使用者：標題下面補一行說明
+    (body || '<div class="hr-note">目前沒有族群漲超過 2%（排除入選183族群後）</div>') + '</div>';
 }
 // skip＝扣掉前幾檔：22-5 從第 6 名、22-35 從第 36 名開始，各列 30 檔（2026-10-18 使用者：22-5 旁邊加一欄 22-35）
 function home225ColHtml(skip = 5){
