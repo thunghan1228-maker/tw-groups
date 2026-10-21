@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 00:15:13";
+const BUILD_STAMP = "2026-10-22 00:26:34";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7169,8 +7169,43 @@ function race333Model(){
   const riverMap = new Map(riverAll.filter((r) => r.pct <= 7).map((r) => [r.code, r]));
   const triple = horses.filter((r) => fireTopCodes.has(r.code) && riverMap.has(r.code))
     .map((r) => Object.assign({}, r, { riverGroupRank: riverMap.get(r.code).groupRank })).sort((a, b) => b.pct - a.pct);
+  // 2026-10-21 使用者：三落空（熄火落馬斷流）＝30加33加34 顛倒過來的弱勢版：
+  // ① 熄火空（30 的顛倒）：族群排名後 1/3、族內後 1/3、今天跌 FIRE_MIN_PCT% 以上（≤ 櫃買%）、成交量 FIRE_MIN_VOLUME 張以上、比昨天或前天弱，跌停鎖死／跌到 FIRE_MAX_PCT% 以上的不列；
+  // ② 落馬空（33 的顛倒）：只看賽馬多那 26 族裡族群排名倒數 horseLimit 名的族群，族內後 1/3（四捨五入）、≤ 櫃買%；
+  // ③ 斷流空（34 的顛倒）：只看 29 族裡族群排名後 1/2、族內後 1/3（進位）、今天沒漲、≤ 櫃買%、跌幅不超過 7%（再跌的放 weak34Over）；
+  // 三份都有才列；全部要可放空（有券）、不是處置股；同一檔在好幾族取排名最差的那族（跟 30／33／34 取最好的相反）。
+  const weakShortable = (code) => { const f = stockFlags && stockFlags[code]; return !!(f && f.shortable) && !bladeDisp(code); };
+  const weakList = (groupOk, takeOf, rowOk) => {
+    const out = [], seen = new Set();
+    for (let gi = ranked.length - 1; gi >= 0; gi--){
+      const g = ranked[gi];
+      if (!groupOk(g, gi + 1)) continue;
+      const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined).slice().sort((a, b) => a.changePercent - b.changePercent);
+      const take = takeOf(valid.length);
+      valid.slice(0, take).forEach((s, i) => {
+        const base = stockRows.get(s.code);
+        if (!base || seen.has(s.code) || !weakShortable(s.code)) return;
+        const r = Object.assign({}, base, { groupName: g.name, groupRank: gi + 1, inGroupRank: valid.length - i, groupTotal: valid.length, groupCut: take, inBottomThird: true });
+        if (!rowOk(r)) return;
+        seen.add(s.code);
+        out.push(r);
+      });
+    }
+    return out.sort((a, b) => a.pct - b.pct);
+  };
+  const weak30 = weakList((g, rk) => rk >= total - fireGroupTop + 1, (n) => Math.ceil(n / 3),
+    (r) => r.pct <= -FIRE_MIN_PCT && belowOtc(r) && (r.belowYesterday || r.belowDayBefore !== null) && (r.volume === null || r.volume >= FIRE_MIN_VOLUME) && !r.limitDown && r.pct > -FIRE_MAX_PCT);
+  const weak33 = weakList((g, rk) => HORSE_GROUPS.has(g.name) && rk >= total - horseLimit + 1, (n) => Math.max(1, Math.round(n / 3)),
+    (r) => belowOtc(r) && !r.limitDown);
+  const weak34All = weakList((g, rk) => BLADE_GROUPS.has(g.name) && rk >= total - riverLimit + 1, (n) => Math.ceil(n / 3),
+    (r) => r.pct <= 0 && belowOtc(r));
+  const weak34 = weak34All.filter((r) => r.pct >= -7), weak34Over = weak34All.filter((r) => r.pct < -7);
+  const weakFireMap = new Map(weak30.map((r) => [r.code, r])), weakRiverMap = new Map(weak34.map((r) => [r.code, r]));
+  const weakTriple = weak33.filter((r) => weakFireMap.has(r.code) && weakRiverMap.has(r.code))
+    .map((r) => Object.assign({}, r, { fireGroupRank: weakFireMap.get(r.code).groupRank, riverGroupRank: weakRiverMap.get(r.code).groupRank }))
+    .sort((a, b) => b.groupRank - a.groupRank || a.pct - b.pct);
   return {
-    fires, fireLocked, fireGroupTop, bladeUpper, bladeMiddle, bladeLower, bladeHarvest, both, triple,
+    fires, fireLocked, fireGroupTop, bladeUpper, bladeMiddle, bladeLower, bladeHarvest, both, triple, weak30, weak33, weak34, weak34Over, weakTriple,
     total, half, otcPct, otcLabel: otcStrengthLatest ? otcStrengthLatest.label : null, hasDaily, bladeShortFrom,
     dates: groupDailyChanges && groupDailyChanges.dates ? groupDailyChanges.dates : [],
     horseLimit, riverLimit, horses,
@@ -8191,6 +8226,17 @@ function homeLaunchStateOf(){
     return (r) => (!live ? null : live.has(r.code) ? 'launch' : quoted.has(r.code) ? 'fallen' : null);
   } catch (_){ return () => null; }
 }
+// 2026-10-21 使用者：三落空（熄火落馬斷流）放在 1+2多(44) 下面、股期黑龍(75) 上面；條件寫在 race333Model 的 weakTriple
+function homeWeak3ColHtml(m){
+  const tip = '熄火落馬斷流＝熄火空(30 顛倒)、落馬空(33 顛倒)、斷流空(34 顛倒) 三份名單都有、而且可放空（有券、非處置股）的股票；族排＝所在族群的名次（越大越弱）';
+  if (!m) return '<div class="hr-col"><div class="hr-title bear" title="' + tip + '">三落空</div><div class="hr-note">讀取中…</div></div>';
+  const rows = m.weakTriple;
+  const row = (r) => '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc(r.groupName) + '・族排第 ' + r.groupRank + ' 名（共 ' + m.total + ' 族）">' +
+    '<span class="hr-rk">' + r.groupRank + '</span><span class="hr-bear-pill ' + dirClass(r.pct) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' +
+    '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span></div>';
+  return '<div class="hr-col"><div class="hr-title bear" title="' + tip + '">三落空 <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
+    (rows.length ? rows.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
+}
 function home44ColHtml(){
   const ev = sigCurrentEvents().filter((e) => e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull'));
   const seen = new Set();
@@ -8291,6 +8337,7 @@ function homeRank4Html(){
     // 2026-10-19 使用者：個股漲 2%（22-5）排到族群漲幅 > 2%（12）前面；2026-10-20 使用者又對調回來：族群漲幅 > 2%（12，疊著股期黑龍 75、今日弱勢股）放在個股漲 > 2% 的左邊
     '<div class="hr-stack">' +
       homeRedBox(home44ColHtml()) +   // 2026-10-18 使用者：193 換成 44；2026-10-21 使用者：183 那欄跟 44 這欄對調（183 在左、44 在右）
+      homeWeak3ColHtml(m) +   // 2026-10-21 使用者：三落空（熄火落馬斷流）放在 1+2多(44) 下面、股期黑龍(75) 上面
       // 2026-10-21 使用者：首頁的終點戰法空(283) 拿掉（機器人代碼 283 還在）
       homeFut75ColHtml() +   // 2026-10-21 使用者：股期黑龍(75) 排到最後一欄 1+2多(44) 下面
     '</div>' +
@@ -8330,6 +8377,14 @@ function homeRankFootHtml(total){
     ['🌊河流多(34)', '河流多名單裡，族群名次前 ' + HOME_334_TOP_GROUPS + ' 名的（訊號中心「盤中333」照舊全部列）'],
     ['每一列', '族群名次、代號、名稱、今天漲跌幅；族排前面的在上面'],
     ['點股票', '開K線圖'],
+  ]) +
+  // 2026-10-21 使用者：三落空（30加33加34 的顛倒）
+  hrHelpTable('🐴 三落空（熄火落馬斷流）', ['項目', '說明'], [
+    ['三落空', '熄火空、落馬空、斷流空 三份名單都有的股票（30加33加34 的顛倒）；族排＝所在族群名次，越大越弱，同一檔在好幾族取最弱的那族'],
+    ['熄火空', '族群排名後 1/3、族內後 1/3、今天跌 ' + FIRE_MIN_PCT + '% 以上（≤ 櫃買%）、成交量 ' + FIRE_MIN_VOLUME + ' 張以上、比昨天或前天弱；跌停鎖死或跌到 ' + FIRE_MAX_PCT + '% 以上的不列'],
+    ['落馬空', '賽馬多那 ' + HORSE_GROUPS.size + ' 族裡，族群排名倒數 20 名的族群，族內後 1/3（四捨五入）、今天 ≤ 櫃買%'],
+    ['斷流空', BLADE_GROUPS.size + ' 族裡，族群排名後 1/2、族內後 1/3（進位）、今天沒漲、≤ 櫃買%、跌幅不超過 7%'],
+    ['限制', '一律要可放空（有券）、不是處置股；機器人代碼「三落空」同一份'],
   ]) +
   // 2026-10-16 使用者：刀劍空的🔰／⚔️、多方打少這些說明也寫到首頁最下面
   hrHelpTable('🔪⚔️ 刀劍空(31)', ['項目', '說明'], [
@@ -14072,7 +14127,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 00:15:13';
+const BUILD_STAMP = '2026-10-22 00:26:34';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19645,7 +19700,7 @@ const botState = { cols: [], restored: false, restoring: false, pendTops: null, 
 const BOT_CODES = [
   ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行，每族列漲幅前三大的股票（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：固定的族群裡，今天衝高 3% 以上、現價漲幅不超過 1.55%，而且三個條件到齊的股票：①1高＝破惡前的最高（不是開盤衝的那根）②5 分K 從 20MA 上面收盤跌破（破惡），現在還在 20MA 下面、20MA 往下彎（均下彎）③破惡之後的反彈（2）沒過 1高，過了 1高就拿掉、要再跌破才重新算；每列最前面是進名單的時間，新的在上面（還有一條篩選我們沒找到，所以會列得比實際多）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
-  ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'],
+  ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'], ['三落空', '熄火落馬斷流：熄火空(30 顛倒)、落馬空(33 顛倒)、斷流空(34 顛倒) 三份都有、而且可放空（有券、非處置股）的弱勢股'],
   ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖雙週入榜黑龍：前兩個交易日上 811、今天收黑K（⭐＝兩週內又上榜幾次）'],
@@ -20078,7 +20133,7 @@ function botAnswer(raw){
   if (!q) return null;
   // 2026-10-18 使用者：空方的（負號代碼 -12、-22…）跟隔日沖 811、813 的標題改綠底白字；
   // 同一天又加：空族群排名(199)、空族群必殺(193)、新刀劍空(32)、刀劍空(31)，連同終點戰法空(283／284／股號+3)
-  const bear = /^-/.test(q) || ['811', '813', '193', '199', '283', '284', '31', '32', '123'].includes(q) || /^.+\\+3$/.test(q);
+  const bear = /^-/.test(q) || ['811', '813', '193', '199', '283', '284', '31', '32', '123', '三落空'].includes(q) || /^.+\\+3$/.test(q);
   // 177 重點族群排名多空都有：標題左半綠、右半紅，白字（2026-10-18 使用者）
   const title = (t, sub) => '<div class="bot-title' + (bear ? ' bot-title-bear' : q === '177' ? ' bot-title-split' : '') + '">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
   const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
@@ -20369,6 +20424,14 @@ function botAnswer(raw){
     return wrap('🌊🌊河流多(34)', (rows.map(line).join('') || botLine('目前沒有', 'bot-dim')) + otc +
       (m.riverOver.length ? botLine('⚠️符合條件>7%有 ' + m.riverOver.length + ' 檔', 'bot-warn') : ''));
   }
+  // 三落空（2026-10-21 使用者）：熄火落馬斷流＝30加33加34 顛倒過來的弱勢版（條件寫在 race333Model 的 weakTriple）
+  if (q === '三落空'){
+    if (!m) return wrap('三落空', botLine('讀取中…', 'bot-dim'));
+    const rows = m.weakTriple;
+    return wrap('三落空', (rows.map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + '</small>'))).join('') || botLine('目前沒有', 'bot-dim')) +
+      botLine('熄火空 ' + m.weak30.length + '・落馬空 ' + m.weak33.length + '・斷流空 ' + m.weak34.length + (m.weak34Over.length ? '（跌超過 7% 的 ' + m.weak34Over.length + ' 檔不列）' : '') + '；三份都有、可放空（有券、非處置股）才列，前面數字＝族群名次（越大越弱）', 'bot-dim') + otcFoot(),
+      stamp + '・熄火落馬斷流');
+  }
   if (q === '31'){
     const list = kill31Model();
     return wrap('🔪⚔️刀劍空(31)', (list || []).map((r) => botLine(botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk))).join('') || botLine(list ? '目前沒有' : '讀取中…', 'bot-dim'));
@@ -20654,7 +20717,7 @@ initColsPan('botBody');
 // 代碼照字排（2026-10-17 使用者：照第一個數字的順序，618 排在 61 後面、17784 排在 177 後面，以後新加的也一樣）；2359 開頭的範例放最後
 function botCodesSorted(){
   const ex = (c) => /^2359/.test(c);
-  const key = (c) => c.replace(/^-/, '');   // 負的（-12、-22）排在同一個數字的正的前面（2026-10-17 使用者）
+  const key = (c) => (c === '三落空' ? '34z' : c.replace(/^-/, ''));   // 三落空排在 34 後面（2026-10-21 使用者）；負的（-12、-22）排在同一個數字的正的前面（2026-10-17 使用者）
   // 「22-5」「22-35」這種扣掉前 N 檔的照 N 大小排（2026-10-18 使用者：22-35 放在 22-5 旁邊）
   const cmp = (a, b) => {
     const [ab, an] = key(a).split('-'), [bb, bn] = key(b).split('-');
