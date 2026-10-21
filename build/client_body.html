@@ -7082,7 +7082,12 @@ function race333Model(){
   const fireCodes = new Set(fireOpen.map((r) => r.code));
   // 2026-10-20 使用者：30 加 33 加 34 改成 30 加 33（不看河流多 34）——賽馬多(33) 裡同時符合馬火多(30) 全部門檻的
   // 2026-10-21 使用者：30加33 又改回 30加33加34——再多要求河流多(34) 名單裡也有（漲幅 ≤ 7%）；櫃買強空時 34 也照出名單
-  const triple = horses.filter((r) => fireCodes.has(r.code) && riverCodes.has(r.code)).sort((a, b) => b.pct - a.pct);
+  // 2026-10-21 使用者：30加33加34 要三份名單「都有」才列（昇陽半導體 33、34 有、30 只在符合門檻的第 11 檔以後、首頁那三欄都看不到它，卻出現在這欄）：
+  // 馬火多這邊改成跟 30 那欄一樣的前 FIRE_MAX_ROWS 檔（不再是「符合全部門檻、不限檔數」），河流多記下它那邊的族群名次（首頁 33、34 只列族群前 10 名，首頁再各看各的）
+  const fireTopCodes = new Set(fires.map((r) => r.code));
+  const riverMap = new Map(riverAll.filter((r) => r.pct <= 7).map((r) => [r.code, r]));
+  const triple = horses.filter((r) => fireTopCodes.has(r.code) && riverMap.has(r.code))
+    .map((r) => Object.assign({}, r, { riverGroupRank: riverMap.get(r.code).groupRank })).sort((a, b) => b.pct - a.pct);
   return {
     fires, fireLocked, fireGroupTop, bladeUpper, bladeMiddle, bladeLower, bladeHarvest, both, triple,
     total, half, otcPct, otcLabel: otcStrengthLatest ? otcStrengthLatest.label : null, hasDaily, bladeShortFrom,
@@ -8184,7 +8189,7 @@ function homeRank4Html(){
       home155ColHtml() +
     '</div>' +
     '<div class="hr-stack">' +
-      homeRedBox(homeStockColHtml('👑30加33加34', m ? m.triple : []) +   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
+      homeRedBox(homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : []) +   // 首頁 33、34 只列族群前 10 名，三欄都有才算   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
         // 2026-10-16 使用者：首頁的河流多(34)、賽馬多(33) 只列族群名次前 10 名的；訊號中心盤中333 照舊全部列
         homeStockColHtml('🐎賽馬多(33)', m ? m.horses.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
         // 2026-10-21 使用者：30加33 下面再加河流多(34)，也在紅框裡（原本放在第 4 欄族群漲幅 > 2%（12）下面）
