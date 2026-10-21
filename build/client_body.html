@@ -216,6 +216,13 @@
   .bct .b.pos{background:var(--up);border-radius:0 4px 4px 0;} .bct .b.neg{background:var(--down);border-radius:4px 0 0 4px;}
   .bct .b.faded{opacity:.5;}
   .bct .v{position:absolute;top:-2px;font-size:11.5px;line-height:16px;white-space:nowrap;color:var(--text);font-variant-numeric:tabular-nums;}
+  /* 2026-10-21 使用者：機器人照老師的族群排名圖／族群籌碼圖／問診卡（多方線空方線、★、🩺 問診） */
+  .bcr.wide{grid-template-columns:2.6em 11.5em minmax(0,1fr);} .bcr.wide .n{text-align:left;}
+  .bcr .bcm{margin-left:4px;font-size:10.5px;color:var(--muted);} .bcr.mid{background:rgba(160,150,120,.12);} .bcr-star{color:#d4a017;margin-right:2px;}
+  .bc-zline{position:relative;height:0;margin:6px 0 6px 3em;border-top:1.5px dashed;} .bc-zline.up{border-color:#ef4444;} .bc-zline.down{border-color:#22a559;}
+  .bc-zline span{position:absolute;right:0;top:-9px;background:var(--panel-2);padding:0 5px;font-size:10.5px;border:1px solid;border-radius:4px;} .bc-zline.up span{color:#ef4444;} .bc-zline.down span{color:#22a559;}
+  .bot-clinic{margin-top:8px;border:2px solid #d4a017;background:rgba(212,160,23,.10);border-radius:10px;padding:8px 12px;font-size:12.5px;line-height:1.75;}
+  .bot-clinic-t{font-weight:800;font-size:13.5px;} .bot-clinic-v{font-weight:800;margin-top:2px;} .bot-clinic-v.up{color:#ef4444;} .bot-clinic-v.down{color:#22a559;}
   .bc-avg{position:relative;border-top:1px dashed var(--muted);margin:5px 0 5px 8.8em;height:0;}
   .bc-avg span{position:absolute;left:0;top:-9px;background:var(--panel-2);padding:0 4px;font-size:10.5px;color:var(--muted);}
   .bot-chart-foot{font-size:10.5px;color:var(--muted);margin-top:6px;}
@@ -3394,7 +3401,7 @@
     <div class="chips-head" id="botHead">
       <div>
         <div class="chips-title">🤖 機器人代碼</div>
-        <div class="chips-sub">輸入代碼（或股號、族群名）就回名單：12＝族群漲 2% 以上排行、22＝個股漲 2% 以上排行、2359B2＝同族群漲 2% 以上、2359a＝族群名次變化、70／71／72＝國際行情…下面有全部代碼。</div>
+        <div class="chips-sub">輸入代碼（或股號、股名、族群名）就回名單（打股號或股名會附族群排名圖、族群籌碼圖、近 9 週籌碼圖跟問診卡）：12＝族群漲 2% 以上排行、22＝個股漲 2% 以上排行、2359B2＝同族群漲 2% 以上、2359a＝族群名次變化、70／71／72＝國際行情…下面有全部代碼。</div>
       </div>
       <div class="bot-win-acts">
         <button type="button" id="botPop" title="另開一個視窗，可以拖到外接螢幕；再按一次移回主畫面">⧉ 移到另一螢幕</button>
@@ -19585,15 +19592,17 @@ function botBarChart(rows, opts){
   const z = usable * maxNeg / span;
   const fmtV = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
   const row = (r) => {
+    if (r.sep) return '<div class="bc-zline ' + r.sep + '"><span>' + wlEsc(r.text) + '</span></div>';   // 多方線／空方線（族群排名圖）
     const v = Number.isFinite(r.v) ? r.v : 0, w = usable * Math.abs(v) / span;
     const bar = v > 0 ? '<i class="b pos' + (r.faded ? ' faded' : '') + '" style="left:' + z + '%;width:' + w + '%"></i><span class="v" style="left:calc(' + (z + w) + '% + 4px)">' + fmtV(r.v) + '</span>'
       : v < 0 ? '<i class="b neg' + (r.faded ? ' faded' : '') + '" style="left:' + (z - w) + '%;width:' + w + '%"></i><span class="v" style="right:calc(' + (100 - z + w) + '% + 4px)">' + fmtV(r.v) + '</span>'
         : '<span class="v" style="left:calc(' + z + '% + 4px)">' + fmtV(r.v) + '</span>';
-    return '<div class="bcr' + (r.hl ? ' hl' : '') + '" title="' + wlEsc((r.c ? r.c + ' ' : '') + r.n + ' ' + fmtV(r.v)) + '"><span class="c">' + wlEsc(r.c || '') + '</span><span class="n">' + wlEsc(r.n) +
+    return '<div class="bcr' + (opts.wide ? ' wide' : '') + (r.hl ? ' hl' : '') + (r.mid ? ' mid' : '') + '" title="' + wlEsc((r.c ? r.c + ' ' : '') + r.n + ' ' + fmtV(r.v)) + '"><span class="c">' + wlEsc(r.c || '') + '</span><span class="n">' +
+      (r.star ? '<b class="bcr-star" title="集保大戶連 2 週以上增加">★</b>' : '') + wlEsc(r.n) + (r.pill ? '<span class="bcm">' + r.pill + '</span>' : '') +
       '</span><span class="bct"><span class="bci" style="left:' + padL + 'px;right:' + padR + 'px"><i class="z" style="left:' + z + '%"></i>' + bar + '</span></span></div>';
   };
   const body = rows.map((r, i) => row(r) + (opts.avgAfter && i === opts.avgAfter - 1 && rows.length > opts.avgAfter ? '<div class="bc-avg"><span>' + wlEsc(opts.avgText || '') + '</span></div>' : '')).join('');
-  return '<div class="bot-chart"><div class="bot-chart-head"><div><div class="bot-chart-title">' + wlEsc(opts.title) + '</div><div class="bot-chart-sub">' + wlEsc(opts.sub || '') + '</div></div>' +
+  return '<div class="bot-chart"><div class="bot-chart-head"><div><div class="bot-chart-title">' + wlEsc(opts.title) + '</div><div class="bot-chart-sub">' + wlEsc(opts.sub || '') + '</div>' + (opts.sub2 ? '<div class="bot-chart-sub">' + wlEsc(opts.sub2) + '</div>' : '') + '</div>' +
     (opts.right ? '<div class="bot-chart-right">' + wlEsc(opts.right) + (opts.rightSub ? '<small>' + wlEsc(opts.rightSub) + '</small>' : '') + '</div>' : '') + '</div>' + body +
     (opts.foot ? '<div class="bot-chart-foot">' + wlEsc(opts.foot) + '</div>' : '') + '</div>';
 }
@@ -19811,6 +19820,135 @@ function botRankTrail(g, r){
       botLine(days.map((y) => (y.p > 0 ? '🔺' : y.p < 0 ? '🔽' : '➖')).join(''));
   }
   return '';
+}
+// ---- 機器人照老師的圖（2026-10-21 使用者：打個股股號／股名或族群，文字下面附老師那幾張圖）：族群排名圖（多方線／空方線）、族群籌碼圖（★＝連 2 週以上增加）、
+// 個股近 9 週籌碼圖；個股那幾張底下各附一張 🩺 問診卡。問診裡「偏多／中性／偏空」怎麼分是看老師 10/21 的幾張圖猜的（華新科多方區＝偏多、聯一光空方區＝偏空、
+// 玉晶光增加但落後族群前 5 平均＝中性、國巨連 2 週減少＝偏空），之後有新樣本再校。----
+function botClinicCard(title, lines, verdict, tone){
+  return '<div class="bot-clinic"><div class="bot-clinic-t">🩺 ' + wlEsc(title) + '</div>' + lines.filter(Boolean).map((l) => '<div class="bot-clinic-l">' + l + '</div>').join('') +
+    (verdict ? '<div class="bot-clinic-v ' + (tone || '') + '">判讀:' + wlEsc(verdict) + '</div>' : '') + '</div>';
+}
+function botGroupZones(n){   // 跟 botGroupBlock 同一套：多方段／中間／空方段
+  const zone = bladeZoneSize(n), botStart = n <= 1 ? n : n - Math.min(zone, n);
+  const topZone = n >= 9 && n <= 12 ? Math.floor(n / 3) : zone;
+  return { topEnd: Math.min(topZone, botStart), botStart };
+}
+function botRankTrailData(g){
+  const day = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(0, 10) : '';
+  const cp = day ? botFetchCache('grc|' + day, '/api/group-rank-checkpoints?date=' + day, 60e3) : null;
+  const d = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups[g.name] : null;
+  const x = cp && cp.status === 'ok' && cp.groups ? cp.groups[g.name] : null;
+  if (!x || !Array.isArray(x.ranks) || !x.ranks.some(Number.isFinite)) return null;
+  const ranks = x.ranks.slice(0, 5).concat(x.ranks.length > 5 ? [x.ranks[x.ranks.length - 1]] : []).filter(Number.isFinite);
+  const half = Math.floor((cp.groupCount || 65) / 2);
+  let prev = d && Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
+  const arrows = ranks.map((k) => { const a = prev === null || k <= prev ? '🔺' : k >= half ? '🔰' : '🔽'; prev = k; return a; });
+  return { ranks, arrows };
+}
+// 族群排名圖（老師「被動元件 族群排名」）：族內漲幅由高到低、多方線／空方線、查的那檔反白；me＝查的股號，有就附問診卡
+function botRankChart(g, h, me){
+  const list = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent)).sort((a, b) => b.changePercent - a.changePercent);
+  const n = list.length;
+  if (!n) return '';
+  const { topEnd, botStart } = botGroupZones(n);
+  const hm = groupHorseMarks(g), rm = groupRiseMarks(g), bm = groupBladeMarks(g);
+  const disp = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].disposition);
+  const mkOf = (code) => ((hm.get(code) || {}).mk || '') + ((rm.get(code) || {}).mk || '') + ((bm.get(code) || {}).mk || '');
+  const rows = [];
+  list.forEach((s, i) => {
+    if (i === topEnd && botStart > topEnd) rows.push({ sep: 'up', text: '↑ 多方線' });
+    if (i === botStart && botStart < n) rows.push({ sep: 'down', text: '↓ 空方線' });
+    rows.push({ c: s.code, n: (disp(s.code) ? '*' : '') + s.name, v: s.changePercent, pill: mkOf(s.code), hl: s.code === me, mid: i >= topEnd && i < botStart });
+  });
+  const trail = botRankTrailData(g);
+  const closed = lastData && String(lastData.quoteTime || '') >= '13:30';
+  const stampTxt = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
+  let html = botBarChart(rows, { title: g.name + ' 族群排名', sub: n + '檔・' + stampTxt + (closed ? ' 收盤' : ' 盤中快照'),
+    sub2: trail ? '族群排名走勢 ' + trail.ranks.join('→') + trail.arrows.join('') : '', right: '多方 ' + topEnd, rightSub: '空方 ' + (n - botStart), wide: true,
+    foot: '👑帶頭 🚀火箭 🐎火馬 🔺轉強 🔪⚔️刀劍 🔰新手（數字＝名次變化）' });
+  const i = me ? list.findIndex((s) => s.code === me) : -1;
+  if (i >= 0){
+    const s = list[i], rank = i + 1;
+    const x = bm.get(me) || {}, rise = rm.get(me), hk = hm.get(me) || {};
+    const zoneName = i < topEnd ? '多方區' : i >= botStart ? '空方區' : '中段區';
+    const dist = i < topEnd ? '距空方線 ' + (botStart + 1 - rank) + ' 名' : i >= botStart ? '距多方線 ' + (rank - topEnd) + ' 名' : '距多方線 ' + (rank - topEnd) + ' 名・距空方線 ' + (botStart + 1 - rank) + ' 名';
+    const k12 = botFetchCache('kill12', '/api/kill12', 15e3);
+    const hit = k12 && k12.status === 'ok' && (k12.items || []).some((it) => it.code === me && (!Number.isFinite(it.dayHighPct) || it.dayHighPct >= K12_RUSH_MIN));
+    const lines = ['族內第 ' + rank + '/' + n + ' 名 ' + (s.changePercent > 0 ? '+' : '') + s.changePercent.toFixed(2) + '%・' + zoneName + '(' + dist + ')'];
+    if (x.knife > 0) lines.push('🔪 刀:跟昨天比下降 ' + x.knife + ' 名' + (i >= botStart ? ',掉到後段班' : ''));
+    if (x.sword > 0) lines.push('⚔️ 劍:跟前天比下降 ' + x.sword + ' 名' + (i >= botStart ? ',掉到後段班' : ''));
+    if (rise) lines.push('🔺 排名上升 ' + rise.rise + ' 名');
+    if (hk.top === 1) lines.push('👑 帶頭:族群第 1 名');
+    if (hk.horse > 0) lines.push('🐎 火馬:跟昨天比上升 ' + hk.horse + ' 名');
+    if (hk.rocket > 0) lines.push('🚀 火箭:跟前天比上升 ' + hk.rocket + ' 名');
+    if (hit) lines.push('1️⃣2️⃣空:破惡均下彎空(空方訊號)');
+    const weak = x.knife > 0 || x.sword > 0 || hit;
+    const verdict = i < topEnd ? '偏多' : i >= botStart ? '偏空' + (weak ? '(轉弱下滑)' : '') : '中性';
+    html += botClinicCard(me + ' ' + s.name + ' 問診', lines, verdict, i < topEnd ? 'up' : i >= botStart ? 'down' : '');
+  }
+  return html;
+}
+// 族群籌碼圖（老師「光學鏡頭 族群籌碼」）：族內籌碼週增減由高到低、前 5 名平均、★＝連 2 週以上增加；me 有就附籌碼問診卡
+function botGroupChipChart(g, me){
+  gmChipLoad();
+  const cd = gmChipState.data && gmChipState.data.status === 'ok' ? gmChipState.data : null;
+  if (!cd) return '';
+  const list = g.stocks.map((x) => ({ code: x.code, name: x.name, v: cd.chips[x.code] ? cd.chips[x.code][0] : NaN, streak: cd.chips[x.code] ? cd.chips[x.code][1] : 0 }))
+    .sort((a, b) => (Number.isFinite(b.v) ? b.v : -1e9) - (Number.isFinite(a.v) ? a.v : -1e9));
+  const withV = list.filter((x) => Number.isFinite(x.v));
+  if (!withV.length) return '';
+  const top = withV.slice(0, 5), avg = top.reduce((a, x) => a + x.v, 0) / top.length;
+  const sign = (v) => (v > 0 ? '+' : '') + v.toFixed(2) + '%';
+  const wk = rdMdShort(cd.week);
+  const i = me ? list.findIndex((x) => x.code === me) : -1;
+  let html = botBarChart(list.map((x) => ({ c: x.code, n: x.name, v: x.v, hl: x.code === me, star: x.streak >= 2 })), { title: g.name + ' 族群籌碼', sub: '籌碼暴增 ' + list.length + '檔・' + wk + ' 當週',
+    right: i >= 0 ? me + ' ' + list[i].name : '', rightSub: i >= 0 && Number.isFinite(list[i].v) ? '族內第 ' + (i + 1) + '/' + list.length + ' 名 ' + sign(list[i].v) : '',
+    avgAfter: top.length >= 5 ? 5 : 0, avgText: '前5名平均 ' + sign(avg), foot: '籌碼暴增＝集保 400 張以上大戶週增減%；★＝連 2 週以上增加' });
+  if (i >= 0 && Number.isFinite(list[i].v)){
+    const x = list[i], n = list.length, front = Math.max(1, Math.round(n / 3)), rank = i + 1;
+    const cls = rank <= front ? '前段班' : rank > n - front ? '後段班' : '中段班';
+    const diff = Math.abs(avg - x.v);
+    const lines = ['族內籌碼第 ' + rank + '/' + n + ' 名 ' + sign(x.v) + '・' + cls, (x.v < avg ? '低於' : '高於') + '前' + top.length + '名平均 ' + sign(avg) + ' (差 ' + diff.toFixed(2) + ' 個百分點)',
+      '本週主力籌碼' + (x.v > 0 ? '增加' : x.v < 0 ? '減少' : '持平') + (x.streak >= 2 ? '・★ 連 2 週以上增加' : x.streak <= -2 ? '・連 ' + (-x.streak) + ' 週減少' : '')];
+    let verdict = '中性', tone = '';
+    if (x.v > 0) { if (x.v >= avg) { verdict = '偏多(增加且領先族群)'; tone = 'up'; } else verdict = '中性(增加但落後族群平均)'; }
+    else if (x.v < 0) { verdict = x.streak <= -2 ? '偏空(主力連續減碼)' : '偏空(主力減碼)'; tone = 'down'; }
+    html += botClinicCard(me + ' ' + x.name + ' 籌碼問診', lines, verdict, tone);
+  }
+  return html;
+}
+// 個股近 9 週籌碼圖（老師「國巨* 籌碼暴增 近9週」）＋問診卡；跟 K 線圖下面那張同一份（/api/chip-radar-stock）
+function botStockChipChart(code){
+  const d = botFetchCache('cr|' + code, '/api/chip-radar-stock?code=' + code, 30 * 60e3);
+  if (!d || d.status !== 'ok' || !Array.isArray(d.trail)) return '';
+  const trail = d.trail.filter((t) => t && Number.isFinite(t.chip)).slice(0, 9);
+  if (!trail.length) return '';
+  const { n: streak, sign } = chipStreak(trail);
+  const latest = trail[0], nm = d.name || botNameOf(code);
+  const f = (v) => (v > 0 ? '+' : '') + v.toFixed(2) + '%';
+  const sum = trail.reduce((a, t) => a + t.chip, 0), sum4 = trail.slice(0, 4).reduce((a, t) => a + t.chip, 0);
+  const inc = trail.filter((t) => t.chip > 0).length, dec = trail.filter((t) => t.chip < 0).length;
+  const run = streak >= 2 ? '・連 ' + streak + ' 週' + (sign > 0 ? '增加' : '減少') : '';
+  const chart = botColChart(trail.slice().reverse().map((x, i, arr) => ({ x: rdMdShort(x.date), v: x.chip, hl: i === arr.length - 1 })), { title: code + ' ' + nm, sub: '籌碼暴增 近' + trail.length + '週',
+    right: f(latest.chip), rightSub: '最新 ' + rdMdShort(latest.date) + run });
+  const verdict = streak >= 2 ? (sign > 0 ? '偏多(主力連續加碼)' : '偏空(主力連續減碼)') : '中性';
+  return chart + botClinicCard(code + ' ' + nm + ' 籌碼問診', ['最新 ' + rdMdShort(latest.date) + ' ' + f(latest.chip) + run, '近 ' + trail.length + ' 週:增加 ' + inc + ' 週 / 減少 ' + dec + ' 週,累計 ' + f(sum),
+    trail.length >= 4 ? '近 4 週累計 ' + f(sum4) + (sum4 > 0 ? '(主力持續吃貨)' : sum4 < 0 ? '(主力持續出貨)' : '') : ''], verdict, streak >= 2 ? (sign > 0 ? 'up' : 'down') : '');
+}
+// 打股名也行（2026-10-21 使用者）：完整股名 > 開頭一樣 > 包含（只有一檔才算）
+function botStockByName(q){
+  const norm = (t) => botNorm(String(t || '').replace(/\*/g, ''));
+  const seen = new Map();
+  (lastData && lastData.groups ? lastData.groups : []).forEach((g) => g.stocks.forEach((x) => { if (!seen.has(x.code)) seen.set(x.code, x.name); }));
+  const key = norm(q);
+  if (key.length < 2) return null;
+  const all = [...seen].map(([code, name]) => ({ code, name, k: norm(name) }));
+  const exact = all.filter((x) => x.k === key);
+  if (exact.length === 1) return exact[0];
+  const starts = all.filter((x) => x.k.startsWith(key));
+  if (starts.length === 1) return starts[0];
+  const has = all.filter((x) => x.k.includes(key));
+  return has.length === 1 ? has[0] : null;
 }
 // 沒有族群的股號（2026-10-17 老師 2330：產業別、漲幅、現價、905 高、昨高，最後寫「此個股沒有族群分類」）
 // 905 高＝今天開盤第一根 5 分 K（09:00～09:05）的高點；昨高＝報價那天的前一個交易日最高（週末查＝週四，老師台積電寫 2450）
@@ -20275,9 +20413,7 @@ function botAnswer(raw){
         return (gs.length > 1 ? botLine(botGrp(g.name), 'bot-head') : '') +
           list.map((x) => botLine(botStk(x.code, x.name, ' ' + chipSpan(x.v)) + (x.code === pre ? ' ◀' : ''))).join('') +
           (top.length >= 5 && Number.isFinite(avg) ? botLine('前 5 名平均 ' + sign(avg), 'bot-dim') : '') +
-          botBarChart(list.map((x) => ({ c: x.code, n: x.name, v: x.v, hl: x.code === pre })), { title: g.name + ' 族群籌碼', sub: '籌碼暴增 ' + list.length + '檔・' + wk + ' 當週',
-            right: me >= 0 ? pre + ' ' + list[me].name : '', rightSub: me >= 0 && Number.isFinite(list[me].v) ? '族內第 ' + (me + 1) + '/' + list.length + ' 名 ' + sign(list[me].v) : '',
-            avgAfter: top.length >= 5 ? 5 : 0, avgText: Number.isFinite(avg) ? '前5名平均 ' + sign(avg) : '', foot: '籌碼暴增＝集保 400 張以上大戶週增減%' });
+          botGroupChipChart(g, /^[0-9A-Z]{4,6}$/.test(pre) ? pre : null);
       }).join(''), '集保大戶週增減・' + wk + ' 週');
     }
   }
@@ -20286,10 +20422,19 @@ function botAnswer(raw){
     // 2026-10-19 照老師：第一行「族群名(名次) 日期 時間 收N」（收N＝這族有幾檔），不另外列漲跌幅跟名次變化
     const g = f.groups[0], r = h.rows.find((x) => x.name === g.name);
     const cnt = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent)).length;
-    return wrap(g.name + '(' + (r ? r.rank : '?') + ')', botGroupBlock(g, h, { full: true, noHead: true }), stamp + ' 收' + cnt);
+    return wrap(g.name + '(' + (r ? r.rank : '?') + ')', botGroupBlock(g, h, { full: true, noHead: true }) + botRankChart(g, h, null) + botGroupChipChart(g, null), stamp + ' 收' + cnt);
   }
-  if (f.groups.length) return wrap(f.code ? f.code + ' 的族群漲幅排行' : '族群漲幅排行', f.groups.slice(0, 6).map((g) => botGroupBlock(g, h, { me: f.code, full: true })).join(''));
+  if (f.groups.length){
+    // 打個股：文字下面附它那族的排名圖、籌碼圖（各一張問診卡）跟個股近 9 週籌碼圖（2026-10-21 使用者）
+    const charts = f.code ? f.groups.slice(0, 2).map((g) => botRankChart(g, h, f.code) + botGroupChipChart(g, f.code)).join('') + botStockChipChart(f.code) : '';
+    return wrap(f.code ? f.code + ' 的族群漲幅排行' : '族群漲幅排行', f.groups.slice(0, 6).map((g) => botGroupBlock(g, h, { me: f.code, full: true })).join('') + charts);
+  }
   if (/^[0-9A-Z]{4,6}$/.test(q)) return botStockCard(q, raw, (t, body) => wrap(t, body, ' '));
+  const byName = botStockByName(q);   // 打股名（華新科）＝打股號
+  if (byName){
+    const html = botAnswer(byName.code);
+    return html ? html.replace('<div class="bot-q">' + wlEsc(byName.code) + '</div>', '<div class="bot-q">' + wlEsc(raw) + '</div>') : html;
+  }
   return wrap(raw, botLine('看不懂這個代碼，下面有全部代碼', 'bot-dim'));
 }
 // 2026-10-17 使用者：結果一格一格往右排（最多 10 格，照點的順序：先點 12 就在第一格、再點 193 在第二格）；
@@ -20432,7 +20577,7 @@ function renderBot(){
   const oldBox = body.querySelector('.bot-cols');
   const left = oldBox ? oldBox.scrollLeft : 0;
   const open = new Set(botState.cols.map((c) => c.key));
-  body.innerHTML = '<div class="bot-q-row"><input id="botQ" placeholder="輸入代碼，例：12、22、2359B2、2359a、70" value="' + wlEsc(keep) + '" autocomplete="off"><button type="button" data-bot-go="1">送出</button></div>' +
+  body.innerHTML = '<div class="bot-q-row"><input id="botQ" placeholder="輸入代碼或股名，例：12、22、2359B2、華新科、70" value="' + wlEsc(keep) + '" autocomplete="off"><button type="button" data-bot-go="1">送出</button></div>' +
     '<div class="bot-chips">' + botCodesSorted().filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip' + (open.has(botNorm(c)) ? ' on' : '') + '" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') +
     (botState.cols.length ? '<button type="button" class="bot-chip bot-chip-clear" data-bot-clear="1" title="開著的格子全部收掉">全部收掉</button>' : '') + '</div>' +
     (botState.cols.length ? '<div class="bot-cols">' + botState.cols.map((c) => '<div class="bot-col" data-col-key="' + wlEsc(c.key) + '">' + botColX(c.key) + c.html + '</div>').join('') + '</div>' +
