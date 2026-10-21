@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-21 08:27:43";
+const BUILD_STAMP = "2026-10-21 08:48:51";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1771,6 +1771,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   #hwInner .td-count.bull,#hwInner .td-count.bull b{color:#c0392b;}
   #hwInner .td-count.mid,#hwInner .td-count.mid b{color:var(--text);}
   #hwInner .td-zbtn{font-weight:800;}
+  #hwInner .td-opts{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 8px;font-size:12.5px;}
+  #hwInner .td-sortsel{font-size:12.5px;padding:3px 6px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--text);}
+  #hwInner .td-onote{color:var(--muted);margin-left:6px;} #hwInner .td-misswrap{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
   #hwInner .td-zbtn.bull{color:#c0392b;} #hwInner .td-zbtn.mid{color:var(--text);} #hwInner .td-zbtn.bear,#hwInner .td-zbtn.harv{color:#15803d;}
   #hwInner .td-zbtn:not(.on){opacity:.82;}
   #hwInner .td-rbtn.off{opacity:.6;}
@@ -14059,7 +14062,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-21 08:27:43';
+const BUILD_STAMP = '2026-10-21 08:48:51';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16256,7 +16259,7 @@ function hwMaScore(code, price){
 // ---- 📋 今日功課（2026-10-18 使用者：照老師「空觀察功課生成器」裡的「今日功課」做，版面、顏色都照他的）----
 // 老師的頁要學員貼四份清單（①盤前空觀察 ②盤中刀劍空 ③即將入獄 ④12空），使用者：「那四份我們系統自己算，不用貼」——
 // 刀劍空＝race333Model（32）、12空＝/api/kill12（123）、處置＝/api/jail、隔日沖＝/api/daytrade；①盤前空觀察不做，
-// 所以老師的「名單外的刀劍空」「今天沒中的族群」兩段沒有。大戶%／N億＝/api/big-holder（老師算法：同秒併單 ≥7 張、
+// 所以老師的「名單外的刀劍空」「今天沒中的族群」兩段原本沒有；2026-10-21 補上，「名單」改用系統自己的：前一個交易日收盤的新刀劍空名單。大戶%／N億＝/api/big-holder（老師算法：同秒併單 ≥7 張、
 // 開盤第一筆算賣、÷ 近 5 日均成交值）。盤中每 5 分鐘把名單送後端存一份（/api/homework-snapshot，誰的網站開著都能記到），
 // 回放時間鈕跟右邊「刀功課廣播」（進榜時間、轉強「跑」、再「回」）都用這份紀錄。
 const TD_ZONES = [
@@ -16271,6 +16274,28 @@ const tdState = { zones: { upper: true, middle: true, lower: true, harvest: true
  
   group: null, hideGone: false, big: { key: '', at: 0, data: null, loading: false }, watch: [], hold: [],
   rep: { date: null, slot: null, data: null, key: '', at: 0, loading: false } };
+// 2026-10-21 使用者：照老師的控制列加三個——「顯示沒中的族群」「顯示名單外的刀劍空」「排序（依跌幅 淺→深／深→淺）」。
+// 老師的「名單」是學員貼的盤前空觀察；我們用系統自己的：名單＝前一個交易日收盤（最後一份紀錄）的新刀劍空名單。
+//   名單外的刀劍空＝今天盤中有、但前一天收盤名單沒列的；今天沒中的族群＝前一天名單裡有、今天整族沒進新刀劍空的。
+tdState.showMiss = true; tdState.showOut = true; tdState.sortDeep = false;
+tdState.prev = { date: null, data: null, key: '', at: 0, loading: false };
+try { const o = JSON.parse(localStorage.getItem('tdOpts') || '{}'); if (o && typeof o === 'object'){ if (o.miss === false) tdState.showMiss = false; if (o.out === false) tdState.showOut = false; if (o.deep === true) tdState.sortDeep = true; } } catch (_){}
+function tdSaveOpts(){ try { localStorage.setItem('tdOpts', JSON.stringify({ miss: tdState.showMiss, out: tdState.showOut, deep: tdState.sortDeep })); } catch (_){} }
+// 前一個交易日收盤的名單：{ date, rows }（還沒載入回 null）。日期從紀錄的日期清單裡找比功課日早的最近一天，抓那天最後一個時段。
+function tdPrevList(snapDate){
+  const rep = tdRepData();
+  const pd = ((rep && rep.dates) || []).filter((d) => d < snapDate).sort().pop();
+  if (!pd) return null;
+  const p = tdState.prev;
+  if (!p.loading && (p.key !== pd || (!p.data && Date.now() - p.at > 30e3))){
+    p.loading = true;
+    fetch('/api/homework-snapshots?date=' + pd).then((x) => x.json()).then((d) => { if (d && d.status === 'ok') p.data = d; })
+      .catch(() => {}).finally(() => { p.loading = false; p.key = pd; p.at = Date.now(); if (tdOpen()) renderHomework(); });
+  }
+  if (!p.data || p.data.date !== pd) return null;
+  const slots = Object.keys(p.data.slots || {}).sort();
+  return slots.length ? { date: pd, rows: p.data.slots[slots[slots.length - 1]].rows || [] } : null;
+}
 try { const w = JSON.parse(localStorage.getItem('tdWatch') || '[]'); if (Array.isArray(w)) tdState.watch = w.filter((c) => /^[0-9A-Z]{4,6}$/.test(c)).slice(0, 60); } catch (_){}
 try { const h = JSON.parse(localStorage.getItem('tdHold') || '[]'); if (Array.isArray(h)) tdState.hold = h.filter((c) => /^[0-9A-Z]{4,6}$/.test(c)).slice(0, 60); } catch (_){}
 function tdSaveWatch(){ try { localStorage.setItem('tdWatch', JSON.stringify(tdState.watch)); } catch (_){} }
@@ -16587,19 +16612,28 @@ function hwTodayHtml(){
   const groupChips = Array.from(new Map(mainRows.map((r) => [r.g, r.gr])).entries()).sort((a, b) => a[1] - b[1]);
   if (tdState.group && !groupChips.some(([g]) => g === tdState.group)) tdState.group = null;
   if (tdState.group) mainRows = mainRows.filter((r) => r.g === tdState.group);
-  const byPct = (a, b) => (b.pct ?? 0) - (a.pct ?? 0);   // 依跌幅：淺的在上、深的在下（老師預設排序）
+  const byPct = tdState.sortDeep ? (a, b) => (a.pct ?? 0) - (b.pct ?? 0) : (a, b) => (b.pct ?? 0) - (a.pct ?? 0);   // 依跌幅：預設淺的在上、深的在下（老師預設排序）；也可以深的在上
   const hitGroups = new Set(mainRows.map((r) => r.g));
   const relBatches = new Map();
   ctx.released.forEach((n, code) => { if (!relBatches.has(n)) relBatches.set(n, []); relBatches.get(n).push(code); });
   const sus = ctx.jd ? (ctx.jd.suspects || []) : [];
+  const prevList = tdPrevList(snap.date);
+  const prevCodes = new Set(prevList ? prevList.rows.map((r) => r.code) : []);
+  const prevGroups = new Map();
+  if (prevList) prevList.rows.forEach((r) => { const g = r.g || tdGroupOf(r.code) || '其他'; prevGroups.set(g, (prevGroups.get(g) || 0) + 1); });
+  const outRows = prevList ? snap.rows.filter((r) => !prevCodes.has(r.code)).slice().sort(byPct) : [];
+  const liveGroups = new Set(snap.rows.map((r) => r.g));
+  const missGroups = prevList ? Array.from(prevGroups.entries()).filter(([g]) => !liveGroups.has(g)).sort((a, b) => b[1] - a[1]) : [];
   const zoneCount = shownZones.filter((z) => zoneRows[z.key].length).map((z) => z.name + ' ' + zoneRows[z.key].length + ' 檔（部位 ' + z.pos + '）').join('、');
   const dtSec = ctx.dtDay ? '<details class="td-dtbox"><summary>💰 隔日沖買超（機器人 811）自動帶入・唯讀　<small>' + tdMd(ctx.dtDay.date) + ' 收盤後的名單；命中的股票掛「💰 隔日沖 N%」，隔天容易出貨、尋黑不追 —— 點開看原文</small></summary><div class="td-chips">' +
     ctx.dtDay.rows.map((r) => '<span class="td-rchip' + (snap.rows.some((x) => x.code === r.code) ? ' blade' : '') + '" data-hw-code="' + wlEsc(r.code) + '" data-hw-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + ' <small>' + r.pct + '%' + (r.two ? '（連兩日）' : '') + '</small></span>').join('') + '</div></details>' : '';
   const summary = '<div class="td-sum"><div class="td-sum1">今天要盯的' + (mainRows.length ? '有 <b>' + mainRows.length + '</b> 檔，分佈在 <b>' + hitGroups.size + '</b> 族。' : '目前沒有（開盤後刀劍空才會出現，盤中隨時變）。') + '</div>' +
     (zoneCount ? '<div class="td-sum2">' + zoneCount + '</div>' : '') + '</div>';
   const counts = '<div class="td-counts">' + [
+    ...(prevList ? [['名單', prevGroups.size + ' 族 / ' + prevList.rows.length + ' 檔']] : []),
     ['刀劍空', snap.rows.length + ' 檔', 'blade'], ['🔵 12空', snap.k12.length + ' 檔', 'k12'],
     ...TD_ZONES.map((z) => [z.name, String(zoneRows[z.key].length), z.cls]),
+    ...(prevList ? [['名單外', outRows.length + ' 檔']] : []),
     ['出獄股', ctx.released.size + ' 檔／' + relBatches.size + ' 批'], ['即將入獄', (ctx.jd ? sus.length : '…') + ' 檔'],
   ].map(([a, b, c]) => '<span class="td-count' + (c ? ' ' + c : '') + '">' + a + ' <b>' + b + '</b></span>').join('') + '</div>';
   // ② 標題列
@@ -16614,7 +16648,12 @@ function hwTodayHtml(){
   const zoneBox = (z) => '<button type="button" class="td-zbtn ' + z.cls + (tdState.zones[z.key] ? ' on' : '') + '" data-td-zone="' + z.key + '">' + (tdState.zones[z.key] ? '☑' : '☐') + ' ' + z.icon + ' ' + z.name + '</button>';
   const ctrls = '<div class="td-ctrls">' + TD_ZONES.map(zoneBox).join('') +
     '<button type="button" class="td-zbtn dt' + (tdState.dtOnly ? ' on' : '') + '" data-td-dt="1">' + (tdState.dtOnly ? '☑' : '☐') + ' 💰 只看隔日沖</button>' +
-    '<button type="button" class="td-view" data-td-view="1">' + (tdState.view === 'zone' ? '🗂 改看族群卡' : '📊 改看段位分區') + '</button></div>';
+    '<button type="button" class="td-view" data-td-view="1">' + (tdState.view === 'zone' ? '🗂 改看族群卡' : '📊 改看段位分區') + '</button></div>' +
+    '<div class="td-opts">' +
+      '<button type="button" class="td-zbtn' + (tdState.showMiss ? ' on' : '') + '" data-td-opt="miss">' + (tdState.showMiss ? '☑' : '☐') + ' 顯示沒中的族群</button>' +
+      '<button type="button" class="td-zbtn' + (tdState.showOut ? ' on' : '') + '" data-td-opt="out">' + (tdState.showOut ? '☑' : '☐') + ' 顯示名單外的刀劍空</button>' +
+      '<span class="td-plabel">排序</span><select class="td-sortsel" data-td-sort="1"><option value="shallow"' + (tdState.sortDeep ? '' : ' selected') + '>依跌幅 淺→深（深的排下面）</option><option value="deep"' + (tdState.sortDeep ? ' selected' : '') + '>依跌幅 深→淺（淺的排下面）</option></select>' +
+      '<small class="td-onote">' + (prevList ? '名單＝' + tdMd(prevList.date) + ' 收盤的新刀劍空' : '名單＝前一個交易日收盤的新刀劍空（還沒載入或沒有紀錄）') + '</small></div>';
   // ④ 回放：日期、前後、最新、時段（名單有變動的時段才列）
   const dates = rep && rep.dates ? rep.dates : [];
   const changed = recSlots.filter((s, i) => {
@@ -16691,6 +16730,11 @@ function hwTodayHtml(){
   const jailSec = '<div class="td-sec"><h4>🔒 即將入獄 <small>處置預測・' + (jd ? wlEsc(jd.nextMd || '') + '（' + wlEsc(jd.nextWeekday || '') + '）' : '讀取中') + '</small></h4>' +
     (jd ? '<div class="td-jail">' + jailCol('高機率會關', sus.filter((s) => s.high)) + jailCol('有機會躲過', sus.filter((s) => !s.high)) + '</div>' +
       '<div class="td-note">門檻是處置監獄算的（收盤價、成交量過門檻才關）——收盤自己再對一下。</div>' : '<div class="td-empty">處置資料讀取中…</div>') + '</div>';
+  // ⑨ 名單外的刀劍空、今天沒中的族群（2026-10-21 使用者；名單＝前一個交易日收盤的新刀劍空）
+  const outSec = tdState.showOut && prevList ? '<div class="td-sec"><h4>➕ 名單外的刀劍空 <small>盤中有、但前一天（' + tdMd(prevList.date) + '）收盤名單沒列</small></h4>' +
+    (outRows.length ? outRows.map((r) => tdRowHtml(r, ctx, snap, { lite: true, group: r.g })).join('') : '<div class="td-empty">沒有</div>') + '</div>' : '';
+  const missSec = tdState.showMiss && prevList ? '<div class="td-sec"><h4>➖ 今天沒中的族群 <small>名單有列，盤中沒進新刀劍空</small></h4>' +
+    (missGroups.length ? '<div class="td-misswrap">' + missGroups.map(([g, n]) => '<span class="td-rchip">' + wlEsc(g) + ' ' + n + ' 檔</span>').join('') + '</div><div class="td-note">這些族群今天整族沒訊號，先放著。</div>' : '<div class="td-empty">名單裡的族群今天都有訊號</div>') + '</div>' : '';
   // ⑩ 段位對照
   const sop = '<div class="td-sec"><h4>📐 段位對照 <small>刀劍空 SOP・族群排名強度表</small></h4><div class="td-sopwrap"><table class="td-sop"><thead><tr><th>族群排名</th><th>前綴</th><th>段位</th><th>停損（相對進場）</th><th>停利目標（當日總跌幅）</th><th>部位</th></tr></thead><tbody>' +
     '<tr><td>1 ~ 5</td><td class="up">▲</td><td class="up">強多</td><td>-1.0% ~ -1.5%</td><td>-3% ~ -4%</td><td>30% 或觀望</td></tr>' +
@@ -16701,7 +16745,7 @@ function hwTodayHtml(){
     '<div class="td-note">符號：🔓 當天出獄｜🔑 出獄股（其他批）｜🔒 必關｜⚠️ 條件關（收盤過門檻才關）｜♣ 梅花＝收割區（今天已跌 5% 以上或跌停鎖死，不追空，有空單考慮回補收割；前面數字＝族群名次，42♣＝第 42 名）｜🔵 12空（道館 MA20 當沖空也點名；只在 12空 的股，排名／段位取 12空 的）｜排名格旁的圓球＝均線分（滿分 15：≥12 金底、6～11 金框、<6 灰）。<br>' +
     '要自己確認的：① 部位還要看族群有沒有帶頭——沒有帶頭時 SOP 部位降 50%（這頁不會自動降）；② 進場時間門檻 09:15 之後（通緝要犯例外）。名次是 67 族的排法，族群數不同時照比例換算。表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
   return dtSec + summary + counts +
-    '<div class="td-wrap"><div class="td-main">' + head + ctrls + replay + filters + main + watch + k12Sec + againSec + relSec + jailSec + sop + '</div>' +
+    '<div class="td-wrap"><div class="td-main">' + head + ctrls + replay + filters + main + watch + k12Sec + againSec + relSec + jailSec + outSec + missSec + sop + '</div>' +
     tdBroadcastHtml(seq, snap) + '</div>';
 }
 // ① 收盤觀察股（當沖多的「多功課」、多觀察的名單）＝形態觀察股的收盤那份：盤中（今天還沒收盤）用前一個交易日收盤的、
@@ -17142,6 +17186,8 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
   const tz = t.closest('[data-td-zone]');
   if (tz){ tdState.zones[tz.dataset.tdZone] = !tdState.zones[tz.dataset.tdZone]; renderHomework(); return; }
   if (t.closest('[data-td-dt]')){ tdState.dtOnly = !tdState.dtOnly; renderHomework(); return; }
+  const topt = t.closest('[data-td-opt]');
+  if (topt){ if (topt.dataset.tdOpt === 'miss') tdState.showMiss = !tdState.showMiss; else tdState.showOut = !tdState.showOut; tdSaveOpts(); renderHomework(); return; }
   if (t.closest('[data-td-view]')){ tdState.view = tdState.view === 'zone' ? 'group' : 'zone'; renderHomework(); return; }
   const tp = t.closest('[data-td-param]');
   if (tp){
@@ -17171,6 +17217,8 @@ document.getElementById('hwBody').addEventListener('change', (e) => {
     tdState.rep.slot = null;
     renderHomework(); return;
   }
+  const tsort = e.target.closest('[data-td-sort]');
+  if (tsort){ tdState.sortDeep = tsort.value === 'deep'; tdSaveOpts(); renderHomework(); return; }
   const ms = e.target.closest('[data-mw-sort]');
   if (ms){ mwState.sort = ms.value; renderHomework(); }
 });
