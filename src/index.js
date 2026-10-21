@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-21 23:57:21";
+const BUILD_STAMP = "2026-10-22 00:01:42";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6955,7 +6955,7 @@ const BLADE_PRIOR_RISE = 3;      // 刀劍空：昨天（🔪）或前天（⚔�
 const FIRE_MIN_PCT = 2;       // 馬火多：今天至少漲這麼多才算有力道
 const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停鎖死）買不到，另列
 const FIRE_MIN_VOLUME = 500;  // 馬火多：成交量（張）低於這個太冷門
-const FIRE_MAX_ROWS = 10;     // 馬火多：最多列這麼多檔
+const FIRE_MAX_ROWS = Infinity;     // 馬火多：最多列這麼多檔（2026-10-21 使用者：不限 10 檔，符合門檻的全列）
 // 族群明細「空方」段的檔數（2026-10-16 對老師 12 個族群明細）：8 檔以下＝後一半（4→2、6→3、7→4、8→4，這時沒有「多方」段）、
 // 9～12 檔＝後 1/3（9→3、10→4）、13 檔以上＝後 5 檔（13、16、20、22 都是 5）
 const bladeRankMark = (rank, total) => rank <= Math.round((total || 67) * 10 / 67) ? '🔺' : rank < Math.round((total || 67) * 26 / 67) ? '🔽' : '🔰';
@@ -7083,7 +7083,7 @@ function race333Model(){
   // （他 11:11、11:24、11:26、11:37 強空時都是 0 檔，不是強空時都有）；馬火多(30) 照列（他 11:37 強空時還有大毅），賽馬多(33) 照列。
   const otcStrongBear = !!(otcStrengthLatest && otcStrengthLatest.label === '強空');
   const fireOpen = fireBase.filter((r) => !(r.limitUp || r.pct >= FIRE_MAX_PCT));  // 符合馬火多全部門檻、買得到的（不限檔數）
-  const fires = fireOpen.slice(0, FIRE_MAX_ROWS);
+  const fires = fireOpen.slice(0, FIRE_MAX_ROWS);   // 2026-10-21 使用者：不限檔數（FIRE_MAX_ROWS = Infinity）
   // 32 刀劍空：族內空方段（後段最多 5 檔）、成交量夠，🔪 或 ⚔️ 成立就列；
   // 跌停鎖死或跌到 BLADE_MAX_PCT% 以上放不到空，跟已跌 BLADE_HARVEST_PCT% 以上的一起放收割區那一行。
   const belowOtc = (r) => otcPct === null || r.pct <= otcPct;
@@ -7163,7 +7163,7 @@ function race333Model(){
   // 2026-10-20 使用者：30 加 33 加 34 改成 30 加 33（不看河流多 34）——賽馬多(33) 裡同時符合馬火多(30) 全部門檻的
   // 2026-10-21 使用者：30加33 又改回 30加33加34——再多要求河流多(34) 名單裡也有（漲幅 ≤ 7%）；櫃買強空時 34 也照出名單
   // 2026-10-21 使用者：30加33加34 要三份名單「都有」才列（昇陽半導體 33、34 有、30 只在符合門檻的第 11 檔以後、首頁那三欄都看不到它，卻出現在這欄）：
-  // 馬火多這邊改成跟 30 那欄一樣的前 FIRE_MAX_ROWS 檔（不再是「符合全部門檻、不限檔數」），河流多記下它那邊的族群名次（首頁 33、34 只列族群前 10 名，首頁再各看各的）
+  // 馬火多這邊用 30 那欄列出來的（現在不限檔數），河流多記下它那邊的族群名次（首頁 33、34 只列族群前 HOME_334_TOP_GROUPS 名，首頁再各看各的）
   const fireTopCodes = new Set(fires.map((r) => r.code));
   const riverMap = new Map(riverAll.filter((r) => r.pct <= 7).map((r) => [r.code, r]));
   const triple = horses.filter((r) => fireTopCodes.has(r.code) && riverMap.has(r.code))
@@ -7612,7 +7612,7 @@ function race333Html(){
       (m.riverOver.length ? '<div class="race-note">漲超過 7% 的另外 ' + m.riverOver.length + ' 檔（不一定符合 33 的門檻，沒算進「續抱勿追高」）：' + m.riverOver.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
       '</div>' +
     '<div class="race-block"><div class="race-head">🐎🚀馬火多(30) ' + stamp + '</div>' +
-      '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・最多 ' + FIRE_MAX_ROWS + ' 檔（取漲幅前 ' + FIRE_MAX_ROWS + ' 檔）・「出現」＝第一次進這個名單的時間，新出現的在上面・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字</div>' +
+      '<div class="race-sub">今天漲 ' + FIRE_MIN_PCT + '%～' + FIRE_MAX_PCT + '%（且 ≥ 櫃買%）・不含漲停鎖死・族群排名前 ' + m.fireGroupTop + '・族內前 1/3・成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張・🐎 現價高於昨收、🚀 現價高於前天收盤（數字＝高出前天收盤幾 %）・👑 該族群第 1 名・不限檔數・「出現」＝第一次進這個名單的時間，新出現的在上面・' + dailyNote + '・' + condsNote + '・滑鼠移到符號上看三天的數字</div>' +
       raceStockListHtml(raceBySeen(fires, 'fires'), { seen: true, fire: true, dates: m.dates, conditions: true, m, limit: m.fireGroupTop, limitLabel: '30' }) +
       (fireLocked.length ? '<div class="race-note">漲停／接近漲停買不到，另列 ' + fireLocked.length + ' 檔：' + fireLocked.map((r) => r.code + ' ' + r.name + ' ' + fmt(r.pct) + '%').join('、') + '</div>' : '') +
       '</div>';
@@ -8010,7 +8010,7 @@ function homeJailHelpHtml(){
       card('🏴 犯罪集團 <small>同族群 2 檔以上被關或即將被關＝資金熱區</small>', '出關日', m ? m.gangs : [], '目前沒有同族群 2 檔以上一起被關', '')) +
     col(card('🎉 已出關', '第幾天', m ? m.out : [], '最近 3 個交易日沒有', ''));
 }
-const HOME_334_TOP_GROUPS = 10;   // 首頁河流多(34)、賽馬多(33) 只列族群前幾名（2026-10-16 使用者）
+const HOME_334_TOP_GROUPS = 20;   // 首頁河流多(34)、賽馬多(33) 只列族群前幾名（2026-10-16 使用者：10；2026-10-21 使用者：改 20，跟 33 的族群門檻一樣）
 // 首頁第二欄：當沖多（2026-10-19 使用者：放在首頁第二欄、取代 183 原本的位置；183 搬到今日強勢股下面）。
 // 跟每日功課「🔥 當沖多」同一份（lgModel）：① 多功課（收盤觀察股）② 賽馬多 33 ③ 河流多 34 ④ 族群在多方區，兩個以上有交集才列，分中四個／中三個／中兩個。
 function homeLongRowHtml(o){
@@ -8269,7 +8269,7 @@ function homeRank4Html(){
       home155ColHtml() +
     '</div>' +
     '<div class="hr-stack">' +
-      homeRedBox(homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : []) +   // 首頁 33、34 只列族群前 10 名，三欄都有才算   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
+      homeRedBox(homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : []) +   // 首頁 33、34 只列族群前 HOME_334_TOP_GROUPS 名，三欄都有才算   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
         // 2026-10-16 使用者：首頁的河流多(34)、賽馬多(33) 只列族群名次前 10 名的；訊號中心盤中333 照舊全部列
         homeStockColHtml('🐎賽馬多(33)', m ? m.horses.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
         // 2026-10-21 使用者：30加33 下面再加河流多(34)，也在紅框裡（原本放在第 4 欄族群漲幅 > 2%（12）下面）
@@ -14073,7 +14073,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-21 23:57:21';
+const BUILD_STAMP = '2026-10-22 00:01:42';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
