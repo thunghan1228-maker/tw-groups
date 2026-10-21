@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 00:31:34";
+const BUILD_STAMP = "2026-10-22 00:34:59";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -190,7 +190,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-lg-hold{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-weight:700;}
   /* 首頁飆股雷達欄（2026-10-15）：分類標題紅底、族群名黃色，每檔後面帶符號；名稱太長截掉，符號和漲跌幅不截 */
   .hr-obs-cat{padding:4px 8px;font-size:12px;font-weight:800;background:#7c3aed;color:#fff;border-top:1px solid var(--line);}   /* 2026-10-18 使用者：【1】【2】【3】改紫底白字 */
-  .hr-obs-cat small{font-weight:600;opacity:.9;}
+  .hr-obs-cat small{font-weight:600;opacity:.9;} .hr-obs-cat + .hr-note{padding:3px 8px;}   /* 2026-10-22 空的分類（只有一個 —）不要留那麼多空白 */
   .hr-obs-sub{padding:3px 8px 0;font-size:12px;font-weight:700;color:#4ade80;border-top:1px solid var(--line);}   /* 2026-10-19 【5】有點深的兩個小標 */
   /* 終點戰法空(283)（2026-10-16）：族群列黃字、底下個股縮排，⚠️ 加註橘字 */
   .hr-283-grp .hr-name{color:#facc15;}
@@ -202,11 +202,11 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-obs-grp[data-group],.hr-st-grp[data-group]{cursor:pointer;} .hr-obs-grp[data-group]:hover .hr-gpill,.hr-st-grp[data-group]:hover{filter:brightness(1.15);}
   .hr-st-grp{background:#dc2626;color:#fff;font-weight:800;}   /* 2026-10-16 使用者：今日強勢股的族群名（第 N 名・族群）改紅底 */
   .hr-st-grp.weak{background:#4ade80;color:#052e16;} .hr-st-grp.weak *{color:#052e16!important;}   /* 2026-10-19 使用者：首頁今日弱勢股的族群名綠底（空方） */
-  .hr-obs-grp{padding:3px 8px 0;font-size:12px;font-weight:800;color:#facc15;border-top:1px solid var(--line);}
-  .hr-row.hr-obs{border-top:none;padding-top:3px;flex-wrap:wrap;row-gap:1px;}
+  .hr-obs-grp{padding:2px 8px 0;font-size:12px;line-height:1.3;font-weight:800;color:#facc15;border-top:1px solid var(--line);}   /* 2026-10-22 使用者：多觀察這欄版面緊一點（族群上下空太多）：族群列、個股列的上下留白縮小、行距收緊 */
+  .hr-row.hr-obs{border-top:none;padding:1px 8px 2px;gap:3px;flex-wrap:wrap;row-gap:0;line-height:1.35;}
   .hr-row.hr-obs .hr-name,.hr-row.hr-obs .hr-code{flex:0 0 auto;overflow:visible;}
   .hr-obs-mk{flex-shrink:0;white-space:nowrap;}
-  .hr-obs-mk .d123-tag{margin:0 1px;}
+  .hr-obs-mk .d123-tag{margin:0 1px;padding:0 4px;}
   /* 首頁最下面的說明表格（2026-10-15 使用者：整段字太亂，改表格）：桌機一排 5 張，窄螢幕自動換行，手機一張一列 */
   .hr-help{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:8px;margin-top:10px;align-items:start;}
   .hr-help-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0;}
@@ -14129,7 +14129,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 00:31:34';
+const BUILD_STAMP = '2026-10-22 00:34:59';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
