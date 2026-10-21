@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-21 07:33:09";
+const BUILD_STAMP = "2026-10-21 08:09:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -14057,7 +14057,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-21 07:33:09';
+const BUILD_STAMP = '2026-10-21 08:09:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17593,7 +17593,7 @@ const GUIDE_TOOLS = [
       '族群那一條點下去看成分股，股票點下去開 K 線圖', '右上角 ⧉ 移到另一螢幕（可以拖到外接螢幕）、－ 最小化、▢ 最大化、✕ 關閉；標題列拖著走，四邊四角拉大小',
       '每個代碼在做什麼，看下面「🤖 機器人代碼一覽」'] },
   { t: '🔔 今日提醒', open: 'remind', v: 'basic-remind', tags: ['盤後', '每天'], d: '右上角「🔔 今日提醒」。每天晚上的警示股整理成三張表，每天有新資料、第一次打開網頁就自動跳出來；關掉後按這顆再開。',
-    b: ['🔓 解鎖：接下來兩個交易日出關、恢復正常交易的', '⚠️ 連續警告：明天再被警告就可能分盤或延長處置，持有的要留意', '🔒 分盤交易：今天新公告的處置股（處置期間、幾分鐘撮合、解鎖日）', '點代號開 K 線圖'] },
+    b: ['🚨 今天入獄（最上面）：今天新公告、下一個交易日起進處置的股票（處置期間、幾分鐘撮合、解鎖日）；底下收著還在分盤交易的其他股票', '🔓 解鎖：接下來兩個交易日出關、恢復正常交易的', '⚠️ 連續警告：明天再被警告就可能分盤或延長處置，持有的要留意', '點代號開 K 線圖'] },
   { t: '自選股', label: '自選股', v: 'tb-watch', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
     b: ['換手機或電腦用「同步碼」就能帶過去', '一鍵健診：持股的防守價、明日紅半／三日低／月線一次算好', '各列表看到喜歡的股票，點「☆」就加進來'] },
   { t: '個股訊號追蹤', label: '個股盤中訊號追蹤', v: 'tb-track', tags: ['盤中'], d: '只看你自選股今天出現了哪些訊號，不用在一堆名單裡找。',
@@ -21208,7 +21208,7 @@ initColsPan('sgtBody');
 new ResizeObserver(() => sizeSgtPanes()).observe(document.getElementById('sgtInner'));
 // ---- 今日提醒（2026-10-17 使用者：照每天晚上的「警示股」整理，只列股票：哪天解鎖、連續警告、分盤交易，做成表格；
 // 每天有新資料、第一次打開就跳出來，關掉後從右上角「🔔 今日提醒」再開）----
-// 資料跟首頁處置名單同一份（/api/jail）：解鎖＝接下來 2 個交易日出關的；連續警告＝嫌疑名單；分盤交易＝今天新公告處置的。
+// 資料跟首頁處置名單同一份（/api/jail）：今天入獄（分盤交易）＝今天新公告處置的，放最上面（2026-10-21）；解鎖＝接下來 2 個交易日出關的；連續警告＝嫌疑名單。
 const REMIND_SEEN_KEY = 'remindSeen';
 function remindMdW(iso){ return iso ? Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10) + '(' + '日一二三四五六'[new Date(iso + 'T12:00:00+08:00').getUTCDay()] + ')' : ''; }
 function remindMd(iso){ return iso ? Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10) : ''; }
@@ -21218,7 +21218,18 @@ function remindHtml(){
   const code = (x) => '<span class="rm-code" data-rm-code="' + wlEsc(x.code) + '" data-rm-name="' + wlEsc(x.name || '') + '">' + wlEsc(x.code) + '</span>';
   const table = (head, rows, empty) => '<table class="rm-table"><thead><tr>' + head.map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' +
     (rows.length ? rows.join('') : '<tr><td class="rm-none" colspan="' + head.length + '">' + empty + '</td></tr>') + '</tbody></table>';
+  // 今天入獄（2026-10-21 使用者：今天才進處置的股票列在最上面）：今天新公告、下一個交易日起分盤交易的處置股，放在最前面
+  const nj = d.newJail || [];
+  const jRow = (j) => '<tr><td>' + code(j) + (j.new ? '<span class="rm-new">新</span>' : '') + '</td><td>' + wlEsc(j.name) + '</td><td class="rm-red">' + remindMd(j.start) + '~' + remindMd(j.end) + '</td><td>' +
+    (j.minutes ? j.minutes + ' 分分盤' : '分盤') + '</td><td>' + remindMdW(j.release) + '</td></tr>';
+  let jailHtml = '<div class="rm-sec"><div class="rm-h">🚨 今天入獄 <small>今天新公告、' + (d.nextMd ? d.nextMd + (d.nextWeekday ? '(' + d.nextWeekday + ')' : '') + ' ' : '') + '起進處置（分盤交易）的股票</small></div>' +
+    table(['代號', '名稱', '處置期間', '撮合', '解鎖日'], nj.map(jRow), '今天沒有新公告的處置股');
+  const newCodes = new Set(nj.map((j) => j.code));
+  const others = (d.jailedList || []).filter((j) => !newCodes.has(j.code) && j.release > d.dataDate);
+  if (others.length) jailHtml += '<details class="rm-more"><summary>還在分盤交易的其他 ' + others.length + ' 檔</summary>' + table(['代號', '名稱', '處置期間', '撮合', '解鎖日'], others.map((j) => jRow({ ...j, new: false })), '') + '</details>';
+  jailHtml += '</div>';
   let html = '<div class="rm-date">' + d.dataDate.replace(/-/g, '/') + ' 警示股</div>';
+  html += jailHtml;
   // 1. 解鎖：資料日之後的 2 個交易日
   const rel = (d.releaseDays || []).filter((x) => x.date > d.dataDate).slice(0, 2);
   const relRows = [];
@@ -21233,15 +21244,6 @@ function remindHtml(){
   const susRows = sus.map((s) => '<tr><td>' + code(s) + '</td><td>' + wlEsc(s.name) + '</td><td class="rm-red">' + (times(s) ? '連續 ' + times(s) + ' 次警告' : wlEsc(s.status || '')) + '</td><td>' + (s.jailed ? '分盤交易中（' + wlEsc(s.releaseMd || '') + ' 解鎖）' : '') + '</td></tr>');
   html += '<div class="rm-sec"><div class="rm-h">⚠️ 連續警告</div>' + table(['代號', '名稱', '警告', '現況'], susRows, '沒有') +
     (susRows.length ? '<div class="rm-warn">⚠️ 以上個股明天再被警告，有可能分盤或延長處置，持有的請留意</div>' : '') + '</div>';
-  // 3. 分盤交易：今天新公告處置的
-  const nj = d.newJail || [];
-  const jRow = (j) => '<tr><td>' + code(j) + (j.new ? '<span class="rm-new">新</span>' : '') + '</td><td>' + wlEsc(j.name) + '</td><td class="rm-red">' + remindMd(j.start) + '~' + remindMd(j.end) + '</td><td>' +
-    (j.minutes ? j.minutes + ' 分分盤' : '分盤') + '</td><td>' + remindMdW(j.release) + '</td></tr>';
-  html += '<div class="rm-sec"><div class="rm-h">🔒 分盤交易 <small>今天新公告的處置股</small></div>' + table(['代號', '名稱', '處置期間', '撮合', '解鎖日'], nj.map(jRow), '今天沒有新公告的處置股');
-  const newCodes = new Set(nj.map((j) => j.code));
-  const others = (d.jailedList || []).filter((j) => !newCodes.has(j.code) && j.release > d.dataDate);
-  if (others.length) html += '<details class="rm-more"><summary>還在分盤交易的其他 ' + others.length + ' 檔</summary>' + table(['代號', '名稱', '處置期間', '撮合', '解鎖日'], others.map((j) => jRow({ ...j, new: false })), '') + '</details>';
-  html += '</div>';
   return html;
 }
 function remindUnseen(){
