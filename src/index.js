@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-21 08:53:42";
+const BUILD_STAMP = "2026-10-21 09:08:39";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -175,7 +175,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-lsec{padding:4px 8px;font-size:12px;font-weight:800;color:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;}
   .hr-lsec.h4{background:#b7791f;} .hr-lsec.h3{background:#c2410c;} .hr-lsec.h2{background:#2563eb;} .hr-lsec small{font-weight:600;opacity:.9;}
   .hr-lrow{display:block;padding:5px 8px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;}
-  .hr-lrow:hover{background:rgba(201,169,140,0.10);} .hr-lrow.lit{background:rgba(220,38,38,.18);}
+  .hr-lrow:hover{background:rgba(201,169,140,0.10);} .hr-lrow.hold{background:rgba(160,160,160,.20);}
   .hr-lrow .l1{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;}
   .hr-lrow .l1 .hr-name{overflow:hidden;text-overflow:ellipsis;min-width:0;}
   .hr-lrow .l1 .hr-avg{margin-left:auto;}
@@ -1681,7 +1681,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .lg-zone.h2 .td-zhead{background:rgba(167,139,250,.18);border-bottom-color:#7c3aed;}
   .lg-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:6px 12px;border-top:1px solid var(--line);font-size:13px;cursor:pointer;}
   .lg-row:hover{background:var(--panel-2);}
-  .lg-row.lit{background:rgba(239,68,68,.16);box-shadow:inset 4px 0 0 #e11d48;}
+  .lg-row.hold{background:rgba(160,160,160,.20);}   /* 只有續抱不追的列才用淺灰底（2026-10-21 使用者） */
   .lg-row.held,.lg-table tr.held{box-shadow:inset 0 0 0 2px #d4a017;}
   .lg-grp{min-width:104px;border-radius:6px;padding:1px 8px;font-size:12px;white-space:nowrap;border-left:4px solid rgba(0,0,0,.18);}
   .lg-grp small{color:var(--muted);}
@@ -7990,7 +7990,7 @@ const HOME_334_TOP_GROUPS = 10;   // 首頁河流多(34)、賽馬多(33) 只列�
 // 跟每日功課「🔥 當沖多」同一份（lgModel）：① 多功課（收盤觀察股）② 賽馬多 33 ③ 河流多 34 ④ 族群在多方區，兩個以上有交集才列，分中四個／中三個／中兩個。
 function homeLongRowHtml(o){
   const chip = (k, label, cls) => (o.src[k] ? '<i class="' + cls + '">' + label + (k === 1 ? '' : o.src[k].n) + '</i>' : '');
-  return '<div class="hr-lrow hr-stk' + (o.lit ? ' lit' : '') + '" data-code="' + o.code + '" data-name="' + wlEsc(o.name) + '" tabindex="0" role="button" title="' + wlEsc((o.group || '') + (o.rank ? '・族排第 ' + o.rank + ' 名' : '')) + '">' +
+  return '<div class="hr-lrow hr-stk' + (o.holdNo ? ' hold' : '') + '" data-code="' + o.code + '" data-name="' + wlEsc(o.name) + '" tabindex="0" role="button" title="' + wlEsc((o.group || '') + (o.rank ? '・族排第 ' + o.rank + ' 名' : '')) + '">' +
     '<div class="l1">' + tdMaBall(o.ma) + '<span class="hr-code">' + o.code + '</span><span class="hr-name">' + wlEsc(o.name) + '</span>' +
     '<span class="hr-avg ' + (Number.isFinite(o.pct) ? dirClass(o.pct) : '') + '">' + (o.lit ? '💡' : '') + (Number.isFinite(o.pct) ? fmt(o.pct) + '%' : '—') + '</span></div>' +
     '<div class="l2"><span class="hr-lg-grp ' + (o.groupAvg > 0 ? 'up' : 'down') + '">' + wlEsc(o.group || '—') + (o.rank ? '(' + o.rank + ')' : '') + (o.groupAvg > 0 ? '▲' : '▼') + '</span>' +
@@ -8118,26 +8118,6 @@ function homeStrongColHtml(){
   }).join('')).join('');
   return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔</span></div>' +
     (n ? body : '<div class="hr-note">' + (d.count ? '均線分數符合的今天都在跌，先不列' : '今天沒有符合的股票') + '</div>') + '</div>';
-}
-// 首頁今日弱勢股（2026-10-19 使用者：拿掉 22-35 那欄，換成盤中訊號中心的今日弱勢股）：跟訊號中心「今日弱勢股」同一份，
-// 族群分數倒數十名裡均線分數 ≤3、今天沒上漲的（盤中用現價即時重算）；每族一行「倒數第 N 名」，下面列代號、名稱、均線分數、今天漲跌幅
-function homeWeakColHtml(){
-  stLoad('weak');
-  const d = stState.weak;
-  const title = '<div class="hr-title bear">🔻今日弱勢股';
-  if (!d) return '<div class="hr-col hr-colw">' + title + '</div><div class="hr-note">' + (stState.error.weak ? '讀取失敗' : '讀取中…') + '</div></div>';
-  const groups = stLiveGroups(d, false).filter((g) => g.rows.length);
-  const n = groups.reduce((a, g) => a + g.rows.length, 0);
-  const body = groups.map((g) => '<div class="hr-sep hr-st-grp weak"' + (homeGroupAvg(g.name) !== null ? ' data-group="' + wlEsc(g.name) + '" tabindex="0" role="button"' : '') + ' title="族群分數＝族內平均均線分數' + (Number.isFinite(g.avg) ? ' ' + g.avg.toFixed(1) : '') + '（' + stBasis(d) + ' 算的），倒數第 N 名；點了看族群成分股">倒數第 ' + (d.groupCount - g.rank + 1) + ' 名・' + wlEsc(g.name) + '</div>' + g.rows.map((r) => {   // 2026-10-20 使用者：欄位縮窄，均分只放在滑鼠提示裡
-
-    const q = getStockQuote(r.code);
-    const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
-    return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="均線分數 ' + r.sum + '（' + stBasis(d) + '）">' +
-      '<span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span><span class="hr-rk">' + r.sum + '分</span>' +
-      '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span></div>';
-  }).join('')).join('');
-  return '<div class="hr-col hr-colw">' + title + ' <span class="hr-rk">' + n + ' 檔</span></div>' +
-    (n ? body : '<div class="hr-note">' + (d.count ? '均線分數符合的今天都在漲，先不列' : '今天沒有符合的股票') + '</div>') + '</div>';
 }
 function homeRankColHtml(title, rows, half, sepLabel, empty, warnOf, warnCls, titleCls){
   let body = '';
@@ -8272,7 +8252,6 @@ function homeRank4Html(){
     '<div class="hr-stack">' +
       homeRedBox(homeLaunchColHtml() +   // 2026-10-18 使用者：昨日強勢股上面加發動；188 搬到 183 下面
         homeStrongColHtml()) +
-      homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +   // 2026-10-19 使用者：183 放在今日強勢股下面
     '</div>' +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
@@ -8282,9 +8261,9 @@ function homeRank4Html(){
     '</div>' +
     // 2026-10-19 使用者：個股漲 2%（22-5）排到族群漲幅 > 2%（12）前面；2026-10-20 使用者又對調回來：族群漲幅 > 2%（12，疊著股期黑龍 75、今日弱勢股）放在個股漲 > 2% 的左邊
     '<div class="hr-stack">' +   // 2026-10-17 使用者：刀劍空(31) 疊在新刀劍空(32) 下面
+      homeRankColHtml('多族群排名(183)', rows188, h.half, '------↑(多方)↑------', '沒有資料', fireOf) +   // 2026-10-19 使用者：183 放在今日強勢股下面；2026-10-21 使用者：183 搬到 188 上面
       homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +   // 2026-10-20 使用者：188 搬到族群漲幅 > 2%（12）原來的位置（倒數第二欄、股期黑龍(75) 上面）
       homeFut75ColHtml() +   // 2026-10-19 使用者：股期黑龍(75) 放到族群漲幅 > 2%（12）下面
-      homeWeakColHtml() +   // 2026-10-20 使用者：今日弱勢股從最右邊一欄搬到股期黑龍(75) 下面
     '</div>' +
     homeDaytradeColsHtml() +   // 2026-10-17 使用者：813／80／75 先做在首頁最右邊一欄（個股漲 > 2% 疊著隔日沖黑龍 80，現在是最右欄）
     '</div>' +
@@ -8363,7 +8342,6 @@ function homeRankFootHtml(total){
     ['隔日沖必殺(813)', '前一個交易日隔日沖 811 名單，今天現價低於開盤價、跌 2.5～4%（跌到 4% 以上不列）、手上 100 張以上的；比例＝今天開盤量（含集合競價）÷ 隔日沖手上張數，≥ 0.7 才列，比例越高越容易出貨。老師盤中常常是空的'],
     ['隔日沖黑龍(80)', '前兩個交易日（今天以前最近兩個名單日）上隔日沖 811 名單、今天收黑K（現價低於開盤）而且下跌，照跌幅小到大排；⭐＝更早以前還上榜過幾次。盤中用即時價，中午 12 點後看比較準'],
     ['股期黑龍(75)', '有股票期貨、均線分數 ≥ 10、今天收黑K，照漲跌幅排；名字前面 *＝處置中。槓桿大，防守黑K低點'],
-    ['🔻今日弱勢股', '跟訊號中心「今日弱勢股」同一份：族群分數（族內平均均線分數，盤中用現價當今天收盤即時重算、收盤後用正式收盤）倒數 10 名裡，均線分數 ≤3、用今日即時行情篩今天沒上漲的股票；「倒數第 N 名」是族群分數名次，不是今天跌幅名次（最右邊一欄，原本 22-35 那欄的位置）'],
   ]);
 }
 // 首頁最後一欄：飆股雷達（2026-10-15 使用者：「盤中形態觀察股」改名飆股雷達，【1】【2】【3】放到首頁原本 177 的位置；
@@ -14069,7 +14047,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-21 08:53:42';
+const BUILD_STAMP = '2026-10-21 09:08:39';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -14939,7 +14917,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・183／188・馬火多(30)／155・30加33／河流多(34)・續抱勿追高／賽馬多(33)・發動／今日強勢股・1+2多(44)／283・族群漲幅(12)・22-5／隔日沖黑龍(80)・今日弱勢股／股期黑龍(75)</div></div>' +
+        '<div class="section-head"><div class="section-title">強勢黑K選股・183／188・馬火多(30)／155・30加33／河流多(34)・續抱勿追高／賽馬多(33)・發動／今日強勢股・1+2多(44)／283・族群漲幅(12)・22-5／隔日沖黑龍(80)／股期黑龍(75)</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -16829,7 +16807,7 @@ function lgRowHtml(o){
     const medal = (k === 2 || k === 3) && s.n <= 11 ? '<b class="lg-medal">' + HW_MEDAL[s.n - 1] + '</b>' : '';
     return '<i class="lg-src ' + cls + '">' + label + (k === 1 ? '' : s.n) + medal + '</i>';
   };
-  return '<div class="lg-row' + (o.lit ? ' lit' : '') + (held ? ' held' : '') + '" data-hw-code="' + wlEsc(o.code) + '" data-hw-name="' + wlEsc(o.name) + '">' +
+  return '<div class="lg-row' + (o.holdNo ? ' hold' : '') + (held ? ' held' : '') + '" data-hw-code="' + wlEsc(o.code) + '" data-hw-name="' + wlEsc(o.name) + '">' +
     '<span class="td-hold" data-lg-hold="' + wlEsc(o.code) + '" title="打勾＝自己有操作（會框起來）">' + (held ? '☑' : '☐') + '</span>' +
     '<span class="lg-grp" style="background:' + hwGroupTint(o.group) + '">' + wlEsc(o.group || '—') + (o.rank ? ' <small>(' + o.rank + ')</small>' + (o.groupAvg > 0 ? '<b class="up">▲</b>' : '🔽') : '') + '</span>' +
     tdMaBall(o.ma) +
