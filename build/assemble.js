@@ -733,9 +733,9 @@ export default {
       }
     }
     if (url.pathname === "/api/kill12") {
-      // 1️⃣2️⃣空（機器人 123，2026-10-18）：後端 5 分K引擎算好的「今天衝高 3% 以上、收在 20MA 下、20MA 往下彎」名單，30 秒快取
+      // 1️⃣2️⃣空（機器人 123，2026-10-18）：後端 5 分K引擎算好的「今天衝高 3% 以上、收在 20MA 下、20MA 往下彎」名單；2026-10-21 使用者：123 比綠卡片慢，快取 30 秒（瀏覽器再 30 秒）→ 10 秒
       try {
-        return await proxyHanstockBars("/api/hub/kill12", 30);
+        return await proxyHanstockBars("/api/hub/kill12", 10);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), items: [] }, { status: 502 });
       }

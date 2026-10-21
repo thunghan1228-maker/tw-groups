@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-21 10:00:35";
+const BUILD_STAMP = "2026-10-21 12:03:38";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -591,6 +591,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 形態觀察股跳窗（2026-10-12 使用者：11:30／12:00／12:30／13:00 像發動一樣跳出來） */
   .launch-alert.k12-alert{background:#047857;top:calc(env(safe-area-inset-top,0px) + 74px);z-index:209;max-width:min(94vw,620px);}
   #k12AlertBox .launch-alert-head{font-size:18px;}
+  #k12AlertBox{cursor:move;} #k12AlertBox .alert-stk{cursor:pointer;}   /* 2026-10-21 使用者：按著卡片哪裡都能拖 */
   #k12AlertBox .launch-alert-body{max-height:min(55vh,460px);overflow:auto;font-size:14px;}
   #k12AlertBox .la-row small{display:block;font-weight:600;opacity:.92;}
   .launch-alert.obs-alert{background:#4c1d95;max-width:min(94vw,680px);width:min(94vw,680px);z-index:211;}
@@ -14047,7 +14048,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-21 10:00:35';
+const BUILD_STAMP = '2026-10-21 12:03:38';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -14135,7 +14136,8 @@ document.addEventListener('click', (e) => {
   if (!s || !s.closest('.pk-alert, .launch-alert')) return;
   openStockChart(s.dataset.alertCode, s.dataset.alertName || '');
 });
-function makeAlertDraggable(el, headSel, key){
+function makeAlertDraggable(el, headSel, key, opts){
+  const anywhere = !!(opts && opts.anywhere);   // 2026-10-21 使用者：1️⃣2️⃣空可空卡片滑鼠按著卡片哪裡都能拖（不只標題列）；手機觸控仍只有標題列能拖（卡片內容要能捲動）
   const place = (pos) => { const p = clampLaunchAlertPos(el, pos.left, pos.top); el.style.left = p.left + 'px'; el.style.top = p.top + 'px'; el.style.transform = 'none'; };
   const save = () => {
     const rect = el.getBoundingClientRect();
@@ -14147,7 +14149,12 @@ function makeAlertDraggable(el, headSel, key){
   el.addEventListener('click', (e) => { if (e.target.closest('.launch-alert-close, .pk-alert-close') && el.style.left) save(); }, true);
   let drag = null;
   el.addEventListener('pointerdown', (e) => {
-    if (!e.target.closest(headSel) || e.target.closest('button')) return;
+    if (e.target.closest('button')) return;
+    if (!e.target.closest(headSel)){
+      if (!anywhere || e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('a, input, .alert-stk')) return;
+      const sc = e.target.closest('.launch-alert-body');   // 捲軸本身要留給捲動
+      if (sc && sc.scrollHeight > sc.clientHeight && e.clientX >= sc.getBoundingClientRect().left + sc.clientWidth) return;
+    }
     const rect = el.getBoundingClientRect();
     drag = { x: e.clientX, y: e.clientY, left: rect.left, top: rect.top };
     el.setPointerCapture(e.pointerId);
@@ -15831,6 +15838,7 @@ setInterval(() => {
 // 關掉頁面期間新出現的，下次打開會補跳。
 let k12AlertRows = [];
 let k12AlertSeen = null;   // { date, keys:Set }
+const k12AlertInfo = new Map();   // 跳出過的：key → { time, at }（✕ 關掉就清空）
 const K12_ALERT_KEY = 'k12AlertSeen';
 function k12AlertLoadSeen(today){
   if (k12AlertSeen && k12AlertSeen.date === today) return k12AlertSeen;
@@ -15866,15 +15874,18 @@ function renderK12AlertBox(){
   if (!el){
     el = document.createElement('div');
     el.id = 'k12AlertBox'; el.className = 'launch-alert k12-alert';
-    el.addEventListener('click', (e) => { if (e.target.closest('.launch-alert-close')){ k12AlertRows = []; renderK12AlertBox(); } });
+    el.addEventListener('click', (e) => { if (e.target.closest('.launch-alert-close')){ k12AlertRows = []; k12AlertInfo.clear(); renderK12AlertBox(); } });
     document.body.appendChild(el);
-    makeAlertDraggable(el, '.launch-alert-head', 'k12AlertPos');
+    makeAlertDraggable(el, '.launch-alert-head', 'k12AlertPos', { anywhere: true });
   }
   const rows = k12AlertRows.slice().sort((a, b) => b.at - a.at);
+  const oldBody = el.querySelector('.launch-alert-body'), keepTop = oldBody ? oldBody.scrollTop : 0;   // 20 秒重畫一次，捲到哪要留著
   el.innerHTML = '<div class="launch-alert-head">🔻 1️⃣2️⃣空・可空 ' + rows.length + ' 檔<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
     '<div class="launch-alert-body">' + rows.map((r) => '<div class="la-row"><span class="launch-alert-time">' + r.time + '</span> <span class="alert-stk" data-alert-code="' + wlEsc(r.code) +
       '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + r.name) + '</span>（' + wlEsc(r.group) + '）' + botPct(r.pct) +
       '<small>1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 沒過 1高 → 可空</small></div>').join('') + '</div>';
+  const newBody = el.querySelector('.launch-alert-body');
+  if (newBody && keepTop) newBody.scrollTop = keepTop;
 }
 async function k12AlertTick(){
   if (!lastData || !lastData.groups || !lastData.groups.length) return;
@@ -15895,12 +15906,15 @@ async function k12AlertTick(){
   rows.forEach((r) => seen.keys.add(r.key));
   const first = seen.fresh; seen.fresh = false;
   k12AlertSaveSeen();
-  if (first || !fresh.length) return;      // 今天第一次開：現有的當舊的，不跳
+  // 2026-10-21 使用者：跳出來的綠卡片（33 檔）跟機器人 123（31 檔）名單不一樣——卡片原本只增不減，股票後來漲過去、掉出 123 名單還留著，
+  // 漲跌也是跳出那一刻的。現在卡片＝「跳出過、而且現在還在 123 名單裡」的：掉出名單的拿掉（卡片空了自己消失）、回來的再出現，漲跌用現價；
+  // 時間仍是跳出那一刻（✕ 關掉就清掉，之後只有新的才再跳）。
+  if (first) return;      // 今天第一次開：現有的當舊的，不跳
   const time = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
-  fresh.forEach((r) => { r.time = time; r.at = Date.now(); });
-  const have = new Set(fresh.map((r) => r.key));
-  k12AlertRows = fresh.concat(k12AlertRows.filter((r) => !have.has(r.key))).slice(0, 40);
+  fresh.forEach((r) => { k12AlertInfo.set(r.key, { time, at: Date.now() }); });
+  k12AlertRows = rows.filter((r) => k12AlertInfo.has(r.key)).map((r) => Object.assign({}, r, k12AlertInfo.get(r.key))).slice(0, 40);
   renderK12AlertBox();
+  if (!fresh.length) return;
   if (alertsEnabled) launchBeep();
   if ('Notification' in window && Notification.permission === 'granted'){
     try {
@@ -15909,7 +15923,7 @@ async function k12AlertTick(){
     } catch (e) { /* 跳不出來就算了 */ }
   }
 }
-setInterval(k12AlertTick, 60000);
+setInterval(k12AlertTick, 20000);   // 2026-10-21 使用者：機器人 123 比綠卡片慢——後端 5 分K 一收完名單就變，每分鐘看一次太慢，改 20 秒
 setTimeout(k12AlertTick, 9000);
 // ---- 飆股雷達（2026-10-07 使用者：照老師 App 的飆股雷達做一個，條件我們自己算）----
 // 後端 /api/grail-radar：嗨投資紫殺四個聖杯 15 個邏輯，每個邏輯照固定時間點（盤中證交所即時報價、收盤後官方日K）篩出的名單，每天保存。
@@ -16403,7 +16417,7 @@ function tdLiveRow(r, zone, big){
     ma: hwMaScore(r.code, price), big: b.pct ?? null, avg: b.avgAmount ?? null, hi, partial: b.pct !== null && b.pct !== undefined && !b.complete };
 }
 function tdLiveSnap(m){
-  const k = botFetchCache('kill12', '/api/kill12', 30e3);
+  const k = botFetchCache('kill12', '/api/kill12', 15e3);
   const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
   const quote = new Map();
   lastData.groups.forEach((g) => g.stocks.forEach((s) => quote.set(s.code, s)));
@@ -20103,7 +20117,7 @@ function botAnswer(raw){
   // 還有一條篩選沒找到，所以盤中大跌時會比老師多列。照族群名次排（同族漲的在前），跌 5% 以上放收割區域；後面的 🔪⚔️🔰 是族群明細的記號。
   if (q === '123'){
     const title = '1️⃣2️⃣空(123)';
-    const k = botFetchCache('kill12', '/api/kill12', 30e3);
+    const k = botFetchCache('kill12', '/api/kill12', 15e3);
     if (!k) return wrap(title, botLine('讀取中…', 'bot-dim'));
     if (k.status !== 'ok') return wrap(title, botLine('後端暫時連不上，等一下再試', 'bot-dim'));
     if (!k.tracked) return wrap(title, botLine('後端今天還沒有 5 分K（盤中 9 點以後、或收盤回補完才有）', 'bot-dim') + otcFoot());
@@ -22566,9 +22580,9 @@ export default {
       }
     }
     if (url.pathname === "/api/kill12") {
-      // 1️⃣2️⃣空（機器人 123，2026-10-18）：後端 5 分K引擎算好的「今天衝高 3% 以上、收在 20MA 下、20MA 往下彎」名單，30 秒快取
+      // 1️⃣2️⃣空（機器人 123，2026-10-18）：後端 5 分K引擎算好的「今天衝高 3% 以上、收在 20MA 下、20MA 往下彎」名單；2026-10-21 使用者：123 比綠卡片慢，快取 30 秒（瀏覽器再 30 秒）→ 10 秒
       try {
-        return await proxyHanstockBars("/api/hub/kill12", 30);
+        return await proxyHanstockBars("/api/hub/kill12", 10);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), items: [] }, { status: 502 });
       }
