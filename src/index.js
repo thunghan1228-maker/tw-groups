@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-21 12:03:38";
+const BUILD_STAMP = "2026-10-21 22:03:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -175,6 +175,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-lsec{padding:4px 8px;font-size:12px;font-weight:800;color:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;}
   .hr-lsec.h4{background:#b7791f;} .hr-lsec.h3{background:#c2410c;} .hr-lsec.h2{background:#2563eb;} .hr-lsec small{font-weight:600;opacity:.9;}
   .hr-lrow{display:block;padding:5px 8px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;}
+  .gm-chipstar{color:#d4a017;font-size:13px;margin-left:2px;font-weight:700;}   /* 2026-10-21 連 2 週以上籌碼增加的 ★ */
   .hr-lrow:hover{background:rgba(201,169,140,0.10);} .hr-lrow.hold{background:rgba(160,160,160,.20);}
   .hr-lrow .l1{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;}
   .hr-lrow .l1 .hr-name{overflow:hidden;text-overflow:ellipsis;min-width:0;}
@@ -5557,6 +5558,8 @@ function openGroupDetail(groupName){
       (Math.abs(c[1]) >= 2 ? '，連 ' + Math.abs(c[1]) + ' 週' + (c[1] > 0 ? '增加' : '減少') : '') + (c[2] ? '，買超榜第 ' + c[2] + ' 名' : '') + '">' + (c[0] > 0 ? '+' : '') + c[0].toFixed(2) + '%' + streak + '</span>';
   };
   const sorted = g.stocks.slice().sort((a, b) => b.changePercent - a.changePercent);
+  // 2026-10-21 使用者（老師族群籌碼圖：★＝連 2 週以上增加）：集保大戶連續兩週以上增加的股票，名字後面加一顆 ★
+  const chipStar = (code) => { const c = chipOf(code); return c && c[1] >= 2 ? '<span class="gm-chipstar" title="集保大戶持股連 ' + c[1] + ' 週增加">★</span>' : ''; };
   const hm = groupHorseMarks(g), rm = groupRiseMarks(g);
   const hmHtml = (code) => {
     const x = hm.get(code);
@@ -5589,7 +5592,7 @@ function openGroupDetail(groupName){
     const prevClose = price / (1 + s.changePercent / 100);
     const changeAmt = price - prevClose;
     return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-      '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + hmHtml(s.code) + bmHtml(s.code) + wlStarHtml(s.code, s.name) + '</div>' +
+      '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + chipStar(s.code) + hmHtml(s.code) + bmHtml(s.code) + wlStarHtml(s.code, s.name) + '</div>' +
       stockValueColsHtml(price, changeAmt, s.changePercent, s).replace('<div class="srow-right">', '<div class="srow-right">' + holdCell(s.code)).replace(/<\\/div>$/, chipCell(s.code) + '</div>') +
     '</div>';
   }).join('');
@@ -14048,7 +14051,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-21 12:03:38';
+const BUILD_STAMP = '2026-10-21 22:03:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19846,8 +19849,12 @@ function botGroupBlock(g, h, opts){
   const list = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent) && s.changePercent >= min).sort((a, b) => b.changePercent - a.changePercent);
   const mv = r && r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? BOT_UP_IC + (-r.drop) : '') : '';
   const disp = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].disposition);
+  // 2026-10-21 使用者：連續兩週籌碼增加的多一顆星（老師族群籌碼圖的 ★＝集保大戶連 2 週以上增加）；籌碼資料沒到之前先不標，到了會自動重畫
+  if (full) gmChipLoad();
+  const cdata = full && gmChipState.data && gmChipState.data.status === 'ok' ? gmChipState.data.chips : null;
+  const chipStarTxt = (code) => (cdata && cdata[code] && cdata[code][1] >= 2 ? '<span class="gm-chipstar" title="集保大戶持股連 ' + cdata[code][1] + ' 週增加">★</span>' : '');
   const line = (s) => botLine((opts && opts.me === s.code ? '👉' : '') + (full && disp(s.code) ? '*' : '') + botStk(s.code, s.name, ' <span class="' + dirClass(s.changePercent) + '">' + botPct(s.changePercent) + '</span>' +
-    ((hm.get(s.code) || {}).mk || '') + ((rm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '')));
+    ((hm.get(s.code) || {}).mk || '') + ((rm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '') + chipStarTxt(s.code)));
   const head = opts && opts.noHead ? '' : botLine(botGrpPill(g.name, '-(' + (r ? r.rank : '?') + ')' + mv + ' ' + botPct(g.avgChange), g.avgChange) + (full ? ' <span class="bot-dim">' + list.length + ' 檔</span>' : ''), 'bot-head');
   if (!list.length) return head + botLine('（沒有符合的）', 'bot-dim');
   if (!full) return head + list.map(line).join('');

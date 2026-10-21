@@ -97,6 +97,7 @@
   .hr-lsec{padding:4px 8px;font-size:12px;font-weight:800;color:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;}
   .hr-lsec.h4{background:#b7791f;} .hr-lsec.h3{background:#c2410c;} .hr-lsec.h2{background:#2563eb;} .hr-lsec small{font-weight:600;opacity:.9;}
   .hr-lrow{display:block;padding:5px 8px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;}
+  .gm-chipstar{color:#d4a017;font-size:13px;margin-left:2px;font-weight:700;}   /* 2026-10-21 連 2 週以上籌碼增加的 ★ */
   .hr-lrow:hover{background:rgba(201,169,140,0.10);} .hr-lrow.hold{background:rgba(160,160,160,.20);}
   .hr-lrow .l1{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;}
   .hr-lrow .l1 .hr-name{overflow:hidden;text-overflow:ellipsis;min-width:0;}
@@ -5477,6 +5478,8 @@ function openGroupDetail(groupName){
       (Math.abs(c[1]) >= 2 ? '，連 ' + Math.abs(c[1]) + ' 週' + (c[1] > 0 ? '增加' : '減少') : '') + (c[2] ? '，買超榜第 ' + c[2] + ' 名' : '') + '">' + (c[0] > 0 ? '+' : '') + c[0].toFixed(2) + '%' + streak + '</span>';
   };
   const sorted = g.stocks.slice().sort((a, b) => b.changePercent - a.changePercent);
+  // 2026-10-21 使用者（老師族群籌碼圖：★＝連 2 週以上增加）：集保大戶連續兩週以上增加的股票，名字後面加一顆 ★
+  const chipStar = (code) => { const c = chipOf(code); return c && c[1] >= 2 ? '<span class="gm-chipstar" title="集保大戶持股連 ' + c[1] + ' 週增加">★</span>' : ''; };
   const hm = groupHorseMarks(g), rm = groupRiseMarks(g);
   const hmHtml = (code) => {
     const x = hm.get(code);
@@ -5509,7 +5512,7 @@ function openGroupDetail(groupName){
     const prevClose = price / (1 + s.changePercent / 100);
     const changeAmt = price - prevClose;
     return '<div class="stock-row" data-code="' + s.code + '" data-name="' + s.name + '" tabindex="0" role="button">' +
-      '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + hmHtml(s.code) + bmHtml(s.code) + wlStarHtml(s.code, s.name) + '</div>' +
+      '<div class="srow-left"><span class="scode">' + s.code + '</span><span class="sname">' + s.name + '</span>' + chipStar(s.code) + hmHtml(s.code) + bmHtml(s.code) + wlStarHtml(s.code, s.name) + '</div>' +
       stockValueColsHtml(price, changeAmt, s.changePercent, s).replace('<div class="srow-right">', '<div class="srow-right">' + holdCell(s.code)).replace(/<\/div>$/, chipCell(s.code) + '</div>') +
     '</div>';
   }).join('');
@@ -19766,8 +19769,12 @@ function botGroupBlock(g, h, opts){
   const list = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent) && s.changePercent >= min).sort((a, b) => b.changePercent - a.changePercent);
   const mv = r && r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? BOT_UP_IC + (-r.drop) : '') : '';
   const disp = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].disposition);
+  // 2026-10-21 使用者：連續兩週籌碼增加的多一顆星（老師族群籌碼圖的 ★＝集保大戶連 2 週以上增加）；籌碼資料沒到之前先不標，到了會自動重畫
+  if (full) gmChipLoad();
+  const cdata = full && gmChipState.data && gmChipState.data.status === 'ok' ? gmChipState.data.chips : null;
+  const chipStarTxt = (code) => (cdata && cdata[code] && cdata[code][1] >= 2 ? '<span class="gm-chipstar" title="集保大戶持股連 ' + cdata[code][1] + ' 週增加">★</span>' : '');
   const line = (s) => botLine((opts && opts.me === s.code ? '👉' : '') + (full && disp(s.code) ? '*' : '') + botStk(s.code, s.name, ' <span class="' + dirClass(s.changePercent) + '">' + botPct(s.changePercent) + '</span>' +
-    ((hm.get(s.code) || {}).mk || '') + ((rm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '')));
+    ((hm.get(s.code) || {}).mk || '') + ((rm.get(s.code) || {}).mk || '') + ((bm.get(s.code) || {}).mk || '') + chipStarTxt(s.code)));
   const head = opts && opts.noHead ? '' : botLine(botGrpPill(g.name, '-(' + (r ? r.rank : '?') + ')' + mv + ' ' + botPct(g.avgChange), g.avgChange) + (full ? ' <span class="bot-dim">' + list.length + ' 檔</span>' : ''), 'bot-head');
   if (!list.length) return head + botLine('（沒有符合的）', 'bot-dim');
   if (!full) return head + list.map(line).join('');
