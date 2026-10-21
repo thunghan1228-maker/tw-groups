@@ -8185,8 +8185,7 @@ function homeRank4Html(){
       // 2026-10-21 使用者：河流多(34) 搬到第 6 欄 30加33／賽馬多(33) 下面，一起放在紅框裡
     '</div>' +
     '<div class="hr-stack">' +   // 2026-10-16 使用者：股票期貨排名(155) 疊在馬火多(30) 下面
-      homeRedBox(homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : [])) +
-      home155ColHtml() +
+      homeRedBox(homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : [])) +   // 2026-10-21 使用者：股票期貨排名(155) 搬到發動下面
     '</div>' +
     '<div class="hr-stack">' +
       homeRedBox(homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : []) +   // 首頁 33、34 只列族群前 HOME_334_TOP_GROUPS 名，三欄都有才算   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
@@ -8198,6 +8197,7 @@ function homeRank4Html(){
     // 2026-10-16 使用者：188 疊到昨日強勢股下面；283 自己一欄，放在右邊
     '<div class="hr-stack">' +
       homeRedBox(homeLaunchColHtml()) +   // 2026-10-18 使用者：昨日強勢股上面加發動；2026-10-21 使用者：首頁的今日強勢股拿掉（訊號中心的分頁還在）
+      home155ColHtml() +   // 2026-10-21 使用者：股票期貨排名(155) 排到發動下面（原本在馬火多(30) 下面）
     '</div>' +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
@@ -8224,7 +8224,7 @@ const hrHelpTable = (title, head, rows, cls) => '<div class="hr-help-card' + (cl
 function homeRankFootHtml(total){
   return hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
-    ['股票期貨排名(155)', '固定 ' + FUT155_GROUPS.length + ' 族', '疊在馬火多(30) 下面；每族只算有股票期貨的成分股，用股期近月的漲跌（開盤前就有）：名次＝它們平均漲跌在全部族群裡的排名，🔺🔽 跟昨天比，最右邊 %＝平均漲跌；空方線＝照名次比例畫（排在後半的在線下）；股期報價沒到時標「現股價」'],
+    ['股票期貨排名(155)', '固定 ' + FUT155_GROUPS.length + ' 族', '疊在發動下面；每族只算有股票期貨的成分股，用股期近月的漲跌（開盤前就有）：名次＝它們平均漲跌在全部族群裡的排名，🔺🔽 跟昨天比，最右邊 %＝平均漲跌；空方線＝照名次比例畫（排在後半的在線下）；股期報價沒到時標「現股價」'],
     ['多族群排名(183)', '固定 ' + RANK183_GROUPS.size + ' 族（跟新刀劍空(32)、1️⃣2️⃣空(123) 同一批：199 的 ' + KILL193_GROUPS.size + ' 族＋188 的 ' + RANK188_GROUPS.size + ' 族＋AI眼鏡、太陽能、設備股，重複的合併）', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 3 檔（漲最多的）'],
     ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
     ['空族群必殺(193)', '固定 ' + KILL193_ONLY_GROUPS.size + ' 族', '199 的 ' + KILL193_GROUPS.size + ' 族＋小光電；名次比昨天掉 5 名以上的；掉 1～4 名要有 ⚔️（族裡六成以上股票低於前天收盤，數字＝比例）才列；🔪＝昨天族群名次前 25 名、今天平均下跌；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
