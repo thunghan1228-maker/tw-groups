@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-21 23:16:34";
+const BUILD_STAMP = "2026-10-21 23:45:26";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7039,7 +7039,7 @@ function race333Model(){
   const horses = [];
   const horseSeen = new Set();
   ranked.forEach((g, gi) => {
-    if (gi + 1 > horseLimit || !KILL193_GROUPS.has(g.name)) return;
+    if (gi + 1 > horseLimit || !HORSE_GROUPS.has(g.name)) return;
     const valid = g.stocks.filter((s) => s.price !== null && s.price !== undefined).slice().sort((a, b) => b.changePercent - a.changePercent);
     // 族內前 1/3 四捨五入（2026-10-17 老師 10/16 那份有小電組第 7 名鉅橡（20 檔）、散熱第 3 名高力（8 檔）；13→4、16→5、21→7 照舊）
     const take = Math.max(1, Math.round(valid.length / 3));
@@ -7591,14 +7591,14 @@ function race333Html(){
       '<div class="race-sub">「續抱勿追高」＝賽馬多裡漲超過 7% 的（不是可進場名單，已經漲多了）・「出現」＝第一次進這個名單的時間，早出現的在上面、新出現的往下排（跟今日即時空的刀劍空一樣）・' + condsNote + '・' + dailyNote + '</div>' +
       (over7 ? raceStockListHtml(raceBySeen(m.horses.filter((r) => r.pct > 7), 'over7', true), { seen: true, dates: m.dates, conditions: true, m, both3334: true }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '<div class="race-note">賽馬多裡沒有漲超過 7% 的</div>') + '</div>' +
     '<div class="race-block"><div class="race-head">👑🐎🚀馬火多加賽馬多（30 加 33） ' + stamp + '</div>' +
-      '<div class="race-sub">兩邊都有的才列：同時符合賽馬多 33 的條件（199 那 ' + KILL193_GROUPS.size + ' 族裡族群前 ' + m.horseLimit + '、族內前 1/3、≥ 櫃買%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
+      '<div class="race-sub">兩邊都有的才列：同時符合賽馬多 33 的條件（199 那 ' + KILL193_GROUPS.size + ' 族＋AI眼鏡、太陽能、設備股，共 ' + HORSE_GROUPS.size + ' 族裡族群前 ' + m.horseLimit + '、族內前 1/3、≥ 櫃買%）和馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
       raceStockListHtml(raceBySeen(triple, 'triple'), { seen: true, fire: true, dates: m.dates, conditions: true, m, both3033: true }) + '</div>' +
     '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
       '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
       raceStockListHtml(raceBySeen(both, 'both'), { seen: true, dates: m.dates, conditions: true, m, both3334: true }) + '</div>' +
     // 2026-09-28 使用者：33／34 各自單獨也要列出來（之前只有跟別的條件合在一起才看得到）。
     '<div class="race-block"><div class="race-head">🐎賽馬多(33) ' + stamp + '</div>' +
-      '<div class="race-sub">只看 199 那 ' + KILL193_GROUPS.size + ' 族裡族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）的族群・族內前 1/3（四捨五入）・現價 ≥ 櫃買%・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・不限漲幅（超過 7% 的另外放最上面「續抱勿追高」，這裡兩邊都列）・' + condsNote + '</div>' +
+      '<div class="race-sub">只看 199 那 ' + KILL193_GROUPS.size + ' 族＋AI眼鏡、太陽能、設備股（共 ' + HORSE_GROUPS.size + ' 族）裡族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）的族群・族內前 1/3（四捨五入）・現價 ≥ 櫃買%・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・不限漲幅（超過 7% 的另外放最上面「續抱勿追高」，這裡兩邊都列）・' + condsNote + '</div>' +
       raceStockListHtml(raceBySeen(horses, 'horses'), { seen: true, dates: m.dates, conditions: true, m, limit: m.horseLimit, limitLabel: '33' }) + '</div>' +
     '<div class="race-block"><div class="race-head">🌊河流多(34) ' + stamp + '</div>' +
       '<div class="race-sub">族群排名前 ' + m.riverLimit + '（共 ' + m.total + ' 個、比 33 的門檻寬）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
@@ -7714,6 +7714,8 @@ const RANK188_GROUPS = new Set(['光學鏡頭', '軍工', '被動元件', '面�
 // 再加 AI眼鏡、太陽能、設備股，共 29 族；188 自己照舊只看原本 13 族（RANK188_GROUPS）
 const BLADE_GROUPS = new Set([...KILL193_GROUPS, ...RANK188_GROUPS, 'AI眼鏡', '太陽能', '設備股']);
 const RANK183_GROUPS = BLADE_GROUPS;
+// 賽馬多(33)（連帶 30加33、33加34）的族群範圍（2026-10-21 使用者：33 也加 AI眼鏡、太陽能、設備股）：原本 199 的 23 族＋這三族，共 26 族；河流多(34) 照舊只看 199 的 23 族＋188 的 13 族
+const HORSE_GROUPS = new Set([...KILL193_GROUPS, 'AI眼鏡', '太陽能', '設備股']);
 function homeRankRows(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
   const groups = rankedGroupsOf(lastData.groups);
@@ -14065,7 +14067,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-21 23:16:34';
+const BUILD_STAMP = '2026-10-21 23:45:26';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
