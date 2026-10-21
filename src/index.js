@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-21 08:48:51";
+const BUILD_STAMP = "2026-10-21 08:53:42";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7798,7 +7798,7 @@ function home283ColHtml(list){
 // - 空方線＝照名次比例畫（2026-10-20 起全天；原本開盤前用台指期，被老師 10/20 08:51、09:00 兩份推翻）；盤中照名次比例畫（2026-10-19 老師 11:28、11:38 兩份）。
 // - 🔺🔽＝跟昨天比（昨天用現股收盤算）；最右邊 %＝那幾檔的平均漲跌。
 // - 族群清單會變：10/16 收盤 13 族、10/16 開盤前多 IP、10/15 開盤前再多探針卡，先放出現過的 15 族。
-//   「↓(櫃買)↓」線、「⚠️多🚀」意思還不知道，先不放。
+//   「↓(櫃買)↓」線＝櫃買指數漲跌的位置（2026-10-21 老師 08:48 畫在最後一行；比櫃買弱的在線下）；「⚠️多🚀」意思還不知道，先不放。
 const FUT155_GROUPS = ['低軌衛星', 'PCB', '記憶體', 'AI', '矽晶圓', '面板', '二極體', '小電組', '航運', '石英', '被動元件', '光學鏡頭', '矽光子', 'IP', '探針卡'];
 const f155State = { data: null, at: 0, loading: false };
 function f155Load(){
@@ -7842,21 +7842,28 @@ function fut155Model(){
   // 2026-10-20 老師 08:51、09:00 兩份開盤前也是照名次比例畫線（08:51 AI(18) 0.00% 在線上、矽晶圓(31) 0.00% 在線下，同樣 0.00% 不可能是台指期的位置；
   // 09:00 探針卡 0.00% 排第 29 在線下，台指期當時 -0.8%），所以 10/15 那次「台指期」是巧合，全天都照名次比例（half）。
   const tx = null;
-  return { rows, total: today.length, half: Math.round(today.length * 35 / 67), tx, futures: !!fq };
+  // 2026-10-21 老師 08:48：最後一行「↓(櫃買)↓」——櫃買指數漲跌的位置（開盤前櫃買還是昨天的 -1.7% 左右，比所有族群都弱，線畫在最下面）；
+  // 比櫃買指數弱的族群在線下，跟刀劍空、河流多那些「不比櫃買強」同一個意思
+  const otcKnown = typeof otcStrengthLatest !== 'undefined' && otcStrengthLatest && Number.isFinite(otcStrengthLatest.changePct);
+  const otcPct = otcKnown ? otcStrengthLatest.changePct : (lastData.quoteTime && String(lastData.quoteTime) < '09:00' ? 0 : null);   // 開盤前櫃買還沒開、漲跌 0
+  return { rows, total: today.length, half: Math.round(today.length * 35 / 67), tx, futures: !!fq, otcPct };
 }
 function home155ColHtml(){
   f155Load();
   const f = fut155Model();
   const title = '<div class="hr-title">股票期貨排名(155)' + (f && !f.futures ? ' <span class="hr-rk" title="股期報價還沒到，先用現股價格算">現股價</span>' : '') + '</div>';
   if (!f) return '<div class="hr-col">' + title + '<div class="hr-note">' + (stockFlags && Object.keys(stockFlags).length ? '沒有資料' : '讀取中…') + '</div></div>';
-  let body = '', sepDone = false;
+  let body = '', sepDone = false, otcDone = f.otcPct === null;
+  const otcSep = '<div class="hr-sep" title="櫃買指數 ' + (f.otcPct === null ? '' : fmt(f.otcPct)) + '%：比櫃買弱的在線下">------↓(櫃買)↓------</div>';
   f.rows.forEach((r) => {
     if (!sepDone && (f.tx !== null ? r.avg < f.tx : r.rank > f.half)){
       body += '<div class="hr-sep"' + (f.tx !== null ? ' title="台指期 ' + fmt(f.tx) + '%：比台指期弱的在線下"' : '') + '>------↓(空方)↓------</div>';
       sepDone = true;
     }
+    if (!otcDone && r.avg < f.otcPct){ body += otcSep; otcDone = true; }
     body += homeRankRowHtml(r);
   });
+  if (!otcDone && f.rows.length) body += otcSep;
   return '<div class="hr-col">' + title + (f.rows.length ? body : '<div class="hr-note">沒有資料</div>') + '</div>';
 }
 // ---- 即將入獄／即將出關／已出關（2026-10-16 使用者：照老師的出關日(61)、出獄股(62)；放在首頁最下面說明欄最前面，
@@ -14062,7 +14069,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-21 08:48:51';
+const BUILD_STAMP = '2026-10-21 08:53:42';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
