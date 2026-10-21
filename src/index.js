@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 00:26:34";
+const BUILD_STAMP = "2026-10-22 00:30:15";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -159,6 +159,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-bear-pill{display:inline-flex;align-items:baseline;gap:4px;font-weight:900;min-width:0;overflow:hidden;}
   .hr-bear-pill .hr-name{font-weight:900;}
   .hr-bear-pill.up .hr-code,.hr-bear-pill.up .hr-name{color:var(--up);} .hr-bear-pill.down .hr-code,.hr-bear-pill.down .hr-name{color:var(--down);}
+  .hr-title.yel{background:#d49a00;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35);} .hr-title.yel .hr-rk{color:#fff;}   /* 2026-10-21 使用者：30加33加34、發動、183、族群漲幅 > 2%(12) 四欄抬頭黃底白字 */
   .hr-title.bear{background:#15803d;color:#fff;} .hr-title.bear .hr-rk{color:#fff;}   /* 2026-10-16 使用者：193／199／刀劍空(32) 抬頭綠底白字 */
   .hr-col{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
   .hr-title{padding:8px 10px;background:#4a3d34;font-weight:800;font-size:15px;color:var(--text);white-space:nowrap;}
@@ -8088,9 +8089,9 @@ function homeLongColsHtml(){
   return wrap('<div class="hr-col">' + head(multi, 1) + colBody(0, cut) + '</div>',
     '<div class="hr-col">' + head(multi, 2) + colBody(cut, rows.length) + note + '</div>');
 }
-function homeStockColHtml(title, list, emptyText){
+function homeStockColHtml(title, list, emptyText, titleCls){
   const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
-  return '<div class="hr-col"><div class="hr-title">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
+  return '<div class="hr-col"><div class="hr-title' + (titleCls ? ' ' + titleCls : '') + '">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
     (rows.length ? rows.map(homeStockRowHtml).join('') : '<div class="hr-note">' + (emptyText || '目前沒有符合的股票') + '</div>') + '</div>';
 }
 // 首頁第一欄最下面的刀劍空(32)（2026-10-15 使用者：放在 30加33加34 下面），照老師的格式分三段：多方打少／強空積極／收割區域，
@@ -8212,7 +8213,7 @@ function homeLaunchColHtml(){
   const day = brewSessionDate();
   const label = day && day !== twTodayStr() ? String(day).slice(5).replace('-', '/') + '・' : '';
   // 2026-10-19 使用者：標題「N 檔」後面加一個灰底的「曾發動」，說明灰底那幾列的意思
-  return '<div class="hr-col"><div class="hr-title">🚀發動 <span class="hr-rk">' + label + rows.length + ' 檔</span> <span class="hr-fallen-tag" title="灰底＝曾發動：發動過、現在跌回箱頂下">曾發動</span></div>' +
+  return '<div class="hr-col"><div class="hr-title yel">🚀發動 <span class="hr-rk">' + label + rows.length + ' 檔</span> <span class="hr-fallen-tag" title="灰底＝曾發動：發動過、現在跌回箱頂下">曾發動</span></div>' +
     (latest.length ? latest.map(row).join('') : '<div class="hr-note">' + (brewLaunchData ? '今天還沒有' : '讀取中…') + '</div>') + '</div>';
 }
 // 發動紀錄現在的狀態：'launch'＝還站在箱頂上、'fallen'＝發動過又跌回箱頂下、null＝判斷不了（沒報價等，照原本當發動列）。跟今日即時多的「🚀 發動／↩ 曾發動」同一套
@@ -8262,7 +8263,7 @@ function home12ColHtml(h){
     return homeRankRowHtml(r) + tops.map((top, i) => '<div class="hr-warn hr-top3"><span>' + ['👑', '🥈', '🥉'][i] + '</span><span class="hr-stk" data-code="' + top.code + '" data-name="' + top.name + '" tabindex="0" role="button">' + top.code + top.name +
       ' <span class="' + dirClass(top.changePercent) + '">' + fmt(top.changePercent) + '%</span></span></div>').join('');
   }).join('');
-  return '<div class="hr-col"><div class="hr-title">族群漲幅 &gt; 2%(12) <span class="hr-rk">' + rows.length + ' 族</span></div>' +
+  return '<div class="hr-col"><div class="hr-title yel">族群漲幅 &gt; 2%(12) <span class="hr-rk">' + rows.length + ' 族</span></div>' +
     '<div class="hr-note">（排除入選183族群）</div>' +   // 2026-10-21 使用者：標題下面補一行說明
     (body || '<div class="hr-note">目前沒有族群漲超過 2%（排除入選183族群後）</div>') + '</div>';
 }
@@ -8314,7 +8315,7 @@ function homeRank4Html(){
       homeRedBox(homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : [])) +   // 2026-10-21 使用者：股票期貨排名(155) 搬到發動下面
     '</div>' +
     '<div class="hr-stack">' +
-      homeRedBox('<div class="hr-pinkname">' + homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : []) + '</div>' +   // 首頁 33、34 只列族群前 HOME_334_TOP_GROUPS 名，三欄都有才算   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
+      homeRedBox('<div class="hr-pinkname">' + homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : [], '', 'yel') + '</div>' +   // 首頁 33、34 只列族群前 HOME_334_TOP_GROUPS 名，三欄都有才算   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
         // 2026-10-16 使用者：首頁的河流多(34)、賽馬多(33) 只列族群名次前 10 名的；訊號中心盤中333 照舊全部列
         homeStockColHtml('🐎賽馬多(33)', m ? m.horses.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
         // 2026-10-21 使用者：30加33 下面再加河流多(34)，也在紅框裡（原本放在第 4 欄族群漲幅 > 2%（12）下面）
@@ -8329,7 +8330,7 @@ function homeRank4Html(){
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
     '<div class="hr-stack">' +   // 2026-10-17 使用者：刀劍空(31) 疊在新刀劍空(32) 下面
-      homeRedBox(homeRankColHtml('多族群排名(183)', rows183, h.half, '------↑(多方)↑------', '沒有資料', fireOf)) +   // 2026-10-19 使用者：183 放在今日強勢股下面；2026-10-21 使用者：183 搬到 188 上面、加紅框（跟發動、1+2多(44) 一樣）
+      homeRedBox(homeRankColHtml('多族群排名(183)', rows183, h.half, '------↑(多方)↑------', '沒有資料', fireOf, undefined, 'yel')) +   // 2026-10-19 使用者：183 放在今日強勢股下面；2026-10-21 使用者：183 搬到 188 上面、加紅框（跟發動、1+2多(44) 一樣）
     '</div>' +
     '<div class="hr-stack">' +
       homeRedBox(home12ColHtml(h)) +   // 2026-10-21 使用者：族群漲幅 > 2%（12）搬到發動右邊、183 左邊，自己一欄（加粗紅框）；2026-10-21 使用者：183 跟 12 對調，183 在左、12 在右
@@ -14127,7 +14128,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 00:26:34';
+const BUILD_STAMP = '2026-10-22 00:30:15';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
