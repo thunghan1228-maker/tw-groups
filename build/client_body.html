@@ -88,6 +88,7 @@
   .hr-row:hover{background:rgba(201,169,140,0.08);}
   .hr-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
   .hr-name{font-weight:700;}
+  .hr-pinkname{display:contents;} .hr-pinkname .hr-name{color:#ff7ab8;font-weight:900;}   /* 2026-10-21 使用者：30加33加34 的股名改粉紅粗體字 */
   .hr-rk{color:var(--muted);}
   .hr-code{color:var(--muted);font-size:12px;}
   .hr-avg{margin-left:auto;font-size:12px;}
@@ -8187,7 +8188,7 @@ function homeRank4Html(){
       homeRedBox(homeStockColHtml('🐎🚀馬火多(30)', m ? m.fires.concat(m.fireLocked).sort((a, b) => b.pct - a.pct) : [])) +   // 2026-10-21 使用者：股票期貨排名(155) 搬到發動下面
     '</div>' +
     '<div class="hr-stack">' +
-      homeRedBox(homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : []) +   // 首頁 33、34 只列族群前 HOME_334_TOP_GROUPS 名，三欄都有才算   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
+      homeRedBox('<div class="hr-pinkname">' + homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : []) + '</div>' +   // 首頁 33、34 只列族群前 HOME_334_TOP_GROUPS 名，三欄都有才算   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
         // 2026-10-16 使用者：首頁的河流多(34)、賽馬多(33) 只列族群名次前 10 名的；訊號中心盤中333 照舊全部列
         homeStockColHtml('🐎賽馬多(33)', m ? m.horses.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
         // 2026-10-21 使用者：30加33 下面再加河流多(34)，也在紅框裡（原本放在第 4 欄族群漲幅 > 2%（12）下面）
