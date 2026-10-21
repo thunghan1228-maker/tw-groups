@@ -6999,7 +6999,7 @@ function race333Model(){
   const fireBase = rows.filter((r) => r.pct >= FIRE_MIN_PCT && aboveOtc(r) && r.inTopThird && r.groupRank <= fireGroupTop
     && (r.horse || r.rocket !== null) && (r.volume === null || r.volume >= FIRE_MIN_VOLUME)).sort((a, b) => b.pct - a.pct);
   const fireLocked = fireBase.filter((r) => r.limitUp || r.pct >= FIRE_MAX_PCT);
-  // 2026-10-15 照老師：櫃買「強空」（跌破五分K 20MA、又跌破第三根五分K低點）時，河流多(34) 不出名單
+  // 2026-10-15 照老師：櫃買「強空」（跌破五分K 20MA、又跌破第三根五分K低點）時，河流多(34) 不出名單（2026-10-21 使用者：這條取消，強空時 34 也照出名單）
   // （他 11:11、11:24、11:26、11:37 強空時都是 0 檔，不是強空時都有）；馬火多(30) 照列（他 11:37 強空時還有大毅），賽馬多(33) 照列。
   const otcStrongBear = !!(otcStrengthLatest && otcStrengthLatest.label === '強空');
   const fireOpen = fireBase.filter((r) => !(r.limitUp || r.pct >= FIRE_MAX_PCT));  // 符合馬火多全部門檻、買得到的（不限檔數）
@@ -7075,19 +7075,20 @@ function race333Model(){
   const bladeLower = bladeLive.filter((r) => r.groupRank >= bladeShortFrom).slice(0, BLADE_MAX_ROWS); // 強空積極：正式名單
   const bladeMiddle = bladeLive.filter((r) => !bladeInUpper(r) && r.groupRank < bladeShortFrom);    // 兩條線中間（老師沒標題的那段）
   // 33 加 34：兩邊都有的才列（使用者 2026-09-23：只看交集）。
-  const riverCodes = new Set(otcStrongBear ? [] : riverAll.filter((r) => r.pct <= 7).map((r) => r.code));
+  // 2026-10-21 使用者：櫃買強空時河流多(34) 也照樣出名單（原本強空時整份 34 不出名單，這條取消）
+  const riverCodes = new Set(riverAll.filter((r) => r.pct <= 7).map((r) => r.code));
   const both = horses.filter((r) => riverCodes.has(r.code));
   // 30 加 33：兩邊都有的才列（使用者 2026-09-23 原本 30 加 33 加 34，2026-10-20 改成不看 34）。馬火多這邊用「符合全部門檻」的，不受最多 10 檔限制。
   const fireCodes = new Set(fireOpen.map((r) => r.code));
   // 2026-10-20 使用者：30 加 33 加 34 改成 30 加 33（不看河流多 34）——賽馬多(33) 裡同時符合馬火多(30) 全部門檻的
-  // 2026-10-21 使用者：30加33 又改回 30加33加34——再多要求河流多(34) 名單裡也有（漲幅 ≤ 7%；櫃買強空時 34 不出名單，這份也就空）
+  // 2026-10-21 使用者：30加33 又改回 30加33加34——再多要求河流多(34) 名單裡也有（漲幅 ≤ 7%）；櫃買強空時 34 也照出名單
   const triple = horses.filter((r) => fireCodes.has(r.code) && riverCodes.has(r.code)).sort((a, b) => b.pct - a.pct);
   return {
     fires, fireLocked, fireGroupTop, bladeUpper, bladeMiddle, bladeLower, bladeHarvest, both, triple,
     total, half, otcPct, otcLabel: otcStrengthLatest ? otcStrengthLatest.label : null, hasDaily, bladeShortFrom,
     dates: groupDailyChanges && groupDailyChanges.dates ? groupDailyChanges.dates : [],
     horseLimit, riverLimit, horses,
-    rivers: otcStrongBear ? [] : riverAll.filter((r) => r.pct <= 7), riverOver: otcStrongBear ? [] : riverAll.filter((r) => r.pct > 7), otcStrongBear,
+    rivers: riverAll.filter((r) => r.pct <= 7), riverOver: riverAll.filter((r) => r.pct > 7), otcStrongBear,
     longGroups: longGroups.slice().sort((a, b) => a.rank - b.rank),
     shortGroups: shortGroups.slice().sort((a, b) => a.rank - b.rank),
   };
@@ -7505,14 +7506,13 @@ function race333Html(){
   const rivers = race333SortByHolder(race333FilterList(m.rivers));
   const condsNote = '每列下面多一行列出門檻比例（族排、族內、距櫃買%、昨／前天%），之前只寫在這行說明文字裡的數字。';
   return race333FilterBarHtml() + raceOtcBoxHtml(m) +
-    (m.otcStrongBear ? '<div class="race-note">櫃買強空（跌破五分K 20MA、也跌破第三根五分K低點），河流多(34) 不出名單；馬火多(30)、賽馬多(33) 照列。</div>' : '') +
     // 2026-09-28 使用者：符合條件>7%放最上面，抬頭改「續抱勿追高」（不是「漲幅最高」）；裡面把 33／34 的門檻比例列出來。
     // 2026-10-12 使用者：抬頭「續抱勿追高」後面加「追高善設停損」六個字
     '<div class="race-block"><div class="race-head">🚀續抱勿追高，追高善設停損・賽馬多(33)>7%有 ' + over7 + ' 檔 ' + stamp + '</div>' +
       '<div class="race-sub">「續抱勿追高」＝賽馬多裡漲超過 7% 的（不是可進場名單，已經漲多了）・「出現」＝第一次進這個名單的時間，早出現的在上面、新出現的往下排（跟今日即時空的刀劍空一樣）・' + condsNote + '・' + dailyNote + '</div>' +
       (over7 ? raceStockListHtml(raceBySeen(m.horses.filter((r) => r.pct > 7), 'over7', true), { seen: true, dates: m.dates, conditions: true, m, both3334: true }) + '<div class="race-sep">------↑(續抱勿追高)↑------</div>' : '<div class="race-note">賽馬多裡沒有漲超過 7% 的</div>') + '</div>' +
     '<div class="race-block"><div class="race-head">👑🐎🚀🌊馬火多加賽馬多加河流多（30 加 33 加 34） ' + stamp + '</div>' +
-      '<div class="race-sub">三份都有的才列（河流多 34 強空時不出名單）：同時符合賽馬多 33 的條件（199 那 ' + KILL193_GROUPS.size + ' 族＋AI眼鏡、太陽能、設備股，共 ' + HORSE_GROUPS.size + ' 族裡族群前 ' + m.horseLimit + '、族內前 1/3、≥ 櫃買%）、馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）和河流多 34 的條件（族群前 ' + m.riverLimit + '、族內前 1/3、今天沒跌、漲幅 ≤ 7%、≥ 櫃買%）・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
+      '<div class="race-sub">三份都有的才列：同時符合賽馬多 33 的條件（199 那 ' + KILL193_GROUPS.size + ' 族＋AI眼鏡、太陽能、設備股，共 ' + HORSE_GROUPS.size + ' 族裡族群前 ' + m.horseLimit + '、族內前 1/3、≥ 櫃買%）、馬火多的個股門檻（漲 ' + FIRE_MIN_PCT + '% 以上、成交量 ≥ ' + FIRE_MIN_VOLUME + ' 張、沒漲停、🐎🚀）和河流多 34 的條件（族群前 ' + m.riverLimit + '、族內前 1/3、今天沒跌、漲幅 ≤ 7%、≥ 櫃買%）・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
       raceStockListHtml(raceBySeen(triple, 'triple'), { seen: true, fire: true, dates: m.dates, conditions: true, m, both3033: true }) + '</div>' +
     '<div class="race-block"><div class="race-head">👑🌊賽馬多加河流多（33 加 34） ' + stamp + '</div>' +
       '<div class="race-sub">賽馬多、河流多兩邊都有的才列：族群排名前 ' + m.horseLimit + '（共 ' + m.total + ' 個）・族內前 1/3・漲幅 0～7% 且 ≥ 櫃買%・「出現」＝第一次進這個名單的時間，新出現的在上面（名次＝大戶力排名，沒有大戶力資料的排最後）・' + condsNote + '</div>' +
@@ -8188,7 +8188,7 @@ function homeRank4Html(){
         // 2026-10-16 使用者：首頁的河流多(34)、賽馬多(33) 只列族群名次前 10 名的；訊號中心盤中333 照舊全部列
         homeStockColHtml('🐎賽馬多(33)', m ? m.horses.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有') +
         // 2026-10-21 使用者：30加33 下面再加河流多(34)，也在紅框裡（原本放在第 4 欄族群漲幅 > 2%（12）下面）
-        homeStockColHtml('🌊河流多(34)', m ? m.rivers.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], m && m.otcStrongBear ? '櫃買強空，河流多(34) 不出名單' : '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有')) +
+        homeStockColHtml('🌊河流多(34)', m ? m.rivers.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS) : [], '族群前 ' + HOME_334_TOP_GROUPS + ' 名目前沒有')) +
     '</div>' +
     // 2026-10-16 使用者：188 疊到昨日強勢股下面；283 自己一欄，放在右邊
     '<div class="hr-stack">' +
@@ -8241,7 +8241,7 @@ function homeRankFootHtml(total){
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔（疊在今日強勢股上面）'],
     ['⭐今日強勢股', '跟訊號中心「今日強勢股」同一份：族群分數（族內平均均線分數，盤中用現價當今天收盤即時重算、收盤後用正式收盤）前 10 名裡，均線分數 ≥12、用今日即時行情篩今天沒跌（現價不低於昨收，盤後也一樣）的股票；「第 N 名・均分」是族群分數名次，不是今天漲幅名次'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
-    ['👑30加33加34', '馬火多(30)、賽馬多(33)、河流多(34) 三份都有的（河流多強空時不出名單）'],
+    ['👑30加33加34', '馬火多(30)、賽馬多(33)、河流多(34) 三份都有的'],
     ['🐎賽馬多(33)', '賽馬多名單裡，族群名次前 ' + HOME_334_TOP_GROUPS + ' 名的（訊號中心「盤中333」照舊全部列）'],
     ['🌊河流多(34)', '河流多名單裡，族群名次前 ' + HOME_334_TOP_GROUPS + ' 名的（訊號中心「盤中333」照舊全部列）'],
     ['每一列', '族群名次、代號、名稱、今天漲跌幅；族排前面的在上面'],
@@ -20282,7 +20282,7 @@ function botAnswer(raw){
       return wrap('👑👑賽馬多(33)', (rows.map((r, i) => line(r, i) + (over && i === over - 1 && over < rows.length ? botLine('----↑(續抱不追)↑----', 'bot-sep') : '')).join('') || botLine('目前沒有', 'bot-dim')) + otc);
     }
     const rows = m.rivers.slice().sort((a, b) => b.pct - a.pct);
-    return wrap('🌊🌊河流多(34)', (rows.map(line).join('') || botLine(m.otcStrongBear ? '櫃買強空，河流多不出名單' : '目前沒有', 'bot-dim')) + otc +
+    return wrap('🌊🌊河流多(34)', (rows.map(line).join('') || botLine('目前沒有', 'bot-dim')) + otc +
       (m.riverOver.length ? botLine('⚠️符合條件>7%有 ' + m.riverOver.length + ' 檔', 'bot-warn') : ''));
   }
   if (q === '31'){
