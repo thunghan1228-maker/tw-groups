@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 00:44:25";
+const BUILD_STAMP = "2026-10-22 00:53:09";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -140,8 +140,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
   /* 2026-10-22 使用者：首頁每檔後面加盤中大戶力、每欄變寬、版面重新分配：現在是 9 欄（當沖多1、當沖多2、多觀察、續抱勿追高、30加33加34、發動／188／155、183、12、44／三落空／75），
-     每欄最小寬度照那一欄最寬的一列量出來（代號＋股名＋漲跌幅＋大戶力色塊不被截），螢幕夠寬（≥ 2420px）一排放 9 欄；不夠寬就換成 5 欄兩排、再窄 3 欄三排（9 欄剛好 3×3）、手機 2 欄 */
-  .home-rank4{display:grid;grid-template-columns:minmax(270px, 1.15fr) minmax(270px, 1.15fr) minmax(270px, 1.15fr) minmax(250px, 1fr) minmax(255px, 1.05fr) minmax(235px, 1fr) minmax(235px, 1fr) minmax(240px, 1fr) minmax(290px, 1.2fr);gap:8px;align-items:start;}   /* 2026-10-21 使用者：當沖多1、當沖多2、多觀察 排前三欄，寬度跟著搬 */
+     每欄最小寬度照那一欄最寬的一列量出來（代號＋股名＋漲跌幅＋大戶力色塊不被截）。
+     2026-10-22 使用者：首頁九欄的字太小，全部放大 1.3 倍（手機以外用 zoom 一次放大：字、行距、留白、色塊一起大，欄位就跟著變深）；
+     放大後每欄要更寬：螢幕 ≥ 3180px 一排 9 欄、≥ 2090px 5 欄、≥ 1675px 4 欄、≥ 1262px 3 欄、再窄 2 欄；手機（≤ 640px）一欄由上往下排（兩欄放不下每檔後面的大戶力），放大 1.15 倍 */
+  .home-rank4{display:grid;grid-template-columns:minmax(270px, 1.15fr) minmax(270px, 1.15fr) minmax(270px, 1.15fr) minmax(270px, 1fr) minmax(275px, 1.05fr) minmax(235px, 1fr) minmax(235px, 1fr) minmax(240px, 1fr) minmax(290px, 1.2fr);gap:8px;align-items:start;}   /* 2026-10-21 使用者：當沖多1、當沖多2、多觀察 排前三欄，寬度跟著搬 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -352,10 +354,14 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-obs-foot .hr-help-tbl,.hr-obs-foot .hr-help-tbl th,.hr-obs-foot .hr-help-tbl td:first-child{color:#f9a8d4;}   /* 2026-10-15 使用者：強勢黑K選股說明的字改粉紅色；①②③底色標籤、符號顏色照原本（★☆●紅、▲粉紅、✗三K低▼綠、↑深紅） */
   .hr-obs-foot .d123-tag{margin:0 2px;}
   .hr-obs-foot .om{font-size:13px;}
-  @media (max-width: 2419px){ .home-rank4{grid-template-columns:repeat(5, minmax(0, 1fr));} }
-  @media (max-width: 1700px){ .home-rank4{grid-template-columns:repeat(3, minmax(0, 1fr));} }
+  @media (min-width: 641px){ .home-rank4{zoom:1.3;} }
+  @media (max-width: 3179px){ .home-rank4{grid-template-columns:repeat(5, minmax(0, 1fr));} }
+  @media (max-width: 2089px){ .home-rank4{grid-template-columns:repeat(4, minmax(0, 1fr));} }
+  @media (max-width: 1674px){ .home-rank4{grid-template-columns:repeat(3, minmax(0, 1fr));} }
+  @media (max-width: 1261px){ .home-rank4{grid-template-columns:repeat(2, minmax(0, 1fr));} }
+  @media (max-width: 640px){ .home-rank4{grid-template-columns:minmax(0, 1fr);zoom:1.15;} }
   /* 2026-10-18 使用者：手機、iPad 前六大族群改成兩欄直著排——左欄 1、2、3 往下，右欄 4、5、6 */
-  @media (max-width: 900px){ .home-rank4{grid-template-columns:repeat(2, minmax(0, 1fr));} .top6-grid{grid-template-columns:repeat(2, minmax(0, 1fr));grid-template-rows:repeat(3, auto);grid-auto-flow:column;} }
+  @media (max-width: 900px){ .top6-grid{grid-template-columns:repeat(2, minmax(0, 1fr));grid-template-rows:repeat(3, auto);grid-auto-flow:column;} }
   /* 2026-10-15 使用者：手機版也要看到每列後面的漲跌幅——兩欄照舊，字和間距縮小，名稱太長就截掉，漲跌幅一定留著 */
   @media (max-width: 640px){
     .hr-row{padding:4px 5px;gap:3px;font-size:12px;}
@@ -14135,7 +14141,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 00:44:25';
+const BUILD_STAMP = '2026-10-22 00:53:09';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
