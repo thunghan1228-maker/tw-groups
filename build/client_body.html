@@ -1682,6 +1682,7 @@
   .b32-h{grid-area:h;justify-self:end;align-self:center;}
   .b32-row.k12{grid-template-columns:38px minmax(0,1fr) auto auto auto;grid-template-areas:"t s l1 h p" "t g l2 h st";}
   /* 盤中訊號中心「新刀劍空(32)」分頁（淺色底）：同一份 .b32-row 排法 */
+  .bcr[data-bot-code]{cursor:pointer;} .bcr[data-bot-code]:hover{background:rgba(255,255,255,.07);}   /* 柱狀圖的股號、股名可以點 */
   .b32-sep{padding:4px 4px 2px;font-size:12px;font-weight:800;text-align:center;color:var(--muted);border-top:1px solid var(--line);} .b32-sep.bear{color:#4ade80;} .b32-tabwrap .b32-sep{color:#6b7280;} .b32-tabwrap .b32-sep.bear{color:#15803d;}   /* 沒有盤中紀錄時的分段標題 */
   .b32-tabwrap{max-width:560px;margin:4px 0 6px;} .b32-tabwrap .b32-row{border-top-color:rgba(0,0,0,.12);} .b32-tabwrap .b32-row:hover{background:rgba(0,0,0,.05);}
   .b32-tabwrap .bot-stk{color:var(--text);} .b32-tabwrap .b32-time{color:#7c3aed;}
@@ -19725,7 +19726,9 @@ function botBarChart(rows, opts){
     const bar = v > 0 ? '<i class="b pos' + (r.faded ? ' faded' : '') + '" style="left:' + z + '%;width:' + w + '%"></i><span class="v" style="left:calc(' + (z + w) + '% + 4px)">' + fmtV(r.v) + '</span>'
       : v < 0 ? '<i class="b neg' + (r.faded ? ' faded' : '') + '" style="left:' + (z - w) + '%;width:' + w + '%"></i><span class="v" style="right:calc(' + (100 - z + w) + '% + 4px)">' + fmtV(r.v) + '</span>'
         : '<span class="v" style="left:calc(' + z + '% + 4px)">' + fmtV(r.v) + '</span>';
-    return '<div class="bcr' + (opts.wide ? ' wide' : '') + (r.hl ? ' hl' : '') + (r.mid ? ' mid' : '') + '" title="' + wlEsc((r.c ? r.c + ' ' : '') + r.n + ' ' + fmtV(r.v)) + '"><span class="c">' + wlEsc(r.c || '') + '</span><span class="n">' +
+    // 2026-10-22 使用者：柱狀圖裡的股號、股名點了開 K 線圖（有股號的列才有；族群那種列沒有）
+    const clk = r.c ? ' data-bot-code="' + wlEsc(r.c) + '" data-bot-name="' + wlEsc(String(r.n || '').replace(/^\*/, '')) + '" tabindex="0" role="button"' : '';
+    return '<div class="bcr' + (opts.wide ? ' wide' : '') + (r.hl ? ' hl' : '') + (r.mid ? ' mid' : '') + '"' + clk + ' title="' + wlEsc((r.c ? r.c + ' ' : '') + r.n + ' ' + fmtV(r.v) + (r.c ? '（點了開K線圖）' : '')) + '"><span class="c">' + wlEsc(r.c || '') + '</span><span class="n">' +
       (r.star ? '<b class="bcr-star" title="集保大戶連 2 週以上增加">★</b>' : '') + wlEsc(r.n) + (r.pill ? '<span class="bcm">' + r.pill + '</span>' : '') +
       '</span><span class="bct"><span class="bci" style="left:' + padL + 'px;right:' + padR + 'px"><i class="z" style="left:' + z + '%"></i>' + bar + '</span></span></div>';
   };
