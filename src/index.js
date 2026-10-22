@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 01:03:30";
+const BUILD_STAMP = "2026-10-22 08:32:16";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7366,7 +7366,7 @@ function bladeSeenMap(){
   return bladeSeenCache.map;
 }
 function bladeRecordSeen(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.preopen || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（盤前試撮價會跳動，不記「第一次出現」的時間）
   const m = race333Model();
   if (!m) return;
   const map = bladeSeenMap();
@@ -7397,7 +7397,7 @@ function race333SeenLists(m){
   return { over7: m.horses.filter((r) => r.pct > 7), triple: m.triple, both: m.both, horses: m.horses, rivers: m.rivers, fires: m.fires };
 }
 function raceRecordSeen(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.preopen || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（盤前試撮價會跳動，不記「第一次出現」的時間）
   const m = race333Model();
   if (!m) return;
   const all = raceSeenMap();
@@ -8350,8 +8350,9 @@ function homeRankFootHtml(total){
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
     ['股票期貨排名(155)', '固定 ' + FUT155_GROUPS.length + ' 族', '疊在發動、188 下面；每族只算有股票期貨的成分股，用股期近月的漲跌（開盤前就有）：名次＝它們平均漲跌在全部族群裡的排名，🔺🔽 跟昨天比，最右邊 %＝平均漲跌；空方線＝照名次比例畫（排在後半的在線下）；股期報價沒到時標「現股價」'],
     ['多族群排名(183)', '固定 ' + RANK183_GROUPS.size + ' 族（跟新刀劍空(32)、1️⃣2️⃣空(123) 同一批：199 的 ' + KILL193_GROUPS.size + ' 族＋188 的 ' + RANK188_GROUPS.size + ' 族＋AI眼鏡、太陽能、設備股，重複的合併）', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 3 檔（漲最多的）'],
-    ['空族群排名(199)', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
-    ['空族群必殺(193)', '固定 ' + KILL193_ONLY_GROUPS.size + ' 族', '199 的 ' + KILL193_GROUPS.size + ' 族＋小光電；名次比昨天掉 5 名以上的；掉 1～4 名要有 ⚔️（族裡六成以上股票低於前天收盤，數字＝比例）才列；🔪＝昨天族群名次前 25 名、今天平均下跌；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
+    ['族群漲幅 > 2%(12)', '今天平均漲幅超過 2% 的族群（已入選 183 的不再列）', '每族列漲幅前三大的股票（👑🥈🥉）；標題下面寫「排除入選183族群」'],
+    ['空族群排名(199)（首頁沒有這欄，機器人代碼 199 或訊號中心看）', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
+    ['空族群必殺(193)（首頁沒有這欄，機器人代碼 193 或訊號中心看）', '固定 ' + KILL193_ONLY_GROUPS.size + ' 族', '199 的 ' + KILL193_GROUPS.size + ' 族＋小光電；名次比昨天掉 5 名以上的；掉 1～4 名要有 ⚔️（族裡六成以上股票低於前天收盤，數字＝比例）才列；🔪＝昨天族群名次前 25 名、今天平均下跌；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
   ]) +
   hrHelpTable('🔎 族群列怎麼看', ['位置', '意思'], [
     ['括號數字', '今天族群名次（平均漲跌幅排，共 ' + total + ' 個族群，1 最強）'],
@@ -8366,6 +8367,8 @@ function homeRankFootHtml(total){
     ['🔰', '族裡最後幾名（空方段）裡，昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上、但不算 🔪⚔️ 的'],
   ]) +
   hrHelpTable('🐎 個股欄（跟訊號中心「盤中333」同一份）', ['欄位', '列什麼'], [
+    ['🔥當沖多1／2', '跟每日功課「當沖多」同一份：被 ① 多功課 ② 賽馬多 ③ 河流多 ④ 族群在多方區 點名兩個以上的股票（空方族群已濾掉），分中四個、中三個、中兩個，一欄放不下就接到第二欄'],
+    ['1+2多・突破黑馬(44)', '跟訊號中心「1+2多」同一份：突破黑馬，前面是出現的時間，首頁只留最新 20 筆（機器人代碼 44 全部列）'],
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
     ['👑30加33加34', '馬火多(30)、賽馬多(33)、河流多(34) 三份都有的（賽馬多、河流多只看族群名次前 ' + HOME_334_TOP_GROUPS + ' 名；三份各自的完整名單看訊號中心「盤中333」或機器人代碼 30／33／34）'],
@@ -8381,13 +8384,13 @@ function homeRankFootHtml(total){
     ['限制', '一律要可放空（有券）、不是處置股；機器人代碼「三落空」同一份'],
   ]) +
   // 2026-10-16 使用者：刀劍空的🔰／⚔️、多方打少這些說明也寫到首頁最下面
-  hrHelpTable('🔪⚔️ 刀劍空(31)', ['項目', '說明'], [
+  hrHelpTable('🔪⚔️ 刀劍空(31)（首頁沒有這欄，機器人代碼 31 看）', ['項目', '說明'], [
     ['看哪些股票', '每個族群「倒數兩名」（跌 ' + BLADE_HARVEST_PCT + '% 以上的不算名次、不列；處置股不列），有 🔪⚔️🔰 標記的'],
     ['🔪N／⚔️N', '原本在族裡前半段，今天跑到倒數；🔪 跟昨天比、⚔️ 跟前天比，N＝下降幾名（跟點族群看到的標記同一套）'],
     ['🔰', '昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上，但不算前半段'],
     ['排序', '不分族群，照今天漲跌幅高到低'],
   ]) +
-  hrHelpTable('🔪⚔️ 新刀劍空(32)', ['項目', '說明'], [
+  hrHelpTable('🔪⚔️ 新刀劍空(32)（首頁沒有這欄，機器人代碼 32 或訊號中心看）', ['項目', '說明'], [
     ['看哪些股票', '固定 ' + BLADE_GROUPS.size + ' 族（跟首頁 183 同一批），每族只看「空方段」（照今天漲跌幅排的後段，最多 5 檔）；處置股不列、成交量 ' + BLADE_MIN_VOLUME + ' 張以上；今天漲跌不限'],
     ['🔪 刀', '昨天漲 ' + BLADE_PRIOR_RISE + '% 以上'],
     ['⚔️ 劍', '前天漲 ' + BLADE_PRIOR_RISE + '% 以上，現價已跌破前天收盤'],
@@ -8428,7 +8431,7 @@ const HOME_OBS_REFRESH_MS = 5 * 60 * 1000;
 function homeObsColHtml(){
   const rep = obsState.report;
   const hm = obsNowHm();   // 只有盤中（09:00～13:35）才每 5 分鐘重算；收盤後停在最後一次（2026-10-15 使用者問多久更新）
-  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && hm >= '09:00' && hm <= '13:35';
+  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';   // 盤前撮合（08:40 起）也算
   const stale = rep && live && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
   const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > (rep ? HOME_OBS_REFRESH_MS : 20000);   // 還沒算出過：20 秒就重試（2026-10-17）
   if (!obsState.loading && ((!rep && !obsState.error) || stale || retry)) setTimeout(() => obsRun(null, false, !!rep), 0);
@@ -14121,7 +14124,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 01:03:30';
+const BUILD_STAMP = '2026-10-22 08:32:16';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -14997,7 +15000,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">強勢黑K選股・當沖多1／2・續抱勿追高・30加33加34・發動・族群漲幅(12)・183／188／155／三落空／股期黑龍(75)・1+2多(44)</div></div>' +
+        '<div class="section-head"><div class="section-title">當沖多1／2・多觀察(等黑K買進)・續抱勿追高・30加33加34・發動／188／155・183・族群漲幅(12)・1+2多(44)／三落空／股期黑龍(75)</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -15102,6 +15105,9 @@ async function refresh(){
       updatedEl.textContent = '⚠ 尚未成功取得即時報價' + (groupsLastError ? '（' + groupsLastError + '）' : '');
     } else if (Date.now() - lastDataFetchedAt.getTime() > STALE_WARNING_MS){
       updatedEl.textContent = '⚠ 報價可能已過期（最後成功更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + '）';
+    } else if (lastData && lastData.preopen){
+      // 2026-10-22 使用者：要用即時價選股的功能從 08:40 盤前撮合就開始算，這時候的價格是試算價（還沒有成交量）
+      updatedEl.textContent = '盤前撮合（試算價）' + String(lastData.quoteTime || '').slice(0, 5) + '，09:00 開盤後換成真的成交價（' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + ' 更新）';
     } else if (lastData && lastData.heldClose && lastData.heldClose.session){
       // 休市日／開盤前：worker 給的是上一個交易日的日K收盤，不是即時報價（2026-10-04 使用者：週末 TWSE 測試盤假價）。
       updatedEl.textContent = '休市中，顯示 ' + String(lastData.heldClose.session).slice(5).replace('-', '/') + ' 收盤（' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + ' 確認）';
@@ -22202,9 +22208,10 @@ async function fetchQuotesFromBackend(codes, timeoutMs) {
     const batches = [];
     for (let i = 0; i < codes.length; i += BACKEND_QUOTE_BATCH) batches.push(codes.slice(i, i + BACKEND_QUOTE_BATCH));
     const parts = await Promise.all(batches.map((b) => fetchBackendQuoteBatch(b, ctrl.signal)));
-    data = { status: "ok", quotes: {}, quoteDate: null, quoteTime: null };
+    data = { status: "ok", quotes: {}, quoteDate: null, quoteTime: null, preopen: false };
     for (const part of parts) {
       Object.assign(data.quotes, part.quotes);
+      if (part.preopen) data.preopen = true;   // 盤前撮合（08:40～09:00）：後端把 Shioaji 試撮價蓋上去的
       const stamp = (part.quoteDate || "") + " " + (part.quoteTime || "");
       if (stamp > (data.quoteDate || "") + " " + (data.quoteTime || "")) { data.quoteDate = part.quoteDate; data.quoteTime = part.quoteTime; }
     }
@@ -22222,7 +22229,7 @@ async function fetchQuotesFromBackend(codes, timeoutMs) {
   }
   const missing = codes.filter((c) => quotes[c].price === null).length;
   Object.defineProperty(quotes, "__meta", {
-    value: { quoteDate: data.quoteDate || null, quoteTime: data.quoteTime || null, missing, retried: 0, source: "backend" },
+    value: { quoteDate: data.quoteDate || null, quoteTime: data.quoteTime || null, missing, retried: 0, source: "backend", preopen: !!data.preopen },
     enumerable: false
   });
   return quotes;
@@ -22411,7 +22418,10 @@ async function buildGroupsBody() {
     // 這次重抓後還是沒有報價的檔數（休市暫留收盤時不算）；前端多到不正常會標示
     quoteMissing: held ? 0 : (meta.missing || 0),
     // 報價來源：hub＝後端報價中心（正常）、mis＝這裡直接抓證交所、backend＝直連失敗改後端代抓、mis+backend＝缺的拿後端補
-    quoteSource: held ? "close" : (meta.source || "mis")
+    quoteSource: held ? "close" : (meta.source || "mis"),
+    // 盤前撮合（2026-10-22 使用者：用即時價選股的功能從 08:40 盤前試撮就開始算）：後端試撮資料夠多時不再暫留昨收（held=false），
+    // 報價是試算價（沒有成交量），前端各名單照盤中的邏輯算；用前一天收盤資料選股的功能不受影響
+    preopen: !held && !!meta.preopen
   });
   return body;
 }
