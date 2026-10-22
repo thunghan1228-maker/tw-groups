@@ -8239,9 +8239,12 @@ function homeLaunchStateOf(){
 function homeWeak3ColHtml(m){
   const tip = '熄火落馬斷流＝熄火空(30 顛倒)、落馬空(33 顛倒)、斷流空(34 顛倒) 三份名單都有、而且可放空（有券、非處置股）的股票；族排＝所在族群的名次（越大越弱）';
   if (!m) return '<div class="hr-col"><div class="hr-title bear" title="' + tip + '">三落空</div><div class="hr-note">讀取中…</div></div>';
-  const rows = m.weakTriple;
-  const row = (r) => '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc(r.groupName) + '・族排第 ' + r.groupRank + ' 名（共 ' + m.total + ' 族）">' +
-    '<span class="hr-rk">' + r.groupRank + '</span><span class="hr-bear-pill ' + dirClass(r.pct) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' +
+  // 2026-10-22 使用者：三落空欄每檔前面加發生時間（第一次進三落空的時間，這台電腦記的），時間近的排上面、早的在下面
+  const seenW = weakSeenMap();
+  const hmW = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '--:--');
+  const rows = m.weakTriple.slice().sort((a, b) => (Math.floor((seenW[b.code] || 0) / 60000) - Math.floor((seenW[a.code] || 0) / 60000)) || b.groupRank - a.groupRank || a.pct - b.pct);
+  const row = (r) => '<div class="hr-row hr-stk hr-wrapold" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + hmW(seenW[r.code]) + ' 進三落空・' + wlEsc(r.groupName) + '・族排第 ' + r.groupRank + ' 名（共 ' + m.total + ' 族）">' +
+    '<span class="hr-rk" style="color:#a78bfa">' + hmW(seenW[r.code]) + '</span><span class="hr-rk">' + r.groupRank + '</span><span class="hr-bear-pill ' + dirClass(r.pct) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' +
     '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span></div>';
   return '<div class="hr-col"><div class="hr-title bear" title="' + tip + '">三落空 <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
     (rows.length ? rows.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
