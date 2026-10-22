@@ -169,7 +169,8 @@
   /* 2026-10-18 使用者：32 新刀劍空後面多了「回／跑 HH:MM」（照老師刀功課廣播），那格放寬，一檔一行放得下 */
   .bot-col[data-col-key="32"]{flex-basis:calc((100% - 72px) / 10 * 1.7);min-width:290px;}
   /* 2026-10-20 使用者（截圖綠框）：機器人代碼 199／193／32／123／177 這幾格加粗綠框——用代碼認，關掉再打開、位置換了也都有；outline 往內畫，不改欄寬 */
-  .bot-col[data-col-key="199"],.bot-col[data-col-key="193"],.bot-col[data-col-key="32"],.bot-col[data-col-key="123"],.bot-col[data-col-key="177"]{outline:3px solid #22c55e;outline-offset:-3px;}
+  .bot-col[data-col-key="199"],.bot-col[data-col-key="193"],.bot-col[data-col-key="32"],.bot-col[data-col-key="123"],.bot-col[data-col-key="177"],.bot-col[data-col-key="三落空"]{outline:3px solid #22c55e;outline-offset:-3px;}   /* 2026-10-22 使用者：三落空也加綠框 */
+  .bot-col[data-col-key="三落空"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
   .bot-col-x:hover{background:#e81123;border-color:#e81123;color:#fff;}
   .bot-cols-hint{color:var(--muted);font-size:13px;margin:0 2px 10px;}
@@ -1697,10 +1698,12 @@
   .hf-tag.hot b{color:#fff;} .hf-tag.hot.up b{background:#dc2626;} .hf-tag.hot.down b{background:#16a34a;}
   .hf-tag.block{flex-direction:column;align-items:flex-end;gap:0;line-height:1.25;}
   .hf-tag.block b{font-size:15px;}
-  .b193-m{display:flex;flex-direction:column;margin:0 0 3px;line-height:1.5;}
-  .b193-m .hf-tag{margin-left:22px;}
+  .b193-m{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;margin:0 0 3px;line-height:1.5;}
+  .b193-m .hf-tag{margin-left:auto;}   /* 2026-10-22 使用者：193 個股、三落空的大戶力靠右切齊（同一行：股名漲跌幅在左、大戶力在右，色塊一樣寬） */
+  .b193-m .hf-tag b,.bot-hrow .hf-tag b{min-width:4.6em;text-align:center;display:inline-block;}
+  .bot-hrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;} .bot-hrow .hf-tag{margin-left:auto;}
   .b193-r1{white-space:nowrap;}
-  .bot-col[data-col-key="193"]{flex-basis:calc((100% - 72px) / 10 * 1.7);min-width:290px;}
+  .bot-col[data-col-key="193"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}   /* 2026-10-22 加寬：個股那行加了靠右的大戶力，股名＋漲跌幅＋大戶力放得進同一行 */
   .bot-col[data-col-key="123"]{flex-basis:calc((100% - 72px) / 10 * 2.1);min-width:370px;}   /* 2026-10-19 使用者：193 個股兩排（名稱代號漲跌幅／大戶力）加寬；123 時間後面多了大戶力也一起加寬 */
   .b32-row.gone{background:rgba(220,38,38,.10);}
   .b32-row.gone .b32-stk{color:#f87171;} .b32-row.gone .b32-stk .bot-stk{text-decoration:line-through;}
@@ -20387,7 +20390,7 @@ function botAnswer(raw){
   if (q === '三落空'){
     if (!m) return wrap('三落空', botLine('讀取中…', 'bot-dim'));
     const rows = m.weakTriple;
-    return wrap('三落空', (rows.map((r) => botLine(r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + '</small>'))).join('') || botLine('目前沒有', 'bot-dim')) +
+    return wrap('三落空', (rows.map((r) => botLine('<span>' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + '</small>') + '</span>' + holderTagHtml(holderPctOf(r.code)), 'bot-hrow')).join('') || botLine('目前沒有', 'bot-dim')) +
       botLine('熄火空 ' + m.weak30.length + '・落馬空 ' + m.weak33.length + '・斷流空 ' + m.weak34.length + (m.weak34Over.length ? '（跌超過 7% 的 ' + m.weak34Over.length + ' 檔不列）' : '') + '；三份都有、可放空（有券、非處置股）才列，前面數字＝族群名次（越大越弱）', 'bot-dim') + otcFoot(),
       stamp + '・熄火落馬斷流');
   }
