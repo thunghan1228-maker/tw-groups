@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 14:02:57";
+const BUILD_STAMP = "2026-10-22 14:15:28";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1556,6 +1556,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .td-rank{display:inline-block;min-width:38px;text-align:center;border:1.5px solid var(--line);border-radius:6px;padding:0 4px;font-size:12px;font-weight:700;}
   .td-rank.bull{border-color:#e6675f;color:#e6675f;} .td-rank.mid{border-color:#3b82f6;} .td-rank.bear{border-color:#5fae6f;} .td-rank.harv{border-color:#14b8a6;}
   .td-grp{font-size:12px;color:var(--muted);min-width:76px;}
+  [data-hw-group]{cursor:pointer;} [data-hw-group]:hover{text-decoration:underline;text-underline-offset:3px;}
+  .td-stk,.td-bstk,.td-glink,.td-rchip[data-hw-code]{cursor:pointer;} .td-row:hover .td-stk,.td-brow:hover .td-bstk,.td-glink:hover{text-decoration:underline;text-underline-offset:3px;}
   .td-ma{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;}
   .td-ma.gold{background:#f6c343;color:#3b2a00;} .td-ma.ring{border:1.5px solid #e0b33a;color:#b7791f;} .td-ma.gray,.td-ma.none{border:1.5px solid var(--line);color:var(--muted);}
   .td-stk{font-size:14px;white-space:nowrap;} .td-stk b{color:#b45309;}
@@ -6491,7 +6493,7 @@ async function refreshStockFlags(){
     if (data && data.stocks && typeof data.stocks === 'object'){
       const first = !Object.keys(stockFlags || {}).length;
       stockFlags = data.stocks;
-      if (first){ try { render(); } catch (_){} }   // 首頁 155、刀劍空等等第一次要等它才畫得出來（2026-10-17）
+      if (first){ try { render(); } catch (_){} hwRerenderIfOpen(); }   // 首頁 155、刀劍空等等第一次要等它才畫得出來（2026-10-17）
       try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
       sigRefreshViews();
       if (!document.getElementById('chartModal').hidden) renderChartFlags(currentChart.code);
@@ -6901,6 +6903,7 @@ async function refreshGroupDailyChanges(force){
       // 2026-10-17 使用者「第一次打開都跑不出來，要重新整理」：首頁報價先回來、這份晚到時首頁不會重畫，
       // 收盤後／週末首頁 5 分鐘才重抓一次 → 排名區整塊空著好幾分鐘。抓到就馬上重畫。
       try { render(); } catch (_){}
+      hwRerenderIfOpen();
       return;
     }
     throw new Error('group-daily-changes 格式不對');
@@ -8943,6 +8946,7 @@ async function refreshBrewLaunch(force){
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
     sigRefreshViews();
+    hwRerenderIfOpen();
     if (!document.getElementById('chipsModal').hidden) renderChips();  // 放空籌碼的均線資料
   } catch (e) {
     brewLaunchFetchedAt = Date.now() - 540000;  // 抓不到就一分鐘後再試，先沿用上一次的資料
@@ -14214,7 +14218,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 14:02:57';
+const BUILD_STAMP = '2026-10-22 14:15:28';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -14561,6 +14565,10 @@ function sigRefreshViews(){
   sgtRerenderSafe();
 }
 function sgtRerenderSafe(){ try { sgtRerender(); } catch (_){} }
+// 每日功課開著時，資料（報價／族群日K／醞釀發動／旗標）一到就重畫——原本只靠它自己每 20 秒的計時器，另開的視窗報價回來後還要再等最多 20 秒才從「族群行情載入中…」換掉
+function hwRerenderIfOpen(){
+  try { const m = document.getElementById('hwModal'); if (m && !m.hidden) renderHomework(); } catch (_){}
+}
 function renderSignalCenter(){
   const tabsEl = document.getElementById('signalTabsBar');
   refreshBrewLaunch(false);
@@ -15180,6 +15188,7 @@ async function refresh(){
     try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
     try { botRerunCols(); } catch (e) { /* 機器人格子重算失敗不影響畫面 */ }
     try { sgtRerender(); } catch (e) { /* 盤中訊號分頁重算失敗不影響畫面 */ }   // 2026-10-17 使用者：機器人格子盤中跟首頁一樣每 15 秒更新
+    hwRerenderIfOpen();
     trkTick();
     lastDataFetchedAt = new Date();
   } catch (e) {
@@ -16565,12 +16574,17 @@ function tdPass(row){
   if (p.max7 && !(Number.isFinite(row.pct) && row.pct > -7)) return false;
   return true;
 }
+// 2026-10-22 使用者：每日功課裡的族群名字點一下看這個族群的成分股、股號股名點一下進 K 線圖（成分股視窗裡再點股票也是進 K 線圖）
+function hwGroupAttr(name){
+  return name && lastData && Array.isArray(lastData.groups) && lastData.groups.some((x) => x.name === name)
+    ? ' data-hw-group="' + wlEsc(name) + '" title="看「' + wlEsc(name) + '」的成分股"' : '';
+}
 function tdRowHtml(row, ctx, snap, opt){
   const o = opt || {}, held = tdState.hold.includes(row.code);
   return '<div class="td-row' + (held ? ' held' : '') + (o.lite ? ' td-lite' : '') + '" data-hw-code="' + wlEsc(row.code) + '" data-hw-name="' + wlEsc(row.name || '') + '">' +
     '<span class="td-hold" data-td-hold="' + wlEsc(row.code) + '" title="打勾＝我持有空單（整列金框、跨日記住，再點一下解除）">' + (held ? '☑' : '☐') + '</span>' +
     (o.lite ? '' : tdRankBadge(row, snap.total)) +
-    (o.showGroup && row.g ? '<span class="td-grp">' + wlEsc(row.g) + ' <small>(' + row.gr + ')</small></span>' : '') +
+    (o.showGroup && row.g ? '<span class="td-grp"' + hwGroupAttr(row.g) + '>' + wlEsc(row.g) + ' <small>(' + row.gr + ')</small></span>' : '') +
     tdMaBall(row.ma) +
     '<span class="td-stk"><b>' + wlEsc(row.code) + '</b> ' + wlEsc(row.name || '') + '</span>' +
     '<span class="td-tags">' + tdTagsHtml(row.code, ctx, o) + tdBigHtml(row) + '</span>' +
@@ -16693,7 +16707,7 @@ function tdBroadcastHtml(seq, snap){
       // 老師廣播股名後面的「期」（有股票期貨）、「持」（打勾持有空單）；在觀察股裡的族群那格寫「⭐ 觀察」
       (stockFlags[x.code] && (stockFlags[x.code].hasStockFutures || stockFlags[x.code].hasMiniStockFutures) ? '<i class="td-bfut">期</i>' : '') +
       (tdState.hold.includes(x.code) ? '<i class="td-bhold">持</i>' : '') + '</span>' +
-      '<span class="td-bgrp">' + (tdState.watch.includes(x.code) ? '⭐ 觀察' : wlEsc(r.g || (r.zone === undefined ? '' : '12空')) + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, snap.total)) : '')) + '</span>' +
+      '<span class="td-bgrp">' + (tdState.watch.includes(x.code) ? '⭐ 觀察' : '<span' + hwGroupAttr(r.g) + '>' + wlEsc(r.g || (r.zone === undefined ? '' : '12空')) + '</span>' + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, snap.total)) : '')) + '</span>' +
       '<span class="td-bh">' + holderTagHtml(r.big !== null && r.big !== undefined ? r.big : holderPctOf(x.code), true) + '</span>' +
       '<span class="td-bpct ' + (Number.isFinite(pctNow(x)) ? dirClass(pctNow(x)) : '') + '">' + hwPct(Number.isFinite(pctNow(x)) ? pctNow(x) : null) + '</span>' +
       (x.inNow ? (x.back ? '<span class="td-bst back">回 ' + x.back + '</span>' : '<span class="td-bst"></span>') : '<span class="td-bst run">跑 ' + x.out + '</span>') + '</div>';
@@ -16737,9 +16751,10 @@ function tdGroupFoot(gname, live){
   const v = g.stocks.filter((s) => Number.isFinite(s.changePercent)).slice().sort((a, b) => b.changePercent - a.changePercent);
   if (!v.length) return '';
   const top = v[0], low = v[v.length - 1];
-  return '<div class="td-gfoot"><div>👑 帶頭 ' + wlEsc(top.code) + ' ' + wlEsc(top.name) + ' <span class="' + dirClass(top.changePercent) + '">' + hwPct(top.changePercent) + '</span>' +
+  const stkLink = (s) => '<span class="td-glink" data-hw-code="' + wlEsc(s.code) + '" data-hw-name="' + wlEsc(s.name || '') + '" title="看 K 線圖">' + wlEsc(s.code) + ' ' + wlEsc(s.name) + '</span>';
+  return '<div class="td-gfoot"><div>👑 帶頭 ' + stkLink(top) + ' <span class="' + dirClass(top.changePercent) + '">' + hwPct(top.changePercent) + '</span>' +
     (top.changePercent >= 5 ? '　族群強，空弱的（挑倒數）合理' : '　<span class="muted">族群沒有強勢帶頭（部位減半）</span>') + '</div>' +
-    '<div class="down">▼ 最低 ' + wlEsc(low.code) + ' ' + wlEsc(low.name) + ' ' + hwPct(low.changePercent) + '</div></div>';
+    '<div class="down">▼ 最低 ' + stkLink(low) + ' ' + hwPct(low.changePercent) + '</div></div>';
 }
 function tdCardsHtml(rows, ctx, snap, opt){
   const o = opt || {};
@@ -16758,7 +16773,7 @@ function tdCardsHtml(rows, ctx, snap, opt){
         (snap.otcPct !== null && snap.otcPct !== undefined ? '<i class="td-otc ' + dirClass(snap.otcPct) + '">櫃買 ' + wlEsc(otc) + ' ' + hwPct(snap.otcPct) + '</i>' : '') + '</div>';
     }
     const g = (lastData.groups || []).find((x) => x.name === name);
-    return banner + '<div class="td-card"><div class="td-chead"><b>' + wlEsc(name) + '</b><span class="td-crank">(' + (list[0].gr || '—') + ')</span><small>' + stamp + '</small>' +
+    return banner + '<div class="td-card"><div class="td-chead"><b' + hwGroupAttr(name) + '>' + wlEsc(name) + '</b><span class="td-crank">(' + (list[0].gr || '—') + ')</span><small>' + stamp + '</small>' +
       '<span class="td-cnt">命中 ' + list.length + ' / 族內 ' + (g ? g.stocks.length : '—') + '</span></div>' +
       list.map((r) => tdRowHtml(r, ctx, snap, o.rowOpt)).join('') + (o.noFoot ? '' : tdGroupFoot(name, snap.live)) + '</div>';
   }).join('') + '</div>';
@@ -17003,7 +17018,7 @@ function lgRowHtml(o){
   };
   return '<div class="lg-row' + (o.holdNo ? ' hold' : '') + (held ? ' held' : '') + '" data-hw-code="' + wlEsc(o.code) + '" data-hw-name="' + wlEsc(o.name) + '">' +
     '<span class="td-hold" data-lg-hold="' + wlEsc(o.code) + '" title="打勾＝自己有操作（會框起來）">' + (held ? '☑' : '☐') + '</span>' +
-    '<span class="lg-grp" style="background:' + hwGroupTint(o.group) + '">' + wlEsc(o.group || '—') + (o.rank ? ' <small>(' + o.rank + ')</small>' + (o.groupAvg > 0 ? '<b class="up">▲</b>' : '🔽') : '') + '</span>' +
+    '<span class="lg-grp" style="background:' + hwGroupTint(o.group) + '"' + hwGroupAttr(o.group) + '>' + wlEsc(o.group || '—') + (o.rank ? ' <small>(' + o.rank + ')</small>' + (o.groupAvg > 0 ? '<b class="up">▲</b>' : '🔽') : '') + '</span>' +
     tdMaBall(o.ma) +
     '<span class="td-stk"><b>' + wlEsc(o.code) + '</b> ' + wlEsc(o.name) + '</span>' +
     '<span class="lg-srcs">' + chip(1, '多功課', 's1') + chip(2, '賽', 's2') + chip(3, '河', 's3') + chip(4, '群', 's4') +
@@ -17061,7 +17076,7 @@ function hwLongHtml(){
     const by = new Map();
     rows.forEach((o) => { if (!by.has(o.group)) by.set(o.group, []); by.get(o.group).push(o); });
     body = '<div class="td-cards">' + Array.from(by.entries()).sort((a, b) => (a[1][0].rank || 99) - (b[1][0].rank || 99)).map(([g, l]) =>
-      '<div class="td-card"><div class="td-chead" style="background:' + hwGroupTint(g) + '"><b>' + wlEsc(g) + '</b><span class="td-crank">(' + (l[0].rank || '—') + ')' + (l[0].groupAvg > 0 ? '▲' : '🔽') + '</span>' +
+      '<div class="td-card"><div class="td-chead" style="background:' + hwGroupTint(g) + '"><b' + hwGroupAttr(g) + '>' + wlEsc(g) + '</b><span class="td-crank">(' + (l[0].rank || '—') + ')' + (l[0].groupAvg > 0 ? '▲' : '🔽') + '</span>' +
       '<small>族群平均 ' + hwPct(l[0].groupAvg) + '</small><span class="td-cnt">' + l.length + ' 檔</span></div>' + l.map(lgRowHtml).join('') + '</div>').join('') + '</div>';
   } else {
     const sec = (title, cls, l) => l.length ? '<div class="td-zone lg-zone ' + cls + '"><div class="td-zhead"><b>' + title + '</b><span class="td-cnt">' + l.length + ' 檔</span></div>' + l.map(lgRowHtml).join('') + '</div>' : '';
@@ -17263,6 +17278,22 @@ const HW_POP_KEY = 'hwPopRect', HW_MODE_KEY = 'hwMode';
 let hwPopWin = null;
 function hwPopWindow(){ return hwPopWin && !hwPopWin.closed ? hwPopWin : null; }
 function hwWantsPop(){ return !hwWindowMode() && botLoad(HW_MODE_KEY) === 'pop' && window.innerWidth >= 768; }   // 上次是移到另一螢幕用的（電腦寬螢幕）：每日功課直接開在另一個視窗
+// 2026-10-22 使用者：每日功課「⧉ 移到另一螢幕」卡在「族群行情載入中…」讀很久。另開的視窗是整頁重新載入，要等自己的 /api/groups（10～20 秒）才有報價；
+// 主畫面手上早就有一份了——另開的視窗一打開就直接跟主畫面要（同網站可以讀 window.opener），先用現成的畫出來，自己的抓取照常跑、回來再換成最新的。
+// 傳 JSON 字串（不傳物件參照），另開的視窗自己 parse，主畫面關掉也不會影響它。
+function popSeedData(){
+  try {
+    return JSON.stringify({
+      at: Date.now(),
+      lastData: lastData && !lastData.mock ? lastData : null,
+      fetchedAt: lastDataFetchedAt ? lastDataFetchedAt.getTime() : null,
+      groupDailyRaw, brewLaunchData, stockFlags, mainForceRanking, mainForceRankingLoaded, mainForceRankingInfo,
+      todaySignalEvents, signalDataIsReal, otcStrengthLatest, jl: jlState.data,
+      big: tdState.big.data ? { key: tdState.big.key, at: tdState.big.at, data: tdState.big.data } : null,
+      rep: tdState.rep.data ? { at: tdState.rep.at, data: tdState.rep.data } : null,
+    });
+  } catch (_){ return null; }
+}
 function popOutHw(){
   if (hwWindowMode()){   // 另開的視窗裡：↩ 移回主畫面
     botStore(HW_MODE_KEY, 'inline');
@@ -17380,6 +17411,8 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
   if (un){ tdState.watch = tdState.watch.filter((c) => c !== un.dataset.tdUnwatch); tdSaveWatch(); renderHomework(); return; }
   if (t.closest('input')) return;
   if (t.closest('summary') || t.closest('select')) return;
+  const hgrp = t.closest('[data-hw-group]');
+  if (hgrp){ openGroupDetail(hgrp.dataset.hwGroup); return; }   // 族群名字：看成分股（成分股視窗裡再點股票進 K 線圖）
   const row = t.closest('[data-hw-code]');
   if (row){
     openStockChart(row.dataset.hwCode, row.dataset.hwName);
@@ -18810,6 +18843,7 @@ async function jlLoad(){
     jlState.loading = false;
     if (!document.getElementById('jailModal').hidden) renderJail();
     try { remindMarkBtn(); renderRemind(); } catch (_){}
+    hwRerenderIfOpen();
   }
 }
 async function jlQuery(code){
@@ -22130,6 +22164,32 @@ document.getElementById('signalModal').addEventListener('click', (e) => {
   if (e.target.id === 'signalModal') closeSignalCenter();
 });
 
+// 另開的視窗（每日功課／機器人／盤中訊號分頁／訊號中心）：開起來先拿主畫面現有的資料，不用等自己的 /api/groups 等十幾秒
+function seedFromOpener(){
+  if (!/^#(daily-hw|sig-tabs|signal-center|bot-panel)/.test(location.hash)) return;
+  try {
+    const op = window.opener;
+    if (!op || op.closed || typeof op.popSeedData !== 'function') return;
+    const raw = op.popSeedData();
+    const d = raw ? JSON.parse(raw) : null;
+    if (!d || !d.lastData || !Array.isArray(d.lastData.groups) || !d.lastData.groups.length) return;
+    if (Date.now() - (d.fetchedAt || 0) > 10 * 60 * 1000) return;   // 主畫面那份太舊（睡著很久）就不用，照原本自己抓
+    lastData = d.lastData;
+    lastDataFetchedAt = d.fetchedAt ? new Date(d.fetchedAt) : new Date();
+    if (d.groupDailyRaw){ groupDailyRaw = d.groupDailyRaw; groupDailyFetchedAt = d.at; try { alignGroupDaily(); } catch (_){} }
+    if (d.brewLaunchData){ brewLaunchData = d.brewLaunchData; brewLaunchFetchedAt = d.at; }
+    if (d.stockFlags && Object.keys(d.stockFlags).length) stockFlags = d.stockFlags;
+    if (d.mainForceRankingLoaded){
+      mainForceRanking = d.mainForceRanking || []; mainForceRankingLoaded = true;
+      if (d.mainForceRankingInfo) mainForceRankingInfo = d.mainForceRankingInfo;
+      todaySignalEvents = d.todaySignalEvents || []; signalDataIsReal = !!d.signalDataIsReal;
+    }
+    if (d.otcStrengthLatest) otcStrengthLatest = d.otcStrengthLatest;
+    if (d.jl && !jlState.data) jlState.data = d.jl;
+    if (d.big && d.big.data){ tdState.big.data = d.big.data; tdState.big.key = d.big.key; tdState.big.at = d.big.at; }
+    if (d.rep && d.rep.data){ tdState.rep.data = d.rep.data; tdState.rep.at = d.rep.at; }
+  } catch (_){ /* 拿不到就照原本自己抓 */ }
+}
 if (CHART_WINDOW_MODE){
   // 內嵌在浮動視窗裡、或「另開視窗」的圖表模式：只顯示這一檔的 K 線圖，不跑儀表板與訊號輪詢。
   const chartParams = new URLSearchParams(location.search);
@@ -22145,6 +22205,7 @@ if (CHART_WINDOW_MODE){
     document.addEventListener('pointerdown', () => window.parent.postMessage({ type: 'hanstockChartFocus' }, location.origin), true);
   }
 } else {
+  seedFromOpener();
   refreshSignalData();
   refreshStockFlags();
   setInterval(refreshStockFlags, 300000);
