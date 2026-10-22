@@ -7462,7 +7462,11 @@ function bladeBotListHtml(m, holderFilter, oldestFirst){
   if (sectioned){
     const xsOf = (l) => l.map((r) => tl.get(r.code)).filter((x) => x && passHolder(x))
       .sort((a, b) => (Math.floor(b.ts / 60000) - Math.floor(a.ts / 60000)) || liveBy.get(a.code).groupRank - liveBy.get(b.code).groupRank || liveBy.get(b.code).pct - liveBy.get(a.code).pct);
-    const secs = [['強空積極', 'bear', m.bladeLower], ['收割區域', '', m.bladeHarvest], ['多方打少', '', m.bladeUpper], ['中間段', '', m.bladeMiddle]];
+    // 2026-10-22 使用者：今日即時空裡的新刀劍空跟機器人 32 顛倒——強空積極放最下面（最近發生的也在最下面，貼著黑線），
+    // 它上面是中間段、再上面多方打少、最上面收割區域；每段內早的在上面
+    const secs = oldestFirst
+      ? [['收割區域', '', m.bladeHarvest], ['多方打少', '', m.bladeUpper], ['中間段', '', m.bladeMiddle], ['強空積極', 'bear', m.bladeLower]]
+      : [['強空積極', 'bear', m.bladeLower], ['收割區域', '', m.bladeHarvest], ['多方打少', '', m.bladeUpper], ['中間段', '', m.bladeMiddle]];
     let n = 0;
     const html = secs.map(([title, cls, l]) => {
       const xs = xsOf(l || []);
