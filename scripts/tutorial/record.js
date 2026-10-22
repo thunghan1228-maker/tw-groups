@@ -121,7 +121,15 @@ const CSS = `
         el.setAttribute('data-tutmark', '1'); el.scrollIntoView({ block: 'center' }); return true;
       }, sc.pick);
       if (!ok) warnings.push('scene ' + i + ' pick not found: ' + sc.pick);
-      else { sc.target = '[data-tutmark="1"]'; await page.waitForTimeout(500); }
+      else {
+        sc.target = '[data-tutmark="1"]'; await page.waitForTimeout(500);
+        // 每日功課這類面板每 15～20 秒會整塊重畫，標記跟著不見：框之前確認標記還在，不在就重標一次
+        const still = await page.evaluate(() => !!document.querySelector('[data-tutmark="1"]'));
+        if (!still){
+          await page.evaluate((js) => { let el = null; try { el = eval(js); } catch (_){} if (el){ el.setAttribute('data-tutmark', '1'); el.scrollIntoView({ block: 'center' }); } }, sc.pick);
+          await page.waitForTimeout(300);
+        }
+      }
     }
     if (sc.scroll){
       const ok = await page.evaluate((sel) => { const el = document.querySelector(sel); if (!el) return false; el.scrollIntoView({ block: 'center' }); return true; }, sc.scroll);
