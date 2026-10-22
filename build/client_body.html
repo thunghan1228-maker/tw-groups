@@ -3542,6 +3542,7 @@
       <div>
         <div class="chips-title">系統選股・個股研究</div>
         <div class="chips-sub">上面「系統選股」勾條件挑名單；下面「個股研究」打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。點名單任一列就帶到下面。收盤後更新，非即時報價。</div>
+        <button type="button" class="chart-tab chips-btn active" id="diagJump" style="margin-top:8px">🩺 直接到「個股問診」（打股號）↓</button>  <!-- 2026-10-22 使用者找不到個股問診：它在系統選股下面，一鍵跳過去 -->
       </div>
       <button class="cm-icon-btn" id="diagClose" aria-label="關閉">✕</button>
     </div>
@@ -14170,6 +14171,11 @@ document.getElementById('diagBody').addEventListener('click', (e) => {
   }
   const link = e.target.closest('.dg-link[data-code]');
   if (link){ dgRun(link.dataset.code); }
+});
+document.getElementById('diagJump').addEventListener('click', () => {
+  const body = document.getElementById('diagBody');
+  if (body) body.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  setTimeout(() => { const i = document.getElementById('dgInput'); if (i) i.focus({ preventScroll: true }); }, 450);
 });
 document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target && e.target.id === 'dgInput'){ e.preventDefault(); dgRun(e.target.value); } });
 
