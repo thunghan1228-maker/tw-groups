@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 21:43:02";
+const BUILD_STAMP = "2026-10-22 21:51:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -614,6 +614,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   #k12AlertBox{cursor:move;} #k12AlertBox .alert-stk{cursor:pointer;}   /* 2026-10-21 使用者：按著卡片哪裡都能拖 */
   #k12AlertBox .launch-alert-body{max-height:min(55vh,460px);overflow:auto;font-size:14px;}
   #k12AlertBox .la-row small{display:block;font-weight:600;opacity:.92;}
+  #k12AlertBox .la-headnote{font-size:13px;font-weight:700;opacity:.9;margin-left:6px;margin-right:auto;}
   .launch-alert.obs-alert{background:#4c1d95;max-width:min(94vw,680px);width:min(94vw,680px);z-index:211;}
   .obs-alert .launch-alert-body{max-height:min(70vh,640px);overflow:auto;font-weight:500;font-size:14px;}
   .obs-tools{display:flex;gap:6px;align-items:center;}
@@ -1571,6 +1572,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   #tdAlertBox .td-alert-head{display:flex;align-items:center;gap:6px;background:#ede9fe;color:#4c1d95;padding:5px 8px 5px 12px;font-size:13px;font-weight:700;}
   #tdAlertBox .td-alert-title{flex:1;cursor:pointer;line-height:1.5;} #tdAlertBox .td-alert-title:hover{text-decoration:underline;}
   #tdAlertBox .td-alert-time{font-size:15px;color:#6d28d9;font-variant-numeric:tabular-nums;}
+  #tdAlertBox .td-alert-note{font-size:12px;font-weight:700;color:#1d4ed8;margin-left:2px;}
   #tdAlertBox .td-alert-kind{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:#7c3aed;border-radius:999px;padding:0 7px;line-height:17px;vertical-align:1px;} #tdAlertBox .td-alert-kind.k12{background:#2563eb;}
   #tdAlertBox .td-alert-item.k12{border-color:#2563eb;} #tdAlertBox .td-alert-item.k12 .td-alert-head{background:#dbeafe;color:#1e3a8a;} #tdAlertBox .td-alert-item.k12 .td-alert-time{color:#1d4ed8;} #tdAlertBox .td-alert-item.k12 .td-chead b{color:#1d4ed8;}
   #tdAlertBox .td-alert-x{flex:0 0 auto;width:26px;height:26px;border-radius:999px;border:0;background:rgba(76,29,149,.14);color:#4c1d95;font-size:14px;font-weight:800;cursor:pointer;}
@@ -14243,7 +14245,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 21:43:02';
+const BUILD_STAMP = '2026-10-22 21:51:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16085,10 +16087,10 @@ function renderK12AlertBox(){
   }
   const rows = k12AlertRows.slice().sort((a, b) => b.at - a.at);
   const oldBody = el.querySelector('.launch-alert-body'), keepTop = oldBody ? oldBody.scrollTop : 0;   // 20 秒重畫一次，捲到哪要留著
-  el.innerHTML = '<div class="launch-alert-head">🔻 1️⃣2️⃣空・可空 ' + rows.length + ' 檔<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
+  el.innerHTML = '<div class="launch-alert-head">🔻 1️⃣2️⃣空・可空 ' + rows.length + ' 檔<small class="la-headnote">（反彈沒過 1高）</small><button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
     '<div class="launch-alert-body">' + rows.map((r) => '<div class="la-row"><span class="launch-alert-time">' + r.time + '</span> <span class="alert-stk" data-alert-code="' + wlEsc(r.code) +
       '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + r.name) + '</span>（' + wlEsc(r.group) + '）' + botPct(r.pct) +
-      '<small>1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 沒過 1高 → 可空</small></div>').join('') + '</div>';
+      '<small>1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 可空（反彈沒過 1高）</small></div>').join('') + '</div>';
   const newBody = el.querySelector('.launch-alert-body');
   if (newBody && keepTop) newBody.scrollTop = keepTop;
 }
@@ -16124,8 +16126,8 @@ async function k12AlertTick(){
   if (alertsEnabled) launchBeep();
   if ('Notification' in window && Notification.permission === 'granted'){
     try {
-      new Notification('🔻 1️⃣2️⃣空・可空：' + fresh.slice(0, 4).map((r) => r.code + ' ' + r.name).join('、') + (fresh.length > 4 ? ' 等 ' + fresh.length + ' 檔' : ''),
-        { body: fresh.slice(0, 6).map((r) => r.code + ' ' + r.name + '：1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' → 可空').join('\\n'), tag: 'k12-' + time, requireInteraction: true });
+      new Notification('🔻 1️⃣2️⃣空・可空（反彈沒過 1高）：' + fresh.slice(0, 4).map((r) => r.code + ' ' + r.name).join('、') + (fresh.length > 4 ? ' 等 ' + fresh.length + ' 檔' : ''),
+        { body: fresh.slice(0, 6).map((r) => r.code + ' ' + r.name + '：1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 可空（反彈沒過 1高）').join('\\n'), tag: 'k12-' + time, requireInteraction: true });
     } catch (e) { /* 跳不出來就算了 */ }
   }
 }
@@ -16844,7 +16846,8 @@ function tdAlertTick(){
         const card = old || { kind: kd, group: g, newCodes: new Set(), title: '' };
         list.forEach((r) => card.newCodes.add(r.code));
         const label = kd === 'k12' ? '<span class="td-alert-kind k12">12空</span>' : '<span class="td-alert-kind">刀劍空</span>';
-        card.title = '<b class="td-alert-time">' + qt + '</b> ' + label + ' 新進榜：' + list.map((r) => wlEsc(r.name || r.code)).join('、');
+        // 2026-10-22 使用者：藍色（12空 新進榜）後面注明「開始轉弱」——剛破 20MA、還沒到可空；可空（反彈沒過 1高）是另一張綠色卡片
+        card.title = '<b class="td-alert-time">' + qt + '</b> ' + label + ' 新進榜' + (kd === 'k12' ? '<span class="td-alert-note">（開始轉弱）</span>' : '') + '：' + list.map((r) => wlEsc(r.name || r.code)).join('、');
         tdAlert.cards = [card].concat(tdAlert.cards.filter((c) => c !== card)).slice(0, 4);
       });
     });
@@ -16856,7 +16859,7 @@ function tdAlertTick(){
       if (tdAlert.sound) launchBeep();
       if ('Notification' in window && Notification.permission === 'granted'){
         TD_ALERT_KINDS.forEach(([kd, kname, icon]) => fresh[kd].slice(0, 5).forEach((r) => {
-          try { new Notification(icon + ' 新' + (kd === 'k12' ? '12空' : '刀劍空') + ' ' + r.code + ' ' + (r.name || '') + '（' + (r.g || '') + '）', { body: qt + ' ' + (Number.isFinite(r.pct) ? (r.pct > 0 ? '+' : '') + r.pct.toFixed(2) + '%' : '') + (r.big !== null && r.big !== undefined ? '　大戶 ' + (r.big > 0 ? '+' : '') + r.big + '%' : ''), tag: 'td-' + kd + '-' + r.code }); } catch (_){}
+          try { new Notification(icon + ' 新' + (kd === 'k12' ? '12空（開始轉弱）' : '刀劍空') + ' ' + r.code + ' ' + (r.name || '') + '（' + (r.g || '') + '）', { body: qt + ' ' + (Number.isFinite(r.pct) ? (r.pct > 0 ? '+' : '') + r.pct.toFixed(2) + '%' : '') + (r.big !== null && r.big !== undefined ? '　大戶 ' + (r.big > 0 ? '+' : '') + r.big + '%' : ''), tag: 'td-' + kd + '-' + r.code }); } catch (_){}
         }));
       }
     }
