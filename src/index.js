@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 23:43:21";
+const BUILD_STAMP = "2026-10-22 23:45:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -13548,16 +13548,17 @@ function dgAboveList(s){
 }
 function dgSummaryLines(s){
   const c = s.chip || {}, f = s.fund || {}, d = s.def, sc = s.score2, above = dgAboveList(s);
+  const chipV = swHas(c.radar) ? c.radar : null;
   const lines = [];
-  lines.push(swHas(sc) ? '均線 <b>' + sc + ' 分</b>，' + (sc >= 12 ? '很強' : sc >= 8 ? '不強不弱' : '偏弱') + (above ? '（站上 ' + above + ' 日線）' : '（沒站上任何均線）') : '均線分數：日K不足 240 根，還算不出來' + (above ? '（目前站上 ' + above + ' 日線）' : ''));
-  lines.push(swHas(c.weekPct) ? '籌碼本週 <b>' + swPct(c.weekPct, 2) + '</b>，' + (c.weekPct >= 3 ? '大戶明顯進' : c.weekPct <= -3 ? '大戶明顯出' : '沒明顯進出') : '籌碼：集保大戶週增還沒有資料' + (swHas(c.mf5) ? '，主力 5 日 <b>' + swLots(c.mf5) + '</b>' : ''));
-  lines.push(swHas(f.yoy) ? '營收 ' + swYm(f.ym) + ' 年增 <b>' + swPct(f.yoy, 1) + '</b>，' + (f.yoy >= 30 ? '成長很強' : f.yoy >= 0 ? '有成長' : '衰退') + (swHas(f.mom) ? '（月增 ' + swPct(f.mom, 1) + '）' : '') : '營收：沒有月營收資料');
+  lines.push(swHas(sc) ? '均線 <b>' + sc + ' 分</b>，' + (sc >= 13 ? '趨勢很強' : sc >= 10 ? '趨勢普通' : '趨勢偏弱') + (above ? '（站上 ' + above + ' 日線）' : '（沒站上任何均線）') : '均線分數：日K不足 240 根，還算不出來' + (above ? '（目前站上 ' + above + ' 日線）' : ''));
+  lines.push(s.group ? (swHas(s.groupDayRank) ? '族群「' + s.group + '」排 第 <b>' + s.groupDayRank + '</b> 名，' + (s.groupDayRank <= 3 ? '資金大舉照顧' : s.groupDayRank <= 32 ? '資金照顧普通' : '後段沒資金照顧') : '族群「' + s.group + '」今天沒有排名') + (s.groupSrank ? '，強度榜第 ' + s.groupSrank : '') : '沒有歸在任何族群');
+  if (s.group && swHas(s.posAvg)) lines.push('族內近 5 日平均 第 <b>' + s.posAvg + ' / ' + s.posN + '</b>，' + (dgThird(s.posAvg, s.posN) === '前 1/3' ? '前段位置' : dgThird(s.posAvg, s.posN) === '中 1/3' ? '中間位置' : '後段位置'));
+  lines.push(chipV !== null ? '籌碼本週 <b>' + swPct(chipV, 2) + '</b>，' + (chipV >= 3 ? '大戶明顯進' : chipV >= -1 ? '沒明顯進出' : '主力在退') : '籌碼：籌碼雷達還沒有這檔' + (swHas(c.mf5) ? '，主力 5 日 <b>' + swLots(c.mf5) + '</b>' : ''));
+  lines.push(swHas(f.yoy) ? '營收 ' + swYm(f.ym) + ' 年增 <b>' + swPct(f.yoy, 1) + '</b>，' + (f.yoy >= 30 ? '成長很強' : f.yoy >= 0 ? '溫和成長' : '衰退') + (swHas(f.mom) ? '（月增 ' + swPct(f.mom, 1) + '）' : '') : '營收：沒有月營收資料');
   if (swHas(c.inst5)){
-    const same = swHas(c.instToday) && c.instToday !== 0 && c.inst5 !== 0 && (c.inst5 > 0) === (c.instToday > 0);
-    lines.push('法人近 5 日 <b>' + swLots(c.inst5) + '</b>、今日 <b>' + (swHas(c.instToday) ? swLots(c.instToday) : '—') + '</b>，' + (swHas(c.instToday) ? (same ? '買賣一致' : '買賣不一致') : '今天的還沒進來'));
+    lines.push('法人近 5 日' + (c.inst5 > 0 ? '買超' : '賣超') + ' <b>' + swLots(c.inst5) + '</b>，' + (c.inst5 > 0 ? (swHas(c.instToday) && c.instToday > 0 ? '籌碼偏多' : '籌碼偏多、今天沒跟') : '籌碼被倒') + (swHas(c.instToday) ? '（今日 ' + swLots(c.instToday) + '）' : '（今天的還沒進來）'));
   } else lines.push('法人：沒有買賣超資料');
-  lines.push(s.group ? '族群 <b>' + s.group + '</b>' + (s.groupRank ? '，族內第 ' + s.groupRank + '/' + s.groupN : '') + (swHas(s.groupAvg2) ? '，族群平均 ' + s.groupAvg2 + ' 分' : '') + (s.groupSrank ? '，強度榜第 ' + s.groupSrank : '') : '沒有歸在任何族群');
-  lines.push(swHas(f.pe) ? '本益比 <b>' + f.pe + '</b>（' + (f.pe < 15 ? '便宜' : f.pe < 30 ? '合理' : f.pe < 50 ? '偏貴' : '貴') + '）' : '本益比：沒有資料');
+  lines.push(swHas(f.pe) ? '預估 PE <b>' + f.pe + '</b>' + (swHas(s.groupPe) ? (f.pe <= s.groupPe ? ' 低於族均 ' + s.groupPe + '（便宜）' : f.pe <= s.groupPe * 1.5 ? ' 略高於族均 ' + s.groupPe : ' 高於族均 ' + s.groupPe + '（偏貴）') : '（' + (f.pe < 15 ? '便宜' : f.pe < 30 ? '合理' : f.pe < 50 ? '偏貴' : '貴') + '）') : '本益比：沒有資料');
   lines.push(d ? '防守：明天守 <b>三日低 ' + ckPrice(d.low3T) + '</b>、<b>月線 ' + ckPrice(d.ma20T) + '</b>' + (d.halfT ? '、<b>紅半 ' + ckPrice(d.halfT) + '</b>' : '') + '（收盤跌破任一 → 減碼；雙破 → 出場）' : '防守：日K不足 21 根，算不出防守線');
   return lines;
 }
@@ -13655,6 +13656,8 @@ function dgSpark(points, opts){
   svg += '<text x="' + (W - R + 4) + '" y="' + Math.max(11, Math.min(H - 2, y(lastV) + 3)).toFixed(1) + '" fill="currentColor" font-weight="700" font-size="12">' + (opts && opts.fmt ? opts.fmt(lastV) : lastV) + '</text></svg>';
   return '<span class="dg-spark">' + svg + '</span><div class="dg-sub">' + (opts && opts.note ? opts.note : '') + '</div>';
 }
+// 個股族內名次：近 5 日平均名次落在前／中／後三分之一（老師問診「中 1/3」）
+const dgThird = (avg, n) => (!n || n < 2 ? '' : avg <= n / 3 ? '前 1/3' : avg <= 2 * n / 3 ? '中 1/3' : '後 1/3');
 function dgSubjectsHtml(s){
   const sc = (s.subjects && s.subjects.sc) || {}, c = s.chip || {}, f = s.fund || {}, h = s.hist || {};
   const chip = (k) => (swHas(sc[k]) ? '<span class="ck-sub s' + sc[k] + '">' + sc[k] + ' 分</span>' : '<span class="muted">—</span>');
@@ -13662,10 +13665,10 @@ function dgSubjectsHtml(s){
   const above = dgAboveList(s);
   return '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">科目</th><th class="l">目前</th><th class="l">族內</th><th class="l">近期走勢</th></tr></thead><tbody>' +
     row('均線分數', 'ma', (swHas(s.score2) ? '<b>' + s.score2 + '</b>/15' : '—') + '<div class="dg-sub">' + (above ? '站上 ' + above + ' 日線' : '沒站上任何均線') + '</div>', swHas(s.groupAvg2) ? '族群平均 ' + s.groupAvg2 : '—', dgSpark(h.score10, { note: '近 10 日分數' })) +
-    row('族群名次', 'grp', s.group ? (s.groupSrank ? '強度榜第 <b>' + s.groupSrank + '</b>' : '—') + (s.groupCloseRank ? '<div class="dg-sub">收盤排名第 ' + s.groupCloseRank + '（籌碼日報）</div>' : '') : '沒有歸在任何族群', s.group ? (swHas(s.groupStrength) ? '族群強度 ' + s.groupStrength : '—') : '—', '<span class="muted">—</span>') +
-    row('個股族內名次', 'pos', s.groupRank ? '第 <b>' + s.groupRank + '</b>/' + s.groupN + '<div class="dg-sub">今日 ' + swPct(s.chgPct, 2) + '</div>' : '—', '—', '<span class="muted">—</span>') +
-    row('籌碼暴增', 'chip', swHas(c.weekPct) ? '<b>' + swPct(c.weekPct, 2) + '</b><div class="dg-sub">' + (c.tdccDate ? swMmdd(c.tdccDate) + ' 週' : '') + (c.weeks > 0 ? '・連 ' + c.weeks + ' 週增' : '') + (swHas(c.bigPct) ? '・大戶持股 ' + c.bigPct + '%' : '') + '</div>' : '還沒有集保週增資料' + (swHas(c.bigPct) ? '<div class="dg-sub">大戶持股 ' + c.bigPct + '%（' + swMmdd(c.tdccDate) + '）</div>' : ''), '—', dgSpark(h.chip8, { bars: true, zero: true, note: '近 8 週增減', fmt: (v) => swPct(v, 1) })) +
-    row('本益比', 'pe', swHas(f.pe) ? '<b>' + f.pe + '</b><div class="dg-sub">' + (f.pe < 15 ? '便宜' : f.pe < 30 ? '合理' : f.pe < 50 ? '偏貴' : '貴') + (f.peDate ? '・' + swMmdd(f.peDate) : '') + '</div>' : '—', '—', dgSpark(h.pe8, { note: '近 8 天本益比' })) +
+    row('族群名次', 'grp', s.group ? (s.groupDayRank ? '第 <b>' + s.groupDayRank + '</b> 名' : '—') + '<div class="dg-sub">' + s.group + (s.groupSrank ? '・強度榜第 ' + s.groupSrank : '') + '</div>' : '沒有歸在任何族群', s.group ? (swHas(s.groupStrength) ? '族群強度 ' + s.groupStrength : '—') : '—', '<span class="muted">—</span>') +
+    row('個股族內名次', 'pos', s.groupRank ? '第 <b>' + s.groupRank + '</b>/' + s.groupN + '<div class="dg-sub">今日 ' + swPct(s.chgPct, 2) + '</div>' : '—', swHas(s.posAvg) ? '近 5 日平均 <b>' + s.posAvg + '</b><div class="dg-sub">' + dgThird(s.posAvg, s.posN) + '</div>' : '—', '<span class="muted">—</span>') +
+    row('籌碼暴增', 'chip', swHas(c.radar) || swHas(c.weekPct) ? '<b>' + swPct(swHas(c.radar) ? c.radar : c.weekPct, 2) + '</b><div class="dg-sub">' + (c.tdccDate ? swMmdd(c.tdccDate) + ' 週' : '') + (swHas(c.radar) && swHas(c.weekPct) ? '・大戶週增 ' + swPct(c.weekPct, 2) : '') + (c.weeks > 0 ? '・連 ' + c.weeks + ' 週增' : '') + (swHas(c.bigPct) ? '・大戶持股 ' + c.bigPct + '%' : '') + '</div>' : '還沒有集保週增資料' + (swHas(c.bigPct) ? '<div class="dg-sub">大戶持股 ' + c.bigPct + '%（' + swMmdd(c.tdccDate) + '）</div>' : ''), '—', dgSpark(h.chip8, { bars: true, zero: true, note: '近 8 週增減', fmt: (v) => swPct(v, 1) })) +
+    row('本益比', 'pe', swHas(f.pe) ? '<b>' + f.pe + '</b><div class="dg-sub">' + (swHas(s.groupPe) ? (f.pe <= s.groupPe ? '低於族均，便宜' : f.pe <= s.groupPe * 1.5 ? '略高於族均' : '高於族均，偏貴') : (f.pe < 15 ? '便宜' : f.pe < 30 ? '合理' : f.pe < 50 ? '偏貴' : '貴')) + (f.peDate ? '・' + swMmdd(f.peDate) : '') + '</div>' : '—', swHas(s.groupPe) ? '族群平均 ' + s.groupPe : '—', dgSpark(h.pe8, { note: '近 8 天本益比' })) +
     row('營收成長', 'rev', swHas(f.yoy) ? '<b>' + swPct(f.yoy, 1) + '</b><div class="dg-sub">' + swYm(f.ym) + (swHas(f.revenue) ? '・' + (f.revenue >= 1e5 ? (f.revenue / 1e5).toFixed(1) + ' 億' : f.revenue.toLocaleString('en-US') + ' 千元') : '') + (swHas(f.mom) ? '・月增 ' + swPct(f.mom, 1) : '') + '</div>' : '—', '—', dgSpark(h.rev4, { bars: true, zero: true, note: '近 4 個月年增', fmt: (v) => swPct(v, 0) })) +
     row('法人買賣超', 'inst', swHas(c.instToday) ? '<b class="' + dirClass(c.instToday) + '">' + swLots(c.instToday) + '</b>' + (c.f3 ? '<div class="dg-sub">外資 ' + swLots(c.f3.foreign) + '・投信 ' + swLots(c.f3.trust) + '・自營 ' + swLots(c.f3.dealer) + '</div>' : '') : (swHas(c.inst5) ? '今天的還沒進來' : '—'), swHas(c.inst5) ? '近 5 日 <b class="' + dirClass(c.inst5) + '">' + swLots(c.inst5) + '</b>' + (c.instStreak > 0 ? '<div class="dg-sub">連買 ' + c.instStreak + ' 天</div>' : c.instStreak < 0 ? '<div class="dg-sub">連賣 ' + (-c.instStreak) + ' 天</div>' : '') : '—', dgSpark((h.inst10 || []).map((p) => [p[0], swHas(p[1]) ? Math.round(p[1] / 1000) : null]), { bars: true, zero: true, note: '近 10 日三大法人（張）', fmt: (v) => swLots(v) })) +
     '</tbody></table></div>';
@@ -14263,7 +14266,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 23:43:21';
+const BUILD_STAMP = '2026-10-22 23:45:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
