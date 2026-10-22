@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 21:56:07";
+const BUILD_STAMP = "2026-10-22 22:58:06";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -11604,6 +11604,8 @@ function spDispoHtml(data){
   if (!d) return head + '<div class="sp-note">這一份是處置動態接入前整理的，沒有處置資料</div>';
   const names = (list) => (list.length ? list.map((e) => '<span class="nmx" data-code="' + e.code + '" data-name="' + wlEsc(e.name || '') + '">' + e.code + ' ' + wlEsc(e.name || '') + '</span>').join('、') : '無');
   const upcoming = d.upcoming || [], releasing = d.releasing || [], high = d.high || [];
+  const highLines = high.length ? high.map((e) => '<div class="nm"><span class="nmx" data-code="' + e.code + '" data-name="' + wlEsc(e.name || '') + '">' + e.code + ' ' + wlEsc(e.name || '') + '</span> ' +
+    (e.lines || []).map((t) => wlEsc(t)).join('；') + '</div>').join('') : '';
   const periods = {};
   upcoming.forEach((e) => { const k = (e.end || '—') + '|' + (e.releaseDay || '—'); (periods[k] = periods[k] || []).push(e); });
   const upSub = Object.keys(periods).map((k) => { const [end, rel] = k.split('|'); return periods[k].map((e) => wlEsc(e.name || e.code)).join('、') + ':分盤至 ' + (end === '—' ? '—' : end) + ',出獄 ' + (rel === '—' ? '—' : rel); }).join('<br>');
@@ -11614,7 +11616,7 @@ function spDispoHtml(data){
     '<div class="sp-dgrid">' +
     card('明日超處置 ' + upcoming.length + ' 檔', '', upcoming, upSub) +
     card('明日出獄 ' + releasing.length + ' 檔', 'green', releasing, releasing.length ? '出獄第 1 天,依規則觀察三日' : '') +
-    card('高機率處置', '', high, '') + '</div>' + more;
+    (highLines ? '<div class="sp-dcard"><h4>高機率處置</h4>' + highLines + '</div>' : card('高機率處置', '', high, '')) + '</div>' + more;
 }
 // 主動式 ETF 五檔：五檔合計當日增減持，加碼／出貨最多（億）
 function spEtfHtml(data){
@@ -11626,13 +11628,13 @@ function spEtfHtml(data){
   if (o.status !== 'ok') return head + '<div class="sp-note">' + wlEsc(o.reason || '還沒有主動式 ETF 的持股資料') + '</div>';
   const stale = data.date && o.date && o.date < data.date ? '<div class="sp-info">⏳ 這份是 ' + o.date + ' 的持股，' + swMmdd(data.date) + ' 的各投信公告後會自動更新（晚上 21 點後）</div>' : '';
   const side = (list, cls, title, none) => {
-    const rows = (list || []).filter((r) => Math.abs(r.amount || 0) >= 2).slice(0, 6);   // 老師 10/20：加碼前 6、出貨前 4（出貨沒有更多超過 2 億的）
+    const rows = (list || []).slice(0, 6);   // 老師 10/22：加碼前 6、出貨有幾檔列幾檔（大毅 -1.1、日電貿 -1.1、漢唐 -0.0 億也列，沒有 2 億門檻）
     const mx = Math.max.apply(null, rows.map((r) => Math.abs(r.amount || 0)).concat([0.1]));
     return '<div><div class="sp-etfh ' + cls + '">' + title + '</div>' + (rows.length ? rows.map((r, k) =>
       '<div class="sp-etfrow ' + cls + '" data-er-stock="' + wlEsc(r.code) + '"><span class="rk">' + (k + 1) + '</span><span class="nm">' + wlEsc(r.code) + ' ' + wlEsc(r.name) + '</span><span class="amt">' + (r.amount > 0 ? '+' : '') + Number(r.amount).toFixed(1) + ' 億</span>' +
       '<i class="bar" style="width:' + Math.max(4, Math.round(Math.abs(r.amount) / mx * 100)) + '%"></i></div>').join('') : '<div class="sp-note">' + none + '</div>') + '</div>';
   };
-  return head + stale + '<div class="sp-etf2">' + side(o.buy, 'up', '▲ 加碼最多', '今天沒有加碼 2 億以上的') + side(o.sell, 'down', '▼ 出貨最多', '今天沒有出貨 2 億以上的') + '</div>';
+  return head + stale + '<div class="sp-etf2">' + side(o.buy, 'up', '▲ 加碼最多', '今天沒有加碼的') + side(o.sell, 'down', '▼ 出貨最多', '今天沒有出貨的') + '</div>';
 }
 function spSummaryHtml(data){
   const t = data.tiles || {};
@@ -11697,8 +11699,9 @@ function spChipsHtml(data){
 }
 function spTechHtml(data){
   const picks = (data.picks || {}).tech || [], c = data.counts || {};
+  const skipped = (data.techSkipped || []).map((x) => wlEsc(x.name) + '(' + wlEsc(x.why) + ')').join('、');   // 老師 10/22：略過:新復興(營收年增為負)、榮星(成交值 4,703 萬)、友達(營收年增為負)
   return spPickSection('spTech', '技術面精選', swMmdd(data.date) + ' 收盤站上月線 ≥3%、量 ≥500 張 = 真穿月線 ' + (c.tech || 0) + ' 檔;剛站上未達門檻 ' + (c.techNear || 0) + ' 檔不列', picks, true, '(今日無真穿月線)',
-    '<div class="sp-quote">站上月線第一天,防守就是月線本身</div>', data);
+    (skipped ? '<div class="sp-note">略過:' + skipped + '</div>' : '') + '<div class="sp-quote">站上月線第一天,防守就是月線本身</div>', data);
 }
 function spBodyHtml(data){
   const picks = (data.picks || {}).body || [], n = data.notes || {}, c = data.counts || {};
@@ -14254,7 +14257,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 21:56:07';
+const BUILD_STAMP = '2026-10-22 22:58:06';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
