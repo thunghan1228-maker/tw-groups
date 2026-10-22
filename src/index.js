@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 08:41:22";
+const BUILD_STAMP = "2026-10-22 08:52:18";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -173,7 +173,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-hold.up{color:var(--up);} .hr-hold.down{color:var(--down);}
   .hr-hold.hot{color:#fff;} .hr-hold.hot.up{background:#dc2626;} .hr-hold.hot.down{background:#16a34a;}
   .hr-row.hr-wrapold{flex-wrap:wrap;row-gap:0;} .hr-row.hr-wrapold .hr-hold{margin-left:auto;} .hr-row.hr-wrapold .hr-avg + .hr-hold{margin-left:4px;}   /* 欄位不夠寬時大戶力色塊換到下一行靠右，名字不被截 */
-  .hr-top3 .hr-hold{margin-left:auto;} .hr-warn:not(.bear) .hr-stk{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:0;}   /* 183 的 ⚠️ 股票一檔一行（加了大戶力色塊後不再兩檔擠一行） */
+  .hr-top3 .hr-hold{margin-left:auto;}
+  /* 183 的 ⚠️ 股票一檔一行：股名靠左、漲跌幅跟大戶力色塊靠右（2026-10-22 使用者：大戶力移到最右邊切齊） */
+  .hr-warn:not(.bear) .hr-stk{display:flex;align-items:baseline;gap:4px;white-space:nowrap;overflow:hidden;margin-right:0;} .hr-warn:not(.bear) .hr-stk > span:not(.hr-hold){margin-left:auto;} .hr-warn:not(.bear) .hr-stk > .hr-hold{margin-left:4px;}
   .hr-code{color:var(--muted);font-size:12px;}
   .hr-avg{margin-left:auto;font-size:12px;}
   .hr-sep{padding:3px 6px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;}
@@ -8332,7 +8334,6 @@ function homeRank4Html(){
     '<div class="hr-stack">' +
       homeRedBox(homeLaunchColHtml()) +   // 2026-10-18 使用者：昨日強勢股上面加發動；2026-10-21 使用者：首頁的今日強勢股拿掉（訊號中心的分頁還在）
       homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +   // 2026-10-21 使用者：188 搬到發動下面（原本在續抱勿追高下面）
-      home155ColHtml() +   // 2026-10-21 使用者：股票期貨排名(155) 排到發動下面、188 的下面（原本在馬火多(30) 下面）
     '</div>' +
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
@@ -8346,6 +8347,7 @@ function homeRank4Html(){
     '<div class="hr-stack">' +
       homeRedBox(home44ColHtml()) +   // 2026-10-18 使用者：193 換成 44；2026-10-21 使用者：183 那欄跟 44 這欄對調（183 在左、44 在右）
       homeWeak3ColHtml(m) +   // 2026-10-21 使用者：三落空（熄火落馬斷流）放在 1+2多(44) 下面、股期黑龍(75) 上面
+      home155ColHtml() +   // 2026-10-22 使用者：股票期貨排名(155) 放到三落空後面、股期黑龍(75) 上面（原本在發動、188 下面）
       // 2026-10-21 使用者：首頁的終點戰法空(283) 拿掉（機器人代碼 283 還在）
       homeFut75ColHtml() +   // 2026-10-21 使用者：股期黑龍(75) 排到最後一欄 1+2多(44) 下面
     '</div>' +
@@ -8360,7 +8362,7 @@ const hrHelpTable = (title, head, rows, cls) => '<div class="hr-help-card' + (cl
 function homeRankFootHtml(total){
   return hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出'],
-    ['股票期貨排名(155)', '固定 ' + FUT155_GROUPS.length + ' 族', '疊在發動、188 下面；每族只算有股票期貨的成分股，用股期近月的漲跌（開盤前就有）：名次＝它們平均漲跌在全部族群裡的排名，🔺🔽 跟昨天比，最右邊 %＝平均漲跌；空方線＝照名次比例畫（排在後半的在線下）；股期報價沒到時標「現股價」'],
+    ['股票期貨排名(155)', '固定 ' + FUT155_GROUPS.length + ' 族', '疊在三落空下面、股期黑龍(75) 上面；每族只算有股票期貨的成分股，用股期近月的漲跌（開盤前就有）：名次＝它們平均漲跌在全部族群裡的排名，🔺🔽 跟昨天比，最右邊 %＝平均漲跌；空方線＝照名次比例畫（排在後半的在線下）；股期報價沒到時標「現股價」'],
     ['多族群排名(183)', '固定 ' + RANK183_GROUPS.size + ' 族（跟新刀劍空(32)、1️⃣2️⃣空(123) 同一批：199 的 ' + KILL193_GROUPS.size + ' 族＋188 的 ' + RANK188_GROUPS.size + ' 族＋AI眼鏡、太陽能、設備股，重複的合併）', '多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 3 檔（漲最多的）'],
     ['族群漲幅 > 2%(12)', '今天平均漲幅超過 2% 的族群（已入選 183 的不再列）', '每族列漲幅前三大的股票（👑🥈🥉）；標題下面寫「排除入選183族群」'],
     ['空族群排名(199)（首頁沒有這欄，機器人代碼 199 或訊號中心看）', '固定 ' + KILL193_GROUPS.size + ' 族', '只列空方線以下的族群（疊在 193 下面）'],
@@ -14137,7 +14139,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 08:41:22';
+const BUILD_STAMP = '2026-10-22 08:52:18';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15013,7 +15015,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">當沖多1／2・多觀察(等黑K買進)・續抱勿追高・30加33加34・發動／188／155・183・族群漲幅(12)・1+2多(44)／三落空／股期黑龍(75)</div></div>' +
+        '<div class="section-head"><div class="section-title">當沖多1／2・多觀察(等黑K買進)・續抱勿追高・30加33加34・發動／188・183・族群漲幅(12)・1+2多(44)／三落空／155／股期黑龍(75)</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -22400,6 +22402,10 @@ async function buildGroupsBody() {
     const c = held ? sessionClose.stocks[code] : null;
     return c && Number.isFinite(c.close) && c.close > 0 && Number.isFinite(c.pct) ? c : null;
   };
+  // 盤前撮合（09:00 以前）：證交所／後端給的量是 0（還沒有成交），當成不知道（null），各名單的成交量門檻才不會把所有股票擋掉
+  const metaEarly = (quotes && quotes.__meta) || {};
+  const preOpenClock = !held && !!metaEarly.quoteTime && String(metaEarly.quoteTime) < "09:00:00";
+  const volOf = (v) => (preOpenClock && !v ? null : (v ?? null));
   const groups = GROUPS.map((g) => {
     const stocks = g.stocks.map((s) => {
       const c = closeOf(s.code);
@@ -22413,7 +22419,7 @@ async function buildGroupsBody() {
         changePercent: quotes[s.code]?.changePercent ?? 0,
         limitUp: quotes[s.code]?.limitUp ?? false,
         limitDown: quotes[s.code]?.limitDown ?? false,
-        volume: quotes[s.code]?.volume ?? null,
+        volume: volOf(quotes[s.code]?.volume),
         // 今天到目前的最高價（2026-10-16 首頁終點戰法空(283)：盤中曾漲到 5% 以上的才列）；後端代抓那條沒有就是 null
         high: Number.isFinite(quotes[s.code]?.high) ? quotes[s.code].high : null
       };

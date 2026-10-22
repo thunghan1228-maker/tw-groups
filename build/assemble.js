@@ -309,6 +309,10 @@ async function buildGroupsBody() {
     const c = held ? sessionClose.stocks[code] : null;
     return c && Number.isFinite(c.close) && c.close > 0 && Number.isFinite(c.pct) ? c : null;
   };
+  // 盤前撮合（09:00 以前）：證交所／後端給的量是 0（還沒有成交），當成不知道（null），各名單的成交量門檻才不會把所有股票擋掉
+  const metaEarly = (quotes && quotes.__meta) || {};
+  const preOpenClock = !held && !!metaEarly.quoteTime && String(metaEarly.quoteTime) < "09:00:00";
+  const volOf = (v) => (preOpenClock && !v ? null : (v ?? null));
   const groups = GROUPS.map((g) => {
     const stocks = g.stocks.map((s) => {
       const c = closeOf(s.code);
@@ -322,7 +326,7 @@ async function buildGroupsBody() {
         changePercent: quotes[s.code]?.changePercent ?? 0,
         limitUp: quotes[s.code]?.limitUp ?? false,
         limitDown: quotes[s.code]?.limitDown ?? false,
-        volume: quotes[s.code]?.volume ?? null,
+        volume: volOf(quotes[s.code]?.volume),
         // 今天到目前的最高價（2026-10-16 首頁終點戰法空(283)：盤中曾漲到 5% 以上的才列）；後端代抓那條沒有就是 null
         high: Number.isFinite(quotes[s.code]?.high) ? quotes[s.code].high : null
       };
