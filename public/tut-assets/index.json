@@ -5,7 +5,7 @@
    "title": "首頁怎麼看",
    "section": "新手入門",
    "file": "basic-home.mp4",
-   "duration": 209.9,
+   "duration": 322.1,
    "tab": null
   },
   {
@@ -21,7 +21,15 @@
    "title": "機器人代碼怎麼用",
    "section": "新手入門",
    "file": "basic-bot.mp4",
-   "duration": 163.6,
+   "duration": 241.3,
+   "tab": null
+  },
+  {
+   "key": "basic-sgt",
+   "title": "盤中訊號分頁（一格一格看）",
+   "section": "新手入門",
+   "file": "basic-sgt.mp4",
+   "duration": 103.4,
    "tab": null
   },
   {
@@ -29,7 +37,7 @@
    "title": "今日提醒（警示股）",
    "section": "新手入門",
    "file": "basic-remind.mp4",
-   "duration": 69.4,
+   "duration": 71.9,
    "tab": null
   },
   {
@@ -69,7 +77,7 @@
    "title": "今日即時多／今日即時空",
    "section": "盤中訊號中心",
    "file": "sc-now.mp4",
-   "duration": 108.8,
+   "duration": 120.2,
    "tab": "now"
   },
   {
@@ -77,7 +85,7 @@
    "title": "今日強勢股／今日弱勢股",
    "section": "盤中訊號中心",
    "file": "sc-strong.mp4",
-   "duration": 83.6,
+   "duration": 87.8,
    "tab": "strongStocks"
   },
   {
@@ -101,7 +109,7 @@
    "title": "盤中大戶力多／大戶力空",
    "section": "盤中訊號中心",
    "file": "sc-holder.mp4",
-   "duration": 81.0,
+   "duration": 103.2,
    "tab": "bigHolderForceBull"
   },
   {
@@ -181,8 +189,16 @@
    "title": "刀劍空(32)",
    "section": "盤中訊號中心",
    "file": "sc-blade.mp4",
-   "duration": 60.6,
+   "duration": 91.8,
    "tab": "bladeShort"
+  },
+  {
+   "key": "sc-kill193",
+   "title": "空族群必殺(193)",
+   "section": "盤中訊號中心",
+   "file": "sc-kill193.mp4",
+   "duration": 67.6,
+   "tab": "kill193"
   },
   {
    "key": "sc-history",
@@ -197,7 +213,7 @@
    "title": "每日功課",
    "section": "下方工具列",
    "file": "tb-homework.mp4",
-   "duration": 168.3,
+   "duration": 221.8,
    "tab": null
   },
   {
@@ -205,7 +221,7 @@
    "title": "籌碼日報",
    "section": "下方工具列",
    "file": "tb-swing.mp4",
-   "duration": 177.8,
+   "duration": 201.2,
    "tab": null
   },
   {
@@ -221,7 +237,7 @@
    "title": "飆股雷達",
    "section": "下方工具列",
    "file": "tb-grail.mp4",
-   "duration": 84.4,
+   "duration": 119.1,
    "tab": null
   },
   {
