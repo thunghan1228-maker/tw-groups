@@ -19957,7 +19957,8 @@ function botRankChart(g, h, me){
   const trail = botRankTrailData(g);
   const closed = lastData && String(lastData.quoteTime || '') >= '13:30';
   const stampTxt = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
-  let html = botBarChart(rows, { title: g.name + ' 族群排名', sub: n + '檔・' + stampTxt + (closed ? ' 收盤' : ' 盤中快照'),
+  const preOpen = !closed && !!lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr() && String(lastData.quoteTime || '') < '09:00';   // 2026-10-22 盤前撮合（試算價）
+  let html = botBarChart(rows, { title: g.name + ' 族群排名', sub: n + '檔・' + stampTxt + (closed ? ' 收盤' : preOpen ? ' 盤前試算' : ' 盤中快照'),
     sub2: trail ? '族群排名走勢 ' + trail.ranks.join('→') + trail.arrows.join('') : '', right: '多方 ' + topEnd, rightSub: '空方 ' + (n - botStart), wide: true,
     foot: '👑帶頭 🚀火箭 🐎火馬 🔺轉強 🔪⚔️刀劍 🔰新手（數字＝名次變化）', show: true });
   const i = me ? list.findIndex((s) => s.code === me) : -1;
