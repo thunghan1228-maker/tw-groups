@@ -1480,6 +1480,12 @@
   .td-rank.bull{border-color:#e6675f;color:#e6675f;} .td-rank.mid{border-color:#3b82f6;} .td-rank.bear{border-color:#5fae6f;} .td-rank.harv{border-color:#14b8a6;}
   .td-grp{font-size:12px;color:var(--muted);min-width:76px;}
   .td-ftime{font-size:11px;font-weight:700;color:#7c3aed;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .td-tags i.td-k12st,.td-k12legend i.td-k12st{font-style:normal;font-weight:800;color:#fff;border-radius:999px;padding:1px 8px;border:0;white-space:nowrap;}
+  .td-k12st.s1{background:#2563eb;} .td-k12st.s2{background:#047857;}
+  .td-tags i.td-k12lv{font-style:normal;font-weight:700;color:#4a3f37;background:rgba(0,0,0,.05);}
+  .td-k12dot{font-size:11px;font-weight:800;border-radius:999px;padding:0 6px;color:#fff;white-space:nowrap;} .td-k12dot.s1{background:#2563eb;} .td-k12dot.s2{background:#047857;}
+  .td-k12cnt1{color:#1d4ed8;} .td-k12cnt2{color:#047857;} .td-k12cnt{white-space:nowrap;}
+  .td-k12legend{font-size:12px;color:var(--muted);line-height:2;margin:2px 0 8px;} .td-k12legend i{margin-right:2px;}
   .td-newtag{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:999px;padding:0 6px;line-height:16px;}
   /* 刀劍空(32) 新訊號跳出卡片（2026-10-22）：右下角一格一格疊，淺色變數跟每日功課同一組 */
   #tdAlertBox{--bg:#f6f1e7; --panel:#fffdf8; --panel-2:#f3ecdf; --line:#e4d9c6; --text:#1d1410; --muted:#4a3f37; --up:#c0392b; --down:#1e8a4c; --td-serif:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;
@@ -1708,7 +1714,8 @@
   .b32-grp{grid-area:g;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .b32-pct{grid-area:p;justify-self:end;font-weight:800;font-size:12.5px;}
   .b32-h{grid-area:h;justify-self:end;align-self:center;}
-  .b32-row.k12{grid-template-columns:38px minmax(0,1fr) auto auto auto;grid-template-areas:"t s l1 h p" "t g l2 h st";}
+  .b32-row.k12{grid-template-columns:38px minmax(0,1fr) auto auto;grid-template-areas:"t s h p" "t g h st" "t l l l";}
+  .b32-lvrow{grid-area:l;display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:2px;}
   /* 盤中訊號中心「新刀劍空(32)」分頁（淺色底）：同一份 .b32-row 排法 */
   .bcr[data-bot-code]{cursor:pointer;} .bcr[data-bot-code]:hover{background:rgba(255,255,255,.07);}   /* 柱狀圖的股號、股名可以點 */
   .b32-sep{padding:4px 4px 2px;font-size:12px;font-weight:800;text-align:center;color:var(--muted);border-top:1px solid var(--line);} .b32-sep.bear{color:#4ade80;} .b32-tabwrap .b32-sep{color:#6b7280;} .b32-tabwrap .b32-sep.bear{color:#15803d;}   /* 沒有盤中紀錄時的分段標題 */
@@ -1716,6 +1723,8 @@
   .b32-tabwrap .bot-stk{color:var(--text);} .b32-tabwrap .b32-time{color:#7c3aed;}
   .b32-lv{font-size:11.5px;color:#fbbf24;font-weight:700;white-space:nowrap;justify-self:end;text-align:right;}
   .b32-lv1{grid-area:l1;} .b32-lv2{grid-area:l2;}
+  .b32-lv.s1{color:#93c5fd;} .b32-lv.s2{color:#4ade80;}
+  .b32-cnt{display:inline-block;font-size:12px;font-weight:800;margin-right:12px;letter-spacing:.5px;} .b32-cnt.s1{color:#93c5fd;} .b32-cnt.s2{color:#4ade80;}
   .b32-tag{grid-area:st;justify-self:end;font-size:11px;font-weight:800;border-radius:5px;padding:0 6px;color:#fff;}
   .b32-tag.run{background:#b91c1c;} .b32-tag.back{background:#2563eb;}
   /* 2026-10-19 使用者：刀劍空(32)、1️⃣2️⃣空(123)、空族群必殺(193) 都加「大戶力」（盤中大戶力％，跟訊號中心同一份）：
@@ -16007,10 +16016,10 @@ function renderK12AlertBox(){
   }
   const rows = k12AlertRows.slice().sort((a, b) => b.at - a.at);
   const oldBody = el.querySelector('.launch-alert-body'), keepTop = oldBody ? oldBody.scrollTop : 0;   // 20 秒重畫一次，捲到哪要留著
-  el.innerHTML = '<div class="launch-alert-head">🔻 1️⃣2️⃣空・可空 ' + rows.length + ' 檔<small class="la-headnote">（反彈沒過 1高）</small><button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
+  el.innerHTML = '<div class="launch-alert-head">🔻 1️⃣2️⃣空・不過前高可空 ' + rows.length + ' 檔<small class="la-headnote">（第二階段）</small><button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
     '<div class="launch-alert-body">' + rows.map((r) => '<div class="la-row"><span class="launch-alert-time">' + r.time + '</span> <span class="alert-stk" data-alert-code="' + wlEsc(r.code) +
       '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + r.name) + '</span>（' + wlEsc(r.group) + '）' + botPct(r.pct) +
-      '<small>1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 可空（反彈沒過 1高）</small></div>').join('') + '</div>';
+      '<small>1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 不過前高可空（反彈沒過 1高）</small></div>').join('') + '</div>';
   const newBody = el.querySelector('.launch-alert-body');
   if (newBody && keepTop) newBody.scrollTop = keepTop;
 }
@@ -16046,8 +16055,8 @@ async function k12AlertTick(){
   if (alertsEnabled) launchBeep();
   if ('Notification' in window && Notification.permission === 'granted'){
     try {
-      new Notification('🔻 1️⃣2️⃣空・可空（反彈沒過 1高）：' + fresh.slice(0, 4).map((r) => r.code + ' ' + r.name).join('、') + (fresh.length > 4 ? ' 等 ' + fresh.length + ' 檔' : ''),
-        { body: fresh.slice(0, 6).map((r) => r.code + ' ' + r.name + '：1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 可空（反彈沒過 1高）').join('\n'), tag: 'k12-' + time, requireInteraction: true });
+      new Notification('🔻 1️⃣2️⃣空・不過前高可空（第二階段）：' + fresh.slice(0, 4).map((r) => r.code + ' ' + r.name).join('、') + (fresh.length > 4 ? ' 等 ' + fresh.length + ' 檔' : ''),
+        { body: fresh.slice(0, 6).map((r) => r.code + ' ' + r.name + '：1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 不過前高可空').join('\n'), tag: 'k12-' + time, requireInteraction: true });
     } catch (e) { /* 跳不出來就算了 */ }
   }
 }
@@ -16576,6 +16585,20 @@ function tdFirstAt(seq){
   }
   return first;
 }
+// 2026-10-22 使用者：12空 有兩個階段，要分得出來——① 剛轉弱（5 分K 剛跌破 20MA、20MA 下彎，還沒有反彈）、② 可空（破了以後反彈出現「2」，而且沒過 1高＝前高）。
+// 藍色＝①（跟「新進榜」藍色卡片同色）、綠色＝②（跟原本綠色「可空」提醒同色）；顏色加文字一起寫，色盲、列印也看得懂。1高＝破之前的最高，停損放這；只有盤中這份有（回放沒有）。
+function tdK12Px(v){ return String(Number(Number(v).toFixed(2))); }
+function tdK12StageHtml(row){
+  if (!Number.isFinite(row.h1)) return '';
+  if (Number.isFinite(row.h2)) return '<i class="td-k12st s2" title="第二階段：破 20MA 之後反彈出現「2」，而且沒過 1高（前高）→ 可以空；停損放 1高">② 不過前高可空</i><i class="td-k12lv">2 ' + tdK12Px(row.h2) + '</i><i class="td-k12lv">1高 ' + tdK12Px(row.h1) + ' 停損</i>';
+  return '<i class="td-k12st s1" title="第一階段：5 分K 剛跌破 20MA、20MA 下彎，還沒有反彈（還沒到可空）；1高＝破之前的最高，之後當停損價">① 剛轉弱</i><i class="td-k12lv">1高 ' + tdK12Px(row.h1) + ' 停損</i>';
+}
+function tdK12Counts(rows){ let a = 0, b = 0; (rows || []).forEach((r) => { if (Number.isFinite(r.h1)){ if (Number.isFinite(r.h2)) b++; else a++; } }); return { s1: a, s2: b }; }
+function tdK12CountHtml(rows){ const c = tdK12Counts(rows); return '現在：<b class="td-k12cnt1">① 剛轉弱 ' + c.s1 + ' 檔</b>・<b class="td-k12cnt2">② 不過前高可空 ' + c.s2 + ' 檔</b>'; }
+function tdK12MiniHtml(row){   // 廣播清單用的小標記
+  if (!Number.isFinite(row.h1)) return '';
+  return Number.isFinite(row.h2) ? ' <b class="td-k12dot s2" title="第二階段：反彈沒過前高，可以空（2 ' + tdK12Px(row.h2) + '、1高 ' + tdK12Px(row.h1) + ' 停損）">②不過前高可空</b>' : ' <b class="td-k12dot s1" title="第一階段：剛轉弱，還沒到可空（1高 ' + tdK12Px(row.h1) + ' 停損）">①剛轉弱</b>';
+}
 function tdRowHtml(row, ctx, snap, opt){
   const o = opt || {}, held = tdState.hold.includes(row.code);
   const firstHm = ctx.firstAt ? ctx.firstAt.get((o.noK12 ? 'k12:' : '') + row.code) : '';
@@ -16587,7 +16610,7 @@ function tdRowHtml(row, ctx, snap, opt){
     (o.showGroup && row.g ? '<span class="td-grp"' + hwGroupAttr(row.g) + '>' + wlEsc(row.g) + ' <small>(' + row.gr + ')</small></span>' : '') +
     tdMaBall(row.ma) +
     '<span class="td-stk"><b>' + wlEsc(row.code) + '</b> ' + wlEsc(row.name || '') + '</span>' +
-    '<span class="td-tags">' + tdTagsHtml(row.code, ctx, o) + tdBigHtml(row) + '</span>' +
+    '<span class="td-tags">' + tdTagsHtml(row.code, ctx, o) + tdK12StageHtml(row) + tdBigHtml(row) + '</span>' +
     '<span class="td-pct ' + (Number.isFinite(row.pct) ? dirClass(row.pct) : '') + '">' + hwPct(Number.isFinite(row.pct) ? row.pct : null) + '</span>' +
     (o.remove ? '<button type="button" class="td-x" data-td-unwatch="' + wlEsc(row.code) + '" title="移除">✕</button>'
       : '<span class="td-mk">' + (row.mk || '') + '</span>') + '</div>';   // 右邊放原本的刀劍空記號（收割區也是，老師合晶 65♣ 右邊是 ⚔️）
@@ -16598,7 +16621,8 @@ function tdLiveRow(r, zone, big){
   let hi = null;
   if (b.high && price > 0 && Number.isFinite(r.pct)) hi = Math.round((b.high / (price / (1 + r.pct / 100)) - 1) * 10000) / 100;
   return { code: r.code, name: r.name, zone, g: r.groupName, gr: r.groupRank, mk: r.bladeMark || '', pct: r.pct, price: r.price,
-    ma: hwMaScore(r.code, price), big: b.pct ?? null, avg: b.avgAmount ?? null, hi, partial: b.pct !== null && b.pct !== undefined && !b.complete };
+    ma: hwMaScore(r.code, price), big: b.pct ?? null, avg: b.avgAmount ?? null, hi, partial: b.pct !== null && b.pct !== undefined && !b.complete,
+    h1: r.h1 ?? null, h2: r.h2 ?? null };   // 12空 的 1高（破惡前最高＝停損價）、2（破惡後反彈的高）：只有盤中這份有
 }
 function tdLiveSnap(m, peek){   // peek＝跳出通知用：1＝只讀手上已經有的資料、不另外抓 kill12／大戶%（每 15 秒算一次，不要多打請求）；2＝要畫卡片了，大戶%照抓、kill12 不抓；參數勾了大戶或最高時一律照抓
   const k = peek ? (botState.cache.kill12 ? botState.cache.kill12.data : null) : botFetchCache('kill12', '/api/kill12', 15e3);
@@ -16617,7 +16641,8 @@ function tdLiveSnap(m, peek){   // peek＝跳出通知用：1＝只讀手上已�
     if (!marks.has(g.name)) marks.set(g.name, groupBladeMarks(g));
     const bm = marks.get(g.name).get(it.code);
     k12Base.push({ code: it.code, name: (s && s.name) || it.name, pct: pct12, price: s ? s.price : it.close,
-      groupName: g.name, groupRank: gi + 1, bladeMark: bm ? bm.mk : '', dayHighPct: it.dayHighPct });
+      groupName: g.name, groupRank: gi + 1, bladeMark: bm ? bm.mk : '', dayHighPct: it.dayHighPct,
+      h1: Number.isFinite(it.high1) ? it.high1 : null, h2: Number.isFinite(it.high2) ? it.high2 : null });
   });
   const zoneRows = TD_ZONES.flatMap((z) => (m[z.list] || []).map((r) => [r, z.key]));
   const codes = zoneRows.map(([r]) => r.code).concat(k12Base.map((r) => r.code), tdState.watch, ((jlState.data && jlState.data.suspects) || []).map((x) => x.code));
@@ -16767,7 +16792,7 @@ function tdAlertTick(){
         list.forEach((r) => card.newCodes.add(r.code));
         const label = kd === 'k12' ? '<span class="td-alert-kind k12">12空</span>' : '<span class="td-alert-kind">刀劍空</span>';
         // 2026-10-22 使用者：藍色（12空 新進榜）後面注明「開始轉弱」——剛破 20MA、還沒到可空；可空（反彈沒過 1高）是另一張綠色卡片
-        card.title = '<b class="td-alert-time">' + qt + '</b> ' + label + ' 新進榜' + (kd === 'k12' ? '<span class="td-alert-note">（開始轉弱）</span>' : '') + '：' + list.map((r) => wlEsc(r.name || r.code)).join('、');
+        card.title = '<b class="td-alert-time">' + qt + '</b> ' + label + ' 新進榜' + (kd === 'k12' ? '<span class="td-alert-note">（第一階段・剛轉弱）</span>' : '') + '：' + list.map((r) => wlEsc(r.name || r.code)).join('、');
         tdAlert.cards = [card].concat(tdAlert.cards.filter((c) => c !== card)).slice(0, 4);
       });
     });
@@ -16779,7 +16804,7 @@ function tdAlertTick(){
       if (tdAlert.sound) launchBeep();
       if ('Notification' in window && Notification.permission === 'granted'){
         TD_ALERT_KINDS.forEach(([kd, kname, icon]) => fresh[kd].slice(0, 5).forEach((r) => {
-          try { new Notification(icon + ' 新' + (kd === 'k12' ? '12空（開始轉弱）' : '刀劍空') + ' ' + r.code + ' ' + (r.name || '') + '（' + (r.g || '') + '）', { body: qt + ' ' + (Number.isFinite(r.pct) ? (r.pct > 0 ? '+' : '') + r.pct.toFixed(2) + '%' : '') + (r.big !== null && r.big !== undefined ? '　大戶 ' + (r.big > 0 ? '+' : '') + r.big + '%' : ''), tag: 'td-' + kd + '-' + r.code }); } catch (_){}
+          try { new Notification(icon + ' 新' + (kd === 'k12' ? '12空（第一階段・剛轉弱）' : '刀劍空') + ' ' + r.code + ' ' + (r.name || '') + '（' + (r.g || '') + '）', { body: qt + ' ' + (Number.isFinite(r.pct) ? (r.pct > 0 ? '+' : '') + r.pct.toFixed(2) + '%' : '') + (r.big !== null && r.big !== undefined ? '　大戶 ' + (r.big > 0 ? '+' : '') + r.big + '%' : ''), tag: 'td-' + kd + '-' + r.code }); } catch (_){}
         }));
       }
     }
@@ -16862,13 +16887,13 @@ function tdBroadcastHtml(seq, snap, kind){
       // 老師廣播股名後面的「期」（有股票期貨）、「持」（打勾持有空單）；在觀察股裡的族群那格寫「⭐ 觀察」
       (stockFlags[x.code] && (stockFlags[x.code].hasStockFutures || stockFlags[x.code].hasMiniStockFutures) ? '<i class="td-bfut">期</i>' : '') +
       (tdState.hold.includes(x.code) ? '<i class="td-bhold">持</i>' : '') + '</span>' +
-      '<span class="td-bgrp">' + (tdState.watch.includes(x.code) ? '⭐ 觀察' : '<span' + hwGroupAttr(r.g) + '>' + wlEsc(r.g || (r.zone === undefined ? '' : '12空')) + '</span>' + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, snap.total)) : '')) + '</span>' +
+      '<span class="td-bgrp">' + (tdState.watch.includes(x.code) ? '⭐ 觀察' : '<span' + hwGroupAttr(r.g) + '>' + wlEsc(r.g || (r.zone === undefined ? '' : '12空')) + '</span>' + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, snap.total)) : '')) + (isK ? tdK12MiniHtml(r) : '') + '</span>' +
       '<span class="td-bh">' + holderTagHtml(r.big !== null && r.big !== undefined ? r.big : holderPctOf(x.code), true) + '</span>' +
       '<span class="td-bpct ' + (Number.isFinite(pctNow(x)) ? dirClass(pctNow(x)) : '') + '">' + hwPct(Number.isFinite(pctNow(x)) ? pctNow(x) : null) + '</span>' +
       (x.inNow ? (x.back ? '<span class="td-bst back">回 ' + x.back + '</span>' : '<span class="td-bst"></span>') : '<span class="td-bst run">跑 ' + x.out + '</span>') + '</div>';
   }).join('');
   return '<aside class="td-side' + (isK ? ' k12' : '') + '"><div class="td-shead">' + (isK ? '📣 🔵 12空(123)功課廣播' : '📣 🔪 刀劍空(32)功課廣播') + '</div>' +
-    '<div class="td-sinfo">' + (snap.live ? '盤中・跟著首頁報價' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
+    '<div class="td-sinfo">' + (snap.live ? '盤中・跟著首頁報價' + (isK ? '・' + tdK12CountHtml(list.filter((x) => x.inNow).map((x) => x.row)) : '') : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
     '<div class="td-sparam">⏸ 跟著上面參數：' + (on.length ? on.join('・') : (isK ? '（都沒勾＝全部12空）' : '（都沒勾＝全部刀劍空）')) + '</div>' +
     '<div class="td-scount">今天 <b>' + list.length + '</b> 檔　在榜 ' + inCnt + '　<span class="down">消失 ' + goneCnt + '</span>' +
     '<button type="button" class="td-hide" data-td-hidegone="1">' + (tdState.hideGone ? '👁 顯示消失的' : '🚫 隱藏') + '</button></div>' +
@@ -17060,6 +17085,7 @@ function hwTodayHtml(){
     (tdState.watch.length ? tdState.watch.map((c) => tdRowHtml(tdQuoteRow(c, '', live.big), ctx, snap, { lite: true, remove: true, group: tdGroupOf(c) })).join('') : '<div class="td-empty">還沒有觀察股</div>') + '</div>';
   // ⑧ 12空
   const k12Sec = '<div class="td-sec"><h4><span class="td-badge k12">12空</span> <small>機器人 123（道館 5 分K MA20 當沖空）・跟上面刀劍空分開看；段位照 12空 自己的族群排名</small></h4>' +
+    '<div class="td-k12legend"><i class="td-k12st s1">① 剛轉弱</i> 5 分K 剛跌破 20MA、20MA 下彎，還沒反彈　<i class="td-k12st s2">② 不過前高可空</i> 破了以後反彈出現「2」、沒過 1高（前高）→ 可以空，停損放 1高　<span class="td-k12cnt">' + tdK12CountHtml(snap.k12) + '</span></div>' +
     (!snap.k12Loaded ? '<div class="td-empty">讀取中…</div>' : !snap.k12Tracked ? '<div class="td-empty">後端今天還沒有 5 分K（盤中 9 點以後才有）</div>' :
       snap.k12.length ? tdCardsHtml(snap.k12.slice().sort(byPct), ctx, snap, { noFoot: true, rowOpt: { noK12: true } }) : '<div class="td-empty">目前沒有衝高後跌破 MA20 下彎的</div>') + '</div>';
   // ⑨ 出獄即入獄、出獄股、即將入獄（整天不變，回放時也照今天的）
@@ -19995,7 +20021,7 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 // 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
 const botState = { cols: [], restored: false, restoring: false, pendTops: null, world: null, worldAt: 0, worldLoading: false, cache: {} };   // cols＝開著的格子 [{cmd, key, html}]，照點的順序
 const BOT_CODES = [
-  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行，每族列漲幅前三大的股票（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：固定的族群裡，今天衝高 3% 以上、現價漲幅不超過 1.55%，而且三個條件到齊的股票：①1高＝破惡前的最高（不是開盤衝的那根）②5 分K 從 20MA 上面收盤跌破（破惡），現在還在 20MA 下面、20MA 往下彎（均下彎）③破惡之後的反彈（2）沒過 1高，過了 1高就拿掉、要再跌破才重新算；每列最前面是進名單的時間，新的在上面（還有一條篩選我們沒找到，所以會列得比實際多）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
+  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行，每族列漲幅前三大的股票（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：固定的族群裡，今天衝高 3% 以上、現價漲幅不超過 1.55%，而且三個條件到齊的股票：①1高＝破惡前的最高（不是開盤衝的那根）②5 分K 從 20MA 上面收盤跌破（破惡），現在還在 20MA 下面、20MA 往下彎（均下彎）③破惡之後的反彈（2）沒過 1高，過了 1高就拿掉、要再跌破才重新算；每列最前面是進名單的時間，新的在上面。每一檔分兩個階段：藍色「① 剛轉弱」＝剛跌破 20MA、20MA 下彎、還沒反彈（右邊寫 1高＝停損價）；綠色「② 不過前高可空」＝破了以後反彈出現「2」、沒過 1高（前高）→ 可以空，停損放 1高（還有一條篩選我們沒找到，所以會列得比實際多）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
   ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'], ['三落空', '熄火落馬斷流：熄火空(30 顛倒)、落馬空(33 顛倒)、斷流空(34 顛倒) 三份都有、而且可放空（有券、非處置股）的弱勢股'],
   ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
@@ -20669,8 +20695,10 @@ function botAnswer(raw){
     const sinceHm = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '');
     // 2026-10-20 使用者：加 1高（停損價）跟 2（破惡後反彈的高，沒過 1高就寫「可空」）——教學頁「12空:2 不過 1高 + 破惡均下彎」
     const px2 = (v) => String(Number(Number(v).toFixed(2)));
-    const k12Lv = (r) => (r.h1 === null ? '' : '<span class="b32-lv b32-lv1" title="1高＝破惡前的最高，當停損價">1高 ' + px2(r.h1) + ' 停損</span>' +
-      (r.h2 === null ? '' : '<span class="b32-lv b32-lv2" title="2＝破惡後反彈的高，沒過 1高就可以空">2 ' + px2(r.h2) + ' 可空</span>'));
+    // 2026-10-22 使用者：① 剛轉弱（還沒反彈）／② 可空（反彈沒過前高）要分得出來——藍＝①、綠＝②
+    const k12Lv = (r) => (r.h1 === null ? '' : '<span class="b32-lvrow">' + (r.h2 === null
+      ? '<span class="b32-lv s1" title="第一階段：剛跌破 20MA、20MA 下彎，還沒有反彈；1高＝破之前的最高，當停損價">① 剛轉弱（還沒反彈）</span><span class="b32-lv" title="1高＝破之前的最高，當停損價">1高 ' + px2(r.h1) + ' 停損</span>'
+      : '<span class="b32-lv s2" title="第二階段：破了以後反彈出現「2」，沒過 1高（前高）就可以空">② 不過前高可空（反彈沒過 1高）</span><span class="b32-lv">2 ' + px2(r.h2) + '</span><span class="b32-lv" title="1高＝破之前的最高，當停損價">1高 ' + px2(r.h1) + ' 停損</span>') + '</span>');
     const line = (r, harvest) => '<div class="b32-row' + (r.h1 === null ? '' : ' k12') + '" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name) + '">' +
       '<span class="b32-time">' + sinceHm(r.since) + '</span>' +
       '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name) + '</span>' + r.mk + '</span>' +
@@ -20679,10 +20707,11 @@ function botAnswer(raw){
       '<span class="b32-h">' + holderTagHtml(holderPctOf(r.code), true) + '</span>' + k12Lv(r) + '</div>';
     const live = rows.filter((r) => !(r.pct <= -BLADE_HARVEST_PCT)), harvest = rows.filter((r) => r.pct <= -BLADE_HARVEST_PCT);
     const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
-    return wrap(title, (rows.length ? live.map((r) => line(r)).join('') +
+    const c1 = rows.filter((r) => r.h1 !== null && r.h2 === null).length, c2 = rows.filter((r) => r.h1 !== null && r.h2 !== null).length;
+    return wrap(title, (rows.length ? botLine('<span class="b32-cnt s1">① 剛轉弱 ' + c1 + ' 檔（還沒反彈）</span><span class="b32-cnt s2">② 不過前高可空 ' + c2 + ' 檔（反彈沒過 1高）</span>', 'bot-dim') : '') + (rows.length ? live.map((r) => line(r)).join('') +
         (harvest.length ? botLine('----↓(收割區域)↓-----', 'bot-sep') + harvest.map((r) => line(r, true)).join('') : '')
       : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
-      (rows.length ? botLine('左邊時間＝進名單的時間（5 分K 判定成立那根）・接近現在的在上面、早的在下面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・1高＝破惡前最高（停損價）・2＝破惡後反彈的高，沒過 1高就寫「可空」（可以空）', 'bot-dim') : '') + otcFoot(),
+      (rows.length ? botLine('左邊時間＝進名單的時間（5 分K 判定成立那根）・接近現在的在上面、早的在下面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・① 剛轉弱＝剛跌破 20MA、20MA 下彎、還沒反彈，1高＝破惡前最高（停損價）・② 不過前高可空＝破了以後反彈出現「2」、沒過 1高（前高）就可以空', 'bot-dim') : '') + otcFoot(),
       (when ? '5 分K算到 ' + when + '・' : '') + rows.length + ' 檔');
   }
   if (q === '30' || q === '32'){
