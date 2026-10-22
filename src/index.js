@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 22:58:06";
+const BUILD_STAMP = "2026-10-22 23:16:53";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -13673,7 +13673,7 @@ const dgDefCell = (d) => (d ? ckPrice(d.ma20T) + ' / ' + ckPrice(d.low3T) + (swH
 const dgJudge = (d) => (d ? '<span class="' + ((d.brkMa || d.brkL3 || d.brkHalf) ? 'dg-bad' : 'dg-ok') + '">' + d.label + '</span>' : '—');
 function dgListRowHtml(r, i, cur){
   return '<tr class="dg-link' + (cur ? ' dg-cur' : '') + '" data-code="' + r.code + '"><td>' + i + '</td><td class="l"><b>' + r.code + '</b> ' + (r.name || '') + (r.disposed ? ' 🔒' : '') + '</td><td class="l">' + dgClsPill(r.cls) + '</td>' +
-    '<td class="' + dirClass(r.chgPct || 0) + '">' + swPct(r.chgPct, 2) + '</td><td>' + (swHas(r.score2) ? r.score2 : '—') + '</td><td class="' + dirClass(r.weekPct || 0) + '">' + swPct(r.weekPct, 2) + '</td><td>' + (swHas(r.pe) ? r.pe : '—') + '</td>' +
+    '<td class="' + dirClass(r.chgPct || 0) + '">' + swPct(r.chgPct, 2) + '</td><td>' + (swHas(r.score2) ? r.score2 : '—') + '</td><td class="' + dirClass((swHas(r.chip) ? r.chip : r.weekPct) || 0) + '">' + swPct(swHas(r.chip) ? r.chip : r.weekPct, 2) + '</td><td>' + (swHas(r.pe) ? r.pe : '—') + '</td>' +
     '<td class="' + dirClass(r.yoy || 0) + '">' + (swHas(r.yoy) ? swPct(r.yoy, 0) : '—') + '</td><td class="' + dirClass(r.inst5 || 0) + '">' + (swHas(r.inst5) ? swLots(r.inst5) : '—') + '</td><td>' + ckPrice(r.close) + '</td><td class="l">' + dgDefCell(r.def) + '</td><td class="l">' + dgJudge(r.def) + '</td></tr>';
 }
 const DG_LIST_HEAD = '<tr><th>#</th><th class="l">股票</th><th class="l">判定</th><th>今日</th><th>均線</th><th>籌碼</th><th>PE</th><th>營收年增</th><th>法人 5 日</th><th>今收</th><th class="l">明日守 月線 / 三日低</th><th class="l">防守判定</th></tr>';
@@ -13717,7 +13717,7 @@ function dgTodayHtml(data){
   return '<div class="bl-section bl-brew">📋 今日名單・族群強度榜前十族 × 強勢／中等（' + (top.list || []).length + ' 檔）</div>' +
     '<div class="dg-filter">防守判定：' + DG_FILTERS.map(([k, l]) => btn(k, l)).join('') + '</div>' +
     (list.length ? '<div class="hl-scroll"><table class="ck-table"><thead>' + DG_LIST_HEAD + '</thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">沒有符合這個判定的股票</div>') +
-    '<div class="sw-rule">依族群強度 → 七科總分排；點列可換該股問診。「即將穿惡」＝破月線但一根漲停能站回。</div>';
+    '<div class="sw-rule">依族群強度 → 七科總分排；籌碼＝籌碼雷達的籌碼%（集保大戶週增換算）；點列可換該股問診。「即將穿惡」＝破月線但一根漲停能站回。</div>';
 }
 function dgCrossHtml(data){
   const cross = data.cross || {}, groups = cross.groups || {};
@@ -14257,7 +14257,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 22:58:06';
+const BUILD_STAMP = '2026-10-22 23:16:53';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22214,7 +22214,7 @@ function renderMa(){
     '<div class="ma-tools">排名方式 ' + vb('sum', '依總分') + vb('up', '名次進步') + vb('streak', '連續上榜') + vb('new', '新進榜') + vb('allma', '站上全部均線') +
     '<span class="ma-vsum">' + view.sum + '</span></div>' +
     (view.rows.length ? maStockTable(view.rows, null, true) : '<div class="ma-legend">沒有符合的股票。</div>') +
-    '<div class="ma-legend">燈號：上排六格＝站上 5/10/20/60/120/240 日均線（金色），下排六格＝創 5/10/20/60/120/360 日新高（紅色，最近 3 天的最高收盤比那個天期內更早的都高，平手不算）。' +
+    '<div class="ma-legend">燈號：上排六格＝站上 5/10/20/60/120/240 日均線（金色），下排六格＝創 5/10/20/60/120/360 日新高（紅色，今天收盤比那個天期內 3 個交易日以前的最高收盤還高，平手不算）。' +
     '總分＝分數（站上＋新高，滿分 12）＋排列（20 日線在 60 日線上、60 在 120 上、120 在 350 上各 1 分）。同總分先比分數、再照股號。連續上榜＝連續幾個交易日都在前 60 名；昨天不在前 60 名掛 NEW。</div></div>' +
     maHitsHtml() +
     '<div class="ma-sec"><h3>族群分數前十大 <small>族內平均分</small><span class="ma-pill">選股日期 ' + maMd(d.date) + '</span></h3>' + maGroupTable(d.groups) +
