@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 23:16:53";
+const BUILD_STAMP = "2026-10-22 23:30:58";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -13723,11 +13723,11 @@ function dgCrossHtml(data){
   const cross = data.cross || {}, groups = cross.groups || {};
   const total = cross.n || 0;
   const block = (cls) => { const rows = groups[cls] || []; if (!rows.length) return ''; return '<div class="sw-etf-kind">' + cls + '・' + rows.length + ' 檔</div><div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>🔴🟢</th><th>均線</th><th>昨收</th><th>收盤</th><th>漲幅</th><th>成交量</th><th>月線</th><th>站上多少</th><th class="l">明日守 三日低 / 紅半</th></tr></thead><tbody>' +
-    rows.map((r) => '<tr class="dg-link' + (r.code === data.stock.code ? ' dg-cur' : '') + '" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + r.name + '</td><td class="l">' + (r.group || '—') + '</td><td>🔴' + (r.red || 0) + '・🟢' + (r.green || 0) + '</td><td>' + (swHas(r.score2) ? r.score2 : '—') + '</td><td>' + ckPrice(r.prev) + '</td><td>' + ckPrice(r.close) + '</td><td class="' + dirClass(r.chgPct || 0) + '">' + swPct(r.chgPct, 2) + '</td><td>' + (r.volume || 0).toLocaleString('en-US') + ' 張</td><td>' + (r.def ? ckPrice(r.def.ma20T) : '—') + '</td><td class="up">' + (r.cross ? swPct(r.cross.dist, 1) : '—') + '</td><td class="l">' + (r.def ? ckPrice(r.def.low3T) + (swHas(r.def.halfT) ? ' / 紅半 ' + ckPrice(r.def.halfT) : '') : '—') + '</td></tr>').join('') + '</tbody></table></div>'; };
+    rows.map((r) => '<tr class="dg-link' + (r.code === data.stock.code ? ' dg-cur' : '') + '" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + r.name + '</td><td class="l">' + (r.group || '—') + '</td><td>🔴' + (r.red || 0) + '・🟢' + (r.green || 0) + '</td><td>' + (swHas(r.score2) ? r.score2 : '—') + '</td><td>' + ckPrice(r.prev) + '</td><td>' + ckPrice(r.close) + '</td><td class="' + dirClass(r.chgPct || 0) + '">' + swPct(r.chgPct, 2) + '</td><td>' + (r.volume || 0).toLocaleString('en-US') + ' 張</td><td>' + (r.def ? ckPrice(swHas(r.def.ma20Y) ? r.def.ma20Y : r.def.ma20T) : '—') + '</td><td class="up">' + (r.cross ? swPct(r.cross.dist, 1) : '—') + '</td><td class="l">' + (r.def ? ckPrice(r.def.low3T) + (swHas(r.def.halfT) ? ' / 紅半 ' + ckPrice(r.def.halfT) : '') : '—') + '</td></tr>').join('') + '</tbody></table></div>'; };
   return '<div class="bl-section bl-launch">🐉 今日穿惡名單・' + swMmdd(data.date) + ' 真穿惡 ' + total + ' 檔</div>' +
     '<div class="sw-basis">強勢 ' + (groups['強勢'] || []).length + '・中等 ' + (groups['中等'] || []).length + '・弱勢 ' + (groups['弱勢'] || []).length + (swHas(cross.nearLeft) ? '・還在月線下但一根漲停可站回 ' + cross.nearLeft + ' 檔' : '') + '</div>' +
     (total ? block('強勢') + block('中等') + block('弱勢') : '<div class="race-note">今天沒有真穿惡的股票</div>') +
-    '<div class="sw-rule">口徑：只掃族群表內的股票；昨收在昨日月線之下、今收站上今日月線 2% 以上、成交量 ≥500 張才算真穿惡；強／中／弱＝七科體質分級。點列可換該股問診。</div>';
+    '<div class="sw-rule">口徑：只掃族群表內的股票；昨收在昨日月線之下、今收比昨日月線高 3% 以上、成交量 ≥500 張才算真穿惡（月線、站上多少都用昨日月線算）；強／中／弱＝七科體質分級。點列可換該股問診。</div>';
 }
 function dgHeaderHtml(data){
   const s = data.stock, sub = s.subjects || {}, ov = ckOverall(s);
@@ -14257,7 +14257,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 23:16:53';
+const BUILD_STAMP = '2026-10-22 23:30:58';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
