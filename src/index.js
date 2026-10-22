@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 19:16:05";
+const BUILD_STAMP = "2026-10-22 21:43:02";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1557,9 +1557,6 @@ const HTML_PAGE = `<!DOCTYPE html>
   .td-rank.bull{border-color:#e6675f;color:#e6675f;} .td-rank.mid{border-color:#3b82f6;} .td-rank.bear{border-color:#5fae6f;} .td-rank.harv{border-color:#14b8a6;}
   .td-grp{font-size:12px;color:var(--muted);min-width:76px;}
   .td-ftime{font-size:11px;font-weight:700;color:#7c3aed;font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .td-stabs{display:flex;gap:6px;padding:7px 10px 2px;}
-  .td-stab{font:inherit;font-size:12px;font-weight:800;padding:3px 11px;border-radius:999px;border:1.5px solid #7c3aed;background:var(--panel);color:#5b21b6;cursor:pointer;}
-  .td-stab.on{background:#5b21b6;color:#fff;} .td-stab.k12{border-color:#2563eb;color:#1d4ed8;} .td-stab.k12.on{background:#2563eb;color:#fff;}
   .td-newtag{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:999px;padding:0 6px;line-height:16px;}
   /* 刀劍空(32) 新訊號跳出卡片（2026-10-22）：右下角一格一格疊，淺色變數跟每日功課同一組 */
   #tdAlertBox{--bg:#f6f1e7; --panel:#fffdf8; --panel-2:#f3ecdf; --line:#e4d9c6; --text:#1d1410; --muted:#4a3f37; --up:#c0392b; --down:#1e8a4c; --td-serif:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;
@@ -1664,7 +1661,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .td-title{font-size:24px;font-weight:900;}
   .td-tbox{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 10px;border:1.5px solid #c0392b;border-radius:999px;padding:3px 12px 3px 4px;background:rgba(192,57,43,.05);}
   .td-replay{font-size:12px;color:#c0392b;font-weight:700;}
-  .td-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start;}
+  .td-wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start;}
+  .td-sides{display:flex;gap:12px;align-items:flex-start;}
+  .td-sides .td-side{width:292px;flex:0 0 292px;} .td-side.k12 .td-shead{background:#1d4ed8;} .td-side.k12 .td-sinfo{color:#1d4ed8;}
   .td-main{min-width:0;}
   .td-side{position:sticky;top:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13px;max-height:calc(92vh - 40px);overflow-y:auto;}
   .td-shead{background:#5b21b6;color:#fff;font-weight:800;font-size:16px;padding:9px 12px;}
@@ -1716,7 +1715,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   #hwInner .td-card{border-color:#c4b5fd;box-shadow:0 2px 0 rgba(91,33,182,.08);}
   #hwInner .td-chead b{color:#6d28d9;}
   #hwInner .td-stk b{color:#a0442c;}
-  @media (max-width:900px){ .td-wrap{grid-template-columns:1fr;} .td-side{position:static;max-height:380px;order:-1;} }
+  @media (max-width:1280px){ .td-sides{flex-direction:column;} .td-sides .td-side{position:static;max-height:420px;} }   /* 窄螢幕：兩欄上下疊，不然左邊主畫面被擠太窄 */
+  @media (max-width:900px){ .td-wrap{grid-template-columns:1fr;} .td-sides{order:-1;} .td-sides .td-side{width:auto;flex:1 1 auto;} .td-side{position:static;max-height:380px;} }
   /* 🔥 當沖多、👀 多觀察（2026-10-18 使用者：照老師當沖多功課、多觀察功課生成器的版面） */
   .lg-summary{font-size:13px;color:var(--muted);margin:4px 0 6px;line-height:1.6;}
   .lg-srcnote{display:block;font-size:12px;}
@@ -14243,7 +14243,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 19:16:05';
+const BUILD_STAMP = '2026-10-22 21:43:02';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16486,8 +16486,6 @@ const tdState = { zones: { upper: true, middle: true, lower: true, harvest: true
 // 老師的「名單」是學員貼的盤前空觀察；我們用系統自己的：名單＝前一個交易日收盤（最後一份紀錄）的新刀劍空名單。
 //   名單外的刀劍空＝今天盤中有、但前一天收盤名單沒列的；今天沒中的族群＝前一天名單裡有、今天整族沒進新刀劍空的。
 tdState.showMiss = true; tdState.showOut = true; tdState.sortDeep = false;
-tdState.side = 'blade';   // 右邊功課廣播看哪一份：刀劍空(32)／12空(123)，跟老師一樣可以切換（2026-10-22 使用者）
-try { if (localStorage.getItem('tdSide') === 'k12') tdState.side = 'k12'; } catch (_){}
 tdState.prev = { date: null, data: null, key: '', at: 0, loading: false };
 try { const o = JSON.parse(localStorage.getItem('tdOpts') || '{}'); if (o && typeof o === 'object'){ if (o.miss === false) tdState.showMiss = false; if (o.out === false) tdState.showOut = false; if (o.deep === true) tdState.sortDeep = true; } } catch (_){}
 function tdSaveOpts(){ try { localStorage.setItem('tdOpts', JSON.stringify({ miss: tdState.showMiss, out: tdState.showOut, deep: tdState.sortDeep })); } catch (_){} }
@@ -16890,7 +16888,6 @@ function tdAlertClick(e){
   if (op){
     if (!hwWindowMode()){
       hwState.tab = 'today';
-      tdState.side = op.dataset.alertOpen === 'k12' ? 'k12' : 'blade';   // 右邊廣播也切到那一份
       openHomeworkFromToolbar();
       try { renderHomework(); } catch (_){}
     }
@@ -16947,8 +16944,7 @@ function tdBroadcastHtml(seq, snap, kind){
       '<span class="td-bpct ' + (Number.isFinite(pctNow(x)) ? dirClass(pctNow(x)) : '') + '">' + hwPct(Number.isFinite(pctNow(x)) ? pctNow(x) : null) + '</span>' +
       (x.inNow ? (x.back ? '<span class="td-bst back">回 ' + x.back + '</span>' : '<span class="td-bst"></span>') : '<span class="td-bst run">跑 ' + x.out + '</span>') + '</div>';
   }).join('');
-  return '<aside class="td-side"><div class="td-shead">📣 功課廣播</div>' +
-    '<div class="td-stabs"><button type="button" class="td-stab' + (isK ? '' : ' on') + '" data-td-side="blade">🔪 刀劍空(32)</button><button type="button" class="td-stab k12' + (isK ? ' on' : '') + '" data-td-side="k12">🔵 12空(123)</button></div>' +
+  return '<aside class="td-side' + (isK ? ' k12' : '') + '"><div class="td-shead">' + (isK ? '📣 🔵 12空(123)功課廣播' : '📣 🔪 刀劍空(32)功課廣播') + '</div>' +
     '<div class="td-sinfo">' + (snap.live ? '盤中・跟著首頁報價' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
     '<div class="td-sparam">⏸ 跟著上面參數：' + (on.length ? on.join('・') : (isK ? '（都沒勾＝全部12空）' : '（都沒勾＝全部刀劍空）')) + '</div>' +
     '<div class="td-scount">今天 <b>' + list.length + '</b> 檔　在榜 ' + inCnt + '　<span class="down">消失 ' + goneCnt + '</span>' +
@@ -17180,7 +17176,7 @@ function hwTodayHtml(){
     '要自己確認的：① 部位還要看族群有沒有帶頭——沒有帶頭時 SOP 部位降 50%（這頁不會自動降）；② 進場時間門檻 09:15 之後（通緝要犯例外）。名次是 67 族的排法，族群數不同時照比例換算。表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
   return dtSec + summary + counts +
     '<div class="td-wrap"><div class="td-main">' + head + ctrls + replay + filters + main + watch + k12Sec + againSec + relSec + jailSec + outSec + missSec + sop + '</div>' +
-    tdBroadcastHtml(seq, snap, tdState.side) + '</div>';
+    '<div class="td-sides">' + tdBroadcastHtml(seq, snap, 'blade') + tdBroadcastHtml(seq, snap, 'k12') + '</div></div>';   // 2026-10-22 使用者：右邊分兩欄（刀劍空、12空）並排，不用切換
 }
 // ① 收盤觀察股（當沖多的「多功課」、多觀察的名單）＝形態觀察股的收盤那份：盤中（今天還沒收盤）用前一個交易日收盤的、
 // 收盤後／休市用最近一次收盤的。老師這份是學員從 LINE 貼的，我們直接拿系統算好的；還沒算過就背景算。
@@ -17636,8 +17632,6 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
   const tz = t.closest('[data-td-zone]');
   if (tz){ tdState.zones[tz.dataset.tdZone] = !tdState.zones[tz.dataset.tdZone]; renderHomework(); return; }
   if (t.closest('[data-td-dt]')){ tdState.dtOnly = !tdState.dtOnly; renderHomework(); return; }
-  const tside = t.closest('[data-td-side]');
-  if (tside){ tdState.side = tside.dataset.tdSide === 'k12' ? 'k12' : 'blade'; try { localStorage.setItem('tdSide', tdState.side); } catch (_){} renderHomework(); return; }
   const talert = t.closest('[data-td-alert]');
   if (talert){ tdAlertToggle(talert.dataset.tdAlert); renderHomework(); return; }
   const topt = t.closest('[data-td-opt]');
