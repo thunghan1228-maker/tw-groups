@@ -7683,7 +7683,7 @@ function kill193Model(){
     const d = daily[g.name] || {};
     const prev = Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
     const members = g.stocks.filter((s) => blade.has(s.code)).map((s) => ({ code: s.code, name: s.name, pct: s.changePercent }))
-      .sort((a, b) => b.pct - a.pct);
+      .sort((a, b) => a.pct - b.pct);   // 2026-10-22 使用者：族群底下的 ⚠️ 個股跌幅大的排上面（原本漲幅高→低，等於跌得少的在上面）
     // 族群的 ⚔️＝族裡六成以上的股票現價低於前天收盤（數字＝比例，全部就寫 all，照老師的寫法）；🔪 見下面
     const two = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent) && stockDaily[s.code] && Number.isFinite((stockDaily[s.code].pct || [])[0]))
       .map((s) => (1 + s.changePercent / 100) * (1 + stockDaily[s.code].pct[0] / 100) - 1);

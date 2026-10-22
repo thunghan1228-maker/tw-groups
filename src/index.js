@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 11:23:36";
+const BUILD_STAMP = "2026-10-22 11:26:14";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7763,7 +7763,7 @@ function kill193Model(){
     const d = daily[g.name] || {};
     const prev = Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
     const members = g.stocks.filter((s) => blade.has(s.code)).map((s) => ({ code: s.code, name: s.name, pct: s.changePercent }))
-      .sort((a, b) => b.pct - a.pct);
+      .sort((a, b) => a.pct - b.pct);   // 2026-10-22 使用者：族群底下的 ⚠️ 個股跌幅大的排上面（原本漲幅高→低，等於跌得少的在上面）
     // 族群的 ⚔️＝族裡六成以上的股票現價低於前天收盤（數字＝比例，全部就寫 all，照老師的寫法）；🔪 見下面
     const two = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent) && stockDaily[s.code] && Number.isFinite((stockDaily[s.code].pct || [])[0]))
       .map((s) => (1 + s.changePercent / 100) * (1 + stockDaily[s.code].pct[0] / 100) - 1);
@@ -14211,7 +14211,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 11:23:36';
+const BUILD_STAMP = '2026-10-22 11:26:14';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
