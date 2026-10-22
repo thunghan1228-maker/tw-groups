@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 08:52:18";
+const BUILD_STAMP = "2026-10-22 08:54:50";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7891,9 +7891,15 @@ function fut155Model(){
   const isFut = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].hasStockFutures);
   const board = f155State.data;
   const fq = board && board.quotes && Object.keys(board.quotes).length ? board.quotes : null;
+  // 2026-10-22 對老師 08:47、08:52 兩份：股期 08:45 開盤後，還沒成交的股期報價停在昨天最後一筆（board 的 time 是昨天），
+  // 那是昨天的漲跌、不算今天的，當 0.00%（老師的矽光子、航運都是 0.00%）；休市日／開盤前沿用上一個交易日時，以首頁報價那天為準
+  const fday = (lastData && lastData.quoteDate) || twTodayStr();
   const pctOf = (st) => {   // 有股期報價用股期漲跌，這檔沒抓到就用現股
     const q = fq ? fq[st.code] : null;
-    if (q && Number.isFinite(q.changePct)) return q.changePct;
+    if (q && Number.isFinite(q.changePct)){
+      const qday = String(q.time || '').slice(0, 10);
+      return !qday || qday === fday ? q.changePct : 0;
+    }
     return st.price !== null && st.price !== undefined && Number.isFinite(st.changePercent) ? st.changePercent : null;
   };
   const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
@@ -7923,7 +7929,9 @@ function fut155Model(){
   // 比櫃買指數弱的族群在線下，跟刀劍空、河流多那些「不比櫃買強」同一個意思
   const otcKnown = typeof otcStrengthLatest !== 'undefined' && otcStrengthLatest && Number.isFinite(otcStrengthLatest.changePct);
   const otcPct = otcKnown ? otcStrengthLatest.changePct : (lastData.quoteTime && String(lastData.quoteTime) < '09:00' ? 0 : null);   // 開盤前櫃買還沒開、漲跌 0
-  return { rows, total: today.length, half: Math.round(today.length * 35 / 67), tx, futures: !!fq, otcPct };
+  // 空方線：照名次的一半（2026-10-22 老師 08:47 航運(24) 在線下、08:52 航運(24) 在線上、10/19 二極體 23 在線上 AI 26 在線下、10/20 08:51 AI(18) 在線上、矽晶圓(31) 在線下：
+  // 線大約在有股期族群數的一半（08:47 約 46 族→23、08:52 約 48 族→24），原本 35/67 比例在 48 族時算成 25 對不上 08:47）
+  return { rows, total: today.length, half: Math.floor(today.length / 2), tx, futures: !!fq, otcPct };
 }
 function home155ColHtml(){
   f155Load();
@@ -14139,7 +14147,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 08:52:18';
+const BUILD_STAMP = '2026-10-22 08:54:50';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

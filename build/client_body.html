@@ -7811,9 +7811,15 @@ function fut155Model(){
   const isFut = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].hasStockFutures);
   const board = f155State.data;
   const fq = board && board.quotes && Object.keys(board.quotes).length ? board.quotes : null;
+  // 2026-10-22 對老師 08:47、08:52 兩份：股期 08:45 開盤後，還沒成交的股期報價停在昨天最後一筆（board 的 time 是昨天），
+  // 那是昨天的漲跌、不算今天的，當 0.00%（老師的矽光子、航運都是 0.00%）；休市日／開盤前沿用上一個交易日時，以首頁報價那天為準
+  const fday = (lastData && lastData.quoteDate) || twTodayStr();
   const pctOf = (st) => {   // 有股期報價用股期漲跌，這檔沒抓到就用現股
     const q = fq ? fq[st.code] : null;
-    if (q && Number.isFinite(q.changePct)) return q.changePct;
+    if (q && Number.isFinite(q.changePct)){
+      const qday = String(q.time || '').slice(0, 10);
+      return !qday || qday === fday ? q.changePct : 0;
+    }
     return st.price !== null && st.price !== undefined && Number.isFinite(st.changePercent) ? st.changePercent : null;
   };
   const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
@@ -7843,7 +7849,9 @@ function fut155Model(){
   // 比櫃買指數弱的族群在線下，跟刀劍空、河流多那些「不比櫃買強」同一個意思
   const otcKnown = typeof otcStrengthLatest !== 'undefined' && otcStrengthLatest && Number.isFinite(otcStrengthLatest.changePct);
   const otcPct = otcKnown ? otcStrengthLatest.changePct : (lastData.quoteTime && String(lastData.quoteTime) < '09:00' ? 0 : null);   // 開盤前櫃買還沒開、漲跌 0
-  return { rows, total: today.length, half: Math.round(today.length * 35 / 67), tx, futures: !!fq, otcPct };
+  // 空方線：照名次的一半（2026-10-22 老師 08:47 航運(24) 在線下、08:52 航運(24) 在線上、10/19 二極體 23 在線上 AI 26 在線下、10/20 08:51 AI(18) 在線上、矽晶圓(31) 在線下：
+  // 線大約在有股期族群數的一半（08:47 約 46 族→23、08:52 約 48 族→24），原本 35/67 比例在 48 族時算成 25 對不上 08:47）
+  return { rows, total: today.length, half: Math.floor(today.length / 2), tx, futures: !!fq, otcPct };
 }
 function home155ColHtml(){
   f155Load();
