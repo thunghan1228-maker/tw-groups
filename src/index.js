@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 08:58:59";
+const BUILD_STAMP = "2026-10-22 09:07:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -182,7 +182,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hr-note{padding:8px 10px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);}
   /* 首頁第二欄：當沖多（2026-10-19 使用者：取代 183 原本的位置；跟每日功課「當沖多」同一份：中四個／中三個／中兩個） */
   .hr-lsec{padding:4px 8px;font-size:12px;font-weight:800;color:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;}
-  .hr-lsec.h4{background:#b7791f;} .hr-lsec.h3{background:#c2410c;} .hr-lsec.h2{background:#2563eb;} .hr-lsec small{font-weight:600;opacity:.9;}
+  .hr-lsec.h4{background:#b7791f;} .hr-lsec.h3{background:#c2410c;} .hr-lsec.h2{background:#2563eb;} .hr-lsec.hh{background:#6b7280;} .hr-lsec small{font-weight:600;opacity:.9;}
   .hr-lrow{display:block;padding:5px 8px;border-top:1px solid var(--line);cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;}
   .gm-chipstar{color:#d4a017;font-size:13px;margin-left:2px;font-weight:700;}   /* 2026-10-21 連 2 週以上籌碼增加的 ★ */
   .hr-lrow:hover{background:rgba(201,169,140,0.10);} .hr-lrow.hold{background:rgba(160,160,160,.20);}
@@ -8096,12 +8096,15 @@ function homeLongColsHtml(){
   const multi = rows.filter((o) => o.hits >= 2).length;
   if (!rows.length) return wrap('<div class="hr-col">' + head(multi, 1) + '<div class="hr-note">目前沒有兩個以上來源同時點名的股票</div>' + note + '</div>', '<div class="hr-col">' + head(multi, 2) + '</div>');
   const cut = Math.ceil(rows.length / 2);
-  const SECS = [[4, '⭐ 中四個', 'h4'], [3, '🔥 中三個', 'h3'], [2, '✅ 中兩個', 'h2']];
+  const SECS = [[4, '⭐ 中四個', 'h4'], [3, '🔥 中三個', 'h3'], [2, '✅ 中兩個', 'h2'], [0, '🔒 續抱不追（不管中幾個）', 'hh']];
+  // 2026-10-22 使用者：有「續抱不追」的（漲太多了不追）不管中幾個，一律移到整份名單最下面，不佔上面的篇幅；
+  // 它的「續抱不追」標記沒了（不再超過門檻）就會自己跳回原本中幾個的那一段
+  const secRows = (n) => (n === 0 ? rows.filter((o) => o.holdNo) : rows.filter((o) => o.hits === n && !o.holdNo));
   // from～to（排序後的第幾檔）這一欄放哪些：每個「中幾個」一條標題＋那幾檔，跨欄的那條在第 2 欄標「（續）」
   const colBody = (from, to) => {
     let at = 0, out = '';
     SECS.forEach(([n, label, cls]) => {
-      const l = rows.filter((o) => o.hits === n), start = at;
+      const l = secRows(n), start = at;
       at += l.length;
       const part = l.filter((_, k) => start + k >= from && start + k < to);
       if (!part.length) return;
@@ -8389,7 +8392,7 @@ function homeRankFootHtml(total){
     ['🔰', '族裡最後幾名（空方段）裡，昨天或前天大漲過 ' + BLADE_BEGINNER_RISE + '% 以上、但不算 🔪⚔️ 的'],
   ]) +
   hrHelpTable('🐎 個股欄（跟訊號中心「盤中333」同一份）', ['欄位', '列什麼'], [
-    ['🔥當沖多1／2', '跟每日功課「當沖多」同一份：被 ① 多功課 ② 賽馬多 ③ 河流多 ④ 族群在多方區 點名兩個以上的股票（空方族群已濾掉），分中四個、中三個、中兩個，一欄放不下就接到第二欄'],
+    ['🔥當沖多1／2', '跟每日功課「當沖多」同一份：被 ① 多功課 ② 賽馬多 ③ 河流多 ④ 族群在多方區 點名兩個以上的股票（空方族群已濾掉），分中四個、中三個、中兩個，一欄放不下就接到第二欄；標「續抱不追」的（漲太多不追）不管中幾個，一律移到整份最下面，標記沒了就跳回原本那一段'],
     ['1+2多・突破黑馬(44)', '跟訊號中心「1+2多」同一份：突破黑馬，前面是出現的時間，首頁只留最新 20 筆（機器人代碼 44 全部列）'],
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
@@ -14147,7 +14150,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 08:58:59';
+const BUILD_STAMP = '2026-10-22 09:07:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
