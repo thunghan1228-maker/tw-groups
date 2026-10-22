@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 18:57:32";
+const BUILD_STAMP = "2026-10-22 19:00:17";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -8476,6 +8476,7 @@ function homeRankFootHtml(total){
     ['落馬空', '賽馬多那 ' + HORSE_GROUPS.size + ' 族裡，族群排名倒數 20 名的族群，族內後 1/3（四捨五入）、今天 ≤ 櫃買%'],
     ['斷流空', BLADE_GROUPS.size + ' 族裡，族群排名後 1/2、族內後 1/3（進位）、今天沒漲、≤ 櫃買%、跌幅不超過 7%'],
     ['限制', '一律要可放空（有券）、不是處置股；機器人代碼「三落空」同一份'],
+    ['跌超過 7%', '斷流空裡已經跌超過 7% 的股票不列入三落空（不追空）；機器人代碼「三落空」最下面（強空那行下面）另外列出來，跌幅大的在上面，標「熄落也中」＝熄火空、落馬空也都有，只差在跌太深'],
   ]) +
   // 2026-10-16 使用者：刀劍空的🔰／⚔️、多方打少這些說明也寫到首頁最下面
   hrHelpTable('🔪⚔️ 刀劍空(31)（首頁沒有這欄，機器人代碼 31 看）', ['項目', '說明'], [
@@ -14219,7 +14220,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 18:57:32';
+const BUILD_STAMP = '2026-10-22 19:00:17';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20486,6 +20487,15 @@ function botAnswer(raw){
   }
   const m = race333Model();
   // 名單最後附櫃買多空（漲跌幅），33／34／123 共用
+  // 2026-10-22 使用者：三落空欄最下面（強空那行下面）把「跌超過 7% 的 N 檔」列出來。這些是斷流空（34 顛倒）裡已經跌超過 7% 的股票，
+  // 不列入三落空（不追空）；跌幅大的在上面，前面數字＝族群名次，後面標「熄落也中」＝熄火空、落馬空也都有（只差在跌太深）。
+  const weakOverHtml = (mm) => {
+    const over = mm && mm.weak34Over ? mm.weak34Over.slice().sort((a, b) => a.pct - b.pct) : [];
+    if (!over.length) return '';
+    const s30 = new Set(mm.weak30.map((r) => r.code)), s33 = new Set(mm.weak33.map((r) => r.code));
+    return botLine('------↓(跌超過 7%：' + over.length + ' 檔・不追空)↓------', 'bot-sep') +
+      over.map((r) => botLine('<span>' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + (s30.has(r.code) && s33.has(r.code) ? '・熄落也中' : '') + '</small>') + '</span>' + holderTagHtml(holderPctOf(r.code), false, true), 'bot-hrow')).join('');
+  };
   const otcFoot = () => (!m || m.otcPct === null || m.otcPct === undefined ? '' : botLine('------↓(櫃買)↓------', 'bot-sep') +
     botLine('⚠️' + (m.otcLabel || '') + (/多/.test(m.otcLabel || '') ? '🚀' : /空/.test(m.otcLabel || '') ? '🔻' : '') + '(' + botPct(m.otcPct).replace('+', '') + ')', 'bot-warn'));
   // 123 1️⃣2️⃣空（2026-10-18 使用者：照老師 10/13～10/16 三十幾份 123 名單反推的第一版）：老師固定的族群（199 的 23 族＋188 的 13 族）裡，
@@ -20577,7 +20587,7 @@ function botAnswer(raw){
     // 時間近的排上面、早的在下面；同一分鐘照族群名次（越大越弱的在上面）、再照跌幅
     const rows = m.weakTriple.slice().sort((a, b) => (Math.floor((seenW[b.code] || 0) / 60000) - Math.floor((seenW[a.code] || 0) / 60000)) || b.groupRank - a.groupRank || a.pct - b.pct);
     return wrap('三落空', (rows.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') : '') + (rows.map((r) => botLine('<span><span style="color:#a78bfa;font-variant-numeric:tabular-nums">' + hmW(seenW[r.code]) + '</span> ' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + '</small>') + '</span>' + holderTagHtml(holderPctOf(r.code), false, true), 'bot-hrow')).join('') || botLine('目前沒有', 'bot-dim')) +
-      botLine('熄火空 ' + m.weak30.length + '・落馬空 ' + m.weak33.length + '・斷流空 ' + m.weak34.length + (m.weak34Over.length ? '（跌超過 7% 的 ' + m.weak34Over.length + ' 檔不列）' : '') + '；三份都有、可放空（有券、非處置股）才列，前面數字＝族群名次（越大越弱）', 'bot-dim') + otcFoot(),
+      botLine('熄火空 ' + m.weak30.length + '・落馬空 ' + m.weak33.length + '・斷流空 ' + m.weak34.length + (m.weak34Over.length ? '（跌超過 7% 的 ' + m.weak34Over.length + ' 檔不列入，列在最下面）' : '') + '；三份都有、可放空（有券、非處置股）才列，前面數字＝族群名次（越大越弱）', 'bot-dim') + otcFoot() + weakOverHtml(m),
       stamp + '・熄火落馬斷流');
   }
   if (q === '31'){
