@@ -1479,6 +1479,9 @@
   .td-rank.bull{border-color:#e6675f;color:#e6675f;} .td-rank.mid{border-color:#3b82f6;} .td-rank.bear{border-color:#5fae6f;} .td-rank.harv{border-color:#14b8a6;}
   .td-grp{font-size:12px;color:var(--muted);min-width:76px;}
   .td-ftime{font-size:11px;font-weight:700;color:#7c3aed;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .td-stabs{display:flex;gap:6px;padding:7px 10px 2px;}
+  .td-stab{font:inherit;font-size:12px;font-weight:800;padding:3px 11px;border-radius:999px;border:1.5px solid #7c3aed;background:var(--panel);color:#5b21b6;cursor:pointer;}
+  .td-stab.on{background:#5b21b6;color:#fff;} .td-stab.k12{border-color:#2563eb;color:#1d4ed8;} .td-stab.k12.on{background:#2563eb;color:#fff;}
   .td-newtag{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:999px;padding:0 6px;line-height:16px;}
   /* 刀劍空(32) 新訊號跳出卡片（2026-10-22）：右下角一格一格疊，淺色變數跟每日功課同一組 */
   #tdAlertBox{--bg:#f6f1e7; --panel:#fffdf8; --panel-2:#f3ecdf; --line:#e4d9c6; --text:#1d1410; --muted:#4a3f37; --up:#c0392b; --down:#1e8a4c; --td-serif:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;
@@ -1493,6 +1496,8 @@
   #tdAlertBox .td-alert-head{display:flex;align-items:center;gap:6px;background:#ede9fe;color:#4c1d95;padding:5px 8px 5px 12px;font-size:13px;font-weight:700;}
   #tdAlertBox .td-alert-title{flex:1;cursor:pointer;line-height:1.5;} #tdAlertBox .td-alert-title:hover{text-decoration:underline;}
   #tdAlertBox .td-alert-time{font-size:15px;color:#6d28d9;font-variant-numeric:tabular-nums;}
+  #tdAlertBox .td-alert-kind{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:#7c3aed;border-radius:999px;padding:0 7px;line-height:17px;vertical-align:1px;} #tdAlertBox .td-alert-kind.k12{background:#2563eb;}
+  #tdAlertBox .td-alert-item.k12{border-color:#2563eb;} #tdAlertBox .td-alert-item.k12 .td-alert-head{background:#dbeafe;color:#1e3a8a;} #tdAlertBox .td-alert-item.k12 .td-alert-time{color:#1d4ed8;} #tdAlertBox .td-alert-item.k12 .td-chead b{color:#1d4ed8;}
   #tdAlertBox .td-alert-x{flex:0 0 auto;width:26px;height:26px;border-radius:999px;border:0;background:rgba(76,29,149,.14);color:#4c1d95;font-size:14px;font-weight:800;cursor:pointer;}
   #tdAlertBox .td-cards{display:block;} #tdAlertBox .td-card{margin:0;border:0;border-radius:0;}
   #tdAlertBox .td-hold{display:none;} #tdAlertBox .td-river{display:none;}
@@ -16017,6 +16022,7 @@ async function k12AlertTick(){
     const res = await fetch('/api/kill12');
     k = await res.json();
     if (!res.ok || !k || k.status !== 'ok' || !k.tracked) return;
+    botState.cache.kill12 = { at: Date.now(), data: k };   // 新訊號跳出卡片（12空）、每日功課共用這份，不另外再抓
   } catch (e) { return; }
   const today = twTodayStr();
   if (k.tradeDate && k.tradeDate !== today) return;
@@ -16400,6 +16406,8 @@ const tdState = { zones: { upper: true, middle: true, lower: true, harvest: true
 // 老師的「名單」是學員貼的盤前空觀察；我們用系統自己的：名單＝前一個交易日收盤（最後一份紀錄）的新刀劍空名單。
 //   名單外的刀劍空＝今天盤中有、但前一天收盤名單沒列的；今天沒中的族群＝前一天名單裡有、今天整族沒進新刀劍空的。
 tdState.showMiss = true; tdState.showOut = true; tdState.sortDeep = false;
+tdState.side = 'blade';   // 右邊功課廣播看哪一份：刀劍空(32)／12空(123)，跟老師一樣可以切換（2026-10-22 使用者）
+try { if (localStorage.getItem('tdSide') === 'k12') tdState.side = 'k12'; } catch (_){}
 tdState.prev = { date: null, data: null, key: '', at: 0, loading: false };
 try { const o = JSON.parse(localStorage.getItem('tdOpts') || '{}'); if (o && typeof o === 'object'){ if (o.miss === false) tdState.showMiss = false; if (o.out === false) tdState.showOut = false; if (o.deep === true) tdState.sortDeep = true; } } catch (_){}
 function tdSaveOpts(){ try { localStorage.setItem('tdOpts', JSON.stringify({ miss: tdState.showMiss, out: tdState.showOut, deep: tdState.sortDeep })); } catch (_){} }
@@ -16523,6 +16531,30 @@ function hwGroupAttr(name){
   return name && lastData && Array.isArray(lastData.groups) && lastData.groups.some((x) => x.name === name)
     ? ' data-hw-group="' + wlEsc(name) + '" title="看「' + wlEsc(name) + '」的成分股"' : '';
 }
+// 12空(123) 第一次出現的時間：這台電腦盤中看到它的時間，一天一份（沒有 5 分鐘紀錄時，廣播清單和卡片的時間用這個）
+function k12SeenKey(){ return 'k12Seen:' + twTodayStr(); }
+let k12SeenCache = null;
+function k12SeenMap(){
+  if (!k12SeenCache || k12SeenCache.key !== k12SeenKey()){
+    let map = {};
+    try { map = JSON.parse(localStorage.getItem(k12SeenKey()) || '{}') || {}; } catch (_){ map = {}; }
+    k12SeenCache = { key: k12SeenKey(), map };
+  }
+  return k12SeenCache.map;
+}
+function k12NoteSeen(rows){
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr() || !rows.length) return;
+  const qt = String(lastData.quoteTime || '').slice(0, 5);
+  if (qt < '09:00' || qt > '13:35') return;
+  const map = k12SeenMap(); let changed = false; const now = Date.now();
+  rows.forEach((r) => { if (!map[r.code]){ map[r.code] = now; changed = true; } });
+  if (changed){
+    try {
+      localStorage.setItem(k12SeenKey(), JSON.stringify(map));
+      Object.keys(localStorage).filter((k) => k.startsWith('k12Seen:') && k !== k12SeenKey()).forEach((k) => localStorage.removeItem(k));
+    } catch (_){}
+  }
+}
 // 2026-10-22 使用者：族群卡每一檔股票前面要寫「訊號出來的時間」——這檔第一次進刀劍空(32)（12空 看 12空）的時間。
 // 不管有沒有符合上面的參數都算（廣播清單只列符合的）；5 分鐘紀錄裡最早出現那份的時段；還沒有紀錄、只在最新那份看到的，
 // 用這台電腦第一次看到它的時間（bladeSeenMap，跟機器人 32、廣播清單同一份）。
@@ -16534,10 +16566,11 @@ function tdFirstAt(seq){
   });
   const lastE = seq.length ? seq[seq.length - 1] : null;
   if (lastE && lastE[1] && lastE[1].live){
-    const seenL = bladeSeenMap();
+    const seenL = bladeSeenMap(), seenK = k12SeenMap();
     first.forEach((slot, key) => {
-      if (slot !== lastE[0] || key.startsWith('k12:') || !seenL[key]) return;
-      const hm = new Date(seenL[key] + 8 * 3600e3).toISOString().slice(11, 16);
+      const isK = key.startsWith('k12:'), ts = isK ? seenK[key.slice(4)] : seenL[key];
+      if (slot !== lastE[0] || !ts) return;
+      const hm = new Date(ts + 8 * 3600e3).toISOString().slice(11, 16);
       if (hm < slot) first.set(key, hm);
     });
   }
@@ -16592,6 +16625,7 @@ function tdLiveSnap(m, peek){   // peek＝跳出通知用：1＝只讀手上已�
   const rows = zoneRows.map(([r, zone]) => tdLiveRow(r, zone, big));
   const k12 = k12Base.map((r) => { const row = tdLiveRow(r, r.pct <= -BLADE_HARVEST_PCT ? 'harvest' : '', big); if (row.hi === null && Number.isFinite(r.dayHighPct)) row.hi = r.dayHighPct; return row; });
   rows.forEach((row) => { if (row.hi === null){ const kr = k12.find((x) => x.code === row.code); if (kr) row.hi = kr.hi; } });
+  try { if (k && k.status === 'ok' && k.tracked) k12NoteSeen(k12); } catch (_){}
   return { live: true, date: lastData.quoteDate, slot: lastData.quoteTime ? String(lastData.quoteTime).slice(0, 5) : '', total: m.total, otcLabel: m.otcLabel || '', otcPct: m.otcPct,
     rows, k12, k12Tracked: !!(k && k.status === 'ok' && k.tracked), k12Loaded: !!(k && k.status === 'ok'), big };
 }
@@ -16640,20 +16674,26 @@ setInterval(tdRecordTick, 60e3);
 // 而且今天還沒跳過的，就跳出那一族的卡片（族裡所有符合的都列，新進榜的標「新」，每一檔前面有訊號出現時間）；一檔一天只跳一次。
 // 剛打開網頁、剛開啟功能、剛改參數的時候已經在榜的當作看過，不會一次跳一堆。位置在右下角，疊成一格一格，每格可以按 ✕ 關掉。
 // 每日功課另開在第二螢幕時只有那個視窗跳（主畫面不跳）；機器人、盤中訊號分頁、訊號中心另開的視窗都不跳。「提醒開啟／關閉」總開關關掉時也不跳。
-const tdAlert = { on: true, sound: false, seen: new Set(), date: null, seeded: false, sig: '', cards: [] };
+const tdAlert = { on: true, sound: false, seen: { blade: new Set(), k12: new Set() }, seeded: { blade: false, k12: false }, date: null, sig: '', cards: [] };
 try { tdAlert.on = localStorage.getItem('tdAlertOn') !== '0'; tdAlert.sound = localStorage.getItem('tdAlertSound') === '1'; } catch (_){}
-function tdAlertSaveSeen(){ try { localStorage.setItem('tdAlertSeen', JSON.stringify({ date: tdAlert.date, sig: tdAlert.sig, codes: [...tdAlert.seen] })); } catch (_){} }
+// 2026-10-22 使用者：12空(123) 也要跳——跟刀劍空一樣的卡片（藍色框、標「12空」）；兩份各自記「跳過了沒」
+const TD_ALERT_KINDS = [['blade', '刀劍空(32)', '🔪'], ['k12', '12空(123)', '🔵']];
+function tdAlertSaveSeen(){ try { localStorage.setItem('tdAlertSeen', JSON.stringify({ date: tdAlert.date, sig: tdAlert.sig, blade: [...tdAlert.seen.blade], k12: [...tdAlert.seen.k12], seeded: tdAlert.seeded })); } catch (_){} }
 function tdAlertLoadSeen(){   // 主畫面、另開視窗、別的分頁共用一份：誰先跳過就不重複跳
   try {
     const raw = JSON.parse(localStorage.getItem('tdAlertSeen') || 'null');
-    if (raw && raw.date === twTodayStr() && raw.sig === tdAlert.sig){ tdAlert.date = raw.date; tdAlert.seen = new Set(raw.codes || []); tdAlert.seeded = true; }
+    if (raw && raw.date === twTodayStr() && raw.sig === tdAlert.sig){
+      tdAlert.date = raw.date;
+      tdAlert.seen = { blade: new Set(raw.blade || raw.codes || []), k12: new Set(raw.k12 || []) };
+      tdAlert.seeded = { blade: !!(raw.seeded ? raw.seeded.blade : true), k12: !!(raw.seeded && raw.seeded.k12) };
+    }
   } catch (_){}
 }
 function tdAlertToggle(kind){
   if (kind === 'on'){
     tdAlert.on = !tdAlert.on;
     try { localStorage.setItem('tdAlertOn', tdAlert.on ? '1' : '0'); } catch (_){}
-    if (tdAlert.on) tdAlert.seeded = false;   // 剛打開：現在已經在榜的當作看過
+    if (tdAlert.on) tdAlert.seeded = { blade: false, k12: false };   // 剛打開：現在已經在榜的當作看過
     else { tdAlert.cards = []; tdAlertRender(); }
   } else if (kind === 'sound'){
     tdAlert.sound = !tdAlert.sound;
@@ -16674,12 +16714,15 @@ function tdAlertSeq(snap){   // 每一檔「訊號出現時間」要用的時間
   seq.push([snap.slot || '最新', snap]);
   return seq;
 }
-function tdAlertCardHtml(card, pass, snap, ctx){
-  const rows = pass.filter((r) => (r.g || '—') === card.group);
+function tdAlertCardHtml(card, passBy, snap, ctx){
+  const rows = (passBy[card.kind] || []).filter((r) => (r.g || '—') === card.group);
   if (!rows.length) return '';
   ctx.newCodes = card.newCodes;
   const byPct = tdState.sortDeep ? (a, b) => (a.pct ?? 0) - (b.pct ?? 0) : (a, b) => (b.pct ?? 0) - (a.pct ?? 0);
-  return tdCardsHtml(rows.slice().sort(byPct), ctx, snap, {});
+  return tdCardsHtml(rows.slice().sort(byPct), ctx, snap, card.kind === 'k12' ? { noFoot: true, rowOpt: { noK12: true } } : {});
+}
+function tdAlertLists(snap){   // 兩份名單（符合上面勾的參數的）；12空 還沒載到（或後端沒在追蹤）就回 null，不當成「沒有」
+  return { blade: snap.rows.filter(tdPass), k12: snap.k12Loaded && snap.k12Tracked ? (snap.k12 || []).filter(tdPass) : null };
 }
 function tdAlertTick(){
   try {
@@ -16691,41 +16734,52 @@ function tdAlertTick(){
     if (!m || !m.hasDaily) return;
     const today = twTodayStr();
     const sig = TD_PARAMS.map(([k]) => (tdState.params[k] ? 1 : 0)).join('');
-    if (tdAlert.date !== today || tdAlert.sig !== sig){ tdAlert.date = today; tdAlert.sig = sig; tdAlert.seen = new Set(); tdAlert.seeded = false; }
+    if (tdAlert.date !== today || tdAlert.sig !== sig){ tdAlert.date = today; tdAlert.sig = sig; tdAlert.seen = { blade: new Set(), k12: new Set() }; tdAlert.seeded = { blade: false, k12: false }; }
     tdAlertLoadSeen();
     let snap = tdLiveSnap(m, 1);
-    let pass = snap.rows.filter(tdPass);
-    if (!tdAlert.seeded){ pass.forEach((r) => tdAlert.seen.add(r.code)); tdAlert.seeded = true; tdAlertSaveSeen(); return; }
-    const fresh = pass.filter((r) => !tdAlert.seen.has(r.code));
-    if (fresh.length) fresh.forEach((r) => tdAlert.seen.add(r.code));
-    if (fresh.length) tdAlertSaveSeen();
-    if (!fresh.length && !tdAlert.cards.length) return;
-    snap = tdLiveSnap(m, 2);   // 要畫卡片了：把大戶%、近 5 日成交值也載進來（沒載到的下一輪／抓完時會補上）
-    pass = snap.rows.filter(tdPass);
+    let lists = tdAlertLists(snap);
+    const fresh = { blade: [], k12: [] };
+    let changed = false;
+    TD_ALERT_KINDS.forEach(([kd]) => {
+      const list = lists[kd];
+      if (list === null) return;
+      if (!tdAlert.seeded[kd]){ list.forEach((r) => tdAlert.seen[kd].add(r.code)); tdAlert.seeded[kd] = true; changed = true; return; }
+      fresh[kd] = list.filter((r) => !tdAlert.seen[kd].has(r.code));
+      if (fresh[kd].length){ fresh[kd].forEach((r) => tdAlert.seen[kd].add(r.code)); changed = true; }
+    });
+    if (changed) tdAlertSaveSeen();
+    const anyFresh = fresh.blade.length + fresh.k12.length > 0;
+    if (!anyFresh && !tdAlert.cards.length) return;
     const alertsOn = typeof alertsEnabled === 'undefined' ? true : alertsEnabled;
-    if (fresh.length && !alertsOn) return;
+    if (anyFresh && !alertsOn) return;
+    snap = tdLiveSnap(m, 2);   // 要畫卡片了：把大戶%、近 5 日成交值也載進來（沒載到的下一輪／抓完時會補上）
+    lists = tdAlertLists(snap);
     const ctx = tdCtx();
     ctx.k12 = new Set((snap.k12 || []).map((r) => r.code));
     ctx.firstAt = tdFirstAt(tdAlertSeq(snap));
-    // 這次新進榜的，依族群各跳一格（同一族已經有一格就更新那格、移到最上面）
-    const byG = new Map();
-    fresh.forEach((r) => { const g = r.g || '—'; if (!byG.has(g)) byG.set(g, []); byG.get(g).push(r); });
-    byG.forEach((list, g) => {
-      const old = tdAlert.cards.find((c) => c.group === g);
-      const card = old || { group: g, newCodes: new Set(), title: '' };
-      list.forEach((r) => card.newCodes.add(r.code));
-      card.at = qt;
-      card.title = '<b class="td-alert-time">' + qt + '</b> 新進榜：' + list.map((r) => wlEsc(r.name || r.code)).join('、');
-      tdAlert.cards = [card].concat(tdAlert.cards.filter((c) => c !== card)).slice(0, 4);
+    // 這次新進榜的，依「哪一份＋哪一族」各跳一格（同一份同一族已經有一格就更新那格、移到最上面）
+    TD_ALERT_KINDS.forEach(([kd]) => {
+      const byG = new Map();
+      fresh[kd].forEach((r) => { const g = r.g || '—'; if (!byG.has(g)) byG.set(g, []); byG.get(g).push(r); });
+      byG.forEach((list, g) => {
+        const old = tdAlert.cards.find((c) => c.kind === kd && c.group === g);
+        const card = old || { kind: kd, group: g, newCodes: new Set(), title: '' };
+        list.forEach((r) => card.newCodes.add(r.code));
+        const label = kd === 'k12' ? '<span class="td-alert-kind k12">12空</span>' : '<span class="td-alert-kind">刀劍空</span>';
+        card.title = '<b class="td-alert-time">' + qt + '</b> ' + label + ' 新進榜：' + list.map((r) => wlEsc(r.name || r.code)).join('、');
+        tdAlert.cards = [card].concat(tdAlert.cards.filter((c) => c !== card)).slice(0, 4);
+      });
     });
     // 每一格的內容每次都照最新報價重畫（漲跌、大戶力跟著動），不符合參數了的股票自然會拿掉
-    tdAlert.cards.forEach((c) => { c.html = tdAlertCardHtml(c, pass, snap, ctx); });
+    tdAlert.cards.forEach((c) => { c.html = tdAlertCardHtml(c, lists, snap, ctx); });
     tdAlert.cards = tdAlert.cards.filter((c) => c.html);
     tdAlertRender();
-    if (fresh.length){
+    if (anyFresh){
       if (tdAlert.sound) launchBeep();
       if ('Notification' in window && Notification.permission === 'granted'){
-        fresh.slice(0, 5).forEach((r) => { try { new Notification('🔪 新刀劍空 ' + r.code + ' ' + (r.name || '') + '（' + (r.g || '') + '）', { body: qt + ' ' + (Number.isFinite(r.pct) ? (r.pct > 0 ? '+' : '') + r.pct.toFixed(2) + '%' : '') + (r.big !== null && r.big !== undefined ? '　大戶 ' + (r.big > 0 ? '+' : '') + r.big + '%' : ''), tag: 'td-' + r.code }); } catch (_){} });
+        TD_ALERT_KINDS.forEach(([kd, kname, icon]) => fresh[kd].slice(0, 5).forEach((r) => {
+          try { new Notification(icon + ' 新' + (kd === 'k12' ? '12空' : '刀劍空') + ' ' + r.code + ' ' + (r.name || '') + '（' + (r.g || '') + '）', { body: qt + ' ' + (Number.isFinite(r.pct) ? (r.pct > 0 ? '+' : '') + r.pct.toFixed(2) + '%' : '') + (r.big !== null && r.big !== undefined ? '　大戶 ' + (r.big > 0 ? '+' : '') + r.big + '%' : ''), tag: 'td-' + kd + '-' + r.code }); } catch (_){}
+        }));
       }
     }
   } catch (e) { /* 跳出通知失敗不影響畫面 */ }
@@ -16740,10 +16794,10 @@ function tdAlertRender(){
     el.addEventListener('click', tdAlertClick);
   }
   const keep = el.scrollTop;
-  el.innerHTML = '<div class="td-alert-bar"><b>🔪 刀劍空(32) 新訊號</b><span class="td-alert-sp"></span>' +
+  el.innerHTML = '<div class="td-alert-bar"><b>🔔 新訊號</b><span class="td-alert-sp"></span>' +
     '<button type="button" class="td-alert-btn' + (tdAlert.sound ? ' on' : '') + '" data-alert-sound="1" title="跳出新訊號時響一聲">' + (tdAlert.sound ? '🔊 響' : '🔇 不響') + '</button>' +
     (tdAlert.cards.length > 1 ? '<button type="button" class="td-alert-btn" data-alert-closeall="1">全部關閉</button>' : '') + '</div>' +
-    tdAlert.cards.map((c) => '<div class="td-alert-item"><div class="td-alert-head"><span class="td-alert-title" data-alert-open="1" title="打開每日功課・今日功課">' + c.title + '</span><button type="button" class="td-alert-x" data-alert-close="' + wlEsc(c.group) + '" aria-label="關掉這一格">✕</button></div>' + c.html + '</div>').join('');
+    tdAlert.cards.map((c) => '<div class="td-alert-item' + (c.kind === 'k12' ? ' k12' : '') + '"><div class="td-alert-head"><span class="td-alert-title" data-alert-open="' + c.kind + '" title="打開每日功課・今日功課">' + c.title + '</span><button type="button" class="td-alert-x" data-alert-close="' + wlEsc(c.kind + '|' + c.group) + '" aria-label="關掉這一格">✕</button></div>' + c.html + '</div>').join('');
   el.scrollTop = keep;
 }
 function tdAlertClick(e){
@@ -16751,20 +16805,29 @@ function tdAlertClick(e){
   if (t.closest('[data-alert-sound]')){ tdAlertToggle('sound'); return; }
   if (t.closest('[data-alert-closeall]')){ tdAlert.cards = []; tdAlertRender(); return; }
   const cl = t.closest('[data-alert-close]');
-  if (cl){ tdAlert.cards = tdAlert.cards.filter((c) => c.group !== cl.dataset.alertClose); tdAlertRender(); return; }
-  if (t.closest('[data-alert-open]')){ if (!hwWindowMode()){ hwState.tab = 'today'; openHomeworkFromToolbar(); try { renderHomework(); } catch (_){} } return; }
+  if (cl){ tdAlert.cards = tdAlert.cards.filter((c) => c.kind + '|' + c.group !== cl.dataset.alertClose); tdAlertRender(); return; }
+  const op = t.closest('[data-alert-open]');
+  if (op){
+    if (!hwWindowMode()){
+      hwState.tab = 'today';
+      tdState.side = op.dataset.alertOpen === 'k12' ? 'k12' : 'blade';   // 右邊廣播也切到那一份
+      openHomeworkFromToolbar();
+      try { renderHomework(); } catch (_){}
+    }
+    return;
+  }
   const hg = t.closest('[data-hw-group]');
   if (hg){ openGroupDetail(hg.dataset.hwGroup); return; }
   const row = t.closest('[data-hw-code]');
   if (row && !t.closest('[data-td-hold]')) openStockChart(row.dataset.hwCode, row.dataset.hwName);
 }
 // 刀功課廣播：照時間順序走過每份紀錄（＋盤中最新那份），符合參數的就算「在榜」；第一次進榜的時間、掉出去＝跑、再進來＝回
-function tdBroadcast(seq){
+function tdBroadcast(seq, kind){   // kind＝'k12' 看 12空(123)；其他＝刀劍空(32)
   const st = new Map();
   seq.forEach(([slot, snap]) => {
     // 2026-10-20 使用者：刀劍空功課廣播的名單要跟機器人 32 一樣——以前連 12空（123）的股票也併進來（燁興、晶心科只在這邊），
     // 現在只放刀劍空(32) 那份；12空 在上面自己那一塊看。
-    const pool = snap.rows;
+    const pool = kind === 'k12' ? (snap.k12 || []) : snap.rows;
     const pass = new Map(pool.filter(tdPass).map((r) => [r.code, r]));
     pass.forEach((r, code) => {
       const s = st.get(code);
@@ -16779,14 +16842,15 @@ function tdBroadcast(seq){
   // （跟機器人 32 同一份 bladeSeenMap），不要全部寫成現在的時間
   const lastE = seq.length ? seq[seq.length - 1] : null;
   if (lastE && lastE[1] && lastE[1].live){
-    const seenL = bladeSeenMap();
+    const seenL = kind === 'k12' ? k12SeenMap() : bladeSeenMap();
     st.forEach((x) => { if (x.first === lastE[0] && !x.back && seenL[x.code]){ const hm = new Date(seenL[x.code] + 8 * 3600e3).toISOString().slice(11, 16); if (hm < lastE[0]) x.first = hm; } });
   }
   const evT = (x) => (x.inNow ? (x.back || x.first) : (x.out || x.first));
   return Array.from(st.values()).sort((a, b) => (evT(a) > evT(b) ? -1 : evT(a) < evT(b) ? 1 : a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1));
 }
-function tdBroadcastHtml(seq, snap){
-  const list = tdBroadcast(seq);
+function tdBroadcastHtml(seq, snap, kind){
+  const isK = kind === 'k12';
+  const list = tdBroadcast(seq, kind);
   const inCnt = list.filter((x) => x.inNow).length, goneCnt = list.length - inCnt;
   const on = TD_PARAMS.filter(([k]) => tdState.params[k]).map(([, l]) => l.replace(/^\S+\s/, ''));
   // 盤中的漲跌幅跟機器人 32 一樣用現在的報價（紀錄裡那份最多晚 5 分鐘）；回放才用那個時段的
@@ -16803,13 +16867,15 @@ function tdBroadcastHtml(seq, snap){
       '<span class="td-bpct ' + (Number.isFinite(pctNow(x)) ? dirClass(pctNow(x)) : '') + '">' + hwPct(Number.isFinite(pctNow(x)) ? pctNow(x) : null) + '</span>' +
       (x.inNow ? (x.back ? '<span class="td-bst back">回 ' + x.back + '</span>' : '<span class="td-bst"></span>') : '<span class="td-bst run">跑 ' + x.out + '</span>') + '</div>';
   }).join('');
-  return '<aside class="td-side"><div class="td-shead">📣 🔪 刀劍空(32)功課廣播</div>' +
+  return '<aside class="td-side"><div class="td-shead">📣 功課廣播</div>' +
+    '<div class="td-stabs"><button type="button" class="td-stab' + (isK ? '' : ' on') + '" data-td-side="blade">🔪 刀劍空(32)</button><button type="button" class="td-stab k12' + (isK ? ' on' : '') + '" data-td-side="k12">🔵 12空(123)</button></div>' +
     '<div class="td-sinfo">' + (snap.live ? '盤中・跟著首頁報價' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
-    '<div class="td-sparam">⏸ 跟著上面參數：' + (on.length ? on.join('・') : '（都沒勾＝全部刀劍空）') + '</div>' +
+    '<div class="td-sparam">⏸ 跟著上面參數：' + (on.length ? on.join('・') : (isK ? '（都沒勾＝全部12空）' : '（都沒勾＝全部刀劍空）')) + '</div>' +
     '<div class="td-scount">今天 <b>' + list.length + '</b> 檔　在榜 ' + inCnt + '　<span class="down">消失 ' + goneCnt + '</span>' +
     '<button type="button" class="td-hide" data-td-hidegone="1">' + (tdState.hideGone ? '👁 顯示消失的' : '🚫 隱藏') + '</button></div>' +
     (seq.length <= 1 && snap.live ? '<div class="td-snote">盤中每 5 分鐘記一次（09:05 起），記到第二次以後才看得出誰跑、誰回來。</div>' : '') +
     (rows || '<div class="td-empty">目前沒有符合參數的</div>') +
+    (isK ? '<div class="td-snote">🔵 12空＝機器人 123（道館 5 分K 在 20MA 下面、20MA 往下彎的當沖空），跟刀劍空分開看；名單每根 5 分K 收完更新。</div>' : '') +
     '<div class="td-snote">左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・<span class="td-bst run">跑</span> 已消失（轉強，要跑）・<span class="td-bst back">回</span> 掉出去又回榜。名次後面 ♣（梅花）＝收割區（今天已跌 5% 以上，不追空，有空單考慮回補）。點一列開K線圖。</div></aside>';
 }
 function tdAddWatch(){
@@ -16938,7 +17004,7 @@ function hwTodayHtml(){
     '<div class="td-opts">' +
       '<button type="button" class="td-zbtn' + (tdState.showMiss ? ' on' : '') + '" data-td-opt="miss">' + (tdState.showMiss ? '☑' : '☐') + ' 顯示沒中的族群</button>' +
       '<button type="button" class="td-zbtn' + (tdState.showOut ? ' on' : '') + '" data-td-opt="out">' + (tdState.showOut ? '☑' : '☐') + ' 顯示名單外的刀劍空</button>' +
-      '<button type="button" class="td-zbtn' + (tdAlert.on ? ' on' : '') + '" data-td-alert="on" title="盤中有新的刀劍空(32) 符合上面勾的參數，就跳出那一族的卡片（右下角）；開頁面時已經在榜的不跳">' + (tdAlert.on ? '☑' : '☐') + ' 新訊號跳出卡片</button>' +
+      '<button type="button" class="td-zbtn' + (tdAlert.on ? ' on' : '') + '" data-td-alert="on" title="盤中有新的刀劍空(32)、12空(123) 符合上面勾的參數，就跳出那一族的卡片（右下角）；開頁面時已經在榜的不跳">' + (tdAlert.on ? '☑' : '☐') + ' 新訊號跳出卡片</button>' +
       '<button type="button" class="td-zbtn' + (tdAlert.sound ? ' on' : '') + '" data-td-alert="sound" title="跳出新訊號卡片時響一聲提示音">' + (tdAlert.sound ? '☑' : '☐') + ' 🔊 提示音</button>' +
       '<span class="td-plabel">排序</span><select class="td-sortsel" data-td-sort="1"><option value="shallow"' + (tdState.sortDeep ? '' : ' selected') + '>依跌幅 淺→深（深的排下面）</option><option value="deep"' + (tdState.sortDeep ? ' selected' : '') + '>依跌幅 深→淺（淺的排下面）</option></select>' +
       '<small class="td-onote">' + (prevList ? '名單＝' + tdMd(prevList.date) + ' 收盤的新刀劍空' : '名單＝前一個交易日收盤的新刀劍空（還沒載入或沒有紀錄）') + '</small></div>';
@@ -17034,7 +17100,7 @@ function hwTodayHtml(){
     '要自己確認的：① 部位還要看族群有沒有帶頭——沒有帶頭時 SOP 部位降 50%（這頁不會自動降）；② 進場時間門檻 09:15 之後（通緝要犯例外）。名次是 67 族的排法，族群數不同時照比例換算。表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
   return dtSec + summary + counts +
     '<div class="td-wrap"><div class="td-main">' + head + ctrls + replay + filters + main + watch + k12Sec + againSec + relSec + jailSec + outSec + missSec + sop + '</div>' +
-    tdBroadcastHtml(seq, snap) + '</div>';
+    tdBroadcastHtml(seq, snap, tdState.side) + '</div>';
 }
 // ① 收盤觀察股（當沖多的「多功課」、多觀察的名單）＝形態觀察股的收盤那份：盤中（今天還沒收盤）用前一個交易日收盤的、
 // 收盤後／休市用最近一次收盤的。老師這份是學員從 LINE 貼的，我們直接拿系統算好的；還沒算過就背景算。
@@ -17490,6 +17556,8 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
   const tz = t.closest('[data-td-zone]');
   if (tz){ tdState.zones[tz.dataset.tdZone] = !tdState.zones[tz.dataset.tdZone]; renderHomework(); return; }
   if (t.closest('[data-td-dt]')){ tdState.dtOnly = !tdState.dtOnly; renderHomework(); return; }
+  const tside = t.closest('[data-td-side]');
+  if (tside){ tdState.side = tside.dataset.tdSide === 'k12' ? 'k12' : 'blade'; try { localStorage.setItem('tdSide', tdState.side); } catch (_){} renderHomework(); return; }
   const talert = t.closest('[data-td-alert]');
   if (talert){ tdAlertToggle(talert.dataset.tdAlert); renderHomework(); return; }
   const topt = t.closest('[data-td-opt]');
