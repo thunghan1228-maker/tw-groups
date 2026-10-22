@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 10:41:45";
+const BUILD_STAMP = "2026-10-22 11:02:17";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1778,7 +1778,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hf-tag.block b{font-size:15px;}
   .b193-m{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;margin:0 0 3px;line-height:1.5;}
   .b193-m .hf-tag{margin-left:auto;}   /* 2026-10-22 使用者：193 個股、三落空的大戶力靠右切齊（同一行：股名漲跌幅在左、大戶力在右，色塊一樣寬） */
-  .b193-m .hf-tag b,.bot-hrow .hf-tag b{min-width:4.6em;text-align:center;display:inline-block;}
+  .b193-m .hf-tag b,.bot-hrow .hf-tag b{width:70px;box-sizing:border-box;text-align:center;display:inline-block;}
+  .bot-hhead{display:flex;justify-content:flex-end;padding-bottom:0;} .hf-colhead{width:70px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);}   /* 整欄只在最上面寫一次「大戶力」 */
   .bot-hrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;} .bot-hrow .hf-tag{margin-left:auto;}
   .b193-r1{white-space:nowrap;}
   .bot-col[data-col-key="193"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}   /* 2026-10-22 加寬：個股那行加了靠右的大戶力，股名＋漲跌幅＋大戶力放得進同一行 */
@@ -6425,11 +6426,11 @@ function holderPctOf(code){
   const h = holderPctMap.get(code), v = h ? Number(h.strengthPct) : NaN;
   return Number.isFinite(v) ? v : null;
 }
-function holderTagHtml(v, block){
+function holderTagHtml(v, block, bare){   // bare＝不寫「大戶力」三個字（整欄最上面寫一次標題就好，2026-10-22 使用者：193、三落空）
   const has = v !== null && v !== undefined && Number.isFinite(Number(v));
   const r1 = has ? Math.round(Number(v) * 10) / 10 : 0;   // 四捨五入到 0.0% 的畫灰色（不是跌）
   return '<span class="hf-tag ' + (!has ? 'none' : r1 > 0 ? 'up' : r1 < 0 ? 'down' : 'flat') + (has && Math.abs(r1) >= 10 ? ' hot' : '') + (block ? ' block' : '') +
-    '" title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）"><i>大戶力</i><b>' + (has ? (r1 > 0 ? '+' : '') + r1.toFixed(1) + '%' : '—') + '</b></span>';
+    '" title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）">' + (bare ? '' : '<i>大戶力</i>') + '<b>' + (has ? (r1 > 0 ? '+' : '') + r1.toFixed(1) + '%' : '—') + '</b></span>';
 }
 // 2026-10-22 使用者：首頁 30加33加34、183、族群漲幅>2%(12) 三欄每一檔股票後面加盤中大戶力（只放百分比色塊）；≥ +10% 紅底白字、≤ −10% 綠底白字，其他只塗字色
 function homeHoldHtml(code){
@@ -14182,7 +14183,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 10:41:45';
+const BUILD_STAMP = '2026-10-22 11:02:17';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20369,8 +20370,8 @@ function botAnswer(raw){
   if (q === '193'){
     const k = kill193Model();
     if (!k) return wrap('空族群必殺(193)', botLine('讀取中…', 'bot-dim'));
-    const line = (r) => rankLine({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark }) + (r.members.length ? botLine(r.members.map((x) => '<span class="b193-m"><span class="b193-r1">⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + '</span>' + holderTagHtml(holderPctOf(x.code)) + '</span>').join(''), 'bot-sub b193-wrap') : '');
-    return wrap('空族群必殺(193)', botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + k.lower.map(line).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') + k.upper.map(line).join(''));
+    const line = (r) => rankLine({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark }) + (r.members.length ? botLine(r.members.map((x) => '<span class="b193-m"><span class="b193-r1">⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + '</span>' + holderTagHtml(holderPctOf(x.code), false, true) + '</span>').join(''), 'bot-sub b193-wrap') : '');
+    return wrap('空族群必殺(193)', botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + k.lower.map(line).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') + k.upper.map(line).join(''));
   }
   if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\\+3$/.test(q)){
     let list = zone283List(h);
@@ -20470,7 +20471,7 @@ function botAnswer(raw){
   if (q === '三落空'){
     if (!m) return wrap('三落空', botLine('讀取中…', 'bot-dim'));
     const rows = m.weakTriple;
-    return wrap('三落空', (rows.map((r) => botLine('<span>' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + '</small>') + '</span>' + holderTagHtml(holderPctOf(r.code)), 'bot-hrow')).join('') || botLine('目前沒有', 'bot-dim')) +
+    return wrap('三落空', (rows.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') : '') + (rows.map((r) => botLine('<span>' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + '</small>') + '</span>' + holderTagHtml(holderPctOf(r.code), false, true), 'bot-hrow')).join('') || botLine('目前沒有', 'bot-dim')) +
       botLine('熄火空 ' + m.weak30.length + '・落馬空 ' + m.weak33.length + '・斷流空 ' + m.weak34.length + (m.weak34Over.length ? '（跌超過 7% 的 ' + m.weak34Over.length + ' 檔不列）' : '') + '；三份都有、可放空（有券、非處置股）才列，前面數字＝族群名次（越大越弱）', 'bot-dim') + otcFoot(),
       stamp + '・熄火落馬斷流');
   }
