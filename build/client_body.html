@@ -7320,6 +7320,33 @@ function bladeRecordSeen(){
     } catch (_){}
   }
 }
+// 2026-10-22 使用者：三落空（機器人代碼）每檔前面加發生時間（第一次進三落空的時間），時間近的排上面、早的在下面；
+// 跟刀劍空一樣是這台電腦用首頁報價即時算的，時間記在這台瀏覽器、一天一份（盤前撮合 08:40 起也記）
+function weakSeenKey(){ return 'weakSeen:' + twTodayStr(); }
+let weakSeenCache = null;
+function weakSeenMap(){
+  if (!weakSeenCache || weakSeenCache.key !== weakSeenKey()){
+    let map = {};
+    try { map = JSON.parse(localStorage.getItem(weakSeenKey()) || '{}') || {}; } catch (_){ map = {}; }
+    weakSeenCache = { key: weakSeenKey(), map };
+  }
+  return weakSeenCache.map;
+}
+function weakRecordSeen(){
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;
+  const m = race333Model();
+  if (!m) return;
+  const map = weakSeenMap();
+  let changed = false;
+  const now = Date.now();
+  (m.weakTriple || []).forEach((r) => { if (!map[r.code]){ map[r.code] = now; changed = true; } });
+  if (changed){
+    try {
+      localStorage.setItem(weakSeenKey(), JSON.stringify(map));
+      Object.keys(localStorage).filter((k) => k.startsWith('weakSeen:') && k !== weakSeenKey()).forEach((k) => localStorage.removeItem(k));
+    } catch (_){}
+  }
+}
 // 2026-10-13 使用者：盤中333 每個名單也加「出現」時間（第一次進那個名單幾點幾分），新出現的在上面、早的往下。
 // 跟刀劍空一樣是這台電腦用首頁報價即時算的，時間記在這台瀏覽器、一天一份；每個名單各記各的（同一檔在不同名單出現的時間不一定一樣）。
 // 記的是沒套「大戶力≥10%／≤-10%」篩選的完整名單，篩選開關不影響時間。
@@ -15060,6 +15087,7 @@ async function refresh(){
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     try { obsTick(); } catch (e) { /* 盤中形態觀察股跳窗失敗不影響畫面 */ }
     try { bladeRecordSeen(); } catch (e) { /* 刀劍空出現時間記不起來不影響畫面 */ }
+    try { weakRecordSeen(); } catch (e) { /* 三落空出現時間記不起來不影響畫面 */ }
     try { raceRecordSeen(); } catch (e) { /* 盤中333 出現時間記不起來不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
@@ -20393,8 +20421,11 @@ function botAnswer(raw){
   // 三落空（2026-10-21 使用者）：熄火落馬斷流＝30加33加34 顛倒過來的弱勢版（條件寫在 race333Model 的 weakTriple）
   if (q === '三落空'){
     if (!m) return wrap('三落空', botLine('讀取中…', 'bot-dim'));
-    const rows = m.weakTriple;
-    return wrap('三落空', (rows.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') : '') + (rows.map((r) => botLine('<span>' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + '</small>') + '</span>' + holderTagHtml(holderPctOf(r.code), false, true), 'bot-hrow')).join('') || botLine('目前沒有', 'bot-dim')) +
+    const seenW = weakSeenMap();
+    const hmW = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '--:--');
+    // 時間近的排上面、早的在下面；同一分鐘照族群名次（越大越弱的在上面）、再照跌幅
+    const rows = m.weakTriple.slice().sort((a, b) => (Math.floor((seenW[b.code] || 0) / 60000) - Math.floor((seenW[a.code] || 0) / 60000)) || b.groupRank - a.groupRank || a.pct - b.pct);
+    return wrap('三落空', (rows.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') : '') + (rows.map((r) => botLine('<span><span style="color:#a78bfa;font-variant-numeric:tabular-nums">' + hmW(seenW[r.code]) + '</span> ' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + '</small>') + '</span>' + holderTagHtml(holderPctOf(r.code), false, true), 'bot-hrow')).join('') || botLine('目前沒有', 'bot-dim')) +
       botLine('熄火空 ' + m.weak30.length + '・落馬空 ' + m.weak33.length + '・斷流空 ' + m.weak34.length + (m.weak34Over.length ? '（跌超過 7% 的 ' + m.weak34Over.length + ' 檔不列）' : '') + '；三份都有、可放空（有券、非處置股）才列，前面數字＝族群名次（越大越弱）', 'bot-dim') + otcFoot(),
       stamp + '・熄火落馬斷流');
   }
