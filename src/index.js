@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 19:00:17";
+const BUILD_STAMP = "2026-10-22 19:07:06";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1557,6 +1557,24 @@ const HTML_PAGE = `<!DOCTYPE html>
   .td-rank.bull{border-color:#e6675f;color:#e6675f;} .td-rank.mid{border-color:#3b82f6;} .td-rank.bear{border-color:#5fae6f;} .td-rank.harv{border-color:#14b8a6;}
   .td-grp{font-size:12px;color:var(--muted);min-width:76px;}
   .td-ftime{font-size:11px;font-weight:700;color:#7c3aed;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .td-newtag{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:999px;padding:0 6px;line-height:16px;}
+  /* 刀劍空(32) 新訊號跳出卡片（2026-10-22）：右下角一格一格疊，淺色變數跟每日功課同一組 */
+  #tdAlertBox{--bg:#f6f1e7; --panel:#fffdf8; --panel-2:#f3ecdf; --line:#e4d9c6; --text:#1d1410; --muted:#4a3f37; --up:#c0392b; --down:#1e8a4c; --td-serif:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;
+    position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);width:min(400px,calc(100vw - 24px));max-height:min(82vh,860px);overflow-y:auto;z-index:212;display:flex;flex-direction:column;gap:8px;
+    color:var(--text);font-weight:600;}
+  #tdAlertBox .up{color:var(--up);} #tdAlertBox .down{color:var(--down);}
+  #tdAlertBox .td-alert-bar{display:flex;align-items:center;gap:6px;background:#4c1d95;color:#fff;border-radius:10px;padding:6px 10px;font-size:14px;position:sticky;top:0;z-index:2;box-shadow:0 4px 14px rgba(0,0,0,.35);}
+  #tdAlertBox .td-alert-sp{flex:1;}
+  #tdAlertBox .td-alert-btn{font:inherit;font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.18);border:0;border-radius:999px;padding:2px 10px;cursor:pointer;}
+  #tdAlertBox .td-alert-btn.on{background:#fde047;color:#4c1d95;}
+  #tdAlertBox .td-alert-item{background:var(--bg);border:2px solid #7c3aed;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.45);overflow:hidden;}
+  #tdAlertBox .td-alert-head{display:flex;align-items:center;gap:6px;background:#ede9fe;color:#4c1d95;padding:5px 8px 5px 12px;font-size:13px;font-weight:700;}
+  #tdAlertBox .td-alert-title{flex:1;cursor:pointer;line-height:1.5;} #tdAlertBox .td-alert-title:hover{text-decoration:underline;}
+  #tdAlertBox .td-alert-time{font-size:15px;color:#6d28d9;font-variant-numeric:tabular-nums;}
+  #tdAlertBox .td-alert-x{flex:0 0 auto;width:26px;height:26px;border-radius:999px;border:0;background:rgba(76,29,149,.14);color:#4c1d95;font-size:14px;font-weight:800;cursor:pointer;}
+  #tdAlertBox .td-cards{display:block;} #tdAlertBox .td-card{margin:0;border:0;border-radius:0;}
+  #tdAlertBox .td-hold{display:none;} #tdAlertBox .td-river{display:none;}
+  #tdAlertBox .td-chead b{font-family:var(--td-serif);color:#6d28d9;}
   [data-hw-group]{cursor:pointer;} [data-hw-group]:hover{text-decoration:underline;text-underline-offset:3px;}
   .td-stk,.td-bstk,.td-glink,.td-rchip[data-hw-code]{cursor:pointer;} .td-row:hover .td-stk,.td-brow:hover .td-bstk,.td-glink:hover{text-decoration:underline;text-underline-offset:3px;}
   .td-ma{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;}
@@ -1628,7 +1646,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .hw-win-acts #hwPop{font-size:13px;font-weight:700;padding:0 10px;width:auto;white-space:nowrap;}
   /* ⧉ 另開的每日功課視窗（2026-10-19 使用者：要能移到外接的另一個螢幕）：只顯示每日功課、整個視窗都是它，跟機器人代碼、盤中訊號分頁另開的一樣 */
   body.hw-window-mode{padding-bottom:0;}
-  body.hw-window-mode > *:not(#hwModal):not(.chart-modal):not(.group-modal):not(#chartWindows):not(#chartTray):not(#toastBox){display:none!important;}
+  body.hw-window-mode > *:not(#hwModal):not(.chart-modal):not(.group-modal):not(#chartWindows):not(#chartTray):not(#toastBox):not(#tdAlertBox){display:none!important;}
   body.hw-window-mode #hwInner{left:0!important;top:0!important;width:100%!important;height:100%!important;max-width:none;max-height:none;border:0;border-radius:0;box-shadow:none;}
   body.hw-window-mode #hwInner > .chips-head{cursor:default;border-radius:0;}
   #hwInner .chips-title{font-family:var(--td-serif);color:#8b2c22;font-weight:900;}
@@ -14220,7 +14238,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 19:00:17';
+const BUILD_STAMP = '2026-10-22 19:07:06';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15181,6 +15199,7 @@ async function refresh(){
     try { obsTick(); } catch (e) { /* 盤中形態觀察股跳窗失敗不影響畫面 */ }
     try { bladeRecordSeen(); } catch (e) { /* 刀劍空出現時間記不起來不影響畫面 */ }
     try { weakRecordSeen(); } catch (e) { /* 三落空出現時間記不起來不影響畫面 */ }
+    tdAlertTick();   // 刀劍空(32) 新訊號跳出卡片（自己 try/catch）
     try { raceRecordSeen(); } catch (e) { /* 盤中333 出現時間記不起來不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
@@ -16450,6 +16469,9 @@ const TD_ZONES = [
 ];
 const TD_FIXED_SLOTS = ['09:05', '09:10', '09:15', '09:20', '09:25', '09:30', '09:35', '09:45', '10:00', '10:15', '10:30', '11:00', '11:30', '12:00', '13:30'];   // 老師回放列的時段
 const TD_PARAMS = [['big', '🟣 大戶≤-10'], ['ma7', '📏 均線≥7'], ['high3', '👑 最高≥3%'], ['max7', '▼ 最大>-7%']];
+// 2026-10-22 使用者：新訊號跳出卡片「只跳符合上面勾的參數」——參數要記住（原本重新整理就全部沒勾），不然跳出通知跟畫面上看到的對不起來
+try { const sp = JSON.parse(localStorage.getItem('tdParams') || 'null'); if (sp && typeof sp === 'object') Object.keys(tdState.params).forEach((k) => { if (typeof sp[k] === 'boolean') tdState.params[k] = sp[k]; }); } catch (_){}
+function tdSaveParams(){ try { localStorage.setItem('tdParams', JSON.stringify(tdState.params)); } catch (_){} }
 const tdState = { zones: { upper: true, middle: true, lower: true, harvest: true }, view: 'group', params: { big: false, ma7: false, high3: false, max7: false }, dtOnly: false,   // 2026-10-19 使用者：預設不要全勾（跟老師一樣，沒勾的名單比較多）
  
   group: null, hideGone: false, big: { key: '', at: 0, data: null, loading: false }, watch: [], hold: [],
@@ -16487,7 +16509,7 @@ function tdBigHolder(codes){
   if (key && !b.loading && (b.key !== key || Date.now() - b.at > 30e3)){
     b.loading = true;
     fetch('/api/big-holder?codes=' + encodeURIComponent(key)).then((r) => r.json()).then((d) => { if (d && d.status === 'ok') b.data = d; })
-      .catch(() => {}).finally(() => { b.loading = false; b.key = key; b.at = Date.now(); if (tdOpen()) renderHomework(); });
+      .catch(() => {}).finally(() => { b.loading = false; b.key = key; b.at = Date.now(); if (tdOpen()) renderHomework(); try { if (tdAlert.cards.length) tdAlertTick(); } catch (_){} });
   }
   return b.data && b.data.items ? b.data.items : {};
 }
@@ -16607,6 +16629,7 @@ function tdRowHtml(row, ctx, snap, opt){
   return '<div class="td-row' + (held ? ' held' : '') + (o.lite ? ' td-lite' : '') + '" data-hw-code="' + wlEsc(row.code) + '" data-hw-name="' + wlEsc(row.name || '') + '">' +
     '<span class="td-hold" data-td-hold="' + wlEsc(row.code) + '" title="打勾＝我持有空單（整列金框、跨日記住，再點一下解除）">' + (held ? '☑' : '☐') + '</span>' +
     (/^\\d\\d:\\d\\d$/.test(firstHm || '') ? '<span class="td-ftime" title="這檔訊號第一次出現的時間">' + firstHm + '</span>' : '') +
+    (ctx.newCodes && ctx.newCodes.has(row.code) ? '<span class="td-newtag">新</span>' : '') +
     (o.lite ? '' : tdRankBadge(row, snap.total)) +
     (o.showGroup && row.g ? '<span class="td-grp"' + hwGroupAttr(row.g) + '>' + wlEsc(row.g) + ' <small>(' + row.gr + ')</small></span>' : '') +
     tdMaBall(row.ma) +
@@ -16624,8 +16647,8 @@ function tdLiveRow(r, zone, big){
   return { code: r.code, name: r.name, zone, g: r.groupName, gr: r.groupRank, mk: r.bladeMark || '', pct: r.pct, price: r.price,
     ma: hwMaScore(r.code, price), big: b.pct ?? null, avg: b.avgAmount ?? null, hi, partial: b.pct !== null && b.pct !== undefined && !b.complete };
 }
-function tdLiveSnap(m){
-  const k = botFetchCache('kill12', '/api/kill12', 15e3);
+function tdLiveSnap(m, peek){   // peek＝跳出通知用：1＝只讀手上已經有的資料、不另外抓 kill12／大戶%（每 15 秒算一次，不要多打請求）；2＝要畫卡片了，大戶%照抓、kill12 不抓；參數勾了大戶或最高時一律照抓
+  const k = peek ? (botState.cache.kill12 ? botState.cache.kill12.data : null) : botFetchCache('kill12', '/api/kill12', 15e3);
   const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
   const quote = new Map();
   lastData.groups.forEach((g) => g.stocks.forEach((s) => quote.set(s.code, s)));
@@ -16645,7 +16668,7 @@ function tdLiveSnap(m){
   });
   const zoneRows = TD_ZONES.flatMap((z) => (m[z.list] || []).map((r) => [r, z.key]));
   const codes = zoneRows.map(([r]) => r.code).concat(k12Base.map((r) => r.code), tdState.watch, ((jlState.data && jlState.data.suspects) || []).map((x) => x.code));
-  const big = tdBigHolder(codes);
+  const big = peek === 1 && !(tdState.params.big || tdState.params.high3) ? ((tdState.big.data && tdState.big.data.items) || {}) : tdBigHolder(codes);
   const rows = zoneRows.map(([r, zone]) => tdLiveRow(r, zone, big));
   const k12 = k12Base.map((r) => { const row = tdLiveRow(r, r.pct <= -BLADE_HARVEST_PCT ? 'harvest' : '', big); if (row.hi === null && Number.isFinite(r.dayHighPct)) row.hi = r.dayHighPct; return row; });
   rows.forEach((row) => { if (row.hi === null){ const kr = k12.find((x) => x.code === row.code); if (kr) row.hi = kr.hi; } });
@@ -16691,6 +16714,130 @@ async function tdRecordTick(){
   } catch (_){ /* 下一分鐘再試 */ } finally { tdRec.busy = false; }
 }
 setInterval(tdRecordTick, 60e3);
+
+// ---- 刀劍空(32) 新訊號跳出卡片（2026-10-22 使用者：偵測到訊號就一格一格跳出那一族的卡片；只跳「符合上面勾的參數」，再加響的開關）----
+// 盤中每 15 秒（跟首頁報價同一個節奏）算一次今天的刀劍空，符合每日功課「參數」（大戶≤-10、均線≥7、最高≥3%、最大>-7%，沒勾＝全部）、
+// 而且今天還沒跳過的，就跳出那一族的卡片（族裡所有符合的都列，新進榜的標「新」，每一檔前面有訊號出現時間）；一檔一天只跳一次。
+// 剛打開網頁、剛開啟功能、剛改參數的時候已經在榜的當作看過，不會一次跳一堆。位置在右下角，疊成一格一格，每格可以按 ✕ 關掉。
+// 每日功課另開在第二螢幕時只有那個視窗跳（主畫面不跳）；機器人、盤中訊號分頁、訊號中心另開的視窗都不跳。「提醒開啟／關閉」總開關關掉時也不跳。
+const tdAlert = { on: true, sound: false, seen: new Set(), date: null, seeded: false, sig: '', cards: [] };
+try { tdAlert.on = localStorage.getItem('tdAlertOn') !== '0'; tdAlert.sound = localStorage.getItem('tdAlertSound') === '1'; } catch (_){}
+function tdAlertSaveSeen(){ try { localStorage.setItem('tdAlertSeen', JSON.stringify({ date: tdAlert.date, sig: tdAlert.sig, codes: [...tdAlert.seen] })); } catch (_){} }
+function tdAlertLoadSeen(){   // 主畫面、另開視窗、別的分頁共用一份：誰先跳過就不重複跳
+  try {
+    const raw = JSON.parse(localStorage.getItem('tdAlertSeen') || 'null');
+    if (raw && raw.date === twTodayStr() && raw.sig === tdAlert.sig){ tdAlert.date = raw.date; tdAlert.seen = new Set(raw.codes || []); tdAlert.seeded = true; }
+  } catch (_){}
+}
+function tdAlertToggle(kind){
+  if (kind === 'on'){
+    tdAlert.on = !tdAlert.on;
+    try { localStorage.setItem('tdAlertOn', tdAlert.on ? '1' : '0'); } catch (_){}
+    if (tdAlert.on) tdAlert.seeded = false;   // 剛打開：現在已經在榜的當作看過
+    else { tdAlert.cards = []; tdAlertRender(); }
+  } else if (kind === 'sound'){
+    tdAlert.sound = !tdAlert.sound;
+    try { localStorage.setItem('tdAlertSound', tdAlert.sound ? '1' : '0'); } catch (_){}
+    if (tdAlert.sound) launchBeep();   // 打開時響一聲試聽（也順便解除瀏覽器要點過頁面才能出聲的限制）
+    tdAlertRender();
+  }
+}
+function tdAlertWindowOk(){
+  if (CHART_WINDOW_MODE || window.parent !== window) return false;
+  if (botWindowMode() || sgtWindowMode() || document.body.classList.contains('signal-window-mode')) return false;
+  if (!hwWindowMode() && hwPopWindow()) return false;   // 每日功課另開了：讓那個視窗跳
+  return true;
+}
+function tdAlertSeq(snap){   // 每一檔「訊號出現時間」要用的時間序列：今天的 5 分鐘紀錄（有載入的話）＋盤中這份
+  const rep = tdState.rep.data, seq = [];
+  if (rep && rep.slots && rep.date === snap.date && !tdState.rep.date) Object.keys(rep.slots).sort().forEach((sl) => seq.push([sl, tdRecSnap(rep.slots[sl], rep.date, sl)]));
+  seq.push([snap.slot || '最新', snap]);
+  return seq;
+}
+function tdAlertCardHtml(card, pass, snap, ctx){
+  const rows = pass.filter((r) => (r.g || '—') === card.group);
+  if (!rows.length) return '';
+  ctx.newCodes = card.newCodes;
+  const byPct = tdState.sortDeep ? (a, b) => (a.pct ?? 0) - (b.pct ?? 0) : (a, b) => (b.pct ?? 0) - (a.pct ?? 0);
+  return tdCardsHtml(rows.slice().sort(byPct), ctx, snap, {});
+}
+function tdAlertTick(){
+  try {
+    if (!tdAlert.on || !tdAlertWindowOk()) return;
+    if (!lastData || lastData.mock || lastData.heldClose || lastData.preopen || lastData.quoteDate !== twTodayStr()) return;
+    const qt = String(lastData.quoteTime || '').slice(0, 5);
+    if (qt < '09:00' || qt > '13:35') return;
+    const m = race333Model();
+    if (!m || !m.hasDaily) return;
+    const today = twTodayStr();
+    const sig = TD_PARAMS.map(([k]) => (tdState.params[k] ? 1 : 0)).join('');
+    if (tdAlert.date !== today || tdAlert.sig !== sig){ tdAlert.date = today; tdAlert.sig = sig; tdAlert.seen = new Set(); tdAlert.seeded = false; }
+    tdAlertLoadSeen();
+    let snap = tdLiveSnap(m, 1);
+    let pass = snap.rows.filter(tdPass);
+    if (!tdAlert.seeded){ pass.forEach((r) => tdAlert.seen.add(r.code)); tdAlert.seeded = true; tdAlertSaveSeen(); return; }
+    const fresh = pass.filter((r) => !tdAlert.seen.has(r.code));
+    if (fresh.length) fresh.forEach((r) => tdAlert.seen.add(r.code));
+    if (fresh.length) tdAlertSaveSeen();
+    if (!fresh.length && !tdAlert.cards.length) return;
+    snap = tdLiveSnap(m, 2);   // 要畫卡片了：把大戶%、近 5 日成交值也載進來（沒載到的下一輪／抓完時會補上）
+    pass = snap.rows.filter(tdPass);
+    const alertsOn = typeof alertsEnabled === 'undefined' ? true : alertsEnabled;
+    if (fresh.length && !alertsOn) return;
+    const ctx = tdCtx();
+    ctx.k12 = new Set((snap.k12 || []).map((r) => r.code));
+    ctx.firstAt = tdFirstAt(tdAlertSeq(snap));
+    // 這次新進榜的，依族群各跳一格（同一族已經有一格就更新那格、移到最上面）
+    const byG = new Map();
+    fresh.forEach((r) => { const g = r.g || '—'; if (!byG.has(g)) byG.set(g, []); byG.get(g).push(r); });
+    byG.forEach((list, g) => {
+      const old = tdAlert.cards.find((c) => c.group === g);
+      const card = old || { group: g, newCodes: new Set(), title: '' };
+      list.forEach((r) => card.newCodes.add(r.code));
+      card.at = qt;
+      card.title = '<b class="td-alert-time">' + qt + '</b> 新進榜：' + list.map((r) => wlEsc(r.name || r.code)).join('、');
+      tdAlert.cards = [card].concat(tdAlert.cards.filter((c) => c !== card)).slice(0, 4);
+    });
+    // 每一格的內容每次都照最新報價重畫（漲跌、大戶力跟著動），不符合參數了的股票自然會拿掉
+    tdAlert.cards.forEach((c) => { c.html = tdAlertCardHtml(c, pass, snap, ctx); });
+    tdAlert.cards = tdAlert.cards.filter((c) => c.html);
+    tdAlertRender();
+    if (fresh.length){
+      if (tdAlert.sound) launchBeep();
+      if ('Notification' in window && Notification.permission === 'granted'){
+        fresh.slice(0, 5).forEach((r) => { try { new Notification('🔪 新刀劍空 ' + r.code + ' ' + (r.name || '') + '（' + (r.g || '') + '）', { body: qt + ' ' + (Number.isFinite(r.pct) ? (r.pct > 0 ? '+' : '') + r.pct.toFixed(2) + '%' : '') + (r.big !== null && r.big !== undefined ? '　大戶 ' + (r.big > 0 ? '+' : '') + r.big + '%' : ''), tag: 'td-' + r.code }); } catch (_){} });
+      }
+    }
+  } catch (e) { /* 跳出通知失敗不影響畫面 */ }
+}
+function tdAlertRender(){
+  let el = document.getElementById('tdAlertBox');
+  if (!tdAlert.cards.length){ if (el) el.remove(); return; }
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'tdAlertBox';
+    document.body.appendChild(el);
+    el.addEventListener('click', tdAlertClick);
+  }
+  const keep = el.scrollTop;
+  el.innerHTML = '<div class="td-alert-bar"><b>🔪 刀劍空(32) 新訊號</b><span class="td-alert-sp"></span>' +
+    '<button type="button" class="td-alert-btn' + (tdAlert.sound ? ' on' : '') + '" data-alert-sound="1" title="跳出新訊號時響一聲">' + (tdAlert.sound ? '🔊 響' : '🔇 不響') + '</button>' +
+    (tdAlert.cards.length > 1 ? '<button type="button" class="td-alert-btn" data-alert-closeall="1">全部關閉</button>' : '') + '</div>' +
+    tdAlert.cards.map((c) => '<div class="td-alert-item"><div class="td-alert-head"><span class="td-alert-title" data-alert-open="1" title="打開每日功課・今日功課">' + c.title + '</span><button type="button" class="td-alert-x" data-alert-close="' + wlEsc(c.group) + '" aria-label="關掉這一格">✕</button></div>' + c.html + '</div>').join('');
+  el.scrollTop = keep;
+}
+function tdAlertClick(e){
+  const t = e.target;
+  if (t.closest('[data-alert-sound]')){ tdAlertToggle('sound'); return; }
+  if (t.closest('[data-alert-closeall]')){ tdAlert.cards = []; tdAlertRender(); return; }
+  const cl = t.closest('[data-alert-close]');
+  if (cl){ tdAlert.cards = tdAlert.cards.filter((c) => c.group !== cl.dataset.alertClose); tdAlertRender(); return; }
+  if (t.closest('[data-alert-open]')){ if (!hwWindowMode()){ hwState.tab = 'today'; openHomeworkFromToolbar(); try { renderHomework(); } catch (_){} } return; }
+  const hg = t.closest('[data-hw-group]');
+  if (hg){ openGroupDetail(hg.dataset.hwGroup); return; }
+  const row = t.closest('[data-hw-code]');
+  if (row && !t.closest('[data-td-hold]')) openStockChart(row.dataset.hwCode, row.dataset.hwName);
+}
 // 刀功課廣播：照時間順序走過每份紀錄（＋盤中最新那份），符合參數的就算「在榜」；第一次進榜的時間、掉出去＝跑、再進來＝回
 function tdBroadcast(seq){
   const st = new Map();
@@ -16871,6 +17018,8 @@ function hwTodayHtml(){
     '<div class="td-opts">' +
       '<button type="button" class="td-zbtn' + (tdState.showMiss ? ' on' : '') + '" data-td-opt="miss">' + (tdState.showMiss ? '☑' : '☐') + ' 顯示沒中的族群</button>' +
       '<button type="button" class="td-zbtn' + (tdState.showOut ? ' on' : '') + '" data-td-opt="out">' + (tdState.showOut ? '☑' : '☐') + ' 顯示名單外的刀劍空</button>' +
+      '<button type="button" class="td-zbtn' + (tdAlert.on ? ' on' : '') + '" data-td-alert="on" title="盤中有新的刀劍空(32) 符合上面勾的參數，就跳出那一族的卡片（右下角）；開頁面時已經在榜的不跳">' + (tdAlert.on ? '☑' : '☐') + ' 新訊號跳出卡片</button>' +
+      '<button type="button" class="td-zbtn' + (tdAlert.sound ? ' on' : '') + '" data-td-alert="sound" title="跳出新訊號卡片時響一聲提示音">' + (tdAlert.sound ? '☑' : '☐') + ' 🔊 提示音</button>' +
       '<span class="td-plabel">排序</span><select class="td-sortsel" data-td-sort="1"><option value="shallow"' + (tdState.sortDeep ? '' : ' selected') + '>依跌幅 淺→深（深的排下面）</option><option value="deep"' + (tdState.sortDeep ? ' selected' : '') + '>依跌幅 深→淺（淺的排下面）</option></select>' +
       '<small class="td-onote">' + (prevList ? '名單＝' + tdMd(prevList.date) + ' 收盤的新刀劍空' : '名單＝前一個交易日收盤的新刀劍空（還沒載入或沒有紀錄）') + '</small></div>';
   // ④ 回放：日期、前後、最新、時段（名單有變動的時段才列）
@@ -17421,6 +17570,8 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
   const tz = t.closest('[data-td-zone]');
   if (tz){ tdState.zones[tz.dataset.tdZone] = !tdState.zones[tz.dataset.tdZone]; renderHomework(); return; }
   if (t.closest('[data-td-dt]')){ tdState.dtOnly = !tdState.dtOnly; renderHomework(); return; }
+  const talert = t.closest('[data-td-alert]');
+  if (talert){ tdAlertToggle(talert.dataset.tdAlert); renderHomework(); return; }
   const topt = t.closest('[data-td-opt]');
   if (topt){ if (topt.dataset.tdOpt === 'miss') tdState.showMiss = !tdState.showMiss; else tdState.showOut = !tdState.showOut; tdSaveOpts(); renderHomework(); return; }
   if (t.closest('[data-td-view]')){ tdState.view = tdState.view === 'zone' ? 'group' : 'zone'; renderHomework(); return; }
@@ -17429,6 +17580,7 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
     const k = tp.dataset.tdParam;
     if (k === 'all'){ const on = !TD_PARAMS.every(([x]) => tdState.params[x]); TD_PARAMS.forEach(([x]) => { tdState.params[x] = on; }); }
     else tdState.params[k] = !tdState.params[k];
+    tdSaveParams();
     renderHomework(); return;
   }
   if (t.closest('[data-td-watch]')){ tdAddWatch(); return; }
