@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 23:39:25";
+const BUILD_STAMP = "2026-10-22 23:43:21";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3620,8 +3620,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   <div class="chips-inner" id="diagInner">
     <div class="chips-head">
       <div>
-        <div class="chips-title">系統選股・個股研究</div>
-        <div class="chips-sub">上面「系統選股」勾條件挑名單；下面「個股研究」打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。點名單任一列就帶到下面。收盤後更新，非即時報價。</div>
+        <div class="chips-title">個股問診・系統選股</div>
+        <div class="chips-sub">上面「系統選股」勾條件挑名單；下面「個股問診」打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。點名單任一列就帶到下面。收盤後更新，非即時報價。</div>
         <button type="button" class="chart-tab chips-btn active" id="diagJump" style="margin-top:8px">🩺 直接到「個股問診」（打股號）↓</button>  <!-- 2026-10-22 使用者找不到個股問診：它在系統選股下面，一鍵跳過去 -->
       </div>
       <button class="cm-icon-btn" id="diagClose" aria-label="關閉">✕</button>
@@ -3742,7 +3742,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   <button class="tb-btn" data-label="均線分數排行"><span class="tb-icon">均</span>均線分數排行</button>  <!-- 2026-10-10 使用者：加第 12 顆，放上排，上下各 6 顆 -->
   <button class="tb-btn" data-label="創高黑龍"><span class="tb-icon">龍</span><span>創高黑龍<span class="tb-sub">（自動）</span></span></button>  <!-- 2026-10-04 使用者：黑龍回測從下午報分離成獨立面板；2026-10-05 名字後面加（自動），跟創高黑選股（手動）分開 -->
   <button class="tb-btn" data-label="創高黑選股"><span class="tb-icon">選</span><span>創高黑選股<span class="tb-sub">（手動）</span></span></button>  <!-- 2026-10-04 使用者：照老師 App「創高黑」做的選股程式；2026-10-05 名字後面加（手動） -->
-  <button class="tb-btn" data-label="問診"><span class="tb-icon">研</span>選股・個股研究</button>  <!-- 2026-09-28 使用者：鈕的名字改成「個股研究」；2026-10-10 併進系統選股，改「選股・個股研究」 -->
+  <button class="tb-btn" data-label="問診"><span class="tb-icon">問</span>個股問診</button>  <!-- 2026-09-28 使用者：鈕的名字改成「個股研究」；2026-10-10 併進系統選股，改「選股・個股研究」 -->
   <button class="tb-btn" data-label="個股盤中訊號追蹤"><span class="tb-icon">追</span>個股訊號追蹤</button>
   <button class="tb-btn" data-label="估值河流圖"><span class="tb-icon">河</span>估值河流圖</button>  <!-- 2026-10-10 使用者：第 13 顆「估值河流圖」（本站版） -->
   <button class="tb-btn" data-label="研究室"><span class="tb-icon">室</span>研究室</button>  <!-- 2026-10-10 使用者：第 15 顆「研究室」（國際大事行事曆＋名詞小學堂，之後放資金保護傘、內部人），放上排 → 上 8 下 7；2026-10-13 使用者：移到最後面（估值河流圖右邊） -->
@@ -13976,7 +13976,7 @@ function renderDiag(){
   body.innerHTML = html + ckRulesHtml(data);
 }
 // ---- 系統選股・條件選股（2026-10-10 使用者：照老師「選股系統」做，跟個股問診合併在同一個面板）----
-// 勾條件、拉門檻 → 「開始篩選」列出同時符合的股票；點名單任一列，下面的個股研究就帶出那一檔。條件與後端 /api/screener 一一對應。
+// 勾條件、拉門檻 → 「開始篩選」列出同時符合的股票；點名單任一列，下面的個股問診就帶出那一檔。條件與後端 /api/screener 一一對應。
 const SCR_CARDS = [
   { key: 'score', title: '均線分數 ≥', desc: '滿分 15：站上 6 條均線＋創 6 個天期新高＋多頭排列加分', min: 0, max: 15, step: 1, def: 10, unit: '' },
   { key: 'chip', title: '籌碼暴增 ≥', desc: '籌碼暴增雷達買超榜的週增減籌碼%（沒上榜視為不符合；上榜門檻是買超 >4）', min: 4, max: 20, step: 0.5, def: 5, unit: '%' },
@@ -14143,7 +14143,7 @@ function scrResultHtml(){
     '法人 3 日／5 日%＝期間三大法人買賣超張數 ÷ 同期成交量；✓＝期間累積是買超。' +
     '籌碼暴增：粗體＝有進雷達買超榜（>4），淡色＝沒上榜但實際的籌碼%（集保用資料日之前最近一週' + (d.chipWeek ? '：' + d.chipWeek : '') + '）。' +
     'K棒：🔴＝收盤高於開盤、⚫＝收盤低於開盤，旁邊是跟前一天收盤比的漲跌幅（可能收黑但還是漲）。D+1／D+2＝資料日之後的收盤漲跌；D+1 高%＝隔天盤中最高相對資料日收盤；目前績效＝資料日收盤一路算到最新收盤。價格用還原日K。' +
-    '股期：期＝有股票期貨、小期＝有小型股票期貨（' + (d.futSource || '') + '）。點任一列，下面的個股研究就帶出那一檔。</div>';
+    '股期：期＝有股票期貨、小期＝有小型股票期貨（' + (d.futSource || '') + '）。點任一列，下面的個股問診就帶出那一檔。</div>';
   return h;
 }
 function renderScreener(){
@@ -14263,7 +14263,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 23:39:25';
+const BUILD_STAMP = '2026-10-22 23:43:21';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18154,7 +18154,7 @@ const GUIDE_TOOLS = [
     b: ['13:20 提醒今天要做的動作', '每一檔沒買的都寫清楚原因'] },
   { t: '每日持股健診', label: '健診', v: 'tb-checkup', tags: ['盤後'], d: '輸入你的持股，看每一檔現在的狀態與明天要守的價位。',
     b: ['防守線：明日紅半、三日低、月線', '同時看籌碼、營收、本益比'] },
-  { t: '選股・個股研究', label: '問診', v: 'tb-diag', tags: ['盤後'], d: '條件選股（勾條件、拉門檻一次篩出來）＋個股問診（打代號一頁看完這檔的均線、族群、籌碼、營收、估值）。',
+  { t: '個股問診', label: '問診', v: 'tb-diag', tags: ['盤後'], d: '條件選股（勾條件、拉門檻一次篩出來）＋個股問診（打代號一頁看完這檔的均線、族群、籌碼、營收、估值）。',
     b: ['選股條件越多，名單越少、越嚴格', '個股問診會給一句結論和明天要守的價', '「這家公司在做什麼」用白話講產業，列出同族群、同產業公司（點了就換那一檔）', '季報：近 8 季營收、毛利率、營益率、淨利率、EPS，近四季 EPS 與本益比', '盤中 10:00 後：今天在漲／跌什麼（盤中走勢、同族群有沒有一起動、當天新聞與公告、要留意的地方、後面看哪條防守線）'] },
   { t: '營收成長榜', label: '營收成長榜', v: 'tb-revenue', tags: ['每月'], d: '每月 10 號前公司陸續公布上個月營收，這裡把全市場排好：誰年增最多、公布後股價怎麼反應。',
     b: ['一天更新三次，公布日自動記下來', '可以查單一檔的每月營收'] },
