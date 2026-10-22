@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 15:26:43";
+const BUILD_STAMP = "2026-10-22 18:57:32";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1556,6 +1556,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .td-rank{display:inline-block;min-width:38px;text-align:center;border:1.5px solid var(--line);border-radius:6px;padding:0 4px;font-size:12px;font-weight:700;}
   .td-rank.bull{border-color:#e6675f;color:#e6675f;} .td-rank.mid{border-color:#3b82f6;} .td-rank.bear{border-color:#5fae6f;} .td-rank.harv{border-color:#14b8a6;}
   .td-grp{font-size:12px;color:var(--muted);min-width:76px;}
+  .td-ftime{font-size:11px;font-weight:700;color:#7c3aed;font-variant-numeric:tabular-nums;white-space:nowrap;}
   [data-hw-group]{cursor:pointer;} [data-hw-group]:hover{text-decoration:underline;text-underline-offset:3px;}
   .td-stk,.td-bstk,.td-glink,.td-rchip[data-hw-code]{cursor:pointer;} .td-row:hover .td-stk,.td-brow:hover .td-bstk,.td-glink:hover{text-decoration:underline;text-underline-offset:3px;}
   .td-ma{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;}
@@ -14218,7 +14219,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.k
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 15:26:43';
+const BUILD_STAMP = '2026-10-22 18:57:32';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16579,10 +16580,32 @@ function hwGroupAttr(name){
   return name && lastData && Array.isArray(lastData.groups) && lastData.groups.some((x) => x.name === name)
     ? ' data-hw-group="' + wlEsc(name) + '" title="看「' + wlEsc(name) + '」的成分股"' : '';
 }
+// 2026-10-22 使用者：族群卡每一檔股票前面要寫「訊號出來的時間」——這檔第一次進刀劍空(32)（12空 看 12空）的時間。
+// 不管有沒有符合上面的參數都算（廣播清單只列符合的）；5 分鐘紀錄裡最早出現那份的時段；還沒有紀錄、只在最新那份看到的，
+// 用這台電腦第一次看到它的時間（bladeSeenMap，跟機器人 32、廣播清單同一份）。
+function tdFirstAt(seq){
+  const first = new Map();
+  seq.forEach(([slot, sn]) => {
+    (sn.rows || []).forEach((r) => { if (!first.has(r.code)) first.set(r.code, slot); });
+    (sn.k12 || []).forEach((r) => { if (!first.has('k12:' + r.code)) first.set('k12:' + r.code, slot); });
+  });
+  const lastE = seq.length ? seq[seq.length - 1] : null;
+  if (lastE && lastE[1] && lastE[1].live){
+    const seenL = bladeSeenMap();
+    first.forEach((slot, key) => {
+      if (slot !== lastE[0] || key.startsWith('k12:') || !seenL[key]) return;
+      const hm = new Date(seenL[key] + 8 * 3600e3).toISOString().slice(11, 16);
+      if (hm < slot) first.set(key, hm);
+    });
+  }
+  return first;
+}
 function tdRowHtml(row, ctx, snap, opt){
   const o = opt || {}, held = tdState.hold.includes(row.code);
+  const firstHm = ctx.firstAt ? ctx.firstAt.get((o.noK12 ? 'k12:' : '') + row.code) : '';
   return '<div class="td-row' + (held ? ' held' : '') + (o.lite ? ' td-lite' : '') + '" data-hw-code="' + wlEsc(row.code) + '" data-hw-name="' + wlEsc(row.name || '') + '">' +
     '<span class="td-hold" data-td-hold="' + wlEsc(row.code) + '" title="打勾＝我持有空單（整列金框、跨日記住，再點一下解除）">' + (held ? '☑' : '☐') + '</span>' +
+    (/^\\d\\d:\\d\\d$/.test(firstHm || '') ? '<span class="td-ftime" title="這檔訊號第一次出現的時間">' + firstHm + '</span>' : '') +
     (o.lite ? '' : tdRankBadge(row, snap.total)) +
     (o.showGroup && row.g ? '<span class="td-grp"' + hwGroupAttr(row.g) + '>' + wlEsc(row.g) + ' <small>(' + row.gr + ')</small></span>' : '') +
     tdMaBall(row.ma) +
@@ -16797,6 +16820,7 @@ function hwTodayHtml(){
   // 盤中才接上即時這份（週末、收盤後首頁停在收盤報價，大戶% 也沒有，接上去會讓全部變成「跑」）
   const liveSession = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr());
   if (snap.live && (!seq.length || (liveSession && seq[seq.length - 1][0] <= snap.slot))) seq.push([snap.slot || '最新', snap]);   // 同一個 5 分鐘時段也接上即時這份（機器人 32 就是跟畫面上現在這份對齊）
+  ctx.firstAt = tdFirstAt(seq);   // 族群卡每一檔前面的「訊號出現時間」
   // ① 統計
   const zoneRows = {};
   TD_ZONES.forEach((z) => { zoneRows[z.key] = snap.rows.filter((r) => r.zone === z.key); });
