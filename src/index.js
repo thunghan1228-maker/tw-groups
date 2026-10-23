@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 18:10:17";
+const BUILD_STAMP = "2026-10-23 21:38:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -513,13 +513,15 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chart-canvas-wrap.macd-wrap{height:100px;}
   .chart-canvas-wrap.kd-wrap{height:100px;}
   .chart-canvas-wrap.mcl-wrap{height:110px;}
+  .chart-canvas-wrap.mg-wrap{height:130px;}
   .chart-modal.fullscreen .chart-canvas-wrap.price-wrap{height:56vh;}
   .chart-modal.fullscreen .chart-canvas-wrap.volume-wrap{height:110px;}
   .chart-modal.fullscreen .chart-canvas-wrap.force-wrap{height:140px;}
   .chart-modal.fullscreen .chart-canvas-wrap.macd-wrap{height:130px;}
   .chart-modal.fullscreen .chart-canvas-wrap.kd-wrap{height:130px;}
   .chart-modal.fullscreen .chart-canvas-wrap.mcl-wrap{height:140px;}
-  #klineCanvas,#volumeCanvas,#forceCanvas,#macdCanvas,#kdCanvas,#mclCanvas{display:block;width:100%;height:100%;touch-action:none;}
+  .chart-modal.fullscreen .chart-canvas-wrap.mg-wrap{height:160px;}
+  #klineCanvas,#volumeCanvas,#forceCanvas,#macdCanvas,#kdCanvas,#mclCanvas,#mgCanvas{display:block;width:100%;height:100%;touch-action:none;}
 
   .ind-panel-block{margin-top:10px;}
   .cm-chip-sum{font-size:12px;font-weight:700;margin-left:6px;color:var(--muted);}
@@ -3879,6 +3881,13 @@ const HTML_PAGE = `<!DOCTYPE html>
       </div>
       <div class="chart-canvas-wrap mcl-wrap" id="mclPanelWrap" hidden><canvas id="mclCanvas"></canvas></div>
     </div>
+    <div class="ind-panel-block" id="mgPanelBlock">  <!-- 2026-10-23 使用者：融資維持率下面加「融資」副圖（日線、5 分K、1 分K）：每天增減張數（柱）、融資餘額（線，累計）、使用率，內定開 -->
+      <div class="ind-panel-head">
+        <span class="force-title">融資（張）<small class="cm-chip-sum" id="mgPanelSum"></small></span>
+        <button class="macd-toggle on" id="mgPanelToggle" aria-pressed="true">關閉</button>
+      </div>
+      <div class="chart-canvas-wrap mg-wrap" id="mgPanelWrap" hidden><canvas id="mgCanvas"></canvas></div>
+    </div>
     <div class="ind-panel-block" id="kdPanelBlock">  <!-- 2026-10-23 使用者：KD (9,3,3) 日線、5 分K、1 分K 都要有圖跟開關（內定開），80 紅線、20 綠線 -->
       <div class="ind-panel-head">
         <span class="force-title"><span id="kdPanelTitleTxt">KD (9,3,3)</span><small class="cm-chip-sum" id="kdPanelSum"></small></span>
@@ -4187,7 +4196,7 @@ function generateForceFlow(code, tf, bars){
 
 let currentChart = {
   code: null, name: null, tf: 'daily', bars: null, force: null, macd: null, kd: null,
-  maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, kdOn: true, hoverIndex: null,
+  maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, kdOn: true, mgOn: true, mg: null, hoverIndex: null,
   viewStart: 0, viewCount: null, isRealBars: false, requestToken: 0, dailyBars: null,
   defOn: (() => { try { return localStorage.getItem('chartDefOn') !== '0'; } catch (_){ return true; } })(),   // 日線的明日防守線
   d123On: (() => { try { return localStorage.getItem('chartD123On') !== '0'; } catch (_){ return true; } })(),   // 日線的 123 黑龍進場點
@@ -4298,6 +4307,25 @@ function chartMclLines(allBars){
   return [{ label: '斷頭價A', v: ln.a, color: MCL_A_COLOR, dash: [6, 3] }, { label: '斷頭價B', v: ln.b, color: MCL_B_COLOR, dash: [2, 3] }]
     .map((d) => ({ ...d, gap: last > 0 ? (last - d.v) / last * 100 : null }))
     .filter((d) => currentChart.tf === 'daily' || (d.gap !== null && d.gap <= MCL_NEAR_PCT));
+}
+// 融資副圖（2026-10-23 使用者）：下面「融資（張）」那張圖的資料＝後端 /api/margin-history 的每日序列（餘額、當天增減、使用率），一檔一次
+function chartMgLoad(code){
+  if (!code || (currentChart.mg && currentChart.mg.code === code)) return;
+  const st = currentChart.mg = { code, rows: [], loading: true, failed: false };
+  (async () => {
+    try {
+      const r = await fetch('/api/margin-history?code=' + encodeURIComponent(code) + '&days=120');
+      const d = r.ok ? await r.json() : null;
+      if (d && Array.isArray(d.rows)) st.rows = d.rows; else st.failed = true;   // 後端還沒有這個端點（404）也走這裡，畫面上寫原因
+    } catch (_){ st.failed = true; }
+  })().finally(() => {
+    st.loading = false;
+    if (currentChart.code === code) redrawAll();
+  });
+}
+function chartBarDate(b){
+  if (!b) return '';
+  return typeof b.ts === 'string' ? b.ts.slice(0, 10) : new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10);   // 日線 ts＝日期字串、分K ts＝毫秒（換成台北日期）
 }
 // 融資維持率（追高者）每天一個值：A＝收盤 ÷（借款成數 × 近 20 日最高），B＝收盤 ÷（借款成數 × 月高那天的五日平均價）。借款成數＝斷頭係數 ÷ 1.3（上市 6 成、上櫃 5 成），
 // 所以買在 A／B 當天剛好是 166.7%（上櫃 200%）、跌到 130% 就是斷頭價。個股實際的維持率沒有公布，這是用價格推算的追高者維持率。
@@ -4562,6 +4590,7 @@ function drawChart(){
   if (vwapSeries) vwapSeries.forEach((v) => { lo = Math.min(lo, v); hi = Math.max(hi, v); });
   const defLines = (currentChart.tf === 'daily' && currentChart.defOn && vStart + vCount >= allBars.length) ? chartDefenseLines(allBars) : [];
   defLines.forEach((d) => { lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); });
+  chartMgLoad(currentChart.code);
   chartMclLoad(currentChart.code);   // 2026-10-23 使用者：K線圖上面加賣壓狀態／落底訊號／回檔警示三個標籤 → 不管斷頭價開關開不開都要載入
   const mclLines = chartMclLines(allBars);   // 融資斷頭價 A／B：日線一定畫、分K離現價 ≤20% 才畫
   mclLines.forEach((d) => { lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); });
@@ -4954,6 +4983,89 @@ function drawMclPanel(){
   }
 }
 
+// 融資副圖（2026-10-23 使用者：K線圖日線、5 分K、1 分K 在融資維持率下面加「融資」：今天增減融資幾張、累計，加上使用率）
+// 上半＝融資餘額（線，就是每天增減累積起來的水位）、下半＝每天增減張數（柱：增加紅、減少綠）；分K 每天只有一個值，同一天的 K 棒畫同一個值（一格一格的）。
+function drawMgPanel(){
+  const wrap = document.getElementById('mgPanelWrap'), sum = document.getElementById('mgPanelSum');
+  if (!wrap || !sum) return;
+  if (!currentChart.mgOn || !currentChart.bars || !currentChart.bars.length){ wrap.hidden = true; sum.textContent = ''; return; }
+  wrap.hidden = false;
+  const canvas = document.getElementById('mgCanvas');
+  const cssW = canvas.parentElement.clientWidth, cssH = canvas.parentElement.clientHeight;
+  const ctx = setupCanvas(canvas, cssW, cssH);
+  const note = (text) => { ctx.fillStyle = '#a89c8f'; ctx.font = '12px -apple-system, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, cssW / 2, cssH / 2); };
+  const m = currentChart.mg && currentChart.mg.code === currentChart.code ? currentChart.mg : null;
+  const mclMg = currentChart.mcl && currentChart.mcl.code === currentChart.code ? currentChart.mcl.mg : null;
+  const fmtN = (n) => (n > 0 ? '+' : '') + Number(n).toLocaleString();
+  const latestSum = () => mclMg ? '餘額 ' + Number(mclMg.balance).toLocaleString() + ' 張・今 ' + (mclMg.chg1 == null ? '—' : fmtN(mclMg.chg1)) + (mclMg.util != null ? '・使用率 ' + Number(mclMg.util).toFixed(1) + '%' : '') : '';
+  if (!m || m.loading){ sum.textContent = latestSum(); note('讀取中…'); return; }
+  if (!m.rows.length){
+    sum.textContent = latestSum();
+    note(m.failed ? '融資每日資料還沒有（後端更新後就會出現）' : '本站沒有這檔的融資餘額紀錄（只有上市櫃普通股有）');
+    return;
+  }
+  const byDate = new Map(m.rows.map((r) => [r.date, r]));
+  const allBars = currentChart.bars;
+  const { start: vStart, count: vCount } = visibleRange(allBars.length);
+  const vis = allBars.slice(vStart, vStart + vCount);
+  const intraday = currentChart.tf !== 'daily';
+  const rowsAt = vis.map((b) => byDate.get(chartBarDate(b)) || null);
+  const padTop = 14, padBottom = 6, plotW = cssW - PAD.left - PAD.right;
+  const lineH = Math.round((cssH - padTop - padBottom) * 0.55), gapH = 10, barsTop = padTop + lineH + gapH, barsH = cssH - padBottom - barsTop;
+  const n = vis.length, xAt = (i) => PAD.left + plotW * (i + 0.5) / n;
+  const bals = rowsAt.filter(Boolean).map((r) => r.balance);
+  if (!bals.length){ sum.textContent = latestSum(); note('這段時間沒有融資紀錄（本站只存最近約一個月）'); return; }
+  let lo = Math.min(...bals), hi = Math.max(...bals);
+  if (hi === lo){ hi += 1; lo -= 1; }
+  const pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
+  const yBal = (v) => padTop + lineH * (1 - (v - lo) / (hi - lo));
+  const chgs = rowsAt.filter((r) => r && r.chg != null).map((r) => Math.abs(r.chg));
+  const maxChg = Math.max(1, ...chgs);
+  const zeroY = barsTop + barsH / 2, yChg = (v) => zeroY - (v / maxChg) * (barsH / 2 - 2);
+  // 柱子（下半）：零線＋每天增減
+  ctx.strokeStyle = 'rgba(168,156,143,0.3)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD.left, zeroY); ctx.lineTo(cssW - PAD.right, zeroY); ctx.stroke();
+  const bw = intraday ? Math.max(1, plotW / n) : Math.max(1, plotW / n * 0.7);
+  rowsAt.forEach((r, i) => {
+    if (!r || r.chg == null || !r.chg) return;
+    ctx.fillStyle = r.chg > 0 ? '#ef4444' : '#22c55e';
+    const y = yChg(r.chg);
+    ctx.fillRect(xAt(i) - bw / 2, Math.min(y, zeroY), bw, Math.max(1, Math.abs(zeroY - y)));
+  });
+  // 線（上半）：融資餘額，分K 同一天是同一個值（階梯）
+  ctx.save(); ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 1.8; ctx.beginPath();
+  let pen = false, firstX = null, lastX = null;
+  rowsAt.forEach((r, i) => { if (!r){ pen = false; return; } const x = xAt(i), y = yBal(r.balance); if (!pen){ ctx.moveTo(x, y); pen = true; } else ctx.lineTo(x, y); if (firstX === null) firstX = x; lastX = x; });
+  ctx.stroke();
+  ctx.restore();
+  // 右邊刻度：餘額高低、增減最大值
+  ctx.fillStyle = '#c084fc'; ctx.font = 'bold 10px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText(Math.round(hi - pad).toLocaleString(), cssW - PAD.right + 6, yBal(hi - pad));
+  ctx.fillText(Math.round(lo + pad).toLocaleString(), cssW - PAD.right + 6, yBal(lo + pad));
+  ctx.fillStyle = '#a89c8f'; ctx.fillText('0', cssW - PAD.right + 6, zeroY);
+  ctx.fillStyle = '#ef4444'; ctx.fillText('+' + Math.round(maxChg).toLocaleString(), cssW - PAD.right + 6, yChg(maxChg));
+  ctx.fillStyle = '#22c55e'; ctx.fillText('-' + Math.round(maxChg).toLocaleString(), cssW - PAD.right + 6, yChg(-maxChg));
+  ctx.fillStyle = '#c084fc'; ctx.textBaseline = 'top'; ctx.fillText('融資餘額（線）', PAD.left, 1);
+  ctx.fillStyle = '#a89c8f'; ctx.fillText('每天增減（柱：增加紅、減少綠）', PAD.left + 92, 1);
+  // 十字線＋數字：滑到哪天看哪天；最右邊那根沒有資料（今天資料晚上才公布）就用最近一天
+  const hi0 = currentChart.hoverIndex != null ? Math.max(0, Math.min(n - 1, currentChart.hoverIndex)) : n - 1;
+  let cur = rowsAt[hi0], usedDate = null;
+  if (!cur){
+    const d0 = chartBarDate(vis[hi0]);
+    for (let k = m.rows.length - 1; k >= 0; k--){ if (m.rows[k].date <= d0){ cur = m.rows[k]; usedDate = cur.date; break; } }
+  }
+  if (cur){
+    const first = m.rows[0], cum = cur.balance - first.balance;
+    sum.textContent = (usedDate ? usedDate.slice(5).replace('-', '/') + ' ' : '') + '餘額 ' + Number(cur.balance).toLocaleString() + ' 張・今 ' + (cur.chg == null ? '—' : fmtN(cur.chg)) +
+      '・累計 ' + fmtN(cum) + '（自 ' + first.date.slice(5).replace('-', '/') + '）' + (cur.util != null ? '・使用率 ' + Number(cur.util).toFixed(1) + '%' : '');
+  } else sum.textContent = latestSum();
+  if (currentChart.hoverIndex != null){
+    const hx = xAt(hi0);
+    ctx.save(); ctx.strokeStyle = 'rgba(241,236,230,0.35)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(hx, padTop); ctx.lineTo(hx, cssH - padBottom); ctx.stroke(); ctx.restore();
+  }
+}
+
 function drawForcePanel(){
   const wrap = document.getElementById('forcePanelWrap');
   if (!currentChart.force){ wrap.hidden = true; return; }
@@ -5149,6 +5261,7 @@ function redrawAll(){
   drawChart();
   drawVolumePanel();
   drawMclPanel();
+  drawMgPanel();
   drawForcePanel();
   drawMacdPanel();
   drawKdPanel();
@@ -5650,6 +5763,9 @@ async function switchTimeframe(tf){
   currentChart.macd = computeMACD(bars);
   currentChart.kd = chartComputeKd(tf, bars);
   currentChart.kdOn = true;   // KD 內定開
+  currentChart.mgOn = true;   // 融資副圖內定開
+  const mgBtn = document.getElementById('mgPanelToggle');
+  mgBtn.textContent = '關閉'; mgBtn.classList.add('on'); mgBtn.setAttribute('aria-pressed', 'true');
   const kdBtn = document.getElementById('kdPanelToggle');
   kdBtn.textContent = '關閉'; kdBtn.classList.add('on'); kdBtn.setAttribute('aria-pressed', 'true');
   currentChart.macdOn = false;
@@ -15105,7 +15221,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 18:10:17';
+const BUILD_STAMP = '2026-10-23 21:38:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16178,6 +16294,14 @@ document.getElementById('maLegend').addEventListener('click', (e) => {
   currentChart.mclOn = !currentChart.mclOn;
   try { localStorage.setItem('chartMclOn', currentChart.mclOn ? '1' : '0'); } catch (_){}
   redrawAll();
+});
+document.getElementById('mgPanelToggle').addEventListener('click', () => {
+  currentChart.mgOn = !currentChart.mgOn;
+  const btn = document.getElementById('mgPanelToggle');
+  btn.textContent = currentChart.mgOn ? '關閉' : '開啟';
+  btn.classList.toggle('on', currentChart.mgOn);
+  btn.setAttribute('aria-pressed', String(currentChart.mgOn));
+  drawMgPanel();
 });
 document.getElementById('kdPanelToggle').addEventListener('click', () => {
   currentChart.kdOn = !currentChart.kdOn;
@@ -25263,6 +25387,10 @@ export default {
     if (url.pathname === "/api/margin-call") {
       // 融資斷頭線名單（2026-10-23 使用者貼老師「斷頭線就在腳下」）：後端每天收盤後才會變，快取 1 分鐘
       return await proxyHanstockBars("/api/hub/margin-call" + url.search, 60);
+    }
+    if (url.pathname === "/api/margin-history") {
+      // 單檔融資餘額每日序列（2026-10-23 使用者：K線圖融資副圖：每天增減、累計、使用率），每天晚上才更新，快取 5 分鐘
+      return await proxyHanstockBars("/api/hub/margin-history" + url.search, 300);
     }
     if (url.pathname === "/api/margin-line") {
       // 單檔斷頭價 A／B（2026-10-23 使用者：K線圖日線畫線、5 分K 離線近才畫），每天收盤後才會變，快取 5 分鐘
