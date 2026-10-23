@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 11:21:07";
+const BUILD_STAMP = "2026-10-23 11:23:09";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3584,13 +3584,13 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div id="sgtBody" class="st-scope"></div>
   </div>
 </div>
-<!-- 2026-10-17 使用者：今日提醒（警示股：解鎖、連續警告、分盤交易，表格），每天第一次打開跳出來 -->
+<!-- 2026-10-17 使用者：今日提醒（警示股：解鎖、連續警告、分盤交易，表格）；2026-10-23 改成每次打開都跳，並加融資斷頭線 -->
 <div class="chips-modal" id="remindModal" hidden>
   <div class="chips-inner" id="remindInner">
     <div class="chips-head">
       <div>
         <div class="chips-title">🔔 今日提醒</div>
-        <div class="chips-sub">每天有新的警示股資料、第一次打開就會跳出來；關掉後點右上角「🔔 今日提醒」可以再看。點股號開K線圖。</div>
+        <div class="chips-sub">每次打開軟體（重新整理網頁）都會跳出來；關掉後點右上角「🔔 今日提醒」可以再看。融資斷頭線、警示股都在這裡，點股號或名字開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="remindClose" aria-label="關閉">✕</button>
     </div>
@@ -14156,6 +14156,20 @@ async function mclEnsure(){
 function mclLineCell(price, gap, broken, isNew){
   return '<b>' + ckPrice(price) + '</b><div class="dg-sub"' + (broken ? ' style="color:#d9392b;font-weight:700"' : '') + '>' + (broken ? '已破' + (isNew ? '・今日新破' : '') : '差 ' + Number(gap).toFixed(1) + '%') + '</div>';
 }
+// 融資斷頭線總結（你的股票在哪一條線上）：個股問診的名單、今日提醒共用。mode＝'diag'：點名字換問診；'remind'：點名字開K線圖
+// 2026-10-23 使用者：A 線已破＝綠字、B 線 5% 內＝粉紅字、今日新破＝藍字，個股名稱紫底白字
+function mclChips(xs, mode){
+  return (xs || []).map((x) => mode === 'remind'
+    ? '<a class="mcl-chip" data-rm-code="' + wlEsc(x.code) + '" data-rm-name="' + wlEsc(x.name || '') + '">' + wlEsc(x.name || x.code) + '</a>'
+    : '<a class="dg-link mcl-chip" data-code="' + wlEsc(x.code) + '">' + wlEsc(x.name || x.code) + '</a>').join('') || '<span class="muted">—</span>';
+}
+function mclSummaryHtml(sm, mode){
+  sm = sm || {};
+  const lab = (color, text) => '<b style="color:' + color + '">' + text + '</b>';
+  return '<div class="race-note" style="line-height:2.1"><b>你的股票在哪一條線上？</b><br>' + lab('#22c55e', 'A 線已破・' + (sm.aBroken || []).length + ' 檔') + '　' + mclChips(sm.aBroken, mode) +
+    '<br>' + lab('#f472b6', 'B 線 5% 內・' + (sm.bWithin || []).length + ' 檔') + '　' + mclChips(sm.bWithin, mode) +
+    ((sm.aNew || []).length || (sm.bNew || []).length ? '<br>' + lab('#60a5fa', '今日新破') + '　' + lab('#60a5fa', 'A：') + mclChips(sm.aNew, mode) + '　' + lab('#60a5fa', 'B：') + mclChips(sm.bNew, mode) : '') + '</div>';
+}
 function mclSigned(n, digits){
   if (n == null) return '—';
   const v = digits ? Number(n).toFixed(digits) : Number(n).toLocaleString();
@@ -14218,12 +14232,7 @@ function dgMarginListHtml(){
   const c = d.counts || {};
   const rows = (d.rows || []).map((r) => '<tr class="dg-link" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
     '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td></tr>').join('');
-  const sm = d.summary || {};
-  const smNames = (xs) => (xs || []).map((x) => '<a class="dg-link mcl-chip" data-code="' + x.code + '">' + wlEsc(x.name || x.code) + '</a>').join('') || '<span class="muted">—</span>';
-  const smLab = (color, text) => '<b style="color:' + color + '">' + text + '</b>';   // 2026-10-23 使用者：A 線已破＝綠字、B 線 5% 內＝粉紅字、今日新破＝藍字，個股名稱紫底白字
-  const summary = !d.summary ? '' : '<div class="race-note" style="line-height:2.1"><b>你的股票在哪一條線上？</b><br>' + smLab('#22c55e', 'A 線已破・' + (sm.aBroken || []).length + ' 檔') + '　' + smNames(sm.aBroken) +
-    '<br>' + smLab('#f472b6', 'B 線 5% 內・' + (sm.bWithin || []).length + ' 檔') + '　' + smNames(sm.bWithin) +
-    ((sm.aNew || []).length || (sm.bNew || []).length ? '<br>' + smLab('#60a5fa', '今日新破') + '　' + smLab('#60a5fa', 'A：') + smNames(sm.aNew) + '　' + smLab('#60a5fa', 'B：') + smNames(sm.bNew) : '') + '</div>';
+  const summary = !d.summary ? '' : mclSummaryHtml(d.summary, 'diag');
   return head + summary + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
     (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th><th>A 月高斷頭</th><th>B 五日平均價線斷頭</th><th>融資餘額（張）</th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
@@ -14560,7 +14569,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 11:21:07';
+const BUILD_STAMP = '2026-10-23 11:23:09';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22219,9 +22228,33 @@ new ResizeObserver(() => sizeSgtPanes()).observe(document.getElementById('sgtInn
 const REMIND_SEEN_KEY = 'remindSeen';
 function remindMdW(iso){ return iso ? Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10) + '(' + '日一二三四五六'[new Date(iso + 'T12:00:00+08:00').getUTCDay()] + ')' : ''; }
 function remindMd(iso){ return iso ? Number(iso.slice(5, 7)) + '/' + iso.slice(8, 10) : ''; }
+// 融資斷頭線（2026-10-23 使用者：問診那個「你的股票在哪一條線上」也放進今日提醒）：全部族群的 A 線已破／B 線 5% 內／今日新破，點名字開K線圖
+const remindMcl = { data: null, loading: false, at: 0, error: '' };
+async function remindMclLoad(){
+  if (remindMcl.loading || (remindMcl.data && Date.now() - remindMcl.at < 5 * 60 * 1000)) return;
+  remindMcl.loading = true; remindMcl.error = '';
+  try {
+    const res = await fetch('/api/margin-call?limit=1&groups=all');
+    const data = await res.json();
+    if (!res.ok) throw new Error((data && (data.detail || data.error)) || ('http ' + res.status));
+    remindMcl.data = data; remindMcl.at = Date.now();
+  } catch (e) {
+    remindMcl.error = String((e && e.message) || e);
+  } finally {
+    remindMcl.loading = false;
+    if (!document.getElementById('remindModal').hidden) renderRemind();
+  }
+}
+function remindMclHtml(){
+  const d = remindMcl.data;
+  const head = '<div class="rm-sec"><div class="rm-h">💥 融資斷頭線 <small>' + (d && d.date ? d.date.slice(5).replace('-', '/') + ' 收盤・全部族群' : '全部族群') + '</small></div>';
+  if (!d) return head + '<div class="race-note">' + (remindMcl.error ? '讀取失敗：' + wlEsc(remindMcl.error) : '讀取中…') + '</div></div>';
+  if (d.status !== 'ok') return head + '<div class="race-note">' + wlEsc(d.reason || '還沒有日K資料') + '</div></div>';
+  return head + mclSummaryHtml(d.summary, 'remind') + '<div class="rm-warn" style="margin-top:4px">A 線＝近一個月最高點追的人的斷頭價、B 線＝月高那天五日平均價追的人的斷頭價；細節到「個股問診」看。</div></div>';
+}
 function remindHtml(){
   const d = jlState.data;
-  if (!d || d.status !== 'ok') return '<div class="race-note">' + (homeJailState.loading ? '讀取中…' : '資料還沒進來，等一下再開') + '</div>';
+  if (!d || d.status !== 'ok') return remindMclHtml() + '<div class="race-note">' + (homeJailState.loading ? '讀取中…' : '資料還沒進來，等一下再開') + '</div>';
   const code = (x) => '<span class="rm-code" data-rm-code="' + wlEsc(x.code) + '" data-rm-name="' + wlEsc(x.name || '') + '">' + wlEsc(x.code) + '</span>';
   const table = (head, rows, empty) => '<table class="rm-table"><thead><tr>' + head.map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' +
     (rows.length ? rows.join('') : '<tr><td class="rm-none" colspan="' + head.length + '">' + empty + '</td></tr>') + '</tbody></table>';
@@ -22235,7 +22268,7 @@ function remindHtml(){
   const others = (d.jailedList || []).filter((j) => !newCodes.has(j.code) && j.release > d.dataDate);
   if (others.length) jailHtml += '<details class="rm-more"><summary>還在分盤交易的其他 ' + others.length + ' 檔</summary>' + table(['代號', '名稱', '處置期間', '撮合', '解鎖日'], others.map((j) => jRow({ ...j, new: false })), '') + '</details>';
   jailHtml += '</div>';
-  let html = '<div class="rm-date">' + d.dataDate.replace(/-/g, '/') + ' 警示股</div>';
+  let html = remindMclHtml() + '<div class="rm-date">' + d.dataDate.replace(/-/g, '/') + ' 警示股</div>';
   html += jailHtml;
   // 1. 解鎖：資料日之後的 2 個交易日
   const rel = (d.releaseDays || []).filter((x) => x.date > d.dataDate).slice(0, 2);
@@ -22268,6 +22301,7 @@ function renderRemind(){
 function openRemindPanel(){
   document.getElementById('remindModal').hidden = false;
   homeJailLoad();
+  remindMclLoad();
   renderRemind();
   document.getElementById('remindInner').scrollTop = 0;
   const d = jlState.data;
@@ -22275,13 +22309,14 @@ function openRemindPanel(){
   remindMarkBtn();
 }
 function closeRemindPanel(){ document.getElementById('remindModal').hidden = true; }
-// 處置資料一進來：有新的一天還沒看過就跳出來（每份資料只跳一次）；視窗開著就重畫
+// 處置資料一進來：每次打開軟體（重新整理網頁）都跳出來一次（2026-10-23 使用者：不再是每天第一次，改成每次開都跳；同一次開著不會一直跳）；視窗開著就重畫
+let remindAutoShown = false;
 function remindOnData(){
   remindMarkBtn();
   if (!document.getElementById('remindModal').hidden){ renderRemind(); const d = jlState.data; if (d && d.status === 'ok'){ try { localStorage.setItem(REMIND_SEEN_KEY, d.dataDate); } catch (_){} } return; }
   // K 線圖小視窗、另開的訊號中心／機器人視窗不跳（看不到，還會被記成已經看過，主畫面就不跳了）
   if (CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || botWindowMode() || sgtWindowMode()) return;
-  if (remindUnseen()) openRemindPanel();
+  if (!remindAutoShown){ remindAutoShown = true; openRemindPanel(); }
 }
 document.getElementById('remindBtn').addEventListener('click', openRemindPanel);
 document.getElementById('remindClose').addEventListener('click', closeRemindPanel);
