@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 23:55:50";
+const BUILD_STAMP = "2026-10-24 00:20:47";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2867,6 +2867,68 @@ const HTML_PAGE = `<!DOCTYPE html>
   .jl-q .rv-mark.accel{border-color:#db2777;color:#db2777;} .jl-q .rv-mark.decel{border-color:#16a34a;color:#16a34a;}
   .jl-q .rv-mark.accel.active{background:#db2777;color:#fff;} .jl-q .rv-mark.decel.active{background:#16a34a;color:#fff;}
   .rv-foot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:8px;line-height:1.6;}
+  /* 2026-10-23 使用者：均線分數排行、每月營收成長榜改成跟老師（zhuang.tw）一樣的淺色底版面：米白底、白卡片、紅褐標題；內容寬度跟老師頁差不多，表格比較寬就左右捲 */
+  #maModal .chips-inner,#revModal .chips-inner{--bg:#f6f3ee;--panel:#fffdf9;--panel-2:#f4eee3;--line:#e6dbc9;--text:#2d241b;--muted:#7c6f60;--up:#b3261e;--down:#0f7b5a;--accent:#a63a2b;
+    background:#f6f3ee;color:var(--text);border:1px solid #d8ccb8;width:min(920px,96vw);padding:20px 26px 26px;box-shadow:0 14px 44px rgba(40,25,5,.45);letter-spacing:.02em;}
+  #maModal .chips-head,#revModal .chips-head{background:transparent;color:var(--text);padding:0;border-radius:0;margin-bottom:4px;align-items:flex-start;}
+  #maModal .chips-head>div:first-child::before,#revModal .chips-head>div:first-child::before{display:inline-block;border:1px solid #b3261e;color:#b3261e;background:#fffdf9;padding:6px 18px;font-size:12.5px;letter-spacing:.3em;margin-bottom:14px;}
+  #maModal .chips-head>div:first-child::before{content:'均線分數排行';}
+  #revModal .chips-head>div:first-child::before{content:'營收・族群分類';}
+  #maModal .chips-title,#revModal .chips-title{font-family:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;font-size:32px;font-weight:900;color:#a63a2b;line-height:1.25;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;}
+  #maModal .chips-title button,#revModal .chips-title button,#maModal .chips-title a,#revModal .chips-title a{font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;font-size:13px;letter-spacing:0;}
+  #maModal .chips-sub,#revModal .chips-sub{color:var(--text);font-size:13.5px;margin-top:8px;}
+  #maModal .cm-icon-btn,#revModal .cm-icon-btn{background:#fffdf9;color:#2d241b;border-color:#d8ccb8;}
+  #maModal .ma-stamp,#revModal .rv-meta{font-size:12.5px;color:var(--text);margin:8px 0 14px;}
+  #maModal .ma-note{display:block;background:#fbf4de;border:1px solid #e8d9a8;border-radius:999px;padding:9px 20px;font-size:13px;margin:0 0 16px;color:var(--text);}
+  #maModal .ma-note b{color:#a63a2b;}
+  #maModal .ma-intro{background:#fffdf9;border:1px solid var(--line);border-left:4px solid #b3261e;border-radius:4px;padding:16px 24px;font-size:14px;line-height:2;margin:0 0 18px;}
+  #maModal .ma-intro b{color:#a63a2b;}
+  #maModal .ma-sec{background:transparent;border:0;border-radius:0;padding:0;margin:20px 0;}
+  #maModal .ma-sec>h3{font-family:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;font-size:20px;font-weight:900;border-left:4px solid #b3261e;padding-left:10px;line-height:1.3;}
+  #maModal .ma-sec>h3 small{font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;}
+  #maModal #maQSec{margin-top:0;}
+  #maModal #maQSec>h3{display:none;}
+  #maModal .ma-q input{background:#fffdf9;color:var(--text);border:1px solid #d8ccb8;border-radius:6px;padding:12px 14px;font-size:18px;width:min(560px,100%);}
+  #maModal .ma-q button{background:#1f1a14;color:#fff;border-radius:6px;padding:13px 22px;font-size:15px;font-weight:800;}
+  #maModal .ma-tools b{font-family:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;font-size:18px;color:#a63a2b;}
+  #maModal .ma-wrap{background:#fffdf9;border:1px solid var(--line);border-radius:14px;padding:6px 8px 2px;}
+  #maModal .ma-table td,#maModal .ma-table th{letter-spacing:.04em;}
+  #maModal .ma-bias.up{color:#b3261e;} #maModal .ma-bias.dn{color:#0f7b5a;}
+  #maModal .ma-vbtn{background:#fffdf9;}
+  #maModal .ma-vbtn.on{background:#f5b301;border-color:#f5b301;}
+  #maModal .ma-tools select,#maModal .ma-sec h3 select{background:#fffdf9;color:var(--text);border:1px solid #d8ccb8;border-radius:6px;}
+  #revModal .rv-top{margin:2px 0 2px;}
+  #revModal .rv-month{font-size:13px;color:var(--muted);}
+  #revModal .rv-sec{background:#fffdf9;border:1px solid var(--line);border-radius:16px;padding:16px 20px;margin:16px 0;}
+  #revModal .rv-h{font-family:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;font-size:20px;font-weight:900;color:#2d241b;}
+  #revModal .rv-h small{font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;}
+  #revModal .rv-grp{background:#fffdf9;border-radius:14px;box-shadow:0 1px 3px rgba(80,55,20,.08);}
+  #revModal .rv-card{width:104px;border-radius:9px;padding:5px 8px;}
+  #revModal .rv-card .y{font-size:22px;}
+  #revModal .rv-cards{max-width:456px;}
+  #revModal .rv-card.t0,#revModal .rv-card.tneg{background:#fffdf9;color:var(--text);}
+  #revModal .rv-ctl select,#revModal .rv-ctl input,#revModal .jl-q input{background:#fffdf9;color:var(--text);border:1px solid #d8ccb8;border-radius:8px;}
+  #revModal .rv-mbtn{background:#fffdf9;}
+  #revModal .rv-mbtn.active{background:#b91c1c;border-color:#b91c1c;color:#fff;}
+  #revModal .rv-table th{background:#efe6d6;color:#5a4a36;}
+  #revModal .rv-table th.pink{background:#f9d5e5;color:#9d174d;} #revModal .rv-table th.mint{background:#cfeedd;color:#166534;}
+  #revModal .rv-full th{background:#fffdf9;color:var(--muted);font-weight:700;border-bottom:1px solid var(--line);}
+  #revModal .rv-tabs button{background:#fffdf9;}
+  #revModal .rv-tabs button.active{background:#b91c1c;color:#fff;}
+  #revModal .rv-board{background:#fffdf9;}
+  #revModal .rv-full th,#revModal .rv-full td{padding:6px 5px;letter-spacing:0;font-size:12.5px;}
+  #maModal .ma-table .code{color:#a63a2b;}
+  #revModal .rv-foot{color:var(--muted);}
+  #revModal .rv-today .rv-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:8px 0;}
+  #revModal .rv-today .rv-box{border-radius:14px;padding:12px 14px;min-height:96px;}
+  #revModal .rv-today .rv-box.turtle{background:#d9f2e3;} #revModal .rv-today .rv-box.rocket{background:#fde0e6;}
+  #revModal .rv-today .rv-box h4{margin:0 0 6px;font-size:15px;font-weight:800;}
+  #revModal .rv-today .rv-hist{background:rgba(255,255,255,.7);border-radius:8px;padding:4px 10px;font-size:12px;margin:0 0 8px;line-height:1.6;}
+  #revModal .rv-today .rv-none{font-size:14px;color:var(--muted);padding:4px 2px;}
+  #revModal .rv-today .rv-cards{max-width:none;}
+  @media (max-width: 720px){ #revModal .rv-today .rv-two{grid-template-columns:1fr;} #revModal .rv-cards{max-width:none;} }
+  @media (max-width: 640px){ #maModal .chips-inner,#revModal .chips-inner{padding:14px 12px 22px;} #maModal .chips-title,#revModal .chips-title{font-size:25px;} #maModal .ma-intro{padding:12px 14px;} #revModal .rv-sec{padding:12px 12px;} }
+
   @media(max-width:760px){
     .rv-grp{grid-template-columns:1fr;}
     .rv-med{text-align:left;}
@@ -3625,7 +3687,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="chips-head">
       <div>
         <div class="chips-title">每月營收成長榜</div>
-        <div class="chips-sub">族群分析、多觀察（自選股）、火箭烏龜（營收公布後隔日漲跌統計）、懸賞榜、全部公司總表。點股票看該股每月營收。</div>
+        <div class="chips-sub">族群分析、多觀察、火箭烏龜（營收公布後隔日漲跌）、懸賞榜、全部公司總表；點股票看該股每月營收。</div>
       </div>
       <button class="cm-icon-btn" id="revClose" aria-label="關閉">✕</button>
     </div>
@@ -3637,8 +3699,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   <div class="chips-inner" id="maInner">
     <div class="chips-head">
       <div>
-        <div class="chips-title">均線分數排行　滿分 15</div>
-        <div class="chips-sub">一檔一檔給分，分數高的排前面。個股分數前 60、前十名常客、族群分數前十大；點股號／股名開K線圖，點族群名查整個族群。</div>
+        <div class="chips-title">均線分數排行 滿分 15</div>
+        <div class="chips-sub">一檔一檔給分，分數高的排前面。</div>
       </div>
       <button class="cm-icon-btn" id="maClose" aria-label="關閉">✕</button>
     </div>
@@ -15440,7 +15502,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 23:55:50';
+const BUILD_STAMP = '2026-10-24 00:20:47';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20532,7 +20594,7 @@ const RV_GROUP_INDEX = (() => {
   return m;
 })();
 const rvState = { data: null, loading: false, error: null, query: null, queryCode: '', queryLoading: false,
-  minN: 3, topN: 20, day: '', boardDay: null, boardMin: 30, boardVol: 0, tab: 'pos', market: 'all', group: 'all', search: '',
+  minN: 3, topN: 20, day: '', todayDay: null, todayGrp: false, boardDay: null, boardMin: 30, boardVol: 0, tab: 'pos', market: 'all', group: 'all', search: '',
   show: 100, sortKey: 'yoy', sortDir: -1, rtOpen: true, open: {}, expand: {}, mark: '' };
 // 2026-10-09 使用者：查詢旁邊加「只看火箭」「只看烏龜」兩顆篩選（族群分析、多觀察、懸賞榜、總表都套用；全市場統計不變）
 const RV_MARK_LABEL = { accel: '🚀 火箭', decel: '🐢 烏龜' };
@@ -20708,6 +20770,29 @@ function rvDayOptions(cur, allLabel){
 }
 function rvSelect(key, options, cur){
   return '<select data-rv-set="' + key + '">' + options.map(([v, label]) => '<option value="' + v + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + label + '</option>').join('') + '</select>';
+}
+// 今日火箭烏龜榜（2026-10-23 使用者：照老師版面，放在查個股營收下面）：選的那天新公布的營收裡，年增比上個月多／少 10 個百分點以上的火箭／烏龜；
+// 老師用「5 日均成交值 > 1 億」濾掉小股，我們只有當天成交量，改用當日成交值（收盤價 × 成交張數）> 1 億。歷史＝本站累積的「公布後隔日」平均漲跌（2026/09 營收起）。
+function rvTodayHtml(){
+  const d = rvState.data;
+  const days = d.announceDays || [];
+  const day = rvState.todayDay && days.includes(rvState.todayDay) ? rvState.todayDay : d.latestDay;
+  const val = (o) => (o.close > 0 && o.volume > 0 ? o.close * o.volume * 1000 / 1e8 : 0);
+  const pool = rvRows().filter((o) => o.known && o.announce === day && val(o) > 1 && (!rvState.todayGrp || o.groups.length));
+  const rocket = pool.filter((o) => o.accel).sort((a, b) => b.yoy - a.yoy), turtle = pool.filter((o) => o.decel).sort((a, b) => a.yoy - b.yoy);
+  const hist = (k) => {
+    const t = { n: 0, up: 0, sum: 0 };
+    (d.history || []).forEach((m) => { if (m[k] && m[k].n){ t.n += m[k].n; t.up += m[k].up; t.sum += m[k].sum; } });
+    return t.n ? '<div class="rv-hist">📚 歷史：隔日 <b class="' + rvCls(t.sum / t.n) + '">' + rvPct(t.sum / t.n, 1) + '</b>（' + Math.round(t.up / t.n * 100) + '% 漲・' + t.n + ' 檔）</div>' : '';
+  };
+  const box = (cls, title, list, k) => '<div class="rv-box ' + cls + '"><h4>' + title + ' ' + list.length + ' 檔</h4>' + hist(k)
+    + (list.length ? '<div class="rv-cards">' + list.map((o) => rvCard(o)).join('') + '</div>' : '<div class="rv-none">無</div>') + '</div>';
+  const opts = days.slice().reverse().map((x) => '<option value="' + x + '"' + (x === day ? ' selected' : '') + '>' + rvMd(x) + ' 公布</option>').join('');
+  return '<div class="rv-sec rv-today"><div class="rv-h">🐢🚀 今日火箭烏龜榜 <small>依 ' + rvMd(day) + ' 公布・' + rvMonthLabel(d.month) + ' 營收・當日成交值 > 1 億・隔日 = 公布後下一個交易日漲跌</small></div>'
+    + '<div class="rv-ctl" style="justify-content:flex-end">批次 <select data-rv-set="todayDay">' + opts + '</select>'
+    + ' <button type="button" class="rv-btn' + (rvState.todayGrp ? '' : ' ghost') + '" data-rv-today-grp>有族群／自選</button></div>'
+    + '<div class="rv-two">' + box('turtle', '🐢 烏龜', turtle, 'decel') + box('rocket', '🚀 火箭', rocket, 'accel') + '</div>'
+    + '<div class="rv-note">🐢／🚀 = 年增比上個月少／多 10 個百分點以上；📚 歷史 = 本站從 2026/09 營收起累積的同類股公布後隔日平均漲跌（括號 = 上漲比例、檔數），只是過去統計、不保證；有族群／自選 = 只列在本站族群裡的股票。</div></div>';
 }
 function rvIndustryHtml(groups){
   const d = rvState.data;
@@ -20973,10 +21058,10 @@ function renderRevenue(){
   const pub = d.published || {};
   const pubText = pub.sii0 || pub.otc0 || Object.values(pub)[0] || '';
   const m = d.month;
-  const head = '<div class="rv-top"><span class="chips-title" style="font-size:22px">📈 每月營收成長榜</span><span class="rv-month">' + m.slice(0, 4) + ' 年 ' + Number(m.slice(5, 7)) + ' 月營收（隔月 1~10 號陸續公布）</span></div>'
+  const head = '<div class="rv-top"><span class="rv-month">' + m.slice(0, 4) + ' 年 ' + Number(m.slice(5, 7)) + ' 月營收（隔月 1~10 號陸續公布）</span></div>'
     + '<div class="rv-meta">已公布 <b>' + (c.published || 0).toLocaleString() + '</b> 檔（上市 ' + (c.tse || 0) + ' / 上櫃 ' + (c.otc || 0) + '）・年增為正 <b>' + (c.positive || 0).toLocaleString() + '</b> 檔'
     + '・最後更新 ' + rdEsc(jlTime(d.fetched || d.updatedAt)) + (pubText ? '・觀測站出表 ' + rdEsc(pubText) : '')
-    + (rvState.loading ? '・更新中…' : '') + '</div><div class="rv-months">' + rvMonthButtons() + '</div>'
+    + (rvState.loading ? '・更新中…' : '') + '</div>'
     + (rvState.error ? '<div class="race-note">更新失敗（' + rdEsc(rvState.error) + '），先顯示上一次的資料</div>' : '');
   const query = '<div class="rv-sec"><div class="rv-h">🔎 查個股營收 <small>每個月的年增、月增、累計年增、公布日、公布隔日漲跌</small></div>'
     + '<div class="jl-q rv-qrow"><input id="rvQ" inputmode="numeric" placeholder="股號，例 2451" value="' + rdEsc(rvState.queryCode) + '"><button type="button" data-rv-go>查詢</button>'
@@ -20989,7 +21074,8 @@ function renderRevenue(){
   const w = rvWatchGroups();
   const foot = '<div class="rv-foot">資料來源：公開資訊觀測站「每月營業收入彙總表」（上市、上櫃，含 KY），每天三次（12:30／18:30／23:30）更新；年增 / 月增 / 累計年增照官方公布數字。'
     + '公布日為我們第一次抓到該公司資料的日期（2026/09 營收從 10/09 開始記，之前就公布的標「前」）；收盤與成交量為證交所 / 櫃買開放資料。本頁整理公開資訊供參考，<b>不構成任何投資建議</b>，投資有風險，盈虧自負。</div>';
-  body.innerHTML = head + query + rvIndustryHtml(groups) + rvWatchHtml(w) + rvRocketHtml(shown, w) + rvBoardHtml() + rvTableHtml() + foot;
+  // 版面順序照老師：查個股營收 → 今日火箭烏龜榜 → 族群分析 → 多觀察 → 火箭烏龜數據分析 → 懸賞榜 → 總表（月份按鈕在總表裡）
+  body.innerHTML = head + query + rvTodayHtml() + rvIndustryHtml(groups) + rvWatchHtml(w) + rvRocketHtml(shown, w) + rvBoardHtml() + rvTableHtml() + foot;
   document.getElementById('revInner').scrollTop = scrollTop;
 }
 function rvRenderTable(){
@@ -21018,6 +21104,7 @@ document.getElementById('revBody').addEventListener('click', (e) => {
   const mark = t.closest('[data-rv-mark]');
   if (mark){ rvState.mark = rvState.mark === mark.dataset.rvMark ? '' : mark.dataset.rvMark; renderRevenue(); return; }
   if (t.closest('[data-rv-fold]')){ rvState.rtOpen = !rvState.rtOpen; renderRevenue(); return; }
+  if (t.closest('[data-rv-today-grp]')){ rvState.todayGrp = !rvState.todayGrp; renderRevenue(); return; }
   const open = t.closest('[data-rv-open]');
   if (open){ const k = open.dataset.rvOpen; rvState.open[k] = !rvState.open[k]; renderRevenue(); return; }
   const expand = t.closest('[data-rv-expand]');
@@ -21052,6 +21139,7 @@ document.getElementById('revBody').addEventListener('change', (e) => {
   const key = el.dataset.rvSet;
   const numeric = ['minN', 'topN', 'boardMin', 'boardVol', 'show'];
   rvState[key] = numeric.includes(key) ? Number(el.value) : el.value;
+  if (key === 'todayDay') rvState.todayDay = el.value || null;
   if (['market', 'group', 'show'].includes(key)) rvRenderTable(); else renderRevenue();
 });
 document.getElementById('revBody').addEventListener('input', (e) => {
@@ -24293,6 +24381,10 @@ async function maQuery(v){
 function maLamps(arr, windows, cls){
   return '<span class="' + cls + '">' + windows.map((w, i) => '<i class="' + (arr && arr[i] ? 'on' : '') + '">' + w + '</i>').join('') + '</span>';
 }
+function maBiasCell(v){
+  if (v === null || v === undefined) return '<td>—</td>';
+  return '<td class="ma-bias ' + (v > 0 ? 'up' : v < 0 ? 'dn' : '') + '">' + (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%</td>';
+}
 function maBall(n){
   if (n === null || n === undefined) return '—';
   return '<span class="ma-ball ' + (n >= 15 * 0.75 ? 'hi' : (n >= 15 * 0.4 ? 'md' : 'lo')) + '">' + n + '</span>';
@@ -24319,7 +24411,7 @@ function maStockTable(rows, hl, withPrev){
   let h = '<div class="ma-wrap"><table class="ma-table"><thead><tr><th></th>' + sortable('code', '股號') + '<th>股名</th>' +
     sortable('sum', '總分') + sortable('total', '分數') + '<th title="排列加分：MA20>MA60、MA60>MA120、MA120>MA350 各 1 分">排列</th>' +
     '<th title="上排：站上 5/10/20/60/120/240 日均線（金色）；下排：創 5/10/20/60/120/360 日新高（紅色，收盤口徑）">均線<small>下排 創新高</small></th>' +
-    sortable('close', '收盤') + '<th>族群</th>' +
+    sortable('close', '收盤') + (rows.some((r) => r.b20 != null) ? '<th title="收盤價 ÷ 20 日均線 − 1">月乖離</th><th title="收盤價 ÷ 60 日均線 − 1">季乖離</th>' : '') + '<th>族群</th>' +
     (withPrev ? '<th>昨天名次<small>' + maMd(maState.data && maState.data.prevDate) + '</small></th><th title="連續幾個交易日都在前 60 名">連續上榜</th>' : '') +
     '</tr></thead><tbody>';
   rows.forEach((r, i) => {
@@ -24329,7 +24421,7 @@ function maStockTable(rows, hl, withPrev){
       '<td>' + maBall(r.sum) + '</td><td>' + r.total + '</td>' +
       '<td class="ma-ex' + (r.extra ? ' on' : '') + '">' + (r.extra ? '+' + r.extra : '0') + '</td>' +
       '<td><span class="ma-lamps">' + maLamps(r.ma, MA_W, 'ma-on') + maLamps(r.hi, MA_HW, 'ma-hi') + '</span></td>' +
-      '<td>' + maNum(r.close) + '</td><td>' + maGroupLinks(r.grp) + '</td>' +
+      '<td>' + maNum(r.close) + '</td>' + (rows.some((x) => x.b20 != null) ? maBiasCell(r.b20) + maBiasCell(r.b60) : '') + '<td>' + maGroupLinks(r.grp) + '</td>' +
       (withPrev ? maPrevCell(r.prev, r._rk || (i + 1)) + maStreakCell(r) : '') + '</tr>';
   });
   return h + '</tbody></table></div>';
@@ -24410,8 +24502,8 @@ function maHitsHtml(){
 }
 function maQueryHtml(){
   let h = '<div class="ma-sec" id="maQSec"><h3>查詢（均線分數）</h3><div class="ma-q"><input id="maQ" placeholder="輸入股號或族群名，例 2330、記憶體" value="' + wlEsc(maState.qText) + '">' +
-    '<button type="button" data-ma-go="1">查詢</button></div>' +
-    '<div class="ma-legend">輸入股號：列出那檔所屬族群的全部成員（依分數排，查的那檔標色）；輸入族群名：列出那個族群。分數是最近一個收盤的，盤中不會變。</div>';
+    '<button type="button" data-ma-go="1">查詢(均線分數)</button></div>' +
+    '<div class="ma-legend">輸入股號或族群名按 Enter：輸入股號列出那檔所屬族群的全部成員，輸入族群名列出那個族群（依分數排序，查的那檔標色）。分數是最近一個收盤的，盤中不會變。點股號／股名開K線圖，點族群名查整個族群。</div>';
   if (maState.qLoading) h += '<div class="ma-legend">查詢中…</div>';
   else if (maState.qError) h += '<div class="ma-err">' + wlEsc(maState.qError) + '</div>';
   else if (maState.q){
@@ -24446,7 +24538,7 @@ function renderMa(){
   body.innerHTML =
     '<div class="ma-stamp">資料日 ' + d.date + '・族群成員 ' + d.n + ' 檔已計分' + (d.updated ? '・更新 ' + String(d.updated).slice(0, 16).replace('T', ' ') : '') +
       (maState.loading ? '・讀取中…' : '') + '</div>' +
-    '<div class="ma-note">🕐 每個交易日收盤、日K進來整表後更新 —— 收完盤才是當天完整的數字；上面「資料日」就是這份分數算到哪一天。</div>' +
+    '<div class="ma-note">🕐 <b>每個交易日收盤後更新一次</b> —— 收完盤才是當天完整的數字。上面那行「資料日」就是這份分數算到哪一天。</div>' +
     '<div class="ma-intro">這頁幫每一檔股票<b>打分數，滿分 15 分</b>。分數越高，代表這檔股票<b>現在的位置越強、走勢站得越穩</b>；分數低不代表不好，多半是還在整理、或是已經走弱。分數講的是「<b>位置強不強</b>」，不是買賣點。</div>' +
     maQueryHtml() +
     '<div class="ma-sec"><h3>個股分數前 ' + (d.top || 60) + ' <small>全部族群成員，總分高→低（點欄位可以自己重排）</small><span class="ma-pill">選股日期 ' + maMd(d.date) + '</span>' + dateSel + '</h3>' +
