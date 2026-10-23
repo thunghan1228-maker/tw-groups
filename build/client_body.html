@@ -513,7 +513,7 @@
   /* 2026-10-24 使用者：指數均線分數（櫃買分數、加權分數）：均線分數排行右上角小卡、首頁櫃買那格、加權指數分析；算法跟個股一樣（滿分 15），近 3 日平均、分水嶺 6 */
   .idx-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;white-space:nowrap;color:var(--text);}
   .idx-pill b{font-size:13.5px;} .idx-pill .idx-arrow{opacity:.55;font-weight:600;} .idx-pill b.idx-day{font-size:15px;}
-  .idx-tag{display:inline-block;border-radius:999px;padding:0 9px;font-weight:800;font-size:12px;color:#fff;} .idx-tag.long{background:#dc2626;} .idx-tag.short{background:#16a34a;}
+  .idx-tag{display:inline-block;border-radius:999px;padding:0 9px;font-weight:800;font-size:12px;color:#fff;} .idx-tag.long{background:#dc2626;} .idx-tag.short{background:#16a34a;} .idx-tag.mid{background:#78716c;}
   .ms-lines .idx-line{margin-top:2px;}
   .tx-chip .tx-l3{display:block;font-size:12px;font-weight:700;margin-top:1px;white-space:nowrap;}
   .tx-pop-idx{margin:6px 0 2px;padding:6px 10px;border-radius:8px;background:var(--panel-2);font-size:13px;line-height:1.7;}
@@ -524,7 +524,14 @@
   .idx-card .idx-big{font-family:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;font-weight:900;color:#a63a2b;line-height:1.1;}
   .idx-card .idx-big.l{font-size:30px;} .idx-card .idx-big.s{font-size:23px;}
   .idx-card .idx-tag{background:transparent;border:1px solid;padding:0 9px;} .idx-card .idx-tag.long{color:#b3261e;border-color:#e8a29d;background:#fdecea;} .idx-card .idx-tag.short{color:#0f7b5a;border-color:#9fd8c3;background:#e6f6ef;}
+  .idx-card .idx-tag.mid{color:#57534e;border-color:#d6d3d1;background:#f5f5f4;}
   .idx-card .idx-sub{font-size:12px;color:#5b4f40;}
+  .idx-table{margin:8px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px 12px;font-size:13px;color:var(--text);}
+  .idx-table .idx-th{font-weight:800;margin-bottom:6px;} .idx-table .idx-th:before{content:'';display:inline-block;width:9px;height:18px;border-radius:4px;background:#5b3fd6;vertical-align:-3px;margin-right:8px;}
+  .idx-table table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;} .idx-table th{background:#5b3fd6;color:#fff;padding:6px 10px;font-weight:700;text-align:right;} .idx-table th:first-child{border-radius:8px 0 0 8px;} .idx-table th:last-child{border-radius:0 8px 8px 0;}
+  .idx-table td{padding:6px 10px;text-align:right;} .idx-table td:first-child{text-align:left;} .idx-table tbody tr:nth-child(even) td{background:rgba(120,100,160,.10);}
+  .idx-table td.above{color:var(--up);font-weight:700;} .idx-table td.below{color:var(--down);font-weight:700;} .idx-table td.sc{color:#5b3fd6;font-weight:800;font-size:15px;}
+  .idx-table .idx-note{font-size:11.5px;color:var(--muted);margin-top:6px;}
   .stock-search-bar{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex:0 1 220px;max-width:240px;}
   .stock-search-bar input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 8px;font-size:13px;font-family:inherit;}
   .stock-search-bar input:focus{outline:2px solid var(--accent);outline-offset:1px;}
@@ -24109,9 +24116,9 @@ async function idxScoreLoad(force){
 }
 const idxX = (k) => (IDXS.data && IDXS.data.indexes && IDXS.data.indexes[k]) || null;
 const idxMd2 = (iso) => String(iso || '').slice(5).replace('-', '/');
-const idxTag = (c) => '<span class="idx-tag ' + (c.label === '多' ? 'long' : 'short') + '">' + c.label + '</span>';
+const idxTag = (c) => '<span class="idx-tag ' + (c.label === '多' ? 'long' : c.label === '空' ? 'short' : 'mid') + '">' + c.label + '</span>';
 function idxTip(x){
-  return x.name + '分數（指數的均線分數，滿分 15：站上 5／10／20／60／120／240 日線各 1 分＋創 5／10／20／60／120／360 日新高各 1 分＋20>60、60>120、120>350 排列各 1 分；近 3 日平均，分水嶺 ' + IDXS.data.threshold + ' 分，≥ 多、< 空）\n'
+  return x.name + '分數（指數的均線分數，滿分 15：站上 5／10／20／60／120／240 日線各 1 分＋創 5／10／20／60／120／360 日新高各 1 分＋20>60、60>120、120>350 排列各 1 分；近 3 日平均，分水嶺 ' + IDXS.data.threshold + ' 分：超過多、低於空、剛好 ' + IDXS.data.threshold + ' 平）\n'
     + idxMd2(x.asOf) + ' 當天 ' + x.daily[x.daily.length - 1].score + ' 分；近幾天日分數：' + x.daily.map((r) => idxMd2(r.date) + ' ' + r.score).join('、') + '\n今天＝' + idxMd2(x.today.basis) + ' 收盤算的、明天＝' + idxMd2(x.next.basis) + ' 收盤算的';
 }
 function idxCardHtml(k){
@@ -24120,13 +24127,28 @@ function idxCardHtml(k){
   return '<div class="idx-card" title="' + wlEsc(idxTip(x)) + '"><div class="idx-h">' + x.name + '分數</div>'
     + '<div class="idx-row"><span>今天</span><span class="idx-big l">' + x.today.avg.toFixed(2) + '</span><span>分</span>' + idxTag(x.today) + '</div>'
     + '<div class="idx-row"><span>明天</span><span class="idx-big s">' + x.next.avg.toFixed(2) + '</span><span>分</span>' + idxTag(x.next) + '</div>'
-    + '<div class="idx-sub">多空分水嶺 ' + IDXS.data.threshold + ' 分（看 3 日平均）</div><div class="idx-sub"><b>' + idxMd2(x.asOf) + ' 當天 ' + x.daily[x.daily.length - 1].score + ' 分</b>（站上 ' + x.daily[x.daily.length - 1].ma + '／新高 ' + x.daily[x.daily.length - 1].hi + '／排列 ' + x.daily[x.daily.length - 1].align + '）</div><div class="idx-sub">' + idxMd2(x.next.basis) + ' 收盤算出「明天」那格</div></div>';
+    + '<div class="idx-sub">多空分水嶺 ' + IDXS.data.threshold + ' 分（看 3 日平均；剛好 6 是平）</div><div class="idx-sub"><b>' + idxMd2(x.asOf) + ' 當天 ' + x.daily[x.daily.length - 1].score + ' 分</b> ' + idxTag(x.daily[x.daily.length - 1]) + '（站上 ' + x.daily[x.daily.length - 1].ma + '／新高 ' + x.daily[x.daily.length - 1].hi + '／排列 ' + x.daily[x.daily.length - 1].align + '）</div><div class="idx-sub">' + idxMd2(x.next.basis) + ' 收盤算出「明天」那格</div></div>';
 }
 function idxPillHtml(k, compact){
   const x = idxX(k);
   if (!x || !x.next) return '';
   const d = x.daily[x.daily.length - 1];
-  return '<span class="idx-pill" title="' + wlEsc(idxTip(x)) + '">' + x.name + '分數 <b class="idx-day">' + d.score + '</b><span class="idx-arrow">｜3日均</span>' + (compact ? '' : '<b>' + x.today.avg.toFixed(2) + '</b><span class="idx-arrow">→</span>') + '<b>' + x.next.avg.toFixed(2) + '</b> ' + idxTag(x.next) + '</span>';
+  return '<span class="idx-pill" title="' + wlEsc(idxTip(x)) + '">' + x.name + '分數 <b class="idx-day">' + d.score + '</b> ' + idxTag(d) + '<span class="idx-arrow">｜3日均</span>' + (compact ? '' : '<b>' + x.today.avg.toFixed(2) + '</b><span class="idx-arrow">→</span>') + '<b>' + x.next.avg.toFixed(2) + '</b></span>';
+}
+// 指數對照表（2026-10-24 使用者：老師影片「10/22 收盤 vs 月／季／半年線」）：加權、櫃買的收盤、20／60／120 日線、距高點（近半年盤中最高）、均線分數；紅＝收盤在線上、綠＝在線下
+function idxTableHtml(){
+  const a = idxX('taiex'), b = idxX('otc');
+  const cols = [a, b].filter((x) => x && x.table);
+  if (!cols.length) return '';
+  const fmt = (x, v, kind) => v == null ? '—' : x.name === '加權' ? Math.round(v).toLocaleString('en-US') : Number(v).toFixed(kind === 'close' ? 2 : 1);
+  const line = (label, key) => '<tr><td>' + label + '</td>' + cols.map((x) => { const v = x.table[key]; return '<td class="' + (v == null ? '' : x.table.close >= v ? 'above' : 'below') + '">' + fmt(x, v, key) + '</td>'; }).join('') + '</tr>';
+  const md = (iso) => idxMd2(iso);
+  return '<div class="idx-table"><div class="idx-th">' + md(cols[0].asOf) + ' 收盤 vs 月 / 季 / 半年線</div><table><thead><tr><th></th>' + cols.map((x) => '<th>' + x.name + '</th>').join('') + '</tr></thead><tbody>'
+    + '<tr><td>收盤</td>' + cols.map((x) => '<td>' + fmt(x, x.table.close, 'close') + '</td>').join('') + '</tr>'
+    + line('月線 20', 'ma20') + line('季線 60', 'ma60') + line('半年線 120', 'ma120')
+    + '<tr><td>距高點</td>' + cols.map((x) => '<td title="近半年（120 個交易日）' + (x.table.highIntraday ? '盤中最高 ' : '收盤最高 ') + fmt(x, x.table.high, 'close') + '（' + md(x.table.highDate) + '）">' + (x.table.fromHigh > 0 ? '+' : '') + x.table.fromHigh.toFixed(1) + '%</td>').join('') + '</tr>'
+    + '<tr><td>均線分數</td>' + cols.map((x) => '<td class="sc">' + x.daily[x.daily.length - 1].score + '</td>').join('') + '</tr></tbody></table>'
+    + '<div class="idx-note">紅 = 收盤在線上・綠 = 在線下；距高點＝近半年最高點；均線分數＝當天（滿分 15）</div></div>';
 }
 function idxPillInject(){   // 首頁櫃買那格（renderOtcStrengthWidget 每次會重寫，所以寫完要補一次）
   const lines = document.querySelector('#otcStrengthBox .ms-lines');
@@ -24139,6 +24161,8 @@ function idxPillInject(){   // 首頁櫃買那格（renderOtcStrengthWidget 每�
 function idxScoreRefresh(){
   const slot = document.getElementById('maIdxSlot');
   if (slot) slot.innerHTML = idxCardHtml('otc') + idxCardHtml('taiex');
+  const tb = document.getElementById('maIdxTable');
+  if (tb) tb.innerHTML = idxTableHtml();
   idxPillInject();
   if (typeof renderTaiexChip === 'function') renderTaiexChip();
 }
@@ -24229,8 +24253,8 @@ function taiexAnalyze(fu, fc){
 function taiexHtml(a){
   const li = (it) => '<li>' + it.t + (it.sub && it.sub.length ? '<ul>' + it.sub.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + '</li>';
   return '<span class="tx-pin">' + (TAIEX.pinned ? '已固定・再按一下或按 Esc 關閉' : '按一下固定') + '</span><h3>加權指數（' + a.title + '）</h3><div class="tx-meta">' + txMd(a.asOf) + ' 收盤資料・每天收盤後（晚上 21:40 以後）自動更新・規則自動判斷</div>' +
-    (idxX('taiex') ? '<div class="tx-pop-idx"><b>加權分數</b>（均線分數，滿分 15）：<b>' + idxMd2(idxX('taiex').asOf) + ' 當天 ' + idxX('taiex').daily[idxX('taiex').daily.length - 1].score + ' 分</b>；近 3 日平均（分水嶺 ' + IDXS.data.threshold + '，≥ 多、< 空）：今天 <b>' + idxX('taiex').today.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').today) + '　明天 <b>' + idxX('taiex').next.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').next) +
-      '<br><small>近幾天日分數：' + idxX('taiex').daily.map((r) => idxMd2(r.date) + ' ' + r.score + '（站上 ' + r.ma + '／新高 ' + r.hi + '／排列 ' + r.align + '）').join('、') + '</small></div>' : '') +
+    (idxX('taiex') ? '<div class="tx-pop-idx"><b>加權分數</b>（均線分數，滿分 15）：<b>' + idxMd2(idxX('taiex').asOf) + ' 當天 ' + idxX('taiex').daily[idxX('taiex').daily.length - 1].score + ' 分</b> ' + idxTag(idxX('taiex').daily[idxX('taiex').daily.length - 1]) + '；近 3 日平均（分水嶺 ' + IDXS.data.threshold + '：超過多、低於空、剛好 6 平）：今天 <b>' + idxX('taiex').today.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').today) + '　明天 <b>' + idxX('taiex').next.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').next) +
+      '<br><small>近幾天日分數：' + idxX('taiex').daily.map((r) => idxMd2(r.date) + ' ' + r.score + '（站上 ' + r.ma + '／新高 ' + r.hi + '／排列 ' + r.align + '）').join('、') + '</small></div>' + idxTableHtml() : '') +
     a.sec.map((x) => '<div class="tx-sec">' + x.h + '</div><ul>' + x.items.map(li).join('') + '</ul>').join('') +
     '<div class="tx-foot">這是依均線、融資水位、外資籌碼自動整理的位置與條件，形態（W 底、頭肩底）要自己看圖確認；不是買賣建議。資料：證交所加權指數、融資融券統計、三大法人（FinMind 公開資料整理）。</div>';
 }
@@ -24533,6 +24557,7 @@ function renderMa(){
       (maState.loading ? '・讀取中…' : '') + '</div>' +
     '<div class="ma-note">🕐 <b>每個交易日收盤後更新一次</b> —— 收完盤才是當天完整的數字。上面那行「資料日」就是這份分數算到哪一天。</div>' +
     '<div class="ma-intro">這頁幫每一檔股票<b>打分數，滿分 15 分</b>。分數越高，代表這檔股票<b>現在的位置越強、走勢站得越穩</b>；分數低不代表不好，多半是還在整理、或是已經走弱。分數講的是「<b>位置強不強</b>」，不是買賣點。</div>' +
+    '<div id="maIdxTable">' + idxTableHtml() + '</div>' +
     maQueryHtml() +
     '<div class="ma-sec"><h3>個股分數前 ' + (d.top || 60) + ' <small>全部族群成員，總分高→低（點欄位可以自己重排）</small><span class="ma-pill">選股日期 ' + maMd(d.date) + '</span>' + dateSel + '</h3>' +
     '<div class="ma-tools">排名方式 ' + vb('sum', '依總分') + vb('up', '名次進步') + vb('streak', '連續上榜') + vb('new', '新進榜') + vb('allma', '站上全部均線') +
