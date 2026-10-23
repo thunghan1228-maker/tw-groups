@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-22 23:45:24";
+const BUILD_STAMP = "2026-10-23 09:43:58";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -13940,12 +13940,64 @@ function mvHtml(data){
   if (st.newsError) html += '<div class="muted">新聞讀取失敗：' + wlEsc(st.newsError) + '</div>';
   return html + '<div class="mv-foot">依盤中報價、同族群漲跌、當天新聞標題（Yahoo 股市、鉅亨、公司公告）自動整理，不是 AI 摘要；新聞整理僅供參考，不構成投資建議。</div></div>';
 }
+// ---- 融資斷頭線（2026-10-23 使用者貼老師 10/22「台股融資追蹤・斷頭線就在腳下」）----
+// A 最高點追＝近 20 個交易日盤中最高 × 0.78（上櫃 × 0.65）、B 五日線追＝月高那天的 5 日均價 × 0.78（上櫃 × 0.65）；今收低於斷頭價＝已破，否則差（今收−斷頭價）÷今收。
+// 後端 /api/margin-call 算名單，單檔的在問診資料 stock.margin；老師 10/22 的八檔（南亞科、國巨、聯電…）月高、A、B、差幾 % 都算得一模一樣。
+const mclState = { groups: '被動元件,記憶體,矽晶圓', loaded: '', data: null, loading: false, failedAt: 0, error: '' };
+async function mclEnsure(){
+  const key = mclState.groups;
+  if (mclState.loaded === key && (mclState.data || mclState.loading)) return;
+  if (mclState.loaded === key && mclState.failedAt && Date.now() - mclState.failedAt < 30000) return;
+  mclState.loaded = key; mclState.loading = true; mclState.data = null; mclState.error = '';
+  try {
+    const res = await fetch('/api/margin-call?limit=80&groups=' + encodeURIComponent(key));
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && (data.detail || data.error)) || ('margin-call http ' + res.status));
+    if (mclState.loaded !== key) return;
+    mclState.data = data; mclState.failedAt = 0;
+  } catch (e) {
+    if (mclState.loaded !== key) return;
+    mclState.failedAt = Date.now(); mclState.error = String((e && e.message) || e);
+  } finally {
+    if (mclState.loaded === key) mclState.loading = false;
+  }
+  const modal = document.getElementById('diagModal');
+  if (modal && !modal.hidden) renderDiag();
+}
+function mclLineCell(price, gap, broken){
+  return '<b>' + ckPrice(price) + '</b><div class="dg-sub"' + (broken ? ' style="color:#d9392b;font-weight:700"' : '') + '>' + (broken ? '已破' : '差 ' + Number(gap).toFixed(1) + '%') + '</div>';
+}
+const MCL_RULE = '<div class="sw-rule">口徑：融資借滿 6 成，股價跌 22% 維持率剛好 130%（收追繳令、2 天沒補錢第 3 天強制賣出＝斷頭）。<b>A 最高點追</b>＝近一個月（20 個交易日）盤中最高價 × 0.78（上櫃 × 0.65），最慘的那批人，A 跌破＝斷頭開始；' +
+  '<b>B 五日線追</b>＝月高那天的 5 日均價 × 0.78（上櫃 × 0.65），比較多人的平均成本，B 跌破＝斷頭高峰。今收低於斷頭價＝已破；否則「差 x%」＝（今收 − 斷頭價）÷ 今收；名單照 B 的距離由近到遠排。' +
+  '這是用價格推算的理論值，不是實際的融資資料；老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看被動元件、記憶體、矽晶圓，上面可以改族群（all＝全部族群）。</div>';
+function dgMarginStockHtml(s){
+  const m = s.margin;
+  if (!m) return '<div class="bl-section bl-launch">💥 融資斷頭線</div><div class="race-note">日K不足 24 根，算不出斷頭線</div>';
+  return '<div class="bl-section bl-launch">💥 融資斷頭線・追高的人在哪裡斷頭</div>' +
+    '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">算法</th><th>基準</th><th>斷頭價（×' + m.factor + '）</th><th>今收</th><th class="l">狀態</th></tr></thead><tbody>' +
+    '<tr><td class="l"><b>A 最高點追</b><div class="dg-sub">跌破＝斷頭開始</div></td><td>月高 ' + ckPrice(m.monthHigh) + '<div class="dg-sub">' + swMmdd(m.highDate) + '</div></td><td><b>' + ckPrice(m.a) + '</b></td><td>' + ckPrice(m.close) + '</td><td class="l">' + (m.aBroken ? '<span class="dg-bad">❌ 已破</span>' : '<span class="dg-ok">差 ' + m.aGap.toFixed(1) + '%</span>') + '</td></tr>' +
+    '<tr><td class="l"><b>B 五日線追</b><div class="dg-sub">跌破＝斷頭高峰</div></td><td>五日線 ' + ckPrice(m.ma5) + '<div class="dg-sub">月高那天</div></td><td><b>' + ckPrice(m.b) + '</b></td><td>' + ckPrice(m.close) + '</td><td class="l">' + (m.bBroken ? '<span class="dg-bad">❌ 已破</span>' : '<span class="dg-ok">差 ' + m.bGap.toFixed(1) + '%</span>') + '</td></tr>' +
+    '</tbody></table></div>' + MCL_RULE;
+}
+function dgMarginListHtml(){
+  mclEnsure();
+  const d = mclState.data;
+  const ctl = '<div class="dg-search"><input class="dg-in" id="mclGroups" placeholder="族群名，逗號分隔（all＝全部族群）" value="' + wlEsc(mclState.groups) + '" style="min-width:260px"><button class="chart-tab chips-btn" id="mclRun">查</button></div>';
+  const head = '<div class="bl-section bl-launch">💥 融資斷頭線追蹤' + (d && d.date ? '・' + swMmdd(d.date) + ' 收盤' : '') + '</div>' + ctl;
+  if (!d) return head + '<div class="race-note">' + (mclState.error ? '讀取失敗：' + wlEsc(mclState.error) : '讀取中…') + '</div>';
+  if (d.status !== 'ok') return head + '<div class="race-note">' + wlEsc(d.reason || '還沒有日K資料') + '</div>';
+  const c = d.counts || {};
+  const rows = (d.rows || []).map((r) => '<tr class="dg-link" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
+    '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken) + '</td></tr>').join('');
+  return head + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
+    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th><th>A 月高斷頭</th><th>B 五日線斷頭</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
+}
 function renderDiag(){
   const body = document.getElementById('diagBody');
   ensureDiag();
   let html = dgSearchHtml();
   if (!dgState.code){
-    body.innerHTML = html + '<div class="race-note">打股號按「問診」，一次看那檔的強弱、七科體檢、防守線、同族比較與今天的名單。</div>' + ckRulesHtml(null);
+    body.innerHTML = html + '<div class="race-note">打股號按「問診」，一次看那檔的強弱、七科體檢、防守線、同族比較與今天的名單。</div>' + dgMarginListHtml() + ckRulesHtml(null);
     return;
   }
   const data = dgState.data;
@@ -13965,6 +14017,7 @@ function renderDiag(){
   html += scrStockCardHtml(s.code);
   html += pfIndustryHtml(s.code);   // 2026-10-10 使用者：產業白話＋同業
   html += '<div class="bl-section bl-launch">🛡 防守線・出場與停損依據</div>' + dgDefenseHtml(s.def);
+  html += dgMarginStockHtml(s);   // 2026-10-23 使用者貼老師「斷頭線就在腳下」：這檔追高的人的斷頭價
   // 2026-10-12 使用者：標題旁加按鈕直接開K線圖（5 分K／1 分K／日線）
   const tfBtn = (tf, label) => '<button type="button" class="dg-tf-btn" data-code="' + s.code + '" data-name="' + wlEsc(s.name || '') + '" data-tf="' + tf + '">' + label + '</button>';
   html += '<div class="bl-section bl-brew dg-chart-head"><span>📈 日線圖・' + s.code + ' ' + (s.name || '') + '・K棒＋均線＋明日防守線（近 60 個交易日）</span>' +
@@ -13976,6 +14029,7 @@ function renderDiag(){
   html += dgTopHtml(data);
   html += dgTodayHtml(data);
   html += dgCrossHtml(data);
+  html += dgMarginListHtml();
   body.innerHTML = html + ckRulesHtml(data);
 }
 // ---- 系統選股・條件選股（2026-10-10 使用者：照老師「選股系統」做，跟個股問診合併在同一個面板）----
@@ -14237,6 +14291,7 @@ document.getElementById('diagClose').addEventListener('click', closeDiagPanel);
 document.getElementById('diagModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDiagPanel(); });
 document.getElementById('diagBody').addEventListener('click', (e) => {
   if (e.target.closest('#dgRun')){ dgRun((document.getElementById('dgInput') || {}).value || ''); return; }
+  if (e.target.closest('#mclRun')){ mclState.groups = ((document.getElementById('mclGroups') || {}).value || '').trim() || '被動元件,記憶體,矽晶圓'; mclState.loaded = ''; mclState.failedAt = 0; renderDiag(); return; }
   const mvr = e.target.closest('[data-mv-refresh]');
   if (mvr){ const d = dgState.data; mvLoad(mvr.dataset.mvRefresh, d && d.stock ? d.stock.name || '' : '', true); return; }
   const pfc = e.target.closest('[data-pf-code]');
@@ -14260,13 +14315,16 @@ document.getElementById('diagJump').addEventListener('click', () => {
   if (body) body.scrollIntoView({ block: 'start', behavior: 'smooth' });
   setTimeout(() => { const i = document.getElementById('dgInput'); if (i) i.focus({ preventScroll: true }); }, 450);
 });
-document.getElementById('diagBody').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target && e.target.id === 'dgInput'){ e.preventDefault(); dgRun(e.target.value); } });
+document.getElementById('diagBody').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target && e.target.id === 'dgInput'){ e.preventDefault(); dgRun(e.target.value); }
+  if (e.key === 'Enter' && e.target && e.target.id === 'mclGroups'){ e.preventDefault(); const b = document.getElementById('mclRun'); if (b) b.click(); }
+});
 
 // ---- 版本戳記與自動更新（2026-09-25 使用者：iPhone 加到主畫面的網頁點籌碼排行沒反應，其實是一直跑舊版）----
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-22 23:45:24';
+const BUILD_STAMP = '2026-10-23 09:43:58';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
