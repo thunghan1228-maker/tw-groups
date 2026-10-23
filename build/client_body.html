@@ -505,6 +505,13 @@
   body.cz-mode .signal-controls [data-cz]{padding-left:28px;} body.cz-mode .signal-controls [data-cz]::before{top:50%;transform:translateY(-50%);left:8px;}
   body.cz-mode .tb-btn[data-cz]{outline:1px dashed rgba(255,255,255,.35);outline-offset:-3px;}
   #toolbarBottom.cz-empty:not(.cz-keep){display:none;}
+  /* 首頁那排欄位（當沖多、多觀察、續抱勿追高、30加33加34、發動、188、183、族群漲幅、1+2多、三落空、155、75）與下面的處置欄、說明卡片也能收：
+     沒收的欄平分寬度（--cz-n＝還看得到幾欄）；整欄都收光的那一欄不佔位置；自訂模式下全部照常顯示（收起來的半透明）才點得到 */
+  body.cz-mode .hr-col.cz-off,body.cz-mode .hr-help-card.cz-off{display:block!important;} body.cz-mode .hr-redbox.cz-off,body.cz-mode .hr-jail-col.cz-off{display:flex!important;}
+  body:not(.cz-mode) .cz-unit-off{display:none!important;}
+  body.cz-mode .home-rank4 [data-cz]::before,body.cz-mode .hr-help [data-cz]::before{left:auto;right:6px;top:6px;}
+  body.cz-mode .home-rank4 [data-cz],body.cz-mode .hr-help [data-cz]{outline:1px dashed rgba(124,58,237,.7);outline-offset:-2px;}
+  @media (min-width:1701px){ .home-rank4.cz-fluid{grid-template-columns:repeat(var(--cz-n),minmax(0,1fr));} }
   .cz-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tb-h) + 12px);z-index:130;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;max-width:min(760px,94vw);background:#3b2a73;color:#fff;border:1px solid #7c3aed;border-radius:12px;padding:9px 14px;font-size:12.5px;line-height:1.6;box-shadow:0 8px 28px rgba(0,0,0,.5);}
   .cz-bar[hidden]{display:none;} .cz-bar a{color:#c4b5fd;font-weight:800;text-decoration:underline;cursor:pointer;white-space:nowrap;} .cz-bar #czCount{color:#fde68a;font-weight:700;margin-left:6px;}
   .cz-bar button{background:#7c3aed;color:#fff;border:none;border-radius:999px;padding:5px 16px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;}
@@ -3382,11 +3389,11 @@
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle guide-btn" id="czBtn" title="自訂畫面：選擇哪些按鈕要留著、哪些收起來（畫面比較精簡）">⊙ 自訂</button>  <!-- 2026-10-23 使用者：照莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，勾掉就收起來；全部顯示一鍵復原 -->
+      <button class="alert-toggle guide-btn" id="botBtn">🤖 機器人代碼</button>  <!-- 2026-10-17 使用者：照對方 Line 機器人的代碼（12／22／B／a／70…）做一個輸入代碼的面板 -->
       <button class="alert-toggle guide-btn" id="wgBtn">⭐ 自選族群個股</button>  <!-- 2026-10-23 使用者：盤中訊號旁邊加分頁，輸入個股代號就開一格那檔所屬族群的排行（像機器人代碼），每檔旁邊有融資斷頭價 A／B -->
+      <button class="alert-toggle guide-btn" id="sgtBtn">📶 盤中訊號分頁</button>  <!-- 2026-10-18 使用者：盤中訊號的分頁也做成機器人代碼那樣，點了開一格、一格一格往右排 -->
       <button class="alert-toggle guide-btn" id="remindBtn">🔔 今日提醒</button>  <!-- 2026-10-17 使用者：每天第一次打開跳出警示股提醒（解鎖／連續警告／分盤交易），關掉後這裡再開 -->
       <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>
-      <button class="alert-toggle guide-btn" id="botBtn">🤖 機器人代碼</button>  <!-- 2026-10-17 使用者：照對方 Line 機器人的代碼（12／22／B／a／70…）做一個輸入代碼的面板 -->
-      <button class="alert-toggle guide-btn" id="sgtBtn">📶 盤中訊號分頁</button>  <!-- 2026-10-18 使用者：盤中訊號的分頁也做成機器人代碼那樣，點了開一格、一格一格往右排 -->
       <button class="alert-toggle guide-btn" id="tutBtn">🎬 影片教學</button>  <!-- 2026-10-13 使用者：訊號教學、工具列各功能的影音教學（女聲旁白＋字幕） -->  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照老師新手教學頁） -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
@@ -23286,7 +23293,7 @@ document.getElementById('maBody').addEventListener('keydown', (e) => {
   setH();
 })();
 // ---- 自訂畫面（2026-10-23 使用者：像莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，選擇要不要看到、畫面比較精簡；要有「全部顯示」一鍵復原）----
-// 可收的項目：下方工具列每一顆、右上角的自選族群個股／今日提醒／新手教學／機器人代碼／盤中訊號分頁／影片教學。不能收的：盤中訊號、提醒開啟（核心）、自訂按鈕本身。
+// 可收的項目：下方工具列每一顆、右上角的自選族群個股／今日提醒／新手教學／機器人代碼／盤中訊號分頁／影片教學、首頁那排欄位（當沖多1／2…股期黑龍 13 塊）與下面的處置欄、說明卡片。不能收的：盤中訊號、提醒開啟（核心）、自訂按鈕本身。
 // 收起來只是不顯示（功能都還在，從別的地方打開照樣可以）；設定存在這台裝置的 localStorage，「全部顯示」清掉。
 const CZ_KEY = 'czHidden';
 const CZ_HEADER_IDS = ['wgBtn', 'remindBtn', 'guideBtn', 'botBtn', 'sgtBtn', 'tutBtn'];
@@ -23300,7 +23307,48 @@ function czItems(){
   CZ_HEADER_IDS.forEach((id) => { const el = document.getElementById(id); if (el) items.push({ id: 'hd:' + id, el }); });
   return items;
 }
+// 首頁欄位：欄位是程式每 15 秒整個重畫的，所以每次畫完（MutationObserver）再依標題標記、收合；標題對不到的欄不管它
+const CZ_HOME_CARDS = [['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
+  ['hm:r183', '多族群排名(183)'], ['hm:g12', '族群漲幅'], ['hm:r44', '1+2多'], ['hm:t3', '三落空'], ['hm:r155', '股票期貨排名(155)'], ['hm:r75', '股期黑龍']];
+const CZ_HOME_JAIL = [['hm:jin', '今日入獄'], ['hm:jsoon', '即將出關'], ['hm:jout', '已出關']];
+function czApplyHome(){
+  const root = document.querySelector('#app .home-rank4');
+  if (root){
+    const cards = root.querySelectorAll(':scope > .hr-col, :scope > .hr-stack > .hr-col, :scope > .hr-stack > .hr-redbox');
+    cards.forEach((el) => {
+      const head = el.textContent.replace(/\s+/g, '').slice(0, 28);
+      const hit = CZ_HOME_CARDS.find(([, t]) => head.includes(t));
+      if (hit){ el.dataset.cz = hit[0]; el.classList.toggle('cz-off', czHidden.has(hit[0])); }
+    });
+    let visible = 0;
+    Array.from(root.children).forEach((unit) => {
+      const cs = unit.matches('.hr-stack') ? Array.from(unit.children).filter((c) => c.matches('.hr-col, .hr-redbox')) : [unit];
+      const off = cs.length > 0 && cs.every((c) => c.classList.contains('cz-off'));
+      unit.classList.toggle('cz-unit-off', off);
+      if (!off) visible += 1;
+    });
+    const some = czHidden.size > 0 && Array.from(cards).some((c) => c.classList.contains('cz-off'));
+    root.classList.toggle('cz-fluid', some && !czMode && visible > 0);
+    root.style.setProperty('--cz-n', String(Math.max(visible, 1)));
+    root.classList.toggle('cz-unit-off', some && visible === 0);
+  }
+  const help = document.querySelector('#app .hr-help');
+  if (help){
+    help.querySelectorAll('.hr-jail-col').forEach((el) => {
+      const head = (el.firstElementChild ? el.firstElementChild.textContent : el.textContent).replace(/\s+/g, '').slice(0, 14);
+      const hit = CZ_HOME_JAIL.find(([, t]) => head.includes(t));
+      if (hit){ el.dataset.cz = hit[0]; el.classList.toggle('cz-off', czHidden.has(hit[0])); }
+    });
+    const cards = Array.from(help.querySelectorAll(':scope > .hr-help-card'));
+    cards.forEach((el, i) => {   // 說明卡片整組一起收：第一張有勾選框、其他跟著它
+      el.classList.toggle('cz-off', czHidden.has('hm:help'));
+      if (i === 0) el.dataset.cz = 'hm:help'; else delete el.dataset.cz;
+    });
+  }
+}
+new MutationObserver(() => { try { czApplyHome(); } catch (_){} }).observe(document.getElementById('app'), { childList: true, subtree: true });
 function czApply(){
+  czApplyHome();
   const items = czItems();
   items.forEach(({ id, el }) => { el.dataset.cz = id; el.classList.toggle('cz-off', czHidden.has(id)); });
   const tb = document.getElementById('toolbarBottom');
@@ -23310,7 +23358,7 @@ function czApply(){
     tb.classList.toggle('cz-keep', czMode);
     document.documentElement.style.setProperty('--tb-h', (tb.offsetHeight || 0) + 'px');
   }
-  const n = items.filter((x) => czHidden.has(x.id)).length;
+  const n = czHidden.size;
   const c = document.getElementById('czCount'); if (c) c.textContent = n ? '（已收起 ' + n + ' 個）' : '';
   const b = document.getElementById('czBtn'); if (b){ b.textContent = czMode ? '✓ 完成' : (n ? '⊙ 自訂（' + n + '）' : '⊙ 自訂'); b.classList.toggle('on', czMode); }
 }
