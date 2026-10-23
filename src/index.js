@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 16:47:59";
+const BUILD_STAMP = "2026-10-23 16:49:38";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3694,6 +3694,7 @@ const HTML_PAGE = `<!DOCTYPE html>
       <div class="bot-q-row"><input id="wgQ" placeholder="輸入個股代號或名稱，例：4991、環球晶、2344" autocomplete="off"><button type="button" data-wg-go="1">加入</button></div>
       <div class="bot-chips" id="wgChips"></div>
       <div id="wgColsBox"></div>
+      <div id="wgHelp"></div>
     </div>
   </div>
 </div>
@@ -14876,7 +14877,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 16:47:59';
+const BUILD_STAMP = '2026-10-23 16:49:38';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22682,6 +22683,24 @@ function wgColHtml(code){
   return wrap(t, wgMeCard(code, name, px) + charts + texts, groups.map((g) => g.name).join('、'));
 }
 // 2026-10-23 使用者：關掉前最後的畫面要記住（開著哪幾格、左右捲到哪、每格上下捲到哪；視窗位置大小、放大、移到另一螢幕、格子高度本來就會記），下次打開還在。
+// 欄位說明（2026-10-23 使用者：每個欄位的說明寫在這一頁下面，跟機器人代碼下面的說明欄一樣，大家比較看得清楚）；門檻都用上面的常數，改了數字說明會跟著變
+function wgHelpHtml(){
+  const L = (name, desc) => botLine('<b class="bot-help-code" style="cursor:default">' + name + '</b>　' + desc);
+  return '<div class="bot-msg bot-help"><div class="bot-title">📋 欄位說明<small>每一欄在看什麼；滑過欄位標題、標籤也有簡短說明</small></div>' +
+    L('怎麼用', '上面輸入個股代號或股名按「加入」，就開一格那檔所屬族群的排行（最多 10 格，左右拖著移動、每格自己上下捲）；格子右上角 ✕ 收掉；點股名開 K 線圖。開了哪幾格、捲到哪都會記住。') +
+    L('查的那檔', '格子最上面的卡片：那檔的 A／B 斷頭價、現價離它們差幾 %、融資餘額、賣壓狀態、落底訊號、回檔警示。') +
+    L('多方線／空方線', '族內依今天漲幅排序，前面幾檔是多方段、後面幾檔是空方段（跟刀劍空同一套分法）；右上角寫各有幾檔。名字前的 * 是處置股；👑帶頭 🚀火箭 🐎火馬 🔺轉強 🔪⚔️刀劍 🔰新手是首頁族群表那些標記。') +
+    L('漲跌幅＋小柱子', '今天（盤中是即時）漲跌幅。小柱子只看大概比例，這一族漲跌幅最大的那檔畫到半格，不是精確比例。') +
+    L('大戶力', '盤中大戶力＝大戶淨買賣額 ÷ 近 5 日平均成交值（老師算法：同秒併單 ≥7 張、開盤第一筆算賣）。≥+10% 紅底白字、≤−10% 綠底白字，其他只塗字色；「—」＝資料還在累積或不在追蹤範圍。') +
+    L('A 斷頭', 'A 最高點追：近 20 個交易日盤中最高價 × 0.78（上櫃 × 0.65）。融資借滿 6 成、股價跌 22% 維持率剛好 130%，會收追繳令、2 天沒補錢第 3 天強制賣出＝斷頭。<b>A 跌破＝斷頭開始</b>。小字＝（現價 − 斷頭價）÷ 現價；<span style="color:#f59e0b;font-weight:700">橘色＝離線 ≤' + MCL_FILTER_PCT + '%</span>、<span style="color:#ef4444;font-weight:700">紅色「已破」＝現價已低於斷頭價</span>。') +
+    L('B 斷頭', 'B 五日平均價線追：月高那天的五日平均價 × 0.78（上櫃 × 0.65），比較多人的平均成本。<b>B 跌破＝斷頭高峰</b>。小字、顏色跟 A 一樣。A、B 是用日 K 推算的理論值（資料到昨天收盤），小字的差距才用現價算。') +
+    L('融資餘額（張）', '證交所／櫃買每天晚上 21:00 後公布的融資餘額，所以今天看到的是前一個交易日的。小字「今」＝今天增減張數；<b>使用率</b>＝融資餘額 ÷ 這檔的融資額度，≥' + MCL_UTIL_HIGH + '% 橘色「偏高」、≥' + MCL_UTIL_HOT + '% 紅色「過熱」。使用率高代表融資擁擠。') +
+    L('月高後', '月高那天（近 20 個交易日盤中最高價出現的那天）的融資餘額 → 現在的融資餘額，增減幾 %：<span style="color:#d9392b;font-weight:700">正的（紅）＝跌下來後融資反而增加，有人在接、賣壓沒釋放</span>；<span style="color:#15803d;font-weight:700">負的（綠）＝融資在退場</span>。下面小字 5 日＝比 5 個交易日前增減幾 %。「—」＝今天剛創月高（還沒有月高之後可以比），或月高那天本站沒有這檔的融資紀錄（融資歷史還在往前補）；這時 5 日還是會顯示。') +
+    L('賣壓狀態', '我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判，離得遠＝<b>離線遠</b>、沒有融資資料＝<b>資料不足</b>。判的時候看月高後融資增減：近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '％或幾乎沒減＝<b>賣壓未釋放</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>。') +
+    L('落底訊號', '近似落底（我訂的條件，不是保證）：賣壓是「釋放中」或「已洗掉一大半」＋近 5 日內有爆量（量 ≥ 前 20 日均量 2 倍）＋今天跌幅比前一天小、沒再破爆量那天的最低價。沒有融資資料時只看價量，標「價量止跌（缺融資）」。') +
+    L('回檔警示', '留意回檔：漲多（近 10 日漲 ≥25% 或乖離月線 ≥20%）＋爆量（≥ 前 20 日均量 2 倍）＋出貨 K（收黑、長上影、或爆量不漲）；後面的「＋融資」代表融資使用率偏高或融資還在增加。回測近一年 417 檔：之後 1～5 天下跌機率約 54～57%（平常 50%），但 10～20 天後平均仍比大盤強，所以只代表短線容易拉回，不是頭部。') +
+    botLine('斷頭價是用價格推算的理論值，融資餘額是交易所公布的實際資料；賣壓、落底、回檔都是依價量與融資整理的參考，不構成投資建議。', 'bot-dim') + '</div>';
+}
 function wgSave(){ botStore(WG_COLS_KEY, wgState.cols); wgSaveView(); }
 function wgSaveView(){
   const modal = document.getElementById('wgModal');
@@ -22870,6 +22889,7 @@ function openWgPanel(){
   }
   wgMarginLoad();
   wgRender();
+  const help = document.getElementById('wgHelp'); if (help && !help.innerHTML) help.innerHTML = wgHelpHtml();
   const i = document.getElementById('wgQ'); if (i && window.innerWidth >= 768) i.focus();
 }
 function initWgChrome(){
