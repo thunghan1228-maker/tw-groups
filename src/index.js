@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 12:26:25";
+const BUILD_STAMP = "2026-10-23 12:35:08";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3128,6 +3128,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 2026-10-23 使用者：問診的同族對照／今日名單加了斷頭價 A／B，版面收緊：字小一點、間距縮、表頭可換行、股票名稱放第二行（欄寬寬一點、兩排字） */
   .mcl-chip{display:inline-block;background:#7c3aed;color:#fff;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px 4px 2px 0;cursor:pointer;text-decoration:none;}   /* 2026-10-23 使用者：融資斷頭線總結裡的個股名稱＝紫底白字 */
   .mcl-chip:hover{background:#6d28d9;}
+  .mcl-chip.pull{background:#b45309;}   /* 今日提醒：容易回檔＝橘、回檔風險高＝紅、近似落底＝青 */
+  .mcl-chip.t2{background:#be123c;}
+  .mcl-chip.low{background:#0891b2;}
   .dg-back[disabled]{opacity:.4;cursor:not-allowed;}
   .mcl-filters{margin:6px 0 4px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
   .mcl-fbtn{background:#16a34a;border-color:#16a34a;color:#fff;font-weight:700;}   /* 2026-10-23 使用者：快速篩選按鈕綠底白字 */
@@ -14689,7 +14692,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 12:26:25';
+const BUILD_STAMP = '2026-10-23 12:35:08';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22355,7 +22358,7 @@ async function remindMclLoad(){
   if (remindMcl.loading || (remindMcl.data && Date.now() - remindMcl.at < 5 * 60 * 1000)) return;
   remindMcl.loading = true; remindMcl.error = '';
   try {
-    const res = await fetch('/api/margin-call?limit=1&groups=all');
+    const res = await fetch('/api/margin-call?limit=1000&groups=all');   // 要整份名單（留意回檔、近似落底要看每檔的價量特徵），後端 60 秒快取
     const data = await res.json();
     if (!res.ok) throw new Error((data && (data.detail || data.error)) || ('http ' + res.status));
     remindMcl.data = data; remindMcl.at = Date.now();
@@ -22371,7 +22374,16 @@ function remindMclHtml(){
   const head = '<div class="rm-sec"><div class="rm-h">💥 融資斷頭線 <small>' + (d && d.date ? d.date.slice(5).replace('-', '/') + ' 收盤・全部族群' : '全部族群') + '</small></div>';
   if (!d) return head + '<div class="race-note">' + (remindMcl.error ? '讀取失敗：' + wlEsc(remindMcl.error) : '讀取中…') + '</div></div>';
   if (d.status !== 'ok') return head + '<div class="race-note">' + wlEsc(d.reason || '還沒有日K資料') + '</div></div>';
-  return head + mclSummaryHtml(d.summary, 'remind') + '<div class="rm-warn" style="margin-top:4px">A 線＝近一個月最高點追的人的斷頭價、B 線＝月高那天五日平均價追的人的斷頭價；細節到「個股問診」看。</div></div>';
+  // 2026-10-23 使用者：容易回檔、接近底部（近似落底）的名單也放進今日提醒。判斷跟個股問診的融資名單同一套（mclPullback、mclBottom）。
+  const rows = d.rows || [];
+  const pullHit = rows.map((r) => ({ r, b: mclPullback(r.pull, r.margin) })).filter((x) => x.b).sort((a, b) => (b.r.pull.tier - a.r.pull.tier) || (b.r.pull.ret10 - a.r.pull.ret10));
+  const lowHit = rows.map((r) => ({ r, b: mclBottom(r, r.margin, r.stab) })).filter((x) => x.b && x.b.key === 'hit');
+  const chip = (x, cls) => '<a class="mcl-chip ' + cls + '" data-rm-code="' + wlEsc(x.r.code) + '" data-rm-name="' + wlEsc(x.r.name || '') + '" title="' + wlEsc(x.b.tip) + '">' + wlEsc(x.r.name || x.r.code) + (x.b.key === 't2' ? '・高' : '') + '</a>';
+  const lab = (color, text) => '<b style="color:' + color + '">' + text + '</b>';
+  const signals = '<div class="race-note" style="line-height:2.1">' +
+    lab('#fb923c', '⚠️ 容易回檔（高檔）・' + pullHit.length + ' 檔') + '　' + (pullHit.length ? pullHit.map((x) => chip(x, x.b.key === 't2' ? 't2' : 'pull')).join('') + '<span class="dg-sub">　紅色「高」＝回檔風險高（近 10 日漲 ≥40%）</span>' : '<span class="muted">目前沒有（漲多＋爆量＋收黑／長上影／爆量不漲）</span>') +
+    '<br>' + lab('#22d3ee', '🌱 接近底部（近似落底）・' + lowHit.length + ' 檔') + '　' + (lowHit.length ? lowHit.map((x) => chip(x, 'low')).join('') : '<span class="muted">目前沒有（賣壓釋放中＋爆量後跌幅縮小、沒再破低）</span>') + '</div>';
+  return head + mclSummaryHtml(d.summary, 'remind') + signals + '<div class="rm-warn" style="margin-top:4px">A 線＝近一個月最高點追的人的斷頭價、B 線＝月高那天五日平均價追的人的斷頭價。容易回檔只代表 1～5 天短線容易拉回、不是頭部（回測 54～57% 會跌）；接近底部是我訂的條件、不是保證。細節到「個股問診」看。</div></div>';
 }
 function remindHtml(){
   const d = jlState.data;
