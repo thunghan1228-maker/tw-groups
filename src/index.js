@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 23:12:30";
+const BUILD_STAMP = "2026-10-23 23:15:21";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1067,6 +1067,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chips-modal.behind-group{z-index:98;}   /* 2026-10-17 使用者：機器人等面板裡點族群名，成分股視窗（z-index 99）要蓋在上面，關掉再回來 */  /* 手機／iPad 直式開K線圖（z-index 100）時退到後面，關圖再回來 */
   #diagInner{width:min(1400px,98vw);}   /* 2026-10-23 使用者：融資斷頭線名單最右邊的落底訊號、回檔警示兩欄被切掉看不到 → 個股問診視窗加寬，表格也縮一點 */
   .ck-table.mcl-tbl th,.ck-table.mcl-tbl td{padding:6px 4px;}
+  .pat-mini{display:inline-block;margin-left:4px;padding:0 6px;border-radius:999px;font-size:10.5px;font-weight:800;background:#475569;color:#fff;vertical-align:middle;white-space:nowrap;} .pat-mini.on,.pat-mini.brk{background:#dc2626;}   /* 醞釀／發動／首頁發動欄每檔後面的形態標籤：發動列、已突破＝紅底白字，其他＝灰藍底 */
   .pat-tag{display:inline-block;padding:0 8px;border-radius:999px;background:#475569;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;margin:1px 2px 1px 0;} .pat-tag.brk{background:#dc2626;}   /* 形態標籤：等突破＝灰藍底、剛突破＝紅底白字 */
   .mcl-prev{opacity:.5;white-space:nowrap;} .mcl-prev .mcl-bottom,.mcl-prev .mcl-pull{filter:saturate(.6);}
   .mcl-ma{font-size:15px;font-weight:800;color:var(--muted);} .mcl-ma.hi{color:var(--up);}   /* 2026-10-23 使用者：融資名單的均線分數（滿分 15，>10 紅字） */
@@ -8960,7 +8961,7 @@ function homeLaunchColHtml(){
   // 整列灰底、時間／代號／名稱白字；漲跌幅照舊漲紅跌綠
   const stateOf = homeLaunchStateOf();
   const row = (r) => { const v = pctOf(r), fallen = stateOf(r) === 'fallen'; return '<div class="hr-row hr-stk' + (fallen ? ' hr-fallen' : '') + '" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button"' + (fallen ? ' title="↩ 曾發動：發動過、現在跌回箱頂下"' : '') + '>' +
-    '<span class="hr-rk" style="color:#a78bfa">' + clock(r) + '</span><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || '') + '</span>' +
+    '<span class="hr-rk" style="color:#a78bfa">' + clock(r) + '</span><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || '') + '</span>' + patTagsHtml(r.code, (getStockQuote(r.code) || {}).price, 'launch') +
     '<span class="hr-avg ' + (v === null ? 'flat' : dirClass(v)) + '">' + (v === null ? '' : fmt(v) + '%') + '</span></div>'; };
   const latest = rows.slice().sort((a, b) => (b.recordedAt ? Date.parse(b.recordedAt) : Infinity) - (a.recordedAt ? Date.parse(a.recordedAt) : Infinity));   // 有幾檔列幾檔
   const day = brewSessionDate();
@@ -9412,6 +9413,7 @@ function launchSignalEvents(){
     if (r.boxHigh) parts.push('箱頂 ' + Number(r.boxHigh).toFixed(2));
     if (r.launchCount > 1) parts.push('發動 ' + r.launchCount + ' 次');
     if (r.brewing) parts.push('醞釀→發動');
+    const pn = patNamesOf(r.code); if (pn.length) parts.push('形態：' + pn.join('、'));
     return { tabs: ['now'], ts: Number.isFinite(t) ? t : Date.now(), time: Number.isFinite(t) ? fmtTime(r.recordedAt) : '盤中',
       code: r.code, name: r.name || lookupStockName(r.code), label: fallen ? '↩ 曾發動' : '🚀 發動', isBuy: true, note: parts.join('・') };
   });
@@ -9726,7 +9728,7 @@ function brewLaunchRowHtml(r, kind){
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
     timeCell +
     '<td class="combo-code">' + r.code + '</td>' +
-    '<td class="combo-name">' + r.name + wlStarHtml(r.code, r.name) + '</td>' +
+    '<td class="combo-name">' + r.name + wlStarHtml(r.code, r.name) + patTagsHtml(r.code, r.price, kind) + '</td>' +
     '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
     '<td class="combo-holder">' + raceHolderCellHtml(r) + '</td>' +
     '<td class="combo-pct ' + cls + '">' + limitPriceHtml(r, fmt(r.pct) + '%') + '</td>' +
@@ -9752,7 +9754,7 @@ function brewLaunchFlatRowHtml(r){
   return '<tr class="combo-row" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button">' +
     '<td class="bl-time" title="第一次符合發動條件的時間（後端永久記錄）；剛觸發、下次掃描才會定案的先用現在時間顯示，定案後會換成正式時間">' + brewWhen(r) + relaunchBadge + '</td>' +
     '<td class="combo-code">' + r.code + '</td>' +
-    '<td class="combo-name">' + r.name + wlStarHtml(r.code, r.name) + '</td>' +
+    '<td class="combo-name">' + r.name + wlStarHtml(r.code, r.name) + patTagsHtml(r.code, r.price, 'launch') + '</td>' +
     '<td><span class="sig-group">' + r.groupNames.join('、') + '</span></td>' +
     '<td class="bl-score" title="5/10/20/60/120/240 日線兩兩比較 15 組，短天期在上面得 1 分（用現價當今天收盤）">' + r.score + star + '</td>' +
     '<td class="combo-holder">' + raceHolderCellHtml(r) + '</td>' +
@@ -15334,7 +15336,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 23:12:30';
+const BUILD_STAMP = '2026-10-23 23:15:21';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16311,6 +16313,7 @@ async function refresh(){
     try { mclTouchTick(); } catch (e) { /* 斷頭價提醒失敗不影響畫面 */ }
     try { mclSigTick(); } catch (e) { /* 落底／回檔提醒失敗不影響畫面 */ }
     try { dgLiveTick(); } catch (e) { /* 個股問診名單盤中更新失敗不影響畫面 */ }
+    try { patSigTick(); } catch (e) { /* 形態突破提醒失敗不影響畫面 */ }
     lastDataFetchedAt = new Date();
   } catch (e) {
     groupsLastError = e && e.name === 'AbortError' ? '等了 20 秒還沒回' : String((e && e.message) || e).slice(0, 80);
@@ -23821,6 +23824,92 @@ function mclSigTick(opts){
   try { localStorage.setItem(MCL_SIG_SEEN_KEY, JSON.stringify({ date: today, keys: Array.from(seen) })); } catch (_){}
   mclSigNotify(events);
 }
+// ---- 形態標籤＋盤中突破提醒（2026-10-23 使用者：VCP 收斂、C 不破 A 的低、W 底、頭肩底；盤後找候選、盤中現價突破觸發價才跳；發動欄後面標形態名稱）----
+// 後端 /api/patterns：日K的波段高低點找出的候選，每檔每種形態有觸發價（頸線／樞紐）、停損、目標價。標籤放在醞釀、發動（含首頁發動欄、今日即時多）每檔後面；
+// 候選（收盤還在觸發價之下）盤中現價站上觸發價＝突破，跳視窗（一檔一種形態今天只跳一次）。形態有主觀成分，是候選不是買進訊號。
+const PAT = { map: null, date: '', at: 0, loading: false, failedAt: 0 };
+const PAT_SEEN_KEY = 'patSeen';
+async function patLoad(force){
+  if (PAT.loading || (!force && PAT.map && Date.now() - PAT.at < 10 * 60e3) || (PAT.failedAt && Date.now() - PAT.failedAt < 5 * 60e3 && !force)) return;
+  PAT.loading = true;
+  try {
+    const res = await fetch('/api/patterns');
+    const d = res.ok ? await res.json().catch(() => null) : null;
+    if (d && d.status === 'ok'){ const map = {}; (d.rows || []).forEach((r) => { map[r.code] = r; }); PAT.map = map; PAT.date = d.date || ''; PAT.at = Date.now(); PAT.failedAt = 0; }
+    else PAT.failedAt = Date.now();
+  } catch (_){ PAT.failedAt = Date.now(); } finally { PAT.loading = false; }
+}
+function patShortName(x){ return x.name === 'C不破A低' ? 'C不破A' : x.name; }
+function patTipOf(x, price){
+  const brk = price > x.trigger;
+  return x.name + '：觸發價 ' + ckPrice(x.trigger) + '（' + (brk ? '現價已站上' : '現價還在下面，再漲 ' + ((x.trigger / price - 1) * 100).toFixed(1) + '% 到觸發價') + '）；停損參考 ' + ckPrice(x.stop) + '、目標價約 ' + ckPrice(x.target) + '。日K波段找出的候選，不是買進訊號。';
+}
+// kind：'launch'＝發動欄（紅底白字）、其他＝灰藍底；price＝現價（沒有就用日K收盤）
+function patTagsHtml(code, price, kind){
+  const e = PAT.map && PAT.map[code];
+  if (!e) return '';
+  const p = price > 0 ? price : e.close;
+  return Object.keys(e.patterns).map((k) => { const x = e.patterns[k], brk = p > x.trigger;
+    return '<span class="pat-mini' + (kind === 'launch' ? ' on' : brk ? ' brk' : '') + '" title="' + wlEsc(patTipOf(x, p)) + '">' + wlEsc(patShortName(x)) + (brk ? '突破' : '') + '</span>'; }).join('');
+}
+function patNamesOf(code){ const e = PAT.map && PAT.map[code]; return e ? Object.keys(e.patterns).map((k) => patShortName(e.patterns[k])) : []; }
+let patSigLines = [];
+function patSigEvents(map, quotes, seen){
+  const out = [];
+  Object.keys(map || {}).forEach((code) => {
+    const e = map[code], q = quotes.get ? quotes.get(code) : quotes[code];
+    if (!q || !(q.price > 0)) return;
+    Object.keys(e.patterns).forEach((k) => {
+      const x = e.patterns[k], key = code + '|' + k;
+      if (x.state !== 'candidate' || seen.has(key)) return;               // 昨天收盤還在觸發價之下的候選，今天才算「突破」
+      if (!(q.price > x.trigger) || !(q.price > e.close)) return;           // 現價站上觸發價、而且比昨天收盤高
+      out.push({ code, name: e.name, group: e.group, q, x, key });
+    });
+  });
+  return out.sort((a, b) => (b.q.changePercent || 0) - (a.q.changePercent || 0));
+}
+function patSigNotify(events){
+  if (!events.length) return;
+  const hm = new Date(Date.now() + 8 * 3600000).toISOString().slice(11, 16);
+  const rowHtml = (e) => '<tr><td>' + hm + '</td><td class="l" style="white-space:nowrap"><b class="alert-stk" data-alert-code="' + wlEsc(e.code) + '" data-alert-name="' + wlEsc(e.name || '') + '">' + wlEsc(e.code + ' ' + (e.name || '')) + '</b><div class="dg-sub">' + wlEsc(e.group || '') + '</div></td>' +
+    '<td class="l"><span class="pat-tag brk" title="' + wlEsc(patTipOf(e.x, e.q.price)) + '">🚀 ' + wlEsc(e.x.name) + '突破</span></td><td><b>' + ckPrice(e.q.price) + '</b>' + (e.q.changePercent != null ? '<div class="dg-sub" style="color:' + (e.q.changePercent > 0 ? '#ef4444' : '#22c55e') + '">' + (e.q.changePercent > 0 ? '+' : '') + Number(e.q.changePercent).toFixed(2) + '%</div>' : '') + '</td>' +
+    '<td>' + ckPrice(e.x.trigger) + '</td><td>' + ckPrice(e.x.stop) + '</td><td>' + ckPrice(e.x.target) + '</td><td>' + homeHoldHtml(e.code) + '</td></tr>';
+  patSigLines = events.map((e) => ({ html: rowHtml(e) })).concat(patSigLines).slice(0, 200);
+  let el = document.getElementById('patSigBox');
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'patSigBox'; el.className = 'pk-alert mcl-touch-alert';
+    el.addEventListener('click', (ev) => { if (ev.target.closest('.pk-alert-close')){ el.remove(); patSigLines = []; } });
+    document.body.appendChild(el);
+    makeAlertDraggable(el, '.pk-alert-head', 'patSigPos');
+  }
+  el.innerHTML = '<div class="pk-alert-head">📐 形態突破・盤中提醒（' + patSigLines.length + ' 檔）<button class="pk-alert-close" aria-label="關閉">✕</button></div>' +
+    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th class="l">形態</th><th>現價</th><th>觸發價<div class="dg-sub">頸線／樞紐</div></th><th>停損參考</th><th>目標價</th><th>大戶力</th></tr></thead><tbody>' + patSigLines.map((l) => l.html).join('') + '</tbody></table></div>' +
+    '<div class="mt-foot">昨天收盤還在觸發價之下的形態候選（VCP 收斂、C 不破 A 的低、W 底、頭肩底），今天盤中現價站上觸發價、而且比昨天收盤高，就跳出來；一檔一種形態今天只跳一次。形態是用日K波段高低點找的，有主觀成分、會漏也會誤判，請看圖確認；停損、目標價只是形態高度推出來的參考。回測近一年：突破之後平均比全體強一些，但勝率只有 4～5 成，靠少數大漲拉高平均，所以停損要設。不是買賣建議。</div>';
+  try { launchBeep(); } catch (_){}
+  if ('Notification' in window && Notification.permission === 'granted'){
+    events.slice(0, 5).forEach((e) => { try { new Notification('📐 ' + e.x.name + '突破 ' + e.code + ' ' + (e.name || ''), { body: hm + ' 現價 ' + e.q.price + '（觸發價 ' + e.x.trigger + '）', tag: 'pat-' + e.key }); } catch (_){} });
+  }
+}
+function patSigTick(opts){
+  opts = opts || {};
+  if (!opts.force && (CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || botWindowMode() || sgtWindowMode())) return;
+  if (!alertsEnabled && !opts.force) return;
+  const live = opts.live !== undefined ? opts.live : mclSessionLive();
+  if (!live) return;
+  if (!PAT.map){ patLoad(false); return; }
+  const today = twTodayStr();
+  let st = { date: today, keys: [] };
+  try { const o = JSON.parse(localStorage.getItem(PAT_SEEN_KEY) || 'null'); if (o && o.date === today) st = o; } catch (_){}
+  const seen = new Set(st.keys);
+  const events = patSigEvents(PAT.map, opts.quotes || mclLiveQuoteMap(), seen);
+  if (!events.length) return;
+  events.forEach((e) => seen.add(e.key));
+  try { localStorage.setItem(PAT_SEEN_KEY, JSON.stringify({ date: today, keys: Array.from(seen) })); } catch (_){}
+  patSigNotify(events);
+}
+setTimeout(() => { patLoad(true); }, 3000);
+setInterval(() => { patLoad(false); }, 10 * 60e3);
 // ---- 每日加權指數分析（2026-10-23 使用者：搜尋框下面空的地方加「每日加權指數分析」，滑過去或按下去看）----
 // 資料：/api/fund-umbrella（加權日K收盤、均線、融資水位、資金保護傘點數）＋ /api/futures-chips（外資現貨買賣超、外資台指期淨未平倉）；
 // 加權當天開高低、成交值（後端新存）有的話多講「收在當天最低」「量能」，沒有就略過。全部是規則自動寫出來的，每天收盤後（晚上 21:40 以後）更新，不是買賣建議。
