@@ -1,7 +1,8 @@
 # 上櫃日K鏡像（創高黑選股要三年日K）：櫃買中心擋 HanStock 的正式站主機（Railway），GitHub runner 抓得到。
 # 每個交易日 16:50（台北）把上個月與這個月還沒有的日子補進 data 分支 tpex/quotes/YYYY-MM.json.gz；
 # 手動跑時填月份範圍（例如 2023-08:2026-10）一次回補，後端再從這裡把上櫃日K補到三年。
-# 每年一份櫃買「減資恢復買賣參考價格」存在 tpex/actions/revivt-YYYY.json，後端做減資還原用。
+# 每年一份櫃買「減資恢復買賣參考價格」存在 tpex/actions/revivt-YYYY.json，後端做減資還原用；
+# 「除權息計算結果表」存在 tpex/actions/exdiv-YYYY.json（近三年），後端算均線分數的除權息還原價用。
 # 腳本在 main 分支 scripts/tpex_quotes_mirror.py。
 name: TPEx quotes mirror
 

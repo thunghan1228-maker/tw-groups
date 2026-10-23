@@ -30,6 +30,7 @@ from datetime import date, datetime, timedelta, timezone
 TW = timezone(timedelta(hours=8))
 QUOTES_URL = "https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date={d}&id=&response=json"
 REVIVT_URL = "https://www.tpex.org.tw/www/zh-tw/bulletin/revivt?startDate={y}/01/01&endDate={y}/12/31&response=json"
+EXDIV_URL = "https://www.tpex.org.tw/www/zh-tw/bulletin/exDailyQ?startDate={y}/01/01&endDate={y}/12/31&response=json"
 HEADERS = {
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "zh-TW,zh;q=0.9",
@@ -209,6 +210,26 @@ def fetch_revivt(root: str, years: list[int]) -> None:
         time.sleep(2)
 
 
+def fetch_exdiv(root: str, years: list[int]) -> None:
+    """櫃買「除權息計算結果表」每年一份（2026-10-24 使用者：均線分數用除權息還原價；後端 dividend_adjust 讀）。"""
+    folder = os.path.join(root, "tpex", "actions")
+    os.makedirs(folder, exist_ok=True)
+    for year in years:
+        try:
+            payload = get_json(EXDIV_URL.format(y=year))
+            table = (payload.get("tables") or [{}])[0]
+            data = {"year": year, "fields": table.get("fields") or [], "data": table.get("data") or []}
+            if not data["data"]:
+                print("exdiv empty", year)
+                continue
+            with open(os.path.join(folder, f"exdiv-{year}.json"), "w", encoding="utf-8") as fh:
+                json.dump(data, fh, ensure_ascii=False, separators=(",", ":"))
+            print("exdiv", year, len(data["data"]))
+        except Exception as exc:  # noqa: BLE001
+            print("exdiv failed", year, type(exc).__name__, exc)
+        time.sleep(2)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True)
@@ -252,6 +273,7 @@ def main() -> None:
             git_push(args.root, f"上櫃日K鏡像 {ym}")
     years = sorted({int(ym[:4]) for ym in months})
     fetch_revivt(args.root, years)
+    fetch_exdiv(args.root, sorted(set(years) | {today.year, today.year - 1, today.year - 2}))   # 除權息至少給近三年（後端均線分數要往前還原）
     index = update_index(args.root)
     print("index months", len(index["months"]))
     if args.push_every:
