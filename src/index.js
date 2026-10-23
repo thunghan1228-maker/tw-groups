@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 11:43:04";
+const BUILD_STAMP = "2026-10-23 11:46:46";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3129,6 +3129,11 @@ const HTML_PAGE = `<!DOCTYPE html>
   .mcl-chip{display:inline-block;background:#7c3aed;color:#fff;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px 4px 2px 0;cursor:pointer;text-decoration:none;}   /* 2026-10-23 使用者：融資斷頭線總結裡的個股名稱＝紫底白字 */
   .mcl-chip:hover{background:#6d28d9;}
   .dg-back[disabled]{opacity:.4;cursor:not-allowed;}
+  .ck-table th.mcl-sort{cursor:pointer;white-space:nowrap;}
+  .ck-table th.mcl-sort .mcl-arrow{color:var(--muted);font-size:11px;}
+  .ck-table th.mcl-sort.on{color:#e11d48;}
+  .ck-table th.mcl-sort.on .mcl-arrow{color:#e11d48;}
+  .ck-table th.mcl-sort:hover{background:var(--panel-2);}
   .pk-alert.mcl-touch-alert{width:min(900px,96vw);border-color:#e11d48;z-index:151;}   /* 2026-10-23 使用者：盤中碰到融資斷頭價自動跳出整排資訊 */
   .mcl-touch-alert .pk-alert-head{color:#fb7185;}
   .mcl-touch-alert .mt-scroll{max-height:min(55vh,420px);overflow:auto;}
@@ -14153,7 +14158,7 @@ function mvHtml(data){
 // ---- 融資斷頭線（2026-10-23 使用者貼老師 10/22「台股融資追蹤・斷頭線就在腳下」）----
 // A 最高點追＝近 20 個交易日盤中最高 × 0.78（上櫃 × 0.65）、B 五日線追＝月高那天的 5 日均價 × 0.78（上櫃 × 0.65）；今收低於斷頭價＝已破，否則差（今收−斷頭價）÷今收。
 // 後端 /api/margin-call 算名單，單檔的在問診資料 stock.margin；老師 10/22 的八檔（南亞科、國巨、聯電…）月高、A、B、差幾 % 都算得一模一樣。
-const mclState = { groups: '被動元件,記憶體,矽晶圓', loaded: '', data: null, loading: false, failedAt: 0, error: '' };
+const mclState = { groups: '被動元件,記憶體,矽晶圓', loaded: '', data: null, loading: false, failedAt: 0, error: '', sortKey: 'bGap', sortDir: 1 };   // sortKey／sortDir：A、B 欄位按鈕排序（2026-10-23 使用者），預設照 B 差由小到大
 async function mclEnsure(){
   const key = mclState.groups;
   if (mclState.loaded === key && (mclState.data || mclState.loading)) return;
@@ -14243,6 +14248,10 @@ function dgMarginStockHtml(s){
     '<tr><td class="l"><b>B 五日平均價線追</b><div class="dg-sub">跌破＝斷頭高峰</div></td><td>五日平均價線 ' + ckPrice(m.ma5) + '<div class="dg-sub">月高那天</div></td><td><b>' + ckPrice(m.b) + '</b></td><td>' + ckPrice(m.close) + '</td><td class="l">' + st(m.bBroken, m.bGap, m.bNew) + '</td></tr>' +
     '</tbody></table></div>' + bal + MCL_RULE;
 }
+function mclSortTh(key, label){
+  const on = mclState.sortKey === key;
+  return '<th class="mcl-sort' + (on ? ' on' : '') + '" data-mcl-sort="' + key + '" title="按一下照「差 %」排序，再按一下反過來（升冪＝差最小的在最前面，已破排最前）">' + label + ' <span class="mcl-arrow">' + (on ? (mclState.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (mclState.sortDir > 0 ? '差小→大' : '差大→小') : '按我排序') + '</div></th>';
+}
 function dgMarginListHtml(){
   mclEnsure();
   const d = mclState.data;
@@ -14251,11 +14260,15 @@ function dgMarginListHtml(){
   if (!d) return head + '<div class="race-note">' + (mclState.error ? '讀取失敗：' + wlEsc(mclState.error) : '讀取中…') + '</div>';
   if (d.status !== 'ok') return head + '<div class="race-note">' + wlEsc(d.reason || '還沒有日K資料') + '</div>';
   const c = d.counts || {};
-  const rows = (d.rows || []).map((r) => '<tr class="dg-link" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
+  const sortedRows = (d.rows || []).slice().sort((x, y) => {   // 照 A 或 B 的「差 %」排：升冪＝差最小（已破＝負的）排最前，降冪＝差最大排最前
+    const gx = x[mclState.sortKey], gy = y[mclState.sortKey];
+    return (mclState.sortDir * ((gx == null ? Infinity : gx) - (gy == null ? Infinity : gy))) || String(x.code).localeCompare(String(y.code));
+  });
+  const rows = sortedRows.map((r) => '<tr class="dg-link" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
     '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td></tr>').join('');
   const summary = !d.summary ? '' : mclSummaryHtml(d.summary, 'diag');
   return head + summary + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
-    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th><th>A 月高斷頭</th><th>B 五日平均價線斷頭</th><th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
+    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th>'+ mclSortTh('aGap', 'A 月高斷頭') + mclSortTh('bGap', 'B 五日平均價線斷頭') + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
 function renderDiag(){
   const body = document.getElementById('diagBody');
@@ -14562,6 +14575,15 @@ document.getElementById('diagClose').addEventListener('click', closeDiagPanel);
 document.getElementById('diagModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDiagPanel(); });
 document.getElementById('diagBody').addEventListener('click', (e) => {
   if (e.target.closest('.dg-back')){ dgBack(); return; }
+  const mst = e.target.closest('[data-mcl-sort]');
+  if (mst){   // A、B 欄位表頭：點一下照那欄的差排（升冪），再點反過來
+    const k = mst.dataset.mclSort;
+    if (mclState.sortKey === k) mclState.sortDir = -mclState.sortDir; else { mclState.sortKey = k; mclState.sortDir = 1; }
+    const inner = document.getElementById('diagInner'), top = inner ? inner.scrollTop : 0;
+    renderDiag();
+    if (inner) inner.scrollTop = top;
+    return;
+  }
   if (e.target.closest('#dgRun')){ dgRun((document.getElementById('dgInput') || {}).value || ''); return; }
   if (e.target.closest('#mclRun')){ mclState.groups = ((document.getElementById('mclGroups') || {}).value || '').trim() || '被動元件,記憶體,矽晶圓'; mclState.loaded = ''; mclState.failedAt = 0; renderDiag(); return; }
   const mvr = e.target.closest('[data-mv-refresh]');
@@ -14591,7 +14613,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 11:43:04';
+const BUILD_STAMP = '2026-10-23 11:46:46';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
