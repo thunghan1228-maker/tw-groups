@@ -990,7 +990,7 @@
   .chips-modal.behind-group{z-index:98;}   /* 2026-10-17 使用者：機器人等面板裡點族群名，成分股視窗（z-index 99）要蓋在上面，關掉再回來 */  /* 手機／iPad 直式開K線圖（z-index 100）時退到後面，關圖再回來 */
   #diagInner{width:min(1400px,98vw);}   /* 2026-10-23 使用者：融資斷頭線名單最右邊的落底訊號、回檔警示兩欄被切掉看不到 → 個股問診視窗加寬，表格也縮一點 */
   .ck-table.mcl-tbl th,.ck-table.mcl-tbl td{padding:6px 4px;}
-  .pat-mini{cursor:pointer;display:inline-block;margin-left:4px;padding:0 6px;border-radius:999px;font-size:10.5px;font-weight:800;background:#475569;color:#fff;vertical-align:middle;white-space:nowrap;} .pat-mini.on,.pat-mini.brk{background:#dc2626;}   /* 醞釀／發動／首頁發動欄每檔後面的形態標籤：發動列、已突破＝紅底白字，其他＝灰藍底 */
+  .pat-mini{cursor:pointer;display:inline-block;margin-left:4px;padding:0 6px;border-radius:999px;font-size:10.5px;font-weight:800;background:#475569;color:#fff;vertical-align:middle;white-space:nowrap;} .pat-mini.on,.pat-mini.brk{background:#dc2626;}   /* 醞釀／發動／首頁發動欄每檔後面的形態標籤：形態真的突破（現價站上觸發價，字尾多「突破」）＝紅底白字，其他（等突破）＝灰藍底；發動欄也一樣（2026-10-23 使用者） */
   .pat-tag{display:inline-block;padding:0 8px;border-radius:999px;background:#475569;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;margin:1px 2px 1px 0;} .pat-tag.brk{background:#dc2626;}   /* 形態標籤：等突破＝灰藍底、剛突破＝紅底白字 */
   .mcl-prev{opacity:.5;white-space:nowrap;} .mcl-prev .mcl-bottom,.mcl-prev .mcl-pull{filter:saturate(.6);}
   .mcl-ma{font-size:15px;font-weight:800;color:var(--muted);} .mcl-ma.hi{color:var(--up);}   /* 2026-10-23 使用者：融資名單的均線分數（滿分 15，>10 紅字） */
@@ -23908,13 +23908,13 @@ function patTipOf(x, price){
   const brk = price > x.trigger;
   return x.name + '：觸發價 ' + ckPrice(x.trigger) + '（' + (brk ? '現價已站上' : '現價還在下面，再漲 ' + ((x.trigger / price - 1) * 100).toFixed(1) + '% 到觸發價') + '）；停損參考 ' + ckPrice(x.stop) + '、目標價約 ' + ckPrice(x.target) + '。日K波段找出的候選，不是買進訊號。';
 }
-// kind：'launch'＝發動欄（紅底白字）、其他＝灰藍底；price＝現價（沒有就用日K收盤）
+// kind：呼叫端的欄位（目前顏色一律看形態有沒有真的突破，不再因為在發動欄就變紅）；price＝現價（沒有就用日K收盤）
 function patTagsHtml(code, price, kind){
   const e = PAT.map && PAT.map[code];
   if (!e) return '';
   const p = price > 0 ? price : e.close;
   return Object.keys(e.patterns).map((k) => { const x = e.patterns[k], brk = p > x.trigger;
-    return '<span class="pat-mini' + (kind === 'launch' ? ' on' : brk ? ' brk' : '') + '" data-pat-code="' + wlEsc(code) + '" data-pat-name="' + wlEsc(x.name) + '" title="' + wlEsc(patTipOf(x, p) + '　👆 點一下開日線並定位到這個形態') + '">' + wlEsc(patShortName(x)) + (brk ? '突破' : '') + '</span>'; }).join('');
+    return '<span class="pat-mini' + (brk ? ' brk' : '') + '" data-pat-code="' + wlEsc(code) + '" data-pat-name="' + wlEsc(x.name) + '" title="' + wlEsc(patTipOf(x, p) + '　👆 點一下開日線並定位到這個形態') + '">' + wlEsc(patShortName(x)) + (brk ? '突破' : '') + '</span>'; }).join('');
 }
 // 形態標籤點下去＝開這檔的日線並定位到形態那段（擋在列的點擊前面，不然會被當成點整列開預設的圖）
 document.addEventListener('click', (e) => {

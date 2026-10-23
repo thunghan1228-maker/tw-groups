@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 23:55:07";
+const BUILD_STAMP = "2026-10-23 23:55:50";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1068,7 +1068,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chips-modal.behind-group{z-index:98;}   /* 2026-10-17 使用者：機器人等面板裡點族群名，成分股視窗（z-index 99）要蓋在上面，關掉再回來 */  /* 手機／iPad 直式開K線圖（z-index 100）時退到後面，關圖再回來 */
   #diagInner{width:min(1400px,98vw);}   /* 2026-10-23 使用者：融資斷頭線名單最右邊的落底訊號、回檔警示兩欄被切掉看不到 → 個股問診視窗加寬，表格也縮一點 */
   .ck-table.mcl-tbl th,.ck-table.mcl-tbl td{padding:6px 4px;}
-  .pat-mini{cursor:pointer;display:inline-block;margin-left:4px;padding:0 6px;border-radius:999px;font-size:10.5px;font-weight:800;background:#475569;color:#fff;vertical-align:middle;white-space:nowrap;} .pat-mini.on,.pat-mini.brk{background:#dc2626;}   /* 醞釀／發動／首頁發動欄每檔後面的形態標籤：發動列、已突破＝紅底白字，其他＝灰藍底 */
+  .pat-mini{cursor:pointer;display:inline-block;margin-left:4px;padding:0 6px;border-radius:999px;font-size:10.5px;font-weight:800;background:#475569;color:#fff;vertical-align:middle;white-space:nowrap;} .pat-mini.on,.pat-mini.brk{background:#dc2626;}   /* 醞釀／發動／首頁發動欄每檔後面的形態標籤：形態真的突破（現價站上觸發價，字尾多「突破」）＝紅底白字，其他（等突破）＝灰藍底；發動欄也一樣（2026-10-23 使用者） */
   .pat-tag{display:inline-block;padding:0 8px;border-radius:999px;background:#475569;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;margin:1px 2px 1px 0;} .pat-tag.brk{background:#dc2626;}   /* 形態標籤：等突破＝灰藍底、剛突破＝紅底白字 */
   .mcl-prev{opacity:.5;white-space:nowrap;} .mcl-prev .mcl-bottom,.mcl-prev .mcl-pull{filter:saturate(.6);}
   .mcl-ma{font-size:15px;font-weight:800;color:var(--muted);} .mcl-ma.hi{color:var(--up);}   /* 2026-10-23 使用者：融資名單的均線分數（滿分 15，>10 紅字） */
@@ -15440,7 +15440,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 23:55:07';
+const BUILD_STAMP = '2026-10-23 23:55:50';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -23988,13 +23988,13 @@ function patTipOf(x, price){
   const brk = price > x.trigger;
   return x.name + '：觸發價 ' + ckPrice(x.trigger) + '（' + (brk ? '現價已站上' : '現價還在下面，再漲 ' + ((x.trigger / price - 1) * 100).toFixed(1) + '% 到觸發價') + '）；停損參考 ' + ckPrice(x.stop) + '、目標價約 ' + ckPrice(x.target) + '。日K波段找出的候選，不是買進訊號。';
 }
-// kind：'launch'＝發動欄（紅底白字）、其他＝灰藍底；price＝現價（沒有就用日K收盤）
+// kind：呼叫端的欄位（目前顏色一律看形態有沒有真的突破，不再因為在發動欄就變紅）；price＝現價（沒有就用日K收盤）
 function patTagsHtml(code, price, kind){
   const e = PAT.map && PAT.map[code];
   if (!e) return '';
   const p = price > 0 ? price : e.close;
   return Object.keys(e.patterns).map((k) => { const x = e.patterns[k], brk = p > x.trigger;
-    return '<span class="pat-mini' + (kind === 'launch' ? ' on' : brk ? ' brk' : '') + '" data-pat-code="' + wlEsc(code) + '" data-pat-name="' + wlEsc(x.name) + '" title="' + wlEsc(patTipOf(x, p) + '　👆 點一下開日線並定位到這個形態') + '">' + wlEsc(patShortName(x)) + (brk ? '突破' : '') + '</span>'; }).join('');
+    return '<span class="pat-mini' + (brk ? ' brk' : '') + '" data-pat-code="' + wlEsc(code) + '" data-pat-name="' + wlEsc(x.name) + '" title="' + wlEsc(patTipOf(x, p) + '　👆 點一下開日線並定位到這個形態') + '">' + wlEsc(patShortName(x)) + (brk ? '突破' : '') + '</span>'; }).join('');
 }
 // 形態標籤點下去＝開這檔的日線並定位到形態那段（擋在列的點擊前面，不然會被當成點整列開預設的圖）
 document.addEventListener('click', (e) => {
