@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 17:27:37";
+const BUILD_STAMP = "2026-10-23 17:37:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -475,6 +475,12 @@ const HTML_PAGE = `<!DOCTYPE html>
   .ma-legend-toggle{margin-left:auto;font:inherit;font-size:11px;font-weight:700;padding:1px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;white-space:nowrap;}   /* 2026-10-23 使用者：融資斷頭價開關放 MA／扣抵那一列的最後面 */
   .ma-legend-toggle.on{background:#e11d48;border-color:#e11d48;color:#fff;}
   .ma-legend-item.chart-holder{border-radius:6px;padding:0 6px;color:#fff;background:#6b7280;}
+  .ma-legend-item.mcl-sig{display:inline-flex;align-items:center;gap:3px;}   /* 2026-10-23 使用者：斷頭價開關右邊的賣壓／落底／回檔標籤 */
+  .ma-legend-item.mcl-sig i{font-style:normal;color:var(--muted);font-weight:600;}
+  .ma-legend-item.mcl-sig .mcl-press,.ma-legend-item.mcl-sig .mcl-bottom,.ma-legend-item.mcl-sig .mcl-pull{font-size:11px;padding:0 8px;}
+  .ma-legend-item.mcl-sig .mcl-none{color:var(--muted);font-weight:600;}
+  .ma-legend-item.mcl-sig .mcl-sub{color:var(--muted);font-weight:600;font-size:10.5px;}
+  .ma-legend-item.mcl-sig .mcl-util{font-size:10.5px;}
   .ma-legend-item.chart-holder.up{background:#dc2626;}
   .ma-legend-item.chart-holder.down{background:#16a34a;}
   .chart-tab{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:700;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;transition:background .12s ease,color .12s ease;}
@@ -1054,19 +1060,20 @@ const HTML_PAGE = `<!DOCTYPE html>
   #wgModal.bot-front:not(.behind-group):not(.behind-chart){z-index:103;}
   #wgInner{position:absolute;pointer-events:auto;min-width:280px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
   #wgInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
-  #wgBody .bot-col.wg-col{flex:0 0 1090px;min-width:1040px;}   /* 排名圖多了融資餘額、月高後、賣壓狀態三欄，格子變寬，左右拖著移動 */
+  #wgBody .bot-col.wg-col{flex:0 0 1150px;min-width:1100px;}   /* 排名圖多了融資餘額、月高後、賣壓狀態三欄，格子變寬，左右拖著移動 */
   @media (max-width:767px){
     #wgBody .bot-col.wg-col{flex-basis:94%;min-width:0;}
     /* 手機寬度放不下小柱子＋A／B 兩欄：柱子拿掉，只留股號、股名、漲跌幅、A、B 五欄 */
     #wgBody .bcr.cp:not(.cpx),.bot-col .bcr.cp:not(.cpx){grid-template-columns:2.2em minmax(0,1fr) 3.6em 3.4em 3.6em 3.6em!important;}
     #wgBody .bcr.cp:not(.cpx) .bct,.bot-col .bcr.cp:not(.cpx) .bct,.bcr.cp.bc-hd:not(.cpx) span:nth-child(4){display:none;}
-    #wgBody .bot-chart{min-width:1040px;}   /* 自選族群個股的排名圖欄位多，手機上整格左右滑 */
+    #wgBody .bot-chart{min-width:1100px;}   /* 自選族群個股的排名圖欄位多，手機上整格左右滑 */
   }
   /* 緊湊排名圖（機器人、自選族群個股共用）：漲跌幅數字、小柱子（大概比例就好）、A／B 斷頭價 */
   .bcr.cp{height:30px;} .bcr.cp.bc-hd{height:18px;font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap;} .bcr.cp.bc-hd > span{font-size:11px;}   /* 欄寬用 em 算：表頭那列的字級要跟下面的列一樣（12px），不然每欄都比下面窄、整排對不齊；字小一點只縮在 span 上 */ .bcr.cp.bc-hd span:nth-child(n+3){text-align:right;}
   .bcr.cp .n{text-align:left;} .bcr.cp .cpv{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:12px;}
   .bot-col.bot-col-wide:has(.bcr.cp){flex:0 0 470px;min-width:450px;}   /* 機器人那格多了 A／B 兩欄，比原本寬一點 */
   .bcr.cp .bct .b{height:10px;top:1px;}
+  .bcr.cp.cpx .bct .b{height:14px;top:-1px;}   /* 2026-10-23 使用者：自選族群個股的柱子再大一點（長度 ×2、粗度 10→14px） */
   .lgs{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;} .lgs b{font-size:14px;font-weight:900;min-width:12px;text-align:center;color:var(--muted);} .lgs b.n3{color:#22c55e;} .lgs b.n2{color:#a3e635;} .lgs b.n1{color:#f59e0b;}
   .lgs i{font-style:normal;font-size:10.5px;font-weight:800;line-height:1.5;padding:0 4px;border-radius:4px;} .lgs i.y{background:#16a34a;color:#fff;} .lgs i.n{border:1px solid var(--line);color:var(--muted);} .lgs i.u{border:1px dashed var(--line);color:var(--muted);opacity:.7;}
   .wg-sortbtn{float:right;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:1px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;} .wg-sortbtn.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
@@ -3857,10 +3864,10 @@ const HTML_PAGE = `<!DOCTYPE html>
       <div class="ind-panel-head"><span class="force-title">成交量</span></div>
       <div class="chart-canvas-wrap volume-wrap"><canvas id="volumeCanvas"></canvas></div>
     </div>
-    <div class="ind-panel-block" id="mclPanelBlock" hidden>  <!-- 2026-10-23 使用者：日線成交量下面加「融資維持率」，可開關、內定關 -->
+    <div class="ind-panel-block" id="mclPanelBlock" hidden>  <!-- 2026-10-23 使用者：成交量下面加「融資維持率」（日線、5 分K、1 分K），可開關、內定開 -->
       <div class="ind-panel-head">
         <span class="force-title">融資維持率（追高者）<small class="cm-chip-sum" id="mclPanelSum"></small></span>
-        <button class="macd-toggle" id="mclPanelToggle" aria-pressed="false">開啟</button>
+        <button class="macd-toggle on" id="mclPanelToggle" aria-pressed="true">關閉</button>
       </div>
       <div class="chart-canvas-wrap mcl-wrap" id="mclPanelWrap" hidden><canvas id="mclCanvas"></canvas></div>
     </div>
@@ -4169,7 +4176,7 @@ let currentChart = {
   d123On: (() => { try { return localStorage.getItem('chartD123On') !== '0'; } catch (_){ return true; } })(),   // 日線的 123 黑龍進場點
   d123: null,
   mclOn: (() => { try { return localStorage.getItem('chartMclOn') !== '0'; } catch (_){ return true; } })(),   // 融資斷頭價 A／B 線（日線一定畫；5 分K／1 分K 離現價近才畫）
-  mclPanelOn: false,   // 日線成交量下面的融資維持率副圖（內定關，跟 MACD 一樣每次開圖都從關開始）
+  mclPanelOn: true,   // 成交量下面的融資維持率副圖（2026-10-23 使用者：日線、5 分K 都內定開）
   mcl: null,
 };
 const D123_COLOR = { 1: '#dc2626', 2: '#d97706' };   // 123 黑龍：紅＝區1、黃＝區2（K線圖、問診圖、形態觀察股共用）
@@ -4209,8 +4216,14 @@ const MCL_CALL_PCT = 130;          // 低於 130% 開始追繳
 const MCL_A_COLOR = '#e11d48', MCL_B_COLOR = '#9333ea';
 function chartMclLoad(code){
   if (!code || (currentChart.mcl && currentChart.mcl.code === code)) return;
-  const st = currentChart.mcl = { code, line: null, loading: true };
+  const st = currentChart.mcl = { code, line: null, mg: null, loading: true };
   (async () => {
+    try {   // 先用名單端點拿那檔那一列：斷頭價 A／B ＋ 融資餘額（賣壓狀態要用）＋ 價量特徵（落底、回檔要用）一次到手
+      const r0 = await fetch('/api/margin-call?limit=5&groups=none&codes=' + encodeURIComponent(code));
+      const d0 = r0.ok ? await r0.json() : null;
+      const row = d0 && Array.isArray(d0.rows) ? d0.rows.find((x) => x && x.code === code) : null;
+      if (row){ st.line = row; st.mg = row.margin || null; return; }
+    } catch (_){ /* 名單端點拿不到就退回單檔端點（只有斷頭價，沒有融資餘額） */ }
     try {
       const r = await fetch('/api/margin-line?code=' + encodeURIComponent(code));
       const d = r.ok ? await r.json() : null;
@@ -4219,12 +4232,46 @@ function chartMclLoad(code){
     try {   // 備援：問診資料裡那檔的斷頭線（收盤後建的，一天一份），後端還沒更新到單檔端點時也畫得出來
       const r2 = await fetch('/api/diag?code=' + encodeURIComponent(code));
       const d2 = r2.ok ? await r2.json() : null;
-      if (d2 && d2.status === 'ok' && d2.stock && d2.stock.margin) st.line = d2.stock.margin;
+      if (d2 && d2.status === 'ok' && d2.stock && d2.stock.margin){ st.line = d2.stock.margin; st.mg = d2.stock.marginBal || null; }
     } catch (_){ /* 兩邊都拿不到就不畫 */ }
   })().finally(() => {
     st.loading = false;
     if (currentChart.code === code) redrawAll();
   });
+}
+// 2026-10-23 使用者：K線圖上面那一列（MA、扣抵、盤中大戶力後面）加六個欄位：融資餘額、月高後、賣壓狀態、落底訊號、回檔警示、做多參考，跟自選族群個股／個股問診同一份判斷；
+// 沒有的寫「無」或「—」；紅底白字的「斷頭價 開／關」開關搬到最右邊
+function chartMclSignalsHtml(){
+  const m = currentChart.mcl;
+  if (!m || m.code !== currentChart.code || !m.line) return '';
+  const ln = m.line, mg = m.mg || null;
+  const bars = currentChart.bars, px = bars && bars.length ? bars[bars.length - 1].close : ln.close;
+  const pr = mclPressure(ln, mg);
+  const bt = mclBottom(ln, mg, ln.stab);
+  const pl = mclPullback(ln.pull, mg);
+  const slot = (label, inner) => '<span class="ma-legend-item mcl-sig"><i>' + label + '</i>' + inner + '</span>';
+  const none = (tip) => '<span class="mcl-none" title="' + wlEsc(tip) + '">無</span>';
+  const bal = mg
+    ? '<b title="融資餘額 ' + Number(mg.balance).toLocaleString() + ' 張；今天' + (mg.chg1 < 0 ? '減少 ' : '增加 ') + Math.abs(mg.chg1 || 0).toLocaleString() + ' 張' + (mg.util != null ? '；使用率＝融資餘額 ÷ 這檔的融資額度，已用 ' + Number(mg.util).toFixed(1) + '%' : '') + '">' + Number(mg.balance).toLocaleString() + '張</b><span class="mcl-sub">今 ' + mclSigned(mg.chg1) + '</span>' + (mg.util != null ? mclUtilHtml(mg.util) : '')
+    : '<span class="mcl-none" title="證交所／櫃買晚上 21:00 後才公布融資餘額，這檔還沒有資料">—</span>';
+  let since;
+  if (mg && mg.sinceHighPct != null){
+    const v = mg.sinceHighPct;
+    since = '<b style="color:' + (v > 0 ? '#ef4444' : v < 0 ? '#22c55e' : 'inherit') + '" title="月高那天' + (ln.highDate ? '（' + String(ln.highDate).slice(5).replace('-', '/') + '）' : '') + '融資餘額 ' + (mg.atHigh != null ? Number(mg.atHigh).toLocaleString() : '—') + ' 張 → 今天 ' + Number(mg.balance).toLocaleString() + ' 張，' + (v > 0 ? '增加' : '減少') + ' ' + Math.abs(v).toFixed(1) + '%（正的＝跌下來後融資反而增加、賣壓沒釋放；負的＝融資在退場）">' + mclSigned(v, 1) + '%</b>' +
+      (mg.chg5Pct != null ? '<span class="mcl-sub" title="今天比 5 個交易日前，融資增減幾 %">5日 ' + mclSigned(mg.chg5Pct, 1) + '%</span>' : '');
+  } else {
+    since = '<span class="mcl-none" title="今天剛創近一個月新高（還沒有「月高之後」可比），或月高那天本站沒有這檔的融資紀錄">—</span>' + (mg && mg.chg5Pct != null ? '<span class="mcl-sub">5日 ' + mclSigned(mg.chg5Pct, 1) + '%</span>' : '');
+  }
+  // 做多參考：買＝盤中大戶力 ≥ +10%、融＝融資使用率 < 20%、線＝離 A、B 斷頭價都 > 10%（用現價重算，盤中會跳）
+  const hr = chartHolderRow(currentChart.code), hold = hr && hr.strengthPct !== null && hr.strengthPct !== undefined && Number.isFinite(Number(hr.strengthPct)) ? Number(hr.strengthPct) : null;
+  const lv = px > 0 && ln.a > 0 && ln.b > 0 ? wgLive(ln, px) : null;
+  const t = [hold === null ? null : hold >= HOLDER_HOT_PCT, mg && mg.util != null ? mg.util < MCL_UTIL_HIGH : null, lv ? (!lv.aBroken && !lv.bBroken && Math.min(lv.aGap, lv.bGap) > MCL_FILTER_PCT) : null];
+  const lg = { n: t.filter((x) => x === true).length, t, hold };
+  return slot('融資', bal) + slot('月高後', since) +
+    slot('賣壓', pr ? mclPressPill(pr) : none('資料不足')) +
+    slot('落底', bt ? mclBottomPill(bt) : none('沒有近似落底訊號：要在斷頭賣壓裡、融資退場、爆量後跌幅變小、沒再破低，四樣同時成立才標')) +
+    slot('回檔', pl ? mclPullPill(pl) : none('沒有留意回檔：要近期漲多＋爆量＋出貨K，三樣同時成立才標')) +
+    slot('做多參考', mclLongHtml(lg));
 }
 function chartMclLine(){ const m = currentChart.mcl; return m && m.code === currentChart.code ? m.line : null; }
 function chartMclLines(allBars){
@@ -4250,6 +4297,14 @@ function chartMclSeries(allBars, factor){
     b[i] = ma5 > 0 ? c / (loan * ma5) * 100 : null;
   }
   return { a, b, base: 100 / loan };
+}
+
+// 分K的融資維持率（2026-10-23 使用者：5 分K 也要有）：沒有每根分K的月高，就用 K 線圖上畫的那兩條斷頭價（今天以前算好的 A、B）當基準——
+// 維持率＝現價 ÷ 斷頭價 × 130%（價格剛好在斷頭價＝130%、借滿起始價＝166.7%／上櫃 200%），跟圖上的 A／B 線一對一對得起來
+function chartMclSeriesIntraday(allBars, ln){
+  const base = 130 / (ln.factor || 0.78);
+  const rate = (c, line) => (c > 0 && line > 0 ? c * 130 / line : null);
+  return { a: allBars.map((b) => rate(b.close, ln.a)), b: allBars.map((b) => rate(b.close, ln.b)), base };
 }
 
 // 日線的明日防守線（2026-10-10 使用者：個股研究日線圖的「明日 紅半／三日低／月線」也畫到 K 線圖的日線）
@@ -4490,7 +4545,7 @@ function drawChart(){
   if (vwapSeries) vwapSeries.forEach((v) => { lo = Math.min(lo, v); hi = Math.max(hi, v); });
   const defLines = (currentChart.tf === 'daily' && currentChart.defOn && vStart + vCount >= allBars.length) ? chartDefenseLines(allBars) : [];
   defLines.forEach((d) => { lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); });
-  if (currentChart.mclOn || currentChart.mclPanelOn) chartMclLoad(currentChart.code);
+  chartMclLoad(currentChart.code);   // 2026-10-23 使用者：K線圖上面加賣壓狀態／落底訊號／回檔警示三個標籤 → 不管斷頭價開關開不開都要載入
   const mclLines = chartMclLines(allBars);   // 融資斷頭價 A／B：日線一定畫、分K離現價 ≤20% 才畫
   mclLines.forEach((d) => { lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); });
   const range = (hi - lo) || 1;
@@ -4826,17 +4881,18 @@ function drawVolumePanel(){
   }
 }
 
-// 日線成交量下面的「融資維持率（追高者）」副圖（2026-10-23 使用者，可開關、內定關）：A、B 兩條曲線＋130% 追繳線＋借滿起始線（166.7%，上櫃 200%）
+// 成交量下面的「融資維持率（追高者）」副圖（2026-10-23 使用者，日線、5 分K、1 分K，可開關、內定開）：A、B 兩條曲線＋130% 追繳線＋借滿起始線（166.7%，上櫃 200%）
 function drawMclPanel(){
   const block = document.getElementById('mclPanelBlock'), wrap = document.getElementById('mclPanelWrap');
   if (!block || !wrap) return;
-  block.hidden = currentChart.tf !== 'daily';
+  const intraday = currentChart.tf === 'm5' || currentChart.tf === 'm1';
+  block.hidden = currentChart.tf !== 'daily' && !intraday;
   if (block.hidden || !currentChart.mclPanelOn){ wrap.hidden = true; return; }
   const allBars = currentChart.bars;
-  if (!allBars || allBars.length < 24) { wrap.hidden = true; return; }
-  wrap.hidden = false;
   const ln = chartMclLine();
-  const ser = chartMclSeries(allBars, ln ? ln.factor : 0.78);
+  if (!allBars || allBars.length < (intraday ? 2 : 24) || (intraday && !(ln && ln.a > 0 && ln.b > 0))){ wrap.hidden = true; return; }   // 分K要等斷頭價載入才畫得出來
+  wrap.hidden = false;
+  const ser = intraday ? chartMclSeriesIntraday(allBars, ln) : chartMclSeries(allBars, ln ? ln.factor : 0.78);
   const canvas = document.getElementById('mclCanvas');
   const cssW = canvas.parentElement.clientWidth, cssH = canvas.parentElement.clientHeight;
   const ctx = setupCanvas(canvas, cssW, cssH);
@@ -5117,7 +5173,7 @@ function updateMaLegend(absIndex){
   }).join('') + chartDeductMarks(allBars).map((m) => '<span class="ma-legend-item" style="color:' + m.color + '" title="扣底：今天不算，往前數 ' + m.period + ' 根的收盤">▲' + m.period + '扣 ' + m.close.toFixed(2) + '</span>').join('') +
     (currentChart.tf === 'daily' && currentChart.defOn
     ? chartDefenseLines(allBars).map((d) => '<span class="ma-legend-item" style="color:#e6675f">明日' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('')
-    : '') + chartMclLines(allBars).map((d) => '<span class="ma-legend-item" style="color:' + d.color + '">' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('') + chartHolderLegendHtml() +
+    : '') + chartMclLines(allBars).map((d) => '<span class="ma-legend-item" style="color:' + d.color + '">' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('') + chartHolderLegendHtml() + chartMclSignalsHtml() +
     '<button type="button" class="ma-legend-toggle' + (currentChart.mclOn ? ' on' : '') + '" data-mcl-toggle="1" aria-pressed="' + currentChart.mclOn + '" title="融資斷頭價 A／B：日線一定畫；5 分K／1 分K 離現價 ' + MCL_NEAR_PCT + '% 以內的那條才畫">斷頭價 ' + (currentChart.mclOn ? '開' : '關') + '</button>';   // 2026-10-23 使用者：開關放在K線圖上面那一列（MA、扣抵、防守線）的最後面
 }
 function updateChartTooltipAt(clientX, clientY){
@@ -5562,9 +5618,9 @@ async function switchTimeframe(tf){
   currentChart.macdOn = false;
   const macdBtn = document.getElementById('macdToggle');
   macdBtn.textContent = '開啟'; macdBtn.classList.remove('on'); macdBtn.setAttribute('aria-pressed', 'false');
-  currentChart.mclPanelOn = false;   // 融資維持率副圖內定關
+  currentChart.mclPanelOn = true;   // 融資維持率副圖內定開（2026-10-23 使用者：日線、5 分K 都是，放在成交量下面）
   const mclBtn = document.getElementById('mclPanelToggle');
-  mclBtn.textContent = '開啟'; mclBtn.classList.remove('on'); mclBtn.setAttribute('aria-pressed', 'false');
+  mclBtn.textContent = '關閉'; mclBtn.classList.add('on'); mclBtn.setAttribute('aria-pressed', 'true');
   renderSettingsPanel();
   redrawAll();
   if (livePromise && isReal){
@@ -14902,7 +14958,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 17:27:37';
+const BUILD_STAMP = '2026-10-23 17:37:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22632,7 +22688,7 @@ function wgAbExtra(s){
   return '<span class="cphold">' + homeHoldHtml(s.code) + '</span>' + (m ? wgLineCell(s.price, m.a) + wgLineCell(s.price, m.b) : '<span class="wg-ab"><b>—</b></span><span class="wg-ab"><b>—</b></span>');
 }
 // 自選族群個股的排名圖多三欄（2026-10-23 使用者：融資餘額、月高後融資增減、賣壓狀態也要有，欄位變寬沒關係、左右可以捲動）：跟個股問診融資名單同一套（mclBalCell／mclSinceCell／mclPressure）
-const WG_GRID_X = '2.6em minmax(4.2em,1fr) 4.3em 60px 7.8em 3.9em 4.4em 4.4em 12.6em 4.9em 9.4em 7.4em 7.4em';
+const WG_GRID_X = '2.6em minmax(4.2em,1fr) 4.3em 120px 7.8em 3.9em 4.4em 4.4em 12.6em 4.9em 9.4em 7.4em 7.4em';
 const WG_HEAD_X = '<div class="bcr cp cpx bc-hd" style="grid-template-columns:' + WG_GRID_X + '"><span></span><span>股票</span><span>漲跌幅</span><span></span><span title="做多參考：買（大戶力 ≥+10%）、融（融資使用率 <20%）、線（離 A、B 斷頭價都 >10%）三項各一勾，勾越多越前面；只是整理，不是買進訊號">做多參考</span><span title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值）；≥+10% 紅底、≤−10% 綠底">大戶力</span><span title="A 最高點追的斷頭價">A 斷頭</span><span title="B 五日平均價線追的斷頭價">B 斷頭</span><span title="融資餘額（張）；今＝今天增減、使用率＝融資餘額 ÷ 這檔的融資額度">融資餘額（張）</span><span title="月高那天到今天融資餘額增減 %；下面小字是 5 個交易日增減">月高後</span><span title="離 A 或 B 斷頭價 ≤10% 或已跌破才判：賣壓未釋放／釋放中／已洗掉一大半；離線遠＝離斷頭價還遠">賣壓狀態</span><span title="近似落底：賣壓釋放中或已洗掉一大半＋近 5 日爆量＋今天跌幅比前一天小、沒再破爆量日最低價">落底訊號</span><span title="留意回檔：漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K">回檔警示</span></div>';
 function wgFullExtra(s){
   const m = wgMargin.map && wgMargin.map[s.code];
