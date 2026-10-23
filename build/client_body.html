@@ -494,6 +494,21 @@
   .ssb-go-btn:hover{background:var(--accent);color:var(--bg);}
 
   /* 底部工具列 */
+  /* 自訂畫面（2026-10-23 使用者：照莊爸網站左側「自訂」）：自訂模式下每個可收的項目前面出現勾選框（打勾＝留著、沒勾＝收起來、半透明），
+     點一下就切換；收起來的平常不顯示；「全部顯示」一鍵復原；設定存在這台裝置（localStorage） */
+  .cz-off{display:none!important;}
+  body.cz-mode .tb-btn.cz-off{display:flex!important;} body.cz-mode .signal-controls .cz-off{display:inline-block!important;}
+  body.cz-mode .cz-off{opacity:.42;}
+  body.cz-mode [data-cz]{position:relative;cursor:pointer;}
+  body.cz-mode [data-cz]::before{content:'✓';position:absolute;top:4px;left:4px;width:15px;height:15px;line-height:13px;box-sizing:border-box;border:2px solid #7c3aed;border-radius:4px;background:#7c3aed;color:#fff;font-size:11px;font-weight:900;text-align:center;z-index:3;pointer-events:none;}
+  body.cz-mode [data-cz].cz-off::before{content:'';background:#fff;}
+  body.cz-mode .signal-controls [data-cz]{padding-left:28px;} body.cz-mode .signal-controls [data-cz]::before{top:50%;transform:translateY(-50%);left:8px;}
+  body.cz-mode .tb-btn[data-cz]{outline:1px dashed rgba(255,255,255,.35);outline-offset:-3px;}
+  #toolbarBottom.cz-empty:not(.cz-keep){display:none;}
+  .cz-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tb-h) + 12px);z-index:130;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;max-width:min(760px,94vw);background:#3b2a73;color:#fff;border:1px solid #7c3aed;border-radius:12px;padding:9px 14px;font-size:12.5px;line-height:1.6;box-shadow:0 8px 28px rgba(0,0,0,.5);}
+  .cz-bar[hidden]{display:none;} .cz-bar a{color:#c4b5fd;font-weight:800;text-decoration:underline;cursor:pointer;white-space:nowrap;} .cz-bar #czCount{color:#fde68a;font-weight:700;margin-left:6px;}
+  .cz-bar button{background:#7c3aed;color:#fff;border:none;border-radius:999px;padding:5px 16px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  #czBtn.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
   :root{--tb-h:56px;}   /* 工具列實際高度，由程式量好寫回來（兩排時會變高） */
   body{padding-bottom:var(--tb-h);}
   .toolbar-bottom{position:fixed;left:0;right:0;bottom:0;display:flex;background:#6b5541;border-top:1px solid #8a6f57;z-index:50;overflow-x:auto;}
@@ -3372,6 +3387,7 @@
       <button class="alert-toggle guide-btn" id="botBtn">🤖 機器人代碼</button>  <!-- 2026-10-17 使用者：照對方 Line 機器人的代碼（12／22／B／a／70…）做一個輸入代碼的面板 -->
       <button class="alert-toggle guide-btn" id="sgtBtn">📶 盤中訊號分頁</button>  <!-- 2026-10-18 使用者：盤中訊號的分頁也做成機器人代碼那樣，點了開一格、一格一格往右排 -->
       <button class="alert-toggle guide-btn" id="tutBtn">🎬 影片教學</button>  <!-- 2026-10-13 使用者：訊號教學、工具列各功能的影音教學（女聲旁白＋字幕） -->  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照老師新手教學頁） -->
+      <button class="alert-toggle guide-btn" id="czBtn" title="自訂畫面：選擇哪些按鈕要留著、哪些收起來（畫面比較精簡）">⊙ 自訂</button>  <!-- 2026-10-23 使用者：照莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，勾掉就收起來；全部顯示一鍵復原 -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
   </div>
@@ -3769,6 +3785,11 @@
   </div>
 </div>
 
+<div class="cz-bar" id="czBar" hidden>
+  <span><b>✏️ 自訂畫面</b>　點一下項目就切換：<b>打勾＝留著、沒勾＝收起來</b>。只存在這台裝置，換手機／電腦要重設一次。<span id="czCount"></span></span>
+  <a href="#" id="czAll" role="button">全部顯示</a>
+  <button type="button" id="czDone">✓ 完成</button>
+</div>
 <div class="toolbar-bottom" id="toolbarBottom">
   <!-- 2026-10-12 使用者：每日功課、籌碼日報、每日持股健診、盤後籌碼排行放最前面四顆，第五顆自選股、第六顆飆股雷達（10/13 改名 K棒組合選股、移到選股・個股研究左邊），後面照原本順序 -->
   <button class="tb-btn" data-label="每日功課"><span class="tb-icon">課</span>每日功課</button>  <!-- 2026-10-10 使用者：第 14 顆「每日功課」（空觀察／當沖多／多觀察自動版），放上排 → 上下各 7 顆 -->
@@ -23264,6 +23285,56 @@ document.getElementById('maBody').addEventListener('keydown', (e) => {
   else window.addEventListener('resize', setH);
   setH();
 })();
+// ---- 自訂畫面（2026-10-23 使用者：像莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，選擇要不要看到、畫面比較精簡；要有「全部顯示」一鍵復原）----
+// 可收的項目：下方工具列每一顆、右上角的自選族群個股／今日提醒／新手教學／機器人代碼／盤中訊號分頁／影片教學。不能收的：盤中訊號、提醒開啟（核心）、自訂按鈕本身。
+// 收起來只是不顯示（功能都還在，從別的地方打開照樣可以）；設定存在這台裝置的 localStorage，「全部顯示」清掉。
+const CZ_KEY = 'czHidden';
+const CZ_HEADER_IDS = ['wgBtn', 'remindBtn', 'guideBtn', 'botBtn', 'sgtBtn', 'tutBtn'];
+let czMode = false;
+function czLoad(){ try { const v = JSON.parse(localStorage.getItem(CZ_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; } catch (_){ return []; } }
+function czSave(){ try { if (czHidden.size) localStorage.setItem(CZ_KEY, JSON.stringify([...czHidden])); else localStorage.removeItem(CZ_KEY); } catch (_){} }
+let czHidden = new Set(czLoad());
+function czItems(){
+  const items = [];
+  document.querySelectorAll('#toolbarBottom .tb-btn').forEach((el) => items.push({ id: 'tb:' + el.dataset.label, el }));
+  CZ_HEADER_IDS.forEach((id) => { const el = document.getElementById(id); if (el) items.push({ id: 'hd:' + id, el }); });
+  return items;
+}
+function czApply(){
+  const items = czItems();
+  items.forEach(({ id, el }) => { el.dataset.cz = id; el.classList.toggle('cz-off', czHidden.has(id)); });
+  const tb = document.getElementById('toolbarBottom');
+  if (tb){
+    const tbItems = items.filter((x) => x.id.startsWith('tb:'));
+    tb.classList.toggle('cz-empty', tbItems.length > 0 && tbItems.every((x) => czHidden.has(x.id)));   // 工具列整排都收起來：整條不顯示（自訂模式下還是要看得到）
+    tb.classList.toggle('cz-keep', czMode);
+    document.documentElement.style.setProperty('--tb-h', (tb.offsetHeight || 0) + 'px');
+  }
+  const n = items.filter((x) => czHidden.has(x.id)).length;
+  const c = document.getElementById('czCount'); if (c) c.textContent = n ? '（已收起 ' + n + ' 個）' : '';
+  const b = document.getElementById('czBtn'); if (b){ b.textContent = czMode ? '✓ 完成' : (n ? '⊙ 自訂（' + n + '）' : '⊙ 自訂'); b.classList.toggle('on', czMode); }
+}
+function czSetMode(on){
+  czMode = !!on;
+  document.body.classList.toggle('cz-mode', czMode);
+  document.getElementById('czBar').hidden = !czMode;
+  czApply();
+}
+document.getElementById('czBtn').addEventListener('click', () => czSetMode(!czMode));
+document.getElementById('czDone').addEventListener('click', () => czSetMode(false));
+document.getElementById('czAll').addEventListener('click', (e) => { e.preventDefault(); czHidden = new Set(); czSave(); czApply(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && czMode) czSetMode(false); });
+// 自訂模式下點項目＝切換勾選（不打開那個功能）；放在最前面（capture）才擋得住按鈕原本的點擊
+document.addEventListener('click', (e) => {
+  if (!czMode) return;
+  const el = e.target.closest('[data-cz]');
+  if (!el) return;
+  e.preventDefault(); e.stopPropagation();
+  const id = el.dataset.cz;
+  if (czHidden.has(id)) czHidden.delete(id); else czHidden.add(id);
+  czSave(); czApply();
+}, true);
+czApply();
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '自選股'){ openWatchPanel(); return; }        // 2026-10-05 使用者：自選股
