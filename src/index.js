@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 11:23:09";
+const BUILD_STAMP = "2026-10-23 11:24:45";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3128,6 +3128,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 2026-10-23 使用者：問診的同族對照／今日名單加了斷頭價 A／B，版面收緊：字小一點、間距縮、表頭可換行、股票名稱放第二行（欄寬寬一點、兩排字） */
   .mcl-chip{display:inline-block;background:#7c3aed;color:#fff;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px 4px 2px 0;cursor:pointer;text-decoration:none;}   /* 2026-10-23 使用者：融資斷頭線總結裡的個股名稱＝紫底白字 */
   .mcl-chip:hover{background:#6d28d9;}
+  .dg-back[disabled]{opacity:.4;cursor:not-allowed;}
   .mcl-press{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;background:#6b7280;}   /* 2026-10-23 使用者：賣壓狀態標籤 */
   .mcl-press.p-no{background:#d9392b;}
   .mcl-press.p-ing{background:#d97706;}
@@ -13685,7 +13686,7 @@ function trkTick(){
 
 // ---- 個股問診（2026-09-28 使用者：照學員專區「個股問診・完整版」做）----
 // 打股號 → /api/diag 拿回那檔收盤後算好的三面向分數、七科、防守線、近 120 根日K、同族對照、族群強度榜與今日名單、穿惡名單。
-let dgState = { code: '', query: null, data: null, loading: false, failedAt: 0, error: '', filter: 'all', recent: [] };
+let dgState = { code: '', query: null, data: null, loading: false, failedAt: 0, error: '', filter: 'all', recent: [], hist: [] };   // hist：回上一頁用（2026-10-23 使用者：問診跳來跳去要能回上一頁）
 try { dgState.recent = (JSON.parse(localStorage.getItem('diagRecent') || '[]') || []).filter((x) => x && x.code); } catch (e) { /* 用空的 */ }
 function dgRemember(code, name){
   dgState.recent = [{ code, name: name || '' }].concat(dgState.recent.filter((x) => x.code !== code)).slice(0, 8);
@@ -13713,13 +13714,24 @@ async function ensureDiag(){
   }
   if (!document.getElementById('diagModal').hidden) renderDiag();
 }
-function dgRun(text){
-  const code = ckResolve(text)[0] || '';
+function dgShow(code, record){
+  const inner = document.getElementById('diagInner');
+  if (record && code !== dgState.code){
+    dgState.hist.push({ code: dgState.code, scroll: inner ? inner.scrollTop : 0 });   // 離開前記下現在這頁（空字串＝融資斷頭線名單那頁）和捲到哪
+    if (dgState.hist.length > 30) dgState.hist.shift();
+  }
   dgState.code = code; dgState.query = null; dgState.failedAt = 0; dgState.filter = 'all';
   renderDiag();
-  const inner = document.getElementById('diagInner');
   if (inner) inner.scrollTop = 0;
 }
+function dgRun(text){ dgShow(ckResolve(text)[0] || '', true); }
+function dgBack(){
+  const prev = dgState.hist.pop();
+  if (!prev) return;
+  dgShow(prev.code, false);
+  setTimeout(() => { const inner = document.getElementById('diagInner'); if (inner) inner.scrollTop = prev.scroll || 0; }, 0);
+}
+const dgBackBtn = () => '<button type="button" class="chart-tab chips-btn dg-back" title="回到上一頁（跳來跳去時用）"' + (dgState.hist.length ? '' : ' disabled') + '>回上一頁</button>';
 const dgClsClass = (cls) => (cls === '強勢' ? 'strong' : cls === '中等' ? 'mid' : cls === '弱勢' ? 'weak' : '');
 const dgClsPill = (cls) => (cls ? '<span class="dg-pill ' + dgClsClass(cls) + '">' + cls + '</span>' : '');
 function dgAboveList(s){
@@ -13931,7 +13943,7 @@ function dgHeaderHtml(data){
     '<ul class="dg-lines">' + dgSummaryLines(s).map((l) => '<li>' + l + '</li>').join('') + '</ul>';
 }
 function dgSearchHtml(){
-  return '<div class="dg-search"><input class="dg-in" id="dgInput" placeholder="股號或股名，例 2330" value="' + (dgState.code || '') + '"><button class="chart-tab chips-btn active" id="dgRun">🩺 問診</button>' +
+  return '<div class="dg-search"><input class="dg-in" id="dgInput" placeholder="股號或股名，例 2330" value="' + (dgState.code || '') + '"><button class="chart-tab chips-btn active" id="dgRun">🩺 問診</button>' + (dgState.code ? dgBackBtn() : '') +
     (dgState.recent.length ? '<span class="dg-recent">最近：' + dgState.recent.map((x) => '<span class="ck-tag dg-link" data-code="' + x.code + '"><b>' + x.code + '</b>' + (x.name || '') + '</span>').join('') + '</span>' : '') + '</div>';
 }
 // ---- 個股研究補強（2026-10-10 使用者：照老師「個股快查」補上產業白話介紹、同業、季報）----
@@ -14225,7 +14237,7 @@ function dgMarginStockHtml(s){
 function dgMarginListHtml(){
   mclEnsure();
   const d = mclState.data;
-  const ctl = '<div class="dg-search"><input class="dg-in" id="mclGroups" placeholder="族群名，逗號分隔（all＝全部族群）" value="' + wlEsc(mclState.groups) + '" style="min-width:260px"><button class="chart-tab chips-btn" id="mclRun">查</button></div>';
+  const ctl = '<div class="dg-search"><input class="dg-in" id="mclGroups" placeholder="族群名，逗號分隔（all＝全部族群）" value="' + wlEsc(mclState.groups) + '" style="min-width:260px"><button class="chart-tab chips-btn" id="mclRun">查</button>' + (dgState.code ? '' : dgBackBtn()) + '</div>';
   const head = '<div class="bl-section bl-launch">💥 融資斷頭線追蹤' + (d && d.date ? '・' + swMmdd(d.date) + ' 收盤' : '') + '</div>' + ctl;
   if (!d) return head + '<div class="race-note">' + (mclState.error ? '讀取失敗：' + wlEsc(mclState.error) : '讀取中…') + '</div>';
   if (d.status !== 'ok') return head + '<div class="race-note">' + wlEsc(d.reason || '還沒有日K資料') + '</div>';
@@ -14540,6 +14552,7 @@ document.getElementById('screenerModal').addEventListener('click', (e) => { if (
 document.getElementById('diagClose').addEventListener('click', closeDiagPanel);
 document.getElementById('diagModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDiagPanel(); });
 document.getElementById('diagBody').addEventListener('click', (e) => {
+  if (e.target.closest('.dg-back')){ dgBack(); return; }
   if (e.target.closest('#dgRun')){ dgRun((document.getElementById('dgInput') || {}).value || ''); return; }
   if (e.target.closest('#mclRun')){ mclState.groups = ((document.getElementById('mclGroups') || {}).value || '').trim() || '被動元件,記憶體,矽晶圓'; mclState.loaded = ''; mclState.failedAt = 0; renderDiag(); return; }
   const mvr = e.target.closest('[data-mv-refresh]');
@@ -14569,7 +14582,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 11:23:09';
+const BUILD_STAMP = '2026-10-23 11:24:45';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
