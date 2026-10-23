@@ -500,7 +500,8 @@
   .tx-chip{display:block;width:100%;text-align:left;font:inherit;font-size:12.5px;color:var(--text);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:10px;padding:6px 10px;cursor:pointer;line-height:1.45;}
   .tx-chip:hover,.tx-chip[aria-expanded="true"]{background:var(--panel-2);}
   .tx-chip.t-bull{border-left-color:#ef4444;} .tx-chip.t-neutral{border-left-color:#f59e0b;} .tx-chip.t-bear{border-left-color:#22c55e;}
-  .tx-chip .tx-l1{display:block;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;} .tx-chip .tx-l2{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tx-chip .tx-l1{display:block;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;} .tx-chip .tx-l2{display:block;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .tx-state{display:inline-block;padding:0 8px;border-radius:999px;color:#fff;font-weight:800;} .tx-state.s-bull{background:#dc2626;} .tx-state.s-neutral{background:#d97706;} .tx-state.s-bear{background:#16a34a;}   /* 2026-10-23 使用者：盤勢標籤偏空綠底白字、偏多紅底白字（中性橘底），日期字調亮 */
   .tx-up{color:#ef4444;font-weight:800;} .tx-dn{color:#22c55e;font-weight:800;}
   .tx-pop{position:fixed;z-index:210;width:min(620px,94vw);max-height:78vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.55);padding:14px 16px;font-size:13.5px;line-height:1.6;}
   .tx-pop h3{margin:0 0 4px;font-size:16px;} .tx-pop .tx-meta{color:var(--muted);font-size:11.5px;margin-bottom:6px;}
@@ -23792,7 +23793,7 @@ function renderTaiexChip(){
   const a = TAIEX.fu ? taiexAnalyze(TAIEX.fu, TAIEX.fc) : null;
   if (!a){ chip.className = 'tx-chip'; chip.innerHTML = '<span class="tx-l1">📈 加權指數分析</span><span class="tx-l2">' + (TAIEX.error || (TAIEX.loading ? '讀取中…' : '點一下重新讀取')) + '</span>'; return; }
   chip.className = 'tx-chip t-' + a.tone;
-  chip.innerHTML = '<span class="tx-l1">📈 加權指數 ' + txN(a.close) + ' <span class="' + (a.pct >= 0 ? 'tx-up' : 'tx-dn') + '">' + txSg(a.pct) + '%</span></span><span class="tx-l2">' + a.title + '・' + txMd(a.asOf) + ' 分析 ▸</span>';
+  chip.innerHTML = '<span class="tx-l1">📈 加權指數 ' + txN(a.close) + ' <span class="' + (a.pct >= 0 ? 'tx-up' : 'tx-dn') + '">' + txSg(a.pct) + '%</span></span><span class="tx-l2"><span class="tx-state s-' + a.tone + '">' + a.title + '</span> ' + txMd(a.asOf) + ' 分析 ▸</span>';
   const pop = document.getElementById('taiexPop');
   if (pop && !pop.hidden) pop.innerHTML = taiexHtml(a);
 }

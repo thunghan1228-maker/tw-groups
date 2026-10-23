@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 23:00:45";
+const BUILD_STAMP = "2026-10-23 23:08:00";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -578,7 +578,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .tx-chip{display:block;width:100%;text-align:left;font:inherit;font-size:12.5px;color:var(--text);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:10px;padding:6px 10px;cursor:pointer;line-height:1.45;}
   .tx-chip:hover,.tx-chip[aria-expanded="true"]{background:var(--panel-2);}
   .tx-chip.t-bull{border-left-color:#ef4444;} .tx-chip.t-neutral{border-left-color:#f59e0b;} .tx-chip.t-bear{border-left-color:#22c55e;}
-  .tx-chip .tx-l1{display:block;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;} .tx-chip .tx-l2{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tx-chip .tx-l1{display:block;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;} .tx-chip .tx-l2{display:block;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .tx-state{display:inline-block;padding:0 8px;border-radius:999px;color:#fff;font-weight:800;} .tx-state.s-bull{background:#dc2626;} .tx-state.s-neutral{background:#d97706;} .tx-state.s-bear{background:#16a34a;}   /* 2026-10-23 使用者：盤勢標籤偏空綠底白字、偏多紅底白字（中性橘底），日期字調亮 */
   .tx-up{color:#ef4444;font-weight:800;} .tx-dn{color:#22c55e;font-weight:800;}
   .tx-pop{position:fixed;z-index:210;width:min(620px,94vw);max-height:78vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.55);padding:14px 16px;font-size:13.5px;line-height:1.6;}
   .tx-pop h3{margin:0 0 4px;font-size:16px;} .tx-pop .tx-meta{color:var(--muted);font-size:11.5px;margin-bottom:6px;}
@@ -15288,7 +15289,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 23:00:45';
+const BUILD_STAMP = '2026-10-23 23:08:00';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -23872,7 +23873,7 @@ function renderTaiexChip(){
   const a = TAIEX.fu ? taiexAnalyze(TAIEX.fu, TAIEX.fc) : null;
   if (!a){ chip.className = 'tx-chip'; chip.innerHTML = '<span class="tx-l1">📈 加權指數分析</span><span class="tx-l2">' + (TAIEX.error || (TAIEX.loading ? '讀取中…' : '點一下重新讀取')) + '</span>'; return; }
   chip.className = 'tx-chip t-' + a.tone;
-  chip.innerHTML = '<span class="tx-l1">📈 加權指數 ' + txN(a.close) + ' <span class="' + (a.pct >= 0 ? 'tx-up' : 'tx-dn') + '">' + txSg(a.pct) + '%</span></span><span class="tx-l2">' + a.title + '・' + txMd(a.asOf) + ' 分析 ▸</span>';
+  chip.innerHTML = '<span class="tx-l1">📈 加權指數 ' + txN(a.close) + ' <span class="' + (a.pct >= 0 ? 'tx-up' : 'tx-dn') + '">' + txSg(a.pct) + '%</span></span><span class="tx-l2"><span class="tx-state s-' + a.tone + '">' + a.title + '</span> ' + txMd(a.asOf) + ' 分析 ▸</span>';
   const pop = document.getElementById('taiexPop');
   if (pop && !pop.hidden) pop.innerHTML = taiexHtml(a);
 }
