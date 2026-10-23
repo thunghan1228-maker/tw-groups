@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 11:15:15";
+const BUILD_STAMP = "2026-10-23 11:16:55";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3126,6 +3126,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .dg-spark svg{display:inline-block;vertical-align:middle;overflow:visible;}  /* 最後一個數值標籤可以超出框，不被切掉 */
   .ck-table tr.dg-cur td{background:rgba(230,103,95,.12);}
   /* 2026-10-23 使用者：問診的同族對照／今日名單加了斷頭價 A／B，版面收緊：字小一點、間距縮、表頭可換行、股票名稱放第二行（欄寬寬一點、兩排字） */
+  .mcl-chip{display:inline-block;background:#7c3aed;color:#fff;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px 4px 2px 0;cursor:pointer;text-decoration:none;}   /* 2026-10-23 使用者：融資斷頭線總結裡的個股名稱＝紫底白字 */
+  .mcl-chip:hover{background:#6d28d9;}
   .ck-table.dg-tbl{font-size:12.5px;}
   .ck-table.dg-tbl th,.ck-table.dg-tbl td{padding:4px 6px;}
   .ck-table.dg-tbl th{white-space:normal;line-height:1.25;vertical-align:bottom;font-size:12px;}
@@ -14192,10 +14194,11 @@ function dgMarginListHtml(){
   const rows = (d.rows || []).map((r) => '<tr class="dg-link" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
     '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td></tr>').join('');
   const sm = d.summary || {};
-  const smNames = (xs) => (xs || []).map((x) => '<a class="dg-link" data-code="' + x.code + '" style="cursor:pointer;text-decoration:underline">' + wlEsc(x.name || x.code) + '</a>').join('、') || '—';
-  const summary = !d.summary ? '' : '<div class="race-note" style="line-height:1.9"><b>你的股票在哪一條線上？</b><br><b style="color:#d9392b">A 線已破・' + (sm.aBroken || []).length + ' 檔</b>　' + smNames(sm.aBroken) +
-    '<br><b>B 線 5% 內・' + (sm.bWithin || []).length + ' 檔</b>　' + smNames(sm.bWithin) +
-    ((sm.aNew || []).length || (sm.bNew || []).length ? '<br><b>今日新破</b>　A：' + smNames(sm.aNew) + '　B：' + smNames(sm.bNew) : '') + '</div>';
+  const smNames = (xs) => (xs || []).map((x) => '<a class="dg-link mcl-chip" data-code="' + x.code + '">' + wlEsc(x.name || x.code) + '</a>').join('') || '<span class="muted">—</span>';
+  const smLab = (color, text) => '<b style="color:' + color + '">' + text + '</b>';   // 2026-10-23 使用者：A 線已破＝綠字、B 線 5% 內＝粉紅字、今日新破＝藍字，個股名稱紫底白字
+  const summary = !d.summary ? '' : '<div class="race-note" style="line-height:2.1"><b>你的股票在哪一條線上？</b><br>' + smLab('#22c55e', 'A 線已破・' + (sm.aBroken || []).length + ' 檔') + '　' + smNames(sm.aBroken) +
+    '<br>' + smLab('#f472b6', 'B 線 5% 內・' + (sm.bWithin || []).length + ' 檔') + '　' + smNames(sm.bWithin) +
+    ((sm.aNew || []).length || (sm.bNew || []).length ? '<br>' + smLab('#60a5fa', '今日新破') + '　' + smLab('#60a5fa', 'A：') + smNames(sm.aNew) + '　' + smLab('#60a5fa', 'B：') + smNames(sm.bNew) : '') + '</div>';
   return head + summary + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
     (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th><th>A 月高斷頭</th><th>B 五日平均價線斷頭</th><th>融資餘額（張）</th><th>月高後<div class="dg-sub">融資增減 %</div></th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
@@ -14532,7 +14535,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 11:15:15';
+const BUILD_STAMP = '2026-10-23 11:16:55';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
