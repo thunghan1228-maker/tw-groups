@@ -4000,9 +4000,18 @@ const MCL_A_COLOR = '#e11d48', MCL_B_COLOR = '#9333ea';
 function chartMclLoad(code){
   if (!code || (currentChart.mcl && currentChart.mcl.code === code)) return;
   const st = currentChart.mcl = { code, line: null, loading: true };
-  fetch('/api/margin-line?code=' + encodeURIComponent(code)).then((r) => r.json()).then((d) => {
-    if (d && d.status === 'ok') st.line = d.line;
-  }).catch(() => {}).finally(() => {
+  (async () => {
+    try {
+      const r = await fetch('/api/margin-line?code=' + encodeURIComponent(code));
+      const d = r.ok ? await r.json() : null;
+      if (d && d.status === 'ok'){ st.line = d.line; return; }
+    } catch (_){ /* 後端還沒有單檔端點：往下改用問診資料 */ }
+    try {   // 備援：問診資料裡那檔的斷頭線（收盤後建的，一天一份），後端還沒更新到單檔端點時也畫得出來
+      const r2 = await fetch('/api/diag?code=' + encodeURIComponent(code));
+      const d2 = r2.ok ? await r2.json() : null;
+      if (d2 && d2.status === 'ok' && d2.stock && d2.stock.margin) st.line = d2.stock.margin;
+    } catch (_){ /* 兩邊都拿不到就不畫 */ }
+  })().finally(() => {
     st.loading = false;
     if (currentChart.code === code) redrawAll();
   });
