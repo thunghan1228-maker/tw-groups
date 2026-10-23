@@ -3052,7 +3052,9 @@
   .mcl-chip:hover{background:#6d28d9;}
   .dg-back[disabled]{opacity:.4;cursor:not-allowed;}
   .mcl-filters{margin:6px 0 4px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
-  .mcl-fbtn.active{background:#e11d48;border-color:#e11d48;color:#fff;}
+  .mcl-fbtn{background:#16a34a;border-color:#16a34a;color:#fff;font-weight:700;}   /* 2026-10-23 使用者：快速篩選按鈕綠底白字 */
+  .mcl-fbtn:hover{background:#15803d;}
+  .mcl-fbtn.active{background:#14532d;border-color:#fff;color:#fff;box-shadow:0 0 0 1px #fff inset;}
   .ck-table th.mcl-sort{cursor:pointer;white-space:nowrap;}
   .ck-table th.mcl-sort .mcl-arrow{color:var(--muted);font-size:11px;}
   .ck-table th.mcl-sort.on{color:#e11d48;}
@@ -14191,7 +14193,7 @@ function dgMarginListHtml(){
   const brokeEarlierB = allRows.filter((r) => r.bBroken && !r.bNew);
   const fbtn = (k, label, tip, n) => '<button type="button" class="chart-tab chips-btn mcl-fbtn' + (mclState.filter === k ? ' active' : '') + '" data-mcl-filter="' + k + '" title="' + tip + '；再按一次取消">' + label + '・' + n + ' 檔</button>';
   const filterTips = { P: '只列昨天以前就已經破 A 斷頭價的股票（不含昨日新破）', Q: '只列昨天以前就已經破 B 斷頭價的股票（不含昨日新破）', A: '只列離 A 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票', B: '只列離 B 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票' };
-  const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('P', 'A 已破（前幾天）', filterTips.P, brokeEarlier.length) + fbtn('Q', 'B 已破（前幾天）', filterTips.Q, brokeEarlierB.length) + fbtn('A', '離 A ≤' + MCL_FILTER_PCT + '%', filterTips.A, nearA.length) + fbtn('B', '離 B ≤' + MCL_FILTER_PCT + '%', filterTips.B, nearB.length) + (mclState.filter ? '<span class="dg-sub">　' + filterTips[mclState.filter] + '；再按一次取消</span>' : '') + '</div>';
+  const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('P', 'A 已破（前幾天）', filterTips.P, brokeEarlier.length) + fbtn('Q', 'B 已破（前幾天）', filterTips.Q, brokeEarlierB.length) + fbtn('A', '離 A ≤' + MCL_FILTER_PCT + '%', filterTips.A, nearA.length) + fbtn('B', '離 B ≤' + MCL_FILTER_PCT + '%', filterTips.B, nearB.length) + (mclState.filter ? '<span class="dg-sub">　' + filterTips[mclState.filter] + '；再按一次取消</span>' : '') + (!brokeEarlier.length && !/\ball\b/.test(mclState.groups) ? '<span class="dg-sub">　（這幾個族群裡 A 已破的都是昨日新破；族群欄打 all 可看全部族群）</span>' : '') + '</div>';
   const shownRows = mclState.filter === 'P' ? brokeEarlier : mclState.filter === 'Q' ? brokeEarlierB : mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows;
   const sortedRows = shownRows.slice().sort((x, y) => {   // 照 A 或 B 的「差 %」排：升冪＝差最小（已破＝負的）排最前，降冪＝差最大排最前
     const gx = x[mclState.sortKey], gy = y[mclState.sortKey];
