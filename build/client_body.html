@@ -512,7 +512,7 @@
   @media (max-width: 640px){ .ssb-col{flex:1 1 100%;max-width:none;} }
   /* 2026-10-24 使用者：指數均線分數（櫃買分數、加權分數）：均線分數排行右上角小卡、首頁櫃買那格、加權指數分析；算法跟個股一樣（滿分 15），近 3 日平均、分水嶺 6 */
   .idx-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;white-space:nowrap;color:var(--text);}
-  .idx-pill b{font-size:13.5px;} .idx-pill .idx-arrow{opacity:.55;font-weight:600;}
+  .idx-pill b{font-size:13.5px;} .idx-pill .idx-arrow{opacity:.55;font-weight:600;} .idx-pill b.idx-day{font-size:15px;}
   .idx-tag{display:inline-block;border-radius:999px;padding:0 9px;font-weight:800;font-size:12px;color:#fff;} .idx-tag.long{background:#dc2626;} .idx-tag.short{background:#16a34a;}
   .ms-lines .idx-line{margin-top:2px;}
   .tx-chip .tx-l3{display:block;font-size:12px;font-weight:700;margin-top:1px;white-space:nowrap;}
@@ -24112,7 +24112,7 @@ const idxMd2 = (iso) => String(iso || '').slice(5).replace('-', '/');
 const idxTag = (c) => '<span class="idx-tag ' + (c.label === '多' ? 'long' : 'short') + '">' + c.label + '</span>';
 function idxTip(x){
   return x.name + '分數（指數的均線分數，滿分 15：站上 5／10／20／60／120／240 日線各 1 分＋創 5／10／20／60／120／360 日新高各 1 分＋20>60、60>120、120>350 排列各 1 分；近 3 日平均，分水嶺 ' + IDXS.data.threshold + ' 分，≥ 多、< 空）\n'
-    + '近幾天日分數：' + x.daily.map((r) => idxMd2(r.date) + ' ' + r.score).join('、') + '\n今天＝' + idxMd2(x.today.basis) + ' 收盤算的、明天＝' + idxMd2(x.next.basis) + ' 收盤算的';
+    + idxMd2(x.asOf) + ' 當天 ' + x.daily[x.daily.length - 1].score + ' 分；近幾天日分數：' + x.daily.map((r) => idxMd2(r.date) + ' ' + r.score).join('、') + '\n今天＝' + idxMd2(x.today.basis) + ' 收盤算的、明天＝' + idxMd2(x.next.basis) + ' 收盤算的';
 }
 function idxCardHtml(k){
   const x = idxX(k);
@@ -24120,12 +24120,13 @@ function idxCardHtml(k){
   return '<div class="idx-card" title="' + wlEsc(idxTip(x)) + '"><div class="idx-h">' + x.name + '分數</div>'
     + '<div class="idx-row"><span>今天</span><span class="idx-big l">' + x.today.avg.toFixed(2) + '</span><span>分</span>' + idxTag(x.today) + '</div>'
     + '<div class="idx-row"><span>明天</span><span class="idx-big s">' + x.next.avg.toFixed(2) + '</span><span>分</span>' + idxTag(x.next) + '</div>'
-    + '<div class="idx-sub">多空分水嶺 ' + IDXS.data.threshold + ' 分</div><div class="idx-sub">' + idxMd2(x.next.basis) + ' 收盤算出「明天」那格</div></div>';
+    + '<div class="idx-sub">多空分水嶺 ' + IDXS.data.threshold + ' 分（看 3 日平均）</div><div class="idx-sub"><b>' + idxMd2(x.asOf) + ' 當天 ' + x.daily[x.daily.length - 1].score + ' 分</b>（站上 ' + x.daily[x.daily.length - 1].ma + '／新高 ' + x.daily[x.daily.length - 1].hi + '／排列 ' + x.daily[x.daily.length - 1].align + '）</div><div class="idx-sub">' + idxMd2(x.next.basis) + ' 收盤算出「明天」那格</div></div>';
 }
-function idxPillHtml(k){
+function idxPillHtml(k, compact){
   const x = idxX(k);
   if (!x || !x.next) return '';
-  return '<span class="idx-pill" title="' + wlEsc(idxTip(x)) + '">' + x.name + '分數 <b>' + x.today.avg.toFixed(2) + '</b><span class="idx-arrow">→</span><b>' + x.next.avg.toFixed(2) + '</b> ' + idxTag(x.next) + '</span>';
+  const d = x.daily[x.daily.length - 1];
+  return '<span class="idx-pill" title="' + wlEsc(idxTip(x)) + '">' + x.name + '分數 <b class="idx-day">' + d.score + '</b><span class="idx-arrow">｜3日均</span>' + (compact ? '' : '<b>' + x.today.avg.toFixed(2) + '</b><span class="idx-arrow">→</span>') + '<b>' + x.next.avg.toFixed(2) + '</b> ' + idxTag(x.next) + '</span>';
 }
 function idxPillInject(){   // 首頁櫃買那格（renderOtcStrengthWidget 每次會重寫，所以寫完要補一次）
   const lines = document.querySelector('#otcStrengthBox .ms-lines');
@@ -24228,7 +24229,7 @@ function taiexAnalyze(fu, fc){
 function taiexHtml(a){
   const li = (it) => '<li>' + it.t + (it.sub && it.sub.length ? '<ul>' + it.sub.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + '</li>';
   return '<span class="tx-pin">' + (TAIEX.pinned ? '已固定・再按一下或按 Esc 關閉' : '按一下固定') + '</span><h3>加權指數（' + a.title + '）</h3><div class="tx-meta">' + txMd(a.asOf) + ' 收盤資料・每天收盤後（晚上 21:40 以後）自動更新・規則自動判斷</div>' +
-    (idxX('taiex') ? '<div class="tx-pop-idx"><b>加權分數</b>（均線分數，滿分 15、近 3 日平均、分水嶺 ' + IDXS.data.threshold + '）：今天 <b>' + idxX('taiex').today.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').today) + '　明天 <b>' + idxX('taiex').next.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').next) +
+    (idxX('taiex') ? '<div class="tx-pop-idx"><b>加權分數</b>（均線分數，滿分 15）：<b>' + idxMd2(idxX('taiex').asOf) + ' 當天 ' + idxX('taiex').daily[idxX('taiex').daily.length - 1].score + ' 分</b>；近 3 日平均（分水嶺 ' + IDXS.data.threshold + '，≥ 多、< 空）：今天 <b>' + idxX('taiex').today.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').today) + '　明天 <b>' + idxX('taiex').next.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').next) +
       '<br><small>近幾天日分數：' + idxX('taiex').daily.map((r) => idxMd2(r.date) + ' ' + r.score + '（站上 ' + r.ma + '／新高 ' + r.hi + '／排列 ' + r.align + '）').join('、') + '</small></div>' : '') +
     a.sec.map((x) => '<div class="tx-sec">' + x.h + '</div><ul>' + x.items.map(li).join('') + '</ul>').join('') +
     '<div class="tx-foot">這是依均線、融資水位、外資籌碼自動整理的位置與條件，形態（W 底、頭肩底）要自己看圖確認；不是買賣建議。資料：證交所加權指數、融資融券統計、三大法人（FinMind 公開資料整理）。</div>';
@@ -24239,7 +24240,7 @@ function renderTaiexChip(){
   const a = TAIEX.fu ? taiexAnalyze(TAIEX.fu, TAIEX.fc) : null;
   if (!a){ chip.className = 'tx-chip'; chip.innerHTML = '<span class="tx-l1">📈 加權指數分析</span><span class="tx-l2">' + (TAIEX.error || (TAIEX.loading ? '讀取中…' : '點一下重新讀取')) + '</span>'; return; }
   chip.className = 'tx-chip t-' + a.tone;
-  chip.innerHTML = '<span class="tx-l1">📈 加權指數 ' + txN(a.close) + ' <span class="' + (a.pct >= 0 ? 'tx-up' : 'tx-dn') + '">' + txSg(a.pct) + '%</span></span><span class="tx-l2"><span class="tx-state s-' + a.tone + '">' + a.title + '</span> ' + txMd(a.asOf) + ' 分析 ▸</span>' + (idxX('taiex') ? '<span class="tx-l3">' + idxPillHtml('taiex') + '</span>' : '');
+  chip.innerHTML = '<span class="tx-l1">📈 加權指數 ' + txN(a.close) + ' <span class="' + (a.pct >= 0 ? 'tx-up' : 'tx-dn') + '">' + txSg(a.pct) + '%</span></span><span class="tx-l2"><span class="tx-state s-' + a.tone + '">' + a.title + '</span> ' + txMd(a.asOf) + ' 分析 ▸</span>' + (idxX('taiex') ? '<span class="tx-l3">' + idxPillHtml('taiex', true) + '</span>' : '');
   const pop = document.getElementById('taiexPop');
   if (pop && !pop.hidden) pop.innerHTML = taiexHtml(a);
 }
