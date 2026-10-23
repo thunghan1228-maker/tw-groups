@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 01:15:47";
+const BUILD_STAMP = "2026-10-24 01:58:40";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -15530,7 +15530,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 01:15:47';
+const BUILD_STAMP = '2026-10-24 01:58:40';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -24415,7 +24415,7 @@ document.getElementById('rivBody').addEventListener('keydown', (e) => {
 // 分數＝官網式 15 分（站上 5/10/20/60/120/240 均線＋創 5/10/20/60/120/360 日新高＋多頭排列 3 分），後端黑龍表收盤後算好。
 // 排法跟老師一樣：總分高→低，同分先比 12 項本體分，再照股號；「昨天名次」的箭頭跟依總分的名次比，不跟切換後的列序比。
 const MA_W = [5, 10, 20, 60, 120, 240], MA_HW = [5, 10, 20, 60, 120, 360];
-const maState = { data: null, loading: false, error: null, date: '', view: 'sum', sortKey: 'sum', sortDir: -1,
+const maState = { data: null, loading: false, error: null, date: '', teacher: false, view: 'sum', sortKey: 'sum', sortDir: -1,
   hits: null, hitsLoading: false, hitsError: null, hitDays: 20, hitTop: 10, hitShow: 20, hitDate: '', hitOpen: -1,
   q: null, qLoading: false, qError: null, qText: '' };
 const maMd = (d) => d ? String(d).slice(5).replace('-', '/') : '';
@@ -24432,7 +24432,8 @@ async function maLoad(){
   maState.loading = true;
   if (!document.getElementById('maModal').hidden) renderMa();
   try {
-    maState.data = await maFetch('/api/ma-rank' + (maState.date ? '?date=' + encodeURIComponent(maState.date) : ''));
+    const qs = []; if (maState.date) qs.push('date=' + encodeURIComponent(maState.date)); if (maState.teacher) qs.push('teacher=1');
+    maState.data = await maFetch('/api/ma-rank' + (qs.length ? '?' + qs.join('&') : ''));
     maState.error = null;
   } catch (e){
     maState.error = e.message || String(e);
@@ -24446,7 +24447,7 @@ async function maHitsLoad(){
   maState.hitOpen = -1;
   maRenderHits();
   try {
-    const qs = '?days=' + maState.hitDays + '&top=' + maState.hitTop + '&show=' + maState.hitShow + (maState.hitDate ? '&date=' + encodeURIComponent(maState.hitDate) : '');
+    const qs = '?days=' + maState.hitDays + '&top=' + maState.hitTop + '&show=' + maState.hitShow + (maState.hitDate ? '&date=' + encodeURIComponent(maState.hitDate) : '') + (maState.teacher ? '&teacher=1' : '');
     maState.hits = await maFetch('/api/ma-rank-hits' + qs);
     maState.hitsError = null;
   } catch (e){
@@ -24633,14 +24634,14 @@ function renderMa(){
   const view = maViewRows();
   const dateSel = '<select data-ma-date="1">' + (d.dates || []).slice().reverse().map((x) => '<option value="' + x + '"' + (x === d.date ? ' selected' : '') + '>' + maMd(x) + '</option>').join('') + '</select>';
   body.innerHTML =
-    '<div class="ma-stamp">資料日 ' + d.date + '・族群成員 ' + d.n + ' 檔已計分' + (d.updated ? '・更新 ' + String(d.updated).slice(0, 16).replace('T', ' ') : '') +
+    '<div class="ma-stamp">資料日 ' + d.date + '・族群成員 ' + d.n + ' 檔已計分' + (d.teacher ? '（已拿掉老師名單沒有的 ' + (d.teacherAbsent || 18) + ' 檔，名次照剩下的排）' : '') + (d.updated ? '・更新 ' + String(d.updated).slice(0, 16).replace('T', ' ') : '') +
       (maState.loading ? '・讀取中…' : '') + '</div>' +
     '<div class="ma-note">🕐 <b>每個交易日收盤後更新一次</b> —— 收完盤才是當天完整的數字。上面那行「資料日」就是這份分數算到哪一天。</div>' +
     '<div class="ma-intro">這頁幫每一檔股票<b>打分數，滿分 15 分</b>。分數越高，代表這檔股票<b>現在的位置越強、走勢站得越穩</b>；分數低不代表不好，多半是還在整理、或是已經走弱。分數講的是「<b>位置強不強</b>」，不是買賣點。</div>' +
     '<div id="maIdxTable">' + idxTableHtml() + '</div>' +
     maQueryHtml() +
     '<div class="ma-sec"><h3>個股分數前 ' + (d.top || 60) + ' <small>全部族群成員，總分高→低（點欄位可以自己重排）</small><span class="ma-pill">選股日期 ' + maMd(d.date) + '</span>' + dateSel + '</h3>' +
-    '<div class="ma-tools">排名方式 ' + vb('sum', '依總分') + vb('up', '名次進步') + vb('streak', '連續上榜') + vb('new', '新進榜') + vb('allma', '站上全部均線') +
+    '<div class="ma-tools"><button type="button" class="ma-vbtn' + (maState.teacher ? ' on' : '') + '" data-ma-teacher="1" title="我們的族群表比老師那天（10/22）的名單多 ' + (d.teacherAbsent || 18) + ' 檔（鋼鐵、化學、太陽能、機殼等族群的股票），所以名次會比老師的後面；按下去拿掉這些再排，名次、族群平均分、前十名常客都會跟老師同一份名單比。">' + (maState.teacher ? '✓ ' : '') + '對照老師名單</button>排名方式 ' + vb('sum', '依總分') + vb('up', '名次進步') + vb('streak', '連續上榜') + vb('new', '新進榜') + vb('allma', '站上全部均線') +
     '<span class="ma-vsum">' + view.sum + '</span></div>' +
     (view.rows.length ? maStockTable(view.rows, null, true) : '<div class="ma-legend">沒有符合的股票。</div>') +
     '<div class="ma-legend">燈號：上排六格＝站上 5/10/20/60/120/240 日均線（金色），下排六格＝創 5/10/20/60/120/360 日新高（紅色，今天收盤比那個天期內 3 個交易日以前的最高收盤還高，平手不算）。' +
@@ -24670,6 +24671,7 @@ document.getElementById('maBody').addEventListener('click', (e) => {
   const grp = t.closest('[data-ma-group]');
   if (grp){ maQuery(grp.dataset.maGroup); const sec = document.getElementById('maQSec'); if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   if (t.closest('[data-ma-go]')){ maQuery((document.getElementById('maQ') || {}).value); return; }
+  if (t.closest('[data-ma-teacher]')){ maState.teacher = !maState.teacher; maState.data = null; maLoad(); maHitsLoad(); return; }
   const v = t.closest('[data-ma-view]');
   if (v){ maState.view = v.dataset.maView; maState.sortKey = 'sum'; maState.sortDir = -1; renderMa(); return; }
   const th = t.closest('[data-ma-sort]');
