@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 10:05:38";
+const BUILD_STAMP = "2026-10-23 10:33:01";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -580,13 +580,14 @@ const HTML_PAGE = `<!DOCTYPE html>
      再加第 13 顆「估值河流圖」放下排最後 → 上 6 下 7；第 14 顆「每日功課」放上排 → 上下各 7（42 欄格線每顆 6 欄）；
      第 15 顆「研究室」放上排最後 → 上 8 下 7（56 欄格線：上排每顆 7 欄、下排每顆 8 欄，兩排都剛好滿）。
      2026-10-10 使用者：iPad／手機改成 3 排、每排 5 顆（15 顆剛好排滿，按鈕比較寬、字不用擠成三行）。
+     2026-10-23 使用者：系統選股從個股問診拆出來成第 16 顆 → 改 4 排、每排 4 顆（16 顆剛好排滿）。
      iPad 橫放比較寬，用觸控螢幕判斷一起涵蓋。 */
   @media (max-width: 1024px), (hover: none) and (pointer: coarse){
-    :root{--tb-h:150px;}
-    .toolbar-bottom{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow-x:visible;}
+    :root{--tb-h:200px;}
+    .toolbar-bottom{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow-x:visible;}
     .toolbar-bottom .tb-btn{min-width:0;padding:7px 2px 6px;text-wrap:balance;}
-    .toolbar-bottom .tb-btn:nth-child(-n+10){border-bottom:1px solid rgba(255,255,255,0.16);}
-    .toolbar-bottom .tb-btn:nth-child(5n){border-right:none;}
+    .toolbar-bottom .tb-btn:nth-child(-n+12){border-bottom:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom .tb-btn:nth-child(4n){border-right:none;}
   }
   .toast{position:fixed;left:50%;bottom:calc(var(--tb-h) + 16px);transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
   /* 版本戳記（右上角小字）與「有新版本」提示：加到主畫面的網頁沒有重新整理鈕，靠這個知道自己在跑哪一版。 */
@@ -3620,14 +3621,24 @@ const HTML_PAGE = `<!DOCTYPE html>
   <div class="chips-inner" id="diagInner">
     <div class="chips-head">
       <div>
-        <div class="chips-title">個股問診・系統選股</div>
-        <div class="chips-sub">上面「系統選股」勾條件挑名單；下面「個股問診」打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。點名單任一列就帶到下面。收盤後更新，非即時報價。</div>
-        <button type="button" class="chart-tab chips-btn active" id="diagJump" style="margin-top:8px">🩺 直接到「個股問診」（打股號）↓</button>  <!-- 2026-10-22 使用者找不到個股問診：它在系統選股下面，一鍵跳過去 -->
+        <div class="chips-title">個股問診</div>
+        <div class="chips-sub">打股號一次看那檔的強弱、七科體檢、防守線（三日低／月線／紅半）、融資斷頭線、日線圖、同族對照、族群強度榜、今日名單與穿惡名單。收盤後更新，非即時報價。<br>想用條件挑股？到最右邊的「系統選股」。</div>  <!-- 2026-10-23 使用者：個股問診跟系統選股拆成兩個面板（原本合在一起，2026-10-10 併、2026-10-22 加過跳轉鈕） -->
       </div>
       <button class="cm-icon-btn" id="diagClose" aria-label="關閉">✕</button>
     </div>
-    <div id="scrBody"></div>  <!-- 2026-10-10 使用者：選股系統首頁下面的欄位併進個股問診 -->
     <div id="diagBody"></div>
+  </div>
+</div>
+<div class="chips-modal" id="screenerModal" hidden>
+  <div class="chips-inner" id="screenerInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">系統選股</div>
+        <div class="chips-sub">勾條件、拉門檻，選出同時符合的名單；點名單任一列會開「個股問診」看那檔完整資料。資料每個交易日收盤、日K整表進來後更新。</div>
+      </div>
+      <button class="cm-icon-btn" id="screenerClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="scrBody"></div>  <!-- 2026-10-10 使用者：選股系統首頁下面的欄位；2026-10-23 拆成獨立的「系統選股」面板 -->
   </div>
 </div>
 <div class="chips-modal" id="watchModal" hidden>
@@ -3732,6 +3743,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   <button class="tb-btn" data-label="每日功課"><span class="tb-icon">課</span>每日功課</button>  <!-- 2026-10-10 使用者：第 14 顆「每日功課」（空觀察／當沖多／多觀察自動版），放上排 → 上下各 7 顆 -->
   <button class="tb-btn" data-label="籌碼日報"><span class="tb-icon">日</span>籌碼日報</button>  <!-- 2026-10-10 使用者：下午報改名「籌碼日報」 -->
   <button class="tb-btn" data-label="健診"><span class="tb-icon">診</span>每日持股健診</button>  <!-- 2026-09-28 使用者：鈕的名字改成「每日持股健診」 -->
+  <button class="tb-btn" data-label="問診"><span class="tb-icon">問</span>個股問診</button>  <!-- 2026-10-23 使用者：個股問診放在每日持股健診右邊、飆股雷達左邊（原本跟系統選股合在一起）-->
   <button class="tb-btn" data-label="K棒組合選股"><span class="tb-icon">K</span>飆股雷達</button>  <!-- 2026-10-15 使用者：改回「飆股雷達」；2026-10-07 使用者：照老師 App 的飆股雷達做；10/13 改名「K棒組合選股」；10/13 再改「盤中K棒組合選股」、移到第 4 顆（每日持股健診右邊） -->
   <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
   <button class="tb-btn" data-label="自選股"><span class="tb-icon">★</span>自選股</button>
@@ -3742,10 +3754,10 @@ const HTML_PAGE = `<!DOCTYPE html>
   <button class="tb-btn" data-label="均線分數排行"><span class="tb-icon">均</span>均線分數排行</button>  <!-- 2026-10-10 使用者：加第 12 顆，放上排，上下各 6 顆 -->
   <button class="tb-btn" data-label="創高黑龍"><span class="tb-icon">龍</span><span>創高黑龍<span class="tb-sub">（自動）</span></span></button>  <!-- 2026-10-04 使用者：黑龍回測從下午報分離成獨立面板；2026-10-05 名字後面加（自動），跟創高黑選股（手動）分開 -->
   <button class="tb-btn" data-label="創高黑選股"><span class="tb-icon">選</span><span>創高黑選股<span class="tb-sub">（手動）</span></span></button>  <!-- 2026-10-04 使用者：照老師 App「創高黑」做的選股程式；2026-10-05 名字後面加（手動） -->
-  <button class="tb-btn" data-label="問診"><span class="tb-icon">問</span>個股問診</button>  <!-- 2026-09-28 使用者：鈕的名字改成「個股研究」；2026-10-10 併進系統選股，改「選股・個股研究」 -->
   <button class="tb-btn" data-label="個股盤中訊號追蹤"><span class="tb-icon">追</span>個股訊號追蹤</button>
   <button class="tb-btn" data-label="估值河流圖"><span class="tb-icon">河</span>估值河流圖</button>  <!-- 2026-10-10 使用者：第 13 顆「估值河流圖」（本站版） -->
   <button class="tb-btn" data-label="研究室"><span class="tb-icon">室</span>研究室</button>  <!-- 2026-10-10 使用者：第 15 顆「研究室」（國際大事行事曆＋名詞小學堂，之後放資金保護傘、內部人），放上排 → 上 8 下 7；2026-10-13 使用者：移到最後面（估值河流圖右邊） -->
+  <button class="tb-btn" data-label="系統選股"><span class="tb-icon">篩</span>系統選股</button>  <!-- 2026-10-23 使用者：系統選股從個股問診拆出來，放最後一顆（研究室後面） -->
 </div>
 
 <div class="signal-modal" id="signalModal" hidden>
@@ -14057,7 +14069,7 @@ function renderDiag(){
   body.innerHTML = html + ckRulesHtml(data);
 }
 // ---- 系統選股・條件選股（2026-10-10 使用者：照老師「選股系統」做，跟個股問診合併在同一個面板）----
-// 勾條件、拉門檻 → 「開始篩選」列出同時符合的股票；點名單任一列，下面的個股問診就帶出那一檔。條件與後端 /api/screener 一一對應。
+// 勾條件、拉門檻 → 「開始篩選」列出同時符合的股票；點名單任一列，開個股問診帶出那一檔（2026-10-23 拆成兩個面板）。條件與後端 /api/screener 一一對應。
 const SCR_CARDS = [
   { key: 'score', title: '均線分數 ≥', desc: '滿分 15：站上 6 條均線＋創 6 個天期新高＋多頭排列加分', min: 0, max: 15, step: 1, def: 10, unit: '' },
   { key: 'chip', title: '籌碼暴增 ≥', desc: '籌碼暴增雷達買超榜的週增減籌碼%（沒上榜視為不符合；上榜門檻是買超 >4）', min: 4, max: 20, step: 0.5, def: 5, unit: '%' },
@@ -14224,7 +14236,7 @@ function scrResultHtml(){
     '法人 3 日／5 日%＝期間三大法人買賣超張數 ÷ 同期成交量；✓＝期間累積是買超。' +
     '籌碼暴增：粗體＝有進雷達買超榜（>4），淡色＝沒上榜但實際的籌碼%（集保用資料日之前最近一週' + (d.chipWeek ? '：' + d.chipWeek : '') + '）。' +
     'K棒：🔴＝收盤高於開盤、⚫＝收盤低於開盤，旁邊是跟前一天收盤比的漲跌幅（可能收黑但還是漲）。D+1／D+2＝資料日之後的收盤漲跌；D+1 高%＝隔天盤中最高相對資料日收盤；目前績效＝資料日收盤一路算到最新收盤。價格用還原日K。' +
-    '股期：期＝有股票期貨、小期＝有小型股票期貨（' + (d.futSource || '') + '）。點任一列，下面的個股問診就帶出那一檔。</div>';
+    '股期：期＝有股票期貨、小期＝有小型股票期貨（' + (d.futSource || '') + '）。點任一列會打開個股問診，帶出那一檔。</div>';
   return h;
 }
 function renderScreener(){
@@ -14280,10 +14292,9 @@ document.getElementById('scrBody').addEventListener('click', (e) => {
   const row = t.closest('[data-scr-row]');
   if (row){
     scrState.picked = row.dataset.scrRow;
-    dgRun(row.dataset.scrRow);
     renderScreener();
-    const target = document.getElementById('diagBody');
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    closeScreenerPanel();
+    openDiagPanel(row.dataset.scrRow);
   }
 });
 document.getElementById('scrBody').addEventListener('change', (e) => {
@@ -14306,11 +14317,18 @@ document.getElementById('scrBody').addEventListener('input', (e) => {
 });
 function openDiagPanel(code){
   document.getElementById('diagModal').hidden = false;
-  renderScreener();
-  if (!scrState.data && !scrState.loading && !scrState.error) scrRun();   // 第一次打開：先跑預設的創高黑龍那組
   if (code) dgRun(code); else renderDiag();
 }
 function closeDiagPanel(){ document.getElementById('diagModal').hidden = true; }
+// 2026-10-23 使用者：系統選股從個股問診拆成獨立面板（工具列最後一顆）；點名單任一列就關掉選股、開個股問診帶出那一檔
+function openScreenerPanel(){
+  document.getElementById('screenerModal').hidden = false;
+  renderScreener();
+  if (!scrState.data && !scrState.loading && !scrState.error) scrRun();   // 第一次打開：先跑預設的創高黑龍那組
+}
+function closeScreenerPanel(){ document.getElementById('screenerModal').hidden = true; }
+document.getElementById('screenerClose').addEventListener('click', closeScreenerPanel);
+document.getElementById('screenerModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeScreenerPanel(); });
 document.getElementById('diagClose').addEventListener('click', closeDiagPanel);
 document.getElementById('diagModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDiagPanel(); });
 document.getElementById('diagBody').addEventListener('click', (e) => {
@@ -14334,11 +14352,6 @@ document.getElementById('diagBody').addEventListener('click', (e) => {
   const link = e.target.closest('.dg-link[data-code]');
   if (link){ dgRun(link.dataset.code); }
 });
-document.getElementById('diagJump').addEventListener('click', () => {
-  const body = document.getElementById('diagBody');
-  if (body) body.scrollIntoView({ block: 'start', behavior: 'smooth' });
-  setTimeout(() => { const i = document.getElementById('dgInput'); if (i) i.focus({ preventScroll: true }); }, 450);
-});
 document.getElementById('diagBody').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target && e.target.id === 'dgInput'){ e.preventDefault(); dgRun(e.target.value); }
   if (e.key === 'Enter' && e.target && e.target.id === 'mclGroups'){ e.preventDefault(); const b = document.getElementById('mclRun'); if (b) b.click(); }
@@ -14348,7 +14361,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 10:05:38';
+const BUILD_STAMP = '2026-10-23 10:33:01';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18239,8 +18252,10 @@ const GUIDE_TOOLS = [
     b: ['13:20 提醒今天要做的動作', '每一檔沒買的都寫清楚原因'] },
   { t: '每日持股健診', label: '健診', v: 'tb-checkup', tags: ['盤後'], d: '輸入你的持股，看每一檔現在的狀態與明天要守的價位。',
     b: ['防守線：明日紅半、三日低、月線', '同時看籌碼、營收、本益比'] },
-  { t: '個股問診', label: '問診', v: 'tb-diag', tags: ['盤後'], d: '條件選股（勾條件、拉門檻一次篩出來）＋個股問診（打代號一頁看完這檔的均線、族群、籌碼、營收、估值）。',
-    b: ['選股條件越多，名單越少、越嚴格', '個股問診會給一句結論和明天要守的價', '「這家公司在做什麼」用白話講產業，列出同族群、同產業公司（點了就換那一檔）', '季報：近 8 季營收、毛利率、營益率、淨利率、EPS，近四季 EPS 與本益比', '盤中 10:00 後：今天在漲／跌什麼（盤中走勢、同族群有沒有一起動、當天新聞與公告、要留意的地方、後面看哪條防守線）'] },
+  { t: '個股問診', label: '問診', v: 'tb-diag', tags: ['盤後'], d: '打代號一頁看完這檔的均線、族群、籌碼、營收、估值，還有追高的人在哪裡斷頭。',
+    b: ['個股問診會給一句結論和明天要守的價', '「這家公司在做什麼」用白話講產業，列出同族群、同產業公司（點了就換那一檔）', '季報：近 8 季營收、毛利率、營益率、淨利率、EPS，近四季 EPS 與本益比', '融資斷頭線：A 月高、B 五日線的斷頭價，加上這檔的融資餘額、月高以來是退場還是還在加', '盤中 10:00 後：今天在漲／跌什麼（盤中走勢、同族群有沒有一起動、當天新聞與公告、要留意的地方、後面看哪條防守線）'] },
+  { t: '系統選股', label: '系統選股', v: 'tb-diag', tags: ['盤後'], d: '勾條件、拉門檻，一次篩出同時符合的名單（均線分數、籌碼暴增、法人買超、處置、河流位置……）。',
+    b: ['選股條件越多，名單越少、越嚴格', '一鍵套用「創高黑龍」等現成的條件組合', '點名單任一列就打開個股問診看那一檔'] },
   { t: '營收成長榜', label: '營收成長榜', v: 'tb-revenue', tags: ['每月'], d: '每月 10 號前公司陸續公布上個月營收，這裡把全市場排好：誰年增最多、公布後股價怎麼反應。',
     b: ['一天更新三次，公布日自動記下來', '可以查單一檔的每月營收'] },
   { t: '處置監獄', label: '處置監獄', v: 'tb-jail', tags: ['盤後'], d: '哪些股票被關（處置）、什麼時候出獄、哪些快被關（嫌疑名單）。被處置的股票要分盤撮合，進出很不順，事先知道比較好。',
@@ -18403,7 +18418,7 @@ document.getElementById('tutBtn').addEventListener('click', () => openTutorialVi
 // 下方工具列每個面板標題旁加「▶ 影片教學」，點了直接播那個工具的影片（影片清單蓋在面板上面，關掉就回到面板）
 const TUT_PANEL_KEYS = { hwModal: 'tb-homework', swingModal: 'tb-swing', checkupModal: 'tb-checkup', chipsModal: 'tb-chips', watchModal: 'tb-watch',
   jailModal: 'tb-jail', revModal: 'tb-revenue', maModal: 'tb-ma', heilongModal: 'tb-heilong', pickerModal: 'tb-picker', grailModal: 'tb-grail',
-  diagModal: 'tb-diag', trackModal: 'tb-track', rivModal: 'tb-river', labModal: 'tb-lab', botModal: 'basic-bot', remindModal: 'basic-remind' };
+  diagModal: 'tb-diag', screenerModal: 'tb-diag', trackModal: 'tb-track', rivModal: 'tb-river', labModal: 'tb-lab', botModal: 'basic-bot', remindModal: 'basic-remind' };
 Object.entries(TUT_PANEL_KEYS).forEach(([id, key]) => {
   const title = document.querySelector('#' + id + ' .chips-title');
   if (!title || title.querySelector('.tut-panel-link')) return;
@@ -22382,7 +22397,8 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '創高黑龍'){ openHeilongPanel(); return; } // 2026-10-04 使用者：黑龍回測獨立面板
     if (btn.dataset.label === '創高黑選股'){ openPickerPanel(); return; } // 2026-10-04 使用者：創高黑選股
     if (btn.dataset.label === '健診'){ openCheckupPanel(); return; }    // 2026-09-28 使用者：每日持股健診
-    if (btn.dataset.label === '問診'){ openDiagPanel(); return; }       // 2026-09-28 使用者：個股問診
+    if (btn.dataset.label === '問診'){ openDiagPanel(); return; }
+    if (btn.dataset.label === '系統選股'){ openScreenerPanel(); return; }   // 2026-10-23 使用者：系統選股從個股問診拆出來       // 2026-09-28 使用者：個股問診
     showToast('「' + btn.dataset.label + '」功能開發中');
   });
 });
