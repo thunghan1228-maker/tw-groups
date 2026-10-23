@@ -496,6 +496,18 @@
 
   /* 股票搜尋 */
   /* 2026-10-15 使用者：搜尋框縮小，能輸入就好 */
+  .ssb-col{display:flex;flex-direction:column;gap:6px;flex:0 1 240px;max-width:240px;min-width:200px;} .ssb-col .stock-search-bar{max-width:none;flex:none;}   /* 2026-10-23 使用者：搜尋框下面放每日加權指數分析 */
+  .tx-chip{display:block;width:100%;text-align:left;font:inherit;font-size:12.5px;color:var(--text);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:10px;padding:6px 10px;cursor:pointer;line-height:1.45;}
+  .tx-chip:hover,.tx-chip[aria-expanded="true"]{background:var(--panel-2);}
+  .tx-chip.t-bull{border-left-color:#ef4444;} .tx-chip.t-neutral{border-left-color:#f59e0b;} .tx-chip.t-bear{border-left-color:#22c55e;}
+  .tx-chip .tx-l1{display:block;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;} .tx-chip .tx-l2{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tx-up{color:#ef4444;font-weight:800;} .tx-dn{color:#22c55e;font-weight:800;}
+  .tx-pop{position:fixed;z-index:210;width:min(620px,94vw);max-height:78vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.55);padding:14px 16px;font-size:13.5px;line-height:1.6;}
+  .tx-pop h3{margin:0 0 4px;font-size:16px;} .tx-pop .tx-meta{color:var(--muted);font-size:11.5px;margin-bottom:6px;}
+  .tx-pop ul{margin:2px 0 8px;padding-left:20px;} .tx-pop ul ul{margin:2px 0;list-style:circle;} .tx-pop li{margin:2px 0;} .tx-pop li > b:first-child{color:var(--accent);}
+  .tx-pop .tx-sec{font-weight:800;margin-top:8px;} .tx-pop .tx-foot{color:var(--muted);font-size:11.5px;border-top:1px solid var(--line);padding-top:6px;margin-top:6px;}
+  .tx-pop .tx-pin{float:right;font-size:11px;color:var(--muted);}
+  @media (max-width: 640px){ .ssb-col{flex:1 1 100%;max-width:none;} }
   .stock-search-bar{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex:0 1 220px;max-width:240px;}
   .stock-search-bar input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 8px;font-size:13px;font-family:inherit;}
   .stock-search-bar input:focus{outline:2px solid var(--accent);outline-offset:1px;}
@@ -3413,10 +3425,13 @@
       <h1>台股族群強弱排行</h1>
       <div class="sub">依族群平均漲跌幅排序，每 15 秒自動更新一次</div>
     </div>
+    <div class="ssb-col">
     <div class="stock-search-bar">
       <input type="text" id="stockSearchInput" placeholder="輸入代號或名稱" title="輸入代號或名稱，按 Enter 或點右邊圖示開啟五分鐘K線圖">
       <button class="ssb-go-btn" id="stockSearchGoBtn" aria-label="開啟K線圖">🔍</button>
       <span class="ssb-hint" id="stockSearchHint" hidden>查無此股票</span>
+    </div>
+    <button type="button" class="tx-chip" id="taiexChip" aria-haspopup="dialog" aria-expanded="false" title="每日加權指數分析：滑過去看、按一下固定打開"><span class="tx-l1">📈 加權指數分析　讀取中…</span></button>  <!-- 2026-10-23 使用者：搜尋框下面空的地方加「每日加權指數分析」，滑過去或按下去看 -->
     </div>
     <div class="market-strength-bar" id="otcStrengthBox"></div>
     <div class="signal-controls">
@@ -3432,6 +3447,7 @@
     </div>
   </div>
 </header>
+<div class="tx-pop" id="taiexPop" role="dialog" aria-label="每日加權指數分析" hidden></div>
 <div class="tabs">
   <button class="tab-btn strong active" id="tabStrong">強勢</button>
   <button class="tab-btn weak" id="tabWeak">弱勢</button>
@@ -23679,6 +23695,152 @@ function mclSigTick(opts){
   try { localStorage.setItem(MCL_SIG_SEEN_KEY, JSON.stringify({ date: today, keys: Array.from(seen) })); } catch (_){}
   mclSigNotify(events);
 }
+// ---- 每日加權指數分析（2026-10-23 使用者：搜尋框下面空的地方加「每日加權指數分析」，滑過去或按下去看）----
+// 資料：/api/fund-umbrella（加權日K收盤、均線、融資水位、資金保護傘點數）＋ /api/futures-chips（外資現貨買賣超、外資台指期淨未平倉）；
+// 加權當天開高低、成交值（後端新存）有的話多講「收在當天最低」「量能」，沒有就略過。全部是規則自動寫出來的，每天收盤後（晚上 21:40 以後）更新，不是買賣建議。
+const TAIEX = { fu: null, fc: null, at: 0, loading: false, error: '', pinned: false, hideTimer: null };
+async function taiexLoad(force){
+  if (TAIEX.loading || (!force && TAIEX.fu && Date.now() - TAIEX.at < 10 * 60e3)) return;
+  TAIEX.loading = true;
+  try {
+    const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    const [a, b] = await Promise.all([get('/api/fund-umbrella'), get('/api/futures-chips')]);
+    if (a && a.status === 'ok' && Array.isArray(a.series) && a.series.length > 60){ TAIEX.fu = a; TAIEX.fc = b && b.status === 'ok' ? b : null; TAIEX.error = ''; TAIEX.at = Date.now(); }
+    else TAIEX.error = '讀不到加權指數資料';
+  } finally { TAIEX.loading = false; renderTaiexChip(); }
+}
+const txN = (n, d) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 });
+const txSg = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d === undefined ? 2 : d);
+const txMd = (d) => String(d || '').slice(5).replace('-', '/');
+function taiexAnalyze(fu, fc){
+  const s = fu.series || [], n = s.length, tx = fu.taiex;
+  if (n < 61 || !tx) return null;
+  const closes = s.map((r) => r.t), last = s[n - 1], prev = s[n - 2];
+  const avg = (k) => (n >= k ? closes.slice(-k).reduce((a, b) => a + b, 0) / k : null);
+  const ma120 = avg(120), ma240 = avg(240);
+  const c = last.t, pts = c - prev.t, pct = (c / prev.t - 1) * 100;
+  const ohlc = last.th != null && last.tl != null && last.th > last.tl;
+  const closePos = ohlc ? (c - last.tl) / (last.th - last.tl) : null;
+  const win60 = s.slice(-60), hiRow = win60.reduce((m, r) => ((r.th != null ? r.th : r.t) >= (m.th != null ? m.th : m.t) ? r : m), win60[0]);
+  const high60 = hiRow.th != null ? hiRow.th : hiRow.t, drop = (c / high60 - 1) * 100;
+  const low20 = Math.min(...s.slice(-20).map((r) => (r.tl != null ? r.tl : r.t)));
+  const vs = (a, b) => (a && b ? (a / b - 1) * 100 : null);
+  const vsMa120 = vs(c, ma120), vsMa240 = vs(c, ma240);
+  let volTxt = '';
+  if (last.tv != null){
+    const prevs = s.slice(-21, -1).map((r) => r.tv).filter((v) => v != null);
+    if (prevs.length >= 10){ const av = prevs.reduce((a, b) => a + b, 0) / prevs.length, r = last.tv / av; volTxt = '成交值 ' + txN(last.tv) + ' 億（是近 20 日平均成交值的 ' + r.toFixed(1) + ' 倍' + (r >= 1.5 ? '，量大' : r <= 0.7 ? '，量縮' : '') + '）'; }
+  }
+  // 形態標題（規則判斷，不是辨識出 W 底／頭肩底）
+  const above20 = tx.above20, above60 = c >= tx.ma60;
+  let title, tone;
+  if (above20 && above60 && tx.ma20Up){ title = '多頭格局・站上月線季線'; tone = 'bull'; }
+  else if (above20 && above60){ title = '站上月線・月線還沒翻揚'; tone = 'neutral'; }
+  else if (above60){ title = '回落月線之下・守季線'; tone = 'neutral'; }
+  else if (Math.abs(tx.vs60) <= 1.5){ title = '測試季線・築底觀察'; tone = 'bear'; }
+  else if (ma120 && c >= ma120){ title = '跌破季線・半年線之上'; tone = 'bear'; }
+  else { title = '跌破半年線・空方'; tone = 'bear'; }
+  const sec = [];
+  // 現況
+  const now = [{ t: '<b>' + txMd(last.d) + ' 收 ' + txN(c) + '，' + (pts >= 0 ? '漲 ' : '跌 ') + txN(Math.abs(pts)) + ' 點（' + txSg(pct) + '%）</b>' + (closePos != null ? '，' + (closePos <= 0.1 ? '收在當天最低' : closePos >= 0.9 ? '收在當天最高' : closePos <= 0.35 ? '收在當天偏低' : closePos >= 0.65 ? '收在當天偏高' : '收在當天區間中間') + '（開 ' + txN(last.to) + '、高 ' + txN(last.th) + '、低 ' + txN(last.tl) + '）' : '') + (volTxt ? '・' + volTxt : ''), sub: [
+    '從近 60 日高點 ' + txN(high60) + '（' + txMd(hiRow.d) + '）' + (drop <= 0 ? '回落 ' : '還差 ') + Math.abs(drop).toFixed(1) + '%',
+    '價位' + (above60 ? '在' : '低於') + '季線（60 日線 ' + txN(tx.ma60) + '）' + txSg(tx.vs60) + '%；月線（20 日線 ' + txN(tx.ma20) + '）' + txSg(tx.vs20) + '%，月線' + (tx.ma20Up ? '向上' : '下彎') + '，' + (above20 ? '站上' : '跌破') + '月線已 ' + tx.streak + ' 天（' + txMd(tx.turnDate) + ' 起）',
+    ma120 ? '半年線（120 日線）約 ' + txN(ma120) + '（現價離它 ' + txSg(vsMa120) + '%）' + (ma240 ? '；年線（240 日線）約 ' + txN(ma240) + '（' + txSg(vsMa240) + '%）' : '') : '' ].filter(Boolean) }];
+  sec.push({ h: '現況', items: now });
+  // 老師的邏輯
+  const logic = !above20
+    ? '跌破上升趨勢（月線）之後，常見走法是在季線附近做 W 底或頭肩底：先止跌、不再破低，頸線站回去、季線站穩，才算趨勢往上；沒站回去之前，只是「可能在築底」，形態還沒完成。'
+    : tx.ma20Up ? '月線向上、價在月線之上＝多頭：回檔不破月線續抱；跌破月線先轉保守，等站回月線、季線站穩才算重新轉強。'
+    : '站上月線但月線還沒翻揚：先看能不能連續站穩、月線轉向上，才算趨勢確認。';
+  sec.push({ h: '老師的邏輯', items: [{ t: logic }] });
+  // 我的想法
+  const mine = [];
+  if (closePos != null && closePos <= 0.1) mine.push('當天收在最低，還看不到止跌 K（要等出現下影、紅 K 或收復前一天的低點）');
+  else if (closePos != null && closePos >= 0.9 && pct > 0) mine.push('當天收在最高，買盤有力；隔天不跌破今天的低點才算守住');
+  const f = fc && fc.series && fc.series.length ? fc.series[fc.series.length - 1] : null;
+  if (f && f.sf != null){
+    mine.push('外資現貨' + (f.sf >= 0 ? '買超 ' : '賣超 ') + txN(Math.abs(f.sf)) + ' 億' + (f.f != null ? '；台指期淨' + (f.f < 0 ? '空' : '多') + '單 ' + txN(Math.abs(f.f)) + ' 口' + (f.fc ? '（' + (f.fc < 0 ? (f.f < 0 ? '空單再增 ' : '多單減 ') : (f.f < 0 ? '空單減 ' : '多單增 ')) + txN(Math.abs(f.fc)) + ' 口）' : '') : '') + (f.sf < 0 && f.f < 0 ? '：現貨賣、期貨空，外資偏空' : f.sf > 0 && f.f > 0 ? '：現貨買、期貨多，外資偏多' : ''));
+  }
+  const m = fu.margin;
+  if (m){
+    mine.push('上市融資餘額 ' + txN(m.balance) + ' 億，離 2020 年以來高點 ' + txN(m.high) + ' 億（' + txMd(m.highDate) + '）' + txSg(m.vsHigh, 1) + '%，近三年百分位 ' + m.percentile + '：' +
+      (m.percentile >= 90 && m.vsHigh >= -5 ? '在高檔，再破低的話斷頭賣壓會放大' : m.percentile >= 90 ? '雖然從高點退了一些，水位還是高' : m.percentile <= 30 ? '水位低，籌碼乾淨' : '水位普通') + (m.d5 != null ? '；近 5 日融資 ' + (m.d5 < 0 ? '減少 ' : '增加 ') + txN(Math.abs(m.d5)) + ' 億' : ''));
+  }
+  if (fu.diverge && fu.diverge.text) mine.push(fu.diverge.text);
+  if (fu.umbrella) mine.push('資金保護傘「' + fu.umbrella.name + '」' + fu.umbrella.icon + ' ' + fu.umbrella.score + ' 點：' + fu.umbrella.advice + (fu.umbrella.reasons && fu.umbrella.reasons.length ? '（' + fu.umbrella.reasons.map((r) => r.text).join('；') + '）' : ''));
+  sec.push({ h: '我的想法', items: mine.map((t) => ({ t })) });
+  // 看多的確認／不成立
+  const up = [];
+  up.push(above60 ? '守住季線 ' + txN(tx.ma60) + '，不跌破近 20 日低點 ' + txN(low20) : '收盤站回季線 ' + txN(tx.ma60) + ' 之上並站穩，而且不再破近 20 日低點 ' + txN(low20));
+  if (ohlc && last.th > c) up.push('放量站回 ' + txN(last.th) + '（' + txMd(last.d) + ' 最高）以上，代表當天賣壓被吃掉');
+  if (!above20) up.push('收盤站回月線 ' + txN(tx.ma20) + '，然後才是頸線（前面反彈的高點）');
+  sec.push({ h: '看多的確認', items: up.map((t) => ({ t })) });
+  const stop = Math.min(low20, tx.ma60 * 0.98);
+  const next = ma120 && c > ma120 ? { n: '半年線', v: ma120 } : ma240 ? { n: '年線', v: ma240 } : null;
+  sec.push({ h: '不成立（風險）', items: [{ t: '收盤有效跌破 ' + txN(stop) + '（季線下 2% 與近 20 日低點取低）' + (next ? '，下一個支撐是' + next.n + '約 ' + txN(next.v) : '') + '；通道（月線）被跌破後，反彈回通道下緣（約 ' + txN(tx.ma20) + ' 一帶）再被壓下來的「回測」也算轉弱，要分清楚是築底反彈還是被壓回' }] });
+  return { title, tone, asOf: last.d, close: c, pts, pct, sec };
+}
+function taiexHtml(a){
+  const li = (it) => '<li>' + it.t + (it.sub && it.sub.length ? '<ul>' + it.sub.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + '</li>';
+  return '<span class="tx-pin">' + (TAIEX.pinned ? '已固定・再按一下或按 Esc 關閉' : '按一下固定') + '</span><h3>加權指數（' + a.title + '）</h3><div class="tx-meta">' + txMd(a.asOf) + ' 收盤資料・每天收盤後（晚上 21:40 以後）自動更新・規則自動判斷</div>' +
+    a.sec.map((x) => '<div class="tx-sec">' + x.h + '</div><ul>' + x.items.map(li).join('') + '</ul>').join('') +
+    '<div class="tx-foot">這是依均線、融資水位、外資籌碼自動整理的位置與條件，形態（W 底、頭肩底）要自己看圖確認；不是買賣建議。資料：證交所加權指數、融資融券統計、三大法人（FinMind 公開資料整理）。</div>';
+}
+function renderTaiexChip(){
+  const chip = document.getElementById('taiexChip');
+  if (!chip) return;
+  const a = TAIEX.fu ? taiexAnalyze(TAIEX.fu, TAIEX.fc) : null;
+  if (!a){ chip.className = 'tx-chip'; chip.innerHTML = '<span class="tx-l1">📈 加權指數分析</span><span class="tx-l2">' + (TAIEX.error || (TAIEX.loading ? '讀取中…' : '點一下重新讀取')) + '</span>'; return; }
+  chip.className = 'tx-chip t-' + a.tone;
+  chip.innerHTML = '<span class="tx-l1">📈 加權指數 ' + txN(a.close) + ' <span class="' + (a.pct >= 0 ? 'tx-up' : 'tx-dn') + '">' + txSg(a.pct) + '%</span></span><span class="tx-l2">' + a.title + '・' + txMd(a.asOf) + ' 分析 ▸</span>';
+  const pop = document.getElementById('taiexPop');
+  if (pop && !pop.hidden) pop.innerHTML = taiexHtml(a);
+}
+function taiexShow(){
+  const chip = document.getElementById('taiexChip'), pop = document.getElementById('taiexPop');
+  const a = TAIEX.fu ? taiexAnalyze(TAIEX.fu, TAIEX.fc) : null;
+  if (!chip || !pop || !a) return;
+  clearTimeout(TAIEX.hideTimer);
+  pop.innerHTML = taiexHtml(a);
+  pop.hidden = false;
+  const r = chip.getBoundingClientRect(), vw = document.documentElement.clientWidth, w = Math.min(620, vw * 0.94);
+  pop.style.left = Math.max(8, Math.min(r.left, vw - w - 8)) + 'px';
+  pop.style.top = (r.bottom + 6) + 'px';
+  pop.style.maxHeight = Math.max(200, window.innerHeight - r.bottom - 20) + 'px';
+  chip.setAttribute('aria-expanded', 'true');
+}
+function taiexHide(force){
+  const chip = document.getElementById('taiexChip'), pop = document.getElementById('taiexPop');
+  if (!pop || (TAIEX.pinned && !force)) return;
+  TAIEX.pinned = false; pop.hidden = true;
+  if (chip) chip.setAttribute('aria-expanded', 'false');
+}
+(function initTaiex(){
+  const chip = document.getElementById('taiexChip'), pop = document.getElementById('taiexPop');
+  if (!chip || !pop) return;
+  const canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+  const later = () => { clearTimeout(TAIEX.hideTimer); TAIEX.hideTimer = setTimeout(() => taiexHide(false), 220); };
+  if (canHover){
+    chip.addEventListener('mouseenter', () => { taiexLoad(false); taiexShow(); });
+    chip.addEventListener('mouseleave', later);
+    pop.addEventListener('mouseenter', () => clearTimeout(TAIEX.hideTimer));
+    pop.addEventListener('mouseleave', later);
+    document.addEventListener('mousemove', (e) => {   // 保險：滑鼠在視窗外面動就收（偶爾 mouseleave 會漏掉）
+      if (pop.hidden || TAIEX.pinned) return;
+      if (e.target.closest && e.target.closest('#taiexChip, #taiexPop')) clearTimeout(TAIEX.hideTimer); else if (!TAIEX.hideTimer || true) later();
+    });
+  }
+  chip.addEventListener('click', () => {
+    if (!TAIEX.fu){ taiexLoad(true); return; }
+    if (TAIEX.pinned){ taiexHide(true); return; }
+    TAIEX.pinned = true; taiexShow();
+  });
+  document.addEventListener('click', (e) => { if (TAIEX.pinned && !e.target.closest('#taiexChip, #taiexPop')) taiexHide(true); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pop.hidden) taiexHide(true); });
+  window.addEventListener('resize', () => { if (!pop.hidden) taiexShow(); });
+  setTimeout(() => taiexLoad(true), 1200);
+  setInterval(() => taiexLoad(false), 10 * 60e3);
+})();
 setTimeout(() => { try { homeJailLoad(); } catch (_){} }, 2000);   // 不在首頁打開的也要抓處置資料，才會跳今日提醒
 setTimeout(() => { try { if (mclSessionLive()) mclWatchLoad(); } catch (_){} }, 4000);   // 盤中先把斷頭價名單抓好
 document.getElementById('rivClose').addEventListener('click', closeRiverPanel);
