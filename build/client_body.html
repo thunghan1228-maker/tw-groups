@@ -14083,7 +14083,7 @@ function mvHtml(data){
 // ---- 融資斷頭線（2026-10-23 使用者貼老師 10/22「台股融資追蹤・斷頭線就在腳下」）----
 // A 最高點追＝近 20 個交易日盤中最高 × 0.78（上櫃 × 0.65）、B 五日線追＝月高那天的 5 日均價 × 0.78（上櫃 × 0.65）；今收低於斷頭價＝已破，否則差（今收−斷頭價）÷今收。
 // 後端 /api/margin-call 算名單，單檔的在問診資料 stock.margin；老師 10/22 的八檔（南亞科、國巨、聯電…）月高、A、B、差幾 % 都算得一模一樣。
-const mclState = { groups: '被動元件,記憶體,矽晶圓', loaded: '', data: null, loading: false, failedAt: 0, error: '', sortKey: 'bGap', sortDir: 1, filter: '' };   // filter：'A'／'B'＝只看離 A／B 斷頭價 ≤10% 的（2026-10-23 使用者）   // sortKey／sortDir：A、B 欄位按鈕排序（2026-10-23 使用者），預設照 B 差由小到大
+const mclState = { groups: 'all', loaded: '', data: null, loading: false, failedAt: 0, error: '', sortKey: 'bGap', sortDir: 1, filter: '' };   // filter：'A'／'B'＝只看離 A／B 斷頭價 ≤10% 的（2026-10-23 使用者）   // sortKey／sortDir：A、B 欄位按鈕排序（2026-10-23 使用者），預設照 B 差由小到大
 async function mclEnsure(){
   const key = mclState.groups;
   if (mclState.loaded === key && (mclState.data || mclState.loading)) return;
@@ -14159,7 +14159,7 @@ function mclPressPill(p){
 }
 const MCL_RULE = '<div class="sw-rule">口徑：融資借滿 6 成，股價跌 22% 維持率剛好 130%（收追繳令、2 天沒補錢第 3 天強制賣出＝斷頭）。<b>A 最高點追</b>＝近一個月（20 個交易日）盤中最高價 × 0.78（上櫃 × 0.65），最慘的那批人，A 跌破＝斷頭開始；' +
   '<b>B 五日平均價線追</b>＝月高那天的五日平均價 × 0.78（上櫃 × 0.65），比較多人的平均成本，B 跌破＝斷頭高峰。今收低於斷頭價＝已破；否則「差 x%」＝（今收 − 斷頭價）÷ 今收；名單照 B 的距離由近到遠排。' +
-  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判；月高後融資增減 ≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；其餘＝<b>賣壓未釋放</b>（近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '% 也算未釋放）；離線太遠＝離線遠、沒融資資料＝資料不足。滑過標籤看數字。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「使用率」＝融資餘額 ÷ 這檔的融資額度），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看被動元件、記憶體、矽晶圓，上面可以改族群（all＝全部族群）。</div>';
+  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判；月高後融資增減 ≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；其餘＝<b>賣壓未釋放</b>（近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '% 也算未釋放）；離線太遠＝離線遠、沒融資資料＝資料不足。滑過標籤看數字。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「使用率」＝融資餘額 ÷ 這檔的融資額度），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看全部族群（all），上面可以改成只看某幾個族群（族群名用逗號分隔）。</div>';
 function dgMarginStockHtml(s){
   const m = s.margin;
   if (!m) return '<div class="bl-section bl-launch">💥 融資斷頭線</div><div class="race-note">日K不足 24 根，算不出斷頭線</div>';
@@ -14530,7 +14530,7 @@ document.getElementById('diagBody').addEventListener('click', (e) => {
     return;
   }
   if (e.target.closest('#dgRun')){ dgRun((document.getElementById('dgInput') || {}).value || ''); return; }
-  if (e.target.closest('#mclRun')){ mclState.groups = ((document.getElementById('mclGroups') || {}).value || '').trim() || '被動元件,記憶體,矽晶圓'; mclState.loaded = ''; mclState.failedAt = 0; renderDiag(); return; }
+  if (e.target.closest('#mclRun')){ mclState.groups = ((document.getElementById('mclGroups') || {}).value || '').trim() || 'all'; mclState.loaded = ''; mclState.failedAt = 0; renderDiag(); return; }
   const mvr = e.target.closest('[data-mv-refresh]');
   if (mvr){ const d = dgState.data; mvLoad(mvr.dataset.mvRefresh, d && d.stock ? d.stock.name || '' : '', true); return; }
   const pfc = e.target.closest('[data-pf-code]');
