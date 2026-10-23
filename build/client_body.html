@@ -990,7 +990,7 @@
   .chips-modal.behind-group{z-index:98;}   /* 2026-10-17 使用者：機器人等面板裡點族群名，成分股視窗（z-index 99）要蓋在上面，關掉再回來 */  /* 手機／iPad 直式開K線圖（z-index 100）時退到後面，關圖再回來 */
   #diagInner{width:min(1400px,98vw);}   /* 2026-10-23 使用者：融資斷頭線名單最右邊的落底訊號、回檔警示兩欄被切掉看不到 → 個股問診視窗加寬，表格也縮一點 */
   .ck-table.mcl-tbl th,.ck-table.mcl-tbl td{padding:6px 4px;}
-  .pat-mini{display:inline-block;margin-left:4px;padding:0 6px;border-radius:999px;font-size:10.5px;font-weight:800;background:#475569;color:#fff;vertical-align:middle;white-space:nowrap;} .pat-mini.on,.pat-mini.brk{background:#dc2626;}   /* 醞釀／發動／首頁發動欄每檔後面的形態標籤：發動列、已突破＝紅底白字，其他＝灰藍底 */
+  .pat-mini{cursor:pointer;display:inline-block;margin-left:4px;padding:0 6px;border-radius:999px;font-size:10.5px;font-weight:800;background:#475569;color:#fff;vertical-align:middle;white-space:nowrap;} .pat-mini.on,.pat-mini.brk{background:#dc2626;}   /* 醞釀／發動／首頁發動欄每檔後面的形態標籤：發動列、已突破＝紅底白字，其他＝灰藍底 */
   .pat-tag{display:inline-block;padding:0 8px;border-radius:999px;background:#475569;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;margin:1px 2px 1px 0;} .pat-tag.brk{background:#dc2626;}   /* 形態標籤：等突破＝灰藍底、剛突破＝紅底白字 */
   .mcl-prev{opacity:.5;white-space:nowrap;} .mcl-prev .mcl-bottom,.mcl-prev .mcl-pull{filter:saturate(.6);}
   .mcl-ma{font-size:15px;font-weight:800;color:var(--muted);} .mcl-ma.hi{color:var(--up);}   /* 2026-10-23 使用者：融資名單的均線分數（滿分 15，>10 紅字） */
@@ -3153,6 +3153,7 @@
   .mcl-chip.pull{background:#b45309;}   /* 今日提醒：留意回檔＝橘、近似落底＝青 */
   .mcl-chip.t2{background:#be123c;}
   .mcl-chip.low{background:#0891b2;}
+  .mcl-chip.pat.brk{background:#dc2626;} .mcl-chip.pat.near{background:#475569;}   /* 今日提醒的形態：已站上觸發價＝紅、快突破＝灰藍 */
   .dg-back[disabled]{opacity:.4;cursor:not-allowed;}
   .mcl-filters{margin:6px 0 4px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
   .mcl-fbtn{background:#16a34a;border-color:#16a34a;color:#fff;font-weight:700;}   /* 2026-10-23 使用者：快速篩選按鈕綠底白字 */
@@ -3673,7 +3674,7 @@
     <div class="chips-head">
       <div>
         <div class="chips-title">🔔 今日提醒</div>
-        <div class="chips-sub">每次打開軟體（重新整理網頁）都會跳出來；關掉後點右上角「🔔 今日提醒」可以再看。融資斷頭線、警示股都在這裡，點股號或名字開K線圖。</div>
+        <div class="chips-sub">每次打開軟體（重新整理網頁）都會跳出來；關掉後點右上角「🔔 今日提醒」可以再看。融資斷頭線、形態候選、警示股都在這裡，點股號或名字開K線圖（形態的會定位到形態那段）。</div>
       </div>
       <button class="cm-icon-btn" id="remindClose" aria-label="關閉">✕</button>
     </div>
@@ -4145,7 +4146,7 @@ function generateForceFlow(code, tf, bars){
 
 let currentChart = {
   code: null, name: null, tf: 'daily', bars: null, force: null, macd: null, kd: null,
-  maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, kdOn: true, mgOn: true, mg: null, pat: null, patOn: (() => { try { return localStorage.getItem('chartPatOn') !== '0'; } catch (_){ return true; } })(), hoverIndex: null,
+  maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, kdOn: true, mgOn: true, mg: null, pat: null, focusPat: false, patOn: (() => { try { return localStorage.getItem('chartPatOn') !== '0'; } catch (_){ return true; } })(), hoverIndex: null,
   viewStart: 0, viewCount: null, isRealBars: false, requestToken: 0, dailyBars: null,
   defOn: (() => { try { return localStorage.getItem('chartDefOn') !== '0'; } catch (_){ return true; } })(),   // 日線的明日防守線
   d123On: (() => { try { return localStorage.getItem('chartD123On') !== '0'; } catch (_){ return true; } })(),   // 日線的 123 黑龍進場點
@@ -4283,7 +4284,36 @@ function chartPatLoad(code){
       const row = d && d.status === 'ok' ? (d.rows || []).find((x) => x && x.code === code) : null;
       if (row) st.items = Object.keys(row.patterns).map((k) => row.patterns[k]);
     } catch (_){ /* 沒有形態資料就不標 */ }
-  })().finally(() => { st.loading = false; if (currentChart.code === code) redrawAll(); });
+  })().finally(() => { st.loading = false; if (currentChart.code === code && !chartApplyPatFocus()) redrawAll(); });
+}
+// 從形態標籤／今日提醒點進來（2026-10-23 使用者）：開日線，並且把畫面定位在形態那段——從最早的轉折點往前多留 10 根，一路到最右邊（最新）；
+// focusPat＝形態名稱（只對準那一種）或 true（這檔所有形態）。日線和形態資料兩個都到了才定位（誰後到誰來做），沒有形態資料就維持整段。
+function chartApplyPatFocus(){
+  const f = currentChart.focusPat;
+  if (!f || currentChart.tf !== 'daily' || !currentChart.isRealBars) return false;
+  const bars = currentChart.bars;
+  if (!Array.isArray(bars) || !bars.length || typeof bars[0].ts !== 'string') return false;   // 還是分K或舊資料
+  const m = currentChart.pat;
+  if (!m || m.code !== currentChart.code || m.loading) return false;
+  currentChart.focusPat = false;
+  let items = m.items.filter((x) => f === true || x.name === f);
+  if (!items.length) items = m.items;
+  const dates = [];
+  items.forEach((x) => (x.points || []).forEach((p) => dates.push(p.date)));
+  if (!dates.length) return false;
+  const first = dates.sort()[0], len = bars.length;
+  let i0 = bars.findIndex((b) => chartBarDate(b) >= first);
+  if (i0 < 0) return false;
+  const start = Math.max(0, Math.min(i0 - 10, len - 40));   // 至少看 40 根
+  currentChart.viewStart = start;
+  currentChart.viewCount = len - start;
+  redrawAll();
+  return true;
+}
+function chartFocusPatterns(name){   // 給外面（浮動視窗開著同一檔時）呼叫：切到日線並定位
+  currentChart.focusPat = name || true;
+  if (currentChart.tf === 'daily' && currentChart.isRealBars){ currentChart.viewStart = 0; currentChart.viewCount = null; if (!chartApplyPatFocus()) redrawAll(); }
+  else switchTimeframe('daily');
 }
 function chartPatItems(){ const m = currentChart.pat; return m && m.code === currentChart.code ? m.items : []; }
 function chartPatLegendHtml(){
@@ -5790,6 +5820,7 @@ async function switchTimeframe(tf){
   mclBtn.textContent = '關閉'; mclBtn.classList.add('on'); mclBtn.setAttribute('aria-pressed', 'true');
   renderSettingsPanel();
   redrawAll();
+  chartApplyPatFocus();
   if (livePromise && isReal){
     const code = currentChart.code;
     livePromise.then((live) => applyLiveDailyBar(code, requestToken, live)).catch(() => {});
@@ -5808,9 +5839,10 @@ let chartWindowZ = 0;
 function useFloatingCharts(){
   return !CHART_WINDOW_MODE && !document.body.classList.contains('signal-window-mode') && window.innerWidth >= 768;
 }
-function chartEmbedUrl(code, name, tf){
+function chartEmbedUrl(code, name, tf, focusPat){
   const params = new URLSearchParams({ embed: 'chart', code: code, name: name || '' });
   if (tf) params.set('tf', tf);
+  if (focusPat) params.set('focus', focusPat === true ? '1' : focusPat);
   return location.pathname + '?' + params.toString();
 }
 function bringChartWindowToFront(win){
@@ -5871,11 +5903,12 @@ function closeTopChartWindow(){
   closeChartWindow(top.id);
   return true;
 }
-function openChartWindow(code, name, tf){
+function openChartWindow(code, name, tf, focusPat){
   for (const win of chartWindows.values()){
     if (win.code === code){   // 同一檔已開著就拉到最前面；有指定週期（問診的 5 分K／1 分K／日線按鈕）就順便切過去
       bringChartWindowToFront(win);
-      if (tf){ try { win.iframe.contentWindow.switchTimeframe(tf); } catch (_){ /* 還在載入就算了 */ } }
+      if (focusPat){ try { win.iframe.contentWindow.chartFocusPatterns(focusPat); } catch (_){ /* 還在載入就算了 */ } }
+      else if (tf){ try { win.iframe.contentWindow.switchTimeframe(tf); } catch (_){ /* 還在載入就算了 */ } }
       return win;
     }
   }
@@ -5898,7 +5931,7 @@ function openChartWindow(code, name, tf){
         '<button type="button" data-act="max" title="最大化／還原" aria-label="最大化／還原">▢</button>' +
         '<button type="button" data-act="close" aria-label="關閉">✕</button>' +
       '</div></div>' +
-    '<iframe title="' + code + ' K線圖" src="' + chartEmbedUrl(code, name, tf) + '"></iframe>';
+    '<iframe title="' + code + ' K線圖" src="' + chartEmbedUrl(code, name, tf, focusPat) + '"></iframe>';
   layer.appendChild(el);
   const win = { id: id, el: el, code: code, name: name, iframe: el.querySelector('iframe') };
   chartWindows.set(id, win);
@@ -5908,7 +5941,7 @@ function openChartWindow(code, name, tf){
   el.querySelector('[data-act="min"]').addEventListener('click', () => minimizeChartWindow(id));
   el.querySelector('[data-act="max"]').addEventListener('click', () => toggleMaximizeChartWindow(id));
   el.querySelector('[data-act="popout"]').addEventListener('click', () => {
-    const popup = window.open(chartEmbedUrl(code, name, tf), 'hanstockChart_' + code, 'width=1100,height=760');
+    const popup = window.open(chartEmbedUrl(code, name, tf, focusPat), 'hanstockChart_' + code, 'width=1100,height=760');
     if (popup){ popup.focus(); closeChartWindow(id); }
   });
   const head = el.querySelector('.chart-float-head');
@@ -6070,8 +6103,8 @@ document.getElementById('cmGroups').addEventListener('click', (e) => {
   if (!CHART_WINDOW_MODE) closeStockChart();
   botOpenRun(cmd);
 });
-function openStockChart(code, name, tf){
-  if (useFloatingCharts()){ openChartWindow(code, name, tf); return; }
+function openStockChart(code, name, tf, focusPat){   // focusPat：形態名稱或 true＝開日線並定位在形態那段（見 chartApplyPatFocus）
+  if (useFloatingCharts()){ openChartWindow(code, name, tf, focusPat); return; }
   // 手機／iPad 直式：從任何面板點進來，面板一律退到K線圖後面、關圖再回來（2026-10-09 使用者：營收成長榜的「K線圖」按了沒出來
   // ——處置監獄、飆股雷達、營收成長榜沒有自己加 behind-chart，K線圖其實開了但被面板蓋住）
   document.querySelectorAll('.chips-modal, #signalModal, .pk-alert, .launch-alert').forEach((el) => el.classList.add('behind-chart'));
@@ -6080,6 +6113,7 @@ function openStockChart(code, name, tf){
   if (currentChart.code !== code) currentChart.dailyBars = null;  // 換股票：漲跌用的日線快取要重抓
   currentChart.code = code;
   currentChart.name = name;
+  currentChart.focusPat = focusPat || false;
   document.getElementById('cmCode').textContent = code;
   document.getElementById('cmName').textContent = name;
   const cmGroups = document.getElementById('cmGroups');
@@ -23552,9 +23586,33 @@ function remindMclHtml(){
     '<br>' + lab('#22d3ee', '🌱 接近底部（近似落底）・' + lowHit.length + ' 檔') + '　' + (lowHit.length ? lowHit.map((x) => chip(x, 'low')).join('') : '<span class="muted">目前沒有（賣壓釋放中＋爆量後跌幅縮小、沒再破低）</span>') + '</div>';
   return head + mclSummaryHtml(d.summary, 'remind') + signals + '<div class="rm-warn" style="margin-top:4px">A 線＝近一個月最高點追的人的斷頭價、B 線＝月高那天五日平均價追的人的斷頭價。容易回檔只代表 1～5 天短線容易拉回、不是頭部（回測 54～57% 會跌）；接近底部是我訂的條件、不是保證。細節到「個股問診」看。</div></div>';
 }
+// 形態候選（2026-10-23 使用者：形態也放進今日提醒）：已經站上觸發價的（回測有優勢的是突破之後）＋離觸發價 3% 內快突破的；點名字開日線並定位在形態那段
+const REMIND_PAT_NEAR = 3;
+function remindPatHtml(){
+  const head = '<div class="rm-sec"><div class="rm-h">📐 形態候選 <small>' + (PAT.date ? PAT.date.slice(5).replace('-', '/') + ' 收盤・VCP 收斂、C 不破 A 的低、W 底、頭肩底' : 'VCP 收斂、C 不破 A 的低、W 底、頭肩底') + '</small></div>';
+  if (!PAT.map) return head + '<div class="race-note">' + (PAT.loading ? '讀取中…' : '形態資料還沒進來（後端更新中的話晚點再開）') + '</div></div>';
+  const brk = [], near = [];
+  Object.keys(PAT.map).forEach((code) => {
+    const e = PAT.map[code], q = getStockQuote(code), p = q && q.price > 0 ? q.price : e.close;
+    Object.keys(e.patterns).forEach((k) => {
+      const x = e.patterns[k], over = (p / x.trigger - 1) * 100, need = (x.trigger / p - 1) * 100, rec = { code, name: e.name, x, p, over, need };
+      if (p > x.trigger) brk.push(rec);
+      else if (need <= REMIND_PAT_NEAR) near.push(rec);   // need＝還要漲多少才到觸發價
+    });
+  });
+  brk.sort((a, b) => a.over - b.over);   // 剛過觸發價的（沒追很高的）排前面
+  near.sort((a, b) => a.need - b.need);  // 離觸發價最近的排前面
+  const chip = (r, cls) => { const gap = cls === 'brk' ? '+' + r.over.toFixed(1) + '%' : '差 ' + r.need.toFixed(1) + '%';
+    return '<a class="mcl-chip pat ' + cls + '" data-rm-code="' + wlEsc(r.code) + '" data-rm-name="' + wlEsc(r.name || '') + '" data-rm-pat="' + wlEsc(r.x.name) + '" title="' + wlEsc(patTipOf(r.x, r.p) + '　👆 點一下開日線並定位到這個形態') + '">' + wlEsc((r.name || r.code) + '・' + patShortName(r.x) + ' ' + gap) + '</a>'; };
+  const lab = (color, text) => '<b style="color:' + color + '">' + text + '</b>';
+  return head + '<div class="race-note" style="line-height:2.1">' +
+    lab('#ef4444', '🚀 已站上觸發價・' + brk.length + ' 檔') + '　' + (brk.length ? brk.map((r) => chip(r, 'brk')).join('') : '<span class="muted">目前沒有</span>') +
+    '<br>' + lab('#94a3b8', '🎯 離觸發價 ' + REMIND_PAT_NEAR + '% 內（快突破）・' + near.length + ' 檔') + '　' + (near.length ? near.map((r) => chip(r, 'near')).join('') : '<span class="muted">目前沒有</span>') + '</div>' +
+    '<div class="rm-warn" style="margin-top:4px">點名字開日線，圖會定位到形態那段、標出轉折點和頸線。形態是用日K波段高低點找的候選，有主觀成分、不是買進訊號；回測近一年只有「突破之後」比全體強一些（勝率 4～5 成、靠少數大漲拉高平均），還沒突破的沒有優勢，所以只列離觸發價 ' + REMIND_PAT_NEAR + '% 內的，其他到「系統選股」看。突破要設停損。</div></div>';
+}
 function remindHtml(){
   const d = jlState.data;
-  if (!d || d.status !== 'ok') return remindMclHtml() + '<div class="race-note">' + (homeJailState.loading ? '讀取中…' : '資料還沒進來，等一下再開') + '</div>';
+  if (!d || d.status !== 'ok') return remindMclHtml() + remindPatHtml() + '<div class="race-note">' + (homeJailState.loading ? '讀取中…' : '資料還沒進來，等一下再開') + '</div>';
   const code = (x) => '<span class="rm-code" data-rm-code="' + wlEsc(x.code) + '" data-rm-name="' + wlEsc(x.name || '') + '">' + wlEsc(x.code) + '</span>';
   const table = (head, rows, empty) => '<table class="rm-table"><thead><tr>' + head.map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' +
     (rows.length ? rows.join('') : '<tr><td class="rm-none" colspan="' + head.length + '">' + empty + '</td></tr>') + '</tbody></table>';
@@ -23568,7 +23626,7 @@ function remindHtml(){
   const others = (d.jailedList || []).filter((j) => !newCodes.has(j.code) && j.release > d.dataDate);
   if (others.length) jailHtml += '<details class="rm-more"><summary>還在分盤交易的其他 ' + others.length + ' 檔</summary>' + table(['代號', '名稱', '處置期間', '撮合', '解鎖日'], others.map((j) => jRow({ ...j, new: false })), '') + '</details>';
   jailHtml += '</div>';
-  let html = remindMclHtml() + '<div class="rm-date">' + d.dataDate.replace(/-/g, '/') + ' 警示股</div>';
+  let html = remindMclHtml() + remindPatHtml() + '<div class="rm-date">' + d.dataDate.replace(/-/g, '/') + ' 警示股</div>';
   html += jailHtml;
   // 1. 解鎖：資料日之後的 2 個交易日
   const rel = (d.releaseDays || []).filter((x) => x.date > d.dataDate).slice(0, 2);
@@ -23602,6 +23660,7 @@ function openRemindPanel(){
   document.getElementById('remindModal').hidden = false;
   homeJailLoad();
   remindMclLoad();
+  patLoad(false).then(() => { if (!document.getElementById('remindModal').hidden) renderRemind(); });
   renderRemind();
   document.getElementById('remindInner').scrollTop = 0;
   const d = jlState.data;
@@ -23623,7 +23682,7 @@ document.getElementById('remindClose').addEventListener('click', closeRemindPane
 document.getElementById('remindModal').addEventListener('click', (e) => {
   if (e.target === e.currentTarget){ closeRemindPanel(); return; }
   const c = e.target.closest('[data-rm-code]');
-  if (c) openStockChart(c.dataset.rmCode, c.dataset.rmName);
+  if (c) openStockChart(c.dataset.rmCode, c.dataset.rmName, c.dataset.rmPat ? 'daily' : undefined, c.dataset.rmPat || false);
 });
 
 // ---- 盤中融資斷頭價觸及提醒（2026-10-23 使用者：盤中第一次碰到 A 或 B 斷頭價就自動跳出來，列出整排資訊）----
@@ -23829,7 +23888,7 @@ async function patLoad(force){
     const d = res.ok ? await res.json().catch(() => null) : null;
     if (d && d.status === 'ok'){ const map = {}; (d.rows || []).forEach((r) => { map[r.code] = r; }); PAT.map = map; PAT.date = d.date || ''; PAT.at = Date.now(); PAT.failedAt = 0; }
     else PAT.failedAt = Date.now();
-  } catch (_){ PAT.failedAt = Date.now(); } finally { PAT.loading = false; }
+  } catch (_){ PAT.failedAt = Date.now(); } finally { PAT.loading = false; if (!document.getElementById('remindModal').hidden) renderRemind(); }
 }
 function patShortName(x){ return x.name === 'C不破A低' ? 'C不破A' : x.name; }
 function patTipOf(x, price){
@@ -23842,8 +23901,16 @@ function patTagsHtml(code, price, kind){
   if (!e) return '';
   const p = price > 0 ? price : e.close;
   return Object.keys(e.patterns).map((k) => { const x = e.patterns[k], brk = p > x.trigger;
-    return '<span class="pat-mini' + (kind === 'launch' ? ' on' : brk ? ' brk' : '') + '" title="' + wlEsc(patTipOf(x, p)) + '">' + wlEsc(patShortName(x)) + (brk ? '突破' : '') + '</span>'; }).join('');
+    return '<span class="pat-mini' + (kind === 'launch' ? ' on' : brk ? ' brk' : '') + '" data-pat-code="' + wlEsc(code) + '" data-pat-name="' + wlEsc(x.name) + '" title="' + wlEsc(patTipOf(x, p) + '　👆 點一下開日線並定位到這個形態') + '">' + wlEsc(patShortName(x)) + (brk ? '突破' : '') + '</span>'; }).join('');
 }
+// 形態標籤點下去＝開這檔的日線並定位到形態那段（擋在列的點擊前面，不然會被當成點整列開預設的圖）
+document.addEventListener('click', (e) => {
+  const t = e.target.closest ? e.target.closest('.pat-mini[data-pat-code]') : null;
+  if (!t) return;
+  e.stopPropagation(); e.preventDefault();
+  const code = t.dataset.patCode;
+  openStockChart(code, lookupStockName(code), 'daily', t.dataset.patName || true);
+}, true);
 function patNamesOf(code){ const e = PAT.map && PAT.map[code]; return e ? Object.keys(e.patterns).map((k) => patShortName(e.patterns[k])) : []; }
 let patSigLines = [];
 function patSigEvents(map, quotes, seen){
@@ -24653,7 +24720,8 @@ if (CHART_WINDOW_MODE){
   document.title = embedCode + ' ' + embedName + ' K線圖';
   refresh(); // 抓一次報價給圖表用，不設輪詢
   refreshStockFlags(); // 可融資／可融券／當沖／股期／處置 那一排
-  openStockChart(embedCode, embedName, chartParams.get('tf') || undefined);
+  const embedFocus = chartParams.get('focus');
+  openStockChart(embedCode, embedName, chartParams.get('tf') || undefined, embedFocus ? (embedFocus === '1' ? true : embedFocus) : false);
   document.getElementById('chartModal').classList.add('fullscreen');
   if (window.parent !== window){
     document.addEventListener('pointerdown', () => window.parent.postMessage({ type: 'hanstockChartFocus' }, location.origin), true);
