@@ -328,7 +328,10 @@ async function buildGroupsBody() {
         limitDown: quotes[s.code]?.limitDown ?? false,
         volume: volOf(quotes[s.code]?.volume),
         // 今天到目前的最高價（2026-10-16 首頁終點戰法空(283)：盤中曾漲到 5% 以上的才列）；後端代抓那條沒有就是 null
-        high: Number.isFinite(quotes[s.code]?.high) ? quotes[s.code].high : null
+        high: Number.isFinite(quotes[s.code]?.high) ? quotes[s.code].high : null,
+        // 開盤價、今天到目前的最低價（2026-10-23 使用者：盤中落底訊號／回檔警示要用今天那根暫時的日K：開高低現價＋累計量）
+        open: Number.isFinite(quotes[s.code]?.open) ? quotes[s.code].open : null,
+        low: Number.isFinite(quotes[s.code]?.low) ? quotes[s.code].low : null
       };
     });
     const valid = stocks.filter((s) => s.price !== null);

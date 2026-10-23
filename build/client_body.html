@@ -974,8 +974,9 @@
   .chips-modal[hidden]{display:none;}
   .chips-modal.behind-chart{z-index:98;}
   .chips-modal.behind-group{z-index:98;}   /* 2026-10-17 使用者：機器人等面板裡點族群名，成分股視窗（z-index 99）要蓋在上面，關掉再回來 */  /* 手機／iPad 直式開K線圖（z-index 100）時退到後面，關圖再回來 */
-  #diagInner{width:min(1360px,96vw);}   /* 2026-10-23 使用者：融資斷頭線名單最右邊的落底訊號、回檔警示兩欄被切掉看不到 → 個股問診視窗加寬，表格也縮一點 */
+  #diagInner{width:min(1400px,98vw);}   /* 2026-10-23 使用者：融資斷頭線名單最右邊的落底訊號、回檔警示兩欄被切掉看不到 → 個股問診視窗加寬，表格也縮一點 */
   .ck-table.mcl-tbl th,.ck-table.mcl-tbl td{padding:6px 6px;}
+  .ck-table.mcl-tbl .hr-hold{margin-left:0;min-width:3em;}
   .chips-inner{background:var(--bg);border:1px solid var(--line);border-radius:14px;width:min(1120px,96vw);height:min(920px,92vh);overflow:auto;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);}
   .chips-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;background:#33333a;color:#fff;padding:10px 12px;border-radius:10px;margin-bottom:10px;}
   /* 2026-10-17 使用者：機器人面板改成像 Windows 的視窗——右上角 ⧉ 移到另一螢幕、－ 最小化（縮到下面托盤）、▢ 最大化、✕ 關閉；
@@ -14637,7 +14638,7 @@ function mclPullPill(b){
 }
 const MCL_RULE = '<div class="sw-rule"><b>白話：</b>融資餘額＝現在有多少人借錢買這檔；月高後、5 日＝跟過去比，借錢的人變多還是變少；賣壓狀態＝再加上現價離斷頭價多近，離斷頭價近、借錢的人又沒減少，賣壓就大。<br>口徑：融資借滿 6 成，股價跌 22% 維持率剛好 130%（收追繳令、2 天沒補錢第 3 天強制賣出＝斷頭）。<b>A 最高點追</b>＝近一個月（20 個交易日）盤中最高價 × 0.78（上櫃 × 0.65），最慘的那批人，A 跌破＝斷頭開始；' +
   '<b>B 五日平均價線追</b>＝月高那天的五日平均價 × 0.78（上櫃 × 0.65），比較多人的平均成本，B 跌破＝斷頭高峰。今收低於斷頭價＝已破；否則「差 x%」＝（今收 − 斷頭價）÷ 今收；名單照 B 的距離由近到遠排。' +
-  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證），依序檢查：① 離 A、B 斷頭價都 >' + MCL_PRESS_NEAR_PCT + '% 且沒破＝<b>離線遠</b>；② 沒有融資資料或算不出月高後＝<b>資料不足</b>；③ 近 5 日融資增加 ≥' + MCL_PRESS_READD_PCT + '%＝<b>賣壓未釋放</b>；④ 月高後融資減少 ≥' + (-MCL_PRESS_WASHED_PCT) + '%＝<b>已洗掉一大半</b>；⑤ 月高後融資減少 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%，或近 5 日減少 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%＝<b>釋放中</b>；⑥ 月高後融資有減少、但不到 ' + (-MCL_PRESS_RELEASING_PCT) + '%＝<b>略減（還在觀察）</b>；⑦ 以上都不是（融資沒有減少）＝<b>賣壓未釋放</b>。滑過標籤看數字。<b>使用率</b>＝融資餘額 ÷ 這檔的融資額度，我用全部股票的實際分布訂：≥' + MCL_UTIL_HIGH + '%（橘）＝<b>偏高</b>（約前 23%）、≥' + MCL_UTIL_HOT + '%（紅）＝<b>過熱</b>（約前 10%）；交易所那邊用到 80% 會進行額度分配、100% 暫停融資買進。<b>近似落底</b>（我訂的條件，不是保證）：賣壓狀態是「釋放中」或「已洗掉一大半」＋近 5 日內有爆量（量 ≥ 前 20 日均量 2 倍）＋今天跌幅比前一天小、沒有再破爆量那天的最低價；沒有融資資料時只看價量，標「價量止跌（缺融資）」。<b>留意回檔</b>（原本想做「近似高點」，回測後改名）：漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K（收黑、長上影、爆量不漲）；近 10 日 ≥40% 的是漲更多的一組（名稱一樣叫留意回檔，只在滑過去的說明裡註明、名單排最前面）。回測近一年 417 檔：之後 1～5 天下跌機率約 54～57%（平常 50%）、極端漲多約 59～61%，但 10～20 天後平均仍比大盤強，所以只代表短線容易回檔、不是頭部；融資使用率高、融資還在增加只當加重提示（融資歷史太短還不能回測）。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「使用率」＝融資餘額 ÷ 這檔的融資額度），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（白話：拿「股價最高那天借錢買的張數」跟「今天借錢買的張數」比；「—」＝今天剛創月高、還沒有月高之後，或月高那天本站沒有融資紀錄；負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看全部族群（all），上面可以改成只看某幾個族群（族群名用逗號分隔）。</div>';
+  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證），依序檢查：① 離 A、B 斷頭價都 >' + MCL_PRESS_NEAR_PCT + '% 且沒破＝<b>離線遠</b>；② 沒有融資資料或算不出月高後＝<b>資料不足</b>；③ 近 5 日融資增加 ≥' + MCL_PRESS_READD_PCT + '%＝<b>賣壓未釋放</b>；④ 月高後融資減少 ≥' + (-MCL_PRESS_WASHED_PCT) + '%＝<b>已洗掉一大半</b>；⑤ 月高後融資減少 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%，或近 5 日減少 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%＝<b>釋放中</b>；⑥ 月高後融資有減少、但不到 ' + (-MCL_PRESS_RELEASING_PCT) + '%＝<b>略減（還在觀察）</b>；⑦ 以上都不是（融資沒有減少）＝<b>賣壓未釋放</b>。滑過標籤看數字。<b>使用率</b>＝融資餘額 ÷ 這檔的融資額度，我用全部股票的實際分布訂：≥' + MCL_UTIL_HIGH + '%（橘）＝<b>偏高</b>（約前 23%）、≥' + MCL_UTIL_HOT + '%（紅）＝<b>過熱</b>（約前 10%）；交易所那邊用到 80% 會進行額度分配、100% 暫停融資買進。<b>近似落底</b>（我訂的條件，不是保證）：賣壓狀態是「釋放中」或「已洗掉一大半」＋近 5 日內有爆量（量 ≥ 前 20 日均量 2 倍）＋今天跌幅比前一天小、沒有再破爆量那天的最低價；沒有融資資料時只看價量，標「價量止跌（缺融資）」。<b>留意回檔</b>（原本想做「近似高點」，回測後改名）：漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K（收黑、長上影、爆量不漲）；近 10 日 ≥40% 的是漲更多的一組（名稱一樣叫留意回檔，只在滑過去的說明裡註明、名單排最前面）。回測近一年 417 檔：之後 1～5 天下跌機率約 54～57%（平常 50%）、極端漲多約 59～61%，但 10～20 天後平均仍比大盤強，所以只代表短線容易回檔、不是頭部；融資使用率高、融資還在增加只當加重提示（融資歷史太短還不能回測）。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「使用率」＝融資餘額 ÷ 這檔的融資額度），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（白話：拿「股價最高那天借錢買的張數」跟「今天借錢買的張數」比；「—」＝今天剛創月高、還沒有月高之後，或月高那天本站沒有融資紀錄；負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看全部族群（all），上面可以改成只看某幾個族群（族群名用逗號分隔）。<br><b>落底訊號、回檔警示是用哪天的價算的？</b>這張名單上的是<b>前一個收盤日</b>的日K算的（收盤後才變）；盤中另外有「提醒」：用今天到目前的開高低現價＋累計量當成今天那根暫時的日K、同樣的公式重算，成立就跳出視窗（一檔一種今天只跳一次；累計量是到目前為止的量，爆量要等量真的累計到才成立，早盤會偏晚）。</div>';
 function dgMarginStockHtml(s){
   const m = s.margin;
   if (!m) return '<div class="bl-section bl-launch">💥 融資斷頭線</div><div class="race-note">日K不足 24 根，算不出斷頭線</div>';
@@ -14711,12 +14712,12 @@ function dgMarginListHtml(){
   });
   const pinned = sortedRows.filter((r) => focus.has(r.code)).concat(sortedRows.filter((r) => !focus.has(r.code)));   // 查的那檔排最上面
   const rows = pinned.map((r) => '<tr class="dg-link' + (focus.has(r.code) ? ' mcl-focus' : '') + '" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td><td class="l">' + mclLongHtml(r._lgs) + '</td>' +
-    '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin, r) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td><td class="l">' + mclBottomPill(mclBottom(r, r.margin, r.stab)) + '</td><td class="l">' + mclPullPill(mclPullback(r.pull, r.margin)) + '</td></tr>').join('');
+    '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + homeHoldHtml(r.code) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin, r) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td><td class="l">' + mclBottomPill(mclBottom(r, r.margin, r.stab)) + '</td><td class="l">' + mclPullPill(mclPullback(r.pull, r.margin)) + '</td></tr>').join('');
   const summary = !d.summary ? '' : mclSummaryHtml(d.summary, 'diag');
   const missing = [...focus].filter((c) => !allRows.some((r) => r.code === c));
   const missNote = missing.length ? '<div class="race-note" style="margin:4px 0;color:#f59e0b">' + missing.map((c) => wlEsc(c + ' ' + (rv.names[c] || ''))).join('、') + '：算不出斷頭線（本站沒有這檔的日K，或日K不足 24 根）</div>' : '';
   return head + missNote + summary + filterBar + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
-    (rows ? '<div class="hl-scroll"><table class="ck-table mcl-tbl"><thead><tr><th class="l">股票</th><th class="l">族群</th>' + mclSortTh('_lg', '做多參考') + '<th>月高</th><th>今收</th>'+ mclSortTh('aGap', 'A 月高斷頭') + mclSortTh('bGap', 'B 五日平均價線斷頭') + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th><th class="l">落底訊號</th><th class="l">回檔警示</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
+    (rows ? '<div class="hl-scroll"><table class="ck-table mcl-tbl"><thead><tr><th class="l">股票</th><th class="l">族群</th>' + mclSortTh('_lg', '做多參考') + '<th>月高</th><th>今收</th><th title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法）；≥ +10% 紅底、≤ −10% 綠底。盤中跟著首頁那份排行更新；沒有資料顯示 —">大戶力</th>'+ mclSortTh('aGap', 'A 月高斷頭') + mclSortTh('bGap', 'B 五日平均價線斷頭') + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th><th class="l">落底訊號</th><th class="l">回檔警示</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
 function renderDiag(){
   const body = document.getElementById('diagBody');
@@ -16118,6 +16119,7 @@ async function refresh(){
     hwRerenderIfOpen();
     trkTick();
     try { mclTouchTick(); } catch (e) { /* 斷頭價提醒失敗不影響畫面 */ }
+    try { mclSigTick(); } catch (e) { /* 落底／回檔提醒失敗不影響畫面 */ }
     lastDataFetchedAt = new Date();
   } catch (e) {
     groupsLastError = e && e.name === 'AbortError' ? '等了 20 秒還沒回' : String((e && e.message) || e).slice(0, 80);
@@ -23391,7 +23393,7 @@ async function mclWatchLoad(){
   if (mclWatch.loading || (mclWatch.rows && Date.now() - mclWatch.at < 60 * 60 * 1000)) return;
   mclWatch.loading = true;
   try {
-    const res = await fetch('/api/margin-call?limit=400&groups=all');
+    const res = await fetch('/api/margin-call?limit=1000&groups=all');   // 1000：落底／回檔警示盤中要看每一檔（剛大漲的離斷頭線最遠、排最後，限 400 會被截掉）
     const data = await res.json();
     if (res.ok && data && data.status === 'ok') mclWatch.rows = (data.rows || []).filter((r) => r.a > 0 && r.b > 0);   // 昨天以前就已破 A 的也留著（盤中提醒要列「已破 A」）
     mclWatch.at = Date.now();
@@ -23471,6 +23473,104 @@ function mclTouchTick(opts){
   events.forEach((e) => e.keys.forEach((k) => seen.add(k)));
   try { localStorage.setItem(MCL_TOUCH_SEEN_KEY, JSON.stringify({ date: today, keys: Array.from(seen) })); } catch (_){}
   mclTouchNotify(events);
+}
+// ---- 盤中落底訊號／回檔警示提醒（2026-10-23 使用者：這兩個訊號盤中有發生要跳出來；問「是前一天收盤還是盤中即時算的」）----
+// 名單上的落底訊號、回檔警示是後端用「前一個收盤日」的日K算的（收盤後才變）。盤中這裡用「今天到目前為止」的 開／高／低／現價／累計量
+// 當成今天那根暫時的日K，接在昨天以前的日K後面，用跟後端 stabilize／pullback 一模一樣的公式重算（昨天以前的基底數字後端算好放在 row.liveBase）。
+// 注意：累計量是「到目前為止」的量，爆量（≥ 前 20 日均量 2 倍）要等量真的累計到才成立，所以早盤會偏晚才報；收盤前的 K 棒（收黑、長上影）也會變，所以每檔每種今天只跳一次。
+const MCL_PULL_RUN_RET10 = 0.25, MCL_PULL_RUN_BIAS20 = 0.20, MCL_PULL_EXTREME_RET10 = 0.40, MCL_PULL_BURST = 2.0, MCL_BURST_RATIO = 2.0;
+function mclLiveEval(base, q, today){
+  const out = { stab: null, pull: null };
+  if (!base || !q || !(q.price > 0) || !(q.volume >= 0) || !(q.open > 0)) return out;
+  const c = q.price, v = q.volume, o = q.open, h = Math.max(q.high > 0 ? q.high : 0, o, c), l = Math.min(q.low > 0 ? q.low : Infinity, o, c);
+  if (base.avgVol20 > 0 && base.prevChg != null && base.burstPrev && base.prevClose > 0){
+    const ratioT = v / base.avgVol20, bp = base.burstPrev;
+    const todayWins = ratioT >= bp.ratio;
+    const ratio = todayWins ? ratioT : bp.ratio, low = todayWins ? l : bp.low, date = todayWins ? today : bp.date;
+    const chg = (c / base.prevClose - 1) * 100;
+    out.stab = { burst: ratio >= MCL_BURST_RATIO, burstRatio: Math.round(ratio * 10) / 10, burstDate: date, chg: Math.round(chg * 100) / 100, chgPrev: Math.round(base.prevChg * 100) / 100,
+      shrinking: base.prevChg < 0 && chg > base.prevChg, noNewLow: l >= low };
+  }
+  if (base.sum19 != null && base.avgVol20 > 0 && base.prevClose > 0 && base.c10 > 0){
+    const ma20 = (base.sum19 + c) / 20, ret10 = c / base.c10 - 1, bias20 = c / ma20 - 1, vr = v / base.avgVol20, chg = c / base.prevClose - 1;
+    const body = Math.abs(c - o), upper = h - Math.max(o, c);
+    const black = c < o, shadow = upper >= 2 * Math.max(body, 0.002 * c) && upper / c >= 0.025;
+    const run = ret10 >= MCL_PULL_RUN_RET10 || bias20 >= MCL_PULL_RUN_BIAS20, burst = vr >= MCL_PULL_BURST, dump = black || shadow || chg < 0.01;
+    const tier = (ret10 >= MCL_PULL_EXTREME_RET10 && burst && dump) ? 2 : (run && burst && dump) ? 1 : 0;
+    out.pull = { tier, ret10: Math.round(ret10 * 1000) / 10, bias20: Math.round(bias20 * 1000) / 10, vr: Math.round(vr * 10) / 10, chg: Math.round(chg * 10000) / 100, black, shadow, run, burst, dump };
+  }
+  return out;
+}
+const MCL_SIG_SEEN_KEY = 'mclSigSeen';
+let mclSigLines = [];
+function mclLiveQuoteMap(){
+  const m = new Map();
+  if (!lastData || !Array.isArray(lastData.groups)) return m;
+  lastData.groups.forEach((g) => g.stocks.forEach((s) => { if (s.price != null && !m.has(s.code)) m.set(s.code, s); }));
+  return m;
+}
+// 純函式：rows＝斷頭價名單（要有 liveBase）、quotes＝code → {price, open, high, low, volume}、seen＝今天已經跳過的 key（code|PL1、code|PL2、code|BT）。回傳事件陣列
+function mclSigEvents(rows, quotes, seen, today){
+  const out = [];
+  for (const r of rows || []){
+    if (!r.liveBase) continue;
+    const q = quotes.get ? quotes.get(r.code) : quotes[r.code];
+    if (!q || !(q.price > 0)) continue;
+    const ev = mclLiveEval(r.liveBase, q, today);
+    const pl = mclPullback(ev.pull, r.margin);
+    if (pl && !seen.has(r.code + '|PL' + (ev.pull.tier === 2 ? '2' : '1'))) out.push({ row: r, q, kind: 'pull', sig: pl, key: r.code + '|PL' + (ev.pull.tier === 2 ? '2' : '1') });
+    const live = wgLive(r, q.price);
+    const bt = mclBottom(live, r.margin, ev.stab);
+    if (bt && !seen.has(r.code + '|BT')) out.push({ row: r, q, kind: 'bottom', sig: bt, key: r.code + '|BT', live });
+  }
+  return out.sort((x, y) => (x.kind === y.kind ? 0 : x.kind === 'bottom' ? -1 : 1));   // 落底在前、回檔在後
+}
+function mclSigRowHtml(e, hm){
+  const r = e.row, q = e.q, p = q.price;
+  const pill = e.kind === 'pull' ? mclPullPill(e.sig) : mclBottomPill(e.sig);
+  const pr = mclPressure(wgLive(r, p), r.margin);
+  const chgTxt = q.changePercent != null ? '<div class="dg-sub" style="color:' + (q.changePercent > 0 ? '#ef4444' : q.changePercent < 0 ? '#22c55e' : 'inherit') + '">' + (q.changePercent > 0 ? '+' : '') + Number(q.changePercent).toFixed(2) + '%</div>' : '';
+  return { kind: e.kind, html: '<tr><td>' + hm + '</td><td class="l" style="white-space:nowrap"><b class="alert-stk" data-alert-code="' + wlEsc(r.code) + '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + (r.name || '')) + '</b><div class="dg-sub">' + wlEsc(r.group || '') + '</div></td>' +
+    '<td class="l">' + pill + '</td><td><b>' + ckPrice(p) + '</b>' + chgTxt + '</td><td class="l" style="white-space:normal;min-width:260px;font-size:12px">' + wlEsc(e.sig.tip) + '</td>' +
+    '<td class="l">' + mclPressPill(pr) + '</td><td>' + mclBalCell(r.margin) + '</td></tr>' };
+}
+function mclSigNotify(events){
+  if (!events.length) return;
+  const hm = new Date(Date.now() + 8 * 3600000).toISOString().slice(11, 16);
+  mclSigLines = events.map((e) => mclSigRowHtml(e, hm)).concat(mclSigLines).slice(0, 200);
+  let el = document.getElementById('mclSigBox');
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'mclSigBox'; el.className = 'pk-alert mcl-touch-alert';
+    el.addEventListener('click', (e) => { if (e.target.closest('.pk-alert-close')){ el.remove(); mclSigLines = []; } });
+    document.body.appendChild(el);
+    makeAlertDraggable(el, '.pk-alert-head', 'mclSigPos');
+  }
+  const nBt = mclSigLines.filter((l) => l.kind === 'bottom').length, nPl = mclSigLines.length - nBt;
+  el.innerHTML = '<div class="pk-alert-head">📉 落底訊號／回檔警示・盤中提醒（落底 ' + nBt + '・回檔 ' + nPl + '）<button class="pk-alert-close" aria-label="關閉">✕</button></div>' +
+    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th class="l">訊號</th><th>現價</th><th class="l">今天的數字</th><th class="l">賣壓狀態</th><th>融資餘額（張）<div class="dg-sub">今＝昨天增減</div></th></tr></thead><tbody>' + mclSigLines.map((l) => l.html).join('') + '</tbody></table></div>' +
+    '<div class="mt-foot">盤中用「今天到目前」的開高低現價＋累計量，當成今天那根暫時的日K，用跟名單一樣的公式重算（名單上的是前一個收盤日算的）。累計量是到目前為止的量，爆量（≥ 前 20 日均量 2 倍）要等量真的累計到才成立，所以早盤會偏晚才報；收黑、長上影到收盤前還會變，一檔一種今天只跳一次。融資餘額、賣壓狀態是證交所／櫃買前一晚公布的數字，盤中不會變。不是買賣建議。</div>';
+  try { launchBeep(); } catch (_){}
+  if ('Notification' in window && Notification.permission === 'granted'){
+    events.slice(0, 5).forEach((e) => { try { new Notification((e.kind === 'pull' ? '📉 留意回檔 ' : '🟢 ' + e.sig.text + ' ') + e.row.code + ' ' + (e.row.name || ''), { body: hm + ' 現價 ' + e.q.price + '（盤中）', tag: 'mcl-sig-' + e.key }); } catch (_){} });
+  }
+}
+function mclSigTick(opts){
+  opts = opts || {};
+  if (!opts.force && (CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || botWindowMode() || sgtWindowMode())) return;
+  if (!alertsEnabled && !opts.force) return;
+  const live = opts.live !== undefined ? opts.live : mclSessionLive();
+  if (!live) return;
+  if (!mclWatch.rows){ mclWatchLoad(); return; }
+  const today = twTodayStr();
+  let st = { date: today, keys: [] };
+  try { const o = JSON.parse(localStorage.getItem(MCL_SIG_SEEN_KEY) || 'null'); if (o && o.date === today) st = o; } catch (_){}
+  const seen = new Set(st.keys);
+  const events = mclSigEvents(mclWatch.rows, opts.quotes || mclLiveQuoteMap(), seen, today);
+  if (!events.length) return;
+  events.forEach((e) => seen.add(e.key));
+  try { localStorage.setItem(MCL_SIG_SEEN_KEY, JSON.stringify({ date: today, keys: Array.from(seen) })); } catch (_){}
+  mclSigNotify(events);
 }
 setTimeout(() => { try { homeJailLoad(); } catch (_){} }, 2000);   // 不在首頁打開的也要抓處置資料，才會跳今日提醒
 setTimeout(() => { try { if (mclSessionLive()) mclWatchLoad(); } catch (_){} }, 4000);   // 盤中先把斷頭價名單抓好
