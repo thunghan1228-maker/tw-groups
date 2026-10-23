@@ -14109,7 +14109,7 @@ function mclSigned(n, digits){
 }
 function mclBalCell(mg){
   if (!mg) return '<span class="muted">—</span>';
-  return '<b>' + Number(mg.balance).toLocaleString() + '</b><div class="dg-sub">今 ' + mclSigned(mg.chg1) + (mg.util != null ? '・用 ' + Number(mg.util).toFixed(1) + '%' : '') + '</div>';
+  return '<span title="融資餘額 ' + Number(mg.balance).toLocaleString() + ' 張；今天' + (mg.chg1 < 0 ? '減少 ' : '增加 ') + Math.abs(mg.chg1 || 0).toLocaleString() + ' 張' + (mg.util != null ? '；使用率＝融資餘額 ÷ 這檔股票的融資額度（限額），已用 ' + Number(mg.util).toFixed(1) + '%' : '') + '"><b>' + Number(mg.balance).toLocaleString() + '</b><div class="dg-sub">今 ' + mclSigned(mg.chg1) + (mg.util != null ? '・用 ' + Number(mg.util).toFixed(1) + '%' : '') + '</div></span>';
 }
 function mclSinceCell(mg){
   if (!mg || mg.sinceHighPct == null) return '<span class="muted">—</span>';
@@ -14166,7 +14166,7 @@ function dgMarginListHtml(){
     '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td></tr>').join('');
   const summary = !d.summary ? '' : mclSummaryHtml(d.summary, 'diag');
   return head + summary + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
-    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th><th>A 月高斷頭</th><th>B 五日平均價線斷頭</th><th>融資餘額（張）</th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
+    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th><th>A 月高斷頭</th><th>B 五日平均價線斷頭</th><th>融資餘額（張）<div class="dg-sub">今＝今天增減・用＝使用率</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
 function renderDiag(){
   const body = document.getElementById('diagBody');
