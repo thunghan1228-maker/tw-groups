@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 23:36:42";
+const BUILD_STAMP = "2026-10-23 23:55:07";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3231,6 +3231,8 @@ const HTML_PAGE = `<!DOCTYPE html>
   .mcl-chip.pull{background:#b45309;}   /* 今日提醒：留意回檔＝橘、近似落底＝青 */
   .mcl-chip.t2{background:#be123c;}
   .mcl-chip.low{background:#0891b2;}
+  .mcl-chip .pat-fire{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;background:#facc15;color:#1f1300;font-size:10.5px;font-weight:800;font-style:normal;vertical-align:1px;}   /* 今日提醒形態名單：這檔也在首頁發動欄 */
+  .mcl-chip .pat-fire.fallen{background:#94a3b8;color:#0f172a;}
   .mcl-chip.pat.brk{background:#dc2626;} .mcl-chip.pat.near{background:#475569;}   /* 今日提醒的形態：已站上觸發價＝紅、快突破＝灰藍 */
   .dg-back[disabled]{opacity:.4;cursor:not-allowed;}
   .mcl-filters{margin:6px 0 4px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
@@ -9712,6 +9714,7 @@ async function refreshBrewLaunch(force){
     try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
     sigRefreshViews();
     hwRerenderIfOpen();
+    try { if (!document.getElementById('remindModal').hidden) renderRemind(); } catch (e) { /* 今日提醒的「今日發動」標記重畫失敗不影響畫面 */ }
     if (!document.getElementById('chipsModal').hidden) renderChips();  // 放空籌碼的均線資料
   } catch (e) {
     brewLaunchFetchedAt = Date.now() - 540000;  // 抓不到就一分鐘後再試，先沿用上一次的資料
@@ -9915,6 +9918,7 @@ async function refreshBrewHistory(force){
     const data = await res.json();
     if (!data || data.status !== 'ok' || !data.days) throw new Error('bad payload');
     brewHistoryData = data;
+    try { if (!document.getElementById('remindModal').hidden) renderRemind(); } catch (e) { /* 同上 */ }
     if (!document.getElementById('signalModal').hidden && /^(brewOnly|launchOnly|now)$/.test(signalCenterState.activeTab)) renderSignalCenter();
     sgtRerenderSafe();
   } catch (e) {
@@ -15436,7 +15440,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 23:36:42';
+const BUILD_STAMP = '2026-10-23 23:55:07';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -23671,6 +23675,14 @@ const REMIND_PAT_NEAR = 3;
 function remindPatHtml(){
   const head = '<div class="rm-sec"><div class="rm-h">📐 形態候選 <small>' + (PAT.date ? PAT.date.slice(5).replace('-', '/') + ' 收盤・VCP 收斂、C 不破 A 的低、W 底、頭肩底' : 'VCP 收斂、C 不破 A 的低、W 底、頭肩底') + '</small></div>';
   if (!PAT.map) return head + '<div class="race-note">' + (PAT.loading ? '讀取中…' : '形態資料還沒進來（後端更新中的話晚點再開）') + '</div></div>';
+  // 這檔今天也在首頁發動欄的，名字旁標「今日發動」（發動欄跌回箱頂下的標灰色「曾發動」）；發動名單跟首頁發動欄同一份（brewTodayRows）
+  const fire = new Map();
+  let fireDay = '';
+  try {
+    const sd = brewSessionDate(), stateOf = homeLaunchStateOf();
+    fireDay = sd && sd !== twTodayStr() ? String(sd).slice(5).replace('-', '/') : '';
+    (brewTodayRows().launch || []).forEach((r) => { fire.set(r.code, stateOf(r) === 'fallen' ? 'fallen' : 'on'); });
+  } catch (_){ /* 發動資料還沒進來就不標 */ }
   const brk = [], near = [];
   Object.keys(PAT.map).forEach((code) => {
     const e = PAT.map[code], q = getStockQuote(code), p = q && q.price > 0 ? q.price : e.close;
@@ -23680,15 +23692,16 @@ function remindPatHtml(){
       else if (need <= REMIND_PAT_NEAR) near.push(rec);   // need＝還要漲多少才到觸發價
     });
   });
-  brk.sort((a, b) => a.over - b.over);   // 剛過觸發價的（沒追很高的）排前面
-  near.sort((a, b) => a.need - b.need);  // 離觸發價最近的排前面
+  const fireFirst = (a, b) => ((fire.get(b.code) === 'on') - (fire.get(a.code) === 'on'));   // 今日發動的排最前面，其餘維持原排序
+  brk.sort((a, b) => fireFirst(a, b) || a.over - b.over);   // 剛過觸發價的（沒追很高的）排前面
+  near.sort((a, b) => fireFirst(a, b) || a.need - b.need);  // 離觸發價最近的排前面
   const chip = (r, cls) => { const gap = cls === 'brk' ? '+' + r.over.toFixed(1) + '%' : '差 ' + r.need.toFixed(1) + '%';
-    return '<a class="mcl-chip pat ' + cls + '" data-rm-code="' + wlEsc(r.code) + '" data-rm-name="' + wlEsc(r.name || '') + '" data-rm-pat="' + wlEsc(r.x.name) + '" title="' + wlEsc(patTipOf(r.x, r.p) + '　👆 點一下開日線並定位到這個形態') + '">' + wlEsc((r.name || r.code) + '・' + patShortName(r.x) + ' ' + gap) + '</a>'; };
+    return '<a class="mcl-chip pat ' + cls + '" data-rm-code="' + wlEsc(r.code) + '" data-rm-name="' + wlEsc(r.name || '') + '" data-rm-pat="' + wlEsc(r.x.name) + '" title="' + wlEsc(patTipOf(r.x, r.p) + '　👆 點一下開日線並定位到這個形態') + '">' + wlEsc((r.name || r.code) + '・' + patShortName(r.x) + ' ' + gap) + (fire.has(r.code) ? '<i class="pat-fire' + (fire.get(r.code) === 'fallen' ? ' fallen' : '') + '" title="' + (fire.get(r.code) === 'fallen' ? '首頁發動欄有這檔，但現在跌回箱頂下（曾發動）' : '這檔' + (fireDay ? fireDay + ' ' : '今天') + '也在首頁發動欄（突破近 10 日箱頂）') + '">' + (fire.get(r.code) === 'fallen' ? '曾發動' : (fireDay ? fireDay + '發動' : '今日發動')) + '</i>' : '') + '</a>'; };
   const lab = (color, text) => '<b style="color:' + color + '">' + text + '</b>';
   return head + '<div class="race-note" style="line-height:2.1">' +
     lab('#ef4444', '🚀 已站上觸發價・' + brk.length + ' 檔') + '　' + (brk.length ? brk.map((r) => chip(r, 'brk')).join('') : '<span class="muted">目前沒有</span>') +
     '<br>' + lab('#94a3b8', '🎯 離觸發價 ' + REMIND_PAT_NEAR + '% 內（快突破）・' + near.length + ' 檔') + '　' + (near.length ? near.map((r) => chip(r, 'near')).join('') : '<span class="muted">目前沒有</span>') + '</div>' +
-    '<div class="rm-warn" style="margin-top:4px">點名字開日線，圖會定位到形態那段、標出轉折點和頸線。形態是用日K波段高低點找的候選，有主觀成分、不是買進訊號；回測近一年只有「突破之後」比全體強一些（勝率 4～5 成、靠少數大漲拉高平均），還沒突破的沒有優勢，所以只列離觸發價 ' + REMIND_PAT_NEAR + '% 內的，其他到「系統選股」看。突破要設停損。</div></div>';
+    '<div class="rm-warn" style="margin-top:4px">黃色「今日發動」（收盤後顯示成日期，例如「10/22發動」）＝這檔也在首頁發動欄（突破近 10 日箱頂＋均線分數＞10），形態和發動兩邊都符合，排最前面。點名字開日線，圖會定位到形態那段、標出轉折點和頸線。形態是用日K波段高低點找的候選，有主觀成分、不是買進訊號；回測近一年只有「突破之後」比全體強一些（勝率 4～5 成、靠少數大漲拉高平均），還沒突破的沒有優勢，所以只列離觸發價 ' + REMIND_PAT_NEAR + '% 內的，其他到「系統選股」看。突破要設停損。</div></div>';
 }
 function remindHtml(){
   const d = jlState.data;
