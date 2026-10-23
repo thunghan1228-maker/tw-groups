@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 12:54:15";
+const BUILD_STAMP = "2026-10-23 13:05:59";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1019,8 +1019,30 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chips-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;background:#33333a;color:#fff;padding:10px 12px;border-radius:10px;margin-bottom:10px;}
   /* 2026-10-17 使用者：機器人面板改成像 Windows 的視窗——右上角 ⧉ 移到另一螢幕、－ 最小化（縮到下面托盤）、▢ 最大化、✕ 關閉；
      標題列拖著走，四邊四角拉大小；不擋後面的頁面（跟盤中訊號中心一樣） */
-  #botModal,#sgtModal{background:none;pointer-events:none;padding:0;}
+  #botModal,#sgtModal,#wgModal{background:none;pointer-events:none;padding:0;}
   #sgtModal.bot-front:not(.behind-group):not(.behind-chart){z-index:103;}
+  /* 自選族群個股（2026-10-23 使用者）：視窗跟機器人、盤中訊號分頁同一套；每格 560px 寬，裡面的柱狀圖多 A／B 兩欄 */
+  #wgModal.bot-front:not(.behind-group):not(.behind-chart){z-index:103;}
+  #wgInner{position:absolute;pointer-events:auto;min-width:280px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
+  #wgInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
+  #wgBody .bot-col.wg-col{flex:0 0 560px;min-width:520px;}
+  .wg-pct{display:none;}
+  @media (max-width:767px){
+    #wgBody .bot-col.wg-col{flex-basis:94%;min-width:0;}
+    /* 手機寬度放不下柱子＋A／B 兩欄：柱子拿掉、直接列漲跌幅數字（代號、股名、漲跌幅、A、B 五欄） */
+    #wgBody .bcr.wg{grid-template-columns:2.6em minmax(0,1fr) 3.9em 3.9em 3.9em!important;}
+    #wgBody .bcr.wg .bct{display:none;}
+    #wgBody .wg-pct{display:block;text-align:right;font-size:11.5px;font-variant-numeric:tabular-nums;}
+    #wgBody .bc-zline{margin-left:0;}
+  }
+  #wgBody .bcr.wg{height:30px;} #wgBody .bcr.bc-hd{height:18px;font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap;} #wgBody .bcr.bc-hd span:nth-child(n+4){text-align:right;}
+  #wgBody .up,#wgBody .down,#wgBody .flat{font-weight:700;}
+  .wg-ab{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap;} .wg-ab b{font-weight:700;} .wg-ab i{font-style:normal;font-size:10.5px;color:var(--muted);}
+  .wg-ab.n i{color:#f59e0b;font-weight:700;} .wg-ab.x b{color:#ef4444;} .wg-ab.x i{color:#ef4444;font-weight:800;}
+  .wg-me{margin:8px 0 2px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--panel-2);font-size:12.5px;line-height:1.8;} .wg-me-t{font-weight:800;font-size:13.5px;} .wg-me-t small{font-weight:600;color:var(--muted);font-size:11px;margin-left:6px;}
+  .wg-me .dg-sub{font-size:11px;color:var(--muted);}
+  .wg-sum{font-size:11.5px;color:var(--muted);margin:6px 2px 0;} .wg-sum b{font-weight:800;}
+  .wg-bad{color:#ef4444;font-weight:800;}
   #sgtInner{position:absolute;pointer-events:auto;min-width:280px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
   #sgtInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
   /* 盤中訊號分頁（2026-10-18 使用者：每格照那個分頁要放的資料決定寬窄，不是一律十等分，畫面上可能只看到四、五格）：
@@ -3415,6 +3437,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="market-strength-bar" id="otcStrengthBox"></div>
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
+      <button class="alert-toggle guide-btn" id="wgBtn">⭐ 自選族群個股</button>  <!-- 2026-10-23 使用者：盤中訊號旁邊加分頁，輸入個股代號就開一格那檔所屬族群的排行（像機器人代碼），每檔旁邊有融資斷頭價 A／B -->
       <button class="alert-toggle guide-btn" id="remindBtn">🔔 今日提醒</button>  <!-- 2026-10-17 使用者：每天第一次打開跳出警示股提醒（解鎖／連續警告／分盤交易），關掉後這裡再開 -->
       <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>
       <button class="alert-toggle guide-btn" id="botBtn">🤖 機器人代碼</button>  <!-- 2026-10-17 使用者：照對方 Line 機器人的代碼（12／22／B／a／70…）做一個輸入代碼的面板 -->
@@ -3614,6 +3637,27 @@ const HTML_PAGE = `<!DOCTYPE html>
       </div>
     </div>
     <div id="sgtBody" class="st-scope"></div>
+  </div>
+</div>
+<!-- 2026-10-23 使用者：自選族群個股（輸入個股代號開一格，顯示它所屬族群的漲幅排行＋每檔的融資斷頭價 A／B；最多 10 格、左右拖著移動） -->
+<div class="chips-modal" id="wgModal" hidden>
+  <div class="chips-inner" id="wgInner">
+    <div class="chips-head" id="wgHead">
+      <div>
+        <div class="chips-title">⭐ 自選族群個股</div>
+        <div class="chips-sub">輸入個股代號或名稱，開一格那檔所屬族群的漲幅排行（有多方線、空方線）；每檔後面多兩欄融資斷頭價 <b>A（最高點追）</b>、<b>B（五日平均價線追）</b>，下面小字是離現價差幾 %、已破就標紅。最多 10 格，左右拖著移動；開了哪幾格會記在這台。</div>
+      </div>
+      <div class="bot-win-acts">
+        <button type="button" id="wgMin" title="最小化（縮到下面，點一下還原）" aria-label="最小化">－</button>
+        <button type="button" id="wgMax" title="最大化" aria-label="最大化">▢</button>
+        <button type="button" id="wgClose" title="關閉" aria-label="關閉">✕</button>
+      </div>
+    </div>
+    <div id="wgBody">
+      <div class="bot-q-row"><input id="wgQ" placeholder="輸入個股代號或名稱，例：4991、環球晶、2344" autocomplete="off"><button type="button" data-wg-go="1">加入</button></div>
+      <div class="bot-chips" id="wgChips"></div>
+      <div id="wgColsBox"></div>
+    </div>
   </div>
 </div>
 <!-- 2026-10-17 使用者：今日提醒（警示股：解鎖、連續警告、分盤交易，表格）；2026-10-23 改成每次打開都跳，並加融資斷頭線 -->
@@ -5501,7 +5545,7 @@ function chartEmbedUrl(code, name, tf){
   return location.pathname + '?' + params.toString();
 }
 function bringChartWindowToFront(win){
-  ['botModal', 'sgtModal', 'hwModal'].forEach((id) => { const el = document.getElementById(id); if (el) el.classList.remove('bot-front'); });
+  ['botModal', 'sgtModal', 'hwModal', 'wgModal'].forEach((id) => { const el = document.getElementById(id); if (el) el.classList.remove('bot-front'); });
   chartWindowZ += 1;
   win.el.style.zIndex = String(chartWindowZ);
   chartWindows.forEach((w) => w.el.classList.toggle('front', w === win));
@@ -14741,7 +14785,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 12:54:15';
+const BUILD_STAMP = '2026-10-23 13:05:59';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -15711,6 +15755,7 @@ async function refresh(){
     try { sigRefreshViews(); } catch (e) { /* 訊號中心重畫失敗不影響畫面 */ }
     try { renderWatchTable(); } catch (e) { /* 自選股重畫失敗不影響畫面 */ }
     try { botRerunCols(); } catch (e) { /* 機器人格子重算失敗不影響畫面 */ }
+    try { wgRerun(); } catch (e) { /* 自選族群個股重算失敗不影響畫面 */ }
     try { sgtRerender(); } catch (e) { /* 盤中訊號分頁重算失敗不影響畫面 */ }   // 2026-10-17 使用者：機器人格子盤中跟首頁一樣每 15 秒更新
     hwRerenderIfOpen();
     trkTick();
@@ -20656,13 +20701,13 @@ function botBarChart(rows, opts){
         : '<span class="v" style="left:calc(' + z + '% + 4px)">' + fmtV(r.v) + '</span>';
     // 2026-10-22 使用者：柱狀圖裡的股號、股名點了開 K 線圖（有股號的列才有；族群那種列沒有）
     const clk = r.c ? ' data-bot-code="' + wlEsc(r.c) + '" data-bot-name="' + wlEsc(String(r.n || '').replace(/^\\*/, '')) + '" tabindex="0" role="button"' : '';
-    return '<div class="bcr' + (opts.wide ? ' wide' : '') + (r.hl ? ' hl' : '') + (r.mid ? ' mid' : '') + '"' + clk + ' title="' + wlEsc((r.c ? r.c + ' ' : '') + r.n + ' ' + fmtV(r.v) + (r.c ? '（點了開K線圖）' : '')) + '"><span class="c">' + wlEsc(r.c || '') + '</span><span class="n">' +
+    return '<div class="bcr' + (opts.wide ? ' wide' : '') + (opts.gridCols ? ' wg' : '') + (r.hl ? ' hl' : '') + (r.mid ? ' mid' : '') + '"' + (opts.gridCols ? ' style="grid-template-columns:' + opts.gridCols + '"' : '') + clk + ' title="' + wlEsc((r.c ? r.c + ' ' : '') + r.n + ' ' + fmtV(r.v) + (r.c ? '（點了開K線圖）' : '')) + '"><span class="c">' + wlEsc(r.c || '') + '</span><span class="n">' +
       (r.star ? '<b class="bcr-star" title="集保大戶連 2 週以上增加">★</b>' : '') + wlEsc(r.n) + (r.pill ? '<span class="bcm">' + r.pill + '</span>' : '') +
-      '</span><span class="bct"><span class="bci" style="left:' + padL + 'px;right:' + padR + 'px"><i class="z" style="left:' + z + '%"></i>' + bar + '</span></span></div>';
+      '</span><span class="bct"><span class="bci" style="left:' + padL + 'px;right:' + padR + 'px"><i class="z" style="left:' + z + '%"></i>' + bar + '</span></span>' + (r.extra || '') + '</div>';
   };
   const body = rows.map((r, i) => row(r) + (opts.avgAfter && i === opts.avgAfter - 1 && rows.length > opts.avgAfter ? '<div class="bc-avg"><span>' + wlEsc(opts.avgText || '') + '</span></div>' : '')).join('');
   return '<div class="bot-chart' + (opts.show ? ' bc-show' : '') + '"><div class="bot-chart-head"><div><div class="bot-chart-title">' + wlEsc(opts.title) + '</div><div class="bot-chart-sub">' + wlEsc(opts.sub || '') + '</div>' + (opts.sub2 ? '<div class="bot-chart-sub">' + wlEsc(opts.sub2) + '</div>' : '') + '</div>' +
-    (opts.right ? '<div class="bot-chart-right">' + wlEsc(opts.right) + (opts.rightSub ? '<small>' + wlEsc(opts.rightSub) + '</small>' : '') + '</div>' : '') + '</div>' + body +
+    (opts.right ? '<div class="bot-chart-right">' + wlEsc(opts.right) + (opts.rightSub ? '<small>' + wlEsc(opts.rightSub) + '</small>' : '') + '</div>' : '') + '</div>' + (opts.headRow || '') + body +
     (opts.foot ? '<div class="bot-chart-foot">' + wlEsc(opts.foot) + '</div>' : '') + '</div>';
 }
 // 機器人直條圖：pts＝[{x: 下面的字, v: 數值%, hl: 加粗}]（照時間左舊右新）
@@ -22395,6 +22440,281 @@ function sgtResetSize(key){
 })();
 initColsPan('sgtBody');
 new ResizeObserver(() => sizeSgtPanes()).observe(document.getElementById('sgtInner'));
+// ---- 自選族群個股（2026-10-23 使用者：首頁右上角盤中訊號旁邊加分頁，像機器人代碼那樣打個股代號就開一格、顯示它所屬族群的漲幅排行，
+// 最多 10 格、左右移動；族群裡每一檔旁邊加融資斷頭價 A／B，查的那檔另外列出它的 A／B、融資餘額、賣壓狀態、落底訊號、回檔警示）----
+// 族群成員跟漲跌用首頁報價（盤中每 15 秒跟著更新）；A／B 是 /api/margin-call 用日K推算的斷頭價（不會盤中變），「差 x%」用現價算：（現價 − 斷頭價）÷ 現價，現價低於斷頭價＝已破。
+const WG_MAX_COLS = 10, WG_COLS_KEY = 'wgCols', WG_RECT_KEY = 'wgRect', WG_MAX_KEY = 'wgMax', WG_COLS_H_KEY = 'wgColsH';
+const wgState = { cols: [], restored: false, maxRestore: null, tray: null };
+const wgMargin = { map: null, date: '', at: 0, failedAt: 0, loading: false, error: '', singles: {} };
+function wgMarginLoad(){
+  if (wgMargin.loading || (wgMargin.map && Date.now() - wgMargin.at < 5 * 60e3) || (wgMargin.failedAt && Date.now() - wgMargin.failedAt < 30e3)) return;
+  wgMargin.loading = true;
+  fetch('/api/margin-call?limit=1000&groups=all')
+    .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+    .then(({ ok, d }) => {
+      if (!ok || !d || d.status !== 'ok') throw new Error((d && (d.detail || d.reason || d.error)) || '讀不到斷頭線資料');
+      const map = {};
+      (d.rows || []).forEach((r) => { map[r.code] = r; });
+      wgMargin.map = map; wgMargin.date = d.date || ''; wgMargin.at = Date.now(); wgMargin.error = ''; wgMargin.failedAt = 0;
+    })
+    .catch((e) => { wgMargin.error = String((e && e.message) || e); wgMargin.failedAt = Date.now(); })
+    .finally(() => { wgMargin.loading = false; wgRerun(); });
+}
+// 不在族群名單裡、或名單沒有的股票：單檔查（日K不足 24 根算不出來會回 short）
+function wgSingleLoad(code){
+  if (wgMargin.singles[code]) return;
+  wgMargin.singles[code] = { loading: true };
+  fetch('/api/margin-line?code=' + encodeURIComponent(code))
+    .then((r) => r.json()).then((d) => { wgMargin.singles[code] = { status: d.status, reason: d.reason, line: d.line || null, date: d.date }; })
+    .catch(() => { wgMargin.singles[code] = { status: 'error', reason: '讀取失敗' }; })
+    .finally(() => wgRerun());
+}
+// 取某檔的斷頭線列：{ row } 有資料、{ wait } 讀取中、{ none: 原因 } 算不出來
+function wgRowOf(code){
+  wgMarginLoad();
+  const m = wgMargin.map && wgMargin.map[code];
+  if (m) return { row: m };
+  if (!wgMargin.map) return wgMargin.error ? { none: '斷頭線資料讀取失敗：' + wgMargin.error } : { wait: true };
+  wgSingleLoad(code);
+  const x = wgMargin.singles[code];
+  if (!x || x.loading) return { wait: true };
+  return x.line ? { row: Object.assign({ code }, x.line, { close: x.line.close }) } : { none: x.reason || '算不出斷頭線' };
+}
+// 用現價重算差距與是否已破（現價拿首頁報價，沒有就用日K收盤）
+function wgLive(row, px){
+  const p = px > 0 ? px : row.close;
+  const gap = (l) => (p - l) / p * 100;
+  return Object.assign({}, row, { close: p, aGap: gap(row.a), bGap: gap(row.b), aBroken: p < row.a, bBroken: p < row.b });
+}
+function wgLineCell(px, line){
+  if (!(line > 0) || !(px > 0)) return '<span class="wg-ab"><b>—</b></span>';
+  const gap = (px - line) / px * 100, broken = px < line;
+  const cls = broken ? 'x' : gap <= MCL_FILTER_PCT ? 'n' : '';
+  return '<span class="wg-ab ' + cls + '" title="斷頭價 ' + ckPrice(line) + '；現價 ' + ckPrice(px) + (broken ? '，已跌破' : '，差 ' + gap.toFixed(1) + '%') + '"><b>' + ckPrice(line) + '</b><i>' + (broken ? '已破' : '差 ' + gap.toFixed(1) + '%') + '</i></span>';
+}
+const WG_GRID = '2.6em 9.5em minmax(40px,1fr) 4.4em 4.4em';
+const WG_HEAD_ROW = '<div class="bcr wg bc-hd wide" style="grid-template-columns:' + WG_GRID + '"><span></span><span>股票</span><span>漲跌幅</span><span title="A 最高點追的斷頭價">A 斷頭</span><span title="B 五日平均價線追的斷頭價">B 斷頭</span></div>';
+function wgGroupChart(g, me){
+  const list = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent)).sort((a, b) => b.changePercent - a.changePercent);
+  const n = list.length;
+  if (!n) return '<div class="bot-line bot-dim">' + wlEsc(g.name) + '：沒有報價</div>';
+  const { topEnd, botStart } = botGroupZones(n);
+  const hm = groupHorseMarks(g), rm = groupRiseMarks(g), bm = groupBladeMarks(g);
+  const disp = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].disposition);
+  const mkOf = (code) => ((hm.get(code) || {}).mk || '') + ((rm.get(code) || {}).mk || '') + ((bm.get(code) || {}).mk || '');
+  let aB = 0, bB = 0, bNear = 0;
+  const rows = [];
+  list.forEach((s, i) => {
+    if (i === topEnd && botStart > topEnd) rows.push({ sep: 'up', text: '↑ 多方線' });
+    if (i === botStart && botStart < n) rows.push({ sep: 'down', text: '↓ 空方線' });
+    const m = wgMargin.map && wgMargin.map[s.code];
+    let extra = '<span class="wg-ab"><b>—</b></span><span class="wg-ab"><b>—</b></span>';
+    if (m){
+      extra = wgLineCell(s.price, m.a) + wgLineCell(s.price, m.b);
+      if (s.price < m.a) aB += 1;
+      if (s.price < m.b) bB += 1; else if ((s.price - m.b) / s.price * 100 <= MCL_FILTER_PCT) bNear += 1;
+    }
+    extra = '<span class="wg-pct ' + dirClass(s.changePercent) + '">' + botPct(s.changePercent) + '</span>' + extra;   // 手機版才顯示（柱子拿掉改列數字）
+    rows.push({ c: s.code, n: (disp(s.code) ? '*' : '') + s.name, v: s.changePercent, pill: mkOf(s.code), hl: s.code === me, mid: i >= topEnd && i < botStart, extra });
+  });
+  const trail = botRankTrailData(g);
+  const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
+  const rank = ranked.findIndex((x) => x.name === g.name) + 1;
+  const closed = lastData && String(lastData.quoteTime || '') >= '13:30';
+  const stampTxt = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
+  const html = botBarChart(rows, { title: g.name + ' 族群排名' + (rank ? '(' + rank + ')' : ''), sub: n + '檔・' + stampTxt + (closed ? ' 收盤' : ' 盤中快照') + '・平均 ' + botPct(g.avgChange),
+    sub2: trail ? '族群排名走勢 ' + trail.ranks.join('→') + trail.arrows.join('') : '', right: '多方 ' + topEnd, rightSub: '空方 ' + (n - botStart), wide: true, gridCols: WG_GRID, headRow: WG_HEAD_ROW,
+    foot: '👑帶頭 🚀火箭 🐎火馬 🔺轉強 🔪⚔️刀劍 🔰新手；A／B＝融資斷頭價，小字＝離現價差幾 %（橘＝≤' + MCL_FILTER_PCT + '%、紅＝已破）', show: true });
+  const sum = wgMargin.map ? '<div class="wg-sum">這族 ' + n + ' 檔：<b class="wg-bad">A 已破 ' + aB + ' 檔</b>・<b class="wg-bad">B 已破 ' + bB + ' 檔</b>・<b style="color:#f59e0b">離 B ≤' + MCL_FILTER_PCT + '% ' + bNear + ' 檔</b></div>' : '';
+  return html + sum;
+}
+// 查的那檔：A／B、融資餘額、賣壓狀態、落底訊號、回檔警示（個股問診「融資斷頭線」那塊的精簡版）
+function wgMeCard(code, name, px){
+  const x = wgRowOf(code);
+  const head = '<div class="wg-me"><div class="wg-me-t">💥 ' + wlEsc(code) + ' ' + wlEsc(name || '') + '・融資斷頭線' + (wgMargin.date ? '<small>日K算到 ' + wgMargin.date.slice(5).replace('-', '/') + '，差距用現價</small>' : '') + '</div>';
+  if (x.wait) return head + '<div class="bot-dim">讀取中…</div></div>';
+  if (x.none) return head + '<div class="bot-dim">' + wlEsc(x.none) + '</div></div>';
+  const m = wgLive(x.row, px);
+  const st = (broken, gap) => broken ? '<span class="wg-bad">❌ 已破</span>' : '差 ' + gap.toFixed(1) + '%';
+  let h = head + 'A 最高點追　月高 ' + ckPrice(m.monthHigh) + '（' + swMmdd(m.highDate) + '）→ 斷頭價 <b>' + ckPrice(m.a) + '</b>　現價 ' + ckPrice(m.close) + '　' + st(m.aBroken, m.aGap) +
+    '<br>B 五日線追　五日均價 ' + ckPrice(m.ma5) + ' → 斷頭價 <b>' + ckPrice(m.b) + '</b>　' + st(m.bBroken, m.bGap);
+  const mg = x.row.margin;
+  if (mg) h += '<br>融資餘額 <b>' + Number(mg.balance).toLocaleString() + ' 張</b>・今 ' + mclSigned(mg.chg1) + (mg.util != null ? '・' + mclUtilHtml(mg.util) : '') +
+    '<br>月高後 ' + (mg.sinceHighPct == null ? '—' : '<b style="color:' + (mg.sinceHighPct > 0 ? '#d9392b' : '#15803d') + '">' + mclSigned(mg.sinceHighPct, 1) + '%</b>') + (mg.chg5Pct != null ? '・5 日 ' + mclSigned(mg.chg5Pct, 1) + '%' : '');
+  const pr = mclPressure(m, mg), bt = mclBottom(m, mg, m.stab), pb = mclPullback(m.pull, mg);
+  h += '<br>賣壓 ' + mclPressPill(pr) + '　落底 ' + mclBottomPill(bt) + '　回檔 ' + mclPullPill(pb);
+  return h + '</div>';
+}
+function wgColHtml(code){
+  const title = (t, sub) => '<div class="bot-title">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
+  const wrap = (t, body, sub) => '<div class="bot-msg"><div class="bot-q">' + wlEsc(code) + '</div>' + title(t, sub) + body + '</div>';
+  if (!(lastData && Array.isArray(lastData.groups) && lastData.groups.length)) return wrap(wlEsc(code), '<div class="bot-line bot-dim">族群行情讀取中…</div>');
+  wgMarginLoad();
+  const name = botNameOf(code);
+  const groups = botStockGroups(code);
+  let px = NaN;
+  for (const g of lastData.groups){ const s = g.stocks.find((y) => y.code === code); if (s && Number.isFinite(s.price)){ px = s.price; break; } }
+  const t = wlEsc(code) + ' ' + wlEsc(name || '');
+  if (!groups.length) return wrap(t, wgMeCard(code, name, px) + '<div class="bot-line bot-dim" style="margin-top:6px">⚠️ 這檔沒有族群分類，只列斷頭線。</div>');
+  return wrap(t, wgMeCard(code, name, px) + groups.slice(0, 2).map((g) => wgGroupChart(g, code)).join(''), groups.map((g) => g.name).join('、'));
+}
+function wgSave(){ botStore(WG_COLS_KEY, wgState.cols); }
+function wgColX(code){ return '<button type="button" class="bot-col-x" data-wg-close="' + wlEsc(code) + '" title="收掉這格">✕</button>'; }
+function wgRender(){
+  const box = document.getElementById('wgColsBox'), chips = document.getElementById('wgChips');
+  if (!box) return;
+  const oldCols = box.querySelector('.bot-cols');
+  const left = oldCols ? oldCols.scrollLeft : 0;
+  const tops = {};
+  box.querySelectorAll('.bot-col').forEach((el) => { tops[el.dataset.colKey] = el.scrollTop; });
+  chips.innerHTML = wgState.cols.map((c) => '<button type="button" class="bot-chip on" data-wg-close="' + wlEsc(c) + '" title="收掉這格">' + wlEsc(c) + ' ' + wlEsc(botNameOf(c)) + ' ✕</button>').join('') +
+    (wgState.cols.length ? '<button type="button" class="bot-chip bot-chip-clear" data-wg-clear="1" title="開著的格子全部收掉">全部收掉</button>' : '');
+  box.innerHTML = wgState.cols.length
+    ? '<div class="bot-cols">' + wgState.cols.map((c) => { const html = wgColHtml(c); return '<div class="bot-col wg-col bot-col-wide" data-col-key="' + wlEsc(c) + '">' + wgColX(c) + html + '</div>'; }).join('') + '</div><div class="bot-cols-grip" title="拉著往下拖，格子變長；往上拖變短（點兩下回到自動）"></div>'
+    : '<div class="bot-cols-hint">上面輸入個股代號或名稱按「加入」，那檔所屬族群的排行就開成一格往右排（最多 10 格）。每檔旁邊有融資斷頭價 A、B。</div>';
+  box.querySelectorAll('.bot-col').forEach((el) => { el._wgHtml = el.innerHTML; if (tops[el.dataset.colKey]) el.scrollTop = tops[el.dataset.colKey]; });
+  const nb = box.querySelector('.bot-cols'); if (nb) nb.scrollLeft = left;
+  sizeWgCols();
+}
+// 報價進來：開著的每一格重算，只換內容有變的（輸入框、捲到哪都不動）
+function wgRerun(){
+  const modal = document.getElementById('wgModal');
+  if (!modal || modal.hidden || !wgState.cols.length) return;
+  const els = [...document.querySelectorAll('#wgColsBox .bot-col')];
+  if (els.length !== wgState.cols.length || els.some((el, i) => el.dataset.colKey !== wgState.cols[i])){ wgRender(); return; }
+  els.forEach((el, i) => {
+    const html = wgColX(wgState.cols[i]) + wgColHtml(wgState.cols[i]);
+    if (el._wgHtml === html) return;
+    const top = el.scrollTop;
+    el.innerHTML = html; el._wgHtml = html; el.scrollTop = top;
+  });
+}
+function wgShowCol(code){
+  const el = [...document.querySelectorAll('#wgColsBox .bot-col')].find((x) => x.dataset.colKey === code);
+  if (!el) return;
+  const box = el.parentElement;
+  if (el.offsetLeft < box.scrollLeft || el.offsetLeft + el.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollLeft = Math.max(0, el.offsetLeft - 8);
+  el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1200);
+}
+function wgAdd(raw){
+  const q = botNorm(raw);
+  if (!q) return;
+  let code = /^[0-9A-Z]{4,6}$/.test(q) ? q : null;
+  if (!code){ const f = botStockByName(raw); if (f) code = f.code; }
+  if (!code){ showToast('找不到「' + String(raw).trim() + '」，請輸入個股代號或完整股名'); return; }
+  if (wgState.cols.includes(code)){ wgShowCol(code); return; }
+  if (wgState.cols.length >= WG_MAX_COLS){ showToast('最多 10 格，先收掉一格（按格子右上角 ✕）'); return; }
+  wgState.cols.push(code); wgSave(); wgRender(); wgShowCol(code);
+}
+function sizeWgCols(){ sizeColsIn('wgInner', 'wgBody', WG_COLS_H_KEY); }
+// 視窗：位置大小、放大、最小化、關閉（跟機器人、盤中訊號分頁一樣）
+function positionWgPanel(){
+  if (wgState.maxRestore){ wgFill(); return; }
+  const panel = document.getElementById('wgInner');
+  const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+  let r = botLoad(WG_RECT_KEY);
+  if (!(r && typeof r === 'object' && r.w >= 280 && r.h >= 240 && r.x >= 0 && r.y >= 0 && r.x + r.w <= vw && r.y + r.h <= vh)){
+    const w = vw * 0.96, h = vh * 0.92;
+    r = { x: Math.max(0, (vw - w) / 2), y: Math.max(0, (vh - h) / 2), w, h };
+  }
+  panel.style.left = r.x + 'px'; panel.style.top = r.y + 'px'; panel.style.width = r.w + 'px'; panel.style.height = r.h + 'px';
+  if (botLoad(WG_MAX_KEY) === '1'){
+    wgState.maxRestore = { left: panel.style.left, top: panel.style.top, width: panel.style.width, height: panel.style.height };
+    wgFill();
+  }
+  wgMaxButton();
+}
+function wgFill(){
+  const panel = document.getElementById('wgInner');
+  panel.style.left = '0px'; panel.style.top = '0px';
+  panel.style.width = document.documentElement.clientWidth + 'px'; panel.style.height = window.innerHeight + 'px';
+}
+function wgMaxButton(){
+  const b = document.getElementById('wgMax');
+  b.textContent = wgState.maxRestore ? '❐' : '▢';
+  b.title = wgState.maxRestore ? '還原大小' : '最大化';
+}
+function toggleWgMax(){
+  const panel = document.getElementById('wgInner');
+  if (wgState.maxRestore){
+    const r = wgState.maxRestore;
+    wgState.maxRestore = null;
+    panel.style.left = r.left; panel.style.top = r.top; panel.style.width = r.width; panel.style.height = r.height;
+  } else {
+    wgState.maxRestore = { left: panel.style.left, top: panel.style.top, width: panel.style.width, height: panel.style.height };
+    wgFill();
+  }
+  botStore(WG_MAX_KEY, wgState.maxRestore ? '1' : '0');
+  wgMaxButton();
+  sizeWgCols();
+}
+function saveWgRect(){
+  if (wgState.maxRestore) return;
+  const r = document.getElementById('wgInner').getBoundingClientRect();
+  botStore(WG_RECT_KEY, { x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) });
+}
+function wgDropTray(){ if (wgState.tray){ wgState.tray.remove(); wgState.tray = null; } }
+function minimizeWg(){
+  document.getElementById('wgModal').hidden = true;
+  if (wgState.tray) return;
+  const pill = document.createElement('button');
+  pill.type = 'button'; pill.title = '還原自選族群個股'; pill.textContent = '▲ ⭐ 自選族群個股';
+  pill.addEventListener('click', openWgPanel);
+  document.getElementById('chartTray').appendChild(pill);
+  wgState.tray = pill;
+}
+function closeWg(){ document.getElementById('wgModal').hidden = true; wgDropTray(); }
+function wgBringFront(){
+  document.getElementById('wgModal').classList.add('bot-front');
+  ['botModal', 'sgtModal', 'hwModal'].forEach((id) => { const el = document.getElementById(id); if (el) el.classList.remove('bot-front'); });
+}
+function openWgPanel(){
+  const m = document.getElementById('wgModal');
+  const wasHidden = m.hidden;
+  m.hidden = false;
+  wgDropTray();
+  if (wasHidden) positionWgPanel();
+  wgBringFront();
+  if (!wgState.restored){   // 這次打開網頁第一次開：回到上次自選的那幾格
+    wgState.restored = true;
+    const v = botLoad(WG_COLS_KEY);
+    if (Array.isArray(v) && !wgState.cols.length) wgState.cols = v.filter((c) => typeof c === 'string' && /^[0-9A-Z]{4,6}$/.test(c)).slice(0, WG_MAX_COLS);
+  }
+  wgMarginLoad();
+  wgRender();
+  const i = document.getElementById('wgQ'); if (i && window.innerWidth >= 768) i.focus();
+}
+function initWgChrome(){
+  attachFloatChrome(document.getElementById('wgModal'), document.getElementById('wgInner'), document.getElementById('wgHead'), {
+    isMax: () => !!wgState.maxRestore,
+    clearMax: () => { wgState.maxRestore = null; botStore(WG_MAX_KEY, '0'); wgMaxButton(); },
+    toggleMax: toggleWgMax,
+    fill: wgFill,
+    recenter: positionWgPanel,
+    onEnd: saveWgRect,
+    minH: 240,
+  });
+}
+document.getElementById('wgBtn').addEventListener('click', openWgPanel);
+document.getElementById('wgClose').addEventListener('click', closeWg);
+document.getElementById('wgMin').addEventListener('click', minimizeWg);
+document.getElementById('wgMax').addEventListener('click', toggleWgMax);
+document.getElementById('wgInner').addEventListener('pointerdown', wgBringFront, true);
+['botInner', 'sgtInner'].forEach((id) => { const el = document.getElementById(id); if (el) el.addEventListener('pointerdown', () => document.getElementById('wgModal').classList.remove('bot-front'), true); });
+document.getElementById('wgBody').addEventListener('click', (e) => {
+  const t = e.target;
+  if (t.closest('[data-wg-go]')){ const i = document.getElementById('wgQ'); wgAdd(i.value); i.value = ''; i.focus(); return; }
+  const x = t.closest('[data-wg-close]');
+  if (x){ wgState.cols = wgState.cols.filter((c) => c !== x.dataset.wgClose); wgSave(); wgRender(); return; }
+  if (t.closest('[data-wg-clear]')){ wgState.cols = []; wgSave(); wgRender(); return; }
+  const st = t.closest('[data-bot-code]'); if (st){ openStockChart(st.dataset.botCode, st.dataset.botName); }
+});
+document.getElementById('wgBody').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'wgQ'){ e.preventDefault(); wgAdd(e.target.value); e.target.value = ''; }
+});
+initColsGrip('wgBody', 'wgInner', WG_COLS_H_KEY, sizeWgCols);
+initColsPan('wgBody');
+new ResizeObserver(() => sizeWgCols()).observe(document.getElementById('wgInner'));
 // ---- 今日提醒（2026-10-17 使用者：照每天晚上的「警示股」整理，只列股票：哪天解鎖、連續警告、分盤交易，做成表格；
 // 每天有新資料、第一次打開就跳出來，關掉後從右上角「🔔 今日提醒」再開）----
 // 資料跟首頁處置名單同一份（/api/jail）：今天入獄（分盤交易）＝今天新公告處置的，放最上面（2026-10-21）；解鎖＝接下來 2 個交易日出關的；連續警告＝嫌疑名單。
@@ -23146,6 +23466,7 @@ if (CHART_WINDOW_MODE){
   initSignalWindowChrome();
   initBotWindowChrome();
   initSgtChrome();
+  initWgChrome();
   initHwChrome();
   updatePinButton();  // 電腦版 Chrome／Edge 才有「📌 釘選最上層」
   // 網頁被重新載入（切 App 回來自動更新、iOS 記憶體不足重載）：回到原本的分頁跟捲到的位置（3 小時內）
