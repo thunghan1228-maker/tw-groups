@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 12:00:29";
+const BUILD_STAMP = "2026-10-23 12:08:34";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3152,6 +3152,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .mcl-press.p-no{background:#d9392b;}
   .mcl-press.p-ing{background:#d97706;}
   .mcl-press.p-done{background:#15803d;}
+  .mcl-bottom{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;}   /* 2026-10-23 使用者：近似落底訊號 */
+  .mcl-bottom.b-hit{background:#0891b2;}
+  .mcl-bottom.b-weak{background:#475569;}
   .ck-table.dg-tbl{font-size:12.5px;}
   .ck-table.dg-tbl th,.ck-table.dg-tbl td{padding:4px 6px;}
   .ck-table.dg-tbl th{white-space:normal;line-height:1.25;vertical-align:bottom;font-size:12px;}
@@ -14237,16 +14240,31 @@ function mclPressure(line, mg){
 function mclPressPill(p){
   return p ? '<span class="mcl-press p-' + p.key + '" title="' + wlEsc(p.tip) + '">' + p.text + '</span>' : '<span class="muted">—</span>';
 }
+// 近似落底（2026-10-23 使用者：融資減少本身看不出哪時候落底，再加「爆大量、跌幅變小」就提醒可能快落底）：
+// 在斷頭賣壓裡（離 A／B ≤10% 或已破）＋賣壓釋放中或已洗掉一大半＋近 5 日內爆量（量 ≥ 前 20 日均量 2 倍）＋今天跌幅比前一天小＋沒有再破爆量那天的最低價。
+// 沒有融資資料（資料不足）時只看價量，標「價量止跌（缺融資）」。價量特徵（stab）後端算好，是我訂的條件，不是保證。
+function mclBottom(line, mg, stab){
+  if (!line || !stab) return null;
+  const pr = mclPressure(line, mg);
+  if (!pr || pr.key === 'far' || !(stab.burst && stab.shrinking && stab.noNewLow)) return null;
+  const px = stab.burstDate.slice(5).replace('-', '/') + ' 爆量（' + stab.burstRatio + ' 倍均量）・今天 ' + mclSigned(stab.chg, 2) + '% 比前一天 ' + mclSigned(stab.chgPrev, 2) + '% 小・沒再破爆量日最低價';
+  if (pr.key === 'ing' || pr.key === 'done') return { key: 'hit', text: '近似落底', tip: pr.text + '（' + pr.tip + '）＋' + px };
+  if (pr.key === 'nodata') return { key: 'weak', text: '價量止跌（缺融資）', tip: '沒有融資資料，只看價量：' + px };
+  return null;   // 賣壓未釋放：融資還沒退，不算
+}
+function mclBottomPill(b){
+  return b ? '<span class="mcl-bottom b-' + b.key + '" title="' + wlEsc(b.tip) + '">' + b.text + '</span>' : '<span class="muted">—</span>';
+}
 const MCL_RULE = '<div class="sw-rule">口徑：融資借滿 6 成，股價跌 22% 維持率剛好 130%（收追繳令、2 天沒補錢第 3 天強制賣出＝斷頭）。<b>A 最高點追</b>＝近一個月（20 個交易日）盤中最高價 × 0.78（上櫃 × 0.65），最慘的那批人，A 跌破＝斷頭開始；' +
   '<b>B 五日平均價線追</b>＝月高那天的五日平均價 × 0.78（上櫃 × 0.65），比較多人的平均成本，B 跌破＝斷頭高峰。今收低於斷頭價＝已破；否則「差 x%」＝（今收 − 斷頭價）÷ 今收；名單照 B 的距離由近到遠排。' +
-  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判；月高後融資增減 ≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；其餘＝<b>賣壓未釋放</b>（近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '% 也算未釋放）；離線太遠＝離線遠、沒融資資料＝資料不足。滑過標籤看數字。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「使用率」＝融資餘額 ÷ 這檔的融資額度），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看全部族群（all），上面可以改成只看某幾個族群（族群名用逗號分隔）。</div>';
+  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判；月高後融資增減 ≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；其餘＝<b>賣壓未釋放</b>（近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '% 也算未釋放）；離線太遠＝離線遠、沒融資資料＝資料不足。滑過標籤看數字。<b>近似落底</b>（我訂的條件，不是保證）：賣壓狀態是「釋放中」或「已洗掉一大半」＋近 5 日內有爆量（量 ≥ 前 20 日均量 2 倍）＋今天跌幅比前一天小、沒有再破爆量那天的最低價；沒有融資資料時只看價量，標「價量止跌（缺融資）」。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「使用率」＝融資餘額 ÷ 這檔的融資額度），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看全部族群（all），上面可以改成只看某幾個族群（族群名用逗號分隔）。</div>';
 function dgMarginStockHtml(s){
   const m = s.margin;
   if (!m) return '<div class="bl-section bl-launch">💥 融資斷頭線</div><div class="race-note">日K不足 24 根，算不出斷頭線</div>';
   const st = (broken, gap, isNew) => broken ? '<span style="color:#d9392b;font-weight:800">❌ 已破' + (isNew ? '・今日新破' : '') + '</span>' : '<span>差 ' + gap.toFixed(1) + '%</span>';
   const mg = s.marginBal;
   const bal = mg ? '<div class="race-note" style="line-height:1.9">融資餘額 <b>' + Number(mg.balance).toLocaleString() + ' 張</b>' + (mg.valueYi != null ? '（約 ' + mg.valueYi + ' 億）' : '') + '・今天 ' + mclSigned(mg.chg1) + ' 張' + (mg.util != null ? '・使用率 ' + Number(mg.util).toFixed(1) + '%' : '') +
-    '<br>月高那天到今天 ' + (mg.sinceHighPct == null ? '—' : '<b style="color:' + (mg.sinceHighPct > 0 ? '#d9392b' : '#15803d') + '">' + mclSigned(mg.sinceHighPct, 1) + '%</b>（' + (mg.sinceHighPct == null ? '' : mg.sinceHighPct > 0 ? '比月高時還多，沒退場' : '融資退場了一些') + '）') + '・5 個交易日 ' + (mg.chg5Pct == null ? '—' : mclSigned(mg.chg5Pct, 1) + '%') + '<br>賣壓狀態 ' + mclPressPill(mclPressure(m, mg)) + ' <span class="dg-sub">' + wlEsc((mclPressure(m, mg) || {}).tip || '') + '</span></div>'
+    '<br>月高那天到今天 ' + (mg.sinceHighPct == null ? '—' : '<b style="color:' + (mg.sinceHighPct > 0 ? '#d9392b' : '#15803d') + '">' + mclSigned(mg.sinceHighPct, 1) + '%</b>（' + (mg.sinceHighPct == null ? '' : mg.sinceHighPct > 0 ? '比月高時還多，沒退場' : '融資退場了一些') + '）') + '・5 個交易日 ' + (mg.chg5Pct == null ? '—' : mclSigned(mg.chg5Pct, 1) + '%') + '<br>賣壓狀態 ' + mclPressPill(mclPressure(m, mg)) + ' <span class="dg-sub">' + wlEsc((mclPressure(m, mg) || {}).tip || '') + '</span><br>落底訊號 ' + mclBottomPill(mclBottom(m, mg, m.stab)) + ' <span class="dg-sub">' + wlEsc((mclBottom(m, mg, m.stab) || {}).tip || '要同時：賣壓釋放中＋近 5 日爆量＋今天跌幅比前一天小且沒再破低') + '</span></div>'
     : '<div class="race-note">融資餘額：證交所／櫃買晚上 21:00 後才公布，還沒有這一天的資料</div>';
   return '<div class="bl-section bl-launch">💥 融資斷頭線・追高的人在哪裡斷頭</div>' +
     '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">算法</th><th>基準</th><th>斷頭價（×' + m.factor + '）</th><th>今收</th><th class="l">狀態</th></tr></thead><tbody>' +
@@ -14271,19 +14289,20 @@ function dgMarginListHtml(){
   const nearA = nearOf('a'), nearB = nearOf('b');
   const brokeEarlier = allRows.filter((r) => r.aBroken && !r.aNew);   // 昨天以前就已經破 A 的（不含昨日新破，那些在「今日新破」那排）
   const brokeEarlierB = allRows.filter((r) => r.bBroken && !r.bNew);
+  const bottomRows = allRows.filter((r) => { const b = mclBottom(r, r.margin, r.stab); return b && b.key === 'hit'; });
   const fbtn = (k, label, tip, n) => '<button type="button" class="chart-tab chips-btn mcl-fbtn' + (mclState.filter === k ? ' active' : '') + '" data-mcl-filter="' + k + '" title="' + tip + '；再按一次取消">' + label + '・' + n + ' 檔</button>';
-  const filterTips = { P: '只列昨天以前就已經破 A 斷頭價的股票（不含昨日新破）', Q: '只列昨天以前就已經破 B 斷頭價的股票（不含昨日新破）', A: '只列離 A 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票', B: '只列離 B 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票' };
-  const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('P', 'A 已破（前幾天）', filterTips.P, brokeEarlier.length) + fbtn('Q', 'B 已破（前幾天）', filterTips.Q, brokeEarlierB.length) + fbtn('A', '離 A ≤' + MCL_FILTER_PCT + '%', filterTips.A, nearA.length) + fbtn('B', '離 B ≤' + MCL_FILTER_PCT + '%', filterTips.B, nearB.length) + (mclState.filter ? '<span class="dg-sub">　' + filterTips[mclState.filter] + '；再按一次取消</span>' : '') + (!brokeEarlier.length && !/\\ball\\b/.test(mclState.groups) ? '<span class="dg-sub">　（這幾個族群裡 A 已破的都是昨日新破；族群欄打 all 可看全部族群）</span>' : '') + '</div>';
-  const shownRows = mclState.filter === 'P' ? brokeEarlier : mclState.filter === 'Q' ? brokeEarlierB : mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows;
+  const filterTips = { P: '只列昨天以前就已經破 A 斷頭價的股票（不含昨日新破）', Q: '只列昨天以前就已經破 B 斷頭價的股票（不含昨日新破）', T: '只列「近似落底」的股票：賣壓釋放中＋爆量後跌幅縮小、沒再破低', A: '只列離 A 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票', B: '只列離 B 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票' };
+  const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('P', 'A 已破（前幾天）', filterTips.P, brokeEarlier.length) + fbtn('Q', 'B 已破（前幾天）', filterTips.Q, brokeEarlierB.length) + fbtn('T', '近似落底', filterTips.T, bottomRows.length) + fbtn('A', '離 A ≤' + MCL_FILTER_PCT + '%', filterTips.A, nearA.length) + fbtn('B', '離 B ≤' + MCL_FILTER_PCT + '%', filterTips.B, nearB.length) + (mclState.filter ? '<span class="dg-sub">　' + filterTips[mclState.filter] + '；再按一次取消</span>' : '') + (!brokeEarlier.length && !/\\ball\\b/.test(mclState.groups) ? '<span class="dg-sub">　（這幾個族群裡 A 已破的都是昨日新破；族群欄打 all 可看全部族群）</span>' : '') + '</div>';
+  const shownRows = mclState.filter === 'T' ? bottomRows : mclState.filter === 'P' ? brokeEarlier : mclState.filter === 'Q' ? brokeEarlierB : mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows;
   const sortedRows = shownRows.slice().sort((x, y) => {   // 照 A 或 B 的「差 %」排：升冪＝差最小（已破＝負的）排最前，降冪＝差最大排最前
     const gx = x[mclState.sortKey], gy = y[mclState.sortKey];
     return (mclState.sortDir * ((gx == null ? Infinity : gx) - (gy == null ? Infinity : gy))) || String(x.code).localeCompare(String(y.code));
   });
   const rows = sortedRows.map((r) => '<tr class="dg-link" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
-    '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td></tr>').join('');
+    '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td><td class="l">' + mclBottomPill(mclBottom(r, r.margin, r.stab)) + '</td></tr>').join('');
   const summary = !d.summary ? '' : mclSummaryHtml(d.summary, 'diag');
   return head + summary + filterBar + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
-    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th>'+ mclSortTh('aGap', 'A 月高斷頭') + mclSortTh('bGap', 'B 五日平均價線斷頭') + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
+    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th>'+ mclSortTh('aGap', 'A 月高斷頭') + mclSortTh('bGap', 'B 五日平均價線斷頭') + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th><th class="l">落底訊號</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
 function renderDiag(){
   const body = document.getElementById('diagBody');
@@ -14594,7 +14613,7 @@ document.getElementById('diagBody').addEventListener('click', (e) => {
   if (mfl){   // 離 A／B ≤10% 快速篩選：按一下只看那一組（並照那條線的差由小到大排），再按一次取消
     const k = mfl.dataset.mclFilter;
     mclState.filter = mclState.filter === k ? '' : k;
-    if (mclState.filter){ mclState.sortKey = (k === 'B' || k === 'Q' ? 'b' : 'a') + 'Gap'; mclState.sortDir = 1; }
+    if (mclState.filter){ mclState.sortKey = (k === 'B' || k === 'Q' ? 'b' : 'a') + 'Gap'; mclState.sortDir = 1; }   // 近似落底（T）照 A 差排
     const inner = document.getElementById('diagInner'), top = inner ? inner.scrollTop : 0;
     renderDiag();
     if (inner) inner.scrollTop = top;
@@ -14638,7 +14657,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 12:00:29';
+const BUILD_STAMP = '2026-10-23 12:08:34';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
