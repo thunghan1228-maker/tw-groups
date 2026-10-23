@@ -976,18 +976,21 @@
   #wgModal.bot-front:not(.behind-group):not(.behind-chart){z-index:103;}
   #wgInner{position:absolute;pointer-events:auto;min-width:280px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
   #wgInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
-  #wgBody .bot-col.wg-col{flex:0 0 470px;min-width:450px;}
+  #wgBody .bot-col.wg-col{flex:0 0 780px;min-width:750px;}   /* 排名圖多了融資餘額、月高後、賣壓狀態三欄，格子變寬，左右拖著移動 */
   @media (max-width:767px){
     #wgBody .bot-col.wg-col{flex-basis:94%;min-width:0;}
     /* 手機寬度放不下小柱子＋A／B 兩欄：柱子拿掉，只留股號、股名、漲跌幅、A、B 五欄 */
-    #wgBody .bcr.cp,.bot-col .bcr.cp{grid-template-columns:2.2em minmax(0,1fr) 3.6em 3.4em 3.6em 3.6em!important;}
-    #wgBody .bcr.cp .bct,.bot-col .bcr.cp .bct,.bcr.cp.bc-hd span:nth-child(4){display:none;}
+    #wgBody .bcr.cp:not(.cpx),.bot-col .bcr.cp:not(.cpx){grid-template-columns:2.2em minmax(0,1fr) 3.6em 3.4em 3.6em 3.6em!important;}
+    #wgBody .bcr.cp:not(.cpx) .bct,.bot-col .bcr.cp:not(.cpx) .bct,.bcr.cp.bc-hd:not(.cpx) span:nth-child(4){display:none;}
+    #wgBody .bot-chart{min-width:750px;}   /* 自選族群個股的排名圖欄位多，手機上整格左右滑 */
   }
   /* 緊湊排名圖（機器人、自選族群個股共用）：漲跌幅數字、小柱子（大概比例就好）、A／B 斷頭價 */
   .bcr.cp{height:30px;} .bcr.cp.bc-hd{height:18px;font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap;} .bcr.cp.bc-hd span:nth-child(n+3){text-align:right;}
   .bcr.cp .n{text-align:left;} .bcr.cp .cpv{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:12px;}
   .bot-col.bot-col-wide:has(.bcr.cp){flex:0 0 470px;min-width:450px;}   /* 機器人那格多了 A／B 兩欄，比原本寬一點 */
   .bcr.cp .bct .b{height:10px;top:1px;}
+  .bcr.cp .cpm{text-align:right;line-height:1.2;font-size:12px;} .bcr.cp .cpm.l{text-align:left;} .bcr.cp .cpm .dg-sub{font-size:10.5px;color:var(--muted);white-space:nowrap;} .bcr.cp .cpm .mcl-util{font-size:10.5px;}
+  .bcr.cp.cpx.bc-hd span:nth-child(n+8){text-align:right;} .bcr.cp.cpx.bc-hd span:nth-child(10){text-align:left;}
   .bcr.cp .cphold{text-align:right;} .bcr.cp .cphold .hr-hold{margin-left:0;min-width:0;font-size:11.5px;padding:0 3px;}
   #wgBody .up,#wgBody .down,#wgBody .flat{font-weight:700;}
   .wg-ab{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap;} .wg-ab b{font-weight:700;} .wg-ab i{font-style:normal;font-size:10.5px;color:var(--muted);}
@@ -3105,7 +3108,7 @@
   /* 2026-10-23 使用者：問診的同族對照／今日名單加了斷頭價 A／B，版面收緊：字小一點、間距縮、表頭可換行、股票名稱放第二行（欄寬寬一點、兩排字） */
   .mcl-chip{display:inline-block;background:#7c3aed;color:#fff;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px 4px 2px 0;cursor:pointer;text-decoration:none;}   /* 2026-10-23 使用者：融資斷頭線總結裡的個股名稱＝紫底白字 */
   .mcl-chip:hover{background:#6d28d9;}
-  .mcl-chip.pull{background:#b45309;}   /* 今日提醒：容易回檔＝橘、回檔風險高＝紅、近似落底＝青 */
+  .mcl-chip.pull{background:#b45309;}   /* 今日提醒：留意回檔＝橘、近似落底＝青 */
   .mcl-chip.t2{background:#be123c;}
   .mcl-chip.low{background:#0891b2;}
   .dg-back[disabled]{opacity:.4;cursor:not-allowed;}
@@ -3137,7 +3140,7 @@
   .mcl-bottom.b-weak{background:#475569;}
   .mcl-pull{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;}   /* 2026-10-23 使用者：高點警示（回測後改稱留意回檔） */
   .mcl-pull.t1{background:#b45309;}
-  .mcl-pull.t2{background:#be123c;}
+  .mcl-pull.t2{background:#b45309;}   /* 2026-10-23 使用者：統一叫「留意回檔」，不分風險高，顏色也一樣 */
   .mcl-util.hi{color:#f59e0b;font-weight:700;}
   .mcl-util.hot{color:#ef4444;font-weight:800;}
   .ck-table.dg-tbl{font-size:12.5px;}
@@ -14312,7 +14315,7 @@ function mclBottomPill(b){
   return b ? '<span class="mcl-bottom b-' + b.key + '" title="' + wlEsc(b.tip) + '">' + b.text + '</span>' : '<span class="muted">—</span>';
 }
 // 留意回檔（2026-10-23 使用者要「近似高點」警示；用近一年 417 檔日K回測後改名，因為價量條件抓不到頭部）：
-// 條件＝漲多（近 10 日漲 ≥25% 或離月線乖離 ≥20%）＋爆量（≥前 20 日均量 2 倍）＋出貨K（收黑、長上影、或爆量不漲）；近 10 日漲 ≥40% 的升成「回檔風險高」。
+// 條件＝漲多（近 10 日漲 ≥25% 或離月線乖離 ≥20%）＋爆量（≥前 20 日均量 2 倍）＋出貨K（收黑、長上影、或爆量不漲）；近 10 日漲 ≥40% 的是漲更多的一組（名稱、顏色都一樣叫留意回檔，只在滑過去的說明裡註明、名單排最前面）。
 // 回測（扣掉大盤）：這組合之後 1～5 天下跌機率約 54～57%（平常 50%）、極端漲多版約 59～61%，超額報酬 −0.1%～−1.2%；但 10～20 天後平均仍比大盤強（動能還在），所以不是頭部。
 // 融資使用率、融資還在增加只當提示（歷史資料太短，還不能回測），不影響判斷。價量特徵（pull）後端算好。
 const MCL_PULL_TIP = '回測近一年 417 檔：這種組合之後 1～5 天下跌機率約 54～57%（平常 50%），極端漲多版約 59～61%；但 10～20 天後平均仍比大盤強，所以只代表短線容易回檔，不是頭部。';
@@ -14323,14 +14326,14 @@ function mclPullback(pull, mg){
   const extra = [];
   if (mg && mg.util != null && mg.util >= MCL_UTIL_HIGH) extra.push('融資使用率 ' + Number(mg.util).toFixed(1) + '%' + (mg.util >= MCL_UTIL_HOT ? '（過熱）' : '（偏高）') + '，融資擁擠');
   if (mg && ((mg.sinceHighPct != null && mg.sinceHighPct >= 10) || (mg.chg5Pct != null && mg.chg5Pct >= 5))) extra.push('融資還在增加（月高後 ' + mclSigned(mg.sinceHighPct, 1) + '%、近 5 日 ' + mclSigned(mg.chg5Pct, 1) + '%），散戶追高');
-  return { key: pull.tier === 2 ? 't2' : 't1', text: pull.tier === 2 ? '回檔風險高' : '留意回檔', tip: base + (extra.length ? '。加重提示：' + extra.join('；') : '') + '。' + MCL_PULL_TIP, extra: extra.length };
+  return { key: pull.tier === 2 ? 't2' : 't1', text: '留意回檔', tip: (pull.tier === 2 ? '近 10 日漲 ≥40%（漲更多的一組，回測這組短線回檔機率最高）。' : '') + base + (extra.length ? '。加重提示：' + extra.join('；') : '') + '。' + MCL_PULL_TIP, extra: extra.length };
 }
 function mclPullPill(b){
   return b ? '<span class="mcl-pull ' + b.key + '" title="' + wlEsc(b.tip) + '">' + b.text + (b.extra ? ' ＋融資' : '') + '</span>' : '<span class="muted">—</span>';
 }
 const MCL_RULE = '<div class="sw-rule">口徑：融資借滿 6 成，股價跌 22% 維持率剛好 130%（收追繳令、2 天沒補錢第 3 天強制賣出＝斷頭）。<b>A 最高點追</b>＝近一個月（20 個交易日）盤中最高價 × 0.78（上櫃 × 0.65），最慘的那批人，A 跌破＝斷頭開始；' +
   '<b>B 五日平均價線追</b>＝月高那天的五日平均價 × 0.78（上櫃 × 0.65），比較多人的平均成本，B 跌破＝斷頭高峰。今收低於斷頭價＝已破；否則「差 x%」＝（今收 − 斷頭價）÷ 今收；名單照 B 的距離由近到遠排。' +
-  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判；月高後融資增減 ≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；其餘＝<b>賣壓未釋放</b>（近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '% 也算未釋放）；離線太遠＝離線遠、沒融資資料＝資料不足。滑過標籤看數字。<b>使用率</b>＝融資餘額 ÷ 這檔的融資額度，我用全部股票的實際分布訂：≥' + MCL_UTIL_HIGH + '%（橘）＝<b>偏高</b>（約前 23%）、≥' + MCL_UTIL_HOT + '%（紅）＝<b>過熱</b>（約前 10%）；交易所那邊用到 80% 會進行額度分配、100% 暫停融資買進。<b>近似落底</b>（我訂的條件，不是保證）：賣壓狀態是「釋放中」或「已洗掉一大半」＋近 5 日內有爆量（量 ≥ 前 20 日均量 2 倍）＋今天跌幅比前一天小、沒有再破爆量那天的最低價；沒有融資資料時只看價量，標「價量止跌（缺融資）」。<b>留意回檔</b>（原本想做「近似高點」，回測後改名）：漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K（收黑、長上影、爆量不漲）；近 10 日 ≥40% 的標「回檔風險高」。回測近一年 417 檔：之後 1～5 天下跌機率約 54～57%（平常 50%）、極端漲多約 59～61%，但 10～20 天後平均仍比大盤強，所以只代表短線容易回檔、不是頭部；融資使用率高、融資還在增加只當加重提示（融資歷史太短還不能回測）。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「使用率」＝融資餘額 ÷ 這檔的融資額度），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看全部族群（all），上面可以改成只看某幾個族群（族群名用逗號分隔）。</div>';
+  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判；月高後融資增減 ≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；其餘＝<b>賣壓未釋放</b>（近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '% 也算未釋放）；離線太遠＝離線遠、沒融資資料＝資料不足。滑過標籤看數字。<b>使用率</b>＝融資餘額 ÷ 這檔的融資額度，我用全部股票的實際分布訂：≥' + MCL_UTIL_HIGH + '%（橘）＝<b>偏高</b>（約前 23%）、≥' + MCL_UTIL_HOT + '%（紅）＝<b>過熱</b>（約前 10%）；交易所那邊用到 80% 會進行額度分配、100% 暫停融資買進。<b>近似落底</b>（我訂的條件，不是保證）：賣壓狀態是「釋放中」或「已洗掉一大半」＋近 5 日內有爆量（量 ≥ 前 20 日均量 2 倍）＋今天跌幅比前一天小、沒有再破爆量那天的最低價；沒有融資資料時只看價量，標「價量止跌（缺融資）」。<b>留意回檔</b>（原本想做「近似高點」，回測後改名）：漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K（收黑、長上影、爆量不漲）；近 10 日 ≥40% 的是漲更多的一組（名稱一樣叫留意回檔，只在滑過去的說明裡註明、名單排最前面）。回測近一年 417 檔：之後 1～5 天下跌機率約 54～57%（平常 50%）、極端漲多約 59～61%，但 10～20 天後平均仍比大盤強，所以只代表短線容易回檔、不是頭部；融資使用率高、融資還在增加只當加重提示（融資歷史太短還不能回測）。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「使用率」＝融資餘額 ÷ 這檔的融資額度），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看全部族群（all），上面可以改成只看某幾個族群（族群名用逗號分隔）。</div>';
 function dgMarginStockHtml(s){
   const m = s.margin;
   if (!m) return '<div class="bl-section bl-launch">💥 融資斷頭線</div><div class="race-note">日K不足 24 根，算不出斷頭線</div>';
@@ -14367,8 +14370,8 @@ function dgMarginListHtml(){
   const brokeEarlierB = allRows.filter((r) => r.bBroken && !r.bNew);
   const pullRows = allRows.filter((r) => r.pull && r.pull.tier);
   const bottomRows = allRows.filter((r) => { const b = mclBottom(r, r.margin, r.stab); return b && b.key === 'hit'; });
-  const fbtn = (k, label, tip, n) => '<button type="button" class="chart-tab chips-btn mcl-fbtn' + (mclState.filter === k ? ' active' : '') + '" data-mcl-filter="' + k + '" title="' + tip + '；再按一次取消">' + label + '・' + n + ' 檔</button>';
-  const filterTips = { P: '只列昨天以前就已經破 A 斷頭價的股票（不含昨日新破）', Q: '只列昨天以前就已經破 B 斷頭價的股票（不含昨日新破）', T: '只列「近似落底」的股票：賣壓釋放中＋爆量後跌幅縮小、沒再破低', R: '只列「留意回檔」的股票：漲多＋爆量＋出貨K（含回檔風險高），按近 10 日漲幅由大到小排', A: '只列離 A 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票', B: '只列離 B 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票' };
+  const fbtn = (k, label, tip, n, extra) => '<button type="button" class="chart-tab chips-btn mcl-fbtn' + (mclState.filter === k ? ' active' : '') + '" data-mcl-filter="' + k + '" title="' + tip + '；再按一次取消">' + label + '・' + n + ' 檔' + (extra || '') + '</button>';
+  const filterTips = { P: '只列昨天以前就已經破 A 斷頭價的股票（不含昨日新破）', Q: '只列昨天以前就已經破 B 斷頭價的股票（不含昨日新破）', T: '只列「近似落底」的股票：賣壓釋放中＋爆量後跌幅縮小、沒再破低', R: '只列「留意回檔」的股票：漲多＋爆量＋出貨K。近 10 日漲得越多排越前面', A: '只列離 A 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票', B: '只列離 B 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票' };
   const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('P', 'A 已破（前幾天）', filterTips.P, brokeEarlier.length) + fbtn('Q', 'B 已破（前幾天）', filterTips.Q, brokeEarlierB.length) + fbtn('T', '近似落底', filterTips.T, bottomRows.length) + fbtn('R', '留意回檔', filterTips.R, pullRows.length) + fbtn('A', '離 A ≤' + MCL_FILTER_PCT + '%', filterTips.A, nearA.length) + fbtn('B', '離 B ≤' + MCL_FILTER_PCT + '%', filterTips.B, nearB.length) + (mclState.filter ? '<span class="dg-sub">　' + filterTips[mclState.filter] + '；再按一次取消</span>' : '') + (!brokeEarlier.length && !/\ball\b/.test(mclState.groups) ? '<span class="dg-sub">　（這幾個族群裡 A 已破的都是昨日新破；族群欄打 all 可看全部族群）</span>' : '') + '</div>';
   const shownRows = mclState.filter === 'R' ? pullRows : mclState.filter === 'T' ? bottomRows : mclState.filter === 'P' ? brokeEarlier : mclState.filter === 'Q' ? brokeEarlierB : mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows;
   const sortedRows = shownRows.slice().sort(mclState.filter === 'R' ? ((x, y) => (y.pull.tier - x.pull.tier) || (y.pull.ret10 - x.pull.ret10)) : (x, y) => {   // 照 A 或 B 的「差 %」排：升冪＝差最小（已破＝負的）排最前，降冪＝差最大排最前
@@ -14442,7 +14445,7 @@ const SCR_CARDS = [
   { key: 'mclP', client: true, title: '融資・A 已破（前幾天）', desc: '昨天以前就已經跌破 A 最高點追斷頭價的股（不含昨日新破）。A＝近 20 個交易日盤中最高 × 0.78（上櫃 × 0.65）。', check: true },
   { key: 'mclQ', client: true, title: '融資・B 已破（前幾天）', desc: '昨天以前就已經跌破 B 五日平均價線追斷頭價的股（不含昨日新破）。B＝月高那天的五日平均價 × 0.78（上櫃 × 0.65）。', check: true },
   { key: 'mclT', client: true, title: '融資・近似落底', desc: '賣壓釋放中或已洗掉一大半（融資在退場）＋近 5 日爆量＋今天跌幅比前一天小、沒再破爆量日最低價。我訂的條件，不是保證。', check: true },
-  { key: 'mclR', client: true, title: '融資・留意回檔', desc: '漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K（收黑、長上影、爆量不漲）；含回檔風險高。回測只代表 1～5 天短線容易拉回。', check: true },
+  { key: 'mclR', client: true, title: '融資・留意回檔', desc: '漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K（收黑、長上影、爆量不漲）。回測只代表 1～5 天短線容易拉回。', check: true },
   { key: 'mclA', client: true, title: '融資・離 A ≤' + MCL_FILTER_PCT + '%', desc: '還沒跌破 A 斷頭價、但離它只剩 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%）的股。', check: true },
   { key: 'mclB', client: true, title: '融資・離 B ≤' + MCL_FILTER_PCT + '%', desc: '還沒跌破 B 斷頭價、但離它只剩 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%）的股。', check: true },
 ];
@@ -20705,7 +20708,7 @@ function botBarChart(rows, opts){
       const v = Number.isFinite(r.v) ? r.v : 0, w = 50 * Math.abs(v) / cpMax;
       const bar = v > 0 ? '<i class="b pos' + (r.faded ? ' faded' : '') + '" style="left:50%;width:' + w + '%"></i>' : v < 0 ? '<i class="b neg' + (r.faded ? ' faded' : '') + '" style="left:' + (50 - w) + '%;width:' + w + '%"></i>' : '';
       const clk2 = r.c ? ' data-bot-code="' + wlEsc(r.c) + '" data-bot-name="' + wlEsc(String(r.n || '').replace(/^\*/, '')) + '" tabindex="0" role="button"' : '';
-      return '<div class="bcr cp' + (r.hl ? ' hl' : '') + (r.mid ? ' mid' : '') + '" style="grid-template-columns:' + opts.gridCols + '"' + clk2 + ' title="' + wlEsc((r.c ? r.c + ' ' : '') + r.n + ' ' + fmtV(r.v) + (r.c ? '（點了開K線圖）' : '')) + '"><span class="c">' + wlEsc(r.c || '') + '</span><span class="n">' + wlEsc(r.n) + (r.pill ? '<span class="bcm">' + r.pill + '</span>' : '') + '</span>' +
+      return '<div class="bcr cp' + (opts.cpx ? ' cpx' : '') + (r.hl ? ' hl' : '') + (r.mid ? ' mid' : '') + '" style="grid-template-columns:' + opts.gridCols + '"' + clk2 + ' title="' + wlEsc((r.c ? r.c + ' ' : '') + r.n + ' ' + fmtV(r.v) + (r.c ? '（點了開K線圖）' : '')) + '"><span class="c">' + wlEsc(r.c || '') + '</span><span class="n">' + wlEsc(r.n) + (r.pill ? '<span class="bcm">' + r.pill + '</span>' : '') + '</span>' +
         '<span class="cpv ' + (v > 0 ? 'up' : v < 0 ? 'down' : 'flat') + '">' + fmtV(r.v) + '</span><span class="bct"><span class="bci" style="left:0;right:0"><i class="z" style="left:50%"></i>' + bar + '</span></span>' + (r.extra || '') + '</div>';
     }
     // 2026-10-22 使用者：柱狀圖裡的股號、股名點了開 K 線圖（有股號的列才有；族群那種列沒有）
@@ -20983,7 +20986,7 @@ function botRankChart(g, h, me, opts){   // opts：title／sub／foot＝改標�
   const preOpen = !closed && !!lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr() && String(lastData.quoteTime || '') < '09:00';   // 2026-10-22 盤前撮合（試算價）
   let html = botBarChart(rows, { title: opts.title || g.name + ' 族群排名', sub: opts.sub || n + '檔・' + stampTxt + (closed ? ' 收盤' : preOpen ? ' 盤前試算' : ' 盤中快照'),
     sub2: trail ? '族群排名走勢 ' + trail.ranks.join('→') + trail.arrows.join('') : '', right: '多方 ' + topEnd, rightSub: '空方 ' + (n - botStart), wide: true,
-    compact: true, gridCols: opts.gridCols, headRow: opts.headRow,
+    compact: true, cpx: opts.cpx, gridCols: opts.gridCols, headRow: opts.headRow,
     foot: opts.foot || '👑帶頭 🚀火箭 🐎火馬 🔺轉強 🔪⚔️刀劍 🔰新手（數字＝名次變化）；大戶力＝盤中大戶力（≥+10% 紅底、≤−10% 綠底）；A／B＝融資斷頭價，小字＝離現價差幾 %（橘＝≤' + MCL_FILTER_PCT + '%、紅＝已破）', show: true });
   const i = me ? list.findIndex((s) => s.code === me) : -1;
   if (i >= 0){
@@ -22513,6 +22516,16 @@ function wgAbExtra(s){
   const m = wgMargin.map && wgMargin.map[s.code];
   return '<span class="cphold">' + homeHoldHtml(s.code) + '</span>' + (m ? wgLineCell(s.price, m.a) + wgLineCell(s.price, m.b) : '<span class="wg-ab"><b>—</b></span><span class="wg-ab"><b>—</b></span>');
 }
+// 自選族群個股的排名圖多三欄（2026-10-23 使用者：融資餘額、月高後融資增減、賣壓狀態也要有，欄位變寬沒關係、左右可以捲動）：跟個股問診融資名單同一套（mclBalCell／mclSinceCell／mclPressure）
+const WG_GRID_X = '2.6em minmax(4.2em,1fr) 4.3em 60px 3.9em 4.4em 4.4em 12.6em 4.9em 6.4em';
+const WG_HEAD_X = '<div class="bcr cp cpx bc-hd" style="grid-template-columns:' + WG_GRID_X + '"><span></span><span>股票</span><span>漲跌幅</span><span></span><span title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值）；≥+10% 紅底、≤−10% 綠底">大戶力</span><span title="A 最高點追的斷頭價">A 斷頭</span><span title="B 五日平均價線追的斷頭價">B 斷頭</span><span title="融資餘額（張）；今＝今天增減、使用率＝融資餘額 ÷ 這檔的融資額度">融資餘額（張）</span><span title="月高那天到今天融資餘額增減 %；下面小字是 5 個交易日增減">月高後</span><span title="離 A 或 B 斷頭價 ≤10% 或已跌破才判：賣壓未釋放／釋放中／已洗掉一大半；離線遠＝離斷頭價還遠">賣壓狀態</span></div>';
+function wgFullExtra(s){
+  const m = wgMargin.map && wgMargin.map[s.code];
+  const none = '<span class="cpm"><span class="muted">—</span></span>';
+  if (!m) return wgAbExtra(s) + none + none + none;
+  const live = wgLive(m, s.price), mg = m.margin;
+  return wgAbExtra(s) + '<span class="cpm">' + mclBalCell(mg) + '</span><span class="cpm">' + mclSinceCell(mg) + '</span><span class="cpm l">' + mclPressPill(mclPressure(live, mg)) + '</span>';
+}
 function wgGroupChart(g, me){
   const list = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent));
   const n = list.length;
@@ -22530,6 +22543,7 @@ function wgGroupChart(g, me){
   const stampTxt = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
   const sum = wgMargin.map ? '<div class="wg-sum">這族 ' + n + ' 檔：<b class="wg-bad">A 已破 ' + aB + ' 檔</b>・<b class="wg-bad">B 已破 ' + bB + ' 檔</b>・<b style="color:#f59e0b">離 B ≤' + MCL_FILTER_PCT + '% ' + bNear + ' 檔</b></div>' : '';
   return sum + botRankChart(g, null, me, { title: g.name + ' 族群排名' + (rank ? '(' + rank + ')' : ''), sub: n + '檔・' + stampTxt + (closed ? ' 收盤' : ' 盤中快照') + '・平均 ' + botPct(g.avgChange),
+    cpx: true, gridCols: WG_GRID_X, headRow: WG_HEAD_X, extraOf: wgFullExtra,
     });
 }
 // 文字名單每檔後面的 A／B（小字）
@@ -22846,10 +22860,10 @@ function remindMclHtml(){
   const rows = d.rows || [];
   const pullHit = rows.map((r) => ({ r, b: mclPullback(r.pull, r.margin) })).filter((x) => x.b).sort((a, b) => (b.r.pull.tier - a.r.pull.tier) || (b.r.pull.ret10 - a.r.pull.ret10));
   const lowHit = rows.map((r) => ({ r, b: mclBottom(r, r.margin, r.stab) })).filter((x) => x.b && x.b.key === 'hit');
-  const chip = (x, cls) => '<a class="mcl-chip ' + cls + '" data-rm-code="' + wlEsc(x.r.code) + '" data-rm-name="' + wlEsc(x.r.name || '') + '" title="' + wlEsc(x.b.tip) + '">' + wlEsc(x.r.name || x.r.code) + (x.b.key === 't2' ? '・高' : '') + '</a>';
+  const chip = (x, cls) => '<a class="mcl-chip ' + cls + '" data-rm-code="' + wlEsc(x.r.code) + '" data-rm-name="' + wlEsc(x.r.name || '') + '" title="' + wlEsc(x.b.tip) + '">' + wlEsc(x.r.name || x.r.code) + '</a>';
   const lab = (color, text) => '<b style="color:' + color + '">' + text + '</b>';
   const signals = '<div class="race-note" style="line-height:2.1">' +
-    lab('#fb923c', '⚠️ 容易回檔（高檔）・' + pullHit.length + ' 檔') + '　' + (pullHit.length ? pullHit.map((x) => chip(x, x.b.key === 't2' ? 't2' : 'pull')).join('') + '<span class="dg-sub">　紅色「高」＝回檔風險高（近 10 日漲 ≥40%）</span>' : '<span class="muted">目前沒有（漲多＋爆量＋收黑／長上影／爆量不漲）</span>') +
+    lab('#fb923c', '⚠️ 容易回檔（高檔）・' + pullHit.length + ' 檔') + '　' + (pullHit.length ? pullHit.map((x) => chip(x, 'pull')).join('') : '<span class="muted">目前沒有（漲多＋爆量＋收黑／長上影／爆量不漲）</span>') +
     '<br>' + lab('#22d3ee', '🌱 接近底部（近似落底）・' + lowHit.length + ' 檔') + '　' + (lowHit.length ? lowHit.map((x) => chip(x, 'low')).join('') : '<span class="muted">目前沒有（賣壓釋放中＋爆量後跌幅縮小、沒再破低）</span>') + '</div>';
   return head + mclSummaryHtml(d.summary, 'remind') + signals + '<div class="rm-warn" style="margin-top:4px">A 線＝近一個月最高點追的人的斷頭價、B 線＝月高那天五日平均價追的人的斷頭價。容易回檔只代表 1～5 天短線容易拉回、不是頭部（回測 54～57% 會跌）；接近底部是我訂的條件、不是保證。細節到「個股問診」看。</div></div>';
 }
