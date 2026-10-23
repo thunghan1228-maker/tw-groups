@@ -3051,6 +3051,8 @@
   .mcl-chip{display:inline-block;background:#7c3aed;color:#fff;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px 4px 2px 0;cursor:pointer;text-decoration:none;}   /* 2026-10-23 使用者：融資斷頭線總結裡的個股名稱＝紫底白字 */
   .mcl-chip:hover{background:#6d28d9;}
   .dg-back[disabled]{opacity:.4;cursor:not-allowed;}
+  .mcl-filters{margin:6px 0 4px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+  .mcl-fbtn.active{background:#e11d48;border-color:#e11d48;color:#fff;}
   .ck-table th.mcl-sort{cursor:pointer;white-space:nowrap;}
   .ck-table th.mcl-sort .mcl-arrow{color:var(--muted);font-size:11px;}
   .ck-table th.mcl-sort.on{color:#e11d48;}
@@ -14078,14 +14080,14 @@ function mvHtml(data){
 // ---- 融資斷頭線（2026-10-23 使用者貼老師 10/22「台股融資追蹤・斷頭線就在腳下」）----
 // A 最高點追＝近 20 個交易日盤中最高 × 0.78（上櫃 × 0.65）、B 五日線追＝月高那天的 5 日均價 × 0.78（上櫃 × 0.65）；今收低於斷頭價＝已破，否則差（今收−斷頭價）÷今收。
 // 後端 /api/margin-call 算名單，單檔的在問診資料 stock.margin；老師 10/22 的八檔（南亞科、國巨、聯電…）月高、A、B、差幾 % 都算得一模一樣。
-const mclState = { groups: '被動元件,記憶體,矽晶圓', loaded: '', data: null, loading: false, failedAt: 0, error: '', sortKey: 'bGap', sortDir: 1 };   // sortKey／sortDir：A、B 欄位按鈕排序（2026-10-23 使用者），預設照 B 差由小到大
+const mclState = { groups: '被動元件,記憶體,矽晶圓', loaded: '', data: null, loading: false, failedAt: 0, error: '', sortKey: 'bGap', sortDir: 1, filter: '' };   // filter：'A'／'B'＝只看離 A／B 斷頭價 ≤10% 的（2026-10-23 使用者）   // sortKey／sortDir：A、B 欄位按鈕排序（2026-10-23 使用者），預設照 B 差由小到大
 async function mclEnsure(){
   const key = mclState.groups;
   if (mclState.loaded === key && (mclState.data || mclState.loading)) return;
   if (mclState.loaded === key && mclState.failedAt && Date.now() - mclState.failedAt < 30000) return;
   mclState.loaded = key; mclState.loading = true; mclState.data = null; mclState.error = '';
   try {
-    const res = await fetch('/api/margin-call?limit=80&groups=' + encodeURIComponent(key));
+    const res = await fetch('/api/margin-call?limit=400&groups=' + encodeURIComponent(key));
     const data = await res.json().catch(() => null);
     if (!res.ok) throw new Error((data && (data.detail || data.error)) || ('margin-call http ' + res.status));
     if (mclState.loaded !== key) return;
@@ -14131,6 +14133,7 @@ function mclSinceCell(mg){
   return '<b style="color:' + (p > 0 ? '#d9392b' : p < 0 ? '#15803d' : 'inherit') + '">' + mclSigned(p, 1) + '%</b>' + (mg.chg5Pct != null ? '<div class="dg-sub">5日 ' + mclSigned(mg.chg5Pct, 1) + '%</div>' : '');
 }
 // 賣壓狀態（2026-10-23 使用者要：賣壓未釋放／釋放中／已洗掉一大半）：斷頭價附近的融資還剩多少、有沒有退場。這是我訂的簡單判斷，不是保證，門檻都在這裡可以調。
+const MCL_FILTER_PCT = 10;            // 名單上「離 A／B ≤10%」快速篩選的門檻（跟盤中提醒的 MCL_NEAR_ALERT_PCT 同一個數字）
 const MCL_PRESS_NEAR_PCT = 10;        // 離 A 或 B 斷頭價 ≤10%（或已跌破）才判；離得遠就標「離線遠」
 const MCL_PRESS_WASHED_PCT = -30;     // 月高那天到今天融資餘額減 ≥30％ ＝ 已洗掉一大半
 const MCL_PRESS_RELEASING_PCT = -5;   // 減 ≥5％（或近 5 日減 ≥5％）＝ 釋放中
@@ -14180,14 +14183,20 @@ function dgMarginListHtml(){
   if (!d) return head + '<div class="race-note">' + (mclState.error ? '讀取失敗：' + wlEsc(mclState.error) : '讀取中…') + '</div>';
   if (d.status !== 'ok') return head + '<div class="race-note">' + wlEsc(d.reason || '還沒有日K資料') + '</div>';
   const c = d.counts || {};
-  const sortedRows = (d.rows || []).slice().sort((x, y) => {   // 照 A 或 B 的「差 %」排：升冪＝差最小（已破＝負的）排最前，降冪＝差最大排最前
+  const allRows = d.rows || [];
+  const nearOf = (k) => allRows.filter((r) => !r[k + 'Broken'] && r[k + 'Gap'] != null && r[k + 'Gap'] <= MCL_FILTER_PCT);   // 離線還有 ≤10%（含 10%、還沒破）
+  const nearA = nearOf('a'), nearB = nearOf('b');
+  const fbtn = (k, n) => '<button type="button" class="chart-tab chips-btn mcl-fbtn' + (mclState.filter === k ? ' active' : '') + '" data-mcl-filter="' + k + '" title="只看離 ' + k + ' 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票；再按一次取消">離 ' + k + ' ≤' + MCL_FILTER_PCT + '%・' + n + ' 檔</button>';
+  const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('A', nearA.length) + fbtn('B', nearB.length) + (mclState.filter ? '<span class="dg-sub">　只列離 ' + mclState.filter + ' 斷頭價還有 ≤' + MCL_FILTER_PCT + '% 的股票（已跌破的在上面「' + mclState.filter + ' 線已破」那排）；再按一次取消</span>' : '') + '</div>';
+  const shownRows = mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows;
+  const sortedRows = shownRows.slice().sort((x, y) => {   // 照 A 或 B 的「差 %」排：升冪＝差最小（已破＝負的）排最前，降冪＝差最大排最前
     const gx = x[mclState.sortKey], gy = y[mclState.sortKey];
     return (mclState.sortDir * ((gx == null ? Infinity : gx) - (gy == null ? Infinity : gy))) || String(x.code).localeCompare(String(y.code));
   });
   const rows = sortedRows.map((r) => '<tr class="dg-link" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
     '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td></tr>').join('');
   const summary = !d.summary ? '' : mclSummaryHtml(d.summary, 'diag');
-  return head + summary + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
+  return head + summary + filterBar + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
     (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th>'+ mclSortTh('aGap', 'A 月高斷頭') + mclSortTh('bGap', 'B 五日平均價線斷頭') + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
 function renderDiag(){
@@ -14495,6 +14504,16 @@ document.getElementById('diagClose').addEventListener('click', closeDiagPanel);
 document.getElementById('diagModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDiagPanel(); });
 document.getElementById('diagBody').addEventListener('click', (e) => {
   if (e.target.closest('.dg-back')){ dgBack(); return; }
+  const mfl = e.target.closest('[data-mcl-filter]');
+  if (mfl){   // 離 A／B ≤10% 快速篩選：按一下只看那一組（並照那條線的差由小到大排），再按一次取消
+    const k = mfl.dataset.mclFilter;
+    mclState.filter = mclState.filter === k ? '' : k;
+    if (mclState.filter){ mclState.sortKey = k.toLowerCase() + 'Gap'; mclState.sortDir = 1; }
+    const inner = document.getElementById('diagInner'), top = inner ? inner.scrollTop : 0;
+    renderDiag();
+    if (inner) inner.scrollTop = top;
+    return;
+  }
   const mst = e.target.closest('[data-mcl-sort]');
   if (mst){   // A、B 欄位表頭：點一下照那欄的差排（升冪），再點反過來
     const k = mst.dataset.mclSort;
