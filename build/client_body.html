@@ -627,8 +627,11 @@
   /* 多視窗 K 線圖（桌機）：每個 K 線圖是獨立的浮動視窗（內嵌同一頁的圖表模式），可同時開很多個、
      互不影響，主畫面照樣能點；手機仍用原本的單一全螢幕視窗。 */
   #chartWindows{position:fixed;inset:0;z-index:102;pointer-events:none;}
-  .chart-float{position:absolute;pointer-events:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.55);display:flex;flex-direction:column;min-width:360px;min-height:320px;max-width:98vw;max-height:96vh;overflow:hidden;resize:both;padding-bottom:12px;}
+  .chart-float{position:absolute;pointer-events:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.55);display:flex;flex-direction:column;min-width:360px;min-height:320px;max-width:98vw;max-height:96vh;overflow:hidden;resize:none;padding-bottom:12px;}   /* 2026-10-23 使用者：K線視窗四邊四角都要能拉大小 → 不用瀏覽器只有右下角的把手，改用下面 .cf-rz 八個把手 */
   .chart-float.front{box-shadow:0 16px 48px rgba(0,0,0,0.75);border-color:var(--accent);}
+  .cf-rz{position:absolute;pointer-events:auto;touch-action:none;}   /* 四邊＋四角的伸縮把手，放在視窗外面那層、貼著視窗邊緣（JS 跟著視窗走），不會壓到視窗裡的捲軸 */
+  .cf-rz-n,.cf-rz-s{cursor:ns-resize;} .cf-rz-e,.cf-rz-w{cursor:ew-resize;} .cf-rz-ne,.cf-rz-sw{cursor:nesw-resize;} .cf-rz-nw,.cf-rz-se{cursor:nwse-resize;}
+  .cf-rz:hover{background:rgba(212,176,140,.35);}
   .chart-float-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px 6px 12px;background:var(--panel);border-bottom:1px solid var(--line);cursor:move;touch-action:none;user-select:none;flex-shrink:0;}
   .chart-float-title{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .chart-float-title .cf-name{color:var(--muted);font-weight:600;margin-left:6px;}
@@ -5582,6 +5585,7 @@ function closeChartWindow(id){
   const win = chartWindows.get(id);
   if (!win) return;
   if (win.tray) win.tray.remove();
+  if (win.rzCleanup) win.rzCleanup();
   win.el.remove();
   chartWindows.delete(id);
   syncMaximizedBodyLock();
@@ -5634,8 +5638,9 @@ function openChartWindow(code, name, tf){
   const layer = document.getElementById('chartWindows');
   const id = ++chartWindowSeq;
   const n = chartWindows.size;
-  const w = Math.min(1000, Math.round(window.innerWidth * 0.7));
-  const h = Math.min(720, Math.round(window.innerHeight * 0.82));
+  const sv = chartWinSavedSize();   // 2026-10-23 使用者：拉過大小就記住，下一次開圖用同樣大小
+  const w = sv ? Math.min(sv.w, Math.round(window.innerWidth * 0.98)) : Math.min(1000, Math.round(window.innerWidth * 0.7));
+  const h = sv ? Math.min(sv.h, Math.round(window.innerHeight * 0.96)) : Math.min(720, Math.round(window.innerHeight * 0.82));
   const left = Math.max(0, Math.min(window.innerWidth - w - 8, 40 + (n % 8) * 36));
   const top = Math.max(0, Math.min(window.innerHeight - h - 8, 40 + (n % 8) * 28));
   const el = document.createElement('div');
@@ -5679,7 +5684,84 @@ function openChartWindow(code, name, tf){
   const stopDrag = () => { dragging = false; el.classList.remove('dragging'); };
   head.addEventListener('pointerup', stopDrag);
   head.addEventListener('pointercancel', stopDrag);
+  attachChartResize(win);
   return win;
+}
+// 2026-10-23 使用者：K線視窗除了移動，上下左右（四邊＋四角）也都要能拉大小。8 個把手放在視窗外面那一層（#chartWindows），貼著視窗邊緣
+// （外 8px、內 2px），不會壓到視窗裡的捲軸；拉哪一邊就往那一邊放大縮小（拉上緣／左緣時對邊不動）；放開時記下大小，下一次開圖就用這個大小。
+const CHART_WIN_SIZE_KEY = 'chartWinSize';
+function chartWinSavedSize(){
+  try {
+    const v = JSON.parse(localStorage.getItem(CHART_WIN_SIZE_KEY) || 'null');
+    if (v && v.w >= 360 && v.h >= 320 && v.w <= 4000 && v.h <= 3000) return { w: Math.round(v.w), h: Math.round(v.h) };
+  } catch (_){ /* 沒存過或讀不到就用預設大小 */ }
+  return null;
+}
+function attachChartResize(win){
+  const el = win.el, layer = el.parentElement;
+  const OUT = 8, IN = 2, CORNER = 8, MIN_W = 360, MIN_H = 320;
+  const handles = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'].map((dir) => {
+    const h = document.createElement('div');
+    h.className = 'cf-rz cf-rz-' + dir; h.dataset.dir = dir;
+    h.title = '拉著調整視窗大小';
+    layer.appendChild(h);
+    return h;
+  });
+  function sync(){
+    const hide = el.classList.contains('maximized') || el.classList.contains('minimized');
+    const r = el.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    handles.forEach((h) => {
+      h.hidden = hide;
+      if (hide) return;
+      const d = h.dataset.dir;
+      let left, top, width, height;
+      if (d.length === 2){
+        left = (d.includes('w') ? r.left : r.right) - CORNER; top = (d.includes('n') ? r.top : r.bottom) - CORNER; width = height = CORNER * 2;
+      } else if (d === 'n' || d === 's'){
+        left = r.left + CORNER; width = Math.max(0, r.width - CORNER * 2); top = d === 'n' ? r.top - OUT : r.bottom - IN; height = OUT + IN;
+      } else {
+        top = r.top + CORNER; height = Math.max(0, r.height - CORNER * 2); left = d === 'w' ? r.left - OUT : r.right - IN; width = OUT + IN;
+      }
+      left = Math.max(0, Math.min(vw - width, left)); top = Math.max(0, Math.min(vh - height, top));   // 視窗貼齊畫面邊緣時，把手一律留在畫面內才抓得到
+      h.style.left = left + 'px'; h.style.top = top + 'px'; h.style.width = width + 'px'; h.style.height = height + 'px';
+      h.style.zIndex = el.style.zIndex || '1';
+    });
+  }
+  let rs = null;
+  handles.forEach((h) => {
+    h.addEventListener('pointerdown', (e) => {
+      const r = el.getBoundingClientRect();
+      rs = { dir: h.dataset.dir, x: e.clientX, y: e.clientY, left: r.left, top: r.top, width: r.width, height: r.height };
+      el.classList.add('dragging');   // 拉的時候 iframe 不吃滑鼠，不會卡住
+      h.setPointerCapture(e.pointerId);
+      bringChartWindowToFront(win);
+      e.preventDefault();
+    });
+    h.addEventListener('pointermove', (e) => {
+      if (!rs) return;
+      const dx = e.clientX - rs.x, dy = e.clientY - rs.y, d = rs.dir;
+      let { left, top, width, height } = rs;
+      if (d.includes('e')) width = Math.min(window.innerWidth - left, Math.max(MIN_W, rs.width + dx));
+      if (d.includes('s')) height = Math.min(window.innerHeight - top, Math.max(MIN_H, rs.height + dy));
+      if (d.includes('w')){ const nl = Math.max(0, Math.min(rs.left + dx, rs.left + rs.width - MIN_W)); width = rs.width + (rs.left - nl); left = nl; }
+      if (d.includes('n')){ const nt = Math.max(0, Math.min(rs.top + dy, rs.top + rs.height - MIN_H)); height = rs.height + (rs.top - nt); top = nt; }
+      el.style.left = left + 'px'; el.style.top = top + 'px'; el.style.width = width + 'px'; el.style.height = height + 'px';
+      sync();
+    });
+    const stop = () => {
+      if (!rs) return;
+      rs = null; el.classList.remove('dragging');
+      try { localStorage.setItem(CHART_WIN_SIZE_KEY, JSON.stringify({ w: Math.round(el.offsetWidth), h: Math.round(el.offsetHeight) })); } catch (_){ /* 存不了就算了，只是下次不記得大小 */ }
+    };
+    h.addEventListener('pointerup', stop);
+    h.addEventListener('pointercancel', stop);
+  });
+  const ro = new ResizeObserver(sync); ro.observe(el);
+  const mo = new MutationObserver(sync); mo.observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
+  window.addEventListener('resize', sync);
+  win.rzCleanup = () => { ro.disconnect(); mo.disconnect(); window.removeEventListener('resize', sync); handles.forEach((h) => h.remove()); };
+  sync();
 }
 // 內嵌圖表模式裡按 ✕ 或 Esc，會通知父頁關掉對應的浮動視窗。
 window.addEventListener('message', (e) => {
