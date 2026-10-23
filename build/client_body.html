@@ -3077,6 +3077,8 @@
   .mcl-bottom{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;}   /* 2026-10-23 使用者：近似落底訊號 */
   .mcl-bottom.b-hit{background:#0891b2;}
   .mcl-bottom.b-weak{background:#475569;}
+  .mcl-util.hi{color:#f59e0b;font-weight:700;}
+  .mcl-util.hot{color:#ef4444;font-weight:800;}
   .ck-table.dg-tbl{font-size:12.5px;}
   .ck-table.dg-tbl th,.ck-table.dg-tbl td{padding:4px 6px;}
   .ck-table.dg-tbl th{white-space:normal;line-height:1.25;vertical-align:bottom;font-size:12px;}
@@ -14129,9 +14131,18 @@ function mclSigned(n, digits){
   const v = digits ? Number(n).toFixed(digits) : Number(n).toLocaleString();
   return (n > 0 ? '+' : '') + v;
 }
+// 融資使用率「偏高／過熱」的定義（2026-10-23 使用者問怎麼定義）：用 10/22 全部族群 553 檔的實際分布訂——中位數 10.8%、前 25% 起 18.6%、前 10% 起 29.5%；
+// ≥20%＝偏高（約前 23%、每 4～5 檔有 1 檔）、≥30%＝過熱（約前 10%）。交易所那邊：用到限額 80% 次一營業日進行額度分配、100% 暫停融資買進。
+const MCL_UTIL_HIGH = 20, MCL_UTIL_HOT = 30;
+function mclUtilHtml(u){
+  if (u == null) return '';
+  const cls = u >= MCL_UTIL_HOT ? 'hot' : u >= MCL_UTIL_HIGH ? 'hi' : '';
+  const tip = '使用率＝融資餘額 ÷ 這檔的融資額度；≥' + MCL_UTIL_HIGH + '% 偏高、≥' + MCL_UTIL_HOT + '% 過熱';
+  return '<span class="mcl-util ' + cls + '" title="' + tip + '">使用率 ' + Number(u).toFixed(1) + '%' + (cls === 'hot' ? '・過熱' : cls === 'hi' ? '・偏高' : '') + '</span>';
+}
 function mclBalCell(mg){
   if (!mg) return '<span class="muted">—</span>';
-  return '<span title="融資餘額 ' + Number(mg.balance).toLocaleString() + ' 張；今天' + (mg.chg1 < 0 ? '減少 ' : '增加 ') + Math.abs(mg.chg1 || 0).toLocaleString() + ' 張' + (mg.util != null ? '；使用率＝融資餘額 ÷ 這檔股票的融資額度（限額），已用 ' + Number(mg.util).toFixed(1) + '%' : '') + '"><b>' + Number(mg.balance).toLocaleString() + '</b><div class="dg-sub">今 ' + mclSigned(mg.chg1) + (mg.util != null ? '・使用率 ' + Number(mg.util).toFixed(1) + '%' : '') + '</div></span>';
+  return '<span title="融資餘額 ' + Number(mg.balance).toLocaleString() + ' 張；今天' + (mg.chg1 < 0 ? '減少 ' : '增加 ') + Math.abs(mg.chg1 || 0).toLocaleString() + ' 張' + (mg.util != null ? '；使用率＝融資餘額 ÷ 這檔股票的融資額度（限額），已用 ' + Number(mg.util).toFixed(1) + '%' : '') + '"><b>' + Number(mg.balance).toLocaleString() + '</b><div class="dg-sub">今 ' + mclSigned(mg.chg1) + (mg.util != null ? '・' + mclUtilHtml(mg.util) : '') + '</div></span>';
 }
 function mclSinceCell(mg){
   if (!mg || mg.sinceHighPct == null) return '<span class="muted">—</span>';
@@ -14177,13 +14188,13 @@ function mclBottomPill(b){
 }
 const MCL_RULE = '<div class="sw-rule">口徑：融資借滿 6 成，股價跌 22% 維持率剛好 130%（收追繳令、2 天沒補錢第 3 天強制賣出＝斷頭）。<b>A 最高點追</b>＝近一個月（20 個交易日）盤中最高價 × 0.78（上櫃 × 0.65），最慘的那批人，A 跌破＝斷頭開始；' +
   '<b>B 五日平均價線追</b>＝月高那天的五日平均價 × 0.78（上櫃 × 0.65），比較多人的平均成本，B 跌破＝斷頭高峰。今收低於斷頭價＝已破；否則「差 x%」＝（今收 − 斷頭價）÷ 今收；名單照 B 的距離由近到遠排。' +
-  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判；月高後融資增減 ≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；其餘＝<b>賣壓未釋放</b>（近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '% 也算未釋放）；離線太遠＝離線遠、沒融資資料＝資料不足。滑過標籤看數字。<b>近似落底</b>（我訂的條件，不是保證）：賣壓狀態是「釋放中」或「已洗掉一大半」＋近 5 日內有爆量（量 ≥ 前 20 日均量 2 倍）＋今天跌幅比前一天小、沒有再破爆量那天的最低價；沒有融資資料時只看價量，標「價量止跌（缺融資）」。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「使用率」＝融資餘額 ÷ 這檔的融資額度），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看全部族群（all），上面可以改成只看某幾個族群（族群名用逗號分隔）。</div>';
+  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判；月高後融資增減 ≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；其餘＝<b>賣壓未釋放</b>（近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '% 也算未釋放）；離線太遠＝離線遠、沒融資資料＝資料不足。滑過標籤看數字。<b>使用率</b>＝融資餘額 ÷ 這檔的融資額度，我用全部股票的實際分布訂：≥' + MCL_UTIL_HIGH + '%（橘）＝<b>偏高</b>（約前 23%）、≥' + MCL_UTIL_HOT + '%（紅）＝<b>過熱</b>（約前 10%）；交易所那邊用到 80% 會進行額度分配、100% 暫停融資買進。<b>近似落底</b>（我訂的條件，不是保證）：賣壓狀態是「釋放中」或「已洗掉一大半」＋近 5 日內有爆量（量 ≥ 前 20 日均量 2 倍）＋今天跌幅比前一天小、沒有再破爆量那天的最低價；沒有融資資料時只看價量，標「價量止跌（缺融資）」。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「使用率」＝融資餘額 ÷ 這檔的融資額度），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看全部族群（all），上面可以改成只看某幾個族群（族群名用逗號分隔）。</div>';
 function dgMarginStockHtml(s){
   const m = s.margin;
   if (!m) return '<div class="bl-section bl-launch">💥 融資斷頭線</div><div class="race-note">日K不足 24 根，算不出斷頭線</div>';
   const st = (broken, gap, isNew) => broken ? '<span style="color:#d9392b;font-weight:800">❌ 已破' + (isNew ? '・今日新破' : '') + '</span>' : '<span>差 ' + gap.toFixed(1) + '%</span>';
   const mg = s.marginBal;
-  const bal = mg ? '<div class="race-note" style="line-height:1.9">融資餘額 <b>' + Number(mg.balance).toLocaleString() + ' 張</b>' + (mg.valueYi != null ? '（約 ' + mg.valueYi + ' 億）' : '') + '・今天 ' + mclSigned(mg.chg1) + ' 張' + (mg.util != null ? '・使用率 ' + Number(mg.util).toFixed(1) + '%' : '') +
+  const bal = mg ? '<div class="race-note" style="line-height:1.9">融資餘額 <b>' + Number(mg.balance).toLocaleString() + ' 張</b>' + (mg.valueYi != null ? '（約 ' + mg.valueYi + ' 億）' : '') + '・今天 ' + mclSigned(mg.chg1) + ' 張' + (mg.util != null ? '・' + mclUtilHtml(mg.util) : '') +
     '<br>月高那天到今天 ' + (mg.sinceHighPct == null ? '—' : '<b style="color:' + (mg.sinceHighPct > 0 ? '#d9392b' : '#15803d') + '">' + mclSigned(mg.sinceHighPct, 1) + '%</b>（' + (mg.sinceHighPct == null ? '' : mg.sinceHighPct > 0 ? '比月高時還多，沒退場' : '融資退場了一些') + '）') + '・5 個交易日 ' + (mg.chg5Pct == null ? '—' : mclSigned(mg.chg5Pct, 1) + '%') + '<br>賣壓狀態 ' + mclPressPill(mclPressure(m, mg)) + ' <span class="dg-sub">' + wlEsc((mclPressure(m, mg) || {}).tip || '') + '</span><br>落底訊號 ' + mclBottomPill(mclBottom(m, mg, m.stab)) + ' <span class="dg-sub">' + wlEsc((mclBottom(m, mg, m.stab) || {}).tip || '要同時：賣壓釋放中＋近 5 日爆量＋今天跌幅比前一天小且沒再破低') + '</span></div>'
     : '<div class="race-note">融資餘額：證交所／櫃買晚上 21:00 後才公布，還沒有這一天的資料</div>';
   return '<div class="bl-section bl-launch">💥 融資斷頭線・追高的人在哪裡斷頭</div>' +
