@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 17:03:11";
+const BUILD_STAMP = "2026-10-23 17:11:54";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1054,21 +1054,24 @@ const HTML_PAGE = `<!DOCTYPE html>
   #wgModal.bot-front:not(.behind-group):not(.behind-chart){z-index:103;}
   #wgInner{position:absolute;pointer-events:auto;min-width:280px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
   #wgInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
-  #wgBody .bot-col.wg-col{flex:0 0 940px;min-width:900px;}   /* 排名圖多了融資餘額、月高後、賣壓狀態三欄，格子變寬，左右拖著移動 */
+  #wgBody .bot-col.wg-col{flex:0 0 1050px;min-width:1000px;}   /* 排名圖多了融資餘額、月高後、賣壓狀態三欄，格子變寬，左右拖著移動 */
   @media (max-width:767px){
     #wgBody .bot-col.wg-col{flex-basis:94%;min-width:0;}
     /* 手機寬度放不下小柱子＋A／B 兩欄：柱子拿掉，只留股號、股名、漲跌幅、A、B 五欄 */
     #wgBody .bcr.cp:not(.cpx),.bot-col .bcr.cp:not(.cpx){grid-template-columns:2.2em minmax(0,1fr) 3.6em 3.4em 3.6em 3.6em!important;}
     #wgBody .bcr.cp:not(.cpx) .bct,.bot-col .bcr.cp:not(.cpx) .bct,.bcr.cp.bc-hd:not(.cpx) span:nth-child(4){display:none;}
-    #wgBody .bot-chart{min-width:900px;}   /* 自選族群個股的排名圖欄位多，手機上整格左右滑 */
+    #wgBody .bot-chart{min-width:1000px;}   /* 自選族群個股的排名圖欄位多，手機上整格左右滑 */
   }
   /* 緊湊排名圖（機器人、自選族群個股共用）：漲跌幅數字、小柱子（大概比例就好）、A／B 斷頭價 */
   .bcr.cp{height:30px;} .bcr.cp.bc-hd{height:18px;font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap;} .bcr.cp.bc-hd > span{font-size:11px;}   /* 欄寬用 em 算：表頭那列的字級要跟下面的列一樣（12px），不然每欄都比下面窄、整排對不齊；字小一點只縮在 span 上 */ .bcr.cp.bc-hd span:nth-child(n+3){text-align:right;}
   .bcr.cp .n{text-align:left;} .bcr.cp .cpv{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:12px;}
   .bot-col.bot-col-wide:has(.bcr.cp){flex:0 0 470px;min-width:450px;}   /* 機器人那格多了 A／B 兩欄，比原本寬一點 */
   .bcr.cp .bct .b{height:10px;top:1px;}
+  .lgs{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;} .lgs b{font-size:14px;font-weight:900;min-width:12px;text-align:center;color:var(--muted);} .lgs b.n3{color:#22c55e;} .lgs b.n2{color:#a3e635;} .lgs b.n1{color:#f59e0b;}
+  .lgs i{font-style:normal;font-size:10.5px;font-weight:800;line-height:1.5;padding:0 4px;border-radius:4px;} .lgs i.y{background:#16a34a;color:#fff;} .lgs i.n{border:1px solid var(--line);color:var(--muted);} .lgs i.u{border:1px dashed var(--line);color:var(--muted);opacity:.7;}
+  .wg-sortbtn{float:right;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:1px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;} .wg-sortbtn.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
   .bcr.cp .cpm{text-align:right;line-height:1.2;font-size:12px;} .bcr.cp .cpm.l{text-align:left;} .bcr.cp .cpm .dg-sub{font-size:10.5px;color:var(--muted);white-space:nowrap;} .bcr.cp .cpm .mcl-util{font-size:10.5px;}
-  .bcr.cp.cpx.bc-hd span:nth-child(n+8){text-align:right;} .bcr.cp.cpx.bc-hd span:nth-child(n+10){text-align:left;}
+  .bcr.cp.cpx.bc-hd span:nth-child(5),.bcr.cp.cpx.bc-hd span:nth-child(n+11){text-align:left;}
   .bcr.cp .cphold{text-align:right;} .bcr.cp .cphold .hr-hold{margin-left:0;min-width:0;font-size:11.5px;padding:0 3px;}
   #wgBody .up,#wgBody .down,#wgBody .flat{font-weight:700;}
   .wg-ab{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap;} .wg-ab b{font-weight:700;} .wg-ab i{font-style:normal;font-size:10.5px;color:var(--muted);}
@@ -14437,8 +14440,27 @@ function dgMarginStockHtml(s){
     '<tr><td class="l"><b>B 五日平均價線追</b><div class="dg-sub">跌破＝斷頭高峰</div></td><td>五日平均價線 ' + ckPrice(m.ma5) + '<div class="dg-sub">月高那天</div></td><td><b>' + ckPrice(m.b) + '</b></td><td>' + ckPrice(m.close) + '</td><td class="l">' + st(m.bBroken, m.bGap, m.bNew) + '</td></tr>' +
     '</tbody></table></div>' + bal + MCL_RULE;
 }
+// 做多參考（2026-10-23 使用者：名單加一欄，三項各打一個勾，勾越多越前面，一眼比較）：這只是把三個欄位的狀況整理成勾，不是買進訊號。
+// ① 買＝盤中大戶力 ≥ +10%（有大戶在買）② 融＝融資使用率 < 20%（借錢買的人不擠，沒有偏高／過熱）③ 線＝離 A、B 斷頭價都 > 10%（離賣壓區還遠、沒破）；資料不足的那項不打勾、標灰色虛線框。
+function mclLongScore(code, row, price){
+  if (!row) return { n: 0, t: [null, null, null], hold: null };
+  const live = price > 0 ? wgLive(row, price) : row;
+  const hold = holderPctOf(code), mg = row.margin;
+  const t = [
+    hold === null ? null : hold >= HOLDER_HOT_PCT,
+    mg && mg.util != null ? mg.util < MCL_UTIL_HIGH : null,
+    live && live.aGap != null && live.bGap != null ? (!live.aBroken && !live.bBroken && Math.min(live.aGap, live.bGap) > MCL_FILTER_PCT) : null,
+  ];
+  return { n: t.filter((x) => x === true).length, t, hold };
+}
+const LG_TIPS = [['買', '盤中大戶力 ≥ +' + HOLDER_HOT_PCT + '%：有大戶在買', '盤中大戶力不到 +' + HOLDER_HOT_PCT + '%'], ['融', '融資使用率 < ' + MCL_UTIL_HIGH + '%：借錢買的人不擠', '融資使用率 ≥ ' + MCL_UTIL_HIGH + '%（偏高／過熱）：借錢買的人很擠'], ['線', '離 A、B 斷頭價都超過 ' + MCL_FILTER_PCT + '%：離賣壓區還遠', '離 A 或 B 斷頭價 ≤' + MCL_FILTER_PCT + '%（或已跌破）：已經在賣壓區附近']];
+function mclLongHtml(sc){
+  return '<span class="lgs" title="做多參考：三項各一勾（買／融／線），勾越多越前面；只是整理，不是買進訊號"><b class="n' + sc.n + '">' + sc.n + '</b>' +
+    LG_TIPS.map((x, i) => '<i class="' + (sc.t[i] === true ? 'y' : sc.t[i] === false ? 'n' : 'u') + '" title="' + wlEsc(x[0] + '：' + (sc.t[i] === true ? x[1] : sc.t[i] === false ? x[2] : '資料不足')) + '">' + x[0] + '</i>').join('') + '</span>';
+}
 function mclSortTh(key, label){
   const on = mclState.sortKey === key;
+  if (key === '_lg') return '<th class="mcl-sort l' + (on ? ' on' : '') + '" data-mcl-sort="_lg" title="按一下照「做多參考」勾的數量排（勾多的在前面，勾一樣多的大戶力高的在前面），再按一下反過來">' + label + ' <span class="mcl-arrow">' + (on ? (mclState.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (mclState.sortDir > 0 ? '勾少→多' : '勾多→少') : '按我排序') + '</div></th>';
   return '<th class="mcl-sort' + (on ? ' on' : '') + '" data-mcl-sort="' + key + '" title="按一下照「差 %」排序，再按一下反過來（升冪＝差最小的在最前面，已破排最前）">' + label + ' <span class="mcl-arrow">' + (on ? (mclState.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (mclState.sortDir > 0 ? '差小→大' : '差大→小') : '按我排序') + '</div></th>';
 }
 function dgMarginListHtml(){
@@ -14463,18 +14485,19 @@ function dgMarginListHtml(){
   const filterTips = { P: '只列昨天以前就已經破 A 斷頭價的股票（不含昨日新破）', Q: '只列昨天以前就已經破 B 斷頭價的股票（不含昨日新破）', T: '只列「近似落底」的股票：賣壓釋放中＋爆量後跌幅縮小、沒再破低', R: '只列「留意回檔」的股票：漲多＋爆量＋出貨K。近 10 日漲得越多排越前面', A: '只列離 A 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票', B: '只列離 B 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票' };
   const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('P', 'A 已破（前幾天）', filterTips.P, brokeEarlier.length) + fbtn('Q', 'B 已破（前幾天）', filterTips.Q, brokeEarlierB.length) + fbtn('T', '近似落底', filterTips.T, bottomRows.length) + fbtn('R', '留意回檔', filterTips.R, pullRows.length) + fbtn('A', '離 A ≤' + MCL_FILTER_PCT + '%', filterTips.A, nearA.length) + fbtn('B', '離 B ≤' + MCL_FILTER_PCT + '%', filterTips.B, nearB.length) + (mclState.filter ? '<span class="dg-sub">　' + filterTips[mclState.filter] + '；再按一次取消</span>' : '') + (!brokeEarlier.length && !/\\ball\\b/.test(mclState.groups) ? '<span class="dg-sub">　（這幾個族群裡 A 已破的都是昨日新破；族群欄打 all 可看全部族群）</span>' : '') + '</div>';
   const shownRows = mclState.filter === 'R' ? pullRows : mclState.filter === 'T' ? bottomRows : mclState.filter === 'P' ? brokeEarlier : mclState.filter === 'Q' ? brokeEarlierB : mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows;
+  allRows.forEach((r) => { const sc = mclLongScore(r.code, r); r._lgs = sc; r._lg = sc.n + Math.max(0, Math.min(sc.hold == null ? 0 : sc.hold, 99.9)) / 1000; });   // 做多參考：勾數＋大戶力當小數（勾一樣多時大戶力高的在前）
   const sortedRows = shownRows.slice().sort(mclState.filter === 'R' ? ((x, y) => (y.pull.tier - x.pull.tier) || (y.pull.ret10 - x.pull.ret10)) : (x, y) => {   // 照 A 或 B 的「差 %」排：升冪＝差最小（已破＝負的）排最前，降冪＝差最大排最前
     const gx = x[mclState.sortKey], gy = y[mclState.sortKey];
     return (mclState.sortDir * ((gx == null ? Infinity : gx) - (gy == null ? Infinity : gy))) || String(x.code).localeCompare(String(y.code));
   });
   const pinned = sortedRows.filter((r) => focus.has(r.code)).concat(sortedRows.filter((r) => !focus.has(r.code)));   // 查的那檔排最上面
-  const rows = pinned.map((r) => '<tr class="dg-link' + (focus.has(r.code) ? ' mcl-focus' : '') + '" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
+  const rows = pinned.map((r) => '<tr class="dg-link' + (focus.has(r.code) ? ' mcl-focus' : '') + '" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td><td class="l">' + mclLongHtml(r._lgs) + '</td>' +
     '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin, r) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td><td class="l">' + mclBottomPill(mclBottom(r, r.margin, r.stab)) + '</td><td class="l">' + mclPullPill(mclPullback(r.pull, r.margin)) + '</td></tr>').join('');
   const summary = !d.summary ? '' : mclSummaryHtml(d.summary, 'diag');
   const missing = [...focus].filter((c) => !allRows.some((r) => r.code === c));
   const missNote = missing.length ? '<div class="race-note" style="margin:4px 0;color:#f59e0b">' + missing.map((c) => wlEsc(c + ' ' + (rv.names[c] || ''))).join('、') + '：算不出斷頭線（本站沒有這檔的日K，或日K不足 24 根）</div>' : '';
   return head + missNote + summary + filterBar + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
-    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th>'+ mclSortTh('aGap', 'A 月高斷頭') + mclSortTh('bGap', 'B 五日平均價線斷頭') + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th><th class="l">落底訊號</th><th class="l">回檔警示</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
+    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th>' + mclSortTh('_lg', '做多參考') + '<th>月高</th><th>今收</th>'+ mclSortTh('aGap', 'A 月高斷頭') + mclSortTh('bGap', 'B 五日平均價線斷頭') + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th><th class="l">落底訊號</th><th class="l">回檔警示</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
 function renderDiag(){
   const body = document.getElementById('diagBody');
@@ -14842,7 +14865,7 @@ document.getElementById('diagBody').addEventListener('click', (e) => {
   const mst = e.target.closest('[data-mcl-sort]');
   if (mst){   // A、B 欄位表頭：點一下照那欄的差排（升冪），再點反過來
     const k = mst.dataset.mclSort;
-    if (mclState.sortKey === k) mclState.sortDir = -mclState.sortDir; else { mclState.sortKey = k; mclState.sortDir = 1; }
+    if (mclState.sortKey === k) mclState.sortDir = -mclState.sortDir; else { mclState.sortKey = k; mclState.sortDir = k === '_lg' ? -1 : 1; }   // 做多參考第一次按＝勾多的在前面
     const inner = document.getElementById('diagInner'), top = inner ? inner.scrollTop : 0;
     renderDiag();
     if (inner) inner.scrollTop = top;
@@ -14877,7 +14900,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 17:03:11';
+const BUILD_STAMP = '2026-10-23 17:11:54';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -21064,10 +21087,11 @@ function botRankChart(g, h, me, opts){   // opts：title／sub／foot＝改標�
   const disp = (code) => !!(stockFlags && stockFlags[code] && stockFlags[code].disposition);
   const mkOf = (code) => ((hm.get(code) || {}).mk || '') + ((rm.get(code) || {}).mk || '') + ((bm.get(code) || {}).mk || '');
   const rows = [];
-  list.forEach((s, i) => {
-    if (i === topEnd && botStart > topEnd) rows.push({ sep: 'up', text: '↑ 多方線' });
-    if (i === botStart && botStart < n) rows.push({ sep: 'down', text: '↓ 空方線' });
-    rows.push({ c: s.code, n: (disp(s.code) ? '*' : '') + s.name, v: s.changePercent, pill: mkOf(s.code), hl: s.code === me, mid: i >= topEnd && i < botStart, extra: opts.extraOf(s) });
+  const showList = opts.order ? list.slice().sort(opts.order) : list;   // opts.order＝照別的順序排（自選族群個股的「做多參考」排序）：就不畫多方線／空方線
+  showList.forEach((s, i) => {
+    if (!opts.order && i === topEnd && botStart > topEnd) rows.push({ sep: 'up', text: '↑ 多方線' });
+    if (!opts.order && i === botStart && botStart < n) rows.push({ sep: 'down', text: '↓ 空方線' });
+    rows.push({ c: s.code, n: (disp(s.code) ? '*' : '') + s.name, v: s.changePercent, pill: mkOf(s.code), hl: s.code === me, mid: !opts.order && i >= topEnd && i < botStart, extra: opts.extraOf(s) });
   });
   const trail = botRankTrailData(g);
   const closed = lastData && String(lastData.quoteTime || '') >= '13:30';
@@ -22548,7 +22572,7 @@ new ResizeObserver(() => sizeSgtPanes()).observe(document.getElementById('sgtInn
 // 最多 10 格、左右移動；族群裡每一檔旁邊加融資斷頭價 A／B，查的那檔另外列出它的 A／B、融資餘額、賣壓狀態、落底訊號、回檔警示）----
 // 族群成員跟漲跌用首頁報價（盤中每 15 秒跟著更新）；A／B 是 /api/margin-call 用日K推算的斷頭價（不會盤中變），「差 x%」用現價算：（現價 − 斷頭價）÷ 現價，現價低於斷頭價＝已破。
 const WG_MAX_COLS = 10, WG_VIEW_KEY = 'wgView', WG_COLS_KEY = 'wgCols', WG_RECT_KEY = 'wgRect', WG_MAX_KEY = 'wgMax', WG_COLS_H_KEY = 'wgColsH', WG_POP_KEY = 'wgPopRect', WG_MODE_KEY = 'wgMode';
-const wgState = { cols: [], restored: false, maxRestore: null, tray: null, popWin: null, pendTops: null, pendLeft: 0, pendUntil: 0, saveTimer: null };
+const wgState = { sortLong: false, cols: [], restored: false, maxRestore: null, tray: null, popWin: null, pendTops: null, pendLeft: 0, pendUntil: 0, saveTimer: null };
 function wgWindowMode(){ return document.body.classList.contains('wg-window-mode'); }
 function wgPopWindow(){ return wgState.popWin && !wgState.popWin.closed ? wgState.popWin : null; }
 const wgMargin = { map: null, date: '', at: 0, failedAt: 0, loading: false, error: '', singles: {} };
@@ -22606,14 +22630,15 @@ function wgAbExtra(s){
   return '<span class="cphold">' + homeHoldHtml(s.code) + '</span>' + (m ? wgLineCell(s.price, m.a) + wgLineCell(s.price, m.b) : '<span class="wg-ab"><b>—</b></span><span class="wg-ab"><b>—</b></span>');
 }
 // 自選族群個股的排名圖多三欄（2026-10-23 使用者：融資餘額、月高後融資增減、賣壓狀態也要有，欄位變寬沒關係、左右可以捲動）：跟個股問診融資名單同一套（mclBalCell／mclSinceCell／mclPressure）
-const WG_GRID_X = '2.6em minmax(4.2em,1fr) 4.3em 60px 3.9em 4.4em 4.4em 12.6em 4.9em 6.4em 7.4em 7.4em';
-const WG_HEAD_X = '<div class="bcr cp cpx bc-hd" style="grid-template-columns:' + WG_GRID_X + '"><span></span><span>股票</span><span>漲跌幅</span><span></span><span title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值）；≥+10% 紅底、≤−10% 綠底">大戶力</span><span title="A 最高點追的斷頭價">A 斷頭</span><span title="B 五日平均價線追的斷頭價">B 斷頭</span><span title="融資餘額（張）；今＝今天增減、使用率＝融資餘額 ÷ 這檔的融資額度">融資餘額（張）</span><span title="月高那天到今天融資餘額增減 %；下面小字是 5 個交易日增減">月高後</span><span title="離 A 或 B 斷頭價 ≤10% 或已跌破才判：賣壓未釋放／釋放中／已洗掉一大半；離線遠＝離斷頭價還遠">賣壓狀態</span><span title="近似落底：賣壓釋放中或已洗掉一大半＋近 5 日爆量＋今天跌幅比前一天小、沒再破爆量日最低價">落底訊號</span><span title="留意回檔：漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K">回檔警示</span></div>';
+const WG_GRID_X = '2.6em minmax(4.2em,1fr) 4.3em 60px 7.8em 3.9em 4.4em 4.4em 12.6em 4.9em 6.4em 7.4em 7.4em';
+const WG_HEAD_X = '<div class="bcr cp cpx bc-hd" style="grid-template-columns:' + WG_GRID_X + '"><span></span><span>股票</span><span>漲跌幅</span><span></span><span title="做多參考：買（大戶力 ≥+10%）、融（融資使用率 <20%）、線（離 A、B 斷頭價都 >10%）三項各一勾，勾越多越前面；只是整理，不是買進訊號">做多參考</span><span title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值）；≥+10% 紅底、≤−10% 綠底">大戶力</span><span title="A 最高點追的斷頭價">A 斷頭</span><span title="B 五日平均價線追的斷頭價">B 斷頭</span><span title="融資餘額（張）；今＝今天增減、使用率＝融資餘額 ÷ 這檔的融資額度">融資餘額（張）</span><span title="月高那天到今天融資餘額增減 %；下面小字是 5 個交易日增減">月高後</span><span title="離 A 或 B 斷頭價 ≤10% 或已跌破才判：賣壓未釋放／釋放中／已洗掉一大半；離線遠＝離斷頭價還遠">賣壓狀態</span><span title="近似落底：賣壓釋放中或已洗掉一大半＋近 5 日爆量＋今天跌幅比前一天小、沒再破爆量日最低價">落底訊號</span><span title="留意回檔：漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K">回檔警示</span></div>';
 function wgFullExtra(s){
   const m = wgMargin.map && wgMargin.map[s.code];
   const none = '<span class="cpm"><span class="muted">—</span></span>';
-  if (!m) return wgAbExtra(s) + none + none + none + none + none;
+  const lg = '<span class="cpm l">' + (m ? mclLongHtml(mclLongScore(s.code, m, s.price)) : '<span class="muted">—</span>') + '</span>';
+  if (!m) return lg + wgAbExtra(s) + none + none + none + none + none;
   const live = wgLive(m, s.price), mg = m.margin;
-  return wgAbExtra(s) + '<span class="cpm">' + mclBalCell(mg) + '</span><span class="cpm">' + mclSinceCell(mg, m) + '</span><span class="cpm l">' + mclPressPill(mclPressure(live, mg)) + '</span>' +
+  return lg + wgAbExtra(s) + '<span class="cpm">' + mclBalCell(mg) + '</span><span class="cpm">' + mclSinceCell(mg, m) + '</span><span class="cpm l">' + mclPressPill(mclPressure(live, mg)) + '</span>' +
     '<span class="cpm l">' + mclBottomPill(mclBottom(live, mg, m.stab)) + '</span><span class="cpm l">' + mclPullPill(mclPullback(m.pull, mg)) + '</span>';
 }
 function wgGroupChart(g, me){
@@ -22631,9 +22656,12 @@ function wgGroupChart(g, me){
   const rank = ranked.findIndex((x) => x.name === g.name) + 1;
   const closed = lastData && String(lastData.quoteTime || '') >= '13:30';
   const stampTxt = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
-  const sum = wgMargin.map ? '<div class="wg-sum">這族 ' + n + ' 檔：<b class="wg-bad">A 已破 ' + aB + ' 檔</b>・<b class="wg-bad">B 已破 ' + bB + ' 檔</b>・<b style="color:#f59e0b">離 B ≤' + MCL_FILTER_PCT + '% ' + bNear + ' 檔</b></div>' : '';
+  const lgOf = (s) => mclLongScore(s.code, wgMargin.map && wgMargin.map[s.code], s.price);
+  const order = wgState.sortLong && wgMargin.map ? (a, b) => { const x = lgOf(a), y = lgOf(b); return (y.n - x.n) || ((y.hold == null ? -1e9 : y.hold) - (x.hold == null ? -1e9 : x.hold)) || (b.changePercent - a.changePercent); } : null;
+  const sortBtn = '<button type="button" class="wg-sortbtn' + (wgState.sortLong ? ' on' : '') + '" data-wg-sort="1" title="切換這一族的排法：照漲幅（有多方線、空方線）／照做多參考（勾多的在前面）">排序：' + (wgState.sortLong ? '做多參考（勾多→少）' : '照漲幅') + ' ⇄</button>';
+  const sum = wgMargin.map ? '<div class="wg-sum">' + sortBtn + '這族 ' + n + ' 檔：<b class="wg-bad">A 已破 ' + aB + ' 檔</b>・<b class="wg-bad">B 已破 ' + bB + ' 檔</b>・<b style="color:#f59e0b">離 B ≤' + MCL_FILTER_PCT + '% ' + bNear + ' 檔</b></div>' : '';
   return sum + botRankChart(g, null, me, { title: g.name + ' 族群排名' + (rank ? '(' + rank + ')' : ''), sub: n + '檔・' + stampTxt + (closed ? ' 收盤' : ' 盤中快照') + '・平均 ' + botPct(g.avgChange),
-    cpx: true, gridCols: WG_GRID_X, headRow: WG_HEAD_X, extraOf: wgFullExtra,
+    cpx: true, order, gridCols: WG_GRID_X, headRow: WG_HEAD_X, extraOf: wgFullExtra,
     });
 }
 // 文字名單每檔後面的 A／B（小字）
@@ -22692,6 +22720,7 @@ function wgHelpHtml(){
     L('多方線／空方線', '族內依今天漲幅排序，前面幾檔是多方段、後面幾檔是空方段（跟刀劍空同一套分法）；右上角寫各有幾檔。名字前的 * 是處置股；👑帶頭 🚀火箭 🐎火馬 🔺轉強 🔪⚔️刀劍 🔰新手是首頁族群表那些標記。') +
     L('漲跌幅＋小柱子', '今天（盤中是即時）漲跌幅。小柱子只看大概比例，這一族漲跌幅最大的那檔畫到半格，不是精確比例。') +
     L('大戶力', '盤中大戶力＝大戶淨買賣額 ÷ 近 5 日平均成交值（老師算法：同秒併單 ≥7 張、開盤第一筆算賣）。≥+10% 紅底白字、≤−10% 綠底白字，其他只塗字色；「—」＝資料還在累積或不在追蹤範圍。') +
+    L('做多參考', '<b>三項各一勾，勾越多越前面，一眼比較。</b>① <b>買</b>＝盤中大戶力 ≥ +' + HOLDER_HOT_PCT + '%（有大戶在買）；② <b>融</b>＝融資使用率 < ' + MCL_UTIL_HIGH + '%（借錢買的人不擠）；③ <b>線</b>＝離 A、B 斷頭價都超過 ' + MCL_FILTER_PCT + '%（離賣壓區還遠）。綠底＝有勾、空框＝沒有、虛線框＝資料不足；前面的大數字是勾了幾項（3 最多）。每一族上面有「排序」鈕，可以切換成「做多參考（勾多的在前面，勾一樣多的大戶力高的在前）」或回到「照漲幅」。<b>這只是把三個欄位整理成勾，不是買進訊號</b>：勾多代表大戶在買、借錢的人不擠、離斷頭價遠，但不保證會漲；還是要看 K 線位置和停損。') +
     L('A 斷頭', 'A 最高點追：近 20 個交易日盤中最高價 × 0.78（上櫃 × 0.65）。融資借滿 6 成、股價跌 22% 維持率剛好 130%，會收追繳令、2 天沒補錢第 3 天強制賣出＝斷頭。<b>A 跌破＝斷頭開始</b>。小字＝（現價 − 斷頭價）÷ 現價；<span style="color:#f59e0b;font-weight:700">橘色＝離線 ≤' + MCL_FILTER_PCT + '%</span>、<span style="color:#ef4444;font-weight:700">紅色「已破」＝現價已低於斷頭價</span>。') +
     L('B 斷頭', 'B 五日平均價線追：月高那天的五日平均價 × 0.78（上櫃 × 0.65），比較多人的平均成本。<b>B 跌破＝斷頭高峰</b>。小字、顏色跟 A 一樣。A、B 是用日 K 推算的理論值（資料到昨天收盤），小字的差距才用現價算。') +
     L('融資餘額（張）', '<b>白話：這檔股票現在有多少張，是別人「跟券商借錢買、還沒還」的。</b>借錢買的人，股價跌太多會被券商強制賣掉（斷頭），所以這個數字越大，萬一下跌，被斷頭賣出的壓力可能越大。證交所／櫃買每天晚上 21:00 後公布，所以今天看到的是前一個交易日的。小字「今」＝今天增減張數；<b>使用率</b>＝融資餘額 ÷ 這檔的融資額度，≥' + MCL_UTIL_HIGH + '% 橘色「偏高」、≥' + MCL_UTIL_HOT + '% 紅色「過熱」，代表借錢買的人很擠。') +
@@ -22699,7 +22728,19 @@ function wgHelpHtml(){
     L('賣壓狀態', '我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判，離得遠＝<b>離線遠</b>、沒有融資資料＝<b>資料不足</b>。判的時候看月高後融資增減：近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '％或幾乎沒減＝<b>賣壓未釋放</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>。') +
     L('落底訊號', '近似落底（我訂的條件，不是保證）：賣壓是「釋放中」或「已洗掉一大半」＋近 5 日內有爆量（量 ≥ 前 20 日均量 2 倍）＋今天跌幅比前一天小、沒再破爆量那天的最低價。沒有融資資料時只看價量，標「價量止跌（缺融資）」。') +
     L('回檔警示', '留意回檔：漲多（近 10 日漲 ≥25% 或乖離月線 ≥20%）＋爆量（≥ 前 20 日均量 2 倍）＋出貨 K（收黑、長上影、或爆量不漲）；後面的「＋融資」代表融資使用率偏高或融資還在增加。回測近一年 417 檔：之後 1～5 天下跌機率約 54～57%（平常 50%），但 10～20 天後平均仍比大盤強，所以只代表短線容易拉回，不是頭部。') +
-    botLine('斷頭價是用價格推算的理論值，融資餘額是交易所公布的實際資料；賣壓、落底、回檔都是依價量與融資整理的參考，不構成投資建議。', 'bot-dim') + '</div>' + wgHelpReadHtml();
+    botLine('斷頭價是用價格推算的理論值，融資餘額是交易所公布的實際資料；賣壓、落底、回檔都是依價量與融資整理的參考，不構成投資建議。', 'bot-dim') + '</div>' + wgHelpReadHtml() + wgHelpCaseHtml();
+}
+// 案例：榮科 vs 台玻（2026-10-23 使用者：「所以怎麼選」那段白話，用他的案例寫進說明欄；數字是 10/22 收盤那天的，只當例子）
+function wgHelpCaseHtml(){
+  const L = (name, desc) => botLine('<b class="bot-help-code" style="cursor:default">' + name + '</b>　' + desc);
+  return '<div class="bot-msg bot-help"><div class="bot-title">📌 案例：榮科 vs 台玻，想做多要怎麼選<small>用 10/22 收盤的數字當例子</small></div>' +
+    L('先說清楚', '這些欄位<b>不能直接告訴你哪一檔會漲</b>，只能告訴你三件事：<b>誰在買</b>（大戶力）、<b>借錢買的人擠不擠</b>（融資使用率）、<b>離斷頭價遠不遠</b>（A、B）。再看「做多參考」的勾，就是把這三件事各打一個勾。') +
+    L('榮科 4989', '今天 <b>+3.05%</b>（同族群小電組平均 −4.23%，它是強的）｜大戶力 <b>+65%</b>（很強）｜融資 20,070 張，<b>今天又增加 2,735 張</b>，使用率 46.5% <span style="color:#ef4444;font-weight:700">過熱</span>｜離 A 差 16.6%、離 B 差 23.3%（離線遠）｜成交量是平常的 3.2 倍，但當天衝到 75.4、收 71.0，收在當天區間下面 30%。<br>→ 做多參考 <b>2 勾</b>：買 ✓、線 ✓、融 ✗（過熱）。') +
+    L('台玻 1802', '今天 <b>−0.15%</b>｜大戶力 <b>+8.5%</b>（偏弱，不到 +10%）｜融資 44,832 張，<b>今天減少 6,180 張</b>，使用率 6.2% <span style="color:#15803d;font-weight:700">很低</span>｜離 A 差 14.4%、離 B 差 22.2%（離線遠）｜成交量是平常的 4.0 倍，但當天衝到 73.6、收回 67.1，收在當天區間最下面 11%（衝高回落）。<br>→ 做多參考 <b>2 勾</b>：融 ✓、線 ✓、買 ✗（大戶力弱）。') +
+    L('白話判斷', '<b>榮科＝強，但擁擠。</b>有人用力在買（大戶力 +65%）、價格也漲，但借錢進場的人也同時擠進來（融資一天加 14%、使用率過熱），而且當天衝高後收在下方。這種股票上去快，<b>萬一轉弱，借錢的人最多，跌得會比較快</b>。<br><b>台玻＝乾淨，但還沒表態。</b>借錢的人很少、而且今天在退場（融資減少），籌碼單純；但今天衝高回落、爆量卻收在最低點附近，大戶力也不強，目前沒有往上的訊號。') +
+    L('所以怎麼選', '兩檔都是 2 勾，所以才會難選——<b>決定關鍵是你要追強勢，還是求穩</b>。<br>・<b>想順勢、要最強的</b>：榮科比較強。但風險高，倉位別重、要設停損（例如跌破當天最低 69.1），因為融資過熱、波動會大。<br>・<b>想風險小、籌碼乾淨的</b>：台玻比較穩，但今天不是好的進場點，先等它站穩（例如不再跌破當天低點 66.3）再看。') +
+    L('提醒', '<b>大戶力高≠一定漲，融資過熱≠一定跌。</b>這幾欄是風險與籌碼的參考，要再搭配 K 線位置、停損點和族群強弱一起看；以上是資料整理，不是買賣建議，下單由你自己決定。') +
+    '</div>';
 }
 // 把幾欄連起來看（2026-10-23 使用者：「兩個數字的關係」這段白話與舉例也要放在說明欄）
 function wgHelpReadHtml(){
@@ -22893,6 +22934,7 @@ function openWgPanel(){
   wgBringFront();
   if (!wgState.restored){   // 這次打開網頁第一次開：回到上次自選的那幾格
     wgState.restored = true;
+    wgState.sortLong = botLoad('wgSort') === 'long';
     const view = botLoad(WG_VIEW_KEY), v = view && Array.isArray(view.cols) ? view.cols : botLoad(WG_COLS_KEY);
     if (Array.isArray(v) && !wgState.cols.length){
       wgState.cols = v.filter((c) => typeof c === 'string' && /^[0-9A-Z]{4,6}$/.test(c)).slice(0, WG_MAX_COLS);
@@ -22930,6 +22972,7 @@ document.getElementById('wgInner').addEventListener('pointerdown', wgBringFront,
 document.getElementById('wgBody').addEventListener('click', (e) => {
   const t = e.target;
   if (t.closest('[data-wg-go]')){ const i = document.getElementById('wgQ'); wgAdd(i.value); i.value = ''; i.focus(); return; }
+  if (t.closest('[data-wg-sort]')){ wgState.sortLong = !wgState.sortLong; botStore('wgSort', wgState.sortLong ? 'long' : 'pct'); wgRender(); return; }
   const x = t.closest('[data-wg-close]');
   if (x){ wgState.cols = wgState.cols.filter((c) => c !== x.dataset.wgClose); wgSave(); wgRender(); return; }
   if (t.closest('[data-wg-clear]')){ wgState.cols = []; wgSave(); wgRender(); return; }
