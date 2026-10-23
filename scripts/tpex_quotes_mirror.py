@@ -273,7 +273,7 @@ def main() -> None:
             git_push(args.root, f"上櫃日K鏡像 {ym}")
     years = sorted({int(ym[:4]) for ym in months})
     fetch_revivt(args.root, years)
-    fetch_exdiv(args.root, sorted(set(years) | {today.year, today.year - 1, today.year - 2}))   # 除權息至少給近三年（後端均線分數要往前還原）
+    fetch_exdiv(args.root, sorted(set(years) | {today.year, today.year - 1, today.year - 2, today.year - 3}))   # 除權息給近三年多一點（後端補日K三年，起點會落在 3 年前的那一年）
     index = update_index(args.root)
     print("index months", len(index["months"]))
     if args.push_every:
