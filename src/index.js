@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 01:14:07";
+const BUILD_STAMP = "2026-10-24 01:15:47";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -589,11 +589,12 @@ const HTML_PAGE = `<!DOCTYPE html>
   .tx-pop .tx-pin{float:right;font-size:11px;color:var(--muted);}
   @media (max-width: 640px){ .ssb-col{flex:1 1 100%;max-width:none;} }
   /* 2026-10-24 使用者：指數均線分數（櫃買分數、加權分數）：均線分數排行右上角小卡、首頁櫃買那格、加權指數分析；算法跟個股一樣（滿分 15），近 3 日平均、分水嶺 6 */
-  .idx-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;white-space:nowrap;color:var(--text);}
+  .idx-pill{display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px 6px;font-size:12px;font-weight:800;color:var(--text);}
   .idx-pill b{font-size:13.5px;} .idx-pill .idx-arrow{opacity:.55;font-weight:600;} .idx-pill b.idx-day{font-size:15px;}
   .idx-tag{display:inline-block;border-radius:999px;padding:0 9px;font-weight:800;font-size:12px;color:#fff;} .idx-tag.long{background:#dc2626;} .idx-tag.short{background:#16a34a;} .idx-tag.mid{background:#78716c;}
   .ms-lines .idx-line{margin-top:2px;}
-  .tx-chip .tx-l3{display:block;font-size:12px;font-weight:700;margin-top:1px;white-space:nowrap;}
+  .tx-chip .tx-l3{display:block;font-size:12px;font-weight:700;margin-top:1px;}
+  .tx-chip .tx-l3 .idx-pill{flex-wrap:nowrap;gap:4px;font-size:11.5px;} .tx-chip .tx-l3 .idx-tag{padding:0 6px;font-size:11px;} .tx-chip .tx-l3 .idx-pill b{font-size:12.5px;} .tx-chip .tx-l3 .idx-pill b.idx-day{font-size:14px;}
   .tx-pop-idx{margin:6px 0 2px;padding:6px 10px;border-radius:8px;background:var(--panel-2);font-size:13px;line-height:1.7;}
   .ma-idx-slot{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;align-items:flex-start;flex:0 1 auto;margin-left:auto;}
   .idx-card{background:#fffdf9;border:1px solid #e0d4be;border-radius:20px;padding:12px 16px 10px;min-width:168px;color:#2d241b;font-size:12.5px;line-height:1.6;box-shadow:0 1px 3px rgba(80,55,20,.08);}
@@ -601,8 +602,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .idx-card .idx-row{display:flex;align-items:baseline;gap:6px;white-space:nowrap;}
   .idx-card .idx-big{font-family:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;font-weight:900;color:#a63a2b;line-height:1.1;}
   .idx-card .idx-big.l{font-size:30px;} .idx-card .idx-big.s{font-size:23px;}
-  .idx-card .idx-tag{background:transparent;border:1px solid;padding:0 9px;} .idx-card .idx-tag.long{color:#b3261e;border-color:#e8a29d;background:#fdecea;} .idx-card .idx-tag.short{color:#0f7b5a;border-color:#9fd8c3;background:#e6f6ef;}
-  .idx-card .idx-tag.mid{color:#57534e;border-color:#d6d3d1;background:#f5f5f4;}
+  .idx-card .idx-tag{padding:0 9px;color:#fff;}   /* 偏多＝紅底白字、偏空＝綠底白字（2026-10-24 使用者），淺色卡片也一樣 */
   .idx-card .idx-sub{font-size:12px;color:#5b4f40;}
   .idx-table{margin:8px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px 12px;font-size:13px;color:var(--text);}
   .idx-table .idx-th{font-weight:800;margin-bottom:6px;} .idx-table .idx-th:before{content:'';display:inline-block;width:9px;height:18px;border-radius:4px;background:#5b3fd6;vertical-align:-3px;margin-right:8px;}
@@ -15530,7 +15530,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 01:14:07';
+const BUILD_STAMP = '2026-10-24 01:15:47';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -24198,7 +24198,7 @@ const idxX = (k) => (IDXS.data && IDXS.data.indexes && IDXS.data.indexes[k]) || 
 const idxMd2 = (iso) => String(iso || '').slice(5).replace('-', '/');
 const idxTag = (c) => '<span class="idx-tag ' + (c.label === '多' ? 'long' : c.label === '空' ? 'short' : 'mid') + '">' + c.label + '</span>';
 function idxTip(x){
-  return x.name + '分數（指數的均線分數，滿分 15：站上 5／10／20／60／120／240 日線各 1 分＋創 5／10／20／60／120／360 日新高各 1 分＋20>60、60>120、120>350 排列各 1 分；近 3 日平均，分水嶺 ' + IDXS.data.threshold + ' 分：超過多、低於空、剛好 ' + IDXS.data.threshold + ' 平）\\n'
+  return x.name + '分數（指數的均線分數，滿分 15：站上 5／10／20／60／120／240 日線各 1 分＋創 5／10／20／60／120／360 日新高各 1 分＋20>60、60>120、120>350 排列各 1 分；近 3 日平均，分水嶺 ' + IDXS.data.threshold + ' 分：≥ ' + IDXS.data.threshold + ' 多（紅底）、< ' + IDXS.data.threshold + ' 空（綠底）；當天分數和 3 日平均各自標）\\n'
     + idxMd2(x.asOf) + ' 當天 ' + x.daily[x.daily.length - 1].score + ' 分；近幾天日分數：' + x.daily.map((r) => idxMd2(r.date) + ' ' + r.score).join('、') + '\\n今天＝' + idxMd2(x.today.basis) + ' 收盤算的、明天＝' + idxMd2(x.next.basis) + ' 收盤算的';
 }
 function idxCardHtml(k){
@@ -24207,13 +24207,13 @@ function idxCardHtml(k){
   return '<div class="idx-card" title="' + wlEsc(idxTip(x)) + '"><div class="idx-h">' + x.name + '分數</div>'
     + '<div class="idx-row"><span>今天</span><span class="idx-big l">' + x.today.avg.toFixed(2) + '</span><span>分</span>' + idxTag(x.today) + '</div>'
     + '<div class="idx-row"><span>明天</span><span class="idx-big s">' + x.next.avg.toFixed(2) + '</span><span>分</span>' + idxTag(x.next) + '</div>'
-    + '<div class="idx-sub">多空分水嶺 ' + IDXS.data.threshold + ' 分（看 3 日平均；剛好 6 是平）</div><div class="idx-sub"><b>' + idxMd2(x.asOf) + ' 當天 ' + x.daily[x.daily.length - 1].score + ' 分</b> ' + idxTag(x.daily[x.daily.length - 1]) + '（站上 ' + x.daily[x.daily.length - 1].ma + '／新高 ' + x.daily[x.daily.length - 1].hi + '／排列 ' + x.daily[x.daily.length - 1].align + '）</div><div class="idx-sub">' + idxMd2(x.next.basis) + ' 收盤算出「明天」那格</div></div>';
+    + '<div class="idx-sub">多空分水嶺 ' + IDXS.data.threshold + ' 分（≥ 多、< 空）</div><div class="idx-sub"><b>' + idxMd2(x.asOf) + ' 當天 ' + x.daily[x.daily.length - 1].score + ' 分</b> ' + idxTag(x.daily[x.daily.length - 1]) + '（站上 ' + x.daily[x.daily.length - 1].ma + '／新高 ' + x.daily[x.daily.length - 1].hi + '／排列 ' + x.daily[x.daily.length - 1].align + '）</div><div class="idx-sub">' + idxMd2(x.next.basis) + ' 收盤算出「明天」那格</div></div>';
 }
 function idxPillHtml(k, compact){
   const x = idxX(k);
   if (!x || !x.next) return '';
   const d = x.daily[x.daily.length - 1];
-  return '<span class="idx-pill" title="' + wlEsc(idxTip(x)) + '">' + x.name + '分數 <b class="idx-day">' + d.score + '</b> ' + idxTag(d) + '<span class="idx-arrow">｜3日均</span>' + (compact ? '' : '<b>' + x.today.avg.toFixed(2) + '</b><span class="idx-arrow">→</span>') + '<b>' + x.next.avg.toFixed(2) + '</b></span>';
+  return '<span class="idx-pill" title="' + wlEsc(idxTip(x)) + '">' + x.name + '分數 <b class="idx-day">' + d.score + '</b> ' + idxTag(d) + '<span class="idx-arrow">｜3日均</span>' + (compact ? '' : '<b>' + x.today.avg.toFixed(2) + '</b><span class="idx-arrow">→</span>') + '<b>' + x.next.avg.toFixed(2) + '</b> ' + idxTag(x.next) + '</span>';
 }
 // 指數對照表（2026-10-24 使用者：老師影片「10/22 收盤 vs 月／季／半年線」）：加權、櫃買的收盤、20／60／120 日線、距高點（近半年盤中最高）、均線分數；紅＝收盤在線上、綠＝在線下
 function idxTableHtml(){
@@ -24333,7 +24333,7 @@ function taiexAnalyze(fu, fc){
 function taiexHtml(a){
   const li = (it) => '<li>' + it.t + (it.sub && it.sub.length ? '<ul>' + it.sub.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + '</li>';
   return '<span class="tx-pin">' + (TAIEX.pinned ? '已固定・再按一下或按 Esc 關閉' : '按一下固定') + '</span><h3>加權指數（' + a.title + '）</h3><div class="tx-meta">' + txMd(a.asOf) + ' 收盤資料・每天收盤後（晚上 21:40 以後）自動更新・規則自動判斷</div>' +
-    (idxX('taiex') ? '<div class="tx-pop-idx"><b>加權分數</b>（均線分數，滿分 15）：<b>' + idxMd2(idxX('taiex').asOf) + ' 當天 ' + idxX('taiex').daily[idxX('taiex').daily.length - 1].score + ' 分</b> ' + idxTag(idxX('taiex').daily[idxX('taiex').daily.length - 1]) + '；近 3 日平均（分水嶺 ' + IDXS.data.threshold + '：超過多、低於空、剛好 6 平）：今天 <b>' + idxX('taiex').today.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').today) + '　明天 <b>' + idxX('taiex').next.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').next) +
+    (idxX('taiex') ? '<div class="tx-pop-idx"><b>加權分數</b>（均線分數，滿分 15）：<b>' + idxMd2(idxX('taiex').asOf) + ' 當天 ' + idxX('taiex').daily[idxX('taiex').daily.length - 1].score + ' 分</b> ' + idxTag(idxX('taiex').daily[idxX('taiex').daily.length - 1]) + '；近 3 日平均（分水嶺 ' + IDXS.data.threshold + '：≥ 多、< 空）：今天 <b>' + idxX('taiex').today.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').today) + '　明天 <b>' + idxX('taiex').next.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').next) +
       '<br><small>近幾天日分數：' + idxX('taiex').daily.map((r) => idxMd2(r.date) + ' ' + r.score + '（站上 ' + r.ma + '／新高 ' + r.hi + '／排列 ' + r.align + '）').join('、') + '</small></div>' + idxTableHtml() : '') +
     a.sec.map((x) => '<div class="tx-sec">' + x.h + '</div><ul>' + x.items.map(li).join('') + '</ul>').join('') +
     '<div class="tx-foot">這是依均線、融資水位、外資籌碼自動整理的位置與條件，形態（W 底、頭肩底）要自己看圖確認；不是買賣建議。資料：證交所加權指數、融資融券統計、三大法人（FinMind 公開資料整理）。</div>';
