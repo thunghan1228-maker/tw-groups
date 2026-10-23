@@ -1203,6 +1203,10 @@ export default {
       // 融資斷頭線名單（2026-10-23 使用者貼老師「斷頭線就在腳下」）：後端每天收盤後才會變，快取 1 分鐘
       return await proxyHanstockBars("/api/hub/margin-call" + url.search, 60);
     }
+    if (url.pathname === "/api/patterns") {
+      // 形態選股（2026-10-23 使用者：VCP 收斂、C 不破 A 的低、W 底、頭肩底）：日K算的，收盤後才變，快取 5 分鐘
+      return await proxyHanstockBars("/api/hub/patterns" + url.search, 300);
+    }
     if (url.pathname === "/api/margin-history") {
       // 單檔融資餘額每日序列（2026-10-23 使用者：K線圖融資副圖：每天增減、累計、使用率），每天晚上才更新，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/margin-history" + url.search, 300);

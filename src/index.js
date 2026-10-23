@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 23:08:00";
+const BUILD_STAMP = "2026-10-23 23:12:30";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1067,6 +1067,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .chips-modal.behind-group{z-index:98;}   /* 2026-10-17 使用者：機器人等面板裡點族群名，成分股視窗（z-index 99）要蓋在上面，關掉再回來 */  /* 手機／iPad 直式開K線圖（z-index 100）時退到後面，關圖再回來 */
   #diagInner{width:min(1400px,98vw);}   /* 2026-10-23 使用者：融資斷頭線名單最右邊的落底訊號、回檔警示兩欄被切掉看不到 → 個股問診視窗加寬，表格也縮一點 */
   .ck-table.mcl-tbl th,.ck-table.mcl-tbl td{padding:6px 4px;}
+  .pat-tag{display:inline-block;padding:0 8px;border-radius:999px;background:#475569;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;margin:1px 2px 1px 0;} .pat-tag.brk{background:#dc2626;}   /* 形態標籤：等突破＝灰藍底、剛突破＝紅底白字 */
   .mcl-prev{opacity:.5;white-space:nowrap;} .mcl-prev .mcl-bottom,.mcl-prev .mcl-pull{filter:saturate(.6);}
   .mcl-ma{font-size:15px;font-weight:800;color:var(--muted);} .mcl-ma.hi{color:var(--up);}   /* 2026-10-23 使用者：融資名單的均線分數（滿分 15，>10 紅字） */
   .ck-table.mcl-tbl .hr-hold{margin-left:0;min-width:3em;}
@@ -14929,6 +14930,11 @@ const SCR_CARDS = [
   { key: 'mclSno', client: true, title: '賣壓・賣壓未釋放', desc: '離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '%（或已跌破），而且月高後融資沒有減少（跟月高時一樣或更多），或近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '%。借錢的人還沒退場、賣壓還在。', check: true },
   { key: 'mclSslight', client: true, title: '賣壓・略減（還在觀察）', desc: '離斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '%（或已跌破），月高後融資有減少、但還不到 ' + (-MCL_PRESS_RELEASING_PCT) + '%，借錢的人剛開始退場。再減到 ' + MCL_PRESS_RELEASING_PCT + '% 以下就變「釋放中」。', check: true },
   { key: 'mclSing', client: true, title: '賣壓・釋放中', desc: '離斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '%（或已跌破），月高後融資減少 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%（或近 5 日減少 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%），融資在退場、還沒退完。', check: true },
+  // 2026-10-23 使用者：形態選股（VCP 收斂、C 不破 A 的低、W 底、頭肩底）。後端 /api/patterns 用日K的波段高低點找出候選（算好觸發價＝頸線／樞紐）；四張卡彼此是「或」，跟其他條件是「且」。
+  { key: 'patVcp', client: true, pat: 'vcp', title: '形態・VCP 收斂', desc: '回檔幅度一次比一次小（至少 2 次，每次 ≤ 前一次的 0.9 倍，最後一次 ≤12%）、低點沒往下破、量縮、價在季線之上且季線向上。樞紐（觸發價）＝最後一次收縮前的高點。候選＝還在樞紐下面等突破；剛突破＝最近 3 天內收盤站上。', check: true },
+  { key: 'patHl', client: true, pat: 'hl', title: '形態・C 不破 A 的低', desc: '低 A → 反彈高 B → 低 C，C 比 A 高 ≥4%（低點墊高）、反彈 B 比 A 高 ≥10%、C 的回檔不超過 30%，價在季線之上＝相對強勢。觸發價＝前高 B。', check: true },
+  { key: 'patW', client: true, pat: 'w', title: '形態・W 底', desc: '兩個低點差不多高（第二個比第一個低 ≤3%、高 ≤4%）、間隔 10～70 天、中間反彈 ≥8%、前面有 ≥12% 的下跌。觸發價＝頸線（中間反彈的高點）。', check: true },
+  { key: 'patHs', client: true, pat: 'hs', title: '形態・頭肩底', desc: '左肩、頭（最低，比兩肩低 ≥3%）、右肩（兩肩差 ≤8%），兩個反彈高點差 ≤6%（頸線接近水平），整段 25～120 天。觸發價＝頸線（兩個反彈高點取高）。', check: true },
   { key: 'mclSdone', client: true, title: '賣壓・已洗掉一大半', desc: '離斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '%（或已跌破），月高後融資減少 ≥' + (-MCL_PRESS_WASHED_PCT) + '%，追高的融資退場了一大半。', check: true },
 ];
 // 融資條件的判斷（跟個股問診名單的快速篩選同一套，r＝/api/margin-call 的一列）
@@ -14958,6 +14964,10 @@ const SCR_PRESETS = [
   { name: '河流便宜', p: { score: 10, river: 2 } },
   { name: '近似落底', p: { mclT: 1 } },
   { name: '留意回檔', p: { mclR: 1 } },
+  { name: 'VCP 收斂', p: { patVcp: 1 } },   // 2026-10-23 使用者：形態選股
+  { name: 'C 不破 A 低', p: { patHl: 1 } },
+  { name: 'W 底', p: { patW: 1 } },
+  { name: '頭肩底', p: { patHs: 1 } },
   { name: '賣壓未釋放', p: { mclSno: 1 } },   // 2026-10-23 使用者：賣壓狀態四種放進一鍵套用
   { name: '略減（觀察）', p: { mclSslight: 1 } },
   { name: '釋放中', p: { mclSing: 1 } },
@@ -14994,7 +15004,21 @@ async function scrMarginMap(date){
   scrMargin.date = date; scrMargin.at = Date.now(); scrMargin.map = map;
   return map;
 }
-function scrMclKeys(){ return SCR_CARDS.filter((c) => c.client && scrState.on[c.key]).map((c) => c.key); }
+function scrMclKeys(){ return SCR_CARDS.filter((c) => c.client && !c.pat && scrState.on[c.key]).map((c) => c.key); }
+function scrPatKeys(){ return SCR_CARDS.filter((c) => c.pat && scrState.on[c.key]).map((c) => c.key); }
+const scrPat = { date: '', at: 0, map: null };
+async function scrPatMap(date){   // 形態候選：code → { vcp, hl, w, hs }
+  if (scrPat.map && scrPat.date === date && Date.now() - scrPat.at < 5 * 60 * 1000) return scrPat.map;
+  const res = await fetch('/api/patterns' + (date ? '?date=' + encodeURIComponent(date) : ''));
+  const m = await res.json().catch(() => null);
+  if (res.status === 404) throw new Error('形態選股的後端資料還沒上線（後端更新後就有）');
+  if (!res.ok || !m) throw new Error('形態資料讀取失敗：' + ((m && (m.detail || m.error)) || ('HTTP ' + res.status)));
+  if (m.status !== 'ok') throw new Error('形態選股：' + (m.reason || '還沒有日K資料'));
+  const map = {};
+  (m.rows || []).forEach((r) => { map[r.code] = r.patterns; });
+  scrPat.date = date; scrPat.at = Date.now(); scrPat.map = map;
+  return map;
+}
 async function scrRun(){
   scrState.loading = true; scrState.error = '';
   renderScreener();
@@ -15010,6 +15034,14 @@ async function scrRun(){
       d.rows = d.rows.filter((r) => { const m = map[r.code]; return m && otherKeys.every((k) => SCR_MCL_TESTS[k](m)) && (!pressKeys.length || pressKeys.some((k) => SCR_MCL_TESTS[k](m))); });
       d.rows.forEach((r) => { r.mcl = map[r.code]; });
       d.mclKeys = keys; d.mclBefore = before; d.count = d.rows.length;
+    }
+    const patKeys = scrPatKeys();
+    if (patKeys.length){   // 形態：四張卡是「或」（勾 W 底＋頭肩底＝兩種都找），跟前面的條件是「且」
+      const pmap = await scrPatMap(d.date);
+      const before = d.rows.length;
+      d.rows = d.rows.filter((r) => { const p = pmap[r.code]; return p && patKeys.some((k) => p[(SCR_CARDS.find((c) => c.key === k) || {}).pat]); });
+      d.rows.forEach((r) => { r.pat = pmap[r.code]; });
+      d.patKeys = patKeys; d.patBefore = before; d.count = d.rows.length;
     }
     scrState.data = d;
   } catch (e){
@@ -15050,8 +15082,9 @@ function scrKCardHtml(){
     '<div class="scr-kr">' + kb('any', '不限') + kb('red', '🔴 紅K') + kb('black', '⚫ 黑K') + '</div>' +
     '<div class="scr-kr">漲跌幅 <input type="number" step="0.5" placeholder="不限" value="' + wlEsc(scrState.kmin) + '" data-scr-kn="kmin"> % ～ <input type="number" step="0.5" placeholder="不限" value="' + wlEsc(scrState.kmax) + '" data-scr-kn="kmax"> %</div></div>';
 }
-function scrChips(p, mclKeys){
+function scrChips(p, mclKeys, patKeys){
   mclKeys = mclKeys || [];
+  patKeys = patKeys || [];
   const out = [];
   if (!p) return '';
   if (p.score !== null) out.push('均線分數 ≥ ' + p.score + ' 分');
@@ -15066,6 +15099,7 @@ function scrChips(p, mclKeys){
   if (p.mini) out.push('小型股期');
   if (p.exdispo) out.push('排除處置');
   mclKeys.forEach((k) => out.push((SCR_CARDS.find((c) => c.key === k) || {}).title));
+  if (patKeys.length) out.push(patKeys.map((k) => (SCR_CARDS.find((c) => c.key === k) || {}).title.replace('形態・', '')).join(' 或 '));
   if (p.k !== 'any' || p.kmin !== null || p.kmax !== null){
     out.push('K棒' + (p.k === 'red' ? ' 紅K' : (p.k === 'black' ? ' 黑K' : '')) + (p.kmin !== null || p.kmax !== null ? ' ・ ' + (p.kmin !== null ? p.kmin + '%' : '不限') + ' ~ ' + (p.kmax !== null ? p.kmax + '%' : '不限') : ''));
   }
@@ -15086,6 +15120,16 @@ function scrSortRows(rows){
     return (x > y ? 1 : -1) * dir;
   });
 }
+// 形態欄：每個形態一顆標籤「W底・等突破 頸線 40.3（再漲 2.1%）」，滑過去看停損、目標價；剛突破用紅底白字
+function scrPatCells(p){
+  if (!p) return '<td class="l">—</td>';
+  const tags = Object.keys(p).map((k) => {
+    const x = p[k], brk = x.state === 'breakout';
+    const tip = x.name + '：觸發價 ' + ckPrice(x.trigger) + '（' + (brk ? '最近 3 天內剛站上' : '現價還在下面，再漲 ' + Number(x.distPct).toFixed(1) + '% 到觸發價') + '）；停損參考 ' + ckPrice(x.stop) + '、目標價約 ' + ckPrice(x.target) + (x.contractions ? '；回檔幅度 ' + x.contractions.join('% → ') + '%' : '') + (x.heightPct != null ? '；形態高度 ' + x.heightPct + '%' : '') + (x.higherLowPct != null ? '；C 比 A 高 ' + x.higherLowPct + '%' : '');
+    return '<span class="pat-tag' + (brk ? ' brk' : '') + '" title="' + wlEsc(tip) + '">' + wlEsc(x.name) + '・' + (brk ? '剛突破' : '等突破') + ' ' + ckPrice(x.trigger) + (brk ? '' : '（+' + Number(x.distPct).toFixed(1) + '%）') + '</span>';
+  });
+  return '<td class="l">' + tags.join(' ') + '</td>';
+}
 function scrMclCells(m){
   if (!m) return '<td>—</td><td>—</td><td>—</td>';
   const pills = [mclPressPill(mclPressure(m, m.margin)), mclBottomPill(mclBottom(m, m.margin, m.stab)), mclPullPill(mclPullback(m.pull, m.margin))].filter((x) => !x.includes('class="muted"')).join(' ');
@@ -15099,7 +15143,7 @@ function scrTableHtml(d){
     th('score', '均線分數', p.score !== null) + th('chip', '籌碼暴增', p.chip !== null) + th('sword', '⚔ 雙劍', p.sword !== null) + th('etf', 'ETF 家數', p.etf !== null) +
     th('dispo', '處置倒數', p.dispo !== null || p.exdispo) + th('river', '河流區', p.river !== null && p.river !== undefined) + '<th class="' + (p.fut || p.mini ? 'act' : '') + '">股期</th>' +
     th('inst3', '法人3日%', p.inst3 !== null) + th('inst5', '法人5日%', p.inst5 !== null) + th('chg', 'K棒', kActive) +
-    th('d1', 'D+1%') + th('d1h', 'D+1 高%') + th('d2', 'D+2%') + th('perf', '目前績效%') + (d.mclKeys ? '<th class="act">A 斷頭</th><th class="act">B 斷頭</th><th class="act">融資訊號</th>' : '') + '</tr></thead><tbody>';
+    th('d1', 'D+1%') + th('d1h', 'D+1 高%') + th('d2', 'D+2%') + th('perf', '目前績效%') + (d.mclKeys ? '<th class="act">A 斷頭</th><th class="act">B 斷頭</th><th class="act">融資訊號</th>' : '') + (d.patKeys ? '<th class="act">形態（觸發價）</th>' : '') + '</tr></thead><tbody>';
   scrSortRows(d.rows).forEach((r) => {
     const inst = (x) => x ? '<span class="' + (x.buy ? 'scr-up' : 'scr-dn') + '">' + (x.buy ? '✓ ' : '') + x.pct + '%</span>' : '—';
     h += '<tr class="scr-row' + (scrState.picked === r.code ? ' hl' : '') + '" data-scr-row="' + wlEsc(r.code) + '"><td class="code">' + wlEsc(r.code) + '</td>' +
@@ -15113,7 +15157,7 @@ function scrTableHtml(d){
       '<td>' + inst(r.inst3) + '</td><td>' + inst(r.inst5) + '</td>' +
       '<td>' + (r.k === 'red' ? '🔴' : (r.k === 'black' ? '⚫' : '➖')) + ' <span class="' + scrCls(r.chg) + '">' + scrPct(r.chg) + '</span></td>' +
       '<td class="' + scrCls(r.d1) + '">' + scrPct(r.d1) + '</td><td class="' + scrCls(r.d1h) + '">' + scrPct(r.d1h) + '</td>' +
-      '<td class="' + scrCls(r.d2) + '">' + scrPct(r.d2) + '</td><td class="' + scrCls(r.perf) + '">' + scrPct(r.perf) + '</td>' + (d.mclKeys ? scrMclCells(r.mcl) : '') + '</tr>';
+      '<td class="' + scrCls(r.d2) + '">' + scrPct(r.d2) + '</td><td class="' + scrCls(r.perf) + '">' + scrPct(r.perf) + '</td>' + (d.mclKeys ? scrMclCells(r.mcl) : '') + (d.patKeys ? scrPatCells(r.pat) : '') + '</tr>';
   });
   return h + '</tbody></table></div>';
 }
@@ -15123,7 +15167,7 @@ function scrResultHtml(){
   const d = scrState.data;
   if (!d) return '<div class="ma-legend">勾好條件按「開始篩選」，或點上面「一鍵套用」。</div>';
   let h = '<div class="scr-head"><b>符合名單</b>' + (scrState.preset ? '<span class="scr-badge">' + wlEsc(scrState.preset) + '</span>' : '') +
-    '<span>' + d.count + ' 檔符合・資料日 ' + d.date + (d.mclKeys ? '・其他條件符合 ' + d.mclBefore + ' 檔，再比對融資斷頭線' : '') + (scrState.loading ? '・更新中…' : '') + '</span>' + scrChips(d.params, d.mclKeys) + '</div>';
+    '<span>' + d.count + ' 檔符合・資料日 ' + d.date + (d.mclKeys ? '・其他條件符合 ' + d.mclBefore + ' 檔，再比對融資斷頭線' : '') + (scrState.loading ? '・更新中…' : '') + '</span>' + scrChips(d.params, d.mclKeys, d.patKeys) + '</div>';
   h += d.latestDate
     ? '<div class="scr-info">📈 這批是 <b>' + d.date + '</b> 的名單，後面有 ' + d.next.length + ' 個交易日的表現：D+1＝' + (d.next[0] || '—') + (d.next[1] ? '、D+2＝' + d.next[1] : '') + '，目前績效算到 ' + d.latestDate + ' 收盤。</div>'
     : '<div class="scr-info">📈 這批是 <b>' + d.date + '</b> 的名單，還沒有事後績效 —— 要等下一個交易日收完盤才會出現 D+1；想馬上看績效，改用上面的「回測指定日」挑一天更早的。</div>';
@@ -15146,7 +15190,8 @@ function renderScreener(){
     (scrState.open
       ? '<div class="ma-note">🕐 每個交易日收盤、日K進來整表後更新 —— 條件來自均線分數、籌碼週報、主動式 ETF 持股與法人買賣超，所以跟著它們一起更新；名單上方會標出實際的資料日。條件勾越多，名單越少、也越嚴格。</div>' +
         '<div class="scr-grid">' + SCR_CARDS.filter((c) => !c.client).map(scrCardHtml).join('') + scrKCardHtml() +
-          '<div class="scr-sub">💥 融資斷頭線條件 <small>跟「個股問診」融資名單的快速篩選同一套；只看得到有算出斷頭線的族群股（約 570 檔）。「賣壓」那四張卡彼此是「或」：勾兩張以上＝符合其中一種就列</small></div>' + SCR_CARDS.filter((c) => c.client).map(scrCardHtml).join('') + '</div>' +
+          '<div class="scr-sub">💥 融資斷頭線條件 <small>跟「個股問診」融資名單的快速篩選同一套；只看得到有算出斷頭線的族群股（約 570 檔）。「賣壓」那四張卡彼此是「或」：勾兩張以上＝符合其中一種就列</small></div>' + SCR_CARDS.filter((c) => c.client && !c.pat).map(scrCardHtml).join('') +
+          '<div class="scr-sub">📐 形態選股 <small>日K的波段高低點找出來的候選，每張卡算好觸發價（頸線／樞紐）；四張彼此是「或」。形態有主觀成分，會漏也會誤判，請看圖確認；回測：只有「突破觸發價之後」比大盤強一點，候選本身看不出優勢</small></div>' + SCR_CARDS.filter((c) => c.pat).map(scrCardHtml).join('') + '</div>' +
         '<div class="scr-presets">一鍵套用 ' + SCR_PRESETS.map((x) => '<button type="button" class="scr-pre' + (scrState.preset === x.name ? ' on' : '') + '" data-scr-preset="' + wlEsc(x.name) + '">' + x.name + '</button>').join('') + '</div>' +
         '<div class="scr-actions"><button type="button" class="scr-go" data-scr-go="1">開始篩選</button>' + dateSel +
         '<button type="button" class="scr-btn" disabled title="盤中用 12:00 即時價篩選，之後再做">⏱ 盤中（12:00）</button>' +
@@ -15289,7 +15334,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 23:08:00';
+const BUILD_STAMP = '2026-10-23 23:12:30';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25762,6 +25807,10 @@ export default {
     if (url.pathname === "/api/margin-call") {
       // 融資斷頭線名單（2026-10-23 使用者貼老師「斷頭線就在腳下」）：後端每天收盤後才會變，快取 1 分鐘
       return await proxyHanstockBars("/api/hub/margin-call" + url.search, 60);
+    }
+    if (url.pathname === "/api/patterns") {
+      // 形態選股（2026-10-23 使用者：VCP 收斂、C 不破 A 的低、W 底、頭肩底）：日K算的，收盤後才變，快取 5 分鐘
+      return await proxyHanstockBars("/api/hub/patterns" + url.search, 300);
     }
     if (url.pathname === "/api/margin-history") {
       // 單檔融資餘額每日序列（2026-10-23 使用者：K線圖融資副圖：每天增減、累計、使用率），每天晚上才更新，快取 5 分鐘
