@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 18:06:21";
+const BUILD_STAMP = "2026-10-23 18:10:17";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -475,6 +475,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .ma-legend-toggle{margin-left:auto;font:inherit;font-size:11px;font-weight:700;padding:1px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;white-space:nowrap;}   /* 2026-10-23 使用者：融資斷頭價開關放 MA／扣抵那一列的最後面 */
   .ma-legend-toggle.on{background:#e11d48;border-color:#e11d48;color:#fff;}
   .ma-legend-item.chart-holder{border-radius:6px;padding:0 6px;color:#fff;background:#6b7280;}
+  .ma-legend.ma-legend-compact{gap:4px 6px;} .ma-legend.ma-legend-compact .ma-legend-item:not(.mcl-sig){font-size:11px;}   /* 2026-10-23 使用者：日線圖上面那排也要跟 5 分K 一樣分兩行（第一行到盤中大戶力、第二行從融資開始）→ 日線的項目多（MA 五條＋扣抵＋明日防守線＋斷頭價），字小一點、間距縮小才排得進一行 */
   .ma-legend-break{flex-basis:100%;height:0;}   /* 2026-10-23 使用者：K線圖上面那一列分成兩行，第二行從融資開始 */
   .ma-legend-item.mcl-sig{display:inline-flex;align-items:center;gap:4px;color:var(--text);}   /* 2026-10-23 使用者：斷頭價開關左邊的融資／月高後／賣壓／落底／回檔／做多參考；字太淡看不清楚 → 字色拉亮、加粗 */
   .ma-legend-item.mcl-sig > i{font-style:normal;color:var(--text);font-weight:800;}
@@ -3878,8 +3879,11 @@ const HTML_PAGE = `<!DOCTYPE html>
       </div>
       <div class="chart-canvas-wrap mcl-wrap" id="mclPanelWrap" hidden><canvas id="mclCanvas"></canvas></div>
     </div>
-    <div class="ind-panel-block">
-      <div class="ind-panel-head"><span class="force-title">KD (9,3,3)．用5分K計算</span></div>
+    <div class="ind-panel-block" id="kdPanelBlock">  <!-- 2026-10-23 使用者：KD (9,3,3) 日線、5 分K、1 分K 都要有圖跟開關（內定開），80 紅線、20 綠線 -->
+      <div class="ind-panel-head">
+        <span class="force-title"><span id="kdPanelTitleTxt">KD (9,3,3)</span><small class="cm-chip-sum" id="kdPanelSum"></small></span>
+        <button class="macd-toggle on" id="kdPanelToggle" aria-pressed="true">關閉</button>
+      </div>
       <div class="chart-canvas-wrap kd-wrap" id="kdPanelWrap" hidden>
         <canvas id="kdCanvas"></canvas>
       </div>
@@ -4153,6 +4157,12 @@ function computeKdFor1m(bars1m){
     return idx != null ? kdByBucket[idx] : { k: null, d: null };
   });
 }
+// KD (9,3,3)：日線用日K、5 分K 用 5 分K、1 分K 用 5 分K 算出來再對到每根 1 分K（2026-10-23 使用者：三種週期都要有）
+function chartComputeKd(tf, bars){
+  if (!bars || !bars.length) return null;
+  if (tf === 'm1') return computeKdFor1m(bars);
+  return computeKDSeries(bars, 9, 1 / 3);
+}
 function computeMACD(bars){
   const closes = bars.map((b) => b.close);
   const ema12 = computeEMA(closes, 12);
@@ -4177,7 +4187,7 @@ function generateForceFlow(code, tf, bars){
 
 let currentChart = {
   code: null, name: null, tf: 'daily', bars: null, force: null, macd: null, kd: null,
-  maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, hoverIndex: null,
+  maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, kdOn: true, hoverIndex: null,
   viewStart: 0, viewCount: null, isRealBars: false, requestToken: 0, dailyBars: null,
   defOn: (() => { try { return localStorage.getItem('chartDefOn') !== '0'; } catch (_){ return true; } })(),   // 日線的明日防守線
   d123On: (() => { try { return localStorage.getItem('chartD123On') !== '0'; } catch (_){ return true; } })(),   // 日線的 123 黑龍進場點
@@ -5068,8 +5078,9 @@ function drawMacdPanel(){
 }
 
 function drawKdPanel(){
-  const wrap = document.getElementById('kdPanelWrap');
-  if (currentChart.tf !== 'm1' || !currentChart.kd){ if (wrap) wrap.hidden = true; return; }
+  const wrap = document.getElementById('kdPanelWrap'), sum = document.getElementById('kdPanelSum'), ttl = document.getElementById('kdPanelTitleTxt');
+  if (ttl) ttl.textContent = 'KD (9,3,3)．用' + (currentChart.tf === 'daily' ? '日K' : '5分K') + '計算';
+  if (!currentChart.kd || !currentChart.kdOn){ if (wrap) wrap.hidden = true; if (sum) sum.textContent = ''; return; }
   wrap.hidden = false;
   const canvas = document.getElementById('kdCanvas');
   const cssW = canvas.parentElement.clientWidth, cssH = canvas.parentElement.clientHeight;
@@ -5082,9 +5093,14 @@ function drawKdPanel(){
   const xAt = (i) => PAD.left + plotW * (i + 0.5) / kd.length;
   const yAt = (v) => padTop + plotH * (1 - v / 100);
 
+  // 2026-10-23 使用者：80 畫紅線（> 80 超買）、20 畫綠線（< 20 超賣），50 淡淡一條中線
   ctx.strokeStyle = 'rgba(168,156,143,0.2)'; ctx.lineWidth = 1;
-  [20, 50, 80].forEach((v) => {
-    ctx.beginPath(); ctx.moveTo(PAD.left, yAt(v)); ctx.lineTo(cssW - PAD.right, yAt(v)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD.left, yAt(50)); ctx.lineTo(cssW - PAD.right, yAt(50)); ctx.stroke();
+  [[80, '#ef4444'], [20, '#22c55e']].forEach(([v, color]) => {
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(PAD.left, yAt(v)); ctx.lineTo(cssW - PAD.right, yAt(v)); ctx.stroke(); ctx.restore();
+    ctx.fillStyle = color; ctx.font = 'bold 10px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(v), cssW - PAD.right + 6, yAt(v));
   });
 
   function drawLine(key, color){
@@ -5112,8 +5128,17 @@ function drawKdPanel(){
       ctx.beginPath(); ctx.arc(xAt(i), yAt(cur.k), 3, 0, Math.PI * 2); ctx.fill();
     }
   }
-  ctx.fillStyle = '#a89c8f'; ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-  ctx.fillText('K/D', PAD.left, 2);
+  const idx = currentChart.hoverIndex != null ? Math.max(0, Math.min(kd.length - 1, currentChart.hoverIndex)) : kd.length - 1;
+  const cur = kd[idx];
+  if (sum) sum.textContent = cur && cur.k != null ? 'K ' + cur.k.toFixed(1) + '・D ' + cur.d.toFixed(1) + (cur.k > 80 ? '（超買區）' : cur.k < 20 ? '（超賣區）' : '') : '';
+  ctx.fillStyle = '#7fb3e0'; ctx.font = 'bold 10px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillText('K', PAD.left, 1);
+  ctx.fillStyle = '#e0c458'; ctx.fillText('D', PAD.left + 12, 1);
+  if (currentChart.hoverIndex != null){
+    const hx = xAt(idx);
+    ctx.save(); ctx.strokeStyle = 'rgba(241,236,230,0.35)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(hx, padTop); ctx.lineTo(hx, cssH - padBottom); ctx.stroke(); ctx.restore();
+  }
 }
 
 function redrawAll(){
@@ -5161,8 +5186,7 @@ async function chartHolderFetch(){
   if (chartHolderCache.rows && chartHolderCache.rows.some((r) => r.code === currentChart.code)) updateMaLegend(currentChart.hoverIndex);
 }
 function chartHolderLegendHtml(){
-  if (currentChart.tf !== 'm5' && currentChart.tf !== 'm1') return '';
-  const r = chartHolderRow(currentChart.code);
+  const r = chartHolderRow(currentChart.code);   // 2026-10-23 使用者：日線圖也要有盤中大戶力（以前只有 5 分K／1 分K）
   if (!r || r.strengthPct === null || r.strengthPct === undefined) return '';
   const amt = fmtAmountWan(r.netAmount);
   return '<span class="ma-legend-item chart-holder ' + (r.strengthPct > 0 ? 'up' : r.strengthPct < 0 ? 'down' : '') + '" title="' + (r.holderLabel || '盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣，開盤到現在整天累加）') + '">盤中大戶力 ' +
@@ -5174,6 +5198,7 @@ function updateMaLegend(absIndex){
   const allBars = currentChart.bars;
   if (!allBars || !allBars.length){ el.innerHTML = ''; return; }
   const idx = Math.max(0, Math.min(allBars.length - 1, absIndex != null ? absIndex : allBars.length - 1));
+  el.classList.toggle('ma-legend-compact', currentChart.tf === 'daily');
   el.innerHTML = currentChart.maLines.filter((ma) => ma.on).map((ma) => {
     const v = computeMA(allBars, ma.period)[idx];
     return '<span class="ma-legend-item" style="color:' + ma.color + '">MA' + ma.period + (v != null ? ' ' + v.toFixed(2) : '') + '</span>';
@@ -5568,6 +5593,7 @@ function applyLiveDailyBar(code, token, live){
   if (merged.appended && currentChart.viewCount != null && start + count >= before) currentChart.viewStart = start + 1;
   currentChart.force = TF_CONFIG.daily.force ? chartForceSeries(merged.bars) : null;
   currentChart.macd = computeMACD(merged.bars);
+  currentChart.kd = chartComputeKd('daily', merged.bars);
   redrawAll();
 }
 setInterval(() => { refreshLiveDailyBar().catch(() => {}); }, LIVE_DAILY_REFRESH_MS);
@@ -5622,7 +5648,10 @@ async function switchTimeframe(tf){
     currentChart.force = cfg.force ? generateForceFlow(currentChart.code, tf, bars) : null;
   }
   currentChart.macd = computeMACD(bars);
-  currentChart.kd = tf === 'm1' ? computeKdFor1m(bars) : null;
+  currentChart.kd = chartComputeKd(tf, bars);
+  currentChart.kdOn = true;   // KD 內定開
+  const kdBtn = document.getElementById('kdPanelToggle');
+  kdBtn.textContent = '關閉'; kdBtn.classList.add('on'); kdBtn.setAttribute('aria-pressed', 'true');
   currentChart.macdOn = false;
   const macdBtn = document.getElementById('macdToggle');
   macdBtn.textContent = '開啟'; macdBtn.classList.remove('on'); macdBtn.setAttribute('aria-pressed', 'false');
@@ -15076,7 +15105,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 18:06:21';
+const BUILD_STAMP = '2026-10-23 18:10:17';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16149,6 +16178,14 @@ document.getElementById('maLegend').addEventListener('click', (e) => {
   currentChart.mclOn = !currentChart.mclOn;
   try { localStorage.setItem('chartMclOn', currentChart.mclOn ? '1' : '0'); } catch (_){}
   redrawAll();
+});
+document.getElementById('kdPanelToggle').addEventListener('click', () => {
+  currentChart.kdOn = !currentChart.kdOn;
+  const btn = document.getElementById('kdPanelToggle');
+  btn.textContent = currentChart.kdOn ? '關閉' : '開啟';
+  btn.classList.toggle('on', currentChart.kdOn);
+  btn.setAttribute('aria-pressed', String(currentChart.kdOn));
+  drawKdPanel();
 });
 document.getElementById('mclPanelToggle').addEventListener('click', () => {
   currentChart.mclPanelOn = !currentChart.mclPanelOn;
