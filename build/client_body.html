@@ -3050,6 +3050,10 @@
   /* 2026-10-23 使用者：問診的同族對照／今日名單加了斷頭價 A／B，版面收緊：字小一點、間距縮、表頭可換行、股票名稱放第二行（欄寬寬一點、兩排字） */
   .mcl-chip{display:inline-block;background:#7c3aed;color:#fff;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px 4px 2px 0;cursor:pointer;text-decoration:none;}   /* 2026-10-23 使用者：融資斷頭線總結裡的個股名稱＝紫底白字 */
   .mcl-chip:hover{background:#6d28d9;}
+  .mcl-press{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;background:#6b7280;}   /* 2026-10-23 使用者：賣壓狀態標籤 */
+  .mcl-press.p-no{background:#d9392b;}
+  .mcl-press.p-ing{background:#d97706;}
+  .mcl-press.p-done{background:#15803d;}
   .ck-table.dg-tbl{font-size:12.5px;}
   .ck-table.dg-tbl th,.ck-table.dg-tbl td{padding:4px 6px;}
   .ck-table.dg-tbl th{white-space:normal;line-height:1.25;vertical-align:bottom;font-size:12px;}
@@ -14086,16 +14090,37 @@ function mclSinceCell(mg){
   const p = mg.sinceHighPct;
   return '<b style="color:' + (p > 0 ? '#d9392b' : p < 0 ? '#15803d' : 'inherit') + '">' + mclSigned(p, 1) + '%</b>' + (mg.chg5Pct != null ? '<div class="dg-sub">5日 ' + mclSigned(mg.chg5Pct, 1) + '%</div>' : '');
 }
+// 賣壓狀態（2026-10-23 使用者要：賣壓未釋放／釋放中／已洗掉一大半）：斷頭價附近的融資還剩多少、有沒有退場。這是我訂的簡單判斷，不是保證，門檻都在這裡可以調。
+const MCL_PRESS_NEAR_PCT = 10;        // 離 A 或 B 斷頭價 ≤10%（或已跌破）才判；離得遠就標「離線遠」
+const MCL_PRESS_WASHED_PCT = -30;     // 月高那天到今天融資餘額減 ≥30％ ＝ 已洗掉一大半
+const MCL_PRESS_RELEASING_PCT = -5;   // 減 ≥5％（或近 5 日減 ≥5％）＝ 釋放中
+const MCL_PRESS_READD_PCT = 5;        // 近 5 日融資又增加 ≥5％ ＝ 有人又進來接，賣壓未釋放
+function mclPressure(line, mg){
+  if (!line) return null;
+  const gaps = [line.aGap, line.bGap].filter((v) => v != null);
+  const broken = !!(line.aBroken || line.bBroken);
+  if (!broken && (!gaps.length || Math.min.apply(null, gaps) > MCL_PRESS_NEAR_PCT)) return { key: 'far', text: '離線遠', tip: '離 A、B 斷頭價都超過 ' + MCL_PRESS_NEAR_PCT + '%，還輪不到斷頭賣壓' };
+  if (!mg || mg.sinceHighPct == null) return { key: 'nodata', text: '資料不足', tip: '還沒有月高那天的融資餘額（資料每晚補，約一個月後才齊）' };
+  const s = mg.sinceHighPct, c5 = mg.chg5Pct;
+  const why = '月高後融資 ' + mclSigned(s, 1) + '%' + (c5 != null ? '、近 5 日 ' + mclSigned(c5, 1) + '%' : '');
+  if (c5 != null && c5 >= MCL_PRESS_READD_PCT) return { key: 'no', text: '賣壓未釋放', tip: why + '：近 5 日融資又在增加，有人接刀' };
+  if (s <= MCL_PRESS_WASHED_PCT) return { key: 'done', text: '已洗掉一大半', tip: why + '：追高的融資退場了一大半' };
+  if (s <= MCL_PRESS_RELEASING_PCT || (c5 != null && c5 <= MCL_PRESS_RELEASING_PCT)) return { key: 'ing', text: '釋放中', tip: why + '：融資在退場，還沒退完' };
+  return { key: 'no', text: '賣壓未釋放', tip: why + '：融資幾乎沒減' + (s > 0 ? '（比月高時還多）' : '') };
+}
+function mclPressPill(p){
+  return p ? '<span class="mcl-press p-' + p.key + '" title="' + wlEsc(p.tip) + '">' + p.text + '</span>' : '<span class="muted">—</span>';
+}
 const MCL_RULE = '<div class="sw-rule">口徑：融資借滿 6 成，股價跌 22% 維持率剛好 130%（收追繳令、2 天沒補錢第 3 天強制賣出＝斷頭）。<b>A 最高點追</b>＝近一個月（20 個交易日）盤中最高價 × 0.78（上櫃 × 0.65），最慘的那批人，A 跌破＝斷頭開始；' +
   '<b>B 五日平均價線追</b>＝月高那天的五日平均價 × 0.78（上櫃 × 0.65），比較多人的平均成本，B 跌破＝斷頭高峰。今收低於斷頭價＝已破；否則「差 x%」＝（今收 − 斷頭價）÷ 今收；名單照 B 的距離由近到遠排。' +
-  '斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「用」＝融資使用率），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看被動元件、記憶體、矽晶圓，上面可以改族群（all＝全部族群）。</div>';
+  '<b>賣壓狀態</b>是我訂的簡單判斷（不是保證）：離 A 或 B 斷頭價 ≤' + MCL_PRESS_NEAR_PCT + '% 或已跌破才判；月高後融資增減 ≤' + MCL_PRESS_WASHED_PCT + '%＝<b>已洗掉一大半</b>；≤' + MCL_PRESS_RELEASING_PCT + '%（或近 5 日減 ≥' + (-MCL_PRESS_RELEASING_PCT) + '%）＝<b>釋放中</b>；其餘＝<b>賣壓未釋放</b>（近 5 日融資又增加 ≥' + MCL_PRESS_READD_PCT + '% 也算未釋放）；離線太遠＝離線遠、沒融資資料＝資料不足。滑過標籤看數字。斷頭價是用價格推算的理論值；<b>融資餘額</b>是證交所／櫃買每天晚上公布的實際資料（張，「今」＝今天增減、「用」＝融資使用率），<b>月高後融資增減 %</b>＝月高那天到今天融資餘額增減（負的＝融資在退場、正的＝跌破了還有人在加融資），下面小字是 5 個交易日增減。老師的「23 檔熱門股」怎麼挑的看不出來，這裡預設看被動元件、記憶體、矽晶圓，上面可以改族群（all＝全部族群）。</div>';
 function dgMarginStockHtml(s){
   const m = s.margin;
   if (!m) return '<div class="bl-section bl-launch">💥 融資斷頭線</div><div class="race-note">日K不足 24 根，算不出斷頭線</div>';
   const st = (broken, gap, isNew) => broken ? '<span style="color:#d9392b;font-weight:800">❌ 已破' + (isNew ? '・今日新破' : '') + '</span>' : '<span>差 ' + gap.toFixed(1) + '%</span>';
   const mg = s.marginBal;
   const bal = mg ? '<div class="race-note" style="line-height:1.9">融資餘額 <b>' + Number(mg.balance).toLocaleString() + ' 張</b>' + (mg.valueYi != null ? '（約 ' + mg.valueYi + ' 億）' : '') + '・今天 ' + mclSigned(mg.chg1) + ' 張' + (mg.util != null ? '・使用率 ' + Number(mg.util).toFixed(1) + '%' : '') +
-    '<br>月高那天到今天 ' + (mg.sinceHighPct == null ? '—' : '<b style="color:' + (mg.sinceHighPct > 0 ? '#d9392b' : '#15803d') + '">' + mclSigned(mg.sinceHighPct, 1) + '%</b>（' + (mg.sinceHighPct == null ? '' : mg.sinceHighPct > 0 ? '比月高時還多，沒退場' : '融資退場了一些') + '）') + '・5 個交易日 ' + (mg.chg5Pct == null ? '—' : mclSigned(mg.chg5Pct, 1) + '%') + '</div>'
+    '<br>月高那天到今天 ' + (mg.sinceHighPct == null ? '—' : '<b style="color:' + (mg.sinceHighPct > 0 ? '#d9392b' : '#15803d') + '">' + mclSigned(mg.sinceHighPct, 1) + '%</b>（' + (mg.sinceHighPct == null ? '' : mg.sinceHighPct > 0 ? '比月高時還多，沒退場' : '融資退場了一些') + '）') + '・5 個交易日 ' + (mg.chg5Pct == null ? '—' : mclSigned(mg.chg5Pct, 1) + '%') + '<br>賣壓狀態 ' + mclPressPill(mclPressure(m, mg)) + ' <span class="dg-sub">' + wlEsc((mclPressure(m, mg) || {}).tip || '') + '</span></div>'
     : '<div class="race-note">融資餘額：證交所／櫃買晚上 21:00 後才公布，還沒有這一天的資料</div>';
   return '<div class="bl-section bl-launch">💥 融資斷頭線・追高的人在哪裡斷頭</div>' +
     '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">算法</th><th>基準</th><th>斷頭價（×' + m.factor + '）</th><th>今收</th><th class="l">狀態</th></tr></thead><tbody>' +
@@ -14112,7 +14137,7 @@ function dgMarginListHtml(){
   if (d.status !== 'ok') return head + '<div class="race-note">' + wlEsc(d.reason || '還沒有日K資料') + '</div>';
   const c = d.counts || {};
   const rows = (d.rows || []).map((r) => '<tr class="dg-link" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
-    '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td></tr>').join('');
+    '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td></tr>').join('');
   const sm = d.summary || {};
   const smNames = (xs) => (xs || []).map((x) => '<a class="dg-link mcl-chip" data-code="' + x.code + '">' + wlEsc(x.name || x.code) + '</a>').join('') || '<span class="muted">—</span>';
   const smLab = (color, text) => '<b style="color:' + color + '">' + text + '</b>';   // 2026-10-23 使用者：A 線已破＝綠字、B 線 5% 內＝粉紅字、今日新破＝藍字，個股名稱紫底白字
@@ -14120,7 +14145,7 @@ function dgMarginListHtml(){
     '<br>' + smLab('#f472b6', 'B 線 5% 內・' + (sm.bWithin || []).length + ' 檔') + '　' + smNames(sm.bWithin) +
     ((sm.aNew || []).length || (sm.bNew || []).length ? '<br>' + smLab('#60a5fa', '今日新破') + '　' + smLab('#60a5fa', 'A：') + smNames(sm.aNew) + '　' + smLab('#60a5fa', 'B：') + smNames(sm.bNew) : '') + '</div>';
   return head + summary + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
-    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th><th>A 月高斷頭</th><th>B 五日平均價線斷頭</th><th>融資餘額（張）</th><th>月高後<div class="dg-sub">融資增減 %</div></th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
+    (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th><th>A 月高斷頭</th><th>B 五日平均價線斷頭</th><th>融資餘額（張）</th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
 function renderDiag(){
   const body = document.getElementById('diagBody');
