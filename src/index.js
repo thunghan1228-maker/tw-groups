@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 23:15:21";
+const BUILD_STAMP = "2026-10-23 23:23:56";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -476,6 +476,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .ma-legend-toggle.on{background:#e11d48;border-color:#e11d48;color:#fff;}
   .ma-legend-item.chart-holder{border-radius:6px;padding:0 6px;color:#fff;background:#6b7280;}
   .ma-legend.ma-legend-compact{gap:4px 6px;} .ma-legend.ma-legend-compact .ma-legend-item:not(.mcl-sig){font-size:11px;}   /* 2026-10-23 使用者：日線圖上面那排也要跟 5 分K 一樣分兩行（第一行到盤中大戶力、第二行從融資開始）→ 日線的項目多（MA 五條＋扣抵＋明日防守線＋斷頭價），字小一點、間距縮小才排得進一行 */
+  .ma-legend-toggle[data-pat-toggle] ~ .ma-legend-toggle{margin-left:6px;}   /* 有「形態」開關時，右邊兩個開關靠在一起、斷頭價還是最右邊 */
   .ma-legend-break{flex-basis:100%;height:0;}   /* 2026-10-23 使用者：K線圖上面那一列分成兩行，第二行從融資開始 */
   .ma-legend-item.mcl-sig{display:inline-flex;align-items:center;gap:4px;color:var(--text);}   /* 2026-10-23 使用者：斷頭價開關左邊的融資／月高後／賣壓／落底／回檔／做多參考；字太淡看不清楚 → 字色拉亮、加粗 */
   .ma-legend-item.mcl-sig > i{font-style:normal;color:var(--text);font-weight:800;}
@@ -4224,7 +4225,7 @@ function generateForceFlow(code, tf, bars){
 
 let currentChart = {
   code: null, name: null, tf: 'daily', bars: null, force: null, macd: null, kd: null,
-  maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, kdOn: true, mgOn: true, mg: null, hoverIndex: null,
+  maLines: [], vwapOn: false, vwapColor: VWAP_COLOR, vwapWidth: 3, macdOn: false, kdOn: true, mgOn: true, mg: null, pat: null, patOn: (() => { try { return localStorage.getItem('chartPatOn') !== '0'; } catch (_){ return true; } })(), hoverIndex: null,
   viewStart: 0, viewCount: null, isRealBars: false, requestToken: 0, dailyBars: null,
   defOn: (() => { try { return localStorage.getItem('chartDefOn') !== '0'; } catch (_){ return true; } })(),   // 日線的明日防守線
   d123On: (() => { try { return localStorage.getItem('chartD123On') !== '0'; } catch (_){ return true; } })(),   // 日線的 123 黑龍進場點
@@ -4350,6 +4351,29 @@ function chartMgLoad(code){
     st.loading = false;
     if (currentChart.code === code) redrawAll();
   });
+}
+// 形態標註（2026-10-23 使用者：在 K 線圖上標出找到的兩個低點和頸線）：後端 /api/patterns?codes=這檔 回這檔符合的形態，每個有轉折點 points（低1／頸／低2…）和觸發價那條線 line
+function chartPatLoad(code){
+  if (!code || (currentChart.pat && currentChart.pat.code === code)) return;
+  const st = currentChart.pat = { code, items: [], loading: true };
+  (async () => {
+    try {
+      const r = await fetch('/api/patterns?codes=' + encodeURIComponent(code));
+      const d = r.ok ? await r.json() : null;
+      const row = d && d.status === 'ok' ? (d.rows || []).find((x) => x && x.code === code) : null;
+      if (row) st.items = Object.keys(row.patterns).map((k) => row.patterns[k]);
+    } catch (_){ /* 沒有形態資料就不標 */ }
+  })().finally(() => { st.loading = false; if (currentChart.code === code) redrawAll(); });
+}
+function chartPatItems(){ const m = currentChart.pat; return m && m.code === currentChart.code ? m.items : []; }
+function chartPatLegendHtml(){
+  const items = chartPatItems();
+  if (!items.length) return '';
+  const bars = currentChart.bars, px = bars && bars.length ? bars[bars.length - 1].close : null;
+  const pills = items.map((x) => { const brk = px != null && px > x.trigger;
+    return '<span class="ma-legend-item mcl-sig" title="' + wlEsc(x.name + '：' + (x.line ? x.line.label : '觸發價') + ' ' + x.trigger + '；停損參考 ' + x.stop + '；目標價約 ' + x.target + '。日K波段找出的候選，不是買進訊號。') + '"><i>形態</i><span class="pat-tag' + (brk ? ' brk' : '') + '">' + wlEsc(x.name) + '・' + (brk ? '已突破' : '等突破') + '</span>' +
+      '<b>' + wlEsc(x.line ? x.line.label : '觸發') + ' ' + Number(x.trigger).toFixed(2) + '</b><span class="mcl-sub">停損 ' + Number(x.stop).toFixed(2) + '・目標 ' + Number(x.target).toFixed(2) + '</span></span>'; }).join('');
+  return pills + (currentChart.tf === 'daily' ? '<button type="button" class="ma-legend-toggle' + (currentChart.patOn ? ' on' : '') + '" data-pat-toggle="1" aria-pressed="' + currentChart.patOn + '" title="在日線圖上標出形態的轉折點和頸線（樞紐）">形態 ' + (currentChart.patOn ? '開' : '關') + '</button>' : '');
 }
 function chartBarDate(b){
   if (!b) return '';
@@ -4619,6 +4643,7 @@ function drawChart(){
   const defLines = (currentChart.tf === 'daily' && currentChart.defOn && vStart + vCount >= allBars.length) ? chartDefenseLines(allBars) : [];
   defLines.forEach((d) => { lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); });
   chartMgLoad(currentChart.code);
+  chartPatLoad(currentChart.code);
   chartMclLoad(currentChart.code);   // 2026-10-23 使用者：K線圖上面加賣壓狀態／落底訊號／回檔警示三個標籤 → 不管斷頭價開關開不開都要載入
   const mclLines = chartMclLines(allBars);   // 融資斷頭價 A／B：日線一定畫、分K離現價 ≤20% 才畫
   mclLines.forEach((d) => { lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); });
@@ -4822,6 +4847,47 @@ function drawChart(){
       ctx.strokeRect(cssW - PAD.right + 1.5, tagY + 0.5, PAD.right - 3, 13);
       ctx.fillStyle = t.color; ctx.textAlign = 'center'; ctx.font = '10px -apple-system, sans-serif';
       ctx.fillText(t.v.toFixed(2), cssW - PAD.right / 2, tagY + 7);
+    });
+    ctx.restore();
+  }
+
+  // 形態標註（日線）：轉折點連線＋圓點＋標籤（低1／頸／低2、左肩／頭／右肩、A／B／C、高1／低1…），再畫一條頸線（樞紐）虛線一路拉到右邊
+  const patItems = currentChart.tf === 'daily' && currentChart.patOn ? chartPatItems() : [];
+  if (patItems.length){
+    const idxOf = new Map();
+    allBars.forEach((b, i) => idxOf.set(chartBarDate(b), i));
+    ctx.save();
+    ctx.beginPath(); ctx.rect(PAD.left, padTop - 4, plotW, plotH + 8); ctx.clip();
+    patItems.forEach((it) => {
+      const PC = '#facc15';
+      const pts = (it.points || []).map((p) => ({ k: p.k, price: p.price, i: idxOf.get(p.date) })).filter((p) => p.i != null);
+      if (pts.length > 1){
+        ctx.strokeStyle = PC; ctx.lineWidth = 1.6; ctx.setLineDash([]); ctx.globalAlpha = 0.9; ctx.beginPath();
+        pts.forEach((p, n) => { const x = xAt(p.i - vStart), y = yAt(p.price); if (n === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+        ctx.stroke(); ctx.globalAlpha = 1;
+      }
+      ctx.font = 'bold 11px -apple-system, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      pts.forEach((p, n) => {
+        if (p.i < vStart || p.i >= vStart + vCount) return;
+        const x = xAt(p.i - vStart), y = yAt(p.price);
+        const prev = pts[n - 1], next = pts[n + 1], peak = (!prev || p.price >= prev.price) && (!next || p.price >= next.price);
+        ctx.fillStyle = '#1b1814'; ctx.strokeStyle = PC; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        const tw = ctx.measureText(p.k).width + 8, ly = peak ? y - 15 : y + 15;
+        ctx.fillStyle = 'rgba(18,16,15,0.85)'; ctx.fillRect(x - tw / 2, ly - 8, tw, 16);
+        ctx.fillStyle = PC; ctx.fillText(p.k, x, ly);
+      });
+      const ln = it.line;
+      if (ln && ln.price >= lo && ln.price <= hi){
+        const fromI = idxOf.has(ln.from) ? idxOf.get(ln.from) - vStart : 0, x0 = fromI < 0 ? PAD.left : xAt(fromI), y = yAt(ln.price);
+        ctx.strokeStyle = '#f97316'; ctx.lineWidth = 2; ctx.setLineDash([8, 4]);
+        ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(cssW - PAD.right, y); ctx.stroke(); ctx.setLineDash([]);
+        const text = it.name + ' ' + ln.label + ' ' + Number(ln.price).toFixed(2);
+        ctx.font = 'bold 11px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        const tw = ctx.measureText(text).width + 10;
+        ctx.fillStyle = 'rgba(18,16,15,0.88)'; ctx.fillRect(Math.max(PAD.left + 2, x0 + 6), y - 20, tw, 16);
+        ctx.fillStyle = '#f97316'; ctx.fillText(text, Math.max(PAD.left + 2, x0 + 6) + 5, y - 12);
+      }
     });
     ctx.restore();
   }
@@ -5347,7 +5413,7 @@ function updateMaLegend(absIndex){
     (currentChart.tf === 'daily' && currentChart.defOn
     ? chartDefenseLines(allBars).map((d) => '<span class="ma-legend-item" style="color:#e6675f">明日' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('')
     : '') + chartMclLines(allBars).map((d) => '<span class="ma-legend-item" style="color:' + d.color + '">' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('') + chartHolderLegendHtml() +
-    '<span class="ma-legend-break"></span>' + chartMclSignalsHtml() +   // 2026-10-23 使用者：第一行到盤中大戶力為止，第二行從融資開始（斷頭價開關在第二行最右邊）
+    '<span class="ma-legend-break"></span>' + chartMclSignalsHtml() + chartPatLegendHtml() +   // 2026-10-23 使用者：第一行到盤中大戶力為止，第二行從融資開始（斷頭價開關在第二行最右邊）
     '<button type="button" class="ma-legend-toggle' + (currentChart.mclOn ? ' on' : '') + '" data-mcl-toggle="1" aria-pressed="' + currentChart.mclOn + '" title="融資斷頭價 A／B：日線一定畫；5 分K／1 分K 離現價 ' + MCL_NEAR_PCT + '% 以內的那條才畫">斷頭價 ' + (currentChart.mclOn ? '開' : '關') + '</button>';   // 2026-10-23 使用者：開關放在K線圖上面那一列（MA、扣抵、防守線）的最後面
 }
 function updateChartTooltipAt(clientX, clientY){
@@ -15336,7 +15402,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 23:15:21';
+const BUILD_STAMP = '2026-10-23 23:23:56';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16408,6 +16474,12 @@ document.getElementById('macdToggle').addEventListener('click', () => {
   drawMacdPanel();
 });
 document.getElementById('maLegend').addEventListener('click', (e) => {
+  if (e.target.closest('[data-pat-toggle]')){
+    currentChart.patOn = !currentChart.patOn;
+    try { localStorage.setItem('chartPatOn', currentChart.patOn ? '1' : '0'); } catch (_){}
+    redrawAll();
+    return;
+  }
   if (!e.target.closest('[data-mcl-toggle]')) return;
   currentChart.mclOn = !currentChart.mclOn;
   try { localStorage.setItem('chartMclOn', currentChart.mclOn ? '1' : '0'); } catch (_){}
