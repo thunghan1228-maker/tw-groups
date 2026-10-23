@@ -1196,6 +1196,14 @@ export default {
       // 個股問診（2026-09-28 使用者）：股號帶給後端，60 秒快取
       return await proxyHanstockBars("/api/hub/diag" + url.search, 60);
     }
+    if (url.pathname === "/api/margin-call") {
+      // 融資斷頭線名單（2026-10-23 使用者貼老師「斷頭線就在腳下」）：後端每天收盤後才會變，快取 1 分鐘
+      return await proxyHanstockBars("/api/hub/margin-call" + url.search, 60);
+    }
+    if (url.pathname === "/api/margin-line") {
+      // 單檔斷頭價 A／B（2026-10-23 使用者：K線圖日線畫線、5 分K 離線近才畫），每天收盤後才會變，快取 5 分鐘
+      return await proxyHanstockBars("/api/hub/margin-line" + url.search, 300);
+    }
     if (url.pathname === "/api/chips-daily") {
       // 盤後籌碼排行（2026-09-25 使用者）：主力大單、三大法人買賣超，後端每天收盤後收好，快取 1 分鐘
       return await proxyHanstockBars("/api/hub/chips/daily" + url.search, 60);
