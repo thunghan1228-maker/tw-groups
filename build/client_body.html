@@ -995,13 +995,13 @@
   #wgModal.bot-front:not(.behind-group):not(.behind-chart){z-index:103;}
   #wgInner{position:absolute;pointer-events:auto;min-width:280px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
   #wgInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
-  #wgBody .bot-col.wg-col{flex:0 0 1150px;min-width:1100px;}   /* 排名圖多了融資餘額、月高後、賣壓狀態三欄，格子變寬，左右拖著移動 */
+  #wgBody .bot-col.wg-col{flex:0 0 1215px;min-width:1160px;}   /* 排名圖多了融資餘額、月高後、賣壓狀態三欄，格子變寬，左右拖著移動 */
   @media (max-width:767px){
     #wgBody .bot-col.wg-col{flex-basis:94%;min-width:0;}
     /* 手機寬度放不下小柱子＋A／B 兩欄：柱子拿掉，只留股號、股名、漲跌幅、A、B 五欄 */
     #wgBody .bcr.cp:not(.cpx),.bot-col .bcr.cp:not(.cpx){grid-template-columns:2.2em minmax(0,1fr) 3.6em 3.4em 3.6em 3.6em!important;}
     #wgBody .bcr.cp:not(.cpx) .bct,.bot-col .bcr.cp:not(.cpx) .bct,.bcr.cp.bc-hd:not(.cpx) span:nth-child(4){display:none;}
-    #wgBody .bot-chart{min-width:1100px;}   /* 自選族群個股的排名圖欄位多，手機上整格左右滑 */
+    #wgBody .bot-chart{min-width:1160px;}   /* 自選族群個股的排名圖欄位多，手機上整格左右滑 */
   }
   /* 緊湊排名圖（機器人、自選族群個股共用）：漲跌幅數字、小柱子（大概比例就好）、A／B 斷頭價 */
   .bcr.cp{height:30px;} .bcr.cp.bc-hd{height:18px;font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap;} .bcr.cp.bc-hd > span{font-size:11px;}   /* 欄寬用 em 算：表頭那列的字級要跟下面的列一樣（12px），不然每欄都比下面窄、整排對不齊；字小一點只縮在 span 上 */ .bcr.cp.bc-hd span:nth-child(n+3){text-align:right;}
@@ -1013,7 +1013,9 @@
   .lgs i{font-style:normal;font-size:10.5px;font-weight:800;line-height:1.5;padding:0 4px;border-radius:4px;} .lgs i.y{background:#16a34a;color:#fff;} .lgs i.n{border:1px solid var(--line);color:var(--muted);} .lgs i.u{border:1px dashed var(--line);color:var(--muted);opacity:.7;}
   .wg-sortbtn{float:right;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:1px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;} .wg-sortbtn.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
   .bcr.cp .cpm{text-align:right;line-height:1.2;font-size:12px;} .bcr.cp .cpm.l{text-align:left;} .bcr.cp .cpm .dg-sub{font-size:10.5px;color:var(--muted);white-space:nowrap;} .bcr.cp .cpm .mcl-util{font-size:10.5px;}
-  .bcr.cp.cpx.bc-hd span:nth-child(5),.bcr.cp.cpx.bc-hd span:nth-child(n+11){text-align:left;}
+  .bcr.cp.cpx.bc-hd span:nth-child(5),.bcr.cp.cpx.bc-hd span:nth-child(n+12){text-align:left;}
+  .bcr.cp.cpx.bc-hd span[data-wg-col]{cursor:pointer;} .bcr.cp.cpx.bc-hd span[data-wg-col]:hover{color:var(--text);} .bcr.cp.cpx.bc-hd span[data-wg-col].on{color:#e11d48;}   /* 2026-10-23 使用者：表頭可按，升冪／降冪排序 */
+  .bcr.cp .cpm .mcl-ma{font-size:14px;}
   .bcr.cp .cphold{text-align:right;} .bcr.cp .cphold .hr-hold{margin-left:0;min-width:0;font-size:11.5px;padding:0 3px;}
   #wgBody .up,#wgBody .down,#wgBody .flat{font-weight:700;}
   .wg-ab{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap;} .wg-ab b{font-weight:700;} .wg-ab i{font-style:normal;font-size:10.5px;color:var(--muted);}
@@ -22845,7 +22847,7 @@ new ResizeObserver(() => sizeSgtPanes()).observe(document.getElementById('sgtInn
 // 最多 10 格、左右移動；族群裡每一檔旁邊加融資斷頭價 A／B，查的那檔另外列出它的 A／B、融資餘額、賣壓狀態、落底訊號、回檔警示）----
 // 族群成員跟漲跌用首頁報價（盤中每 15 秒跟著更新）；A／B 是 /api/margin-call 用日K推算的斷頭價（不會盤中變），「差 x%」用現價算：（現價 − 斷頭價）÷ 現價，現價低於斷頭價＝已破。
 const WG_MAX_COLS = 10, WG_VIEW_KEY = 'wgView', WG_COLS_KEY = 'wgCols', WG_RECT_KEY = 'wgRect', WG_MAX_KEY = 'wgMax', WG_COLS_H_KEY = 'wgColsH', WG_POP_KEY = 'wgPopRect', WG_MODE_KEY = 'wgMode';
-const wgState = { sortLong: false, cols: [], restored: false, maxRestore: null, tray: null, popWin: null, pendTops: null, pendLeft: 0, pendUntil: 0, saveTimer: null };
+const wgState = { sortKey: 'pct', sortDir: -1, maWait: false, cols: [], restored: false, maxRestore: null, tray: null, popWin: null, pendTops: null, pendLeft: 0, pendUntil: 0, saveTimer: null };
 function wgWindowMode(){ return document.body.classList.contains('wg-window-mode'); }
 function wgPopWindow(){ return wgState.popWin && !wgState.popWin.closed ? wgState.popWin : null; }
 const wgMargin = { map: null, date: '', at: 0, failedAt: 0, loading: false, error: '', singles: {} };
@@ -22903,15 +22905,60 @@ function wgAbExtra(s){
   return '<span class="cphold">' + homeHoldHtml(s.code) + '</span>' + (m ? wgLineCell(s.price, m.a) + wgLineCell(s.price, m.b) : '<span class="wg-ab"><b>—</b></span><span class="wg-ab"><b>—</b></span>');
 }
 // 自選族群個股的排名圖多三欄（2026-10-23 使用者：融資餘額、月高後融資增減、賣壓狀態也要有，欄位變寬沒關係、左右可以捲動）：跟個股問診融資名單同一套（mclBalCell／mclSinceCell／mclPressure）
-const WG_GRID_X = '2.6em minmax(4.2em,1fr) 4.3em 120px 7.8em 3.9em 4.4em 4.4em 12.6em 4.9em 9.4em 7.4em 7.4em';
-const WG_HEAD_X = '<div class="bcr cp cpx bc-hd" style="grid-template-columns:' + WG_GRID_X + '"><span></span><span>股票</span><span>漲跌幅</span><span></span><span title="做多參考：買（大戶力 ≥+10%）、融（融資使用率 <20%）、線（離 A、B 斷頭價都 >10%）三項各一勾，勾越多越前面；只是整理，不是買進訊號">做多參考</span><span title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值）；≥+10% 紅底、≤−10% 綠底">大戶力</span><span title="A 最高點追的斷頭價">A 斷頭</span><span title="B 五日平均價線追的斷頭價">B 斷頭</span><span title="融資餘額（張）；今＝今天增減、使用率＝融資餘額 ÷ 這檔的融資額度">融資餘額（張）</span><span title="月高那天到今天融資餘額增減 %；下面小字是 5 個交易日增減">月高後</span><span title="離 A 或 B 斷頭價 ≤10% 或已跌破才判：賣壓未釋放／釋放中／已洗掉一大半；離線遠＝離斷頭價還遠">賣壓狀態</span><span title="近似落底：賣壓釋放中或已洗掉一大半＋近 5 日爆量＋今天跌幅比前一天小、沒再破爆量日最低價">落底訊號</span><span title="留意回檔：漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K">回檔警示</span></div>';
+const WG_GRID_X = '2.6em minmax(4.2em,1fr) 4.3em 120px 7.8em 3.9em 4.4em 4.4em 4.9em 12.6em 4.9em 9.4em 7.4em 7.4em';   // 2026-10-23 使用者：B 斷頭右邊加「均線分數」欄（滿分 15）
+// 表頭每一欄可以按（2026-10-23 使用者：均線分數、大戶力、A 斷頭、B 斷頭都要有升冪／降冪的按鈕）：按一下照那欄排，再按一下反過來；目前排哪一欄、哪個方向用 ▼▲ 標在表頭
+const WG_SORT_COLS = {
+  pct: { label: '漲跌幅', first: -1, up: '小→大', down: '大→小' }, lg: { label: '做多參考', first: -1, up: '勾少→多', down: '勾多→少' }, hold: { label: '大戶力', first: -1, up: '小→大', down: '大→小' },
+  a: { label: 'A 斷頭', first: 1, up: '差小→大', down: '差大→小' }, b: { label: 'B 斷頭', first: 1, up: '差小→大', down: '差大→小' }, ma: { label: '均線分數', first: -1, up: '低→高', down: '高→低' },
+};
+function wgHeadX(){
+  const hs = (key, text, tip) => '<span data-wg-col="' + key + '"' + (wgState.sortKey === key ? ' class="on"' : '') + ' title="' + tip + '；按一下照這欄排，再按一下反過來' + (wgState.sortKey === key ? '（現在：' + WG_SORT_COLS[key][wgState.sortDir > 0 ? 'up' : 'down'] + '）' : '') + '">' + text + (wgState.sortKey === key ? (wgState.sortDir > 0 ? ' ▲' : ' ▼') : '') + '</span>';
+  return '<div class="bcr cp cpx bc-hd" style="grid-template-columns:' + WG_GRID_X + '"><span></span><span>股票</span>' + hs('pct', '漲跌幅', '今天漲跌幅') + '<span></span>' +
+    hs('lg', '做多參考', '做多參考：買（大戶力 ≥+10%）、融（融資使用率 <20%）、線（離 A、B 斷頭價都 >10%）三項各一勾，勾越多越前面；只是整理，不是買進訊號') +
+    hs('hold', '大戶力', '盤中大戶力（大戶淨額 ÷ 近 5 日均成交值）；≥+10% 紅底、≤−10% 綠底') +
+    hs('a', 'A 斷頭', 'A 最高點追的斷頭價，小字＝離現價差幾 %（已破排最前）') + hs('b', 'B 斷頭', 'B 五日平均價線追的斷頭價，小字＝離現價差幾 %（已破排最前）') +
+    hs('ma', '均線分數', '均線分數（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分，滿分 15；用現價當今天收盤）') +
+    '<span title="融資餘額（張）；今＝今天增減、使用率＝融資餘額 ÷ 這檔的融資額度">融資餘額（張）</span><span title="月高那天到今天融資餘額增減 %；下面小字是 5 個交易日增減">月高後</span>' +
+    '<span title="離 A 或 B 斷頭價 ≤10% 或已跌破才判：賣壓未釋放／略減／釋放中／已洗掉一大半；離線遠＝離斷頭價還遠">賣壓狀態</span><span title="近似落底：賣壓釋放中或已洗掉一大半＋近 5 日爆量＋今天跌幅比前一天小、沒再破爆量日最低價">落底訊號</span>' +
+    '<span title="留意回檔：漲多（近 10 日 ≥25% 或乖離月線 ≥20%）＋爆量 2 倍＋出貨 K">回檔警示</span></div>';
+}
+// 均線分數（滿分 15，用現價當今天收盤）；沒有（日K不足 240 天、均線資料還在讀）回 null
+function wgMaScore(s){
+  const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[s.code] : null;
+  return info && s.price > 0 ? maScoreFromSums(info, s.price, brewLaunchData.rules) : null;
+}
+function wgMaCell(s){
+  const v = wgMaScore(s);
+  return v == null ? '<span class="muted" title="日K不足 240 天或均線資料還在讀取，算不出均線分數">—</span>' : '<b class="mcl-ma' + (v > 10 ? ' hi' : '') + '" title="均線分數 ' + v + ' / 15（5/10/20/60/120/240 日線兩兩比較，短天期在上面得 1 分；用現價當今天收盤）">' + v + '</b>';
+}
+// 表頭排序用的數字：沒有就回 null（一律排最後）；A／B 用現價算的「差 %」，已跌破＝負的、排最前
+function wgSortVal(key, s){
+  if (key === 'pct') return s.changePercent;
+  if (key === 'hold') return holderPctOf(s.code);
+  if (key === 'ma') return wgMaScore(s);
+  const m = wgMargin.map && wgMargin.map[s.code];
+  if (!m) return null;
+  if (key === 'a' || key === 'b'){ const line = key === 'a' ? m.a : m.b; return line > 0 && s.price > 0 ? (s.price - line) / s.price * 100 : null; }
+  if (key === 'lg') return mclLongScore(s.code, m, s.price).n + Math.max(0, Math.min(holderPctOf(s.code) == null ? 0 : holderPctOf(s.code), 99.9)) / 1000;   // 勾數＋大戶力當小數
+  return null;
+}
+function wgOrderFn(){
+  const key = wgState.sortKey, dir = wgState.sortDir;
+  if (key === 'pct' && dir < 0) return null;   // 照漲幅由大到小＝原本的排法（有多方線、空方線）
+  if (key === 'lg' && !wgMargin.map) return null;
+  return (a, b) => {
+    const x = wgSortVal(key, a), y = wgSortVal(key, b);
+    if (x == null || y == null) return (x == null ? 1 : 0) - (y == null ? 1 : 0) || (b.changePercent - a.changePercent);
+    return (dir * (x - y)) || (b.changePercent - a.changePercent);
+  };
+}
 function wgFullExtra(s){
   const m = wgMargin.map && wgMargin.map[s.code];
   const none = '<span class="cpm"><span class="muted">—</span></span>';
   const lg = '<span class="cpm l">' + (m ? mclLongHtml(mclLongScore(s.code, m, s.price)) : '<span class="muted">—</span>') + '</span>';
-  if (!m) return lg + wgAbExtra(s) + none + none + none + none + none;
+  if (!m) return lg + wgAbExtra(s) + none + none + none + none + none + none;
   const live = wgLive(m, s.price), mg = m.margin;
-  return lg + wgAbExtra(s) + '<span class="cpm">' + mclBalCell(mg) + '</span><span class="cpm">' + mclSinceCell(mg, m) + '</span><span class="cpm l">' + mclPressPill(mclPressure(live, mg)) + '</span>' +
+  return lg + wgAbExtra(s) + '<span class="cpm">' + wgMaCell(s) + '</span><span class="cpm">' + mclBalCell(mg) + '</span><span class="cpm">' + mclSinceCell(mg, m) + '</span><span class="cpm l">' + mclPressPill(mclPressure(live, mg)) + '</span>' +
     '<span class="cpm l">' + mclBottomPill(mclBottom(live, mg, m.stab)) + '</span><span class="cpm l">' + mclPullPill(mclPullback(m.pull, mg)) + '</span>';
 }
 function wgGroupChart(g, me){
@@ -22929,12 +22976,13 @@ function wgGroupChart(g, me){
   const rank = ranked.findIndex((x) => x.name === g.name) + 1;
   const closed = lastData && String(lastData.quoteTime || '') >= '13:30';
   const stampTxt = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
-  const lgOf = (s) => mclLongScore(s.code, wgMargin.map && wgMargin.map[s.code], s.price);
-  const order = wgState.sortLong && wgMargin.map ? (a, b) => { const x = lgOf(a), y = lgOf(b); return (y.n - x.n) || ((y.hold == null ? -1e9 : y.hold) - (x.hold == null ? -1e9 : x.hold)) || (b.changePercent - a.changePercent); } : null;
-  const sortBtn = '<button type="button" class="wg-sortbtn' + (wgState.sortLong ? ' on' : '') + '" data-wg-sort="1" title="切換這一族的排法：照漲幅（有多方線、空方線）／照做多參考（勾多的在前面）">排序：' + (wgState.sortLong ? '做多參考（勾多→少）' : '照漲幅') + ' ⇄</button>';
+  if (!brewLaunchData && !wgState.maWait){ wgState.maWait = true; refreshBrewLaunch().catch(() => {}).finally(() => { wgState.maWait = false; if (brewLaunchData) wgRerun(); }); }   // 均線分數要用醞釀／發動那份均線基底
+  const order = wgOrderFn();
+  const sc = WG_SORT_COLS[wgState.sortKey] || WG_SORT_COLS.pct, custom = !(wgState.sortKey === 'pct' && wgState.sortDir < 0);
+  const sortBtn = '<button type="button" class="wg-sortbtn' + (custom ? ' on' : '') + '" data-wg-sort="1" title="目前的排法；按一下回到照漲幅由大到小（有多方線、空方線）。想換排法：直接按下面表頭的欄位名稱（漲跌幅、做多參考、大戶力、A 斷頭、B 斷頭、均線分數），再按一次反過來">排序：' + sc.label + '（' + sc[wgState.sortDir > 0 ? 'up' : 'down'] + '）' + (custom ? ' ↺' : '') + '</button>';
   const sum = wgMargin.map ? '<div class="wg-sum">' + sortBtn + '這族 ' + n + ' 檔：<b class="wg-bad">A 已破 ' + aB + ' 檔</b>・<b class="wg-bad">B 已破 ' + bB + ' 檔</b>・<b style="color:#f59e0b">離 B ≤' + MCL_FILTER_PCT + '% ' + bNear + ' 檔</b></div>' : '';
   return sum + botRankChart(g, null, me, { title: g.name + ' 族群排名' + (rank ? '(' + rank + ')' : ''), sub: n + '檔・' + stampTxt + (closed ? ' 收盤' : ' 盤中快照') + '・平均 ' + botPct(g.avgChange),
-    cpx: true, order, gridCols: WG_GRID_X, headRow: WG_HEAD_X, extraOf: wgFullExtra,
+    cpx: true, order, gridCols: WG_GRID_X, headRow: wgHeadX(), extraOf: wgFullExtra,
     });
 }
 // 文字名單每檔後面的 A／B（小字）
@@ -22991,6 +23039,8 @@ function wgHelpHtml(){
     L('怎麼用', '上面輸入個股代號或股名按「加入」，就開一格那檔所屬族群的排行（最多 10 格，左右拖著移動、每格自己上下捲）；格子右上角 ✕ 收掉；點股名開 K 線圖。開了哪幾格、捲到哪都會記住。') +
     L('查的那檔', '格子最上面的卡片：那檔的 A／B 斷頭價、現價離它們差幾 %、融資餘額、賣壓狀態、落底訊號、回檔警示。') +
     L('多方線／空方線', '族內依今天漲幅排序，前面幾檔是多方段、後面幾檔是空方段（跟刀劍空同一套分法）；右上角寫各有幾檔。名字前的 * 是處置股；👑帶頭 🚀火箭 🐎火馬 🔺轉強 🔪⚔️刀劍 🔰新手是首頁族群表那些標記。') +
+    L('怎麼排序', '<b>表頭的欄位名稱都可以按</b>（漲跌幅、做多參考、大戶力、A 斷頭、B 斷頭、均線分數）：按一下照那欄排，<b>再按一下反過來</b>（升冪／降冪），表頭會標 ▼▲ 看現在是哪個方向；A、B 斷頭是照「差幾 %」排（已破排最前、差最小在前）。沒有數字的（—）一律排最後。右上角那顆「排序：…」按鈕顯示現在的排法，按一下回到照漲幅由大到小（有多方線、空方線；其他排法不畫那兩條線）。排法會記住。') +
+    L('均線分數', '<b>滿分 15 分</b>：5、10、20、60、120、240 日線兩兩比較，共 15 組，短天期的均線在長天期的上面就得 1 分（15＝完整多頭排列、0＝完整空頭排列）；今天的均線用現價當今天收盤，盤中會跟著動。超過 10 分用紅字。「—」＝日 K 不足 240 天（新上市）或均線資料還在讀取。跟均線分數排行同一套。') +
     L('漲跌幅＋小柱子', '今天（盤中是即時）漲跌幅。小柱子只看大概比例，這一族漲跌幅最大的那檔畫到半格，不是精確比例。') +
     L('大戶力', '盤中大戶力＝大戶淨買賣額 ÷ 近 5 日平均成交值（老師算法：同秒併單 ≥7 張、開盤第一筆算賣）。≥+10% 紅底白字、≤−10% 綠底白字，其他只塗字色；「—」＝資料還在累積或不在追蹤範圍。') +
     L('做多參考', '<b>三項各一勾，勾越多越前面，一眼比較。</b>① <b>買</b>＝盤中大戶力 ≥ +' + HOLDER_HOT_PCT + '%（有大戶在買）；② <b>融</b>＝融資使用率 < ' + MCL_UTIL_HIGH + '%（借錢買的人不擠）；③ <b>線</b>＝離 A、B 斷頭價都超過 ' + MCL_FILTER_PCT + '%（離賣壓區還遠）。綠底＝有勾、空框＝沒有、虛線框＝資料不足；前面的大數字是勾了幾項（3 最多）。每一族上面有「排序」鈕，可以切換成「做多參考（勾多的在前面，勾一樣多的大戶力高的在前）」或回到「照漲幅」。<b>這只是把三個欄位整理成勾，不是買進訊號</b>：勾多代表大戶在買、借錢的人不擠、離斷頭價遠，但不保證會漲；還是要看 K 線位置和停損。') +
@@ -23223,7 +23273,9 @@ function openWgPanel(){
   wgBringFront();
   if (!wgState.restored){   // 這次打開網頁第一次開：回到上次自選的那幾格
     wgState.restored = true;
-    wgState.sortLong = botLoad('wgSort') === 'long';
+    const sv = botLoad('wgSort');   // 舊版存 'long'／'pct'；新版存 '欄位:方向'（例 ma:-1）
+    if (sv === 'long'){ wgState.sortKey = 'lg'; wgState.sortDir = -1; }
+    else if (typeof sv === 'string' && /^(pct|lg|hold|a|b|ma):(-1|1)$/.test(sv)){ const pr = sv.split(':'); wgState.sortKey = pr[0]; wgState.sortDir = Number(pr[1]); }
     const view = botLoad(WG_VIEW_KEY), v = view && Array.isArray(view.cols) ? view.cols : botLoad(WG_COLS_KEY);
     if (Array.isArray(v) && !wgState.cols.length){
       wgState.cols = v.filter((c) => typeof c === 'string' && /^[0-9A-Z]{4,6}$/.test(c)).slice(0, WG_MAX_COLS);
@@ -23261,7 +23313,15 @@ document.getElementById('wgInner').addEventListener('pointerdown', wgBringFront,
 document.getElementById('wgBody').addEventListener('click', (e) => {
   const t = e.target;
   if (t.closest('[data-wg-go]')){ const i = document.getElementById('wgQ'); wgAdd(i.value); i.value = ''; i.focus(); return; }
-  if (t.closest('[data-wg-sort]')){ wgState.sortLong = !wgState.sortLong; botStore('wgSort', wgState.sortLong ? 'long' : 'pct'); wgRender(); return; }
+  if (t.closest('[data-wg-sort]')){ wgState.sortKey = 'pct'; wgState.sortDir = -1; botStore('wgSort', 'pct:-1'); wgRender(); return; }
+  const hc = t.closest('[data-wg-col]');
+  if (hc){   // 表頭：按一下照那欄排（第一次的方向看欄位），再按一下反過來
+    const k = hc.dataset.wgCol;
+    if (wgState.sortKey === k) wgState.sortDir = -wgState.sortDir; else { wgState.sortKey = k; wgState.sortDir = WG_SORT_COLS[k].first; }
+    botStore('wgSort', wgState.sortKey + ':' + wgState.sortDir);
+    wgRender();
+    return;
+  }
   const x = t.closest('[data-wg-close]');
   if (x){ wgState.cols = wgState.cols.filter((c) => c !== x.dataset.wgClose); wgSave(); wgRender(); return; }
   if (t.closest('[data-wg-clear]')){ wgState.cols = []; wgSave(); wgRender(); return; }
