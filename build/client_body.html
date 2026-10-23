@@ -496,6 +496,7 @@
   /* 底部工具列 */
   /* 自訂畫面（2026-10-23 使用者：照莊爸網站左側「自訂」）：自訂模式下每個可收的項目前面出現勾選框（打勾＝留著、沒勾＝收起來、半透明），
      點一下就切換；收起來的平常不顯示；「全部顯示」一鍵復原；設定存在這台裝置（localStorage） */
+  .ck-table tr.mcl-focus td{background:rgba(124,58,237,.24);}
   .cz-off{display:none!important;}
   body.cz-mode .tb-btn.cz-off{display:flex!important;} body.cz-mode .signal-controls .cz-off{display:inline-block!important;}
   body.cz-mode .cz-off{opacity:.42;}
@@ -14187,13 +14188,39 @@ function mvHtml(data){
 // A 最高點追＝近 20 個交易日盤中最高 × 0.78（上櫃 × 0.65）、B 五日線追＝月高那天的 5 日均價 × 0.78（上櫃 × 0.65）；今收低於斷頭價＝已破，否則差（今收−斷頭價）÷今收。
 // 後端 /api/margin-call 算名單，單檔的在問診資料 stock.margin；老師 10/22 的八檔（南亞科、國巨、聯電…）月高、A、B、差幾 % 都算得一模一樣。
 const mclState = { groups: 'all', loaded: '', data: null, loading: false, failedAt: 0, error: '', sortKey: 'bGap', sortDir: 1, filter: '' };   // filter：'A'／'B'＝只看離 A／B 斷頭價 ≤10% 的（2026-10-23 使用者）   // sortKey／sortDir：A、B 欄位按鈕排序（2026-10-23 使用者），預設照 B 差由小到大
+// 2026-10-23 使用者：欄位打股號「查」要跑出那檔本身、加上它那個族群的資料 → 欄位現在可以打族群名、all、股號或股名（逗號分隔）：
+// 股號／股名＝那檔（排最上面、紫底）＋它所屬的族群；找不到的字當族群名（沒有就是空的，畫面上會說找不到）
+function mclResolve(input){
+  const tokens = String(input || '').split(/[,，、\s]+/).map((t) => t.trim()).filter(Boolean);
+  const out = { groups: [], codes: [], names: {}, unknown: [], ready: !!(lastData && Array.isArray(lastData.groups) && lastData.groups.length) };
+  const groupNames = new Set(out.ready ? lastData.groups.map((g) => g.name) : []);
+  const addGroup = (n) => { if (!out.groups.includes(n)) out.groups.push(n); };
+  tokens.forEach((t) => {
+    const q = botNorm(t);
+    if (q === 'ALL'){ addGroup('all'); return; }
+    if (groupNames.has(t)){ addGroup(t); return; }
+    let code = /^(?=.*\d)[0-9A-Z]{4,6}$/.test(q) ? q : null;   // 股號至少有一個數字（純英文字不算，免得亂打的字被當股號）
+    if (!code && out.ready){ const f = botStockByName(t); if (f) code = f.code; }
+    if (code){
+      if (!out.codes.includes(code)) out.codes.push(code);
+      out.names[code] = (out.ready && botNameOf(code)) || code;
+      if (out.ready) botStockGroups(code).forEach((g) => addGroup(g.name));
+      return;
+    }
+    addGroup(t);
+    if (out.ready && !groupNames.has(t)) out.unknown.push(t);
+  });
+  return out;
+}
 async function mclEnsure(){
   const key = mclState.groups;
   if (mclState.loaded === key && (mclState.data || mclState.loading)) return;
   if (mclState.loaded === key && mclState.failedAt && Date.now() - mclState.failedAt < 30000) return;
+  const rv = mclResolve(key);
+  if (rv.codes.length && !rv.ready){ setTimeout(() => { if (mclState.groups === key && !mclState.data){ mclState.loaded = ''; const modal = document.getElementById('diagModal'); if (modal && !modal.hidden) renderDiag(); } }, 1500); return; }   // 打了股號：等首頁族群資料進來才知道它的族群
   mclState.loaded = key; mclState.loading = true; mclState.data = null; mclState.error = '';
   try {
-    const res = await fetch('/api/margin-call?limit=1000&groups=' + encodeURIComponent(key));   // 1000：剛大漲的股票離斷頭線最遠、排最後，限 400 會被截掉（留意回檔要看到）
+    const res = await fetch('/api/margin-call?limit=1000&groups=' + encodeURIComponent(rv.groups.length ? rv.groups.join(',') : (rv.codes.length ? 'none' : key)) + (rv.codes.length ? '&codes=' + encodeURIComponent(rv.codes.join(',')) : ''));   // 1000：剛大漲的股票離斷頭線最遠、排最後，限 400 會被截掉（留意回檔要看到）
     const data = await res.json().catch(() => null);
     if (!res.ok) throw new Error((data && (data.detail || data.error)) || ('margin-call http ' + res.status));
     if (mclState.loaded !== key) return;
@@ -14325,7 +14352,10 @@ function mclSortTh(key, label){
 function dgMarginListHtml(){
   mclEnsure();
   const d = mclState.data;
-  const ctl = '<div class="dg-search"><input class="dg-in" id="mclGroups" placeholder="族群名，逗號分隔（all＝全部族群）" value="' + wlEsc(mclState.groups) + '" style="min-width:260px"><button class="chart-tab chips-btn" id="mclRun">查</button>' + (dgState.code ? '' : dgBackBtn()) + '</div>';
+  const rv = mclResolve(mclState.groups), focus = new Set(rv.codes);
+  const ctl = '<div class="dg-search"><input class="dg-in" id="mclGroups" placeholder="族群名或股號／股名，逗號分隔（all＝全部族群）" value="' + wlEsc(mclState.groups) + '" style="min-width:300px"><button class="chart-tab chips-btn" id="mclRun">查</button>' + (dgState.code ? '' : dgBackBtn()) + '</div>' +
+    (rv.codes.length ? '<div class="race-note" style="margin:4px 0">查：' + rv.codes.map((c) => wlEsc(c + ' ' + (rv.names[c] || ''))).join('、') + (rv.groups.filter((g) => g !== 'all').length ? ' → 那檔排最上面（紫底），下面是它所屬的族群：' + rv.groups.filter((g) => g !== 'all').map(wlEsc).join('、') : '') + '</div>' : '') +
+    (rv.unknown.length ? '<div class="race-note" style="margin:4px 0;color:#f59e0b">找不到「' + rv.unknown.map(wlEsc).join('、') + '」：請輸入族群名、股號或股名</div>' : '');
   const head = '<div class="bl-section bl-launch">💥 融資斷頭線追蹤' + (d && d.date ? '・' + swMmdd(d.date) + ' 收盤' : '') + '</div>' + ctl;
   if (!d) return head + '<div class="race-note">' + (mclState.error ? '讀取失敗：' + wlEsc(mclState.error) : '讀取中…') + '</div>';
   if (d.status !== 'ok') return head + '<div class="race-note">' + wlEsc(d.reason || '還沒有日K資料') + '</div>';
@@ -14345,10 +14375,13 @@ function dgMarginListHtml(){
     const gx = x[mclState.sortKey], gy = y[mclState.sortKey];
     return (mclState.sortDir * ((gx == null ? Infinity : gx) - (gy == null ? Infinity : gy))) || String(x.code).localeCompare(String(y.code));
   });
-  const rows = sortedRows.map((r) => '<tr class="dg-link" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
+  const pinned = sortedRows.filter((r) => focus.has(r.code)).concat(sortedRows.filter((r) => !focus.has(r.code)));   // 查的那檔排最上面
+  const rows = pinned.map((r) => '<tr class="dg-link' + (focus.has(r.code) ? ' mcl-focus' : '') + '" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td>' +
     '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td><td class="l">' + mclBottomPill(mclBottom(r, r.margin, r.stab)) + '</td><td class="l">' + mclPullPill(mclPullback(r.pull, r.margin)) + '</td></tr>').join('');
   const summary = !d.summary ? '' : mclSummaryHtml(d.summary, 'diag');
-  return head + summary + filterBar + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
+  const missing = [...focus].filter((c) => !allRows.some((r) => r.code === c));
+  const missNote = missing.length ? '<div class="race-note" style="margin:4px 0;color:#f59e0b">' + missing.map((c) => wlEsc(c + ' ' + (rv.names[c] || ''))).join('、') + '：算不出斷頭線（本站沒有這檔的日K，或日K不足 24 根）</div>' : '';
+  return head + missNote + summary + filterBar + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
     (rows ? '<div class="hl-scroll"><table class="ck-table"><thead><tr><th class="l">股票</th><th class="l">族群</th><th>月高</th><th>今收</th>'+ mclSortTh('aGap', 'A 月高斷頭') + mclSortTh('bGap', 'B 五日平均價線斷頭') + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th><th class="l">落底訊號</th><th class="l">回檔警示</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
 function renderDiag(){
