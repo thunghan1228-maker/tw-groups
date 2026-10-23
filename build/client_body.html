@@ -3066,6 +3066,7 @@
   .mt-tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:700;color:#fff;margin:1px 3px 1px 0;white-space:nowrap;}
   .mt-tag.hit{background:#d9392b;}
   .mt-tag.near{background:#d97706;}
+  .mt-tag.broke{background:#7f1d1d;}
   .mcl-touch-alert .mt-foot{font-size:11.5px;color:#a89c8f;margin-top:6px;line-height:1.5;}
   .mcl-press{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;background:#6b7280;}   /* 2026-10-23 使用者：賣壓狀態標籤 */
   .mcl-press.p-no{background:#d9392b;}
@@ -14186,9 +14187,11 @@ function dgMarginListHtml(){
   const allRows = d.rows || [];
   const nearOf = (k) => allRows.filter((r) => !r[k + 'Broken'] && r[k + 'Gap'] != null && r[k + 'Gap'] <= MCL_FILTER_PCT);   // 離線還有 ≤10%（含 10%、還沒破）
   const nearA = nearOf('a'), nearB = nearOf('b');
-  const fbtn = (k, n) => '<button type="button" class="chart-tab chips-btn mcl-fbtn' + (mclState.filter === k ? ' active' : '') + '" data-mcl-filter="' + k + '" title="只看離 ' + k + ' 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票；再按一次取消">離 ' + k + ' ≤' + MCL_FILTER_PCT + '%・' + n + ' 檔</button>';
-  const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('A', nearA.length) + fbtn('B', nearB.length) + (mclState.filter ? '<span class="dg-sub">　只列離 ' + mclState.filter + ' 斷頭價還有 ≤' + MCL_FILTER_PCT + '% 的股票（已跌破的在上面「' + mclState.filter + ' 線已破」那排）；再按一次取消</span>' : '') + '</div>';
-  const shownRows = mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows;
+  const brokeEarlier = allRows.filter((r) => r.aBroken && !r.aNew);   // 昨天以前就已經破 A 的（不含昨日新破，那些在「今日新破」那排）
+  const fbtn = (k, label, tip, n) => '<button type="button" class="chart-tab chips-btn mcl-fbtn' + (mclState.filter === k ? ' active' : '') + '" data-mcl-filter="' + k + '" title="' + tip + '；再按一次取消">' + label + '・' + n + ' 檔</button>';
+  const filterTips = { P: '只列昨天以前就已經破 A 斷頭價的股票（不含昨日新破）', A: '只列離 A 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票', B: '只列離 B 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票' };
+  const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('P', 'A 已破（前幾天）', filterTips.P, brokeEarlier.length) + fbtn('A', '離 A ≤' + MCL_FILTER_PCT + '%', filterTips.A, nearA.length) + fbtn('B', '離 B ≤' + MCL_FILTER_PCT + '%', filterTips.B, nearB.length) + (mclState.filter ? '<span class="dg-sub">　' + filterTips[mclState.filter] + '；再按一次取消</span>' : '') + '</div>';
+  const shownRows = mclState.filter === 'P' ? brokeEarlier : mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows;
   const sortedRows = shownRows.slice().sort((x, y) => {   // 照 A 或 B 的「差 %」排：升冪＝差最小（已破＝負的）排最前，降冪＝差最大排最前
     const gx = x[mclState.sortKey], gy = y[mclState.sortKey];
     return (mclState.sortDir * ((gx == null ? Infinity : gx) - (gy == null ? Infinity : gy))) || String(x.code).localeCompare(String(y.code));
@@ -14508,7 +14511,7 @@ document.getElementById('diagBody').addEventListener('click', (e) => {
   if (mfl){   // 離 A／B ≤10% 快速篩選：按一下只看那一組（並照那條線的差由小到大排），再按一次取消
     const k = mfl.dataset.mclFilter;
     mclState.filter = mclState.filter === k ? '' : k;
-    if (mclState.filter){ mclState.sortKey = k.toLowerCase() + 'Gap'; mclState.sortDir = 1; }
+    if (mclState.filter){ mclState.sortKey = (k === 'B' ? 'b' : 'a') + 'Gap'; mclState.sortDir = 1; }
     const inner = document.getElementById('diagInner'), top = inner ? inner.scrollTop : 0;
     renderDiag();
     if (inner) inner.scrollTop = top;
@@ -22323,7 +22326,7 @@ async function mclWatchLoad(){
   try {
     const res = await fetch('/api/margin-call?limit=400&groups=all');
     const data = await res.json();
-    if (res.ok && data && data.status === 'ok') mclWatch.rows = (data.rows || []).filter((r) => r.a > 0 && r.b > 0 && !(r.aBroken && r.bBroken));
+    if (res.ok && data && data.status === 'ok') mclWatch.rows = (data.rows || []).filter((r) => r.a > 0 && r.b > 0);   // 昨天以前就已破 A 的也留著（盤中提醒要列「已破 A」）
     mclWatch.at = Date.now();
   } catch (e) { mclWatch.at = Date.now() - 50 * 60 * 1000; /* 失敗 10 分鐘後再試 */ } finally { mclWatch.loading = false; }
 }
@@ -22333,7 +22336,7 @@ function mclSessionLive(){
   return wd >= 1 && wd <= 5 && hm >= '09:00' && hm <= '13:35';
 }
 // 純函式：rows＝斷頭價名單、quoteOf(code)＝{price}、seen＝今天已經跳過的 key 集合（code|A、code|B、code|N）。
-// 一檔合併成一筆，事件有四種：觸及 A（昨天收盤還在 A 上、現在 ≤ A）、觸及 B、接近 A（A 還沒破、離 A ≤ MCL_NEAR_ALERT_PCT%）、接近 B（B 還沒破、離 B ≤ MCL_NEAR_ALERT_PCT%）；每一種今天各跳一次。
+// 一檔合併成一筆，事件有五種：觸及 A（昨天收盤還在 A 上、現在 ≤ A）、觸及 B、已破 A（昨天收盤就已經破 A：昨日新破或前幾天就破，盤前已破、不是今天才碰到）、接近 A（A 還沒破、離 A ≤ MCL_NEAR_ALERT_PCT%）、接近 B；每一種今天各跳一次。
 const MCL_NEAR_ALERT_PCT = 10;   // 使用者 2026-10-23：離 A 月高斷頭價或 B 五日平均價線斷頭價 ≤10% 也跳（晶豪科差 3.2% 早就該跳、凌航差 11.1% 進到 10% 才跳）
 function mclTouchEvents(rows, quoteOf, seen){
   const byCode = new Map();
@@ -22345,19 +22348,21 @@ function mclTouchEvents(rows, quoteOf, seen){
     const q = quoteOf(r.code);
     if (!q || !(q.price > 0)) continue;
     const p = q.price;
+    if (r.aBroken && !seen.has(r.code + '|P')) add(r, p, r.code + '|P', r.aNew ? '已破 A（昨日新破）' : '已破 A（前幾天）', 'broke');   // 使用者 2026-10-23：已經破 A 的也要秀出來
     if (!r.aBroken && p <= r.a && !seen.has(r.code + '|A')) add(r, p, r.code + '|A', '觸及 A', 'touch');
     if (!r.bBroken && p <= r.b && !seen.has(r.code + '|B')) add(r, p, r.code + '|B', '觸及 B', 'touch');
     if (!r.aBroken && p > r.a && (p - r.a) / p * 100 <= MCL_NEAR_ALERT_PCT && !seen.has(r.code + '|N')) add(r, p, r.code + '|N', '近 A ' + MCL_NEAR_ALERT_PCT + '% 內', 'near');
     if (!r.bBroken && p > r.b && (p - r.b) / p * 100 <= MCL_NEAR_ALERT_PCT && !seen.has(r.code + '|NB')) add(r, p, r.code + '|NB', '近 B ' + MCL_NEAR_ALERT_PCT + '% 內', 'near');
   }
-  return Array.from(byCode.values()).sort((x, y) => (y.kinds.has('touch') - x.kinds.has('touch')) || ((x.price - x.row.a) / x.price - (y.price - y.row.a) / y.price));
+  const rank = (e) => (e.kinds.has('touch') ? 0 : e.kinds.has('broke') ? 1 : 2);   // 今天剛觸及的最前面、其次盤前已破、最後只是接近
+  return Array.from(byCode.values()).sort((x, y) => (rank(x) - rank(y)) || ((x.price - x.row.a) / x.price - (y.price - y.row.a) / y.price));
 }
 function mclTouchRowHtml(e, hm){
   const r = e.row, p = e.price;
   const cell = (line) => '<b>' + ckPrice(line) + '</b><div class="dg-sub"' + (p <= line ? ' style="color:#d9392b;font-weight:700"' : '') + '>' + (p <= line ? '已破' : '差 ' + ((p - line) / p * 100).toFixed(1) + '%') + '</div>';
   const live = { aBroken: p <= r.a, bBroken: p <= r.b, aGap: (p - r.a) / p * 100, bGap: (p - r.b) / p * 100 };
-  const tags = e.tags.map((t) => '<span class="mt-tag ' + (t.indexOf('觸及') === 0 ? 'hit' : 'near') + '">' + wlEsc(t) + '</span>').join('');
-  return { touch: e.kinds.has('touch'), html: '<tr><td>' + hm + '</td><td class="l"><b class="alert-stk" data-alert-code="' + wlEsc(r.code) + '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + (r.name || '')) + '</b><div class="dg-sub">' + wlEsc(r.group || '') + '</div></td><td class="l">' + tags + '</td>' +
+  const tags = e.tags.map((t) => '<span class="mt-tag ' + (t.indexOf('觸及') === 0 ? 'hit' : t.indexOf('已破') === 0 ? 'broke' : 'near') + '">' + wlEsc(t) + '</span>').join('');
+  return { touch: e.kinds.has('touch'), broke: e.kinds.has('broke') && !e.kinds.has('touch'), html: '<tr><td>' + hm + '</td><td class="l"><b class="alert-stk" data-alert-code="' + wlEsc(r.code) + '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + (r.name || '')) + '</b><div class="dg-sub">' + wlEsc(r.group || '') + '</div></td><td class="l">' + tags + '</td>' +
     '<td><b>' + ckPrice(p) + '</b></td><td>' + cell(r.a) + '</td><td>' + cell(r.b) + '</td>' +
     '<td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin) + '</td><td class="l">' + mclPressPill(mclPressure(live, r.margin)) + '</td></tr>' };
 }
@@ -22373,10 +22378,10 @@ function mclTouchNotify(events){
     document.body.appendChild(el);
     makeAlertDraggable(el, '.pk-alert-head', 'mclTouchPos');
   }
-  const nHit = mclTouchLines.filter((l) => l.touch).length;
-  el.innerHTML = '<div class="pk-alert-head">💥 融資斷頭價・盤中提醒（觸及 ' + nHit + '・接近 ' + (mclTouchLines.length - nHit) + '）<button class="pk-alert-close" aria-label="關閉">✕</button></div>' +
+  const nHit = mclTouchLines.filter((l) => l.touch).length, nBroke = mclTouchLines.filter((l) => l.broke).length;
+  el.innerHTML = '<div class="pk-alert-head">💥 融資斷頭價・盤中提醒（觸及 ' + nHit + '・已破 ' + nBroke + '・接近 ' + (mclTouchLines.length - nHit - nBroke) + '）<button class="pk-alert-close" aria-label="關閉">✕</button></div>' +
     '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th class="l">事件</th><th>現價</th><th>斷頭價 A<div class="dg-sub">月高</div></th><th>斷頭價 B<div class="dg-sub">五日平均價線</div></th><th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + mclTouchLines.map((l) => l.html).join('') + '</tbody></table></div>' +
-    '<div class="mt-foot">一檔一種事件今天只跳一次：觸及 A／B＝現價碰到斷頭價、近 A／B ' + MCL_NEAR_ALERT_PCT + '% 內＝離 A 月高斷頭價（或 B 五日平均價線斷頭價）≤' + MCL_NEAR_ALERT_PCT + '%。融資餘額是證交所／櫃買晚上才公布的資料，盤中用的是前一個交易日收盤後的數字。點股號開 K 線圖。</div>';
+    '<div class="mt-foot">一檔一種事件今天只跳一次：觸及 A／B＝今天現價碰到斷頭價、已破 A＝昨天收盤以前就破了（盤前已破，不是今天才碰到）、近 A／B ' + MCL_NEAR_ALERT_PCT + '% 內＝離 A 月高斷頭價（或 B 五日平均價線斷頭價）≤' + MCL_NEAR_ALERT_PCT + '%。融資餘額是證交所／櫃買晚上才公布的資料，盤中用的是前一個交易日收盤後的數字。點股號開 K 線圖。</div>';
   try { launchBeep(); } catch (_){}
   if ('Notification' in window && Notification.permission === 'granted'){
     events.slice(0, 5).forEach((e) => { try { new Notification('💥 ' + e.row.code + ' ' + (e.row.name || '') + '・' + e.tags.join('、'), { body: hm + ' 現價 ' + e.price + '（融資斷頭價，盤中）', tag: 'mcl-' + e.row.code + '-' + e.keys.join('') }); } catch (_){} });
