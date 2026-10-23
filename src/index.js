@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-23 22:21:54";
+const BUILD_STAMP = "2026-10-23 22:25:15";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -14786,11 +14786,12 @@ function dgMarginListHtml(){
   const brokeEarlier = allRows.filter((r) => r.aBroken && !r.aNew);   // 昨天以前就已經破 A 的（不含昨日新破，那些在「今日新破」那排）
   const brokeEarlierB = allRows.filter((r) => r.bBroken && !r.bNew);
   const pullRows = allRows.filter((r) => r.pull && r.pull.tier);
+  const holdRows = allRows.filter((r) => { const v = holderPctOf(r.code); return v !== null && v >= HOLDER_HOT_PCT; });   // 2026-10-23 使用者：只看盤中大戶力 ≥ +10% 的股票
   const bottomRows = allRows.filter((r) => !!mclBottom(r, r.margin, r.stab));   // 落底訊號欄有標的（近似落底＋價量止跌缺融資）
   const fbtn = (k, label, tip, n, extra) => '<button type="button" class="chart-tab chips-btn mcl-fbtn' + (mclState.filter === k ? ' active' : '') + '" data-mcl-filter="' + k + '" title="' + tip + '；再按一次取消">' + label + '・' + n + ' 檔' + (extra || '') + '</button>';
-  const filterTips = { P: '只列昨天以前就已經破 A 斷頭價的股票（不含昨日新破）', Q: '只列昨天以前就已經破 B 斷頭價的股票（不含昨日新破）', T: '只列「落底訊號」欄有標的股票：近似落底（賣壓釋放中或已洗掉一大半＋爆量後跌幅縮小、沒再破低），或價量止跌（沒有融資資料、只看價量）', R: '只列「回檔警示」欄有標的（留意回檔）的股票：漲多＋爆量＋出貨K。近 10 日漲得越多排越前面', A: '只列離 A 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票', B: '只列離 B 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票' };
-  const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('P', 'A 已破（前幾天）', filterTips.P, brokeEarlier.length) + fbtn('Q', 'B 已破（前幾天）', filterTips.Q, brokeEarlierB.length) + fbtn('A', '離 A ≤' + MCL_FILTER_PCT + '%', filterTips.A, nearA.length) + fbtn('B', '離 B ≤' + MCL_FILTER_PCT + '%', filterTips.B, nearB.length) + fbtn('T', '落底訊號', filterTips.T, bottomRows.length) + fbtn('R', '回檔警示', filterTips.R, pullRows.length) + (mclState.filter ? '<span class="dg-sub">　' + filterTips[mclState.filter] + '；再按一次取消</span>' : '') + (!brokeEarlier.length && !/\\ball\\b/.test(mclState.groups) ? '<span class="dg-sub">　（這幾個族群裡 A 已破的都是昨日新破；族群欄打 all 可看全部族群）</span>' : '') + '</div>';
-  const shownRows = (mclState.filter === 'R' ? pullRows : mclState.filter === 'T' ? bottomRows : mclState.filter === 'P' ? brokeEarlier : mclState.filter === 'Q' ? brokeEarlierB : mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows).filter((r) => { if (!mclState.press) return true; const p = mclPressure(r, r.margin); return !!p && p.key === mclState.press; });
+  const filterTips = { H: '只列盤中大戶力 ≥ +' + HOLDER_HOT_PCT + '% 的股票（大戶淨買超金額 ÷ 近 5 日均成交值，老師算法）；列表照大戶力由大到小排', P: '只列昨天以前就已經破 A 斷頭價的股票（不含昨日新破）', Q: '只列昨天以前就已經破 B 斷頭價的股票（不含昨日新破）', T: '只列「落底訊號」欄有標的股票：近似落底（賣壓釋放中或已洗掉一大半＋爆量後跌幅縮小、沒再破低），或價量止跌（沒有融資資料、只看價量）', R: '只列「回檔警示」欄有標的（留意回檔）的股票：漲多＋爆量＋出貨K。近 10 日漲得越多排越前面', A: '只列離 A 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票', B: '只列離 B 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票' };
+  const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('H', '大戶力 ≥ +' + HOLDER_HOT_PCT + '%', filterTips.H, holdRows.length) + fbtn('P', 'A 已破（前幾天）', filterTips.P, brokeEarlier.length) + fbtn('Q', 'B 已破（前幾天）', filterTips.Q, brokeEarlierB.length) + fbtn('A', '離 A ≤' + MCL_FILTER_PCT + '%', filterTips.A, nearA.length) + fbtn('B', '離 B ≤' + MCL_FILTER_PCT + '%', filterTips.B, nearB.length) + fbtn('T', '落底訊號', filterTips.T, bottomRows.length) + fbtn('R', '回檔警示', filterTips.R, pullRows.length) + (mclState.filter ? '<span class="dg-sub">　' + filterTips[mclState.filter] + '；再按一次取消</span>' : '') + (!brokeEarlier.length && !/\\ball\\b/.test(mclState.groups) ? '<span class="dg-sub">　（這幾個族群裡 A 已破的都是昨日新破；族群欄打 all 可看全部族群）</span>' : '') + '</div>';
+  const shownRows = (mclState.filter === 'H' ? holdRows : mclState.filter === 'R' ? pullRows : mclState.filter === 'T' ? bottomRows : mclState.filter === 'P' ? brokeEarlier : mclState.filter === 'Q' ? brokeEarlierB : mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows).filter((r) => { if (!mclState.press) return true; const p = mclPressure(r, r.margin); return !!p && p.key === mclState.press; });
   if (!brewLaunchData && !mclState.maWait){ mclState.maWait = true; refreshBrewLaunch().catch(() => {}).finally(() => { mclState.maWait = false; const md = document.getElementById('diagModal'); if (md && !md.hidden && brewLaunchData) renderDiag(); }); }   // 均線分數要用醞釀／發動那份均線基底（首頁開著通常已經有）
   allRows.forEach((r) => { const q = getStockQuote(r.code), info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[r.code] : null, px = q && q.price > 0 ? q.price : r.close; r._ma = info && px > 0 ? maScoreFromSums(info, px, brewLaunchData.rules) : null; });
   allRows.forEach((r) => { r._hold = holderPctOf(r.code); });
@@ -15185,7 +15186,7 @@ document.getElementById('diagBody').addEventListener('click', (e) => {
   if (mfl){   // 離 A／B ≤10% 快速篩選：按一下只看那一組（並照那條線的差由小到大排），再按一次取消
     const k = mfl.dataset.mclFilter;
     mclState.filter = mclState.filter === k ? '' : k;
-    if (mclState.filter){ mclState.sortKey = (k === 'B' || k === 'Q' ? 'b' : 'a') + 'Gap'; mclState.sortDir = 1; }   // 近似落底（T）照 A 差排
+    if (mclState.filter){ if (k === 'H'){ mclState.sortKey = '_hold'; mclState.sortDir = -1; } else { mclState.sortKey = (k === 'B' || k === 'Q' ? 'b' : 'a') + 'Gap'; mclState.sortDir = 1; } }   // 大戶力 ≥ +10%：照大戶力由大到小   // 近似落底（T）照 A 差排
     const inner = document.getElementById('diagInner'), top = inner ? inner.scrollTop : 0;
     renderDiag();
     if (inner) inner.scrollTop = top;
@@ -15238,7 +15239,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-23 22:21:54';
+const BUILD_STAMP = '2026-10-23 22:25:15';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
