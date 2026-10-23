@@ -847,6 +847,10 @@ export default {
       // 均線分數排行的前十名常客（近 N 天每天取前 K 名，同分全算），5 分鐘快取
       return await proxyHanstockBars("/api/hub/ma-rank/hits" + url.search, 300);
     }
+    if (url.pathname === "/api/index-score") {
+      // 指數均線分數（2026-10-24 使用者：櫃買分數、加權分數）：收盤後才變，5 分鐘快取
+      return await proxyHanstockBars("/api/hub/index-score", 300);
+    }
     if (url.pathname === "/api/ma-rank-q") {
       // 均線分數查詢（股號→所屬族群全部成員；或族群名），60 秒快取
       return await proxyHanstockBars("/api/hub/ma-rank/q" + url.search, 60);
