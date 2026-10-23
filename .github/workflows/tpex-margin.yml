@@ -2,6 +2,8 @@
 # 櫃買中心「上櫃股票融資融券餘額」每天一張表，最下面的合計列有融資張數、融資金額（仟元）、融券張數。
 # 櫃買擋 HanStock 的正式站主機，GitHub 的 runner 抓得到：每個交易日晚上抓最近幾天，第一次（或給 since）往回補到 2020 年，
 # 整份存在 data 分支 tpex/margin-otc.json（{日期: [融資張數, 融資金額仟元, 融券張數]}），再戳後端立刻拉回去。
+# 2026-10-23：同一張表也把每一檔的融資餘額整張存起來（tpex/margin-stock-<日期>.json，最近 60 天，日期清單 margin-stock-index.json），
+# 給個股問診的融資斷頭線看「那檔融資還剩多少」。
 name: TPEx margin mirror
 
 on:
@@ -95,14 +97,65 @@ jobs:
                     open(path, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
           print('抓到', got, '天；總共', len(rows), '天，最新', max(rows) if rows else None)
           PY
+      - name: 抓櫃買每檔融資餘額（最近 60 天，一天一份）
+        run: |
+          python3 - <<'PY'
+          import json, os, time
+          import urllib.request
+          from datetime import datetime, timedelta, timezone
+          tw = timezone(timedelta(hours=8))
+          now = datetime.now(tw)
+          os.makedirs('tpex', exist_ok=True)
+          index_path = 'tpex/margin-stock-index.json'
+          try:
+              index = set(json.load(open(index_path, encoding='utf-8')))
+          except Exception:
+              index = set()
+          today = now.date() if (now.hour, now.minute) >= (21, 30) else now.date() - timedelta(days=1)
+          UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128.0 Safari/537.36'
+          got, t0 = 0, time.time()
+          d = today
+          while d >= today - timedelta(days=60):
+              iso = d.isoformat()
+              if d.weekday() < 5 and iso not in index and time.time() - t0 < 8 * 60:
+                  url = f'https://www.tpex.org.tw/www/zh-tw/margin/balance?date={d.year}%2F{d.month:02d}%2F{d.day:02d}&response=json'
+                  payload = None
+                  for attempt in range(3):
+                      try:
+                          with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': UA}), timeout=40) as r:
+                              payload = json.load(r)
+                          break
+                      except Exception as e:
+                          print('retry', iso, type(e).__name__, e)
+                          time.sleep(4 * (attempt + 1))
+                  table = ((payload or {}).get('tables') or [{}])[0]
+                  if table.get('data') and table.get('fields'):
+                      slim = {'date': payload.get('date'), 'tables': [{'fields': table['fields'], 'data': table['data']}]}
+                      json.dump(slim, open(f'tpex/margin-stock-{iso}.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+                      index.add(iso)
+                      got += 1
+                  time.sleep(0.9)
+              d -= timedelta(days=1)
+          keep = {i for i in index if i >= (today - timedelta(days=60)).isoformat()}
+          for i in index - keep:
+              try:
+                  os.remove(f'tpex/margin-stock-{i}.json')
+              except OSError:
+                  pass
+          json.dump(sorted(keep, reverse=True), open(index_path, 'w', encoding='utf-8'))
+          print('每檔融資餘額：抓到', got, '天；共', len(keep), '天，最新', max(keep) if keep else None)
+          PY
       - name: 推到 data 分支
         run: |
           git config user.name "tpex-margin-mirror"
           git config user.email "tpex-margin-mirror@users.noreply.github.com"
           git add tpex/margin-otc.json
+          git add -A tpex/margin-stock-index.json 'tpex/margin-stock-*.json'
           git commit -m "上櫃融資餘額鏡像 $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "沒有變動"; exit 0; }
           for i in 1 2 3 4; do git pull --rebase origin data && git push && break; sleep $((i * 5)); done
       - name: 戳後端立刻拉回去
         run: |
           curl -sS -X POST --max-time 170 "https://hanstock-production-b872.up.railway.app/api/hub/fund-umbrella/fetch" -o /tmp/fu.json -w "HTTP %{http_code}\n" || true
           head -c 600 /tmp/fu.json; echo
+          curl -sS -X POST --max-time 170 "https://hanstock-production-b872.up.railway.app/api/hub/margin-balance/collect" -o /tmp/mb.json -w "HTTP %{http_code}\n" || true
+          head -c 600 /tmp/mb.json; echo
