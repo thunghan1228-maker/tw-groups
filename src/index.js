@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 10:42:29";
+const BUILD_STAMP = "2026-10-24 10:44:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2931,12 +2931,13 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bf-gcard .bf-gl small{font-size:11.5px;color:var(--muted);margin-top:2px;}
   .bf-gcard .bf-gl b{font-size:18px;color:#3a3180;line-height:1.3;} .bf-gcard .bf-gl span{font-size:22px;font-weight:800;line-height:1.2;}
   .bf-gcard .bf-gm{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 16px;padding:10px 14px;align-content:center;}
-  .bf-gcard .bf-gm.two{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .bf-gcard .bf-gm.two{grid-template-columns:repeat(2,minmax(0,1fr));} .bf-gcard .bf-gm.four{grid-template-columns:repeat(4,minmax(0,1fr));gap:2px 12px;}
+  .bf-gcard .bf-gl span.bf-cn{font-size:14px;font-weight:700;color:#5b3fd6;line-height:1.3;} .bf-m .bf-tm{color:#7c6f60;font-size:11.5px;margin-right:2px;} .bf-m .bf-x{color:#7c6f60;margin-left:3px;}
   .bf-m{font-size:14.5px;white-space:nowrap;cursor:pointer;line-height:1.8;overflow:hidden;text-overflow:ellipsis;} .bf-m:hover{background:rgba(91,63,214,.08);}
   .bf-m b{font-weight:700;} .bf-m .up{color:#d92d20;margin-left:4px;} .bf-m .dn{color:#12805c;margin-left:4px;} .bf-m small{font-size:11.5px;} .bf-m .bf-v{font-size:inherit;margin-left:4px;font-weight:700;} .bf-m .acc{color:#d92d20;margin-left:2px;} .bf-m .dec{color:#12805c;margin-left:2px;} .bf-m .wn{color:#b45309;margin-left:2px;} .bf-m.bf-more{color:#7c6f60;cursor:default;} .bf-m.bf-more:hover{background:none;} .bf-m .dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#ef4444;margin-left:4px;vertical-align:-1px;}
   .bf-note{background:#fbf4de;border:1px solid #e8d9a8;border-radius:14px;padding:10px 16px;font-size:13px;line-height:1.7;}
   .bf-foot{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:6px;}
-  @media (max-width: 860px){ .bf-grid{grid-template-columns:1fr;} .bf-list{grid-template-columns:1fr;} .bf-gcard{grid-template-columns:84px minmax(0,1fr);} .bf-gcard .bf-gm{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  @media (max-width: 860px){ .bf-grid{grid-template-columns:1fr;} .bf-list{grid-template-columns:1fr;} .bf-gcard{grid-template-columns:84px minmax(0,1fr);} .bf-gcard .bf-gm,.bf-gcard .bf-gm.four{grid-template-columns:repeat(2,minmax(0,1fr));} }
   @media (max-width: 640px){ #briefModal .chips-inner{padding:14px 12px 22px;} #briefModal .chips-title{font-size:25px;} .bf-h .bf-k,.bf-h .bf-t{font-size:21px;} .bf-bar{grid-template-columns:64px minmax(0,1fr) 44px;} }
 
   /* 2026-10-23 使用者：均線分數排行、每月營收成長榜改成跟老師（zhuang.tw）一樣的淺色底版面：米白底、白卡片、紅褐標題；內容寬度跟老師頁差不多，表格比較寬就左右捲 */
@@ -10083,6 +10084,7 @@ async function refreshBrewHistory(force){
     const data = await res.json();
     if (!data || data.status !== 'ok' || !data.days) throw new Error('bad payload');
     brewHistoryData = data;
+    try { briefRerender(); } catch (e) { /* 簡報沒開就不用 */ }
     try { if (!document.getElementById('remindModal').hidden) renderRemind(); } catch (e) { /* 同上 */ }
     if (!document.getElementById('signalModal').hidden && /^(brewOnly|launchOnly|now)$/.test(signalCenterState.activeTab)) renderSignalCenter();
     sgtRerenderSafe();
@@ -15605,7 +15607,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 10:42:29';
+const BUILD_STAMP = '2026-10-24 10:44:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20776,6 +20778,39 @@ function briefRevenueSlide(){
     + '<div class="bf-col tight"><div class="bf-legend"><b>強勢股＝年增 ≥ 30%（每族群最多 ' + BRIEF_PER_GROUP + ' 檔）</b><span class="acc">▲ 年增比 ' + pNum + ' 月多 10 點以上（加速）</span><span class="dec">▼ 少 10 點以上（放緩）</span><span class="wn">⚠ 年增或累計為負</span></div>'
     + (cards || '<div class="bf-none">還沒有資料。</div>') + '</div></div></div>';
 }
+// 2026-10-24 使用者：熱門族群那張最下面再列「本週發動股票」清單——本週有發動、而且收盤還站在箱頂上的（盤中發動過、收盤跌回箱頂下的＝曾發動，不列）。
+// 發動紀錄來自 /api/brew-launch-history（本站每天盤中記的發動名單，brewHistoryDay），收盤狀態沿用「發動／曾發動」分頁同一個判斷（brewCloseState）。
+function briefLaunchHtml(w){
+  if (!brewHistoryData || !brewHistoryData.days) return '<div class="bf-card"><div class="bf-ct">本週發動股票</div><div class="bf-none">發動紀錄讀取中…</div></div>';
+  const by = new Map();
+  (w.weekDates || []).forEach((d) => {
+    const day = brewHistoryDay(d);
+    ((day && day.launch) || []).forEach((r) => {
+      if (brewCloseState(r, d) === 'fallen') return;   // 收盤跌回箱頂下＝曾發動，不列
+      const hit = { date: d, row: r, at: String(r.recordedAt || '') };
+      const cur = by.get(r.code);
+      if (cur) cur.hits.push(hit); else by.set(r.code, { code: r.code, name: r.name, group: r.group, hits: [hit] });
+    });
+  });
+  const list = [...by.values()];
+  list.forEach((x) => { x.hits.sort((a, b) => a.at.localeCompare(b.at)); x.first = x.hits[0]; x.days = [...new Set(x.hits.map((h) => h.date))]; x.pct = briefWeekPct(x.code, w); x.lit = briefLitDays(x.code, w); });
+  const days = [...new Set(list.map((x) => x.first.date))].sort().reverse();   // 一檔只列一次，放在它第一次發動那天（新的日子在上面）
+  const rows = days.map((d) => {
+    const ms = list.filter((x) => x.first.date === d).sort((a, b) => a.first.at.localeCompare(b.first.at));
+    const chips = ms.map((x) => {
+      const r = x.first.row, t = r.eod ? '收盤' : fmtTime(r.recordedAt);
+      const tip = x.code + ' ' + x.name + (x.group ? '・' + x.group : '') + '・第一次發動 ' + briefMd(d) + ' ' + t + (r.price ? ' ' + num2(r.price) : '') + (x.days.length > 1 ? '・本週發動 ' + x.days.length + ' 天（' + x.days.map(briefMd).join('、') + '）' : '')
+        + '・本週 ' + briefPctTxt(x.pct, 2) + (x.lit.length ? '・亮燈（收盤漲停）' : '');
+      return '<div class="bf-m" data-brief-code="' + rdEsc(x.code) + '" data-brief-name="' + rdEsc(x.name) + '" title="' + rdEsc(tip) + '"><small class="bf-tm">' + t + '</small> <b>' + wlEsc(x.name) + '</b>'
+        + (x.pct == null ? '<span class="dn" style="color:#9a8f80">—</span>' : '<span class="' + (x.pct >= 0 ? 'up' : 'dn') + '">' + briefPctTxt(x.pct) + '</span>')
+        + (x.days.length > 1 ? '<small class="bf-x">×' + x.days.length + '</small>' : '') + (x.lit.length ? '<span class="dot" title="本週亮燈（收盤漲停）"></span>' : '') + '</div>';
+    }).join('');
+    return '<div class="bf-gcard"><div class="bf-gl"><b>' + briefMd(d) + '</b><span class="bf-cn">' + ms.length + ' 檔</span></div><div class="bf-gm four">' + chips + '</div></div>';
+  }).join('');
+  return '<div class="bf-card"><div class="bf-ct">本週發動股票・' + list.length + ' 檔<small>' + briefMd(w.weekDates[w.weekDates.length - 1]) + ' ～ ' + briefMd(w.weekDates[0]) + '</small></div>'
+    + '<div class="bf-legend"><span>只列收盤還站在箱頂上的發動；盤中發動後收盤跌回箱頂下的（曾發動）不列</span><span>時間＝那天第一次發動・數字＝本週漲跌・×N＝本週發動 N 天・<span style="color:#ef4444">●</span> ＝本週亮燈（收盤漲停）</span></div>'
+    + '<div class="bf-col tight" style="margin-top:8px">' + (rows || '<div class="bf-none">本週還沒有收盤站在箱頂上的發動股票。</div>') + '</div></div>';
+}
 function briefGroupSlide(){
   const w = briefWeek();
   if (!w) return briefLoading('族群', '熱門族群：本週誰最強', '族群日漲跌資料讀取中…（需要上週收盤到最新收盤的日線）');
@@ -20799,7 +20834,8 @@ function briefGroupSlide(){
   return '<div class="bf-slide"><div class="bf-h"><span class="bf-k">族群</span><span class="bf-t">熱門族群：本週誰最強</span></div><div class="bf-rule"></div><div class="bf-sub">' + sub + '</div>'
     + '<div class="bf-grid"><div class="bf-col"><div class="bf-card"><div class="bf-ct">族群平均漲跌（本週）</div>' + bars + '</div>'
     + '<div class="bf-note">⚠ 簡報只整理位置與強弱，不是買賣建議；停損、加碼規則請照自己的策略。</div></div>'
-    + '<div class="bf-col tight">' + (cards || '') + '</div></div></div>';
+    + '<div class="bf-col tight">' + (cards || '') + '</div></div>'
+    + '<div style="margin-top:14px">' + briefLaunchHtml(w) + '</div></div>';
 }
 function renderBrief(){
   const body = document.getElementById('briefBody');
@@ -20815,6 +20851,7 @@ function openBriefPanel(){
   renderBrief();
   rvLoad(rvState.data && rvState.data.month);
   try { refreshGroupDailyChanges(false); } catch (_){}
+  try { refreshBrewHistory(false); } catch (_){}
 }
 document.getElementById('briefBtn').addEventListener('click', openBriefPanel);
 document.getElementById('briefClose').addEventListener('click', () => { document.getElementById('briefModal').hidden = true; });
