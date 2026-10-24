@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 09:28:33";
+const BUILD_STAMP = "2026-10-24 09:58:07";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2903,7 +2903,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bf-rule{height:5px;width:230px;border-radius:3px;background:linear-gradient(90deg,#5b3fd6 0 72%,#e11d48 72% 100%);margin:6px 0 8px;}
   .bf-sub{font-size:14px;color:#3a3128;margin:0 0 12px;}
   .bf-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px;align-items:start;}
-  .bf-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
+  .bf-col{display:flex;flex-direction:column;gap:14px;min-width:0;} .bf-col.tight{gap:10px;}
   .bf-card{background:#fffdf9;border:1px solid var(--line);border-radius:16px;padding:14px 18px;box-shadow:0 1px 4px rgba(80,55,20,.08);}
   .bf-card.tint{background:#f1ecfb;}
   .bf-ct{font-weight:900;font-size:17px;color:#2f2a6e;display:flex;align-items:center;gap:8px;margin-bottom:8px;}
@@ -2916,9 +2916,9 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bf-bar .bf-v{font-size:16px;font-weight:600;white-space:nowrap;} .bf-bar .bf-cnt{font-size:14px;color:#3a3128;text-align:right;white-space:nowrap;}
   .bf-fill.t100{background:#ef4444;} .bf-fill.t50{background:#f97316;} .bf-fill.t30{background:#8b5cf6;} .bf-fill.t0{background:#3f4254;} .bf-fill.tneg{background:#16a34a;} .bf-fill.up{background:#ef4444;}
   .bf-v.t100{color:#dc2626;} .bf-v.t50{color:#ea580c;} .bf-v.t30{color:#7c3aed;} .bf-v.t0{color:#3a3128;} .bf-v.tneg{color:#12805c;} .bf-v.up{color:#d92d20;}
-  .bf-legend{font-size:12px;color:#3a3128;display:flex;flex-wrap:wrap;gap:2px 14px;margin-bottom:8px;} .bf-legend .acc{color:#d92d20;} .bf-legend .dec{color:#12805c;} .bf-legend .wn{color:#b45309;}
+  .bf-legend{font-size:12px;color:#3a3128;display:flex;flex-wrap:wrap;gap:2px 14px;margin-bottom:2px;} .bf-legend .acc{color:#d92d20;} .bf-legend .dec{color:#12805c;} .bf-legend .wn{color:#b45309;}
   .bf-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 22px;}
-  .bf-item{font-size:14.5px;cursor:pointer;line-height:1.7;} .bf-item:hover{background:rgba(91,63,214,.08);}
+  .bf-item{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;line-height:1.75;} .bf-item:hover{background:rgba(91,63,214,.08);}
   .bf-item b{font-weight:700;} .bf-item .acc{color:#d92d20;} .bf-item .dec{color:#12805c;} .bf-item .wn{color:#b45309;}
   .bf-item .up{color:#d92d20;} .bf-item .dn{color:#12805c;}
   .bf-none{color:var(--muted);font-size:13.5px;padding:8px 2px;}
@@ -2928,11 +2928,12 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bf-tbl td small{color:var(--muted);font-size:11.5px;} .bf-tbl .up{color:#d92d20;} .bf-tbl .dn{color:#12805c;}
   .bf-gcard{display:grid;grid-template-columns:104px minmax(0,1fr);background:#fffdf9;border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 4px rgba(80,55,20,.08);overflow:hidden;}
   .bf-gcard .bf-gl{background:#f1ecfb;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;text-align:center;}
+  .bf-gcard .bf-gl small{font-size:11.5px;color:var(--muted);margin-top:2px;}
   .bf-gcard .bf-gl b{font-size:18px;color:#3a3180;line-height:1.3;} .bf-gcard .bf-gl span{font-size:22px;font-weight:800;line-height:1.2;}
   .bf-gcard .bf-gm{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 16px;padding:10px 14px;align-content:center;}
   .bf-gcard .bf-gm.two{grid-template-columns:repeat(2,minmax(0,1fr));}
   .bf-m{font-size:14.5px;white-space:nowrap;cursor:pointer;line-height:1.8;overflow:hidden;text-overflow:ellipsis;} .bf-m:hover{background:rgba(91,63,214,.08);}
-  .bf-m .up{color:#d92d20;margin-left:4px;} .bf-m .dn{color:#12805c;margin-left:4px;} .bf-m .dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#ef4444;margin-left:4px;vertical-align:-1px;}
+  .bf-m b{font-weight:700;} .bf-m .up{color:#d92d20;margin-left:4px;} .bf-m .dn{color:#12805c;margin-left:4px;} .bf-m small{font-size:11.5px;} .bf-m .bf-v{font-size:inherit;margin-left:4px;font-weight:700;} .bf-m .acc{color:#d92d20;margin-left:2px;} .bf-m .dec{color:#12805c;margin-left:2px;} .bf-m .wn{color:#b45309;margin-left:2px;} .bf-m.bf-more{color:#7c6f60;cursor:default;} .bf-m.bf-more:hover{background:none;} .bf-m .dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#ef4444;margin-left:4px;vertical-align:-1px;}
   .bf-note{background:#fbf4de;border:1px solid #e8d9a8;border-radius:14px;padding:10px 16px;font-size:13px;line-height:1.7;}
   .bf-foot{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:6px;}
   @media (max-width: 860px){ .bf-grid{grid-template-columns:1fr;} .bf-list{grid-template-columns:1fr;} .bf-gcard{grid-template-columns:84px minmax(0,1fr);} .bf-gcard .bf-gm{grid-template-columns:repeat(2,minmax(0,1fr));} }
@@ -3776,7 +3777,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="chips-head">
       <div>
         <div class="chips-title">觀察股簡報</div>
-        <div class="chips-sub">照老師影片的兩張投影片：營收「觀察股誰在加速」、族群「本週誰最強」。名單＝你的自選股，族群＝自選股的分組（到「自選股」加股票、分組）。</div>
+        <div class="chips-sub">照老師影片的兩張投影片：營收「觀察股誰在加速」（全部族群 9 月營收最強的前十名）、族群「本週誰最強」（全部族群本週平均漲跌前十名）；每個族群再抓強勢股，有發動的標紅點。</div>
       </div>
       <button class="cm-icon-btn" id="briefClose" aria-label="關閉">✕</button>
     </div>
@@ -15593,7 +15594,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 09:28:33';
+const BUILD_STAMP = '2026-10-24 09:58:07';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19518,8 +19519,8 @@ const GUIDE_TOOLS = [
       '主動式 ETF 雷達：五檔主動式 ETF 每天買賣什麼、連續同向、資金潮汐', '營收面：先看前一個交易日之後新公布的，再看整月累計前 10 檔'] },
   { t: '盤後籌碼排行', label: '今日盤後籌碼排行', v: 'tb-chips', tags: ['盤後', '每週'], d: '看大戶手上的股票變多還是變少：籌碼暴增雷達、法人連買、主力大單、放空籌碼，還有每週的籌碼週報。',
     b: ['集保大戶資料每週五更新一次', '可以跟醞釀／發動交叉看'] },
-  { t: '📋 觀察股簡報', open: 'brief', tags: ['盤後'], d: '照老師影片兩張投影片做的簡報，名單用你的自選股（族群＝自選股的分組）：',
-    b: ['營收：觀察股族群的年增中位、上榜觀察股（年增 ≥30%，標加速／放緩／年增為負、公布隔日漲跌）、全市場「營收公告 → 隔日漲跌」', '族群：本週（上週收盤 → 最新收盤）族群平均漲跌排行、每檔本週漲跌、● ＝本週有發動（亮燈）'] },
+  { t: '📋 觀察股簡報', open: 'brief', tags: ['盤後'], d: '照老師影片兩張投影片做的簡報，兩張都是全部族群取前十名、再抓每個族群的強勢股：',
+    b: ['營收：全部族群照當月營收年增中位排名（前 10 名）、每個族群的強勢股（年增 ≥30%，標加速／放緩／年增為負、公布隔日漲跌）、全市場「營收公告 → 隔日漲跌」', '族群：本週（上週收盤 → 最新收盤）全部族群平均漲跌前 10 名、每個族群本週漲最多的強勢股、● ＝本週有發動'] },
   { t: '均線分數排行', label: '均線分數排行', v: 'tb-ma', tags: ['盤後'], d: '幫每一檔打均線分數（滿分 15）：分數越高，代表位置越強、均線排得越整齊。',
     b: ['全市場前 60 名、昨天名次、連續上榜幾天', '族群平均分數排行：看哪一整群底子最硬', '打代號可以查單一檔'] },
   { t: '創高黑龍（自動）', label: '創高黑龍', v: 'tb-heilong', tags: ['盤後', '12:00 暫定'], d: '收盤後依均線分數＋收黑 K 挑出名單，附上過去績效回測；中午 12:00 先給一份暫定名單。',
@@ -20680,21 +20681,9 @@ setInterval(() => {
 }, 600000);
 
 // ---- 觀察股簡報（2026-10-24 使用者：照老師影片兩張投影片做新版面）----
-// 名單＝自選股（wl.data.groups：每個分組一個「觀察股族群」）。營收那張用營收成長榜同一份資料（rvState.data）；
+// 營收那張：全部族群（GROUPS）照當月營收年增中位排名，用營收成長榜同一份資料（rvState.data）；族群那張：名單＝自選股（wl.data.groups，每個分組一個族群）；
 // 族群那張用族群日漲跌 groupDailyChanges 的收盤算「本週」（上週最後一個交易日收盤 → 最新收盤），● ＝本週有發動（我們的發動名單，brewHistory）。
-function briefGroups(){
-  const out = [];
-  const gs = (wl && wl.data && Array.isArray(wl.data.groups)) ? wl.data.groups : [];
-  for (const g of gs){
-    const items = [], seen = new Set();
-    for (const it of (g.items || [])){
-      if (!it || !it.code || seen.has(it.code)) continue;
-      seen.add(it.code); items.push({ code: it.code, name: it.name || lookupStockName(it.code) });
-    }
-    if (items.length) out.push({ name: g.name || '自選', items });
-  }
-  return out;
-}
+const BRIEF_TOP = 10, BRIEF_PER_GROUP = 6, BRIEF_MIN = 3;   // 兩張都是：列前 10 名族群、每個族群最多列 6 檔強勢股、族群至少 3 檔有資料才排名
 const briefMd = (iso) => String(iso || '').slice(5).replace('-', '/').replace(/^0/, '').replace('/0', '/');
 const briefPctTxt = (v, d) => (v == null || !Number.isFinite(v)) ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(d === undefined ? 1 : d) + '%';
 function briefTier(v){ return v == null ? 't0' : v < 0 ? 'tneg' : v >= 100 ? 't100' : v >= 50 ? 't50' : v >= 30 ? 't30' : 't0'; }
@@ -20715,38 +20704,43 @@ function briefWeekPct(code, w){
 }
 function briefLitSet(w){   // 本週有發動（亮燈）的股票：本週每個交易日的發動名單（brew-launch-history）
   const set = new Set();
-  try { (w ? w.weekDates : []).forEach((d) => { const day = brewHistoryDay(d); (day && day.launch || []).forEach((r) => set.add(r.code)); }); } catch (_){}
+  try { (w ? w.weekDates : []).forEach((d) => { const day = brewHistoryDay(d); (day && day.launch || []).forEach((r) => { if (brewCloseState(r, d) !== 'fallen') set.add(r.code); }); }); } catch (_){}
   return set;
 }
-function briefRevenueSlide(groups){
-  const d = rvState.data;
-  if (!d || d.status !== 'ok'){
-    return '<div class="bf-slide"><div class="bf-h"><span class="bf-k">營收</span><span class="bf-t">觀察股誰在加速</span></div><div class="bf-rule"></div><div class="bf-none">' + (rvState.error ? '營收資料讀取失敗（' + rdEsc(rvState.error) + '）' : '營收資料讀取中…') + '</div></div>';
-  }
-  rvRows();
-  const by = d._byCode;
-  const mNum = Number(d.month.slice(5, 7)), pNum = mNum === 1 ? 12 : mNum - 1;
-  const codes = []; groups.forEach((g) => g.items.forEach((it) => { if (!codes.includes(it.code)) codes.push(it.code); }));
-  const pubCodes = codes.filter((c) => by[c]);
-  const upd = d.fetched || d.updatedAt || '';
-  const sub = '官方營收資料（到 ' + (upd ? briefMd(String(upd).slice(0, 10)) + ' ' + String(upd).slice(11, 16) : '—') + '）・名單 ＝ 自選股 ' + codes.length + ' 檔，' + pubCodes.length + ' / ' + codes.length + ' 檔已公布';
-  // 左：觀察股族群年增中位
-  const stats = groups.map((g) => ({ g, st: rvGroupStats(g.items) })).sort((a, b) => (b.st.median == null ? -1e9 : b.st.median) - (a.st.median == null ? -1e9 : a.st.median));
-  const maxMed = Math.max(1, ...stats.map((x) => (x.st.median == null ? 0 : Math.abs(x.st.median))));
-  const bars = stats.length ? stats.map(({ g, st }) => {
-    const t = briefTier(st.median), w = st.median == null ? 0 : Math.max(4, Math.abs(st.median) / maxMed * 100);
-    return '<div class="bf-bar"><span class="bf-gn' + (/自選/.test(g.name) ? ' gold' : '') + '" title="' + wlEsc(g.name) + '">' + wlEsc(g.name) + '</span><span class="bf-track"><span class="bf-fill ' + t + '" style="width:' + (w * 0.62).toFixed(1) + '%"></span><span class="bf-v ' + t + '">' + briefPctTxt(st.median) + '</span></span><span class="bf-cnt">' + st.published + ' / ' + st.total + '</span></div>';
-  }).join('') : '<div class="bf-none">自選股還沒有股票——到「自選股」加入股票、分組後，這裡會照分組整理。</div>';
-  // 右上：上榜觀察股（年增 ≥ 30%）
-  const listed = pubCodes.map((c) => by[c]).filter((o) => o.yoy != null && o.yoy >= 30).sort((a, b) => b.yoy - a.yoy);
-  const items = listed.map((o) => {
-    const t = briefTier(o.yoy);
-    const mark = o.accel ? '<span class="acc"> ▲</span>' : o.decel ? '<span class="dec"> ▼</span>' : '';
-    const warn = o.warn ? '<span class="wn"> ⚠</span>' : '';
-    const nx = o.next != null ? '<span class="' + (o.next >= 0 ? 'up' : 'dn') + '"> 隔日 ' + briefPctTxt(o.next) + '</span>' : '<span class="dn" style="opacity:.55"> 隔日 —</span>';
-    return '<div class="bf-item" data-brief-code="' + rdEsc(o.code) + '" data-brief-name="' + rdEsc(o.name) + '" title="' + rdEsc(rvTitle(o)) + '"><b>' + rdEsc(o.code) + ' ' + rdEsc(o.name) + '</b> <b class="bf-v ' + t + '" style="font-size:inherit">' + briefPctTxt(o.yoy, 0) + '</b>' + mark + warn + nx + '</div>';
+const briefLoading = (k, t, msg) => '<div class="bf-slide"><div class="bf-h"><span class="bf-k">' + k + '</span><span class="bf-t">' + t + '</span></div><div class="bf-rule"></div><div class="bf-none">' + msg + '</div></div>';
+function briefBars(rows, valueOf, tierOf, cntOf){   // 左邊長條：rows＝已排好的族群，valueOf＝長條的數字，tierOf＝顏色，cntOf＝右邊小字
+  const maxAbs = Math.max(0.5, ...rows.map((r) => Math.abs(valueOf(r) || 0)));
+  return rows.map((r, i) => {
+    const v = valueOf(r), t = tierOf(v), w = v == null ? 0 : Math.max(4, Math.abs(v) / maxAbs * 100);
+    return '<div class="bf-bar" style="grid-template-columns:112px minmax(0,1fr)' + (cntOf ? ' 54px' : '') + '"><span class="bf-gn" title="' + wlEsc(r.g.name) + '">' + (i + 1) + '. ' + wlEsc(r.g.name) + '</span><span class="bf-track"><span class="bf-fill ' + t + '" style="width:' + (w * 0.62).toFixed(1) + '%"></span><span class="bf-v ' + t + '">' + briefPctTxt(v) + '</span></span>' + (cntOf ? '<span class="bf-cnt">' + cntOf(r) + '</span>' : '') + '</div>';
   }).join('');
-  // 右下：營收公告 → 隔日漲跌（全市場）
+}
+function briefRevenueSlide(){
+  const d = rvState.data;
+  if (!d || d.status !== 'ok') return briefLoading('營收', '觀察股誰在加速', rvState.error ? '營收資料讀取失敗（' + rdEsc(rvState.error) + '）' : '營收資料讀取中…');
+  rvRows();
+  const mNum = Number(d.month.slice(5, 7)), pNum = mNum === 1 ? 12 : mNum - 1;
+  // 2026-10-24 使用者：營收那張照老師「全部族群 9 月營收（年增中位）最強的前十名」排，每個族群再抓年增 ≥30% 的強勢股
+  const ind = rvIndustryGroups();   // 全部族群：已公布 ≥ rvState.minN 檔，照年增中位由高到低
+  const top = ind.slice(0, BRIEF_TOP);
+  const upd = d.fetched || d.updatedAt || '';
+  const sub = '官方營收資料（到 ' + (upd ? briefMd(String(upd).slice(0, 10)) + ' ' + String(upd).slice(11, 16) : '—') + '）・全部 ' + GROUPS.length + ' 個族群，已公布 ≥ ' + rvState.minN + ' 檔的 ' + ind.length + ' 個照 ' + mNum + ' 月年增中位排名，列前 ' + top.length + ' 名';
+  const bars = top.length ? briefBars(top.map((g) => ({ g, st: g.st })), (r) => r.st.median, briefTier, (r) => r.st.published + ' / ' + r.st.total)
+    : '<div class="bf-none">營收資料還沒有足夠的族群（每個族群要有 ' + rvState.minN + ' 檔以上已公布）。</div>';
+  const cards = top.map((g) => {
+    const st = g.st;
+    const strong = st.pub.filter((o) => o.yoy != null && o.yoy >= 30).sort((a, b) => b.yoy - a.yoy);
+    const shown = strong.slice(0, BRIEF_PER_GROUP);
+    const mem = shown.map((o) => {
+      const mark = o.accel ? '<span class="acc">▲</span>' : o.decel ? '<span class="dec">▼</span>' : '';
+      const warn = o.warn ? '<span class="wn">⚠</span>' : '';
+      const nx = o.next != null ? '<small class="' + (o.next >= 0 ? 'up' : 'dn') + '">隔日' + briefPctTxt(o.next) + '</small>' : '';
+      return '<div class="bf-m" data-brief-code="' + rdEsc(o.code) + '" data-brief-name="' + rdEsc(o.name) + '" title="' + rdEsc(rvTitle(o)) + '"><b>' + rdEsc(o.name) + '</b><span class="bf-v ' + briefTier(o.yoy) + '">' + briefPctTxt(o.yoy, 0) + '</span>' + mark + warn + nx + '</div>';
+    }).join('') + (strong.length > shown.length ? '<div class="bf-m bf-more">…還有 ' + (strong.length - shown.length) + ' 檔</div>' : '');
+    return '<div class="bf-gcard"><div class="bf-gl"><b>' + wlEsc(g.name) + '</b><span class="bf-v ' + briefTier(st.median) + '">' + briefPctTxt(st.median) + '</span><small>年增中位</small></div>'
+      + '<div class="bf-gm two">' + (mem || '<div class="bf-none">沒有年增 ≥ 30% 的</div>') + '</div></div>';
+  }).join('');
+  // 左下：營收公告 → 隔日漲跌（全市場）
   const cols = (d.history || []).slice().sort((a, b) => String(b.month).localeCompare(String(a.month))).slice(0, 2);
   const cell = (b) => { if (!b || !b.n) return ['<td>—</td>', '<td>—</td>']; const avg = b.sum / b.n; return ['<td class="' + (avg >= 0 ? 'up' : 'dn') + '">' + briefPctTxt(avg, 2) + '</td>', '<td>' + Math.round(b.up / b.n * 100) + '%<small>(' + b.n.toLocaleString() + ' 檔)</small></td>']; };
   const rowsDef = [['<span class="acc" style="color:#d92d20">▲</span> 加速', 'accel'], ['持平', 'flat'], ['<span style="color:#12805c">▼</span> 放緩', 'decel'], ['<span style="color:#b45309">⚠</span> 有', 'warn'], ['全部', 'all']];
@@ -20755,44 +20749,40 @@ function briefRevenueSlide(groups){
     + rowsDef.map(([label, k]) => '<tr><td>' + label + '</td>' + cols.map((b) => cell(b[k]).join('')).join('') + '</tr>').join('') + '</tbody></table>'
     : '<div class="bf-none">還沒有累積到有公布日的月份。</div>';
   return '<div class="bf-slide"><div class="bf-h"><span class="bf-k">營收</span><span class="bf-t">' + mNum + ' 月營收：觀察股誰在加速</span></div><div class="bf-rule"></div><div class="bf-sub">' + sub + '</div>'
-    + '<div class="bf-grid"><div class="bf-col"><div class="bf-card"><div class="bf-ct">觀察股族群：' + mNum + ' 月年增中位<small>已公布 / 名單</small></div>' + bars + '</div></div>'
-    + '<div class="bf-col"><div class="bf-card"><div class="bf-ct">上榜觀察股（年增 ≥ 30%）・ ' + listed.length + ' 檔</div>'
-    + '<div class="bf-legend"><span class="acc">▲ 年增比 ' + pNum + ' 月多 10 點以上（加速）</span><span class="dec">▼ 少 10 點以上（放緩）</span><span class="wn">⚠ 年增或累計為負</span></div>'
-    + (items ? '<div class="bf-list">' + items + '</div>' : '<div class="bf-none">' + (codes.length ? '自選股裡還沒有年增 ≥ 30% 的（或還沒公布）。' : '自選股還沒有股票。') + '</div>') + '</div>'
+    + '<div class="bf-grid"><div class="bf-col"><div class="bf-card"><div class="bf-ct">族群：' + mNum + ' 月營收排名（年增中位）<small>已公布 / 成員</small></div>' + bars + '</div>'
     + '<div class="bf-card tint"><div class="bf-ct">營收公告 → 隔日漲跌（全市場）</div>' + tbl
-    + '<div class="bf-foot">公布日是本站每天三次抓公開資訊觀測站彙總表時第一次出現的日期（' + mNum + ' 月營收從 10/09 開始記），所以檔數比老師的少、更早的月份沒有。</div></div></div></div></div>';
+    + '<div class="bf-foot">公布日是本站每天三次抓公開資訊觀測站彙總表時第一次出現的日期（' + mNum + ' 月營收從 10/09 開始記），所以檔數比老師的少、更早的月份沒有。</div></div></div>'
+    + '<div class="bf-col tight"><div class="bf-legend"><b>強勢股＝年增 ≥ 30%（每族群最多 ' + BRIEF_PER_GROUP + ' 檔）</b><span class="acc">▲ 年增比 ' + pNum + ' 月多 10 點以上（加速）</span><span class="dec">▼ 少 10 點以上（放緩）</span><span class="wn">⚠ 年增或累計為負</span></div>'
+    + (cards || '<div class="bf-none">還沒有資料。</div>') + '</div></div></div>';
 }
-function briefGroupSlide(groups){
+function briefGroupSlide(){
   const w = briefWeek();
-  if (!w){
-    return '<div class="bf-slide"><div class="bf-h"><span class="bf-k">族群</span><span class="bf-t">熱門族群：本週誰最強</span></div><div class="bf-rule"></div><div class="bf-none">族群日漲跌資料讀取中…（需要上週收盤到最新收盤的日線）</div></div>';
-  }
+  if (!w) return briefLoading('族群', '熱門族群：本週誰最強', '族群日漲跌資料讀取中…（需要上週收盤到最新收盤的日線）');
   const lit = briefLitSet(w);
-  const rows = groups.map((g) => {
-    const ms = g.items.map((it) => ({ ...it, pct: briefWeekPct(it.code, w), lit: lit.has(it.code) })).sort((a, b) => (b.pct == null ? -1e9 : b.pct) - (a.pct == null ? -1e9 : a.pct));
-    const vals = ms.map((m) => m.pct).filter((v) => v != null);
-    return { g, ms, avg: vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null };
-  }).sort((a, b) => (b.avg == null ? -1e9 : b.avg) - (a.avg == null ? -1e9 : a.avg));
-  const maxAbs = Math.max(0.5, ...rows.map((r) => (r.avg == null ? 0 : Math.abs(r.avg))));
-  const bars = rows.length ? rows.map((r) => {
-    const neg = r.avg != null && r.avg < 0, width = r.avg == null ? 0 : Math.max(4, Math.abs(r.avg) / maxAbs * 100);
-    return '<div class="bf-bar" style="grid-template-columns:78px minmax(0,1fr)"><span class="bf-gn' + (/自選/.test(r.g.name) ? ' gold' : '') + '">' + wlEsc(r.g.name) + '</span><span class="bf-track"><span class="bf-fill ' + (neg ? 'tneg' : 'up') + '" style="width:' + (width * 0.68).toFixed(1) + '%"></span><span class="bf-v ' + (neg ? 'tneg' : 'up') + '">' + briefPctTxt(r.avg) + '</span></span></div>';
-  }).join('') : '<div class="bf-none">自選股還沒有股票——到「自選股」加入股票、分組後，這裡會照分組整理。</div>';
-  const cards = rows.map((r) => '<div class="bf-gcard"><div class="bf-gl"><b>' + wlEsc(r.g.name) + '</b><span class="' + (r.avg != null && r.avg < 0 ? 'dn' : 'up') + '" style="color:' + (r.avg != null && r.avg < 0 ? '#12805c' : '#d92d20') + '">' + briefPctTxt(r.avg) + '</span></div>'
-    + '<div class="bf-gm' + (r.ms.length <= 4 ? ' two' : '') + '">' + r.ms.map((m) => '<div class="bf-m" data-brief-code="' + rdEsc(m.code) + '" data-brief-name="' + rdEsc(m.name) + '" title="' + rdEsc(m.code + ' ' + m.name + '・本週 ' + briefPctTxt(m.pct, 2)) + '">' + wlEsc(m.name) + (m.pct == null ? '<span class="dn" style="color:#9a8f80">—</span>' : '<span class="' + (m.pct >= 0 ? 'up' : 'dn') + '">' + briefPctTxt(m.pct) + '</span>') + (m.lit ? '<span class="dot" title="本週有發動（亮燈）"></span>' : '') + '</div>').join('') + '</div></div>').join('');
-  return '<div class="bf-slide"><div class="bf-h"><span class="bf-k">族群</span><span class="bf-t">熱門族群：本週誰最強</span></div><div class="bf-rule"></div>'
-    + '<div class="bf-sub">族群平均漲跌 ＝ ' + briefMd(w.base) + ' 收 → ' + briefMd(w.latest) + ' 收・<span style="color:#ef4444">●</span> ＝ 本週有發動（亮燈）・名單 ＝ ' + briefMd(w.latest) + ' 收盤觀察股</div>'
+  // 2026-10-24 使用者：族群那張＝全部族群「本週平均漲跌」前十名，每個族群再抓本週最強的股票，有發動的標紅點
+  const ranked = GROUPS.map((g) => {
+    const ms = g.stocks.map((s) => ({ code: s.code, name: s.name, pct: briefWeekPct(s.code, w) })).filter((m) => m.pct != null);
+    return { g, ms, avg: ms.length >= BRIEF_MIN ? ms.reduce((a, m) => a + m.pct, 0) / ms.length : null };
+  }).filter((r) => r.avg != null).sort((a, b) => b.avg - a.avg);
+  const top = ranked.slice(0, BRIEF_TOP);
+  const sub = '族群平均漲跌 ＝ ' + briefMd(w.base) + ' 收 → ' + briefMd(w.latest) + ' 收・全部 ' + GROUPS.length + ' 個族群、有收盤價的成員 ≥ ' + BRIEF_MIN + ' 檔的 ' + ranked.length + ' 個照本週平均漲跌排名，列前 ' + top.length + ' 名・強勢股 ＝ 族群裡本週漲最多的前 ' + BRIEF_PER_GROUP + ' 檔・<span style="color:#ef4444">●</span> ＝ 本週有發動';
+  const bars = top.length ? briefBars(top, (r) => r.avg, (v) => (v != null && v < 0 ? 'tneg' : 'up'), null) : '<div class="bf-none">還沒有足夠的資料。</div>';
+  const cards = top.map((r) => {
+    const strong = r.ms.filter((m) => m.pct > 0).sort((a, b) => b.pct - a.pct).slice(0, BRIEF_PER_GROUP);
+    const mem = strong.map((m) => '<div class="bf-m" data-brief-code="' + rdEsc(m.code) + '" data-brief-name="' + rdEsc(m.name) + '" title="' + rdEsc(m.code + ' ' + m.name + '・本週 ' + briefPctTxt(m.pct, 2) + (lit.has(m.code) ? '・本週有發動' : '')) + '"><b>' + wlEsc(m.name) + '</b><span class="up">' + briefPctTxt(m.pct) + '</span>' + (lit.has(m.code) ? '<span class="dot" title="本週有發動"></span>' : '') + '</div>').join('');
+    return '<div class="bf-gcard"><div class="bf-gl"><b>' + wlEsc(r.g.name) + '</b><span class="' + (r.avg < 0 ? 'dn' : 'up') + '" style="color:' + (r.avg < 0 ? '#12805c' : '#d92d20') + '">' + briefPctTxt(r.avg) + '</span><small>' + r.ms.length + ' 檔</small></div>'
+      + '<div class="bf-gm">' + (mem || '<div class="bf-none">沒有收紅的</div>') + '</div></div>';
+  }).join('');
+  return '<div class="bf-slide"><div class="bf-h"><span class="bf-k">族群</span><span class="bf-t">熱門族群：本週誰最強</span></div><div class="bf-rule"></div><div class="bf-sub">' + sub + '</div>'
     + '<div class="bf-grid"><div class="bf-col"><div class="bf-card"><div class="bf-ct">族群平均漲跌（本週）</div>' + bars + '</div>'
     + '<div class="bf-note">⚠ 簡報只整理位置與強弱，不是買賣建議；停損、加碼規則請照自己的策略。</div></div>'
-    + '<div class="bf-col">' + (cards || '') + '</div></div></div>';
+    + '<div class="bf-col tight">' + (cards || '') + '</div></div></div>';
 }
 function renderBrief(){
   const body = document.getElementById('briefBody');
   if (!body) return;
-  const groups = briefGroups();
   const scroll = document.getElementById('briefInner').scrollTop;
-  body.innerHTML = (groups.length ? '' : '<div class="ma-note" style="background:#fbf4de;border:1px solid #e8d9a8;border-radius:12px;padding:10px 16px;font-size:13px;margin:10px 0">你的自選股還沒有股票。到「自選股」加入股票、依族群分組後，這兩張簡報就會照你的分組產生。</div>')
-    + briefRevenueSlide(groups) + briefGroupSlide(groups)
+  body.innerHTML = briefRevenueSlide() + briefGroupSlide()
     + '<div class="bf-foot">資料：營收＝公開資訊觀測站每月營業收入彙總表；漲跌＝證交所／櫃買日K；● ＝本站的發動名單（不是老師的亮燈，定義不一定一樣）。不是買賣建議。</div>';
   document.getElementById('briefInner').scrollTop = scroll;
 }
@@ -20803,7 +20793,6 @@ function openBriefPanel(){
   rvLoad(rvState.data && rvState.data.month);
   try { refreshGroupDailyChanges(false); } catch (_){}
   try { refreshBrewHistory(false); } catch (_){}
-  try { if (wl && !wl.data.groups.length && typeof wlLoad === 'function') wlLoad(); } catch (_){}
 }
 document.getElementById('briefBtn').addEventListener('click', openBriefPanel);
 document.getElementById('briefClose').addEventListener('click', () => { document.getElementById('briefModal').hidden = true; });
@@ -20812,7 +20801,7 @@ document.getElementById('briefModal').addEventListener('click', (e) => {
   const c = e.target.closest('[data-brief-code]');
   if (c) openStockChart(c.dataset.briefCode, c.dataset.briefName);
 });
-setInterval(() => { briefRerender(); }, 60000);   // 開著就每分鐘用最新的資料重畫（日漲跌、發動名單、自選股變動）
+setInterval(() => { briefRerender(); }, 60000);   // 開著就每分鐘用最新的資料重畫（日漲跌、發動名單）
 // ---- 營收成長榜（2026-10-09 使用者：照老師「每月營收成長榜 學員版」做一模一樣的）----
 // 後端 /api/revenue?month=：公開資訊觀測站「每月營業收入彙總表」（排程主機每天 12:30／18:30／23:30 抓），公布日＝我們第一次抓到的日期，
 // 收盤、成交量、公布隔日漲跌用我們的日K。段落照老師的順序：查個股營收、族群分析、多觀察分析（我們用自選股）、
