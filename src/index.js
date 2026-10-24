@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 14:12:13";
+const BUILD_STAMP = "2026-10-24 14:27:43";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -76,6 +76,14 @@ const HTML_PAGE = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){var KEY="tabletScale",LV=[1,1.15,1.25,1.4,1.6],DEF=1.25;
+function tablet(){try{if(Math.min(screen.width,screen.height)<700)return false;return matchMedia("(pointer:coarse)").matches||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent));}catch(e){return false;}}
+function get(){var v=NaN;try{v=parseFloat(localStorage.getItem(KEY));}catch(e){}return LV.indexOf(v)>=0?v:DEF;}
+function apply(){var m=document.querySelector("meta[name=viewport]");if(!m)return;var sc=tablet()?get():1,c;
+if(sc<=1)c="width=device-width, initial-scale=1";else{var a=Math.min(screen.width,screen.height),b=Math.max(screen.width,screen.height),land=matchMedia("(orientation: landscape)").matches;c="width="+Math.round((land?b:a)/sc);}
+if(m.getAttribute("content")!==c)m.setAttribute("content",c);}
+window.tabletScale={isTablet:tablet,get:get,step:function(d){var i=LV.indexOf(get())+d;i=Math.max(0,Math.min(LV.length-1,i));try{localStorage.setItem(KEY,String(LV[i]));}catch(e){}apply();}};
+apply();window.addEventListener("orientationchange",function(){setTimeout(apply,50);});window.addEventListener("resize",apply);})();</script>
 <title>台股族群強弱排行</title>
 <!-- 2026-10-13 使用者：放到手機／iPad／電腦桌面要像 App：網站圖示（public/icons，原圖 scripts/tutorial/assets/icon.svg）＋manifest；
      display 用 minimal-ui：電腦 Chrome／Edge 可以「安裝」成獨立視窗、Android 有返回／重新整理鈕，iPhone／iPad 照舊在 Safari 開 -->
@@ -554,7 +562,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   /* 頂部：標題／搜尋框／櫃買盤勢／盤中訊號同一排（2026-09-24 使用者：搜尋框移到標題右邊、
      櫃買強弱widget移到搜尋框右邊，盤中訊號維持最右邊；空間不夠時各自換行）。 */
   .header-top{display:flex;justify-content:flex-start;align-items:flex-start;gap:12px;flex-wrap:wrap;}
-  .signal-controls{display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:auto;}
+  .signal-controls{display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:auto;flex-wrap:wrap;justify-content:flex-end;max-width:100%;}   /* 2026-10-24 使用者（iPad 字太小）：這排按鈕原本不換行、寬 1216px，超出 iPad 畫面，Safari 會把整頁縮小到 66%——改成放不下就換行 */
   /* 盤中訊號按鈕（2026-09-25 使用者）：紫底白字、字放大、按鈕加寬加高；手機、平板、桌機都一樣，沒有另外的媒體查詢 */
   .signal-badge-btn{display:flex;align-items:center;gap:10px;background:#7c3aed;border:1px solid #7c3aed;color:#fff;font-size:17px;font-weight:800;padding:10px 22px;border-radius:999px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(124,58,237,.35);white-space:nowrap;}
   .signal-badge-btn:hover{background:#6d28d9;border-color:#6d28d9;}
@@ -639,6 +647,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   body.cz-mode .home-rank4 [data-cz],body.cz-mode .hr-help [data-cz]{outline:1px dashed rgba(124,58,237,.7);outline-offset:-2px;}
   @media (min-width:1701px){ .home-rank4.cz-fluid{grid-template-columns:repeat(var(--cz-n),minmax(0,1fr));} }
   .cz-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tb-h) + 12px);z-index:130;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;max-width:min(760px,94vw);background:#3b2a73;color:#fff;border:1px solid #7c3aed;border-radius:12px;padding:9px 14px;font-size:12.5px;line-height:1.6;box-shadow:0 8px 28px rgba(0,0,0,.5);}
+  .cz-bar .cz-tab{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-weight:800;} .cz-bar .cz-tab[hidden]{display:none;} .cz-bar .cz-tab button{width:30px;height:30px;padding:0;border-radius:999px;font-size:17px;line-height:1;} .cz-bar .cz-tab b{min-width:3.2em;text-align:center;color:#fde68a;}
   .cz-bar[hidden]{display:none;} .cz-bar a{color:#c4b5fd;font-weight:800;text-decoration:underline;cursor:pointer;white-space:nowrap;} .cz-bar #czCount{color:#fde68a;font-weight:700;margin-left:6px;}
   .cz-bar button{background:#7c3aed;color:#fff;border:none;border-radius:999px;padding:5px 16px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;}
   #czBtn.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
@@ -662,6 +671,15 @@ const HTML_PAGE = `<!DOCTYPE html>
     .toolbar-bottom .tb-btn{min-width:0;padding:7px 2px 6px;text-wrap:balance;}
     .toolbar-bottom .tb-btn:nth-child(-n+12){border-bottom:1px solid rgba(255,255,255,0.16);}
     .toolbar-bottom .tb-btn:nth-child(4n){border-right:none;}
+  }
+  /* 2026-10-24 使用者（iPad 字太小、整頁放大）：平板橫放（版面寬 ≥ 760px）下方導覽列改 8 顆一排、兩排就好，
+     不然放大後 4 排會吃掉三分之一個畫面；直放（窄）照舊 4 排。 */
+  @media (min-width: 760px) and (max-width: 1500px) and (pointer: coarse){
+    .toolbar-bottom{grid-template-columns:repeat(8,minmax(0,1fr));}
+    .toolbar-bottom .tb-btn:nth-child(-n+12){border-bottom:none;}
+    .toolbar-bottom .tb-btn:nth-child(-n+8){border-bottom:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom .tb-btn:nth-child(4n){border-right:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom .tb-btn:nth-child(8n){border-right:none;}
   }
   .toast{position:fixed;left:50%;bottom:calc(var(--tb-h) + 16px);transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
   /* 版本戳記（右上角小字）與「有新版本」提示：加到主畫面的網頁沒有重新整理鈕，靠這個知道自己在跑哪一版。 */
@@ -4208,6 +4226,7 @@ const HTML_PAGE = `<!DOCTYPE html>
 
 <div class="cz-bar" id="czBar" hidden>
   <span><b>✏️ 自訂畫面</b>　點一下項目就切換：<b>打勾＝留著、沒勾＝收起來</b>。只存在這台裝置，換手機／電腦要重設一次。<span id="czCount"></span></span>
+  <span class="cz-tab" id="czTab" hidden>平板字體 <button type="button" data-tab-scale="-1" aria-label="縮小">－</button><b id="czTabVal">125%</b><button type="button" data-tab-scale="1" aria-label="放大">＋</button></span>
   <a href="#" id="czAll" role="button">全部顯示</a>
   <button type="button" id="czDone">✓ 完成</button>
 </div>
@@ -9561,14 +9580,14 @@ function homeRankFootHtml(total){
 }
 // 首頁最後一欄：飆股雷達（2026-10-15 使用者：「盤中形態觀察股」改名飆股雷達，【1】【2】【3】放到首頁原本 177 的位置；
 // 每檔後面照樣標符號，符號說明寫在首頁最下面）。跟訊號中心「盤中飆股雷達」同一份（obsState.report），
-// 盤中每 HOME_OBS_REFRESH_MS 重算一次；重算不動自選股的四個 ⏰ 分組（那邊照舊只在 10:30、11:00…跳出來的時段換）。
+// 盤中每 HOME_OBS_REFRESH_MS（1 分鐘）重算一次；2026-10-24 起每次重算也同步自選股的四個 ⏰ 分組（使用者：盤中即時，不等盤後）。
 const HOME_OBS_CATS = [1, 2, 3, 4, 5];   // 首頁顯示順序（2026-10-20 使用者：恢復照【1】【2】【3】【4】【5】的順序；原本 2026-10-16 是今天噴出最上面、已噴在高檔第二、黑K出現第三；【4】右肩打底、【5】有點深 2026-10-19 加的，只放股票）
 const HOME_OBS_FOOT_CATS = [1, 2, 3];     // 首頁最下面的說明表照舊只講前三類（使用者：4、5 的說明、跟上次名單比、移出原因都不用搬過來，留在跳出來的畫面）
 const homeObsCats = (ks = HOME_OBS_CATS) => ks.map((k) => OBS_CATS.find(([c]) => c === k)).filter(Boolean);
-const HOME_OBS_REFRESH_MS = 5 * 60 * 1000;
+const HOME_OBS_REFRESH_MS = 60 * 1000;   // 2026-10-24 使用者：盤中要即時，原本 5 分鐘改每分鐘重算（也同步自選股的 ⏰ 四個分組）
 function homeObsColHtml(){
   const rep = obsState.report;
-  const hm = obsNowHm();   // 只有盤中（09:00～13:35）才每 5 分鐘重算；收盤後停在最後一次（2026-10-15 使用者問多久更新）
+  const hm = obsNowHm();   // 只有盤中（09:00～13:35）才每分鐘重算；收盤後停在最後一次（2026-10-15 使用者問多久更新）
   const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';   // 盤前撮合（08:40 起）也算
   const stale = rep && live && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
   const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > (rep ? HOME_OBS_REFRESH_MS : 20000);   // 還沒算出過：20 秒就重試（2026-10-17）
@@ -15201,12 +15220,13 @@ function mclLongHtml(sc){
   return '<span class="lgs" title="做多參考：三項各一勾（買／融／線），勾越多越前面；只是整理，不是買進訊號"><b class="n' + sc.n + '">' + sc.n + '</b>' +
     LG_TIPS.map((x, i) => '<i class="' + (sc.t[i] === true ? 'y' : sc.t[i] === false ? 'n' : 'u') + '" title="' + wlEsc(x[0] + '：' + (sc.t[i] === true ? x[1] : sc.t[i] === false ? x[2] : '資料不足')) + '">' + x[0] + '</i>').join('') + '</span>';
 }
-function mclSortTh(key, label){
-  const on = mclState.sortKey === key;
-  if (key === '_hold') return '<th class="mcl-sort' + (on ? ' on' : '') + '" data-mcl-sort="_hold" title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法）；≥ +10% 紅底、≤ −10% 綠底。按一下由大到小排，再按一下由小到大；沒有資料的排最後">' + label + ' <span class="mcl-arrow">' + (on ? (mclState.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (mclState.sortDir > 0 ? '小→大' : '大→小') : '按我排序') + '</div></th>';
-  if (key === '_ma') return '<th class="mcl-sort' + (on ? ' on' : '') + '" data-mcl-sort="_ma" title="均線分數（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分，滿分 15；用現價當今天收盤）。按一下照分數排（高的在前面），再按一下反過來；沒有分數的（日K不足 240 天）排最後">' + label + ' <span class="mcl-arrow">' + (on ? (mclState.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (mclState.sortDir > 0 ? '低→高' : '高→低') : '按我排序') + '</div></th>';
-  if (key === '_lg') return '<th class="mcl-sort l' + (on ? ' on' : '') + '" data-mcl-sort="_lg" title="按一下照「做多參考」勾的數量排（勾多的在前面，勾一樣多的大戶力高的在前面），再按一下反過來">' + label + ' <span class="mcl-arrow">' + (on ? (mclState.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (mclState.sortDir > 0 ? '勾少→多' : '勾多→少') : '按我排序') + '</div></th>';
-  return '<th class="mcl-sort' + (on ? ' on' : '') + '" data-mcl-sort="' + key + '" title="按一下照「差 %」排序，再按一下反過來（升冪＝差最小的在最前面，已破排最前）">' + label + ' <span class="mcl-arrow">' + (on ? (mclState.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (mclState.sortDir > 0 ? '差小→大' : '差大→小') : '按我排序') + '</div></th>';
+function mclSortTh(key, label, st){   // st＝另一份排序狀態（自選股的融資斷頭表用自己的）；沒給就是個股問診那份 mclState
+  const S = st || mclState, AT = st ? 'data-wl-mcl-sort' : 'data-mcl-sort';
+  const on = S.sortKey === key;
+  if (key === '_hold') return '<th class="mcl-sort' + (on ? ' on' : '') + '" ' + AT + '="_hold" title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法）；≥ +10% 紅底、≤ −10% 綠底。按一下由大到小排，再按一下由小到大；沒有資料的排最後">' + label + ' <span class="mcl-arrow">' + (on ? (S.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (S.sortDir > 0 ? '小→大' : '大→小') : '按我排序') + '</div></th>';
+  if (key === '_ma') return '<th class="mcl-sort' + (on ? ' on' : '') + '" ' + AT + '="_ma" title="均線分數（5/10/20/60/120/240 日線兩兩比較共 15 組，短天期在長天期上面得 1 分，滿分 15；用現價當今天收盤）。按一下照分數排（高的在前面），再按一下反過來；沒有分數的（日K不足 240 天）排最後">' + label + ' <span class="mcl-arrow">' + (on ? (S.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (S.sortDir > 0 ? '低→高' : '高→低') : '按我排序') + '</div></th>';
+  if (key === '_lg') return '<th class="mcl-sort l' + (on ? ' on' : '') + '" ' + AT + '="_lg" title="按一下照「做多參考」勾的數量排（勾多的在前面，勾一樣多的大戶力高的在前面），再按一下反過來">' + label + ' <span class="mcl-arrow">' + (on ? (S.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (S.sortDir > 0 ? '勾少→多' : '勾多→少') : '按我排序') + '</div></th>';
+  return '<th class="mcl-sort' + (on ? ' on' : '') + '" ' + AT + '="' + key + '" title="按一下照「差 %」排序，再按一下反過來（升冪＝差最小的在最前面，已破排最前）">' + label + ' <span class="mcl-arrow">' + (on ? (S.sortDir > 0 ? '▲' : '▼') : '⇅') + '</span><div class="dg-sub">' + (on ? (S.sortDir > 0 ? '差小→大' : '差大→小') : '按我排序') + '</div></th>';
 }
 // 落底訊號／回檔警示那一格：今天成立的畫正常顏色；盤中今天還沒成立、但昨天收盤時有的，淡淡地畫「昨」＋標籤
 // 個股問診的融資斷頭線名單盤中跟著報價（15 秒）重畫：只有視窗開著、在名單畫面（沒有查單檔）、而且沒在打字時才重畫；捲動位置（上下、表格左右）保留
@@ -15225,16 +15245,13 @@ function mclSigNow(now, prev, pillFn){
   if (prev) return '<span class="mcl-prev" title="這是昨天收盤時的訊號；今天到目前還沒成立（盤中累計量還沒到、K 棒也還沒定）">昨 ' + pillFn(prev) + '</span>';
   return '<span class="muted">—</span>';
 }
-function dgMarginListHtml(){
-  mclEnsure();
-  const d = mclState.data;
-  const rv = mclResolve(mclState.groups), focus = new Set(rv.codes);
-  // 2026-10-23 使用者：賣壓狀態四種（賣壓未釋放／略減／釋放中／已洗掉一大半）做成按鈕放在搜尋列，按一下只看那一種（可以跟下面的快速篩選一起用），再按一次取消
-  const pressDefs = [['no', '賣壓未釋放'], ['slight', '略減（還在觀察）'], ['ing', '釋放中'], ['done', '已洗掉一大半']];
-  // 2026-10-23 使用者問：這張名單是用盤中即時價算的嗎？→ 盤中（9:00～13:35）現價、離斷頭價差 %、賣壓狀態、落底訊號、回檔警示都用即時價重算（名單每 15 秒跟著更新）；
-  // 融資餘額、月高後增減是前一晚公布的、月高是前一個收盤日的，盤中不會變。落底／回檔用「今天到目前」的開高低現價＋累計量當今天暫時的日K（liveBase 後端算好），淡色「昨」＝昨天收盤時的訊號、今天還沒成立。
-  const liveSes = !!(d && d.status === 'ok' && mclSessionLive()), quotesMap = liveSes ? mclLiveQuoteMap() : new Map(), todayStr = twTodayStr();
-  const allRows = d && d.status === 'ok' ? (d.rows || []).map((r) => {
+function mclRowExtras(rows, rerender){   // 均線分數（要醞釀／發動那份均線基底）、盤中大戶力、做多參考三欄（個股問診名單、自選股融資斷頭表共用）
+  if (!brewLaunchData && !mclState.maWait){ mclState.maWait = true; refreshBrewLaunch().catch(() => {}).finally(() => { mclState.maWait = false; if (brewLaunchData && rerender) rerender(); }); }
+  rows.forEach((r) => { const q = getStockQuote(r.code), info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[r.code] : null, px = q && q.price > 0 ? q.price : r.close; r._ma = info && px > 0 ? maScoreFromSums(info, px, brewLaunchData.rules) : null; });
+  rows.forEach((r) => { r._hold = holderPctOf(r.code); });
+  rows.forEach((r) => { const sc = mclLongScore(r.code, r); r._lgs = sc; r._lg = sc.n + Math.max(0, Math.min(sc.hold == null ? 0 : sc.hold, 99.9)) / 1000; });   // 做多參考：勾數＋大戶力當小數（勾一樣多時大戶力高的在前）
+}
+function mclLiveRow(r, liveSes, quotesMap, todayStr){   // 一列斷頭線資料套上盤中即時價、重算賣壓／落底／回檔（個股問診名單、自選股融資斷頭表共用）
     const q = quotesMap.get(r.code), px = q && q.price > 0 ? q.price : r.close;
     const lr = wgLive(r, px);
     lr._r0 = r;   // 前一個收盤日那一列（昨日新破、前幾天已破要看原本的）
@@ -15245,7 +15262,24 @@ function dgMarginListHtml(){
     lr._pullPill = mclPullback(pullNow, r.margin); lr._botPill = mclBottom(lr, r.margin, stabNow);
     lr._pullPrevPill = pullPrev ? mclPullback(pullPrev, r.margin) : null; lr._botPrevPill = stabPrev ? mclBottom(lr, r.margin, stabPrev) : null;
     return lr;
-  }) : [];
+}
+function mclRowHtml(r, focus, cls){   // 一檔一列（個股問診名單、自選股融資斷頭表共用；cls＝點下去要做什麼的 class）
+  return '<tr class="' + (cls || 'dg-link') + (focus.has(r.code) ? ' mcl-focus' : '') + '" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td><td class="l">' + mclLongHtml(r._lgs) + '</td>' +
+    '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + homeHoldHtml(r.code) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + (r._ma == null ? '<span class="muted" title="日K不足 240 天或均線資料還在讀取，算不出均線分數">—</span>' : '<b class="mcl-ma' + (r._ma > 10 ? ' hi' : '') + '" title="均線分數 ' + r._ma + ' / 15（5/10/20/60/120/240 日線兩兩比較，短天期在上面得 1 分；用現價當今天收盤）">' + r._ma + '</b>') + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin, r) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td><td class="l">' + mclSigNow(r._botPill, r._botPrevPill, mclBottomPill) + '</td><td class="l">' + mclSigNow(r._pullPill, r._pullPrevPill, mclPullPill) + '</td></tr>';
+}
+function mclTheadHtml(liveSes, st){   // 表頭（個股問診名單、自選股融資斷頭表共用）；st＝另一份排序狀態
+  return '<thead><tr><th class="l">股票</th><th class="l">族群</th>' + mclSortTh('_lg', '做多參考', st) + '<th>月高</th><th title="盤中是即時價（每 15 秒更新），收盤後就是今收">' + (liveSes ? '現價' : '今收') + '</th>'+ mclSortTh('_hold', '大戶力', st) + mclSortTh('aGap', 'A 月高斷頭', st) + mclSortTh('bGap', 'B 五日平均價線斷頭', st) + mclSortTh('_ma', '均線分數', st) + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th><th class="l">落底訊號</th><th class="l">回檔警示</th></tr></thead>';
+}
+function dgMarginListHtml(){
+  mclEnsure();
+  const d = mclState.data;
+  const rv = mclResolve(mclState.groups), focus = new Set(rv.codes);
+  // 2026-10-23 使用者：賣壓狀態四種（賣壓未釋放／略減／釋放中／已洗掉一大半）做成按鈕放在搜尋列，按一下只看那一種（可以跟下面的快速篩選一起用），再按一次取消
+  const pressDefs = [['no', '賣壓未釋放'], ['slight', '略減（還在觀察）'], ['ing', '釋放中'], ['done', '已洗掉一大半']];
+  // 2026-10-23 使用者問：這張名單是用盤中即時價算的嗎？→ 盤中（9:00～13:35）現價、離斷頭價差 %、賣壓狀態、落底訊號、回檔警示都用即時價重算（名單每 15 秒跟著更新）；
+  // 融資餘額、月高後增減是前一晚公布的、月高是前一個收盤日的，盤中不會變。落底／回檔用「今天到目前」的開高低現價＋累計量當今天暫時的日K（liveBase 後端算好），淡色「昨」＝昨天收盤時的訊號、今天還沒成立。
+  const liveSes = !!(d && d.status === 'ok' && mclSessionLive()), quotesMap = liveSes ? mclLiveQuoteMap() : new Map(), todayStr = twTodayStr();
+  const allRows = d && d.status === 'ok' ? (d.rows || []).map((r) => mclLiveRow(r, liveSes, quotesMap, todayStr)) : [];
   const pressCount = {};
   allRows.forEach((r) => { if (r._press) pressCount[r._press.key] = (pressCount[r._press.key] || 0) + 1; });
   const pressBtns = d && d.status === 'ok'
@@ -15269,10 +15303,7 @@ function dgMarginListHtml(){
   const filterTips = { H: '只列盤中大戶力 ≥ +' + HOLDER_HOT_PCT + '% 的股票（大戶淨買超金額 ÷ 近 5 日均成交值，老師算法）；列表照大戶力由大到小排', P: '只列昨天以前就已經破 A 斷頭價的股票（不含昨日新破）', Q: '只列昨天以前就已經破 B 斷頭價的股票（不含昨日新破）', T: '只列「落底訊號」欄有標的股票：近似落底（賣壓釋放中或已洗掉一大半＋爆量後跌幅縮小、沒再破低），或價量止跌（沒有融資資料、只看價量）', R: '只列「回檔警示」欄有標的（留意回檔）的股票：漲多＋爆量＋出貨K。近 10 日漲得越多排越前面', A: '只列離 A 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票', B: '只列離 B 斷頭價還有 ≤' + MCL_FILTER_PCT + '%（含 ' + MCL_FILTER_PCT + '%、還沒跌破）的股票' };
   const filterBar = '<div class="mcl-filters">快速篩選　' + fbtn('H', '大戶力 ≥ +' + HOLDER_HOT_PCT + '%', filterTips.H, holdRows.length) + fbtn('P', 'A 已破（前幾天）', filterTips.P, brokeEarlier.length) + fbtn('Q', 'B 已破（前幾天）', filterTips.Q, brokeEarlierB.length) + fbtn('A', '離 A ≤' + MCL_FILTER_PCT + '%', filterTips.A, nearA.length) + fbtn('B', '離 B ≤' + MCL_FILTER_PCT + '%', filterTips.B, nearB.length) + fbtn('T', '落底訊號', filterTips.T, bottomRows.length) + fbtn('R', '回檔警示', filterTips.R, pullRows.length) + (mclState.filter ? '<span class="dg-sub">　' + filterTips[mclState.filter] + '；再按一次取消</span>' : '') + (!brokeEarlier.length && !/\\ball\\b/.test(mclState.groups) ? '<span class="dg-sub">　（這幾個族群裡 A 已破的都是昨日新破；族群欄打 all 可看全部族群）</span>' : '') + '</div>';
   const shownRows = (mclState.filter === 'H' ? holdRows : mclState.filter === 'R' ? pullRows : mclState.filter === 'T' ? bottomRows : mclState.filter === 'P' ? brokeEarlier : mclState.filter === 'Q' ? brokeEarlierB : mclState.filter === 'A' ? nearA : mclState.filter === 'B' ? nearB : allRows).filter((r) => { if (!mclState.press) return true; return !!r._press && r._press.key === mclState.press; });
-  if (!brewLaunchData && !mclState.maWait){ mclState.maWait = true; refreshBrewLaunch().catch(() => {}).finally(() => { mclState.maWait = false; const md = document.getElementById('diagModal'); if (md && !md.hidden && brewLaunchData) renderDiag(); }); }   // 均線分數要用醞釀／發動那份均線基底（首頁開著通常已經有）
-  allRows.forEach((r) => { const q = getStockQuote(r.code), info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[r.code] : null, px = q && q.price > 0 ? q.price : r.close; r._ma = info && px > 0 ? maScoreFromSums(info, px, brewLaunchData.rules) : null; });
-  allRows.forEach((r) => { r._hold = holderPctOf(r.code); });
-  allRows.forEach((r) => { const sc = mclLongScore(r.code, r); r._lgs = sc; r._lg = sc.n + Math.max(0, Math.min(sc.hold == null ? 0 : sc.hold, 99.9)) / 1000; });   // 做多參考：勾數＋大戶力當小數（勾一樣多時大戶力高的在前）
+  mclRowExtras(allRows, () => { const md = document.getElementById('diagModal'); if (md && !md.hidden) renderDiag(); });
   const sortedRows = shownRows.slice().sort(mclState.filter === 'R' ? ((x, y) => { const px = x._pullPill ? x.pull : (x._pullPrev || { tier: 0, ret10: 0 }), py = y._pullPill ? y.pull : (y._pullPrev || { tier: 0, ret10: 0 }); return (py.tier - px.tier) || (py.ret10 - px.ret10) || (x._pullPill ? 0 : 1) - (y._pullPill ? 0 : 1); }) : (x, y) => {   // 照 A 或 B 的「差 %」排：升冪＝差最小（已破＝負的）排最前，降冪＝差最大排最前
     if (mclState.sortKey === '_ma' || mclState.sortKey === '_hold'){   // 均線分數、大戶力：沒有數字的一律排最後，同數字的離 B 斷頭價近的在前
       const ma = x[mclState.sortKey], mb = y[mclState.sortKey];
@@ -15283,13 +15314,12 @@ function dgMarginListHtml(){
     return (mclState.sortDir * ((gx == null ? Infinity : gx) - (gy == null ? Infinity : gy))) || String(x.code).localeCompare(String(y.code));
   });
   const pinned = sortedRows.filter((r) => focus.has(r.code)).concat(sortedRows.filter((r) => !focus.has(r.code)));   // 查的那檔排最上面
-  const rows = pinned.map((r) => '<tr class="dg-link' + (focus.has(r.code) ? ' mcl-focus' : '') + '" data-code="' + r.code + '"><td class="l"><b>' + r.code + '</b> ' + wlEsc(r.name || '') + (r.market === 'OTC' ? ' <span class="muted">櫃</span>' : '') + '</td><td class="l">' + wlEsc(r.group || '—') + '</td><td class="l">' + mclLongHtml(r._lgs) + '</td>' +
-    '<td>' + ckPrice(r.monthHigh) + '</td><td>' + ckPrice(r.close) + '</td><td>' + homeHoldHtml(r.code) + '</td><td>' + mclLineCell(r.a, r.aGap, r.aBroken, r.aNew) + '</td><td>' + mclLineCell(r.b, r.bGap, r.bBroken, r.bNew) + '</td><td>' + (r._ma == null ? '<span class="muted" title="日K不足 240 天或均線資料還在讀取，算不出均線分數">—</span>' : '<b class="mcl-ma' + (r._ma > 10 ? ' hi' : '') + '" title="均線分數 ' + r._ma + ' / 15（5/10/20/60/120/240 日線兩兩比較，短天期在上面得 1 分；用現價當今天收盤）">' + r._ma + '</b>') + '</td><td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin, r) + '</td><td class="l">' + mclPressPill(mclPressure(r, r.margin)) + '</td><td class="l">' + mclSigNow(r._botPill, r._botPrevPill, mclBottomPill) + '</td><td class="l">' + mclSigNow(r._pullPill, r._pullPrevPill, mclPullPill) + '</td></tr>').join('');
+  const rows = pinned.map((r) => mclRowHtml(r, focus)).join('');
   const summary = !d.summary ? '' : mclSummaryHtml(d.summary, 'diag');
   const missing = [...focus].filter((c) => !allRows.some((r) => r.code === c));
   const missNote = missing.length ? '<div class="race-note" style="margin:4px 0;color:#f59e0b">' + missing.map((c) => wlEsc(c + ' ' + (rv.names[c] || ''))).join('、') + '：算不出斷頭線（本站沒有這檔的日K，或日K不足 24 根）</div>' : '';
   return head + missNote + summary + filterBar + '<div class="sw-basis">' + (d.groups || []).join('、') + '・共 ' + (c.stocks || 0) + ' 檔：<b style="color:#d9392b">' + (c.aBroken || 0) + ' 檔</b> A 已破（最高點追的已跌破斷頭線）、<b>' + (c.bBroken || 0) + ' 檔</b> B 已破、<b>' + (c.bNear || 0) + ' 檔</b> B 差 10% 內（只差一根跌停）</div>' +
-    (rows ? '<div class="hl-scroll"><table class="ck-table mcl-tbl"><thead><tr><th class="l">股票</th><th class="l">族群</th>' + mclSortTh('_lg', '做多參考') + '<th>月高</th><th title="盤中是即時價（每 15 秒更新），收盤後就是今收">' + (liveSes ? '現價' : '今收') + '</th>'+ mclSortTh('_hold', '大戶力') + mclSortTh('aGap', 'A 月高斷頭') + mclSortTh('bGap', 'B 五日平均價線斷頭') + mclSortTh('_ma', '均線分數') + '<th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th><th class="l">落底訊號</th><th class="l">回檔警示</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
+    (rows ? '<div class="hl-scroll"><table class="ck-table mcl-tbl">' + mclTheadHtml(liveSes) + '<tbody>' + rows + '</tbody></table></div>' : '<div class="race-note">這幾個族群今天沒有算得出斷頭線的股票</div>') + MCL_RULE;
 }
 function renderDiag(){
   const body = document.getElementById('diagBody');
@@ -15760,7 +15790,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 14:12:13';
+const BUILD_STAMP = '2026-10-24 14:27:43';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19325,6 +19355,7 @@ function obsCloseState(c){
   st.cat = obsCat(st);
   return st;
 }
+const obsCkMemo = { key: '', at: 0, parts: null };
 async function obsBuild(slot){
   const dragon = await obsDragonHits();
   const inGroups = new Set(ALL_CODES);
@@ -19335,7 +19366,10 @@ async function obsBuild(slot){
   const okPrev = (c) => !!hitsPrev && inGroups.has(c) && (hitsPrev[c] || 0) >= OBS_POOL_MIN_HITS;
   const cand = [...new Set([...Object.keys(hitsNow), ...Object.keys(hitsPrev || {})])].filter((c) => okNow(c) || okPrev(c));
   if (!cand.length) throw new Error('近 10 天創高黑龍名單還沒有資料');
-  const ckParts = await obsBatched(cand, 120, (b) => obsJson('/api/checkup?codes=' + encodeURIComponent(b.join(','))));
+  const ckKey = twTodayStr() + '|' + cand.join(',');
+  let ckParts;
+  if (obsCkMemo.key === ckKey && Date.now() - obsCkMemo.at < 5 * 60e3) ckParts = obsCkMemo.parts;   // 健診表盤中不變，1 分鐘重算一次時 5 分鐘內不重抓（2026-10-24）
+  else { ckParts = await obsBatched(cand, 120, (b) => obsJson('/api/checkup?codes=' + encodeURIComponent(b.join(',')))); Object.assign(obsCkMemo, { key: ckKey, at: Date.now(), parts: ckParts }); }
   const ckBy = {};
   let ckDate = null;
   ckParts.forEach((ck) => { ckDate = ckDate || ck.date; (ck.rows || []).forEach((r) => { ckBy[r.code] = r; }); });
@@ -19567,14 +19601,14 @@ function obsShowPopup(rep){
     '<button type="button" class="launch-alert-close" aria-label="關閉">✕</button></span></div><div class="launch-alert-body">' + obsBodyHtml(rep) + '</div>';
 }
 async function obsRun(slot, popup, quiet){
-  // quiet＝首頁飆股雷達欄每幾分鐘的重算：不動自選股分組（2026-10-15）
+  // quiet＝首頁飆股雷達欄盤中每分鐘的自動重算（不跳視窗、不響鈴；2026-10-24 起也會同步自選股分組）
   if (obsState.loading) return;
   obsState.loading = true; obsState.error = '';
   obsRerender();
   try {
     const rep = await obsBuild(slot);
     obsState.report = rep;
-    if (!quiet){ try { obsSyncWatchlist(rep); } catch (e){ console.warn('obs → 自選股', e); } }
+    try { obsSyncWatchlist(rep); } catch (e){ console.warn('obs → 自選股', e); }   // 2026-10-24 使用者：盤中即時——每分鐘的重算（quiet）也同步自選股的 ⏰ 四個分組，不再只在 10:30、11:00… 跳出來的時段換
     if (popup){
       obsShowPopup(rep);
       if (alertsEnabled) launchBeep();
@@ -19597,10 +19631,12 @@ async function obsRun(slot, popup, quiet){
 // 觀察股列多少檔這裡就多少檔；【5】有點深不放）。分組沒有就建在最後面；內容跟上次一樣就不動，免得一直同步。
 const OBS_WL_GROUPS = [[1, 'obs1', '⏰黑K・黑龍符合'], [2, 'obs2', '⏰今天噴出'], [3, 'obs3', '⏰已噴在高檔'], [4, 'obs4', '⏰右肩打底']];
 function obsSyncWatchlist(rep){
+  if (wl.key && !wl.syncedAt) return;   // 有同步碼但雲端那份還沒讀回來：先不動，免得蓋掉（盤中每分鐘會再來一次）
   const today = twTodayStr(), at = rep.slot || obsNowHm();
   const want = OBS_WL_GROUPS.map(([cat, id, name]) => [id, name, obsGroupLines(rep.items.filter((x) => x.cat === cat)).flatMap(([, xs]) => xs)
     .map((x) => ({ code: x.code, note: at + (obsMarks(x) ? ' ' + obsMarks(x) : ''), addedAt: today }))]);
-  const sig = (items) => items.map((it) => it.code + '|' + (it.note || '')).join(',');
+  // 比內容時不看備註開頭的時間（HH:MM）：每分鐘重算時間都不一樣，只有名單或符號真的變了才寫進自選股
+  const sig = (items) => items.map((it) => it.code + '|' + String(it.note || '').replace(/^\\d\\d:\\d\\d\\s?/, '')).join(',');
   if (want.every(([id, , items]) => { const g = wl.data.groups.find((x) => x.id === id); return g && sig(g.items) === sig(items); })) return;
   wlMutate((data) => {
     for (const [id, name, items] of want){
@@ -19610,6 +19646,16 @@ function obsSyncWatchlist(rep){
     }
   });
 }
+// 盤中每分鐘自己重算一次，讓自選股的 ⏰ 四個分組即時跟著動（2026-10-24 使用者：不要等到盤後）；不依賴首頁那欄有沒有顯示
+function obsWlTick(){
+  if (obsState.loading || wl.loading || wl.busy) return;
+  const hm = obsNowHm();
+  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';
+  if (!live) return;
+  if (obsState.report && Date.now() - obsState.report.at < HOME_OBS_REFRESH_MS - 5000) return;
+  obsRun(null, false, true);
+}
+setInterval(obsWlTick, 30000);
 function obsRerender(){
   if (!document.getElementById('hwModal').hidden && hwState.tab === 'obs') renderHomework();
   try { if (!document.getElementById('signalModal').hidden && signalCenterState.activeTab === 'obsWatch') renderSignalCenter(); } catch (_){}
@@ -24985,50 +25031,81 @@ const MA_WL_ID = 'ma20', MA_WL_NAME = '📊個股分數前20名', MA_WL_TOP = 20
 const MA_HIT_WL_ID = 'mahit', MA_HIT_WL_NAME = '📊前二十名常客', MA_HIT_QS = 'days=10&top=10&show=20';
 const maCnNum = (n) => ({ 10: '十', 20: '二十', 30: '三十', 40: '四十', 50: '五十' })[n] || String(n);
 let maWlAt = 0, maWlLoading = false;
-function maSyncWatchlist(d){
-  if (!d || d.status !== 'ok' || d.teacher || !Array.isArray(d.stocks) || !d.stocks.length || (d.latest && d.date !== d.latest)) return false;
-  const today = twTodayStr();
-  const items = d.stocks.slice(0, MA_WL_TOP).map((r, i) => ({ code: r.code, note: maMd(d.date) + ' 第' + (i + 1) + '名・' + r.sum + ' 分', addedAt: today }));
-  const sig = (xs) => xs.map((it) => it.code + '|' + (it.note || '')).join(',');
-  const g = wl.data.groups.find((x) => x.id === MA_WL_ID);
-  if (g && g.name === MA_WL_NAME && sig(g.items) === sig(items)) return false;
+// 2026-10-24 使用者：兩個自動分組（個股分數前20名、前二十名常客）還有 ⏰ 四個觀察分組，盤中都要即時，不等盤後。
+// 後端盤中用現價當今天收盤重算（回 live＝true），所以這裡盤中每分鐘看一次、有變才動自選股；收盤後 25 分鐘看一次就夠。
+// 兩個榜單放在一起算：各自的備註會標「也在另一個榜」，另外多一個「📊雙榜交集」分組＝兩個榜都有的（照個股分數名次排）。
+const MA_BOTH_WL_ID = 'maboth', MA_BOTH_WL_NAME = '📊雙榜交集';
+const maWlLast = { rank: null, hits: null };
+function maLiveHours(){
+  const hm = obsNowHm();
+  return !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && hm >= '09:05' && hm <= '14:05';   // 13:30 收盤後再抓到 14:05，把最後的收盤價收進來
+}
+const maWlSig = (xs) => xs.map((it) => it.code + '|' + (it.note || '')).join(',');
+function maWlPut(id, name, items){
+  const g = wl.data.groups.find((x) => x.id === id);
+  if (g && g.name === name && maWlSig(g.items) === maWlSig(items)) return false;
+  if (!g && !items.length) return false;      // 還沒有這個分組、又沒東西可放：不用特地建一個空的
   wlMutate((data) => {
-    let gg = data.groups.find((x) => x.id === MA_WL_ID);
-    if (!gg){ gg = { id: MA_WL_ID, name: MA_WL_NAME, items: [] }; data.groups.push(gg); }
-    gg.name = MA_WL_NAME;
+    let gg = data.groups.find((x) => x.id === id);
+    if (!gg){ gg = { id, name, items: [] }; data.groups.push(gg); }
+    gg.name = name;
     gg.items = items.map((it) => ({ ...it }));
   });
   return true;
 }
+function maWlApply(){
+  const rk = maWlLast.rank, ht = maWlLast.hits;
+  const today = twTodayStr();
+  const rankCodes = new Set(rk ? rk.stocks.slice(0, MA_WL_TOP).map((r) => r.code) : []);
+  const hitCodes = new Set(ht ? ht.rows.map((r) => r.code) : []);
+  let changed = false;
+  if (rk){
+    const tag = rk.live ? ' 盤中' : '';
+    const items = rk.stocks.slice(0, MA_WL_TOP).map((r, i) => ({ code: r.code, note: maMd(rk.date) + tag + ' 第' + (i + 1) + '名・' + r.sum + ' 分' + (ht ? (hitCodes.has(r.code) ? '・也在前二十名常客' : '') : ''), addedAt: today }));
+    changed = maWlPut(MA_WL_ID, MA_WL_NAME, items) || changed;
+  }
+  if (ht){
+    const tag = ht.live ? ' 盤中' : '';
+    const items = ht.rows.map((r) => ({ code: r.code, note: '上榜 ' + r.hits + '/' + ht.ndays + ' 次・近 5 日 ' + r.r5 + '/5・' + maMd(ht.to) + tag + ' 第' + r.rank + '名' + (rk ? (rankCodes.has(r.code) ? '・也在個股分數前20名' : '') : ''), addedAt: today }));
+    changed = maWlPut(MA_HIT_WL_ID, MA_HIT_WL_NAME, items) || changed;
+  }
+  if (rk && ht){
+    const hitBy = {};
+    ht.rows.forEach((r) => { hitBy[r.code] = r; });
+    const items = rk.stocks.slice(0, MA_WL_TOP).map((r, i) => [r, i]).filter(([r]) => hitBy[r.code])
+      .map(([r, i]) => ({ code: r.code, note: maMd(rk.date) + (rk.live ? ' 盤中' : '') + ' 分數第' + (i + 1) + '名・' + r.sum + ' 分＋常客 ' + hitBy[r.code].hits + '/' + ht.ndays + ' 次', addedAt: today }));
+    changed = maWlPut(MA_BOTH_WL_ID, MA_BOTH_WL_NAME, items) || changed;
+  }
+  return changed;
+}
+function maSyncWatchlist(d){
+  if (!d || d.status !== 'ok' || d.teacher || !Array.isArray(d.stocks) || !d.stocks.length || (d.latest && d.date !== d.latest)) return false;
+  maWlLast.rank = d;
+  return maWlApply();
+}
 function maHitsSyncWatchlist(d){
   if (!d || d.status !== 'ok' || !Array.isArray(d.rows) || !d.rows.length) return false;
-  const today = twTodayStr();
-  const items = d.rows.map((r) => ({ code: r.code, note: '上榜 ' + r.hits + '/' + d.ndays + ' 次・近 5 日 ' + r.r5 + '/5・' + maMd(d.to) + ' 第' + r.rank + '名', addedAt: today }));
-  const sig = (xs) => xs.map((it) => it.code + '|' + (it.note || '')).join(',');
-  const g = wl.data.groups.find((x) => x.id === MA_HIT_WL_ID);
-  if (g && g.name === MA_HIT_WL_NAME && sig(g.items) === sig(items)) return false;
-  wlMutate((data) => {
-    let gg = data.groups.find((x) => x.id === MA_HIT_WL_ID);
-    if (!gg){ gg = { id: MA_HIT_WL_ID, name: MA_HIT_WL_NAME, items: [] }; data.groups.push(gg); }
-    gg.name = MA_HIT_WL_NAME;
-    gg.items = items.map((it) => ({ ...it }));
-  });
-  return true;
+  maWlLast.hits = d;
+  return maWlApply();
 }
 async function maWlTick(){
   if (maWlLoading || wl.loading || wl.busy) return;
   if (wl.key && !wl.syncedAt) return;                       // 有同步碼但雲端那份還沒讀回來：先不動，免得蓋掉
-  if (Date.now() - maWlAt < 25 * 60e3) return;              // 25 分鐘看一次就夠（排行一天才換一次）
+  if (Date.now() - maWlAt < (maLiveHours() ? 50 * 1000 : 25 * 60e3)) return;   // 盤中每分鐘看一次；其他時間 25 分鐘看一次就夠（排行一天才換一次）
   maWlLoading = true;
   try {
     const d = await maFetch('/api/ma-rank');
-    maSyncWatchlist(d);
-    try { maHitsSyncWatchlist(await maFetch('/api/ma-rank-hits?' + MA_HIT_QS)); } catch (_){ /* 常客那份抓不到，下一輪再試 */ }
+    if (d && d.status === 'ok' && !d.teacher && Array.isArray(d.stocks) && d.stocks.length && (!d.latest || d.date === d.latest)) maWlLast.rank = d;
+    try {
+      const h = await maFetch('/api/ma-rank-hits?' + MA_HIT_QS);
+      if (h && h.status === 'ok' && Array.isArray(h.rows) && h.rows.length) maWlLast.hits = h;
+    } catch (_){ /* 常客那份抓不到，下一輪再試 */ }
+    maWlApply();
     maWlAt = Date.now();
   } catch (_){ /* 抓不到下一分鐘再試 */ } finally { maWlLoading = false; }
 }
 setTimeout(maWlTick, 8000);
-setInterval(maWlTick, 60000);
+setInterval(maWlTick, 30000);
 async function maHitsLoad(){
   maState.hitsLoading = true;
   maState.hitOpen = -1;
@@ -25221,9 +25298,11 @@ function renderMa(){
   const view = maViewRows();
   const dateSel = '<select data-ma-date="1">' + (d.dates || []).slice().reverse().map((x) => '<option value="' + x + '"' + (x === d.date ? ' selected' : '') + '>' + maMd(x) + '</option>').join('') + '</select>';
   body.innerHTML =
-    '<div class="ma-stamp">資料日 ' + d.date + '・族群成員 ' + d.n + ' 檔已計分' + (d.teacher ? '（已拿掉老師名單沒有的 ' + (d.teacherAbsent || 18) + ' 檔，名次照剩下的排）' : '') + (d.updated ? '・更新 ' + String(d.updated).slice(0, 16).replace('T', ' ') : '') +
+    '<div class="ma-stamp">資料日 ' + d.date + (d.live ? '（盤中即時 ' + wlEsc(d.asOf || '') + '）' : '') + '・族群成員 ' + d.n + ' 檔已計分' + (d.teacher ? '（已拿掉老師名單沒有的 ' + (d.teacherAbsent || 18) + ' 檔，名次照剩下的排）' : '') + (d.updated ? '・更新 ' + String(d.updated).slice(0, 16).replace('T', ' ') : '') +
       (maState.loading ? '・讀取中…' : '') + '</div>' +
-    '<div class="ma-note">🕐 <b>每個交易日收盤後更新一次</b> —— 收完盤才是當天完整的數字。上面那行「資料日」就是這份分數算到哪一天。</div>' +
+    (d.live
+      ? '<div class="ma-note">⚡ <b>盤中即時</b>（報價 ' + wlEsc(d.asOf || '') + '）—— 用現價當今天收盤重算分數和名次，每 30 秒內更新一次；收盤後以正式整表為準，名次可能再微調。個股分數前 20 名、前二十名常客也同步放進自選股，盤中跟著動。</div>'
+      : '<div class="ma-note">🕐 <b>每個交易日收盤後更新一次</b> —— 收完盤才是當天完整的數字。上面那行「資料日」就是這份分數算到哪一天。盤中打開這頁（沒選舊日期）會改用現價即時重算。</div>') +
     '<div class="ma-intro">這頁幫每一檔股票<b>打分數，滿分 15 分</b>。分數越高，代表這檔股票<b>現在的位置越強、走勢站得越穩</b>；分數低不代表不好，多半是還在整理、或是已經走弱。分數講的是「<b>位置強不強</b>」，不是買賣點。</div>' +
     '<div id="maIdxTable">' + idxTableHtml() + '</div>' +
     maQueryHtml() +
@@ -25369,9 +25448,24 @@ function czSetMode(on){
   document.body.classList.toggle('cz-mode', czMode);
   document.getElementById('czBar').hidden = !czMode;
   czApply();
+  if (czMode) czTabletRefresh();
 }
 document.getElementById('czBtn').addEventListener('click', () => czSetMode(!czMode));
 document.getElementById('czDone').addEventListener('click', () => czSetMode(false));
+// 平板字體大小（2026-10-24 使用者：iPad 字太小、整頁比例跟 iPhone 差不多，要放大）：只在平板（iPad／Android 平板）有效，
+// 靠 <head> 裡那段把 viewport 寬度縮成 螢幕寬 ÷ 倍率，等於整頁（含視窗、下方導覽列）等比放大；自訂畫面的列上 ＋／－ 調整，存在這台裝置。
+function czTabletRefresh(){
+  const box = document.getElementById('czTab');
+  if (!box || !window.tabletScale) return;
+  box.hidden = !window.tabletScale.isTablet();
+  document.getElementById('czTabVal').textContent = Math.round(window.tabletScale.get() * 100) + '%';
+}
+document.getElementById('czBar').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-tab-scale]');
+  if (!b || !window.tabletScale) return;
+  window.tabletScale.step(Number(b.dataset.tabScale));
+  czTabletRefresh();
+});
 document.getElementById('czAll').addEventListener('click', (e) => { e.preventDefault(); czHidden = new Set(); czSave(); czApply(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && czMode) czSetMode(false); });
 // 自訂模式下點項目＝切換勾選（不打開那個功能）；放在最前面（capture）才擋得住按鈕原本的點擊
@@ -26073,6 +26167,12 @@ async function fetchMoveNews(code, name) {
   return data;
 }
 
+// 均線分數排行／前二十名常客的快取秒數：沒指定日期、或指定的是今天（台北）＝可能是盤中即時，30 秒；回看舊日期的歷史資料 5 分鐘
+function maLiveTtl(url) {
+  const date = url.searchParams.get("date");
+  return !date || date === new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10) ? 30 : 300;
+}
+
 async function proxyHanstockBars(pathname, cacheSeconds = 20) {
   // 代理到 Railway 上 HanStock 主要服務自己的 Hub API（用 Railway 專屬網址，
   // 不依賴 hanstock.xyz 這個要續約的自訂網域，到期也不受影響）。
@@ -26462,8 +26562,9 @@ export default {
       return await proxyHanstockBars("/api/hub/revenue/stock" + url.search, 60);
     }
     if (url.pathname === "/api/ma-rank") {
-      // 均線分數排行（2026-10-10 使用者：照老師 zhuang.tw/ma 做）：個股分數前 60＋族群分數前十大，收盤後才變，5 分鐘快取
-      return await proxyHanstockBars("/api/hub/ma-rank" + url.search, 300);
+      // 均線分數排行（2026-10-10 使用者：照老師 zhuang.tw/ma 做）：個股分數前 60＋族群分數前十大。
+      // 2026-10-24 使用者：盤中也要即時——沒指定日期（或選到今天）時後端用現價當今天收盤重算（回 live＝true），所以快取 30 秒；回看舊日期的歷史資料照舊 5 分鐘（選到今天＝還是即時，也 30 秒）
+      return await proxyHanstockBars("/api/hub/ma-rank" + url.search, maLiveTtl(url));
     }
     if (url.pathname === "/api/ma-strength") {
       // 今日強勢股／弱勢股（2026-10-12 使用者）：族群分數前十大（倒數十名）裡均線分數高（低）的股票。
@@ -26471,8 +26572,8 @@ export default {
       return await proxyHanstockBars("/api/hub/ma-rank/strength" + url.search, url.searchParams.get("date") ? 300 : 30);
     }
     if (url.pathname === "/api/ma-rank-hits") {
-      // 均線分數排行的前十名常客（近 N 天每天取前 K 名，同分全算），5 分鐘快取
-      return await proxyHanstockBars("/api/hub/ma-rank/hits" + url.search, 300);
+      // 均線分數排行的前十名常客（近 N 天每天取前 K 名，同分全算）。2026-10-24：沒指定日期時最後一天盤中用現價即時算，快取 30 秒；指定日期照舊 5 分鐘
+      return await proxyHanstockBars("/api/hub/ma-rank/hits" + url.search, maLiveTtl(url));
     }
     if (url.pathname === "/api/index-score") {
       // 指數均線分數（2026-10-24 使用者：櫃買分數、加權分數）：收盤後才變，5 分鐘快取

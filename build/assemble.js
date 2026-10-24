@@ -26,6 +26,17 @@ const fullHtml =
   '<!DOCTYPE html>\n<html lang="zh-Hant">\n<head>\n' +
   '<meta charset="UTF-8">\n' +
   '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+  // 2026-10-24 使用者：iPad 字太小（整頁比例跟 iPhone 差不多）。平板上把 viewport 寬度縮成「螢幕寬 ÷ 倍率」，瀏覽器就會整頁等比放大
+  // （視窗、下方導覽列、K線圖一起放大，media query／vw／vh 也都跟著新寬度算，不像 CSS zoom 會讓 vh 跑掉）。倍率存在這台裝置（localStorage tabletScale），
+  // 預設 1.25；在「自訂」的列上用 ＋／－ 調。電腦、手機不動。
+  '<script>(function(){var KEY="tabletScale",LV=[1,1.15,1.25,1.4,1.6],DEF=1.25;\n' +
+  'function tablet(){try{if(Math.min(screen.width,screen.height)<700)return false;return matchMedia("(pointer:coarse)").matches||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent));}catch(e){return false;}}\n' +
+  'function get(){var v=NaN;try{v=parseFloat(localStorage.getItem(KEY));}catch(e){}return LV.indexOf(v)>=0?v:DEF;}\n' +
+  'function apply(){var m=document.querySelector("meta[name=viewport]");if(!m)return;var sc=tablet()?get():1,c;\n' +
+  'if(sc<=1)c="width=device-width, initial-scale=1";else{var a=Math.min(screen.width,screen.height),b=Math.max(screen.width,screen.height),land=matchMedia("(orientation: landscape)").matches;c="width="+Math.round((land?b:a)/sc);}\n' +
+  'if(m.getAttribute("content")!==c)m.setAttribute("content",c);}\n' +
+  'window.tabletScale={isTablet:tablet,get:get,step:function(d){var i=LV.indexOf(get())+d;i=Math.max(0,Math.min(LV.length-1,i));try{localStorage.setItem(KEY,String(LV[i]));}catch(e){}apply();}};\n' +
+  'apply();window.addEventListener("orientationchange",function(){setTimeout(apply,50);});window.addEventListener("resize",apply);})();</script>\n' +
   headPart +
   '\n</head>\n<body>' +
   bodyPart +
@@ -446,6 +457,12 @@ async function fetchMoveNews(code, name) {
   return data;
 }
 
+// 均線分數排行／前二十名常客的快取秒數：沒指定日期、或指定的是今天（台北）＝可能是盤中即時，30 秒；回看舊日期的歷史資料 5 分鐘
+function maLiveTtl(url) {
+  const date = url.searchParams.get("date");
+  return !date || date === new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10) ? 30 : 300;
+}
+
 async function proxyHanstockBars(pathname, cacheSeconds = 20) {
   // 代理到 Railway 上 HanStock 主要服務自己的 Hub API（用 Railway 專屬網址，
   // 不依賴 hanstock.xyz 這個要續約的自訂網域，到期也不受影響）。
@@ -835,8 +852,9 @@ export default {
       return await proxyHanstockBars("/api/hub/revenue/stock" + url.search, 60);
     }
     if (url.pathname === "/api/ma-rank") {
-      // 均線分數排行（2026-10-10 使用者：照老師 zhuang.tw/ma 做）：個股分數前 60＋族群分數前十大，收盤後才變，5 分鐘快取
-      return await proxyHanstockBars("/api/hub/ma-rank" + url.search, 300);
+      // 均線分數排行（2026-10-10 使用者：照老師 zhuang.tw/ma 做）：個股分數前 60＋族群分數前十大。
+      // 2026-10-24 使用者：盤中也要即時——沒指定日期（或選到今天）時後端用現價當今天收盤重算（回 live＝true），所以快取 30 秒；回看舊日期的歷史資料照舊 5 分鐘（選到今天＝還是即時，也 30 秒）
+      return await proxyHanstockBars("/api/hub/ma-rank" + url.search, maLiveTtl(url));
     }
     if (url.pathname === "/api/ma-strength") {
       // 今日強勢股／弱勢股（2026-10-12 使用者）：族群分數前十大（倒數十名）裡均線分數高（低）的股票。
@@ -844,8 +862,8 @@ export default {
       return await proxyHanstockBars("/api/hub/ma-rank/strength" + url.search, url.searchParams.get("date") ? 300 : 30);
     }
     if (url.pathname === "/api/ma-rank-hits") {
-      // 均線分數排行的前十名常客（近 N 天每天取前 K 名，同分全算），5 分鐘快取
-      return await proxyHanstockBars("/api/hub/ma-rank/hits" + url.search, 300);
+      // 均線分數排行的前十名常客（近 N 天每天取前 K 名，同分全算）。2026-10-24：沒指定日期時最後一天盤中用現價即時算，快取 30 秒；指定日期照舊 5 分鐘
+      return await proxyHanstockBars("/api/hub/ma-rank/hits" + url.search, maLiveTtl(url));
     }
     if (url.pathname === "/api/index-score") {
       // 指數均線分數（2026-10-24 使用者：櫃買分數、加權分數）：收盤後才變，5 分鐘快取
