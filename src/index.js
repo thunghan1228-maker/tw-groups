@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 09:58:07";
+const BUILD_STAMP = "2026-10-24 10:04:20";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3777,7 +3777,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="chips-head">
       <div>
         <div class="chips-title">觀察股簡報</div>
-        <div class="chips-sub">照老師影片的兩張投影片：營收「觀察股誰在加速」（全部族群 9 月營收最強的前十名）、族群「本週誰最強」（全部族群本週平均漲跌前十名）；每個族群再抓強勢股，有發動的標紅點。</div>
+        <div class="chips-sub">照老師影片的兩張投影片：營收「觀察股誰在加速」（全部族群 9 月營收最強的前十名）、族群「本週誰最強」（全部族群本週平均漲跌前十名）；每個族群再抓強勢股，本週有亮燈（收盤漲停）的標紅點。</div>
       </div>
       <button class="cm-icon-btn" id="briefClose" aria-label="關閉">✕</button>
     </div>
@@ -15594,7 +15594,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 09:58:07';
+const BUILD_STAMP = '2026-10-24 10:04:20';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19520,7 +19520,7 @@ const GUIDE_TOOLS = [
   { t: '盤後籌碼排行', label: '今日盤後籌碼排行', v: 'tb-chips', tags: ['盤後', '每週'], d: '看大戶手上的股票變多還是變少：籌碼暴增雷達、法人連買、主力大單、放空籌碼，還有每週的籌碼週報。',
     b: ['集保大戶資料每週五更新一次', '可以跟醞釀／發動交叉看'] },
   { t: '📋 觀察股簡報', open: 'brief', tags: ['盤後'], d: '照老師影片兩張投影片做的簡報，兩張都是全部族群取前十名、再抓每個族群的強勢股：',
-    b: ['營收：全部族群照當月營收年增中位排名（前 10 名）、每個族群的強勢股（年增 ≥30%，標加速／放緩／年增為負、公布隔日漲跌）、全市場「營收公告 → 隔日漲跌」', '族群：本週（上週收盤 → 最新收盤）全部族群平均漲跌前 10 名、每個族群本週漲最多的強勢股、● ＝本週有發動'] },
+    b: ['營收：全部族群照當月營收年增中位排名（前 10 名）、每個族群的強勢股（年增 ≥30%，標加速／放緩／年增為負、公布隔日漲跌）、全市場「營收公告 → 隔日漲跌」', '族群：本週（上週收盤 → 最新收盤）全部族群平均漲跌前 10 名、每個族群的強勢股（本週漲最多＋有亮燈的）、● ＝本週有亮燈（收盤漲停）'] },
   { t: '均線分數排行', label: '均線分數排行', v: 'tb-ma', tags: ['盤後'], d: '幫每一檔打均線分數（滿分 15）：分數越高，代表位置越強、均線排得越整齊。',
     b: ['全市場前 60 名、昨天名次、連續上榜幾天', '族群平均分數排行：看哪一整群底子最硬', '打代號可以查單一檔'] },
   { t: '創高黑龍（自動）', label: '創高黑龍', v: 'tb-heilong', tags: ['盤後', '12:00 暫定'], d: '收盤後依均線分數＋收黑 K 挑出名單，附上過去績效回測；中午 12:00 先給一份暫定名單。',
@@ -20702,10 +20702,20 @@ function briefWeekPct(code, w){
   const a = st.close[0], b = st.close[w.baseIdx];
   return a > 0 && b > 0 ? (a / b - 1) * 100 : null;
 }
-function briefLitSet(w){   // 本週有發動（亮燈）的股票：本週每個交易日的發動名單（brew-launch-history）
-  const set = new Set();
-  try { (w ? w.weekDates : []).forEach((d) => { const day = brewHistoryDay(d); (day && day.launch || []).forEach((r) => { if (brewCloseState(r, d) !== 'fallen') set.add(r.code); }); }); } catch (_){}
-  return set;
+// 2026-10-24 使用者：族群那張的紅點。拿老師 10/16→10/22 那張卡上的 32 檔對日K反推：有紅點的 10 檔剛好都是「本週有收盤漲停（鎖到收盤）」，
+// 沒有紅點的 22 檔本週一次都沒有收盤漲停（盤中摸到漲停價但沒鎖住的也沒有點，例如南亞、禾伸堂、安碁）→ 老師的「亮燈」＝漲停亮燈。
+// 漲停價＝前收盤 ×1.1 往下取到升降單位（<10 元 0.01、<50 元 0.05、<100 元 0.1、<500 元 0.5、<1000 元 1、其餘 5）。
+function briefTick(p){ return p < 10 ? 0.01 : p < 50 ? 0.05 : p < 100 ? 0.1 : p < 500 ? 0.5 : p < 1000 ? 1 : 5; }
+function briefLimitUp(prev){ const raw = prev * 1.1, t = briefTick(raw); return Math.floor(raw / t + 1e-9) * t; }
+function briefLitDays(code, w){   // 本週哪幾天收盤漲停（日期，新到舊）；沒有日K資料＝空
+  const st = w && w.src && w.src.stocks ? w.src.stocks[code] : null;
+  if (!st || !Array.isArray(st.close)) return [];
+  const out = [];
+  for (let i = 0; i < w.baseIdx; i++){
+    const c = st.close[i], prev = st.close[i + 1];
+    if (c > 0 && prev > 0 && c >= briefLimitUp(prev) - 1e-6) out.push(w.src.dates[i]);
+  }
+  return out;
 }
 const briefLoading = (k, t, msg) => '<div class="bf-slide"><div class="bf-h"><span class="bf-k">' + k + '</span><span class="bf-t">' + t + '</span></div><div class="bf-rule"></div><div class="bf-none">' + msg + '</div></div>';
 function briefBars(rows, valueOf, tierOf, cntOf){   // 左邊長條：rows＝已排好的族群，valueOf＝長條的數字，tierOf＝顏色，cntOf＝右邊小字
@@ -20758,18 +20768,20 @@ function briefRevenueSlide(){
 function briefGroupSlide(){
   const w = briefWeek();
   if (!w) return briefLoading('族群', '熱門族群：本週誰最強', '族群日漲跌資料讀取中…（需要上週收盤到最新收盤的日線）');
-  const lit = briefLitSet(w);
-  // 2026-10-24 使用者：族群那張＝全部族群「本週平均漲跌」前十名，每個族群再抓本週最強的股票，有發動的標紅點
+  // 2026-10-24 使用者：族群那張＝全部族群「本週平均漲跌」前十名，每個族群再抓強勢股（本週漲最多的 + 本週有亮燈的），亮燈（本週有收盤漲停）的標紅點
   const ranked = GROUPS.map((g) => {
-    const ms = g.stocks.map((s) => ({ code: s.code, name: s.name, pct: briefWeekPct(s.code, w) })).filter((m) => m.pct != null);
+    const ms = g.stocks.map((s) => ({ code: s.code, name: s.name, pct: briefWeekPct(s.code, w), lit: briefLitDays(s.code, w) })).filter((m) => m.pct != null);
     return { g, ms, avg: ms.length >= BRIEF_MIN ? ms.reduce((a, m) => a + m.pct, 0) / ms.length : null };
   }).filter((r) => r.avg != null).sort((a, b) => b.avg - a.avg);
   const top = ranked.slice(0, BRIEF_TOP);
-  const sub = '族群平均漲跌 ＝ ' + briefMd(w.base) + ' 收 → ' + briefMd(w.latest) + ' 收・全部 ' + GROUPS.length + ' 個族群、有收盤價的成員 ≥ ' + BRIEF_MIN + ' 檔的 ' + ranked.length + ' 個照本週平均漲跌排名，列前 ' + top.length + ' 名・強勢股 ＝ 族群裡本週漲最多的前 ' + BRIEF_PER_GROUP + ' 檔・<span style="color:#ef4444">●</span> ＝ 本週有發動';
+  const sub = '族群平均漲跌 ＝ ' + briefMd(w.base) + ' 收 → ' + briefMd(w.latest) + ' 收・全部 ' + GROUPS.length + ' 個族群、有收盤價的成員 ≥ ' + BRIEF_MIN + ' 檔的 ' + ranked.length + ' 個照本週平均漲跌排名，列前 ' + top.length + ' 名・強勢股 ＝ 族群裡本週漲最多的前 ' + BRIEF_PER_GROUP + ' 檔＋本週有亮燈的・<span style="color:#ef4444">●</span> ＝ 本週有亮燈（收盤漲停）';
   const bars = top.length ? briefBars(top, (r) => r.avg, (v) => (v != null && v < 0 ? 'tneg' : 'up'), null) : '<div class="bf-none">還沒有足夠的資料。</div>';
   const cards = top.map((r) => {
-    const strong = r.ms.filter((m) => m.pct > 0).sort((a, b) => b.pct - a.pct).slice(0, BRIEF_PER_GROUP);
-    const mem = strong.map((m) => '<div class="bf-m" data-brief-code="' + rdEsc(m.code) + '" data-brief-name="' + rdEsc(m.name) + '" title="' + rdEsc(m.code + ' ' + m.name + '・本週 ' + briefPctTxt(m.pct, 2) + (lit.has(m.code) ? '・本週有發動' : '')) + '"><b>' + wlEsc(m.name) + '</b><span class="up">' + briefPctTxt(m.pct) + '</span>' + (lit.has(m.code) ? '<span class="dot" title="本週有發動"></span>' : '') + '</div>').join('');
+    const byPct = r.ms.slice().sort((a, b) => b.pct - a.pct);
+    const strong = byPct.filter((m) => m.pct > 0).slice(0, BRIEF_PER_GROUP);
+    byPct.forEach((m) => { if (m.lit.length && !strong.includes(m)) strong.push(m); });   // 本週有亮燈的一定列出來（就算整週收黑）
+    strong.sort((a, b) => b.pct - a.pct);
+    const mem = strong.map((m) => '<div class="bf-m" data-brief-code="' + rdEsc(m.code) + '" data-brief-name="' + rdEsc(m.name) + '" title="' + rdEsc(m.code + ' ' + m.name + '・本週 ' + briefPctTxt(m.pct, 2) + (m.lit.length ? '・亮燈（收盤漲停）' + m.lit.map(briefMd).join('、') : '')) + '"><b>' + wlEsc(m.name) + '</b><span class="' + (m.pct >= 0 ? 'up' : 'dn') + '">' + briefPctTxt(m.pct) + '</span>' + (m.lit.length ? '<span class="dot" title="本週亮燈（收盤漲停）"></span>' : '') + '</div>').join('');
     return '<div class="bf-gcard"><div class="bf-gl"><b>' + wlEsc(r.g.name) + '</b><span class="' + (r.avg < 0 ? 'dn' : 'up') + '" style="color:' + (r.avg < 0 ? '#12805c' : '#d92d20') + '">' + briefPctTxt(r.avg) + '</span><small>' + r.ms.length + ' 檔</small></div>'
       + '<div class="bf-gm">' + (mem || '<div class="bf-none">沒有收紅的</div>') + '</div></div>';
   }).join('');
@@ -20783,7 +20795,7 @@ function renderBrief(){
   if (!body) return;
   const scroll = document.getElementById('briefInner').scrollTop;
   body.innerHTML = briefRevenueSlide() + briefGroupSlide()
-    + '<div class="bf-foot">資料：營收＝公開資訊觀測站每月營業收入彙總表；漲跌＝證交所／櫃買日K；● ＝本站的發動名單（不是老師的亮燈，定義不一定一樣）。不是買賣建議。</div>';
+    + '<div class="bf-foot">資料：營收＝公開資訊觀測站每月營業收入彙總表；漲跌＝證交所／櫃買日K；● ＝亮燈＝本週有收盤漲停（用老師 10/22 那張卡的 32 檔對過，紅點跟漲停完全一致）。不是買賣建議。</div>';
   document.getElementById('briefInner').scrollTop = scroll;
 }
 function briefRerender(){ const m = document.getElementById('briefModal'); if (m && !m.hidden) renderBrief(); }
@@ -20792,7 +20804,6 @@ function openBriefPanel(){
   renderBrief();
   rvLoad(rvState.data && rvState.data.month);
   try { refreshGroupDailyChanges(false); } catch (_){}
-  try { refreshBrewHistory(false); } catch (_){}
 }
 document.getElementById('briefBtn').addEventListener('click', openBriefPanel);
 document.getElementById('briefClose').addEventListener('click', () => { document.getElementById('briefModal').hidden = true; });
@@ -20801,7 +20812,7 @@ document.getElementById('briefModal').addEventListener('click', (e) => {
   const c = e.target.closest('[data-brief-code]');
   if (c) openStockChart(c.dataset.briefCode, c.dataset.briefName);
 });
-setInterval(() => { briefRerender(); }, 60000);   // 開著就每分鐘用最新的資料重畫（日漲跌、發動名單）
+setInterval(() => { briefRerender(); }, 60000);   // 開著就每分鐘用最新的資料重畫（日漲跌）
 // ---- 營收成長榜（2026-10-09 使用者：照老師「每月營收成長榜 學員版」做一模一樣的）----
 // 後端 /api/revenue?month=：公開資訊觀測站「每月營業收入彙總表」（排程主機每天 12:30／18:30／23:30 抓），公布日＝我們第一次抓到的日期，
 // 收盤、成交量、公布隔日漲跌用我們的日K。段落照老師的順序：查個股營收、族群分析、多觀察分析（我們用自選股）、
