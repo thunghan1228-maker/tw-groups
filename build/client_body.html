@@ -13438,7 +13438,7 @@ function wlSyncHtml(){
 function wlTabsHtml(){
   return '<div class="wl-groups">' + wl.data.groups.map((g) => '<button class="wl-gtab' + (g.id === wl.active ? ' active' : '') + '" data-gid="' + wlEsc(g.id) + '">' +
       wlEsc(g.name) + '<span class="wl-gcount">' + g.items.length + '</span></button>').join('') +
-    '<button class="wl-gtab add" id="wlGroupAdd" title="新增一個分組">＋ 分組</button>' +
+    '<button class="wl-gtab add" id="wlGroupAdd" title="新增一個分組">＋ 增加分組</button>' +
     '<span class="wl-gops"><button class="wl-btn" id="wlGroupRename">改名</button><button class="wl-btn" id="wlGroupDelete">刪除這組</button></span></div>';
 }
 function renderWatch(){
