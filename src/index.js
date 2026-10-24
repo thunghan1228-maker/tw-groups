@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 10:19:52";
+const BUILD_STAMP = "2026-10-24 10:42:29";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3777,7 +3777,7 @@ const HTML_PAGE = `<!DOCTYPE html>
     <div class="chips-head">
       <div>
         <div class="chips-title">觀察股簡報</div>
-        <div class="chips-sub">照老師影片的兩張投影片：營收「觀察股誰在加速」（全部族群 9 月營收最強的前十名）、族群「本週誰最強」（全部族群本週平均漲跌前十名）；每個族群再抓強勢股，本週有亮燈（收盤漲停）的標紅點。</div>
+        <div class="chips-sub">照老師影片的兩張投影片：族群「本週誰最強」（全部族群本週平均漲跌前十名；每個族群再抓強勢股，本週有亮燈（收盤漲停）的標紅點）、營收「觀察股誰在加速」（全部族群 9 月營收最強的前十名）。</div>
       </div>
       <button class="cm-icon-btn" id="briefClose" aria-label="關閉">✕</button>
     </div>
@@ -15605,7 +15605,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 10:19:52';
+const BUILD_STAMP = '2026-10-24 10:42:29';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19531,7 +19531,7 @@ const GUIDE_TOOLS = [
   { t: '盤後籌碼排行', label: '今日盤後籌碼排行', v: 'tb-chips', tags: ['盤後', '每週'], d: '看大戶手上的股票變多還是變少：籌碼暴增雷達、法人連買、主力大單、放空籌碼，還有每週的籌碼週報。',
     b: ['集保大戶資料每週五更新一次', '可以跟醞釀／發動交叉看'] },
   { t: '📋 觀察股簡報', open: 'brief', tags: ['盤後'], d: '照老師影片兩張投影片做的簡報，兩張都是全部族群取前十名、再抓每個族群的強勢股：',
-    b: ['營收：全部族群照當月營收年增中位排名（前 10 名）、每個族群的強勢股（年增 ≥30%，標加速／放緩／年增為負、公布隔日漲跌）、全市場「營收公告 → 隔日漲跌」', '族群：本週（上週收盤 → 最新收盤）全部族群平均漲跌前 10 名、每個族群的強勢股（本週漲最多＋有亮燈的）、● ＝本週有亮燈（收盤漲停）'] },
+    b: ['族群（上面）：本週（上週收盤 → 最新收盤）全部族群平均漲跌前 10 名、每個族群的強勢股（本週漲最多＋有亮燈的）、● ＝本週有亮燈（收盤漲停）', '營收（下面）：全部族群照當月營收年增中位排名（前 10 名）、每個族群的強勢股（年增 ≥30%，標加速／放緩／年增為負、公布隔日漲跌）、全市場「營收公告 → 隔日漲跌」'] },
   { t: '均線分數排行', label: '均線分數排行', v: 'tb-ma', tags: ['盤後'], d: '幫每一檔打均線分數（滿分 15）：分數越高，代表位置越強、均線排得越整齊。',
     b: ['全市場前 60 名、昨天名次、連續上榜幾天', '族群平均分數排行：看哪一整群底子最硬', '打代號可以查單一檔'] },
   { t: '創高黑龍（自動）', label: '創高黑龍', v: 'tb-heilong', tags: ['盤後', '12:00 暫定'], d: '收盤後依均線分數＋收黑 K 挑出名單，附上過去績效回測；中午 12:00 先給一份暫定名單。',
@@ -20805,7 +20805,7 @@ function renderBrief(){
   const body = document.getElementById('briefBody');
   if (!body) return;
   const scroll = document.getElementById('briefInner').scrollTop;
-  body.innerHTML = briefRevenueSlide() + briefGroupSlide()
+  body.innerHTML = briefGroupSlide() + briefRevenueSlide()   // 2026-10-24 使用者：熱門族群（本週誰最強）放上面、營收（觀察股誰在加速）放下面
     + '<div class="bf-foot">資料：營收＝公開資訊觀測站每月營業收入彙總表；漲跌＝證交所／櫃買日K；● ＝亮燈＝本週有收盤漲停（用老師 10/22 那張卡的 32 檔對過，紅點跟漲停完全一致）。不是買賣建議。</div>';
   document.getElementById('briefInner').scrollTop = scroll;
 }
