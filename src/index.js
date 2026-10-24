@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 10:54:12";
+const BUILD_STAMP = "2026-10-24 12:00:28";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2890,13 +2890,13 @@ const HTML_PAGE = `<!DOCTYPE html>
   .jl-q .rv-mark.accel.active{background:#db2777;color:#fff;} .jl-q .rv-mark.decel.active{background:#16a34a;color:#fff;}
   .rv-foot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:8px;line-height:1.6;}
   /* 2026-10-24 使用者：觀察股簡報——照老師影片兩張投影片（營收「觀察股誰在加速」、族群「本週誰最強」）做的新版面：淺色底、紫色重點、白卡片 */
-  #briefModal .chips-inner{--bg:#f6f3ee;--panel:#fffdf9;--panel-2:#f4eee3;--line:#e6dbc9;--text:#2d241b;--muted:#7c6f60;--up:#d92d20;--down:#12805c;--accent:#5b3fd6;
+  :is(#briefModal,#mbModal) .chips-inner{--bg:#f6f3ee;--panel:#fffdf9;--panel-2:#f4eee3;--line:#e6dbc9;--text:#2d241b;--muted:#7c6f60;--up:#d92d20;--down:#12805c;--accent:#5b3fd6;
     background:#f6f3ee;color:var(--text);border:1px solid #d8ccb8;width:min(1040px,97vw);padding:20px 26px 26px;box-shadow:0 14px 44px rgba(40,25,5,.45);}
-  #briefModal .chips-head{background:transparent;color:var(--text);padding:0;border-radius:0;margin-bottom:4px;align-items:flex-start;}
-  #briefModal .chips-head>div:first-child::before{content:'每日簡報';display:inline-block;border:1px solid #5b3fd6;color:#5b3fd6;background:#fffdf9;padding:6px 18px;font-size:12.5px;letter-spacing:.3em;margin-bottom:14px;}
-  #briefModal .chips-title{font-family:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;font-size:32px;font-weight:900;color:#5b3fd6;line-height:1.25;}
-  #briefModal .chips-sub{color:var(--text);font-size:13.5px;margin-top:8px;}
-  #briefModal .cm-icon-btn{background:#fffdf9;color:#2d241b;border-color:#d8ccb8;}
+  :is(#briefModal,#mbModal) .chips-head{background:transparent;color:var(--text);padding:0;border-radius:0;margin-bottom:4px;align-items:flex-start;}
+  :is(#briefModal,#mbModal) .chips-head>div:first-child::before{content:'每日簡報';display:inline-block;border:1px solid #5b3fd6;color:#5b3fd6;background:#fffdf9;padding:6px 18px;font-size:12.5px;letter-spacing:.3em;margin-bottom:14px;}
+  :is(#briefModal,#mbModal) .chips-title{font-family:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;font-size:32px;font-weight:900;color:#5b3fd6;line-height:1.25;}
+  :is(#briefModal,#mbModal) .chips-sub{color:var(--text);font-size:13.5px;margin-top:8px;}
+  :is(#briefModal,#mbModal) .cm-icon-btn{background:#fffdf9;color:#2d241b;border-color:#d8ccb8;}
   .bf-slide{margin:22px 0 30px;}
   .bf-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:0;}
   .bf-h .bf-k{font-size:26px;font-weight:900;color:#5b3fd6;} .bf-h .bf-t{font-size:26px;font-weight:900;color:#1f1b16;}
@@ -2937,8 +2937,32 @@ const HTML_PAGE = `<!DOCTYPE html>
   .bf-m b{font-weight:700;} .bf-m .up{color:#d92d20;margin-left:4px;} .bf-m .dn{color:#12805c;margin-left:4px;} .bf-m small{font-size:11.5px;} .bf-m .bf-v{font-size:inherit;margin-left:4px;font-weight:700;} .bf-m .acc{color:#d92d20;margin-left:2px;} .bf-m .dec{color:#12805c;margin-left:2px;} .bf-m .wn{color:#b45309;margin-left:2px;} .bf-m.bf-more{color:#7c6f60;cursor:default;} .bf-m.bf-more:hover{background:none;} .bf-m .dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#ef4444;margin-left:4px;vertical-align:-1px;}
   .bf-note{background:#fbf4de;border:1px solid #e8d9a8;border-radius:14px;padding:10px 16px;font-size:13px;line-height:1.7;}
   .bf-foot{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:6px;}
+  /* 2026-10-24 使用者：融資簡報（照老師 IG 那 7 張：融資還沒殺完、單日增減、指數先跌融資才剛退、均線位置）——沿用觀察股簡報的淺色版面 */
+  #mbModal .chips-head>div:first-child::before{content:'每日簡報・融資';}
+  .mb-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+  .mb-stat{background:#fffdf9;border:1px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center;box-shadow:0 1px 4px rgba(80,55,20,.08);}
+  .mb-stat.cur{border-color:#c8a24a;background:#fbf4de;}
+  .mb-stat small{display:block;font-size:12px;color:#7c6f60;line-height:1.4;}
+  .mb-stat b{display:block;font-size:22px;line-height:1.35;color:#2d241b;} .mb-stat .mb-p{font-size:13px;font-weight:700;}
+  .mb-neg{color:#12805c;} .mb-pos{color:#d92d20;}
+  .mb-chip{display:inline-block;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;background:#f1ecfb;color:#5b3fd6;}
+  .mb-note{background:#fbf4de;border:1px solid #e8d9a8;border-radius:14px;padding:10px 16px;font-size:13.5px;line-height:1.8;color:#2d241b;}
+  .mb-note b{color:#a16207;}
+  .mb-bars{display:flex;gap:4px;align-items:stretch;margin-top:4px;}
+  .mb-bcol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:stretch;}
+  .mb-bpos,.mb-bneg{height:84px;display:flex;flex-direction:column;align-items:center;}
+  .mb-bpos{justify-content:flex-end;} .mb-bneg{justify-content:flex-start;border-top:1px solid #d8ccb8;}
+  .mb-bcol .mb-bar{width:78%;border-radius:3px;min-height:2px;} .mb-bcol .mb-bar.up{background:#ef4444;} .mb-bcol .mb-bar.dn{background:#16a34a;}
+  .mb-bcol .mb-bv{font-size:12px;font-weight:700;line-height:1.3;white-space:nowrap;} .mb-bcol .mb-bv.up{color:#d92d20;} .mb-bcol .mb-bv.dn{color:#12805c;}
+  .mb-bcol .mb-bd{font-size:11px;color:#7c6f60;text-align:center;margin-top:3px;white-space:nowrap;}
+  .mb-svg{width:100%;height:auto;display:block;} .mb-svg text{font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;}
+  .mb-ladder{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14.5px;}
+  .mb-ladder td{padding:7px 8px;border-bottom:1px solid #eee3d2;} .mb-ladder td:nth-child(2){text-align:right;font-weight:700;} .mb-ladder td:nth-child(3){text-align:right;color:#7c6f60;}
+  .mb-ladder tr.me td{background:#f1ecfb;font-weight:800;color:#3a3180;}
+  @media (max-width: 640px){ .mb-stat b{font-size:18px;} .mb-bcol .mb-bv{font-size:10.5px;} .mb-bcol .mb-bd{font-size:9.5px;} .mb-bars{gap:2px;} }
+
   @media (max-width: 860px){ .bf-grid{grid-template-columns:1fr;} .bf-list{grid-template-columns:1fr;} .bf-gcard{grid-template-columns:84px minmax(0,1fr);} .bf-gcard .bf-gm,.bf-gcard .bf-gm.four{grid-template-columns:repeat(2,minmax(0,1fr));} }
-  @media (max-width: 640px){ #briefModal .chips-inner{padding:14px 12px 22px;} #briefModal .chips-title{font-size:25px;} .bf-h .bf-k,.bf-h .bf-t{font-size:21px;} .bf-bar{grid-template-columns:64px minmax(0,1fr) 44px;} }
+  @media (max-width: 640px){ :is(#briefModal,#mbModal) .chips-inner{padding:14px 12px 22px;} :is(#briefModal,#mbModal) .chips-title{font-size:25px;} .bf-h .bf-k,.bf-h .bf-t{font-size:21px;} .bf-bar{grid-template-columns:64px minmax(0,1fr) 44px;} }
 
   /* 2026-10-23 使用者：均線分數排行、每月營收成長榜改成跟老師（zhuang.tw）一樣的淺色底版面：米白底、白卡片、紅褐標題；內容寬度跟老師頁差不多，表格比較寬就左右捲 */
   #maModal .chips-inner,#revModal .chips-inner{--bg:#f6f3ee;--panel:#fffdf9;--panel-2:#f4eee3;--line:#e6dbc9;--text:#2d241b;--muted:#7c6f60;--up:#b3261e;--down:#0f7b5a;--accent:#a63a2b;
@@ -3665,6 +3689,7 @@ const HTML_PAGE = `<!DOCTYPE html>
       <button class="alert-toggle guide-btn" id="czBtn" title="自訂畫面：選擇哪些按鈕要留著、哪些收起來（畫面比較精簡）">⊙ 自訂</button>  <!-- 2026-10-23 使用者：照莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，勾掉就收起來；全部顯示一鍵復原 -->
       <button class="alert-toggle guide-btn" id="botBtn">🤖 機器人代碼</button>  <!-- 2026-10-17 使用者：照對方 Line 機器人的代碼（12／22／B／a／70…）做一個輸入代碼的面板 -->
       <button class="alert-toggle guide-btn" id="briefBtn">📋 觀察股簡報</button>  <!-- 2026-10-24 使用者：照老師影片兩張投影片（營收觀察股誰在加速、族群本週誰最強）做新版面，名單用自選股 -->
+      <button class="alert-toggle guide-btn" id="mbBtn">💰 融資簡報</button>  <!-- 2026-10-24 使用者：照老師 IG 那 7 張融資還沒殺完做的獨立簡報 -->
       <button class="alert-toggle guide-btn" id="wgBtn">⭐ 自選族群個股</button>  <!-- 2026-10-23 使用者：盤中訊號旁邊加分頁，輸入個股代號就開一格那檔所屬族群的排行（像機器人代碼），每檔旁邊有融資斷頭價 A／B -->
       <button class="alert-toggle guide-btn" id="sgtBtn">📶 盤中訊號分頁</button>  <!-- 2026-10-18 使用者：盤中訊號的分頁也做成機器人代碼那樣，點了開一格、一格一格往右排 -->
       <button class="alert-toggle guide-btn" id="remindBtn">🔔 今日提醒</button>  <!-- 2026-10-17 使用者：每天第一次打開跳出警示股提醒（解鎖／連續警告／分盤交易），關掉後這裡再開 -->
@@ -3783,6 +3808,19 @@ const HTML_PAGE = `<!DOCTYPE html>
       <button class="cm-icon-btn" id="briefClose" aria-label="關閉">✕</button>
     </div>
     <div id="briefBody"></div>
+  </div>
+</div>
+<!-- 2026-10-24 使用者：照老師 IG 那 7 張「融資還沒殺完」做獨立的「融資簡報」（右上角按鈕），資料用資金保護傘的上市融資餘額＋加權日K -->
+<div class="chips-modal" id="mbModal" hidden>
+  <div class="chips-inner" id="mbInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">融資簡報</div>
+        <div class="chips-sub">每天只盯一個數字：上市融資餘額。這次從高點退了多少、跟上一次大跌比、指數跟融資誰先動、加權在月線／季線／半年線的哪裡。全部用資料自己算，行情變了會跟著換。</div>
+      </div>
+      <button class="cm-icon-btn" id="mbClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="mbBody"></div>
   </div>
 </div>
 <!-- 2026-10-10 使用者：照老師「均線分數排行 滿分 15」（zhuang.tw/ma）做（下方導覽列「均線分數排行」，手機／iPad 放上排第 6 顆） -->
@@ -15607,7 +15645,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 10:54:12';
+const BUILD_STAMP = '2026-10-24 12:00:28';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19534,6 +19572,8 @@ const GUIDE_TOOLS = [
     b: ['集保大戶資料每週五更新一次', '可以跟醞釀／發動交叉看'] },
   { t: '📋 觀察股簡報', open: 'brief', tags: ['盤後'], d: '照老師影片兩張投影片做的簡報，兩張都是全部族群取前十名、再抓每個族群的強勢股：',
     b: ['族群（上面）：本週（上週收盤 → 最新收盤）全部族群平均漲跌前 10 名、每個族群的強勢股（本週漲最多＋本週曾亮燈的）、● ＝本週曾亮燈（收盤漲停）', '營收（下面）：全部族群照當月營收年增中位排名（前 10 名）、每個族群的強勢股（年增 ≥30%，標加速／放緩／年增為負、公布隔日漲跌）、全市場「營收公告 → 隔日漲跌」'] },
+  { t: '💰 融資簡報', open: 'mb', tags: ['盤後'], d: '照老師 IG 那 7 張「融資還沒殺完」做的簡報，每天只盯上市融資餘額：',
+    b: ['這次融資從高點退了多少，跟上一次大跌（頂→A 段、頂→整段）並排比，算出「這次只退了上一次的幾 %」', '每天融資增減長條圖、指數跟融資的走勢（誰先見頂、差幾天）、加權在月線／季線／半年線的位置'] },
   { t: '均線分數排行', label: '均線分數排行', v: 'tb-ma', tags: ['盤後'], d: '幫每一檔打均線分數（滿分 15）：分數越高，代表位置越強、均線排得越整齊。',
     b: ['全市場前 60 名、昨天名次、連續上榜幾天', '族群平均分數排行：看哪一整群底子最硬', '打代號可以查單一檔'] },
   { t: '創高黑龍（自動）', label: '創高黑龍', v: 'tb-heilong', tags: ['盤後', '12:00 暫定'], d: '收盤後依均線分數＋收黑 K 挑出名單，附上過去績效回測；中午 12:00 先給一份暫定名單。',
@@ -19744,6 +19784,7 @@ document.getElementById('guideBody').addEventListener('click', (e) => {
   if (tool.open === 'bot'){ openBotPanel(); return; }
   if (tool.open === 'remind'){ openRemindPanel(); return; }
   if (tool.open === 'brief'){ openBriefPanel(); return; }
+  if (tool.open === 'mb'){ openMbPanel(); return; }
   const btn = document.querySelector('#toolbarBottom .tb-btn[data-label="' + tool.label + '"]');
   if (btn) btn.click();
 });
@@ -20861,6 +20902,134 @@ document.getElementById('briefModal').addEventListener('click', (e) => {
   if (c) openStockChart(c.dataset.briefCode, c.dataset.briefName);
 });
 setInterval(() => { briefRerender(); }, 60000);   // 開著就每分鐘用最新的資料重畫（日漲跌）
+// ---- 融資簡報（2026-10-24 使用者：照老師 IG 那 7 張「融資還沒殺完」做獨立的簡報，右上角「💰 融資簡報」）----
+// 資料＝資金保護傘 /api/fund-umbrella（fuState）：每天的上市融資餘額 m、上櫃融資 mo、加權收盤 t、當天最高 th。老師的數字（6,533→6,339 億、-105、七月 -1,375／-623）都用這份對過。
+// 全部自己算、不寫死日期：指數高點＝近 120 個交易日加權最高（盤中）；這次融資高點＝指數高點前 10 個交易日起到現在的最高；
+// 上一次＝崩盤清單裡最近一次已經收復的（資金保護傘的 crashes），頂＝那段融資最高那天、C＝那段指數最低那天、A＝頂之後第一個反彈 ≥5% 的低點。
+const MB_HIGH_DAYS = 120, MB_PRE_DAYS = 10, MB_A_REBOUND = 0.05, MB_BAR_DAYS = 11;
+// 整數億元用「四捨六入五成雙」（剛好 .5 取偶數）：我們的融資餘額只存到小數 1 位，-194.5 要顯示成老師的 -194、-83.5 顯示 -84（老師卡上都是這樣）
+function mbRound(v){ const f = Math.floor(v), r = v - f; return Math.abs(r - 0.5) < 1e-6 ? (f % 2 === 0 ? f : f + 1) : Math.round(v); }
+const mbNum = (v, d) => (v == null || !Number.isFinite(v)) ? '—' : Number(d ? v : mbRound(v)).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 });
+const mbSigned = (v, d) => (v == null || !Number.isFinite(v)) ? '—' : (v > 0 ? '+' : v < 0 ? '-' : '') + mbNum(Math.abs(v), d);
+const mbCls = (v) => v > 0 ? 'mb-pos' : v < 0 ? 'mb-neg' : '';
+const mbWeekdaysBetween = (a, b) => { let n = 0; const e = new Date(b + 'T00:00:00Z'); for (const d = new Date(a + 'T00:00:00Z'); d < e;){ d.setUTCDate(d.getUTCDate() + 1); if (d.getUTCDay() % 6) n++; } return n; };
+function mbCompute(){
+  const d = fuState.data;
+  if (!d || d.status !== 'ok' || !Array.isArray(d.series)) return null;
+  const s = d.series.filter((x) => x && x.m > 0 && x.t > 0);
+  if (s.length < 30) return null;
+  const dates = s.map((x) => x.d), last = s[s.length - 1];
+  const win = s.slice(-MB_HIGH_DAYS);
+  const hi = win.reduce((a, x) => ((x.th || x.t) > (a.th || a.t) ? x : a), win[0]);
+  const ih = dates.indexOf(hi.d);
+  const mWin = s.slice(Math.max(0, ih - MB_PRE_DAYS));
+  const mh = mWin.reduce((a, x) => (x.m > a.m ? x : a), mWin[0]);
+  const oWin = mWin.filter((x) => x.mo > 0), oh = oWin.length ? oWin.reduce((a, x) => (x.mo > a.mo ? x : a), oWin[0]) : null;
+  const idxHigh = hi.th || hi.t;
+  const out = { last, hi, idxHigh, idxPct: (last.t / idxHigh - 1) * 100, mh, mDelta: last.m - mh.m, mPct: (last.m / mh.m - 1) * 100,
+    lag: mbWeekdaysBetween(hi.d, mh.d), oh, oDelta: oh && last.mo > 0 ? last.mo - oh.mo : null, oPct: oh && last.mo > 0 ? (last.mo / oh.mo - 1) * 100 : null };
+  // 上一次：最近一次已收復、而且谷底在這次指數高點以前的崩盤
+  const prevC = (d.crashes || []).filter((c) => c.recovered && c.peakDate && c.troughDate && c.troughDate < hi.d).pop();
+  if (prevC && dates.includes(prevC.peakDate) && dates.includes(prevC.troughDate)){
+    const i0 = dates.indexOf(prevC.peakDate), i1 = dates.indexOf(prevC.troughDate);
+    const seg = s.slice(i0, i1 + 1);
+    const top = seg.reduce((a, x) => (x.m > a.m ? x : a), seg[0]), c = s[i1];
+    const j = dates.indexOf(top.d);
+    let lowV = s[j].t, lowI = j, aI = null;
+    for (let k = j + 1; k <= i1; k++){
+      if (s[k].t < lowV){ lowV = s[k].t; lowI = k; }
+      else if (s[k].t >= lowV * (1 + MB_A_REBOUND)){ aI = lowI; break; }
+    }
+    const a = aI != null && aI < i1 ? s[aI] : null;
+    out.prev = { top, c, a, full: c.m - top.m, fullPct: (c.m / top.m - 1) * 100, aD: a ? a.m - top.m : null, aPct: a ? (a.m / top.m - 1) * 100 : null };
+    out.ratio = out.prev.full < 0 ? out.mDelta / out.prev.full : null;
+  }
+  // 每天增減（最近 MB_BAR_DAYS 天）
+  out.bars = s.slice(-MB_BAR_DAYS).map((x, i, arr) => ({ d: x.d, v: x.m - s[s.length - arr.length + i - 1].m }));
+  // 走勢圖：從指數高點那天往前多留 2 天到現在，至少 12 個點
+  const from = Math.max(0, Math.min(ih - 2, s.length - 12));
+  out.line = s.slice(from);
+  // 均線（用加權收盤）
+  const ma = (n) => s.length >= n ? s.slice(-n).reduce((a, x) => a + x.t, 0) / n : null;
+  out.ma = [['月線 20', ma(20)], ['季線 60', ma(60)], ['半年線 120', ma(120)]].filter((x) => x[1] != null);
+  return out;
+}
+function mbStat(label, v, p, cur){ return '<div class="mb-stat' + (cur ? ' cur' : '') + '"><small>' + label + '</small><b>' + (v == null ? '—' : mbSigned(v, 0) + ' 億') + '</b><span class="mb-p ' + mbCls(p) + '">' + (p == null ? '' : mbSigned(p, 1) + '%') + '</span></div>'; }
+function mbBarsHtml(bars){
+  const maxAbs = Math.max(1, ...bars.map((b) => Math.abs(b.v)));
+  return '<div class="mb-bars">' + bars.map((b) => {
+    const h = Math.max(2, Math.abs(b.v) / maxAbs * 52).toFixed(0), up = b.v >= 0, lab = '<span class="mb-bv ' + (up ? 'up' : 'dn') + '">' + mbSigned(b.v, 0) + '</span>';
+    return '<div class="mb-bcol"><div class="mb-bpos">' + (up ? lab + '<span class="mb-bar up" style="height:' + h + 'px"></span>' : '') + '</div><div class="mb-bneg">' + (up ? '' : '<span class="mb-bar dn" style="height:' + h + 'px"></span>' + lab) + '</div><div class="mb-bd">' + briefMd(b.d) + '</div></div>';
+  }).join('') + '</div>';
+}
+function mbLineSvg(rows, key, color, hiDate, hiVal, fmt, lastLabel){
+  const W = 400, H = 126, L = 10, R = 10, T = 30, B = 24;
+  const vals = rows.map((r) => r[key]).concat(hiVal != null ? [hiVal] : []);
+  const lo = Math.min(...vals), hi = Math.max(...vals), span = (hi - lo) || 1;
+  const x = (i) => L + (W - L - R) * (rows.length < 2 ? 0.5 : i / (rows.length - 1));
+  const y = (v) => T + (H - T - B) * (1 - (v - lo) / span);
+  const pts = rows.map((r, i) => x(i).toFixed(1) + ',' + y(r[key]).toFixed(1)).join(' ');
+  const hiI = rows.findIndex((r) => r.d === hiDate), li = rows.length - 1;
+  const dot = (i, v, label, anchor, below) => '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="4.5" fill="#fffdf9" stroke="' + color + '" stroke-width="2.5"/><text x="' + Math.min(W - 4, Math.max(4, x(i))).toFixed(1) + '" y="' + (below ? Math.min(H - 3, y(v) + 20) : y(v) - 9).toFixed(1) + '" font-size="13" font-weight="700" fill="' + color + '" text-anchor="' + anchor + '">' + label + '</text>';
+  const dy = (i, v, label, anchor) => dot(i, v, label, anchor);
+  let g = '<polyline points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="2.2" stroke-linejoin="round"/>';
+  if (hiI >= 0 && hiI !== li) g += dy(hiI, hiVal != null ? hiVal : rows[hiI][key], fmt(hiVal != null ? hiVal : rows[hiI][key]) + '（' + briefMd(hiDate) + '）', hiI > rows.length * 0.6 ? 'end' : 'start');
+  g += dot(li, rows[li][key], lastLabel, 'end', li > 0 && rows[li][key] <= rows[li - 1][key]);   // 最後一點在往下掉：標籤放在點的下面，不被線蓋住
+  return '<svg class="mb-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img">' + g + '</svg>';
+}
+function renderMb(){
+  const body = document.getElementById('mbBody');
+  if (!body) return;
+  const scroll = document.getElementById('mbInner').scrollTop;
+  const m = mbCompute();
+  if (!m){
+    body.innerHTML = '<div class="bf-slide"><div class="bf-none">' + (fuState.error ? '融資資料讀取失敗（' + rdEsc(fuState.error) + '）' : '融資資料讀取中…') + '</div></div>';
+    return;
+  }
+  const L = m.last, pv = m.prev;
+  const chip = m.ratio == null ? '' : m.ratio < 0.3 ? '離上一次退到位還遠' : m.ratio < 0.7 ? '退了一半左右' : '已接近上一次退到位的程度';
+  const prevLabel = pv ? briefMd(pv.top.d) + ' 頂 ' + mbNum(pv.top.m, 0) + ' 億 → ' + briefMd(pv.c.d) + ' ' + mbNum(pv.c.m, 0) + ' 億' : '';
+  const stats = '<div class="mb-stats">' + (pv && pv.a ? mbStat('上一次 A 段<br>（頂→' + briefMd(pv.a.d) + '）', pv.aD, pv.aPct) : '<div class="mb-stat"><small>上一次 A 段</small><b>—</b></div>')
+    + (pv ? mbStat('上一次整段<br>（頂→' + briefMd(pv.c.d) + '）', pv.full, pv.fullPct) : '<div class="mb-stat"><small>上一次整段</small><b>—</b></div>')
+    + mbStat('這次到今天<br>（' + briefMd(m.mh.d) + ' 高點→' + briefMd(L.d) + '）', m.mDelta, m.mPct, true) + '</div>';
+  const note = '<div class="mb-note">' + (m.ratio != null ? '<b>這次只退了上一次整段的 ' + Math.round(m.ratio * 100) + '%</b>（' + mbNum(Math.abs(m.mDelta), 0) + ' ÷ ' + mbNum(Math.abs(pv.full), 0) + '）。上一次是 ' + prevLabel + ' 才止跌。' : '找不到上一次已收復的大跌可以比。')
+    + '<br>' + briefMd(L.d) + ' 單日 ' + mbSigned(m.bars[m.bars.length - 1].v, 0) + ' 億。上櫃融資 ' + mbNum(L.mo, 0) + ' 億' + (m.oPct != null ? '（自 ' + briefMd(m.oh.d) + ' 高點 ' + mbSigned(m.oPct, 1) + '%）' : '') + '，上面都只算上市。</div>';
+  const lag = m.lag > 0 ? '融資高點比指數晚 ' + m.lag + ' 天' : m.lag === 0 ? '融資跟指數同一天見頂' : '融資高點比指數早';
+  const lineIdx = mbLineSvg(m.line, 't', '#1f1a14', m.hi.d, m.idxHigh, (v) => mbNum(v, 0), mbNum(L.t, 0) + '（' + briefMd(L.d) + '）');
+  const lineMg = mbLineSvg(m.line, 'm', '#a16207', m.mh.d, m.mh.m, (v) => mbNum(v, 0), mbNum(L.m, 0) + '（' + briefMd(L.d) + '）');
+  const miniStats = '<div class="mb-stats" style="margin-top:8px"><div class="mb-stat"><small>指數 自頂<br>' + mbNum(m.idxHigh, 0) + ' → ' + mbNum(L.t, 0) + '</small><b class="' + mbCls(m.idxPct) + '">' + mbSigned(m.idxPct, 1) + '%</b></div>'
+    + '<div class="mb-stat cur"><small>融資 自頂<br>' + mbNum(m.mh.m, 0) + ' → ' + mbNum(L.m, 0) + ' 億</small><b class="' + mbCls(m.mPct) + '">' + mbSigned(m.mPct, 1) + '%</b></div>'
+    + '<div class="mb-stat"><small>' + (m.lag > 0 ? '融資高點晚了' : '高點先後') + '</small><b>' + (m.lag > 0 ? m.lag + ' 天' : m.lag === 0 ? '同天' : '早 ' + Math.abs(m.lag) + ' 天') + '</b><span class="mb-p" style="color:#7c6f60">' + (m.lag > 0 ? '指數先見頂、融資還在加' : '') + '</span></div></div>';
+  const rows = m.ma.map((x) => ({ k: x[0], v: x[1], me: false })).concat([{ k: '加權收盤', v: L.t, me: true }]).sort((a, b) => b.v - a.v);
+  const ladder = '<table class="mb-ladder"><tbody>' + rows.map((r) => '<tr class="' + (r.me ? 'me' : '') + '"><td>' + r.k + '</td><td>' + mbNum(r.v, 0) + '</td><td>' + (r.me ? briefMd(L.d) + ' 收' : mbSigned((r.v / L.t - 1) * 100, 1) + '%（離收盤）') + '</td></tr>').join('') + '</tbody></table>';
+  const above = m.ma.filter((x) => L.t >= x[1]).map((x) => x[0].split(' ')[0]), below = m.ma.filter((x) => L.t < x[1]).map((x) => x[0].split(' ')[0]);
+  const pos = '收盤' + (above.length ? '在 ' + above.join('、') + ' 之上' : '') + (above.length && below.length ? '、' : '') + (below.length ? '在 ' + below.join('、') + ' 之下' : '') + '。';
+  body.innerHTML = '<div class="bf-slide"><div class="bf-h"><span class="bf-k">融資</span><span class="bf-t">上市融資：跟上一次比，退了多少？</span></div><div class="bf-rule"></div>'
+    + '<div class="bf-sub">上市融資餘額（證交所，FinMind）・資料到 ' + briefMd(L.d) + '・指數高點 ' + briefMd(m.hi.d) + ' → 融資高點 ' + briefMd(m.mh.d) + (chip ? '　<span class="mb-chip">' + chip + '</span>' : '') + '</div>'
+    + '<div class="bf-grid"><div class="bf-col">' + '<div class="bf-card"><div class="bf-ct">這次 vs 上一次<small>億元</small></div>' + stats + '<div style="margin-top:10px">' + note + '</div></div>'
+    + '<div class="bf-card"><div class="bf-ct">融資餘額 單日增減（億）<small>最近 ' + m.bars.length + ' 個交易日</small></div>' + mbBarsHtml(m.bars) + '</div></div>'
+    + '<div class="bf-col"><div class="bf-card"><div class="bf-ct">指數 vs 融資<small>' + lag + '</small></div>'
+    + '<div style="font-size:12.5px;font-weight:700;color:#1f1a14">加權指數（收盤）</div>' + lineIdx + '<div style="font-size:12.5px;font-weight:700;color:#a16207;margin-top:2px">上市融資餘額（億）</div>' + lineMg + miniStats + '</div>'
+    + '<div class="bf-card tint"><div class="bf-ct">加權在均線的哪裡<small>' + briefMd(L.d) + '</small></div>' + ladder
+    + '<div class="bf-foot">' + pos + '老師的看法：A 區看半年線附近、B 彈看季線～月線之間、C 看融資有沒有退到位（他自己的判斷，這裡只放均線位置，點位不寫死）。</div></div></div></div></div>'
+    + '<div class="bf-foot">資料：證交所上市融資餘額、上櫃融資（櫃買中心）、加權指數日K，每天晚上更新。「這次只退了上一次的幾 %」是算出來的事實，不是買賣建議。</div>';
+  document.getElementById('mbInner').scrollTop = scroll;
+}
+function mbRerender(){ const m = document.getElementById('mbModal'); if (m && !m.hidden) renderMb(); }
+function openMbPanel(){
+  document.getElementById('mbModal').hidden = false;
+  renderMb();
+  let tries = 0;
+  const go = async () => {   // 研究室可能正在載同一份資料（fuLoad 會直接跳出），沒載到就隔 1.5 秒再看，最多 10 次
+    try { await fuLoad(false); } catch (_){}
+    renderMb();
+    if (!fuState.data && !fuState.error && ++tries < 10) setTimeout(go, 1500);
+  };
+  go();
+}
+document.getElementById('mbBtn').addEventListener('click', openMbPanel);
+document.getElementById('mbClose').addEventListener('click', () => { document.getElementById('mbModal').hidden = true; });
+document.getElementById('mbModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.currentTarget.hidden = true; });
 // ---- 營收成長榜（2026-10-09 使用者：照老師「每月營收成長榜 學員版」做一模一樣的）----
 // 後端 /api/revenue?month=：公開資訊觀測站「每月營業收入彙總表」（排程主機每天 12:30／18:30／23:30 抓），公布日＝我們第一次抓到的日期，
 // 收盤、成交量、公布隔日漲跌用我們的日K。段落照老師的順序：查個股營收、族群分析、多觀察分析（我們用自選股）、
@@ -24961,7 +25130,7 @@ document.getElementById('maBody').addEventListener('keydown', (e) => {
 // 可收的項目：下方工具列每一顆、右上角的自選族群個股／今日提醒／新手教學／機器人代碼／盤中訊號分頁／影片教學、首頁那排欄位（當沖多1／2…股期黑龍 13 塊）與下面的處置欄、說明卡片。不能收的：盤中訊號、提醒開啟（核心）、自訂按鈕本身。
 // 收起來只是不顯示（功能都還在，從別的地方打開照樣可以）；設定存在這台裝置的 localStorage，「全部顯示」清掉。
 const CZ_KEY = 'czHidden';
-const CZ_HEADER_IDS = ['wgBtn', 'briefBtn', 'remindBtn', 'guideBtn', 'botBtn', 'sgtBtn', 'tutBtn'];
+const CZ_HEADER_IDS = ['wgBtn', 'briefBtn', 'mbBtn', 'remindBtn', 'guideBtn', 'botBtn', 'sgtBtn', 'tutBtn'];
 let czMode = false;
 function czLoad(){ try { const v = JSON.parse(localStorage.getItem(CZ_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; } catch (_){ return []; } }
 function czSave(){ try { if (czHidden.size) localStorage.setItem(CZ_KEY, JSON.stringify([...czHidden])); else localStorage.removeItem(CZ_KEY); } catch (_){} }
