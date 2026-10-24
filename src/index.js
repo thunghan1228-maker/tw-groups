@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 14:06:24";
+const BUILD_STAMP = "2026-10-24 14:08:31";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -15760,7 +15760,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 14:06:24';
+const BUILD_STAMP = '2026-10-24 14:08:31';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -24981,6 +24981,9 @@ async function maLoad(){
 // 跟形態觀察股（⏰ 四個分組）同一套做法：分組沒有就建在最後面，內容（股號＋名次＋分數）跟上次一樣就不動；每天收盤後排行換了，
 // 網頁開著（或下次打開）就會把分組換成最新的前 20 名。只拿最新一天的預設排行（不是「對照老師名單」、也不是回看的舊日期）。
 const MA_WL_ID = 'ma20', MA_WL_NAME = '📊個股分數前20名', MA_WL_TOP = 20;
+// 2026-10-24 使用者：前十名常客也自動進自選股，列 20 檔所以標題叫「前二十名常客」（面板裡的小標題也跟著列出幾檔改）；用面板預設的條件（回看 20 個交易日、每天取前 10 名、列 20 檔），不跟著你在面板上調的下拉選單變
+const MA_HIT_WL_ID = 'mahit', MA_HIT_WL_NAME = '📊前二十名常客', MA_HIT_QS = 'days=20&top=10&show=20';
+const maCnNum = (n) => ({ 10: '十', 20: '二十', 30: '三十', 40: '四十', 50: '五十' })[n] || String(n);
 let maWlAt = 0, maWlLoading = false;
 function maSyncWatchlist(d){
   if (!d || d.status !== 'ok' || d.teacher || !Array.isArray(d.stocks) || !d.stocks.length || (d.latest && d.date !== d.latest)) return false;
@@ -24997,6 +25000,21 @@ function maSyncWatchlist(d){
   });
   return true;
 }
+function maHitsSyncWatchlist(d){
+  if (!d || d.status !== 'ok' || !Array.isArray(d.rows) || !d.rows.length) return false;
+  const today = twTodayStr();
+  const items = d.rows.map((r) => ({ code: r.code, note: '上榜 ' + r.hits + '/' + d.ndays + ' 次・近 5 日 ' + r.r5 + '/5・' + maMd(d.to) + ' 第' + r.rank + '名', addedAt: today }));
+  const sig = (xs) => xs.map((it) => it.code + '|' + (it.note || '')).join(',');
+  const g = wl.data.groups.find((x) => x.id === MA_HIT_WL_ID);
+  if (g && g.name === MA_HIT_WL_NAME && sig(g.items) === sig(items)) return false;
+  wlMutate((data) => {
+    let gg = data.groups.find((x) => x.id === MA_HIT_WL_ID);
+    if (!gg){ gg = { id: MA_HIT_WL_ID, name: MA_HIT_WL_NAME, items: [] }; data.groups.push(gg); }
+    gg.name = MA_HIT_WL_NAME;
+    gg.items = items.map((it) => ({ ...it }));
+  });
+  return true;
+}
 async function maWlTick(){
   if (maWlLoading || wl.loading || wl.busy) return;
   if (wl.key && !wl.syncedAt) return;                       // 有同步碼但雲端那份還沒讀回來：先不動，免得蓋掉
@@ -25005,6 +25023,7 @@ async function maWlTick(){
   try {
     const d = await maFetch('/api/ma-rank');
     maSyncWatchlist(d);
+    try { maHitsSyncWatchlist(await maFetch('/api/ma-rank-hits?' + MA_HIT_QS)); } catch (_){ /* 常客那份抓不到，下一輪再試 */ }
     maWlAt = Date.now();
   } catch (_){ /* 抓不到下一分鐘再試 */ } finally { maWlLoading = false; }
 }
@@ -25138,7 +25157,7 @@ function maHitsHtml(){
   const opt = (vals, cur, fmt) => vals.map((v) => '<option value="' + v + '"' + (+cur === v ? ' selected' : '') + '>' + fmt(v) + '</option>').join('');
   const d = maState.hits;
   const dates = (d && d.dates) || (maState.data && maState.data.dates) || [];
-  let h = '<div class="ma-sec" id="maHitsSec"><h3>前十名常客 <small>近 N 個交易日，擠進前十名幾次</small>' +
+  let h = '<div class="ma-sec" id="maHitsSec"><h3>前' + maCnNum(maState.hitShow) + '名常客 <small>近 N 個交易日，擠進每天前 ' + maState.hitTop + ' 名幾次，列出次數最多的前 ' + maState.hitShow + ' 檔</small>' +
     '<select data-ma-hit="hitDate">' + dates.slice().reverse().map((x) => '<option value="' + x + '"' + ((maState.hitDate || (d && d.to)) === x ? ' selected' : '') + '>' + maMd(x) + '</option>').join('') + '</select></h3>' +
     '<div class="ma-tools">回看 <select data-ma-hit="hitDays">' + opt([10, 20, 40, 60], maState.hitDays, (v) => v + ' 個交易日') + '</select>' +
     '每天取 <select data-ma-hit="hitTop">' + opt([5, 10, 20, 30], maState.hitTop, (v) => '前 ' + v + ' 名') + '</select>' +
@@ -25209,7 +25228,7 @@ function renderMa(){
     '<div id="maIdxTable">' + idxTableHtml() + '</div>' +
     maQueryHtml() +
     '<div class="ma-sec"><h3>個股分數前 ' + (d.top || 60) + ' <small>全部族群成員，總分高→低（點欄位可以自己重排）</small><span class="ma-pill">選股日期 ' + maMd(d.date) + '</span>' + dateSel + '</h3>' +
-    '<div class="ma-tools"><button type="button" class="ma-vbtn' + (maState.teacher ? ' on' : '') + '" data-ma-teacher="1" title="我們的族群表比老師那天（10/22）的名單多 ' + (d.teacherAbsent || 18) + ' 檔（鋼鐵、化學、太陽能、機殼等族群的股票），所以名次會比老師的後面；按下去拿掉這些再排，名次、族群平均分、前十名常客都會跟老師同一份名單比。">' + (maState.teacher ? '✓ ' : '') + '對照老師名單</button>排名方式 ' + vb('sum', '依總分') + vb('up', '名次進步') + vb('streak', '連續上榜') + vb('new', '新進榜') + vb('allma', '站上全部均線') +
+    '<div class="ma-tools"><button type="button" class="ma-vbtn' + (maState.teacher ? ' on' : '') + '" data-ma-teacher="1" title="我們的族群表比老師那天（10/22）的名單多 ' + (d.teacherAbsent || 18) + ' 檔（鋼鐵、化學、太陽能、機殼等族群的股票），所以名次會比老師的後面；按下去拿掉這些再排，名次、族群平均分、前二十名常客都會跟老師同一份名單比。">' + (maState.teacher ? '✓ ' : '') + '對照老師名單</button>排名方式 ' + vb('sum', '依總分') + vb('up', '名次進步') + vb('streak', '連續上榜') + vb('new', '新進榜') + vb('allma', '站上全部均線') +
     '<span class="ma-vsum">' + view.sum + '</span></div>' +
     (view.rows.length ? maStockTable(view.rows, null, true) : '<div class="ma-legend">沒有符合的股票。</div>') +
     '<div class="ma-legend">燈號：上排六格＝站上 5/10/20/60/120/240 日均線（金色），下排六格＝創 5/10/20/60/120/360 日新高（紅色，今天收盤比那個天期內 3 個交易日以前的最高收盤還高，平手不算）。' +
