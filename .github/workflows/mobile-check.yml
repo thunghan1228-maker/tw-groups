@@ -1,7 +1,7 @@
 name: Mobile tap check
 
 # 沙盒裡沒有 WebKit、也連不到線上網址；用 GitHub runner 跑 Playwright WebKit（iPhone 模擬）
-# 對線上頁面實際點「今日盤後籌碼排行」的股票列，把狀態與截圖（base64）印在 log 裡讓沙盒讀回來。
+# 對線上頁面實際點「籌碼暴增雷達」的股票列，把狀態與截圖（base64）印在 log 裡讓沙盒讀回來。
 on:
   workflow_dispatch:
     inputs:

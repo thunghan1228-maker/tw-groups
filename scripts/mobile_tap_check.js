@@ -16,7 +16,7 @@ const log = (label, obj) => console.log('## ' + label + ' ' + (obj === undefined
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push('console.' + m.type() + ': ' + m.text()); });
   log('config', { engine, deviceName, url, ua: devices[deviceName].userAgent });
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
-  await page.waitForFunction(() => typeof openChipsPanel === 'function' && !!document.querySelector('[data-label="今日盤後籌碼排行"]'), null, { timeout: 30000 });
+  await page.waitForFunction(() => typeof openChipsPanel === 'function' && !!document.querySelector('[data-label="籌碼暴增雷達"]'), null, { timeout: 30000 });
   await page.waitForTimeout(2500);
 
   const state = () => page.evaluate(() => {
@@ -45,7 +45,7 @@ const log = (label, obj) => console.log('## ' + label + ' ' + (obj === undefined
   });
   log('initial', await state());
 
-  await page.tap('[data-label="今日盤後籌碼排行"]');
+  await page.tap('[data-label="籌碼暴增雷達"]');
   await page.waitForFunction(() => !document.getElementById('chipsModal').hidden, null, { timeout: 10000 });
   const gotRows = await page.waitForFunction(() => document.querySelectorAll('#chipsBody .chips-row[data-code]').length > 0, null, { timeout: 45000 }).then(() => true).catch(() => false);
   log('panel', {

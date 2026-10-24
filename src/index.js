@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 12:00:28";
+const BUILD_STAMP = "2026-10-24 13:00:28";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1321,6 +1321,81 @@ const HTML_PAGE = `<!DOCTYPE html>
     .rw-grow .rw-l{grid-column:1 / -1;}
     .rw-stat b{font-size:21px;}
   }
+  /* 2026-10-24 使用者：榜單每一檔右邊的月乖離／季乖離（兩行小字）、熱門股卡片的乖離行、累積榜均線分數欄的乖離 */
+  .rd-lrow.rd-b{grid-template-columns:40px minmax(60px,1.1fr) minmax(50px,1.3fr) 54px 24px 66px;}
+  .rd-bias{display:inline-flex;flex-direction:column;align-items:flex-end;font-size:10.5px;line-height:1.25;white-space:nowrap;font-variant-numeric:tabular-nums;min-width:58px;}
+  .rd-macell{display:inline-flex;align-items:center;gap:6px;}
+  .rd-bias-line{font-size:12px;color:var(--muted);margin:-2px 0 6px;} .rd-bias-line b{font-weight:700;}
+  .rd-wrap-in{display:flex;flex-direction:column;gap:14px;margin-top:6px;border-top:2px dashed var(--line);padding-top:16px;}
+  .rd-grow.rw-hit{box-shadow:inset 0 0 0 1px #e6675f;}
+  .rd-grow .rw-mv{font-size:11px;font-weight:700;margin-left:2px;}
+  @media (max-width:640px){ .rd-lrow.rd-b{grid-template-columns:34px minmax(56px,1fr) minmax(36px,0.9fr) 48px 22px 54px;} .rd-bias{min-width:50px;font-size:10px;} }
+  /* 籌碼暴增雷達淺色版（2026-10-24 使用者：版面照老師，也用淺色底；只有這個分頁淺色，其他分頁還是深色）。顏色照老師頁：米白底、白卡、紅漲綠跌、深紅標題 */
+  #chipsModal.rd-light .chips-inner{--bg:#f6f3ee;--panel:#fffdf9;--panel-2:#f4eee3;--line:#e6dbc9;--text:#2d241b;--muted:#7c6f60;--up:#b3261e;--down:#0f7b5a;--accent:#a63a2b;background:#f6f3ee;color:#2d241b;border:1px solid #d8ccb8;box-shadow:0 14px 44px rgba(40,25,5,.45);}
+  #chipsModal.rd-light .chips-head{background:transparent;color:var(--text);padding:0;border-radius:0;margin-bottom:6px;align-items:center;}
+  #chipsModal.rd-light .chips-title{font-size:14px;color:#7c6f60;font-weight:700;}
+  #chipsModal.rd-light .chips-sub{display:none;}
+  #chipsModal.rd-light .cm-icon-btn{background:#fffdf9;color:#2d241b;border-color:#d8ccb8;}
+  #chipsModal.rd-light #chipsTabs{background:transparent;border:0;box-shadow:none;padding:0 0 10px;}
+  #chipsModal.rd-light #chipsTabs .signal-tab,#chipsModal.rd-light #chipsTabs .signal-tab[data-measure="radar"]{background:#fffdf9;color:#2d241b;border:1px solid #d8ccb8;box-shadow:none;}
+  #chipsModal.rd-light #chipsTabs .signal-tab:hover{background:#f4eee3;}
+  #chipsModal.rd-light #chipsTabs .signal-tab.active,#chipsModal.rd-light #chipsTabs .signal-tab[data-measure="radar"].active{background:#fff3f1;border-color:#b3261e;color:#b3261e;box-shadow:none;font-weight:800;}
+  #chipsModal.rd-light .rd-tag{border-color:#b3261e;color:#b3261e;background:#fffdf9;padding:4px 14px;letter-spacing:.2em;font-size:12px;}
+  #chipsModal.rd-light .rd-title{font-size:38px;color:#a63a2b;letter-spacing:.04em;line-height:1.2;}
+  #chipsModal.rd-light .rd-weekly-btn{background:linear-gradient(135deg,#b23a2f,#8c2a22);color:#fff;box-shadow:0 4px 12px rgba(140,42,34,.35);}
+  #chipsModal.rd-light .rd-sub{color:#4a3f33;font-size:13px;}
+  #chipsModal.rd-light .rd-pill{background:#fbf4de;border-color:#e8d9a8;color:#2d241b;}
+  #chipsModal.rd-light .rd-intro{background:#fffdf9;border:1px solid var(--line);border-left:4px solid #b3261e;border-radius:4px;box-shadow:0 1px 4px rgba(80,55,20,.06);}
+  #chipsModal.rd-light .rd-intro b.rd-up,#chipsModal.rd-light .rd-up{color:#b3261e;} #chipsModal.rd-light .rd-intro b.rd-down,#chipsModal.rd-light .rd-down{color:#0f7b5a;}
+  #chipsModal.rd-light .rw-def b,#chipsModal.rd-light .rw-read b,#chipsModal.rd-light .rw-code,#chipsModal.rd-light .rw-ghead b,#chipsModal.rd-light .rw-tagc,#chipsModal.rd-light .rw-banner,#chipsModal.rd-light .rw-stat b,#chipsModal.rd-light .rw-grow.rw-hit .rw-n{color:#a63a2b;}
+  #chipsModal.rd-light .rw-stat b.rd-up{color:#b3261e;} #chipsModal.rd-light .rw-stat b.rd-down{color:#0f7b5a;}
+  #chipsModal.rd-light .rw-mv.up{color:#b3261e;} #chipsModal.rd-light .rw-mv.down{color:#0f7b5a;} #chipsModal.rd-light .rw-mv.new{color:#a63a2b;}
+  #chipsModal.rd-light .rw-pill{background:#f1ecfb;color:#5b3fd6;border-color:#cfc3f1;}
+  #chipsModal.rd-light .rw-star{color:#d49b00;}
+  #chipsModal.rd-light .rd-search input{background:#fffdf9;color:#2d241b;border:1px solid #d8ccb8;}
+  #chipsModal.rd-light .rd-search button{background:#1f1a14;border-color:#1f1a14;color:#fff;}
+  #chipsModal.rd-light .rd-search button.rd-btn-sm{background:#fffdf9;color:#2d241b;border-color:#d8ccb8;}
+  #chipsModal.rd-light .rd-sec-title{font-size:25px;color:#1f1a14;}
+  #chipsModal.rd-light .rd-card{background:#fffdf9;border:1px solid var(--line);border-radius:6px;box-shadow:0 3px 10px rgba(80,55,20,.12);padding:14px 16px;}
+  #chipsModal.rd-light .rd-week{background:#fffdf9;color:#2d241b;border-color:#d8ccb8;}
+  #chipsModal.rd-light .rd-week.active{border-color:#b3261e;color:#b3261e;background:#fff3f1;}
+  #chipsModal.rd-light .rd-list-title{font-size:17px;}
+  #chipsModal.rd-light .rd-date-pill,#chipsModal.rd-light .rd-range{background:#fffdf9;color:#7c6f60;border-color:#d8ccb8;}
+  #chipsModal.rd-light .rd-lrow,#chipsModal.rd-light .rd-grow,#chipsModal.rd-light .rd-srow,#chipsModal.rd-light .rd-trow,#chipsModal.rd-light .rd-table td,#chipsModal.rd-light .rw-rtable td{border-bottom-color:#efe5d6;}
+  #chipsModal.rd-light .rd-lrow:hover,#chipsModal.rd-light .rd-grow:hover,#chipsModal.rd-light .rd-srow:hover{background:#faf4e8;}
+  #chipsModal.rd-light .rd-grow.active{background:#fdecea;}
+  #chipsModal.rd-light .rd-bar,#chipsModal.rd-light .rd-track,#chipsModal.rd-light .rd-share{background:#e9e4ee;}
+  #chipsModal.rd-light .rd-track::after{background:rgba(0,0,0,.25);}
+  #chipsModal.rd-light .rd-bar i.up,#chipsModal.rd-light .rd-fill.up{background:linear-gradient(90deg,#a8323f,#cc5461);}
+  #chipsModal.rd-light .rd-bar i.up.soft{background:linear-gradient(90deg,#c14a55,#d98089);}
+  #chipsModal.rd-light .rd-bar i.down,#chipsModal.rd-light .rd-fill.down{background:linear-gradient(90deg,#16835a,#2fa070);}
+  #chipsModal.rd-light .rd-ma.full{background:#f5b301;color:#2b2000;}
+  #chipsModal.rd-light .rd-ma.half{background:#fdf1c8;color:#8a6200;border:1px solid #ecd58b;}
+  #chipsModal.rd-light .rd-ma.line{border:1px solid #cdbfa9;color:#7c6f60;background:#fffdf9;}
+  #chipsModal.rd-light .rd-star{color:#e0a800;}
+  #chipsModal.rd-light .rd-badge,#chipsModal.rd-light .rd-circle{border-color:#b3261e;color:#b3261e;}
+  #chipsModal.rd-light .rd-cap{background:#f1ecfb;color:#5b3fd6;border-color:#cfc3f1;}
+  #chipsModal.rd-light .rd-table th{color:#a63a2b;border-bottom-color:#e6dbc9;}
+  #chipsModal.rd-light .rd-scroll{background:#fffdf9;border-color:#e6dbc9;box-shadow:0 3px 10px rgba(80,55,20,.10);}
+  #chipsModal.rd-light .rd-table tr.rd-crow:hover td{background:#faf4e8;}
+  #chipsModal.rd-light .rd-table tr.rd-open td{background:#fff8e6;}
+  #chipsModal.rd-light .rd-table tr.rd-gridrow td{background:#fbf7ee;}
+  #chipsModal.rd-light .rd-count.gold{background:#f5b301;color:#2b2000;} #chipsModal.rd-light .rd-count.line{border-color:#b3261e;color:#b3261e;background:#fffdf9;}
+  #chipsModal.rd-light .rd-share i{background:#f5b301;}
+  #chipsModal.rd-light .rd-cell{background:#fffdf9;color:#2d241b;border-color:#e6dbc9;} #chipsModal.rd-light .rd-cell.gold{background:#f5b301;color:#2b2000;border-color:#f5b301;}
+  #chipsModal.rd-light .rd-legend{background:#fffdf9;border-color:#d8ccb8;color:#4a3f33;}
+  #chipsModal.rd-light .rd-select{background:#fffdf9;color:#2d241b;border-color:#d8ccb8;}
+  #chipsModal.rd-light .rd-chip{background:#fffdf9;color:#2d241b;border-color:#d8ccb8;}
+  #chipsModal.rd-light .rd-kbox{background:#f8f3ea;border-color:#e6dbc9;}
+  #chipsModal.rd-light .rd-outside-btn{color:#7c6f60;border-color:#cdbfa9;}
+  #chipsModal.rd-light .rw-stat,#chipsModal.rd-light .rw-grow,#chipsModal.rd-light .rw-card,#chipsModal.rd-light .rw-ghead{background:#fffdf9;border-color:#e6dbc9;}
+  #chipsModal.rd-light .rw-notebox,#chipsModal.rd-light .rw-banner{background:#fbf4de;border-color:#e8d9a8;color:#2d241b;}
+  #chipsModal.rd-light .rw-banner{color:#a63a2b;}
+  #chipsModal.rd-light .rw-nav button,#chipsModal.rd-light .rw-back{background:#fffdf9;color:#2d241b;border-color:#d8ccb8;}
+  #chipsModal.rd-light .rd-wrap-in{border-top-color:#d8ccb8;}
+  #chipsModal.rd-light .rd-inst-plot,#chipsModal.rd-light .rd-inst-plot::after{background-color:#e9e4ee;}
+  #chipsModal.rd-light .rd-itable th{border-bottom-color:#e6dbc9;}
+  @media (max-width: 640px){ #chipsModal.rd-light .rd-title{font-size:28px;} #chipsModal.rd-light .rd-sec-title{font-size:21px;} }
   .rd-tag{display:inline-block;border:1px solid #e6675f;color:#f08a7e;border-radius:4px;padding:1px 8px;font-size:11px;letter-spacing:1px;}
   .rd-title{font-size:28px;font-weight:900;color:#f08a7e;margin:6px 0 2px;letter-spacing:3px;font-family:"Noto Serif TC","Songti TC",serif;}
   .rd-sub{font-size:12px;color:var(--muted);}
@@ -3723,7 +3798,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   <div class="chips-inner" id="chipsInner">
     <div class="chips-head">
       <div>
-        <div class="chips-title">盤後籌碼排行</div>
+        <div class="chips-title">籌碼暴增雷達</div>
         <div class="chips-sub">籌碼週報＝集保週資料的大戶增減（每週五結算）；其他分頁是主力大單（永豐逐筆算的大單淨額）＋三大法人買賣超（證交所、櫃買中心公開資料），每個交易日收盤後更新，只列 67 個族群的股票，點股票可開K線圖。</div>
       </div>
       <button class="cm-icon-btn" id="chipsClose" aria-label="關閉">✕</button>
@@ -4143,7 +4218,7 @@ const HTML_PAGE = `<!DOCTYPE html>
   <button class="tb-btn" data-label="籌碼日報"><span class="tb-icon">日</span>籌碼日報</button>  <!-- 2026-10-10 使用者：下午報改名「籌碼日報」 -->
   <button class="tb-btn" data-label="健診"><span class="tb-icon">診</span>每日持股健診</button>  <!-- 2026-09-28 使用者：鈕的名字改成「每日持股健診」 -->
   <button class="tb-btn" data-label="K棒組合選股"><span class="tb-icon">K</span>飆股雷達</button>  <!-- 2026-10-15 使用者：改回「飆股雷達」；2026-10-07 使用者：照老師 App 的飆股雷達做；10/13 改名「K棒組合選股」；10/13 再改「盤中K棒組合選股」、移到第 4 顆（每日持股健診右邊） -->
-  <button class="tb-btn" data-label="今日盤後籌碼排行"><span class="tb-icon">籌</span>盤後籌碼排行</button>
+  <button class="tb-btn" data-label="籌碼暴增雷達"><span class="tb-icon">籌</span>籌碼暴增雷達</button>  <!-- 2026-10-24 使用者：「盤後籌碼排行」改名「籌碼暴增雷達」，第一個分頁照老師的版面（淺色）＋把我們的籌碼週報合進同一頁 -->
   <button class="tb-btn" data-label="自選股"><span class="tb-icon">★</span>自選股</button>
   <!-- 2026-09-26 使用者：下方導覽列的「三角收斂」「隔日沖大單籌碼」不用再留著（本來就是開發中的空位）；2026-09-28 再拿掉「個股研究中心」；
        2026-10-05 再拿掉「每週籌碼分析」（開發中的空位）。「個股訊號追蹤」拿掉後使用者又要加回來，要放自選股的今日訊號與提醒。 -->
@@ -10484,7 +10559,7 @@ function brewLaunchHtml(part){
 // 後端 /api/chips-daily：每個交易日收盤後的主力大單淨額（永豐逐筆）＋三大法人買賣超（上市＝證交所 T86，
 // 上櫃＝櫃買中心開放資料經排程主機鏡像），連續買超／賣超天數，收盤與漲跌幅。這裡只做排序、篩選、切日期。
 const CHIPS_MEASURES = [
-  { key: 'radar', label: '籌碼週報' },   // 2026-10-04 使用者：照老師 zhuang.tw/radar 做（集保週資料），放第一個；2026-10-10 改名「籌碼週報」
+  { key: 'radar', label: '籌碼暴增雷達' },   // 2026-10-04 使用者：照老師 zhuang.tw/radar 做（集保週資料），放第一個；2026-10-10 改名「籌碼週報」；2026-10-24 改回「籌碼暴增雷達」（整個面板也叫這個名字，週報合進同一頁）
   { key: 'mf', label: '主力大單' }, { key: 'foreign', label: '外資' }, { key: 'trust', label: '投信' },
   { key: 'dealer', label: '自營商' }, { key: 'total', label: '三大法人' }, { key: 'brewx', label: '法人連買∩醞釀發動' },
   { key: 'mfx', label: '主力大單∩醞釀發動' }, { key: 'short', label: '放空籌碼' },
@@ -10839,6 +10914,7 @@ function chipsSourceNoteHtml(data){
   return '<div class="race-sub">' + mmdd + '：' + tse + '・' + otc + '・' + mf + '。單位：張；「連續」＝連續買超或賣超的交易日數；佔成交量＝當天買賣超張數 ÷ 當天成交量（主力大單看佔成交額）。分點資料沒有免費來源，主力大單是我們自己用永豐逐筆算的大單淨額。名稱旁的標記：停資／停券／不可當沖＝目前不可融資、不可融券、不可現股當沖，有股期＝有股票期貨；都沒有就不標。</div>';
 }
 function renderChips(){
+  document.getElementById('chipsModal').classList.toggle('rd-light', chipsState.measure === 'radar');   // 2026-10-24 使用者：籌碼暴增雷達照老師用淺色版，其他分頁維持深色
   const tabs = document.getElementById('chipsTabs');
   tabs.innerHTML = CHIPS_MEASURES.map((mm) => '<button class="chart-tab signal-tab' + (chipsState.measure === mm.key ? ' active' : '') + '" data-measure="' + mm.key + '">' + mm.label + '</button>').join('');
   const body = document.getElementById('chipsBody');
@@ -10965,6 +11041,12 @@ function rdMa(score){
   if (!rdHas(score)) return '<span class="rd-ma none">0</span>';
   const s = Number(score);
   return '<span class="rd-ma ' + (s >= 12 ? 'full' : (s >= 8 ? 'half' : 'line')) + '" title="均線分數 ' + s + '/15">' + s + '</span>';
+}
+// 月乖離／季乖離（2026-10-24 使用者：照老師雷達頁，榜單每一檔右邊兩行小字）；後端 b20／b60，還沒有（日K不夠）就顯示「—」
+function rdBias(b20, b60){
+  if (!rdHas(b20) && !rdHas(b60)) return '<span class="rd-bias"></span>';
+  const one = (label, v) => '<span class="' + (rdHas(v) ? rdCls(v) : 'rd-muted') + '">' + label + ' ' + (rdHas(v) ? rdPct(v, 1) : '—') + '</span>';
+  return '<span class="rd-bias">' + one('月', b20) + one('季', b60) + '</span>';
 }
 function rdLots(v){
   if (!rdHas(v)) return '—';
@@ -11245,9 +11327,9 @@ function rdSearchHtml(){
 function rdListRows(rows, side){
   if (!rows.length) return '<div class="rd-empty-list">這週沒有' + (side === 'buy' ? '籌碼% ≥ 4' : '籌碼% ≤ −1.5') + ' 的股票。</div>';
   const max = Math.max(0.01, ...rows.map((r) => Math.abs(r.chip)));
-  return rows.map((r) => '<div class="rd-lrow" data-rd-code="' + r.code + '"><span class="rd-c">' + r.code + '</span><span class="rd-n">' + rdEsc(r.name) + (r.star ? '<span class="rd-star" title="連續兩週上榜">★</span>' : '') + rdCapTag(r.capital) + rdVsTag(r.vs) + '</span>' +
+  return rows.map((r) => '<div class="rd-lrow rd-b" data-rd-code="' + r.code + '"><span class="rd-c">' + r.code + '</span><span class="rd-n">' + rdEsc(r.name) + (r.star ? '<span class="rd-star" title="連續兩週上榜">★</span>' : '') + rdCapTag(r.capital) + rdVsTag(r.vs) + '</span>' +
     '<span class="rd-bar"><i class="' + (side === 'buy' ? 'up' : 'down') + '" style="width:' + Math.min(100, Math.abs(r.chip) / max * 100).toFixed(1) + '%"></i></span>' +
-    '<span class="rd-val ' + (side === 'buy' ? 'rd-up' : 'rd-down') + '">' + rdPct(rdHas(r.chip1) ? r.chip1 : r.chip, 1) + '</span>' + rdMa(r.score) + '</div>').join('');
+    '<span class="rd-val ' + (side === 'buy' ? 'rd-up' : 'rd-down') + '">' + rdPct(rdHas(r.chip1) ? r.chip1 : r.chip, 1) + '</span>' + rdMa(r.score) + rdBias(r.b20, r.b60) + '</div>').join('');
 }
 function rdListsHtml(d){
   const lists = d.lists || [];
@@ -11292,7 +11374,7 @@ function rdCumHtml(d){
     let html = '<tr class="rd-crow' + (open ? ' rd-open' : '') + '" data-rd-expand="' + r.code + '"><td class="rd-muted">' + (i + 1) + ' ' + (open ? '▾' : '▸') + '</td><td>' + r.code + '</td><td><span data-rd-code="' + r.code + '" style="cursor:pointer;text-decoration:underline dotted">' + rdEsc(r.name) + '</span></td>' +
       '<td><span class="rd-count ' + (x.count >= 3 ? 'gold' : 'line') + '">' + x.count + '</span></td>' +
       '<td><span class="rd-share"><i style="width:' + share.toFixed(0) + '%"></i></span>' + share.toFixed(0) + '%</td>' +
-      '<td class="' + (x.recent ? '' : 'rd-muted') + '">' + x.recent + '/' + Math.min(4, k) + '</td><td>' + rdMa(r.score) + '</td>' +
+      '<td class="' + (x.recent ? '' : 'rd-muted') + '">' + x.recent + '/' + Math.min(4, k) + '</td><td><span class="rd-macell">' + rdMa(r.score) + rdBias(r.b20, r.b60) + '</span></td>' +
       '<td>' + x.avg.toFixed(2) + '%</td><td><b>' + x.sum.toFixed(2) + '</b></td><td>#' + x.best + '</td><td class="rd-muted">' + rdEsc(r.group || '') + '</td></tr>';
     if (open){
       const cells = x.grid.map((g, j) => '<span class="rd-cell' + (g[0] ? ' gold' : '') + '"><span>' + rdMd(res.dates[j]) + '</span><b>' + (g[0] || '—') + '</b><span class="' + (g[0] ? '' : rdCls(g[1])) + '">' + (rdHas(g[1]) ? rdPct(g[1]) : '—') + '</span></span>').join('');
@@ -11315,7 +11397,10 @@ function rdGroupsHtml(d){
   const top = groups.slice(0, (d.rules && d.rules.groupShow) || 10);
   const pick = groups.find((g) => g.name === radarState.group) || top[0];
   const max = Math.max(0.01, ...top.map((g) => Math.abs(g.avg)));
-  const left = top.map((g, i) => '<div class="rd-grow' + (g.name === pick.name ? ' active' : '') + '" data-rd-group="' + rdEsc(g.name) + '"><span class="rd-c">' + (i + 1) + '</span><span class="rd-n">' + rdEsc(g.name) + '</span>' +
+  const wk = rwCache['latest'] || rwCache[d.week];
+  const rmap = {};
+  if (wk && wk.status === 'ok') (wk.ranking || []).forEach((g) => { rmap[g.name] = g; });
+  const left = top.map((g, i) => '<div class="rd-grow' + (g.name === pick.name ? ' active' : '') + (rmap[g.name] && rmap[g.name].together ? ' rw-hit' : '') + '" data-rd-group="' + rdEsc(g.name) + '"><span class="rd-c">' + (i + 1) + '</span><span class="rd-n">' + rdEsc(g.name) + (rmap[g.name] ? ' ' + rwMvHtml(rmap[g.name].move) : '') + '</span>' +
     '<span class="rd-bar"><i class="' + (g.avg >= 0 ? 'up' + (i >= 3 ? ' soft' : '') : 'down') + '" style="width:' + Math.min(100, Math.abs(g.avg) / max * 100).toFixed(1) + '%"></i></span><span class="rd-val ' + rdCls(g.avg) + '">' + rdPct(g.avg) + '</span></div>').join('');
   const mmax = Math.max(0.01, ...pick.members.map((m) => Math.abs(m.chip)));
   const right = pick.members.map((m, i) => '<div class="rd-lrow" data-rd-code="' + m.code + '"><span class="rd-c">' + m.code + '</span><span class="rd-n">' + rdEsc(m.name) + (m.rank ? ' <span class="rd-circle">' + m.rank + '</span>' : '') + '</span>' +
@@ -11323,7 +11408,7 @@ function rdGroupsHtml(d){
     '<span class="rd-val ' + rdCls(m.chip) + '">' + rdPct(m.chip) + '</span>' + rdMa(m.score) + '</div>' +
     (i === 4 && pick.members.length > 5 ? '<div class="rd-avg-line">前5名平均 ' + rdPct(pick.avg) + '</div>' : '')).join('');
   return '<section><div class="rd-sec-title">族群排名比較<small>週籌碼暴增 前十族群（族群裡籌碼% 最高 5 檔的平均）・' + rdMdShort(d.week) + '</small></div><div class="rd-groups">' +
-    '<div class="rd-card">' + left + '<div class="rd-note">點族群名稱，右邊帶出那個族群這週的籌碼排名。</div></div>' +
+    '<div class="rd-card">' + left + '<div class="rd-note">點族群名稱，右邊帶出那個族群這週的籌碼排名。' + (wk && wk.status === 'ok' ? (wk.prevWeek ? '名稱旁邊的 ↑↓ 是名次對 ' + rdMdShort(wk.prevWeek) + ' 那週的變化；' : '') + '紅框＝整族一起動（同族 2 檔以上上了買超榜）。' : '') + '</div></div>' +
     '<div class="rd-card"><div class="rd-list-head"><span class="rd-list-title">' + rdEsc(pick.name) + ' 當週籌碼排名</span><span class="rd-date-pill">前 5 平均 ' + rdPct(pick.avg) + '・' + pick.count + ' 檔</span></div>' + right + '</div>' +
     '</div></section>';
 }
@@ -11350,6 +11435,7 @@ function rdHotHtml(d){
     const open = i < 3 || !!radarState.kOpen[c.code];
     return '<div class="rd-card"><div class="rd-card-head"><span class="rd-name" data-rd-code="' + c.code + '">' + rdEsc(c.name) + '</span><span class="rd-code">' + c.code + '</span>' +
       (c.rank ? '<span class="rd-badge">本週榜 <span class="rd-circle">' + c.rank + '</span></span>' : '') + '<span class="rd-big ' + rdCls(c.chip) + '">' + rdPct(c.chip) + '</span></div>' +
+      ((rdHas(c.b20) || rdHas(c.b60)) ? '<div class="rd-bias-line">月乖離 <b class="' + (rdHas(c.b20) ? rdCls(c.b20) : 'rd-muted') + '">' + (rdHas(c.b20) ? rdPct(c.b20, 1) : '—') + '</b>　季乖離 <b class="' + (rdHas(c.b60) ? rdCls(c.b60) : 'rd-muted') + '">' + (rdHas(c.b60) ? rdPct(c.b60, 1) : '—') + '</b></div>' : '') +
       rdKlineBox(c.code, open) + rdTrailHtml(c.trail) + '</div>';
   }).join('');
   return '<section><div class="rd-sec-title">熱門股籌碼分析<small>本週買超榜前十名＋五大族群第一名</small></div><div class="rd-chips"><span>五大族群第一名</span>' + leaders + '</div><div class="rd-hot">' + cards + '</div></section>';
@@ -11507,11 +11593,39 @@ function rdOutsideHtml(rows, side){
   return '<div class="rd-outside"><button class="rd-outside-btn" data-rd-outside="' + side + '">' + (open ? '▾' : '▸') + ' 另有 ' + rows.length + ' 檔不在追蹤範圍（不進排行）</button>' +
     (open ? '<div class="rd-outside-list">' + rows.map((r) => '<span data-rd-code="' + r.code + '">' + r.code + ' ' + rdEsc(r.name) + ' <b class="' + rdCls(r.chip1) + '">' + rdPct(r.chip1, 1) + '</b></span>').join('') + '</div>' : '') + '</div>';
 }
+// 2026-10-24 使用者：兩個網站的功能合在一起——老師雷達頁有的（買超賣超榜、上榜累積榜、族群排名比較、連續增排行、熱門股）照他的版面，
+// 我們原本籌碼週報獨有的（本週摘要、上週榜對帳、整族一起動、單獨上榜、賣超、怎麼讀）接在最下面同一頁；兩邊重複的族群排名只留一份
+// （雷達的族群排名比較，旁邊補上週報才有的名次變化 ↑↓／新進、整族一起動的紅框）。週報區跟上面榜單選的那週一起換（週報只保留近 4 週）。
+function rwMvHtml(m){
+  if (!m) return '';
+  if (m.kind === 'new') return '<span class="rw-mv new">新進</span>';
+  if (m.kind === 'same') return '<span class="rw-mv same">持平</span>';
+  return '<span class="rw-mv ' + m.kind + '">' + (m.kind === 'up' ? '↑' : '↓') + m.n + '</span>';
+}
+function rwBlockHtml(d){
+  const lists = d.lists || [];
+  const idx = Math.max(0, lists.findIndex((w) => w.date === (radarState.listWeek || d.latest)));
+  const pickDate = (lists[idx] || {}).date || d.latest;
+  const week = idx === 0 ? '' : pickDate;
+  const maxWeeks = 4;
+  const title = '<div class="rd-sec-title">籌碼週報<small>' + rwSettleText(pickDate) + '・跟上面榜單選的週一起換（週報只保留近 ' + maxWeeks + ' 週）・上週榜對帳、整族一起動、單獨上榜、賣超是我們多做的整理</small></div>';
+  if (idx >= maxWeeks) return '<div id="rwBlock" class="rd-wrap-in">' + title + '<div class="rd-note">這一週比較早，週報只保留最近 ' + maxWeeks + ' 週——點上面最近 ' + maxWeeks + ' 週的任一顆看週報。</div></div>';
+  ensureWeekly(week);
+  const w = rwCache[week || 'latest'];
+  if (!w) return '<div id="rwBlock" class="rd-wrap-in">' + title + '<div class="rd-note">' + (rwError[week || 'latest'] ? '週報讀取失敗：' + rdEsc(rwError[week || 'latest']) : '週報讀取中…（第一次要抓股價，幾秒）') + '</div></div>';
+  if (w.status !== 'ok') return '<div id="rwBlock" class="rd-wrap-in">' + title + '<div class="rd-note">' + rdEsc(w.message || '還沒有這一週的週報') + '</div></div>';
+  const nav = [['rw-sum', '本週摘要'], ['rw-recon', '上週榜對帳'], ['rw-together', '整族一起動'], ['rw-single', '單獨上榜'], ['rw-sell', '賣超'], ['rw-read', '怎麼讀']]
+    .map((x) => '<button data-rw-jump="' + x[0] + '">' + x[1] + '</button>').join('');
+  const def = '<div class="rd-intro rw-def"><b>籌碼暴增</b>＝大戶手上的股票這一週變多；<b>買超榜</b>＝籌碼增加 ≥4%、<b>賣超榜</b>＝減少 ≥1.5%；' +
+    '<b>整族一起動</b>＝同族 2 檔以上同時上買超榜（兄弟姊妹多，佐證多一層）；<b>單獨上榜</b>＝族群裡只有它一檔在榜上。這只是強度分級，不是選股名單。</div>';
+  return '<div id="rwBlock" class="rd-wrap-in">' + title + '<div class="rw-nav">' + nav + '</div>' + def +
+    rwSummaryHtml(w) + rwReconHtml(w) + rwTogetherHtml(w) + rwSingleHtml(w) + rwSellHtml(w) + rwReadHtml() + '</div>';
+}
 function radarHtml(){
   if (radarState.view === 'weekly') return rwHtml();
   ensureRadar(false);
   const d = radarData;
-  const wbtn = '<button class="rd-weekly-btn" data-rw-view="weekly">📰 籌碼週報<small>' + (d && d.latest ? rdMdShort(d.latest) + ' 結算・' : '') + '可回看 4 週</small></button>';
+  const wbtn = '<button class="rd-weekly-btn" data-rw-jump="rwBlock">📰 籌碼週報<small>' + (d && d.latest ? rdMdShort(d.latest) + ' 結算・' : '') + '可回看 4 週・往下看</small></button>';   // 2026-10-24 使用者：週報跟雷達合成一頁，按鈕改成捲到下面的週報區
   const head = '<div><span class="rd-tag">盤後籌碼・互動版</span><div class="rd-headrow"><div class="rd-title">籌碼暴增雷達</div>' + wbtn + '</div>' +
     '<div class="rd-sub">集保週資料 ' + (d && d.week ? String(d.week).replace(/-/g, '/') : '—') + '（每週五結算）・均線分數 ' + (d && d.scoreDate ? rdMd(d.scoreDate) + ' 收盤' : '—') + (d && d.universe ? '・追蹤範圍 ' + d.universe + ' 檔' + (d.market ? '（全市場 ' + d.market + ' 檔）' : '') : '') + '</div>' +
     '<div class="rd-pill">ⓘ 每週更新一次——集保在每週五結算、週六公布，整個下一週看到的都是同一份；個股的三大法人是每個交易日收盤後更新。</div></div>';
@@ -11527,7 +11641,8 @@ function radarHtml(){
   if (d.status !== 'ok'){
     return '<div class="rd-wrap">' + head + intro + '<div class="signal-empty"><div class="se-title">還沒有集保週資料</div><div class="se-sub">' + rdEsc(d.message || '') + '（後端會從鏡像匯入近 18 週，第一次大約要幾分鐘）</div></div></div>';
   }
-  return '<div class="rd-wrap">' + head + intro + rdSearchHtml() + rdListsHtml(d) + rdCumHtml(d) + rdGroupsHtml(d) + rdStreakHtml(d) + rdHotHtml(d) + '</div>';
+  ensureWeekly('');   // 族群排名比較要用週報的名次變化，先把最新一週的週報備好
+  return '<div class="rd-wrap">' + head + intro + rdSearchHtml() + rdListsHtml(d) + rdCumHtml(d) + rdGroupsHtml(d) + rdStreakHtml(d) + rdHotHtml(d) + rwBlockHtml(d) + '</div>';
 }
 function radarShowStock(code){
   code = String(code || '').trim().toUpperCase();
@@ -15645,7 +15760,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 12:00:28';
+const BUILD_STAMP = '2026-10-24 13:00:28';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19568,7 +19683,7 @@ const GUIDE_TOOLS = [
   { t: '籌碼日報', label: '籌碼日報', v: 'tb-swing', tags: ['盤後'], d: '收盤後的一份整理：今日摘要、產業、籌碼、技術、均線轉強、處置動態，還有主動式 ETF 持股雷達、營收面精選。',
     b: ['可以回看之前的日子；交易日晚上 9 點後、隔天早上 7 點半再更新一次（處置公告、ETF 持股晚上才齊）', '處置動態看全市場：明日入獄／出獄、處置中、剛出獄觀察、高機率處置',
       '主動式 ETF 雷達：五檔主動式 ETF 每天買賣什麼、連續同向、資金潮汐', '營收面：先看前一個交易日之後新公布的，再看整月累計前 10 檔'] },
-  { t: '盤後籌碼排行', label: '今日盤後籌碼排行', v: 'tb-chips', tags: ['盤後', '每週'], d: '看大戶手上的股票變多還是變少：籌碼暴增雷達、法人連買、主力大單、放空籌碼，還有每週的籌碼週報。',
+  { t: '籌碼暴增雷達', label: '籌碼暴增雷達', v: 'tb-chips', tags: ['盤後', '每週'], d: '看大戶手上的股票變多還是變少：照老師雷達頁的版面（買超賣超榜、上榜累積榜、族群排名、連續增排行、熱門股），再把我們的籌碼週報（上週榜對帳、整族一起動、單獨上榜、賣超）合在同一頁；其他分頁有法人連買、主力大單、放空籌碼。',
     b: ['集保大戶資料每週五更新一次', '可以跟醞釀／發動交叉看'] },
   { t: '📋 觀察股簡報', open: 'brief', tags: ['盤後'], d: '照老師影片兩張投影片做的簡報，兩張都是全部族群取前十名、再抓每個族群的強勢股：',
     b: ['族群（上面）：本週（上週收盤 → 最新收盤）全部族群平均漲跌前 10 名、每個族群的強勢股（本週漲最多＋本週曾亮燈的）、● ＝本週曾亮燈（收盤漲停）', '營收（下面）：全部族群照當月營收年增中位排名（前 10 名）、每個族群的強勢股（年增 ≥30%，標加速／放緩／年增為負、公布隔日漲跌）、全市場「營收公告 → 隔日漲跌」'] },
@@ -19632,8 +19747,8 @@ function guideHtml(){
     ['盤中 09:00～13:30', '首頁看族群強弱、⚠ 盤中訊號看誰在發動；🤖 機器人代碼打 12、22 一秒看族群、個股漲幅排行；自選股、個股訊號追蹤盯自己的股票。'],
     ['12:00', '創高黑龍出今日暫定名單。'],
     ['13:20', '創高黑選股提醒今天要做的動作。'],
-    ['收盤後', '盤後籌碼排行、均線分數排行、籌碼日報、創高黑龍正式名單陸續出來；🤖 機器人 81／811／813 隔日沖名單晚上六點後更新；晚上處置監獄、法人、融資（約 21:40）更新。'],
-    ['週末', '盤後籌碼排行的籌碼週報（集保週五資料）、研究室看下週行事曆。'],
+    ['收盤後', '籌碼暴增雷達、均線分數排行、籌碼日報、創高黑龍正式名單陸續出來；🤖 機器人 81／811／813 隔日沖名單晚上六點後更新；晚上處置監獄、法人、融資（約 21:40）更新。'],
+    ['週末', '籌碼暴增雷達的籌碼週報（集保週五資料）、研究室看下週行事曆。'],
   ].map(([w, t]) => '<div class="gd-tr"><b>' + w + '</b><span>' + t + '</span></div>').join('') + '</div>';
   html += '<h3 class="gd-h">📱 放到手機、平板、電腦桌面，一點就開</h3><div class="gd-card"><p class="gd-sub">把網站加到主畫面或電腦桌面，以後像 App 一樣一點就開，不用再找網址。</p>' +
     '<div class="gd-htabs">' + homeTabs.map(([k, l]) => '<button type="button" class="chart-tab' + (guideState.home === k ? ' active' : '') + '" data-gd-home="' + k + '">' + l + '</button>').join('') + '</div>' +
@@ -25228,7 +25343,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '研究室'){ openLabPanel(); return; }        // 2026-10-10 使用者：國際大事行事曆（照老師 zhuang.tw/calendar）
     if (btn.dataset.label === '每日功課'){ openHomeworkFromToolbar(); return; }   // 2026-10-10 使用者：空觀察／當沖多／多觀察功課自動版   // 2026-10-10 使用者：估值河流圖（本站版）
     if (btn.dataset.label === '個股盤中訊號追蹤'){ openTrackPanel(); return; }   // 2026-10-05 使用者：自選股的今日訊號＋提醒
-    if (btn.dataset.label === '今日盤後籌碼排行'){ openChipsPanel(); return; }
+    if (btn.dataset.label === '籌碼暴增雷達'){ openChipsPanel(); return; }   // 2026-10-24 使用者：原本叫「今日盤後籌碼排行」
     if (btn.dataset.label === '籌碼日報'){ openSwingPanel(); return; }   // 2026-09-26 使用者：波段日報改名「下午報」；2026-10-10 再改名「籌碼日報」
     if (btn.dataset.label === '創高黑龍'){ openHeilongPanel(); return; } // 2026-10-04 使用者：黑龍回測獨立面板
     if (btn.dataset.label === '創高黑選股'){ openPickerPanel(); return; } // 2026-10-04 使用者：創高黑選股
