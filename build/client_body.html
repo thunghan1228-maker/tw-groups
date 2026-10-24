@@ -24889,6 +24889,7 @@ async function maLoad(){
     const qs = []; if (maState.date) qs.push('date=' + encodeURIComponent(maState.date)); if (maState.teacher) qs.push('teacher=1');
     maState.data = await maFetch('/api/ma-rank' + (qs.length ? '?' + qs.join('&') : ''));
     maState.error = null;
+    try { maSyncWatchlist(maState.data); } catch (e){ console.warn('個股分數前 20 → 自選股', e); }
   } catch (e){
     maState.error = e.message || String(e);
   } finally {
@@ -24896,6 +24897,39 @@ async function maLoad(){
     if (!document.getElementById('maModal').hidden) renderMa();
   }
 }
+// 個股分數前 20 名自動進自選股（2026-10-24 使用者：均線分數排行「個股分數前 60」裡的前 20 名，自動加到自選股，分組抬頭寫「個股分數前20名」）。
+// 跟形態觀察股（⏰ 四個分組）同一套做法：分組沒有就建在最後面，內容（股號＋名次＋分數）跟上次一樣就不動；每天收盤後排行換了，
+// 網頁開著（或下次打開）就會把分組換成最新的前 20 名。只拿最新一天的預設排行（不是「對照老師名單」、也不是回看的舊日期）。
+const MA_WL_ID = 'ma20', MA_WL_NAME = '📊個股分數前20名', MA_WL_TOP = 20;
+let maWlAt = 0, maWlLoading = false;
+function maSyncWatchlist(d){
+  if (!d || d.status !== 'ok' || d.teacher || !Array.isArray(d.stocks) || !d.stocks.length || (d.latest && d.date !== d.latest)) return false;
+  const today = twTodayStr();
+  const items = d.stocks.slice(0, MA_WL_TOP).map((r, i) => ({ code: r.code, note: maMd(d.date) + ' 第' + (i + 1) + '名・' + r.sum + ' 分', addedAt: today }));
+  const sig = (xs) => xs.map((it) => it.code + '|' + (it.note || '')).join(',');
+  const g = wl.data.groups.find((x) => x.id === MA_WL_ID);
+  if (g && g.name === MA_WL_NAME && sig(g.items) === sig(items)) return false;
+  wlMutate((data) => {
+    let gg = data.groups.find((x) => x.id === MA_WL_ID);
+    if (!gg){ gg = { id: MA_WL_ID, name: MA_WL_NAME, items: [] }; data.groups.push(gg); }
+    gg.name = MA_WL_NAME;
+    gg.items = items.map((it) => ({ ...it }));
+  });
+  return true;
+}
+async function maWlTick(){
+  if (maWlLoading || wl.loading || wl.busy) return;
+  if (wl.key && !wl.syncedAt) return;                       // 有同步碼但雲端那份還沒讀回來：先不動，免得蓋掉
+  if (Date.now() - maWlAt < 25 * 60e3) return;              // 25 分鐘看一次就夠（排行一天才換一次）
+  maWlLoading = true;
+  try {
+    const d = await maFetch('/api/ma-rank');
+    maSyncWatchlist(d);
+    maWlAt = Date.now();
+  } catch (_){ /* 抓不到下一分鐘再試 */ } finally { maWlLoading = false; }
+}
+setTimeout(maWlTick, 8000);
+setInterval(maWlTick, 60000);
 async function maHitsLoad(){
   maState.hitsLoading = true;
   maState.hitOpen = -1;

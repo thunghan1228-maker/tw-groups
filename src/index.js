@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 14:04:48";
+const BUILD_STAMP = "2026-10-24 14:06:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -15760,7 +15760,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 14:04:48';
+const BUILD_STAMP = '2026-10-24 14:06:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -24969,6 +24969,7 @@ async function maLoad(){
     const qs = []; if (maState.date) qs.push('date=' + encodeURIComponent(maState.date)); if (maState.teacher) qs.push('teacher=1');
     maState.data = await maFetch('/api/ma-rank' + (qs.length ? '?' + qs.join('&') : ''));
     maState.error = null;
+    try { maSyncWatchlist(maState.data); } catch (e){ console.warn('個股分數前 20 → 自選股', e); }
   } catch (e){
     maState.error = e.message || String(e);
   } finally {
@@ -24976,6 +24977,39 @@ async function maLoad(){
     if (!document.getElementById('maModal').hidden) renderMa();
   }
 }
+// 個股分數前 20 名自動進自選股（2026-10-24 使用者：均線分數排行「個股分數前 60」裡的前 20 名，自動加到自選股，分組抬頭寫「個股分數前20名」）。
+// 跟形態觀察股（⏰ 四個分組）同一套做法：分組沒有就建在最後面，內容（股號＋名次＋分數）跟上次一樣就不動；每天收盤後排行換了，
+// 網頁開著（或下次打開）就會把分組換成最新的前 20 名。只拿最新一天的預設排行（不是「對照老師名單」、也不是回看的舊日期）。
+const MA_WL_ID = 'ma20', MA_WL_NAME = '📊個股分數前20名', MA_WL_TOP = 20;
+let maWlAt = 0, maWlLoading = false;
+function maSyncWatchlist(d){
+  if (!d || d.status !== 'ok' || d.teacher || !Array.isArray(d.stocks) || !d.stocks.length || (d.latest && d.date !== d.latest)) return false;
+  const today = twTodayStr();
+  const items = d.stocks.slice(0, MA_WL_TOP).map((r, i) => ({ code: r.code, note: maMd(d.date) + ' 第' + (i + 1) + '名・' + r.sum + ' 分', addedAt: today }));
+  const sig = (xs) => xs.map((it) => it.code + '|' + (it.note || '')).join(',');
+  const g = wl.data.groups.find((x) => x.id === MA_WL_ID);
+  if (g && g.name === MA_WL_NAME && sig(g.items) === sig(items)) return false;
+  wlMutate((data) => {
+    let gg = data.groups.find((x) => x.id === MA_WL_ID);
+    if (!gg){ gg = { id: MA_WL_ID, name: MA_WL_NAME, items: [] }; data.groups.push(gg); }
+    gg.name = MA_WL_NAME;
+    gg.items = items.map((it) => ({ ...it }));
+  });
+  return true;
+}
+async function maWlTick(){
+  if (maWlLoading || wl.loading || wl.busy) return;
+  if (wl.key && !wl.syncedAt) return;                       // 有同步碼但雲端那份還沒讀回來：先不動，免得蓋掉
+  if (Date.now() - maWlAt < 25 * 60e3) return;              // 25 分鐘看一次就夠（排行一天才換一次）
+  maWlLoading = true;
+  try {
+    const d = await maFetch('/api/ma-rank');
+    maSyncWatchlist(d);
+    maWlAt = Date.now();
+  } catch (_){ /* 抓不到下一分鐘再試 */ } finally { maWlLoading = false; }
+}
+setTimeout(maWlTick, 8000);
+setInterval(maWlTick, 60000);
 async function maHitsLoad(){
   maState.hitsLoading = true;
   maState.hitOpen = -1;
