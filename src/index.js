@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 10:04:20";
+const BUILD_STAMP = "2026-10-24 10:19:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4423,6 +4423,7 @@ function chartD123Load(code){
 // 融資斷頭價 A／B（2026-10-23 使用者貼老師「斷頭線就在腳下」）：A＝近 20 日盤中最高 × 0.78、B＝月高那天五日平均價 × 0.78（上櫃 × 0.65），後端 /api/margin-line 算好
 // 日線一定畫；5 分K／1 分K 只有那一條離現價 ≤ MCL_NEAR_PCT（含已跌破）才畫，平常多頭、離很遠就不出現
 const MCL_NEAR_PCT = 20;           // 使用者 2026-10-23：離現價 ≤20% 才出現（21% 不用、19% 要）
+const MCL_FIT_RANGES = 1;          // 使用者 2026-10-24：分K的斷頭價線離這張圖的價格範圍超過「範圍的 1 倍」就不拉進縮放（不然K棒被壓成一條細帶），改貼在圖的上／下緣畫
 const MCL_CALL_PCT = 130;          // 低於 130% 開始追繳
 const MCL_A_COLOR = '#e11d48', MCL_B_COLOR = '#9333ea';
 function chartMclLoad(code){
@@ -4831,15 +4832,24 @@ function drawChart(){
   chartPatLoad(currentChart.code);
   chartMclLoad(currentChart.code);   // 2026-10-23 使用者：K線圖上面加賣壓狀態／落底訊號／回檔警示三個標籤 → 不管斷頭價開關開不開都要載入
   const mclLines = chartMclLines(allBars);   // 融資斷頭價 A／B：日線一定畫、分K離現價 ≤20% 才畫
-  mclLines.forEach((d) => { lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); });
+  // 2026-10-24 使用者「K 線圖揪成一團」（創見 2451：5 分K 價格只在 270～277，A／B 線在 225～228，兩條線一拉進縮放範圍，K棒就擠成一條細帶）：
+  // 分K的線如果離「K棒＋均線」的高低範圍太遠（超過範圍的 MCL_FIT_RANGES 倍）就不納入縮放，改成貼在圖的下緣（或上緣）畫，標籤加 ↓↑ 跟差幾 %；日線一律照舊納入。
+  const fitLo = lo, fitHi = hi, fitRange = (hi - lo) || 1;
+  mclLines.forEach((d) => {
+    d.far = currentChart.tf !== 'daily' && d.v < fitLo - fitRange * MCL_FIT_RANGES ? -1 : currentChart.tf !== 'daily' && d.v > fitHi + fitRange * MCL_FIT_RANGES ? 1 : 0;
+    if (!d.far){ lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); }
+  });
   const range = (hi - lo) || 1;
   lo -= range * 0.06; hi += range * 0.06;
+  lo -= range * 0.04 * mclLines.filter((t) => t.far < 0).length; hi += range * 0.04 * mclLines.filter((t) => t.far > 0).length;   // 貼在上／下緣的線，每條多留一點位置，不蓋到K棒
   // 123 黑龍圓圈畫在K棒下面（2026-10-12 使用者），底部多留一點空間
   const d123Marks = currentChart.tf === 'daily' && currentChart.d123On && currentChart.d123 && currentChart.d123.code === currentChart.code ? currentChart.d123.marks : null;
   if (d123Marks && Object.keys(d123Marks).length) lo -= range * 0.05;
 
   const xAt = (i) => PAD.left + (plotW * (i + 0.5) / bars.length);
   const yAt = (v) => padTop + plotH * (1 - (v - lo) / (hi - lo));
+  mclLines.filter((t) => t.far < 0).sort((a, b) => a.v - b.v).forEach((t, i) => { t.edgeY = yAt(lo) - 3 - i * 14; });   // 太遠的線貼下緣，一條一條往上疊（隔 14px，標籤不重疊）
+  mclLines.filter((t) => t.far > 0).sort((a, b) => b.v - a.v).forEach((t, i) => { t.edgeY = yAt(hi) + 3 + i * 14; });
 
   ctx.strokeStyle = 'rgba(168,156,143,0.15)';
   ctx.fillStyle = '#a89c8f';
@@ -5013,11 +5023,11 @@ function drawChart(){
   if (mclLines.length){
     ctx.save();
     mclLines.forEach((t) => {
-      const y = yAt(t.v);
+      const y = t.far ? t.edgeY : yAt(t.v);
       ctx.strokeStyle = t.color; ctx.globalAlpha = 0.95; ctx.lineWidth = 1.5; ctx.setLineDash(t.dash);
       ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(cssW - PAD.right, y); ctx.stroke();
       ctx.setLineDash([]); ctx.globalAlpha = 1;
-      const text = t.label + ' ' + t.v.toFixed(2) + (t.gap === null ? '' : t.gap < 0 ? '（已破）' : '（差 ' + t.gap.toFixed(1) + '%）');
+      const text = (t.far < 0 ? '↓ ' : t.far > 0 ? '↑ ' : '') + t.label + ' ' + t.v.toFixed(2) + (t.gap === null ? '' : t.gap < 0 ? '（已破）' : '（差 ' + t.gap.toFixed(1) + '%）');
       ctx.font = 'bold 10px -apple-system, sans-serif';
       const tw = ctx.measureText(text).width + 8;
       const ly = Math.max(padTop + 8, Math.min(cssH - padBottom - 8, y - 9));
@@ -5025,6 +5035,7 @@ function drawChart(){
       ctx.fillRect(cssW - PAD.right - tw - 2, ly - 7, tw, 14);
       ctx.fillStyle = t.color; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
       ctx.fillText(text, cssW - PAD.right - tw + 2, ly);
+      if (t.far) return;   // 貼邊的線不在價格軸上的真實位置，右邊不放價位框（價位寫在線上的標籤裡）
       const tagY = Math.max(padTop, Math.min(cssH - padBottom - 14, y - 7));
       ctx.fillStyle = 'rgba(18,16,15,0.92)';
       ctx.fillRect(cssW - PAD.right + 1, tagY, PAD.right - 2, 14);
@@ -15594,7 +15605,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 10:04:20';
+const BUILD_STAMP = '2026-10-24 10:19:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
