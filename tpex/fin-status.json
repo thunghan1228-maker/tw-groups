@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T01:17:04+08:00",
+ "at": "2026-10-28T00:26:54+08:00",
  "requests": [
   {
    "season": "2026Q4",
@@ -14,17 +14,17 @@
   {
    "season": "2026Q3",
    "market": "sii",
-   "rows": 5
+   "rows": 9
   },
   {
    "season": "2026Q3",
    "market": "otc",
-   "rows": 5
+   "rows": 15
   },
   {
    "season": "2026Q2",
    "market": "sii",
-   "rows": 1086
+   "rows": 1087
   },
   {
    "season": "2026Q2",
