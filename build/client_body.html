@@ -368,7 +368,7 @@
   }
   .chart-modal-inner input,.chart-modal-inner textarea{user-select:text;-webkit-user-select:text;}
   .chart-modal.fullscreen .chart-modal-inner{left:0!important;top:0!important;right:0;bottom:0;width:auto!important;height:auto!important;max-width:none;max-height:none;border-radius:0;resize:none;}
-  .chart-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;cursor:move;touch-action:none;}
+  .chart-modal-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;row-gap:4px;margin-bottom:10px;cursor:move;touch-action:none;}
   .chart-modal-head .cm-actions{cursor:default;}
   .cm-code{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;margin-right:8px;}
   .cm-name{font-weight:800;font-size:17px;}
@@ -377,7 +377,8 @@
   .cm-group-tag{background:#7c3aed;color:#fff;font-size:12px;font-weight:700;border-radius:5px;padding:1px 7px;white-space:nowrap;}   /* 族群：紫底白字 */
   .cm-group-tag.cm-dt-tag{background:#ea580c;cursor:pointer;}   /* 2026-10-17 使用者：最近一份 811 有這檔就標「⚡隔日沖 %」，橘底白字，點了看隔日沖分點 */
   .cm-data-badge{margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;vertical-align:middle;}
-  .chart-info-bar{flex:1;text-align:center;padding:0 8px;font-size:20px;font-weight:700;color:#fff5e0;font-variant-numeric:tabular-nums;}
+  .chart-info-bar{flex:1 1 100%;order:3;text-align:left;padding:0 2px;font-size:19px;font-weight:700;color:#fff5e0;font-variant-numeric:tabular-nums;}   /* 2026-10-28 使用者：資訊列兩行放在股名下面（原本夾在股名跟右邊按鈕中間、窄了就亂換行） */
+  .chart-info-bar .cib-row{line-height:1.5;}
   .chart-info-bar .cib-item{white-space:nowrap;display:inline-block;margin:0 3px;}
   .cm-actions{display:flex;gap:6px;align-items:center;}
   .cm-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;cursor:default;}
@@ -4818,23 +4819,27 @@ function updateChartInfoBar(bars, index){
   if (!el || !ib) return;
   const item = (text, color) => '<span class="cib-item"' + (color ? ' style="color:' + color + '"' : '') + '>' + text + '</span>';
   const prevClose = chartPrevClose(bars, index);
-  let change = '—';
+  let change = '—', changePct = '—';
   let changeColor = null;
   if (prevClose > 0){
     const amt = ib.close - prevClose;
     const sign = amt > 0 ? '+' : '';
-    change = sign + amt.toFixed(2) + '（' + sign + (amt / prevClose * 100).toFixed(2) + '%）';
+    change = sign + amt.toFixed(2);
+    changePct = sign + (amt / prevClose * 100).toFixed(2) + '%';   // 2026-10-28 使用者：漲跌幅另外一項寫「漲跌幅」，不要放在漲跌後面的括號裡
     changeColor = amt > 0 ? '#e6675f' : amt < 0 ? '#5fae6f' : null;
   }
-  const parts = [
+  // 2026-10-28 使用者：資訊列分成兩行放在股名下面——第一行 時間／開／高／低，第二行 量／漲跌／漲跌幅／收（／大戶）
+  const row1 = [
     item(ib.fullLabel + (ib.liveNote ? '（' + ib.liveNote + '）' : '')), item('開' + ib.open.toFixed(2)), item('高' + ib.high.toFixed(2)), item('低' + ib.low.toFixed(2)),
-    item('量' + Math.round(ib.volume) + '張'), item('漲跌' + change, changeColor), item('收' + ib.close.toFixed(2), changeColor),
+  ];
+  const row2 = [
+    item('量' + Math.round(ib.volume) + '張'), item('漲跌' + change, changeColor), item('漲跌幅' + changePct, changeColor), item('收' + ib.close.toFixed(2), changeColor),
   ];
   const fnet = barForceNet(ib);
   if (Number.isFinite(fnet)){
-    parts.push(item((forceAlgo === 'teacher' ? '大戶' : '主力') + (fnet >= 0 ? '+' : '') + Math.round(fnet) + '張', fnet >= 0 ? '#e6675f' : '#5fae6f'));
+    row2.push(item((forceAlgo === 'teacher' ? '大戶' : '主力') + (fnet >= 0 ? '+' : '') + Math.round(fnet) + '張', fnet >= 0 ? '#e6675f' : '#5fae6f'));
   }
-  el.innerHTML = parts.join(' ');
+  el.innerHTML = '<div class="cib-row">' + row1.join(' ') + '</div><div class="cib-row">' + row2.join(' ') + '</div>';
 }
 
 // 2026-10-13 使用者：扣底（使用者自己的算法，跟一般往前推一根）：今天這根不算，往前數 N 根的那一根
