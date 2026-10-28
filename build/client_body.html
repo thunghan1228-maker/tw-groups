@@ -61,7 +61,9 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.25fr) minmax(0, 1.1fr) minmax(0, 0.95fr) minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.25fr);gap:8px;align-items:start;}   /* 2026-10-21 使用者：當沖多1、當沖多2、多觀察 排前三欄，寬度跟著搬 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.1fr) minmax(0, 1.25fr) minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.25fr);gap:8px;align-items:start;}   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄（今日強勢股疊在當沖多1 下面）；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .hr-stack.hr-strong4{display:none;} .hr-strong3{margin-top:8px;}
+  @media (min-width:2040px){ .home-rank4{grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.1fr) minmax(0, 1.25fr) minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.35fr);} .hr-stack.hr-strong4{display:flex;} .hr-strong3{display:none;} }   /* 2026-10-28 使用者：今日強勢股多一欄排第四（10 欄），太擠就疊在第三欄下面——寬螢幕（≥2040px）才放得下 10 欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -9144,7 +9146,7 @@ function homeLongRowHtml(o){
 function homeLongColsHtml(){
   const m = race333Model();
   const head = (n, k) => '<div class="hr-title">🔥當沖多' + k + (n === null ? '' : ' <span class="hr-rk">' + (k === 1 ? '交集 ' + n + ' 檔' : '') + '</span>') + '</div>';
-  const wrap = (a, b) => '<div class="hr-stack">' + a + '</div><div class="hr-stack">' + b + '</div>';
+  const wrap = (a, b) => ({ one: '<div class="hr-stack">' + a + '</div>', two: '<div class="hr-stack">' + b + '</div>' });   // 2026-10-28 使用者：欄位順序改成多觀察、當沖多2、當沖多1，所以兩欄分開回傳讓呼叫的人自己排
   const note = '<div class="hr-note">' + '中幾個＝被 ① 多功課 ② 賽馬多 ③ 河流多 ④ 族群在多方區 點名幾個；空方族群已濾掉，只中一個的不列</div>';
   if (!m) return wrap('<div class="hr-col">' + head(null, 1) + '<div class="hr-note">讀取中…（33／34 開盤後才有）</div></div>', '<div class="hr-col">' + head(null, 2) + '</div>');
   let model = null;
@@ -9388,10 +9390,16 @@ function homeRank4Html(){
   const rows188 = h.rows.filter((r) => RANK188_GROUPS.has(r.name));
   const rows183 = h.rows.filter((r) => RANK183_GROUPS.has(r.name));   // 2026-10-21 使用者：183 多加幾個族群
   // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／199 疊在同一欄）、193、刀劍空(32)、33、34、188、177
+  const homeLong = homeLongColsHtml(), strongCol = homeStrongColHtml();
   return '<div class="home-rank4">' +
     // 2026-10-16 使用者：183 排第二欄、昨日強勢股排第六欄；2026-10-19 使用者：第二欄換成當沖多（取代 183 的位置），183 搬到今日強勢股下面
-    homeLongColsHtml() +   // 2026-10-20 使用者：當沖多檔數太多，分成兩欄（當沖多1、當沖多2），各跟原本第二欄一樣寬；2026-10-21 使用者：當沖多1、2 排前兩欄
-    homeObsColHtml() +   // 2026-10-16 使用者：強勢黑K選股（多觀察）排第一欄；2026-10-21 使用者：多觀察改排第三欄（當沖多1、當沖多2、多觀察）
+    // 2026-10-28 使用者：欄位順序改成 ①多觀察(等黑K買進) ②當沖多2 ③當沖多1 ④今日強勢股（盤中訊號裡的今日強勢股，多一欄），其他後面不變
+    // （2026-10-20 使用者：當沖多檔數太多，分成兩欄；2026-10-21 使用者排前三欄 當沖多1、當沖多2、多觀察；2026-10-16 多觀察原本是第一欄）
+    // 今日強勢股：螢幕夠寬（≥2040px，10 欄放得下）排第四欄；不夠寬（一般 1920 的螢幕，10 欄會擠到一堆名字被切掉）就疊在第三欄（當沖多1）下面——兩份只會顯示一份（CSS 切換）
+    homeObsColHtml() +
+    homeLong.two +
+    homeLong.one.replace(/<\/div>$/, '<div class="hr-strong3">' + strongCol + '</div></div>') +
+    '<div class="hr-stack hr-strong4">' + strongCol + '</div>' +
     // 2026-10-16 使用者：第 4 欄續抱勿追高疊在河流多(34) 上面；第 5 欄馬火多(30)（155 疊在下面）；第 6 欄 30加33 疊在賽馬多(33) 上面（2026-10-20 使用者：30加33 跟續抱勿追高對調，馬火多再移到 30加33 左邊）
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
     '<div class="hr-stack">' +
@@ -25467,7 +25475,7 @@ function czItems(){
   return items;
 }
 // 首頁欄位：欄位是程式每 15 秒整個重畫的，所以每次畫完（MutationObserver）再依標題標記、收合；標題對不到的欄不管它
-const CZ_HOME_CARDS = [['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
+const CZ_HOME_CARDS = [['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:strong', '今日強勢股'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
   ['hm:r183', '多族群排名(183)'], ['hm:g12', '族群漲幅'], ['hm:r44', '1+2多'], ['hm:t3', '三落空'], ['hm:r155', '股票期貨排名(155)'], ['hm:r75', '股期黑龍']];
 const CZ_HOME_JAIL = [['hm:jin', '今日入獄'], ['hm:jsoon', '即將出關'], ['hm:jout', '已出關']];
 function czApplyHome(){
