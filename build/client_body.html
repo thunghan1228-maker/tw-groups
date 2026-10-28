@@ -1751,6 +1751,8 @@
   .td-gfoot{margin:6px 10px 10px;padding:6px 10px;border:1px dashed #d6b44a;border-radius:8px;font-size:12px;line-height:1.7;background:rgba(214,180,74,.08);}
   .td-river{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;background:linear-gradient(90deg,#7f1d1d,#b91c1c,#7f1d1d);color:#fff;border-radius:10px;padding:8px 14px;font-size:14px;}
   .td-river span{opacity:.75;letter-spacing:2px;} .td-river .td-otc{background:transparent;border:1.5px solid #fff;color:#fff;}
+  /* 2026-10-28 使用者：楚河漢界上那顆「櫃買 強多／強空」紅字壓在紅底上看不清楚——強多改亮粉紅、強空改亮綠（要壓過 #hwInner .up／.down 的紅綠，所以多寫一層 id） */
+  #hwInner .td-river .td-otc.up{color:#ff9ac8;border-color:#ff9ac8;background:rgba(0,0,0,.2);font-weight:900;} #hwInner .td-river .td-otc.down{color:#86efac;border-color:#86efac;background:rgba(0,0,0,.18);font-weight:900;}
   .td-sec{margin:14px 0;}
   .td-sec h4{margin:0 0 6px;font-size:17px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;}
   .td-sec h4 small{font-size:12px;color:var(--muted);font-weight:400;}
@@ -18679,13 +18681,15 @@ function tdCardsHtml(rows, ctx, snap, opt){
   rows.forEach((r) => { const k = r.g || '—'; if (!by.has(k)) by.set(k, []); by.get(k).push(r); });
   let groups = Array.from(by.entries()).sort((a, b) => (a[1][0].gr || 99) - (b[1][0].gr || 99));
   const upTo = Math.max(1, Math.round((snap.total || 67) * 10 / 67));
-  if (o.banner){
-    // 2026-10-28 使用者：族群卡照「訊號發生的時間」排，最近發生的（時間晚的）放最上面，08:xx 這種最早的放最下面；楚河漢界上下兩邊各自照時間排，
-    // 族群的時間＝族裡最晚那檔的「訊號第一次出現時間」（卡片每列前面那個時間）；撮合時段（08:30 起）用試撮名單，同一套；沒有時間的（還沒記到）時間相同就照族群名次
-    const hmOf = (r) => { const t = ctx.firstAt ? ctx.firstAt.get(r.code) : ''; return /^\d\d:\d\d$/.test(t || '') ? t : ''; };
+  const k12 = !!(o.rowOpt && o.rowOpt.noK12);   // 12空 那塊（key 前面多 k12:）
+  if (o.banner || k12){
+    // 2026-10-28 使用者：族群卡照「訊號發生的時間」排，最近發生的（時間晚的）放最上面，08:xx 這種最早的放最下面（2026-10-28 又說：下面 12空 那塊也一樣）；
+    // 空觀察那塊楚河漢界上下兩邊各自照時間排，族群的時間＝族裡最晚那檔的「訊號第一次出現時間」（卡片每列前面那個時間）；
+    // 撮合時段（08:30 起）用試撮名單，同一套；沒有時間的（還沒記到）時間相同就照族群名次
+    const hmOf = (r) => { const t = ctx.firstAt ? ctx.firstAt.get((k12 ? 'k12:' : '') + r.code) : ''; return /^\d\d:\d\d$/.test(t || '') ? t : ''; };
     const timeOf = (list) => list.reduce((m, r) => { const t = hmOf(r); return t > m ? t : m; }, '');
     const byTime = (a, b) => (timeOf(b[1]) > timeOf(a[1]) ? 1 : timeOf(b[1]) < timeOf(a[1]) ? -1 : (a[1][0].gr || 99) - (b[1][0].gr || 99));
-    groups = groups.filter((g) => (g[1][0].gr || 99) <= upTo).sort(byTime).concat(groups.filter((g) => (g[1][0].gr || 99) > upTo).sort(byTime));
+    groups = o.banner ? groups.filter((g) => (g[1][0].gr || 99) <= upTo).sort(byTime).concat(groups.filter((g) => (g[1][0].gr || 99) > upTo).sort(byTime)) : groups.slice().sort(byTime);
   }
   let bannerDone = !o.banner;
   const stamp = tdMd(snap.date) + ' ' + snap.slot + '・機器人';
