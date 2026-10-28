@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-28 22:05:41";
+const BUILD_STAMP = "2026-10-28 22:09:30";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1867,6 +1867,38 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   #hwInner > .chips-head{background:var(--panel);color:var(--text);border:1px solid var(--line);}
   /* 2026-10-19 使用者：每日功課視窗要能上下左右移動、四邊四角拉大小（跟機器人代碼、盤中訊號分頁一樣）：標題列拖著走、點兩下最大化，
      不擋後面的頁面；位置大小記在這台瀏覽器 */
+  /* 族群園區（2026-10-25 使用者）：淺藍底、白色圓角標籤，房子是 SVG 畫的等角（2.5D）方塊 */
+  #parkInner{--bg:#eaf0f8;--panel:#ffffff;--panel-2:#dde6f3;--line:#c6d3e6;--text:#1e293b;--muted:#64748b;--up:#d92d20;--down:#12805c;--accent:#2563eb;background:#eaf0f8;color:#1e293b;border:1px solid #c6d3e6;}
+  #parkInner .chips-head{background:transparent;color:var(--text);padding:0;border-radius:0;margin-bottom:6px;align-items:flex-start;}
+  #parkInner .chips-title{font-size:26px;font-weight:900;color:#1d4ed8;}
+  #parkInner .chips-sub{color:var(--muted);font-size:13px;margin-top:4px;}
+  #parkInner .cm-icon-btn{background:#fff;color:#1e293b;border-color:#c6d3e6;}
+  #parkInner .up{color:#d92d20;font-weight:800;} #parkInner .down{color:#12805c;font-weight:800;} #parkInner .flat{color:#64748b;}
+  .pk-tabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0;}
+  .pk-tab,.pk-btn{border:1px solid #c6d3e6;background:#fff;color:#1e293b;border-radius:999px;padding:6px 16px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;}
+  .pk-tab.on,.pk-btn.on,.pk-play.on{background:#2563eb;border-color:#2563eb;color:#fff;}
+  .pk-btn{padding:5px 13px;font-size:13px;}
+  .pk-zoom{margin-left:auto;display:flex;align-items:center;gap:6px;} .pk-zoom b{min-width:3.2em;text-align:center;font-size:13px;color:var(--muted);} .pk-zoom .pk-btn{width:32px;padding:5px 0;text-align:center;}
+  .pk-tbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0;} .pk-stamp{font-size:12.5px;color:var(--muted);margin-right:auto;}
+  .pk-strip{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 8px;} .pk-sl{font-size:12px;color:var(--muted);font-weight:700;}
+  .pk-zs{background:#fff;border:1px solid #c6d3e6;border-radius:999px;padding:3px 10px;font-size:12.5px;white-space:nowrap;} .pk-zs b{font-variant-numeric:tabular-nums;}
+  .pk-zs.up{border-color:#fca5a5;} .pk-zs.down{border-color:#86efac;}
+  .pk-note{font-size:12.5px;color:var(--muted);line-height:1.7;margin:8px 0;}
+  .pk-mapbox{overflow:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#f4f7fc,#e3ebf6);border:1px solid #c6d3e6;border-radius:14px;max-height:min(72vh,820px);cursor:grab;touch-action:pan-x pan-y;}
+  .pk-mapbox.teach{max-height:min(46vh,520px);}
+  .pk-mapbox:active{cursor:grabbing;} .pk-svg{display:block;-webkit-user-select:none;user-select:none;}
+  .pk-pill rect{fill:#fff;stroke:#cbd5e1;stroke-width:1;filter:drop-shadow(0 2px 3px rgba(15,23,42,.18));} .pk-pill{cursor:pointer;} .pk-pill text{pointer-events:none;}
+  .pk-pill.pk-s rect{fill:#fffbeb;stroke:#fcd34d;} .pk-pill:hover rect{stroke:#2563eb;}
+  .pk-bld{cursor:pointer;} .pk-bld:hover{filter:brightness(1.07);} .pk-tag{cursor:default;} [data-park-zone]{cursor:pointer;} .pk-stop text{pointer-events:none;}
+  .pk-steps{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto;} .pk-step{border:1px solid #c6d3e6;background:#fff;border-radius:8px;padding:4px 8px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;color:#1e293b;} .pk-step.on{background:#2563eb;border-color:#2563eb;color:#fff;}
+  .pk-card{background:#fff;border:2px solid #38bdf8;border-radius:14px;padding:12px 14px;margin:10px 0;}
+  .pk-ct{font-size:20px;font-weight:900;display:flex;align-items:center;gap:8px;flex-wrap:wrap;} .pk-ct small{font-size:12px;color:var(--muted);font-weight:600;margin-left:auto;}
+  .pk-no{display:inline-flex;width:28px;height:28px;border-radius:50%;color:#fff;align-items:center;justify-content:center;font-size:15px;}
+  .pk-cd{font-size:14px;line-height:1.75;margin:8px 0 6px;}
+  .pk-tg{margin:8px 0;} .pk-gname{display:inline-block;font-weight:900;font-size:14px;color:#1d4ed8;cursor:pointer;margin-bottom:4px;} .pk-gname small{color:var(--muted);font-weight:600;} .pk-gname.plain{color:var(--muted);cursor:default;font-size:12.5px;}
+  .pk-chips{display:flex;flex-wrap:wrap;gap:5px;} .pk-chip{background:#eef3fb;border:1px solid #c6d3e6;border-radius:8px;padding:3px 8px;font-size:12.5px;cursor:pointer;} .pk-chip b{font-variant-numeric:tabular-nums;color:#475569;} .pk-chip:hover{border-color:#2563eb;background:#fff;}
+  .pk-next{font-size:12.5px;color:#1d4ed8;font-weight:700;margin-top:8px;}
+  @media (max-width: 640px){ #parkInner .chips-sub{display:none;} #parkInner .chips-title{font-size:21px;} #parkInner .chips-inner,#parkInner{padding:12px;} .pk-ct{font-size:17px;} .pk-mapbox{max-height:58vh;} .pk-steps{margin-left:0;} }
   /* 2026-10-24 使用者：自選股視窗要能自由搬動、上下左右拉大小，而且可以更寬（融資斷頭表 14 欄）——跟每日功課視窗同一套（attachFloatChrome） */
   #watchModal{background:none;pointer-events:none;padding:0;}
   #watchInner{position:absolute;pointer-events:auto;min-width:320px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
@@ -3783,6 +3815,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="alert-toggle guide-btn" id="botBtn">🤖 機器人代碼</button>  <!-- 2026-10-17 使用者：照對方 Line 機器人的代碼（12／22／B／a／70…）做一個輸入代碼的面板 -->
       <button class="alert-toggle guide-btn" id="briefBtn">📋 觀察股簡報</button>  <!-- 2026-10-24 使用者：照老師影片兩張投影片（營收觀察股誰在加速、族群本週誰最強）做新版面，名單用自選股 -->
       <button class="alert-toggle guide-btn" id="mbBtn">💰 融資簡報</button>  <!-- 2026-10-24 使用者：照老師 IG 那 7 張融資還沒殺完做的獨立簡報 -->
+      <button class="alert-toggle guide-btn" id="parkBtn">🏭 族群園區</button>  <!-- 2026-10-25 使用者：照老師 zhuang.tw/park 的等角園區，做「盤面園區」（每個族群一棟房子、盤中漲跌上色）＋「供應鏈教學」（一條路線一站一站走） -->
       <button class="alert-toggle guide-btn" id="wgBtn">⭐ 自選族群個股</button>  <!-- 2026-10-23 使用者：盤中訊號旁邊加分頁，輸入個股代號就開一格那檔所屬族群的排行（像機器人代碼），每檔旁邊有融資斷頭價 A／B -->
       <button class="alert-toggle guide-btn" id="sgtBtn">📶 盤中訊號分頁</button>  <!-- 2026-10-18 使用者：盤中訊號的分頁也做成機器人代碼那樣，點了開一格、一格一格往右排 -->
       <button class="alert-toggle guide-btn" id="remindBtn">🔔 今日提醒</button>  <!-- 2026-10-17 使用者：每天第一次打開跳出警示股提醒（解鎖／連續警告／分盤交易），關掉後這裡再開 -->
@@ -3914,6 +3947,19 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="cm-icon-btn" id="mbClose" aria-label="關閉">✕</button>
     </div>
     <div id="mbBody"></div>
+  </div>
+</div>
+<!-- 2026-10-25 使用者：族群園區（照老師 zhuang.tw/park 的等角園區）：盤面園區＋供應鏈教學 -->
+<div class="chips-modal" id="parkModal" hidden>
+  <div class="chips-inner" id="parkInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">🏭 族群園區</div>
+        <div class="chips-sub">八個區照供應鏈順序排，每個族群一棟房子。「盤面園區」看今天誰漲誰跌，「供應鏈教學」從矽晶圓一路走到 AI 伺服器、光通訊。</div>
+      </div>
+      <button class="cm-icon-btn" id="parkClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="parkBody"></div>
   </div>
 </div>
 <!-- 2026-10-10 使用者：照老師「均線分數排行 滿分 15」（zhuang.tw/ma）做（下方導覽列「均線分數排行」，手機／iPad 放上排第 6 顆） -->
@@ -15927,7 +15973,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-28 22:05:41';
+const BUILD_STAMP = '2026-10-28 22:09:30';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -21337,6 +21383,253 @@ function openMbPanel(){
 document.getElementById('mbBtn').addEventListener('click', openMbPanel);
 document.getElementById('mbClose').addEventListener('click', () => { document.getElementById('mbModal').hidden = true; });
 document.getElementById('mbModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.currentTarget.hidden = true; });
+// ---- 族群園區（2026-10-25 使用者：照老師 zhuang.tw/park 的等角 3D「科學園區」，做兩種——「盤面園區」＝每個族群一棟房子、盤中漲跌直接上色；「供應鏈教學」＝一條固定的路線一站一站走）----
+// 老師那個頁面是產業教學（24 家代表公司、七個產業區、飛車導覽、進廠看製程）；我們這份用自己的族群表跟首頁同一份報價（lastData，15 秒更新），
+// 用純 SVG 畫等角（2.5D）的園區：八個區（照供應鏈順序 ①→⑧），每個族群一棟房子——顏色＝今天族群平均漲跌（紅漲綠跌、越深越多）、高度＝族群檔數；
+// 點房子開族群成分股、點個股標籤開K線圖。「供應鏈教學」同一張地圖，用弧線把八個區串成一條路線，一站一站講這站做什麼、有哪些族群和股票（沒有漲跌）。
+// 產業分工是示意，不代表實際客戶關係；不是投資建議。
+const PARK_ZONES = [
+  { no: 1, name: '材料・設備', icon: '🧪', color: '#38bdf8', groups: ['矽晶圓', '設備股', '特化', '化學'], extra: [['6488', '環球晶']],
+    desc: '一切從沙子（矽）開始：把矽拉成晶柱、切成一片一片的晶圓，再靠各種設備和特殊化學品，才能在晶圓上刻電路。這一站是整條供應鏈的起點，景氣跟著晶圓廠的擴產與稼動走。' },
+  { no: 2, name: 'IC 設計', icon: '✏️', color: '#a78bfa', groups: ['IP', '神盾', 'PA', '電通'], extra: [['2454', '聯發科'], ['2379', '瑞昱'], ['3034', '聯詠']],
+    desc: '設計晶片的藍圖，自己不蓋工廠。IP 公司賣設計好的電路模組，IC 設計公司把它們組成手機、網路、指紋辨識的晶片，設計完交給晶圓廠代工；電通是 IC 通路，負責把晶片賣到各家電子廠。' },
+  { no: 3, name: '晶圓製造・封測', icon: '🏭', color: '#f59e0b', groups: ['聯電股', '扇形封裝', '探針卡'], extra: [['2330', '台積電'], ['3711', '日月光投控'], ['6239', '力成'], ['2449', '京元電']],
+    desc: '晶圓廠把藍圖一層一層刻在晶圓上；做好後要先用探針卡測過、切下來、再封裝成一顆顆晶片（扇形封裝是先進封裝的一種）。製程越先進、封裝越複雜，單價越高。' },
+  { no: 4, name: 'PCB・載板', icon: '🔌', color: '#34d399', groups: ['PCB', '玻璃基板', '小電組'], extra: [],
+    desc: '晶片要裝在載板和電路板上，才能跟記憶體、電源、連接器連在一起。AI 晶片越來越大，載板層數和材料要求跟著提高，玻璃基板是下一代的題材。' },
+  { no: 5, name: '記憶體', icon: '💾', color: '#f472b6', groups: ['記憶體'], extra: [],
+    desc: '暫時存資料（DRAM）和長期存資料（快閃記憶體）的晶片。AI 運算要大量搬資料，記憶體的容量和速度常常是瓶頸，所以跟 AI 伺服器的需求一起看。' },
+  { no: 6, name: '零組件', icon: '🔋', color: '#fb923c', groups: ['被動元件', '石英', '二極體', '功率半導體', '電零組'], extra: [],
+    desc: '每台電子產品都要用的小零件：電阻電容（被動元件）、石英振盪器（時脈）、二極體與功率半導體（電源轉換）。單價低、用量大，景氣循環比較明顯，常常是庫存調整後最先回溫的一群。' },
+  { no: 7, name: 'AI 伺服器', icon: '🖥️', color: '#60a5fa', groups: ['AI', '機殼', '散熱', '鴻家軍', 'D電腦'], extra: [['2317', '鴻海']],
+    desc: '把晶片、載板、記憶體組成一台台伺服器，再裝進機櫃：AI 組裝廠負責整機、機殼裝零件、散熱把晶片的熱帶走（高功耗之後越來越重要）。這一站是前面所有環節的終端需求。' },
+  { no: 8, name: '光通訊・衛星', icon: '📡', color: '#2dd4bf', groups: ['矽光子', '光電', '低軌衛星', '光學鏡頭'], extra: [],
+    desc: '資料中心裡的伺服器要互相傳大量資料，電訊號傳不快，就改用光（矽光子、光通訊模組）；地面網路到不了的地方靠低軌衛星。光電與鏡頭是同樣靠「光」的相關族群。' },
+];
+const PARK_POS = [[0, 0], [1, 0], [2, 0], [2, 1], [1, 1], [0, 1], [0, 2], [1, 2]];   // 八個區在 3×3 格子裡的位置：蛇行，①→⑧ 一路接下去
+const PARK_U = 30, PARK_SLOT = 2.0, PARK_BW = 1.3, PARK_ZW = 6.6, PARK_ZD = 4.6, PARK_GAP = 1.2, PARK_PAD = 30, PARK_OY = 150;
+const parkState = { tab: 'live', labels: 'group', zoom: 0, step: 0, playing: false, timer: null, drag: null };
+function parkGroupsOf(z){ return z.groups.map((n) => GROUPS.find((g) => g.name === n)).filter(Boolean); }
+function parkLiveGroup(name){ return lastData && Array.isArray(lastData.groups) ? lastData.groups.find((x) => x.name === name) : null; }
+function parkMix(a, b, t){
+  const pa = [1, 3, 5].map((i) => parseInt(a.substr(i, 2), 16)), pb = [1, 3, 5].map((i) => parseInt(b.substr(i, 2), 16));
+  return '#' + pa.map((v, i) => Math.round(v + (pb[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+const parkShade = (c, f) => parkMix(c, '#0f172a', 1 - f);
+function parkHeat(avg){   // 房子顏色：紅漲綠跌，越深越多；沒有報價＝灰
+  if (avg === null || avg === undefined || !Number.isFinite(avg)) return '#cbd5e1';
+  const t = Math.min(1, Math.abs(avg) / 4);
+  if (avg > 0.05) return parkMix('#fecaca', '#dc2626', t);
+  if (avg < -0.05) return parkMix('#bbf7d0', '#15803d', t);
+  return '#e2e8f0';
+}
+function parkTextW(s){ let w = 0; for (const ch of String(s)) w += /[\\x00-\\x7f]/.test(ch) ? 7.4 : 13.2; return w; }
+function parkPct(v){ return v === null || v === undefined || !Number.isFinite(v) ? '' : (v > 0 ? '+' : '') + v.toFixed(2) + '%'; }
+function parkPill(cx, cy, parts, attrs, cls){   // 一顆白底圓角標籤；parts＝[[文字, 顏色, 粗體]]
+  const pad = 8, h = 20, w = parts.reduce((s, p) => s + parkTextW(p[0]), 0) + pad * 2 + (parts.length - 1) * 4;
+  let x = cx - w / 2 + pad, out = '';
+  parts.forEach((p) => { out += '<text x="' + x.toFixed(1) + '" y="' + (cy + 4.5).toFixed(1) + '" fill="' + p[1] + '"' + (p[2] ? ' font-weight="800"' : '') + '>' + wlEsc(p[0]) + '</text>'; x += parkTextW(p[0]) + 4; });
+  return '<g class="pk-pill' + (cls ? ' ' + cls : '') + '" ' + (attrs || '') + '><rect x="' + (cx - w / 2).toFixed(1) + '" y="' + (cy - h / 2).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h + '" rx="10"/>' + out + '</g>';
+}
+function parkBuild(){   // 算每個區的位置、每棟房子的位置和高度（不含顏色）
+  const zones = [];
+  let xmax = 0, ymax = 0;
+  PARK_ZONES.forEach((z, i) => {
+    const [c, r] = PARK_POS[i];
+    const x0 = c * (PARK_ZW + PARK_GAP), y0 = r * (PARK_ZD + PARK_GAP);
+    const gs = parkGroupsOf(z), n = gs.length, cols = Math.min(3, n), rows = Math.ceil(n / 3);
+    const gx0 = x0 + (PARK_ZW - cols * PARK_SLOT) / 2, gy0 = y0 + (PARK_ZD - rows * PARK_SLOT) / 2;
+    const blds = gs.map((g, k) => {
+      const sc = k % 3, sr = Math.floor(k / 3);
+      const h = Math.min(104, 20 + Math.sqrt(g.stocks.length) * 14);
+      return { g, h, x: gx0 + sc * PARK_SLOT + (PARK_SLOT - PARK_BW) / 2, y: gy0 + sr * PARK_SLOT + (PARK_SLOT - PARK_BW) / 2 };
+    });
+    zones.push({ z, i, x0, y0, blds });
+    xmax = Math.max(xmax, x0 + PARK_ZW); ymax = Math.max(ymax, y0 + PARK_ZD);
+  });
+  return { zones, xmax, ymax };
+}
+function parkSvg(mode){
+  const { zones, xmax, ymax } = parkBuild();
+  const W = (xmax + ymax) * PARK_U + PARK_PAD * 2, H = (xmax + ymax) * PARK_U / 2 + PARK_OY + 40 + PARK_PAD;
+  const OX = ymax * PARK_U + PARK_PAD, OY = PARK_OY;
+  const P = (x, y, z) => [(x - y) * PARK_U + OX, (x + y) * PARK_U / 2 - (z || 0) + OY];
+  const pts = (arr) => arr.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const teach = mode === 'teach', step = parkState.step;
+  let ground = '', blds = [], labels = '', tags = '', route = '';
+  zones.forEach((zn) => {
+    const { z, x0, y0 } = zn, on = !teach || zn.i === step, fillTop = parkMix(z.color, '#ffffff', 0.8);
+    const op = on ? 1 : 0.5;
+    ground += '<g opacity="' + op + '" ' + (teach ? 'class="pk-zone" data-park-zone="' + zn.i + '"' : '') + '>' +
+      '<polygon points="' + pts([P(x0, y0 + PARK_ZD, 0), P(x0 + PARK_ZW, y0 + PARK_ZD, 0), P(x0 + PARK_ZW, y0 + PARK_ZD, -8), P(x0, y0 + PARK_ZD, -8)]) + '" fill="' + parkShade(z.color, 0.78) + '"/>' +
+      '<polygon points="' + pts([P(x0 + PARK_ZW, y0, 0), P(x0 + PARK_ZW, y0 + PARK_ZD, 0), P(x0 + PARK_ZW, y0 + PARK_ZD, -8), P(x0 + PARK_ZW, y0, -8)]) + '" fill="' + parkShade(z.color, 0.62) + '"/>' +
+      '<polygon points="' + pts([P(x0, y0, 0), P(x0 + PARK_ZW, y0, 0), P(x0 + PARK_ZW, y0 + PARK_ZD, 0), P(x0, y0 + PARK_ZD, 0)]) + '" fill="' + fillTop + '" stroke="' + (teach && zn.i === step ? z.color : parkMix(z.color, '#ffffff', 0.35)) + '" stroke-width="' + (teach && zn.i === step ? 3.5 : 1.5) + '"/>';
+    [[0.35, 0.4], [PARK_ZW - 0.35, 0.4], [0.35, PARK_ZD - 0.4], [PARK_ZW - 0.35, PARK_ZD - 0.4], [PARK_ZW / 2, 0.35], [PARK_ZW / 2, PARK_ZD - 0.35]].forEach(([tx, ty]) => {   // 幾棵樹
+      const b = P(x0 + tx, y0 + ty, 0), a = P(x0 + tx, y0 + ty, 17);
+      ground += '<polygon points="' + a[0].toFixed(1) + ',' + a[1].toFixed(1) + ' ' + (b[0] - 6).toFixed(1) + ',' + b[1].toFixed(1) + ' ' + (b[0] + 6).toFixed(1) + ',' + b[1].toFixed(1) + '" fill="#4ade80" stroke="#16a34a" stroke-width=".6"/>';
+    });
+    ground += '</g>';
+    zn.blds.forEach((b) => {
+      const live = parkLiveGroup(b.g.name), avg = live && Number.isFinite(live.avgChange) ? live.avgChange : null;
+      const top = teach ? parkMix(z.color, '#ffffff', on ? 0.45 : 0.7) : parkHeat(avg);
+      blds.push({ zn, b, avg, top, depth: b.x + b.y, on });
+    });
+    // 區名牌：放在每個區最前面那個角的下面
+    const tip = P(x0 + PARK_ZW, y0 + PARK_ZD, -8);
+    const act = teach && zn.i === step;
+    const tw = parkTextW(z.name) + 40;
+    tags += '<g class="pk-tag' + (act ? ' act' : '') + '" opacity="' + (on ? 1 : 0.8) + '" ' + (teach ? 'data-park-zone="' + zn.i + '"' : '') + '><rect x="' + (tip[0] - tw / 2 - 2).toFixed(1) + '" y="' + (tip[1] + 3).toFixed(1) + '" width="' + tw.toFixed(1) + '" height="26" rx="13" fill="rgba(255,255,255,.88)" stroke="' + z.color + '" stroke-width="1.5"/><circle cx="' + (tip[0] - parkTextW(z.name) / 2 - 12).toFixed(1) + '" cy="' + (tip[1] + 16).toFixed(1) + '" r="10" fill="' + z.color + '"/>' +
+      '<text x="' + (tip[0] - parkTextW(z.name) / 2 - 12).toFixed(1) + '" y="' + (tip[1] + 20.5).toFixed(1) + '" text-anchor="middle" fill="#fff" font-weight="900" font-size="12">' + z.no + '</text>' +
+      '<text x="' + (tip[0] - parkTextW(z.name) / 2 + 2).toFixed(1) + '" y="' + (tip[1] + 20.5).toFixed(1) + '" fill="#1e293b" font-weight="800" font-size="13">' + wlEsc(z.name) + '</text></g>';
+  });
+  blds.sort((p, q) => p.depth - q.depth);
+  let bsvg = '';
+  blds.forEach(({ zn, b, avg, top, on }) => {
+    const x = b.x, y = b.y, bw = PARK_BW, h = b.h;
+    const left = parkShade(top, 0.84), right = parkShade(top, 0.68);
+    const stripes = Math.max(2, Math.round(h / 14));
+    let win = '';
+    for (let k = 1; k < stripes; k++) {
+      const zz = k * h / stripes;
+      const l1 = P(x, y + bw, zz), l2 = P(x + bw, y + bw, zz), r1 = P(x + bw, y + bw, zz), r2 = P(x + bw, y, zz);
+      win += '<line x1="' + l1[0].toFixed(1) + '" y1="' + l1[1].toFixed(1) + '" x2="' + l2[0].toFixed(1) + '" y2="' + l2[1].toFixed(1) + '"/><line x1="' + r1[0].toFixed(1) + '" y1="' + r1[1].toFixed(1) + '" x2="' + r2[0].toFixed(1) + '" y2="' + r2[1].toFixed(1) + '"/>';
+    }
+    bsvg += '<g class="pk-bld" ' + (teach && !on ? 'data-park-zone="' + zn.i + '"' : 'data-park-group="' + wlEsc(b.g.name) + '"') + ' opacity="' + (on ? 1 : 0.55) + '">' +
+      '<polygon points="' + pts([P(x, y + bw, h), P(x + bw, y + bw, h), P(x + bw, y + bw, 0), P(x, y + bw, 0)]) + '" fill="' + left + '"/>' +
+      '<polygon points="' + pts([P(x + bw, y, h), P(x + bw, y + bw, h), P(x + bw, y + bw, 0), P(x + bw, y, 0)]) + '" fill="' + right + '"/>' +
+      '<g stroke="rgba(255,255,255,.4)" stroke-width="1">' + win + '</g>' +
+      '<polygon points="' + pts([P(x, y, h), P(x + bw, y, h), P(x + bw, y + bw, h), P(x, y + bw, h)]) + '" fill="' + top + '" stroke="rgba(255,255,255,.55)" stroke-width="1"/></g>';
+    // 標籤：族群名稱＋今天平均漲跌；「強勢股」模式再多一顆最強那檔（代號＋名稱＋漲跌）
+    const showLabel = !teach || zn.i === parkState.step;
+    if (showLabel) {
+      const c = P(x + bw / 2, y + bw / 2, h), live = parkLiveGroup(b.g.name);
+      const col = avg === null ? '#64748b' : avg > 0 ? '#dc2626' : avg < 0 ? '#15803d' : '#64748b';
+      labels += parkPill(c[0], c[1] - 16, teach ? [[b.g.name, '#1e293b', true]] : [[b.g.name, '#1e293b', true], [parkPct(avg), col, true]], 'data-park-group="' + wlEsc(b.g.name) + '"', 'pk-g');
+      if (!teach && parkState.labels === 'leader' && live) {
+        const lead = live.stocks.filter((s) => s.price != null && Number.isFinite(s.changePercent)).sort((p, q) => q.changePercent - p.changePercent)[0];
+        if (lead) {
+          const lc = lead.changePercent > 0 ? '#dc2626' : lead.changePercent < 0 ? '#15803d' : '#64748b';
+          labels += parkPill(c[0], c[1] + 6, [[lead.code, '#475569', false], [lead.name, '#1e293b', true], [parkPct(lead.changePercent), lc, true]], 'data-park-code="' + wlEsc(lead.code) + '" data-park-name="' + wlEsc(lead.name) + '"', 'pk-s');
+        }
+      }
+    }
+  });
+  if (teach) {   // 路線：八個區的中心用弧線接起來，一站一站走；已走過的實線、還沒到的虛線
+    const cen = zones.map((zn) => P(zn.x0 + PARK_ZW / 2, zn.y0 + PARK_ZD / 2, 0));
+    for (let i = 0; i < cen.length - 1; i++) {
+      const a = cen[i], b = cen[i + 1], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 - 46;
+      route += '<path d="M' + a[0].toFixed(1) + ',' + a[1].toFixed(1) + ' Q' + mx.toFixed(1) + ',' + my.toFixed(1) + ' ' + b[0].toFixed(1) + ',' + b[1].toFixed(1) + '" fill="none" stroke="' + (i < step ? '#2563eb' : '#94a3b8') + '" stroke-width="' + (i < step ? 3.2 : 2.2) + '"' + (i < step ? '' : ' stroke-dasharray="7 6"') + ' marker-end="url(#pkArrow)"/>';
+    }
+    cen.forEach((c, i) => { route += '<g class="pk-stop' + (i === step ? ' act' : '') + '" data-park-zone="' + i + '"><circle cx="' + c[0].toFixed(1) + '" cy="' + (c[1] + 4).toFixed(1) + '" r="' + (i === step ? 15 : 11) + '" fill="' + (i <= step ? '#2563eb' : '#94a3b8') + '" stroke="#fff" stroke-width="2.5"/><text x="' + c[0].toFixed(1) + '" y="' + (c[1] + 9).toFixed(1) + '" text-anchor="middle" fill="#fff" font-weight="900" font-size="' + (i === step ? 15 : 12) + '">' + (i + 1) + '</text></g>'; });
+  }
+  const defs = '<defs><marker id="pkArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker></defs>';
+  return { W, H, svg: defs + ground + bsvg + (teach ? route : '') + labels + tags };
+}
+function parkZoneAvg(z){
+  const v = parkGroupsOf(z).map((g) => { const l = parkLiveGroup(g.name); return l && Number.isFinite(l.avgChange) ? l.avgChange : null; }).filter((x) => x !== null);
+  return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+}
+function parkStockChip(code, name){
+  return '<a class="pk-chip" data-park-code="' + wlEsc(code) + '" data-park-name="' + wlEsc(name) + '" tabindex="0" role="button" title="開K線圖"><b>' + wlEsc(code) + '</b> ' + wlEsc(name) + '</a>';
+}
+function parkTeachHtml(part){
+  const z = PARK_ZONES[parkState.step], gs = parkGroupsOf(z), seen = new Set(gs.flatMap((g) => g.stocks.map((s) => s.code)));
+  const nav = PARK_ZONES.map((p, i) => '<button type="button" class="pk-step' + (i === parkState.step ? ' on' : '') + '" data-park-zone="' + i + '" title="' + wlEsc(p.name) + '">' + (i + 1) + ' ' + p.icon + '</button>').join('');
+  const groups = gs.map((g) => '<div class="pk-tg"><a class="pk-gname" data-park-group="' + wlEsc(g.name) + '" tabindex="0" role="button" title="看族群成分股">' + wlEsc(g.name) + ' <small>' + g.stocks.length + ' 檔</small></a><div class="pk-chips">' + g.stocks.map((s) => parkStockChip(s.code, s.name)).join('') + '</div></div>').join('');
+  const extra = z.extra.filter(([c]) => !seen.has(c));
+  const bar = '<div class="pk-teach"><div class="pk-tbar"><button type="button" class="pk-btn" data-park-step="-1">◀ 上一站</button><button type="button" class="pk-btn pk-play' + (parkState.playing ? ' on' : '') + '" data-park-play="1">' + (parkState.playing ? '⏸ 暫停導覽' : '▶ 自動導覽') + '</button><button type="button" class="pk-btn" data-park-step="1">下一站 ▶</button><span class="pk-steps">' + nav + '</span></div></div>';
+  const card = '<div class="pk-teach"><div class="pk-card" style="border-color:' + z.color + '"><div class="pk-ct"><span class="pk-no" style="background:' + z.color + '">' + z.no + '</span>' + z.icon + ' ' + wlEsc(z.name) + '<small>第 ' + z.no + ' 站／共 ' + PARK_ZONES.length + ' 站</small></div>' +
+    '<div class="pk-cd">' + wlEsc(z.desc) + '</div>' + groups +
+    (extra.length ? '<div class="pk-tg"><span class="pk-gname plain">這一站的代表股（不在我們的族群表裡）</span><div class="pk-chips">' + extra.map(([c, n]) => parkStockChip(c, n)).join('') + '</div></div>' : '') +
+    (parkState.step < PARK_ZONES.length - 1 ? '<div class="pk-next">下一站：' + PARK_ZONES[parkState.step + 1].icon + ' ' + wlEsc(PARK_ZONES[parkState.step + 1].name) + '</div>' : '<div class="pk-next">路線到這裡就走完了，再按「下一站」回到第 1 站。</div>') + '</div>' +
+    '<div class="pk-note">這是產業分工的示意，把我們的族群放到各站，不代表實際的客戶或供貨關係；不是投資建議。想看盤中漲跌，切到「盤面園區」。</div></div>';
+  return part === 'bar' ? bar : card;
+}
+function parkLiveHtml(part){
+  const zs = PARK_ZONES.map((z) => [z, parkZoneAvg(z)]).sort((a, b) => (b[1] === null ? -99 : b[1]) - (a[1] === null ? -99 : a[1]));
+  const strip = zs.map(([z, v]) => '<span class="pk-zs ' + (v === null ? 'flat' : dirClass(v)) + '">' + z.icon + ' ' + wlEsc(z.name) + ' <b>' + (v === null ? '—' : parkPct(v)) + '</b></span>').join('');
+  const stamp = lastData ? (lastData.heldClose ? '休市，顯示最近一個交易日收盤' : '報價 ' + wlEsc(lastData.quoteDate || '') + ' ' + wlEsc(String(lastData.quoteTime || '').slice(0, 8))) : '報價載入中…';
+  const bar = '<div class="pk-live"><div class="pk-tbar"><span class="pk-stamp">' + stamp + '・每 15 秒更新</span><button type="button" class="pk-btn' + (parkState.labels === 'leader' ? ' on' : '') + '" data-park-labels="1" title="每個族群再多標一顆今天最強的個股（代號＋名稱＋漲跌），點下去開K線圖">' + (parkState.labels === 'leader' ? '✓ ' : '') + '顯示最強個股</button></div></div>';
+  const note = '<div class="pk-live"><div class="pk-strip"><span class="pk-sl">各區平均（強→弱）</span>' + strip + '</div><div class="pk-note">房子顏色＝族群今天平均漲跌（<span class="up">紅漲</span>、<span class="down">綠跌</span>，越深越多）；高度＝族群裡有幾檔；點房子或族群名稱看成分股，點個股標籤開K線圖。八個區照供應鏈順序排（①材料設備 → ⑧光通訊），想一站一站看用「供應鏈教學」。</div></div>';
+  return part === 'bar' ? bar : note;
+}
+function parkRender(keepScroll){
+  const body = document.getElementById('parkBody');
+  if (!body) return;
+  const box = document.getElementById('parkMapBox');
+  const sx = box ? box.scrollLeft : 0, sy = box ? box.scrollTop : 0;
+  const mode = parkState.tab === 'teach' ? 'teach' : 'live', m = parkSvg(mode);
+  if (!parkState.zoom) parkState.zoom = Math.max((body.clientWidth || 1000) < 640 ? 0.85 : 0.62, Math.min(1.15, (body.clientWidth || 1000) / m.W));
+  const z = parkState.zoom;
+  body.innerHTML = '<div class="pk-tabs"><button type="button" class="pk-tab' + (mode === 'live' ? ' on' : '') + '" data-park-tab="live">🏙️ 盤面園區</button><button type="button" class="pk-tab' + (mode === 'teach' ? ' on' : '') + '" data-park-tab="teach">🧭 供應鏈教學</button>' +
+    '<span class="pk-zoom"><button type="button" class="pk-btn" data-park-zoom="-1" aria-label="縮小">－</button><b>' + Math.round(z * 100) + '%</b><button type="button" class="pk-btn" data-park-zoom="1" aria-label="放大">＋</button></span></div>' +
+    (mode === 'live' ? parkLiveHtml('bar') : parkTeachHtml('bar')) +
+    '<div class="pk-mapbox' + (mode === 'teach' ? ' teach' : '') + '" id="parkMapBox"><svg class="pk-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + m.W.toFixed(0) + ' ' + m.H.toFixed(0) + '" width="' + (m.W * z).toFixed(0) + '" height="' + (m.H * z).toFixed(0) + '" font-family="-apple-system,BlinkMacSystemFont,\\'PingFang TC\\',\\'Noto Sans TC\\',\\'Microsoft JhengHei\\',sans-serif" font-size="12.5">' + m.svg + '</svg></div>' + (mode === 'live' ? parkLiveHtml('note') : parkTeachHtml('card'));
+  const nb = document.getElementById('parkMapBox');
+  if (nb && keepScroll){ nb.scrollLeft = sx; nb.scrollTop = sy; }
+  else if (nb){ nb.scrollLeft = Math.max(0, (nb.scrollWidth - nb.clientWidth) / 2); nb.scrollTop = Math.max(0, 90 * z); }   // 剛打開：左右置中、上面那段空白略過
+}
+function parkStopPlay(){ if (parkState.timer){ clearInterval(parkState.timer); parkState.timer = null; } parkState.playing = false; }
+function parkGo(i, keepPlay){
+  parkState.step = (i + PARK_ZONES.length) % PARK_ZONES.length;
+  if (!keepPlay) parkStopPlay();
+  parkRender(true);
+  const box = document.getElementById('parkMapBox');   // 把這一站捲到畫面中間
+  if (box && parkState.tab === 'teach'){
+    const m = parkBuild(), zn = m.zones[parkState.step], zz = parkState.zoom;
+    const OX = m.ymax * PARK_U + PARK_PAD, cx = ((zn.x0 + PARK_ZW / 2) - (zn.y0 + PARK_ZD / 2)) * PARK_U + OX, cy = ((zn.x0 + PARK_ZW / 2) + (zn.y0 + PARK_ZD / 2)) * PARK_U / 2 + PARK_OY;
+    box.scrollTo({ left: Math.max(0, cx * zz - box.clientWidth / 2), top: Math.max(0, cy * zz - box.clientHeight / 2), behavior: 'smooth' });
+  }
+}
+function openParkPanel(){
+  document.getElementById('parkModal').hidden = false;
+  parkState.zoom = 0;
+  parkRender(false);
+}
+function closeParkPanel(){ parkStopPlay(); document.getElementById('parkModal').hidden = true; }
+document.getElementById('parkBtn').addEventListener('click', openParkPanel);
+document.getElementById('parkClose').addEventListener('click', closeParkPanel);
+document.getElementById('parkModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeParkPanel(); });
+document.getElementById('parkBody').addEventListener('click', (e) => {
+  if (parkState.drag && parkState.drag.moved) return;   // 拖著移動地圖不算點擊
+  const t = e.target;
+  const tab = t.closest('[data-park-tab]');
+  if (tab){ parkState.tab = tab.dataset.parkTab; parkStopPlay(); parkRender(false); return; }
+  if (t.closest('[data-park-labels]')){ parkState.labels = parkState.labels === 'leader' ? 'group' : 'leader'; parkRender(true); return; }
+  const zm = t.closest('[data-park-zoom]');
+  if (zm){ parkState.zoom = Math.max(0.35, Math.min(2.2, parkState.zoom + Number(zm.dataset.parkZoom) * 0.15)); parkRender(true); return; }
+  const st = t.closest('[data-park-step]');
+  if (st){ parkGo(parkState.step + Number(st.dataset.parkStep), false); return; }
+  if (t.closest('[data-park-play]')){
+    if (parkState.playing){ parkStopPlay(); parkRender(true); return; }
+    parkState.playing = true;
+    parkState.timer = setInterval(() => { if (document.getElementById('parkModal').hidden){ parkStopPlay(); return; } parkGo(parkState.step + 1, true); }, 5200);
+    parkGo(parkState.step + 1, true);
+    return;
+  }
+  const zone = t.closest('[data-park-zone]');
+  if (zone){ parkGo(Number(zone.dataset.parkZone), false); return; }
+  const code = t.closest('[data-park-code]');
+  if (code){ openStockChart(code.dataset.parkCode, code.dataset.parkName || ''); return; }
+  const grp = t.closest('[data-park-group]');
+  if (grp){ openGroupDetail(grp.dataset.parkGroup); return; }
+});
+// 滑鼠拖著地圖走（手機、平板用手指滑，瀏覽器自己會捲）
+document.getElementById('parkBody').addEventListener('pointerdown', (e) => {
+  const box = e.target.closest('#parkMapBox');
+  if (!box || e.pointerType !== 'mouse' || e.button !== 0) return;
+  parkState.drag = { x: e.clientX, y: e.clientY, sl: box.scrollLeft, st: box.scrollTop, moved: false, box };
+});
+window.addEventListener('pointermove', (e) => {
+  const d = parkState.drag;
+  if (!d) return;
+  const dx = e.clientX - d.x, dy = e.clientY - d.y;
+  if (!d.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+  d.moved = true;
+  d.box.scrollLeft = d.sl - dx; d.box.scrollTop = d.st - dy;
+});
+window.addEventListener('pointerup', () => { if (parkState.drag){ const d = parkState.drag; setTimeout(() => { if (parkState.drag === d) parkState.drag = null; }, 0); } });
+setInterval(() => { const m = document.getElementById('parkModal'); if (m && !m.hidden && parkState.tab === 'live') parkRender(true); }, 15000);   // 開著就跟著報價重畫
 // ---- 營收成長榜（2026-10-09 使用者：照老師「每月營收成長榜 學員版」做一模一樣的）----
 // 後端 /api/revenue?month=：公開資訊觀測站「每月營業收入彙總表」（排程主機每天 12:30／18:30／23:30 抓），公布日＝我們第一次抓到的日期，
 // 收盤、成交量、公布隔日漲跌用我們的日K。段落照老師的順序：查個股營收、族群分析、多觀察分析（我們用自選股）、
@@ -25525,7 +25818,7 @@ document.getElementById('maBody').addEventListener('keydown', (e) => {
 // 可收的項目：下方工具列每一顆、右上角的自選族群個股／今日提醒／新手教學／機器人代碼／盤中訊號分頁／影片教學、首頁那排欄位（當沖多1／2…股期黑龍 13 塊）與下面的處置欄、說明卡片。不能收的：盤中訊號、提醒開啟（核心）、自訂按鈕本身。
 // 收起來只是不顯示（功能都還在，從別的地方打開照樣可以）；設定存在這台裝置的 localStorage，「全部顯示」清掉。
 const CZ_KEY = 'czHidden';
-const CZ_HEADER_IDS = ['wgBtn', 'briefBtn', 'mbBtn', 'remindBtn', 'guideBtn', 'botBtn', 'sgtBtn', 'tutBtn'];
+const CZ_HEADER_IDS = ['wgBtn', 'briefBtn', 'mbBtn', 'parkBtn', 'remindBtn', 'guideBtn', 'botBtn', 'sgtBtn', 'tutBtn'];
 let czMode = false;
 function czLoad(){ try { const v = JSON.parse(localStorage.getItem(CZ_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; } catch (_){ return []; } }
 function czSave(){ try { if (czHidden.size) localStorage.setItem(CZ_KEY, JSON.stringify([...czHidden])); else localStorage.removeItem(CZ_KEY); } catch (_){} }
