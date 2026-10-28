@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-28 22:58:44";
+const BUILD_STAMP = "2026-10-28 23:03:25";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -15958,7 +15958,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-28 22:58:44';
+const BUILD_STAMP = '2026-10-28 23:03:25';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22878,47 +22878,40 @@ function botAnswer(raw){
     if (!k) return wrap(title, botLine('讀取中…', 'bot-dim'));
     if (k.status !== 'ok') return wrap(title, botLine('後端暫時連不上，等一下再試', 'bot-dim'));
     if (!k.tracked) return wrap(title, botLine('後端今天還沒有 5 分K（盤中 9 點以後、或收盤回補完才有）', 'bot-dim') + otcFoot());
-    const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
-    const quote = new Map();
-    lastData.groups.forEach((g) => g.stocks.forEach((s) => quote.set(s.code, s)));
-    const marksOf = new Map();
-    const rows = [];
-    (k.items || []).forEach((it) => {
-      if (Number.isFinite(it.dayHighPct) && it.dayHighPct < K12_RUSH_MIN) return;
-      const gi = ranked.findIndex((g) => BLADE_GROUPS.has(g.name) && g.stocks.some((s) => s.code === it.code));
-      if (gi < 0) return;
-      const g = ranked[gi], s = quote.get(it.code);
-      if (!marksOf.has(g.name)) marksOf.set(g.name, groupBladeMarks(g));
-      const bm = marksOf.get(g.name).get(it.code);
-      const pct = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
-      if (Number.isFinite(pct) && pct > K12_MAX_PCT) return;
-      rows.push({ code: it.code, name: (s && s.name) || it.name, group: g.name, rank: gi + 1, pct, mk: bm ? bm.mk : '', since: Number(it.since) || 0,
-        h1: Number.isFinite(it.high1) ? it.high1 : null, h2: Number.isFinite(it.high2) ? it.high2 : null });
-    });
-    // 2026-10-19 使用者：12空照時間排，最新進名單的在最上面（since＝5 分K 收在 20MA 下、20MA 下彎成立的那根）；同一根再照跌幅大的在上面
-    rows.sort((a, b) => b.since - a.since || a.pct - b.pct || a.rank - b.rank);
-    // 2026-10-20 使用者：進名單的時間（5 分K 判定成立的那根）放最前面，早的在下面、接近現在的在上面——排法跟機器人 32 一樣
-    const sinceHm = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '');
-    // 2026-10-20 使用者：加 1高（停損價）跟 2（破惡後反彈的高，沒過 1高就寫「可空」）——教學頁「12空:2 不過 1高 + 破惡均下彎」
-    const px2 = (v) => String(Number(Number(v).toFixed(2)));
-    // 2026-10-22 使用者：① 剛轉弱（還沒反彈）／② 可空（反彈沒過前高）要分得出來——藍＝①、綠＝②
-    const k12Lv = (r) => (r.h1 === null ? '' : '<span class="b32-lvrow">' + (r.h2 === null
-      ? '<span class="b32-lv s1" title="第一階段：剛跌破 20MA、20MA 下彎，還沒有反彈；1高＝破之前的最高，當停損價">① 剛轉弱（還沒反彈）</span><span class="b32-lv" title="1高＝破之前的最高，當停損價">1高 ' + px2(r.h1) + ' 停損</span>'
-      : '<span class="b32-lv s2" title="第二階段：破了以後反彈出現「2」，沒過 1高（前高）就可以空">② 不過前高可空（反彈沒過 1高）</span><span class="b32-lv">2 ' + px2(r.h2) + '</span><span class="b32-lv" title="1高＝破之前的最高，當停損價">1高 ' + px2(r.h1) + ' 停損</span>') + '</span>');
-    const line = (r, harvest) => '<div class="b32-row' + (r.h1 === null ? '' : ' k12') + '" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name) + '">' +
-      '<span class="b32-time">' + sinceHm(r.since) + '</span>' +
-      '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name) + '</span>' + r.mk + '</span>' +
-      '<span class="b32-grp">' + wlEsc(r.group) + '・' + r.rank + (harvest ? '♣' : bladeRankMark(r.rank, ranked.length)) + '</span>' +
-      '<span class="b32-pct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + botPct(r.pct) + '</span>' +
-      '<span class="b32-h">' + holderTagHtml(holderPctOf(r.code), true) + '</span>' + k12Lv(r) + '</div>';
-    const live = rows.filter((r) => !(r.pct <= -BLADE_HARVEST_PCT)), harvest = rows.filter((r) => r.pct <= -BLADE_HARVEST_PCT);
+    if (!m) return wrap(title, botLine('讀取中…', 'bot-dim'));
+    // 2026-10-28 使用者：機器人 123 的排法、版面、時間次序要跟「功課廣播 12空(123)」一模一樣——同一份資料（今天每 5 分鐘的紀錄＋盤中最新那份）、
+    // 同一套進榜／跑／回的算法（tdBroadcast）：左邊最早進榜時間，排序＝最近發生的在上面（回、跑看標籤時間），消失（跑）的劃掉、再回來的標「回」
+    const rep = botFetchCache('hwsnap', '/api/homework-snapshots', 60e3);
+    let live = null;
+    try { live = tdLiveSnap(m); } catch (_){ live = null; }
+    if (!live) return wrap(title, botLine('讀取中…', 'bot-dim'));
+    const recOk = !!(rep && rep.status === 'ok' && rep.slots && rep.date === live.date);
+    const recSlots = recOk ? Object.keys(rep.slots).sort() : [];
+    const seq = recSlots.map((sl) => [sl, tdRecSnap(rep.slots[sl], rep.date, sl)]);
+    const liveSession = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr());
+    if (!seq.length || (liveSession && seq[seq.length - 1][0] <= live.slot)) seq.push([live.slot || '最新', live]);   // 跟每日功課同一個接法
+    const list = tdBroadcast(seq, 'k12');
+    const stage = (row) => (!row || !Number.isFinite(row.h1) ? '' : '<span class="b32-lvrow">' + (!Number.isFinite(row.h2)
+      ? '<span class="b32-lv s1" title="第一階段：剛跌破 20MA、20MA 下彎，還沒有反彈；1高＝破之前的最高，當停損價">① 剛轉弱（還沒反彈）</span><span class="b32-lv" title="1高＝破之前的最高，當停損價">1高 ' + tdK12Px(row.h1) + ' 停損</span>'
+      : '<span class="b32-lv s2" title="第二階段：破了以後反彈出現「2」，沒過 1高（前高）就可以空">② 不過前高可空（反彈沒過 1高）</span><span class="b32-lv">2 ' + tdK12Px(row.h2) + '</span><span class="b32-lv" title="1高＝破之前的最高，當停損價">1高 ' + tdK12Px(row.h1) + ' 停損</span>') + '</span>');
+    const pctNow = (x) => { const q2 = getStockQuote(x.code); return q2 && Number.isFinite(q2.changePercent) ? q2.changePercent : x.row.pct; };
+    const rowHtml = (x) => {
+      const r = x.row, gone = !x.inNow, pct = pctNow(x);
+      return '<div class="b32-row k12' + (gone ? ' gone' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
+        '<span class="b32-time">' + x.first + '</span>' +
+        '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(r.name || '') + '</span>' + (/[🔪⚔️🔰]/u.test(r.mk || '') ? r.mk : '') + '</span>' +
+        '<span class="b32-grp">' + wlEsc(r.g || '12空') + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, live.total)) : '') + '</span>' +
+        '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
+        '<span class="b32-h">' + holderTagHtml(r.big !== null && r.big !== undefined ? r.big : holderPctOf(x.code), true) + '</span>' +
+        (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + stage(r) + '</div>';
+    };
+    const inCnt = list.filter((x) => x.inNow).length, goneCnt = list.length - inCnt;
+    const c = tdK12Counts(list.filter((x) => x.inNow).map((x) => x.row));
     const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
-    const c1 = rows.filter((r) => r.h1 !== null && r.h2 === null).length, c2 = rows.filter((r) => r.h1 !== null && r.h2 !== null).length;
-    return wrap(title, (rows.length ? botLine('<span class="b32-cnt s1">① 剛轉弱 ' + c1 + ' 檔（還沒反彈）</span><span class="b32-cnt s2">② 不過前高可空 ' + c2 + ' 檔（反彈沒過 1高）</span>', 'bot-dim') : '') + (rows.length ? live.map((r) => line(r)).join('') +
-        (harvest.length ? botLine('----↓(收割區域)↓-----', 'bot-sep') + harvest.map((r) => line(r, true)).join('') : '')
-      : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
-      (rows.length ? botLine('左邊時間＝進名單的時間（5 分K 判定成立那根）・接近現在的在上面、早的在下面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・① 剛轉弱＝剛跌破 20MA、20MA 下彎、還沒反彈，1高＝破惡前最高（停損價）・② 不過前高可空＝破了以後反彈出現「2」、沒過 1高（前高）就可以空', 'bot-dim') : '') + otcFoot(),
-      (when ? '5 分K算到 ' + when + '・' : '') + rows.length + ' 檔');
+    return wrap(title, (list.length ? botLine('<span class="b32-cnt s1">① 剛轉弱 ' + c.s1 + ' 檔（還沒反彈）</span><span class="b32-cnt s2">② 不過前高可空 ' + c.s2 + ' 檔（反彈沒過 1高）</span>', 'bot-dim') : '') +
+      (list.length ? list.map(rowHtml).join('') : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
+      (list.length ? botLine('跟「功課廣播 12空(123)」同一份・左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（劃掉）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・① 剛轉弱＝剛跌破 20MA、20MA 下彎、還沒反彈，1高＝破惡前最高當停損價・② 不過前高可空＝破了以後反彈沒過 1高', 'bot-dim') : ''),
+      (when ? '5 分K算到 ' + when + '・' : '') + '今天 ' + list.length + ' 檔，在榜 ' + inCnt + '、消失 ' + goneCnt);
   }
   if (q === '30' || q === '32'){
     if (!m) return wrap(q, botLine('讀取中…', 'bot-dim'));
