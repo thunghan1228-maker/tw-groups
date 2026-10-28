@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-24 14:41:21";
+const BUILD_STAMP = "2026-10-28 22:05:41";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -9589,7 +9589,7 @@ function homeObsColHtml(){
   const rep = obsState.report;
   const hm = obsNowHm();   // 只有盤中（09:00～13:35）才每分鐘重算；收盤後停在最後一次（2026-10-15 使用者問多久更新）
   const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';   // 盤前撮合（08:40 起）也算
-  const stale = rep && live && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
+  const stale = rep && live && document.visibilityState === 'visible' && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
   const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > (rep ? HOME_OBS_REFRESH_MS : 20000);   // 還沒算出過：20 秒就重試（2026-10-17）
   if (!obsState.loading && ((!rep && !obsState.error) || stale || retry)) setTimeout(() => obsRun(null, false, !!rep), 0);
   const title = '<div class="hr-title">📡多觀察(等黑K買進)';   // 2026-10-19 使用者：首頁這欄的標題「強勢黑K選股」改叫「多觀察(等黑K買進)」
@@ -15927,7 +15927,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-24 14:41:21';
+const BUILD_STAMP = '2026-10-28 22:05:41';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19455,7 +19455,15 @@ async function obsJson(url){
   if (!r.ok || !d) throw new Error((d && (d.detail || d.error)) || ('HTTP ' + r.status));
   return d;
 }
+let obsDragonMemo = { at: 0, day: '', data: null };
 async function obsDragonHits(){
+  // 2026-10-28 請求量警示（盤中每分鐘重算後 09:15 那段 6500 > 5000）：選股名單收盤後才變，同一天 10 分鐘內直接用上一份，不再每分鐘打一次 /api/screener
+  if (obsDragonMemo.data && obsDragonMemo.day === twTodayStr() && Date.now() - obsDragonMemo.at < 10 * 60e3) return obsDragonMemo.data;
+  const out = await obsDragonHitsFetch();
+  obsDragonMemo = { at: Date.now(), day: twTodayStr(), data: out };
+  return out;
+}
+async function obsDragonHitsFetch(){
   // 近 11 個交易日每天的創高黑龍名單（今天用最近 10 天、上一個交易日的名單用再往前一天起算的 10 天）；依資料日存在這台電腦，一天只抓一次
   const latest = await obsJson('/api/screener?' + OBS_DRAGON_Q);
   // 2026-10-13：多抓兩天（昨天、前天的觀察池要那天之前的 10 個交易日）
@@ -19786,6 +19794,7 @@ function obsSyncWatchlist(rep){
 // 盤中每分鐘自己重算一次，讓自選股的 ⏰ 四個分組即時跟著動（2026-10-24 使用者：不要等到盤後）；不依賴首頁那欄有沒有顯示
 function obsWlTick(){
   if (obsState.loading || wl.loading || wl.busy) return;
+  if (document.visibilityState !== 'visible') return;   // 看不到的分頁不重算（請求量警示 2026-10-28）
   const hm = obsNowHm();
   const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';
   if (!live) return;
@@ -25227,6 +25236,7 @@ function maHitsSyncWatchlist(d){
 }
 async function maWlTick(){
   if (maWlLoading || wl.loading || wl.busy) return;
+  if (document.visibilityState !== 'visible') return;   // 2026-10-28：看不到的分頁不每分鐘打 API（請求量警示），回到畫面時下面的 visibilitychange 會馬上補一次
   if (wl.key && !wl.syncedAt) return;                       // 有同步碼但雲端那份還沒讀回來：先不動，免得蓋掉
   if (Date.now() - maWlAt < (maLiveHours() ? 50 * 1000 : 25 * 60e3)) return;   // 盤中每分鐘看一次；其他時間 25 分鐘看一次就夠（排行一天才換一次）
   maWlLoading = true;
@@ -25243,6 +25253,7 @@ async function maWlTick(){
 }
 setTimeout(maWlTick, 8000);
 setInterval(maWlTick, 30000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(() => { try { maWlTick(); } catch (_){} try { obsWlTick(); } catch (_){} }, 800); });
 async function maHitsLoad(){
   maState.hitsLoading = true;
   maState.hitOpen = -1;

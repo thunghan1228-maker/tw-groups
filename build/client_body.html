@@ -9501,7 +9501,7 @@ function homeObsColHtml(){
   const rep = obsState.report;
   const hm = obsNowHm();   // 只有盤中（09:00～13:35）才每分鐘重算；收盤後停在最後一次（2026-10-15 使用者問多久更新）
   const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';   // 盤前撮合（08:40 起）也算
-  const stale = rep && live && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
+  const stale = rep && live && document.visibilityState === 'visible' && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
   const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > (rep ? HOME_OBS_REFRESH_MS : 20000);   // 還沒算出過：20 秒就重試（2026-10-17）
   if (!obsState.loading && ((!rep && !obsState.error) || stale || retry)) setTimeout(() => obsRun(null, false, !!rep), 0);
   const title = '<div class="hr-title">📡多觀察(等黑K買進)';   // 2026-10-19 使用者：首頁這欄的標題「強勢黑K選股」改叫「多觀察(等黑K買進)」
@@ -19367,7 +19367,15 @@ async function obsJson(url){
   if (!r.ok || !d) throw new Error((d && (d.detail || d.error)) || ('HTTP ' + r.status));
   return d;
 }
+let obsDragonMemo = { at: 0, day: '', data: null };
 async function obsDragonHits(){
+  // 2026-10-28 請求量警示（盤中每分鐘重算後 09:15 那段 6500 > 5000）：選股名單收盤後才變，同一天 10 分鐘內直接用上一份，不再每分鐘打一次 /api/screener
+  if (obsDragonMemo.data && obsDragonMemo.day === twTodayStr() && Date.now() - obsDragonMemo.at < 10 * 60e3) return obsDragonMemo.data;
+  const out = await obsDragonHitsFetch();
+  obsDragonMemo = { at: Date.now(), day: twTodayStr(), data: out };
+  return out;
+}
+async function obsDragonHitsFetch(){
   // 近 11 個交易日每天的創高黑龍名單（今天用最近 10 天、上一個交易日的名單用再往前一天起算的 10 天）；依資料日存在這台電腦，一天只抓一次
   const latest = await obsJson('/api/screener?' + OBS_DRAGON_Q);
   // 2026-10-13：多抓兩天（昨天、前天的觀察池要那天之前的 10 個交易日）
@@ -19698,6 +19706,7 @@ function obsSyncWatchlist(rep){
 // 盤中每分鐘自己重算一次，讓自選股的 ⏰ 四個分組即時跟著動（2026-10-24 使用者：不要等到盤後）；不依賴首頁那欄有沒有顯示
 function obsWlTick(){
   if (obsState.loading || wl.loading || wl.busy) return;
+  if (document.visibilityState !== 'visible') return;   // 看不到的分頁不重算（請求量警示 2026-10-28）
   const hm = obsNowHm();
   const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';
   if (!live) return;
@@ -25139,6 +25148,7 @@ function maHitsSyncWatchlist(d){
 }
 async function maWlTick(){
   if (maWlLoading || wl.loading || wl.busy) return;
+  if (document.visibilityState !== 'visible') return;   // 2026-10-28：看不到的分頁不每分鐘打 API（請求量警示），回到畫面時下面的 visibilitychange 會馬上補一次
   if (wl.key && !wl.syncedAt) return;                       // 有同步碼但雲端那份還沒讀回來：先不動，免得蓋掉
   if (Date.now() - maWlAt < (maLiveHours() ? 50 * 1000 : 25 * 60e3)) return;   // 盤中每分鐘看一次；其他時間 25 分鐘看一次就夠（排行一天才換一次）
   maWlLoading = true;
@@ -25155,6 +25165,7 @@ async function maWlTick(){
 }
 setTimeout(maWlTick, 8000);
 setInterval(maWlTick, 30000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(() => { try { maWlTick(); } catch (_){} try { obsWlTick(); } catch (_){} }, 800); });
 async function maHitsLoad(){
   maState.hitsLoading = true;
   maState.hitOpen = -1;
