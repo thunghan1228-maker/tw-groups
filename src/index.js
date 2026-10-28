@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-28 23:03:25";
+const BUILD_STAMP = "2026-10-28 23:06:40";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4044,7 +4044,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
     <div class="chips-head">
       <div>
         <div class="chips-title">🔔 今日提醒</div>
-        <div class="chips-sub">每次打開軟體（重新整理網頁）都會跳出來；關掉後點右上角「🔔 今日提醒」可以再看。融資斷頭線、形態候選、警示股都在這裡，點股號或名字開K線圖（形態的會定位到形態那段）。</div>
+        <div class="chips-sub">每天早上 8 點以後第一次打開軟體才會自動跳出來；其他時候點右上角「🔔 今日提醒」可以再看。融資斷頭線、形態候選、警示股都在這裡，點股號或名字開K線圖（形態的會定位到形態那段）。</div>
       </div>
       <button class="cm-icon-btn" id="remindClose" aria-label="關閉">✕</button>
     </div>
@@ -15958,7 +15958,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-28 23:03:25';
+const BUILD_STAMP = '2026-10-28 23:06:40';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19903,7 +19903,7 @@ const GUIDE_TOOLS = [
     b: ['上面一排是全部代碼，點一下就查；也可以打股號（例：2330）或族群名（例：低軌衛星）', '點一個代碼開一格，結果一格一格往右排（最多 10 格，照點的順序）；同一個代碼再點一次就收掉，「全部收掉」一次清空；柱狀圖不顯示，只列名稱跟漲跌幅', '全部代碼的說明一直留在最下面（點代碼直接查）', '盤中跟首頁一樣每 15 秒自動更新，開著的格子都跟著重算', '關掉再打開，會回到上次最後看的畫面：開著哪幾格、捲到哪、視窗位置大小、有沒有移到另一個螢幕（電腦、手機、iPad 各自記）',
       '族群那一條點下去看成分股，股票點下去開 K 線圖', '右上角 ⧉ 移到另一螢幕（可以拖到外接螢幕）、－ 最小化、▢ 最大化、✕ 關閉；標題列拖著走，四邊四角拉大小',
       '每個代碼在做什麼，看下面「🤖 機器人代碼一覽」'] },
-  { t: '🔔 今日提醒', open: 'remind', v: 'basic-remind', tags: ['盤後', '每天'], d: '右上角「🔔 今日提醒」。每天晚上的警示股整理成三張表，每天有新資料、第一次打開網頁就自動跳出來；關掉後按這顆再開。',
+  { t: '🔔 今日提醒', open: 'remind', v: 'basic-remind', tags: ['盤後', '每天'], d: '右上角「🔔 今日提醒」。每天晚上的警示股整理成三張表，每天早上 8 點以後第一次打開網頁才會自動跳出來；其他時候按這顆再開。',
     b: ['🚨 今天入獄（最上面）：今天新公告、下一個交易日起進處置的股票（處置期間、幾分鐘撮合、解鎖日）；底下收著還在分盤交易的其他股票', '🔓 解鎖：接下來兩個交易日出關、恢復正常交易的', '⚠️ 連續警告：明天再被警告就可能分盤或延長處置，持有的要留意', '點代號開 K 線圖'] },
   { t: '自選股', label: '自選股', v: 'tb-watch', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
     b: ['換手機或電腦用「同步碼」就能帶過去', '一鍵健診：持股的防守價、明日紅半／三日低／月線一次算好', '各列表看到喜歡的股票，點「☆」就加進來'] },
@@ -24637,14 +24637,30 @@ function openRemindPanel(){
   remindMarkBtn();
 }
 function closeRemindPanel(){ document.getElementById('remindModal').hidden = true; }
-// 處置資料一進來：每次打開軟體（重新整理網頁）都跳出來一次（2026-10-23 使用者：不再是每天第一次，改成每次開都跳；同一次開著不會一直跳）；視窗開著就重畫
+// 處置資料一進來：自動跳出來（2026-10-23 曾改成每次開都跳；2026-10-28 又改回每天第一次、8 點以後才算，見下面 remindAutoDue）；視窗開著就重畫
+// 2026-10-28 使用者：今日提醒只在「每天第一次打開」才自動跳出來，而且「每天」是指早上 8 點以後（不是半夜 12 點過後）：
+// 8 點以後開的第一次才跳，同一天之後再開、或是 8 點以前開，都不跳；其他時候要看就從首頁「🔔 今日提醒」進去。這台裝置記「最後一次自動跳出來是哪一天」。
+const REMIND_AUTO_KEY = 'remindAutoDay', REMIND_DAY_START_HM = '08:00';
+function remindAutoDue(){
+  const tw = new Date(Date.now() + 8 * 3600e3), day = tw.toISOString().slice(0, 10), hm = tw.toISOString().slice(11, 16);
+  if (hm < REMIND_DAY_START_HM) return null;   // 早上 8 點以前不算新的一天、也不跳
+  let last = '';
+  try { last = localStorage.getItem(REMIND_AUTO_KEY) || ''; } catch (_){}
+  return last === day ? null : day;
+}
 let remindAutoShown = false;
 function remindOnData(){
   remindMarkBtn();
   if (!document.getElementById('remindModal').hidden){ renderRemind(); const d = jlState.data; if (d && d.status === 'ok'){ try { localStorage.setItem(REMIND_SEEN_KEY, d.dataDate); } catch (_){} } return; }
   // K 線圖小視窗、另開的訊號中心／機器人視窗不跳（看不到，還會被記成已經看過，主畫面就不跳了）
   if (CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || botWindowMode() || sgtWindowMode()) return;
-  if (!remindAutoShown){ remindAutoShown = true; openRemindPanel(); }
+  if (!remindAutoShown){
+    remindAutoShown = true;
+    const day = remindAutoDue();
+    if (!day) return;   // 今天（8 點以後）已經跳過了，或現在還沒到 8 點：不跳
+    try { localStorage.setItem(REMIND_AUTO_KEY, day); } catch (_){}
+    openRemindPanel();
+  }
 }
 document.getElementById('remindBtn').addEventListener('click', openRemindPanel);
 document.getElementById('remindClose').addEventListener('click', closeRemindPanel);
