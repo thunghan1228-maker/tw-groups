@@ -18677,8 +18677,16 @@ function tdCardsHtml(rows, ctx, snap, opt){
   const o = opt || {};
   const by = new Map();
   rows.forEach((r) => { const k = r.g || '—'; if (!by.has(k)) by.set(k, []); by.get(k).push(r); });
-  const groups = Array.from(by.entries()).sort((a, b) => (a[1][0].gr || 99) - (b[1][0].gr || 99));
+  let groups = Array.from(by.entries()).sort((a, b) => (a[1][0].gr || 99) - (b[1][0].gr || 99));
   const upTo = Math.max(1, Math.round((snap.total || 67) * 10 / 67));
+  if (o.banner){
+    // 2026-10-28 使用者：族群卡照「訊號發生的時間」排，最近發生的（時間晚的）放最上面，08:xx 這種最早的放最下面；楚河漢界上下兩邊各自照時間排，
+    // 族群的時間＝族裡最晚那檔的「訊號第一次出現時間」（卡片每列前面那個時間）；撮合時段（08:30 起）用試撮名單，同一套；沒有時間的（還沒記到）時間相同就照族群名次
+    const hmOf = (r) => { const t = ctx.firstAt ? ctx.firstAt.get(r.code) : ''; return /^\d\d:\d\d$/.test(t || '') ? t : ''; };
+    const timeOf = (list) => list.reduce((m, r) => { const t = hmOf(r); return t > m ? t : m; }, '');
+    const byTime = (a, b) => (timeOf(b[1]) > timeOf(a[1]) ? 1 : timeOf(b[1]) < timeOf(a[1]) ? -1 : (a[1][0].gr || 99) - (b[1][0].gr || 99));
+    groups = groups.filter((g) => (g[1][0].gr || 99) <= upTo).sort(byTime).concat(groups.filter((g) => (g[1][0].gr || 99) > upTo).sort(byTime));
+  }
   let bannerDone = !o.banner;
   const stamp = tdMd(snap.date) + ' ' + snap.slot + '・機器人';
   return '<div class="td-cards">' + groups.map(([name, list]) => {
