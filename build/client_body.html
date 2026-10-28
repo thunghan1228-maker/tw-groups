@@ -61,9 +61,7 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.1fr) minmax(0, 1.25fr) minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.25fr);gap:8px;align-items:start;}   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄（今日強勢股疊在當沖多1 下面）；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
-  .hr-stack.hr-strong4{display:none;} .hr-strong3{margin-top:8px;}
-  @media (min-width:2040px){ .home-rank4{grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.1fr) minmax(0, 1.25fr) minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.35fr);} .hr-stack.hr-strong4{display:flex;} .hr-strong3{display:none;} }   /* 2026-10-28 使用者：今日強勢股多一欄排第四（10 欄），太擠就疊在第三欄下面——寬螢幕（≥2040px）才放得下 10 欄 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.1fr) minmax(0, 1.25fr) minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.25fr);gap:8px;align-items:start;}   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -9390,16 +9388,15 @@ function homeRank4Html(){
   const rows188 = h.rows.filter((r) => RANK188_GROUPS.has(r.name));
   const rows183 = h.rows.filter((r) => RANK183_GROUPS.has(r.name));   // 2026-10-21 使用者：183 多加幾個族群
   // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／199 疊在同一欄）、193、刀劍空(32)、33、34、188、177
-  const homeLong = homeLongColsHtml(), strongCol = homeStrongColHtml();
+  const homeLong = homeLongColsHtml();
   return '<div class="home-rank4">' +
     // 2026-10-16 使用者：183 排第二欄、昨日強勢股排第六欄；2026-10-19 使用者：第二欄換成當沖多（取代 183 的位置），183 搬到今日強勢股下面
     // 2026-10-28 使用者：欄位順序改成 ①多觀察(等黑K買進) ②當沖多2 ③當沖多1 ④今日強勢股（盤中訊號裡的今日強勢股，多一欄），其他後面不變
     // （2026-10-20 使用者：當沖多檔數太多，分成兩欄；2026-10-21 使用者排前三欄 當沖多1、當沖多2、多觀察；2026-10-16 多觀察原本是第一欄）
-    // 今日強勢股：螢幕夠寬（≥2040px，10 欄放得下）排第四欄；不夠寬（一般 1920 的螢幕，10 欄會擠到一堆名字被切掉）就疊在第三欄（當沖多1）下面——兩份只會顯示一份（CSS 切換）
+    // 2026-10-28 使用者（又改）：今日強勢股放在第五欄 30加33加34 的下面，一樣用紅框框起來（先前排第四欄／疊在當沖多1 下面都拿掉）
     homeObsColHtml() +
     homeLong.two +
-    homeLong.one.replace(/<\/div>$/, '<div class="hr-strong3">' + strongCol + '</div></div>') +
-    '<div class="hr-stack hr-strong4">' + strongCol + '</div>' +
+    homeLong.one +
     // 2026-10-16 使用者：第 4 欄續抱勿追高疊在河流多(34) 上面；第 5 欄馬火多(30)（155 疊在下面）；第 6 欄 30加33 疊在賽馬多(33) 上面（2026-10-20 使用者：30加33 跟續抱勿追高對調，馬火多再移到 30加33 左邊）
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
     '<div class="hr-stack">' +
@@ -9408,7 +9405,8 @@ function homeRank4Html(){
     '</div>' +
     // 2026-10-22 使用者：首頁的馬火多(30)、賽馬多(33)、河流多(34) 三欄拿掉（機器人代碼 30／33／34、訊號中心「盤中333」還在；30加33加34 照舊）
     '<div class="hr-stack">' +
-      homeRedBox('<div class="hr-pinkname">' + homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : [], '', 'yel', true) + '</div>') +   // 三欄（30、33、34）都有才算；33、34 只看族群前 HOME_334_TOP_GROUPS 名（2026-10-22 使用者：首頁的 30／33／34 三欄拿掉，只留這欄）   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
+      homeRedBox('<div class="hr-pinkname">' + homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : [], '', 'yel', true) + '</div>') +
+      homeRedBox(homeStrongColHtml()) +   // 2026-10-28 使用者：盤中訊號的今日強勢股放在 30加33加34 下面，紅框框起來（跟訊號中心今日強勢股同一份）   // 三欄（30、33、34）都有才算；33、34 只看族群前 HOME_334_TOP_GROUPS 名（2026-10-22 使用者：首頁的 30／33／34 三欄拿掉，只留這欄）   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34
     '</div>' +
     // 2026-10-16 使用者：188 疊到昨日強勢股下面；283 自己一欄，放在右邊
     '<div class="hr-stack">' +
