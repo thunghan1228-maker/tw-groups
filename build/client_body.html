@@ -8522,6 +8522,14 @@ function bladeTimeline(m){
     else if (!x.inNow){ x.inNow = true; x.back = nowSlot > x.out ? nowSlot : x.out; x.out = null; }
   });
   st.forEach((x) => { if (x.inNow && !liveCodes.has(x.code)){ x.inNow = false; x.out = nowSlot; } });
+  // 2026-10-29 使用者：機器人 32 跟功課廣播的排序不一樣——功課廣播（tdBroadcast）對「只在盤中最新那份才看到」的股票，進榜時間改寫成這台電腦第一次看到它的那一分鐘，
+  // 機器人這邊原本一律寫成現在這個 5 分鐘時段，結果一堆同時間的在榜股票照股號排在最上面、跑掉的反而被擠下去。兩邊改成同一個算法
+  const seenLive = bladeSeenMap();
+  st.forEach((x) => {
+    if (x.first !== nowSlot || x.back || !seenLive[x.code]) return;
+    const hm = new Date(seenLive[x.code] + 8 * 3600e3).toISOString().slice(11, 16);
+    if (hm < nowSlot) x.first = hm;
+  });
   return st;
 }
 const bladeBackTag = (x) => (x && x.inNow && x.back ? '<span class="blade-back" title="掉出刀劍空後 ' + x.back + ' 又回來">回 ' + x.back + '</span>' : '');
