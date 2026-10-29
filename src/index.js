@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 20:56:16";
+const BUILD_STAMP = "2026-10-29 21:24:09";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5120,21 +5120,31 @@ function drawChart(){
 
   // 每天開盤第一根畫細的紅色虛線，10:30那根畫粗的紫色實線；整段已載入的多日範圍都畫，不隨縮放/平移消失
   // 5分線／1分線都適用；「今天第一根K高低點」只在5分線畫（1分線的第一根意義不大）
+  // 2026-10-29 使用者：① 5 分K 今天 12:00 那根（11:55～12:00）畫一條橘紅色粗實線（只畫今天，之前的日子不畫）；
+  // ② 這幾條垂直線下面的時間軸都標時間（開盤那條 09:05、紫線 10:30、橘紅線 12:00）；
+  // ③ 紫線原本畫在「開始時間」10:30 那根（收盤時間是 10:35），改成收盤時間 10:30 那根＝10:25～10:30（1 分K 是 10:29～10:30）
+  const axisMarks = [];   // {x, text, color}：時間軸上要標的時間，下面畫時間軸文字時一起處理
   if (currentChart.tf === 'm5' || currentChart.tf === 'm1'){
     const dayKey = (ts) => { const d = new Date(ts); return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); };
+    const closeMin = currentChart.tf === 'm1' ? 29 : 25;   // 收盤時間是 10:30 的那根，開始時間是 10:25（1 分K 10:29）
+    const lastDayKey = allBars.length ? dayKey(allBars[allBars.length - 1].ts) : '';
     bars.forEach((b, i) => {
       const globalIdx = vStart + i;
       const prevBar = globalIdx > 0 ? allBars[globalIdx - 1] : null;
       const isDayOpen = !prevBar || dayKey(prevBar.ts) !== dayKey(b.ts);
       const d = new Date(b.ts);
-      const is1030 = d.getHours() === 10 && d.getMinutes() === 30;
-      if (!isDayOpen && !is1030) return;
+      const is1030 = d.getHours() === 10 && d.getMinutes() === closeMin;
+      const isNoon = currentChart.tf === 'm5' && d.getHours() === 11 && d.getMinutes() === 55 && dayKey(b.ts) === lastDayKey;   // 5 分K 11:55～12:00 那根，只有今天（最後一個交易日）
+      if (!isDayOpen && !is1030 && !isNoon) return;
       const x = xAt(i);
       ctx.save();
-      if (isDayOpen){ ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); }
-      else { ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2; ctx.setLineDash([]); }
+      let mark;
+      if (isDayOpen){ ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); mark = '#ef4444'; }
+      else if (isNoon){ ctx.strokeStyle = '#ff5a1f'; ctx.lineWidth = 3; ctx.setLineDash([]); mark = '#ff6a33'; }
+      else { ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2; ctx.setLineDash([]); mark = '#c084fc'; }
       ctx.beginPath(); ctx.moveTo(x, padTop); ctx.lineTo(x, cssH - padBottom); ctx.stroke();
       ctx.restore();
+      axisMarks.push({ x, text: b.label, color: mark });
     });
 
     // 今天第一根5分K高低點（延伸到10:30）＋ 昨日高低點（延伸到今天整個範圍）
@@ -5174,7 +5184,7 @@ function drawChart(){
       let today1030Index = todayEnd;
       for (let i = todayStart; i <= todayEnd; i++){
         const d = new Date(allBars[i].ts);
-        if (d.getHours() === 10 && d.getMinutes() === 30){ today1030Index = i; break; }
+        if (d.getHours() === 10 && d.getMinutes() === closeMin){ today1030Index = i; break; }
       }
       if (currentChart.tf === 'm5'){
         const todayFirstBar = allBars[todayStart];
@@ -5381,6 +5391,7 @@ function drawChart(){
   for (let k = 0; k <= 5; k++){
     const i = Math.round((bars.length - 1) * k / 5);
     const bar = bars[i];
+    if (axisMarks.some((m) => Math.abs(m.x - xAt(i)) < 36)) continue;   // 這附近已經有垂直線的時間標籤，一般刻度讓位
     let text = bar.label;
     if (spansMultipleDays){
       const d = new Date(bar.ts);
@@ -5389,6 +5400,21 @@ function drawChart(){
       prevAxisLabelDay = dayKey;
     }
     ctx.fillText(text, xAt(i), cssH - padBottom + 4);
+  }
+  // 垂直線下面的時間標籤（深色底、跟線同色，字粗一點）；兩個標籤靠太近（多日縮很小）就略過後面那個
+  if (axisMarks.length){
+    ctx.save();
+    ctx.font = 'bold 10px -apple-system, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    let lastRight = -Infinity;
+    axisMarks.sort((a, b) => a.x - b.x).forEach((m) => {
+      const tw = ctx.measureText(m.text).width + 8;
+      const cx = Math.max(PAD.left + tw / 2, Math.min(cssW - PAD.right - tw / 2, m.x));
+      if (cx - tw / 2 < lastRight + 2) return;
+      lastRight = cx + tw / 2;
+      ctx.fillStyle = 'rgba(18,16,15,0.92)'; ctx.fillRect(cx - tw / 2, cssH - padBottom + 2, tw, 14);
+      ctx.fillStyle = m.color; ctx.fillText(m.text, cx, cssH - padBottom + 4);
+    });
+    ctx.restore();
   }
 
   // 扣底：時間軸下方、跟均線同色的向上三角形（旁邊小字寫是哪一條均線）
@@ -16592,7 +16618,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 20:56:16';
+const BUILD_STAMP = '2026-10-29 21:24:09';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
