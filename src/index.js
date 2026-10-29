@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 11:35:44";
+const BUILD_STAMP = "2026-10-29 12:06:42";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1670,6 +1670,64 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   #swingInner .sw-card,#swingInner .sw-gcard,#swingInner .sw-drow,#swingInner .sw-noteBox,#swingInner .sw-quote{background:#fffdf8;color:var(--text);}
   #swingInner .sw-code,#swingInner .sw-dcode,#swingInner .sw-gname,#swingInner .sw-def b,#swingInner .sw-risk,#swingInner .sw-hot,#swingInner .sw-readhead,#swingInner .sw-quote{color:#a8321f;}
   @media (max-width:900px){ .sp-grid4{grid-template-columns:repeat(2,minmax(0,1fr));} .sp-dgrid{grid-template-columns:1fr;} .sp-etf2{grid-template-columns:1fr;} .sp-srow{grid-template-columns:1fr;gap:6px;} .sp-h1{font-size:32px;} .sp-sumtiles{gap:8px;} .sp-sumtile b{font-size:26px;} }
+  /* 收盤觀察股 週分析（2026-10-29 使用者：照老師「收盤觀察股 週分析」白紫版面——淺紫底、紫色標題、白卡片、淺紫分隔線）：進到週分析時 #swingInner 換成淺紫變數 */
+  #swingInner.wk-on{--bg:#f3eefb; --panel:#fff; --panel-2:#ece4f8; --line:#d9cdee; --text:#241b36; --muted:#756a8c; --accent:#6d28d9; --up:#dc2626; --down:#15803d;background:#f3eefb;color:#241b36;}
+  #swingInner.wk-on > .chips-head{background:#fff;border-color:#d9cdee;}
+  #swingInner.wk-on .chips-title{color:#6d28d9;}
+  #swingInner.wk-on .signal-tab.active{background:#6d28d9;border-color:#6d28d9;}
+  .wk{font-family:"Noto Sans TC","PingFang TC",sans-serif;padding:4px 6px 14px;color:#241b36;}
+  .wk-back{display:inline-block;color:#6d28d9;font-size:13.5px;font-weight:700;cursor:pointer;margin:2px 0 8px;} .wk-back:hover{text-decoration:underline;}
+  .wk-tag{display:inline-block;border:1px solid #a78bdb;color:#6d28d9;font-size:13px;padding:4px 16px;border-radius:6px;background:#fff;letter-spacing:2px;}
+  .wk-h1{font-size:42px;font-weight:900;color:#6d28d9;margin:14px 0 8px;line-height:1.2;letter-spacing:1px;}
+  .wk-sub{font-size:14px;color:#3d3354;line-height:1.75;margin:2px 0 8px;}
+  .wk-basis{background:#fff;border-left:4px solid #7c3aed;border-radius:6px;padding:9px 14px;font-size:12.5px;line-height:1.8;color:#4a4066;margin:8px 0;}
+  .wk-legend{font-size:13px;line-height:2.1;color:#4a4066;margin:10px 0 6px;}
+  .wk-nav{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 10px;}
+  .wk-nav a{border:1px solid #cdbbec;color:#4c1d95;background:#fff;border-radius:999px;padding:6px 18px;font-size:14px;cursor:pointer;}
+  .wk-nav a:hover{background:#6d28d9;color:#fff;}
+  .wk-h2{font-size:26px;font-weight:900;color:#241b36;margin:34px 0 10px;scroll-margin-top:8px;}
+  .wk-h2 small{font-size:12.5px;font-weight:700;color:#6b6385;margin-left:10px;}
+  .wk-h3{font-size:18px;font-weight:900;color:#241b36;margin:24px 0 8px;} .wk-h3 small{font-size:12.5px;font-weight:700;color:#6b6385;margin-left:10px;}
+  .wk-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:12px 0;}
+  .wk-tiles div{background:#fff;border:1px solid #d9cdee;border-top:3px solid #7c3aed;border-radius:12px;text-align:center;padding:14px 6px;}
+  .wk-tiles b{display:block;font-size:40px;font-weight:600;color:#6d28d9;line-height:1.15;} .wk-tiles span{font-size:13px;color:#4a4066;}
+  .wk-note{background:#fff;border:1px dashed #c4b2e6;border-radius:10px;padding:10px 14px;font-size:13.5px;line-height:1.85;color:#2f2745;margin:10px 0;}
+  .wk-note.wk-cross{border-style:solid;border-color:#e3b64d;background:#fffaf0;}
+  .wk-warn{border:1px dashed #dc2626;background:#fff;border-radius:12px;padding:12px 16px;font-size:13.5px;line-height:1.8;color:#3d3354;margin:10px 0;} .wk-warn b{color:#b91c1c;}
+  .wk-empty{border:1px dashed #c4b2e6;border-radius:10px;padding:12px 14px;font-size:13px;color:#756a8c;background:#fff;margin:10px 0;}
+  .wk-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .wk-tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:680px;}
+  .wk-tbl th{font-size:12.5px;color:#6b6385;font-weight:600;text-align:left;padding:9px 10px;border-bottom:1px solid #c9b8e8;white-space:nowrap;vertical-align:bottom;}
+  .wk-tbl th small{display:block;font-size:11px;font-weight:500;color:#8b82a3;}
+  .wk-tbl td{padding:12px 10px;border-bottom:1px solid #d9cdee;vertical-align:top;line-height:1.55;}
+  .wk-tbl td.grp,.wk-tbl th.grp{white-space:nowrap;} .wk-tbl td.stk{min-width:170px;} .wk-tbl td.why{min-width:230px;font-size:13px;color:#3d3354;}
+  .wk-stk{cursor:pointer;} .wk-stk:hover{text-decoration:underline;} .wk-stk b{font-weight:800;}
+  .wk-px{font-variant-numeric:tabular-nums;} .wk-mut{color:#8b82a3;} .wk-ser{color:#7d7399;font-size:13px;white-space:nowrap;}
+  .wk-sc{color:#6d28d9;font-size:15px;}
+  .wk-up{color:#dc2626;} .wk-down{color:#15803d;}
+  .wk-m{font-style:normal;margin-left:3px;} .wk-red{color:#dc2626;} .wk-dark{color:#1f1b2e;}
+  .wk-b{display:inline-block;font-style:normal;font-size:11.5px;font-weight:800;border-radius:999px;padding:1px 9px;margin:2px 0 0 5px;white-space:nowrap;vertical-align:middle;}
+  .wk-b.new{background:#5b21b6;color:#fff;} .wk-b.high{border:1px solid #9a1b1b;color:#9a1b1b;background:#fff;}
+  .wk-b.below{background:#15803d;color:#fff;} .wk-b.cross{background:#fef3c7;border:1px solid #d9a441;color:#8a5a00;cursor:help;}
+  .wk-b.brk{background:#e5e7eb;color:#374151;} .wk-b.danger{background:#7f1d1d;color:#fff;} .wk-b.del{background:#6b7280;color:#fff;}
+  .wk-legend .wk-b{margin:0 2px;}
+  .wk-week{background:#fff;border:1px solid #d9cdee;border-radius:16px;padding:14px 16px;margin:12px 0;}
+  .wk-wh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:12px;font-size:14px;color:#4a4066;}
+  .wk-wd{font-size:19px;color:#6d28d9;font-weight:900;}
+  .wk-pill{font-style:normal;border:1px solid #c9b8e8;border-radius:999px;padding:2px 12px;font-size:13px;background:#fff;}
+  .wk-pill.ok{border-color:#15803d;color:#15803d;} .wk-pill.bad{border-color:#dc2626;color:#dc2626;}
+  .wk-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+  .wk-mc{border:1px solid #d9cdee;border-top:3px solid #7c3aed;border-radius:10px;padding:10px 14px;background:#fff;min-width:0;}
+  .wk-mc.r{border-top-color:#dc2626;} .wk-mc.g{border-top-color:#15803d;}
+  .wk-mt{font-weight:800;font-size:14px;color:#241b36;margin-bottom:4px;} .wk-mt small{font-weight:500;font-size:11.5px;color:#8b82a3;margin-left:6px;}
+  .wk-mr{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed #d9cdee;font-size:14px;} .wk-mr:last-child{border-bottom:0;}
+  .wk-chips{display:flex;flex-wrap:wrap;gap:6px 8px;}
+  .wk-chip{border:1px solid #d9cdee;border-radius:999px;padding:2px 12px;font-size:13px;background:#faf7ff;}
+  .wk-rem{margin:8px 0;padding-left:26px;font-size:14.5px;line-height:1.95;color:#2f2745;} .wk-rem b{color:#6d28d9;}
+  .wk-foot{font-size:12px;color:#756a8c;line-height:1.7;border-top:1px solid #d9cdee;margin-top:26px;padding-top:10px;}
+  .sp-wkbtn{display:inline-block;margin:0 0 18px;border:1px solid #a78bdb;color:#6d28d9;background:#fff;border-radius:999px;padding:7px 20px;font-size:14.5px;font-weight:700;cursor:pointer;}
+  .sp-wkbtn:hover{background:#6d28d9;color:#fff;}
+  @media (max-width:760px){ .wk-h1{font-size:30px;} .wk-3{grid-template-columns:1fr;} .wk-tiles b{font-size:30px;} .wk-h2{font-size:21px;} }
   /* 創高黑龍（2026-10-19 使用者：版面跟底色照老師「創高黑龍・績效分析」——米色紙底、紅棕襯線標題、白卡片）：用淺色變數蓋掉 */
   #heilongInner{--bg:#f6f1e7; --panel:#fffdf8; --panel-2:#f3ecdf; --line:#e4d9c6; --text:#3a2c25; --muted:#8a7c6f; --accent:#8b2c22; --up:#c0392b; --down:#1e8a4c;
     --td-serif:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif; color:var(--text);background:var(--bg);}
@@ -12837,6 +12895,7 @@ function swingPageHtml(data){
     '<div class="sp-upd">🕘 <span>每個交易日收盤後整理(法人、集保、主動式 ETF 持股公告後會再更新);名單為系統既有資料整理,不另抓行情;右側可回看近 10 個交易日。<br>整理時間 ' + String(data.generatedAt || '').slice(5, 16).replace('T', ' ') + '</span>' +
     '<select id="swingDateSel" class="sp-sel">' + opts + '</select></div>' +
     '<div class="sp-nav">' + SP_NAV.map((x) => '<a data-sp-go="' + x[0] + '">' + x[1] + '</a>').join('') + '</div>' +
+    '<a class="sp-wkbtn" data-wk-open>📋 收盤觀察股 週分析 →</a>' +   // 2026-10-29 使用者：波段日報新增每週多觀察全方面解析
     spFutHtml(data) + spDispoHtml(data) + spEtfHtml(data) + spSummaryHtml(data) + spGroupHtml(data) + spChipsHtml(data) + spTechHtml(data) + spBodyHtml(data) + spFullHtml(data) +
     '<h2 class="sp-h2" id="spHist">回看歷史<small>近 10 個交易日</small></h2><div class="sp-note"><select id="swingDateSel2" class="sp-sel">' + opts + '</select> <span class="sp-mut">產生 ' + String(data.generatedAt || '').slice(0, 16).replace('T', ' ') + '</span></div>' +
     '<details class="sp-more"><summary>資料口徑與判斷規則</summary>' + swingBasisHtml(data) + '<div class="sp-rules">' + ['chips', 'tech', 'body', 'full', 'fund', 'disposition', 'risks'].filter((k) => rules[k]).map((k) => '<p>' + rules[k] + '。</p>').join('') + '</div></details>' +
@@ -12846,6 +12905,14 @@ function renderSwing(){
   const tabs = document.getElementById('swingTabs');
   tabs.innerHTML = SWING_SECTIONS.map((sc) => '<button class="chart-tab signal-tab' + (swingState.section === sc.key ? ' active' : '') + '" data-section="' + sc.key + '">' + sc.label + '</button>').join('');
   const body = document.getElementById('swingBody');
+  const weekly = swingState.section === 'page' && wkState.open;
+  document.getElementById('swingInner').classList.toggle('wk-on', weekly);
+  if (weekly){
+    const sc = document.getElementById('swingInner'), top = sc ? sc.scrollTop : 0;
+    body.innerHTML = wkPageHtml();
+    if (sc) sc.scrollTop = top;
+    return;
+  }
   const data = swingData();
   if (!data){
     body.innerHTML = swingDatePillsHtml(swingCache['']) + '<div class="signal-empty"><div class="se-title">' + (swingFailedAt[swingState.date || ''] ? '讀取失敗' : '讀取中…') + '</div><div class="se-sub">後端每個交易日收盤後整理；讀不到的話稍後再試。</div></div>';
@@ -12877,9 +12944,12 @@ document.getElementById('swingTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('[data-section]');
   if (!btn) return;
   swingState.section = btn.dataset.section;
+  wkState.open = false;
   renderSwing();
 });
 document.getElementById('swingBody').addEventListener('change', (e) => {
+  const wsel = e.target.closest('#wkDateSel');
+  if (wsel){ wkState.date = wsel.value === (wkCache[''] && wkCache[''].date) ? '' : wsel.value; renderSwing(); return; }
   const sel = e.target.closest('#swingDateSel, #swingDateSel2');
   if (!sel) return;
   swingState.date = sel.value && sel.options[0] && sel.value === sel.options[0].value ? '' : sel.value;
@@ -12887,6 +12957,10 @@ document.getElementById('swingBody').addEventListener('change', (e) => {
   renderSwing();
 });
 document.getElementById('swingBody').addEventListener('click', (e) => {
+  if (e.target.closest('[data-wk-open]')){ wkState.open = true; renderSwing(); const sc = document.getElementById('swingInner'); if (sc) sc.scrollTop = 0; return; }
+  if (e.target.closest('[data-wk-back]')){ wkState.open = false; renderSwing(); const sc = document.getElementById('swingInner'); if (sc) sc.scrollTop = 0; return; }
+  const wkGo = e.target.closest('[data-wk-go]');
+  if (wkGo){ const el = document.getElementById(wkGo.dataset.wkGo); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   const go = e.target.closest('[data-sp-go]');
   if (go){ const el = document.getElementById(go.dataset.spGo); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   if (e.target.closest('[data-sw-fut]')){ labState.tab = 'fut'; try { localStorage.setItem('labTab', 'fut'); } catch (_){} openLabPanel(); return; }
@@ -12896,7 +12970,7 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
   if (e.target.closest('#swingRevAll')){ swingState.revAll = true; renderSwing(); return; }
   if (e.target.closest('.sw-open-revenue')){ e.preventDefault(); openRevenuePanel(); return; }
   if ((swingState.section === 'etf' || e.target.closest('.sp-etfrow')) && erHandleClick(e)) return;
-  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code], .sp-srow[data-code], .sp-dcard .nmx[data-code]');
+  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code], .sp-srow[data-code], .sp-dcard .nmx[data-code], .wk-stk[data-code]');
   if (card){
     if (!useFloatingCharts()){
       document.getElementById('swingModal').classList.add('behind-chart');
@@ -12905,6 +12979,202 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
     openStockChart(card.dataset.code, card.dataset.name);
   }
 });
+
+// ---- 收盤觀察股 週分析（2026-10-29 使用者：波段日報新增「每週多觀察全方面解析」，照老師「收盤觀察股 週分析」頁做）----
+// 後端 /api/obs-weekly 一次給整份：名單＝形態觀察股（創高黑龍 10 天 ≥2 次＋均線分 ≥15）的收盤版，可回推任何一個交易日；
+// 九個段落：一名單異動、二族群總覽、三功課重點、四已噴在高檔、五月線下（含即將穿越）、六危險個股、七觀察、八四週回測、九功課提醒。
+// 名單是我們自己的系統選的，不是老師的名單，檔數與個股會不一樣。
+const wkState = { open: false, date: '' };
+const wkCache = {}, wkLoading = {}, wkFailed = {};
+async function ensureWeekly(date){
+  const key = date || '';
+  if (wkCache[key] || wkLoading[key]) return;
+  if (wkFailed[key] && Date.now() - wkFailed[key].at < 30000) return;
+  wkLoading[key] = true;
+  try {
+    const res = await fetch('/api/obs-weekly' + (date ? '?date=' + encodeURIComponent(date) : ''));
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || data.status !== 'ok') throw new Error((data && (data.detail || data.error)) || ('HTTP ' + res.status));
+    wkCache[key] = data;
+    if (data.date) wkCache[data.date] = data;
+    delete wkFailed[key];
+  } catch (e) {
+    wkFailed[key] = { at: Date.now(), msg: String((e && e.message) || e) };
+  } finally {
+    delete wkLoading[key];
+  }
+  if (wkState.open && !document.getElementById('swingModal').hidden) renderSwing();
+}
+function wkData(){ ensureWeekly(wkState.date); return wkCache[wkState.date || '']; }
+const wkHas = (v) => v !== null && v !== undefined;
+const wkMd = (d) => (d ? String(d).slice(5).replace('-', '/') : '');
+const wkPx = (v) => (wkHas(v) ? Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 }) : '—');
+const wkNone = '<span class="wk-mut">—</span>';
+function wkPct(v, digits){
+  if (!wkHas(v)) return wkNone;
+  return '<span class="' + (v > 0 ? 'wk-up' : v < 0 ? 'wk-down' : '') + '">' + (v > 0 ? '+' : '') + Number(v).toFixed(digits === undefined ? 1 : digits) + '%</span>';
+}
+function wkLots(v){
+  if (!wkHas(v)) return wkNone;
+  return '<span class="' + (v > 0 ? 'wk-up' : v < 0 ? 'wk-down' : '') + '">' + (v > 0 ? '+' : '') + Math.round(v).toLocaleString('en-US') + '</span>';
+}
+function wkItemMap(d){
+  if (!d.byCode){ d.byCode = {}; d.items.forEach((it) => { d.byCode[it.code] = it; }); }
+  return d.byCode;
+}
+function wkItemsOf(d, key){ const by = wkItemMap(d); return ((d.sections || {})[key] || []).map((c) => by[c]).filter(Boolean); }
+const WK_CROSS_TIP = '即將穿越＝月線下、距月線不到 9%：接近穿越月線，特別注意，或用條件單在月線價位設警示提醒穿越的位置，有機會買在起漲點。盤只要轉多，通常就是最低點（位置 1＝即將穿越出現；位置 2＝你設定的穿越價格）；進場後通常也是最低點。';
+function wkBadges(it){
+  const b = [];
+  if (it.isNew) b.push('<i class="wk-b new">新進</i>');
+  if (it.high) b.push('<i class="wk-b high">▲高檔</i>');
+  if (it.below) b.push('<i class="wk-b below">月線下</i>');
+  if (it.crossing) b.push('<i class="wk-b cross" title="' + wlEsc(WK_CROSS_TIP) + '">即將穿越</i>');
+  if (it.brk3) b.push('<i class="wk-b brk">破三K低</i>');
+  if (it.danger) b.push('<i class="wk-b danger">⚠危險</i>');
+  return b.join('');
+}
+function wkStk(it, plain){
+  return '<span class="wk-stk" data-code="' + wlEsc(it.code) + '" data-name="' + wlEsc(it.name) + '"><b>' + wlEsc(it.code) + '</b> ' + wlEsc(it.name) + '</span>' +
+    (it.star ? '<i class="wk-m wk-red">' + it.star + '</i>' : '') + (it.lit ? '<i class="wk-m wk-dark">●</i>' : '') + (plain ? '' : wkBadges(it));
+}
+function wkWhy(it){
+  const p = [];
+  if (it.below) p.push('月線下，距月線 ' + Math.abs(it.dist20).toFixed(1) + '%' + (it.crossing ? '（即將穿越，月線 ' + wkPx(it.ma20) + '）' : ''));
+  else if (it.high) p.push('高檔，離月線 ' + (wkHas(it.dist20) ? it.dist20.toFixed(1) + '%' : '—') + '、20 日漲 ' + (wkHas(it.ret20) ? it.ret20.toFixed(1) + '%' : '—'));
+  else p.push('月線上');
+  if (wkHas(it.revYoy) && it.revYoy < 0) p.push((it.revYm ? parseInt(String(it.revYm).slice(5), 10) + ' 月' : '') + '營收年減 ' + Math.abs(it.revYoy).toFixed(1) + '%');
+  if (it.epsQ && wkHas(it.epsQ.eps) && it.epsQ.eps < 0) p.push(it.epsQ.label + ' 虧損，列刪除候選');
+  if (wkHas(it.chipWeek) && it.chipWeek < 0) p.push('籌碼週 ' + it.chipWeek.toFixed(1) + '%');
+  if (wkHas(it.inst10) && it.inst10 < 0) p.push('法人 10 日賣超');
+  return p.join('・');
+}
+const WK_COL = {
+  grp: { h: '族群', cls: 'grp', f: (it) => wlEsc(it.gname || it.grp) },
+  stk: { h: '個股', cls: 'stk', f: (it) => wkStk(it) },
+  close: { h: '收盤', f: (it) => '<span class="wk-px">' + wkPx(it.close) + '</span> ' + wkPct(it.chg) },
+  score: { h: '均線分<small>近 5 日</small>', f: (it) => '<b class="wk-sc">' + it.score + '</b> <span class="wk-ser">' + (it.scoreSeries || []).join('→') + '</span>' },
+  dist: { h: '離月線', f: (it) => wkPct(it.dist20) },
+  dist2: { h: '離月線<small>20 日</small>', f: (it) => wkPct(it.dist20) + '<br>' + wkPct(it.ret20) },
+  ret20: { h: '20 日', f: (it) => wkPct(it.ret20) },
+  ma20: { h: '月線價<small>穿越價</small>', f: (it) => '<span class="wk-px">' + wkPx(it.ma20) + '</span>' },
+  inst10: { h: '法人 10 日', f: (it) => wkLots(it.inst10) },
+  chip: { h: '籌碼週', f: (it) => (wkHas(it.chipWeek) ? wkPct(it.chipWeek) + (it.chipWeeks ? '<small class="wk-mut">（連 ' + it.chipWeeks + '）</small>' : '') : wkNone) },
+  ck: { h: '健診<small>基 / 籌 / 技</small>', f: (it) => (it.ck ? [it.ck.fund, it.ck.chip, it.ck.tech].map((v) => (wkHas(v) ? v : '—')).join(' / ') : wkNone) },
+  fin: { h: '營收年增<small>Q 營益率 / EPS</small>', f: (it) => wkPct(it.revYoy) + (it.epsQ ? '<br><small class="wk-mut">' + wlEsc(it.epsQ.label) + ' ' + (wkHas(it.epsQ.margin) ? it.epsQ.margin + '%' : '—') + ' / ' + (wkHas(it.epsQ.eps) ? it.epsQ.eps : '—') + '</small>' : '') },
+  why: { h: '位置・為什麼', cls: 'why', f: (it) => wlEsc(wkWhy(it)) },
+};
+function wkTable(cols, list, empty){
+  if (!list.length) return '<div class="wk-empty">' + wlEsc(empty || '這一區目前沒有股票。') + '</div>';
+  return '<div class="wk-scroll"><table class="wk-tbl"><thead><tr>' + cols.map((c) => '<th class="' + (c.cls || '') + '">' + c.h + '</th>').join('') + '</tr></thead><tbody>' +
+    list.map((it) => '<tr>' + cols.map((c) => '<td class="' + (c.cls || '') + '">' + c.f(it) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+}
+function wkSec(id, title, note, body){
+  return '<h2 class="wk-h2" id="' + id + '">' + title + (note ? '<small>' + note + '</small>' : '') + '</h2>' + body;
+}
+const WK_NAV = [['wkDiff', '名單異動'], ['wkGroups', '族群總覽'], ['wkHome', '功課重點'], ['wkHigh', '高檔等黑'], ['wkBelow', '月線下'], ['wkDanger', '危險個股'], ['wkWatch', '觀察'], ['wkBack', '四週回測'], ['wkRemind', '提醒']];
+function wkDiffHtml(d){
+  const diff = d.diff;
+  if (!diff) return wkSec('wkDiff', '一、名單異動', '', '<div class="wk-empty">還沒有上一週的名單可以比（要有上一週、而且那天之前有 10 個交易日以上的均線分數）。</div>');
+  const added = diff.added || [], removed = diff.removed || [];
+  const by = new Map();
+  added.forEach((it) => { const g = it.gname || it.grp; if (!by.has(g)) by.set(g, []); by.get(g).push(it); });
+  const addHtml = added.length ? '<div class="wk-note"><b>新進：</b>' + Array.from(by.entries()).map(([g, list]) => wlEsc(g) + ' ' + list.map((it) => wkStk(it, true)).join(' / ')).join('；') + '</div>' : '';
+  const delCols = [
+    { h: '刪除', cls: 'stk', f: (it) => wkStk(it, true) + '<i class="wk-b del">刪除</i>' + (it.below ? '<i class="wk-b below">月線下</i>' : '') },
+    { h: '均線分', f: (it) => '<b class="wk-sc">' + it.score + '</b>' }, { h: '離月線', f: (it) => wkPct(it.dist20) },
+    { h: '法人 10 日', f: (it) => wkLots(it.inst10) }, { h: '籌碼週', f: (it) => wkPct(it.chipWeek) },
+    { h: '原因', cls: 'why', f: (it) => wlEsc((it.reasons || []).join('、')) },
+  ];
+  return wkSec('wkDiff', '一、名單異動', '對 ' + wkMd(diff.base) + ' 名單（上一週最後一份，' + diff.baseCount + ' 檔）',
+    '<div class="wk-tiles"><div><b>' + added.length + '</b><span>新進</span></div><div><b>' + removed.length + '</b><span>刪除</span></div><div><b>' + diff.kept + '</b><span>留任</span></div></div>' +
+    addHtml + (removed.length ? wkTable(delCols, removed) : '<div class="wk-empty">這週沒有刪除的股票。</div>'));
+}
+function wkGroupsHtml(d){
+  const cols = [
+    { h: '族群', cls: 'grp', f: (g) => '<b>' + wlEsc(g.name) + '</b>' }, { h: '檔數', f: (g) => g.n },
+    { h: '站上月線', f: (g) => g.above + '/' + g.withMa }, { h: '均線≥10', f: (g) => g.ma10 },
+    { h: '營收年增中位', f: (g) => wkPct(g.revMedian) }, { h: '吸籌連≥2週', f: (g) => g.chip2 },
+    { h: '法人 5 日合計', f: (g) => wkLots(g.inst5) }, { h: '一句話', cls: 'why', f: (g) => wlEsc(g.note) },
+  ];
+  return wkSec('wkGroups', '二、族群總覽', '先看這張', wkTable(cols, d.groups || [], '名單裡沒有股票。'));
+}
+function wkHomeworkHtml(d){
+  const r = d.rules || {};
+  const cols = [WK_COL.grp, WK_COL.stk, WK_COL.close, WK_COL.score, WK_COL.dist2, WK_COL.chip, WK_COL.inst10, WK_COL.fin];
+  return wkSec('wkHome', '三、功課重點', '三者同時成立才上功課',
+    '<div class="wk-note">均線分 ≥' + r.homeworkMinScore + '、籌碼不為負（集保週不是減少）、基本面有撐（健診基本面 ≥' + r.homeworkFundMin + '、最新一季 EPS 不是虧損），而且收盤在月線上、不在高檔。單一指標再強都不算。</div>' +
+    wkTable(cols, wkItemsOf(d, 'homework'), '這週沒有三者同時成立的股票。'));
+}
+function wkHighHtml(d){
+  const cols = [WK_COL.grp, WK_COL.stk, WK_COL.close, WK_COL.score, WK_COL.dist, WK_COL.ret20, WK_COL.inst10, WK_COL.chip, WK_COL.fin];
+  return wkSec('wkHigh', '四、已噴在高檔', '▲ 離月線 ≥15% 或 20 日漲 ≥30%，只能等黑再看', wkTable(cols, wkItemsOf(d, 'high'), '沒有已噴在高檔的股票。'));
+}
+function wkBelowHtml(d){
+  const list = wkItemsOf(d, 'below');
+  const cols = [WK_COL.grp, WK_COL.stk, WK_COL.close, WK_COL.score, WK_COL.dist, WK_COL.ma20, WK_COL.inst10, WK_COL.chip, WK_COL.why];
+  const n = list.filter((it) => it.crossing).length;
+  return wkSec('wkBelow', '五、月線下', '收盤在 20 日均線下；先不做功課，等站回月線＋黑K',
+    (n ? '<div class="wk-note wk-cross"><b>即將穿越 ' + n + ' 檔：</b>月線下、距月線不到 9%，接近穿越月線，特別注意，或用<b>條件單</b>在月線價（表裡的「月線價」）設警示，提醒穿越的位置，有機會買在起漲點。盤只要轉多，通常就是最低點；<b>位置 1＝即將穿越出現，位置 2＝你設定的穿越價格</b>，進場後通常也是最低點。</div>' : '') +
+    wkTable(cols, list, '沒有收在月線下的股票。'));
+}
+function wkDangerHtml(d){
+  const list = wkItemsOf(d, 'danger');
+  const cols = [WK_COL.grp, WK_COL.stk, WK_COL.close, WK_COL.score, WK_COL.dist2, WK_COL.fin, WK_COL.chip, WK_COL.ck, WK_COL.inst10, WK_COL.why];
+  const noCk = !(d.basis && d.basis.checkup);
+  return wkSec('wkDanger', '六、危險個股', '只看基本面：健診 基本 / 籌碼 / 技術 三科都低於 60 分，不管位置；位置另備註',
+    '<div class="wk-warn"><b>⚠ 進場要打短，或者小心防守、紀律執行。</b> 這幾檔基本面、籌碼、技術三項都差，只有題材或族群在撐；不管現在位置在月線上或下，做了就要照三K低 / 五日線防守，不留戀。</div>' +
+    (noCk ? '<div class="wk-empty">這一天沒有健診資料（後端只留最近幾個交易日），危險個股無法判斷。</div>' : wkTable(cols, list, '這週沒有三科都低於 60 分的股票。')));
+}
+function wkWatchHtml(d){
+  const cols = [WK_COL.grp, WK_COL.stk, WK_COL.close, WK_COL.score, WK_COL.dist2, WK_COL.chip, WK_COL.inst10, WK_COL.fin];
+  return wkSec('wkWatch', '七、觀察', '在月線上、不算高檔、但三者還沒同時成立', wkTable(cols, wkItemsOf(d, 'watch'), '沒有其他的股票。'));
+}
+function wkMiniCard(title, sub, cls, rows){
+  return '<div class="wk-mc ' + cls + '"><div class="wk-mt">' + title + '<small>' + sub + '</small></div>' +
+    (rows.length ? rows.map((r) => '<div class="wk-mr"><span>' + r.left + '</span>' + wkPct(r.v) + '</div>').join('') : '<div class="wk-mr wk-mut">—</div>') + '</div>';
+}
+function wkBacktestHtml(d){
+  const bt = d.backtest || {}, weeks = bt.weeks || [], after = bt.removedAfter || [];
+  if (!weeks.length) return wkSec('wkBack', '八、四週回測', '', '<div class="wk-empty">過去四週的名單還算不出來（均線分數資料不夠長）。</div>');
+  const stk = (r) => '<span class="wk-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name) + '">' + wlEsc(r.name) + '</span>';
+  const cards = weeks.map((w) => '<div class="wk-week"><div class="wk-wh"><b class="wk-wd">' + wkMd(w.date) + ' 名單</b><span>' + w.n + ' 檔</span>' +
+    '<i class="wk-pill">中位 ' + wkPct(w.median) + '</i><i class="wk-pill">平均 ' + wkPct(w.mean) + '</i><i class="wk-pill">勝率 ' + w.winRate + '%</i><i class="wk-pill">守月線 ' + (wkHas(w.keepMa) ? w.keepMa + '%' : '—') + '</i></div>' +
+    '<div class="wk-3">' + wkMiniCard('族群', '族內中位前五', 'v', w.groups.map((g) => ({ left: wlEsc(g.name), v: g.median }))) +
+    wkMiniCard('好股', '最強五檔', 'r', w.best.map((x) => ({ left: stk(x), v: x.ret }))) + wkMiniCard('壞股', '最弱五檔', 'g', w.worst.map((x) => ({ left: stk(x), v: x.ret }))) + '</div></div>').join('');
+  const afterHtml = after.length ? '<h3 class="wk-h3">被刪除的股票・刪掉之後怎麼走<small>用來驗證「刪得對不對」：刪除那天收盤 → ' + wkMd(d.date) + ' 收盤</small></h3>' + after.map((a) =>
+    '<div class="wk-week"><div class="wk-wh"><b class="wk-wd">' + wkMd(a.date) + ' 刪除</b><span>' + a.n + ' 檔（對 ' + wkMd(a.from) + ' 名單）</span><i class="wk-pill">中位 ' + wkPct(a.median) + '</i><i class="wk-pill">上漲 ' + a.upShare + '%</i>' +
+    '<i class="wk-pill ' + (a.median !== null && a.median < 0 ? 'ok' : 'bad') + '">' + (a.median !== null && a.median < 0 ? '刪得對（刪後多數續跌）' : '刪太早（刪後多數反彈）') + '</i></div>' +
+    '<div class="wk-chips">' + a.items.map((x) => '<span class="wk-chip">' + stk(x) + ' ' + wkPct(x.ret) + '</span>').join('') + '</div></div>').join('') : '';
+  return wkSec('wkBack', '八、四週回測', '過去四週每份名單：名單日收盤 → ' + wkMd(d.date) + ' 收盤',
+    '<div class="wk-note">每週取該週最後一份名單；報酬＝名單日收盤到本週收盤；守月線＝本週收盤仍在 20 日均線上。</div>' + cards + afterHtml);
+}
+function wkRemindHtml(d){
+  const list = d.reminders || [];
+  return wkSec('wkRemind', '九、給同學的功課提醒', '', '<ol class="wk-rem">' + list.map((t) => {
+    const i = t.indexOf('：');
+    return '<li>' + (i > 0 && i <= 16 ? '<b>' + wlEsc(t.slice(0, i + 1)) + '</b>' + wlEsc(t.slice(i + 1)) : wlEsc(t)) + '</li>';
+  }).join('') + '</ol>');
+}
+function wkPageHtml(){
+  const back = '<a class="wk-back" data-wk-back>← 波段精選日報</a>';
+  const d = wkData();
+  if (!d){
+    const f = wkFailed[wkState.date || ''];
+    return '<div class="wk">' + back + '<div class="wk-empty">' + (f ? '讀取失敗（' + wlEsc(f.msg) + '），30 秒後再試。' : '讀取中…（第一次要整理名單與四週回測，約幾秒）') + '</div></div>';
+  }
+  const b = d.basis || {}, r = d.rules || {};
+  const opts = (d.dates || []).slice().reverse().map((x) => '<option value="' + x + '"' + (x === d.date ? ' selected' : '') + '>' + x + spWd(x) + ' 收盤</option>').join('');
+  return '<div class="wk">' + back + '<div class="wk-tagrow"><span class="wk-tag">波段日報・週分析</span></div>' +
+    '<h1 class="wk-h1">收盤觀察股 週分析</h1>' +
+    '<div class="wk-sub">' + wkMd(d.date) + ' 名單（' + d.n + ' 檔）・名單異動 + 月營收 / 季報 + 均線分數 + 籌碼，方便同學做功課。名單＝本站形態觀察股（首頁「多觀察」那欄）近 ' + r.listDays + ' 個交易日內進過觀察池的股票；觀察池＝近 ' + r.poolDays + ' 日創高黑龍 ≥' + r.minHits + ' 次、當天均線分 ≥' + r.minScore + '。超過 ' + r.listDays + ' 個交易日沒再進池才刪除，所以轉弱掉到月線下的還在名單裡。這不是老師的名單，檔數與個股會不一樣。</div>' +
+    '<div class="wk-basis">📅 收盤 ' + d.date + '｜均線分數・健診 ' + (b.checkup || '—') + '｜法人 5 / 10 日 = 至 ' + wkMd(b.instTo) + '｜籌碼 = 集保週 ' + (b.chipWeek || '—') + '｜月營收 = ' + (b.revYm ? b.revYm.replace('-', '/') : '—') + '｜季報 = ' + (b.season || '—') + '（公開資訊觀測站彙總；EPS 欄累計 / 單季口徑待確認；營益率＝營業利益 ÷ 營收）' +
+    ' <select id="wkDateSel" class="sp-sel">' + opts + '</select></div>' +
+    '<div class="wk-legend"><i class="wk-m wk-red">★</i> 健診強 <i class="wk-m wk-red">☆</i> 中上　<i class="wk-m wk-dark">●</i> 今日漲停　<i class="wk-b high">▲高檔</i> 離月線 ≥' + r.highDist + '% 或 20 日漲 ≥' + r.highRet20 + '%　<i class="wk-b below">月線下</i> 收盤在月線下　<i class="wk-b cross">即將穿越</i> 月線下、距月線 ≤' + r.crossMax + '%　<i class="wk-b brk">破三K低</i>　<i class="wk-b danger">⚠危險</i> 健診基 / 籌 / 技都 <' + r.dangerBelow + '</div>' +
+    '<div class="wk-nav">' + WK_NAV.map((x) => '<a data-wk-go="' + x[0] + '">' + x[1] + '</a>').join('') + '</div>' +
+    wkDiffHtml(d) + wkGroupsHtml(d) + wkHomeworkHtml(d) + wkHighHtml(d) + wkBelowHtml(d) + wkDangerHtml(d) + wkWatchHtml(d) + wkBacktestHtml(d) + wkRemindHtml(d) +
+    '<div class="wk-foot">資料來源：本站日K與均線分數（收盤後整表）、三大法人買賣超、集保週資料、月營收與季報（公開資訊觀測站）、健診（基本 / 籌碼 / 技術）。表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
+}
 
 // ---- 創高黑龍（黑龍回測）獨立面板：2026-10-04 使用者，從下午報分離出來 ----
 function renderHeilong(){ document.getElementById('heilongBody').innerHTML = swingHeilongHtml() + SWING_FOOT; }
@@ -15974,7 +16244,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 11:35:44';
+const BUILD_STAMP = '2026-10-29 12:06:42';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26738,6 +27008,10 @@ export default {
       } catch (err) {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
+    }
+    if (url.pathname === "/api/obs-weekly") {
+      // 收盤觀察股 週分析（2026-10-29 使用者）：名單、回測都是收盤後才變，同一個日期 5 分鐘快取（沒指定日期的 2 分鐘）
+      return await proxyHanstockBars("/api/hub/obs-weekly" + url.search, url.searchParams.get("date") ? 300 : 120);
     }
     if (url.pathname === "/api/swing-report") {
       // 波段日報（2026-09-26 使用者）：後端每日保存，60 秒快取

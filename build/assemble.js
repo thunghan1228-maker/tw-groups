@@ -819,6 +819,10 @@ export default {
         return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/obs-weekly") {
+      // 收盤觀察股 週分析（2026-10-29 使用者）：名單、回測都是收盤後才變，同一個日期 5 分鐘快取（沒指定日期的 2 分鐘）
+      return await proxyHanstockBars("/api/hub/obs-weekly" + url.search, url.searchParams.get("date") ? 300 : 120);
+    }
     if (url.pathname === "/api/swing-report") {
       // 波段日報（2026-09-26 使用者）：後端每日保存，60 秒快取
       return await proxyHanstockBars("/api/hub/swing-report" + url.search, 60);
