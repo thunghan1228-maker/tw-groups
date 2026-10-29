@@ -5091,6 +5091,11 @@ function drawChart(){
         const p905d = drawHRangeLine(todayStart, today1030Index, todayFirstBar.low, '#6366f1', 4.5, []);
         labelHLine(p905h, '905高 ' + (+todayFirstBar.high.toFixed(2)), false);
         labelHLine(p905d, '905低 ' + (+todayFirstBar.low.toFixed(2)), true);
+        // 2026-10-29 使用者：櫃買指數 5 分K 第三根（09:10～09:15）的最低點拉一條紅色虛線，延伸到收盤；
+        // 跟 905 高低線一樣畫在「最後一個交易日」，隔天開盤第一根 K 棒出來之後就換成新的一天、這條自然消失（新的一天要等到第三根收完才畫）
+        if (currentChart.code === 'IDX_OTC' && todayEnd - todayStart >= 2){
+          drawHRangeLine(todayStart + 2, todayEnd, allBars[todayStart + 2].low, '#ef4444', 3, [9, 6]);
+        }
       }
 
       const prevEnd = todayStart - 1;
