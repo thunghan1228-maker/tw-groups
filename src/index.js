@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 09:13:54";
+const BUILD_STAMP = "2026-10-29 09:16:43";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -8581,44 +8581,36 @@ function bladeTrackRefresh(){
   if (bladeTrack.loading || Date.now() - bladeTrack.at < 60e3) return;
   bladeTrack.loading = true;
   fetch('/api/homework-snapshots').then((r) => r.json()).then((d) => { if (d && d.status === 'ok') bladeTrack.data = d; })
-    .catch(() => {}).finally(() => { bladeTrack.loading = false; bladeTrack.at = Date.now(); try { sigRefreshViews(); botRerunCols(); } catch (_){} });
+    .catch(() => {}).finally(() => { bladeTrack.loading = false; bladeTrack.at = Date.now(); try { sigRefreshViews(); botRerunCols(); } catch (_){} try { if (tdOpen()) renderHomework(); } catch (_){} });
 }
 const bladeSlotTs = (date, hm) => Date.parse(date + 'T' + hm + ':00+08:00');
 function bladeTimeline(m){
+  // 2026-10-29 使用者：機器人 32 跟每日功課「刀劍空(32)功課廣播」的排序、名單內容都不一樣 → 兩邊改用同一個函式、同一份資料：
+  // 今天每 5 分鐘的功課紀錄（bladeTrack，功課面板看今天也讀這份）＋盤中最新那份，走 tdBroadcast（含「參數」勾選、進榜／跑／回、這台電腦第一次看到的分鐘）。
+  // 以前這裡自己另外算一套（不看參數、時間寫成現在的時段、另一份 60 秒快取），兩邊時間差一點、名單就差一兩檔。
   bladeTrackRefresh();
   const d = bladeTrack.data;
   if (!m || !d || !lastData || d.date !== lastData.quoteDate) return null;
-  const slots = Object.keys(d.slots || {}).sort();
-  if (!slots.length) return null;
-  const live = [].concat(m.bladeUpper || [], m.bladeMiddle || [], m.bladeLower || [], m.bladeHarvest || []);
-  const nowSlot = lastData.quoteTime ? String(lastData.quoteTime).slice(0, 5) : slots[slots.length - 1];
-  const st = new Map();
-  slots.forEach((slot) => {
-    const inSet = new Map((d.slots[slot].rows || []).map((r) => [r.code, r]));
-    inSet.forEach((r, code) => {
-      const x = st.get(code);
-      if (!x) st.set(code, { code, first: slot, inNow: true, out: null, back: null, row: r });
-      else { if (!x.inNow){ x.back = slot; x.out = null; } x.inNow = true; x.row = r; }
-    });
-    st.forEach((x, code) => { if (x.inNow && !inSet.has(code)){ x.inNow = false; x.out = slot; } });
-  });
-  // 跟畫面上現在這份對齊：現在在名單裡的就是在榜（紀錄裡掉出去的算回來），紀錄說在榜、現在不在的算跑
-  const liveCodes = new Set(live.map((r) => r.code));
-  live.forEach((r) => {
-    const x = st.get(r.code);
-    if (!x) st.set(r.code, { code: r.code, first: nowSlot, inNow: true, out: null, back: null, row: { code: r.code, name: r.name, g: r.groupName, gr: r.groupRank } });
-    else if (!x.inNow){ x.inNow = true; x.back = nowSlot > x.out ? nowSlot : x.out; x.out = null; }
-  });
-  st.forEach((x) => { if (x.inNow && !liveCodes.has(x.code)){ x.inNow = false; x.out = nowSlot; } });
-  // 2026-10-29 使用者：機器人 32 跟功課廣播的排序不一樣——功課廣播（tdBroadcast）對「只在盤中最新那份才看到」的股票，進榜時間改寫成這台電腦第一次看到它的那一分鐘，
-  // 機器人這邊原本一律寫成現在這個 5 分鐘時段，結果一堆同時間的在榜股票照股號排在最上面、跑掉的反而被擠下去。兩邊改成同一個算法
-  const seenLive = bladeSeenMap();
-  st.forEach((x) => {
-    if (x.first !== nowSlot || x.back || !seenLive[x.code]) return;
-    const hm = new Date(seenLive[x.code] + 8 * 3600e3).toISOString().slice(11, 16);
-    if (hm < nowSlot) x.first = hm;
-  });
-  return st;
+  if (!Object.keys(d.slots || {}).length) return null;
+  const seq = tdTodaySeq(m);
+  if (!seq) return null;
+  return new Map(tdBroadcast(seq, 'blade').map((x) => [x.code, x]));
+}
+// 今天的時間序列（機器人 32／123 跟每日功課看「今天」時共用）：每 5 分鐘的紀錄＋盤中最新那份；跟 hwTodayHtml 同一個接法
+function tdTodaySeq(m){
+  const d = bladeTrack.data;
+  let live = null;
+  try { live = tdLiveSnap(m, 2); } catch (_){ live = null; }
+  if (!live) return null;
+  const recOk = !!(d && d.status === 'ok' && d.slots && d.date === live.date);
+  const seq = (recOk ? Object.keys(d.slots).sort() : []).map((sl) => [sl, tdRecSnap(d.slots[sl], d.date, sl)]);
+  const liveSession = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr());
+  if (!seq.length || (liveSession && seq[seq.length - 1][0] <= live.slot)) seq.push([live.slot || '最新', live]);
+  return seq;
+}
+function tdParamsNote(){   // 功課面板勾的參數（大戶≤-10…）會一起篩機器人 32／123：有勾的時候在說明列提醒
+  const on = TD_PARAMS.filter(([k]) => tdState.params[k]).map(([, l]) => l.replace(/^\\S+\\s/, ''));
+  return on.length ? '・⏸ 跟著每日功課的參數：' + on.join('、') + '（到每日功課取消勾選就是全部）' : '';
 }
 const bladeBackTag = (x) => (x && x.inNow && x.back ? '<span class="blade-back" title="掉出刀劍空後 ' + x.back + ' 又回來">回 ' + x.back + '</span>' : '');
 // 跑掉的那幾檔：一列，紅色刪除線，標進榜時間跟跑的時間，漲跌照現在報價
@@ -15974,7 +15966,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 09:13:54';
+const BUILD_STAMP = '2026-10-29 09:16:43';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18295,6 +18287,7 @@ function tdBigHolder(codes){
 // 某一天的 5 分鐘紀錄（date＝null：今天，今天沒有就最近那天）；面板開著每分鐘重抓
 function tdRepData(){
   const r = tdState.rep, key = r.date || '';
+  if (!r.date){ bladeTrackRefresh(); const bd = bladeTrack.data; return bd && bd.status === 'ok' ? bd : null; }   // 2026-10-29：看今天的紀錄跟機器人 32／123 同一份、同一個快取，兩邊不會差一個更新週期
   if (!r.loading && (r.key !== key || Date.now() - r.at > 60e3)){
     r.loading = true;
     fetch('/api/homework-snapshots' + (r.date ? '?date=' + r.date : '')).then((x) => x.json()).then((d) => { if (d && d.status === 'ok'){ r.data = d; } })
@@ -22897,15 +22890,10 @@ function botAnswer(raw){
     if (!m) return wrap(title, botLine('讀取中…', 'bot-dim'));
     // 2026-10-28 使用者：機器人 123 的排法、版面、時間次序要跟「功課廣播 12空(123)」一模一樣——同一份資料（今天每 5 分鐘的紀錄＋盤中最新那份）、
     // 同一套進榜／跑／回的算法（tdBroadcast）：左邊最早進榜時間，排序＝最近發生的在上面（回、跑看標籤時間），消失（跑）的劃掉、再回來的標「回」
-    const rep = botFetchCache('hwsnap', '/api/homework-snapshots', 60e3);
-    let live = null;
-    try { live = tdLiveSnap(m); } catch (_){ live = null; }
-    if (!live) return wrap(title, botLine('讀取中…', 'bot-dim'));
-    const recOk = !!(rep && rep.status === 'ok' && rep.slots && rep.date === live.date);
-    const recSlots = recOk ? Object.keys(rep.slots).sort() : [];
-    const seq = recSlots.map((sl) => [sl, tdRecSnap(rep.slots[sl], rep.date, sl)]);
-    const liveSession = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr());
-    if (!seq.length || (liveSession && seq[seq.length - 1][0] <= live.slot)) seq.push([live.slot || '最新', live]);   // 跟每日功課同一個接法
+    bladeTrackRefresh();
+    const seq = tdTodaySeq(m);   // 跟功課廣播、機器人 32 同一份紀錄、同一個接法
+    if (!seq) return wrap(title, botLine('讀取中…', 'bot-dim'));
+    const live = { total: m.total };
     const list = tdBroadcast(seq, 'k12');
     const stage = (row) => (!row || !Number.isFinite(row.h1) ? '' : '<span class="b32-lvrow">' + (!Number.isFinite(row.h2)
       ? '<span class="b32-lv s1" title="第一階段：剛跌破 20MA、20MA 下彎，還沒有反彈；1高＝破之前的最高，當停損價">① 剛轉弱（還沒反彈）</span><span class="b32-lv" title="1高＝破之前的最高，當停損價">1高 ' + tdK12Px(row.h1) + ' 停損</span>'
@@ -22926,7 +22914,7 @@ function botAnswer(raw){
     const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
     return wrap(title, (list.length ? botLine('<span class="b32-cnt s1">① 剛轉弱 ' + c.s1 + ' 檔（還沒反彈）</span><span class="b32-cnt s2">② 不過前高可空 ' + c.s2 + ' 檔（反彈沒過 1高）</span>', 'bot-dim') : '') +
       (list.length ? list.map(rowHtml).join('') : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
-      (list.length ? botLine('跟「功課廣播 12空(123)」同一份・左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（劃掉）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・① 剛轉弱＝剛跌破 20MA、20MA 下彎、還沒反彈，1高＝破惡前最高當停損價・② 不過前高可空＝破了以後反彈沒過 1高', 'bot-dim') : ''),
+      (list.length ? botLine('跟「功課廣播 12空(123)」同一份・左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（劃掉）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・① 剛轉弱＝剛跌破 20MA、20MA 下彎、還沒反彈，1高＝破惡前最高當停損價・② 不過前高可空＝破了以後反彈沒過 1高' + tdParamsNote(), 'bot-dim') : ''),
       (when ? '5 分K算到 ' + when + '・' : '') + '今天 ' + list.length + ' 檔，在榜 ' + inCnt + '、消失 ' + goneCnt);
   }
   if (q === '30' || q === '32'){
@@ -22940,7 +22928,7 @@ function botAnswer(raw){
     // 2026-10-19 使用者：排法照「刀功課廣播」——不分段，一檔一列：左邊最早進榜時間（越晚進榜越上面，同時間照股號）、
     // 股號股名下面接族群（名次＋🔺🔽🔰♣）、右邊漲跌幅跟大戶%、最下面「跑／回 HH:MM」；跑掉的紅色刪除線夾在裡面照時間排。底色跟顏色照機器人原本的黑底。
     const bl = bladeBotListHtml(m);
-    return wrap('🔪⚔️新刀劍空(32)', (bl.html || botLine('目前沒有', 'bot-dim')) + botLine(bladeLegend(bl), 'bot-dim'), stamp + '・' + bladeCountTxt(bl));
+    return wrap('🔪⚔️新刀劍空(32)', (bl.html || botLine('目前沒有', 'bot-dim')) + botLine(bladeLegend(bl) + tdParamsNote(), 'bot-dim'), stamp + '・' + bladeCountTxt(bl));
   }
   // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
   // 最後附櫃買多空（漲跌幅）；34 再附漲 7% 以上沒列的檔數；處置股名字前面 *
