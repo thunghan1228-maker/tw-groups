@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 13:54:36";
+const BUILD_STAMP = "2026-10-29 14:08:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -16428,7 +16428,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 13:54:36';
+const BUILD_STAMP = '2026-10-29 14:08:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22683,7 +22683,7 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 // ---- 機器人代碼（2026-10-17 使用者：照對方 Line 機器人「紫殺」的代碼表做；輸入代碼就回名單）----
 // 1N＝族群漲幅 > N% 排行（1＝>1%）；2N＝個股💎漲幅 > N% 排行（2＝>0%），「22-5」扣掉前 5 檔；177／188／199／193／283／284；
 // 30（🐎🚀）／31（🔪⚔️）／32（新刀劍空）；44＝今天 1+2 多；60／61／62＝處置／即將出關／已出關；70／71／72＝亞洲股市／美國股市／台指期；
-// 84＝本週籌碼暴增排行；股號或族群名＝那個族群的漲幅排行；股號B2＝同族群漲 2% 以上；股號a＝族群前天／昨天／今天名次；股號+3＝那族的 283。
+// 84＝籌碼暴增排序（本週買超榜、賣超榜）；股號或族群名＝那個族群的漲幅排行；股號B2＝同族群漲 2% 以上；股號a＝族群前天／昨天／今天名次；股號+3＝那族的 283。
 // 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
 const botState = { cols: [], restored: false, restoring: false, pendTops: null, world: null, worldAt: 0, worldLoading: false, cache: {} };   // cols＝開著的格子 [{cmd, key, html}]，照點的順序
 const BOT_CODES = [
@@ -22694,7 +22694,7 @@ const BOT_CODES = [
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖雙週入榜黑龍：前兩個交易日上 811、今天收黑K（⭐＝兩週內又上榜幾次）'],
   ['81', '隔日沖買超排序（每天六點後更新）'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
-  ['84', '本週籌碼暴增排行'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
+  ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
   ['2359', '股號或族群名：那族漲幅排行'], ['2359m', '那檔當天的隔日沖買賣超（2359m1＝前一天，最多 2359m9）'], ['235984', '那族的籌碼暴增排序（族群名＋84 也可以，例：低軌衛星84）'], ['2359g', '那檔過去五週籌碼增減%'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
 ];
 const botPct = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
@@ -23438,16 +23438,19 @@ function botAnswer(raw){
       botStk(e.code, e.name, v === null ? '' : ' <span class="' + dirClass(v) + '">' + botPct(v) + '</span>')); }).join('') || botLine('今天還沒有', 'bot-dim'), stamp + '・跟訊號中心「1+2多」同一份');
   }
   if (q === '84'){
-    gmChipLoad();
-    const cd = gmChipState.data && gmChipState.data.status === 'ok' ? gmChipState.data : null;
-    if (!cd) return wrap('籌碼暴增(84)', botLine(gmChipState.error ? '籌碼資料暫時抓不到，等一下再試' : '讀取中…', 'bot-dim'));
-    const names = new Map();
-    lastData.groups.forEach((g) => g.stocks.forEach((s) => { if (!names.has(s.code)) names.set(s.code, s.name); }));
-    const rows = Object.entries(cd.chips).filter(([c, v]) => names.has(c) && v && Number.isFinite(v[0])).sort((a, b) => b[1][0] - a[1][0]).slice(0, 30);
-    return wrap('本週籌碼暴增排行(84)', rows.map(([c, v], i) => botLine((i + 1) + '. ' + botStk(c, names.get(c), ' <span class="' + dirClass(v[0]) + '">' + botPct(v[0]) + '</span>' + (v[1] >= 2 ? ' <span class="bot-dim">連 ' + v[1] + ' 週</span>' : '')))).join('') +
-      (rows.length ? botBarChart(rows.map(([c, v]) => ({ c, n: names.get(c), v: v[0] })), { title: '本週籌碼暴增排行', sub: '前 ' + rows.length + ' 名・' + rdMdShort(cd.week) + ' 當週',
-        right: rows[0][0] + ' ' + names.get(rows[0][0]), rightSub: '第 1 名 +' + rows[0][1][0].toFixed(2) + '%', foot: '籌碼暴增＝集保 400 張以上大戶週增減%' }) : ''),
-      '集保 400 張以上大戶週增減・' + rdMdShort(cd.week) + ' 週');
+    // 2026-10-29 照老師「籌碼暴增排序(84) 10/22」：買超榜（籌碼 % 一位小數）、SEP賣超、賣超榜；賣超榜股名後面的 ⭐＝往前連續幾週也在賣超榜
+    // （聯一光電、晶心科 ⭐⭐、萬潤、環球晶 ⭐；他的買超榜沒有打星，今國光、友威科連三週還是沒有）
+    const rd = botFetchCache('chipRadar84', '/api/chip-radar', 30 * 60e3);
+    if (!rd || rd.status !== 'ok' || !rd.lists || !rd.lists.length){
+      return wrap('籌碼暴增排序(84)', botLine(rd && rd.status === 'error' ? '籌碼資料暫時抓不到，等一下再試' : (rd && rd.status === 'empty' ? '還沒有集保資料' : '讀取中…'), 'bot-dim'));
+    }
+    const wk = rd.lists[0];
+    const stars = (code) => { let n = 0; for (let i = 1; i < rd.lists.length && (rd.lists[i].sell || []).some((r) => r.code === code); i++) n++; return n; };
+    const one = (v) => (v > 0 ? '+' : '') + v.toFixed(1) + '%';
+    const line = (r, mark) => botLine(botStk(r.code, r.name, ' <span class="' + dirClass(r.chip1) + '">' + one(r.chip1) + '</span>' + mark));
+    return wrap('籌碼暴增排序(84) ' + rdMdShort(wk.date),
+      (wk.buy || []).map((r) => line(r, '')).join('') + botLine('SEP賣超', 'bot-dim') + (wk.sell || []).map((r) => line(r, '⭐️'.repeat(stars(r.code)))).join(''),
+      '集保 400 張以上大戶週增減・' + rdMdShort(wk.date) + ' 週・買超 ' + (wk.buy || []).length + ' 檔、賣超 ' + (wk.sell || []).length + ' 檔');
   }
   // 籌碼暴增系列（2026-10-17 使用者）：籌碼＝集保 400 張以上大戶週增減（跟 84 同一份）
   const chipOf = () => { gmChipLoad(); return gmChipState.data && gmChipState.data.status === 'ok' ? gmChipState.data : null; };
