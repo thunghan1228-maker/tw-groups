@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 11:06:16";
+const BUILD_STAMP = "2026-10-29 11:35:44";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -711,6 +711,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   #k12AlertBox .la-row:last-child{border-bottom:0;}
   #k12AlertBox .launch-alert-time,#k12AlertBox .alert-stk{color:#047857;}
   #k12AlertBox .la-pct{display:inline-block;background:#047857;color:#fff;border-radius:6px;padding:0 6px;margin-left:4px;font-weight:800;} #k12AlertBox .la-pct *{color:#fff!important;}
+  #k12AlertBox .la-big{white-space:nowrap;margin-left:6px;} #k12AlertBox .la-big i{font-style:normal;font-size:11px;font-weight:700;color:#047857;} #k12AlertBox .la-big .hr-hold{margin-left:3px;}
   #k12AlertBox .la-row small{color:#000!important;opacity:1;font-weight:700;}
   #k12AlertBox{cursor:move;} #k12AlertBox .alert-stk{cursor:pointer;}   /* 2026-10-21 使用者：按著卡片哪裡都能拖 */
   #k12AlertBox .launch-alert-body{max-height:min(55vh,460px);overflow:auto;font-size:14px;}
@@ -15973,7 +15974,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 11:06:16';
+const BUILD_STAMP = '2026-10-29 11:35:44';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17859,7 +17860,7 @@ function renderK12AlertBox(){
   const oldBody = el.querySelector('.launch-alert-body'), keepTop = oldBody ? oldBody.scrollTop : 0;   // 20 秒重畫一次，捲到哪要留著
   el.innerHTML = '<div class="launch-alert-head">🔻 1️⃣2️⃣空・不過前高可空 ' + rows.length + ' 檔<small class="la-headnote">（第二階段）</small><button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
     '<div class="launch-alert-body">' + rows.map((r) => '<div class="la-row"><span class="launch-alert-time">' + r.time + '</span> <span class="alert-stk" data-alert-code="' + wlEsc(r.code) +
-      '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + r.name) + '</span>（' + wlEsc(r.group) + '）<span class="la-pct">' + botPct(r.pct) + '</span>' +
+      '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + r.name) + '</span>（' + wlEsc(r.group) + '）<span class="la-pct">' + botPct(r.pct) + '</span><span class="la-big"><i>大戶力</i>' + homeHoldHtml(r.code) + '</span>' +   // 2026-10-29 使用者：漲跌幅後面再加一欄大戶力（紅底≥+10／綠底≤−10 同首頁）
       '<small>1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 不過前高可空（反彈沒過 1高）</small></div>').join('') + '</div>';
   const newBody = el.querySelector('.launch-alert-body');
   if (newBody && keepTop) newBody.scrollTop = keepTop;
