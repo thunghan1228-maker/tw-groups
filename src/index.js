@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 22:00:12";
+const BUILD_STAMP = "2026-10-29 22:09:23";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -596,8 +596,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .tx-chip .tx-l1{cursor:pointer;} #otcStrengthBox{cursor:pointer;}   /* 2026-10-29 點價位／整格開指數 K 線圖 */   /* 2026-10-29 使用者：漲紅、跌綠、平盤白字 */
   .ix-up{color:#ff5a5a;font-weight:900;} .ix-dn{color:#3ddc84;font-weight:900;} .ix-flat{color:var(--text);font-weight:900;}
   .ms-lines .ms-idx{font-size:14px;margin-bottom:1px;}
-  .txf-box{flex:0 1 auto;max-width:300px;min-width:170px;align-self:flex-start;display:block;line-height:1.45;cursor:pointer;}
-  .txf-box .txf-l1{display:block;font-size:14px;font-weight:800;white-space:nowrap;} .txf-box .txf-l2{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-top:1px;}
+  .txf-box{flex:0 1 auto;max-width:320px;min-width:170px;align-self:flex-start;display:block;line-height:1.45;cursor:pointer;}
+  .txf-box .txf-l1{display:block;font-size:14px;font-weight:800;white-space:nowrap;} .txf-box .txf-sess{font-size:11px;font-weight:700;color:var(--muted);margin-right:2px;} .txf-box .txf-l2{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-top:1px;}
   .tx-pop{position:fixed;z-index:210;width:min(620px,94vw);max-height:78vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.55);padding:14px 16px;font-size:13.5px;line-height:1.6;}
   .tx-pop h3{margin:0 0 4px;font-size:16px;} .tx-pop .tx-meta{color:var(--muted);font-size:11.5px;margin-bottom:6px;}
   .tx-pop ul{margin:2px 0 8px;padding-left:20px;} .tx-pop ul ul{margin:2px 0;list-style:circle;} .tx-pop li{margin:2px 0;} .tx-pop li > b:first-child{color:var(--accent);}
@@ -3894,7 +3894,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
     </div>
     <button type="button" class="tx-chip" id="taiexChip" aria-haspopup="dialog" aria-expanded="false" title="每日加權指數分析：滑過去看、按一下固定打開"><span class="tx-l1">📈 加權指數分析　讀取中…</span></button>  <!-- 2026-10-23 使用者：每日加權指數分析，滑過去或按下去看；2026-10-29 使用者：移到搜尋框右邊（原本個股震盪的位置），個股震盪往右移 -->
     <div class="market-strength-bar" id="otcStrengthBox"></div>
-    <div class="market-strength-bar txf-box" id="txfBox" title="台指期近月（期交所日盤即時，每 20 秒更新）・點一下看 K 線圖"><span class="txf-l1"><b>台指期近月</b>　讀取中…</span></div>  <!-- 2026-10-29 使用者：個股震盪右邊空白處加台指期近月：價位、漲跌點數、漲跌幅，漲紅跌綠平盤白字 -->
+    <div class="market-strength-bar txf-box" id="txfBox" title="台指期近月（期交所日盤即時，每 20 秒更新）・點一下看 K 線圖"><span class="txf-l1"><b>台指期近月</b><small class="txf-sess">（日盤）</small>　讀取中…</span></div>  <!-- 2026-10-29 使用者：個股震盪右邊空白處加台指期近月：價位、漲跌點數、漲跌幅，漲紅跌綠平盤白字 -->
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle guide-btn" id="czBtn" title="自訂畫面：選擇哪些按鈕要留著、哪些收起來（畫面比較精簡）">⊙ 自訂</button>  <!-- 2026-10-23 使用者：照莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，勾掉就收起來；全部顯示一鍵復原 -->
@@ -16634,7 +16634,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 22:00:12';
+const BUILD_STAMP = '2026-10-29 22:09:23';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25746,12 +25746,12 @@ function txfRender(){
   const el = document.getElementById('txfBox');
   if (!el) return;
   const d = TXF.d;
-  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期近月</b>　讀取中…</span>'; return; }
+  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期近月</b><small class="txf-sess">（日盤）</small>　讀取中…</span>'; return; }
   const sg = (v, n) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + Math.abs(v).toFixed(n);
   const cls = Math.abs(d.change) < 0.0000001 ? 'ix-flat' : d.change > 0 ? 'ix-up' : 'ix-dn';
   const tp = new Date(Date.now() + 8 * 3600e3), hm = tp.toISOString().slice(11, 16);   // 台北現在時間
   const live = d.date === tp.toISOString().slice(0, 10) && hm >= '08:45' && hm <= '13:46' && Date.now() - TXF.at < 120e3;
-  el.innerHTML = '<span class="txf-l1"><b>台指期近月</b> <b class="' + cls + '">' + txN(d.price) + '</b> <span class="' + cls + '">' + sg(d.change, 0) + ' 點　' + sg(d.pct, 2) + '%</span></span>'
+  el.innerHTML = '<span class="txf-l1"><b>台指期近月</b><small class="txf-sess">（日盤）</small> <b class="' + cls + '">' + txN(d.price) + '</b> <span class="' + cls + '">' + sg(d.change, 0) + ' 點　' + sg(d.pct, 2) + '%</span></span>'
     + '<span class="txf-l2">' + (d.month ? d.month + '月合約・' : '') + String(d.date || '').slice(5).replace('-', '/') + ' ' + (d.time || '') + (live ? ' 日盤即時' : ' 收盤') + '・量 ' + txN(d.volume) + '</span>';
 }
 async function txfLoad(){
