@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 14:16:45";
+const BUILD_STAMP = "2026-10-29 15:22:15";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -108,7 +108,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .updated{color:var(--muted);font-size:11px;text-align:center;padding:8px 0 28px;}
   /* 2026-09-24 使用者：搜尋框、櫃買強弱widget移到標題列（跟盤中訊號同一排）；
      強勢/弱勢族群統計移到強勢/弱勢分頁正上方，不再擠在「各族群前三強個股」標題旁邊。 */
-  .stat-bar-row{padding:0;margin-left:auto;flex:0 0 auto;align-self:center;}
+  .stat-bar-row{padding:0;flex:0 0 auto;align-self:center;}
   .loading{color:var(--muted);text-align:center;padding:40px 0;}
 
   .layout{display:flex;gap:14px;padding:8px 16px 32px;align-items:flex-start;flex-wrap:wrap;}
@@ -588,15 +588,19 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .tx-chip{display:block;width:100%;text-align:left;font:inherit;font-size:12.5px;color:var(--text);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:10px;padding:6px 10px;cursor:pointer;line-height:1.45;}
   .tx-chip:hover,.tx-chip[aria-expanded="true"]{background:var(--panel-2);}
   .tx-chip.t-bull{border-left-color:#ef4444;} .tx-chip.t-neutral{border-left-color:#f59e0b;} .tx-chip.t-bear{border-left-color:#22c55e;}
-  .tx-chip .tx-l1{display:block;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;} .tx-chip .tx-l2{display:block;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .tx-chip .tx-l1{display:block;font-weight:800;white-space:normal;overflow-wrap:anywhere;} .tx-chip .tx-l2{display:block;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
   .tx-state{display:inline-block;padding:0 8px;border-radius:999px;color:#fff;font-weight:800;} .tx-state.s-bull{background:#dc2626;} .tx-state.s-neutral{background:#d97706;} .tx-state.s-bear{background:#16a34a;}   /* 2026-10-23 使用者：盤勢標籤偏空綠底白字、偏多紅底白字（中性橘底），日期字調亮 */
   .tx-up{color:#ef4444;font-weight:800;} .tx-dn{color:#22c55e;font-weight:800;}
+  .tx-flat{color:var(--text);font-weight:800;}   /* 2026-10-29 使用者：漲紅、跌綠、平盤白字 */
+  .ix-up{color:#ff5a5a;font-weight:900;} .ix-dn{color:#3ddc84;font-weight:900;} .ix-flat{color:var(--text);font-weight:900;}
+  .ms-lines .ms-idx{font-size:14px;margin-bottom:1px;}
   .tx-pop{position:fixed;z-index:210;width:min(620px,94vw);max-height:78vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.55);padding:14px 16px;font-size:13.5px;line-height:1.6;}
   .tx-pop h3{margin:0 0 4px;font-size:16px;} .tx-pop .tx-meta{color:var(--muted);font-size:11.5px;margin-bottom:6px;}
   .tx-pop ul{margin:2px 0 8px;padding-left:20px;} .tx-pop ul ul{margin:2px 0;list-style:circle;} .tx-pop li{margin:2px 0;} .tx-pop li > b:first-child{color:var(--accent);}
   .tx-pop .tx-sec{font-weight:800;margin-top:8px;} .tx-pop .tx-foot{color:var(--muted);font-size:11.5px;border-top:1px solid var(--line);padding-top:6px;margin-top:6px;}
   .tx-pop .tx-pin{float:right;font-size:11px;color:var(--muted);}
-  @media (max-width: 640px){ .ssb-col{flex:1 1 100%;max-width:none;} }
+  .header-top > .tx-chip{width:auto;flex:0 1 300px;max-width:340px;min-width:220px;align-self:flex-start;}   /* 2026-10-29 使用者：加權指數移到搜尋框右邊（原本個股震盪的位置） */
+  @media (max-width: 640px){ .ssb-col{flex:1 1 100%;max-width:none;} .header-top > .tx-chip{flex:1 1 100%;max-width:none;} }
   /* 2026-10-24 使用者：指數均線分數（櫃買分數、加權分數）：均線分數排行右上角小卡、首頁櫃買那格、加權指數分析；算法跟個股一樣（滿分 15），近 3 日平均、分水嶺 6 */
   .idx-pill{display:inline-flex;align-items:center;flex-wrap:wrap;gap:2px 6px;font-size:12px;font-weight:800;color:var(--text);}
   .idx-pill b{font-size:13.5px;} .idx-pill .idx-arrow{opacity:.55;font-weight:600;} .idx-pill b.idx-day{font-size:15px;}
@@ -3883,8 +3887,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="ssb-go-btn" id="stockSearchGoBtn" aria-label="開啟K線圖">🔍</button>
       <span class="ssb-hint" id="stockSearchHint" hidden>查無此股票</span>
     </div>
-    <button type="button" class="tx-chip" id="taiexChip" aria-haspopup="dialog" aria-expanded="false" title="每日加權指數分析：滑過去看、按一下固定打開"><span class="tx-l1">📈 加權指數分析　讀取中…</span></button>  <!-- 2026-10-23 使用者：搜尋框下面空的地方加「每日加權指數分析」，滑過去或按下去看 -->
     </div>
+    <button type="button" class="tx-chip" id="taiexChip" aria-haspopup="dialog" aria-expanded="false" title="每日加權指數分析：滑過去看、按一下固定打開"><span class="tx-l1">📈 加權指數分析　讀取中…</span></button>  <!-- 2026-10-23 使用者：每日加權指數分析，滑過去或按下去看；2026-10-29 使用者：移到搜尋框右邊（原本個股震盪的位置），個股震盪往右移 -->
     <div class="market-strength-bar" id="otcStrengthBox"></div>
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
@@ -3905,8 +3909,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 <div class="tabs">
   <button class="tab-btn strong active" id="tabStrong">強勢</button>
   <button class="tab-btn weak" id="tabWeak">弱勢</button>
+  <div class="stat-bar-row" id="groupStatBar"></div>  <!-- 2026-10-15 使用者：強勢／弱勢族群數移到這一列最右邊；2026-10-29 使用者：移到左邊，強勢／弱勢分頁旁邊 -->
   <div class="top6-strip" id="top6Strip"></div>  <!-- 2026-10-15 使用者：漲幅／跌幅前六大族群搬到最上面、強勢弱勢右邊，橫排 1～6 -->
-  <div class="stat-bar-row" id="groupStatBar"></div>  <!-- 2026-10-15 使用者：強勢／弱勢族群數移到這一列最右邊 -->
 </div>
 <div id="app"><div class="loading">資料讀取中…</div></div>
 <div class="updated" id="updatedAt"></div>
@@ -6975,9 +6979,16 @@ async function renderOtcStrengthWidget(){
     const line2Cls = data.aboveRefLow ? 'up' : 'down';
     // 2026-10-23 使用者：沒開盤、或停止交易休息時，這裡放最近一個交易日的資料（後端 heldFrom／heldReason：before-open＝還沒到開盤、no-trading＝今天沒開盤或停止交易）
     const px = data.heldFrom ? '收盤' : '即時';
+    // 2026-10-29 使用者：第一行寫「櫃買指數」＋指數＋漲跌點數＋漲跌幅（漲紅、跌綠、平盤白字）
+    const otcChg = Number.isFinite(data.prevClose) ? data.price - data.prevClose : null;
+    const otcPct = Number.isFinite(data.changePct) ? data.changePct : (otcChg !== null && data.prevClose ? otcChg / data.prevClose * 100 : null);
+    const otcCls = otcChg === null || Math.abs(otcChg) < 0.005 ? 'ix-flat' : otcChg > 0 ? 'ix-up' : 'ix-dn';
+    const otcSg = (v, d) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + Math.abs(v).toFixed(d);
+    const otcIdxLine = '<div class="ms-line ms-idx"><b>櫃買指數</b> <b>' + data.price.toFixed(2) + '</b>' +
+      (otcChg === null ? '' : ' <span class="' + otcCls + '">' + otcSg(otcChg, 2) + ' 點' + (otcPct === null ? '' : '　' + otcSg(otcPct, 2) + '%') + '</span>') + '</div>';
     el.innerHTML =
       '<div class="ms-badge' + (badgeCls ? ' ' + badgeCls : '') + '">' + data.label + '</div>' +
-      '<div class="ms-lines"><div class="ms-line ' + line1Cls + '">' + (data.aboveMa20 ? '↑' : '↓') + ' 5K 20MA　' + px + ' ' + data.price.toFixed(2) + '，在20MA ' + data.ma20.toFixed(2) + ' 之' + (data.aboveMa20 ? '上' : '下') + '</div>' +
+      '<div class="ms-lines">' + otcIdxLine + '<div class="ms-line ' + line1Cls + '">' + (data.aboveMa20 ? '↑' : '↓') + ' 5K 20MA　' + px + ' ' + data.price.toFixed(2) + '，在20MA ' + data.ma20.toFixed(2) + ' 之' + (data.aboveMa20 ? '上' : '下') + '</div>' +
       '<div class="ms-line ' + line2Cls + '">' + (data.aboveRefLow ? '↑' : '↓') + ' 第三根5K低點　' + px + ' ' + data.price.toFixed(2) + '，在第3根低點 ' + data.refLow.toFixed(2) + ' 之' + (data.aboveRefLow ? '上' : '下') + '</div>' +
       '<div class="ms-updated">' + (data.heldFrom
         ? String(data.tradeDate || '').slice(5).replace('-', '/') + ' 收盤時的判斷' + '（今天還沒開盤、休市或停止交易，有資料會自動換成今天的）'
@@ -16496,7 +16507,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 14:16:45';
+const BUILD_STAMP = '2026-10-29 15:22:15';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25659,7 +25670,8 @@ function renderTaiexChip(){
   const a = TAIEX.fu ? taiexAnalyze(TAIEX.fu, TAIEX.fc) : null;
   if (!a){ chip.className = 'tx-chip'; chip.innerHTML = '<span class="tx-l1">📈 加權指數分析</span><span class="tx-l2">' + (TAIEX.error || (TAIEX.loading ? '讀取中…' : '點一下重新讀取')) + '</span>'; return; }
   chip.className = 'tx-chip t-' + a.tone;
-  chip.innerHTML = '<span class="tx-l1">📈 加權指數 ' + txN(a.close) + ' <span class="' + (a.pct >= 0 ? 'tx-up' : 'tx-dn') + '">' + txSg(a.pct) + '%</span></span><span class="tx-l2"><span class="tx-state s-' + a.tone + '">' + a.title + '</span> ' + txMd(a.asOf) + ' 分析 ▸</span>' + (idxX('taiex') ? '<span class="tx-l3">' + idxPillHtml('taiex', true) + '</span>' : '');
+  const txCls = a.pts > 0 ? 'tx-up' : a.pts < 0 ? 'tx-dn' : 'tx-flat';   // 2026-10-29 使用者：價位旁加漲跌點數，漲紅跌綠平盤白
+  chip.innerHTML = '<span class="tx-l1">📈 加權指數 ' + txN(a.close, 2) + ' <span class="' + txCls + '">' + txSg(a.pts, 2) + ' 點　' + txSg(a.pct) + '%</span></span><span class="tx-l2"><span class="tx-state s-' + a.tone + '">' + a.title + '</span> ' + txMd(a.asOf) + ' 分析 ▸</span>' + (idxX('taiex') ? '<span class="tx-l3">' + idxPillHtml('taiex', true) + '</span>' : '');
   const pop = document.getElementById('taiexPop');
   if (pop && !pop.hidden) pop.innerHTML = taiexHtml(a);
 }
