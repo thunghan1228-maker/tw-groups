@@ -1367,28 +1367,51 @@ export default {
           const qd = String(near.CDate || "");
           const qDay = qd.slice(0, 4) + "-" + qd.slice(4, 6) + "-" + qd.slice(6, 8);
           if (tf === "1m" || tf === "5m") {
+            // 日盤（08:45～13:45）＋夜盤（15:00～隔天 05:00）接在一起，照時間排；期交所只給「最近一個」日盤、「最近一個」夜盤
+            // （夜盤開著時：今天日盤＋今晚到現在；隔天早上 08:45 前：昨天日盤＋昨晚整個夜盤；08:45 後：今天日盤＋昨晚夜盤）。
+            // 每根 K 棒帶 ref＝昨結算價（日盤＝日盤的參考價，夜盤＝夜盤的參考價＝當天日盤結算價），K 線圖標題的漲跌用它算（使用者 2026-10-29）
+            const ticksToBars = (rt, dateOf) => {
+              const out = [];
+              for (const t of (rt.Ticks || [])) {
+                const hh = Number(String(t[0]).slice(0, 2)), mm = Number(String(t[0]).slice(2, 4));
+                const b = { open: num(t[1]), high: num(t[2]), low: num(t[3]), close: num(t[4]), volume: num(t[5]) || 0 };
+                const base = dateOf(hh, mm);
+                if (!okBar(b) || !base || !Number.isFinite(hh)) continue;
+                // Ticks 的時間是那根 1 分K 的收盤時間（084600＝08:45～08:46），K 棒時間（ts）用開始時間，跟個股一樣
+                b.ts = base + (hh * 60 + mm) * 60000 - 8 * 3600000 - 60000;
+                out.push(b);
+              }
+              return out;
+            };
             const cj = await txfMis("getChartData1M", { SymbolID: near.SymbolID, CID: "TXF", MarketType: "0", SymbolType: "F", KindID: "1" }, 8000);
             const rt = (cj && cj.RtData) || {};
-            const ticks = rt.Ticks || [];
             const cd = String((rt.Quote && rt.Quote.CDate) || near.CDate || "");
-            const y = Number(cd.slice(0, 4)), mo = Number(cd.slice(4, 6)), dd = Number(cd.slice(6, 8));
-            const m1 = [];
-            for (const t of ticks) {
-              const hh = Number(String(t[0]).slice(0, 2)), mm = Number(String(t[0]).slice(2, 4));
-              const b = { open: num(t[1]), high: num(t[2]), low: num(t[3]), close: num(t[4]), volume: num(t[5]) || 0 };
-              if (!okBar(b) || !Number.isFinite(y) || !Number.isFinite(hh)) continue;
-              // Ticks 的時間是那根 1 分K 的收盤時間（084600＝08:45～08:46），K 棒時間（ts）用開始時間，跟個股一樣
-              b.ts = Date.UTC(y, mo - 1, dd, hh, mm) - 8 * 3600000 - 60000;
-              m1.push(b);
-            }
+            const dayBase = Date.UTC(Number(cd.slice(0, 4)), Number(cd.slice(4, 6)) - 1, Number(cd.slice(6, 8)));
+            const dayRef = num(rt.Quote && rt.Quote.CRefPrice) !== null ? num(rt.Quote.CRefPrice) : num(near.CRefPrice);
+            const dayBars = ticksToBars(rt, () => (Number.isFinite(dayBase) ? dayBase : null)).map((b) => Object.assign(b, { ref: dayRef }));
+            let nightBars = [];
+            try {
+              const nj = await txfMis("getChartData1M", { SymbolID: near.SymbolID.replace("-F", "-M"), CID: "TXF", MarketType: "1", SymbolType: "F", KindID: "1" }, 8000);
+              const nrt = (nj && nj.RtData) || {};
+              // 夜盤 15:00 開始、隔天 05:00 結束：Ticks 只有時間沒有日期，開始那天用現在的台北時間推（15:00 以前＝前一個晚上開始的；週末往前找到星期五），
+              // 15:00 以後的 K 棒算開始那天、凌晨的算隔天
+              const nowT = new Date(Date.now() + 8 * 3600000);
+              let sd = new Date(Date.UTC(nowT.getUTCFullYear(), nowT.getUTCMonth(), nowT.getUTCDate()));
+              if (nowT.getUTCHours() * 60 + nowT.getUTCMinutes() < 15 * 60) sd = new Date(sd.getTime() - 86400000);
+              while (sd.getUTCDay() === 0 || sd.getUTCDay() === 6) sd = new Date(sd.getTime() - 86400000);
+              const nightRef = num(nrt.Quote && nrt.Quote.CRefPrice);
+              nightBars = ticksToBars(nrt, (hh) => (hh >= 15 ? sd.getTime() : sd.getTime() + 86400000)).map((b) => Object.assign(b, { ref: nightRef }));
+              const lastN = nightBars.length ? nightBars[nightBars.length - 1].ts : 0;
+              if (lastN > Date.now() + 120000 || (lastN && Date.now() - lastN > 30 * 3600000)) nightBars = [];   // 日期推錯（還沒開始的新夜盤、或太舊）就不放
+            } catch (e) { nightBars = []; }
+            const m1 = dayBars.concat(nightBars).sort((a, c) => a.ts - c.ts);
             if (tf === "1m") bars = m1;
             else {
               const bucket = new Map();
               for (const b of m1) {
-                const minOfDay = Math.floor((b.ts + 8 * 3600000) / 60000) % 1440;
-                const k = Math.floor((minOfDay - 525) / 5);   // 日盤 08:45 開始，每 5 分鐘一根
+                const k = Math.floor(b.ts / 300000);   // 台北時間跟 UTC 差整數小時，5 分鐘的邊界一樣（日盤 08:45、夜盤 15:00 都對得上）
                 const g = bucket.get(k);
-                if (!g) bucket.set(k, { ts: b.ts - ((minOfDay - 525) % 5) * 60000, open: b.open, high: b.high, low: b.low, close: b.close, volume: b.volume });
+                if (!g) bucket.set(k, { ts: k * 300000, open: b.open, high: b.high, low: b.low, close: b.close, volume: b.volume, ref: b.ref });
                 else { g.high = Math.max(g.high, b.high); g.low = Math.min(g.low, b.low); g.close = b.close; g.volume += b.volume; }
               }
               bars = Array.from(bucket.keys()).sort((a, c) => a - c).map((k) => bucket.get(k));
@@ -1427,7 +1450,7 @@ export default {
               cache[m.key] = { at: Date.now(), rows };
               return rows;
             };
-            const results = await Promise.all(months.map((m) => fetchMonth(m).catch(() => [])));
+            const results = await Promise.all(months.map((m) => fetchMonth(m).catch(() => fetchMonth(m)).catch(() => [])));   // 期交所偶爾單月失敗，重試一次
             const nearOf = new Map();
             for (const row of [].concat.apply([], results)) {
               const cur = nearOf.get(row.day);
@@ -1438,6 +1461,9 @@ export default {
             const lastDay = bars.length ? bars[bars.length - 1].ts.slice(0, 10) : "";
             const todayBar = { open: num(near.COpenPrice), high: num(near.CHighPrice), low: num(near.CLowPrice), close: num(near.CLastPrice) };
             if (qDay > lastDay && okBar(todayBar)) bars.push({ ts: qDay + "T00:00:00+00:00", open: todayBar.open, high: todayBar.high, low: todayBar.low, close: todayBar.close, volume: num(near.CTotalVolume) || 0 });
+            // 日線標題的漲跌：最後一根（今天）用即時報價的昨結算價，前面的日子用前一根收盤；日K 的收盤時間是 13:45
+            bars.forEach((b) => { b.closeTime = "13:45"; });
+            if (bars.length && bars[bars.length - 1].ts.slice(0, 10) === qDay && num(near.CRefPrice) !== null) bars[bars.length - 1].ref = num(near.CRefPrice);
           }
         } else {
           const hub = "https://hanstock-production-b872.up.railway.app/api/hub/index/otc/";

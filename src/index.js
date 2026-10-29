@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 21:38:55";
+const BUILD_STAMP = "2026-10-29 22:00:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5007,6 +5007,7 @@ function chartPrevClose(bars, index){
   // 那天之前最後一根的收盤，沒有就用這批分K裡前一天最後一根；都沒有（只載到一天）就不顯示。
   const bar = bars[index];
   if (!bar) return null;
+  if (Number.isFinite(bar.prevRef) && bar.prevRef > 0) return bar.prevRef;   // 台指期：即時報價給的昨結算價（日盤、夜盤各自的參考價）
   if (currentChart.tf === 'daily') return index > 0 ? bars[index - 1].close : null;
   const day = chartDayKey(bar.ts);
   const daily = currentChart.dailyBars;
@@ -5127,12 +5128,18 @@ function drawChart(){
   if (currentChart.tf === 'm5' || currentChart.tf === 'm1'){
     const dayKey = (ts) => { const d = new Date(ts); return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); };
     const closeMin = currentChart.tf === 'm1' ? 29 : 25;   // 收盤時間是 10:30 的那根，開始時間是 10:25（1 分K 10:29）
-    const lastDayKey = allBars.length ? dayKey(allBars[allBars.length - 1].ts) : '';
+    // 台指期（日盤 08:45～13:45＋夜盤 15:00～05:00 接在一起）：每一段的開盤那根畫開盤線（08:50、15:05），「今天」＝最近一個日盤那天（夜盤凌晨已經是隔天日期，不能用最後一根的日期）
+    const isTxf = currentChart.code === 'IDX_TXF';
+    let lastDayKey = allBars.length ? dayKey(allBars[allBars.length - 1].ts) : '';
+    if (isTxf){
+      for (let i = allBars.length - 1; i >= 0; i--){ const d0 = new Date(allBars[i].ts), mod = d0.getHours() * 60 + d0.getMinutes(); if (mod >= 525 && mod < 825){ lastDayKey = dayKey(allBars[i].ts); break; } }
+    }
     bars.forEach((b, i) => {
       const globalIdx = vStart + i;
       const prevBar = globalIdx > 0 ? allBars[globalIdx - 1] : null;
-      const isDayOpen = !prevBar || dayKey(prevBar.ts) !== dayKey(b.ts);
       const d = new Date(b.ts);
+      const sessMin = d.getHours() * 60 + d.getMinutes();
+      const isDayOpen = isTxf ? (currentChart.tf === 'm5' || currentChart.tf === 'm1') && (sessMin === 525 || sessMin === 900) : (!prevBar || dayKey(prevBar.ts) !== dayKey(b.ts));
       const is1030 = d.getHours() === 10 && d.getMinutes() === closeMin;
       const isNoon = currentChart.tf === 'm5' && d.getHours() === 11 && d.getMinutes() === 55 && dayKey(b.ts) === lastDayKey;   // 5 分K 11:55～12:00 那根，只有今天（最後一個交易日）
       if (!isDayOpen && !is1030 && !isNoon) return;
@@ -5200,7 +5207,7 @@ function drawChart(){
       }
 
       const prevEnd = todayStart - 1;
-      if (prevEnd >= 0){
+      if (prevEnd >= 0 && currentChart.code !== 'IDX_TXF'){   // 台指期日盤夜盤混在一起，前一天高低點的算法不適用
         const prevDay = dayKey2(allBars[prevEnd].ts);
         let prevStart = prevEnd;
         while (prevStart > 0 && dayKey2(allBars[prevStart - 1].ts) === prevDay) prevStart--;
@@ -6061,7 +6068,7 @@ function tsToBar(b, stepMs){
   const fullLabel = (d.getMonth() + 1) + '/' + d.getDate() + ' ' + label;
   return {
     ts: b.ts, open: b.open, high: b.high, low: b.low, close: b.close,
-    volume: b.volume ?? 0, label, fullLabel,
+    volume: b.volume ?? 0, label, fullLabel, prevRef: Number.isFinite(b.ref) ? b.ref : null,   // prevRef＝昨結算價（台指期用，漲跌拿它算）
     mainNet: b.main_force_available !== false && Number.isFinite(b.main_net_volume) ? b.main_net_volume : null,
     bigNet: bigNetLots(b.big_buy_amount, b.big_sell_amount, b.close),
   };
@@ -6223,9 +6230,9 @@ async function fetchRealBars1Range(code){
 function dailyBarToBar(b){
   const d = new Date(b.ts);
   const label = (d.getMonth() + 1) + '/' + d.getDate();
-  const fullLabel = d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' 13:30';   // 日 K 的收盤時間
+  const fullLabel = d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + (b.closeTime || '13:30');   // 日 K 的收盤時間（台指期 13:45）
   return {
-    ts: b.ts, open: b.open, high: b.high, low: b.low, close: b.close,
+    ts: b.ts, open: b.open, high: b.high, low: b.low, close: b.close, prevRef: Number.isFinite(b.ref) ? b.ref : null,
     volume: b.volume ?? 0, label, fullLabel, mainNet: b.mainNet ?? null, bigNet: b.bigNet ?? null,
   };
 }
@@ -6297,6 +6304,15 @@ function chartForceSeries(bars){
     return { net, cum, date: d };
   });
 }
+// 台指期有交易的時間（台北）：日盤 08:40～13:50、夜盤 14:55～隔天 05:05；週六凌晨還有週五夜盤、週日整天沒有
+function txfSessionLiveNow(){
+  const t = new Date(Date.now() + 8 * 3600000);
+  const day = t.getUTCDay(), m = t.getUTCHours() * 60 + t.getUTCMinutes();
+  if (m >= 8 * 60 + 40 && m <= 13 * 60 + 50) return day >= 1 && day <= 5;
+  if (m >= 14 * 60 + 55) return day >= 1 && day <= 5;
+  if (m <= 5 * 60 + 5) return day >= 2 && day <= 6;
+  return false;
+}
 function twMarketLiveNow(){
   // 台北時間平日 09:00～13:40（收盤 13:30，多留幾分鐘拿到最後一盤）
   const t = new Date(Date.now() + 8 * 3600000);
@@ -6331,7 +6347,7 @@ setInterval(() => { refreshLiveDailyBar().catch(() => {}); }, LIVE_DAILY_REFRESH
 // 2026-10-29 指數 K 線圖（IDX_TAIEX／IDX_OTC）盤中每 20 秒整份重抓目前的週期（日線最後一根、5 分、1 分都會跟著走），圖開著、頁面看得到才抓
 async function refreshIdxChart(){
   if (!isIdxCode(currentChart.code) || !currentChart.isRealBars || !Array.isArray(currentChart.bars) || !currentChart.bars.length) return;
-  if (document.visibilityState === 'hidden' || !twMarketLiveNow()) return;
+  if (document.visibilityState === 'hidden' || (!twMarketLiveNow() && !(currentChart.code === 'IDX_TXF' && txfSessionLiveNow()))) return;
   if (!CHART_WINDOW_MODE && document.getElementById('chartModal').hidden) return;
   const code = currentChart.code, tf = currentChart.tf, token = currentChart.requestToken;
   let bars;
@@ -16618,7 +16634,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 21:38:55';
+const BUILD_STAMP = '2026-10-29 22:00:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -28009,28 +28025,51 @@ export default {
           const qd = String(near.CDate || "");
           const qDay = qd.slice(0, 4) + "-" + qd.slice(4, 6) + "-" + qd.slice(6, 8);
           if (tf === "1m" || tf === "5m") {
+            // 日盤（08:45～13:45）＋夜盤（15:00～隔天 05:00）接在一起，照時間排；期交所只給「最近一個」日盤、「最近一個」夜盤
+            // （夜盤開著時：今天日盤＋今晚到現在；隔天早上 08:45 前：昨天日盤＋昨晚整個夜盤；08:45 後：今天日盤＋昨晚夜盤）。
+            // 每根 K 棒帶 ref＝昨結算價（日盤＝日盤的參考價，夜盤＝夜盤的參考價＝當天日盤結算價），K 線圖標題的漲跌用它算（使用者 2026-10-29）
+            const ticksToBars = (rt, dateOf) => {
+              const out = [];
+              for (const t of (rt.Ticks || [])) {
+                const hh = Number(String(t[0]).slice(0, 2)), mm = Number(String(t[0]).slice(2, 4));
+                const b = { open: num(t[1]), high: num(t[2]), low: num(t[3]), close: num(t[4]), volume: num(t[5]) || 0 };
+                const base = dateOf(hh, mm);
+                if (!okBar(b) || !base || !Number.isFinite(hh)) continue;
+                // Ticks 的時間是那根 1 分K 的收盤時間（084600＝08:45～08:46），K 棒時間（ts）用開始時間，跟個股一樣
+                b.ts = base + (hh * 60 + mm) * 60000 - 8 * 3600000 - 60000;
+                out.push(b);
+              }
+              return out;
+            };
             const cj = await txfMis("getChartData1M", { SymbolID: near.SymbolID, CID: "TXF", MarketType: "0", SymbolType: "F", KindID: "1" }, 8000);
             const rt = (cj && cj.RtData) || {};
-            const ticks = rt.Ticks || [];
             const cd = String((rt.Quote && rt.Quote.CDate) || near.CDate || "");
-            const y = Number(cd.slice(0, 4)), mo = Number(cd.slice(4, 6)), dd = Number(cd.slice(6, 8));
-            const m1 = [];
-            for (const t of ticks) {
-              const hh = Number(String(t[0]).slice(0, 2)), mm = Number(String(t[0]).slice(2, 4));
-              const b = { open: num(t[1]), high: num(t[2]), low: num(t[3]), close: num(t[4]), volume: num(t[5]) || 0 };
-              if (!okBar(b) || !Number.isFinite(y) || !Number.isFinite(hh)) continue;
-              // Ticks 的時間是那根 1 分K 的收盤時間（084600＝08:45～08:46），K 棒時間（ts）用開始時間，跟個股一樣
-              b.ts = Date.UTC(y, mo - 1, dd, hh, mm) - 8 * 3600000 - 60000;
-              m1.push(b);
-            }
+            const dayBase = Date.UTC(Number(cd.slice(0, 4)), Number(cd.slice(4, 6)) - 1, Number(cd.slice(6, 8)));
+            const dayRef = num(rt.Quote && rt.Quote.CRefPrice) !== null ? num(rt.Quote.CRefPrice) : num(near.CRefPrice);
+            const dayBars = ticksToBars(rt, () => (Number.isFinite(dayBase) ? dayBase : null)).map((b) => Object.assign(b, { ref: dayRef }));
+            let nightBars = [];
+            try {
+              const nj = await txfMis("getChartData1M", { SymbolID: near.SymbolID.replace("-F", "-M"), CID: "TXF", MarketType: "1", SymbolType: "F", KindID: "1" }, 8000);
+              const nrt = (nj && nj.RtData) || {};
+              // 夜盤 15:00 開始、隔天 05:00 結束：Ticks 只有時間沒有日期，開始那天用現在的台北時間推（15:00 以前＝前一個晚上開始的；週末往前找到星期五），
+              // 15:00 以後的 K 棒算開始那天、凌晨的算隔天
+              const nowT = new Date(Date.now() + 8 * 3600000);
+              let sd = new Date(Date.UTC(nowT.getUTCFullYear(), nowT.getUTCMonth(), nowT.getUTCDate()));
+              if (nowT.getUTCHours() * 60 + nowT.getUTCMinutes() < 15 * 60) sd = new Date(sd.getTime() - 86400000);
+              while (sd.getUTCDay() === 0 || sd.getUTCDay() === 6) sd = new Date(sd.getTime() - 86400000);
+              const nightRef = num(nrt.Quote && nrt.Quote.CRefPrice);
+              nightBars = ticksToBars(nrt, (hh) => (hh >= 15 ? sd.getTime() : sd.getTime() + 86400000)).map((b) => Object.assign(b, { ref: nightRef }));
+              const lastN = nightBars.length ? nightBars[nightBars.length - 1].ts : 0;
+              if (lastN > Date.now() + 120000 || (lastN && Date.now() - lastN > 30 * 3600000)) nightBars = [];   // 日期推錯（還沒開始的新夜盤、或太舊）就不放
+            } catch (e) { nightBars = []; }
+            const m1 = dayBars.concat(nightBars).sort((a, c) => a.ts - c.ts);
             if (tf === "1m") bars = m1;
             else {
               const bucket = new Map();
               for (const b of m1) {
-                const minOfDay = Math.floor((b.ts + 8 * 3600000) / 60000) % 1440;
-                const k = Math.floor((minOfDay - 525) / 5);   // 日盤 08:45 開始，每 5 分鐘一根
+                const k = Math.floor(b.ts / 300000);   // 台北時間跟 UTC 差整數小時，5 分鐘的邊界一樣（日盤 08:45、夜盤 15:00 都對得上）
                 const g = bucket.get(k);
-                if (!g) bucket.set(k, { ts: b.ts - ((minOfDay - 525) % 5) * 60000, open: b.open, high: b.high, low: b.low, close: b.close, volume: b.volume });
+                if (!g) bucket.set(k, { ts: k * 300000, open: b.open, high: b.high, low: b.low, close: b.close, volume: b.volume, ref: b.ref });
                 else { g.high = Math.max(g.high, b.high); g.low = Math.min(g.low, b.low); g.close = b.close; g.volume += b.volume; }
               }
               bars = Array.from(bucket.keys()).sort((a, c) => a - c).map((k) => bucket.get(k));
@@ -28069,7 +28108,7 @@ export default {
               cache[m.key] = { at: Date.now(), rows };
               return rows;
             };
-            const results = await Promise.all(months.map((m) => fetchMonth(m).catch(() => [])));
+            const results = await Promise.all(months.map((m) => fetchMonth(m).catch(() => fetchMonth(m)).catch(() => [])));   // 期交所偶爾單月失敗，重試一次
             const nearOf = new Map();
             for (const row of [].concat.apply([], results)) {
               const cur = nearOf.get(row.day);
@@ -28080,6 +28119,9 @@ export default {
             const lastDay = bars.length ? bars[bars.length - 1].ts.slice(0, 10) : "";
             const todayBar = { open: num(near.COpenPrice), high: num(near.CHighPrice), low: num(near.CLowPrice), close: num(near.CLastPrice) };
             if (qDay > lastDay && okBar(todayBar)) bars.push({ ts: qDay + "T00:00:00+00:00", open: todayBar.open, high: todayBar.high, low: todayBar.low, close: todayBar.close, volume: num(near.CTotalVolume) || 0 });
+            // 日線標題的漲跌：最後一根（今天）用即時報價的昨結算價，前面的日子用前一根收盤；日K 的收盤時間是 13:45
+            bars.forEach((b) => { b.closeTime = "13:45"; });
+            if (bars.length && bars[bars.length - 1].ts.slice(0, 10) === qDay && num(near.CRefPrice) !== null) bars[bars.length - 1].ref = num(near.CRefPrice);
           }
         } else {
           const hub = "https://hanstock-production-b872.up.railway.app/api/hub/index/otc/";
