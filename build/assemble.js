@@ -1297,6 +1297,109 @@ export default {
         }
       }
     }
+    if (url.pathname.indexOf("/api/idx-bars/") === 0) {
+      // 2026-10-29 使用者：加權指數、櫃買指數各點開 K 線圖（日線、5 分、1 分），即時行情；沒有即時就停在最後交易日收盤。
+      // 加權：Yahoo ^TWII（日、5 分、1 分都有，盤中即時）；櫃買：5 分、1 分用後端櫃買 Hub（Shioaji，含前幾天），日線用 FinMind TPEx 日K＋今天用 Hub 的 5 分K 組一根。
+      // 輸出格式跟個股 K 線圖用的 /api/bars* 一樣：{ status, bars: [{ ts, open, high, low, close, volume }] }（日線 ts 是 YYYY-MM-DDT00:00:00+00:00）
+      const idxId = url.pathname.slice("/api/idx-bars/".length);
+      const tf = url.searchParams.get("tf") || "5m";
+      try {
+        if ((idxId !== "taiex" && idxId !== "otc") || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
+        const taipeiDay = (sec) => new Date((sec + 8 * 3600) * 1000).toISOString().slice(0, 10);
+        const okBar = (b) => b && Number.isFinite(b.open) && Number.isFinite(b.high) && Number.isFinite(b.low) && Number.isFinite(b.close);
+        const r2 = (v) => Math.round(v * 100) / 100;
+        const upstreamJson = async (u, ttl) => {
+          const r = await fetch(u, { headers: { "user-agent": "Mozilla/5.0", accept: "application/json" }, cf: { cacheTtlByStatus: { "200-299": ttl, "300-599": 0 }, cacheEverything: true } });
+          if (!r.ok) throw new Error(u.slice(8, 40) + " HTTP " + r.status);
+          return r.json();
+        };
+        let bars = [];
+        if (idxId === "taiex") {
+          const spec = tf === "1d" ? "interval=1d&range=1y" : tf === "5m" ? "interval=5m&range=1mo" : "interval=1m&range=5d";
+          const y = await upstreamJson("https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?" + spec, tf === "1d" ? 30 : 15);
+          const r0 = y && y.chart && y.chart.result && y.chart.result[0];
+          if (!r0) throw new Error("Yahoo 沒有 ^TWII 資料");
+          const q = (r0.indicators && r0.indicators.quote && r0.indicators.quote[0]) || {};
+          const stamps = r0.timestamp || [];
+          for (let i = 0; i < stamps.length; i++) {
+            const b = { open: q.open && q.open[i], high: q.high && q.high[i], low: q.low && q.low[i], close: q.close && q.close[i] };
+            if (!okBar(b)) continue;
+            const bar = { ts: tf === "1d" ? taipeiDay(stamps[i]) + "T00:00:00+00:00" : stamps[i] * 1000, open: r2(b.open), high: r2(b.high), low: r2(b.low), close: r2(b.close), volume: (q.volume && q.volume[i]) || 0 };
+            // 13:30 收盤集合競價那根（Yahoo 單獨一根平的）併進前一根：5 分K 最後一根 13:25～13:30 的收盤＝官方收盤，不多出一根
+            const minOfDay = (Math.floor(stamps[i] / 60) + 480) % 1440;
+            const prev = bars[bars.length - 1];
+            if (tf !== "1d" && minOfDay >= 13 * 60 + 30 && prev && typeof prev.ts === "number" && taipeiDay(prev.ts / 1000) === taipeiDay(stamps[i])) {
+              prev.high = Math.max(prev.high, bar.high); prev.low = Math.min(prev.low, bar.low); prev.close = bar.close;
+              continue;
+            }
+            bars.push(bar);
+          }
+        } else {
+          const hub = "https://hanstock-production-b872.up.railway.app/api/hub/index/otc/";
+          if (tf === "5m" || tf === "1m") {
+            const d = await upstreamJson(hub + (tf === "5m" ? "bars?include_current=true" : "bars1m?include_current=true"), 10);
+            bars = (d.bars || []).filter(okBar).map((b) => ({ ts: Number(b.ts), open: b.open, high: b.high, low: b.low, close: b.close, volume: b.volume || 0 }));
+          } else {
+            const since = new Date(Date.now() + 8 * 3600000 - 400 * 86400000).toISOString().slice(0, 10);
+            const f = await upstreamJson("https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=TPEx&start_date=" + since, 120);
+            for (const row of (f && f.data) || []) {
+              const b = { open: Number(row.open), high: Number(row.max), low: Number(row.min), close: Number(row.close) };
+              if (okBar(b)) bars.push({ ts: String(row.date) + "T00:00:00+00:00", open: b.open, high: b.high, low: b.low, close: b.close, volume: Math.round((Number(row.Trading_Volume) || 0) / 1000) });
+            }
+            // 今天還沒有 FinMind 日K（晚上才有）：用櫃買 Hub 的 5 分K 組今天這根
+            try {
+              const d5 = await upstreamJson(hub + "bars?include_current=true", 10);
+              const m5 = (d5.bars || []).filter(okBar);
+              const lastDay = bars.length ? bars[bars.length - 1].ts.slice(0, 10) : "";
+              const byDay = {};
+              for (const b of m5) { const k = taipeiDay(Number(b.ts) / 1000); (byDay[k] = byDay[k] || []).push(b); }
+              const days = Object.keys(byDay).sort();
+              const lastM5Day = days[days.length - 1];
+              if (lastM5Day && lastM5Day > lastDay) {
+                const g = byDay[lastM5Day];
+                bars.push({ ts: lastM5Day + "T00:00:00+00:00", open: g[0].open, high: Math.max.apply(null, g.map((x) => x.high)), low: Math.min.apply(null, g.map((x) => x.low)), close: g[g.length - 1].close, volume: 0, live: true });
+              }
+            } catch (e) { /* 沒有今天的就算了，日K停在最後一個有資料的交易日 */ }
+          }
+        }
+        if (!bars.length) return Response.json({ status: "empty", error: "沒有資料", bars: [] }, { status: 200, headers: { "cache-control": "no-store" } });
+        return Response.json({ status: "ok", id: idxId, interval: tf, bars }, { headers: { "cache-control": "public, max-age=" + (tf === "1d" ? 30 : 10) } });
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502, headers: { "cache-control": "no-store" } });
+      }
+    }
+    if (url.pathname === "/api/taiex-live") {
+      // 2026-10-29 使用者：首頁加權指數那格要顯示今天（後端加權日資料晚上才更新）。用 Yahoo ^TWII：盤中即時、收盤後就是收盤價，快取 15 秒
+      try {
+        const yres = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?interval=1d&range=5d", {
+          headers: { "user-agent": "Mozilla/5.0", accept: "application/json" },
+          cf: { cacheTtlByStatus: { "200-299": 15, "300-599": 0 }, cacheEverything: true }
+        });
+        if (!yres.ok) throw new Error("Yahoo HTTP " + yres.status);
+        const ybody = await yres.json();
+        const r0 = ybody && ybody.chart && ybody.chart.result && ybody.chart.result[0];
+        if (!r0 || !r0.meta) throw new Error("Yahoo 沒有 ^TWII 資料");
+        const meta = r0.meta;
+        const stamps = r0.timestamp || [];
+        const closes = (r0.indicators && r0.indicators.quote && r0.indicators.quote[0] && r0.indicators.quote[0].close) || [];
+        const day = (t) => new Date((t + 8 * 3600) * 1000).toISOString().slice(0, 10);
+        const bars = [];
+        for (let i = 0; i < stamps.length; i++) if (Number.isFinite(closes[i])) bars.push({ date: day(stamps[i]), close: closes[i] });
+        const price = Number(meta.regularMarketPrice);
+        const date = day(Number(meta.regularMarketTime));
+        // 昨收：最後一根日K就是今天的話取它前一根，不是（還沒有今天的）就取最後一根
+        let prevClose = null;
+        if (bars.length) prevClose = bars[bars.length - 1].date === date ? (bars.length > 1 ? bars[bars.length - 2].close : null) : bars[bars.length - 1].close;
+        if (!Number.isFinite(prevClose) && Number.isFinite(meta.fulldayChange)) prevClose = price - meta.fulldayChange;
+        if (!Number.isFinite(price) || !Number.isFinite(prevClose)) throw new Error("Yahoo ^TWII 資料不完整");
+        prevClose = Math.round(prevClose * 100) / 100;
+        const change = Math.round((price - prevClose) * 100) / 100;
+        return Response.json({ status: "ok", date, price, prevClose, change, pct: Math.round(change / prevClose * 10000) / 100, time: new Date(Number(meta.regularMarketTime) * 1000).toISOString(), source: "yahoo ^TWII" },
+          { headers: { "cache-control": "public, max-age=15" } });
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502, headers: { "cache-control": "no-store" } });
+      }
+    }
     if (url.pathname === "/api/otc-strength") {
       try {
         return await proxyHanstockBars("/api/hub/index/otc/strength", 0);

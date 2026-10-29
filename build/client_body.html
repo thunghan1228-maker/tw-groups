@@ -505,7 +505,9 @@
   .tx-chip .tx-l1{display:block;font-weight:800;white-space:normal;overflow-wrap:anywhere;} .tx-chip .tx-l2{display:block;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
   .tx-state{display:inline-block;padding:0 8px;border-radius:999px;color:#fff;font-weight:800;} .tx-state.s-bull{background:#dc2626;} .tx-state.s-neutral{background:#d97706;} .tx-state.s-bear{background:#16a34a;}   /* 2026-10-23 使用者：盤勢標籤偏空綠底白字、偏多紅底白字（中性橘底），日期字調亮 */
   .tx-up{color:#ef4444;font-weight:800;} .tx-dn{color:#22c55e;font-weight:800;}
-  .tx-flat{color:var(--text);font-weight:800;}   /* 2026-10-29 使用者：漲紅、跌綠、平盤白字 */
+  .tx-flat{color:var(--text);font-weight:800;}
+  .tx-chip .tx-lvtag{font-size:11px;font-weight:700;color:var(--muted);margin-left:2px;}
+  .tx-chip .tx-l1{cursor:pointer;} #otcStrengthBox{cursor:pointer;}   /* 2026-10-29 點價位／整格開指數 K 線圖 */   /* 2026-10-29 使用者：漲紅、跌綠、平盤白字 */
   .ix-up{color:#ff5a5a;font-weight:900;} .ix-dn{color:#3ddc84;font-weight:900;} .ix-flat{color:var(--text);font-weight:900;}
   .ms-lines .ms-idx{font-size:14px;margin-bottom:1px;}
   .tx-pop{position:fixed;z-index:210;width:min(620px,94vw);max-height:78vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.55);padding:14px 16px;font-size:13.5px;line-height:1.6;}
@@ -4585,7 +4587,7 @@ const MCL_FIT_RANGES = 1;          // 使用者 2026-10-24：分K的斷頭價線
 const MCL_CALL_PCT = 130;          // 低於 130% 開始追繳
 const MCL_A_COLOR = '#e11d48', MCL_B_COLOR = '#9333ea';
 function chartMclLoad(code){
-  if (!code || (currentChart.mcl && currentChart.mcl.code === code)) return;
+  if (!code || isIdxCode(code) || (currentChart.mcl && currentChart.mcl.code === code)) return;   // 指數沒有融資
   const st = currentChart.mcl = { code, line: null, mg: null, loading: true };
   (async () => {
     try {   // 先用名單端點拿那檔那一列：斷頭價 A／B ＋ 融資餘額（賣壓狀態要用）＋ 價量特徵（落底、回檔要用）一次到手
@@ -4654,7 +4656,7 @@ function chartMclLines(allBars){
 }
 // 融資副圖（2026-10-23 使用者）：下面「融資（張）」那張圖的資料＝後端 /api/margin-history 的每日序列（餘額、當天增減、使用率），一檔一次
 function chartMgLoad(code){
-  if (!code || (currentChart.mg && currentChart.mg.code === code)) return;
+  if (!code || isIdxCode(code) || (currentChart.mg && currentChart.mg.code === code)) return;
   const st = currentChart.mg = { code, rows: [], loading: true, failed: false };
   (async () => {
     try {
@@ -5790,7 +5792,7 @@ function updateMaLegend(absIndex){
     ? chartDefenseLines(allBars).map((d) => '<span class="ma-legend-item" style="color:#e6675f">明日' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('')
     : '') + chartMclLines(allBars).map((d) => '<span class="ma-legend-item" style="color:' + d.color + '">' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('') + chartHolderLegendHtml() +
     '<span class="ma-legend-break"></span>' + chartMclSignalsHtml() + chartPatLegendHtml() +   // 2026-10-23 使用者：第一行到盤中大戶力為止，第二行從融資開始（斷頭價開關在第二行最右邊）
-    '<button type="button" class="ma-legend-toggle' + (currentChart.mclOn ? ' on' : '') + '" data-mcl-toggle="1" aria-pressed="' + currentChart.mclOn + '" title="融資斷頭價 A／B：日線一定畫；5 分K／1 分K 離現價 ' + MCL_NEAR_PCT + '% 以內的那條才畫">斷頭價 ' + (currentChart.mclOn ? '開' : '關') + '</button>';   // 2026-10-23 使用者：開關放在K線圖上面那一列（MA、扣抵、防守線）的最後面
+    (isIdxCode(currentChart.code) ? '' : '<button type="button" class="ma-legend-toggle' + (currentChart.mclOn ? ' on' : '') + '" data-mcl-toggle="1" aria-pressed="' + currentChart.mclOn + '" title="融資斷頭價 A／B：日線一定畫；5 分K／1 分K 離現價 ' + MCL_NEAR_PCT + '% 以內的那條才畫">斷頭價 ' + (currentChart.mclOn ? '開' : '關') + '</button>');   // 2026-10-23 使用者：開關放在K線圖上面那一列（MA、扣抵、防守線）的最後面
 }
 function updateChartTooltipAt(clientX, clientY){
   const canvas = document.getElementById('klineCanvas');
@@ -5965,7 +5967,27 @@ document.getElementById('forceAlgo').addEventListener('click', (e) => {
 });
 syncForceAlgoBtns();
 
+// 2026-10-29 使用者：加權指數、櫃買指數各點開 K 線圖（日線、5 分、1 分都要，即時行情；沒有即時就停在最後交易日的收盤）。
+// 用假代號 IDX_TAIEX／IDX_OTC 走同一個 K 線圖：K 棒由 /api/idx-bars/{taiex|otc}?tf=1d|5m|1m 給（加權＝Yahoo ^TWII；櫃買＝後端櫃買 Hub＋FinMind 日K），
+// 格式跟個股的一樣；指數沒有主力、融資、籌碼，那幾個副圖就是空的。
+const IDX_CHARTS = { IDX_TAIEX: { id: 'taiex', name: '加權指數' }, IDX_OTC: { id: 'otc', name: '櫃買指數' } };
+const isIdxCode = (c) => Object.prototype.hasOwnProperty.call(IDX_CHARTS, c);
+const chartCodeLabel = (c) => (isIdxCode(c) ? '' : c);
+async function fetchIdxBars(code, tf){   // tf：'daily'｜'m5'｜'m1'
+  const res = await fetch('/api/idx-bars/' + IDX_CHARTS[code].id + '?tf=' + (tf === 'daily' ? '1d' : tf === 'm5' ? '5m' : '1m'));
+  if (!res.ok) throw new Error('idx-bars http ' + res.status);
+  const data = await res.json();
+  if (!data || !Array.isArray(data.bars) || !data.bars.length) throw new Error('idx-bars empty');
+  if (tf === 'daily'){
+    const bars = data.bars.map(dailyBarToBar);
+    const last = data.bars[data.bars.length - 1];
+    if (last && last.live){ bars[bars.length - 1].live = true; bars[bars.length - 1].liveNote = '盤中'; }
+    return bars;
+  }
+  return data.bars.map((b) => tsToBar(b, tf === 'm1' ? 60000 : 300000));
+}
 async function fetchRealBars(code, tf){
+  if (isIdxCode(code)) return fetchIdxBars(code, tf);
   const path = tf === 'm1' ? ('/api/bars1m/' + code) : ('/api/bars/' + code);
   const res = await fetch(path);
   if (!res.ok) throw new Error('bars http ' + res.status);
@@ -6030,6 +6052,7 @@ function triggerMainForceBackfill(code, interval, bars){
 }
 
 async function fetchRealBars5Range(code){
+  if (isIdxCode(code)) return fetchIdxBars(code, 'm5');
   // 5分K 補多天歷史：OHLC來自Shioaji kbars回補；主力淨量分兩層合併——
   // 永久保存的歷史逐日資料先墊底，今日即時Hub資料較新，覆蓋在最上層。
   const [rangeRes, historyForceByTs, todayBars] = await Promise.all([
@@ -6053,6 +6076,7 @@ async function fetchRealBars5Range(code){
 }
 
 async function fetchRealBars1Range(code){
+  if (isIdxCode(code)) return fetchIdxBars(code, 'm1');
   // 1分K 補多天歷史（至少3天，含今天），主力淨量合併邏輯跟5分K相同。
   const [rangeRes, historyForceByTs, todayBars] = await Promise.all([
     fetch('/api/bars1mrange/' + code),
@@ -6085,6 +6109,7 @@ function dailyBarToBar(b){
 }
 
 async function fetchRealDailyBars(code){
+  if (isIdxCode(code)) return fetchIdxBars(code, 'daily');
   const res = await fetch('/api/bars1d/' + code);
   if (!res.ok) throw new Error('bars1d http ' + res.status);
   const data = await res.json();
@@ -6103,6 +6128,7 @@ function withTimeout(promise, ms, fallback){
   return Promise.race([promise, new Promise((resolve) => setTimeout(() => resolve(fallback), ms))]);
 }
 async function fetchLiveDailyBar(code){
+  if (isIdxCode(code)) return null;   // 指數的日K本來就含今天（盤中即時），由 refreshIdxChart 整份重抓
   try {
     const [data, m5] = await Promise.all([
       withTimeout(fetch('/api/watch-quotes?codes=' + encodeURIComponent(code)).then((res) => (res.ok ? res.json() : null)), 6000, null),
@@ -6180,6 +6206,26 @@ function applyLiveDailyBar(code, token, live){
   redrawAll();
 }
 setInterval(() => { refreshLiveDailyBar().catch(() => {}); }, LIVE_DAILY_REFRESH_MS);
+// 2026-10-29 指數 K 線圖（IDX_TAIEX／IDX_OTC）盤中每 20 秒整份重抓目前的週期（日線最後一根、5 分、1 分都會跟著走），圖開著、頁面看得到才抓
+async function refreshIdxChart(){
+  if (!isIdxCode(currentChart.code) || !currentChart.isRealBars || !Array.isArray(currentChart.bars) || !currentChart.bars.length) return;
+  if (document.visibilityState === 'hidden' || !twMarketLiveNow()) return;
+  if (!CHART_WINDOW_MODE && document.getElementById('chartModal').hidden) return;
+  const code = currentChart.code, tf = currentChart.tf, token = currentChart.requestToken;
+  let bars;
+  try { bars = await fetchIdxBars(code, tf); } catch (e) { return; }
+  if (code !== currentChart.code || tf !== currentChart.tf || token !== currentChart.requestToken || !bars.length) return;
+  const before = currentChart.bars.length;
+  const { start, count } = visibleRange(before);
+  currentChart.bars = bars;
+  if (tf === 'daily') currentChart.dailyBars = bars;
+  if (bars.length > before && currentChart.viewCount != null && start + count >= before) currentChart.viewStart = start + (bars.length - before);
+  currentChart.force = null;
+  currentChart.macd = computeMACD(bars);
+  currentChart.kd = chartComputeKd(tf, bars);
+  redrawAll();
+}
+setInterval(() => { refreshIdxChart().catch(() => {}); }, 20000);
 
 async function switchTimeframe(tf){
   const requestToken = ++currentChart.requestToken;
@@ -6226,14 +6272,14 @@ async function switchTimeframe(tf){
   document.getElementById('forceNote').textContent = forceNoteText(isReal);
 
   if (isReal){
-    currentChart.force = cfg.force ? chartForceSeries(bars) : null;
+    currentChart.force = cfg.force && !isIdxCode(currentChart.code) ? chartForceSeries(bars) : null;   // 指數沒有主力買賣力
   } else {
     currentChart.force = cfg.force ? generateForceFlow(currentChart.code, tf, bars) : null;
   }
   currentChart.macd = computeMACD(bars);
   currentChart.kd = chartComputeKd(tf, bars);
   currentChart.kdOn = true;   // KD 內定開
-  currentChart.mgOn = true;   // 融資副圖內定開
+  currentChart.mgOn = !isIdxCode(currentChart.code);   // 融資副圖內定開（指數沒有融資）
   const mgBtn = document.getElementById('mgPanelToggle');
   mgBtn.textContent = '關閉'; mgBtn.classList.add('on'); mgBtn.setAttribute('aria-pressed', 'true');
   const kdBtn = document.getElementById('kdPanelToggle');
@@ -6241,7 +6287,7 @@ async function switchTimeframe(tf){
   currentChart.macdOn = false;
   const macdBtn = document.getElementById('macdToggle');
   macdBtn.textContent = '開啟'; macdBtn.classList.remove('on'); macdBtn.setAttribute('aria-pressed', 'false');
-  currentChart.mclPanelOn = true;   // 融資維持率副圖內定開（2026-10-23 使用者：日線、5 分K 都是，放在成交量下面）
+  currentChart.mclPanelOn = !isIdxCode(currentChart.code);   // 融資維持率副圖內定開（2026-10-23 使用者：日線、5 分K 都是，放在成交量下面）
   const mclBtn = document.getElementById('mclPanelToggle');
   mclBtn.textContent = '關閉'; mclBtn.classList.add('on'); mclBtn.setAttribute('aria-pressed', 'true');
   renderSettingsPanel();
@@ -6350,7 +6396,7 @@ function openChartWindow(code, name, tf, focusPat){
   el.className = 'chart-float';
   el.style.cssText = 'left:' + left + 'px;top:' + top + 'px;width:' + w + 'px;height:' + h + 'px;';
   el.innerHTML = '<div class="chart-float-head">' +
-      '<div class="chart-float-title">' + code + '<span class="cf-name">' + (name || '') + '</span></div>' +
+      '<div class="chart-float-title">' + chartCodeLabel(code) + '<span class="cf-name">' + (isIdxCode(code) ? IDX_CHARTS[code].name : (name || '')) + '</span></div>' +
       '<div class="chart-float-actions">' +
         '<button type="button" data-act="popout" title="移到另一螢幕">⧉ 另開視窗</button>' +
         '<button type="button" data-act="min" title="最小化" aria-label="最小化">－</button>' +
@@ -6540,14 +6586,14 @@ function openStockChart(code, name, tf, focusPat){   // focusPat：形態名稱�
   currentChart.code = code;
   currentChart.name = name;
   currentChart.focusPat = focusPat || false;
-  document.getElementById('cmCode').textContent = code;
-  document.getElementById('cmName').textContent = name;
+  document.getElementById('cmCode').textContent = chartCodeLabel(code);
+  document.getElementById('cmName').textContent = isIdxCode(code) ? IDX_CHARTS[code].name : name;
   const cmGroups = document.getElementById('cmGroups');
   if (cmGroups){ cmGroups.innerHTML = chartGroupTagsHtml(code); cmGroups.dataset.html = cmGroups.innerHTML === '' ? '' : chartGroupTagsHtml(code); }
   const cmStar = document.getElementById('cmStar');
-  if (cmStar){ cmStar.dataset.code = code; cmStar.dataset.name = name || ''; wlRefreshStars(); }
+  if (cmStar){ cmStar.dataset.code = isIdxCode(code) ? '' : code; cmStar.dataset.name = name || ''; cmStar.hidden = isIdxCode(code); wlRefreshStars(); }   // 指數不能加自選股
   renderChartFlags(code);
-  try { cmChipLoad(code); } catch (_){}   // 籌碼九週（2026-10-15）
+  if (!isIdxCode(code)){ try { cmChipLoad(code); } catch (_){} }   // 籌碼九週（2026-10-15）
   if (wasHidden){
     const panel = document.getElementById('chartModalInner');
     overlay.hidden = false;
@@ -25497,6 +25543,21 @@ async function taiexLoad(force){
     else TAIEX.error = '讀不到加權指數資料';
   } finally { TAIEX.loading = false; renderTaiexChip(); }
 }
+// 2026-10-29 使用者：加權指數那格也要顯示今天。後端加權日資料晚上才更新，今天的價位、漲跌點數另外抓 /api/taiex-live（Yahoo ^TWII：盤中即時、收盤後＝收盤價）；
+// 抓不到就維持原本（昨天收盤的日資料）。分析文字（狀態、10/28 分析）還是照日資料。
+const TAIEX_LIVE = { d: null, at: 0, loading: false };
+async function taiexLiveLoad(){
+  if (TAIEX_LIVE.loading) return;
+  TAIEX_LIVE.loading = true;
+  try {
+    const r = await fetch('/api/taiex-live');
+    const d = r.ok ? await r.json() : null;
+    if (d && d.status === 'ok' && Number.isFinite(d.price) && Number.isFinite(d.prevClose)){ TAIEX_LIVE.d = d; TAIEX_LIVE.at = Date.now(); }
+  } catch (e) { /* 抓不到就用日資料 */ }
+  finally { TAIEX_LIVE.loading = false; try { renderTaiexChip(); } catch (e) { /* 還沒畫過 */ } }
+}
+setTimeout(taiexLiveLoad, 1500);
+setInterval(() => { if (document.visibilityState === 'visible') taiexLiveLoad(); }, 20e3);
 const txN = (n, d) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 });
 const txSg = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d === undefined ? 2 : d);
 const txMd = (d) => String(d || '').slice(5).replace('-', '/');
@@ -25576,14 +25637,24 @@ function taiexHtml(a){
     a.sec.map((x) => '<div class="tx-sec">' + x.h + '</div><ul>' + x.items.map(li).join('') + '</ul>').join('') +
     '<div class="tx-foot">這是依均線、融資水位、外資籌碼自動整理的位置與條件，形態（W 底、頭肩底）要自己看圖確認；不是買賣建議。資料：證交所加權指數、融資融券統計、三大法人（FinMind 公開資料整理）。</div>';
 }
+function lvOpen(lv){   // 加權即時價：台北時間 09:00～13:35、資料時間在 5 分鐘內＝盤中，其他就是收盤價
+  const t = Date.parse(lv.time);
+  if (!Number.isFinite(t) || Date.now() - t > 5 * 60e3) return false;
+  const hm = new Date(Date.now() + 8 * 3600e3).toISOString().slice(11, 16);
+  return hm >= '09:00' && hm <= '13:35';
+}
 function renderTaiexChip(){
   const chip = document.getElementById('taiexChip');
   if (!chip) return;
   const a = TAIEX.fu ? taiexAnalyze(TAIEX.fu, TAIEX.fc) : null;
   if (!a){ chip.className = 'tx-chip'; chip.innerHTML = '<span class="tx-l1">📈 加權指數分析</span><span class="tx-l2">' + (TAIEX.error || (TAIEX.loading ? '讀取中…' : '點一下重新讀取')) + '</span>'; return; }
   chip.className = 'tx-chip t-' + a.tone;
-  const txCls = a.pts > 0 ? 'tx-up' : a.pts < 0 ? 'tx-dn' : 'tx-flat';   // 2026-10-29 使用者：價位旁加漲跌點數，漲紅跌綠平盤白
-  chip.innerHTML = '<span class="tx-l1">📈 加權指數 ' + txN(a.close, 2) + ' <span class="' + txCls + '">' + txSg(a.pts, 2) + ' 點　' + txSg(a.pct) + '%</span></span><span class="tx-l2"><span class="tx-state s-' + a.tone + '">' + a.title + '</span> ' + txMd(a.asOf) + ' 分析 ▸</span>' + (idxX('taiex') ? '<span class="tx-l3">' + idxPillHtml('taiex', true) + '</span>' : '');
+  // 2026-10-29 使用者：價位旁加漲跌點數，漲紅跌綠平盤白；今天的即時／收盤價比日資料新的話，用今天的
+  const lv = TAIEX_LIVE.d && TAIEX_LIVE.d.date > a.asOf ? TAIEX_LIVE.d : null;
+  const px = lv ? lv.price : a.close, pts = lv ? lv.change : a.pts, pctNow = lv ? lv.pct : a.pct;
+  const txCls = pts > 0 ? 'tx-up' : pts < 0 ? 'tx-dn' : 'tx-flat';
+  const lvTag = lv ? ' <small class="tx-lvtag">' + txMd(lv.date) + (lvOpen(lv) ? ' 即時' : ' 收盤') + '</small>' : '';
+  chip.innerHTML = '<span class="tx-l1" title="點一下看加權指數 K 線圖">📈 加權指數 ' + txN(px, 2) + ' <span class="' + txCls + '">' + txSg(pts, 2) + ' 點　' + txSg(pctNow) + '%</span>' + lvTag + '</span><span class="tx-l2"><span class="tx-state s-' + a.tone + '">' + a.title + '</span> ' + txMd(a.asOf) + ' 分析 ▸</span>' + (idxX('taiex') ? '<span class="tx-l3">' + idxPillHtml('taiex', true) + '</span>' : '');
   const pop = document.getElementById('taiexPop');
   if (pop && !pop.hidden) pop.innerHTML = taiexHtml(a);
 }
@@ -25621,7 +25692,8 @@ function taiexHide(force){
       if (e.target.closest && e.target.closest('#taiexChip, #taiexPop')) clearTimeout(TAIEX.hideTimer); else if (!TAIEX.hideTimer || true) later();
     });
   }
-  chip.addEventListener('click', () => {
+  chip.addEventListener('click', (e) => {
+    if (e.target.closest && e.target.closest('.tx-l1') && TAIEX.fu){ taiexHide(true); openStockChart('IDX_TAIEX', '加權指數'); return; }   // 2026-10-29 使用者：點價位開加權指數 K 線圖；點下面那行（狀態、分析）才是分析視窗
     if (!TAIEX.fu){ taiexLoad(true); return; }
     if (TAIEX.pinned){ taiexHide(true); return; }
     TAIEX.pinned = true; taiexShow();
@@ -25631,6 +25703,11 @@ function taiexHide(force){
   window.addEventListener('resize', () => { if (!pop.hidden) taiexShow(); });
   setTimeout(() => taiexLoad(true), 1200);
   setInterval(() => taiexLoad(false), 10 * 60e3);
+})();
+(function initOtcChartClick(){   // 2026-10-29 使用者：點櫃買那格（個股震盪）開櫃買指數 K 線圖
+  const box = document.getElementById('otcStrengthBox');
+  if (!box) return;
+  box.addEventListener('click', () => { openStockChart('IDX_OTC', '櫃買指數'); });
 })();
 setTimeout(() => { try { homeJailLoad(); } catch (_){} }, 2000);   // 不在首頁打開的也要抓處置資料，才會跳今日提醒
 setTimeout(() => { try { if (mclSessionLive()) mclWatchLoad(); } catch (_){} }, 4000);   // 盤中先把斷頭價名單抓好
@@ -26345,7 +26422,7 @@ if (CHART_WINDOW_MODE){
   const embedCode = (chartParams.get('code') || '').trim().toUpperCase();
   const embedName = chartParams.get('name') || lookupStockName(embedCode) || embedCode;
   document.body.classList.add('chart-window-mode');
-  document.title = embedCode + ' ' + embedName + ' K線圖';
+  document.title = (chartCodeLabel(embedCode) ? chartCodeLabel(embedCode) + ' ' : '') + embedName + ' K線圖';
   refresh(); // 抓一次報價給圖表用，不設輪詢
   refreshStockFlags(); // 可融資／可融券／當沖／股期／處置 那一排
   const embedFocus = chartParams.get('focus');
