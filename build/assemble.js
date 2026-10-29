@@ -483,9 +483,46 @@ async function txfMis(endpoint, body, ttlMs) {
 async function txfNearQuote() {
   const j = await txfMis("getQuoteList", { MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" }, 8000);
   const list = (j && j.RtData && j.RtData.QuoteList) || [];
-  const q = list.find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && String(x.CLastPrice == null ? "" : x.CLastPrice).trim() !== "");
+  const months = list.filter((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")));
+  // 有日盤成交價的第一檔月合約；開盤前（夜盤收盤 05:00～日盤 08:45）期交所把日盤報價清空，沒有成交價也要回近月那一檔（合約代號、昨結算價還在），
+  // 呼叫端看 CLastPrice 空白就改用官方每日行情的最後一個交易日日盤收盤（2026-10-30 使用者：開盤前停在昨天日盤收盤價，不要一直「讀取中」）
+  const q = months.find((x) => String(x.CLastPrice == null ? "" : x.CLastPrice).trim() !== "") || months[0];
   if (!q) throw new Error("期交所沒有臺指期近月資料");
   return q;
+}
+// 期交所官方每日行情（CSV、Big5）最近 20 天的日盤（一般交易時段），每天取到期月份最小的那一檔＝近月；回最後一個交易日：
+// { day, month(6 碼), open, high, low, close, change(漲跌價，對前一日結算價), pct, volume, settle }
+async function txfLastDayClose() {
+  const cache = (globalThis.__txfLastDay = globalThis.__txfLastDay || {});
+  if (cache.at && Date.now() - cache.at < 300000 && cache.row) return cache.row;
+  const today = new Date(Date.now() + 8 * 3600000);
+  const from = new Date(today.getTime() - 20 * 86400000);
+  const f = (d) => d.getUTCFullYear() + "/" + String(d.getUTCMonth() + 1).padStart(2, "0") + "/" + String(d.getUTCDate()).padStart(2, "0");
+  const r = await fetch("https://www.taifex.com.tw/cht/3/futDataDown", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded", referer: "https://www.taifex.com.tw/cht/3/dlFutDailyMarketView", "user-agent": "Mozilla/5.0" },
+    body: "down_type=1&commodity_id=TX&commodity_id2=&queryStartDate=" + encodeURIComponent(f(from)) + "&queryEndDate=" + encodeURIComponent(f(today))
+  });
+  if (!r.ok) throw new Error("期交所每日行情 HTTP " + r.status);
+  const text = new TextDecoder("big5").decode(await r.arrayBuffer());
+  const num = (v) => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
+  const nearOf = new Map();
+  for (const line of text.split(String.fromCharCode(10))) {
+    const c = line.split(",");
+    if (c.length < 11 || !/^[0-9]{4}[/][0-9]{2}[/][0-9]{2}$/.test(c[0])) continue;
+    const month = String(c[2]).trim();
+    if (!/^[0-9]{6}$/.test(month) || String(c[17]).trim() !== "一般") continue;
+    const close = num(c[6]);
+    if (close === null || close <= 0) continue;
+    const day = c[0].replace(/[/]/g, "-");
+    const cur = nearOf.get(day);
+    if (!cur || month < cur.month) nearOf.set(day, { day, month, open: num(c[3]), high: num(c[4]), low: num(c[5]), close, change: num(c[7]), pct: num(String(c[8]).replace("%", "")), volume: num(c[9]) || 0, settle: num(c[10]) });
+  }
+  const days = Array.from(nearOf.keys()).sort();
+  if (!days.length) throw new Error("期交所每日行情沒有日盤資料");
+  const row = nearOf.get(days[days.length - 1]);
+  cache.at = Date.now(); cache.row = row;
+  return row;
 }
 
 async function proxyHanstockBars(pathname, cacheSeconds = 20) {
@@ -1509,28 +1546,41 @@ export default {
       }
     }
     if (url.pathname === "/api/txf-live") {
-      // 2026-10-29 使用者：首頁加「台指期近月」的價位、漲跌點數、漲跌幅。期交所 MIS（日盤）：臺指期近月合約（TXF 後面接月份代碼的第一檔），盤中即時、收盤後＝日盤最後一筆；快取 8 秒
+      // 2026-10-29 使用者：首頁加「台指期近月」的價位、漲跌點數、漲跌幅。期交所 MIS 近月合約（TXF 後面接月份代碼的第一檔）。
+      // 2026-10-30 使用者：日盤時間顯示日盤、夜盤時間（15:00～隔天 08:45）切成夜盤價（標籤跟著換）；夜盤收盤後（05:00～08:45）停在夜盤最後一筆，
+      // 週末也停在週五夜盤收盤；期交所日盤報價在 05:00 會清空，兩個盤都沒有價才退回官方每日行情最後一個交易日的日盤收盤。
       try {
-        if (!globalThis.__txfCache || Date.now() - globalThis.__txfCache.at > 8000) {
-          const r = await fetch("https://mis.taifex.com.tw/futures/api/getQuoteList", {
-            method: "POST",
-            headers: { "content-type": "application/json", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/", "user-agent": "Mozilla/5.0" },
-            body: JSON.stringify({ MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" })
-          });
-          if (!r.ok) throw new Error("期交所 HTTP " + r.status);
-          globalThis.__txfCache = { at: Date.now(), data: await r.json() };
-        }
-        const list = (globalThis.__txfCache.data && globalThis.__txfCache.data.RtData && globalThis.__txfCache.data.RtData.QuoteList) || [];
-        const MONTHS = "ABCDEFGHIJKL";
         const num = (v) => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
-        const q = list.find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null);
-        if (!q) throw new Error("期交所沒有臺指期近月資料");
+        const quotes = async (marketType) => {
+          const j = await txfMis("getQuoteList", { MarketType: marketType, SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" }, 8000);
+          return (j && j.RtData && j.RtData.QuoteList) || [];
+        };
+        const tp = new Date(Date.now() + 8 * 3600000);
+        const hm = tp.getUTCHours() * 100 + tp.getUTCMinutes();
+        const wantNight = hm >= 1500 || hm < 845;      // 夜盤（15:00～隔天 05:00）和夜盤收盤後到日盤開盤前，看夜盤
+        const dayQ = (await quotes("0")).find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null) || null;
+        const nightQ = (wantNight || !dayQ) ? ((await quotes("1")).find((x) => /^TXF[A-L][0-9]-M$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null) || null) : null;
+        const q = wantNight ? (nightQ || dayQ) : (dayQ || nightQ);
+        if (!q) {
+          const last = await txfLastDayClose();
+          const chg = last.change !== null ? last.change : (last.settle !== null ? Math.round((last.close - last.settle) * 100) / 100 : 0);
+          const pc = last.pct !== null ? last.pct : (last.close - chg ? Math.round(chg / (last.close - chg) * 10000) / 100 : 0);
+          return Response.json({ status: "ok", session: "day", symbol: null, name: "臺指期", month: Number(last.month.slice(4)), price: last.close, ref: Math.round((last.close - chg) * 100) / 100, change: chg, pct: pc,
+            open: last.open, high: last.high, low: last.low, volume: last.volume, date: last.day, time: "13:45", closed: true },
+            { headers: { "cache-control": "public, max-age=30" } });
+        }
+        const night = String(q.SymbolID).endsWith("-M");
+        const MONTHS = "ABCDEFGHIJKL";
         const price = num(q.CLastPrice), ref = num(q.CRefPrice);
         const change = num(q.CDiff) !== null ? num(q.CDiff) : (ref !== null ? Math.round((price - ref) * 100) / 100 : null);
         const pct = num(q.CDiffRate) !== null ? num(q.CDiffRate) : (ref ? Math.round(change / ref * 10000) / 100 : null);
-        const d = String(q.CDate || ""), t = String(q.CTime || "");
-        return Response.json({ status: "ok", symbol: q.SymbolID, name: q.DispCName, month: MONTHS.indexOf(q.SymbolID.charAt(3)) + 1, price, ref, change, pct,
-          open: num(q.COpenPrice), high: num(q.CHighPrice), low: num(q.CLowPrice), volume: num(q.CTotalVolume), date: d.slice(0, 4) + "-" + d.slice(4, 6) + "-" + d.slice(6, 8), time: t.slice(0, 2) + ":" + t.slice(2, 4), source: "TAIFEX MIS 日盤" },
+        let d = String(q.CDate || "");
+        const t = String(q.CTime || "");
+        let date = d.slice(0, 4) + "-" + d.slice(4, 6) + "-" + d.slice(6, 8);
+        // 夜盤的 CDate 是那個交易日（15:00 開盤那天），過了午夜的成交（00:00～05:00）日曆日期要加一天
+        if (night && t && t < "060000") date = new Date(Date.parse(date + "T00:00:00Z") + 86400000).toISOString().slice(0, 10);
+        return Response.json({ status: "ok", session: night ? "night" : "day", symbol: q.SymbolID, name: q.DispCName, month: MONTHS.indexOf(q.SymbolID.charAt(3)) + 1, price, ref, change, pct,
+          open: num(q.COpenPrice), high: num(q.CHighPrice), low: num(q.CLowPrice), volume: num(q.CTotalVolume), date, time: t.slice(0, 2) + ":" + t.slice(2, 4) },
           { headers: { "cache-control": "public, max-age=8" } });
       } catch (err) {
         return Response.json({ status: "error", error: String(err) }, { status: 502, headers: { "cache-control": "no-store" } });

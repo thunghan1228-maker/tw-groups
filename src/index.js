@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 01:00:04";
+const BUILD_STAMP = "2026-10-30 06:15:21";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3931,6 +3931,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="alert-toggle guide-btn" id="wgBtn">⭐ 自選族群個股</button>  <!-- 2026-10-23 使用者：盤中訊號旁邊加分頁，輸入個股代號就開一格那檔所屬族群的排行（像機器人代碼），每檔旁邊有融資斷頭價 A／B -->
       <button class="alert-toggle guide-btn" id="sgtBtn">📶 盤中訊號分頁</button>  <!-- 2026-10-18 使用者：盤中訊號的分頁也做成機器人代碼那樣，點了開一格、一格一格往右排 -->
       <button class="alert-toggle guide-btn" id="remindBtn">🔔 今日提醒</button>  <!-- 2026-10-17 使用者：每天第一次打開跳出警示股提醒（解鎖／連續警告／分盤交易），關掉後這裡再開 -->
+      <button class="alert-toggle guide-btn" id="dojoBtn">🕯️ K棒道場</button>  <!-- 2026-10-30 使用者：K 棒型態道場放首頁這排，今日提醒右邊、新手教學左邊（研究室的「🕯️ K棒道場」分頁也還在） -->
       <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>
       <button class="alert-toggle guide-btn" id="tutBtn">🎬 影片教學</button>  <!-- 2026-10-13 使用者：訊號教學、工具列各功能的影音教學（女聲旁白＋字幕） -->  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照老師新手教學頁） -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
@@ -16674,7 +16675,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 01:00:04';
+const BUILD_STAMP = '2026-10-30 06:15:21';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -21763,6 +21764,7 @@ function openDojo(){
 }
 function closeDojo(){ clearInterval(dojoTimer); dojoState.loading = false; document.getElementById('dojoModal').hidden = true; }
 document.getElementById('dojoClose').addEventListener('click', closeDojo);
+document.getElementById('dojoBtn').addEventListener('click', openDojo);
 document.getElementById('dojoModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDojo(); });
 document.getElementById('dojoBody').addEventListener('click', (e) => {
   const t = e.target.closest('[data-dj],[data-dj-lesson],[data-dj-pick]'); if (!t) return;
@@ -26032,19 +26034,20 @@ async function taiexLiveLoad(){
 setTimeout(taiexLiveLoad, 1500);
 setInterval(() => { if (document.visibilityState === 'visible') taiexLiveLoad(); }, 20e3);
 // 2026-10-29 使用者：個股震盪右邊空白處加「台指期近月」：價位、漲跌點數、漲跌幅（先點數再幅度），漲紅跌綠平盤白字。
-// 資料 /api/txf-live（期交所 MIS 日盤近月；盤中即時、收盤後＝收盤價），每 20 秒更新，抓不到就留上一次的。
+// 資料 /api/txf-live（期交所 MIS 近月：日盤時間看日盤、夜盤時間 15:00～隔天 08:45 看夜盤；盤中即時、收盤後＝收盤價），每 20 秒更新，抓不到就留上一次的。
 const TXF = { d: null, at: 0, loading: false };
 function txfRender(){
   const el = document.getElementById('txfBox');
   if (!el) return;
   const d = TXF.d;
-  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期近月</b><small class="txf-sess">（日盤）</small>　讀取中…</span>'; return; }
+  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期近月</b>　讀取中…</span>'; return; }
   const sg = (v, n) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + Math.abs(v).toFixed(n);
   const cls = Math.abs(d.change) < 0.0000001 ? 'ix-flat' : d.change > 0 ? 'ix-up' : 'ix-dn';
   const tp = new Date(Date.now() + 8 * 3600e3), hm = tp.toISOString().slice(11, 16);   // 台北現在時間
-  const live = d.date === tp.toISOString().slice(0, 10) && hm >= '08:45' && hm <= '13:46' && Date.now() - TXF.at < 120e3;
-  el.innerHTML = '<span class="txf-l1"><b>台指期近月</b><small class="txf-sess">（日盤）</small> <b class="' + cls + '">' + txN(d.price) + '</b> <span class="' + cls + '">' + sg(d.change, 0) + ' 點　' + sg(d.pct, 2) + '%</span></span>'
-    + '<span class="txf-l2">' + (d.month ? d.month + '月合約・' : '') + String(d.date || '').slice(5).replace('-', '/') + ' ' + (d.time || '') + (live ? ' 日盤即時' : ' 收盤') + '・量 ' + txN(d.volume) + '</span>';
+  const night = d.session === 'night';   // 2026-10-30 使用者：日盤時間看日盤、夜盤時間（15:00～隔天 08:45）切成夜盤價，標籤跟著換
+  const live = Date.now() - TXF.at < 120e3 && (night ? (hm >= '15:00' || hm <= '05:00') : (d.date === tp.toISOString().slice(0, 10) && hm >= '08:45' && hm <= '13:46'));
+  el.innerHTML = '<span class="txf-l1"><b>台指期近月</b><small class="txf-sess">（' + (night ? '夜盤' : '日盤') + '）</small> <b class="' + cls + '">' + txN(d.price) + '</b> <span class="' + cls + '">' + sg(d.change, 0) + ' 點　' + sg(d.pct, 2) + '%</span></span>'
+    + '<span class="txf-l2">' + (d.month ? d.month + '月合約・' : '') + String(d.date || '').slice(5).replace('-', '/') + ' ' + (d.time || '') + (live ? (night ? ' 夜盤即時' : ' 日盤即時') : (night ? ' 夜盤收盤' : ' 收盤')) + '・量 ' + txN(d.volume) + '</span>';
 }
 async function txfLoad(){
   if (TXF.loading) return;
@@ -26617,7 +26620,7 @@ document.getElementById('maBody').addEventListener('keydown', (e) => {
 // 可收的項目：下方工具列每一顆、右上角的自選族群個股／今日提醒／新手教學／機器人代碼／盤中訊號分頁／影片教學、首頁那排欄位（當沖多1／2…股期黑龍 13 塊）與下面的處置欄、說明卡片。不能收的：盤中訊號、提醒開啟（核心）、自訂按鈕本身。
 // 收起來只是不顯示（功能都還在，從別的地方打開照樣可以）；設定存在這台裝置的 localStorage，「全部顯示」清掉。
 const CZ_KEY = 'czHidden';
-const CZ_HEADER_IDS = ['wgBtn', 'briefBtn', 'mbBtn', 'remindBtn', 'guideBtn', 'botBtn', 'sgtBtn', 'tutBtn'];
+const CZ_HEADER_IDS = ['wgBtn', 'briefBtn', 'mbBtn', 'remindBtn', 'dojoBtn', 'guideBtn', 'botBtn', 'sgtBtn', 'tutBtn'];
 let czMode = false;
 function czLoad(){ try { const v = JSON.parse(localStorage.getItem(CZ_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; } catch (_){ return []; } }
 function czSave(){ try { if (czHidden.size) localStorage.setItem(CZ_KEY, JSON.stringify([...czHidden])); else localStorage.removeItem(CZ_KEY); } catch (_){} }
@@ -27433,9 +27436,46 @@ async function txfMis(endpoint, body, ttlMs) {
 async function txfNearQuote() {
   const j = await txfMis("getQuoteList", { MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" }, 8000);
   const list = (j && j.RtData && j.RtData.QuoteList) || [];
-  const q = list.find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && String(x.CLastPrice == null ? "" : x.CLastPrice).trim() !== "");
+  const months = list.filter((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")));
+  // 有日盤成交價的第一檔月合約；開盤前（夜盤收盤 05:00～日盤 08:45）期交所把日盤報價清空，沒有成交價也要回近月那一檔（合約代號、昨結算價還在），
+  // 呼叫端看 CLastPrice 空白就改用官方每日行情的最後一個交易日日盤收盤（2026-10-30 使用者：開盤前停在昨天日盤收盤價，不要一直「讀取中」）
+  const q = months.find((x) => String(x.CLastPrice == null ? "" : x.CLastPrice).trim() !== "") || months[0];
   if (!q) throw new Error("期交所沒有臺指期近月資料");
   return q;
+}
+// 期交所官方每日行情（CSV、Big5）最近 20 天的日盤（一般交易時段），每天取到期月份最小的那一檔＝近月；回最後一個交易日：
+// { day, month(6 碼), open, high, low, close, change(漲跌價，對前一日結算價), pct, volume, settle }
+async function txfLastDayClose() {
+  const cache = (globalThis.__txfLastDay = globalThis.__txfLastDay || {});
+  if (cache.at && Date.now() - cache.at < 300000 && cache.row) return cache.row;
+  const today = new Date(Date.now() + 8 * 3600000);
+  const from = new Date(today.getTime() - 20 * 86400000);
+  const f = (d) => d.getUTCFullYear() + "/" + String(d.getUTCMonth() + 1).padStart(2, "0") + "/" + String(d.getUTCDate()).padStart(2, "0");
+  const r = await fetch("https://www.taifex.com.tw/cht/3/futDataDown", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded", referer: "https://www.taifex.com.tw/cht/3/dlFutDailyMarketView", "user-agent": "Mozilla/5.0" },
+    body: "down_type=1&commodity_id=TX&commodity_id2=&queryStartDate=" + encodeURIComponent(f(from)) + "&queryEndDate=" + encodeURIComponent(f(today))
+  });
+  if (!r.ok) throw new Error("期交所每日行情 HTTP " + r.status);
+  const text = new TextDecoder("big5").decode(await r.arrayBuffer());
+  const num = (v) => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
+  const nearOf = new Map();
+  for (const line of text.split(String.fromCharCode(10))) {
+    const c = line.split(",");
+    if (c.length < 11 || !/^[0-9]{4}[/][0-9]{2}[/][0-9]{2}$/.test(c[0])) continue;
+    const month = String(c[2]).trim();
+    if (!/^[0-9]{6}$/.test(month) || String(c[17]).trim() !== "一般") continue;
+    const close = num(c[6]);
+    if (close === null || close <= 0) continue;
+    const day = c[0].replace(/[/]/g, "-");
+    const cur = nearOf.get(day);
+    if (!cur || month < cur.month) nearOf.set(day, { day, month, open: num(c[3]), high: num(c[4]), low: num(c[5]), close, change: num(c[7]), pct: num(String(c[8]).replace("%", "")), volume: num(c[9]) || 0, settle: num(c[10]) });
+  }
+  const days = Array.from(nearOf.keys()).sort();
+  if (!days.length) throw new Error("期交所每日行情沒有日盤資料");
+  const row = nearOf.get(days[days.length - 1]);
+  cache.at = Date.now(); cache.row = row;
+  return row;
 }
 
 async function proxyHanstockBars(pathname, cacheSeconds = 20) {
@@ -28459,28 +28499,41 @@ export default {
       }
     }
     if (url.pathname === "/api/txf-live") {
-      // 2026-10-29 使用者：首頁加「台指期近月」的價位、漲跌點數、漲跌幅。期交所 MIS（日盤）：臺指期近月合約（TXF 後面接月份代碼的第一檔），盤中即時、收盤後＝日盤最後一筆；快取 8 秒
+      // 2026-10-29 使用者：首頁加「台指期近月」的價位、漲跌點數、漲跌幅。期交所 MIS 近月合約（TXF 後面接月份代碼的第一檔）。
+      // 2026-10-30 使用者：日盤時間顯示日盤、夜盤時間（15:00～隔天 08:45）切成夜盤價（標籤跟著換）；夜盤收盤後（05:00～08:45）停在夜盤最後一筆，
+      // 週末也停在週五夜盤收盤；期交所日盤報價在 05:00 會清空，兩個盤都沒有價才退回官方每日行情最後一個交易日的日盤收盤。
       try {
-        if (!globalThis.__txfCache || Date.now() - globalThis.__txfCache.at > 8000) {
-          const r = await fetch("https://mis.taifex.com.tw/futures/api/getQuoteList", {
-            method: "POST",
-            headers: { "content-type": "application/json", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/", "user-agent": "Mozilla/5.0" },
-            body: JSON.stringify({ MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" })
-          });
-          if (!r.ok) throw new Error("期交所 HTTP " + r.status);
-          globalThis.__txfCache = { at: Date.now(), data: await r.json() };
-        }
-        const list = (globalThis.__txfCache.data && globalThis.__txfCache.data.RtData && globalThis.__txfCache.data.RtData.QuoteList) || [];
-        const MONTHS = "ABCDEFGHIJKL";
         const num = (v) => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
-        const q = list.find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null);
-        if (!q) throw new Error("期交所沒有臺指期近月資料");
+        const quotes = async (marketType) => {
+          const j = await txfMis("getQuoteList", { MarketType: marketType, SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" }, 8000);
+          return (j && j.RtData && j.RtData.QuoteList) || [];
+        };
+        const tp = new Date(Date.now() + 8 * 3600000);
+        const hm = tp.getUTCHours() * 100 + tp.getUTCMinutes();
+        const wantNight = hm >= 1500 || hm < 845;      // 夜盤（15:00～隔天 05:00）和夜盤收盤後到日盤開盤前，看夜盤
+        const dayQ = (await quotes("0")).find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null) || null;
+        const nightQ = (wantNight || !dayQ) ? ((await quotes("1")).find((x) => /^TXF[A-L][0-9]-M$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null) || null) : null;
+        const q = wantNight ? (nightQ || dayQ) : (dayQ || nightQ);
+        if (!q) {
+          const last = await txfLastDayClose();
+          const chg = last.change !== null ? last.change : (last.settle !== null ? Math.round((last.close - last.settle) * 100) / 100 : 0);
+          const pc = last.pct !== null ? last.pct : (last.close - chg ? Math.round(chg / (last.close - chg) * 10000) / 100 : 0);
+          return Response.json({ status: "ok", session: "day", symbol: null, name: "臺指期", month: Number(last.month.slice(4)), price: last.close, ref: Math.round((last.close - chg) * 100) / 100, change: chg, pct: pc,
+            open: last.open, high: last.high, low: last.low, volume: last.volume, date: last.day, time: "13:45", closed: true },
+            { headers: { "cache-control": "public, max-age=30" } });
+        }
+        const night = String(q.SymbolID).endsWith("-M");
+        const MONTHS = "ABCDEFGHIJKL";
         const price = num(q.CLastPrice), ref = num(q.CRefPrice);
         const change = num(q.CDiff) !== null ? num(q.CDiff) : (ref !== null ? Math.round((price - ref) * 100) / 100 : null);
         const pct = num(q.CDiffRate) !== null ? num(q.CDiffRate) : (ref ? Math.round(change / ref * 10000) / 100 : null);
-        const d = String(q.CDate || ""), t = String(q.CTime || "");
-        return Response.json({ status: "ok", symbol: q.SymbolID, name: q.DispCName, month: MONTHS.indexOf(q.SymbolID.charAt(3)) + 1, price, ref, change, pct,
-          open: num(q.COpenPrice), high: num(q.CHighPrice), low: num(q.CLowPrice), volume: num(q.CTotalVolume), date: d.slice(0, 4) + "-" + d.slice(4, 6) + "-" + d.slice(6, 8), time: t.slice(0, 2) + ":" + t.slice(2, 4), source: "TAIFEX MIS 日盤" },
+        let d = String(q.CDate || "");
+        const t = String(q.CTime || "");
+        let date = d.slice(0, 4) + "-" + d.slice(4, 6) + "-" + d.slice(6, 8);
+        // 夜盤的 CDate 是那個交易日（15:00 開盤那天），過了午夜的成交（00:00～05:00）日曆日期要加一天
+        if (night && t && t < "060000") date = new Date(Date.parse(date + "T00:00:00Z") + 86400000).toISOString().slice(0, 10);
+        return Response.json({ status: "ok", session: night ? "night" : "day", symbol: q.SymbolID, name: q.DispCName, month: MONTHS.indexOf(q.SymbolID.charAt(3)) + 1, price, ref, change, pct,
+          open: num(q.COpenPrice), high: num(q.CHighPrice), low: num(q.CLowPrice), volume: num(q.CTotalVolume), date, time: t.slice(0, 2) + ":" + t.slice(2, 4) },
           { headers: { "cache-control": "public, max-age=8" } });
       } catch (err) {
         return Response.json({ status: "error", error: String(err) }, { status: 502, headers: { "cache-control": "no-store" } });
