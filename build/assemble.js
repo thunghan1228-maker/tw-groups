@@ -655,14 +655,17 @@ async function notifyDiscordUsageAnomaly(env, result) {
 
 // 教學影片（2026-10-13 使用者：訊號教學、下方工具列各功能做影音教學）：mp4 放在 Workers 靜態檔案 public/tut-assets/，
 // 網址用 /videos/<名字>.mp4 經過這裡：iPhone／iPad 的 Safari 播影片一定要 Range（206 分段），靜態檔案有沒有支援文件沒寫，這裡自己切。
+// 2026-10-30 使用者：K 棒道場每堂課的「語音課程」mp3 放在 public/tut-assets/dj/，網址 /dojo-voice/<型態>.mp3，同樣要 Range（iPhone 播音檔也要）
 async function serveTutorialVideo(request, env, url) {
-  const name = url.pathname.slice("/videos/".length);
-  if (!/^[a-z0-9_-]{1,60}[.]mp4$/.test(name) || !env.ASSETS) return new Response("not found", { status: 404 });
-  const res = await env.ASSETS.fetch(new Request(new URL("/tut-assets/" + name, url.origin).toString()));
+  const isVoice = url.pathname.indexOf("/dojo-voice/") === 0;
+  const name = url.pathname.slice((isVoice ? "/dojo-voice/" : "/videos/").length);
+  const nameOk = isVoice ? /^[a-z0-9_-]{1,60}[.]mp3$/.test(name) : /^[a-z0-9_-]{1,60}[.]mp4$/.test(name);
+  if (!nameOk || !env.ASSETS) return new Response("not found", { status: 404 });
+  const res = await env.ASSETS.fetch(new Request(new URL((isVoice ? "/tut-assets/dj/" : "/tut-assets/") + name, url.origin).toString()));
   if (!res.ok) return new Response("not found", { status: 404 });
   const buf = await res.arrayBuffer();
   const size = buf.byteLength;
-  const headers = { "content-type": "video/mp4", "accept-ranges": "bytes", "cache-control": "public, max-age=600" };
+  const headers = { "content-type": isVoice ? "audio/mpeg" : "video/mp4", "accept-ranges": "bytes", "cache-control": "public, max-age=600" };
   const head = request.method === "HEAD";
   const m = /^bytes=([0-9]*)-([0-9]*)$/.exec(String(request.headers.get("range") || "").trim());
   if (m && (m[1] !== "" || m[2] !== "")) {
@@ -680,7 +683,7 @@ export default {
   async fetch(request, env, ctx) {
     recordSampledRequest(env, ctx);
     const url = new URL(request.url);
-    if (url.pathname.indexOf("/videos/") === 0) return await serveTutorialVideo(request, env, url);
+    if (url.pathname.indexOf("/videos/") === 0 || url.pathname.indexOf("/dojo-voice/") === 0) return await serveTutorialVideo(request, env, url);
     let barsRequest = null;
     if (url.pathname.indexOf("/api/bars1m/") === 0) {
       barsRequest = { isOneMin: true, code: url.pathname.slice("/api/bars1m/".length) };

@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 06:23:30";
+const BUILD_STAMP = "2026-10-30 06:39:03";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2149,6 +2149,11 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .b193-m{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;margin:0 0 3px;line-height:1.5;}
   .b193-m .hf-tag{margin-left:auto;}   /* 2026-10-22 使用者：193 個股、三落空的大戶力靠右切齊（同一行：股名漲跌幅在左、大戶力在右，色塊一樣寬） */
   .b193-m .hf-tag b,.bot-hrow .hf-tag b{width:70px;box-sizing:border-box;text-align:center;display:inline-block;}
+  /* 2026-10-29 使用者：三落空（機器人、首頁）、首頁續抱勿追高每列：代號、股名、（族群名）、漲跌幅、大戶力放最後；同族群同一個顏色，族群字放大提亮（顏色由族群名算出來，固定不變） */
+  .grp-c{font-weight:800;font-size:13px;white-space:nowrap;letter-spacing:.2px;}
+  .bot-hrow .bot-tail{margin-left:auto;display:inline-flex;align-items:baseline;gap:8px;flex:0 0 auto;max-width:100%;} .bot-hrow .bot-tail .hf-tag{margin-left:0;}   /* 族群名＋大戶力綁在一起靠右；格子太窄就整組換到下一行靠右 */
+  .hr-row .grp-c{margin-left:4px;font-size:12.5px;}
+  .hr-row .hr-tail{margin-left:auto;display:inline-flex;align-items:baseline;gap:4px;flex:0 0 auto;} .hr-row .hr-tail .hr-avg,.hr-row .hr-tail .hr-hold{margin-left:0;}   /* 漲跌幅＋大戶力綁在一起靠右，太窄就整組換到下一行靠右 */
   .bot-hhead{display:flex;justify-content:flex-end;padding-bottom:0;} .hf-colhead{width:70px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);}   /* 整欄只在最上面寫一次「大戶力」 */
   .bot-hrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;} .bot-hrow .hf-tag{margin-left:auto;}
   .b193-r1{white-space:nowrap;}
@@ -2201,6 +2206,17 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .dj-run{font-size:13px;line-height:1.8;} .dj-run .up{color:var(--up);font-weight:800;} .dj-run .down{color:var(--down);font-weight:800;}
   .dj-hist{width:100%;border-collapse:collapse;font-size:13px;} .dj-hist th,.dj-hist td{padding:5px 8px;border-top:1px solid var(--line);text-align:left;} .dj-hist th{color:var(--muted);font-size:12px;border-top:none;}
   .dj-bar{height:8px;background:#2a211b;border-radius:4px;overflow:hidden;min-width:70px;} .dj-bar i{display:block;height:100%;background:#8a6f57;}
+  /* 2026-10-30 使用者：每堂課標題旁加「語音課程」——用語音把這堂教學念出來，念到哪一句哪一句亮黃底 */
+  .dj-lh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .dj-voice{background:var(--panel);border:1.5px solid #a98b70;color:var(--text);border-radius:999px;padding:3px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .dj-voice:hover{border-color:var(--accent);} .dj-voice.on{background:#8a6f57;border-color:#a98b70;color:#fff;}
+  .dj-speaking{background:rgba(250,204,21,.18);box-shadow:0 0 0 3px rgba(250,204,21,.18);border-radius:5px;}
+  .dj-vp{margin:2px 0 10px;padding:8px 10px;background:#241c16;border:1px solid var(--line);border-radius:10px;}
+  .dj-vp-row{display:flex;align-items:center;gap:10px;} .dj-vp-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid #a98b70;background:#8a6f57;color:#fff;font-size:15px;cursor:pointer;flex:0 0 auto;font-family:inherit;}
+  .dj-vp-bar{flex:1 1 auto;height:10px;background:#3a2f27;border-radius:5px;cursor:pointer;overflow:hidden;position:relative;} .dj-vp-bar i{display:block;height:100%;width:0;background:#facc15;}
+  .dj-vp-time{flex:0 0 auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
+  .dj-vp-cap{margin-top:8px;font-size:15.5px;line-height:1.7;font-weight:700;color:#fde68a;min-height:3.4em;}
+  .dj-vp-cap2{margin:0 0 8px;font-size:14px;min-height:2.6em;padding:6px 10px;background:#241c16;border-radius:8px;}
   /* 研究室：國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar） */
   .mc-meta{font-size:12px;color:var(--muted);margin:2px 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
   .mc-meta b{color:var(--text);}
@@ -7784,6 +7800,22 @@ function homeHoldHtml(code){
   const r1 = Math.round(v * 10) / 10;   // 四捨五入到 0.0% 的畫灰色（不是跌）
   return '<span class="hr-hold ' + (r1 > 0 ? 'up' : r1 < 0 ? 'down' : 'flat') + (Math.abs(r1) >= 10 ? ' hot' : '') + '" title="盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）">' + (r1 > 0 ? '+' : '') + r1.toFixed(1) + '%</span>';
 }
+// 2026-10-29 使用者：同族群顯示同一個顏色（族群字放大、提亮）。顏色由族群名算出來：24 個色相 × 3 種亮度，同名永遠同色
+const GRP_COLOR_CACHE = new Map();
+function grpColor(name){
+  const key = String(name || '');
+  let c = GRP_COLOR_CACHE.get(key);
+  if (!c){
+    let h = 5381;
+    for (let i = 0; i < key.length; i++) h = ((h << 5) + h + key.charCodeAt(i)) >>> 0;
+    c = 'hsl(' + (h % 24) * 15 + ',88%,' + [72, 64, 80][Math.floor(h / 24) % 3] + '%)';
+    GRP_COLOR_CACHE.set(key, c);
+  }
+  return c;
+}
+function grpTagHtml(name, extra){
+  return name ? '<span class="grp-c" style="color:' + grpColor(name) + '" title="' + wlEsc(name) + '">' + wlEsc(name) + (extra || '') + '</span>' : '';
+}
 function sigHolderMap(view){
   const date = view && view.date;
   if (view && view.isPast){
@@ -9260,10 +9292,10 @@ function homeRankRowHtml(r){
   return '<div class="hr-row" data-group="' + r.name + '" tabindex="0" role="button" title="' + tip + '"><span class="hr-name hr-gpill ' + dirClass(r.avg) + '">' + r.name + '</span><span class="hr-rk">(' + r.rank + ')</span>' + mv + (r.swordMark || '') +
     '<span class="hr-avg ' + dirClass(r.avg) + '">' + fmt(r.avg) + '%</span></div>';
 }
-function homeStockRowHtml(r, hold){
+function homeStockRowHtml(r, hold, showGroup){
   return '<div class="hr-row hr-stk' + (hold ? ' hr-wrapold' : '') + '" data-code="' + r.code + '" data-name="' + r.name + '" tabindex="0" role="button" title="' + r.groupName + '・族排第 ' + r.groupRank + ' 名">' +
-    '<span class="hr-rk">' + r.groupRank + '</span><span class="hr-code">' + r.code + '</span><span class="hr-name">' + r.name + '</span>' +
-    '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' + (hold ? homeHoldHtml(r.code) : '') + '</div>';
+    '<span class="hr-rk">' + r.groupRank + '</span><span class="hr-code">' + r.code + '</span><span class="hr-name">' + r.name + '</span>' + (showGroup ? grpTagHtml(r.groupName) + '<span class="hr-tail">' : '') +
+    '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' + (hold ? homeHoldHtml(r.code) : '') + (showGroup ? '</span>' : '') + '</div>';
 }
 // ---- 終點戰法空(283)（2026-10-16 使用者：族裡有漲停（亮燈）的族群就列，兩檔以上漲停的特別標「有兩個以上亮燈」）----
 // 照老師 10:58、12:18 兩份：族群照名次排；兩檔以上漲停加註「⚠️有兩個以上亮燈空小心」；整份最下面固定一行「⚠️注意破惡均下彎打倒數」（12:18 那份在分隔線後面，不是跟著某一族）。
@@ -9577,10 +9609,10 @@ function homeLongColsHtml(){
   return wrap('<div class="hr-col">' + head(multi, 1) + colBody(0, cut) + '</div>',
     '<div class="hr-col">' + head(multi, 2) + colBody(cut, rows.length) + note + '</div>');
 }
-function homeStockColHtml(title, list, emptyText, titleCls, hold){
+function homeStockColHtml(title, list, emptyText, titleCls, hold, showGroup){
   const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
   return '<div class="hr-col"><div class="hr-title' + (titleCls ? ' ' + titleCls : '') + '">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
-    (rows.length ? rows.map((r) => homeStockRowHtml(r, hold)).join('') : '<div class="hr-note">' + (emptyText || '目前沒有符合的股票') + '</div>') + '</div>';
+    (rows.length ? rows.map((r) => homeStockRowHtml(r, hold, showGroup)).join('') : '<div class="hr-note">' + (emptyText || '目前沒有符合的股票') + '</div>') + '</div>';
 }
 // 首頁第一欄最下面的刀劍空(32)（2026-10-15 使用者：放在 30加33加34 下面），照老師的格式分三段：多方打少／強空積極／收割區域，
 // 每列＝族群名次、代號、名稱、漲跌幅，後面 🔪（昨天大漲今天殺）或 ⚔️（前天大漲、跌破前天收盤）；同一段裡族排前面的在上面。
@@ -9725,9 +9757,9 @@ function homeWeak3ColHtml(m){
   const hmW = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '--:--');
   const rows = m.weakTriple.slice().sort((a, b) => (Math.floor((seenW[b.code] || 0) / 60000) - Math.floor((seenW[a.code] || 0) / 60000)) || b.groupRank - a.groupRank || a.pct - b.pct);
   const row = (r) => '<div class="hr-row hr-stk hr-wrapold" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + hmW(seenW[r.code]) + ' 進三落空・' + wlEsc(r.groupName) + '・族排第 ' + r.groupRank + ' 名（共 ' + m.total + ' 族）">' +
-    '<span class="hr-rk" style="color:#a78bfa">' + hmW(seenW[r.code]) + '</span><span class="hr-rk">' + r.groupRank + '</span><span class="hr-bear-pill ' + dirClass(r.pct) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' +
-    '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span></div>';
-  return '<div class="hr-col"><div class="hr-title bear" title="' + tip + '">三落空 <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
+    '<span class="hr-rk" style="color:#a78bfa">' + hmW(seenW[r.code]) + '</span><span class="hr-rk">' + r.groupRank + '</span><span class="hr-bear-pill ' + dirClass(r.pct) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' + grpTagHtml(r.groupName) + '<span class="hr-tail">' +
+    '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' + homeHoldHtml(r.code) + '</span></div>';
+  return '<div class="hr-col"><div class="hr-title bear" title="' + tip + '">三落空<span class="hr-rk">' + rows.length + ' 檔</span></div>' +
     (rows.length ? rows.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
 function home44ColHtml(){
@@ -9801,7 +9833,7 @@ function homeRank4Html(){
     // 2026-10-16 使用者：第 4 欄續抱勿追高疊在河流多(34) 上面；第 5 欄馬火多(30)（155 疊在下面）；第 6 欄 30加33 疊在賽馬多(33) 上面（2026-10-20 使用者：30加33 跟續抱勿追高對調，馬火多再移到 30加33 左邊）
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
     '<div class="hr-stack">' +
-      homeRedBox(homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : [])) +   // 2026-10-20 使用者：族群漲幅 > 2%（12）搬到續抱勿追高下面；2026-10-21 使用者：12 又搬走，搬到發動右邊自己一欄
+      homeRedBox(homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : [], undefined, undefined, true, true)) +   // 2026-10-29 使用者：代號、股名、（族群名彩色）、漲跌幅、大戶力放最後；2026-10-20 使用者：族群漲幅 > 2%（12）搬到續抱勿追高下面；2026-10-21 使用者：12 又搬走，搬到發動右邊自己一欄
       // 2026-10-21 使用者：河流多(34) 搬到第 6 欄 30加33／賽馬多(33) 下面，一起放在紅框裡
     '</div>' +
     // 2026-10-22 使用者：首頁的馬火多(30)、賽馬多(33)、河流多(34) 三欄拿掉（機器人代碼 30／33／34、訊號中心「盤中333」還在；30加33加34 照舊）
@@ -16685,7 +16717,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 06:23:30';
+const BUILD_STAMP = '2026-10-30 06:39:03';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -21633,6 +21665,47 @@ function dojoDraw(cv, c, k, o){
       g.fillStyle = '#fbbf24'; g.textAlign = 'center'; g.fillText('▼ 破防守', x, Y(all[i][2]) - 10);
     }
   }
+  if (o.cue){                                         // 語音課程：念到哪一段，就把對應的K棒打亮、其他壓暗、標字（框會閃）
+    const cue = o.cue, pulse = 0.5 + 0.5 * Math.sin((o.tick || 0) * 0.9);
+    const s0 = c.box[0], e0 = c.box[1], nb = Math.max(1, e0 - s0), th = (n) => Math.max(1, Math.floor(nb * n / 3));
+    const rng = (tok) => tok === 's' ? [s0, s0] : tok === 'e' ? [e0, e0] : tok === 'all' ? [s0, e0]
+      : tok === 't1' ? [s0, s0 + th(1) - 1] : tok === 't2' ? [s0 + th(1), s0 + th(2) - 1] : tok === 't3' ? [s0 + th(2), Math.max(s0 + th(2), e0 - 1)] : null;
+    const holes = [];
+    (cue.bars || []).forEach((tok) => { const r = rng(tok); if (r) holes.push(r); });
+    if (cue.future && c.future.length) holes.push([c.bars.length, c.bars.length + c.future.length - 1]);
+    const top = padT, bot = padT + priceH + gap + volH;
+    const pill = (text, cx, y, col) => {
+      g.font = 'bold 12.5px sans-serif'; const tw = g.measureText(text).width + 14, x0 = Math.max(padL, Math.min(w - padR - tw, cx - tw / 2));
+      g.fillStyle = 'rgba(0,0,0,0.78)'; g.fillRect(x0, y - 10, tw, 20); g.strokeStyle = col; g.lineWidth = 1; g.strokeRect(x0, y - 10, tw, 20);
+      g.fillStyle = col; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, x0 + tw / 2, y); g.font = '11px sans-serif';
+    };
+    if (holes.length){
+      g.fillStyle = 'rgba(12,9,7,0.62)'; g.beginPath(); g.rect(padL, top, w - padL - padR, bot - top);
+      holes.forEach((r) => { const x0 = X(r[0]) - slot * 0.5, x1 = X(r[1]) + slot * 0.5; g.rect(x0, top, x1 - x0, bot - top); });
+      g.fill('evenodd');
+      holes.forEach((r, hi2) => {
+        const x0 = X(r[0]) - slot * 0.5, x1 = X(r[1]) + slot * 0.5;
+        g.strokeStyle = 'rgba(253,224,71,' + (0.55 + 0.45 * pulse).toFixed(2) + ')'; g.lineWidth = 2.5; g.strokeRect(x0, top, x1 - x0, bot - top);
+        const text = cue.labels ? cue.labels[hi2] : (hi2 === 0 ? cue.label : '');
+        if (text) pill(text, (x0 + x1) / 2, top + 14, '#fde047');
+      });
+    }
+    if (cue.ma){
+      const m = dojoMa(closes, cue.ma); g.strokeStyle = cue.ma === 5 ? '#fbbf24' : '#93c5fd'; g.lineWidth = 3.4; g.beginPath(); let on = false;
+      for (let i = lead; i < all.length; i++){ if (m[i] == null) continue; const x = X(i), y = Y(m[i]); if (!on){ g.moveTo(x, y); on = true; } else g.lineTo(x, y); }
+      g.stroke();
+      if (!holes.length && cue.label) pill(cue.label, (padL + w - padR) / 2, top + 14, '#fde047');
+    }
+    if (cue.lines && c.lines){
+      [c.lines.top, c.lines.bottom].forEach((ln) => { g.strokeStyle = '#ddd6fe'; g.lineWidth = 3; g.beginPath(); g.moveTo(X(ln[0]), Y(ln[1])); g.lineTo(X(ln[2]), Y(ln[3])); g.stroke(); });
+    }
+    if (cue.defense){
+      g.strokeStyle = 'rgba(196,181,253,' + (0.6 + 0.4 * pulse).toFixed(2) + ')'; g.lineWidth = 3; g.setLineDash([6, 4]); g.beginPath(); g.moveTo(padL, Y(c.defense)); g.lineTo(w - padR, Y(c.defense)); g.stroke(); g.setLineDash([]);
+      pill((cue.label || '防守線') + ' ' + c.defense, padL + 70, Y(c.defense) - 16, '#c4b5fd');
+    }
+    if (cue.future && !holes.length && cue.label) pill(cue.label, (padL + w - padR) / 2, top + 14, '#fde047');
+  }
+  g.textBaseline = 'middle'; g.font = '11px sans-serif';
   g.fillStyle = muted; g.textAlign = 'left'; g.fillText(o.dates ? c.bars[lead][0].slice(5) : '', padL, h - 5);
   g.textAlign = 'right'; g.fillText(o.dates ? all[all.length - 1][0].slice(5) : '', w - padR, h - 5);
 }
@@ -21642,7 +21715,7 @@ function dojoCharts(){                                // 畫目前畫面上的�
   const cv = body.querySelector('canvas[data-dj-cv]'); if (!cv) return;
   if (st.view === 'lessons'){
     const ex = st.lessons && st.lessons.find((x) => x.pattern === st.lessonId);
-    if (ex) dojoDraw(cv, ex, ex.future.length, { box: true, lines: true, dates: true, run: true, defense: true });   // 上課的案例連後 10 天跟防守線一起畫（右邊那段就是型態之後怎麼走）
+    if (ex) dojoDraw(cv, ex, ex.future.length, { box: true, lines: true, dates: true, run: true, defense: true, cue: dojoVoice.on && dojoVoice.seg ? dojoVoice.seg.cue : null, tick: dojoVoice.tick });   // 上課的案例連後 10 天跟防守線一起畫（右邊那段就是型態之後怎麼走）
   } else if (st.view === 'quiz' && st.quiz){
     const q = st.quiz[st.qi], run = st.run;
     dojoDraw(cv, q, run ? run.k : 0, { box: true, lines: st.picked != null, run: !!run, defense: !!run, exitIdx: run ? run.exitIdx : null, dates: st.picked != null });
@@ -21718,6 +21791,77 @@ function dojoRunSummary(q, run){
   }
   return html;
 }
+// ---- 語音課程（2026-10-30 使用者：每堂課標題旁加「語音課程」——文字＋錄好的語音，配合線圖的動態教學）----
+// 每堂一支錄好的 mp3（scripts/tutorial/dojo_voice.py 用 gTTS 錄，/dojo-voice/<型態>.mp3 由 Worker 處理 Range），
+// /tut-assets/dj/index.json 記每一段的開始／結束秒數、字幕、線圖動作（cue）：念到哪段，字幕換哪段、線圖框出對應的K棒、標字、亮防守線／後 10 天。
+// 開著語音課程時按上一堂／下一堂會自動接著播；離開課程、關視窗或再按一次按鈕就停。
+const dojoVoice = { on: false, data: null, audio: null, timer: 0, seg: null, tick: 0, err: '' };
+function dojoVoiceClock(s){ const v = Math.max(0, Math.floor(s || 0)); return Math.floor(v / 60) + ':' + ('0' + (v % 60)).slice(-2); }
+function dojoVoiceEntry(){ return dojoVoice.data && dojoVoice.data[dojoState.lessonId]; }
+function dojoVoiceUi(){
+  const body = document.getElementById('dojoBody'); if (!body) return;
+  const a = dojoVoice.audio, ent = dojoVoiceEntry(), dur = ent ? ent.dur : 0, t = a ? a.currentTime : 0, seg = dojoVoice.seg;
+  body.querySelectorAll('[data-seg]').forEach((el) => el.classList.toggle('dj-speaking', dojoVoice.on && !!seg && el.dataset.seg === seg.k));
+  const btn = body.querySelector('[data-dj="voice"]');
+  if (btn){ btn.classList.toggle('on', dojoVoice.on); btn.textContent = dojoVoice.on ? '⏹ 關閉語音課程' : '🔊 語音課程'; }
+  const play = body.querySelector('[data-dj="vplay"]'); if (play) play.textContent = a && !a.paused ? '⏸' : '▶';
+  const fill = body.querySelector('[data-vp-fill]'); if (fill) fill.style.width = (dur ? Math.min(100, t / dur * 100) : 0) + '%';
+  const tm = body.querySelector('[data-vp-time]'); if (tm) tm.textContent = dojoVoiceClock(t) + ' / ' + dojoVoiceClock(dur);
+  body.querySelectorAll('[data-vp-cap]').forEach((cap) => { cap.textContent = seg ? seg.text : (dojoVoice.err || '讀取語音中……'); });   // 上面的播放器跟線圖上面各有一條字幕（手機要往下滑才看得到線圖）
+}
+function dojoVoiceTick(){
+  const a = dojoVoice.audio, ent = dojoVoiceEntry(); if (!a || !ent || !dojoVoice.on) return;
+  const t = a.currentTime;
+  let seg = null; ent.segs.forEach((s) => { if (t >= s.t0 - 0.05) seg = s; });   // 目前念到（或剛念完、還在換氣）的那一段
+  const changed = seg !== dojoVoice.seg; dojoVoice.seg = seg;
+  dojoVoice.tick += 1;
+  dojoVoiceUi();
+  if (changed || (seg && seg.cue && (seg.cue.bars || seg.cue.defense || seg.cue.future || seg.cue.ma || seg.cue.lines) && dojoVoice.tick % 2 === 0)) dojoCharts();   // 有框的時候每 0.2 秒重畫一次，框才會閃
+}
+function dojoVoiceStopAudio(){
+  clearInterval(dojoVoice.timer); dojoVoice.timer = 0;
+  if (dojoVoice.audio){ try { dojoVoice.audio.pause(); } catch (_){} }
+  dojoVoice.seg = null;
+}
+function dojoVoiceOff(){
+  const was = dojoVoice.on; dojoVoice.on = false; dojoVoiceStopAudio();
+  if (was){ dojoVoiceUi(); dojoCharts(); }
+}
+function dojoVoicePlay(){
+  const ent = dojoVoiceEntry(); dojoVoiceStopAudio(); dojoVoice.err = '';
+  if (!ent){ dojoVoice.err = '這堂課的語音還沒準備好。'; dojoVoiceUi(); return; }
+  const a = dojoVoice.audio || (dojoVoice.audio = new Audio());
+  a.onended = () => { dojoVoice.seg = null; clearInterval(dojoVoice.timer); dojoVoice.timer = 0; dojoVoiceUi(); dojoCharts(); };
+  a.onerror = () => { dojoVoice.err = '語音檔讀不到，稍後再試。'; dojoVoice.seg = null; dojoVoiceUi(); };
+  a.src = '/dojo-voice/' + dojoState.lessonId + '.mp3?v=' + encodeURIComponent(dojoVoice.data.v || '');
+  const pr = a.play();
+  if (pr && pr.catch) pr.catch(() => { dojoVoice.err = '瀏覽器擋住自動播放，按一下 ▶ 開始。'; dojoVoiceUi(); });
+  dojoVoice.timer = setInterval(dojoVoiceTick, 100);
+  dojoVoiceTick();
+}
+function dojoVoiceToggle(){
+  if (dojoVoice.on){ dojoVoiceOff(); dojoRender(); return; }
+  dojoVoice.on = true; dojoVoice.err = '';
+  if (dojoVoice.data){ dojoRender(); dojoVoicePlay(); return; }
+  dojoRender();
+  fetch('/tut-assets/dj/index.json', { cache: 'no-cache' }).then((r) => r.json()).then((j) => { dojoVoice.data = j; if (dojoVoice.on) dojoVoicePlay(); })
+    .catch(() => { dojoVoice.err = '語音課程資料讀不到，稍後再試。'; dojoVoiceUi(); });
+}
+function dojoVoicePlayPause(){
+  const a = dojoVoice.audio; if (!a || !dojoVoice.on) return;
+  if (a.ended){ dojoVoicePlay(); return; }
+  if (a.paused){ const pr = a.play(); if (pr && pr.catch) pr.catch(() => {}); if (!dojoVoice.timer) dojoVoice.timer = setInterval(dojoVoiceTick, 100); } else a.pause();
+  dojoVoiceUi();
+}
+function dojoVoiceSeek(e){
+  const a = dojoVoice.audio, ent = dojoVoiceEntry(), bar = e.target.closest('[data-vp-bar]'); if (!a || !ent || !bar) return;
+  const r = bar.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(ent.dur - 0.1, (e.clientX - r.left) / r.width * ent.dur));
+  if (a.paused) dojoVoicePlayPause(); else dojoVoiceTick();
+}
+function dojoVoicePlayerHtml(){
+  if (!dojoVoice.on) return '';
+  return '<div class="dj-vp"><div class="dj-vp-row"><button type="button" class="dj-vp-btn" data-dj="vplay" title="播放／暫停">⏸</button><div class="dj-vp-bar" data-vp-bar title="點一下跳到那個位置"><i data-vp-fill></i></div><span class="dj-vp-time" data-vp-time>0:00 / 0:00</span></div><div class="dj-vp-cap" data-vp-cap>讀取語音中……</div></div>';
+}
 function dojoHtml(){
   const st = dojoState;
   if (st.loading){
@@ -21727,7 +21871,7 @@ function dojoHtml(){
   if (st.view === 'home'){
     const h = dojoHist(), best = h.reduce((m, r) => Math.max(m, r.score || 0), 0);
     const rows = h.slice(0, 8).map((r) => '<tr><td>' + new Date(r.t).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) + '</td><td><b>' + r.score + '</b> / ' + r.n + '</td><td><div class="dj-bar"><i style="width:' + Math.round((r.score / (r.n || 10)) * 100) + '%"></i></div></td></tr>').join('');
-    return '<div class="dj-wrap">' + err + '<div class="dj-hero"><h2>五種神奇K棒，看得懂才敢買</h2><p>紅劍・黑豹・黑飛舞・三角收斂・穿山惡龍。先用五堂課認識它們長什麼樣子；再從真的股票線圖出題，名字先藏起來，猜對了才揭曉；還能「跑圖」看後面 10 天怎麼走、有沒有跌破防守線。</p>' +
+    return '<div class="dj-wrap">' + err + '<div class="dj-hero"><h2>五種神奇K棒，看得懂才敢買</h2><p>紅劍・黑豹・黑飛舞・三角收斂・穿山惡龍。先用五堂課認識它們長什麼樣子（每堂標題旁有「🔊 語音課程」，語音一段一段念、字幕同步、線圖跟著框出重點）；再從真的股票線圖出題，名字先藏起來，猜對了才揭曉；還能「跑圖」看後面 10 天怎麼走、有沒有跌破防守線。</p>' +
       '<div class="dj-btns"><button type="button" class="dj-btn pri" data-dj="lessons">📖 開始上課</button><button type="button" class="dj-btn" data-dj="quiz">📝 直接考試（10 題）</button></div></div>' +
       '<div class="dj-card" style="margin-top:10px"><h3>🏆 我的成績' + (h.length ? '（最高 ' + best + ' 分）' : '') + '</h3>' + (h.length ? '<table class="dj-hist"><thead><tr><th>時間</th><th>答對</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' : '<p class="dj-tip">還沒有成績，考一次看看。成績只記在這台裝置上。</p>') + '</div>' +
       '<div class="dj-tip">型態定義是我們自己整理的示範版本，量化門檻不一定跟任何老師一樣；價格用除權息還原後的日K；案例都是真實歷史資料。僅供教學，不是買賣建議。</div></div>';
@@ -21735,9 +21879,9 @@ function dojoHtml(){
   if (st.view === 'lessons'){
     const p = dojoPat(st.lessonId), ex = st.lessons && st.lessons.find((x) => x.pattern === p.id), idx = DOJO_PATS.findIndex((x) => x.id === p.id);
     const tabs = '<div class="dj-tabs">' + DOJO_PATS.map((x, i) => '<button type="button" class="dj-tab' + (x.id === p.id ? ' active' : '') + '" data-dj-lesson="' + x.id + '">' + x.icon + ' 第 ' + (i + 1) + ' 堂 ' + x.label + '</button>').join('') + '</div>';
-    return '<div class="dj-wrap">' + err + tabs + '<div class="dj-card"><h3>' + p.icon + ' ' + p.label + '</h3><p>' + p.intro + '</p><ul>' + p.points.map((x) => '<li>' + x + '</li>').join('') + '</ul>' +
-      '<p><b>進場：</b>' + p.entry + '<br><b>防守：</b>' + p.defense + '</p></div>' +
-      (ex ? '<div class="dj-card"><div class="dj-prog"><span>真實案例：<b>' + ex.code + ' ' + dojoEsc(ex.name) + '</b>・' + ex.date + '</span><span>黃框＝這個型態</span></div>' + dojoLegend() + '<canvas class="dj-canvas" data-dj-cv></canvas></div>' : '<div class="dj-card"><p class="dj-tip">這個型態目前沒有案例。</p></div>') +
+    return '<div class="dj-wrap">' + err + tabs + '<div class="dj-card"><h3 class="dj-lh"><span data-seg="title">' + p.icon + ' ' + p.label + '</span><button type="button" class="dj-voice' + (dojoVoice.on ? ' on' : '') + '" data-dj="voice" title="用語音把這堂課念出來，念到哪句哪句亮黃底；開著的時候按上一堂、下一堂會自動接著念">' + (dojoVoice.on ? '⏹ 關閉語音課程' : '🔊 語音課程') + '</button></h3>' + dojoVoicePlayerHtml() + '<p data-seg="intro">' + p.intro + '</p><ul>' + p.points.map((x, i) => '<li data-seg="pt' + i + '">' + x + '</li>').join('') + '</ul>' +
+      '<p><span data-seg="entry"><b>進場：</b>' + p.entry + '</span><br><span data-seg="def"><b>防守：</b>' + p.defense + '</span></p></div>' +
+      (ex ? '<div class="dj-card">' + (dojoVoice.on ? '<div class="dj-vp-cap dj-vp-cap2" data-vp-cap>' + dojoEsc(dojoVoice.seg ? dojoVoice.seg.text : '') + '</div>' : '') + '<div class="dj-prog"><span data-seg="case">真實案例：<b>' + ex.code + ' ' + dojoEsc(ex.name) + '</b>・' + ex.date + '</span><span>黃框＝這個型態</span></div>' + dojoLegend() + '<canvas class="dj-canvas" data-dj-cv></canvas></div>' : '<div class="dj-card"><p class="dj-tip">這個型態目前沒有案例。</p></div>') +
       '<div class="dj-btns"><button type="button" class="dj-btn" data-dj="home">← 回首頁</button>' + (idx > 0 ? '<button type="button" class="dj-btn" data-dj-lesson="' + DOJO_PATS[idx - 1].id + '">上一堂</button>' : '') +
       (idx < DOJO_PATS.length - 1 ? '<button type="button" class="dj-btn pri" data-dj-lesson="' + DOJO_PATS[idx + 1].id + '">下一堂 →</button>' : '<button type="button" class="dj-btn pri" data-dj="quiz">📝 上完了，去考試</button>') + '</div></div>';
   }
@@ -21767,21 +21911,26 @@ function dojoRender(){
   const body = document.getElementById('dojoBody'); if (!body || document.getElementById('dojoModal').hidden) return;
   body.innerHTML = dojoHtml();
   dojoCharts();
+  dojoVoiceUi();
 }
 function openDojo(){
-  const st = dojoState; st.view = 'home'; st.err = ''; st.loading = false; clearInterval(dojoTimer); st.run = null;
+  const st = dojoState; st.view = 'home'; st.err = ''; st.loading = false; clearInterval(dojoTimer); st.run = null; dojoVoiceOff();
   document.getElementById('dojoModal').hidden = false; dojoRender();
 }
-function closeDojo(){ clearInterval(dojoTimer); dojoState.loading = false; document.getElementById('dojoModal').hidden = true; }
+function closeDojo(){ clearInterval(dojoTimer); dojoState.loading = false; dojoVoiceOff(); document.getElementById('dojoModal').hidden = true; }
 document.getElementById('dojoClose').addEventListener('click', closeDojo);
 document.getElementById('dojoBtn').addEventListener('click', openDojo);
 document.getElementById('dojoModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDojo(); });
 document.getElementById('dojoBody').addEventListener('click', (e) => {
+  if (e.target.closest('[data-vp-bar]')){ dojoVoiceSeek(e); return; }
   const t = e.target.closest('[data-dj],[data-dj-lesson],[data-dj-pick]'); if (!t) return;
-  if (t.dataset.djLesson){ dojoState.lessonId = t.dataset.djLesson; dojoState.view = 'lessons'; dojoRender(); return; }
+  if (t.dataset.djLesson){ dojoState.lessonId = t.dataset.djLesson; dojoState.view = 'lessons'; dojoRender(); if (dojoVoice.on && dojoVoice.data) dojoVoicePlay(); return; }   // 語音課程開著就自動接著念新的一堂
   if (t.dataset.djPick){ dojoPick(t.dataset.djPick); return; }
   const a = t.dataset.dj;
-  if (a === 'home'){ dojoState.view = 'home'; dojoState.err = ''; dojoRender(); }
+  if (a !== 'voice' && a !== 'vplay' && a !== 'lessons') dojoVoiceOff();   // 離開課程（回首頁、去考試）就停
+  if (a === 'voice') dojoVoiceToggle();
+  else if (a === 'vplay') dojoVoicePlayPause();
+  else if (a === 'home'){ dojoState.view = 'home'; dojoState.err = ''; dojoRender(); }
   else if (a === 'lessons') dojoOpenLessons();
   else if (a === 'quiz') dojoStartQuiz();
   else if (a === 'run') dojoRun();
@@ -23858,7 +24007,7 @@ function botAnswer(raw){
     if (!over.length) return '';
     const s30 = new Set(mm.weak30.map((r) => r.code)), s33 = new Set(mm.weak33.map((r) => r.code));
     return botLine('------↓(跌超過 7%：' + over.length + ' 檔・不追空)↓------', 'bot-sep') +
-      over.map((r) => botLine('<span>' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + (s30.has(r.code) && s33.has(r.code) ? '・熄落也中' : '') + '</small>') + '</span>' + holderTagHtml(holderPctOf(r.code), false, true), 'bot-hrow')).join('');
+      over.map((r) => botLine('<span>' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>') + '</span><span class="bot-tail">' + grpTagHtml(r.groupName, s30.has(r.code) && s33.has(r.code) ? '・熄落也中' : '') + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow')).join('');   // 2026-10-29 使用者：族群名同族同色放大提亮，大戶力放最後
   };
   const otcFoot = () => (!m || m.otcPct === null || m.otcPct === undefined ? '' : botLine('------↓(櫃買)↓------', 'bot-sep') +
     botLine('⚠️' + (m.otcLabel || '') + (/多/.test(m.otcLabel || '') ? '🚀' : /空/.test(m.otcLabel || '') ? '🔻' : '') + '(' + botPct(m.otcPct).replace('+', '') + ')', 'bot-warn'));
@@ -23941,7 +24090,7 @@ function botAnswer(raw){
     const hmW = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '--:--');
     // 時間近的排上面、早的在下面；同一分鐘照族群名次（越大越弱的在上面）、再照跌幅
     const rows = m.weakTriple.slice().sort((a, b) => (Math.floor((seenW[b.code] || 0) / 60000) - Math.floor((seenW[a.code] || 0) / 60000)) || b.groupRank - a.groupRank || a.pct - b.pct);
-    return wrap('三落空', (rows.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') : '') + (rows.map((r) => botLine('<span><span style="color:#a78bfa;font-variant-numeric:tabular-nums">' + hmW(seenW[r.code]) + '</span> ' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span> <small class="bot-dim">' + wlEsc(r.groupName) + '</small>') + '</span>' + holderTagHtml(holderPctOf(r.code), false, true), 'bot-hrow')).join('') || botLine('目前沒有', 'bot-dim')) +
+    return wrap('三落空', (rows.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') : '') + (rows.map((r) => botLine('<span><span style="color:#a78bfa;font-variant-numeric:tabular-nums">' + hmW(seenW[r.code]) + '</span> ' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>') + '</span><span class="bot-tail">' + grpTagHtml(r.groupName) + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow')).join('') || botLine('目前沒有', 'bot-dim')) +
       botLine('熄火空 ' + m.weak30.length + '・落馬空 ' + m.weak33.length + '・斷流空 ' + m.weak34.length + (m.weak34Over.length ? '（跌超過 7% 的 ' + m.weak34Over.length + ' 檔不列入，列在最下面）' : '') + '；三份都有、可放空（有券、非處置股）才列，前面數字＝族群名次（越大越弱）', 'bot-dim') + otcFoot() + weakOverHtml(m),
       stamp + '・熄火落馬斷流');
   }
@@ -27618,14 +27767,17 @@ async function notifyDiscordUsageAnomaly(env, result) {
 
 // 教學影片（2026-10-13 使用者：訊號教學、下方工具列各功能做影音教學）：mp4 放在 Workers 靜態檔案 public/tut-assets/，
 // 網址用 /videos/<名字>.mp4 經過這裡：iPhone／iPad 的 Safari 播影片一定要 Range（206 分段），靜態檔案有沒有支援文件沒寫，這裡自己切。
+// 2026-10-30 使用者：K 棒道場每堂課的「語音課程」mp3 放在 public/tut-assets/dj/，網址 /dojo-voice/<型態>.mp3，同樣要 Range（iPhone 播音檔也要）
 async function serveTutorialVideo(request, env, url) {
-  const name = url.pathname.slice("/videos/".length);
-  if (!/^[a-z0-9_-]{1,60}[.]mp4$/.test(name) || !env.ASSETS) return new Response("not found", { status: 404 });
-  const res = await env.ASSETS.fetch(new Request(new URL("/tut-assets/" + name, url.origin).toString()));
+  const isVoice = url.pathname.indexOf("/dojo-voice/") === 0;
+  const name = url.pathname.slice((isVoice ? "/dojo-voice/" : "/videos/").length);
+  const nameOk = isVoice ? /^[a-z0-9_-]{1,60}[.]mp3$/.test(name) : /^[a-z0-9_-]{1,60}[.]mp4$/.test(name);
+  if (!nameOk || !env.ASSETS) return new Response("not found", { status: 404 });
+  const res = await env.ASSETS.fetch(new Request(new URL((isVoice ? "/tut-assets/dj/" : "/tut-assets/") + name, url.origin).toString()));
   if (!res.ok) return new Response("not found", { status: 404 });
   const buf = await res.arrayBuffer();
   const size = buf.byteLength;
-  const headers = { "content-type": "video/mp4", "accept-ranges": "bytes", "cache-control": "public, max-age=600" };
+  const headers = { "content-type": isVoice ? "audio/mpeg" : "video/mp4", "accept-ranges": "bytes", "cache-control": "public, max-age=600" };
   const head = request.method === "HEAD";
   const m = /^bytes=([0-9]*)-([0-9]*)$/.exec(String(request.headers.get("range") || "").trim());
   if (m && (m[1] !== "" || m[2] !== "")) {
@@ -27643,7 +27795,7 @@ export default {
   async fetch(request, env, ctx) {
     recordSampledRequest(env, ctx);
     const url = new URL(request.url);
-    if (url.pathname.indexOf("/videos/") === 0) return await serveTutorialVideo(request, env, url);
+    if (url.pathname.indexOf("/videos/") === 0 || url.pathname.indexOf("/dojo-voice/") === 0) return await serveTutorialVideo(request, env, url);
     let barsRequest = null;
     if (url.pathname.indexOf("/api/bars1m/") === 0) {
       barsRequest = { isOneMin: true, code: url.pathname.slice("/api/bars1m/".length) };
