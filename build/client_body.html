@@ -8071,6 +8071,17 @@ const BLADE_MAX_ROWS = Infinity;   // 2026-10-22 老師 09:23 的 32 強空積�
 // 2026-10-20 老師 12:50／13:00 的 123 列了奇鋐（高點 3.01%）、統新（高點 3.05%），所以門檻不能高過 3.01：改回跟後端一樣 3%
 // （驊宏資 3.07% 09:15 沒列、南亞 3.09% 10/19 沒列，應該是別的條件擋掉，不是門檻）
 const K12_RUSH_MIN = 3;
+// 2026-10-29 使用者給了老師今天 09:05～13:30 十八份 123 名單校對：老師列的 117 筆前一個交易日收盤的均線分數（官網 15 分）全部 ≥7，我們多列的那些
+// （旺宏、光聖、IET-KY、環宇-KY、愛普*、台光電…）幾乎都 ≤6——加這條以後我們多列的從 217 筆掉到 80 筆、老師列的一筆沒掉（後端 scoreY 給前一天的分數，查不到就不擋）
+const K12_MIN_SCORE = 7;
+const k12ScoreOk = (it) => !Number.isFinite(it.scoreY) || it.scoreY >= K12_MIN_SCORE;
+// 2026-10-29 使用者：收盤後 123 的資料要留著，到隔天開盤之後才消失。後端名單帶 tradeDate（備份還原的也帶）：今天已經開盤（09:00 後、今天有報價）、
+// 但後端還是昨天的名單，就當「今天還沒有 5 分K」（不要把昨天的名單當今天 09:05 那一格記下來，老師 09:05 是空的）；收盤後、假日、開盤前都照舊顯示最後一份。
+function k12Effective(k){
+  if (!k || k.status !== 'ok' || !k.tradeDate || !lastData) return k;
+  const stale = k.tradeDate !== lastData.quoteDate && lastData.quoteDate === twTodayStr() && !lastData.heldClose && obsNowHm() >= '09:00';
+  return stale ? Object.assign({}, k, { tracked: 0, items: [], stale: true }) : k;
+}
 // 12:50 老師只列台玻 +0.6%、台塑化、驊宏資；我們多列尖點 +6.3%、精測 +3.2%、有成精密 +1.6%（高點都 ≥ 4%、也都在 5 分K 20MA 下彎）。
 // 三檔多的現在漲幅都比老師最高那檔（+0.6%）高，所以現價漲超過 +1% 的先不列（只有這一份樣本，門檻 1% 是猜的，下次對）
 const K12_MAX_PCT = 1.55;   // 2026-10-20 老師 13:00 列了統新 +1.52%、奇鋐 +0.6%；10/19 的有成精密 +1.6% 沒列 → 放寬到 1.55
@@ -18191,6 +18202,7 @@ function k12AlertEligible(k){
   (k.items || []).forEach((it) => {
     if (!Number.isFinite(it.high1) || !Number.isFinite(it.high2)) return;      // 2 還沒出現
     if (Number.isFinite(it.dayHighPct) && it.dayHighPct < K12_RUSH_MIN) return;
+    if (!k12ScoreOk(it)) return;
     const gi = ranked.findIndex((g) => BLADE_GROUPS.has(g.name) && g.stocks.some((s) => s.code === it.code));
     if (gi < 0) return;
     const s = quote.get(it.code);
@@ -18823,7 +18835,7 @@ function tdLiveRow(r, zone, big){
     h1: r.h1 ?? null, h2: r.h2 ?? null };   // 12空 的 1高（破惡前最高＝停損價）、2（破惡後反彈的高）：只有盤中這份有
 }
 function tdLiveSnap(m, peek){   // peek＝跳出通知用：1＝只讀手上已經有的資料、不另外抓 kill12／大戶%（每 15 秒算一次，不要多打請求）；2＝要畫卡片了，大戶%照抓、kill12 不抓；參數勾了大戶或最高時一律照抓
-  const k = peek ? (botState.cache.kill12 ? botState.cache.kill12.data : null) : botFetchCache('kill12', '/api/kill12', 15e3);
+  const k = k12Effective(peek ? (botState.cache.kill12 ? botState.cache.kill12.data : null) : botFetchCache('kill12', '/api/kill12', 15e3));
   const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
   const quote = new Map();
   lastData.groups.forEach((g) => g.stocks.forEach((s) => quote.set(s.code, s)));
@@ -18831,6 +18843,7 @@ function tdLiveSnap(m, peek){   // peek＝跳出通知用：1＝只讀手上已�
   const k12Base = [];
   (k && k.status === 'ok' ? k.items || [] : []).forEach((it) => {
     if (Number.isFinite(it.dayHighPct) && it.dayHighPct < K12_RUSH_MIN) return;
+    if (!k12ScoreOk(it)) return;
     const gi = ranked.findIndex((g) => BLADE_GROUPS.has(g.name) && g.stocks.some((s) => s.code === it.code));
     if (gi < 0) return;
     const g = ranked[gi], s = quote.get(it.code);
@@ -22927,8 +22940,8 @@ function botRankChart(g, h, me, opts){   // opts：title／sub／foot＝改標�
     const x = bm.get(me) || {}, rise = rm.get(me), hk = hm.get(me) || {};
     const zoneName = i < topEnd ? '多方區' : i >= botStart ? '空方區' : '中段區';
     const dist = i < topEnd ? '距空方線 ' + (botStart + 1 - rank) + ' 名' : i >= botStart ? '距多方線 ' + (rank - topEnd) + ' 名' : '距多方線 ' + (rank - topEnd) + ' 名・距空方線 ' + (botStart + 1 - rank) + ' 名';
-    const k12 = botFetchCache('kill12', '/api/kill12', 15e3);
-    const hit = k12 && k12.status === 'ok' && (k12.items || []).some((it) => it.code === me && (!Number.isFinite(it.dayHighPct) || it.dayHighPct >= K12_RUSH_MIN));
+    const k12 = k12Effective(botFetchCache('kill12', '/api/kill12', 15e3));
+    const hit = k12 && k12.status === 'ok' && (k12.items || []).some((it) => it.code === me && (!Number.isFinite(it.dayHighPct) || it.dayHighPct >= K12_RUSH_MIN) && k12ScoreOk(it));
     const lines = ['族內第 ' + rank + '/' + n + ' 名 ' + (s.changePercent > 0 ? '+' : '') + s.changePercent.toFixed(2) + '%・' + zoneName + '(' + dist + ')'];
     if (x.knife > 0) lines.push('🔪 刀:跟昨天比下降 ' + x.knife + ' 名' + (i >= botStart ? ',掉到後段班' : ''));
     if (x.sword > 0) lines.push('⚔️ 劍:跟前天比下降 ' + x.sword + ' 名' + (i >= botStart ? ',掉到後段班' : ''));
@@ -23246,7 +23259,7 @@ function botAnswer(raw){
   // 還有一條篩選沒找到，所以盤中大跌時會比老師多列。照族群名次排（同族漲的在前），跌 5% 以上放收割區域；後面的 🔪⚔️🔰 是族群明細的記號。
   if (q === '123'){
     const title = '1️⃣2️⃣空(123)';
-    const k = botFetchCache('kill12', '/api/kill12', 15e3);
+    const k = k12Effective(botFetchCache('kill12', '/api/kill12', 15e3));
     if (!k) return wrap(title, botLine('讀取中…', 'bot-dim'));
     if (k.status !== 'ok') return wrap(title, botLine('後端暫時連不上，等一下再試', 'bot-dim'));
     if (!k.tracked) return wrap(title, botLine('後端今天還沒有 5 分K（盤中 9 點以後、或收盤回補完才有）', 'bot-dim') + otcFoot());
