@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T12:28:41+08:00",
+ "at": "2026-10-30T01:23:30+08:00",
  "requests": [
   {
    "season": "2026Q4",
@@ -14,12 +14,12 @@
   {
    "season": "2026Q3",
    "market": "sii",
-   "rows": 18
+   "rows": 30
   },
   {
    "season": "2026Q3",
    "market": "otc",
-   "rows": 24
+   "rows": 30
   },
   {
    "season": "2026Q2",
@@ -29,7 +29,7 @@
   {
    "season": "2026Q2",
    "market": "otc",
-   "rows": 895
+   "rows": 896
   },
   {
    "season": "2026Q1",
@@ -39,7 +39,7 @@
   {
    "season": "2026Q1",
    "market": "otc",
-   "rows": 895
+   "rows": 896
   }
  ],
  "headers": [
@@ -76,7 +76,7 @@
  ],
  "sample": {
   "2026Q3": {
-   "rows": 42,
+   "rows": 60,
    "baseline": "2026-10-29",
    "first": [
     [
@@ -118,7 +118,7 @@
    ]
   },
   "2026Q2": {
-   "rows": 1982,
+   "rows": 1983,
    "baseline": "2026-10-29",
    "first": [
     [
