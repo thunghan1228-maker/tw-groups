@@ -793,6 +793,15 @@ export default {
         return Response.json({ status: "error", error: String(err), items: [] }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/kbar-dojo/quiz" || url.pathname === "/api/kbar-dojo/lessons") {
+      // K 棒型態道場（2026-10-30）：後端用日K歷史掃出五種型態的真實案例出題；題目每次隨機、案例池剛建好前會回 building，都不快取
+      try {
+        const lessons = url.pathname.endsWith("/lessons");
+        return await proxyHanstockBars("/api/hub/kbar-dojo/" + (lessons ? "lessons" : "quiz" + url.search), 0);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/big-holder") {
       // 老師版大戶%（2026-10-18：同秒同方向併單 ≥7 張、開盤第一筆算賣、÷ 近 5 日平均成交值），今日功課用，20 秒快取
       try {

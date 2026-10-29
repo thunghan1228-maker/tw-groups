@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 00:06:14";
+const BUILD_STAMP = "2026-10-30 01:00:04";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2174,6 +2174,33 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   #hwInner .td-rbtn.off{opacity:.6;}
   #hwInner .td-param,#hwInner .td-gchip,#hwInner .td-rbtn,#hwInner .td-view{font-weight:800;}
   #hwInner .td-tags i,#hwInner .lg-src,#hwInner .mw-pill,#hwInner .td-chip{font-weight:800;}
+  /* K 棒型態道場（2026-10-30 使用者：照老師 zhuang.tw/kbar 做第一版；放在研究室的「🕯️ K棒道場」分頁，開獨立視窗）：上課五堂、10 題真實日K考試、跑圖、本機成績 */
+  .dj-wrap{max-width:820px;margin:0 auto;padding:4px 2px 18px;}
+  .dj-hero{background:linear-gradient(135deg,#3b2f26,#2a211b);border:1px solid var(--line);border-radius:14px;padding:18px 16px;text-align:center;}
+  .dj-hero h2{margin:0 0 6px;font-size:20px;} .dj-hero p{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.7;text-wrap:balance;}
+  .dj-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .dj-btn{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .dj-btn:hover{border-color:var(--accent);} .dj-btn.pri{background:#8a6f57;border-color:#a98b70;color:#fff;} .dj-btn:disabled{opacity:.45;cursor:default;}
+  .dj-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px;}
+  .dj-tab{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .dj-tab.active{background:#8a6f57;border-color:#a98b70;color:#fff;}
+  .dj-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px;}
+  .dj-card h3{margin:0 0 6px;font-size:16px;} .dj-card p{margin:0 0 8px;font-size:13.5px;line-height:1.75;} .dj-card ul{margin:0 0 8px;padding-left:20px;font-size:13px;line-height:1.8;color:var(--text);}
+  .dj-tip{font-size:12.5px;color:var(--muted);line-height:1.7;}
+  .dj-canvas{display:block;width:100%;height:340px;background:#1d1713;border:1px solid var(--line);border-radius:10px;}
+  .dj-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:0 0 6px;align-items:center;}
+  .dj-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:4px;vertical-align:middle;}
+  .dj-prog{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px;font-size:13px;color:var(--muted);flex-wrap:wrap;}
+  .dj-prog b{color:var(--text);}
+  .dj-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0;}
+  .dj-opt{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 6px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .dj-opt:hover:not(:disabled){border-color:var(--accent);} .dj-opt.ok{background:#1f4d2c;border-color:#3f9b57;} .dj-opt.bad{background:#5a2222;border-color:#b64545;} .dj-opt:disabled{cursor:default;}
+  .dj-res{border-radius:12px;padding:11px 14px;margin:0 0 10px;font-size:14px;line-height:1.75;}
+  .dj-res.ok{background:#1b3a25;border:1px solid #3f9b57;} .dj-res.bad{background:#3d1f1f;border:1px solid #b64545;}
+  .dj-res b.big{font-size:16px;}
+  .dj-run{font-size:13px;line-height:1.8;} .dj-run .up{color:var(--up);font-weight:800;} .dj-run .down{color:var(--down);font-weight:800;}
+  .dj-hist{width:100%;border-collapse:collapse;font-size:13px;} .dj-hist th,.dj-hist td{padding:5px 8px;border-top:1px solid var(--line);text-align:left;} .dj-hist th{color:var(--muted);font-size:12px;border-top:none;}
+  .dj-bar{height:8px;background:#2a211b;border-radius:4px;overflow:hidden;min-width:70px;} .dj-bar i{display:block;height:100%;background:#8a6f57;}
   /* 研究室：國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar） */
   .mc-meta{font-size:12px;color:var(--muted);margin:2px 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
   .mc-meta b{color:var(--text);}
@@ -4092,6 +4119,19 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="cm-icon-btn" id="labClose" aria-label="關閉">✕</button>
     </div>
     <div id="labBody"></div>
+  </div>
+</div>
+<!-- 2026-10-30 使用者：K 棒型態道場（照老師 zhuang.tw/kbar 做第一版），從研究室的「🕯️ K棒道場」分頁打開 -->
+<div class="chips-modal" id="dojoModal" hidden>
+  <div class="chips-inner" id="dojoInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">🕯️ K棒型態道場</div>
+        <div class="chips-sub">先上五堂型態課，再用真的線圖考試：框起來的K棒是哪一種型態？答完還能「跑圖」看後面 10 天怎麼走。型態的量化條件是我們自己的示範值，僅供教學，不是買賣建議。</div>
+      </div>
+      <button class="cm-icon-btn" id="dojoClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="dojoBody"></div>
   </div>
 </div>
 <!-- 2026-10-17 使用者：機器人代碼面板（照對方 Line 機器人：輸入代碼回名單） -->
@@ -16634,7 +16674,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 00:06:14';
+const BUILD_STAMP = '2026-10-30 01:00:04';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20619,10 +20659,10 @@ const GUIDE_TOOLS = [
     b: ['一週出獄時間表、今日入獄、嫌疑名單門檻', '打代號查前科：以前被關過幾次'] },
   { t: '估值河流圖', label: '估值河流圖', v: 'tb-river', tags: ['盤後'], d: '把股價放進本益比河道裡，看現在是便宜、合理還是貴。',
     b: ['河道四區＋分水嶺', '「均線分數 ≥10 × 便宜區」清單：位置強又不貴的'] },
-  { t: '研究室', label: '研究室', v: 'tb-lab', tags: ['大方向'], d: '盤勢以外的大方向，五個分頁：',
+  { t: '研究室', label: '研究室', v: 'tb-lab', tags: ['大方向'], d: '盤勢以外的大方向，六個分頁：',
     b: ['🌐 國際大事行事曆：非農、CPI、聯準會……台灣時間幾點公布、前值預期公布值，附名詞小學堂', '🛡 資金保護傘：融資水位、加權／櫃買是否跌破月線季線，合成「收傘／備傘／半開／全開」',
       '📉 外資空單：外資台指期淨未平倉＋當日增減、外資買權／賣權、散戶小台／微台多空比、P/C、三大法人現貨買賣超（每天 15:40 更新）',
-      '👥 內部人：董監、經理人每月加碼減碼，疊上 400 張大戶比', '🎫 抽籤股：可以抽籤的新股、增資股，承銷價、收盤、獲利空間、抽籤日，還有最近的中籤率'] },
+      '👥 內部人：董監、經理人每月加碼減碼，疊上 400 張大戶比', '🎫 抽籤股：可以抽籤的新股、增資股，承銷價、收盤、獲利空間、抽籤日，還有最近的中籤率', '🕯️ K棒道場：五堂型態課（紅劍、黑豹、黑飛舞、三角收斂、穿山惡龍）＋10 題真實日K考試，答完還能跑圖看後 10 天'] },
 ];
 const GUIDE_FAQ = [
   ['資料多久更新一次？', '盤中報價、訊號每 15 秒更新；盤後資料（法人、處置、融資、營收、集保）在官方公布後自動抓進來，各工具頁面上都有寫資料日期。休市日不更新，沿用上一個交易日。'],
@@ -20827,7 +20867,7 @@ document.getElementById('guideBody').addEventListener('click', (e) => {
 // ---- 研究室：國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar 做，含名詞小學堂）----
 // 後端 /api/macro-calendar：TradingView 經濟日曆（美／中／日／歐）每小時更新公布值，加台指期結算、美股季度結算、公司法說。
 // 版面照老師：頁首更新時間 → 下一件大事倒數 → 全部／★★ 以上／只看大事篩選 → 依週分段的事件（前值／預期／公布）→ 小學堂。
-const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘'], ['fut', '📉 外資空單'], ['insider', '👥 內部人'], ['ipo', '🎫 抽籤股']];   // 2026-10-17 使用者：抽籤股放研究室   // 2026-10-15 使用者：外資空單放資金保護傘旁邊
+const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘'], ['fut', '📉 外資空單'], ['insider', '👥 內部人'], ['ipo', '🎫 抽籤股'], ['dojo', '🕯️ K棒道場']];   // 2026-10-17 使用者：抽籤股放研究室   // 2026-10-15 使用者：外資空單放資金保護傘旁邊
 const MC_FLAGS = { US: '🇺🇸', CN: '🇨🇳', JP: '🇯🇵', EU: '🇪🇺', TW: '🇹🇼' };
 const MC_FILTERS = [['all', '全部'], ['2', '★★ 以上'], ['3', '只看大事 ★★★']];
 const labState = { tab: (() => { try { const t = localStorage.getItem('labTab'); return LAB_TABS.some((x) => x[0] === t) ? t : 'cal'; } catch (_){ return 'cal'; } })(), timer: null };
@@ -21485,6 +21525,257 @@ function renderLab(){
   body.querySelectorAll('details[data-mc-calls]').forEach((x) => { if (callsOpen.includes(x.dataset.mcCalls)) x.open = true; });
 }
 function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else if (labState.tab === 'fut') fcLoad(false); else if (labState.tab === 'insider') inLoad(false); else if (labState.tab === 'ipo') ipoLoad(false); else mcLoad(false); }
+// ===== K 棒型態道場（2026-10-30 使用者：照老師 zhuang.tw/kbar 做第一版）=====
+// 後端 /api/kbar-dojo/lessons、/api/kbar-dojo/quiz：用我們自己的日K歷史（還原後）掃出五種型態的真實案例；型態的量化條件是示範值，文字是我們自己寫的。
+const DOJO_PATS = [
+  { id: 'sword', label: '紅劍', icon: '🗡️',
+    intro: '盤中一度拉出一根長紅，收盤被賣壓壓回來，留下很長的上影線，當天爆出大量。通常出現在起漲的第一根，像一把劍插在K線上。',
+    points: ['最高價比昨收高 6% 以上（盤中一度長紅）', '上影線佔整根振幅一半以上，而且比昨收的 3% 還長', '量是前 5 天平均的 2.5 倍以上（爆量，等於把上面的賣壓先消化掉）', '起漲第一根：昨天比 4 天前漲不到 8%，收盤離月線不到 12%'],
+    entry: '收盤附近就能進，後面等它噴出；隔天容易出現吞噬劍身的紅K。', defense: '收盤價離最低價 3% 以內，防守最低價；離太遠就防守收盤價。' },
+  { id: 'panther', label: '黑豹', icon: '🐆',
+    intro: '前一天漲停，隔天開高，卻爆量收成一根長黑。這是漲停後的換手黑K：高檔的人在賣、也有人願意接。',
+    points: ['前一天漲停（收盤比前天漲 9.5% 以上，收在最高附近）', '今天開盤比昨收高 1% 以上（開高）', '今天量是昨天的 1.5 倍以上（爆量）', '收長黑：開盤到收盤跌 5% 以上（黑K可以吞掉昨天的紅K，也可以不吞）'],
+    entry: '屬於換手黑，收盤附近進場。', defense: '跌破這根黑K的最低點就出場。' },
+  { id: 'dance', label: '黑飛舞', icon: '💃',
+    intro: '股價跳空創新高，當天卻收了一根黑K；隔天量縮，股價拉回五日線附近，沒有跌破（最多破 2.5%）。創高不追高，等拉回再進。',
+    points: ['黑K那天：開盤跳空在昨天最高價之上，最高價創 60 日新高，收盤比開盤低', '隔天量縮到黑K那天的 75% 以下', '隔天最低價碰到五日線上 3% 以內，收盤沒有跌破五日線 2.5% 以上'],
+    entry: '拉回五日線附近收盤再進場，不追高。', defense: '防守五日線或十日線。' },
+  { id: 'triangle', label: '三角收斂', icon: '🔺',
+    intro: '高點被壓住、一次比一次低；低點一次比一次高；震盪越來越小，量也跟著縮，上下兩條線慢慢靠在一起。',
+    points: ['把前 24～36 根切成三段：每一段的最高價比前一段低 1% 以上、最低價比前一段高 1% 以上', '最後一段的寬度（最高−最低）不到第一段的 65%', '收斂的末端出現第一根長紅（收紅 3.5% 以上、爆量）站上最後一段的高點，就是發動訊號'],
+    entry: '第一根長紅站上壓力線時進場。', defense: '防守突破那根K棒的最低點。' },
+  { id: 'dragon', label: '穿山惡龍', icon: '🐉',
+    intro: '先看趨勢：強勢股、近半年漲三成以上、月線（20 日線）一路往上，像一條龍。股價先跌破月線叫「破惡」，不要追；等它重新站回月線上並放量叫「穿惡」，才是進場訊號。',
+    points: ['近 120 根最高收盤是最低收盤的 1.3 倍以上，月線比 20 根前高 2% 以上', '昨天收在月線下（破惡）', '今天收盤站上月線 3% 以上，量是前 5 天平均的 1.2 倍以上（穿惡）'],
+    entry: '穿惡當天收盤附近進場，量放大更好。', defense: '防守昨天的最低點或月線。' },
+];
+const dojoState = { view: 'home', lessons: null, lessonId: 'sword', quiz: null, qi: 0, score: 0, picks: [], picked: null, run: null, loading: false, err: '', wait: 0, byPat: {} };
+function dojoEsc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+function dojoPat(id){ return DOJO_PATS.find((p) => p.id === id) || DOJO_PATS[0]; }
+function dojoHist(){ try { const h = JSON.parse(localStorage.getItem('dojoHist') || '[]'); return Array.isArray(h) ? h : []; } catch (_){ return []; } }
+function dojoSaveHist(rec){ try { const h = dojoHist(); h.unshift(rec); localStorage.setItem('dojoHist', JSON.stringify(h.slice(0, 30))); } catch (_){} }
+function dojoCssVar(name, fallback){ try { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback; } catch (_){ return fallback; } }
+function dojoMa(closes, n){ return closes.map((_, i) => (i < n - 1 ? null : closes.slice(i - n + 1, i + 1).reduce((a, b) => a + b, 0) / n)); }
+function dojoPct(a, b){ return a > 0 ? (b / a - 1) * 100 : 0; }
+function dojoSign(v){ return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }
+
+// 畫一題的K線圖：bars＝題目那段（前面 lead 根只拿來算均線不畫）、k＝跑圖已經長出幾根、o＝{box, lines, defense, run, exitIdx}
+function dojoDraw(cv, c, k, o){
+  const w = cv.clientWidth || 640, h = cv.clientHeight || 340, dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  const upC = dojoCssVar('--up', '#e6675f'), dnC = dojoCssVar('--down', '#5fae6f'), muted = dojoCssVar('--muted', '#a89c8f');
+  const all = c.bars.concat(c.future.slice(0, k));
+  const full = o.run ? c.bars.concat(c.future) : c.bars;
+  const lead = c.lead, slots = c.bars.length - lead + c.future.length;
+  const padL = 6, padR = 54, padT = 10, padB = 16, volH = 54, gap = 8;
+  const priceH = h - padT - padB - volH - gap, slot = (w - padL - padR) / slots;
+  let hi = -Infinity, lo = Infinity, vmax = 1;
+  for (let i = lead; i < full.length; i++){ hi = Math.max(hi, full[i][2]); lo = Math.min(lo, full[i][3]); vmax = Math.max(vmax, full[i][5]); }
+  if (o.defense && o.run){ lo = Math.min(lo, c.defense); hi = Math.max(hi, c.defense); }
+  const span = (hi - lo) || 1; hi += span * 0.05; lo -= span * 0.05;
+  const Y = (v) => padT + (hi - v) / (hi - lo) * priceH;
+  const X = (i) => padL + (i - lead + 0.5) * slot;
+  g.font = '11px sans-serif'; g.textBaseline = 'middle';
+  for (let t = 0; t <= 4; t++){                       // 橫線與價格
+    const v = lo + (hi - lo) * t / 4, y = Y(v);
+    g.strokeStyle = 'rgba(255,255,255,0.07)'; g.lineWidth = 1; g.beginPath(); g.moveTo(padL, y); g.lineTo(w - padR, y); g.stroke();
+    g.fillStyle = muted; g.textAlign = 'left'; g.fillText(v >= 100 ? v.toFixed(0) : v.toFixed(2), w - padR + 4, y);
+  }
+  if (o.box){                                         // 框起來的K棒
+    const b0 = c.box[0], b1 = c.box[1], x0 = X(b0) - slot * 0.6, x1 = X(b1) + slot * 0.6;
+    g.fillStyle = 'rgba(250,204,21,0.13)'; g.fillRect(x0, padT, x1 - x0, priceH + gap + volH);
+    g.strokeStyle = 'rgba(250,204,21,0.9)'; g.lineWidth = 1.5; g.strokeRect(x0, padT, x1 - x0, priceH + gap + volH);
+  }
+  const bw = Math.max(2, slot * 0.62);
+  for (let i = lead; i < all.length; i++){            // 量
+    const b = all[i], up = b[4] >= b[1], bh = b[5] / vmax * volH;
+    g.fillStyle = up ? upC : dnC; g.globalAlpha = 0.55; g.fillRect(X(i) - bw / 2, h - padB - bh, bw, bh); g.globalAlpha = 1;
+  }
+  const closes = all.map((b) => b[4]);
+  [[5, '#f59e0b'], [20, '#60a5fa']].forEach(([n, col]) => {   // 均線
+    const m = dojoMa(closes, n); g.strokeStyle = col; g.lineWidth = 1.4; g.beginPath(); let on = false;
+    for (let i = lead; i < all.length; i++){ if (m[i] == null) continue; const x = X(i), y = Y(m[i]); if (!on){ g.moveTo(x, y); on = true; } else g.lineTo(x, y); }
+    g.stroke();
+  });
+  for (let i = lead; i < all.length; i++){            // K棒（紅漲綠跌）
+    const b = all[i], up = b[4] >= b[1], col = up ? upC : dnC, x = X(i);
+    g.strokeStyle = col; g.fillStyle = col; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(x, Y(b[2])); g.lineTo(x, Y(b[3])); g.stroke();
+    const y1 = Y(Math.max(b[1], b[4])), y2 = Y(Math.min(b[1], b[4]));
+    g.fillRect(x - bw / 2, y1, bw, Math.max(1.5, y2 - y1));
+  }
+  if (o.lines && c.lines){                             // 三角收斂的上下兩條線（答完才畫）
+    [c.lines.top, c.lines.bottom].forEach((ln) => {
+      const slope = (ln[3] - ln[1]) / Math.max(1, ln[2] - ln[0]), endI = c.bars.length - 1;
+      g.strokeStyle = '#c4b5fd'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(X(ln[0]), Y(ln[1])); g.lineTo(X(ln[2]), Y(ln[3])); g.stroke();
+      g.setLineDash([4, 4]); g.beginPath(); g.moveTo(X(ln[2]), Y(ln[3])); g.lineTo(X(endI), Y(ln[3] + slope * (endI - ln[2]))); g.stroke(); g.setLineDash([]);
+    });
+  }
+  if (o.run){                                         // 跑圖：分隔線、防守線、破防守標記
+    const sx = X(c.bars.length - 1) + slot / 2;
+    g.strokeStyle = 'rgba(255,255,255,0.35)'; g.setLineDash([3, 4]); g.beginPath(); g.moveTo(sx, padT); g.lineTo(sx, padT + priceH); g.stroke(); g.setLineDash([]);
+    g.strokeStyle = '#a78bfa'; g.lineWidth = 1.4; g.setLineDash([6, 4]); g.beginPath(); g.moveTo(padL, Y(c.defense)); g.lineTo(w - padR, Y(c.defense)); g.stroke(); g.setLineDash([]);
+    g.fillStyle = '#c4b5fd'; g.textAlign = 'left'; g.fillText('防守 ' + c.defense, w - padR + 4, Y(c.defense) - 8);
+    if (o.exitIdx != null && o.exitIdx < k){
+      const i = c.bars.length + o.exitIdx, x = X(i);
+      g.fillStyle = '#fbbf24'; g.textAlign = 'center'; g.fillText('▼ 破防守', x, Y(all[i][2]) - 10);
+    }
+  }
+  g.fillStyle = muted; g.textAlign = 'left'; g.fillText(o.dates ? c.bars[lead][0].slice(5) : '', padL, h - 5);
+  g.textAlign = 'right'; g.fillText(o.dates ? all[all.length - 1][0].slice(5) : '', w - padR, h - 5);
+}
+function dojoLegend(){ return '<div class="dj-legend"><span><i style="background:#f59e0b"></i>5 日線</span><span><i style="background:#60a5fa"></i>20 日線（月線）</span><span><i style="background:rgba(250,204,21,.9)"></i>框起來的K棒</span><span>紅漲綠跌；下面是成交量</span></div>'; }
+function dojoCharts(){                                // 畫目前畫面上的圖
+  const st = dojoState, body = document.getElementById('dojoBody'); if (!body) return;
+  const cv = body.querySelector('canvas[data-dj-cv]'); if (!cv) return;
+  if (st.view === 'lessons'){
+    const ex = st.lessons && st.lessons.find((x) => x.pattern === st.lessonId);
+    if (ex) dojoDraw(cv, ex, ex.future.length, { box: true, lines: true, dates: true, run: true, defense: true });   // 上課的案例連後 10 天跟防守線一起畫（右邊那段就是型態之後怎麼走）
+  } else if (st.view === 'quiz' && st.quiz){
+    const q = st.quiz[st.qi], run = st.run;
+    dojoDraw(cv, q, run ? run.k : 0, { box: true, lines: st.picked != null, run: !!run, defense: !!run, exitIdx: run ? run.exitIdx : null, dates: st.picked != null });
+  }
+}
+function dojoFetch(url, done){
+  const st = dojoState;
+  fetch(url, { cache: 'no-store' }).then((r) => r.json()).then((j) => {
+    if (j && j.status === 'building'){
+      st.wait += 1;
+      if (st.wait > 45){ st.loading = false; st.err = '題庫還沒準備好，請稍後再試。'; dojoRender(); return; }
+      st.err = ''; dojoRender();
+      setTimeout(() => { if (!document.getElementById('dojoModal').hidden && st.loading) dojoFetch(url, done); }, 4000);
+      return;
+    }
+    st.loading = false; st.wait = 0;
+    if (!j || j.status !== 'ok'){ st.err = '讀不到題庫（' + dojoEsc((j && (j.status || j.error)) || '連線失敗') + '），稍後再試。'; dojoRender(); return; }
+    st.err = ''; done(j);
+  }).catch(() => { st.loading = false; st.err = '連不到後端，稍後再試。'; dojoRender(); });
+}
+function dojoOpenLessons(){
+  const st = dojoState; st.view = 'lessons'; st.err = '';
+  if (st.lessons){ dojoRender(); return; }
+  st.loading = true; st.wait = 0; dojoRender();
+  dojoFetch('/api/kbar-dojo/lessons', (j) => { st.lessons = j.examples || []; dojoRender(); });
+}
+function dojoStartQuiz(){
+  const st = dojoState; st.view = 'quiz'; st.err = ''; st.loading = true; st.wait = 0; st.quiz = null; st.qi = 0; st.score = 0; st.picks = []; st.picked = null; st.run = null; st.byPat = {};
+  dojoRender();
+  dojoFetch('/api/kbar-dojo/quiz?n=10&seed=' + Math.floor(Math.random() * 1e9), (j) => { st.quiz = j.questions || []; st.qi = 0; dojoRender(); });
+}
+function dojoPick(id){
+  const st = dojoState, q = st.quiz && st.quiz[st.qi]; if (!q || st.picked != null) return;
+  st.picked = id;
+  const ok = id === q.pattern; if (ok) st.score += 1;
+  st.picks.push({ id: q.pattern, pick: id, ok: ok });
+  const b = st.byPat[q.pattern] || (st.byPat[q.pattern] = { n: 0, ok: 0 }); b.n += 1; if (ok) b.ok += 1;
+  dojoRender();
+}
+function dojoNext(){
+  const st = dojoState; clearInterval(dojoTimer); st.run = null; st.picked = null;
+  if (st.qi + 1 >= st.quiz.length){
+    dojoSaveHist({ t: Date.now(), score: st.score, n: st.quiz.length, by: st.byPat });
+    st.view = 'end';
+  } else st.qi += 1;
+  dojoRender();
+}
+let dojoTimer = null;
+function dojoRun(){
+  const st = dojoState, q = st.quiz[st.qi]; if (!q || st.picked == null || st.run) return;
+  const exitIdx = (() => { for (let i = 0; i < q.future.length; i++) if (q.future[i][4] < q.defense) return i; return null; })();
+  st.run = { k: 0, exitIdx: exitIdx, done: false };
+  clearInterval(dojoTimer);
+  dojoTimer = setInterval(() => {
+    if (document.getElementById('dojoModal').hidden || !st.run){ clearInterval(dojoTimer); return; }
+    st.run.k += 1;
+    if (st.run.k >= q.future.length){ st.run.k = q.future.length; st.run.done = true; clearInterval(dojoTimer); dojoRender(); return; }
+    dojoCharts();
+  }, 650);
+  dojoRender();
+}
+function dojoRunSummary(q, run){
+  const entry = q.bars[q.bars.length - 1][4], f = q.future, last = f[f.length - 1][4];
+  const maxUp = Math.max.apply(null, f.map((b) => dojoPct(entry, b[2]))), maxDown = Math.min.apply(null, f.map((b) => dojoPct(entry, b[3])));
+  const cls = (v) => (v >= 0 ? 'up' : 'down');
+  let html = '進場價（型態最後一根收盤）<b>' + entry + '</b>，防守線 <b>' + q.defense + '</b>。後 10 天最高到 <span class="' + cls(maxUp) + '">' + dojoSign(maxUp) + '</span>，最低到 <span class="' + cls(maxDown) + '">' + dojoSign(maxDown) + '</span>。<br>';
+  if (run.exitIdx != null){
+    const ex = f[run.exitIdx][4];
+    html += '第 ' + (run.exitIdx + 1) + ' 天收盤 ' + ex + ' 跌破防守線 → 出場，這筆 <span class="' + cls(dojoPct(entry, ex)) + '">' + dojoSign(dojoPct(entry, ex)) + '</span>。猜對型態不代表一定賺，守住防守點最重要。';
+  } else {
+    html += '10 天都守住防守線，第 10 天收 ' + last + '（<span class="' + cls(dojoPct(entry, last)) + '">' + dojoSign(dojoPct(entry, last)) + '</span>）。' +
+      (last >= entry ? '續抱是對的；賺到一段後可以改守五日線或十日線，把獲利留住。' : '雖然沒破防守線，但 10 天後還在進場價之下，這種就要看量價有沒有配合再決定續抱或減碼。');
+  }
+  return html;
+}
+function dojoHtml(){
+  const st = dojoState;
+  if (st.loading){
+    return '<div class="dj-wrap"><div class="dj-card"><p>' + (st.wait ? '題庫準備中……第一次要掃三年的日K找出真實案例，約 20 秒～1 分鐘（已等 ' + st.wait * 4 + ' 秒）。' : '讀取中……') + '</p></div></div>';
+  }
+  const err = st.err ? '<div class="dj-card"><p style="color:#fbbf24">' + st.err + '</p></div>' : '';
+  if (st.view === 'home'){
+    const h = dojoHist(), best = h.reduce((m, r) => Math.max(m, r.score || 0), 0);
+    const rows = h.slice(0, 8).map((r) => '<tr><td>' + new Date(r.t).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) + '</td><td><b>' + r.score + '</b> / ' + r.n + '</td><td><div class="dj-bar"><i style="width:' + Math.round((r.score / (r.n || 10)) * 100) + '%"></i></div></td></tr>').join('');
+    return '<div class="dj-wrap">' + err + '<div class="dj-hero"><h2>五種神奇K棒，看得懂才敢買</h2><p>紅劍・黑豹・黑飛舞・三角收斂・穿山惡龍。先用五堂課認識它們長什麼樣子；再從真的股票線圖出題，名字先藏起來，猜對了才揭曉；還能「跑圖」看後面 10 天怎麼走、有沒有跌破防守線。</p>' +
+      '<div class="dj-btns"><button type="button" class="dj-btn pri" data-dj="lessons">📖 開始上課</button><button type="button" class="dj-btn" data-dj="quiz">📝 直接考試（10 題）</button></div></div>' +
+      '<div class="dj-card" style="margin-top:10px"><h3>🏆 我的成績' + (h.length ? '（最高 ' + best + ' 分）' : '') + '</h3>' + (h.length ? '<table class="dj-hist"><thead><tr><th>時間</th><th>答對</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' : '<p class="dj-tip">還沒有成績，考一次看看。成績只記在這台裝置上。</p>') + '</div>' +
+      '<div class="dj-tip">型態定義是我們自己整理的示範版本，量化門檻不一定跟任何老師一樣；價格用除權息還原後的日K；案例都是真實歷史資料。僅供教學，不是買賣建議。</div></div>';
+  }
+  if (st.view === 'lessons'){
+    const p = dojoPat(st.lessonId), ex = st.lessons && st.lessons.find((x) => x.pattern === p.id), idx = DOJO_PATS.findIndex((x) => x.id === p.id);
+    const tabs = '<div class="dj-tabs">' + DOJO_PATS.map((x, i) => '<button type="button" class="dj-tab' + (x.id === p.id ? ' active' : '') + '" data-dj-lesson="' + x.id + '">' + x.icon + ' 第 ' + (i + 1) + ' 堂 ' + x.label + '</button>').join('') + '</div>';
+    return '<div class="dj-wrap">' + err + tabs + '<div class="dj-card"><h3>' + p.icon + ' ' + p.label + '</h3><p>' + p.intro + '</p><ul>' + p.points.map((x) => '<li>' + x + '</li>').join('') + '</ul>' +
+      '<p><b>進場：</b>' + p.entry + '<br><b>防守：</b>' + p.defense + '</p></div>' +
+      (ex ? '<div class="dj-card"><div class="dj-prog"><span>真實案例：<b>' + ex.code + ' ' + dojoEsc(ex.name) + '</b>・' + ex.date + '</span><span>黃框＝這個型態</span></div>' + dojoLegend() + '<canvas class="dj-canvas" data-dj-cv></canvas></div>' : '<div class="dj-card"><p class="dj-tip">這個型態目前沒有案例。</p></div>') +
+      '<div class="dj-btns"><button type="button" class="dj-btn" data-dj="home">← 回首頁</button>' + (idx > 0 ? '<button type="button" class="dj-btn" data-dj-lesson="' + DOJO_PATS[idx - 1].id + '">上一堂</button>' : '') +
+      (idx < DOJO_PATS.length - 1 ? '<button type="button" class="dj-btn pri" data-dj-lesson="' + DOJO_PATS[idx + 1].id + '">下一堂 →</button>' : '<button type="button" class="dj-btn pri" data-dj="quiz">📝 上完了，去考試</button>') + '</div></div>';
+  }
+  if (st.view === 'quiz' && st.quiz){
+    const q = st.quiz[st.qi], run = st.run, answered = st.picked != null, p = dojoPat(q.pattern);
+    const opts = '<div class="dj-opts">' + DOJO_PATS.map((x) => '<button type="button" class="dj-opt' + (answered ? (x.id === q.pattern ? ' ok' : (x.id === st.picked ? ' bad' : '')) : '') + '" data-dj-pick="' + x.id + '"' + (answered ? ' disabled' : '') + '>' + x.icon + ' ' + x.label + '</button>').join('') + '</div>';
+    let res = '';
+    if (answered){
+      const ok = st.picked === q.pattern;
+      res = '<div class="dj-res ' + (ok ? 'ok' : 'bad') + '"><b class="big">' + (ok ? '✅ 答對了！' : '❌ 差一點') + ' 這是「' + p.label + '」</b><br>股票：<b>' + q.code + ' ' + dojoEsc(q.name) + '</b>・型態在 ' + q.date + (q.pattern === 'triangle' ? '（圖上紫色線是收斂的上下兩條線）' : '') + '<br>' + p.intro + '<br><b>防守：</b>' + dojoEsc(q.defenseNote) + '（這題防守線 ' + q.defense + '）</div>';
+      if (!run) res += '<div class="dj-btns"><button type="button" class="dj-btn" data-dj="run">▶ 跑圖：看後面 10 天</button><button type="button" class="dj-btn pri" data-dj="next">' + (st.qi + 1 >= st.quiz.length ? '看成績 →' : '下一題 →') + '</button></div>';
+      else if (run.done) res += '<div class="dj-res ok dj-run" style="background:#2a211b;border-color:var(--line)">' + dojoRunSummary(q, run) + '</div><div class="dj-btns"><button type="button" class="dj-btn pri" data-dj="next">' + (st.qi + 1 >= st.quiz.length ? '看成績 →' : '下一題 →') + '</button></div>';
+      else res += '<div class="dj-tip">跑圖中……紫色虛線是防守線，收盤跌破就要出場。</div>';
+    }
+    return '<div class="dj-wrap">' + err + '<div class="dj-prog"><span>第 <b>' + (st.qi + 1) + '</b> / ' + st.quiz.length + ' 題</span><span>目前答對 <b>' + st.score + '</b> 題</span></div>' +
+      '<div class="dj-card"><div class="dj-prog"><span>框起來的K棒（黃框）是哪一種型態？</span><span>' + (answered ? '' : '名字、日期先藏起來') + '</span></div>' + dojoLegend() + '<canvas class="dj-canvas" data-dj-cv></canvas></div>' + opts + res + '</div>';
+  }
+  if (st.view === 'end'){
+    const n = st.quiz.length, pct = st.score / n, msg = pct >= 0.9 ? '太厲害了，型態都看得很準！' : pct >= 0.7 ? '不錯喔，把錯的再練一次會更穩。' : '沒關係，先回教室複習一下，再來挑戰。';
+    const per = DOJO_PATS.map((x) => { const b = st.byPat[x.id] || { n: 0, ok: 0 }; return '<tr><td>' + x.icon + ' ' + x.label + '</td><td>' + b.ok + ' / ' + b.n + '</td><td><div class="dj-bar"><i style="width:' + (b.n ? Math.round(b.ok / b.n * 100) : 0) + '%"></i></div></td></tr>'; }).join('');
+    return '<div class="dj-wrap"><div class="dj-hero"><h2>' + st.score + ' / ' + n + ' 題答對</h2><p>' + msg + '</p><div class="dj-btns"><button type="button" class="dj-btn pri" data-dj="quiz">再考一次</button><button type="button" class="dj-btn" data-dj="lessons">回去上課</button><button type="button" class="dj-btn" data-dj="home">首頁</button></div></div>' +
+      '<div class="dj-card" style="margin-top:10px"><h3>各型態答對</h3><table class="dj-hist"><tbody>' + per + '</tbody></table></div></div>';
+  }
+  return err + '<div class="dj-wrap"><div class="dj-btns"><button type="button" class="dj-btn" data-dj="home">← 回首頁</button></div></div>';
+}
+function dojoRender(){
+  const body = document.getElementById('dojoBody'); if (!body || document.getElementById('dojoModal').hidden) return;
+  body.innerHTML = dojoHtml();
+  dojoCharts();
+}
+function openDojo(){
+  const st = dojoState; st.view = 'home'; st.err = ''; st.loading = false; clearInterval(dojoTimer); st.run = null;
+  document.getElementById('dojoModal').hidden = false; dojoRender();
+}
+function closeDojo(){ clearInterval(dojoTimer); dojoState.loading = false; document.getElementById('dojoModal').hidden = true; }
+document.getElementById('dojoClose').addEventListener('click', closeDojo);
+document.getElementById('dojoModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDojo(); });
+document.getElementById('dojoBody').addEventListener('click', (e) => {
+  const t = e.target.closest('[data-dj],[data-dj-lesson],[data-dj-pick]'); if (!t) return;
+  if (t.dataset.djLesson){ dojoState.lessonId = t.dataset.djLesson; dojoState.view = 'lessons'; dojoRender(); return; }
+  if (t.dataset.djPick){ dojoPick(t.dataset.djPick); return; }
+  const a = t.dataset.dj;
+  if (a === 'home'){ dojoState.view = 'home'; dojoState.err = ''; dojoRender(); }
+  else if (a === 'lessons') dojoOpenLessons();
+  else if (a === 'quiz') dojoStartQuiz();
+  else if (a === 'run') dojoRun();
+  else if (a === 'next') dojoNext();
+});
+window.addEventListener('resize', () => { if (!document.getElementById('dojoModal').hidden) dojoCharts(); });
 function openLabPanel(){
   document.getElementById('labModal').hidden = false;
   renderLab();
@@ -21524,6 +21815,7 @@ document.getElementById('labBody').addEventListener('keydown', (e) => {
 document.getElementById('labBody').addEventListener('click', (e) => {
   const t = e.target;
   const tab = t.closest('[data-lab-tab]');
+  if (tab && tab.dataset.labTab === 'dojo'){ openDojo(); return; }   // 2026-10-30 使用者：K 棒型態道場（獨立視窗，不跟著研究室每分鐘重畫）
   if (tab){ labState.tab = tab.dataset.labTab; try { localStorage.setItem('labTab', labState.tab); } catch (_){} renderLab(); labLoad(); return; }
   if (t.closest('[data-fu-reload]')){ fuLoad(true); return; }
   if (t.closest('[data-ipo-reload]')){ ipoLoad(true); return; }
@@ -27449,6 +27741,15 @@ export default {
         return await proxyHanstockBars("/api/hub/kill12", 10);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), items: [] }, { status: 502 });
+      }
+    }
+    if (url.pathname === "/api/kbar-dojo/quiz" || url.pathname === "/api/kbar-dojo/lessons") {
+      // K 棒型態道場（2026-10-30）：後端用日K歷史掃出五種型態的真實案例出題；題目每次隨機、案例池剛建好前會回 building，都不快取
+      try {
+        const lessons = url.pathname.endsWith("/lessons");
+        return await proxyHanstockBars("/api/hub/kbar-dojo/" + (lessons ? "lessons" : "quiz" + url.search), 0);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
       }
     }
     if (url.pathname === "/api/big-holder") {
