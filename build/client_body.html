@@ -8325,7 +8325,9 @@ function race333Model(){
   // 2026-10-16 使用者貼老師 09:06～09:32：今天漲的也會列（雷科 +1.54%⚔️、巨有科技 +1.59%⚔️、希華 +0.94%⚔️），
   // 不要求今天跌 2%、也不要求低於昨收；🔪 也不用今天跌（大毅 +0.70%🔪、台表科 +1.98%🔪⚔️）
   const bladeKnife = (r) => r.yesterday !== null && r.yesterday >= BLADE_PRIOR_RISE;
-  const bladeSword = (r) => r.dayBefore !== null && r.dayBefore >= BLADE_PRIOR_RISE && r.twoDay !== null && r.twoDay < 0;
+  // 2026-10-29 老師 13:31 的 32 列了力積電 ⚔️（前天 +4.52%、昨天 +2.74%、今天 -2.52%，現價還在前天收盤上面 0.16%）：
+  // 劍不用現價跌破前天收盤（10/16 他也列過今天漲的雷科 +1.54%⚔️、巨有 +1.59%⚔️），拿掉這條後 13:31 的名單只多力積電這一檔、一檔都沒多列
+  const bladeSword = (r) => r.dayBefore !== null && r.dayBefore >= BLADE_PRIOR_RISE && r.twoDay !== null;
   // 三段（2026-10-16 對老師 09:10～09:49 八份）：多方打少＝族群前 10 名（🔺）；強空積極＝族群第 26 名以後（🔰）；中間沒標題的一段＝11～25 名（🔽）
   // （09:40 良維族排 10 在多方打少、巨有 12 在中間；09:49 巨有 6 在多方打少、良維 11 在中間）
   const bladeShortFrom = Math.max(1, Math.round(total * 26 / 67));
@@ -9039,6 +9041,20 @@ const BLADE_GROUPS = new Set([...KILL193_GROUPS, ...RANK188_GROUPS, 'AI眼鏡', 
 const RANK183_GROUPS = BLADE_GROUPS;
 // 賽馬多(33)（連帶 30加33、33加34）的族群範圍（2026-10-21 使用者：33 也加 AI眼鏡、太陽能、設備股）：原本 199 的 23 族＋這三族，共 26 族；河流多(34) 用 BLADE_GROUPS（199 的 23 族＋188 的 13 族＋這三族，共 29 族）
 const HORSE_GROUPS = new Set([...KILL193_GROUPS, 'AI眼鏡', '太陽能', '設備股']);
+// 183（多族群排名）的 ⚠️ 個股：多方線以上的族群裡今天漲 HOME183_WARN_PCT% 以上的股票，每族最多 3 檔，漲最多的在前（首頁 183 欄、機器人 183 共用）
+function home183WarnOf(r, half){
+  const g = lastData && Array.isArray(lastData.groups) ? lastData.groups.find((x) => x.name === r.name) : null;
+  if (r.rank > half || !g) return [];
+  return g.stocks.filter((x) => x.price !== null && x.price !== undefined && x.changePercent >= HOME183_WARN_PCT)
+    .map((x) => ({ code: x.code, name: x.name, pct: x.changePercent })).sort((a, b) => b.pct - a.pct).slice(0, 3);   // 2026-10-16 照老師每族最多 2 檔；2026-10-21 使用者改成 3 檔（漲最多的）
+}
+// 2026-10-29 老師 10/29 13:31 的 183：往下掉的族群後面有 🔪⚔️（不寫比例，跟 193 的 ⚔️0.9 不一樣）、往上的有 🐎，跟 193／199 同一套記號；
+// 回傳 {族群名: 記號}（kill193Model 算好的 mark，把 ⚔️ 後面的比例拿掉）
+function rank183Marks(){
+  let km = null;
+  try { km = kill193Model(); } catch (_){}
+  return new Map(km ? km.rows.map((x) => [x.name, String(x.mark || '').replace(/⚔️(?:all|[0-9]+(?:\.[0-9]+)?)/g, '⚔️')]) : []);
+}
 function homeRankRows(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
   const groups = rankedGroupsOf(lastData.groups);
@@ -9587,14 +9603,10 @@ function homeRank4Html(){
   // 10:33 加上光學鏡頭 ⚠️6209今國光（10:02 才 +3.9% 沒列、10:32 +7% 就列），大毅 +4.7%、台表科 +4.7% 都沒列；
   // 他 10:36 的馬火多(30) 沒有銘旺科、卻有大毅和台表科，所以不是 30 的名單，是「族裡漲 5% 以上」（刀劍空收割區跌 5% 的鏡像）。
   const groupByName = new Map(lastData.groups.map((g) => [g.name, g]));
-  const fireOf = (r) => {
-    const g = groupByName.get(r.name);
-    if (r.rank > h.half || !g) return [];
-    return g.stocks.filter((x) => x.price !== null && x.price !== undefined && x.changePercent >= HOME183_WARN_PCT)
-      .map((x) => ({ code: x.code, name: x.name, pct: x.changePercent })).sort((a, b) => b.pct - a.pct).slice(0, 3);   // 2026-10-16 照老師每族最多 2 檔；2026-10-21 使用者改成 3 檔（漲最多的）
-  };
+  const fireOf = (r) => home183WarnOf(r, h.half);
   const rows188 = h.rows.filter((r) => RANK188_GROUPS.has(r.name));
-  const rows183 = h.rows.filter((r) => RANK183_GROUPS.has(r.name));   // 2026-10-21 使用者：183 多加幾個族群
+  const mk183 = rank183Marks();   // 2026-10-29 老師 183 往下掉的族群後面有 🔪⚔️
+  const rows183 = h.rows.filter((r) => RANK183_GROUPS.has(r.name)).map((r) => Object.assign({}, r, { swordMark: r.drop !== null && r.drop > 0 ? (mk183.get(r.name) || '') : '' }));   // 2026-10-21 使用者：183 多加幾個族群
   // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／199 疊在同一欄）、193、刀劍空(32)、33、34、188、177
   const homeLong = homeLongColsHtml();
   return '<div class="home-rank4">' +
@@ -22752,7 +22764,7 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 const botState = { cols: [], restored: false, restoring: false, pendTops: null, world: null, worldAt: 0, worldLoading: false, cache: {} };   // cols＝開著的格子 [{cmd, key, html}]，照點的順序
 const BOT_CODES = [
   ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行，每族列漲幅前三大的股票（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：固定的族群裡，今天衝高 3% 以上、現價漲幅不超過 1.55%，而且三個條件到齊的股票：①1高＝破惡前的最高（不是開盤衝的那根）②5 分K 從 20MA 上面收盤跌破（破惡），現在還在 20MA 下面、20MA 往下彎（均下彎）③破惡之後的反彈（2）沒過 1高，過了 1高就拿掉、要再跌破才重新算；每列最前面是進名單的時間，新的在上面。每一檔分兩個階段：藍色「① 剛轉弱」＝剛跌破 20MA、20MA 下彎、還沒反彈（右邊寫 1高＝停損價）；綠色「② 不過前高可空」＝破了以後反彈出現「2」、沒過 1高（前高）→ 可以空，停損放 1高（還有一條篩選我們沒找到，所以會列得比實際多）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
-  ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
+  ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['183', '多族群排名：固定族群，往下掉的標 🔪⚔️，多方線以上列漲 5% 以上的 ⚠️ 個股'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
   ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'], ['三落空', '熄火落馬斷流：熄火空(30 顛倒)、落馬空(33 顛倒)、斷流空(34 顛倒) 三份都有、而且可放空（有券、非處置股）的弱勢股'],
   ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
@@ -23363,6 +23375,18 @@ function botAnswer(raw){
     let body = down.length ? botLine('------↓(空方・跌)↓------', 'bot-sep bot-sep-bear') + down.map(rankLine).join('') + botLine('------------', 'bot-sep') : '', sep = false;
     rest.forEach((r) => { if (!sep && r.rank > h.half){ body += botLine('------水平------', 'bot-sep'); sep = true; } body += rankLine(r); });
     return wrap('重點族群排名(177)', body);
+  }
+  if (q === '183'){
+    // 2026-10-29 使用者要對老師 10/29 13:31 的 183：族群名次、🔽🔺、🔪⚔️，多方線以上每族列漲 5% 以上的 ⚠️ 個股（漲最多的在前）
+    const mk = rank183Marks();
+    let body = '', sep = false;
+    h.rows.filter((r) => RANK183_GROUPS.has(r.name)).forEach((r) => {
+      if (!sep && r.rank > h.half){ body += botLine('------↑(多方)↑------', 'bot-sep'); sep = true; }
+      body += rankLine(Object.assign({}, r, { mk: mk.get(r.name) || '' }));
+      const warn = home183WarnOf(r, h.half);
+      if (warn.length) body += botLine('⚠️' + warn.map((x) => botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>')).join(' '), 'bot-sub');
+    });
+    return wrap('多族群排名(183)', body || botLine('沒有資料', 'bot-dim'));
   }
   if (q === '188'){
     let body = '', sep = false;
