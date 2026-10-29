@@ -1642,6 +1642,35 @@
   .sp-wkbtn{display:inline-block;margin:0 0 18px;border:1px solid #a78bdb;color:#6d28d9;background:#fff;border-radius:999px;padding:7px 20px;font-size:14.5px;font-weight:700;cursor:pointer;}
   .sp-wkbtn:hover{background:#6d28d9;color:#fff;}
   @media (max-width:760px){ .wk-h1{font-size:30px;} .wk-3{grid-template-columns:1fr;} .wk-tiles b{font-size:30px;} .wk-h2{font-size:21px;} }
+  /* 季報 EPS：族群分析・多觀察分析（2026-10-29 使用者：照老師頁——白卡片、紅／橘／紫／綠框色塊） */
+  .eq-sec{background:#fff;border:1px solid #d9cdee;border-radius:18px;padding:16px 18px;margin:18px 0;}
+  .eq-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 16px;margin-bottom:8px;}
+  .eq-t{font-size:20px;color:#241b36;margin-right:8px;} .eq-head small{font-size:12.5px;color:#6b6385;}
+  .eq-ctl{font-size:13px;color:#4a4066;white-space:nowrap;}
+  .eq-legend{font-size:12.5px;color:#4a4066;line-height:2.1;margin:6px 0 10px;}
+  .eq-pill{display:inline-block;border-radius:999px;padding:2px 12px;font-size:12.5px;font-weight:800;margin:0 4px;border:1px solid transparent;font-style:normal;}
+  .eq-pill.t100{background:#e0485a;color:#fff;} .eq-pill.t30{background:#f08a2c;color:#fff;} .eq-pill.t0{background:#7c4ddb;color:#fff;}
+  .eq-pill.tneg{background:#fff;color:#15803d;border-color:#15803d;} .eq-pill.tnone{background:#fff;color:#6b6385;border-color:#c9bfe0;}
+  .eq-day{font-style:normal;font-size:11.5px;border:1px solid #c9bfe0;border-radius:6px;padding:0 6px;background:#fff;color:#4a4066;white-space:nowrap;} .eq-day.new{border-color:#d9a441;background:#fff7e0;color:#8a5a00;}
+  .eq-grp{display:grid;grid-template-columns:minmax(210px,250px) 130px minmax(0,1fr);gap:12px 16px;align-items:center;border:1px solid #d9cdee;border-left:5px solid #b9acd6;border-radius:14px;padding:12px 14px;margin:10px 0;background:#fff;}
+  .eq-grp.r1{border-left-color:#e9b61e;} .eq-grp.r2{border-left-color:#b6bcc8;} .eq-grp.r3{border-left-color:#c98a4b;}
+  .eq-gname{display:flex;gap:12px;align-items:center;} .eq-gname b{font-size:17px;color:#241b36;}
+  .eq-rank{flex:0 0 auto;width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;background:#e7e1f3;color:#4c1d95;}
+  .eq-grp.r1 .eq-rank{background:#f7d968;color:#5c4400;} .eq-grp.r2 .eq-rank{background:#dfe3ea;color:#444b58;} .eq-grp.r3 .eq-rank{background:#e8c39a;color:#5b3a14;}
+  .eq-gsub{font-size:12px;color:#6b6385;line-height:1.6;margin-top:2px;}
+  .eq-med{text-align:center;} .eq-med .eq-pill{font-size:17px;padding:5px 16px;margin:0;} .eq-med small{display:block;font-size:11px;color:#8b82a3;margin-top:3px;}
+  .eq-cards{display:flex;flex-wrap:wrap;gap:8px;min-width:0;}
+  .eq-card{border:1px solid transparent;border-radius:12px;padding:7px 11px;min-width:128px;text-align:left;cursor:pointer;font-family:inherit;line-height:1.35;color:#fff;}
+  .eq-card .n{font-size:13px;font-weight:800;} .eq-card .e{font-size:22px;font-weight:800;margin:1px 0;} .eq-card .e small{font-size:12px;font-weight:600;margin-left:2px;}
+  .eq-card .y{font-size:11.5px;font-weight:700;} .eq-card .d{font-size:11.5px;margin-top:2px;}
+  .eq-card.t100{background:linear-gradient(135deg,#f0687a,#d83a50);} .eq-card.t30{background:linear-gradient(135deg,#f7a24a,#ef7f1f);} .eq-card.t0{background:linear-gradient(135deg,#9468e6,#6d3fd0);}
+  .eq-card.tneg{background:#fff;color:#241b36;border-color:#15803d;} .eq-card.tnone{background:#fff;color:#241b36;border-color:#cdc3e2;}
+  .eq-card.tpend{background:#fff;color:#756a8c;border:1px dashed #b9acd6;cursor:default;}
+  .eq-card.tneg .e,.eq-card.tnone .e{color:#241b36;}
+  .eq-card .eq-up{color:#ffe08a;} .eq-card .eq-down{color:#c8ffd9;}
+  .eq-card.tneg .eq-up,.eq-card.tnone .eq-up{color:#dc2626;} .eq-card.tneg .eq-down,.eq-card.tnone .eq-down{color:#15803d;}
+  .eq-few{font-size:12.5px;color:#6b6385;margin:8px 2px 0;line-height:1.8;}
+  @media (max-width:900px){ .eq-grp{grid-template-columns:1fr;} .eq-med{text-align:left;display:flex;gap:10px;align-items:center;} .eq-med small{margin:0;} }
   /* 創高黑龍（2026-10-19 使用者：版面跟底色照老師「創高黑龍・績效分析」——米色紙底、紅棕襯線標題、白卡片）：用淺色變數蓋掉 */
   #heilongInner{--bg:#f6f1e7; --panel:#fffdf8; --panel-2:#f3ecdf; --line:#e4d9c6; --text:#3a2c25; --muted:#8a7c6f; --accent:#8b2c22; --up:#c0392b; --down:#1e8a4c;
     --td-serif:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif; color:var(--text);background:var(--bg);}
@@ -12807,7 +12836,7 @@ function swingPageHtml(data){
     '<div class="sp-upd">🕘 <span>每個交易日收盤後整理(法人、集保、主動式 ETF 持股公告後會再更新);名單為系統既有資料整理,不另抓行情;右側可回看近 10 個交易日。<br>整理時間 ' + String(data.generatedAt || '').slice(5, 16).replace('T', ' ') + '</span>' +
     '<select id="swingDateSel" class="sp-sel">' + opts + '</select></div>' +
     '<div class="sp-nav">' + SP_NAV.map((x) => '<a data-sp-go="' + x[0] + '">' + x[1] + '</a>').join('') + '</div>' +
-    '<a class="sp-wkbtn" data-wk-open>📋 收盤觀察股 週分析 →</a>' +   // 2026-10-29 使用者：波段日報新增每週多觀察全方面解析
+    '<a class="sp-wkbtn" data-wk-open>📋 收盤觀察股 週分析 →</a> <a class="sp-wkbtn" data-eq-open>📊 季報 EPS：族群分析・多觀察分析 →</a>' +   // 2026-10-29 使用者：波段日報新增每週多觀察全方面解析
     spFutHtml(data) + spDispoHtml(data) + spEtfHtml(data) + spSummaryHtml(data) + spGroupHtml(data) + spChipsHtml(data) + spTechHtml(data) + spBodyHtml(data) + spFullHtml(data) +
     '<h2 class="sp-h2" id="spHist">回看歷史<small>近 10 個交易日</small></h2><div class="sp-note"><select id="swingDateSel2" class="sp-sel">' + opts + '</select> <span class="sp-mut">產生 ' + String(data.generatedAt || '').slice(0, 16).replace('T', ' ') + '</span></div>' +
     '<details class="sp-more"><summary>資料口徑與判斷規則</summary>' + swingBasisHtml(data) + '<div class="sp-rules">' + ['chips', 'tech', 'body', 'full', 'fund', 'disposition', 'risks'].filter((k) => rules[k]).map((k) => '<p>' + rules[k] + '。</p>').join('') + '</div></details>' +
@@ -12821,7 +12850,7 @@ function renderSwing(){
   document.getElementById('swingInner').classList.toggle('wk-on', weekly);
   if (weekly){
     const sc = document.getElementById('swingInner'), top = sc ? sc.scrollTop : 0;
-    body.innerHTML = wkPageHtml();
+    body.innerHTML = wkState.page === 'eps' ? eqPageHtml() : wkPageHtml();
     if (sc) sc.scrollTop = top;
     return;
   }
@@ -12860,6 +12889,14 @@ document.getElementById('swingTabs').addEventListener('click', (e) => {
   renderSwing();
 });
 document.getElementById('swingBody').addEventListener('change', (e) => {
+  const eqsel = e.target.closest('[data-eq-set]');
+  if (eqsel){
+    const k = eqsel.dataset.eqSet;
+    if (k === 'season') eqState.season = eqsel.value === (eqCache[''] && eqCache[''].season) ? '' : eqsel.value;
+    else eqState[k] = Number(eqsel.value);
+    renderSwing();
+    return;
+  }
   const wsel = e.target.closest('#wkDateSel');
   if (wsel){ wkState.date = wsel.value === (wkCache[''] && wkCache[''].date) ? '' : wsel.value; renderSwing(); return; }
   const sel = e.target.closest('#swingDateSel, #swingDateSel2');
@@ -12869,7 +12906,9 @@ document.getElementById('swingBody').addEventListener('change', (e) => {
   renderSwing();
 });
 document.getElementById('swingBody').addEventListener('click', (e) => {
-  if (e.target.closest('[data-wk-open]')){ wkState.open = true; renderSwing(); const sc = document.getElementById('swingInner'); if (sc) sc.scrollTop = 0; return; }
+  if (e.target.closest('[data-eq-open]')){ wkState.open = true; wkState.page = 'eps'; renderSwing(); const sc = document.getElementById('swingInner'); if (sc) sc.scrollTop = 0; return; }
+  if (e.target.closest('[data-wk-week]')){ wkState.page = 'week'; renderSwing(); const sc = document.getElementById('swingInner'); if (sc) sc.scrollTop = 0; return; }
+  if (e.target.closest('[data-wk-open]')){ wkState.open = true; wkState.page = 'week'; renderSwing(); const sc = document.getElementById('swingInner'); if (sc) sc.scrollTop = 0; return; }
   if (e.target.closest('[data-wk-back]')){ wkState.open = false; renderSwing(); const sc = document.getElementById('swingInner'); if (sc) sc.scrollTop = 0; return; }
   const wkGo = e.target.closest('[data-wk-go]');
   if (wkGo){ const el = document.getElementById(wkGo.dataset.wkGo); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
@@ -12882,7 +12921,7 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
   if (e.target.closest('#swingRevAll')){ swingState.revAll = true; renderSwing(); return; }
   if (e.target.closest('.sw-open-revenue')){ e.preventDefault(); openRevenuePanel(); return; }
   if ((swingState.section === 'etf' || e.target.closest('.sp-etfrow')) && erHandleClick(e)) return;
-  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code], .sp-srow[data-code], .sp-dcard .nmx[data-code], .wk-stk[data-code]');
+  const card = e.target.closest('.sw-card[data-code], .sw-drow[data-code], .sp-srow[data-code], .sp-dcard .nmx[data-code], .wk-stk[data-code], .eq-card[data-code]');
   if (card){
     if (!useFloatingCharts()){
       document.getElementById('swingModal').classList.add('behind-chart');
@@ -12896,7 +12935,7 @@ document.getElementById('swingBody').addEventListener('click', (e) => {
 // 後端 /api/obs-weekly 一次給整份：名單＝形態觀察股（創高黑龍 10 天 ≥2 次＋均線分 ≥15）的收盤版，可回推任何一個交易日；
 // 九個段落：一名單異動、二族群總覽、三功課重點、四已噴在高檔、五月線下（含即將穿越）、六危險個股、七觀察、八四週回測、九功課提醒。
 // 名單是我們自己的系統選的，不是老師的名單，檔數與個股會不一樣。
-const wkState = { open: false, date: '' };
+const wkState = { open: false, date: '', page: 'week' };   // page：week＝收盤觀察股 週分析、eps＝季報 EPS 族群分析・多觀察分析
 const wkCache = {}, wkLoading = {}, wkFailed = {};
 async function ensureWeekly(date){
   const key = date || '';
@@ -13084,8 +13123,142 @@ function wkPageHtml(){
     ' <select id="wkDateSel" class="sp-sel">' + opts + '</select></div>' +
     '<div class="wk-legend"><i class="wk-m wk-red">★</i> 健診強 <i class="wk-m wk-red">☆</i> 中上　<i class="wk-m wk-dark">●</i> 今日漲停　<i class="wk-b high">▲高檔</i> 離月線 ≥' + r.highDist + '% 或 20 日漲 ≥' + r.highRet20 + '%　<i class="wk-b below">月線下</i> 收盤在月線下　<i class="wk-b cross">即將穿越</i> 月線下、距月線 ≤' + r.crossMax + '%　<i class="wk-b brk">破三K低</i>　<i class="wk-b danger">⚠危險</i> 健診基 / 籌 / 技都 <' + r.dangerBelow + '</div>' +
     '<div class="wk-nav">' + WK_NAV.map((x) => '<a data-wk-go="' + x[0] + '">' + x[1] + '</a>').join('') + '</div>' +
+    '<a class="sp-wkbtn" data-eq-open>📊 季報 EPS：族群分析・多觀察分析 →</a>' +
     wkDiffHtml(d) + wkGroupsHtml(d) + wkHomeworkHtml(d) + wkHighHtml(d) + wkBelowHtml(d) + wkDangerHtml(d) + wkWatchHtml(d) + wkBacktestHtml(d) + wkRemindHtml(d) +
     '<div class="wk-foot">資料來源：本站日K與均線分數（收盤後整表）、三大法人買賣超、集保週資料、月營收與季報（公開資訊觀測站）、健診（基本 / 籌碼 / 技術）。表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
+}
+
+// ---- 季報 EPS：族群分析・多觀察分析（2026-10-29 使用者：老師頁的 Q3 季報 EPS 族群分析、多觀察分析）----
+// 後端 /api/eps-board 給一季裡已公布的公司（單季 EPS、去年同季、年增、單季毛利率／營益率／淨利率與上季的差、公布隔日漲跌）；
+// 族群分析＝全部族群，同族已公布 ≥N 檔的照「單季 EPS 年增中位」排；多觀察分析＝週分析的名單（本站形態觀察股）逐檔、沒公布的標 ⏳。
+// 公布日＝我們第一次抓到的日子（財報鏡像一天抓一次），第一次存檔那批日期不確定，隔日漲跌不算（標 —）。
+const eqState = { season: '', minN: 2, topN: 5 };
+const eqCache = {}, eqLoading = {}, eqFailed = {};
+async function ensureEps(season){
+  const key = season || '';
+  if (eqCache[key] || eqLoading[key]) return;
+  if (eqFailed[key] && Date.now() - eqFailed[key].at < 30000) return;
+  eqLoading[key] = true;
+  try {
+    const res = await fetch('/api/eps-board' + (season ? '?season=' + encodeURIComponent(season) : ''));
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || data.status !== 'ok') throw new Error((data && (data.detail || data.error)) || ('HTTP ' + res.status));
+    const idx = {};
+    data.fields.forEach((k, i) => { idx[k] = i; });
+    data.byCode = {};
+    data.list = data.rows.map((r) => { const o = {}; for (const k in idx) o[k] = r[idx[k]]; data.byCode[o.code] = o; return o; });
+    eqCache[key] = data;
+    if (data.season) eqCache[data.season] = data;
+    delete eqFailed[key];
+  } catch (e) {
+    eqFailed[key] = { at: Date.now(), msg: String((e && e.message) || e) };
+  } finally {
+    delete eqLoading[key];
+  }
+  if (wkState.open && wkState.page === 'eps' && !document.getElementById('swingModal').hidden) renderSwing();
+}
+function eqData(){ ensureEps(eqState.season); return eqCache[eqState.season || '']; }
+const EQ_GROUP_INDEX = (() => {
+  const m = {};
+  for (const g of GROUPS) for (const s of g.stocks) (m[s.code] = m[s.code] || []).push(g.name);
+  return m;
+})();
+const eqMedian = (values) => {
+  const s = values.filter((v) => v !== null && v !== undefined).sort((a, b) => a - b);
+  if (!s.length) return null;
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
+function eqStats(codes, by){
+  const pub = codes.map((c) => by[c]).filter(Boolean);
+  const yoys = pub.map((o) => o.yoy).filter((v) => v !== null && v !== undefined);
+  return {
+    total: codes.length, pub, published: pub.length, yoyN: yoys.length, median: eqMedian(yoys),
+    positive: pub.filter((o) => o.tier === 't100' || o.tier === 't30' || o.tier === 't0').length,
+    triple: pub.filter((o) => o.triple).length, rocket: pub.filter((o) => o.rocket).length, turtle: pub.filter((o) => o.turtle).length,
+    next: (() => { const v = pub.map((o) => o.next).filter((x) => x !== null && x !== undefined); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; })(),
+  };
+}
+const EQ_TIER_LABEL = { t100: '≥100%', t30: '30~100%・轉盈', t0: '0~30%', tneg: '年減・虧損', tnone: '去年虧・無' };
+function eqCardTitle(o, d){
+  return o.name + '（' + o.code + '）' + d.label + ' 單季 EPS ' + o.eps + ' 元・去年同季 ' + (wkHas(o.last) ? o.last + ' 元' : '無') + '・年增 ' + (wkHas(o.yoy) ? o.yoy + '%' : '—')
+    + '\n毛利率 ' + (wkHas(o.gm) ? o.gm + '%' : '—') + '（上季 ' + (wkHas(o.gmPrev) ? o.gmPrev + '%' : '—') + '）・營益率 ' + (wkHas(o.om) ? o.om + '%' : '—') + '（上季 ' + (wkHas(o.omPrev) ? o.omPrev + '%' : '—') + '）・淨利率 '
+    + (wkHas(o.nm) ? o.nm + '%' : '—') + '（上季 ' + (wkHas(o.nmPrev) ? o.nmPrev + '%' : '—') + '）' + (o.triple ? '・三率三升' : '')
+    + '\n公布日 ' + (o.announce ? wkMd(o.announce) + (o.known ? '' : ' 前（第一次存檔就在，日期不確定）') : '—');
+}
+function eqCard(o, d, code, name){
+  if (!o) return '<div class="eq-card tpend" title="還沒公布"><div class="n">⏳ ' + wlEsc(code) + ' ' + wlEsc(name || '') + '</div><div class="e">&nbsp;</div><div class="d">未公布</div></div>';
+  const icon = o.rocket ? '🚀 ' : o.turtle ? '🐢 ' : '';
+  const yoy = wkHas(o.yoy) ? '年增 ' + (o.yoy > 0 ? '+' : '') + Math.round(o.yoy) + '%' : o.tier === 't30' ? '轉盈' : o.eps < 0 ? '虧損' : '去年虧・無';
+  const gm = wkHas(o.gmDelta) ? '・毛利 ' + (o.gmDelta >= 0 ? '▲' : '▼') + Math.abs(o.gmDelta).toFixed(1) + 'pp' : '';
+  const next = wkHas(o.next) ? '<b class="' + (o.next > 0 ? 'eq-up' : o.next < 0 ? 'eq-down' : '') + '">' + (o.next > 0 ? '+' : '') + o.next.toFixed(1) + '%</b>' : '—';
+  const day = o.known && o.announce ? '<i class="eq-day' + (o.announce === d.latestDay ? ' new' : '') + '">🗓' + wkMd(o.announce) + '</i>' : '';
+  return '<button type="button" class="eq-card ' + o.tier + '" data-code="' + wlEsc(o.code) + '" data-name="' + wlEsc(o.name) + '" title="' + wlEsc(eqCardTitle(o, d)) + '">' +
+    '<div class="n">' + icon + wlEsc(o.code) + ' ' + wlEsc(o.name) + '</div><div class="e">' + o.eps + '<small>元</small></div>' +
+    '<div class="y">' + yoy + gm + '</div><div class="d">隔日 ' + next + ' ' + day + '</div></button>';
+}
+const eqKey = (o) => (!o ? -1e9 : wkHas(o.yoy) ? o.yoy : o.tier === 't30' ? 50 : -1e6);   // 年增高的在前、轉盈放中間、沒公布的最後
+function eqGroupRow(g, i, d, allMembers){
+  const st = g.st;
+  const cards = (allMembers
+    ? g.members.slice().sort((x, y) => eqKey(d.byCode[y.code]) - eqKey(d.byCode[x.code])).map((m) => eqCard(d.byCode[m.code], d, m.code, m.name))
+    : st.pub.slice().sort((x, y) => eqKey(y) - eqKey(x)).map((o) => eqCard(o, d))).join('');
+  const sub = '已公布 ' + st.published + ' / ' + (allMembers ? '' : '名單 ') + st.total + ' 檔' + (st.total ? '（' + Math.round(st.published / st.total * 100) + '%）' : '') + '・' + st.positive + '/' + st.published + ' 年增為正' +
+    '<br>三率三升 ' + st.triple + '・🚀 ' + st.rocket + '・🐢 ' + st.turtle + (wkHas(st.next) ? '・隔日均 ' + wkPct(st.next) : '');
+  const medal = i === 0 ? ' r1' : i === 1 ? ' r2' : i === 2 ? ' r3' : '';
+  return '<div class="eq-grp' + medal + '"><div class="eq-gname"><span class="eq-rank">' + (i + 1) + '</span><div><b>' + wlEsc(g.name) + '</b><div class="eq-gsub">' + sub + '</div></div></div>' +
+    '<div class="eq-med">' + (wkHas(st.median) ? '<span class="eq-pill ' + (st.median >= 100 ? 't100' : st.median >= 30 ? 't30' : st.median >= 0 ? 't0' : 'tneg') + '">' + (st.median > 0 ? '+' : '') + st.median.toFixed(1) + '%</span>' : '<span class="eq-pill tnone">—</span>') +
+    '<small>EPS 年增中位（' + st.yoyN + ' 檔）</small></div><div class="eq-cards">' + (cards || '<span class="wk-mut">還沒有公布的成員</span>') + '</div></div>';
+}
+function eqLegend(d){
+  return '<div class="eq-legend">顏色 = 單季 EPS 年增：<span class="eq-pill t100">≥100%</span><span class="eq-pill t30">30~100%・轉盈</span><span class="eq-pill t0">0~30%</span><span class="eq-pill tneg">年減・虧損</span><span class="eq-pill tnone">去年虧・無</span>' +
+    '　🚀／🐢 = 單季毛利率比上一季多／少 ' + 2 + ' 個百分點　隔日 = 首次公布後下一個交易日的漲跌　<i class="eq-day new">🗓' + (d.latestDay ? wkMd(d.latestDay) : '—') + '</i> = 最新一天公布</div>';
+}
+function eqSelect(key, options, cur){
+  return '<select data-eq-set="' + key + '" class="sp-sel">' + options.map(([v, label]) => '<option value="' + v + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + label + '</option>').join('') + '</select>';
+}
+function eqGroupsSection(d){
+  const by = d.byCode;
+  const groups = GROUPS.map((g) => ({ name: g.name, members: g.stocks, st: eqStats(g.stocks.map((s) => s.code), by) }));
+  const ok = groups.filter((g) => g.st.published >= eqState.minN && g.st.median !== null).sort((a, b) => b.st.median - a.st.median);
+  const shown = eqState.topN > 0 ? ok.slice(0, eqState.topN) : ok;
+  const few = groups.filter((g) => g.st.published > 0 && g.st.published < eqState.minN).sort((a, b) => b.st.published - a.st.published);
+  const top = ok[0];
+  const sum = top ? '<div class="wk-note"><b>' + wlEsc(top.name) + '</b> 目前季獲利年增最強：已公布 ' + top.st.published + ' 檔，單季 EPS 年增中位 ' + (top.st.median > 0 ? '+' : '') + top.st.median.toFixed(1) + '%（' + top.st.yoyN + ' 檔算得出年增' +
+    (top.st.yoyN < 5 ? '，檔數少、基期小，參考就好' : '') + '）、三率三升 ' + top.st.triple + ' 檔、🚀 ' + top.st.rocket + '・🐢 ' + top.st.turtle + '；族群 ' + top.st.total + ' 檔裡還有 ' + (top.st.total - top.st.published) + ' 檔未公布，截止前再看一次。</div>' : '';
+  return '<div class="eq-sec"><div class="eq-head"><div><b class="eq-t">🧭 族群分析</b><small>' + wlEsc(d.label) + ' 季報・同族已公布 ≥ ' + eqState.minN + ' 檔（共 ' + ok.length + ' 族，列前 ' + shown.length + '）・單季 EPS 年增中位由高到低</small></div>' +
+    '<div class="eq-ctl">至少 ' + eqSelect('minN', [[1, '1 檔'], [2, '2 檔'], [3, '3 檔'], [5, '5 檔']], eqState.minN) + ' 列 ' + eqSelect('topN', [[5, '5 族'], [10, '10 族'], [20, '20 族'], [0, '全部']], eqState.topN) + '</div></div>' +
+    eqLegend(d) + (shown.length ? shown.map((g, i) => eqGroupRow(g, i, d, false)).join('') : '<div class="wk-empty">同族已公布 ≥ ' + eqState.minN + ' 檔的族群還沒有（公布期間陸續出來，截止日前再看）。</div>') + sum +
+    (few.length ? '<div class="eq-few">還不到 ' + eqState.minN + ' 檔的族群：' + few.slice(0, 14).map((g) => wlEsc(g.name) + ' ' + g.st.published).join('、') + (few.length > 14 ? '…' : '') + '</div>' : '') + '</div>';
+}
+function eqWatchSection(d){
+  const w = wkCache[''] || wkCache[wkState.date || ''];
+  if (!w || !w.items){
+    ensureWeekly('');
+    return '<div class="eq-sec"><div class="eq-head"><div><b class="eq-t">🧭 多觀察分析</b></div></div><div class="wk-empty">讀取週分析的名單中…</div></div>';
+  }
+  const by = d.byCode;
+  const groups = {};
+  w.items.forEach((it) => { (groups[it.grp] = groups[it.grp] || []).push({ code: it.code, name: it.name }); });
+  const list = Object.entries(groups).map(([name, members]) => ({ name, members, st: eqStats(members.map((m) => m.code), by) }))
+    .sort((a, b) => (wkHas(b.st.median) ? b.st.median : -1e9) - (wkHas(a.st.median) ? a.st.median : -1e9) || b.st.published - a.st.published);
+  const pubN = w.items.filter((it) => by[it.code]).length;
+  return '<div class="eq-sec"><div class="eq-head"><div><b class="eq-t">🧭 多觀察分析</b><small>' + wkMd(w.date) + ' 收盤觀察股（本站形態觀察股）・' + wlEsc(d.label) + ' 季報・已公布 ' + pubN + ' / ' + w.items.length + ' 檔・有族群照單季 EPS 年增中位排序；逐檔、好壞都標</small></div></div>' +
+    eqLegend(d) + (list.length ? list.map((g, i) => eqGroupRow(g, i, d, true)).join('') : '<div class="wk-empty">名單是空的。</div>') + '</div>';
+}
+function eqPageHtml(){
+  const back = '<a class="wk-back" data-wk-back>← 波段精選日報</a>　<a class="wk-back" data-wk-week>← 收盤觀察股 週分析</a>';
+  const d = eqData();
+  if (!d){
+    const f = eqFailed[eqState.season || ''];
+    return '<div class="wk">' + back + '<div class="wk-empty">' + (f ? '讀取失敗（' + wlEsc(f.msg) + '），30 秒後再試。' : '讀取中…') + '</div></div>';
+  }
+  const opts = (d.seasons || []).map((s) => [s, s.slice(0, 4) + ' Q' + s[5]]);
+  return '<div class="wk">' + back + '<div class="wk-tagrow"><span class="wk-tag">波段日報・季報</span></div><h1 class="wk-h1">季報 EPS　族群分析・多觀察分析</h1>' +
+    '<div class="wk-sub">' + wlEsc(d.label) + ' 季報已公布 ' + d.published + ' 家（財報截止前陸續增加；Q3 到 11/14）・單季 EPS ＝ 這季累計 − 上季累計・年增 ＝ 跟去年同一季比（去年同季是虧損不算百分比）。 季別 ' + eqSelect('season', opts, d.season) + '</div>' +
+    '<div class="wk-basis">📅 資料：公開資訊觀測站綜合損益表彙總（EPS 欄累計，單季 = 這季累計 − 上季累計）；毛利率 = 單季營業毛利 ÷ 單季營業收入；公布日 = 本站第一次抓到的日期（一天抓一次），第一次存檔那批日期不確定、隔日不算；價格資料到 ' + (d.priceDate ? wkMd(d.priceDate) : '—') + '。</div>' +
+    eqGroupsSection(d) + eqWatchSection(d) +
+    '<div class="wk-foot">表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
 }
 
 // ---- 創高黑龍（黑龍回測）獨立面板：2026-10-04 使用者，從下午報分離出來 ----
