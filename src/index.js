@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 20:48:19";
+const BUILD_STAMP = "2026-10-29 20:51:15";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -16580,7 +16580,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 20:48:19';
+const BUILD_STAMP = '2026-10-29 20:51:15';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25579,7 +25579,7 @@ setTimeout(() => { patLoad(true); }, 3000);
 setInterval(() => { patLoad(false); }, 10 * 60e3);
 // ---- 每日加權指數分析（2026-10-23 使用者：搜尋框下面空的地方加「每日加權指數分析」，滑過去或按下去看）----
 // 資料：/api/fund-umbrella（加權日K收盤、均線、融資水位、資金保護傘點數）＋ /api/futures-chips（外資現貨買賣超、外資台指期淨未平倉）；
-// 加權當天開高低、成交值（後端新存）有的話多講「收在當天最低」「量能」，沒有就略過。全部是規則自動寫出來的，每天收盤後（晚上 21:40 以後）更新，不是買賣建議。
+// 加權當天開高低、成交值（後端新存）有的話多講「收在當天最低」「量能」，沒有就略過。全部是規則自動寫出來的，每天收盤後（約 15:30 以後；融資晚上 21:40 後補）更新，不是買賣建議。
 // ---- 指數均線分數（2026-10-24 使用者）：老師均線分數排行右上角「櫃買分數」小卡的算法——跟個股一樣的 15 分均線分數（站上 6 條均線＋創 6 個新高＋3 個排列），
 // 取近 3 日平均、分水嶺 6 分（≥6 多、<6 空）。今天＝前一個收盤算的、明天＝最新收盤算的。後端 /api/index-score（資金保護傘的加權、櫃買日K）；櫃買、加權都做，
 // 放在均線分數排行右上角、首頁櫃買那格、加權指數分析。
@@ -25754,7 +25754,7 @@ function taiexAnalyze(fu, fc){
   }
   const m = fu.margin;
   if (m){
-    mine.push('上市融資餘額 ' + txN(m.balance) + ' 億，離 2020 年以來高點 ' + txN(m.high) + ' 億（' + txMd(m.highDate) + '）' + txSg(m.vsHigh, 1) + '%，近三年百分位 ' + m.percentile + '：' +
+    mine.push('上市融資餘額 ' + txN(m.balance) + ' 億' + (m.date && fu.asOf && m.date !== fu.asOf ? '（' + txMd(m.date) + '，今天的融資晚上 21:40 後才公布）' : '') + '，離 2020 年以來高點 ' + txN(m.high) + ' 億（' + txMd(m.highDate) + '）' + txSg(m.vsHigh, 1) + '%，近三年百分位 ' + m.percentile + '：' +
       (m.percentile >= 90 && m.vsHigh >= -5 ? '在高檔，再破低的話斷頭賣壓會放大' : m.percentile >= 90 ? '雖然從高點退了一些，水位還是高' : m.percentile <= 30 ? '水位低，籌碼乾淨' : '水位普通') + (m.d5 != null ? '；近 5 日融資 ' + (m.d5 < 0 ? '減少 ' : '增加 ') + txN(Math.abs(m.d5)) + ' 億' : ''));
   }
   if (fu.diverge && fu.diverge.text) mine.push(fu.diverge.text);
@@ -25773,7 +25773,7 @@ function taiexAnalyze(fu, fc){
 }
 function taiexHtml(a){
   const li = (it) => '<li>' + it.t + (it.sub && it.sub.length ? '<ul>' + it.sub.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + '</li>';
-  return '<span class="tx-pin">' + (TAIEX.pinned ? '已固定・再按一下或按 Esc 關閉' : '按一下固定') + '</span><h3>加權指數（' + a.title + '）</h3><div class="tx-meta">' + txMd(a.asOf) + ' 收盤資料・每天收盤後（晚上 21:40 以後）自動更新・規則自動判斷</div>' +
+  return '<span class="tx-pin">' + (TAIEX.pinned ? '已固定・再按一下或按 Esc 關閉' : '按一下固定') + '</span><h3>加權指數（' + a.title + '）</h3><div class="tx-meta">' + txMd(a.asOf) + ' 收盤資料・每天收盤後（約 15:30 以後；融資晚上 21:40 後補）自動更新・規則自動判斷</div>' +
     (idxX('taiex') ? '<div class="tx-pop-idx"><b>加權分數</b>（均線分數，滿分 15）：<b>' + idxMd2(idxX('taiex').asOf) + ' 當天 ' + idxX('taiex').daily[idxX('taiex').daily.length - 1].score + ' 分</b> ' + idxTag(idxX('taiex').daily[idxX('taiex').daily.length - 1]) + '；近 3 日平均（分水嶺 ' + IDXS.data.threshold + '：≥ 多、< 空）：今天 <b>' + idxX('taiex').today.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').today) + '　明天 <b>' + idxX('taiex').next.avg.toFixed(2) + '</b> 分 ' + idxTag(idxX('taiex').next) +
       '<br><small>近幾天日分數：' + idxX('taiex').daily.map((r) => idxMd2(r.date) + ' ' + r.score + '（站上 ' + r.ma + '／新高 ' + r.hi + '／排列 ' + r.align + '）').join('、') + '</small></div>' + idxTableHtml() : '') +
     a.sec.map((x) => '<div class="tx-sec">' + x.h + '</div><ul>' + x.items.map(li).join('') + '</ul>').join('') +
