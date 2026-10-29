@@ -114,7 +114,7 @@ jobs:
                                     num(rec, ['營業收入', '收益', '收入', '淨收益', '營業收入合計']),
                                     num(rec, ['營業利益（損失）', '營業利益', '營業利益(損失)']),
                                     num(rec, ['基本每股盈餘（元）', '基本每股盈餘(元)', '基本每股盈餘']),
-                                    pick(rec, ['營業毛利', '淨額']) if pick(rec, ['營業毛利', '淨額']) is not None else pick(rec, ['營業毛利'], ('未實現', '已實現')),
+                                    pick(rec, ['營業毛利'], ('未實現', '已實現', '淨額')) if pick(rec, ['營業毛利'], ('未實現', '已實現', '淨額')) is not None else pick(rec, ['營業毛利', '淨額']),
                                     pick(rec, ['本期淨利']) if pick(rec, ['本期淨利']) is not None else pick(rec, ['淨利'], ('歸屬', '稅前', '綜合'))]
               return rows
 
