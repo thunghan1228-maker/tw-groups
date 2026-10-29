@@ -13212,7 +13212,7 @@ function eqGroupRow(g, i, d, allMembers){
 }
 function eqLegend(d){
   return '<div class="eq-legend">顏色 = 單季 EPS 年增：<span class="eq-pill t100">≥100%</span><span class="eq-pill t30">30~100%・轉盈</span><span class="eq-pill t0">0~30%</span><span class="eq-pill tneg">年減・虧損</span><span class="eq-pill tnone">去年虧・無</span>' +
-    '　🚀／🐢 = 單季毛利率比上一季多／少 ' + 2 + ' 個百分點　隔日 = 首次公布後下一個交易日的漲跌　<i class="eq-day new">🗓' + (d.latestDay ? wkMd(d.latestDay) : '—') + '</i> = 最新一天公布</div>';
+    '　🚀／🐢 = 單季毛利率比上一季多／少 2 個百分點　隔日 = 首次公布後下一個交易日的漲跌' + (d.latestDay ? '　<i class="eq-day new">🗓' + wkMd(d.latestDay) + '</i> = 最新一天公布' : '') + '</div>';
 }
 function eqSelect(key, options, cur){
   return '<select data-eq-set="' + key + '" class="sp-sel">' + options.map(([v, label]) => '<option value="' + v + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + label + '</option>').join('') + '</select>';
