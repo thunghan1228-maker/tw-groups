@@ -510,7 +510,7 @@
   .tx-chip .tx-l1{cursor:pointer;} #otcStrengthBox{cursor:pointer;}   /* 2026-10-29 點價位／整格開指數 K 線圖 */   /* 2026-10-29 使用者：漲紅、跌綠、平盤白字 */
   .ix-up{color:#ff5a5a;font-weight:900;} .ix-dn{color:#3ddc84;font-weight:900;} .ix-flat{color:var(--text);font-weight:900;}
   .ms-lines .ms-idx{font-size:14px;margin-bottom:1px;}
-  .txf-box{flex:0 1 auto;max-width:300px;min-width:170px;align-self:flex-start;display:block;line-height:1.45;}
+  .txf-box{flex:0 1 auto;max-width:300px;min-width:170px;align-self:flex-start;display:block;line-height:1.45;cursor:pointer;}
   .txf-box .txf-l1{display:block;font-size:14px;font-weight:800;white-space:nowrap;} .txf-box .txf-l2{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-top:1px;}
   .tx-pop{position:fixed;z-index:210;width:min(620px,94vw);max-height:78vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.55);padding:14px 16px;font-size:13.5px;line-height:1.6;}
   .tx-pop h3{margin:0 0 4px;font-size:16px;} .tx-pop .tx-meta{color:var(--muted);font-size:11.5px;margin-bottom:6px;}
@@ -3806,7 +3806,7 @@
     </div>
     <button type="button" class="tx-chip" id="taiexChip" aria-haspopup="dialog" aria-expanded="false" title="每日加權指數分析：滑過去看、按一下固定打開"><span class="tx-l1">📈 加權指數分析　讀取中…</span></button>  <!-- 2026-10-23 使用者：每日加權指數分析，滑過去或按下去看；2026-10-29 使用者：移到搜尋框右邊（原本個股震盪的位置），個股震盪往右移 -->
     <div class="market-strength-bar" id="otcStrengthBox"></div>
-    <div class="market-strength-bar txf-box" id="txfBox" title="台指期近月（TAIFEX 日盤即時，每 20 秒更新）"><span class="txf-l1"><b>台指期</b>　讀取中…</span></div>  <!-- 2026-10-29 使用者：個股震盪右邊空白處加台指期近月：價位、漲跌點數、漲跌幅，漲紅跌綠平盤白字 -->
+    <div class="market-strength-bar txf-box" id="txfBox" title="台指期近月（期交所日盤即時，每 20 秒更新）・點一下看 K 線圖"><span class="txf-l1"><b>台指期近月</b>　讀取中…</span></div>  <!-- 2026-10-29 使用者：個股震盪右邊空白處加台指期近月：價位、漲跌點數、漲跌幅，漲紅跌綠平盤白字 -->
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle guide-btn" id="czBtn" title="自訂畫面：選擇哪些按鈕要留著、哪些收起來（畫面比較精簡）">⊙ 自訂</button>  <!-- 2026-10-23 使用者：照莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，勾掉就收起來；全部顯示一鍵復原 -->
@@ -5098,7 +5098,7 @@ function drawChart(){
         const d = new Date(allBars[i].ts);
         if (d.getHours() === 10 && d.getMinutes() === closeMin){ today1030Index = i; break; }
       }
-      if (currentChart.tf === 'm5'){
+      if (currentChart.tf === 'm5' && currentChart.code !== 'IDX_TXF'){   // 台指期 08:45 開盤，第一根不是 905，不畫 905 高低
         const todayFirstBar = allBars[todayStart];
         const p905h = drawHRangeLine(todayStart, today1030Index, todayFirstBar.high, '#ef4444', 4.5, []);
         const p905d = drawHRangeLine(todayStart, today1030Index, todayFirstBar.low, '#6366f1', 4.5, []);
@@ -6004,7 +6004,7 @@ syncForceAlgoBtns();
 // 2026-10-29 使用者：加權指數、櫃買指數各點開 K 線圖（日線、5 分、1 分都要，即時行情；沒有即時就停在最後交易日的收盤）。
 // 用假代號 IDX_TAIEX／IDX_OTC 走同一個 K 線圖：K 棒由 /api/idx-bars/{taiex|otc}?tf=1d|5m|1m 給（加權＝Yahoo ^TWII；櫃買＝後端櫃買 Hub＋FinMind 日K），
 // 格式跟個股的一樣；指數沒有主力、融資、籌碼，那幾個副圖就是空的。
-const IDX_CHARTS = { IDX_TAIEX: { id: 'taiex', name: '加權指數' }, IDX_OTC: { id: 'otc', name: '櫃買指數' } };
+const IDX_CHARTS = { IDX_TAIEX: { id: 'taiex', name: '加權指數' }, IDX_OTC: { id: 'otc', name: '櫃買指數' }, IDX_TXF: { id: 'txf', name: '台指期近月' } };   // 2026-10-29 使用者：台指期近月框點開也要有 K 線圖（日線、5 分、1 分）；1 分、5 分只有最近一個日盤（期交所只給當天），日線有半年
 const isIdxCode = (c) => Object.prototype.hasOwnProperty.call(IDX_CHARTS, c);
 const chartCodeLabel = (c) => (isIdxCode(c) ? '' : c);
 async function fetchIdxBars(code, tf){   // tf：'daily'｜'m5'｜'m1'
@@ -25642,13 +25642,13 @@ function txfRender(){
   const el = document.getElementById('txfBox');
   if (!el) return;
   const d = TXF.d;
-  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期</b>　讀取中…</span>'; return; }
+  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期近月</b>　讀取中…</span>'; return; }
   const sg = (v, n) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + Math.abs(v).toFixed(n);
   const cls = Math.abs(d.change) < 0.0000001 ? 'ix-flat' : d.change > 0 ? 'ix-up' : 'ix-dn';
   const tp = new Date(Date.now() + 8 * 3600e3), hm = tp.toISOString().slice(11, 16);   // 台北現在時間
   const live = d.date === tp.toISOString().slice(0, 10) && hm >= '08:45' && hm <= '13:46' && Date.now() - TXF.at < 120e3;
-  el.innerHTML = '<span class="txf-l1"><b>台指期 ' + (d.month || '') + '月</b> <b class="' + cls + '">' + txN(d.price) + '</b> <span class="' + cls + '">' + sg(d.change, 0) + ' 點　' + sg(d.pct, 2) + '%</span></span>'
-    + '<span class="txf-l2">' + String(d.date || '').slice(5).replace('-', '/') + ' ' + (d.time || '') + (live ? ' 日盤即時' : ' 收盤') + '・量 ' + txN(d.volume) + '</span>';
+  el.innerHTML = '<span class="txf-l1"><b>台指期近月</b> <b class="' + cls + '">' + txN(d.price) + '</b> <span class="' + cls + '">' + sg(d.change, 0) + ' 點　' + sg(d.pct, 2) + '%</span></span>'
+    + '<span class="txf-l2">' + (d.month ? d.month + '月合約・' : '') + String(d.date || '').slice(5).replace('-', '/') + ' ' + (d.time || '') + (live ? ' 日盤即時' : ' 收盤') + '・量 ' + txN(d.volume) + '</span>';
 }
 async function txfLoad(){
   if (TXF.loading) return;
@@ -25662,6 +25662,8 @@ async function txfLoad(){
 }
 setTimeout(txfLoad, 1200);
 setInterval(() => { if (document.visibilityState === 'visible') txfLoad(); }, 20e3);
+// 2026-10-29 使用者：點台指期近月這格開 K 線圖（日線、5 分、1 分，跟加權、櫃買一樣）；近月合約換月（到期日收盤後）期交所的近月自己就換了，名稱不用改
+document.getElementById('txfBox').addEventListener('click', () => { openStockChart('IDX_TXF', '台指期近月'); });
 const txN = (n, d) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 });
 const txSg = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d === undefined ? 2 : d);
 const txMd = (d) => String(d || '').slice(5).replace('-', '/');

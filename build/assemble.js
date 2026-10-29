@@ -463,6 +463,31 @@ function maLiveTtl(url) {
   return !date || date === new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10) ? 30 : 300;
 }
 
+// 期交所 MIS（臺指期）：2026-10-29 使用者要台指期近月的 K 線圖（日線、5 分、1 分）。getQuoteList 找近月合約、getChartData1M 給今天日盤的 1 分K；
+// 同一份資料短時間內共用（globalThis 存活在同一個 isolate 裡），不每個瀏覽器都打一次期交所
+async function txfMis(endpoint, body, ttlMs) {
+  const cache = (globalThis.__txfMis = globalThis.__txfMis || {});
+  const key = endpoint + JSON.stringify(body);
+  const hit = cache[key];
+  if (hit && Date.now() - hit.at < ttlMs) return hit.data;
+  const r = await fetch("https://mis.taifex.com.tw/futures/api/" + endpoint, {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/", "user-agent": "Mozilla/5.0" },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error("期交所 HTTP " + r.status);
+  const data = await r.json();
+  cache[key] = { at: Date.now(), data };
+  return data;
+}
+async function txfNearQuote() {
+  const j = await txfMis("getQuoteList", { MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" }, 8000);
+  const list = (j && j.RtData && j.RtData.QuoteList) || [];
+  const q = list.find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && String(x.CLastPrice == null ? "" : x.CLastPrice).trim() !== "");
+  if (!q) throw new Error("期交所沒有臺指期近月資料");
+  return q;
+}
+
 async function proxyHanstockBars(pathname, cacheSeconds = 20) {
   // 代理到 Railway 上 HanStock 主要服務自己的 Hub API（用 Railway 專屬網址，
   // 不依賴 hanstock.xyz 這個要續約的自訂網域，到期也不受影響）。
@@ -1304,7 +1329,7 @@ export default {
       const idxId = url.pathname.slice("/api/idx-bars/".length);
       const tf = url.searchParams.get("tf") || "5m";
       try {
-        if ((idxId !== "taiex" && idxId !== "otc") || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
+        if ((idxId !== "taiex" && idxId !== "otc" && idxId !== "txf") || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
         const taipeiDay = (sec) => new Date((sec + 8 * 3600) * 1000).toISOString().slice(0, 10);
         const okBar = (b) => b && Number.isFinite(b.open) && Number.isFinite(b.high) && Number.isFinite(b.low) && Number.isFinite(b.close);
         const r2 = (v) => Math.round(v * 100) / 100;
@@ -1333,6 +1358,86 @@ export default {
               continue;
             }
             bars.push(bar);
+          }
+        } else if (idxId === "txf") {
+          // 台指期近月（2026-10-29 使用者）：近月合約自己會換（期交所 getQuoteList 的第一檔月合約，到期日收盤後下個月就變近月）。
+          // 1 分K／5 分K＝今天日盤（08:45～13:45，沒開盤就是最後一個交易日）：期交所只給當天；日線＝期交所官方每日行情的日盤（一般交易時段）近月，今天還沒進官方資料就用即時報價補一根
+          const near = await txfNearQuote();
+          const num = (v) => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
+          const qd = String(near.CDate || "");
+          const qDay = qd.slice(0, 4) + "-" + qd.slice(4, 6) + "-" + qd.slice(6, 8);
+          if (tf === "1m" || tf === "5m") {
+            const cj = await txfMis("getChartData1M", { SymbolID: near.SymbolID, CID: "TXF", MarketType: "0", SymbolType: "F", KindID: "1" }, 8000);
+            const rt = (cj && cj.RtData) || {};
+            const ticks = rt.Ticks || [];
+            const cd = String((rt.Quote && rt.Quote.CDate) || near.CDate || "");
+            const y = Number(cd.slice(0, 4)), mo = Number(cd.slice(4, 6)), dd = Number(cd.slice(6, 8));
+            const m1 = [];
+            for (const t of ticks) {
+              const hh = Number(String(t[0]).slice(0, 2)), mm = Number(String(t[0]).slice(2, 4));
+              const b = { open: num(t[1]), high: num(t[2]), low: num(t[3]), close: num(t[4]), volume: num(t[5]) || 0 };
+              if (!okBar(b) || !Number.isFinite(y) || !Number.isFinite(hh)) continue;
+              // Ticks 的時間是那根 1 分K 的收盤時間（084600＝08:45～08:46），K 棒時間（ts）用開始時間，跟個股一樣
+              b.ts = Date.UTC(y, mo - 1, dd, hh, mm) - 8 * 3600000 - 60000;
+              m1.push(b);
+            }
+            if (tf === "1m") bars = m1;
+            else {
+              const bucket = new Map();
+              for (const b of m1) {
+                const minOfDay = Math.floor((b.ts + 8 * 3600000) / 60000) % 1440;
+                const k = Math.floor((minOfDay - 525) / 5);   // 日盤 08:45 開始，每 5 分鐘一根
+                const g = bucket.get(k);
+                if (!g) bucket.set(k, { ts: b.ts - ((minOfDay - 525) % 5) * 60000, open: b.open, high: b.high, low: b.low, close: b.close, volume: b.volume });
+                else { g.high = Math.max(g.high, b.high); g.low = Math.min(g.low, b.low); g.close = b.close; g.volume += b.volume; }
+              }
+              bars = Array.from(bucket.keys()).sort((a, c) => a - c).map((k) => bucket.get(k));
+            }
+          } else {
+            // 期交所官方每日行情（CSV、Big5，一次最多查一個月）：每天的「一般」（日盤）列裡，到期月份最小的那一檔＝近月
+            const cache = (globalThis.__txfDaily = globalThis.__txfDaily || {});
+            const today = new Date(Date.now() + 8 * 3600000);
+            const months = [];
+            for (let i = 0; i < 6; i++) {
+              const first = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - i, 1));
+              const last = i === 0 ? today : new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0));
+              const f = (d) => d.getUTCFullYear() + "/" + String(d.getUTCMonth() + 1).padStart(2, "0") + "/" + String(d.getUTCDate()).padStart(2, "0");
+              months.push({ key: first.getUTCFullYear() + "-" + (first.getUTCMonth() + 1), start: f(first), end: f(last), current: i === 0 });
+            }
+            const fetchMonth = async (m) => {
+              const hit = cache[m.key];
+              if (hit && Date.now() - hit.at < (m.current ? 300000 : 6 * 3600000)) return hit.rows;
+              const r = await fetch("https://www.taifex.com.tw/cht/3/futDataDown", {
+                method: "POST",
+                headers: { "content-type": "application/x-www-form-urlencoded", referer: "https://www.taifex.com.tw/cht/3/dlFutDailyMarketView", "user-agent": "Mozilla/5.0" },
+                body: "down_type=1&commodity_id=TX&commodity_id2=&queryStartDate=" + encodeURIComponent(m.start) + "&queryEndDate=" + encodeURIComponent(m.end)
+              });
+              if (!r.ok) throw new Error("期交所每日行情 HTTP " + r.status);
+              const text = new TextDecoder("big5").decode(await r.arrayBuffer());
+              const rows = [];
+              for (const line of text.split(String.fromCharCode(10))) {
+                const c = line.split(",");
+                if (c.length < 10 || !/^[0-9]{4}[/][0-9]{2}[/][0-9]{2}$/.test(c[0])) continue;
+                const month = String(c[2]).trim();
+                if (!/^[0-9]{6}$/.test(month) || String(c[17]).trim() !== "一般") continue;
+                const b = { open: num(c[3]), high: num(c[4]), low: num(c[5]), close: num(c[6]) };
+                if (!okBar(b)) continue;
+                rows.push({ day: c[0].replace(/[/]/g, "-"), month, open: b.open, high: b.high, low: b.low, close: b.close, volume: num(c[9]) || 0 });
+              }
+              cache[m.key] = { at: Date.now(), rows };
+              return rows;
+            };
+            const results = await Promise.all(months.map((m) => fetchMonth(m).catch(() => [])));
+            const nearOf = new Map();
+            for (const row of [].concat.apply([], results)) {
+              const cur = nearOf.get(row.day);
+              if (!cur || row.month < cur.month) nearOf.set(row.day, row);
+            }
+            bars = Array.from(nearOf.keys()).sort().map((d) => { const r = nearOf.get(d); return { ts: d + "T00:00:00+00:00", open: r.open, high: r.high, low: r.low, close: r.close, volume: r.volume }; });
+            // 官方資料收盤後才有：今天還沒進來就用即時報價補今天這一根（日盤開高低現價、累計量）
+            const lastDay = bars.length ? bars[bars.length - 1].ts.slice(0, 10) : "";
+            const todayBar = { open: num(near.COpenPrice), high: num(near.CHighPrice), low: num(near.CLowPrice), close: num(near.CLastPrice) };
+            if (qDay > lastDay && okBar(todayBar)) bars.push({ ts: qDay + "T00:00:00+00:00", open: todayBar.open, high: todayBar.high, low: todayBar.low, close: todayBar.close, volume: num(near.CTotalVolume) || 0 });
           }
         } else {
           const hub = "https://hanstock-production-b872.up.railway.app/api/hub/index/otc/";
