@@ -3,6 +3,9 @@
 # 都是「今年累計到該季」的數字；單季＝這季累計 − 上季累計（第 1 季就是累計本身），後端自己減。
 # 觀測站擋 HanStock 的正式站主機，GitHub 的 runner 抓得到：抓最近 11 季，已經存過、而且不是最近 2 季的就不重抓（財報公布後不會改），
 # 每季一份存 tpex/fin-YYYYQn.json，清單存 tpex/fin-index.json，每次結果存 tpex/fin-status.json（查錯用）。抓完戳後端立刻拉回去。
+# 2026-10-29 使用者：老師頁有「Q3 季報 EPS 族群分析、多觀察分析」——要看公布期間陸續出來的那幾家：最近 2 季不到 300 家也存檔（只增不減），
+# 多存營業毛利、稅後淨利（毛利率、三率三升、毛利率比上季多／少 2 個百分點用），並記每家「我們第一次抓到的日期」（seen；算公布隔日漲跌用，
+# 第一次存檔那批 baseline 日期不確定，跟月營收一樣標「前」）。毛利、淨利要往前補，所以最近 4 季每次都重抓。
 name: MOPS financials mirror
 
 on:
@@ -77,6 +80,17 @@ jobs:
                           return None
               return None
 
+          def pick(rec, must, skip=()):
+              # 欄位名稱用「包含」找（觀測站不同產業表頭括號、全半形不一樣）：must 都要有、skip 都不能有
+              for k, v in rec.items():
+                  if all(m in k for m in must) and not any(x in k for x in skip):
+                      v = v.replace(',', '').strip()
+                      try:
+                          return float(v)
+                      except ValueError:
+                          return None
+              return None
+
           def parse(text, market):
               rows = {}
               for tbl in TABLE.findall(text):
@@ -87,6 +101,8 @@ jobs:
                           continue
                       if '公司代號' in cells:
                           head = cells
+                          if 'headers' not in status:
+                              status['headers'] = cells
                           continue
                       if not head or len(cells) != len(head):
                           continue
@@ -97,7 +113,9 @@ jobs:
                       rows[code] = [rec.get('公司名稱', ''), market,
                                     num(rec, ['營業收入', '收益', '收入', '淨收益', '營業收入合計']),
                                     num(rec, ['營業利益（損失）', '營業利益', '營業利益(損失)']),
-                                    num(rec, ['基本每股盈餘（元）', '基本每股盈餘(元)', '基本每股盈餘'])]
+                                    num(rec, ['基本每股盈餘（元）', '基本每股盈餘(元)', '基本每股盈餘']),
+                                    pick(rec, ['營業毛利', '淨額']) if pick(rec, ['營業毛利', '淨額']) is not None else pick(rec, ['營業毛利'], ('未實現', '已實現')),
+                                    pick(rec, ['本期淨利']) if pick(rec, ['本期淨利']) is not None else pick(rec, ['淨利'], ('歸屬', '稅前', '綜合'))]
               return rows
 
           # 最近 11 季（含還沒公布的這一季，沒資料就跳過；河道歷史「長時間」要用）
@@ -108,7 +126,8 @@ jobs:
               q -= 1
               if q == 0:
                   y, q = y - 1, 4
-          recent = set(seasons[:3])   # 最近幾季可能還有公司晚交、更正，每次重抓
+          recent = set(seasons[:4])   # 最近幾季可能還有公司晚交、更正，每次重抓；毛利、淨利是新加的欄位，往前 4 季一起補
+          partial_ok = set(seasons[:2])   # 公布期間（Q3 從 10 月底陸續出來）不到 300 家也存檔，只增不減
           saved = []
           for (y, q) in seasons:
               name = f'tpex/fin-{y}Q{q}.json'
@@ -125,15 +144,34 @@ jobs:
                   except Exception as e:
                       status['requests'].append({'season': f'{y}Q{q}', 'market': market, 'error': str(e)[:300]})
                   time.sleep(5)
-              if len(rows) < 300:   # 還沒公布（或抓失敗）的季，不寫檔
+              old = None
+              if os.path.exists(name):
+                  try:
+                      old = json.load(open(name, encoding='utf-8'))
+                  except Exception:
+                      old = None
+              floor = 1 if (y, q) in partial_ok else 300
+              if len(rows) < floor or (old and len(rows) < len(old.get('rows') or {}) and len(rows) < 300):   # 還沒公布（或抓失敗）的季不寫檔；部分公布的季只增不減
                   if os.path.exists(name):
                       saved.append(f'{y}Q{q}')
                   continue
-              out = {'season': f'{y}Q{q}', 'updated': now.isoformat(timespec='seconds'), 'counts': counts,
-                     'fields': ['name', 'market', 'revenue', 'opIncome', 'eps'], 'rows': rows}
+              # 每家第一次被我們抓到的日期（半夜 0～3 點才跑完的算前一天）；這一季第一次存檔那批是 baseline（公布日不確定）
+              seen_day = (now - timedelta(hours=3)).strftime('%Y-%m-%d')
+              seen = dict((old or {}).get('seen') or {})
+              baseline = (old or {}).get('baseline') or seen_day
+              for code in rows:
+                  seen.setdefault(code, seen_day)
+              out = {'season': f'{y}Q{q}', 'updated': now.isoformat(timespec='seconds'), 'counts': counts, 'baseline': baseline, 'seen': seen,
+                     'fields': ['name', 'market', 'revenue', 'opIncome', 'eps', 'gross', 'net'], 'rows': rows}
               json.dump(out, open(name, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
               saved.append(f'{y}Q{q}')
               print(name, counts)
+          sample = {}
+          for nm in ('tpex/fin-2026Q3.json', 'tpex/fin-2026Q2.json'):
+              if os.path.exists(nm):
+                  d = json.load(open(nm, encoding='utf-8'))
+                  sample[d.get('season')] = {'rows': len(d.get('rows') or {}), 'baseline': d.get('baseline'), 'first': list((d.get('rows') or {}).items())[:3]}
+          status['sample'] = sample
           index = sorted({f[4:10] for f in os.listdir('tpex') if f.startswith('fin-') and len(f) == 15 and f[8] == 'Q'} | set(saved), reverse=True)
           json.dump({'updated': now.isoformat(timespec='seconds'), 'seasons': index}, open('tpex/fin-index.json', 'w', encoding='utf-8'), ensure_ascii=False)
           json.dump(status, open('tpex/fin-status.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
