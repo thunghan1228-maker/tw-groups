@@ -617,11 +617,18 @@
   #launchAlertBox .la-tag.fallen{background:rgba(255,255,255,.25);color:#fff;}
   #launchAlertBox .la-tag.times{background:rgba(0,0,0,.22);color:#fff;}
   /* 形態觀察股跳窗（2026-10-12 使用者：11:30／12:00／12:30／13:00 像發動一樣跳出來） */
-  .launch-alert.k12-alert{background:#047857;top:calc(env(safe-area-inset-top,0px) + 74px);z-index:209;max-width:min(94vw,620px);}
-  #k12AlertBox .launch-alert-head{font-size:18px;}
+  .launch-alert.k12-alert{background:#fff;color:#000;border:2px solid #047857;padding:0 18px 14px;top:calc(env(safe-area-inset-top,0px) + 74px);z-index:209;max-width:min(94vw,620px);}
+  /* 2026-10-29 使用者：1️⃣2️⃣空跳出視窗整個背景改白色——標題列綠底白字；原本白色的字（時間、股號股名、族群）改綠字、漲跌幅綠底白字；下面「1高…不過前高可空」那行改黑字 */
+  #k12AlertBox .launch-alert-head{font-size:18px;background:#047857;color:#fff;margin:0 -18px 8px;padding:12px 18px;border-radius:12px 12px 0 0;}
+  #k12AlertBox .launch-alert-close{background:rgba(255,255,255,.28);color:#fff;}
+  #k12AlertBox .la-row{color:#047857;font-weight:700;border-bottom:1px solid #d1fae5;padding:4px 0;}
+  #k12AlertBox .la-row:last-child{border-bottom:0;}
+  #k12AlertBox .launch-alert-time,#k12AlertBox .alert-stk{color:#047857;}
+  #k12AlertBox .la-pct{display:inline-block;background:#047857;color:#fff;border-radius:6px;padding:0 6px;margin-left:4px;font-weight:800;} #k12AlertBox .la-pct *{color:#fff!important;}
+  #k12AlertBox .la-row small{color:#000!important;opacity:1;font-weight:700;}
   #k12AlertBox{cursor:move;} #k12AlertBox .alert-stk{cursor:pointer;}   /* 2026-10-21 使用者：按著卡片哪裡都能拖 */
   #k12AlertBox .launch-alert-body{max-height:min(55vh,460px);overflow:auto;font-size:14px;}
-  #k12AlertBox .la-row small{display:block;font-weight:600;opacity:.92;}
+  #k12AlertBox .la-row small{display:block;}
   #k12AlertBox .la-headnote{font-size:13px;font-weight:700;opacity:.9;margin-left:6px;margin-right:auto;}
   .launch-alert.obs-alert{background:#4c1d95;max-width:min(94vw,680px);width:min(94vw,680px);z-index:211;}
   .obs-alert .launch-alert-body{max-height:min(70vh,640px);overflow:auto;font-weight:500;font-size:14px;}
@@ -17764,7 +17771,7 @@ function renderK12AlertBox(){
   const oldBody = el.querySelector('.launch-alert-body'), keepTop = oldBody ? oldBody.scrollTop : 0;   // 20 秒重畫一次，捲到哪要留著
   el.innerHTML = '<div class="launch-alert-head">🔻 1️⃣2️⃣空・不過前高可空 ' + rows.length + ' 檔<small class="la-headnote">（第二階段）</small><button type="button" class="launch-alert-close" aria-label="關閉">✕</button></div>' +
     '<div class="launch-alert-body">' + rows.map((r) => '<div class="la-row"><span class="launch-alert-time">' + r.time + '</span> <span class="alert-stk" data-alert-code="' + wlEsc(r.code) +
-      '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + r.name) + '</span>（' + wlEsc(r.group) + '）' + botPct(r.pct) +
+      '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + r.name) + '</span>（' + wlEsc(r.group) + '）<span class="la-pct">' + botPct(r.pct) + '</span>' +
       '<small>1高 ' + k12AlertPx(r.h1) + '（停損）・2 ' + k12AlertPx(r.h2) + ' 不過前高可空（反彈沒過 1高）</small></div>').join('') + '</div>';
   const newBody = el.querySelector('.launch-alert-body');
   if (newBody && keepTop) newBody.scrollTop = keepTop;
