@@ -8782,6 +8782,16 @@ function tdTodaySeq(m){
   const recOk = !!(d && d.status === 'ok' && d.slots && d.date === live.date);
   const seq = (recOk ? Object.keys(d.slots).sort() : []).map((sl) => [sl, tdRecSnap(d.slots[sl], d.date, sl)]);
   const liveSession = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr());
+  // 2026-10-30 使用者：10/29 的 123 跟老師完全不一樣、全部「跑 12:20」。原因：後端 12:20 部署重開，引擎還在回補、12空名單是空的，
+  // 12:20～13:30 那幾個時段送上去的紀錄 12空 都是 0～1 檔（同一時段只收第一份，改不掉），算成「全部同時消失」。
+  // 12空名單突然從 ≥8 檔掉到 ≤1 檔的時段當成沒有紀錄：沿用前一個正常時段的名單；收盤後最後一個時段用最新那份（後端有備份還原）。
+  let good = null;
+  seq.forEach((e, i) => {
+    const sn = e[1], n = (sn.k12 || []).length;
+    if (good && good.length >= 8 && n <= 1){
+      sn.k12 = (i === seq.length - 1 && !liveSession && live.k12 && live.k12.length > 1) ? live.k12 : good;
+    } else good = sn.k12 || [];
+  });
   if (!seq.length || (liveSession && seq[seq.length - 1][0] <= live.slot)) seq.push([live.slot || '最新', live]);
   return seq;
 }
