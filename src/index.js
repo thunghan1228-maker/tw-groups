@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 06:39:03";
+const BUILD_STAMP = "2026-10-30 07:26:28";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1677,12 +1677,17 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .sp-rules p{font-size:12px;color:#6f6258;line-height:1.7;margin:6px 0;}
   #swingInner .sw-card,#swingInner .sw-gcard,#swingInner .sw-drow,#swingInner .sw-noteBox,#swingInner .sw-quote{background:#fffdf8;color:var(--text);}
   #swingInner .sw-code,#swingInner .sw-dcode,#swingInner .sw-gname,#swingInner .sw-def b,#swingInner .sw-risk,#swingInner .sw-hot,#swingInner .sw-readhead,#swingInner .sw-quote{color:#a8321f;}
-  @media (max-width:900px){ .sp-grid4{grid-template-columns:repeat(2,minmax(0,1fr));} .sp-dgrid{grid-template-columns:1fr;} .sp-etf2{grid-template-columns:1fr;} .sp-srow{grid-template-columns:1fr;gap:6px;} .sp-h1{font-size:32px;} .sp-sumtiles{gap:8px;} .sp-sumtile b{font-size:26px;} }
+  @media (max-width:900px){ .sp-grid4{grid-template-columns:repeat(2,minmax(0,1fr));} .sp-dgrid{grid-template-columns:1fr;} .sp-etf2{grid-template-columns:1fr;}   .sp-h1{font-size:32px;} .sp-sumtiles{gap:8px;} .sp-sumtile b{font-size:26px;} }
+  @media (max-width:700px){ .sp-srow{grid-template-columns:1fr;gap:6px;} }   /* 2026-10-30 老師版面到 700px 以下才收成一欄 */
   /* 收盤觀察股 週分析（2026-10-29 使用者：照老師「收盤觀察股 週分析」白紫版面——淺紫底、紫色標題、白卡片、淺紫分隔線）：進到週分析時 #swingInner 換成淺紫變數 */
   #swingInner.wk-on{--bg:#f3eefb; --panel:#fff; --panel-2:#ece4f8; --line:#d9cdee; --text:#241b36; --muted:#756a8c; --accent:#6d28d9; --up:#dc2626; --down:#15803d;background:#f3eefb;color:#241b36;}
   #swingInner.wk-on > .chips-head{background:#fff;border-color:#d9cdee;}
   #swingInner.wk-on .chips-title{color:#6d28d9;}
   #swingInner.wk-on .signal-tab.active{background:#6d28d9;border-color:#6d28d9;}
+  .wk-hw{display:grid;grid-template-columns:150px 160px minmax(0,1fr);gap:14px;background:#fff;border:1px solid #d9cdee;border-left:4px solid #6d28d9;border-radius:10px;padding:12px 16px;margin:10px 0;cursor:pointer;}
+  .wk-hw:hover{background:#faf7ff;} .wk-hw .cd{font-size:24px;font-weight:900;color:#6d28d9;line-height:1.1;} .wk-hw .nm{font-size:16px;font-weight:700;margin-top:2px;} .wk-hw .gs{font-size:11.5px;color:#756a8c;margin-top:2px;}
+  .wk-hw .c2{font-size:14px;} .wk-hw .c2 .px{color:#241b36;} .wk-hw .c3{font-size:13.5px;line-height:1.8;}
+  @media (max-width:700px){ .wk-hw{grid-template-columns:1fr;gap:6px;} }
   .wk{font-family:"Noto Sans TC","PingFang TC",sans-serif;padding:4px 6px 14px;color:#241b36;}
   .wk-back{display:inline-block;color:#6d28d9;font-size:13.5px;font-weight:700;cursor:pointer;margin:2px 0 8px;} .wk-back:hover{text-decoration:underline;}
   .wk-tag{display:inline-block;border:1px solid #a78bdb;color:#6d28d9;font-size:13px;padding:4px 16px;border-radius:6px;background:#fff;letter-spacing:2px;}
@@ -13111,7 +13116,7 @@ function spStockRowHtml(x, green){
   const r = x.radar;
   const sc = x.score === null || x.score === undefined ? '—' : (x.prevScore !== null && x.prevScore !== undefined && x.prevScore !== x.score ? '<span class="sp-mut">' + x.prevScore + '</span>→<b class="up">' + x.score + '</b>' : '<b>' + x.score + '</b>');
   const parts = [];
-  if (r) parts.push('籌碼 <b class="' + spCls(r.chip) + '">' + swPct(r.chip, 1) + '</b><span class="sp-mut">(集保 ' + swMmdd(r.week) + ' 週' + (r.streak > 0 ? ',連 ' + r.streak + ' 週' : '') + (r.rank ? (r.listSize ? '、' + r.listSize + ' 榜第 ' : '、榜第 ') + r.rank : '') + ')</span>');
+  if (r) parts.push('籌碼 <b class="' + spCls(r.chip) + '">' + swPct(r.chip, 1) + '</b><span class="sp-mut">(集保 ' + swMmdd(r.week) + ' 週' + (r.streak > 0 ? ',連 ' + r.streak + ' 週' : '') + (r.rank && r.rank <= 10 ? '、84 榜第 ' + r.rank : '') + ')</span>');
   parts.push('均線 ' + sc);
   parts.push('法人 5 日 ' + (swHas(x.inst5VolPct) ? '<b class="' + spCls(x.inst5) + '">' + swPct(x.inst5VolPct, 1) + '</b>' : '<b class="' + spCls(x.inst5) + '">' + swLots(x.inst5) + '</b>'));
   if (swHas(x.revenueYoy)) parts.push('營收年增 <b class="' + spCls(x.revenueYoy) + '">' + swPct(x.revenueYoy, 0) + '</b>');
@@ -13379,12 +13384,21 @@ function wkGroupsHtml(d){
   ];
   return wkSec('wkGroups', '二、族群總覽', '先看這張', wkTable(cols, d.groups || [], '名單裡沒有股票。'));
 }
+// 功課重點：一檔一張卡（老師版：左邊代號股名族群、中間收盤、右邊四行數字）
+function wkHwCard(it){
+  const ck = it.ck ? '健診 基' + (wkHas(it.ck.fund) ? it.ck.fund : '—') + ' 籌' + (wkHas(it.ck.chip) ? it.ck.chip : '—') + ' 技' + (wkHas(it.ck.tech) ? it.ck.tech : '—') : '';
+  const fin = [wkHas(it.revYoy) ? (it.revYm ? it.revYm.replace('-', '/') + ' ' : '') + '營收 ' + wkPct(it.revYoy) : '', it.epsQ && wkHas(it.epsQ.margin) ? it.epsQ.label + ' 毛利 ' + it.epsQ.margin + '%' : '', it.epsQ && wkHas(it.epsQ.eps) ? 'EPS ' + it.epsQ.eps : '', ck].filter(Boolean).join('・');
+  return '<div class="wk-hw" data-code="' + wlEsc(it.code) + '" data-name="' + wlEsc(it.name) + '"><div class="c1"><div class="cd">' + wlEsc(it.code) + '</div><div class="nm">' + wlEsc(it.name) + ' ' + wkBadges(it) + '</div><div class="gs">' + wlEsc(it.gname || it.grp) + '</div></div>' +
+    '<div class="c2"><span class="px">收 ' + wkPx(it.close) + '</span> ' + wkPct(it.chg) + '</div>' +
+    '<div class="c3"><div>均線 <b>' + it.score + '</b> <span class="wk-ser">(' + (it.scoreSeries || []).join('→') + ')</span>・離月線 ' + wkPct(it.dist20) + '・20 日 ' + wkPct(it.ret20) + '</div>' +
+    '<div>籌碼 ' + (wkHas(it.chipWeek) ? wkPct(it.chipWeek) + (it.chipWeeks ? ' (連 ' + it.chipWeeks + ')' : '') : '—') + '・法人 10 日 ' + wkLots(it.inst10) + '</div>' +
+    (fin ? '<div class="wk-mut">' + fin + '</div>' : '') + '</div></div>';
+}
 function wkHomeworkHtml(d){
-  const r = d.rules || {};
-  const cols = [WK_COL.grp, WK_COL.stk, WK_COL.close, WK_COL.score, WK_COL.dist2, WK_COL.chip, WK_COL.inst10, WK_COL.fin];
-  return wkSec('wkHome', '三、功課重點', '三者同時成立才上功課',
-    '<div class="wk-note">均線分 ≥' + r.homeworkMinScore + '、籌碼不為負（集保週不是減少）、基本面有撐（健診基本面 ≥' + r.homeworkFundMin + '、最新一季 EPS 不是虧損），而且收盤在月線上、不在高檔。單一指標再強都不算。</div>' +
-    wkTable(cols, wkItemsOf(d, 'homework'), '這週沒有三者同時成立的股票。'));
+  const r = d.rules || {}, list = wkItemsOf(d, 'homework');
+  return wkSec('wkHome', '三、功課重點', '均線 ≥' + r.homeworkMinScore + ' + 籌碼不為負 + 基本面有撐，三者同時成立',
+    (d.teacher && d.teacher.exact ? '' : '<div class="wk-note">均線分 ≥' + r.homeworkMinScore + '、籌碼不為負（集保週不是減少）、基本面有撐（健診基本面 ≥' + r.homeworkFundMin + '、最新一季 EPS 不是虧損），而且收盤在月線上、不在高檔。單一指標再強都不算。</div>') +
+    (list.length ? list.map(wkHwCard).join('') : '<div class="wk-empty">這週沒有三者同時成立的股票。</div>'));
 }
 function wkHighHtml(d){
   const cols = [WK_COL.grp, WK_COL.stk, WK_COL.close, WK_COL.score, WK_COL.dist, WK_COL.ret20, WK_COL.inst10, WK_COL.chip, WK_COL.fin];
@@ -13436,6 +13450,13 @@ function wkRemindHtml(d){
     return '<li>' + (i > 0 && i <= 16 ? '<b>' + wlEsc(t.slice(0, i + 1)) + '</b>' + wlEsc(t.slice(i + 1)) : wlEsc(t)) + '</li>';
   }).join('') + '</ol>');
 }
+// 名單的來源說明：有老師公布的名單就以它為基準（2026-10-30 使用者：週分析內容要跟老師一樣），沒有才用我們的規則
+function wkListNote(d, r){
+  const t = d.teacher;
+  if (t && t.exact) return '名單、族群歸類、各段落的個股與順序照老師 ' + wkMd(t.date) + ' 公布的；個股的均線分數、離月線、營收、籌碼、法人是本站自己算的。';
+  if (t) return '名單＝老師 ' + wkMd(t.date) + ' 公布的名單，再加上之後新進觀察池的股票（觀察池＝近 ' + r.poolDays + ' 日創高黑龍 ≥' + r.minHits + ' 次、當天均線分 ≥' + r.minScore + '）；段落是本站的規則分的。';
+  return '這一週沒有老師公布的名單可對，名單＝本站形態觀察股（首頁「多觀察」那欄）近 ' + r.listDays + ' 個交易日內進過觀察池的股票；觀察池＝近 ' + r.poolDays + ' 日創高黑龍 ≥' + r.minHits + ' 次、當天均線分 ≥' + r.minScore + '。超過 ' + r.listDays + ' 個交易日沒再進池才刪除，所以轉弱掉到月線下的還在名單裡；跟老師的名單會不一樣。';
+}
 function wkPageHtml(){
   const back = '<a class="wk-back" data-wk-back>← 波段精選日報</a>';
   const d = wkData();
@@ -13447,7 +13468,7 @@ function wkPageHtml(){
   const opts = (d.dates || []).slice().reverse().map((x) => '<option value="' + x + '"' + (x === d.date ? ' selected' : '') + '>' + x + spWd(x) + ' 收盤</option>').join('');
   return '<div class="wk">' + back + '<div class="wk-tagrow"><span class="wk-tag">波段日報・週分析</span></div>' +
     '<h1 class="wk-h1">收盤觀察股 週分析</h1>' +
-    '<div class="wk-sub">' + wkMd(d.date) + ' 名單（' + d.n + ' 檔）・名單異動 + 月營收 / 季報 + 均線分數 + 籌碼，方便同學做功課。名單＝本站形態觀察股（首頁「多觀察」那欄）近 ' + r.listDays + ' 個交易日內進過觀察池的股票；觀察池＝近 ' + r.poolDays + ' 日創高黑龍 ≥' + r.minHits + ' 次、當天均線分 ≥' + r.minScore + '。超過 ' + r.listDays + ' 個交易日沒再進池才刪除，所以轉弱掉到月線下的還在名單裡。這不是老師的名單，檔數與個股會不一樣。</div>' +
+    '<div class="wk-sub">' + wkMd(d.date) + ' 名單（' + d.n + ' 檔）・名單異動 + 月營收 / 季報 + 均線分數 + 籌碼，方便同學做功課。' + wkListNote(d, r) + '</div>' +
     '<div class="wk-basis">📅 收盤 ' + d.date + '｜均線分數・健診 ' + (b.checkup || '—') + '｜法人 5 / 10 日 = 至 ' + wkMd(b.instTo) + '｜籌碼 = 集保週 ' + (b.chipWeek || '—') + '｜月營收 = ' + (b.revYm ? b.revYm.replace('-', '/') : '—') + '｜季報 = ' + (b.season || '—') + '（公開資訊觀測站彙總；EPS 欄累計 / 單季口徑待確認；營益率＝營業利益 ÷ 營收）' +
     ' <select id="wkDateSel" class="sp-sel">' + opts + '</select></div>' +
     '<div class="wk-legend"><i class="wk-m wk-red">★</i> 健診強 <i class="wk-m wk-red">☆</i> 中上　<i class="wk-m wk-dark">●</i> 今日漲停　<i class="wk-b high">▲高檔</i> 離月線 ≥' + r.highDist + '% 或 20 日漲 ≥' + r.highRet20 + '%　<i class="wk-b below">月線下</i> 收盤在月線下　<i class="wk-b cross">即將穿越</i> 月線下、距月線 ≤' + r.crossMax + '%　<i class="wk-b brk">破三K低</i>　<i class="wk-b danger">⚠危險</i> 健診基 / 籌 / 技都 <' + r.dangerBelow + '</div>' +
@@ -16717,7 +16738,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 06:39:03';
+const BUILD_STAMP = '2026-10-30 07:26:28';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
