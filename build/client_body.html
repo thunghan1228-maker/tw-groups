@@ -510,6 +510,8 @@
   .tx-chip .tx-l1{cursor:pointer;} #otcStrengthBox{cursor:pointer;}   /* 2026-10-29 點價位／整格開指數 K 線圖 */   /* 2026-10-29 使用者：漲紅、跌綠、平盤白字 */
   .ix-up{color:#ff5a5a;font-weight:900;} .ix-dn{color:#3ddc84;font-weight:900;} .ix-flat{color:var(--text);font-weight:900;}
   .ms-lines .ms-idx{font-size:14px;margin-bottom:1px;}
+  .txf-box{flex:0 1 auto;max-width:300px;min-width:170px;align-self:flex-start;display:block;line-height:1.45;}
+  .txf-box .txf-l1{display:block;font-size:14px;font-weight:800;white-space:nowrap;} .txf-box .txf-l2{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-top:1px;}
   .tx-pop{position:fixed;z-index:210;width:min(620px,94vw);max-height:78vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.55);padding:14px 16px;font-size:13.5px;line-height:1.6;}
   .tx-pop h3{margin:0 0 4px;font-size:16px;} .tx-pop .tx-meta{color:var(--muted);font-size:11.5px;margin-bottom:6px;}
   .tx-pop ul{margin:2px 0 8px;padding-left:20px;} .tx-pop ul ul{margin:2px 0;list-style:circle;} .tx-pop li{margin:2px 0;} .tx-pop li > b:first-child{color:var(--accent);}
@@ -3804,6 +3806,7 @@
     </div>
     <button type="button" class="tx-chip" id="taiexChip" aria-haspopup="dialog" aria-expanded="false" title="每日加權指數分析：滑過去看、按一下固定打開"><span class="tx-l1">📈 加權指數分析　讀取中…</span></button>  <!-- 2026-10-23 使用者：每日加權指數分析，滑過去或按下去看；2026-10-29 使用者：移到搜尋框右邊（原本個股震盪的位置），個股震盪往右移 -->
     <div class="market-strength-bar" id="otcStrengthBox"></div>
+    <div class="market-strength-bar txf-box" id="txfBox" title="台指期近月（TAIFEX 日盤即時，每 20 秒更新）"><span class="txf-l1"><b>台指期</b>　讀取中…</span></div>  <!-- 2026-10-29 使用者：個股震盪右邊空白處加台指期近月：價位、漲跌點數、漲跌幅，漲紅跌綠平盤白字 -->
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle guide-btn" id="czBtn" title="自訂畫面：選擇哪些按鈕要留著、哪些收起來（畫面比較精簡）">⊙ 自訂</button>  <!-- 2026-10-23 使用者：照莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，勾掉就收起來；全部顯示一鍵復原 -->
@@ -9388,8 +9391,9 @@ function kill31Model(){
           tip: g.name + '・族裡倒數第 ' + (i + 1) + ' 名' + (x.knife ? '・昨天族裡第 ' + x.ry + ' 名' : '') + (x.sword ? '・前天族裡第 ' + x.r2 + ' 名' : '') });
       });
   });
-  // 2026-10-19 使用者：31 跌幅大的排上面（機器人 31、首頁 31 欄都一樣）
-  return [...out.values()].sort((a, b) => a.pct - b.pct);
+  // 2026-10-19 使用者：31 跌幅大的排上面；2026-10-29 使用者貼老師 13:31 的 31（鈺創 -1.32%、雲豹能源 -1.61%…力旺 -4.52%，跌得少的在上面）
+  // 說「31 的排序改成老師那樣」→ 改成跌幅小的排上面、跌幅大的排下面（機器人 31、首頁 31 欄、訊號中心都一樣）
+  return [...out.values()].sort((a, b) => b.pct - a.pct || a.group.localeCompare(b.group));
 }
 function homeKill31ColHtml(){
   const list = kill31Model();
@@ -25563,6 +25567,33 @@ async function taiexLiveLoad(){
 }
 setTimeout(taiexLiveLoad, 1500);
 setInterval(() => { if (document.visibilityState === 'visible') taiexLiveLoad(); }, 20e3);
+// 2026-10-29 使用者：個股震盪右邊空白處加「台指期近月」：價位、漲跌點數、漲跌幅（先點數再幅度），漲紅跌綠平盤白字。
+// 資料 /api/txf-live（期交所 MIS 日盤近月；盤中即時、收盤後＝收盤價），每 20 秒更新，抓不到就留上一次的。
+const TXF = { d: null, at: 0, loading: false };
+function txfRender(){
+  const el = document.getElementById('txfBox');
+  if (!el) return;
+  const d = TXF.d;
+  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期</b>　讀取中…</span>'; return; }
+  const sg = (v, n) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + Math.abs(v).toFixed(n);
+  const cls = Math.abs(d.change) < 0.0000001 ? 'ix-flat' : d.change > 0 ? 'ix-up' : 'ix-dn';
+  const tp = new Date(Date.now() + 8 * 3600e3), hm = tp.toISOString().slice(11, 16);   // 台北現在時間
+  const live = d.date === tp.toISOString().slice(0, 10) && hm >= '08:45' && hm <= '13:46' && Date.now() - TXF.at < 120e3;
+  el.innerHTML = '<span class="txf-l1"><b>台指期 ' + (d.month || '') + '月</b> <b class="' + cls + '">' + txN(d.price) + '</b> <span class="' + cls + '">' + sg(d.change, 0) + ' 點　' + sg(d.pct, 2) + '%</span></span>'
+    + '<span class="txf-l2">' + String(d.date || '').slice(5).replace('-', '/') + ' ' + (d.time || '') + (live ? ' 日盤即時' : ' 收盤') + '・量 ' + txN(d.volume) + '</span>';
+}
+async function txfLoad(){
+  if (TXF.loading) return;
+  TXF.loading = true;
+  try {
+    const r = await fetch('/api/txf-live');
+    const d = r.ok ? await r.json() : null;
+    if (d && d.status === 'ok' && Number.isFinite(d.price) && Number.isFinite(d.change)){ TXF.d = d; TXF.at = Date.now(); }
+  } catch (e) { /* 抓不到就留上一次 */ }
+  finally { TXF.loading = false; txfRender(); }
+}
+setTimeout(txfLoad, 1200);
+setInterval(() => { if (document.visibilityState === 'visible') txfLoad(); }, 20e3);
 const txN = (n, d) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 });
 const txSg = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d === undefined ? 2 : d);
 const txMd = (d) => String(d || '').slice(5).replace('-', '/');

@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 15:59:17";
+const BUILD_STAMP = "2026-10-29 17:51:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -596,6 +596,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .tx-chip .tx-l1{cursor:pointer;} #otcStrengthBox{cursor:pointer;}   /* 2026-10-29 點價位／整格開指數 K 線圖 */   /* 2026-10-29 使用者：漲紅、跌綠、平盤白字 */
   .ix-up{color:#ff5a5a;font-weight:900;} .ix-dn{color:#3ddc84;font-weight:900;} .ix-flat{color:var(--text);font-weight:900;}
   .ms-lines .ms-idx{font-size:14px;margin-bottom:1px;}
+  .txf-box{flex:0 1 auto;max-width:300px;min-width:170px;align-self:flex-start;display:block;line-height:1.45;}
+  .txf-box .txf-l1{display:block;font-size:14px;font-weight:800;white-space:nowrap;} .txf-box .txf-l2{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-top:1px;}
   .tx-pop{position:fixed;z-index:210;width:min(620px,94vw);max-height:78vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.55);padding:14px 16px;font-size:13.5px;line-height:1.6;}
   .tx-pop h3{margin:0 0 4px;font-size:16px;} .tx-pop .tx-meta{color:var(--muted);font-size:11.5px;margin-bottom:6px;}
   .tx-pop ul{margin:2px 0 8px;padding-left:20px;} .tx-pop ul ul{margin:2px 0;list-style:circle;} .tx-pop li{margin:2px 0;} .tx-pop li > b:first-child{color:var(--accent);}
@@ -3892,6 +3894,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
     </div>
     <button type="button" class="tx-chip" id="taiexChip" aria-haspopup="dialog" aria-expanded="false" title="每日加權指數分析：滑過去看、按一下固定打開"><span class="tx-l1">📈 加權指數分析　讀取中…</span></button>  <!-- 2026-10-23 使用者：每日加權指數分析，滑過去或按下去看；2026-10-29 使用者：移到搜尋框右邊（原本個股震盪的位置），個股震盪往右移 -->
     <div class="market-strength-bar" id="otcStrengthBox"></div>
+    <div class="market-strength-bar txf-box" id="txfBox" title="台指期近月（TAIFEX 日盤即時，每 20 秒更新）"><span class="txf-l1"><b>台指期</b>　讀取中…</span></div>  <!-- 2026-10-29 使用者：個股震盪右邊空白處加台指期近月：價位、漲跌點數、漲跌幅，漲紅跌綠平盤白字 -->
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle guide-btn" id="czBtn" title="自訂畫面：選擇哪些按鈕要留著、哪些收起來（畫面比較精簡）">⊙ 自訂</button>  <!-- 2026-10-23 使用者：照莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，勾掉就收起來；全部顯示一鍵復原 -->
@@ -9476,8 +9479,9 @@ function kill31Model(){
           tip: g.name + '・族裡倒數第 ' + (i + 1) + ' 名' + (x.knife ? '・昨天族裡第 ' + x.ry + ' 名' : '') + (x.sword ? '・前天族裡第 ' + x.r2 + ' 名' : '') });
       });
   });
-  // 2026-10-19 使用者：31 跌幅大的排上面（機器人 31、首頁 31 欄都一樣）
-  return [...out.values()].sort((a, b) => a.pct - b.pct);
+  // 2026-10-19 使用者：31 跌幅大的排上面；2026-10-29 使用者貼老師 13:31 的 31（鈺創 -1.32%、雲豹能源 -1.61%…力旺 -4.52%，跌得少的在上面）
+  // 說「31 的排序改成老師那樣」→ 改成跌幅小的排上面、跌幅大的排下面（機器人 31、首頁 31 欄、訊號中心都一樣）
+  return [...out.values()].sort((a, b) => b.pct - a.pct || a.group.localeCompare(b.group));
 }
 function homeKill31ColHtml(){
   const list = kill31Model();
@@ -16558,7 +16562,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 15:59:17';
+const BUILD_STAMP = '2026-10-29 17:51:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25651,6 +25655,33 @@ async function taiexLiveLoad(){
 }
 setTimeout(taiexLiveLoad, 1500);
 setInterval(() => { if (document.visibilityState === 'visible') taiexLiveLoad(); }, 20e3);
+// 2026-10-29 使用者：個股震盪右邊空白處加「台指期近月」：價位、漲跌點數、漲跌幅（先點數再幅度），漲紅跌綠平盤白字。
+// 資料 /api/txf-live（期交所 MIS 日盤近月；盤中即時、收盤後＝收盤價），每 20 秒更新，抓不到就留上一次的。
+const TXF = { d: null, at: 0, loading: false };
+function txfRender(){
+  const el = document.getElementById('txfBox');
+  if (!el) return;
+  const d = TXF.d;
+  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期</b>　讀取中…</span>'; return; }
+  const sg = (v, n) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + Math.abs(v).toFixed(n);
+  const cls = Math.abs(d.change) < 0.0000001 ? 'ix-flat' : d.change > 0 ? 'ix-up' : 'ix-dn';
+  const tp = new Date(Date.now() + 8 * 3600e3), hm = tp.toISOString().slice(11, 16);   // 台北現在時間
+  const live = d.date === tp.toISOString().slice(0, 10) && hm >= '08:45' && hm <= '13:46' && Date.now() - TXF.at < 120e3;
+  el.innerHTML = '<span class="txf-l1"><b>台指期 ' + (d.month || '') + '月</b> <b class="' + cls + '">' + txN(d.price) + '</b> <span class="' + cls + '">' + sg(d.change, 0) + ' 點　' + sg(d.pct, 2) + '%</span></span>'
+    + '<span class="txf-l2">' + String(d.date || '').slice(5).replace('-', '/') + ' ' + (d.time || '') + (live ? ' 日盤即時' : ' 收盤') + '・量 ' + txN(d.volume) + '</span>';
+}
+async function txfLoad(){
+  if (TXF.loading) return;
+  TXF.loading = true;
+  try {
+    const r = await fetch('/api/txf-live');
+    const d = r.ok ? await r.json() : null;
+    if (d && d.status === 'ok' && Number.isFinite(d.price) && Number.isFinite(d.change)){ TXF.d = d; TXF.at = Date.now(); }
+  } catch (e) { /* 抓不到就留上一次 */ }
+  finally { TXF.loading = false; txfRender(); }
+}
+setTimeout(txfLoad, 1200);
+setInterval(() => { if (document.visibilityState === 'visible') txfLoad(); }, 20e3);
 const txN = (n, d) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 });
 const txSg = (v, d) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d === undefined ? 2 : d);
 const txMd = (d) => String(d || '').slice(5).replace('-', '/');
@@ -27907,6 +27938,34 @@ export default {
         return Response.json({ status: "ok", id: idxId, interval: tf, bars }, { headers: { "cache-control": "public, max-age=" + (tf === "1d" ? 30 : 10) } });
       } catch (err) {
         return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502, headers: { "cache-control": "no-store" } });
+      }
+    }
+    if (url.pathname === "/api/txf-live") {
+      // 2026-10-29 使用者：首頁加「台指期近月」的價位、漲跌點數、漲跌幅。期交所 MIS（日盤）：臺指期近月合約（TXF 後面接月份代碼的第一檔），盤中即時、收盤後＝日盤最後一筆；快取 8 秒
+      try {
+        if (!globalThis.__txfCache || Date.now() - globalThis.__txfCache.at > 8000) {
+          const r = await fetch("https://mis.taifex.com.tw/futures/api/getQuoteList", {
+            method: "POST",
+            headers: { "content-type": "application/json", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/", "user-agent": "Mozilla/5.0" },
+            body: JSON.stringify({ MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" })
+          });
+          if (!r.ok) throw new Error("期交所 HTTP " + r.status);
+          globalThis.__txfCache = { at: Date.now(), data: await r.json() };
+        }
+        const list = (globalThis.__txfCache.data && globalThis.__txfCache.data.RtData && globalThis.__txfCache.data.RtData.QuoteList) || [];
+        const MONTHS = "ABCDEFGHIJKL";
+        const num = (v) => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
+        const q = list.find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null);
+        if (!q) throw new Error("期交所沒有臺指期近月資料");
+        const price = num(q.CLastPrice), ref = num(q.CRefPrice);
+        const change = num(q.CDiff) !== null ? num(q.CDiff) : (ref !== null ? Math.round((price - ref) * 100) / 100 : null);
+        const pct = num(q.CDiffRate) !== null ? num(q.CDiffRate) : (ref ? Math.round(change / ref * 10000) / 100 : null);
+        const d = String(q.CDate || ""), t = String(q.CTime || "");
+        return Response.json({ status: "ok", symbol: q.SymbolID, name: q.DispCName, month: MONTHS.indexOf(q.SymbolID.charAt(3)) + 1, price, ref, change, pct,
+          open: num(q.COpenPrice), high: num(q.CHighPrice), low: num(q.CLowPrice), volume: num(q.CTotalVolume), date: d.slice(0, 4) + "-" + d.slice(4, 6) + "-" + d.slice(6, 8), time: t.slice(0, 2) + ":" + t.slice(2, 4), source: "TAIFEX MIS 日盤" },
+          { headers: { "cache-control": "public, max-age=8" } });
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502, headers: { "cache-control": "no-store" } });
       }
     }
     if (url.pathname === "/api/taiex-live") {

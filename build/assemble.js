@@ -1368,6 +1368,34 @@ export default {
         return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502, headers: { "cache-control": "no-store" } });
       }
     }
+    if (url.pathname === "/api/txf-live") {
+      // 2026-10-29 使用者：首頁加「台指期近月」的價位、漲跌點數、漲跌幅。期交所 MIS（日盤）：臺指期近月合約（TXF 後面接月份代碼的第一檔），盤中即時、收盤後＝日盤最後一筆；快取 8 秒
+      try {
+        if (!globalThis.__txfCache || Date.now() - globalThis.__txfCache.at > 8000) {
+          const r = await fetch("https://mis.taifex.com.tw/futures/api/getQuoteList", {
+            method: "POST",
+            headers: { "content-type": "application/json", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/", "user-agent": "Mozilla/5.0" },
+            body: JSON.stringify({ MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" })
+          });
+          if (!r.ok) throw new Error("期交所 HTTP " + r.status);
+          globalThis.__txfCache = { at: Date.now(), data: await r.json() };
+        }
+        const list = (globalThis.__txfCache.data && globalThis.__txfCache.data.RtData && globalThis.__txfCache.data.RtData.QuoteList) || [];
+        const MONTHS = "ABCDEFGHIJKL";
+        const num = (v) => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
+        const q = list.find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null);
+        if (!q) throw new Error("期交所沒有臺指期近月資料");
+        const price = num(q.CLastPrice), ref = num(q.CRefPrice);
+        const change = num(q.CDiff) !== null ? num(q.CDiff) : (ref !== null ? Math.round((price - ref) * 100) / 100 : null);
+        const pct = num(q.CDiffRate) !== null ? num(q.CDiffRate) : (ref ? Math.round(change / ref * 10000) / 100 : null);
+        const d = String(q.CDate || ""), t = String(q.CTime || "");
+        return Response.json({ status: "ok", symbol: q.SymbolID, name: q.DispCName, month: MONTHS.indexOf(q.SymbolID.charAt(3)) + 1, price, ref, change, pct,
+          open: num(q.COpenPrice), high: num(q.CHighPrice), low: num(q.CLowPrice), volume: num(q.CTotalVolume), date: d.slice(0, 4) + "-" + d.slice(4, 6) + "-" + d.slice(6, 8), time: t.slice(0, 2) + ":" + t.slice(2, 4), source: "TAIFEX MIS 日盤" },
+          { headers: { "cache-control": "public, max-age=8" } });
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502, headers: { "cache-control": "no-store" } });
+      }
+    }
     if (url.pathname === "/api/taiex-live") {
       // 2026-10-29 使用者：首頁加權指數那格要顯示今天（後端加權日資料晚上才更新）。用 Yahoo ^TWII：盤中即時、收盤後就是收盤價，快取 15 秒
       try {
