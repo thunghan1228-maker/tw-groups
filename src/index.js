@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 08:53:52";
+const BUILD_STAMP = "2026-10-29 08:56:03";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1823,7 +1823,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-tags i.td-dt{border-color:#f59e0b;color:#f59e0b;}
   .td-tags i.td-gtag{background:var(--panel-2);}
   .td-tags i.td-big{font-weight:800;}
-  .td-tags i.td-big.deep{background:#4c1d95;color:#fff;border-color:#4c1d95;} .td-tags i.td-big.neg{background:#ede9fe;color:#4c1d95;border-color:#c4b5fd;}
+  .td-tags i.td-big.deep{background:#16a34a;color:#fff;border-color:#16a34a;} .td-tags i.td-big.neg{background:#ede9fe;color:#4c1d95;border-color:#c4b5fd;}
   .td-tags i.td-big.pos{background:#fef3c7;color:#92400e;border-color:#fcd34d;} .td-tags i.td-big.hot{background:#dc2626;color:#fff;border-color:#dc2626;}
   .td-pct{margin-left:auto;font-weight:800;font-size:15px;white-space:nowrap;}
   .td-mk{width:22px;text-align:center;}
@@ -1945,7 +1945,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-count.k12{border-color:#38bdf8;}
   .td-zbtn.dt.on{border-color:#d97706;background:rgba(217,119,6,.12);}
   .td-help i,.td-sum i{font-style:normal;font-size:11px;border-radius:5px;padding:0 6px;border:1px solid var(--line);}
-  .td-help i.td-big.deep{background:#4c1d95;color:#fff;} .td-help i.td-big.neg{background:#ede9fe;color:#4c1d95;}
+  .td-help i.td-big.deep{background:#16a34a;color:#fff;} .td-help i.td-big.neg{background:#ede9fe;color:#4c1d95;}
   .td-help i.td-big.pos{background:#fef3c7;color:#92400e;} .td-help i.td-big.hot{background:#dc2626;color:#fff;}
   .td-help i.td-k12{background:#38bdf8;color:#05324a;} .td-help i.td-fut{background:#166534;color:#fff;}
   #hwInner .td-time{background:#8b2c22;}
@@ -15966,7 +15966,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 08:53:52';
+const BUILD_STAMP = '2026-10-29 08:56:03';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18343,7 +18343,7 @@ function tdTagsHtml(code, ctx, opt){
   if (o.group) t.push('<i class="td-gtag">' + wlEsc(o.group) + '</i>');
   return t.join('');
 }
-// 大戶% 藥丸＋N億（近 5 日均成交值）：≤-10 深紫、負淺紫、正淺黃、≥+5 深黃（老師「開關怎麼看」）
+// 大戶% 藥丸＋N億（近 5 日均成交值）：≤-10 綠底白字、負淺紫、正淺黃、≥+10 紅底白字（2026-10-29 使用者改；老師「開關怎麼看」原本是 ≤-10 深紫、≥+5 深黃）
 function tdBigHtml(row){
   const n = row.avg ? '<i class="td-n" title="近 5 日平均成交值">' + (row.avg >= 1e8 ? Math.round(row.avg / 1e8) : (row.avg / 1e8).toFixed(1)) + '億</i>' : '';
   if (row.big === null || row.big === undefined) return n;
@@ -18906,7 +18906,7 @@ function hwTodayHtml(){
     '<button type="button" class="td-param p-all' + (allOn ? ' on' : '') + '" data-td-param="all">' + (allOn ? '☑' : '☐') + ' 全勾</button>' +
     '<span class="td-rnote">只篩選右邊「刀劍空(32)功課廣播」，下面族群卡不受影響</span></div></div>' +
     '<details class="td-help"><summary>💡 開關怎麼看</summary><div>' +
-    '<p><b>大戶%</b>＝今天同秒併單 ≥7 張的大戶買減大戶賣（開盤第一筆算賣）÷ 近 5 日平均成交值。<i class="td-big neg">大戶 %</i> 負＝大戶在倒貨，<i class="td-big deep">≤ -10</i> 深紫＝倒貨重點股；<i class="td-big pos">大戶 +</i> 正＝大戶在買（對空單不利），<i class="td-big hot">≥ +10</i> 紅底白字＝警訊（不到 +10 維持淡黃色）。<i class="td-n">N億</i>＝近 5 日平均成交值，看流動性夠不夠。數字後面有 * 是今天的 5 分K不完整。</p>' +
+    '<p><b>大戶%</b>＝今天同秒併單 ≥7 張的大戶買減大戶賣（開盤第一筆算賣）÷ 近 5 日平均成交值。<i class="td-big neg">大戶 %</i> 負＝大戶在倒貨，<i class="td-big deep">≤ -10</i> 綠底白字＝倒貨重點股；<i class="td-big pos">大戶 +</i> 正＝大戶在買（對空單不利），<i class="td-big hot">≥ +10</i> 紅底白字＝警訊（不到 +10 維持淡黃色）。<i class="td-n">N億</i>＝近 5 日平均成交值，看流動性夠不夠。數字後面有 * 是今天的 5 分K不完整。</p>' +
     '<p><b>參數</b>決定右邊「刀劍空(32)功課廣播」誰進榜：大戶≤-10、均線分≥7、今天最高曾漲 3% 以上、現在跌幅還沒超過 7%（沒勾的就不看）。主畫面的刀劍空不受參數影響。</p>' +
     '<p>☑ 打勾＝我持有空單（整列金框、跨日記住，再點一下解除）。排名格旁的圓球＝均線分（滿分 15：≥12 金底、6～11 金框、<6 灰）。<i class="td-k12">🔵 12空</i>＝機器人 123（衝高後跌破 5 分K 20MA、20MA 下彎）。<i class="td-fut">📈 股期</i>＝有股票期貨可避險。</p>' +
     '<p>段位照族群排名：前 10 名 ▲ 多方（前 5 名強多不列）、11～25 名 🔽 中間、26 名以後 🔰 強空、今天已跌 5% 以上 ♣ 收割區；每段的部位、停損、目標見最下面段位對照。</p></div></details>';
