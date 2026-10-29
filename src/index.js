@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-29 14:08:27";
+const BUILD_STAMP = "2026-10-29 14:16:45";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3491,6 +3491,15 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .wl-star{background:none;border:none;cursor:pointer;color:#8b8178;font-size:15px;padding:0 3px;line-height:1;vertical-align:middle;font-family:inherit;}
   .wl-star:hover{color:#f5b301;}
   .wl-star.on{color:#f5b301;}
+  /* 2026-10-29 使用者：☆ 不直接加進目前這組，先跳出分組清單讓他選（觀察、自選三…） */
+  .wl-pick{position:fixed;z-index:2000;min-width:180px;max-width:min(280px,calc(100vw - 16px));max-height:min(60vh,420px);overflow:auto;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:6px;color:var(--text);font-size:13px;}
+  .wl-pick-h{padding:4px 8px 6px;color:var(--muted);font-size:12px;border-bottom:1px solid var(--line);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .wl-pick-h b{color:var(--text);}
+  .wl-pick button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:none;border:none;color:inherit;font:inherit;padding:8px 10px;border-radius:7px;cursor:pointer;}
+  .wl-pick button:hover,.wl-pick button:focus-visible{background:rgba(245,179,1,.14);outline:none;}
+  .wl-pick button small{color:var(--muted);font-size:11px;white-space:nowrap;}
+  .wl-pick button.cur small{color:#f5b301;}
+  .wl-pick .wl-pick-new{border-top:1px solid var(--line);margin-top:4px;border-radius:0 0 7px 7px;color:var(--muted);}
   .race-row .race-star-slot,.race-col-labels .race-star-slot{flex:0 0 20px;text-align:center;}  /* 要蓋過 .race-col-labels span 的 5em */
   /* 個股訊號追蹤（2026-10-05 使用者） */
   .trk-table{min-width:720px;}
@@ -14061,7 +14070,7 @@ function renderWatchTable(){
   if (draftCost && draftLots) wl.editDraft = { code: draftCost.dataset.code, cost: draftCost.value, lots: draftLots.value };   // 打一半、點到別處：重畫後保留
   const g = wlGroup();
   if (!g.items.length){
-    el.innerHTML = '<div class="signal-empty"><div class="se-title">這組還沒有股票</div><div class="se-sub">在上面輸入代號或名稱加入；首頁、盤中333、醞釀／發動、K線圖等名稱旁的 ☆ 也可以直接加入。</div></div>';
+    el.innerHTML = '<div class="signal-empty"><div class="se-title">這組還沒有股票</div><div class="se-sub">在上面輸入代號或名稱加入；首頁、盤中333、醞釀／發動、K線圖等名稱旁的 ☆ 也可以加入（會跳出分組清單讓你選）。</div></div>';
     return;
   }
   if (wl.view === 'digest'){
@@ -14144,7 +14153,7 @@ const WL_VIEW_SORTS = {
 const WL_SORT_FIELD = { live: 'sort', pnl: 'sortPnl', chips: 'sortChips', digest: 'sortDigest', mcl: 'sort' };
 const WL_VIEW_FOOT = {
   live: '報價：族群表裡的股票跟首頁同一份（15 秒更新）；族群表外的股票另外向證交所抓，沒有盤中大戶力、均線分數、融資券等標籤。' +
-    '點代號或名稱開K線圖；首頁、盤中333、醞釀／發動、健診、K線圖名稱旁的 ☆ 也能直接加入（加到目前這組），★ 再點一下移除。',
+    '點代號或名稱開K線圖；首頁、盤中333、醞釀／發動、健診、K線圖名稱旁的 ☆ 也能加入（點了會跳出分組清單，選一組才加進去），★ 再點一下移除。',
   pnl: '點「成本」或「張數」那一格輸入你的成本均價和張數（零股打小數：0.5 張＝500 股），跟著同步碼存，三台一樣。' +
     '損益＝用現價賣掉的預估淨額－買進花的錢（含手續費）；勾「扣手續費＋證交稅」時，手續費照你填的折數、證交稅股票 0.3%、ETF 0.1%。今日損益＝今天的漲跌×股數。' +
     '明天防守＝每日持股健診算的三日低／月線（收盤後更新），盤中現價跌破會標紅。',
@@ -14833,7 +14842,7 @@ window.addEventListener('storage', (e) => {
 });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && wl.key) wlLoad(); });
 
-// ---- 各列表的 ☆：點一下加入自選股（目前這組），★ 再點一下從所有分組移除
+// ---- 各列表的 ☆：點一下跳出分組清單、選一組加入自選股，★ 再點一下從所有分組移除
 function wlStarHtml(code, name){
   if (!code) return '';
   const on = wlHas(code);
@@ -14848,23 +14857,82 @@ function wlRefreshStars(){
     b.title = on ? '已在自選股（點一下移除）' : '加入自選股';
   });
 }
+// 2026-10-29 使用者：☆ 按下去不要直接加進自選（目前那組），先跳出分組清單（持股、觀察、自選三…）讓他選；★ 照舊再點一下移除
+function wlPickClose(){
+  const m = document.getElementById('wlPick');
+  if (m) m.remove();
+}
+function wlPickOpen(star){
+  wlPickClose();
+  const code = star.dataset.code;
+  const name = star.dataset.name || (WL_GROUP_INDEX[code] && WL_GROUP_INDEX[code].name) || '';
+  const groups = wl.data.groups.filter((g) => !wlIsAuto(g));
+  const cur = wlTargetGroup().id;
+  const m = document.createElement('div');
+  m.id = 'wlPick';
+  m.className = 'wl-pick';
+  m.dataset.code = code;
+  m.dataset.name = star.dataset.name || '';
+  m.innerHTML = '<div class="wl-pick-h">加入自選股：<b>' + wlEsc(code + (name ? ' ' + name : '')) + '</b></div>' +
+    groups.map((g) => '<button type="button" data-wlpick="' + wlEsc(g.id) + '"' + (g.id === cur ? ' class="cur"' : '') + '><span>' + wlEsc(g.name) + '</span><small>' +
+      (g.id === cur ? '目前這組・' : '') + g.items.length + ' 檔</small></button>').join('') +
+    '<button type="button" class="wl-pick-new" data-wlpick="__new"><span>＋ 新增分組…</span></button>';
+  document.body.appendChild(m);
+  const r = star.getBoundingClientRect(), w = m.offsetWidth, h = m.offsetHeight;
+  const left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+  const top = r.bottom + 6 + h > window.innerHeight - 8 ? Math.max(8, r.top - h - 6) : r.bottom + 6;
+  m.style.left = left + 'px';
+  m.style.top = top + 'px';
+  const first = m.querySelector('button');
+  if (first) first.focus({ preventScroll: true });
+}
+function wlPickChoose(m, gid){
+  const code = m.dataset.code, name = m.dataset.name;
+  wlPickClose();
+  if (gid === '__new'){
+    const nm = (window.prompt('新分組的名字（例如：持股、觀察、短線）', '') || '').trim().slice(0, 20);
+    if (!nm) return;
+    let newId = '';
+    wlMutate((data) => {
+      const hit = data.groups.find((g) => g.name === nm);
+      if (hit){ newId = hit.id; return; }
+      newId = wlNewGroupId(data);
+      data.groups.push({ id: newId, name: nm, items: [] });
+    });
+    gid = newId;
+  }
+  const g = wl.data.groups.find((x) => x.id === gid);
+  if (!g) return;
+  wlAddCodes([{ code, name }], g.id);
+  showToast('已加入自選股「' + g.name + '」：' + (name || code));
+}
 document.addEventListener('click', (e) => {
+  const pick = e.target.closest('#wlPick');
+  if (pick){
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    const b = e.target.closest('[data-wlpick]');
+    if (b) wlPickChoose(pick, b.dataset.wlpick);
+    return;
+  }
   const star = e.target.closest('.wl-star');
-  if (!star) return;
+  if (!star){ wlPickClose(); return; }   // 點選單外面＝取消
   e.preventDefault();
   e.stopPropagation();
   const code = star.dataset.code;
   if (!code) return;
   if (wlHas(code)){
+    wlPickClose();
     const names = wl.data.groups.filter((g) => !wlIsAuto(g) && g.items.some((it) => it.code === code)).map((g) => g.name);
     wlRemoveEverywhere(code);
     showToast('已從自選股「' + names.join('、') + '」移除 ' + (star.dataset.name || code));
   } else {
-    const g = wlTargetGroup();
-    wlAddCodes([{ code, name: star.dataset.name || '' }], g.id);
-    showToast('已加入自選股「' + g.name + '」：' + (star.dataset.name || code));
+    wlPickOpen(star);
   }
 }, true);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') wlPickClose(); });
+window.addEventListener('scroll', (e) => { if (!(e.target && e.target.closest && e.target.closest('#wlPick'))) wlPickClose(); }, true);
 setTimeout(() => { if (wl.key && !document.body.classList.contains('chart-window-mode')) wlLoad(); }, 1500);   // 開頁面先跟雲端對一次，其他地方的 ☆ 才會是最新的
 
 // ---- 個股訊號追蹤（2026-10-05 使用者：自選股第二階段）----
@@ -16428,7 +16496,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-29 14:08:27';
+const BUILD_STAMP = '2026-10-29 14:16:45';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
