@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 09:36:36";
+const BUILD_STAMP = "2026-10-30 10:00:37";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -16756,7 +16756,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 09:36:36';
+const BUILD_STAMP = '2026-10-30 10:00:37';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26004,7 +26004,7 @@ function mclTouchNotify(events){
 }
 // 2026-10-30 使用者：融資斷頭價視窗空白處加大戶力。每列是跳出當下寫好的，大戶力是盤中一直在變的，所以每次報價更新時把已經在視窗裡的幾格換成最新的
 function mclTouchHoldRefresh(){
-  document.querySelectorAll('#mclTouchBox [data-mt-hold]').forEach((td) => { td.innerHTML = holderTagHtml(holderPctOf(td.getAttribute('data-mt-hold')), false, true); });
+  document.querySelectorAll('.mcl-touch-alert [data-mt-hold]').forEach((td) => { td.innerHTML = holderTagHtml(holderPctOf(td.getAttribute('data-mt-hold')), false, true); });
 }
 function mclTouchTick(opts){
   opts = opts || {};
@@ -26081,7 +26081,7 @@ function mclSigRowHtml(e, hm){
   const pr = mclPressure(wgLive(r, p), r.margin);
   const chgTxt = q.changePercent != null ? '<div class="dg-sub" style="color:' + (q.changePercent > 0 ? '#ef4444' : q.changePercent < 0 ? '#22c55e' : 'inherit') + '">' + (q.changePercent > 0 ? '+' : '') + Number(q.changePercent).toFixed(2) + '%</div>' : '';
   return { kind: e.kind, html: '<tr><td>' + hm + '</td><td class="l" style="white-space:nowrap"><b class="alert-stk" data-alert-code="' + wlEsc(r.code) + '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + (r.name || '')) + '</b><div class="dg-sub">' + wlEsc(r.group || '') + '</div></td>' +
-    '<td class="l">' + pill + '</td><td><b>' + ckPrice(p) + '</b>' + chgTxt + '</td><td class="l" style="white-space:normal;min-width:260px;font-size:12px">' + wlEsc(e.sig.tip) + '</td>' +
+    '<td class="mt-hold" data-mt-hold="' + wlEsc(r.code) + '">' + holderTagHtml(holderPctOf(r.code), false, true) + '</td><td class="l">' + pill + '</td><td><b>' + ckPrice(p) + '</b>' + chgTxt + '</td><td class="l" style="white-space:normal;min-width:260px;font-size:12px">' + wlEsc(e.sig.tip) + '</td>' +
     '<td class="l">' + mclPressPill(pr) + '</td><td>' + mclBalCell(r.margin) + '</td></tr>' };
 }
 function mclSigNotify(events){
@@ -26099,7 +26099,7 @@ function mclSigNotify(events){
   }
   const nBt = mclSigLines.filter((l) => l.kind === 'bottom').length, nPl = mclSigLines.length - nBt;
   el.innerHTML = '<div class="pk-alert-head">📉 落底訊號／回檔警示・盤中提醒（落底 ' + nBt + '・回檔 ' + nPl + '）' + ALERT_CTL_HTML + '</div>' +
-    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th class="l">訊號</th><th>現價</th><th class="l">今天的數字</th><th class="l">賣壓狀態</th><th>融資餘額（張）<div class="dg-sub">今＝昨天增減</div></th></tr></thead><tbody>' + mclSigLines.map((l) => l.html).join('') + '</tbody></table></div>' +
+    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th>大戶力<div class="dg-sub">盤中即時</div></th><th class="l">訊號</th><th>現價</th><th class="l">今天的數字</th><th class="l">賣壓狀態</th><th>融資餘額（張）<div class="dg-sub">今＝昨天增減</div></th></tr></thead><tbody>' + mclSigLines.map((l) => l.html).join('') + '</tbody></table></div>' +
     '<div class="mt-foot">盤中用「今天到目前」的開高低現價＋累計量，當成今天那根暫時的日K，用跟名單一樣的公式重算（名單上的是前一個收盤日算的）。累計量是到目前為止的量，爆量（≥ 前 20 日均量 2 倍）要等量真的累計到才成立，所以早盤會偏晚才報；收黑、長上影到收盤前還會變，一檔一種今天只跳一次。融資餘額、賣壓狀態是證交所／櫃買前一晚公布的數字，盤中不會變。不是買賣建議。</div>';
   try { launchBeep(); } catch (_){}
   if ('Notification' in window && Notification.permission === 'granted'){
@@ -26179,8 +26179,8 @@ function patSigNotify(events){
   if (!events.length) return;
   const hm = new Date(Date.now() + 8 * 3600000).toISOString().slice(11, 16);
   const rowHtml = (e) => '<tr><td>' + hm + '</td><td class="l" style="white-space:nowrap"><b class="alert-stk" data-alert-code="' + wlEsc(e.code) + '" data-alert-name="' + wlEsc(e.name || '') + '">' + wlEsc(e.code + ' ' + (e.name || '')) + '</b><div class="dg-sub">' + wlEsc(e.group || '') + '</div></td>' +
-    '<td class="l"><span class="pat-tag brk" title="' + wlEsc(patTipOf(e.x, e.q.price)) + '">🚀 ' + wlEsc(e.x.name) + '突破</span></td><td><b>' + ckPrice(e.q.price) + '</b>' + (e.q.changePercent != null ? '<div class="dg-sub" style="color:' + (e.q.changePercent > 0 ? '#ef4444' : '#22c55e') + '">' + (e.q.changePercent > 0 ? '+' : '') + Number(e.q.changePercent).toFixed(2) + '%</div>' : '') + '</td>' +
-    '<td>' + ckPrice(e.x.trigger) + '</td><td>' + ckPrice(e.x.stop) + '</td><td>' + ckPrice(e.x.target) + '</td><td>' + homeHoldHtml(e.code) + '</td></tr>';
+    '<td class="mt-hold" data-mt-hold="' + wlEsc(e.code) + '">' + holderTagHtml(holderPctOf(e.code), false, true) + '</td><td class="l"><span class="pat-tag brk" title="' + wlEsc(patTipOf(e.x, e.q.price)) + '">🚀 ' + wlEsc(e.x.name) + '突破</span></td><td><b>' + ckPrice(e.q.price) + '</b>' + (e.q.changePercent != null ? '<div class="dg-sub" style="color:' + (e.q.changePercent > 0 ? '#ef4444' : '#22c55e') + '">' + (e.q.changePercent > 0 ? '+' : '') + Number(e.q.changePercent).toFixed(2) + '%</div>' : '') + '</td>' +
+    '<td>' + ckPrice(e.x.trigger) + '</td><td>' + ckPrice(e.x.stop) + '</td><td>' + ckPrice(e.x.target) + '</td></tr>';
   patSigLines = events.map((e) => ({ html: rowHtml(e) })).concat(patSigLines).slice(0, 200);
   let el = document.getElementById('patSigBox');
   if (!el){
@@ -26192,7 +26192,7 @@ function patSigNotify(events){
     makeAlertWindow(el, 'patSigPos');
   }
   el.innerHTML = '<div class="pk-alert-head">📐 形態突破・盤中提醒（' + patSigLines.length + ' 檔）' + ALERT_CTL_HTML + '</div>' +
-    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th class="l">形態</th><th>現價</th><th>觸發價<div class="dg-sub">頸線／樞紐</div></th><th>停損參考</th><th>目標價</th><th>大戶力</th></tr></thead><tbody>' + patSigLines.map((l) => l.html).join('') + '</tbody></table></div>' +
+    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th>大戶力<div class="dg-sub">盤中即時</div></th><th class="l">形態</th><th>現價</th><th>觸發價<div class="dg-sub">頸線／樞紐</div></th><th>停損參考</th><th>目標價</th></tr></thead><tbody>' + patSigLines.map((l) => l.html).join('') + '</tbody></table></div>' +
     '<div class="mt-foot">昨天收盤還在觸發價之下的形態候選（VCP 收斂、C 不破 A 的低、W 底、頭肩底），今天盤中現價站上觸發價、而且比昨天收盤高，就跳出來；一檔一種形態今天只跳一次。形態是用日K波段高低點找的，有主觀成分、會漏也會誤判，請看圖確認；停損、目標價只是形態高度推出來的參考。回測近一年：突破之後平均比全體強一些，但勝率只有 4～5 成，靠少數大漲拉高平均，所以停損要設。不是買賣建議。</div>';
   try { launchBeep(); } catch (_){}
   if ('Notification' in window && Notification.permission === 'granted'){
