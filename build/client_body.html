@@ -1871,16 +1871,16 @@
   .td-crank{border:1px solid var(--line);border-radius:999px;padding:0 8px;font-size:13px;}
   .td-chead small{font-size:11px;color:var(--muted);}
   .td-gfoot{margin:6px 10px 10px;padding:6px 10px;border:1px dashed #d6b44a;border-radius:8px;font-size:12px;line-height:1.7;background:rgba(214,180,74,.08);}
-  .td-river{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;background:linear-gradient(90deg,#7f1d1d,#b91c1c,#7f1d1d);color:#fff;border-radius:10px;padding:8px 14px;font-size:14px;}
-  .td-river span{opacity:.75;letter-spacing:2px;} .td-river .td-otc{background:transparent;border:1.5px solid #fff;color:#fff;}
+  .td-river{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;background:#e5e7eb;color:#111;border:1px solid #cbd5e1;border-radius:10px;padding:8px 14px;font-size:14px;}   /* 2026-10-30 使用者：楚河漢界那條紅底改淺灰底、字改黑色 */
+  .td-river span{letter-spacing:2px;color:#111;} .td-river b{color:#111;} .td-river .td-otc{background:#fff;border:1.5px solid #9ca3af;color:#111;font-weight:900;}
   .td-river .td-hbtns{opacity:1;letter-spacing:0;display:inline-flex;gap:8px;margin-left:auto;}   /* 2026-10-30 使用者：楚河漢界右邊兩顆大戶力按鈕，只管下面的族群卡片 */
-  /* 2026-10-30 使用者：兩顆大戶力按鈕改淺灰色底，≥ +10% 紅字、≤ -10% 綠字（紅底上才看得清楚）；按下去（篩選中）整顆填色＋白字 */
-  #hwInner .td-river .td-hbtn,.td-river .td-hbtn{border:1.5px solid #9ca3af;background:#e5e7eb;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;cursor:pointer;}
-  #hwInner .td-river .td-hbtn.hb-up,.td-river .td-hbtn.hb-up{color:#b91c1c;} #hwInner .td-river .td-hbtn.hb-down,.td-river .td-hbtn.hb-down{color:#15803d;}
-  #hwInner .td-river .td-hbtn:hover,.td-river .td-hbtn:hover{background:#f3f4f6;}
-  #hwInner .td-river .td-hbtn.hb-up.on{background:#b91c1c;color:#fff;border-color:#fff;box-shadow:0 0 0 2px #fff;} #hwInner .td-river .td-hbtn.hb-down.on{background:#15803d;color:#fff;border-color:#fff;box-shadow:0 0 0 2px #fff;}
+  /* 2026-10-30 使用者：大戶力 ≥ +10% 紅底白字、≤ -10% 綠底白字（一直是這兩個顏色）；按下去（篩選中）外面多一圈黑框 */
+  #hwInner .td-river .td-hbtn,.td-river .td-hbtn{border:2px solid transparent;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;cursor:pointer;color:#fff;}
+  #hwInner .td-river .td-hbtn.hb-up,.td-river .td-hbtn.hb-up{background:#dc2626;color:#fff;} #hwInner .td-river .td-hbtn.hb-down,.td-river .td-hbtn.hb-down{background:#16a34a;color:#fff;}
+  #hwInner .td-river .td-hbtn:hover,.td-river .td-hbtn:hover{filter:brightness(1.1);}
+  #hwInner .td-river .td-hbtn.on,.td-river .td-hbtn.on{border-color:#111;box-shadow:0 0 0 2px #fff,0 0 0 4px #111;}
   /* 2026-10-28 使用者：楚河漢界上那顆「櫃買 強多／強空」紅字壓在紅底上看不清楚——強多改亮粉紅、強空改亮綠（要壓過 #hwInner .up／.down 的紅綠，所以多寫一層 id） */
-  #hwInner .td-river .td-otc.up{color:#ff9ac8;border-color:#ff9ac8;background:rgba(0,0,0,.2);font-weight:900;} #hwInner .td-river .td-otc.down{color:#86efac;border-color:#86efac;background:rgba(0,0,0,.18);font-weight:900;}
+  #hwInner .td-river .td-otc.up{color:#dc2626;border-color:#dc2626;background:#fff;font-weight:900;} #hwInner .td-river .td-otc.down{color:#15803d;border-color:#15803d;background:#fff;font-weight:900;} #hwInner .td-river .td-otc.flat{color:#111;}   /* 櫃買個股震盪：漲紅、跌綠 */
   .td-sec{margin:14px 0;}
   .td-sec h4{margin:0 0 6px;font-size:17px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;}
   .td-sec h4 small{font-size:12px;color:var(--muted);font-weight:400;}
