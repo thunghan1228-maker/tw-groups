@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 13:13:59";
+const BUILD_STAMP = "2026-10-30 13:18:51";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1881,7 +1881,11 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-zhead small{color:var(--muted);font-size:11px;}
   .td-chip{border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:12px;background:var(--panel);}
   .td-cnt{margin-left:auto;font-size:12px;color:#b45309;font-weight:700;}
-  .td-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:6px 12px;border-top:1px solid var(--line);font-size:13px;cursor:pointer;}
+  .td-row{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;padding:4px 10px;border-top:1px solid var(--line);font-size:13px;cursor:pointer;}
+  /* 2026-10-30 使用者：所有訊號族群卡（刀劍空 32、12空 123、跳出的新訊號）排法統一、排緊密：第一行＝時間、名次、均線分、股號股名、漲跌幅；標籤（股期、②不過前高可空、大戶、成交值）一律自己一整行放第二行，
+     不再因為標籤多寡有的擠在右邊把股名擠到中間、上面留一塊空白 */
+  .td-row > .td-pct{order:2;margin-left:auto;} .td-row > .td-mk,.td-row > .td-x{order:3;}
+  .td-row > .td-tags{order:4;flex:1 1 100%;margin-left:0;}
   .td-row:hover{background:var(--panel-2);}
   .td-rank{display:inline-block;min-width:38px;text-align:center;border:1.5px solid var(--line);border-radius:6px;padding:0 4px;font-size:12px;font-weight:700;}
   .td-rank.bull{border-color:#e6675f;color:#e6675f;} .td-rank.mid{border-color:#3b82f6;} .td-rank.bear{border-color:#5fae6f;} .td-rank.harv{border-color:#14b8a6;}
@@ -1920,7 +1924,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-ma{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;}
   .td-ma.gold{background:#f6c343;color:#3b2a00;} .td-ma.ring{border:1.5px solid #e0b33a;color:#b7791f;} .td-ma.gray,.td-ma.none{border:1.5px solid var(--line);color:var(--muted);}
   .td-stk{font-size:14px;white-space:nowrap;} .td-stk b{color:#b45309;}
-  .td-tags{display:flex;flex-wrap:wrap;gap:3px;flex:1 1 160px;min-width:0;}
+  .td-tags{display:flex;flex-wrap:wrap;gap:2px 4px;flex:1 1 160px;min-width:0;}
   .td-tags i{font-style:normal;font-size:11px;border-radius:5px;padding:1px 6px;border:1px solid var(--line);white-space:nowrap;}
   .td-tags i.td-k12{background:#38bdf8;color:#05324a;border-color:#38bdf8;font-weight:700;}
   .td-tags i.td-out{background:#8b2c22;color:#fff;border-color:#8b2c22;} .td-tags i.td-out.d1{background:#b45309;border-color:#b45309;}
@@ -16784,7 +16788,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 13:13:59';
+const BUILD_STAMP = '2026-10-30 13:18:51';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
