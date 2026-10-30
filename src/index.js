@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 10:00:37";
+const BUILD_STAMP = "2026-10-30 10:02:31";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3578,6 +3578,11 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .trk-alert .trk-a-bull{color:#ff6b6b;font-weight:700;}   /* 2026-10-14 使用者：多方訊號紅字、空方訊號綠字 */
   .trk-alert .trk-a-bear{color:#4ade80;font-weight:700;}
   .trk-alert-foot{margin-top:6px;text-align:right;}
+  .trk-alert .trk-a-row{display:flex;align-items:center;gap:14px;justify-content:space-between;padding:2px 0;}   /* 2026-10-30 使用者：右邊三格＝漲跌幅、漲跌、大戶力 */
+  .trk-alert .trk-a-l{white-space:nowrap;}
+  .trk-alert .trk-a-q{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .trk-alert .trk-a-n{display:inline-block;min-width:58px;text-align:right;font-weight:700;}
+  .trk-alert .trk-a-n.up{color:#ff6b6b;} .trk-alert .trk-a-n.down{color:#4ade80;} .trk-alert .trk-a-n.flat{color:#cbd5e1;}
   @media (max-width: 640px){ .trk-table{min-width:560px;} }
   .ck-detail td{background:var(--panel-2);white-space:normal;text-align:left;font-size:12px;line-height:1.6;padding:8px 12px;}
   /* 2026-09-28 使用者：健診表要能照族群看（像學員專區的族群籤），也能整張表分族群排 */
@@ -15368,11 +15373,24 @@ function trkCheck(){
   if (fresh.length) trkNotify(fresh);
 }
 let trkAlertLines = [];
+// 2026-10-30 使用者：自選股提醒每一列後面加三個數字——漲跌幅、漲跌（點數）、大戶力。漲跌（點數）用現價跟昨收推回來；每次報價更新時換成最新的
+function trkAlertQuoteHtml(code){
+  const q = getStockQuote(code), pct = q && Number.isFinite(Number(q.changePercent)) ? Number(q.changePercent) : null;
+  const chg = pct !== null && Number(q.price) > 0 ? Number(q.price) - Number(q.price) / (1 + pct / 100) : null;
+  const cls = pct === null ? '' : dirClass(pct);
+  return '<span class="trk-a-n ' + cls + '" title="漲跌幅">' + (pct === null ? '—' : botPct(pct)) + '</span>' +
+    '<span class="trk-a-n ' + cls + '" title="漲跌（點數）">' + (chg === null ? '—' : (chg > 0.004 ? '+' : chg < -0.004 ? '−' : '') + Math.abs(chg).toFixed(2)) + '</span>' +
+    '<span class="trk-a-n">' + holderTagHtml(holderPctOf(code), false, true) + '</span>';
+}
+function trkAlertRefresh(){
+  document.querySelectorAll('#trkAlertBox [data-trk-q]').forEach((el) => { el.innerHTML = trkAlertQuoteHtml(el.getAttribute('data-trk-q')); });
+}
 function trkNotify(list){
   if (!alertsEnabled || trkSetting('trkOn', true) === false) return;
   launchBeep();
-  trkAlertLines = list.map((x) => (x.time ? x.time + ' ' : '') + '<b class="alert-stk" data-alert-code="' + wlEsc(x.code) + '" data-alert-name="' + wlEsc(x.name || '') + '">' + wlEsc(x.code + ' ' + x.name) + '</b>・' +
-    (x.bull === true || x.bull === false ? '<span class="' + (x.bull ? 'trk-a-bull' : 'trk-a-bear') + '">' + wlEsc(x.text) + '</span>' : wlEsc(x.text))).concat(trkAlertLines).slice(0, 12);
+  trkAlertLines = list.map((x) => '<div class="trk-a-row"><span class="trk-a-l">' + (x.time ? x.time + ' ' : '') + '<b class="alert-stk" data-alert-code="' + wlEsc(x.code) + '" data-alert-name="' + wlEsc(x.name || '') + '">' + wlEsc(x.code + ' ' + x.name) + '</b>・' +
+    (x.bull === true || x.bull === false ? '<span class="' + (x.bull ? 'trk-a-bull' : 'trk-a-bear') + '">' + wlEsc(x.text) + '</span>' : wlEsc(x.text)) + '</span>' +
+    '<span class="trk-a-q" data-trk-q="' + wlEsc(x.code) + '">' + trkAlertQuoteHtml(x.code) + '</span></div>').concat(trkAlertLines).slice(0, 12);
   let el = document.getElementById('trkAlertBox');
   if (!el){
     el = document.createElement('div');
@@ -15384,7 +15402,7 @@ function trkNotify(list){
     document.body.appendChild(el);
     makeAlertDraggable(el, '.pk-alert-head', 'trkAlertPos');
   }
-  el.innerHTML = '<div class="pk-alert-head">★ 自選股提醒<button class="pk-alert-close" aria-label="關閉">✕</button></div><div>' + trkAlertLines.join('<br>') +
+  el.innerHTML = '<div class="pk-alert-head">★ 自選股提醒<button class="pk-alert-close" aria-label="關閉">✕</button></div><div>' + trkAlertLines.join('') +
     '</div><div class="trk-alert-foot"><button class="wl-btn trk-alert-open">打開個股訊號追蹤</button></div>';
   if ('Notification' in window && Notification.permission === 'granted'){
     list.slice(0, 5).forEach((x) => {
@@ -16756,7 +16774,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 10:00:37';
+const BUILD_STAMP = '2026-10-30 10:02:31';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26008,7 +26026,7 @@ function mclTouchHoldRefresh(){
 }
 function mclTouchTick(opts){
   opts = opts || {};
-  try { mclTouchHoldRefresh(); } catch (_){}
+  try { mclTouchHoldRefresh(); trkAlertRefresh(); } catch (_){}
   if (!opts.force && (CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || botWindowMode() || sgtWindowMode())) return;
   if (!alertsEnabled && !opts.force) return;
   const live = opts.live !== undefined ? opts.live : mclSessionLive();
