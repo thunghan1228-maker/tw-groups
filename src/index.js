@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 13:11:15";
+const BUILD_STAMP = "2026-10-30 13:13:59";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1947,6 +1947,10 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-gfoot{margin:6px 10px 10px;padding:6px 10px;border:1px dashed #d6b44a;border-radius:8px;font-size:12px;line-height:1.7;background:rgba(214,180,74,.08);}
   .td-river{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;background:linear-gradient(90deg,#7f1d1d,#b91c1c,#7f1d1d);color:#fff;border-radius:10px;padding:8px 14px;font-size:14px;}
   .td-river span{opacity:.75;letter-spacing:2px;} .td-river .td-otc{background:transparent;border:1.5px solid #fff;color:#fff;}
+  .td-river .td-hbtns{opacity:1;letter-spacing:0;display:inline-flex;gap:8px;margin-left:auto;}   /* 2026-10-30 使用者：楚河漢界右邊兩顆大戶力按鈕，只管下面的族群卡片 */
+  .td-river .td-hbtn{border:1.5px solid rgba(255,255,255,.75);background:rgba(0,0,0,.18);color:#fff;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;cursor:pointer;}
+  .td-river .td-hbtn:hover{background:rgba(255,255,255,.2);}
+  .td-river .td-hbtn.on.up{background:#fff;color:#b91c1c;border-color:#fff;} .td-river .td-hbtn.on.down{background:#16a34a;color:#fff;border-color:#bbf7d0;}
   /* 2026-10-28 使用者：楚河漢界上那顆「櫃買 強多／強空」紅字壓在紅底上看不清楚——強多改亮粉紅、強空改亮綠（要壓過 #hwInner .up／.down 的紅綠，所以多寫一層 id） */
   #hwInner .td-river .td-otc.up{color:#ff9ac8;border-color:#ff9ac8;background:rgba(0,0,0,.2);font-weight:900;} #hwInner .td-river .td-otc.down{color:#86efac;border-color:#86efac;background:rgba(0,0,0,.18);font-weight:900;}
   .td-sec{margin:14px 0;}
@@ -16780,7 +16784,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 13:11:15';
+const BUILD_STAMP = '2026-10-30 13:13:59';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19141,6 +19145,15 @@ const tdState = { zones: { upper: true, middle: true, lower: true, harvest: true
 // 老師的「名單」是學員貼的盤前空觀察；我們用系統自己的：名單＝前一個交易日收盤（最後一份紀錄）的新刀劍空名單。
 //   名單外的刀劍空＝今天盤中有、但前一天收盤名單沒列的；今天沒中的族群＝前一天名單裡有、今天整族沒進新刀劍空的。
 tdState.showMiss = true; tdState.showOut = true; tdState.sortDeep = false;
+// 2026-10-30 使用者：楚河漢界那條右邊加兩顆按鈕，只控制下面族群卡片（光學鏡頭、探針卡、小電組…）的大戶力：≥ +10% 或 ≤ -10%，跟上面「參數」那排分開、互不影響
+tdState.cardHold = null;
+try { const ch = localStorage.getItem('tdCardHold'); if (ch === 'up' || ch === 'down') tdState.cardHold = ch; } catch (_){}
+function tdCardHoldPass(row){
+  if (!tdState.cardHold) return true;
+  const v = row.big;
+  if (v === null || v === undefined || !Number.isFinite(Number(v))) return false;
+  return tdState.cardHold === 'up' ? Number(v) >= 10 : Number(v) <= -10;
+}
 tdState.prev = { date: null, data: null, key: '', at: 0, loading: false };
 try { const o = JSON.parse(localStorage.getItem('tdOpts') || '{}'); if (o && typeof o === 'object'){ if (o.miss === false) tdState.showMiss = false; if (o.out === false) tdState.showOut = false; if (o.deep === true) tdState.sortDeep = true; } } catch (_){}
 function tdSaveOpts(){ try { localStorage.setItem('tdOpts', JSON.stringify({ miss: tdState.showMiss, out: tdState.showOut, deep: tdState.sortDeep })); } catch (_){} }
@@ -19667,6 +19680,7 @@ function tdGroupFoot(gname, live){
 }
 function tdCardsHtml(rows, ctx, snap, opt){
   const o = opt || {};
+  if (o.cardFilter && tdState.cardHold) rows = rows.filter(tdCardHoldPass);   // 楚河漢界右邊那兩顆大戶力按鈕（只管畫面上這兩塊族群卡片）
   const by = new Map();
   rows.forEach((r) => { const k = r.g || '—'; if (!by.has(k)) by.set(k, []); by.get(k).push(r); });
   let groups = Array.from(by.entries()).sort((a, b) => (a[1][0].gr || 99) - (b[1][0].gr || 99));
@@ -19683,19 +19697,26 @@ function tdCardsHtml(rows, ctx, snap, opt){
   }
   let bannerDone = !o.banner;
   const stamp = tdMd(snap.date) + ' ' + snap.slot + '・機器人';
-  return '<div class="td-cards">' + groups.map(([name, list]) => {
+  const makeBanner = () => {
+    const otc = snap.otcLabel || '';
+    const hb = (k, label) => '<button type="button" class="td-hbtn ' + k + (tdState.cardHold === k ? ' on' : '') + '" data-td-cardhold="' + k + '" title="只看下面族群卡片裡大戶力' + (k === 'up' ? ' ≥ +10%' : ' ≤ -10%') + '的股票（再點一次取消；跟上面的「參數」分開）">' + label + '</button>';
+    return '<div class="td-river"><span>楚 河</span><b>↓ ' + (/多/.test(otc) ? '雖然個股為強空區，但櫃買' + wlEsc(otc) + '要尊重' : '以下為中間、強空區') + ' ↓</b><span>漢 界</span>' +
+      (snap.otcPct !== null && snap.otcPct !== undefined ? '<i class="td-otc ' + dirClass(snap.otcPct) + '">櫃買 ' + wlEsc(otc) + ' ' + hwPct(snap.otcPct) + '</i>' : '') +
+      '<span class="td-hbtns">' + hb('up', '大戶力 ≥ +10%') + hb('down', '大戶力 ≤ -10%') + '</span></div>';
+  };
+  const html = '<div class="td-cards">' + groups.map(([name, list]) => {
     let banner = '';
     if (!bannerDone && (list[0].gr || 99) > upTo){
       bannerDone = true;
-      const otc = snap.otcLabel || '';
-      banner = '<div class="td-river"><span>楚 河</span><b>↓ ' + (/多/.test(otc) ? '雖然個股為強空區，但櫃買' + wlEsc(otc) + '要尊重' : '以下為中間、強空區') + ' ↓</b><span>漢 界</span>' +
-        (snap.otcPct !== null && snap.otcPct !== undefined ? '<i class="td-otc ' + dirClass(snap.otcPct) + '">櫃買 ' + wlEsc(otc) + ' ' + hwPct(snap.otcPct) + '</i>' : '') + '</div>';
+      banner = makeBanner();
     }
     const g = (lastData.groups || []).find((x) => x.name === name);
     return banner + '<div class="td-card"><div class="td-chead"><b' + hwGroupAttr(name) + '>' + wlEsc(name) + '</b><span class="td-crank">(' + (list[0].gr || '—') + ')</span><small>' + stamp + '</small>' +
       '<span class="td-cnt">命中 ' + list.length + ' / 族內 ' + (g ? g.stocks.length : '—') + '</span></div>' +
       list.map((r) => tdRowHtml(r, ctx, snap, o.rowOpt)).join('') + (o.noFoot ? '' : tdGroupFoot(name, snap.live)) + '</div>';
-  }).join('') + '</div>';
+  }).join('');
+  // 篩到下面沒有任何族群時楚河漢界那條也要在，不然按鈕不見、沒辦法取消
+  return html + (!bannerDone && tdState.cardHold ? makeBanner() : '') + '</div>';
 }
 function hwTodayHtml(){
   const m = race333Model();
@@ -19815,7 +19836,7 @@ function hwTodayHtml(){
         (list.length ? list.map((r) => tdRowHtml(r, ctx, snap, { showGroup: true })).join('') : '<div class="td-empty">目前沒有</div>') + '</div>';
     }).join('');
   } else {
-    main = mainRows.length ? tdCardsHtml(mainRows.slice().sort(byPct), ctx, snap, { banner: true }) : '<div class="td-empty">目前沒有</div>';
+    main = mainRows.length ? tdCardsHtml(mainRows.slice().sort(byPct), ctx, snap, { banner: true, cardFilter: true }) : '<div class="td-empty">目前沒有</div>';
   }
   // ⑦ 觀察股
   const watch = '<div class="td-sec td-watch"><h4>⭐ 觀察股 <small>自己加・不限檔數・這台瀏覽器會記住；大戶% 盤中自己抓</small><span class="td-cnt">' + tdState.watch.length + ' 檔</span></h4>' +
@@ -19825,7 +19846,7 @@ function hwTodayHtml(){
   const k12Sec = '<div class="td-sec"><h4><span class="td-badge k12">12空</span> <small>機器人 123（道館 5 分K MA20 當沖空）・跟上面刀劍空分開看；段位照 12空 自己的族群排名</small></h4>' +
     '<div class="td-k12legend"><i class="td-k12st s1">① 剛轉弱</i> 5 分K 剛跌破 20MA、20MA 下彎，還沒反彈　<i class="td-k12st s2">② 不過前高可空</i> 破了以後反彈出現「2」、沒過 1高（前高）→ 可以空，停損放 1高　<span class="td-k12cnt">' + tdK12CountHtml(snap.k12) + '</span></div>' +
     (!snap.k12Loaded ? '<div class="td-empty">讀取中…</div>' : !snap.k12Tracked ? '<div class="td-empty">後端今天還沒有 5 分K（盤中 9 點以後才有）</div>' :
-      snap.k12.length ? tdCardsHtml(snap.k12.slice().sort(byPct), ctx, snap, { noFoot: true, rowOpt: { noK12: true } }) : '<div class="td-empty">目前沒有衝高後跌破 MA20 下彎的</div>') + '</div>';
+      snap.k12.length ? tdCardsHtml(snap.k12.slice().sort(byPct), ctx, snap, { noFoot: true, rowOpt: { noK12: true }, cardFilter: true }) : '<div class="td-empty">目前沒有衝高後跌破 MA20 下彎的</div>') + '</div>';
   // ⑨ 出獄即入獄、出獄股、即將入獄（整天不變，回放時也照今天的）
   const again = sus.filter((s) => { const n = ctx.released.get(s.code); return n && n <= 3; });
   const againSec = '<div class="td-sec"><h4>⛓ 出獄即入獄 <small>剛出獄，又被點名可能再被關</small></h4>' +
@@ -20314,6 +20335,13 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
       if (j >= 0 && j < slots.length) tdState.rep.slot = slots[j];
       else if (j >= slots.length && viewingToday) tdState.rep.slot = null;
     }
+    renderHomework(); return;
+  }
+  const tch = t.closest('[data-td-cardhold]');
+  if (tch){
+    const k = tch.dataset.tdCardhold;
+    tdState.cardHold = tdState.cardHold === k ? null : k;
+    try { if (tdState.cardHold) localStorage.setItem('tdCardHold', tdState.cardHold); else localStorage.removeItem('tdCardHold'); } catch (_){}
     renderHomework(); return;
   }
   const tz = t.closest('[data-td-zone]');
