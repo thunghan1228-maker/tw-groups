@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 09:14:24";
+const BUILD_STAMP = "2026-10-30 09:16:50";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3668,6 +3668,20 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .ck-table th.mcl-sort:hover{background:var(--panel-2);}
   .pk-alert.mcl-touch-alert{width:min(900px,96vw);border-color:#e11d48;z-index:151;}   /* 2026-10-23 使用者：盤中碰到融資斷頭價自動跳出整排資訊 */
   .mcl-touch-alert .pk-alert-head{color:#fb7185;}
+  /* 2026-10-30 使用者：提醒小視窗要能隱藏／放大／四邊拉伸（見 makeAlertWindow） */
+  .pk-alert .pk-alert-ctl{display:flex;align-items:center;gap:6px;}
+  .pk-alert .pk-alert-ctl button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.28);border-radius:7px;width:32px;height:28px;font-size:15px;line-height:1;padding:0;color:#fff;cursor:pointer;}
+  .pk-alert .pk-alert-ctl button:hover{background:rgba(255,255,255,.22);}
+  .pk-alert.sized{display:flex;flex-direction:column;max-width:none;}
+  .pk-alert.sized > .mt-scroll{flex:1 1 auto;min-height:0;max-height:none;overflow:auto;}
+  .pk-alert.sized > .mt-foot{flex:0 0 auto;}
+  .pk-alert.is-min{height:auto!important;}
+  .pk-alert.is-min > *:not(.pk-alert-head):not(.pk-rz){display:none;}
+  .pk-alert.is-min .pk-alert-head{margin-bottom:0;}
+  .pk-rz{position:absolute;z-index:5;display:block;}
+  .pk-rz-l,.pk-rz-r{top:14px;bottom:14px;width:12px;cursor:ew-resize;} .pk-rz-l{left:-6px;} .pk-rz-r{right:-6px;}
+  .pk-rz-t,.pk-rz-b{left:14px;right:14px;height:12px;cursor:ns-resize;} .pk-rz-t{top:-6px;} .pk-rz-b{bottom:-6px;}
+  .pk-rz-tl,.pk-rz-tr,.pk-rz-bl,.pk-rz-br{width:18px;height:18px;} .pk-rz-tl{left:-7px;top:-7px;cursor:nwse-resize;} .pk-rz-br{right:-7px;bottom:-7px;cursor:nwse-resize;} .pk-rz-tr{right:-7px;top:-7px;cursor:nesw-resize;} .pk-rz-bl{left:-7px;bottom:-7px;cursor:nesw-resize;}
   .mcl-touch-alert .mt-scroll{max-height:min(55vh,420px);overflow:auto;}
   .mcl-touch-alert .ck-table{font-size:12.5px;}
   .mcl-touch-alert .ck-table td.l{white-space:normal;}
@@ -16738,7 +16752,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 09:14:24';
+const BUILD_STAMP = '2026-10-30 09:16:50';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -16854,6 +16868,81 @@ function makeAlertDraggable(el, headSel, key, opts){
   const stop = () => { if (!drag) return; drag = null; save(); };
   el.addEventListener('pointerup', stop);
   el.addEventListener('pointercancel', stop);
+}
+// 2026-10-30 使用者：融資斷頭價・盤中提醒這類小視窗要能「隱藏（只留標題列）」「放大」，而且四邊四角都能拉伸、按著標題列拖著移動：
+// 標題列右邊三顆鈕＝－隱藏／＋展開、⛶放大／❐還原、✕關閉；視窗四邊四角有看不見的把手（滑鼠移上去變成拉伸的箭頭）。
+// 大小、隱藏狀態記在這台瀏覽器（位置由 makeAlertDraggable 記）。內容（innerHTML）每次有新提醒都會整個重畫，所以事件綁在常駐的 el 上、
+// 把手用 MutationObserver 在重畫後補回去。
+const ALERT_CTL_HTML = '<span class="pk-alert-ctl"><button type="button" class="pk-alert-min" title="隱藏（只留標題列，再按一次展開）">－</button><button type="button" class="pk-alert-max" title="放大（再按一次還原）">⛶</button><button type="button" class="pk-alert-close" aria-label="關閉">✕</button></span>';
+function makeAlertWindow(el, posKey){
+  const K = posKey + 'Win', MINW = 340, MINH = 120;
+  let st = {};
+  try { st = JSON.parse(localStorage.getItem(K) || '{}') || {}; } catch (_){}
+  st.max = false;   // 放大的狀態不記，下次跳出來是平常大小
+  let prev = null;
+  const save = () => { try { localStorage.setItem(K, JSON.stringify({ w: st.w, h: st.h, min: !!st.min })); } catch (_){} };
+  const savePos = () => { const r = el.getBoundingClientRect(); try { localStorage.setItem(posKey, JSON.stringify({ left: Math.round(r.left), top: Math.round(r.top) })); } catch (_){} };
+  const vw = () => document.documentElement.clientWidth, vh = () => window.innerHeight;
+  const apply = () => {
+    el.classList.toggle('is-min', !!st.min);
+    el.classList.toggle('is-max', !!st.max);
+    if (st.max){
+      el.classList.add('sized'); el.style.transform = 'none';
+      el.style.left = '2vw'; el.style.top = '3vh'; el.style.width = '96vw'; el.style.height = '94vh';
+    } else {
+      el.style.width = st.w ? Math.min(st.w, vw() - 8) + 'px' : '';
+      el.style.height = !st.min && st.h ? Math.min(st.h, vh() - 8) + 'px' : '';
+      el.classList.toggle('sized', !!st.h && !st.min);
+      if (prev){ el.style.left = prev.left + 'px'; el.style.top = prev.top + 'px'; prev = null; }
+    }
+  };
+  const decorate = () => {
+    if (!Array.from(el.children).some((c) => c.classList.contains('pk-rz'))){
+      ['l', 'r', 't', 'b', 'tl', 'tr', 'bl', 'br'].forEach((d) => { const i = document.createElement('i'); i.className = 'pk-rz pk-rz-' + d; i.dataset.rz = d; el.appendChild(i); });
+    }
+    const mn = el.querySelector('.pk-alert-min'), mx = el.querySelector('.pk-alert-max');
+    if (mn){ mn.textContent = st.min ? '＋' : '－'; mn.title = st.min ? '展開' : '隱藏（只留標題列，再按一次展開）'; }
+    if (mx){ mx.textContent = st.max ? '❐' : '⛶'; mx.title = st.max ? '還原大小' : '放大（再按一次還原）'; }
+  };
+  new MutationObserver(decorate).observe(el, { childList: true });
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('.pk-alert-min')){ st.min = !st.min; if (st.min && st.max){ st.max = false; } apply(); decorate(); save(); return; }
+    if (e.target.closest('.pk-alert-max')){
+      if (!st.max){ const r = el.getBoundingClientRect(); prev = { left: r.left, top: r.top }; st.max = true; st.min = false; }
+      else st.max = false;
+      apply(); decorate(); save();
+    }
+  });
+  el.addEventListener('pointerdown', (e) => {
+    const h = e.target.closest && e.target.closest('.pk-rz');
+    if (!h || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault(); e.stopPropagation();
+    const dir = h.dataset.rz, r = el.getBoundingClientRect();
+    const s0 = { x: e.clientX, y: e.clientY, l: r.left, t: r.top, w: r.width, h: r.height };
+    st.max = false; el.classList.remove('is-max'); el.classList.add('sized'); el.style.transform = 'none';
+    el.style.left = s0.l + 'px'; el.style.top = s0.t + 'px'; el.style.width = s0.w + 'px'; el.style.height = s0.h + 'px';
+    h.setPointerCapture(e.pointerId);
+    const move = (ev) => {
+      const dx = ev.clientX - s0.x, dy = ev.clientY - s0.y;
+      let l = s0.l, t = s0.t, w = s0.w, hh = s0.h;
+      if (dir.indexOf('r') >= 0) w = s0.w + dx;
+      if (dir.indexOf('l') >= 0){ w = s0.w - dx; l = s0.l + dx; }
+      if (dir.indexOf('b') >= 0) hh = s0.h + dy;
+      if (dir.indexOf('t') >= 0){ hh = s0.h - dy; t = s0.t + dy; }
+      if (w < MINW){ if (dir.indexOf('l') >= 0) l -= MINW - w; w = MINW; }
+      if (hh < MINH){ if (dir.indexOf('t') >= 0) t -= MINH - hh; hh = MINH; }
+      l = Math.max(0, l); t = Math.max(0, t);
+      w = Math.min(w, vw() - l); hh = Math.min(hh, vh() - t);
+      el.style.left = l + 'px'; el.style.top = t + 'px'; el.style.width = w + 'px'; el.style.height = hh + 'px';
+    };
+    const up = () => {
+      h.removeEventListener('pointermove', move); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up);
+      const r2 = el.getBoundingClientRect(); st.w = Math.round(r2.width); st.h = Math.round(r2.height); st.min = false;
+      el.classList.remove('is-min'); save(); savePos(); decorate();
+    };
+    h.addEventListener('pointermove', move); h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+  });
+  apply(); decorate();
 }
 function renderLaunchAlertBox(){
   let el = document.getElementById('launchAlertBox');
@@ -25898,9 +25987,10 @@ function mclTouchNotify(events){
     el.addEventListener('click', (e) => { if (e.target.closest('.pk-alert-close')){ el.remove(); mclTouchLines = []; } });
     document.body.appendChild(el);
     makeAlertDraggable(el, '.pk-alert-head', 'mclTouchPos');
+    makeAlertWindow(el, 'mclTouchPos');
   }
   const nHit = mclTouchLines.filter((l) => l.touch).length, nBroke = mclTouchLines.filter((l) => l.broke).length;
-  el.innerHTML = '<div class="pk-alert-head">💥 融資斷頭價・盤中提醒（觸及 ' + nHit + '・已破 ' + nBroke + '・接近 ' + (mclTouchLines.length - nHit - nBroke) + '）<button class="pk-alert-close" aria-label="關閉">✕</button></div>' +
+  el.innerHTML = '<div class="pk-alert-head">💥 融資斷頭價・盤中提醒（觸及 ' + nHit + '・已破 ' + nBroke + '・接近 ' + (mclTouchLines.length - nHit - nBroke) + '）' + ALERT_CTL_HTML + '</div>' +
     '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th class="l">事件</th><th>現價</th><th>斷頭價 A<div class="dg-sub">月高</div></th><th>斷頭價 B<div class="dg-sub">五日平均價線</div></th><th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + mclTouchLines.map((l) => l.html).join('') + '</tbody></table></div>' +
     '<div class="mt-foot">一檔一種事件今天只跳一次：觸及 A／B＝今天現價碰到斷頭價、已破 A／B＝昨天收盤以前就破了（盤前已破，不是今天才碰到）、近 A／B ' + MCL_NEAR_ALERT_PCT + '% 內＝離 A 月高斷頭價（或 B 五日平均價線斷頭價）≤' + MCL_NEAR_ALERT_PCT + '%。融資餘額是證交所／櫃買晚上才公布的資料，盤中用的是前一個交易日收盤後的數字。點股號開 K 線圖。</div>';
   try { launchBeep(); } catch (_){}
@@ -25996,9 +26086,10 @@ function mclSigNotify(events){
     el.addEventListener('click', (e) => { if (e.target.closest('.pk-alert-close')){ el.remove(); mclSigLines = []; } });
     document.body.appendChild(el);
     makeAlertDraggable(el, '.pk-alert-head', 'mclSigPos');
+    makeAlertWindow(el, 'mclSigPos');
   }
   const nBt = mclSigLines.filter((l) => l.kind === 'bottom').length, nPl = mclSigLines.length - nBt;
-  el.innerHTML = '<div class="pk-alert-head">📉 落底訊號／回檔警示・盤中提醒（落底 ' + nBt + '・回檔 ' + nPl + '）<button class="pk-alert-close" aria-label="關閉">✕</button></div>' +
+  el.innerHTML = '<div class="pk-alert-head">📉 落底訊號／回檔警示・盤中提醒（落底 ' + nBt + '・回檔 ' + nPl + '）' + ALERT_CTL_HTML + '</div>' +
     '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th class="l">訊號</th><th>現價</th><th class="l">今天的數字</th><th class="l">賣壓狀態</th><th>融資餘額（張）<div class="dg-sub">今＝昨天增減</div></th></tr></thead><tbody>' + mclSigLines.map((l) => l.html).join('') + '</tbody></table></div>' +
     '<div class="mt-foot">盤中用「今天到目前」的開高低現價＋累計量，當成今天那根暫時的日K，用跟名單一樣的公式重算（名單上的是前一個收盤日算的）。累計量是到目前為止的量，爆量（≥ 前 20 日均量 2 倍）要等量真的累計到才成立，所以早盤會偏晚才報；收黑、長上影到收盤前還會變，一檔一種今天只跳一次。融資餘額、賣壓狀態是證交所／櫃買前一晚公布的數字，盤中不會變。不是買賣建議。</div>';
   try { launchBeep(); } catch (_){}
@@ -26089,8 +26180,9 @@ function patSigNotify(events){
     el.addEventListener('click', (ev) => { if (ev.target.closest('.pk-alert-close')){ el.remove(); patSigLines = []; } });
     document.body.appendChild(el);
     makeAlertDraggable(el, '.pk-alert-head', 'patSigPos');
+    makeAlertWindow(el, 'patSigPos');
   }
-  el.innerHTML = '<div class="pk-alert-head">📐 形態突破・盤中提醒（' + patSigLines.length + ' 檔）<button class="pk-alert-close" aria-label="關閉">✕</button></div>' +
+  el.innerHTML = '<div class="pk-alert-head">📐 形態突破・盤中提醒（' + patSigLines.length + ' 檔）' + ALERT_CTL_HTML + '</div>' +
     '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th class="l">形態</th><th>現價</th><th>觸發價<div class="dg-sub">頸線／樞紐</div></th><th>停損參考</th><th>目標價</th><th>大戶力</th></tr></thead><tbody>' + patSigLines.map((l) => l.html).join('') + '</tbody></table></div>' +
     '<div class="mt-foot">昨天收盤還在觸發價之下的形態候選（VCP 收斂、C 不破 A 的低、W 底、頭肩底），今天盤中現價站上觸發價、而且比昨天收盤高，就跳出來；一檔一種形態今天只跳一次。形態是用日K波段高低點找的，有主觀成分、會漏也會誤判，請看圖確認；停損、目標價只是形態高度推出來的參考。回測近一年：突破之後平均比全體強一些，但勝率只有 4～5 成，靠少數大漲拉高平均，所以停損要設。不是買賣建議。</div>';
   try { launchBeep(); } catch (_){}
