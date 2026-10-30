@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 13:21:49";
+const BUILD_STAMP = "2026-10-30 13:23:41";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1960,9 +1960,11 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-river{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;background:linear-gradient(90deg,#7f1d1d,#b91c1c,#7f1d1d);color:#fff;border-radius:10px;padding:8px 14px;font-size:14px;}
   .td-river span{opacity:.75;letter-spacing:2px;} .td-river .td-otc{background:transparent;border:1.5px solid #fff;color:#fff;}
   .td-river .td-hbtns{opacity:1;letter-spacing:0;display:inline-flex;gap:8px;margin-left:auto;}   /* 2026-10-30 使用者：楚河漢界右邊兩顆大戶力按鈕，只管下面的族群卡片 */
-  .td-river .td-hbtn{border:1.5px solid rgba(255,255,255,.75);background:rgba(0,0,0,.18);color:#fff;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;cursor:pointer;}
-  .td-river .td-hbtn:hover{background:rgba(255,255,255,.2);}
-  .td-river .td-hbtn.on.up{background:#fff;color:#b91c1c;border-color:#fff;} .td-river .td-hbtn.on.down{background:#16a34a;color:#fff;border-color:#bbf7d0;}
+  /* 2026-10-30 使用者：兩顆大戶力按鈕改淺灰色底，≥ +10% 紅字、≤ -10% 綠字（紅底上才看得清楚）；按下去（篩選中）整顆填色＋白字 */
+  #hwInner .td-river .td-hbtn,.td-river .td-hbtn{border:1.5px solid #9ca3af;background:#e5e7eb;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;cursor:pointer;}
+  #hwInner .td-river .td-hbtn.hb-up,.td-river .td-hbtn.hb-up{color:#b91c1c;} #hwInner .td-river .td-hbtn.hb-down,.td-river .td-hbtn.hb-down{color:#15803d;}
+  #hwInner .td-river .td-hbtn:hover,.td-river .td-hbtn:hover{background:#f3f4f6;}
+  #hwInner .td-river .td-hbtn.hb-up.on{background:#b91c1c;color:#fff;border-color:#fff;box-shadow:0 0 0 2px #fff;} #hwInner .td-river .td-hbtn.hb-down.on{background:#15803d;color:#fff;border-color:#fff;box-shadow:0 0 0 2px #fff;}
   /* 2026-10-28 使用者：楚河漢界上那顆「櫃買 強多／強空」紅字壓在紅底上看不清楚——強多改亮粉紅、強空改亮綠（要壓過 #hwInner .up／.down 的紅綠，所以多寫一層 id） */
   #hwInner .td-river .td-otc.up{color:#ff9ac8;border-color:#ff9ac8;background:rgba(0,0,0,.2);font-weight:900;} #hwInner .td-river .td-otc.down{color:#86efac;border-color:#86efac;background:rgba(0,0,0,.18);font-weight:900;}
   .td-sec{margin:14px 0;}
@@ -16796,7 +16798,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 13:21:49';
+const BUILD_STAMP = '2026-10-30 13:23:41';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19718,7 +19720,7 @@ function tdCardsHtml(rows, ctx, snap, opt){
   const stamp = tdMd(snap.date) + ' ' + snap.slot + '・機器人';
   const makeBanner = () => {
     const otc = snap.otcLabel || '';
-    const hb = (k, label) => '<button type="button" class="td-hbtn ' + k + (tdState.cardHold === k ? ' on' : '') + '" data-td-cardhold="' + k + '" title="只看下面族群卡片裡大戶力' + (k === 'up' ? ' ≥ +10%' : ' ≤ -10%') + '的股票（再點一次取消；跟上面的「參數」分開）">' + label + '</button>';
+    const hb = (k, label) => '<button type="button" class="td-hbtn hb-' + k + (tdState.cardHold === k ? ' on' : '') + '" data-td-cardhold="' + k + '" title="只看下面族群卡片裡大戶力' + (k === 'up' ? ' ≥ +10%' : ' ≤ -10%') + '的股票（再點一次取消；跟上面的「參數」分開）">' + label + '</button>';
     return '<div class="td-river"><span>楚 河</span><b>↓ ' + (/多/.test(otc) ? '雖然個股為強空區，但櫃買' + wlEsc(otc) + '要尊重' : '以下為中間、強空區') + ' ↓</b><span>漢 界</span>' +
       (snap.otcPct !== null && snap.otcPct !== undefined ? '<i class="td-otc ' + dirClass(snap.otcPct) + '">櫃買 ' + wlEsc(otc) + ' ' + hwPct(snap.otcPct) + '</i>' : '') +
       '<span class="td-hbtns">' + hb('up', '大戶力 ≥ +10%') + hb('down', '大戶力 ≤ -10%') + '</span></div>';
