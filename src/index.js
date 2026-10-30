@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 09:25:52";
+const BUILD_STAMP = "2026-10-30 09:27:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -16753,7 +16753,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 09:25:52';
+const BUILD_STAMP = '2026-10-30 09:27:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -27752,6 +27752,38 @@ async function txfNearQuote() {
   if (!q) throw new Error("期交所沒有臺指期近月資料");
   return q;
 }
+// 2026-10-30 使用者：台指期近月一直抓不到。Worker 直接打期交所被回 520、後端代打還沒上線時，退到台灣版 Yahoo 的「台指期近一」（WTX&）：
+// 即時報價（price、previousClose＝昨結算、volume）加夜盤＋日盤接在一起的 1 分K（時間標籤是那根的結束時間，減 60 秒才是開始）。回 { price, ref, sec, volume, month, bars }
+function txfNearMonthOf(tp) {   // tp＝台北時間（UTC 方法讀出來的 Date）；近月＝這個月，過了第三個週三 13:45 結算就是下個月
+  const y = tp.getUTCFullYear(), mo = tp.getUTCMonth();
+  const dow = new Date(Date.UTC(y, mo, 1)).getUTCDay();
+  const thirdWed = 1 + ((3 - dow + 7) % 7) + 14;
+  const day = tp.getUTCDate(), mins = tp.getUTCHours() * 60 + tp.getUTCMinutes();
+  const rolled = day > thirdWed || (day === thirdWed && mins >= 13 * 60 + 45);
+  return (rolled ? mo + 1 : mo) % 12 + 1;
+}
+async function txfYahooTw() {
+  const cache = (globalThis.__txfYahoo = globalThis.__txfYahoo || {});
+  if (cache.at && Date.now() - cache.at < 6000 && cache.data) return cache.data;
+  const r = await fetch("https://tw.stock.yahoo.com/_td-stock/api/resource/FinanceChartService.ApacLibraCharts;symbols=%5B%22WTX%26%22%5D;type=tick", {
+    headers: { "user-agent": "Mozilla/5.0", accept: "application/json" },
+    cf: { cacheTtlByStatus: { "200-299": 6, "300-599": 0 }, cacheEverything: true }
+  });
+  if (!r.ok) throw new Error("Yahoo 台指期 HTTP " + r.status);
+  const j = await r.json();
+  const c = j && j[0] && j[0].chart, m = c && c.meta, qt = (c && c.quote) || {};
+  const price = Number(qt.price !== undefined ? qt.price : (m && m.regularMarketPrice)), ref = Number(m && m.previousClose), sec = Number(m && m.regularMarketTime);
+  if (!c || !Number.isFinite(price) || !Number.isFinite(ref) || ref <= 0 || !Number.isFinite(sec)) throw new Error("Yahoo 台指期資料不完整");
+  const tq = (c.indicators && c.indicators.quote && c.indicators.quote[0]) || {}, stamps = c.timestamp || [], bars = [];
+  for (let i = 0; i < stamps.length; i++) {
+    const b = { open: tq.open && tq.open[i], high: tq.high && tq.high[i], low: tq.low && tq.low[i], close: tq.close && tq.close[i] };
+    if (!Number.isFinite(b.open) || !Number.isFinite(b.high) || !Number.isFinite(b.low) || !Number.isFinite(b.close)) continue;
+    bars.push({ ts: (stamps[i] - 60) * 1000, open: b.open, high: b.high, low: b.low, close: b.close, volume: (tq.volume && tq.volume[i]) || 0, ref });
+  }
+  const data = { price, ref, sec, volume: Number(qt.volume) || 0, month: txfNearMonthOf(new Date((sec + 8 * 3600) * 1000)), bars };
+  cache.at = Date.now(); cache.data = data;
+  return data;
+}
 // 期交所官方每日行情（CSV、Big5）最近 20 天的日盤（一般交易時段），每天取到期月份最小的那一檔＝近月；回最後一個交易日：
 // { day, month(6 碼), open, high, low, close, change(漲跌價，對前一日結算價), pct, volume, settle }
 async function txfLastDayClose() {
@@ -28702,11 +28734,29 @@ export default {
         } else if (idxId === "txf") {
           // 台指期近月（2026-10-29 使用者）：近月合約自己會換（期交所 getQuoteList 的第一檔月合約，到期日收盤後下個月就變近月）。
           // 1 分K／5 分K＝今天日盤（08:45～13:45，沒開盤就是最後一個交易日）：期交所只給當天；日線＝期交所官方每日行情的日盤（一般交易時段）近月，今天還沒進官方資料就用即時報價補一根
-          const near = await txfNearQuote();
+          // 期交所抓不到（Worker 被擋 520、後端代打也失敗）就改用台灣版 Yahoo 的台指期近月：報價、夜盤＋日盤的 1 分K
+          let yTx = null, near = null;
+          try { near = await txfNearQuote(); } catch (e0) {
+            yTx = await txfYahooTw();
+            const tyd = new Date((yTx.sec + 8 * 3600) * 1000).toISOString().slice(0, 10).split("-").join("");
+            const dayBars = yTx.bars.filter((x) => { const mm = (Math.floor(x.ts / 60000) + 480) % 1440; return mm >= 8 * 60 + 45 && mm < 13 * 60 + 45; });
+            near = { CDate: tyd, COpenPrice: dayBars.length ? dayBars[0].open : null, CHighPrice: dayBars.length ? Math.max.apply(null, dayBars.map((x) => x.high)) : null, CLowPrice: dayBars.length ? Math.min.apply(null, dayBars.map((x) => x.low)) : null, CLastPrice: yTx.price, CTotalVolume: yTx.volume, CRefPrice: yTx.ref };
+          }
           const num = (v) => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
           const qd = String(near.CDate || "");
           const qDay = qd.slice(0, 4) + "-" + qd.slice(4, 6) + "-" + qd.slice(6, 8);
-          if (tf === "1m" || tf === "5m") {
+          if (yTx && (tf === "1m" || tf === "5m")) {
+            if (tf === "1m") bars = yTx.bars;
+            else {
+              const bucket5 = new Map();
+              for (const b of yTx.bars) {
+                const k = Math.floor(b.ts / 300000), g = bucket5.get(k);
+                if (!g) bucket5.set(k, { ts: k * 300000, open: b.open, high: b.high, low: b.low, close: b.close, volume: b.volume, ref: b.ref });
+                else { g.high = Math.max(g.high, b.high); g.low = Math.min(g.low, b.low); g.close = b.close; g.volume += b.volume; }
+              }
+              bars = Array.from(bucket5.keys()).sort((x, y) => x - y).map((k) => bucket5.get(k));
+            }
+          } else if (tf === "1m" || tf === "5m") {
             // 日盤（08:45～13:45）＋夜盤（15:00～隔天 05:00）接在一起，照時間排；期交所只給「最近一個」日盤、「最近一個」夜盤
             // （夜盤開著時：今天日盤＋今晚到現在；隔天早上 08:45 前：昨天日盤＋昨晚整個夜盤；08:45 後：今天日盤＋昨晚夜盤）。
             // 每根 K 棒帶 ref＝昨結算價（日盤＝日盤的參考價，夜盤＝夜盤的參考價＝當天日盤結算價），K 線圖標題的漲跌用它算（使用者 2026-10-29）
@@ -28877,6 +28927,16 @@ export default {
           open: num(q.COpenPrice), high: num(q.CHighPrice), low: num(q.CLowPrice), volume: num(q.CTotalVolume), date, time: t.slice(0, 2) + ":" + t.slice(2, 4) },
           { headers: { "cache-control": "public, max-age=8" } });
       } catch (err) {
+        // 期交所直打（520）、後端代打都失敗：退台灣版 Yahoo 的台指期近月（即時價、昨結算、成交量）
+        try {
+          const y = await txfYahooTw();
+          const tpNow = new Date(Date.now() + 8 * 3600000), hmNow = tpNow.getUTCHours() * 100 + tpNow.getUTCMinutes();
+          const ty = new Date((y.sec + 8 * 3600) * 1000);
+          const change = Math.round((y.price - y.ref) * 100) / 100;
+          return Response.json({ status: "ok", session: (hmNow >= 1500 || hmNow < 845) ? "night" : "day", symbol: null, name: "台指期近月", month: y.month, price: y.price, ref: y.ref, change, pct: Math.round(change / y.ref * 10000) / 100,
+            open: null, high: null, low: null, volume: y.volume, date: ty.toISOString().slice(0, 10), time: ty.toISOString().slice(11, 16), source: "yahoo tw WTX&" },
+            { headers: { "cache-control": "public, max-age=8" } });
+        } catch (err2) { /* 兩邊都失敗，下面回錯誤 */ }
         return Response.json({ status: "error", error: String(err) }, { status: 502, headers: { "cache-control": "no-store" } });
       }
     }
