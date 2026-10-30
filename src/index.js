@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 10:09:54";
+const BUILD_STAMP = "2026-10-30 10:16:56";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3693,7 +3693,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .mcl-touch-alert .mt-scroll{max-height:min(55vh,420px);overflow:auto;}
   .mcl-touch-alert .ck-table{font-size:12.5px;}
   .mcl-touch-alert .ck-table td.l{white-space:normal;}
-  .mcl-touch-alert .ck-table td.mt-hold{white-space:nowrap;}   /* 2026-10-30 使用者：股票欄右邊的空白處放大戶力 */
+  .mcl-touch-alert .ck-table td.mt-hold,.mcl-touch-alert .ck-table td.mt-pct{white-space:nowrap;}
+  .mcl-touch-alert .ck-table td.mt-pct b.up{color:#ff6b6b;} .mcl-touch-alert .ck-table td.mt-pct b.down{color:#4ade80;} .mcl-touch-alert .ck-table td.mt-pct b.flat{color:#cbd5e1;}   /* 2026-10-30 使用者：股票欄右邊的空白處放大戶力 */
   .mt-tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:700;color:#fff;margin:1px 3px 1px 0;white-space:nowrap;}
   .mt-tag.hit{background:#d9392b;}
   .mt-tag.near{background:#d97706;}
@@ -16778,7 +16779,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 10:09:54';
+const BUILD_STAMP = '2026-10-30 10:16:56';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25993,13 +25994,18 @@ function mclTouchEvents(rows, quoteOf, seen){
   const rank = (e) => (e.kinds.has('touch') ? 0 : e.kinds.has('broke') ? 1 : 2);   // 今天剛觸及的最前面、其次盤前已破、最後只是接近
   return Array.from(byCode.values()).sort((x, y) => (rank(x) - rank(y)) || ((x.price - x.row.a) / x.price - (y.price - y.row.a) / y.price));
 }
+// 2026-10-30 使用者：融資斷頭價提醒在事件和現價中間加「漲跌幅」欄（漲紅跌綠，盤中跟著換）
+function mclPctCell(code){
+  const q = getStockQuote(code), v = q ? Number(q.changePercent) : NaN;
+  return Number.isFinite(v) ? '<b class="' + dirClass(v) + '">' + (v > 0 ? '+' : '') + v.toFixed(2) + '%</b>' : '—';
+}
 function mclTouchRowHtml(e, hm){
   const r = e.row, p = e.price;
   const cell = (line) => '<b>' + ckPrice(line) + '</b><div class="dg-sub"' + (p <= line ? ' style="color:#d9392b;font-weight:700"' : '') + '>' + (p <= line ? '已破' : '差 ' + ((p - line) / p * 100).toFixed(1) + '%') + '</div>';
   const live = { aBroken: p <= r.a, bBroken: p <= r.b, aGap: (p - r.a) / p * 100, bGap: (p - r.b) / p * 100 };
   const tags = e.tags.map((t) => '<span class="mt-tag ' + (t.indexOf('觸及') === 0 ? 'hit' : t.indexOf('已破') === 0 ? 'broke' : 'near') + '">' + wlEsc(t) + '</span>').join('');
   return { touch: e.kinds.has('touch'), broke: e.kinds.has('broke') && !e.kinds.has('touch'), html: '<tr><td>' + hm + '</td><td class="l"><b class="alert-stk" data-alert-code="' + wlEsc(r.code) + '" data-alert-name="' + wlEsc(r.name || '') + '">' + wlEsc(r.code + ' ' + (r.name || '')) + '</b><div class="dg-sub">' + wlEsc(r.group || '') + '</div></td><td class="mt-hold" data-mt-hold="' + wlEsc(r.code) + '">' + holderTagHtml(holderPctOf(r.code), false, true) + '</td><td class="l">' + tags + '</td>' +
-    '<td><b>' + ckPrice(p) + '</b></td><td>' + cell(r.a) + '</td><td>' + cell(r.b) + '</td>' +
+    '<td class="mt-pct" data-mt-pct="' + wlEsc(r.code) + '">' + mclPctCell(r.code) + '</td><td><b>' + ckPrice(p) + '</b></td><td>' + cell(r.a) + '</td><td>' + cell(r.b) + '</td>' +
     '<td>' + mclBalCell(r.margin) + '</td><td>' + mclSinceCell(r.margin, r) + '</td><td class="l">' + mclPressPill(mclPressure(live, r.margin)) + '</td></tr>' };
 }
 function mclTouchNotify(events){
@@ -26017,7 +26023,7 @@ function mclTouchNotify(events){
   }
   const nHit = mclTouchLines.filter((l) => l.touch).length, nBroke = mclTouchLines.filter((l) => l.broke).length;
   el.innerHTML = '<div class="pk-alert-head">💥 融資斷頭價・盤中提醒（觸及 ' + nHit + '・已破 ' + nBroke + '・接近 ' + (mclTouchLines.length - nHit - nBroke) + '）' + ALERT_CTL_HTML + '</div>' +
-    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th>大戶力<div class="dg-sub">盤中即時</div></th><th class="l">事件</th><th>現價</th><th>斷頭價 A<div class="dg-sub">月高</div></th><th>斷頭價 B<div class="dg-sub">五日平均價線</div></th><th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + mclTouchLines.map((l) => l.html).join('') + '</tbody></table></div>' +
+    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th>大戶力<div class="dg-sub">盤中即時</div></th><th class="l">事件</th><th>漲跌幅</th><th>現價</th><th>斷頭價 A<div class="dg-sub">月高</div></th><th>斷頭價 B<div class="dg-sub">五日平均價線</div></th><th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + mclTouchLines.map((l) => l.html).join('') + '</tbody></table></div>' +
     '<div class="mt-foot">一檔一種事件今天只跳一次：觸及 A／B＝今天現價碰到斷頭價、已破 A／B＝昨天收盤以前就破了（盤前已破，不是今天才碰到）、近 A／B ' + MCL_NEAR_ALERT_PCT + '% 內＝離 A 月高斷頭價（或 B 五日平均價線斷頭價）≤' + MCL_NEAR_ALERT_PCT + '%。融資餘額是證交所／櫃買晚上才公布的資料，盤中用的是前一個交易日收盤後的數字。大戶力是盤中即時的（大戶淨額 ÷ 近 5 日均成交值）。點股號開 K 線圖。</div>';
   try { launchBeep(); } catch (_){}
   if ('Notification' in window && Notification.permission === 'granted'){
@@ -26027,6 +26033,7 @@ function mclTouchNotify(events){
 // 2026-10-30 使用者：融資斷頭價視窗空白處加大戶力。每列是跳出當下寫好的，大戶力是盤中一直在變的，所以每次報價更新時把已經在視窗裡的幾格換成最新的
 function mclTouchHoldRefresh(){
   document.querySelectorAll('.mcl-touch-alert [data-mt-hold]').forEach((td) => { td.innerHTML = holderTagHtml(holderPctOf(td.getAttribute('data-mt-hold')), false, true); });
+  document.querySelectorAll('#mclTouchBox [data-mt-pct]').forEach((td) => { td.innerHTML = mclPctCell(td.getAttribute('data-mt-pct')); });
 }
 function mclTouchTick(opts){
   opts = opts || {};
