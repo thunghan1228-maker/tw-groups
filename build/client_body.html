@@ -943,7 +943,7 @@
   .race-otc.up{color:var(--up);} .race-otc.down{color:var(--down);}
   /* 內嵌／獨立視窗的圖表模式：只顯示 K 線圖、填滿整個視窗 */
   body.chart-window-mode{padding-bottom:0;overflow:hidden;}
-  body.chart-window-mode > *:not(.chart-modal){display:none!important;}
+  body.chart-window-mode > *:not(.chart-modal):not(.wl-pick):not(.toast){display:none!important;}   /* 2026-10-30 使用者：浮動 K 線圖標題的 ☆ 按了沒反應——加入自選股的分組清單（.wl-pick）和「已加入」提示（.toast）也被這條藏起來了 */
   body.chart-window-mode .chart-modal{background:none;}
   body.chart-window-mode .chart-modal-inner{left:0!important;top:0!important;right:0;bottom:0;width:auto!important;height:auto!important;max-width:none;max-height:none;border-radius:0;border:0;resize:none;}
   body.chart-window-mode .chart-modal-head{cursor:default;}
