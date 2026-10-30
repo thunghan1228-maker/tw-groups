@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 13:18:51";
+const BUILD_STAMP = "2026-10-30 13:21:49";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1900,8 +1900,16 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-newtag{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:999px;padding:0 6px;line-height:16px;}
   /* 刀劍空(32) 新訊號跳出卡片（2026-10-22）：右下角一格一格疊，淺色變數跟每日功課同一組 */
   #tdAlertBox{--bg:#f6f1e7; --panel:#fffdf8; --panel-2:#f3ecdf; --line:#e4d9c6; --text:#1d1410; --muted:#4a3f37; --up:#c0392b; --down:#1e8a4c; --td-serif:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;
-    position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);width:min(400px,calc(100vw - 24px));max-height:min(82vh,860px);overflow-y:auto;z-index:212;display:flex;flex-direction:column;gap:8px;
+    position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);width:min(400px,calc(100vw - 24px));z-index:212;display:block;
     color:var(--text);font-weight:600;}
+  /* 2026-10-30 使用者：新訊號視窗要能按住標題列拖到別的地方、四邊四角拉伸放大、隱藏／放大（電腦、iPhone、iPad 都一樣）。捲動移到裡面那層 .td-alert-in，外層不捲，
+     拉伸把手才不會跟著內容捲走 */
+  #tdAlertBox .td-alert-in{display:flex;flex-direction:column;gap:8px;max-height:min(82vh,860px);overflow-y:auto;overscroll-behavior:contain;}
+  #tdAlertBox.sized{display:flex;flex-direction:column;max-width:none;} #tdAlertBox.sized .td-alert-in{flex:1 1 auto;min-height:0;max-height:none;}
+  #tdAlertBox.is-min{height:auto!important;} #tdAlertBox.is-min .td-alert-in > *:not(.td-alert-bar){display:none;}
+  #tdAlertBox .td-alert-bar{touch-action:none;cursor:move;} #tdAlertBox .td-alert-bar button{cursor:pointer;}
+  #tdAlertBox .pk-alert-min,#tdAlertBox .pk-alert-max{min-width:30px;}
+  .pk-rz{touch-action:none;}
   #tdAlertBox .up{color:var(--up);} #tdAlertBox .down{color:var(--down);}
   #tdAlertBox .td-alert-bar{display:flex;align-items:center;gap:6px;background:#4c1d95;color:#fff;border-radius:10px;padding:6px 10px;font-size:14px;position:sticky;top:0;z-index:2;box-shadow:0 4px 14px rgba(0,0,0,.35);}
   #tdAlertBox .td-alert-sp{flex:1;}
@@ -16788,7 +16796,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 13:18:51';
+const BUILD_STAMP = '2026-10-30 13:21:49';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19561,13 +19569,20 @@ function tdAlertRender(){
     el.id = 'tdAlertBox';
     document.body.appendChild(el);
     el.addEventListener('click', tdAlertClick);
+    // 從右下角固定位置改成可以拖：一按標題列或拉伸把手，就把位置換成 left／top（right／bottom 設 auto，不然上下都有值、高度會被拉長）
+    const freePos = () => { const r = el.getBoundingClientRect(); el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto'; el.style.transform = 'none'; };
+    el.addEventListener('pointerdown', (e) => { if (e.target.closest && e.target.closest('.td-alert-bar, .pk-rz') && el.style.bottom !== 'auto') freePos(); }, true);
+    makeAlertDraggable(el, '.td-alert-bar', 'tdAlertPos');
+    makeAlertWindow(el, 'tdAlertPos');
+    if (el.style.left) { el.style.right = 'auto'; el.style.bottom = 'auto'; }   // 上次拖過：還原到上次的位置
   }
-  const keep = el.scrollTop;
-  el.innerHTML = '<div class="td-alert-bar"><b>🔔 新訊號</b><span class="td-alert-sp"></span>' +
+  const inOld = el.querySelector('.td-alert-in'), keep = inOld ? inOld.scrollTop : 0;
+  el.innerHTML = '<div class="td-alert-in"><div class="td-alert-bar" title="按住標題列可以拖到別的地方；四邊四角可以拉大縮小"><b>🔔 新訊號</b><span class="td-alert-sp"></span>' +
+    '<button type="button" class="td-alert-btn pk-alert-min" title="隱藏（只留標題列，再按一次展開）">－</button><button type="button" class="td-alert-btn pk-alert-max" title="放大（再按一次還原）">⛶</button>' +
     '<button type="button" class="td-alert-btn' + (tdAlert.sound ? ' on' : '') + '" data-alert-sound="1" title="跳出新訊號時響一聲">' + (tdAlert.sound ? '🔊 響' : '🔇 不響') + '</button>' +
     (tdAlert.cards.length > 1 ? '<button type="button" class="td-alert-btn" data-alert-closeall="1">全部關閉</button>' : '') + '</div>' +
-    tdAlert.cards.map((c) => '<div class="td-alert-item' + (c.kind === 'k12' ? ' k12' : '') + '"><div class="td-alert-head"><span class="td-alert-title" data-alert-open="' + c.kind + '" title="打開每日功課・今日功課">' + c.title + '</span><button type="button" class="td-alert-x" data-alert-close="' + wlEsc(c.kind + '|' + c.group) + '" aria-label="關掉這一格">✕</button></div>' + c.html + '</div>').join('');
-  el.scrollTop = keep;
+    tdAlert.cards.map((c) => '<div class="td-alert-item' + (c.kind === 'k12' ? ' k12' : '') + '"><div class="td-alert-head"><span class="td-alert-title" data-alert-open="' + c.kind + '" title="打開每日功課・今日功課">' + c.title + '</span><button type="button" class="td-alert-x" data-alert-close="' + wlEsc(c.kind + '|' + c.group) + '" aria-label="關掉這一格">✕</button></div>' + c.html + '</div>').join('') + '</div>';
+  const inNew = el.querySelector('.td-alert-in'); if (inNew) inNew.scrollTop = keep;
 }
 function tdAlertClick(e){
   const t = e.target;
