@@ -173,17 +173,25 @@ def build(data_dir: str, day: date, prev_day: str | None) -> dict | None:
 def main() -> None:
     _main_dir, data_dir = sys.argv[1], sys.argv[2]   # 第一個參數（main 分支目錄）放寬範圍後用不到，保留給排程的呼叫方式
     today = datetime.now(TW).date()
+    catch_up = False
     if len(sys.argv) > 3:
         a, _, b = sys.argv[3].partition(":")
         start, end = date.fromisoformat(a), date.fromisoformat(b or a)
     else:
-        start = end = today
+        # 2026-10-30：GitHub 排程常常晚好幾個小時（10/28、10/29 兩班都過了台北午夜才跑，「今天」已經是隔天、那天還沒有資料 → 算出「沒資料」，
+        # 前一天的名單就永遠沒算，老師 10/30 的隔日沖黑龍(80) 拿 10/28、10/29 的名單，我們只有 10/27 以前）。
+        # 沒指定範圍時往前看最近 3 天，沒有檔案的工作日補算（今天一定算）
+        start, end = today - timedelta(days=3), today
+        catch_up = True
     os.makedirs(os.path.join(data_dir, "tpex", "daytrade"), exist_ok=True)
     index_path = os.path.join(data_dir, "tpex", "daytrade-index.json")
     index = json.load(open(index_path, encoding="utf-8")) if os.path.exists(index_path) else {"dates": []}
     dates = set(index.get("dates") or [])
     day = start
     while day <= end:
+        if catch_up and day != today and day.isoformat() in dates:
+            day += timedelta(days=1)
+            continue
         if day.weekday() < 5:
             prev_day = max((d for d in dates if d < day.isoformat()), default=None)
             try:
