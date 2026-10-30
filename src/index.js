@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 10:02:31";
+const BUILD_STAMP = "2026-10-30 10:09:54";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3574,14 +3574,17 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .trk-ma{font-size:12px;}
   .trk-in{width:90px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font-size:13px;font-family:inherit;text-align:right;}
   .trk-chk{display:inline-flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;white-space:nowrap;flex:0 0 auto;}
-  .trk-alert{border-color:#f5b301;}
+  .trk-alert{border-color:#f5b301;width:min(800px,96vw);}   /* 2026-10-30 使用者：自選股提醒太窄，現價、漲跌幅、漲跌、大戶力放不進去 → 加寬 */
   .trk-alert .trk-a-bull{color:#ff6b6b;font-weight:700;}   /* 2026-10-14 使用者：多方訊號紅字、空方訊號綠字 */
   .trk-alert .trk-a-bear{color:#4ade80;font-weight:700;}
   .trk-alert-foot{margin-top:6px;text-align:right;}
-  .trk-alert .trk-a-row{display:flex;align-items:center;gap:14px;justify-content:space-between;padding:2px 0;}   /* 2026-10-30 使用者：右邊三格＝漲跌幅、漲跌、大戶力 */
-  .trk-alert .trk-a-l{white-space:nowrap;}
-  .trk-alert .trk-a-q{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font-variant-numeric:tabular-nums;}
-  .trk-alert .trk-a-n{display:inline-block;min-width:58px;text-align:right;font-weight:700;}
+  .trk-alert .trk-a-row{display:flex;align-items:center;gap:14px;justify-content:space-between;padding:2px 0;flex-wrap:wrap;}   /* 2026-10-30 使用者：右邊四格＝現價（收盤後＝收盤價）、漲跌幅、漲跌、大戶力 */
+  .trk-alert .trk-a-l{white-space:nowrap;flex:1 1 auto;}
+  .trk-alert .trk-a-q{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font-variant-numeric:tabular-nums;margin-left:auto;}
+  .trk-alert .trk-a-n{display:inline-block;min-width:62px;text-align:right;font-weight:700;}
+  .trk-alert .trk-a-n.px{min-width:70px;color:#fff;}
+  .trk-alert .trk-a-head{display:flex;justify-content:flex-end;gap:8px;font-size:12px;color:#a89c8f;border-bottom:1px solid #3a3022;margin:2px 0 4px;padding-bottom:2px;}
+  .trk-alert .trk-a-head span{min-width:62px;text-align:right;} .trk-alert .trk-a-head span:first-child{min-width:70px;}
   .trk-alert .trk-a-n.up{color:#ff6b6b;} .trk-alert .trk-a-n.down{color:#4ade80;} .trk-alert .trk-a-n.flat{color:#cbd5e1;}
   @media (max-width: 640px){ .trk-table{min-width:560px;} }
   .ck-detail td{background:var(--panel-2);white-space:normal;text-align:left;font-size:12px;line-height:1.6;padding:8px 12px;}
@@ -15378,7 +15381,8 @@ function trkAlertQuoteHtml(code){
   const q = getStockQuote(code), pct = q && Number.isFinite(Number(q.changePercent)) ? Number(q.changePercent) : null;
   const chg = pct !== null && Number(q.price) > 0 ? Number(q.price) - Number(q.price) / (1 + pct / 100) : null;
   const cls = pct === null ? '' : dirClass(pct);
-  return '<span class="trk-a-n ' + cls + '" title="漲跌幅">' + (pct === null ? '—' : botPct(pct)) + '</span>' +
+  return '<span class="trk-a-n px" title="現價（收盤後就是收盤價）">' + (q && Number(q.price) > 0 ? ckPrice(Number(q.price)) : '—') + '</span>' +
+    '<span class="trk-a-n ' + cls + '" title="漲跌幅">' + (pct === null ? '—' : botPct(pct)) + '</span>' +
     '<span class="trk-a-n ' + cls + '" title="漲跌（點數）">' + (chg === null ? '—' : (chg > 0.004 ? '+' : chg < -0.004 ? '−' : '') + Math.abs(chg).toFixed(2)) + '</span>' +
     '<span class="trk-a-n">' + holderTagHtml(holderPctOf(code), false, true) + '</span>';
 }
@@ -15402,7 +15406,7 @@ function trkNotify(list){
     document.body.appendChild(el);
     makeAlertDraggable(el, '.pk-alert-head', 'trkAlertPos');
   }
-  el.innerHTML = '<div class="pk-alert-head">★ 自選股提醒<button class="pk-alert-close" aria-label="關閉">✕</button></div><div>' + trkAlertLines.join('') +
+  el.innerHTML = '<div class="pk-alert-head">★ 自選股提醒<button class="pk-alert-close" aria-label="關閉">✕</button></div><div class="trk-a-head"><span>現價</span><span>漲跌幅</span><span>漲跌</span><span>大戶力</span></div><div>' + trkAlertLines.join('') +
     '</div><div class="trk-alert-foot"><button class="wl-btn trk-alert-open">打開個股訊號追蹤</button></div>';
   if ('Notification' in window && Notification.permission === 'granted'){
     list.slice(0, 5).forEach((x) => {
@@ -16774,7 +16778,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 10:02:31';
+const BUILD_STAMP = '2026-10-30 10:09:54';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
