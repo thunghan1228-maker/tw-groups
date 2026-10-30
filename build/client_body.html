@@ -19619,6 +19619,9 @@ function tdCardsHtml(rows, ctx, snap, opt){
   let groups = Array.from(by.entries()).sort((a, b) => (a[1][0].gr || 99) - (b[1][0].gr || 99));
   const upTo = Math.max(1, Math.round((snap.total || 67) * 10 / 67));
   const k12 = !!(o.rowOpt && o.rowOpt.noK12);   // 12空 那塊（key 前面多 k12:）
+  // 2026-10-30 使用者：族群卡和每張卡裡的股票一律照「訊號第一次出現的時間」排——越晚發生的越上面、越早的越下面（刀劍空、12空、跳出的新訊號卡都一樣）；
+  // 同一個時間的維持傳進來的順序（跌幅），沒有時間的排最後
+  const rowHm = (r) => { const t = ctx.firstAt ? ctx.firstAt.get((k12 ? 'k12:' : '') + r.code) : ''; return /^\d\d:\d\d$/.test(t || '') ? t : ''; };
   if (o.banner || k12){
     // 2026-10-28 使用者：族群卡照「訊號發生的時間」排，最近發生的（時間晚的）放最上面，08:xx 這種最早的放最下面（2026-10-28 又說：下面 12空 那塊也一樣）；
     // 空觀察那塊楚河漢界上下兩邊各自照時間排，族群的時間＝族裡最晚那檔的「訊號第一次出現時間」（卡片每列前面那個時間）；
@@ -19646,7 +19649,7 @@ function tdCardsHtml(rows, ctx, snap, opt){
     const g = (lastData.groups || []).find((x) => x.name === name);
     return banner + '<div class="td-card"><div class="td-chead"><b' + hwGroupAttr(name) + '>' + wlEsc(name) + '</b><span class="td-crank">(' + (list[0].gr || '—') + ')</span><small>' + stamp + '</small>' +
       '<span class="td-cnt">命中 ' + list.length + ' / 族內 ' + (g ? g.stocks.length : '—') + '</span></div>' +
-      list.map((r) => tdRowHtml(r, ctx, snap, o.rowOpt)).join('') + (o.noFoot ? '' : tdGroupFoot(name, snap.live)) + '</div>';
+      list.slice().sort((a, b) => (rowHm(b) > rowHm(a) ? 1 : rowHm(b) < rowHm(a) ? -1 : 0)).map((r) => tdRowHtml(r, ctx, snap, o.rowOpt)).join('') + (o.noFoot ? '' : tdGroupFoot(name, snap.live)) + '</div>';
   }).join('');
   // 篩到下面沒有任何族群時楚河漢界那條也要在，不然按鈕不見、沒辦法取消
   return html + (!bannerDone && tdState.cardHold ? makeBanner() : '') + '</div>';
