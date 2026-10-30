@@ -493,6 +493,21 @@ async function txfMis(endpoint, body, ttlMs) {
       await new Promise((res) => setTimeout(res, 350));
     }
   }
+  // 直接打期交所失敗（2026-10-30 起被回 520）就請後端（Railway）代打同一支 getQuoteList，回來的 JSON 跟期交所原樣一樣
+  if (endpoint === "getQuoteList") {
+    try {
+      const r2 = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/txf-mis?market=" + encodeURIComponent(String(body.MarketType || "0")),
+        { headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0" }, cf: { cacheTtl: 0 } });
+      if (r2.ok) {
+        const data = await r2.json();
+        cache[key] = { at: Date.now(), data };
+        return data;
+      }
+      lastErr = new Error("期交所 520、後端代打也失敗 HTTP " + r2.status);
+    } catch (e2) {
+      lastErr = new Error("期交所失敗、後端代打也失敗：" + String(e2));
+    }
+  }
   if (hit && Date.now() - hit.at < 120000) return hit.data;
   throw lastErr;
 }
