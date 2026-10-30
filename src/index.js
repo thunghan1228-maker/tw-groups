@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 07:26:28";
+const BUILD_STAMP = "2026-10-30 09:14:24";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -16738,7 +16738,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 07:26:28';
+const BUILD_STAMP = '2026-10-30 09:14:24';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26215,12 +26215,12 @@ setTimeout(taiexLiveLoad, 1500);
 setInterval(() => { if (document.visibilityState === 'visible') taiexLiveLoad(); }, 20e3);
 // 2026-10-29 使用者：個股震盪右邊空白處加「台指期近月」：價位、漲跌點數、漲跌幅（先點數再幅度），漲紅跌綠平盤白字。
 // 資料 /api/txf-live（期交所 MIS 近月：日盤時間看日盤、夜盤時間 15:00～隔天 08:45 看夜盤；盤中即時、收盤後＝收盤價），每 20 秒更新，抓不到就留上一次的。
-const TXF = { d: null, at: 0, loading: false };
+const TXF = { d: null, at: 0, loading: false, err: 0 };
 function txfRender(){
   const el = document.getElementById('txfBox');
   if (!el) return;
   const d = TXF.d;
-  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期近月</b>　讀取中…</span>'; return; }
+  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期近月</b>　' + (TXF.err >= 2 ? '暫時抓不到，自動重試中…' : '讀取中…') + '</span>'; return; }   // 連續失敗兩次就說抓不到，不要一直寫讀取中
   const sg = (v, n) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + Math.abs(v).toFixed(n);
   const cls = Math.abs(d.change) < 0.0000001 ? 'ix-flat' : d.change > 0 ? 'ix-up' : 'ix-dn';
   const tp = new Date(Date.now() + 8 * 3600e3), hm = tp.toISOString().slice(11, 16);   // 台北現在時間
@@ -26235,8 +26235,8 @@ async function txfLoad(){
   try {
     const r = await fetch('/api/txf-live');
     const d = r.ok ? await r.json() : null;
-    if (d && d.status === 'ok' && Number.isFinite(d.price) && Number.isFinite(d.change)){ TXF.d = d; TXF.at = Date.now(); }
-  } catch (e) { /* 抓不到就留上一次 */ }
+    if (d && d.status === 'ok' && Number.isFinite(d.price) && Number.isFinite(d.change)){ TXF.d = d; TXF.at = Date.now(); TXF.err = 0; } else TXF.err += 1;
+  } catch (e) { TXF.err += 1; /* 抓不到就留上一次 */ }
   finally { TXF.loading = false; txfRender(); }
 }
 setTimeout(txfLoad, 1200);
@@ -27603,15 +27603,31 @@ async function txfMis(endpoint, body, ttlMs) {
   const key = endpoint + JSON.stringify(body);
   const hit = cache[key];
   if (hit && Date.now() - hit.at < ttlMs) return hit.data;
-  const r = await fetch("https://mis.taifex.com.tw/futures/api/" + endpoint, {
-    method: "POST",
-    headers: { "content-type": "application/json", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/", "user-agent": "Mozilla/5.0" },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) throw new Error("期交所 HTTP " + r.status);
-  const data = await r.json();
-  cache[key] = { at: Date.now(), data };
-  return data;
+  // 2026-10-30 09:13 使用者截圖：日盤開盤後 Worker 打期交所一直回 HTTP 520（同一時間從別的地方打都正常）——換兩種標頭輪流試最多 3 次，
+  // 還是失敗就用 2 分鐘內的舊資料；錯誤訊息帶上期交所回的前 80 個字，方便看是被擋還是掛了
+  const heads = [
+    { "content-type": "application/json", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/", "user-agent": "Mozilla/5.0" },
+    { "content-type": "application/json;charset=UTF-8", accept: "application/json, text/plain, */*", "accept-language": "zh-TW,zh;q=0.9", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" }
+  ];
+  let lastErr = null;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const r = await fetch("https://mis.taifex.com.tw/futures/api/" + endpoint, { method: "POST", headers: heads[i % 2], body: JSON.stringify(body), cf: { cacheTtl: 0 } });
+      if (!r.ok) {
+        const t = (await r.text().catch(() => "")).split(String.fromCharCode(10)).join(" ").slice(0, 80);
+        throw new Error("期交所 HTTP " + r.status + (t ? "：" + t : ""));
+      }
+      const data = await r.json();
+      cache[key] = { at: Date.now(), data };
+      return data;
+    } catch (e) {
+      lastErr = e;
+      await new Promise((res) => setTimeout(res, 350));
+    }
+  }
+  if (hit && Date.now() - hit.at < 120000) return hit.data;
+  throw lastErr;
 }
 async function txfNearQuote() {
   const j = await txfMis("getQuoteList", { MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" }, 8000);

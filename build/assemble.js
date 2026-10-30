@@ -470,15 +470,31 @@ async function txfMis(endpoint, body, ttlMs) {
   const key = endpoint + JSON.stringify(body);
   const hit = cache[key];
   if (hit && Date.now() - hit.at < ttlMs) return hit.data;
-  const r = await fetch("https://mis.taifex.com.tw/futures/api/" + endpoint, {
-    method: "POST",
-    headers: { "content-type": "application/json", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/", "user-agent": "Mozilla/5.0" },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) throw new Error("期交所 HTTP " + r.status);
-  const data = await r.json();
-  cache[key] = { at: Date.now(), data };
-  return data;
+  // 2026-10-30 09:13 使用者截圖：日盤開盤後 Worker 打期交所一直回 HTTP 520（同一時間從別的地方打都正常）——換兩種標頭輪流試最多 3 次，
+  // 還是失敗就用 2 分鐘內的舊資料；錯誤訊息帶上期交所回的前 80 個字，方便看是被擋還是掛了
+  const heads = [
+    { "content-type": "application/json", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/", "user-agent": "Mozilla/5.0" },
+    { "content-type": "application/json;charset=UTF-8", accept: "application/json, text/plain, */*", "accept-language": "zh-TW,zh;q=0.9", origin: "https://mis.taifex.com.tw", referer: "https://mis.taifex.com.tw/futures/",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" }
+  ];
+  let lastErr = null;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const r = await fetch("https://mis.taifex.com.tw/futures/api/" + endpoint, { method: "POST", headers: heads[i % 2], body: JSON.stringify(body), cf: { cacheTtl: 0 } });
+      if (!r.ok) {
+        const t = (await r.text().catch(() => "")).split(String.fromCharCode(10)).join(" ").slice(0, 80);
+        throw new Error("期交所 HTTP " + r.status + (t ? "：" + t : ""));
+      }
+      const data = await r.json();
+      cache[key] = { at: Date.now(), data };
+      return data;
+    } catch (e) {
+      lastErr = e;
+      await new Promise((res) => setTimeout(res, 350));
+    }
+  }
+  if (hit && Date.now() - hit.at < 120000) return hit.data;
+  throw lastErr;
 }
 async function txfNearQuote() {
   const j = await txfMis("getQuoteList", { MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" }, 8000);

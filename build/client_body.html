@@ -26127,12 +26127,12 @@ setTimeout(taiexLiveLoad, 1500);
 setInterval(() => { if (document.visibilityState === 'visible') taiexLiveLoad(); }, 20e3);
 // 2026-10-29 使用者：個股震盪右邊空白處加「台指期近月」：價位、漲跌點數、漲跌幅（先點數再幅度），漲紅跌綠平盤白字。
 // 資料 /api/txf-live（期交所 MIS 近月：日盤時間看日盤、夜盤時間 15:00～隔天 08:45 看夜盤；盤中即時、收盤後＝收盤價），每 20 秒更新，抓不到就留上一次的。
-const TXF = { d: null, at: 0, loading: false };
+const TXF = { d: null, at: 0, loading: false, err: 0 };
 function txfRender(){
   const el = document.getElementById('txfBox');
   if (!el) return;
   const d = TXF.d;
-  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期近月</b>　讀取中…</span>'; return; }
+  if (!d){ el.innerHTML = '<span class="txf-l1"><b>台指期近月</b>　' + (TXF.err >= 2 ? '暫時抓不到，自動重試中…' : '讀取中…') + '</span>'; return; }   // 連續失敗兩次就說抓不到，不要一直寫讀取中
   const sg = (v, n) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + Math.abs(v).toFixed(n);
   const cls = Math.abs(d.change) < 0.0000001 ? 'ix-flat' : d.change > 0 ? 'ix-up' : 'ix-dn';
   const tp = new Date(Date.now() + 8 * 3600e3), hm = tp.toISOString().slice(11, 16);   // 台北現在時間
@@ -26147,8 +26147,8 @@ async function txfLoad(){
   try {
     const r = await fetch('/api/txf-live');
     const d = r.ok ? await r.json() : null;
-    if (d && d.status === 'ok' && Number.isFinite(d.price) && Number.isFinite(d.change)){ TXF.d = d; TXF.at = Date.now(); }
-  } catch (e) { /* 抓不到就留上一次 */ }
+    if (d && d.status === 'ok' && Number.isFinite(d.price) && Number.isFinite(d.change)){ TXF.d = d; TXF.at = Date.now(); TXF.err = 0; } else TXF.err += 1;
+  } catch (e) { TXF.err += 1; /* 抓不到就留上一次 */ }
   finally { TXF.loading = false; txfRender(); }
 }
 setTimeout(txfLoad, 1200);
