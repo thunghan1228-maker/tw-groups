@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-10-30 09:23:57";
+const BUILD_STAMP = "2026-10-30 09:25:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1926,7 +1926,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-tags i.td-must{background:#b91c1c;color:#fff;border-color:#b91c1c;font-weight:700;}
   .td-tags i.td-cond{background:#ede9fe;color:#4c1d95;border-color:#a78bfa;}
   .td-tags i.td-again{background:linear-gradient(90deg,#fbbf24,#f87171);color:#3b0d0d;border-color:#f87171;font-weight:700;}
-  .td-tags i.td-fut{background:#166534;color:#fff;border-color:#166534;} .td-tags i.td-mini{background:#2563eb;color:#fff;border-color:#2563eb;}
+  .td-tags i.td-fut{background:#db2777;color:#fff;border-color:#db2777;}   /* 2026-10-30 使用者：有股期的改粉紅底白字 */ .td-tags i.td-mini{background:#db2777;color:#fff;border-color:#db2777;}   /* 2026-10-30 使用者：小期也改粉紅底白字 */
   .td-tags i.td-nofut{color:var(--muted);}
   .td-tags i.td-dt{border-color:#f59e0b;color:#f59e0b;}
   .td-tags i.td-gtag{background:var(--panel-2);}
@@ -2055,7 +2055,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-help i,.td-sum i{font-style:normal;font-size:11px;border-radius:5px;padding:0 6px;border:1px solid var(--line);}
   .td-help i.td-big.deep{background:#16a34a;color:#fff;} .td-help i.td-big.neg{background:#ede9fe;color:#4c1d95;}
   .td-help i.td-big.pos{background:#fef3c7;color:#92400e;} .td-help i.td-big.hot{background:#dc2626;color:#fff;}
-  .td-help i.td-k12{background:#38bdf8;color:#05324a;} .td-help i.td-fut{background:#166534;color:#fff;}
+  .td-help i.td-k12{background:#38bdf8;color:#05324a;} .td-help i.td-fut{background:#db2777;color:#fff;}
   #hwInner .td-time{background:#8b2c22;}
   #hwInner .td-card{border-color:#c4b5fd;box-shadow:0 2px 0 rgba(91,33,182,.08);}
   #hwInner .td-chead b{color:#6d28d9;}
@@ -16753,7 +16753,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-10-30 09:23:57';
+const BUILD_STAMP = '2026-10-30 09:25:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -28670,6 +28670,35 @@ export default {
             }
             bars.push(bar);
           }
+          // 2026-10-30 使用者：加權指數沒有及時更新。國際版 Yahoo 的分K慢約 20 分鐘，今天這一天的 K 棒改用台灣版 Yahoo 的 1 分K（跟盤；時間標籤是「那根的結束時間」，減 60 秒才是開始）蓋掉，5 分K 由 1 分K 合併；抓不到就維持國際版
+          if (tf !== "1d") {
+            try {
+              const tw = await upstreamJson("https://tw.stock.yahoo.com/_td-stock/api/resource/FinanceChartService.ApacLibraCharts;symbols=%5B%22%5ETWII%22%5D;type=tick", 8);
+              const c0 = tw && tw[0] && tw[0].chart;
+              const tq = c0 && c0.indicators && c0.indicators.quote && c0.indicators.quote[0];
+              const tst = (c0 && c0.timestamp) || [];
+              if (tq && tst.length) {
+                const step = tf === "5m" ? 300 : 60, merged = [];
+                let twDay = null;
+                for (let i = 0; i < tst.length; i++) {
+                  const b = { open: tq.open && tq.open[i], high: tq.high && tq.high[i], low: tq.low && tq.low[i], close: tq.close && tq.close[i] };
+                  if (!okBar(b)) continue;
+                  let start = tst[i] - 60;
+                  if ((Math.floor(start / 60) + 480) % 1440 >= 13 * 60 + 30) start -= 60;   // 13:30 收盤集合競價併進前一根
+                  twDay = taipeiDay(start);
+                  const key = Math.floor(start / step) * step * 1000;
+                  const last = merged[merged.length - 1];
+                  if (last && last.ts === key) { last.high = Math.max(last.high, b.high); last.low = Math.min(last.low, b.low); last.close = b.close; }
+                  else merged.push({ ts: key, open: b.open, high: b.high, low: b.low, close: b.close, volume: 0 });
+                }
+                if (merged.length && twDay) {
+                  bars = bars.filter((x) => !(typeof x.ts === "number" && taipeiDay(x.ts / 1000) === twDay));
+                  merged.forEach((x) => bars.push({ ts: x.ts, open: r2(x.open), high: r2(x.high), low: r2(x.low), close: r2(x.close), volume: 0 }));
+                  bars.sort((x, y) => x.ts - y.ts);
+                }
+              }
+            } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
+          }
         } else if (idxId === "txf") {
           // 台指期近月（2026-10-29 使用者）：近月合約自己會換（期交所 getQuoteList 的第一檔月合約，到期日收盤後下個月就變近月）。
           // 1 分K／5 分K＝今天日盤（08:45～13:45，沒開盤就是最後一個交易日）：期交所只給當天；日線＝期交所官方每日行情的日盤（一般交易時段）近月，今天還沒進官方資料就用即時報價補一根
@@ -28854,6 +28883,23 @@ export default {
     if (url.pathname === "/api/taiex-live") {
       // 2026-10-29 使用者：首頁加權指數那格要顯示今天（後端加權日資料晚上才更新）。用 Yahoo ^TWII：盤中即時、收盤後就是收盤價，快取 15 秒
       try {
+        // 2026-10-30 使用者：加權指數沒有跟著盤走。國際版 Yahoo 的 ^TWII 慢約 20 分鐘，先抓台灣版 Yahoo（1 分K、跟盤，meta 的價格、時間就是最新一分鐘），抓不到才退回國際版
+        try {
+          const twres = await fetch("https://tw.stock.yahoo.com/_td-stock/api/resource/FinanceChartService.ApacLibraCharts;symbols=%5B%22%5ETWII%22%5D;type=tick", {
+            headers: { "user-agent": "Mozilla/5.0", accept: "application/json" },
+            cf: { cacheTtlByStatus: { "200-299": 8, "300-599": 0 }, cacheEverything: true }
+          });
+          if (twres.ok) {
+            const twbody = await twres.json();
+            const tm = twbody && twbody[0] && twbody[0].chart && twbody[0].chart.meta;
+            const tprice = tm ? Number(tm.regularMarketPrice) : NaN, tprev = tm ? Number(tm.previousClose) : NaN, tsec = tm ? Number(tm.regularMarketTime) : NaN;
+            if (Number.isFinite(tprice) && Number.isFinite(tprev) && tprev > 0 && Number.isFinite(tsec)) {
+              const tchange = Math.round((tprice - tprev) * 100) / 100;
+              return Response.json({ status: "ok", date: new Date((tsec + 8 * 3600) * 1000).toISOString().slice(0, 10), price: tprice, prevClose: tprev, change: tchange, pct: Math.round(tchange / tprev * 10000) / 100, time: new Date(tsec * 1000).toISOString(), source: "yahoo tw ^TWII" },
+                { headers: { "cache-control": "public, max-age=8" } });
+            }
+          }
+        } catch (twErr) { /* 台灣版抓不到就用下面國際版 */ }
         const yres = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?interval=1d&range=5d", {
           headers: { "user-agent": "Mozilla/5.0", accept: "application/json" },
           cf: { cacheTtlByStatus: { "200-299": 15, "300-599": 0 }, cacheEverything: true }

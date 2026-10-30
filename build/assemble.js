@@ -1439,6 +1439,35 @@ export default {
             }
             bars.push(bar);
           }
+          // 2026-10-30 使用者：加權指數沒有及時更新。國際版 Yahoo 的分K慢約 20 分鐘，今天這一天的 K 棒改用台灣版 Yahoo 的 1 分K（跟盤；時間標籤是「那根的結束時間」，減 60 秒才是開始）蓋掉，5 分K 由 1 分K 合併；抓不到就維持國際版
+          if (tf !== "1d") {
+            try {
+              const tw = await upstreamJson("https://tw.stock.yahoo.com/_td-stock/api/resource/FinanceChartService.ApacLibraCharts;symbols=%5B%22%5ETWII%22%5D;type=tick", 8);
+              const c0 = tw && tw[0] && tw[0].chart;
+              const tq = c0 && c0.indicators && c0.indicators.quote && c0.indicators.quote[0];
+              const tst = (c0 && c0.timestamp) || [];
+              if (tq && tst.length) {
+                const step = tf === "5m" ? 300 : 60, merged = [];
+                let twDay = null;
+                for (let i = 0; i < tst.length; i++) {
+                  const b = { open: tq.open && tq.open[i], high: tq.high && tq.high[i], low: tq.low && tq.low[i], close: tq.close && tq.close[i] };
+                  if (!okBar(b)) continue;
+                  let start = tst[i] - 60;
+                  if ((Math.floor(start / 60) + 480) % 1440 >= 13 * 60 + 30) start -= 60;   // 13:30 收盤集合競價併進前一根
+                  twDay = taipeiDay(start);
+                  const key = Math.floor(start / step) * step * 1000;
+                  const last = merged[merged.length - 1];
+                  if (last && last.ts === key) { last.high = Math.max(last.high, b.high); last.low = Math.min(last.low, b.low); last.close = b.close; }
+                  else merged.push({ ts: key, open: b.open, high: b.high, low: b.low, close: b.close, volume: 0 });
+                }
+                if (merged.length && twDay) {
+                  bars = bars.filter((x) => !(typeof x.ts === "number" && taipeiDay(x.ts / 1000) === twDay));
+                  merged.forEach((x) => bars.push({ ts: x.ts, open: r2(x.open), high: r2(x.high), low: r2(x.low), close: r2(x.close), volume: 0 }));
+                  bars.sort((x, y) => x.ts - y.ts);
+                }
+              }
+            } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
+          }
         } else if (idxId === "txf") {
           // 台指期近月（2026-10-29 使用者）：近月合約自己會換（期交所 getQuoteList 的第一檔月合約，到期日收盤後下個月就變近月）。
           // 1 分K／5 分K＝今天日盤（08:45～13:45，沒開盤就是最後一個交易日）：期交所只給當天；日線＝期交所官方每日行情的日盤（一般交易時段）近月，今天還沒進官方資料就用即時報價補一根
@@ -1623,6 +1652,23 @@ export default {
     if (url.pathname === "/api/taiex-live") {
       // 2026-10-29 使用者：首頁加權指數那格要顯示今天（後端加權日資料晚上才更新）。用 Yahoo ^TWII：盤中即時、收盤後就是收盤價，快取 15 秒
       try {
+        // 2026-10-30 使用者：加權指數沒有跟著盤走。國際版 Yahoo 的 ^TWII 慢約 20 分鐘，先抓台灣版 Yahoo（1 分K、跟盤，meta 的價格、時間就是最新一分鐘），抓不到才退回國際版
+        try {
+          const twres = await fetch("https://tw.stock.yahoo.com/_td-stock/api/resource/FinanceChartService.ApacLibraCharts;symbols=%5B%22%5ETWII%22%5D;type=tick", {
+            headers: { "user-agent": "Mozilla/5.0", accept: "application/json" },
+            cf: { cacheTtlByStatus: { "200-299": 8, "300-599": 0 }, cacheEverything: true }
+          });
+          if (twres.ok) {
+            const twbody = await twres.json();
+            const tm = twbody && twbody[0] && twbody[0].chart && twbody[0].chart.meta;
+            const tprice = tm ? Number(tm.regularMarketPrice) : NaN, tprev = tm ? Number(tm.previousClose) : NaN, tsec = tm ? Number(tm.regularMarketTime) : NaN;
+            if (Number.isFinite(tprice) && Number.isFinite(tprev) && tprev > 0 && Number.isFinite(tsec)) {
+              const tchange = Math.round((tprice - tprev) * 100) / 100;
+              return Response.json({ status: "ok", date: new Date((tsec + 8 * 3600) * 1000).toISOString().slice(0, 10), price: tprice, prevClose: tprev, change: tchange, pct: Math.round(tchange / tprev * 10000) / 100, time: new Date(tsec * 1000).toISOString(), source: "yahoo tw ^TWII" },
+                { headers: { "cache-control": "public, max-age=8" } });
+            }
+          }
+        } catch (twErr) { /* 台灣版抓不到就用下面國際版 */ }
         const yres = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?interval=1d&range=5d", {
           headers: { "user-agent": "Mozilla/5.0", accept: "application/json" },
           cf: { cacheTtlByStatus: { "200-299": 15, "300-599": 0 }, cacheEverything: true }
