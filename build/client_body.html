@@ -13417,7 +13417,8 @@ function wkBacktestHtml(d){
   const bt = d.backtest || {}, weeks = bt.weeks || [], after = bt.removedAfter || [];
   if (!weeks.length) return wkSec('wkBack', '八、四週回測', '', '<div class="wk-empty">過去四週的名單還算不出來（均線分數資料不夠長）。</div>');
   const stk = (r) => '<span class="wk-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name) + '">' + wlEsc(r.name) + '</span>';
-  const cards = weeks.map((w) => '<div class="wk-week"><div class="wk-wh"><b class="wk-wd">' + wkMd(w.date) + ' 名單</b><span>' + w.n + ' 檔</span>' +
+  // 自選觀察股頁：最接近今天的那週排最上面、最早的排最下面（2026-11-01 使用者）；收盤觀察股頁照老師舊到新
+  const cards = (d.custom ? weeks.slice().reverse() : weeks).map((w) => '<div class="wk-week"><div class="wk-wh"><b class="wk-wd">' + wkMd(w.date) + ' 名單</b><span>' + w.n + ' 檔</span>' +
     '<i class="wk-pill">中位 ' + wkPct(w.median) + '</i><i class="wk-pill">平均 ' + wkPct(w.mean) + '</i><i class="wk-pill">勝率 ' + w.winRate + '%</i><i class="wk-pill">守月線 ' + (wkHas(w.keepMa) ? w.keepMa + '%' : '—') + '</i></div>' +
     '<div class="wk-3">' + wkMiniCard(d.custom ? '分組' : '族群', d.custom ? '分組內中位前五' : '族內中位前五', 'v', w.groups.map((g) => ({ left: wlEsc(g.name), v: g.median }))) +
     wkMiniCard('好股', '最強五檔', 'r', w.best.map((x) => ({ left: stk(x), v: x.ret }))) + wkMiniCard('壞股', '最弱五檔', 'g', w.worst.map((x) => ({ left: stk(x), v: x.ret }))) + '</div></div>').join('');
