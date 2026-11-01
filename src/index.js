@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-01 15:36:09";
+const BUILD_STAMP = "2026-11-01 15:52:17";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -15226,6 +15226,47 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') wlPickClose(); });
 window.addEventListener('scroll', (e) => { if (!(e.target && e.target.closest && e.target.closest('#wlPick'))) wlPickClose(); }, true);
 setTimeout(() => { if (wl.key && !document.body.classList.contains('chart-window-mode')) wlLoad(); }, 1500);   // 開頁面先跟雲端對一次，其他地方的 ☆ 才會是最新的
+// 2026-11-01 使用者：一份股票名單（例如券商軟體的自選清單）一次加進自選股某個分組（多觀察）。我沒辦法直接寫進你的自選股（清單在你自己的瀏覽器／同步碼裡），
+// 所以用網址帶進來：網址後面加 ?addwatch=2615,2603,3406&wgroup=多觀察 ，在你平常用的那個瀏覽器打開，會先問一次「要加進去嗎」，按確定才加；
+// 分組已經有就加進去（已在那組的略過），沒有就新增一組。加完會把網址上的參數拿掉，重新整理不會再加一次。
+(function wlImportFromUrl(){
+  if (document.body.classList.contains('chart-window-mode')) return;
+  let p = null;
+  try { p = new URLSearchParams(location.search); } catch (_){ return; }
+  const raw = p.get('addwatch');
+  if (!raw) return;
+  const gname = (p.get('wgroup') || '多觀察').trim().slice(0, 20) || '多觀察';
+  const entries = [], seen = new Set();
+  raw.split(/[,\\s]+/).forEach((tok) => {
+    const m = tok.match(/^([0-9A-Za-z]{4,6})(?::(.*))?$/);
+    if (m && !seen.has(m[1])){ seen.add(m[1]); entries.push({ code: m[1], name: m[2] ? decodeURIComponent(m[2]).slice(0, 20) : '' }); }
+  });
+  if (!entries.length) return;
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch (_){}
+  const run = async () => {
+    for (let i = 0; i < 30 && (wl.loading || wl.busy); i++) await new Promise((r) => setTimeout(r, 200));   // 等雲端清單讀進來再加，不然會被蓋掉
+    const names = entries.map((e) => (WL_GROUP_INDEX[e.code] && WL_GROUP_INDEX[e.code].name) || e.name || e.code);
+    const old = wl.data.groups.find((g) => !wlIsAuto(g) && (g.name === gname || g.name.indexOf(gname) >= 0));
+    const have = old ? entries.filter((e) => old.items.some((it) => it.code === e.code)).length : 0;
+    const ok = window.confirm('要把這 ' + entries.length + ' 檔加進自選股「' + (old ? old.name : gname) + '」嗎？' + (old ? '' : '（這個分組還沒有，會新增）') + (have ? '\\n其中 ' + have + ' 檔已經在那一組，會略過。' : '') + '\\n\\n' + names.join('、'));
+    if (!ok) return;
+    const today = twTodayStr();
+    wlMutate((data) => {
+      let g = data.groups.find((x) => !wlIsAuto(x) && (x.name === gname || x.name.indexOf(gname) >= 0));
+      if (!g){ g = { id: wlNewGroupId(data), name: gname, items: [] }; data.groups.push(g); }
+      entries.forEach((e) => {
+        if (g.items.some((it) => it.code === e.code)) return;
+        const item = { code: e.code, addedAt: today };
+        const nm = e.name || '';
+        if (nm && !WL_GROUP_INDEX[e.code]) item.name = nm;
+        g.items.push(item);
+      });
+    });
+    wlFetchExtra(true);
+    showToast('已加進自選股「' + (old ? old.name : gname) + '」：' + entries.length + ' 檔');
+  };
+  setTimeout(run, 3200);
+})();
 
 // ---- 個股訊號追蹤（2026-10-05 使用者：自選股第二階段）----
 // 自選股今天出現的盤中訊號照時間列（資料跟盤中訊號中心同一份，不另外抓）＋提醒：到價（站上／跌破）、跌破均線、
@@ -16802,7 +16843,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-01 15:36:09';
+const BUILD_STAMP = '2026-11-01 15:52:17';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
