@@ -1963,7 +1963,8 @@
   .td-bk{display:inline-block;padding:1px 8px;border-radius:6px;border:1px solid #cbd5e1;color:#64748b;font-size:12px;font-weight:700;} .td-bk.on{background:#16a34a;border-color:#16a34a;color:#fff;} .td-bk.down{background:#fee2e2;border-color:#fca5a5;color:#b91c1c;}
   .td-b9x{border:0;background:none;color:#94a3b8;cursor:pointer;font-size:12px;} .td-b9x:hover{color:#dc2626;}
   @media (max-width:900px){ .td-sidecol{order:-1;position:static;} .td-sides .td-side.wide{width:auto;flex:1 1 auto;} .td-b9head,.td-b9row{grid-template-columns:42px minmax(0,1fr) 70px 60px 56px 20px;} }
-  .td-b9head.stop,.td-b9row.stop{grid-template-columns:minmax(0,1fr) 62px 62px 66px 92px 78px;} .td-b9row.stop .px{text-align:right;font-weight:700;} .td-b9row.stop .sp{text-align:right;} .td-b9row.stop .st{text-align:right;} .td-b9row.stop.hit{background:#fee2e2;}
+  .td-side.stop .td-b9head,.td-side.stop .td-b9row{grid-template-columns:46px minmax(0,1fr) 138px 70px 62px 24px;} .td-side.stop .td-b9row .b{white-space:nowrap;}
+  .td-bk.red{background:#dc2626;border-color:#dc2626;color:#fff;} .td-b9fold{float:right;border:1px solid #c4b2e6;background:#fff;color:#6d28d9;border-radius:6px;padding:0 8px;font-size:12px;cursor:pointer;font-family:inherit;} .td-b9from{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:#4a4066;}
   .td-sides .td-side{width:292px;flex:0 0 292px;} .td-side.k12 .td-shead{background:#1d4ed8;} .td-side.k12 .td-sinfo{color:#1d4ed8;}
   .td-main{min-width:0;}
   .td-side{position:sticky;top:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13px;max-height:calc(92vh - 40px);overflow-y:auto;}
@@ -19799,7 +19800,8 @@ function tdBroadcastHtml(seq, snap, kind){
 // ---- 今日功課右側分頁（2026-11-01 使用者：做成跟老師一樣——右上角三個分頁「刀功課／1+2・905 突破／持股停損」，老師有的都要有，12空保留，再加本站自己的）----
 // 刀功課＝原本並排的兩欄（刀劍空(32)、12空(123)），排序一樣最近發生的在上面；1+2／905 突破＝老師那頁的「我的 1+2／905」（各貼股號，5 分K 收盤站上
 // 905 高［1+2 還要過昨高］算突破、之後收回線下算跌破，時間用 5 分K 收盤時間）＋本站自己的全市場 1+2多、首次過905高（不用貼）；
-// 持股停損＝在族群卡打勾「我持有空單」的股票，填停損價、現價漲到停損價就標紅（並響提示音）。
+// 持股停損（老師的「持股停損監控」）＝貼自己的持股或自選股（最多 20 檔，沒刪就一直留著），盤中 1 分K 收盤跌破 905 低（開盤第一根 5 分K 的最低）
+// 或三日低（前三個交易日最低）就通知；我們另外加「從自選股帶入」。
 const TD_SIDE_TABS = [['blade', '🔪 刀功課'], ['b905', '📈 1+2 / 905 突破'], ['stop', '🛡 持股停損']];
 let tdSideTab = (() => { try { const v = localStorage.getItem('tdSide'); return TD_SIDE_TABS.some((x) => x[0] === v) ? v : 'blade'; } catch (_) { return 'blade'; } })();
 const TD_B905_MAX = 10;
@@ -19808,9 +19810,11 @@ const tdB905 = (() => {
   try { const j = JSON.parse(localStorage.getItem('tdB905') || '{}') || {}; Object.keys(d).forEach((k) => { if (j[k] !== undefined) d[k] = j[k]; }); } catch (_) { /* 讀不到就用預設 */ }
   return d;
 })();
-const tdStops = (() => { try { return JSON.parse(localStorage.getItem('tdStops') || '{}') || {}; } catch (_) { return {}; } })();
+const TD_STOP_MAX = 20;
+const tdStopList = (() => { try { const j = JSON.parse(localStorage.getItem('tdStopList') || '[]'); return Array.isArray(j) ? j.slice(0, TD_STOP_MAX) : []; } catch (_) { return []; } })();
+let tdStopFold = (() => { try { return localStorage.getItem('tdStopFold') === '1'; } catch (_) { return false; } })();
 const tdSaveB905 = () => { try { localStorage.setItem('tdB905', JSON.stringify(tdB905)); } catch (_) { /* 存不了就算了 */ } };
-const tdSaveStops = () => { try { localStorage.setItem('tdStops', JSON.stringify(tdStops)); } catch (_) { /* 存不了就算了 */ } };
+const tdSaveStopList = () => { try { localStorage.setItem('tdStopList', JSON.stringify(tdStopList)); localStorage.setItem('tdStopFold', tdStopFold ? '1' : '0'); } catch (_) { /* 存不了就算了 */ } };
 const tdJCache = {};
 let tdJTimer = 0, tdSigTimer = 0;
 function tdJ(key, url, ttl){
@@ -19866,13 +19870,12 @@ function tdB905Check(snap){
     if (!r.ev) return;
     r.ev.forEach((e) => { if ((e.type === 'up' && tdB905.up) || (e.type === 'down' && tdB905.down)) note(code + '|' + k + '|' + e.type + '|' + e.t, e.t + ' ' + code + ' ' + wlNameOf(code) + ' ' + lab + (e.type === 'up' ? ' 突破 ' : ' 跌破 ') + +e.px.toFixed(2)); });
   }));
-  tdState.hold.forEach((code) => {
-    const stop = Number(tdStops[code]);
-    if (!(stop > 0)) return;
-    const r = tdB905Calc(code, 'c905', snap.date, null);
-    if (r.price !== null && r.price !== undefined && r.price >= stop) note(code + '|stop|' + stop, '🔴 ' + code + ' ' + wlNameOf(code) + ' 現價 ' + +r.price.toFixed(2) + ' 到停損價 ' + stop);
+  tdStopList.forEach((code) => {
+    const r = tdStopCalc(code, snap.date, null);
+    if (!r.ev || !tdB905.down) return;
+    r.ev.forEach((e) => note(code + '|stop|' + e.kind + '|' + e.t, e.t + ' 🔴 ' + code + ' ' + wlNameOf(code) + ' 跌破' + e.label + ' ' + +e.px.toFixed(2)));
   });
-  const allLoaded = [...tdB905.c12, ...tdB905.c905, ...tdState.hold].every((c) => { const e = tdJCache['m5|' + c]; return e && !e.loading; });
+  const allLoaded = [...tdB905.c12, ...tdB905.c905].every((c) => { const e = tdJCache['m5|' + c]; return e && !e.loading; }) && tdStopList.every((c) => { const e = tdJCache['m1|' + c]; return e && !e.loading; });
   if (allLoaded) tdB905Primed = snap.date;
   if (fresh.length){
     if (tdB905.snd) { try { launchBeep(); } catch (_) { /* 出不了聲就算了 */ } }
@@ -19936,31 +19939,64 @@ function tdB905PanelHtml(snap){
     '<div class="td-b9sec sys">🤖 本站全市場 1+2多（自動，不用貼） <b>' + sys.length + '</b>　<small>今天第一次收盤同時站上 905 高與昨高；最近的在上面</small></div>' + (sys.length ? head + sysRows : '<div class="td-empty">' + (snap.live ? '今天還沒有（開盤後 5 分K 收盤才會出現）' : '這個時段以前沒有紀錄') + '</div>') +
     '</aside>';
 }
+// 持股停損：一檔股在某天（到某個時段為止）有沒有「1 分K 收盤跌破 905 低」「收盤跌破三日低」，什麼時候
+function tdStopCalc(code, date, slot){
+  const d1 = tdJ('d1|' + code, '/api/bars1d/' + code, 1800e3);
+  const m1 = date === twTodayStr() ? tdJ('m1|' + code, '/api/bars1m/' + code, 30e3) : tdJ('m1r|' + code, '/api/bars1mrange/' + code, 1800e3);
+  if (!d1 || !m1) return { loading: true };
+  if (d1.status !== 'ok' || m1.status !== 'ok') return { error: true };
+  const hmOf = (b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(11, 16);
+  const endHm = (b) => new Date(b.ts + 8 * 3600e3 + 60e3).toISOString().slice(11, 16);
+  const dayBars = (m1.bars || []).filter((b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10) === date).sort((a, b) => a.ts - b.ts);
+  if (!dayBars.length) return { empty: true };
+  const prev = (d1.bars || []).filter((b) => String(b.ts).slice(0, 10) < date);
+  const yClose = prev.length ? prev[prev.length - 1].close : null;
+  const low3 = prev.length >= 3 ? Math.min(...prev.slice(-3).map((b) => b.low)) : null;     // 三日低＝前三個交易日（不含當天）最低價
+  const first5 = dayBars.filter((b) => hmOf(b) < '09:05');
+  const low905 = first5.length ? Math.min(...first5.map((b) => b.low)) : null;
+  const ev = [];
+  let b905 = false, b3 = false, last = null;
+  dayBars.forEach((b) => {
+    if (slot && endHm(b) > slot) return;
+    last = b;
+    if (hmOf(b) < '09:05') return;      // 905 低要等第一根 5 分K 收完才有
+    if (!b905 && Number.isFinite(low905) && b.close < low905){ b905 = true; ev.push({ kind: '905', label: '905 低', t: endHm(b), px: b.close }); }
+    if (!b3 && Number.isFinite(low3) && b.close < low3){ b3 = true; ev.push({ kind: '3d', label: '三日低', t: endHm(b), px: b.close }); }
+  });
+  return { low905, low3, yClose, ev, b905, b3, price: last ? last.close : null, pct: last && yClose ? (last.close / yClose - 1) * 100 : null, lastT: last ? endHm(last) : '' };
+}
 function tdStopPanelHtml(snap){
   const date = snap.date, slot = snap.live ? null : snap.slot;
-  const list = tdState.hold;
-  const rows = list.map((code) => {
-    const r = tdB905Calc(code, 'c905', date, slot);
-    const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(code) : null;
-    const price = q && Number(q.price) > 0 ? Number(q.price) : r.price;
+  const items = tdStopList.map((code) => ({ code, r: tdStopCalc(code, date, slot) }));
+  const lastEv = (x) => (x.r.ev && x.r.ev.length ? x.r.ev[x.r.ev.length - 1].t : '');
+  items.sort((a, b) => (lastEv(a) < lastEv(b) ? 1 : lastEv(a) > lastEv(b) ? -1 : a.code < b.code ? -1 : 1));    // 最近發生的在上面，沒破的排最後
+  const hit = items.filter((x) => x.r.ev && x.r.ev.length).length;
+  const rows = items.map((x) => {
+    const r = x.r;
+    const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(x.code) : null;
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : r.pct;
-    const stop = Number(tdStops[code]);
-    const hit = stop > 0 && Number.isFinite(price) && price >= stop;
-    const gap = stop > 0 && Number.isFinite(price) ? (stop / price - 1) * 100 : null;
-    return '<div class="td-b9row stop' + (hit ? ' hit' : '') + '" data-hw-code="' + wlEsc(code) + '" data-hw-name="' + wlEsc(wlNameOf(code)) + '"><span class="s"><b>' + wlEsc(code) + '</b> ' + wlEsc(wlNameOf(code)) +
-      ((r.h905 !== undefined) ? '<small>905高 ' + tdPx(r.h905) + '・昨高 ' + tdPx(r.yHigh) + '・今高 ' + tdPx(r.high) + '</small>' : '') + '</span>' +
-      '<span class="px">' + tdPx(price) + '</span><span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '—') + '</span>' +
-      '<span class="h">' + holderTagHtml(holderPctOf(code), true) + '</span>' +
-      '<span class="sp"><input class="td-b9in sm" data-keep="1" data-td-stop="' + wlEsc(code) + '" placeholder="停損價" value="' + (stop > 0 ? stop : '') + '"></span>' +
-      '<span class="st">' + (hit ? '<i class="td-bst run">🔴 停損</i>' : gap !== null ? '<small>再漲 ' + gap.toFixed(1) + '%</small>' : '') + '</span></div>';
+    const bad = r.loading ? '讀取中' : r.error ? '讀取失敗' : r.empty ? '沒有1分K' : '';
+    const bk = bad ? '<span class="td-bk' + (r.error ? ' down' : '') + '">' + bad + '</span>' :
+      '<span class="td-bk' + (r.b905 ? ' red' : '') + '">' + (r.b905 ? '✗' : '') + '905低</span> <span class="td-bk' + (r.b3 ? ' red' : '') + '">' + (r.b3 ? '✗' : '') + '三日低</span>';
+    return '<div class="td-b9row" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(wlNameOf(x.code)) + '"><span class="t">' + (lastEv(x) || '—') + '</span>' +
+      '<span class="s"><b>' + wlEsc(x.code) + '</b> ' + wlEsc(wlNameOf(x.code)) + (bad ? '' : '<small>905低 ' + tdPx(r.low905) + '・三日低 ' + tdPx(r.low3) + '・現 ' + tdPx(r.price) + '</small>') + '</span>' +
+      '<span class="b">' + bk + '</span><span class="h">' + holderTagHtml(holderPctOf(x.code), true) + '</span>' +
+      '<span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '—') + '</span>' +
+      '<button type="button" class="td-b9x" data-td-stop-del="' + wlEsc(x.code) + '" title="從清單移除">✕</button></div>';
   }).join('');
-  return '<aside class="td-side wide stop"><div class="td-shead">📣 🛡 持股停損</div>' +
-    '<div class="td-sinfo">' + (snap.live ? '盤中・跟著首頁報價' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
-    '<div class="td-b9opts">' + opt2('snd', '🔊 聲音', tdB905.snd) + opt2('notif', '🔔 開通知', tdB905.notif) + '</div>' +
-    '<div class="td-b9sec">我持有的空單 <b>' + list.length + '</b>　<small>在左邊族群卡打勾 ☑「我持有空單」就會出現在這裡</small></div>' +
-    (list.length ? '<div class="td-b9head stop"><span class="s">股號・股名</span><span class="px">現價</span><span class="p">今日%</span><span class="h">大戶力</span><span class="sp">停損價</span><span class="st"></span></div>' + rows
-      : '<div class="td-empty">還沒有持有空單的股票 —— 在左邊刀劍空的卡片上打勾 ☑ 就會列在這裡。</div>') +
-    '<div class="td-snote">停損價自己填（空單：現價漲到停損價就標紅、響提示音）。參考：905 高、昨高、今天最高都列在股名下面，常見做法是站上 905 高或虧損 2～3% 就停損。這個停損價只記在這台電腦。</div></aside>';
+  const groupBtns = mineEligible().filter((g) => (g.items || []).length).map((g) => '<button type="button" class="td-b9opt" data-td-stop-from="' + wlEsc(g.id) + '">＋ ' + wlEsc(g.name) + ' <small>' + g.items.length + '</small></button>').join('');
+  const head = '<div class="td-b9head"><span class="t">時間</span><span class="s">股號・股名</span><span class="b">破線</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';
+  return '<aside class="td-side wide stop"><div class="td-shead">📣 🛡 持股停損監控</div>' +
+    '<div class="td-sinfo">' + (snap.live ? '盤中・1 分K 收完更新' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
+    '<div class="td-b9opts">' + opt2('snd', '🔊 聲音', tdB905.snd) + opt2('down', '▶ 跌破', tdB905.down) + opt2('notif', '🔔 開通知', tdB905.notif) + '</div>' +
+    '<div class="td-b9box"><div class="td-b9t">⭐ 我的自選監控　<small>最多 ' + TD_STOP_MAX + ' 檔，沒刪就一直留著</small>' +
+    '<button type="button" class="td-b9fold" data-td-stop-fold="1">' + (tdStopFold ? '展開 ▾' : '收起 ▴') + '</button></div>' +
+    (tdStopFold ? '' : '<input class="td-b9in" id="tdStopIn" data-keep="1" placeholder="貼持股或自選股，例：2330 2454 3008" value="' + wlEsc(tdStopList.join(' ')) + '"><button type="button" class="td-b9save" data-td-stop-save="1">存</button>' +
+      (groupBtns ? '<div class="td-b9from">從自選股帶入：' + groupBtns + '</div>' : '') +
+      '<div class="td-snote">盤中 1 分K 收盤跌破 905 低（開盤第一根 5 分K 的最低）或三日低（前三個交易日最低）就通知；跟 1+2 / 905 突破、刀功課同一份清單提醒。老師的持股不公開，這裡放你自己的持股或自選股。</div>') + '</div>' +
+    '<div class="td-b9sec">⭐ 監控中 <b>' + items.length + '</b>　已破線 <b>' + hit + '</b>　<small>最近發生的在上面</small></div>' +
+    (items.length ? head + rows : '<div class="td-empty">還沒加 —— 貼你的持股或自選股（最多 ' + TD_STOP_MAX + ' 檔），盤中 1 分K 收盤跌破 905 低或三日低就通知。</div>') +
+    '</aside>';
 }
 const opt2 = (k, label, on) => '<button type="button" class="td-b9opt' + (on ? ' on' : '') + '" data-td-b905-opt="' + k + '">' + label + '</button>';
 function tdAddWatch(){
@@ -20466,14 +20502,14 @@ function renderHomework(){
   const inp = document.getElementById('tdWatchInput');
   const keep = inp ? { v: inp.value, f: document.activeElement === inp } : null;   // 每 20 秒重畫不要吃掉打到一半的股號
   const act = document.activeElement;
-  const keep2 = act && act.dataset && act.dataset.keep ? { id: act.id, stop: act.dataset.tdStop, v: act.value } : null;   // 1+2／905 的股號框、停損價框也一樣
+  const keep2 = act && act.dataset && act.dataset.keep ? { id: act.id, v: act.value } : null;   // 1+2／905、持股停損的股號框也一樣
   body.innerHTML = '<div class="hw-tabs">' + HW_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (hwState.tab === k ? ' active' : '') + '" data-hw-tab="' + k + '">' + label + '</button>').join('') +
     '<span class="hw-stamp">' + stamp + ' 更新・盤中每 20 秒跟著首頁報價重算</span></div>' + html;
   if (open){ const d = body.querySelector('details.hw-more'); if (d) d.open = true; }
   if (helpOpen){ const d = body.querySelector('details.td-help'); if (d) d.open = true; }
   if (dtOpen){ const d = body.querySelector('details.td-dtbox'); if (d) d.open = true; }
   if (keep){ const n = document.getElementById('tdWatchInput'); if (n){ n.value = keep.v; if (keep.f) n.focus(); } }
-  if (keep2){ const n = keep2.id ? document.getElementById(keep2.id) : body.querySelector('[data-td-stop="' + keep2.stop + '"]'); if (n){ n.value = keep2.v; n.focus(); } }
+  if (keep2 && keep2.id){ const n = document.getElementById(keep2.id); if (n){ n.value = keep2.v; n.focus(); } }
 }
 // ---- 每日功課視窗：拖著標題列走、四邊四角拉大小（2026-10-19 使用者），跟機器人代碼、盤中訊號分頁共用 attachFloatChrome ----
 const HW_RECT_KEY = 'hwRect', HW_MAX_KEY = 'hwMaxed';
@@ -20622,13 +20658,7 @@ function closeHomeworkPanel(){
   document.getElementById('hwModal').hidden = true; clearInterval(hwState.timer);
 }
 document.getElementById('hwClose').addEventListener('click', closeHomeworkPanel);
-document.getElementById('hwBody').addEventListener('change', (e) => {
-  const si = e.target.closest ? e.target.closest('[data-td-stop]') : null;
-  if (!si) return;
-  const v = Number(String(si.value).replace(/[^0-9.]/g, ''));
-  if (v > 0) tdStops[si.dataset.tdStop] = v; else delete tdStops[si.dataset.tdStop];
-  tdSaveStops(); renderHomework();
-});
+
 document.getElementById('hwBody').addEventListener('click', (e) => {
   const t = e.target;
   const tab = t.closest('[data-hw-tab]');
@@ -20659,6 +20689,20 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
     tdB905.c12 = parse('tdB905In12'); tdB905.c905 = parse('tdB905In905'); tdSaveB905();
     renderHomework(); return;
   }
+  if (t.closest('[data-td-stop-save]')){
+    const el = document.getElementById('tdStopIn');
+    const codes = Array.from(new Set(String(el ? el.value : '').toUpperCase().split(/[^0-9A-Z]+/).filter((c) => /^[0-9A-Z]{4,6}$/.test(c)))).slice(0, TD_STOP_MAX);
+    tdStopList.length = 0; codes.forEach((c) => tdStopList.push(c)); tdSaveStopList(); renderHomework(); return;
+  }
+  if (t.closest('[data-td-stop-fold]')){ tdStopFold = !tdStopFold; tdSaveStopList(); renderHomework(); return; }
+  const sfrom = t.closest('[data-td-stop-from]');
+  if (sfrom){
+    const g = wl.data.groups.find((x) => x.id === sfrom.dataset.tdStopFrom);
+    if (g){ (g.items || []).forEach((it) => { if (!tdStopList.includes(it.code) && tdStopList.length < TD_STOP_MAX) tdStopList.push(it.code); }); tdSaveStopList(); renderHomework(); }
+    return;
+  }
+  const sdel = t.closest('[data-td-stop-del]');
+  if (sdel){ const i = tdStopList.indexOf(sdel.dataset.tdStopDel); if (i >= 0) tdStopList.splice(i, 1); tdSaveStopList(); renderHomework(); return; }
   const b9del = t.closest('[data-td-b905-del]');
   if (b9del){ const [c, k] = b9del.dataset.tdB905Del.split('|'); tdB905[k] = (tdB905[k] || []).filter((x) => x !== c); tdSaveB905(); renderHomework(); return; }
   const b9opt = t.closest('[data-td-b905-opt]');
