@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-01 16:02:03";
+const BUILD_STAMP = "2026-11-01 16:10:35";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1745,6 +1745,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .wk-foot{font-size:12px;color:#756a8c;line-height:1.7;border-top:1px solid #d9cdee;margin-top:26px;padding-top:10px;}
   .sp-wkbtn{display:inline-block;margin:0 0 18px;border:1px solid #a78bdb;color:#6d28d9;background:#fff;border-radius:999px;padding:7px 20px;font-size:14.5px;font-weight:700;cursor:pointer;}
   .sp-wkbtn:hover{background:#6d28d9;color:#fff;}
+  .sp-wkbar{display:flex;flex-wrap:wrap;gap:8px 10px;margin:4px 0 14px;} .sp-wkbar .sp-wkbtn{margin:0;}
   @media (max-width:760px){ .wk-h1{font-size:30px;} .wk-3{grid-template-columns:1fr;} .wk-tiles b{font-size:30px;} .wk-h2{font-size:21px;} }
   /* 季報 EPS：族群分析・多觀察分析（2026-10-29 使用者：照老師頁——白卡片、紅／橘／紫／綠框色塊） */
   .eq-sec{background:#fff;border:1px solid #d9cdee;border-radius:18px;padding:16px 18px;margin:18px 0;}
@@ -13220,11 +13221,11 @@ function swingPageHtml(data){
   const opts = dates.map((d) => '<option value="' + d + '"' + (d === data.date ? ' selected' : '') + '>' + d + spWd(d) + ' 收盤</option>').join('');
   const rules = data.rules || {};
   return '<div class="sp-paper"><span class="sp-tag">波段精選</span><h1 class="sp-h1">波段精選日報</h1>' +
+    '<div class="sp-wkbar"><a class="sp-wkbtn" data-wk-open>📋 收盤觀察股 週分析 →</a> <a class="sp-wkbtn" data-mine-open>🗂 自選觀察股 週分析 →</a> <a class="sp-wkbtn" data-eq-open>📊 季報 EPS：族群分析・多觀察分析 →</a></div>' +   // 2026-10-29 使用者：波段日報新增每週多觀察全方面解析；2026-11-01 加自選觀察股，三顆移到標題正下方（順序：週分析、自選週分析、季報 EPS）
     '<div class="sp-sub">' + (data.readDate ? data.readDate + spWd(data.readDate) + '盤前讀 · ' : '') + '資料基準 ' + data.date + ' 收盤 · 籌碼 / 技術 / 體質 / 均線四面向,每類精選 3~5 檔,附防守價與風險。</div>' +
     '<div class="sp-upd">🕘 <span>每個交易日收盤後整理(法人、集保、主動式 ETF 持股公告後會再更新);名單為系統既有資料整理,不另抓行情;右側可回看近 10 個交易日。<br>整理時間 ' + String(data.generatedAt || '').slice(5, 16).replace('T', ' ') + '</span>' +
     '<select id="swingDateSel" class="sp-sel">' + opts + '</select></div>' +
     '<div class="sp-nav">' + SP_NAV.map((x) => '<a data-sp-go="' + x[0] + '">' + x[1] + '</a>').join('') + '</div>' +
-    '<a class="sp-wkbtn" data-wk-open>📋 收盤觀察股 週分析 →</a> <a class="sp-wkbtn" data-eq-open>📊 季報 EPS：族群分析・多觀察分析 →</a> <a class="sp-wkbtn" data-mine-open>🗂 自選觀察股 週分析 →</a>' +   // 2026-10-29 使用者：波段日報新增每週多觀察全方面解析；2026-11-01 加自選觀察股
     spFutHtml(data) + spDispoHtml(data) + spEtfHtml(data) + spSummaryHtml(data) + spGroupHtml(data) + spChipsHtml(data) + spTechHtml(data) + spBodyHtml(data) + spFullHtml(data) +
     '<h2 class="sp-h2" id="spHist">回看歷史<small>近 10 個交易日</small></h2><div class="sp-note"><select id="swingDateSel2" class="sp-sel">' + opts + '</select> <span class="sp-mut">產生 ' + String(data.generatedAt || '').slice(0, 16).replace('T', ' ') + '</span></div>' +
     '<details class="sp-more"><summary>資料口徑與判斷規則</summary>' + swingBasisHtml(data) + '<div class="sp-rules">' + ['chips', 'tech', 'body', 'full', 'fund', 'disposition', 'risks'].filter((k) => rules[k]).map((k) => '<p>' + rules[k] + '。</p>').join('') + '</div></details>' +
@@ -13535,7 +13536,7 @@ function wkPageHtml(){
     ' <select id="wkDateSel" class="sp-sel">' + opts + '</select></div>' +
     '<div class="wk-legend"><i class="wk-m wk-red">★</i> 健診強 <i class="wk-m wk-red">☆</i> 中上　<i class="wk-m wk-dark">●</i> 今日漲停　<i class="wk-b high">▲高檔</i> 離月線 ≥' + r.highDist + '% 或 20 日漲 ≥' + r.highRet20 + '%　<i class="wk-b below">月線下</i> 收盤在月線下　<i class="wk-b cross">即將穿越</i> 月線下、距月線 ≤' + r.crossMax + '%　<i class="wk-b brk">破三K低</i>　<i class="wk-b danger">⚠危險</i> 健診基 / 籌 / 技都 <' + r.dangerBelow + '</div>' +
     '<div class="wk-nav">' + WK_NAV.map((x) => '<a data-wk-go="' + x[0] + '">' + x[1] + '</a>').join('') + '</div>' +
-    '<a class="sp-wkbtn" data-eq-open>📊 季報 EPS：族群分析・多觀察分析 →</a> <a class="sp-wkbtn" data-mine-open>🗂 自選觀察股 週分析 →</a>' +
+    '<a class="sp-wkbtn" data-mine-open>🗂 自選觀察股 週分析 →</a> <a class="sp-wkbtn" data-eq-open>📊 季報 EPS：族群分析・多觀察分析 →</a>' +
     wkDiffHtml(d) + wkGroupsHtml(d) + wkHomeworkHtml(d) + wkHighHtml(d) + wkBelowHtml(d) + wkDangerHtml(d) + wkWatchHtml(d) + wkBacktestHtml(d) + wkRemindHtml(d) +
     '<div class="wk-foot">資料來源：本站日K與均線分數（收盤後整表）、三大法人買賣超、集保週資料、月營收與季報（公開資訊觀測站）、健診（基本 / 籌碼 / 技術）。表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
 }
@@ -16954,7 +16955,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-01 16:02:03';
+const BUILD_STAMP = '2026-11-01 16:10:35';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
