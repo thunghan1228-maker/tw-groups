@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-01 16:17:48";
+const BUILD_STAMP = "2026-11-01 17:13:15";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2035,6 +2035,22 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-replay{font-size:12px;color:#c0392b;font-weight:700;}
   .td-wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start;}
   .td-sides{display:flex;gap:12px;align-items:flex-start;}
+  .td-sidecol{display:flex;flex-direction:column;gap:8px;min-width:0;position:sticky;top:0;align-self:start;} .td-sidecol .td-side{position:static;}
+  .td-stabs{display:flex;gap:6px;flex-wrap:wrap;} .td-stab{border:1px solid #a78bdb;background:#fff;color:#5b21b6;border-radius:999px;padding:6px 14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;} .td-stab.on{background:#5b21b6;color:#fff;border-color:#5b21b6;}
+  .td-sides .td-side.wide{width:596px;flex:0 0 596px;max-height:calc(92vh - 90px);}
+  .td-b9opts{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px 2px;} .td-b9opt{border:1px solid #c4b2e6;background:#fff;color:#6d28d9;border-radius:999px;padding:3px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;} .td-b9opt.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
+  .td-b9box{margin:8px 10px;padding:8px 10px;background:#f5f0ff;border:1px solid #d9cdee;border-radius:10px;} .td-b9t{font-weight:800;color:#5b21b6;font-size:13px;margin-bottom:4px;} .td-b9t small{font-weight:400;color:#7d7399;}
+  .td-b9l{display:block;margin:6px 0 2px;font-size:12px;color:#4a4066;font-weight:700;} .td-b9in{width:100%;box-sizing:border-box;border:1px solid #c4b2e6;border-radius:8px;padding:6px 9px;font-size:13px;background:#fff;color:#1f1535;font-family:inherit;} .td-b9in.sm{width:84px;padding:4px 6px;text-align:right;}
+  .td-b9save{margin-top:8px;border:0;background:#7c3aed;color:#fff;border-radius:8px;padding:5px 18px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .td-b9tag{display:inline-block;margin-left:6px;padding:0 6px;border-radius:5px;background:#ef4444;color:#fff;font-style:normal;font-size:11px;font-weight:800;vertical-align:1px;} .td-b9tag.c905{background:#0d9488;}
+  .td-b9sec{margin:8px 0 0;padding:6px 12px;background:#ede9fe;color:#4c1d95;font-weight:800;font-size:13px;border-top:1px solid var(--line);} .td-b9sec small{font-weight:400;color:#7d7399;} .td-b9sec.sys{background:#e0f2fe;color:#075985;}
+  .td-b9head,.td-b9row{display:grid;grid-template-columns:46px minmax(0,1fr) 78px 70px 62px 24px;gap:0 6px;align-items:center;padding:6px 10px;border-top:1px solid var(--line);}
+  .td-b9head{font-size:11px;color:var(--muted);font-weight:700;background:rgba(124,58,237,.05);} .td-b9row{cursor:pointer;font-size:13px;} .td-b9row:hover{background:rgba(124,58,237,.06);}
+  .td-b9row .t{color:#8b2c22;font-weight:800;font-size:12px;} .td-b9row .s small{display:block;color:var(--muted);font-size:11px;font-weight:400;} .td-b9row .p{text-align:right;font-weight:700;} .td-b9row .b{text-align:center;} .td-b9row .h{text-align:right;}
+  .td-bk{display:inline-block;padding:1px 8px;border-radius:6px;border:1px solid #cbd5e1;color:#64748b;font-size:12px;font-weight:700;} .td-bk.on{background:#16a34a;border-color:#16a34a;color:#fff;} .td-bk.down{background:#fee2e2;border-color:#fca5a5;color:#b91c1c;}
+  .td-b9x{border:0;background:none;color:#94a3b8;cursor:pointer;font-size:12px;} .td-b9x:hover{color:#dc2626;}
+  @media (max-width:900px){ .td-sidecol{order:-1;position:static;} .td-sides .td-side.wide{width:auto;flex:1 1 auto;} .td-b9head,.td-b9row{grid-template-columns:42px minmax(0,1fr) 70px 60px 56px 20px;} }
+  .td-b9head.stop,.td-b9row.stop{grid-template-columns:minmax(0,1fr) 62px 62px 66px 92px 78px;} .td-b9row.stop .px{text-align:right;font-weight:700;} .td-b9row.stop .sp{text-align:right;} .td-b9row.stop .st{text-align:right;} .td-b9row.stop.hit{background:#fee2e2;}
   .td-sides .td-side{width:292px;flex:0 0 292px;} .td-side.k12 .td-shead{background:#1d4ed8;} .td-side.k12 .td-sinfo{color:#1d4ed8;}
   .td-main{min-width:0;}
   .td-side{position:sticky;top:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13px;max-height:calc(92vh - 40px);overflow-y:auto;}
@@ -16997,7 +17013,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-01 16:17:48';
+const BUILD_STAMP = '2026-11-01 17:13:15';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19869,6 +19885,173 @@ function tdBroadcastHtml(seq, snap, kind){
     (isK ? '<div class="td-snote">🔵 12空＝機器人 123（道館 5 分K 在 20MA 下面、20MA 往下彎的當沖空），跟刀劍空分開看；名單每根 5 分K 收完更新。</div>' : '') +
     '<div class="td-snote">左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・<span class="td-bst run">跑</span> 已消失（轉強，要跑）・<span class="td-bst back">回</span> 掉出去又回榜。名次後面 ♣（梅花）＝收割區（今天已跌 5% 以上，不追空，有空單考慮回補）。點一列開K線圖。</div></aside>';
 }
+// ---- 今日功課右側分頁（2026-11-01 使用者：做成跟老師一樣——右上角三個分頁「刀功課／1+2・905 突破／持股停損」，老師有的都要有，12空保留，再加本站自己的）----
+// 刀功課＝原本並排的兩欄（刀劍空(32)、12空(123)），排序一樣最近發生的在上面；1+2／905 突破＝老師那頁的「我的 1+2／905」（各貼股號，5 分K 收盤站上
+// 905 高［1+2 還要過昨高］算突破、之後收回線下算跌破，時間用 5 分K 收盤時間）＋本站自己的全市場 1+2多、首次過905高（不用貼）；
+// 持股停損＝在族群卡打勾「我持有空單」的股票，填停損價、現價漲到停損價就標紅（並響提示音）。
+const TD_SIDE_TABS = [['blade', '🔪 刀功課'], ['b905', '📈 1+2 / 905 突破'], ['stop', '🛡 持股停損']];
+let tdSideTab = (() => { try { const v = localStorage.getItem('tdSide'); return TD_SIDE_TABS.some((x) => x[0] === v) ? v : 'blade'; } catch (_) { return 'blade'; } })();
+const TD_B905_MAX = 10;
+const tdB905 = (() => {
+  const d = { c12: [], c905: [], snd: true, up: true, down: true, notif: false };
+  try { const j = JSON.parse(localStorage.getItem('tdB905') || '{}') || {}; Object.keys(d).forEach((k) => { if (j[k] !== undefined) d[k] = j[k]; }); } catch (_) { /* 讀不到就用預設 */ }
+  return d;
+})();
+const tdStops = (() => { try { return JSON.parse(localStorage.getItem('tdStops') || '{}') || {}; } catch (_) { return {}; } })();
+const tdSaveB905 = () => { try { localStorage.setItem('tdB905', JSON.stringify(tdB905)); } catch (_) { /* 存不了就算了 */ } };
+const tdSaveStops = () => { try { localStorage.setItem('tdStops', JSON.stringify(tdStops)); } catch (_) { /* 存不了就算了 */ } };
+const tdJCache = {};
+let tdJTimer = 0, tdSigTimer = 0;
+function tdJ(key, url, ttl){
+  const e = tdJCache[key];
+  if (e && (e.loading || Date.now() - e.at < ttl)) return e.data;
+  tdJCache[key] = { loading: true, at: Date.now(), data: e ? e.data : null };
+  const bad = (d) => ({ at: Date.now() - ttl + 15000, data: d || { status: 'error', bars: [] } });    // 讀失敗的 15 秒後再試，不要壓整個快取時間
+  fetch(url).then((r) => r.json().catch(() => null)).then((d) => { tdJCache[key] = d && d.status === 'ok' ? { at: Date.now(), data: d } : bad(d); })
+    .catch(() => { tdJCache[key] = bad(null); })
+    .finally(() => { clearTimeout(tdJTimer); tdJTimer = setTimeout(() => { if (tdOpen()) renderHomework(); }, 200); });
+  return e ? e.data : null;
+}
+// 一檔股在某天（到某個時段為止）的 905 高、昨高、突破／跌破時間。kind：'c12'＝1+2（要同時過 905 高與昨高）、'c905'＝905（只過 905 高）
+function tdB905Calc(code, kind, date, slot){
+  const d1 = tdJ('d1|' + code, '/api/bars1d/' + code, 1800e3);
+  const m5 = date === twTodayStr() ? tdJ('m5|' + code, '/api/bars/' + code, 60e3) : tdJ('m5r|' + code, '/api/bars5range/' + code, 1800e3);
+  if (!d1 || !m5) return { loading: true };
+  if (d1.status !== 'ok' || m5.status !== 'ok') return { error: true };
+  const dayBars = (m5.bars || []).filter((b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10) === date).sort((a, b) => a.ts - b.ts);
+  if (!dayBars.length) return { empty: true };
+  const endHm = (b) => new Date(b.ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16);
+  const prev = (d1.bars || []).filter((b) => String(b.ts).slice(0, 10) < date);
+  const yHigh = prev.length ? prev[prev.length - 1].high : null, yClose = prev.length ? prev[prev.length - 1].close : null;
+  const h905 = dayBars[0].high;
+  const thr = kind === 'c12' && Number.isFinite(yHigh) ? Math.max(h905, yHigh) : h905;
+  const ev = [];
+  let inside = false, last = null;
+  dayBars.forEach((b) => {
+    const t = endHm(b);
+    if (slot && t > slot) return;      // 回放：只算到選的時段
+    last = b;
+    if (!inside && b.close > thr){ inside = true; ev.push({ t, type: 'up', px: b.close }); }
+    else if (inside && b.close < thr){ inside = false; ev.push({ t, type: 'down', px: b.close }); }
+  });
+  return { h905, yHigh, yClose, thr, ev, inside, price: last ? last.close : null, high: dayBars.filter((b) => !slot || endHm(b) <= slot).reduce((m, b) => Math.max(m, b.high), 0),
+    pct: last && yClose ? (last.close / yClose - 1) * 100 : null, lastT: last ? endHm(last) : '' };
+}
+function tdSigEvents(date){
+  if (date === twTodayStr()) return todaySignalEvents || [];
+  try { ensureSigHistory(date); } catch (_) { /* 抓不到就先空著 */ }
+  return sigHistoryEvents[date] || [];
+}
+// 盤中新的突破／跌破／停損：響提示音（＋瀏覽器通知）；第一次算只記下來不響（開頁面時已經有的不吵）
+const tdB905Seen = new Set();
+let tdB905Primed = '';
+function tdB905Check(snap){
+  if (!snap.live) return;
+  const fresh = [];
+  const prime = tdB905Primed !== snap.date;
+  const note = (key, text) => { if (tdB905Seen.has(key)) return; tdB905Seen.add(key); if (!prime) fresh.push(text); };
+  [['c12', '1+2'], ['c905', '905']].forEach(([k, lab]) => tdB905[k].forEach((code) => {
+    const r = tdB905Calc(code, k, snap.date, null);
+    if (!r.ev) return;
+    r.ev.forEach((e) => { if ((e.type === 'up' && tdB905.up) || (e.type === 'down' && tdB905.down)) note(code + '|' + k + '|' + e.type + '|' + e.t, e.t + ' ' + code + ' ' + wlNameOf(code) + ' ' + lab + (e.type === 'up' ? ' 突破 ' : ' 跌破 ') + +e.px.toFixed(2)); });
+  }));
+  tdState.hold.forEach((code) => {
+    const stop = Number(tdStops[code]);
+    if (!(stop > 0)) return;
+    const r = tdB905Calc(code, 'c905', snap.date, null);
+    if (r.price !== null && r.price !== undefined && r.price >= stop) note(code + '|stop|' + stop, '🔴 ' + code + ' ' + wlNameOf(code) + ' 現價 ' + +r.price.toFixed(2) + ' 到停損價 ' + stop);
+  });
+  const allLoaded = [...tdB905.c12, ...tdB905.c905, ...tdState.hold].every((c) => { const e = tdJCache['m5|' + c]; return e && !e.loading; });
+  if (allLoaded) tdB905Primed = snap.date;
+  if (fresh.length){
+    if (tdB905.snd) { try { launchBeep(); } catch (_) { /* 出不了聲就算了 */ } }
+    if (tdB905.notif && typeof Notification !== 'undefined' && Notification.permission === 'granted') { try { new Notification('今日功課', { body: fresh.slice(0, 4).join('\\n') }); } catch (_) { /* 通知失敗就算了 */ } }
+  }
+}
+function tdSideTabsHtml(){
+  return '<div class="td-stabs">' + TD_SIDE_TABS.map(([k, label]) => '<button type="button" class="td-stab' + (tdSideTab === k ? ' on' : '') + '" data-td-side="' + k + '">' + label + '</button>').join('') + '</div>';
+}
+const tdPx = (v) => (Number.isFinite(v) ? String(+Number(v).toFixed(2)) : '—');
+function tdB905PanelHtml(snap){
+  const date = snap.date, slot = snap.live ? null : snap.slot;
+  const mine = [];
+  [['c12', '1+2'], ['c905', '905']].forEach(([k, lab]) => tdB905[k].forEach((code) => mine.push({ code, k, lab, r: tdB905Calc(code, k, date, slot) })));
+  const lastEv = (x) => (x.r.ev && x.r.ev.length ? x.r.ev[x.r.ev.length - 1].t : '');
+  mine.sort((a, b) => (lastEv(a) < lastEv(b) ? 1 : lastEv(a) > lastEv(b) ? -1 : a.code < b.code ? -1 : 1));    // 最近發生的在上面（沒發生的排最後）
+  const pctOf = (x) => { const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(x.code) : null; return q && Number.isFinite(q.changePercent) ? q.changePercent : x.r.pct; };
+  const myRows = mine.map((x) => {
+    const r = x.r;
+    const state = r.loading ? '<span class="td-bk">讀取中</span>' : r.error ? '<span class="td-bk down">讀取失敗</span>' : r.empty ? '<span class="td-bk">沒有5分K</span>' :
+      r.inside ? '<span class="td-bk on">✓' + x.lab + '</span>' : (r.ev.length ? '<span class="td-bk down">跌破</span>' : '<span class="td-bk">' + x.lab + '</span>');
+    const detail = r.loading || r.empty || r.error ? '' : '<small>905高 ' + tdPx(r.h905) + (x.k === 'c12' ? '・昨高 ' + tdPx(r.yHigh) : '') + '・現 ' + tdPx(r.price) + '</small>';
+    const pct = pctOf(x);
+    return '<div class="td-b9row" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(wlNameOf(x.code)) + '"><span class="t">' + (lastEv(x) || '—') + '</span>' +
+      '<span class="s"><b>' + wlEsc(x.code) + '</b> ' + wlEsc(wlNameOf(x.code)) + '<i class="td-b9tag">' + x.lab + '</i>' + detail + '</span>' +
+      '<span class="b">' + state + '</span><span class="h">' + holderTagHtml(holderPctOf(x.code), true) + '</span>' +
+      '<span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '—') + '</span>' +
+      '<button type="button" class="td-b9x" data-td-b905-del="' + wlEsc(x.code) + '|' + x.k + '" title="從清單移除">✕</button></div>';
+  }).join('');
+  // 本站自己的：全市場今天第一次 1+2多（跟首頁小幫手 44 同一份），不用貼
+  const evs = tdSigEvents(date).filter((e) => (!slot || String(e.time || '') <= slot));
+  if (date !== twTodayStr() && !sigHistoryEvents[date]){ clearTimeout(tdSigTimer); tdSigTimer = setTimeout(() => { if (tdOpen()) renderHomework(); }, 1500); }   // 別天的訊號還在抓：抓到就重畫
+  const sys = [];
+  const seen = new Set();
+  evs.forEach((e) => {
+    const k = e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull') ? 'c12' : '';     // 全市場的訊號事件流只有 1+2多；905 要逐檔算 5 分K，只做自己貼的清單
+    if (!k || seen.has(e.code + k)) return;
+    seen.add(e.code + k);
+    sys.push({ code: e.code, name: e.name, k, t: String(e.time || '') });
+  });
+  sys.sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.code < b.code ? -1 : 1));
+  const sysRows = sys.slice(0, 60).map((x) => {
+    const q = typeof getStockQuote === 'function' ? getStockQuote(x.code) : null;
+    const pct = snap.live && q && Number.isFinite(q.changePercent) ? q.changePercent : null;
+    return '<div class="td-b9row" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(x.name || '') + '"><span class="t">' + wlEsc(x.t || '—') + '</span>' +
+      '<span class="s"><b>' + wlEsc(x.code) + '</b> ' + wlEsc(x.name || wlNameOf(x.code)) + '<i class="td-b9tag ' + x.k + '">' + (x.k === 'c12' ? '1+2' : '905') + '</i></span>' +
+      '<span class="b"><span class="td-bk on">✓' + (x.k === 'c12' ? '1+2' : '905') + '</span></span><span class="h">' + holderTagHtml(holderPctOf(x.code), true) + '</span>' +
+      '<span class="p ' + (pct !== null ? dirClass(pct) : '') + '">' + (pct !== null ? hwPct(pct) : '') + '</span><span class="x"></span></div>';
+  }).join('');
+  const opt = (k, label) => '<button type="button" class="td-b9opt' + (tdB905[k] ? ' on' : '') + '" data-td-b905-opt="' + k + '">' + label + '</button>';
+  const head = '<div class="td-b9head"><span class="t">時間</span><span class="s">股號・股名</span><span class="b">破線</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';
+  return '<aside class="td-side wide b905"><div class="td-shead">📣 📈 1+2 / 905 突破廣播</div>' +
+    '<div class="td-sinfo">' + (snap.live ? '盤中・5 分K 收完更新' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
+    '<div class="td-b9opts">' + opt('snd', '🔊 聲音') + opt('up', '▶ 突破') + opt('down', '▶ 跌破') + opt('notif', '🔔 開通知') + '</div>' +
+    '<div class="td-b9box"><div class="td-b9t">⭐ 我的 1+2 / 905　<small>各最多 ' + TD_B905_MAX + ' 檔，沒貼就一直留著（老師是各 5 檔）</small></div>' +
+    '<label class="td-b9l"><i class="td-b9tag">1+2</i> 要過昨高</label><input class="td-b9in" id="tdB905In12" data-keep="1" placeholder="1+2 股號（要過昨高），例：2330 2454" value="' + wlEsc(tdB905.c12.join(' ')) + '">' +
+    '<label class="td-b9l"><i class="td-b9tag c905">905</i> 不用過昨高</label><input class="td-b9in" id="tdB905In905" data-keep="1" placeholder="905 股號（過 905 高就算），例：2330 2454" value="' + wlEsc(tdB905.c905.join(' ')) + '">' +
+    '<button type="button" class="td-b9save" data-td-b905-save="1">存</button>' +
+    '<div class="td-snote">1+2＝5 分K 收盤同時站上 905 高（開盤第一根 5 分K 的最高）和昨高；905＝5 分K 收盤站上 905 高（不用過昨高）；突破＝第一次收在線上，跌破＝突破後又收回線下；兩條件分開算。時間＝那根 5 分K 的收盤時間。</div></div>' +
+    '<div class="td-b9sec">⭐ 我的清單 <b>' + mine.length + '</b>　<small>最近發生的在上面</small></div>' + (mine.length ? head + myRows : '<div class="td-empty">還沒加 —— 把自己選的 1+2 / 905 股貼上去、按「存」，盤中就跟老師的名單一樣自動跳。</div>') +
+    '<div class="td-b9sec sys">🤖 本站全市場 1+2多（自動，不用貼） <b>' + sys.length + '</b>　<small>今天第一次收盤同時站上 905 高與昨高；最近的在上面</small></div>' + (sys.length ? head + sysRows : '<div class="td-empty">' + (snap.live ? '今天還沒有（開盤後 5 分K 收盤才會出現）' : '這個時段以前沒有紀錄') + '</div>') +
+    '</aside>';
+}
+function tdStopPanelHtml(snap){
+  const date = snap.date, slot = snap.live ? null : snap.slot;
+  const list = tdState.hold;
+  const rows = list.map((code) => {
+    const r = tdB905Calc(code, 'c905', date, slot);
+    const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(code) : null;
+    const price = q && Number(q.price) > 0 ? Number(q.price) : r.price;
+    const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : r.pct;
+    const stop = Number(tdStops[code]);
+    const hit = stop > 0 && Number.isFinite(price) && price >= stop;
+    const gap = stop > 0 && Number.isFinite(price) ? (stop / price - 1) * 100 : null;
+    return '<div class="td-b9row stop' + (hit ? ' hit' : '') + '" data-hw-code="' + wlEsc(code) + '" data-hw-name="' + wlEsc(wlNameOf(code)) + '"><span class="s"><b>' + wlEsc(code) + '</b> ' + wlEsc(wlNameOf(code)) +
+      ((r.h905 !== undefined) ? '<small>905高 ' + tdPx(r.h905) + '・昨高 ' + tdPx(r.yHigh) + '・今高 ' + tdPx(r.high) + '</small>' : '') + '</span>' +
+      '<span class="px">' + tdPx(price) + '</span><span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '—') + '</span>' +
+      '<span class="h">' + holderTagHtml(holderPctOf(code), true) + '</span>' +
+      '<span class="sp"><input class="td-b9in sm" data-keep="1" data-td-stop="' + wlEsc(code) + '" placeholder="停損價" value="' + (stop > 0 ? stop : '') + '"></span>' +
+      '<span class="st">' + (hit ? '<i class="td-bst run">🔴 停損</i>' : gap !== null ? '<small>再漲 ' + gap.toFixed(1) + '%</small>' : '') + '</span></div>';
+  }).join('');
+  return '<aside class="td-side wide stop"><div class="td-shead">📣 🛡 持股停損</div>' +
+    '<div class="td-sinfo">' + (snap.live ? '盤中・跟著首頁報價' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
+    '<div class="td-b9opts">' + opt2('snd', '🔊 聲音', tdB905.snd) + opt2('notif', '🔔 開通知', tdB905.notif) + '</div>' +
+    '<div class="td-b9sec">我持有的空單 <b>' + list.length + '</b>　<small>在左邊族群卡打勾 ☑「我持有空單」就會出現在這裡</small></div>' +
+    (list.length ? '<div class="td-b9head stop"><span class="s">股號・股名</span><span class="px">現價</span><span class="p">今日%</span><span class="h">大戶力</span><span class="sp">停損價</span><span class="st"></span></div>' + rows
+      : '<div class="td-empty">還沒有持有空單的股票 —— 在左邊刀劍空的卡片上打勾 ☑ 就會列在這裡。</div>') +
+    '<div class="td-snote">停損價自己填（空單：現價漲到停損價就標紅、響提示音）。參考：905 高、昨高、今天最高都列在股名下面，常見做法是站上 905 高或虧損 2～3% 就停損。這個停損價只記在這台電腦。</div></aside>';
+}
+const opt2 = (k, label, on) => '<button type="button" class="td-b9opt' + (on ? ' on' : '') + '" data-td-b905-opt="' + k + '">' + label + '</button>';
 function tdAddWatch(){
   const el = document.getElementById('tdWatchInput');
   const codes = String(el ? el.value : '').toUpperCase().split(/[^0-9A-Z]+/).filter((c) => /^[0-9A-Z]{4,6}$/.test(c));
@@ -19967,6 +20150,7 @@ function hwTodayHtml(){
   const liveSession = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr());
   if (snap.live && (!seq.length || (liveSession && seq[seq.length - 1][0] <= snap.slot))) seq.push([snap.slot || '最新', snap]);   // 同一個 5 分鐘時段也接上即時這份（機器人 32 就是跟畫面上現在這份對齊）
   ctx.firstAt = tdFirstAt(seq);   // 族群卡每一檔前面的「訊號出現時間」
+  tdB905Check(snap);               // 1+2／905 突破、持股停損：盤中有新的就響（不管現在開的是哪個分頁）
   // ① 統計
   const zoneRows = {};
   TD_ZONES.forEach((z) => { zoneRows[z.key] = snap.rows.filter((r) => r.zone === z.key); });
@@ -20113,7 +20297,7 @@ function hwTodayHtml(){
     '要自己確認的：① 部位還要看族群有沒有帶頭——沒有帶頭時 SOP 部位降 50%（這頁不會自動降）；② 進場時間門檻 09:15 之後（通緝要犯例外）。名次是 67 族的排法，族群數不同時照比例換算。表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
   return dtSec + summary + counts +
     '<div class="td-wrap"><div class="td-main">' + head + ctrls + replay + filters + main + watch + k12Sec + againSec + relSec + jailSec + outSec + missSec + sop + '</div>' +
-    '<div class="td-sides">' + tdBroadcastHtml(seq, snap, 'blade') + tdBroadcastHtml(seq, snap, 'k12') + '</div></div>';   // 2026-10-22 使用者：右邊分兩欄（刀劍空、12空）並排，不用切換
+    '<div class="td-sidecol">' + tdSideTabsHtml() + '<div class="td-sides">' + (tdSideTab === 'b905' ? tdB905PanelHtml(snap) : tdSideTab === 'stop' ? tdStopPanelHtml(snap) : tdBroadcastHtml(seq, snap, 'blade') + tdBroadcastHtml(seq, snap, 'k12')) + '</div></div></div>';   // 2026-10-22 使用者：刀功課那頁右邊分兩欄（刀劍空、12空）並排，不用切換；2026-11-01 照老師加分頁（1+2/905 突破、持股停損）
 }
 // ① 收盤觀察股（當沖多的「多功課」、多觀察的名單）＝形態觀察股的收盤那份：盤中（今天還沒收盤）用前一個交易日收盤的、
 // 收盤後／休市用最近一次收盤的。老師這份是學員從 LINE 貼的，我們直接拿系統算好的；還沒算過就背景算。
@@ -20370,12 +20554,15 @@ function renderHomework(){
   const dtOpen = !!body.querySelector('details.td-dtbox[open]');
   const inp = document.getElementById('tdWatchInput');
   const keep = inp ? { v: inp.value, f: document.activeElement === inp } : null;   // 每 20 秒重畫不要吃掉打到一半的股號
+  const act = document.activeElement;
+  const keep2 = act && act.dataset && act.dataset.keep ? { id: act.id, stop: act.dataset.tdStop, v: act.value } : null;   // 1+2／905 的股號框、停損價框也一樣
   body.innerHTML = '<div class="hw-tabs">' + HW_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (hwState.tab === k ? ' active' : '') + '" data-hw-tab="' + k + '">' + label + '</button>').join('') +
     '<span class="hw-stamp">' + stamp + ' 更新・盤中每 20 秒跟著首頁報價重算</span></div>' + html;
   if (open){ const d = body.querySelector('details.hw-more'); if (d) d.open = true; }
   if (helpOpen){ const d = body.querySelector('details.td-help'); if (d) d.open = true; }
   if (dtOpen){ const d = body.querySelector('details.td-dtbox'); if (d) d.open = true; }
   if (keep){ const n = document.getElementById('tdWatchInput'); if (n){ n.value = keep.v; if (keep.f) n.focus(); } }
+  if (keep2){ const n = keep2.id ? document.getElementById(keep2.id) : body.querySelector('[data-td-stop="' + keep2.stop + '"]'); if (n){ n.value = keep2.v; n.focus(); } }
 }
 // ---- 每日功課視窗：拖著標題列走、四邊四角拉大小（2026-10-19 使用者），跟機器人代碼、盤中訊號分頁共用 attachFloatChrome ----
 const HW_RECT_KEY = 'hwRect', HW_MAX_KEY = 'hwMaxed';
@@ -20524,6 +20711,13 @@ function closeHomeworkPanel(){
   document.getElementById('hwModal').hidden = true; clearInterval(hwState.timer);
 }
 document.getElementById('hwClose').addEventListener('click', closeHomeworkPanel);
+document.getElementById('hwBody').addEventListener('change', (e) => {
+  const si = e.target.closest ? e.target.closest('[data-td-stop]') : null;
+  if (!si) return;
+  const v = Number(String(si.value).replace(/[^0-9.]/g, ''));
+  if (v > 0) tdStops[si.dataset.tdStop] = v; else delete tdStops[si.dataset.tdStop];
+  tdSaveStops(); renderHomework();
+});
 document.getElementById('hwBody').addEventListener('click', (e) => {
   const t = e.target;
   const tab = t.closest('[data-hw-tab]');
@@ -20547,6 +20741,26 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
   // 🔪 空觀察（今日功課）的開關
   const th = t.closest('[data-td-hold]');
   if (th){ const c = th.dataset.tdHold; tdState.hold = tdState.hold.includes(c) ? tdState.hold.filter((x) => x !== c) : tdState.hold.concat(c).slice(-60); tdSaveHold(); renderHomework(); return; }
+  const tside = t.closest('[data-td-side]');
+  if (tside){ tdSideTab = tside.dataset.tdSide; try { localStorage.setItem('tdSide', tdSideTab); } catch (_) { /* 記不住就算了 */ } renderHomework(); return; }
+  if (t.closest('[data-td-b905-save]')){
+    const parse = (id) => Array.from(new Set(String((document.getElementById(id) || {}).value || '').toUpperCase().split(/[^0-9A-Z]+/).filter((c) => /^[0-9A-Z]{4,6}$/.test(c)))).slice(0, TD_B905_MAX);
+    tdB905.c12 = parse('tdB905In12'); tdB905.c905 = parse('tdB905In905'); tdSaveB905();
+    renderHomework(); return;
+  }
+  const b9del = t.closest('[data-td-b905-del]');
+  if (b9del){ const [c, k] = b9del.dataset.tdB905Del.split('|'); tdB905[k] = (tdB905[k] || []).filter((x) => x !== c); tdSaveB905(); renderHomework(); return; }
+  const b9opt = t.closest('[data-td-b905-opt]');
+  if (b9opt){
+    const k = b9opt.dataset.tdB905Opt;
+    if (k === 'notif' && !tdB905.notif && typeof Notification !== 'undefined' && Notification.permission !== 'granted'){
+      Notification.requestPermission().then((perm) => { tdB905.notif = perm === 'granted'; tdSaveB905(); renderHomework(); });
+      return;
+    }
+    tdB905[k] = !tdB905[k]; tdSaveB905();
+    if (k === 'snd' && tdB905.snd) { try { launchBeep(); } catch (_) { /* 出不了聲就算了 */ } }
+    renderHomework(); return;
+  }
   const tg = t.closest('[data-td-group]');
   if (tg){ tdState.group = tdState.group === tg.dataset.tdGroup ? null : tg.dataset.tdGroup; renderHomework(); return; }
   if (t.closest('[data-td-hidegone]')){ tdState.hideGone = !tdState.hideGone; renderHomework(); return; }
