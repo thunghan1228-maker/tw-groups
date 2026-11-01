@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-01 20:17:11";
+const BUILD_STAMP = "2026-11-01 20:20:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2054,6 +2054,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-side.b905 .td-b9head,.td-side.b905 .td-b9row{grid-template-columns:58px minmax(0,1fr) 96px 70px 62px 24px;} .td-side.b905 .td-b9head .t{line-height:1.25;}
   .td-side.stop .td-b9head,.td-side.stop .td-b9row{grid-template-columns:46px minmax(0,1fr) 138px 70px 62px 24px;} .td-side.stop .td-b9row .b{white-space:nowrap;}
   .td-bk.bk-above{background:#dc2626;border-color:#dc2626;color:#fff !important;} .td-bk.bk-below{background:#16a34a;border-color:#16a34a;color:#fff !important;}   /* 不能叫 up／down：跟全站漲跌字色 class 撞名會變紅底紅字 */
+  .td-b9sec.s905{background:#fef3c7;color:#92400e;} .td-b9sec.s905 small{color:#a16207;}
   .td-bkn{display:block;margin-top:1px;font-size:10.5px;color:var(--muted);font-weight:400;} .td-bk.red{background:#dc2626;border-color:#dc2626;color:#fff;} .td-b9fold{float:right;border:1px solid #c4b2e6;background:#fff;color:#6d28d9;border-radius:6px;padding:0 8px;font-size:12px;cursor:pointer;font-family:inherit;} .td-b9from{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:#4a4066;}
   .td-sides .td-side{width:292px;flex:0 0 292px;} .td-side.k12 .td-shead{background:#1d4ed8;} .td-side.k12 .td-sinfo{color:#1d4ed8;}
   .td-main{min-width:0;}
@@ -17035,7 +17036,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-01 20:17:11';
+const BUILD_STAMP = '2026-11-01 20:20:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18078,6 +18079,7 @@ async function refresh(){
     try { bladeRecordSeen(); } catch (e) { /* 刀劍空出現時間記不起來不影響畫面 */ }
     try { weakRecordSeen(); } catch (e) { /* 三落空出現時間記不起來不影響畫面 */ }
     tdAlertTick();   // 刀劍空(32) 新訊號跳出卡片（自己 try/catch）
+    try { td905Tick(); } catch (e) { /* 905 突破記不起來不影響畫面 */ }
     try { raceRecordSeen(); } catch (e) { /* 盤中333 出現時間記不起來不影響畫面 */ }
     // 2026-09-30 使用者：發動彈出通知比醞釀／發動分頁的列表快，要同步——列表原本只靠
     // refreshBrewLaunch(10分鐘)／refreshBrewHistory(60秒)重畫，這裡讓它跟報價同一個節奏（15秒）重畫。
@@ -19910,7 +19912,7 @@ function tdBroadcastHtml(seq, snap, kind){
 // 905 高［1+2 還要過昨高］算突破、之後收回線下算跌破，時間用 5 分K 收盤時間）＋本站自己的全市場 1+2多、首次過905高（不用貼）；
 // 持股停損（老師的「持股停損監控」）＝盤中 1 分K 收盤跌破 905 低（開盤第一根 5 分K 的最低）或三日低（前三個交易日最低）就通知；
 // 老師是貼自己的持股，我們改成自動帶入自選股裡自己的分組（2026-11-01 使用者），不用貼。
-const TD_SIDE_TABS = [['blade', '🔪 刀功課'], ['b905', '📈 1+2 突破'], ['stop', '🛡 持股停損']];     // 2026-11-01 使用者：905 先不做（訊號太多），分頁只叫「1+2 突破」
+const TD_SIDE_TABS = [['blade', '🔪 刀功課'], ['b905', '📈 1+2 / 905 突破'], ['stop', '🛡 持股停損']];     // 2026-11-01 使用者：905 先不做（訊號太多），分頁只叫「1+2 突破」
 let tdSideTab = (() => { try { const v = localStorage.getItem('tdSide'); return TD_SIDE_TABS.some((x) => x[0] === v) ? v : 'blade'; } catch (_) { return 'blade'; } })();
 const tdB905 = (() => {
   const d = { snd: true, up: true, down: true, notif: false };
@@ -19983,11 +19985,13 @@ function tdB905Check(snap){
     if (r.loading) allLoaded = false;
     if (r.ev) r.ev.forEach((e) => { if (e.type === 'down') note('sys|down|' + x.code + '|' + e.t, e.t + ' ' + x.code + ' ' + (x.name || wlNameOf(x.code)) + ' 1+2 跌破 ' + +e.px.toFixed(2)); });
   });
+  if (tdB905.down) Object.keys(td905Seen(snap.date)).forEach((code) => {       // 905 突破名單裡的股票收回 905 高下面＝跌破
+    const r = tdB905Calc(code, 'c905', snap.date, null, 120e3);
+    if (r.loading){ allLoaded = false; return; }
+    (r.ev || []).forEach((e) => { if (e.type === 'down') note('905|down|' + code + '|' + e.t, e.t + ' ' + code + ' ' + wlNameOf(code) + ' 905 跌破 ' + +e.px.toFixed(2)); });
+  });
   if (allLoaded) tdB905Primed = snap.date;
-  if (fresh.length){
-    if (tdB905.snd) { try { launchBeep(); } catch (_) { /* 出不了聲就算了 */ } }
-    if (tdB905.notif && typeof Notification !== 'undefined' && Notification.permission === 'granted') { try { new Notification('今日功課', { body: fresh.slice(0, 4).join('\\n') }); } catch (_) { /* 通知失敗就算了 */ } }
-  }
+  tdFireAlert('今日功課', fresh);
 }
 // 持股停損：自選監控清單裡的股票 1 分K 收盤跌破 905 低／三日低，盤中新破的響
 const tdStopSeen = new Set();
@@ -20021,6 +20025,77 @@ function tdSysList(date, slot){
   });
   return sys.sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.code < b.code ? -1 : 1));
 }
+// ---- 905 突破（2026-11-01 使用者：要做，但訊號太多，所以四個條件都成立才跳出）----
+// 條件：① 當天第一次 5 分K 收盤站上 905 高（開盤第一根 5 分K 的最高）② 盤中大戶力 ≥ +10% ③ 漲幅 ≥ 2% ④ 族群在多方區（族群名次前一半，跟當沖多同一個算法）。
+// 先用 ②③④（首頁報價就有）篩出候選，只替候選抓 5 分K 看 905 高；四個都成立的那一刻記下來（時間＝這台電腦第一次看到的時間，一天一次、記在這台電腦），
+// 之後一整天都留在名單上、狀態（在 905 之上／之下）照 5 分K 更新。回放只看得到那天這台電腦有開著網頁記到的。
+const TD905_BIG = 10, TD905_PCT = 2;
+let td905Cache = { date: '', seen: null, primed: false };
+function td905Seen(date){
+  if (td905Cache.date !== date){
+    let o = {};
+    try { o = JSON.parse(localStorage.getItem('td905Seen:' + date) || '{}') || {}; } catch (_) { o = {}; }
+    td905Cache = { date, seen: o, primed: false };
+  }
+  return td905Cache.seen;
+}
+function td905Save(){ try { localStorage.setItem('td905Seen:' + td905Cache.date, JSON.stringify(td905Cache.seen)); } catch (_) { /* 存不了就算了 */ } }
+function td905Candidates(){
+  const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
+  const half = Math.ceil(ranked.length / 2);
+  const out = new Map();
+  ranked.slice(0, half).forEach((g) => g.stocks.forEach((st) => {
+    if (st.price === null || st.price === undefined || !Number.isFinite(st.changePercent) || st.changePercent < TD905_PCT) return;
+    const big = holderPctOf(st.code);
+    if (big === null || big < TD905_BIG) return;
+    if (!out.has(st.code)) out.set(st.code, { code: st.code, name: st.name, group: g.name, pct: st.changePercent, big });
+  }));
+  return Array.from(out.values());
+}
+function tdFireAlert(title, list){
+  if (!list.length) return;
+  if (tdB905.snd) { try { launchBeep(); } catch (_) { /* 出不了聲就算了 */ } }
+  if (tdB905.notif && typeof Notification !== 'undefined' && Notification.permission === 'granted') { try { new Notification(title, { body: list.slice(0, 4).join('\\n') }); } catch (_) { /* 通知失敗就算了 */ } }
+}
+function td905Tick(){
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.preopen || lastData.quoteDate !== twTodayStr() || !Array.isArray(lastData.groups)) return;
+  const hm = new Date(Date.now() + 8 * 3600e3).toISOString().slice(11, 16);
+  if (hm < '09:05' || hm > '13:35') return;
+  const date = twTodayStr(), seen = td905Seen(date);
+  let loading = false, changed = false;
+  const fresh = [];
+  td905Candidates().forEach((c) => {
+    if (seen[c.code]) return;
+    const r = tdB905Calc(c.code, 'c905', date, null, 120e3);
+    if (r.loading){ loading = true; return; }
+    if (!r.inside || !r.ev || !r.ev.length) return;       // 現在要站在 905 高上面（當天已經突破過）
+    seen[c.code] = { t: hm, group: c.group, big: c.big, pct: c.pct, px: r.price, brk: r.ev[0].t };
+    changed = true;
+    if (td905Cache.primed) fresh.push(hm + ' ' + c.code + ' ' + c.name + ' 905 突破（大戶力 ' + (c.big > 0 ? '+' : '') + c.big.toFixed(1) + '%、漲 ' + c.pct.toFixed(2) + '%、' + c.group + '）');
+  });
+  if (changed) td905Save();
+  if (!loading) td905Cache.primed = true;      // 第一輪（開頁面時已經符合的）只記不響
+  if (tdB905.up) tdFireAlert('905 突破', fresh);
+}
+function td905SectionHtml(snap){
+  const date = snap.date, slot = snap.live ? null : snap.slot;
+  const seen = td905Seen(date);
+  const list = Object.keys(seen).map((code) => Object.assign({ code }, seen[code])).filter((x) => !slot || x.t <= slot).sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.code < b.code ? -1 : 1));
+  const cand = snap.live && lastData && Array.isArray(lastData.groups) ? td905Candidates() : null;
+  const rows = list.map((x) => {
+    const r = tdB905Calc(x.code, 'c905', date, slot, 120e3);
+    const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(x.code) : null;
+    const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : (r.pct !== undefined && r.pct !== null ? r.pct : x.pct);
+    return '<div class="td-b9row" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(wlNameOf(x.code)) + '"><span class="t">' + wlEsc(x.t) + '</span>' +
+      '<span class="s"><b>' + wlEsc(x.code) + '</b> ' + wlEsc(wlNameOf(x.code)) + '<small>' + wlEsc(x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + '</small></span>' +
+      '<span class="b">' + tdB905Badge('905', r) + '</span><span class="h">' + holderTagHtml(snap.live ? holderPctOf(x.code) : x.big, true) + '</span>' +
+      '<span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '—') + '</span><span class="x"></span></div>';
+  }).join('');
+  const head = '<div class="td-b9head"><span class="t">首次發生<br>時間</span><span class="s">股號・股名・族群</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';
+  return '<div class="td-b9sec s905">🎯 905 突破（篩選後） <b>' + list.length + '</b>　<small>四個條件都成立才列：當天第一次站上 905 高、大戶力 ≥ +' + TD905_BIG + '%、漲幅 ≥ ' + TD905_PCT + '%、族群在多方區（族群名次前一半）' +
+    (cand ? '；現在符合後三項的候選 ' + cand.length + ' 檔' : '') + '</small></div>' +
+    (list.length ? head + rows : '<div class="td-empty">' + (snap.live ? '目前沒有（四個條件都成立才會出現；盤中要開著網頁才記得到，時間＝這台電腦第一次看到的時間）' : '這個時段以前這台電腦沒有記到（905 要盤中開著網頁才會記）') + '</div>');
+}
 function tdSideTabsHtml(){
   return '<div class="td-stabs">' + TD_SIDE_TABS.map(([k, label]) => '<button type="button" class="td-stab' + (tdSideTab === k ? ' on' : '') + '" data-td-side="' + k + '">' + label + '</button>').join('') + '</div>';
 }
@@ -20053,14 +20128,15 @@ function tdB905PanelHtml(snap){
   }).join('');
   const opt = (k, label, tip) => '<button type="button" class="td-b9opt' + (tdB905[k] ? ' on' : '') + '" data-td-b905-opt="' + k + '" title="' + tip + '">' + label + '</button>';
   const head = '<div class="td-b9head"><span class="t">首次發生<br>時間</span><span class="s">股號・股名</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';   // 2026-11-01 使用者：時間欄標題改「首次發生時間」（今天第一次突破的 5 分K 收盤時間）
-  return '<aside class="td-side wide b905"><div class="td-shead">📣 📈 1+2 突破廣播</div>' +
+  return '<aside class="td-side wide b905"><div class="td-shead">📣 📈 1+2 / 905 突破廣播</div>' +
     '<div class="td-sinfo">' + (snap.live ? '盤中・5 分K 收完更新' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
     '<div class="td-b9opts">' + opt('snd', '🔊 聲音', '盤中有新的突破／跌破時，響一聲提示音') + opt('up', '▶ 突破', '提醒「突破」：有新的股票 5 分K 收盤同時站上 905 高與昨高') +
     opt('down', '▶ 跌破', '提醒「跌破」：突破之後又有一根 5 分K 收盤收回線的下面（假突破）') + opt('notif', '🔔 開通知', '跳出瀏覽器通知（第一次要按允許）') + '</div>' +
-    '<div class="td-snote">這四顆只管盤中提醒（紫色＝開），顯示的內容不受影響。名單是全市場自動算的，不用貼。</div>' +
+    '<div class="td-snote">這四顆只管盤中提醒（紫色＝開），顯示的內容不受影響。名單是全市場自動算的，不用貼。905 突破排在 1+2 後面，要四個條件都成立才跳出（訊號比 1+2 多很多，所以加了篩選）。</div>' +
     '<div class="td-snote">1+2＝5 分K 收盤同時站上 905 高（開盤第一根 5 分K 的最高）和昨高。狀態：在 1+2 之上（紅底）＝現在收在線上；在 1+2 之下（綠底）＝收在線下，小字寫「跌破」是突破過又收回來（假突破）。時間＝今天第一次突破的 5 分K 收盤時間。</div>' +
     '<div class="td-b9sec sys">🤖 全市場 1+2多（自動） <b>' + sys.length + '</b>　<small>最近的在上面' + (sys.length > SYS_MAX ? '（只列最近 ' + SYS_MAX + ' 檔）' : '') + '</small></div>' +
     (sys.length ? head + sysRows : '<div class="td-empty">' + (snap.live ? '今天還沒有（開盤後 5 分K 收盤才會出現）' : '這個時段以前沒有紀錄') + '</div>') +
+    td905SectionHtml(snap) +
     '</aside>';
 }
 // 持股停損：一檔股在某天（到某個時段為止）有沒有「1 分K 收盤跌破 905 低」「收盤跌破三日低」，什麼時候
