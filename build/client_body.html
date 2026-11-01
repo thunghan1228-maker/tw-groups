@@ -1964,6 +1964,7 @@
   .td-b9x{border:0;background:none;color:#94a3b8;cursor:pointer;font-size:12px;} .td-b9x:hover{color:#dc2626;}
   @media (max-width:900px){ .td-sidecol{order:-1;position:static;} .td-sides .td-side.wide{width:auto;flex:1 1 auto;} .td-b9head,.td-b9row{grid-template-columns:42px minmax(0,1fr) 90px 60px 56px 20px;} }
   .td-side.stop .td-b9head,.td-side.stop .td-b9row{grid-template-columns:46px minmax(0,1fr) 138px 70px 62px 24px;} .td-side.stop .td-b9row .b{white-space:nowrap;}
+  .td-bk.up{background:#dc2626;border-color:#dc2626;color:#fff;} .td-bk.dn{background:#16a34a;border-color:#16a34a;color:#fff;}
   .td-bkn{display:block;margin-top:1px;font-size:10.5px;color:var(--muted);font-weight:400;} .td-bk.red{background:#dc2626;border-color:#dc2626;color:#fff;} .td-b9fold{float:right;border:1px solid #c4b2e6;background:#fff;color:#6d28d9;border-radius:6px;padding:0 8px;font-size:12px;cursor:pointer;font-family:inherit;} .td-b9from{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:#4a4066;}
   .td-sides .td-side{width:292px;flex:0 0 292px;} .td-side.k12 .td-shead{background:#1d4ed8;} .td-side.k12 .td-sinfo{color:#1d4ed8;}
   .td-main{min-width:0;}
@@ -19886,16 +19887,16 @@ function tdSideTabsHtml(){
   return '<div class="td-stabs">' + TD_SIDE_TABS.map(([k, label]) => '<button type="button" class="td-stab' + (tdSideTab === k ? ' on' : '') + '" data-td-side="' + k + '">' + label + '</button>').join('') + '</div>';
 }
 const tdPx = (v) => (Number.isFinite(v) ? String(+Number(v).toFixed(2)) : '—');
-// 狀態標籤（2026-11-01 使用者：不要打勾，改成「在 1+2 之上／之下」）：之上＝現在 5 分K 收在線上（綠）；之下＝收在線下，突破過又收回來是紅色（跌破）、
-// 從來沒突破過是灰色（未突破）。標籤下面小字寫最近一次突破／跌破的時間。線：1+2＝905 高與昨高較高的那條，905＝905 高。
+// 狀態標籤（2026-11-01 使用者：不要打勾，改成「在 1+2 之上／之下」，之上紅底、之下綠底——漲紅跌綠）：之上＝現在 5 分K 收在線上；之下＝收在線下，
+// 小字寫「跌破 HH:MM」（突破過又收回來）或「未突破」。標籤下面小字寫最近一次突破／跌破的時間。線：1+2＝905 高與昨高較高的那條，905＝905 高。
 function tdB905Badge(lab, r){
   if (r.loading) return '<span class="td-bk">讀取中</span>';
   if (r.error) return '<span class="td-bk down">讀取失敗</span>';
   if (r.empty) return '<span class="td-bk">沒有5分K</span>';
   const lastOf = (type) => { const e = (r.ev || []).filter((x) => x.type === type); return e.length ? e[e.length - 1].t : ''; };
-  if (r.inside) return '<span class="td-bk on">在 ' + lab + ' 之上</span><small class="td-bkn">突破 ' + lastOf('up') + '</small>';
-  if (r.ev.length) return '<span class="td-bk red">在 ' + lab + ' 之下</span><small class="td-bkn">跌破 ' + lastOf('down') + '</small>';
-  return '<span class="td-bk">在 ' + lab + ' 之下</span><small class="td-bkn">未突破</small>';
+  if (r.inside) return '<span class="td-bk up">在 ' + lab + ' 之上</span><small class="td-bkn">突破 ' + lastOf('up') + '</small>';
+  if (r.ev.length) return '<span class="td-bk dn">在 ' + lab + ' 之下</span><small class="td-bkn">跌破 ' + lastOf('down') + '</small>';
+  return '<span class="td-bk dn">在 ' + lab + ' 之下</span><small class="td-bkn">未突破</small>';
 }
 function tdB905PanelHtml(snap){
   const date = snap.date, slot = snap.live ? null : snap.slot;
@@ -19947,7 +19948,7 @@ function tdB905PanelHtml(snap){
     '<label class="td-b9l"><i class="td-b9tag">1+2</i> 要過昨高</label><input class="td-b9in" id="tdB905In12" data-keep="1" placeholder="1+2 股號（要過昨高），例：2330 2454" value="' + wlEsc(tdB905.c12.join(' ')) + '">' +
     '<label class="td-b9l"><i class="td-b9tag c905">905</i> 不用過昨高</label><input class="td-b9in" id="tdB905In905" data-keep="1" placeholder="905 股號（過 905 高就算），例：2330 2454" value="' + wlEsc(tdB905.c905.join(' ')) + '">' +
     '<button type="button" class="td-b9save" data-td-b905-save="1">存</button>' +
-    '<div class="td-snote">1+2＝5 分K 收盤同時站上 905 高（開盤第一根 5 分K 的最高）和昨高；905＝5 分K 收盤站上 905 高（不用過昨高）。狀態：在線之上＝現在收在線上（綠）；在線之下＝收在線下，突破過又收回來是紅色（跌破＝假突破），從來沒突破過是灰色。時間＝那根 5 分K 的收盤時間。</div></div>' +
+    '<div class="td-snote">1+2＝5 分K 收盤同時站上 905 高（開盤第一根 5 分K 的最高）和昨高；905＝5 分K 收盤站上 905 高（不用過昨高）。狀態：在線之上（紅底）＝現在收在線上；在線之下（綠底）＝收在線下，小字寫「跌破」是突破過又收回來（假突破）、「未突破」是從來沒站上過。時間＝那根 5 分K 的收盤時間。</div></div>' +
     '<div class="td-b9sec">⭐ 我的清單 <b>' + mine.length + '</b>　<small>最近發生的在上面</small></div>' + (mine.length ? head + myRows : '<div class="td-empty">還沒加 —— 把自己選的 1+2 / 905 股貼上去、按「存」，盤中就跟老師的名單一樣自動跳。</div>') +
     '<div class="td-b9sec sys">🤖 本站全市場 1+2多（自動，不用貼） <b>' + sys.length + '</b>　<small>今天第一次收盤同時站上 905 高與昨高的時間；右邊狀態是現在還在不在線上；最近的在上面' + (sys.length > SYS_MAX ? '（只列最近 ' + SYS_MAX + ' 檔）' : '') + '</small></div>' + (sys.length ? head + sysRows : '<div class="td-empty">' + (snap.live ? '今天還沒有（開盤後 5 分K 收盤才會出現）' : '這個時段以前沒有紀錄') + '</div>') +
     '</aside>';

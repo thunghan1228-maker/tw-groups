@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-01 18:55:10";
+const BUILD_STAMP = "2026-11-01 19:07:42";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2051,6 +2051,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .td-b9x{border:0;background:none;color:#94a3b8;cursor:pointer;font-size:12px;} .td-b9x:hover{color:#dc2626;}
   @media (max-width:900px){ .td-sidecol{order:-1;position:static;} .td-sides .td-side.wide{width:auto;flex:1 1 auto;} .td-b9head,.td-b9row{grid-template-columns:42px minmax(0,1fr) 90px 60px 56px 20px;} }
   .td-side.stop .td-b9head,.td-side.stop .td-b9row{grid-template-columns:46px minmax(0,1fr) 138px 70px 62px 24px;} .td-side.stop .td-b9row .b{white-space:nowrap;}
+  .td-bk.up{background:#dc2626;border-color:#dc2626;color:#fff;} .td-bk.dn{background:#16a34a;border-color:#16a34a;color:#fff;}
   .td-bkn{display:block;margin-top:1px;font-size:10.5px;color:var(--muted);font-weight:400;} .td-bk.red{background:#dc2626;border-color:#dc2626;color:#fff;} .td-b9fold{float:right;border:1px solid #c4b2e6;background:#fff;color:#6d28d9;border-radius:6px;padding:0 8px;font-size:12px;cursor:pointer;font-family:inherit;} .td-b9from{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:#4a4066;}
   .td-sides .td-side{width:292px;flex:0 0 292px;} .td-side.k12 .td-shead{background:#1d4ed8;} .td-side.k12 .td-sinfo{color:#1d4ed8;}
   .td-main{min-width:0;}
@@ -17014,7 +17015,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-01 18:55:10';
+const BUILD_STAMP = '2026-11-01 19:07:42';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19975,16 +19976,16 @@ function tdSideTabsHtml(){
   return '<div class="td-stabs">' + TD_SIDE_TABS.map(([k, label]) => '<button type="button" class="td-stab' + (tdSideTab === k ? ' on' : '') + '" data-td-side="' + k + '">' + label + '</button>').join('') + '</div>';
 }
 const tdPx = (v) => (Number.isFinite(v) ? String(+Number(v).toFixed(2)) : '—');
-// 狀態標籤（2026-11-01 使用者：不要打勾，改成「在 1+2 之上／之下」）：之上＝現在 5 分K 收在線上（綠）；之下＝收在線下，突破過又收回來是紅色（跌破）、
-// 從來沒突破過是灰色（未突破）。標籤下面小字寫最近一次突破／跌破的時間。線：1+2＝905 高與昨高較高的那條，905＝905 高。
+// 狀態標籤（2026-11-01 使用者：不要打勾，改成「在 1+2 之上／之下」，之上紅底、之下綠底——漲紅跌綠）：之上＝現在 5 分K 收在線上；之下＝收在線下，
+// 小字寫「跌破 HH:MM」（突破過又收回來）或「未突破」。標籤下面小字寫最近一次突破／跌破的時間。線：1+2＝905 高與昨高較高的那條，905＝905 高。
 function tdB905Badge(lab, r){
   if (r.loading) return '<span class="td-bk">讀取中</span>';
   if (r.error) return '<span class="td-bk down">讀取失敗</span>';
   if (r.empty) return '<span class="td-bk">沒有5分K</span>';
   const lastOf = (type) => { const e = (r.ev || []).filter((x) => x.type === type); return e.length ? e[e.length - 1].t : ''; };
-  if (r.inside) return '<span class="td-bk on">在 ' + lab + ' 之上</span><small class="td-bkn">突破 ' + lastOf('up') + '</small>';
-  if (r.ev.length) return '<span class="td-bk red">在 ' + lab + ' 之下</span><small class="td-bkn">跌破 ' + lastOf('down') + '</small>';
-  return '<span class="td-bk">在 ' + lab + ' 之下</span><small class="td-bkn">未突破</small>';
+  if (r.inside) return '<span class="td-bk up">在 ' + lab + ' 之上</span><small class="td-bkn">突破 ' + lastOf('up') + '</small>';
+  if (r.ev.length) return '<span class="td-bk dn">在 ' + lab + ' 之下</span><small class="td-bkn">跌破 ' + lastOf('down') + '</small>';
+  return '<span class="td-bk dn">在 ' + lab + ' 之下</span><small class="td-bkn">未突破</small>';
 }
 function tdB905PanelHtml(snap){
   const date = snap.date, slot = snap.live ? null : snap.slot;
@@ -20036,7 +20037,7 @@ function tdB905PanelHtml(snap){
     '<label class="td-b9l"><i class="td-b9tag">1+2</i> 要過昨高</label><input class="td-b9in" id="tdB905In12" data-keep="1" placeholder="1+2 股號（要過昨高），例：2330 2454" value="' + wlEsc(tdB905.c12.join(' ')) + '">' +
     '<label class="td-b9l"><i class="td-b9tag c905">905</i> 不用過昨高</label><input class="td-b9in" id="tdB905In905" data-keep="1" placeholder="905 股號（過 905 高就算），例：2330 2454" value="' + wlEsc(tdB905.c905.join(' ')) + '">' +
     '<button type="button" class="td-b9save" data-td-b905-save="1">存</button>' +
-    '<div class="td-snote">1+2＝5 分K 收盤同時站上 905 高（開盤第一根 5 分K 的最高）和昨高；905＝5 分K 收盤站上 905 高（不用過昨高）。狀態：在線之上＝現在收在線上（綠）；在線之下＝收在線下，突破過又收回來是紅色（跌破＝假突破），從來沒突破過是灰色。時間＝那根 5 分K 的收盤時間。</div></div>' +
+    '<div class="td-snote">1+2＝5 分K 收盤同時站上 905 高（開盤第一根 5 分K 的最高）和昨高；905＝5 分K 收盤站上 905 高（不用過昨高）。狀態：在線之上（紅底）＝現在收在線上；在線之下（綠底）＝收在線下，小字寫「跌破」是突破過又收回來（假突破）、「未突破」是從來沒站上過。時間＝那根 5 分K 的收盤時間。</div></div>' +
     '<div class="td-b9sec">⭐ 我的清單 <b>' + mine.length + '</b>　<small>最近發生的在上面</small></div>' + (mine.length ? head + myRows : '<div class="td-empty">還沒加 —— 把自己選的 1+2 / 905 股貼上去、按「存」，盤中就跟老師的名單一樣自動跳。</div>') +
     '<div class="td-b9sec sys">🤖 本站全市場 1+2多（自動，不用貼） <b>' + sys.length + '</b>　<small>今天第一次收盤同時站上 905 高與昨高的時間；右邊狀態是現在還在不在線上；最近的在上面' + (sys.length > SYS_MAX ? '（只列最近 ' + SYS_MAX + ' 檔）' : '') + '</small></div>' + (sys.length ? head + sysRows : '<div class="td-empty">' + (snap.live ? '今天還沒有（開盤後 5 分K 收盤才會出現）' : '這個時段以前沒有紀錄') + '</div>') +
     '</aside>';
