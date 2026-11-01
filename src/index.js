@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-01 19:07:42";
+const BUILD_STAMP = "2026-11-01 19:55:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -8992,10 +8992,7 @@ function tdTodaySeq(m){
   if (!seq.length || (liveSession && seq[seq.length - 1][0] <= live.slot)) seq.push([live.slot || '最新', live]);
   return seq;
 }
-function tdParamsNote(){   // 功課面板勾的參數（大戶≤-10…）會一起篩機器人 32／123：有勾的時候在說明列提醒
-  const on = TD_PARAMS.filter(([k]) => tdState.params[k]).map(([, l]) => l.replace(/^\\S+\\s/, ''));
-  return on.length ? '・⏸ 跟著每日功課的參數：' + on.join('、') + '（到每日功課取消勾選就是全部）' : '';
-}
+function tdParamsNote(){ return ''; }   // 2026-11-01 使用者：功課面板的參數只篩選下面的族群卡，不再影響機器人 32／123 與功課廣播，所以不用提醒
 const bladeBackTag = (x) => (x && x.inNow && x.back ? '<span class="blade-back" title="掉出刀劍空後 ' + x.back + ' 又回來">回 ' + x.back + '</span>' : '');
 // 跑掉的那幾檔：一列，紅色刪除線，標進榜時間跟跑的時間，漲跌照現在報價
 function bladeGoneRowHtml(x){
@@ -17015,7 +17012,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-01 19:07:42';
+const BUILD_STAMP = '2026-11-01 19:55:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19838,7 +19835,7 @@ function tdBroadcast(seq, kind){   // kind＝'k12' 看 12空(123)；其他＝刀
     // 2026-10-20 使用者：刀劍空功課廣播的名單要跟機器人 32 一樣——以前連 12空（123）的股票也併進來（燁興、晶心科只在這邊），
     // 現在只放刀劍空(32) 那份；12空 在上面自己那一塊看。
     const pool = kind === 'k12' ? (snap.k12 || []) : snap.rows;
-    const pass = new Map(pool.filter(tdPass).map((r) => [r.code, r]));
+    const pass = new Map(pool.map((r) => [r.code, r]));      // 2026-11-01 使用者：參數只篩選下面的族群卡，右邊功課廣播（和機器人 32）不受影響
     pass.forEach((r, code) => {
       const s = st.get(code);
       if (!s) st.set(code, { code, first: slot, inNow: true, back: null, out: null, row: r });
@@ -19862,7 +19859,6 @@ function tdBroadcastHtml(seq, snap, kind){
   const isK = kind === 'k12';
   const list = tdBroadcast(seq, kind);
   const inCnt = list.filter((x) => x.inNow).length, goneCnt = list.length - inCnt;
-  const on = TD_PARAMS.filter(([k]) => tdState.params[k]).map(([, l]) => l.replace(/^\\S+\\s/, ''));
   // 盤中的漲跌幅跟機器人 32 一樣用現在的報價（紀錄裡那份最多晚 5 分鐘）；回放才用那個時段的
   const pctNow = (x) => { const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(x.code) : null; return q && Number.isFinite(q.changePercent) ? q.changePercent : x.row.pct; };
   const rows = list.filter((x) => x.inNow || !tdState.hideGone).map((x) => {
@@ -19879,7 +19875,6 @@ function tdBroadcastHtml(seq, snap, kind){
   }).join('');
   return '<aside class="td-side' + (isK ? ' k12' : '') + '"><div class="td-shead">' + (isK ? '📣 🔵 12空(123)功課廣播' : '📣 🔪 刀劍空(32)功課廣播') + '</div>' +
     '<div class="td-sinfo">' + (snap.live ? '盤中・跟著首頁報價' + (isK ? '・' + tdK12CountHtml(list.filter((x) => x.inNow).map((x) => x.row)) : '') : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
-    '<div class="td-sparam">⏸ 跟著上面參數：' + (on.length ? on.join('・') : (isK ? '（都沒勾＝全部12空）' : '（都沒勾＝全部刀劍空）')) + '</div>' +
     '<div class="td-scount">今天 <b>' + list.length + '</b> 檔　在榜 ' + inCnt + '　<span class="down">消失 ' + goneCnt + '</span>' +
     '<button type="button" class="td-hide" data-td-hidegone="1">' + (tdState.hideGone ? '👁 顯示消失的' : '🚫 隱藏') + '</button></div>' +
     (seq.length <= 1 && snap.live ? '<div class="td-snote">盤中每 5 分鐘記一次（09:05 起），記到第二次以後才看得出誰跑、誰回來。</div>' : '') +
@@ -20207,6 +20202,7 @@ function hwTodayHtml(){
   const shownZones = TD_ZONES.filter((z) => tdState.zones[z.key]);
   let mainRows = shownZones.flatMap((z) => zoneRows[z.key]);
   if (tdState.dtOnly) mainRows = mainRows.filter((r) => ctx.dt.has(r.code));
+  mainRows = mainRows.filter(tdPass);     // 2026-11-01 使用者：參數（大戶≤-10、均線≥7…）只篩選下面的族群卡／段位分區
   const groupChips = Array.from(new Map(mainRows.map((r) => [r.g, r.gr])).entries()).sort((a, b) => a[1] - b[1]);
   if (tdState.group && !groupChips.some(([g]) => g === tdState.group)) tdState.group = null;
   if (tdState.group) mainRows = mainRows.filter((r) => r.g === tdState.group);
@@ -20282,10 +20278,10 @@ function hwTodayHtml(){
     // 2026-10-19 使用者以為「🟣 大戶≤-10」已經勾了（那顆紫圓點只是圖示），其實沒勾；每顆前面補 ☑／☐，跟上面段位開關一樣
     '<div class="td-params"><span class="td-plabel">參數</span>' + TD_PARAMS.map(([k, label]) => '<button type="button" class="td-param p-' + k + (tdState.params[k] ? ' on' : '') + '" data-td-param="' + k + '">' + (tdState.params[k] ? '☑ ' : '☐ ') + label + '</button>').join('') +
     '<button type="button" class="td-param p-all' + (allOn ? ' on' : '') + '" data-td-param="all">' + (allOn ? '☑' : '☐') + ' 全勾</button>' +
-    '<span class="td-rnote">只篩選右邊「刀劍空(32)功課廣播」，下面族群卡不受影響</span></div></div>' +
+    '<span class="td-rnote">勾＝篩選下面的族群卡</span></div></div>' +
     '<details class="td-help"><summary>💡 開關怎麼看</summary><div>' +
     '<p><b>大戶%</b>＝今天同秒併單 ≥7 張的大戶買減大戶賣（開盤第一筆算賣）÷ 近 5 日平均成交值。<i class="td-big neg">大戶 %</i> 負＝大戶在倒貨，<i class="td-big deep">≤ -10</i> 綠底白字＝倒貨重點股；<i class="td-big pos">大戶 +</i> 正＝大戶在買（對空單不利），<i class="td-big hot">≥ +10</i> 紅底白字＝警訊（不到 +10 維持淡黃色）。<i class="td-n">N億</i>＝近 5 日平均成交值，看流動性夠不夠。數字後面有 * 是今天的 5 分K不完整。</p>' +
-    '<p><b>參數</b>決定右邊「刀劍空(32)功課廣播」誰進榜：大戶≤-10、均線分≥7、今天最高曾漲 3% 以上、現在跌幅還沒超過 7%（沒勾的就不看）。主畫面的刀劍空不受參數影響。</p>' +
+    '<p><b>參數</b>用來篩選下面的族群卡（含段位分區、12空）：大戶≤-10、均線分≥7、今天最高曾漲 3% 以上、現在跌幅還沒超過 7%（沒勾的就不看，勾多個＝要全部符合）。右邊功課廣播不受影響。</p>' +
     '<p>☑ 打勾＝我持有空單（整列金框、跨日記住，再點一下解除）。排名格旁的圓球＝均線分（滿分 15：≥12 金底、6～11 金框、<6 灰）。<i class="td-k12">🔵 12空</i>＝機器人 123（衝高後跌破 5 分K 20MA、20MA 下彎）。<i class="td-fut">📈 股期</i>＝有股票期貨可避險。</p>' +
     '<p>段位照族群排名：前 10 名 ▲ 多方（前 5 名強多不列）、11～25 名 🔽 中間、26 名以後 🔰 強空、今天已跌 5% 以上 ♣ 收割區；每段的部位、停損、目標見最下面段位對照。</p></div></details>';
   // ⑥ 主體：族群卡或段位分區
@@ -20306,10 +20302,11 @@ function hwTodayHtml(){
     '<div class="td-wadd"><input type="text" id="tdWatchInput" placeholder="股號，可一串：3374/8358/6213"><button type="button" data-td-watch="1">＋ 新增</button></div>' +
     (tdState.watch.length ? tdState.watch.map((c) => tdRowHtml(tdQuoteRow(c, '', live.big), ctx, snap, { lite: true, remove: true, group: tdGroupOf(c) })).join('') : '<div class="td-empty">還沒有觀察股</div>') + '</div>';
   // ⑧ 12空
+  const k12Rows = snap.k12.filter(tdPass);
   const k12Sec = '<div class="td-sec"><h4><span class="td-badge k12">12空</span> <small>機器人 123（道館 5 分K MA20 當沖空）・跟上面刀劍空分開看；段位照 12空 自己的族群排名</small></h4>' +
     '<div class="td-k12legend"><i class="td-k12st s1">① 剛轉弱</i> 5 分K 剛跌破 20MA、20MA 下彎，還沒反彈　<i class="td-k12st s2">② 不過前高可空</i> 破了以後反彈出現「2」、沒過 1高（前高）→ 可以空，停損放 1高　<span class="td-k12cnt">' + tdK12CountHtml(snap.k12) + '</span></div>' +
     (!snap.k12Loaded ? '<div class="td-empty">讀取中…</div>' : !snap.k12Tracked ? '<div class="td-empty">後端今天還沒有 5 分K（盤中 9 點以後才有）</div>' :
-      snap.k12.length ? tdCardsHtml(snap.k12.slice().sort(byPct), ctx, snap, { noFoot: true, rowOpt: { noK12: true }, cardFilter: true }) : '<div class="td-empty">目前沒有衝高後跌破 MA20 下彎的</div>') + '</div>';
+      k12Rows.length ? tdCardsHtml(k12Rows.slice().sort(byPct), ctx, snap, { noFoot: true, rowOpt: { noK12: true }, cardFilter: true }) : '<div class="td-empty">' + (snap.k12.length ? '沒有符合上面參數的' : '目前沒有衝高後跌破 MA20 下彎的') + '</div>') + '</div>';
   // ⑨ 出獄即入獄、出獄股、即將入獄（整天不變，回放時也照今天的）
   const again = sus.filter((s) => { const n = ctx.released.get(s.code); return n && n <= 3; });
   const againSec = '<div class="td-sec"><h4>⛓ 出獄即入獄 <small>剛出獄，又被點名可能再被關</small></h4>' +
