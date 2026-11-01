@@ -19800,9 +19800,8 @@ function tdBroadcastHtml(seq, snap, kind){
 // 或三日低（前三個交易日最低）就通知；我們另外加「從自選股帶入」。
 const TD_SIDE_TABS = [['blade', '🔪 刀功課'], ['b905', '📈 1+2 / 905 突破'], ['stop', '🛡 持股停損']];
 let tdSideTab = (() => { try { const v = localStorage.getItem('tdSide'); return TD_SIDE_TABS.some((x) => x[0] === v) ? v : 'blade'; } catch (_) { return 'blade'; } })();
-const TD_B905_MAX = 10;
 const tdB905 = (() => {
-  const d = { c12: [], c905: [], snd: true, up: true, down: true, notif: false };
+  const d = { snd: true, up: true, down: true, notif: false };
   try { const j = JSON.parse(localStorage.getItem('tdB905') || '{}') || {}; Object.keys(d).forEach((k) => { if (j[k] !== undefined) d[k] = j[k]; }); } catch (_) { /* 讀不到就用預設 */ }
   return d;
 })();
@@ -19861,22 +19860,51 @@ function tdB905Check(snap){
   const fresh = [];
   const prime = tdB905Primed !== snap.date;
   const note = (key, text) => { if (tdB905Seen.has(key)) return; tdB905Seen.add(key); if (!prime) fresh.push(text); };
-  [['c12', '1+2'], ['c905', '905']].forEach(([k, lab]) => tdB905[k].forEach((code) => {
-    const r = tdB905Calc(code, k, snap.date, null);
-    if (!r.ev) return;
-    r.ev.forEach((e) => { if ((e.type === 'up' && tdB905.up) || (e.type === 'down' && tdB905.down)) note(code + '|' + k + '|' + e.type + '|' + e.t, e.t + ' ' + code + ' ' + wlNameOf(code) + ' ' + lab + (e.type === 'up' ? ' 突破 ' : ' 跌破 ') + +e.px.toFixed(2)); });
-  }));
-  tdStopList.forEach((code) => {
-    const r = tdStopCalc(code, snap.date, null);
-    if (!r.ev || !tdB905.down) return;
-    r.ev.forEach((e) => note(code + '|stop|' + e.kind + '|' + e.t, e.t + ' 🔴 ' + code + ' ' + wlNameOf(code) + ' 跌破' + e.label + ' ' + +e.px.toFixed(2)));
+  // 本站全市場 1+2多：新出現的股票＝突破提醒（直接用訊號事件流，不用抓 5 分K）；最近 20 檔再逐檔看有沒有收回線下＝跌破提醒
+  const sys = tdSysList(snap.date, null);
+  if (tdB905.up) sys.forEach((x) => note('sys|up|' + x.code + '|' + x.t, x.t + ' ' + x.code + ' ' + (x.name || wlNameOf(x.code)) + ' 1+2 突破'));
+  let allLoaded = true;
+  if (tdB905.down) sys.slice(0, 20).forEach((x) => {
+    const r = tdB905Calc(x.code, 'c12', snap.date, null, 180e3);
+    if (r.loading) allLoaded = false;
+    if (r.ev) r.ev.forEach((e) => { if (e.type === 'down') note('sys|down|' + x.code + '|' + e.t, e.t + ' ' + x.code + ' ' + (x.name || wlNameOf(x.code)) + ' 1+2 跌破 ' + +e.px.toFixed(2)); });
   });
-  const allLoaded = [...tdB905.c12, ...tdB905.c905].every((c) => { const e = tdJCache['m5|' + c]; return e && !e.loading; }) && tdStopList.every((c) => { const e = tdJCache['m1|' + c]; return e && !e.loading; });
   if (allLoaded) tdB905Primed = snap.date;
   if (fresh.length){
     if (tdB905.snd) { try { launchBeep(); } catch (_) { /* 出不了聲就算了 */ } }
     if (tdB905.notif && typeof Notification !== 'undefined' && Notification.permission === 'granted') { try { new Notification('今日功課', { body: fresh.slice(0, 4).join('\n') }); } catch (_) { /* 通知失敗就算了 */ } }
   }
+}
+// 持股停損：自選監控清單裡的股票 1 分K 收盤跌破 905 低／三日低，盤中新破的響
+const tdStopSeen = new Set();
+let tdStopPrimed = '';
+function tdStopCheck(snap){
+  if (!snap.live || !tdStopList.length) return;
+  const fresh = [];
+  const prime = tdStopPrimed !== snap.date;
+  let allLoaded = true;
+  tdStopList.forEach((code) => {
+    const r = tdStopCalc(code, snap.date, null);
+    if (r.loading) allLoaded = false;
+    if (!r.ev || !tdB905.down) return;
+    r.ev.forEach((e) => { const key = code + '|stop|' + e.kind + '|' + e.t; if (tdStopSeen.has(key)) return; tdStopSeen.add(key); if (!prime) fresh.push(e.t + ' 🔴 ' + code + ' ' + wlNameOf(code) + ' 跌破' + e.label + ' ' + +e.px.toFixed(2)); });
+  });
+  if (allLoaded) tdStopPrimed = snap.date;
+  if (fresh.length){
+    if (tdB905.snd) { try { launchBeep(); } catch (_) { /* 出不了聲就算了 */ } }
+    if (tdB905.notif && typeof Notification !== 'undefined' && Notification.permission === 'granted') { try { new Notification('持股停損', { body: fresh.slice(0, 4).join('\n') }); } catch (_) { /* 通知失敗就算了 */ } }
+  }
+}
+// 全市場今天第一次 1+2多（跟首頁小幫手 44 同一份）：[{code, name, t}]，最近的在前
+function tdSysList(date, slot){
+  const sys = [];
+  const seen = new Set();
+  tdSigEvents(date).filter((e) => (!slot || String(e.time || '') <= slot)).forEach((e) => {
+    if (!(e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull')) || seen.has(e.code)) return;
+    seen.add(e.code);
+    sys.push({ code: e.code, name: e.name, t: String(e.time || '') });
+  });
+  return sys.sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.code < b.code ? -1 : 1));
 }
 function tdSideTabsHtml(){
   return '<div class="td-stabs">' + TD_SIDE_TABS.map(([k, label]) => '<button type="button" class="td-stab' + (tdSideTab === k ? ' on' : '') + '" data-td-side="' + k + '">' + label + '</button>').join('') + '</div>';
@@ -19895,33 +19923,9 @@ function tdB905Badge(lab, r){
 }
 function tdB905PanelHtml(snap){
   const date = snap.date, slot = snap.live ? null : snap.slot;
-  const mine = [];
-  [['c12', '1+2'], ['c905', '905']].forEach(([k, lab]) => tdB905[k].forEach((code) => mine.push({ code, k, lab, r: tdB905Calc(code, k, date, slot) })));
-  const lastEv = (x) => (x.r.ev && x.r.ev.length ? x.r.ev[x.r.ev.length - 1].t : '');
-  mine.sort((a, b) => (lastEv(a) < lastEv(b) ? 1 : lastEv(a) > lastEv(b) ? -1 : a.code < b.code ? -1 : 1));    // 最近發生的在上面（沒發生的排最後）
-  const pctOf = (x) => { const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(x.code) : null; return q && Number.isFinite(q.changePercent) ? q.changePercent : x.r.pct; };
-  const myRows = mine.map((x) => {
-    const r = x.r;
-    const detail = r.loading || r.empty || r.error ? '' : '<small>905高 ' + tdPx(r.h905) + (x.k === 'c12' ? '・昨高 ' + tdPx(r.yHigh) : '') + '・現 ' + tdPx(r.price) + '</small>';
-    const pct = pctOf(x);
-    return '<div class="td-b9row" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(wlNameOf(x.code)) + '"><span class="t">' + (lastEv(x) || '—') + '</span>' +
-      '<span class="s"><b>' + wlEsc(x.code) + '</b> ' + wlEsc(wlNameOf(x.code)) + detail + '</span>' +
-      '<span class="b">' + tdB905Badge(x.lab, r) + '</span><span class="h">' + holderTagHtml(holderPctOf(x.code), true) + '</span>' +
-      '<span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '—') + '</span>' +
-      '<button type="button" class="td-b9x" data-td-b905-del="' + wlEsc(x.code) + '|' + x.k + '" title="從清單移除">✕</button></div>';
-  }).join('');
-  // 本站自己的：全市場今天第一次 1+2多（跟首頁小幫手 44 同一份），不用貼；狀態（在線上／線下）逐檔用 5 分K 算，最近 40 檔
-  const evs = tdSigEvents(date).filter((e) => (!slot || String(e.time || '') <= slot));
+  // 全市場今天第一次 1+2多；狀態（在線上／線下）逐檔用 5 分K 算，最近 40 檔（2026-11-01 使用者：不用自己貼清單，全市場自動算）
+  const sys = tdSysList(date, slot);
   if (date !== twTodayStr() && !sigHistoryEvents[date]){ clearTimeout(tdSigTimer); tdSigTimer = setTimeout(() => { if (tdOpen()) renderHomework(); }, 1500); }   // 別天的訊號還在抓：抓到就重畫
-  const sys = [];
-  const seen = new Set();
-  evs.forEach((e) => {
-    const k = e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull') ? 'c12' : '';     // 全市場的訊號事件流只有 1+2多；905 要逐檔算 5 分K，只做自己貼的清單
-    if (!k || seen.has(e.code + k)) return;
-    seen.add(e.code + k);
-    sys.push({ code: e.code, name: e.name, t: String(e.time || '') });
-  });
-  sys.sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.code < b.code ? -1 : 1));
   const SYS_MAX = 40;
   const sysRows = sys.slice(0, SYS_MAX).map((x) => {
     const r = tdB905Calc(x.code, 'c12', date, slot, 180e3);
@@ -19936,16 +19940,12 @@ function tdB905PanelHtml(snap){
   const head = '<div class="td-b9head"><span class="t">時間</span><span class="s">股號・股名</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';
   return '<aside class="td-side wide b905"><div class="td-shead">📣 📈 1+2 / 905 突破廣播</div>' +
     '<div class="td-sinfo">' + (snap.live ? '盤中・5 分K 收完更新' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
-    '<div class="td-b9opts">' + opt('snd', '🔊 聲音', '盤中「我的清單」有新的突破／跌破時，響一聲提示音') + opt('up', '▶ 突破', '提醒「突破」：5 分K 收盤收在線的上面（1+2＝905 高與昨高較高的那條，905＝905 高）') +
+    '<div class="td-b9opts">' + opt('snd', '🔊 聲音', '盤中有新的突破／跌破時，響一聲提示音') + opt('up', '▶ 突破', '提醒「突破」：有新的股票 5 分K 收盤同時站上 905 高與昨高') +
     opt('down', '▶ 跌破', '提醒「跌破」：突破之後又有一根 5 分K 收盤收回線的下面（假突破）') + opt('notif', '🔔 開通知', '跳出瀏覽器通知（第一次要按允許）') + '</div>' +
-    '<div class="td-snote">這四顆只管盤中提醒、只對下面「我的清單」有效；顯示的內容不受影響。紫色＝開。</div>' +
-    '<div class="td-b9box"><div class="td-b9t">⭐ 我的 1+2 / 905　<small>各最多 ' + TD_B905_MAX + ' 檔，沒貼就一直留著（老師是各 5 檔）</small></div>' +
-    '<label class="td-b9l"><i class="td-b9tag">1+2</i> 要過昨高</label><input class="td-b9in" id="tdB905In12" data-keep="1" placeholder="1+2 股號（要過昨高），例：2330 2454" value="' + wlEsc(tdB905.c12.join(' ')) + '">' +
-    '<label class="td-b9l"><i class="td-b9tag c905">905</i> 不用過昨高</label><input class="td-b9in" id="tdB905In905" data-keep="1" placeholder="905 股號（過 905 高就算），例：2330 2454" value="' + wlEsc(tdB905.c905.join(' ')) + '">' +
-    '<button type="button" class="td-b9save" data-td-b905-save="1">存</button>' +
-    '<div class="td-snote">1+2＝5 分K 收盤同時站上 905 高（開盤第一根 5 分K 的最高）和昨高；905＝5 分K 收盤站上 905 高（不用過昨高）。狀態：在線之上（紅底）＝現在收在線上；在線之下（綠底）＝收在線下，小字寫「跌破」是突破過又收回來（假突破）、「未突破」是從來沒站上過。時間＝那根 5 分K 的收盤時間。</div></div>' +
-    '<div class="td-b9sec">⭐ 我的清單 <b>' + mine.length + '</b>　<small>最近發生的在上面</small></div>' + (mine.length ? head + myRows : '<div class="td-empty">還沒加 —— 把自己選的 1+2 / 905 股貼上去、按「存」，盤中就跟老師的名單一樣自動跳。</div>') +
-    '<div class="td-b9sec sys">🤖 本站全市場 1+2多（自動，不用貼） <b>' + sys.length + '</b>　<small>今天第一次收盤同時站上 905 高與昨高的時間；右邊狀態是現在還在不在線上；最近的在上面' + (sys.length > SYS_MAX ? '（只列最近 ' + SYS_MAX + ' 檔）' : '') + '</small></div>' + (sys.length ? head + sysRows : '<div class="td-empty">' + (snap.live ? '今天還沒有（開盤後 5 分K 收盤才會出現）' : '這個時段以前沒有紀錄') + '</div>') +
+    '<div class="td-snote">這四顆只管盤中提醒（紫色＝開），顯示的內容不受影響。名單是全市場自動算的，不用貼。</div>' +
+    '<div class="td-snote">1+2＝5 分K 收盤同時站上 905 高（開盤第一根 5 分K 的最高）和昨高。狀態：在 1+2 之上（紅底）＝現在收在線上；在 1+2 之下（綠底）＝收在線下，小字寫「跌破」是突破過又收回來（假突破）。時間＝今天第一次突破的 5 分K 收盤時間。</div>' +
+    '<div class="td-b9sec sys">🤖 全市場 1+2多（自動） <b>' + sys.length + '</b>　<small>最近的在上面' + (sys.length > SYS_MAX ? '（只列最近 ' + SYS_MAX + ' 檔）' : '') + '</small></div>' +
+    (sys.length ? head + sysRows : '<div class="td-empty">' + (snap.live ? '今天還沒有（開盤後 5 分K 收盤才會出現）' : '這個時段以前沒有紀錄') + '</div>') +
     '</aside>';
 }
 // 持股停損：一檔股在某天（到某個時段為止）有沒有「1 分K 收盤跌破 905 低」「收盤跌破三日低」，什麼時候
@@ -20106,7 +20106,7 @@ function hwTodayHtml(){
   const liveSession = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr());
   if (snap.live && (!seq.length || (liveSession && seq[seq.length - 1][0] <= snap.slot))) seq.push([snap.slot || '最新', snap]);   // 同一個 5 分鐘時段也接上即時這份（機器人 32 就是跟畫面上現在這份對齊）
   ctx.firstAt = tdFirstAt(seq);   // 族群卡每一檔前面的「訊號出現時間」
-  tdB905Check(snap);               // 1+2／905 突破、持股停損：盤中有新的就響（不管現在開的是哪個分頁）
+  tdB905Check(snap); tdStopCheck(snap);     // 1+2 突破／跌破、持股停損：盤中有新的就響（不管現在開的是哪個分頁）
   // ① 統計
   const zoneRows = {};
   TD_ZONES.forEach((z) => { zoneRows[z.key] = snap.rows.filter((r) => r.zone === z.key); });
@@ -20695,11 +20695,6 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
   if (th){ const c = th.dataset.tdHold; tdState.hold = tdState.hold.includes(c) ? tdState.hold.filter((x) => x !== c) : tdState.hold.concat(c).slice(-60); tdSaveHold(); renderHomework(); return; }
   const tside = t.closest('[data-td-side]');
   if (tside){ tdSideTab = tside.dataset.tdSide; try { localStorage.setItem('tdSide', tdSideTab); } catch (_) { /* 記不住就算了 */ } renderHomework(); return; }
-  if (t.closest('[data-td-b905-save]')){
-    const parse = (id) => Array.from(new Set(String((document.getElementById(id) || {}).value || '').toUpperCase().split(/[^0-9A-Z]+/).filter((c) => /^[0-9A-Z]{4,6}$/.test(c)))).slice(0, TD_B905_MAX);
-    tdB905.c12 = parse('tdB905In12'); tdB905.c905 = parse('tdB905In905'); tdSaveB905();
-    renderHomework(); return;
-  }
   if (t.closest('[data-td-stop-save]')){
     const el = document.getElementById('tdStopIn');
     const codes = Array.from(new Set(String(el ? el.value : '').toUpperCase().split(/[^0-9A-Z]+/).filter((c) => /^[0-9A-Z]{4,6}$/.test(c)))).slice(0, TD_STOP_MAX);
@@ -20714,8 +20709,6 @@ document.getElementById('hwBody').addEventListener('click', (e) => {
   }
   const sdel = t.closest('[data-td-stop-del]');
   if (sdel){ const i = tdStopList.indexOf(sdel.dataset.tdStopDel); if (i >= 0) tdStopList.splice(i, 1); tdSaveStopList(); renderHomework(); return; }
-  const b9del = t.closest('[data-td-b905-del]');
-  if (b9del){ const [c, k] = b9del.dataset.tdB905Del.split('|'); tdB905[k] = (tdB905[k] || []).filter((x) => x !== c); tdSaveB905(); renderHomework(); return; }
   const b9opt = t.closest('[data-td-b905-opt]');
   if (b9opt){
     const k = b9opt.dataset.tdB905Opt;
