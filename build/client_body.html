@@ -62,7 +62,7 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.1fr) minmax(0, 1.25fr) minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.25fr);gap:8px;align-items:start;}   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.1fr) minmax(0, 1.25fr) minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.25fr);gap:8px;align-items:start;}   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -9787,6 +9787,26 @@ function home12BcastColHtml(){
   return '<div class="hr-col"><div class="hr-title">📈 1+2 突破廣播 <span class="hr-rk">' + (sys.length > 20 ? '最新 20／共 ' : '') + sys.length + ' 檔</span></div>' +
     (list.length ? list.map(row).join('') : '<div class="hr-note">今天還沒有</div>') + '</div>';
 }
+// 首頁「905 突破廣播」（2026-11-01 使用者：905 突破也拉一欄到首頁，放在 1+2 突破廣播旁邊）。名單＝每日功課「905 突破（篩選後）」同一份：
+// 當天第一次站上 905 高＋大戶力 ≥ +10%＋漲幅 ≥ 2%＋族群在多方區，四個都成立才記（這台電腦盤中開著網頁時記，一天一次）；最近的在上面、最多 20 檔。
+function home905BcastColHtml(){
+  const date = sigCurrentDate();
+  const seen = td905Seen(date);
+  tdHomeAsked = Date.now();
+  const list = Object.keys(seen).map((code) => Object.assign({ code }, seen[code])).sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.code < b.code ? -1 : 1));
+  const row = (x) => {
+    const r = tdB905Calc(x.code, 'c905', date, null, 180e3);
+    const q = getStockQuote(x.code);
+    const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : (r.pct !== undefined && r.pct !== null ? r.pct : x.pct);
+    const st = r.ev ? (r.inside ? '<span class="td-bk bk-above hr-bk">之上</span>' : '<span class="td-bk bk-below hr-bk">之下</span>') : '';
+    const tip = (x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + (r.ev ? (r.inside ? '・在 905 之上' : '・收回 905 之下') : '') + '・首次突破 ' + (x.brk || '');
+    return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(wlNameOf(x.code)) + '" tabindex="0" role="button" title="' + wlEsc(tip) + '">' +
+      '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(x.t) + '</span><span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(wlNameOf(x.code)) + '</span>' + st +
+      '<span class="hr-avg ' + (Number.isFinite(pct) ? dirClass(pct) : 'flat') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '') + '</span>' + homeHoldHtml(x.code) + '</div>';
+  };
+  return '<div class="hr-col"><div class="hr-title">🎯 905 突破廣播 <span class="hr-rk">' + (list.length > 20 ? '最新 20／共 ' : '') + list.length + ' 檔</span></div>' +
+    (list.length ? list.slice(0, 20).map(row).join('') : '<div class="hr-note">今天還沒有（大戶力 ≥ +10%、漲幅 ≥ 2%、族群在多方，且當天第一次站上 905 高才列）</div>') + '</div>';
+}
 // 2026-10-20 使用者（截圖框給我看）：首頁這幾塊要加粗紅框——續抱勿追高＋族群漲幅 > 2%(12)、馬火多(30)、30加33＋賽馬多(33)、發動＋今日強勢股、1+2多(44)
 const homeRedBox = (html) => '<div class="hr-redbox">' + html + '</div>';
 function home12ColHtml(h){
@@ -9860,6 +9880,7 @@ function homeRank4Html(){
     '</div>' +
     // 2026-11-01 使用者：每日功課的「1+2 突破廣播」單獨一欄，放在發動右邊、多族群排名(183) 前面（905 先不做）
     '<div class="hr-stack">' + homeRedBox(home12BcastColHtml()) + '</div>' +
+    '<div class="hr-stack">' + homeRedBox(home905BcastColHtml()) + '</div>' +   // 2026-11-01 使用者：905 突破廣播放在 1+2 突破廣播旁邊
     // 2026-10-15 使用者：193 也要列 ⚠️ 個股（族裡在刀劍空(32) 名單上的，跟訊號中心 193 分頁同一份），不能只有族群
     // 2026-10-16 使用者：199 疊到 193 下面，只列空方線以下的族群（上面多方的不列）
     '<div class="hr-stack">' +   // 2026-10-17 使用者：刀劍空(31) 疊在新刀劍空(32) 下面
@@ -9867,13 +9888,13 @@ function homeRank4Html(){
     '</div>' +
     '<div class="hr-stack">' +
       homeRedBox(home12ColHtml(h)) +   // 2026-10-21 使用者：族群漲幅 > 2%（12）搬到發動右邊、183 左邊，自己一欄（加粗紅框）；2026-10-21 使用者：183 跟 12 對調，183 在左、12 在右
+      // 2026-11-01 使用者：股票期貨排名(155) 搬到族群漲幅 > 2%(12) 下面，三落空接在 155 下面
+      home155ColHtml() +
+      homeWeak3ColHtml(m) +
     '</div>' +
     // 2026-10-19 使用者：個股漲 2%（22-5）排到族群漲幅 > 2%（12）前面；2026-10-20 使用者又對調回來：族群漲幅 > 2%（12，疊著股期黑龍 75、今日弱勢股）放在個股漲 > 2% 的左邊
     '<div class="hr-stack">' +
-      // 2026-11-01 使用者：最後一欄的 1+2多・突破黑馬(44) 拿掉（改放「1+2 突破廣播」在發動右邊）；股票期貨排名(155) 拉到最上面、三落空排在它下面、股期黑龍(75) 照舊最後
-      home155ColHtml() +   // 2026-10-22 使用者：股票期貨排名(155) 放到三落空後面、股期黑龍(75) 上面（原本在發動、188 下面）；2026-11-01 使用者：改排到三落空上面
-      homeWeak3ColHtml(m) +   // 2026-10-21 使用者：三落空（熄火落馬斷流）放在 1+2多(44) 下面、股期黑龍(75) 上面；2026-11-01 使用者：現在排在股票期貨排名(155) 下面
-      // 2026-10-21 使用者：首頁的終點戰法空(283) 拿掉（機器人代碼 283 還在）
+      // 2026-11-01 使用者：最後一欄的 1+2多・突破黑馬(44) 拿掉；股票期貨排名(155)、三落空搬到族群漲幅 > 2%(12) 下面，這欄只剩股期黑龍(75)
       homeFut75ColHtml() +   // 2026-10-21 使用者：股期黑龍(75) 排到最後一欄 1+2多(44) 下面
     '</div>' +
     // 2026-10-21 使用者：最右邊一欄（個股漲 > 2%（22-5）＋隔日沖黑龍(80)）整欄拿掉；股期黑龍(75) 還在 188 下面
