@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-01 20:31:08";
+const BUILD_STAMP = "2026-11-01 20:32:23";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -17055,7 +17055,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-01 20:31:08';
+const BUILD_STAMP = '2026-11-01 20:32:23';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19927,11 +19927,11 @@ function tdBroadcastHtml(seq, snap, kind){
     '<div class="td-snote">左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・<span class="td-bst run">跑</span> 已消失（轉強，要跑）・<span class="td-bst back">回</span> 掉出去又回榜。名次後面 ♣（梅花）＝收割區（今天已跌 5% 以上，不追空，有空單考慮回補）。點一列開K線圖。</div></aside>';
 }
 // ---- 今日功課右側分頁（2026-11-01 使用者：做成跟老師一樣——右上角三個分頁「刀功課／1+2・905 突破／持股停損」，老師有的都要有，12空保留，再加本站自己的）----
-// 刀功課＝原本並排的兩欄（刀劍空(32)、12空(123)），排序一樣最近發生的在上面；1+2／905 突破＝老師那頁的「我的 1+2／905」（各貼股號，5 分K 收盤站上
+// 刀功課＝原本並排的兩欄（刀劍空(32)、12空(123)），排序一樣最近發生的在上面；1+2 突破、905 突破（2026-11-01 起各自一個分頁）＝老師那頁的「我的 1+2／905」（各貼股號，5 分K 收盤站上
 // 905 高［1+2 還要過昨高］算突破、之後收回線下算跌破，時間用 5 分K 收盤時間）＋本站自己的全市場 1+2多、首次過905高（不用貼）；
 // 持股停損（老師的「持股停損監控」）＝盤中 1 分K 收盤跌破 905 低（開盤第一根 5 分K 的最低）或三日低（前三個交易日最低）就通知；
 // 老師是貼自己的持股，我們改成自動帶入自選股裡自己的分組（2026-11-01 使用者），不用貼。
-const TD_SIDE_TABS = [['blade', '🔪 刀功課'], ['b905', '📈 1+2 / 905 突破'], ['stop', '🛡 持股停損']];     // 2026-11-01 使用者：905 先不做（訊號太多），分頁只叫「1+2 突破」
+const TD_SIDE_TABS = [['blade', '🔪 刀功課'], ['b12', '📈 1+2 突破'], ['b905', '🎯 905 突破'], ['stop', '🛡 持股停損']];     // 2026-11-01 使用者：1+2 突破、905 突破分成兩個單位，各自一個分頁、各自廣播
 let tdSideTab = (() => { try { const v = localStorage.getItem('tdSide'); return TD_SIDE_TABS.some((x) => x[0] === v) ? v : 'blade'; } catch (_) { return 'blade'; } })();
 const tdB905 = (() => {
   const d = { snd: true, up: true, down: true, notif: false };
@@ -20145,16 +20145,29 @@ function tdB905PanelHtml(snap){
       '<span class="b">' + tdB905Badge('1+2', r) + '</span><span class="h">' + holderTagHtml(holderPctOf(x.code), true) + '</span>' +
       '<span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '') + '</span><span class="x"></span></div>';
   }).join('');
-  const opt = (k, label, tip) => '<button type="button" class="td-b9opt' + (tdB905[k] ? ' on' : '') + '" data-td-b905-opt="' + k + '" title="' + tip + '">' + label + '</button>';
   const head = '<div class="td-b9head"><span class="t">首次發生<br>時間</span><span class="s">股號・股名</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';   // 2026-11-01 使用者：時間欄標題改「首次發生時間」（今天第一次突破的 5 分K 收盤時間）
-  return '<aside class="td-side wide b905"><div class="td-shead">📣 📈 1+2 / 905 突破廣播</div>' +
-    '<div class="td-sinfo">' + (snap.live ? '盤中・5 分K 收完更新' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
-    '<div class="td-b9opts">' + opt('snd', '🔊 聲音', '盤中有新的突破／跌破時，響一聲提示音') + opt('up', '▶ 突破', '提醒「突破」：有新的股票 5 分K 收盤同時站上 905 高與昨高') +
-    opt('down', '▶ 跌破', '提醒「跌破」：突破之後又有一根 5 分K 收盤收回線的下面（假突破）') + opt('notif', '🔔 開通知', '跳出瀏覽器通知（第一次要按允許）') + '</div>' +
-    '<div class="td-snote">這四顆只管盤中提醒（紫色＝開），顯示的內容不受影響。名單是全市場自動算的，不用貼。905 突破排在 1+2 後面，要四個條件都成立才跳出（訊號比 1+2 多很多，所以加了篩選）。</div>' +
+  return '<aside class="td-side wide b905"><div class="td-shead">📣 📈 1+2 突破廣播</div>' +
+    tdB9InfoHtml(snap) + tdB9OptsHtml('有新的股票 5 分K 收盤同時站上 905 高與昨高') +
+    '<div class="td-snote">這四顆只管盤中提醒（紫色＝開），顯示的內容不受影響。名單是全市場自動算的，不用貼。</div>' +
     '<div class="td-snote">1+2＝5 分K 收盤同時站上 905 高（開盤第一根 5 分K 的最高）和昨高。狀態：在 1+2 之上（紅底）＝現在收在線上；在 1+2 之下（綠底）＝收在線下，小字寫「跌破」是突破過又收回來（假突破）。時間＝今天第一次突破的 5 分K 收盤時間。</div>' +
     '<div class="td-b9sec sys">🤖 全市場 1+2多（自動） <b>' + sys.length + '</b>　<small>最近的在上面' + (sys.length > SYS_MAX ? '（只列最近 ' + SYS_MAX + ' 檔）' : '') + '</small></div>' +
     (sys.length ? head + sysRows : '<div class="td-empty">' + (snap.live ? '今天還沒有（開盤後 5 分K 收盤才會出現）' : '這個時段以前沒有紀錄') + '</div>') +
+    '</aside>';
+}
+function tdB9InfoHtml(snap){
+  return '<div class="td-sinfo">' + (snap.live ? '盤中・5 分K 收完更新' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>';
+}
+// 聲音／突破／跌破／開通知：1+2 突破、905 突破共用同一組開關（只管盤中提醒）
+function tdB9OptsHtml(upTip){
+  const opt = (k, label, tip) => '<button type="button" class="td-b9opt' + (tdB905[k] ? ' on' : '') + '" data-td-b905-opt="' + k + '" title="' + tip + '">' + label + '</button>';
+  return '<div class="td-b9opts">' + opt('snd', '🔊 聲音', '盤中有新的突破／跌破時，響一聲提示音') + opt('up', '▶ 突破', '提醒「突破」：' + upTip) +
+    opt('down', '▶ 跌破', '提醒「跌破」：突破之後又有一根 5 分K 收盤收回線的下面（假突破）') + opt('notif', '🔔 開通知', '跳出瀏覽器通知（第一次要按允許）') + '</div>';
+}
+function td905PanelHtml(snap){
+  return '<aside class="td-side wide b905"><div class="td-shead">📣 🎯 905 突破廣播</div>' +
+    tdB9InfoHtml(snap) + tdB9OptsHtml('四個條件都成立的新股票（905 突破的條件見下面）') +
+    '<div class="td-snote">這四顆只管盤中提醒（紫色＝開），顯示的內容不受影響。905 站上的股票比 1+2 多很多，所以要四個條件都成立才跳出。</div>' +
+    '<div class="td-snote">905＝5 分K 收盤站上 905 高（開盤第一根 5 分K 的最高，不用過昨高）。狀態：在 905 之上（紅底）＝現在收在線上；在 905 之下（綠底）＝收在線下，小字寫「跌破」是突破過又收回來（假突破）。</div>' +
     td905SectionHtml(snap) +
     '</aside>';
 }
@@ -20460,7 +20473,7 @@ function hwTodayHtml(){
     '要自己確認的：① 部位還要看族群有沒有帶頭——沒有帶頭時 SOP 部位降 50%（這頁不會自動降）；② 進場時間門檻 09:15 之後（通緝要犯例外）。名次是 67 族的排法，族群數不同時照比例換算。表格是分類歸檔，不是投資建議，進出自己判斷、盈虧自負。</div></div>';
   return dtSec + summary + counts +
     '<div class="td-wrap"><div class="td-main">' + head + ctrls + replay + filters + main + watch + k12Sec + againSec + relSec + jailSec + outSec + missSec + sop + '</div>' +
-    '<div class="td-sidecol">' + tdSideTabsHtml() + '<div class="td-sides">' + (tdSideTab === 'b905' ? tdB905PanelHtml(snap) : tdSideTab === 'stop' ? tdStopPanelHtml(snap) : tdBroadcastHtml(seq, snap, 'blade') + tdBroadcastHtml(seq, snap, 'k12')) + '</div></div></div>';   // 2026-10-22 使用者：刀功課那頁右邊分兩欄（刀劍空、12空）並排，不用切換；2026-11-01 照老師加分頁（1+2/905 突破、持股停損）
+    '<div class="td-sidecol">' + tdSideTabsHtml() + '<div class="td-sides">' + (tdSideTab === 'b12' ? tdB905PanelHtml(snap) : tdSideTab === 'b905' ? td905PanelHtml(snap) : tdSideTab === 'stop' ? tdStopPanelHtml(snap) : tdBroadcastHtml(seq, snap, 'blade') + tdBroadcastHtml(seq, snap, 'k12')) + '</div></div></div>';   // 2026-10-22 使用者：刀功課那頁右邊分兩欄（刀劍空、12空）並排，不用切換；2026-11-01 照老師加分頁（1+2/905 突破、持股停損）
 }
 // ① 收盤觀察股（當沖多的「多功課」、多觀察的名單）＝形態觀察股的收盤那份：盤中（今天還沒收盤）用前一個交易日收盤的、
 // 收盤後／休市用最近一次收盤的。老師這份是學員從 LINE 貼的，我們直接拿系統算好的；還沒算過就背景算。
