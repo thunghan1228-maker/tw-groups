@@ -1964,6 +1964,7 @@
   .td-bk{display:inline-block;padding:1px 8px;border-radius:6px;border:1px solid #cbd5e1;color:#64748b;font-size:12px;font-weight:700;} .td-bk.on{background:#16a34a;border-color:#16a34a;color:#fff;} .td-bk.down{background:#fee2e2;border-color:#fca5a5;color:#b91c1c;}
   .td-b9x{border:0;background:none;color:#94a3b8;cursor:pointer;font-size:12px;} .td-b9x:hover{color:#dc2626;}
   @media (max-width:900px){ .td-sidecol{order:-1;position:static;} .td-sides .td-side.wide{width:auto;flex:1 1 auto;} .td-b9head,.td-b9row{grid-template-columns:42px minmax(0,1fr) 90px 60px 56px 20px;} }
+  .td-side.b905 .td-b9head,.td-side.b905 .td-b9row{grid-template-columns:58px minmax(0,1fr) 96px 70px 62px 24px;} .td-side.b905 .td-b9head .t{line-height:1.25;}
   .td-side.stop .td-b9head,.td-side.stop .td-b9row{grid-template-columns:46px minmax(0,1fr) 138px 70px 62px 24px;} .td-side.stop .td-b9row .b{white-space:nowrap;}
   .td-bk.bk-above{background:#dc2626;border-color:#dc2626;color:#fff !important;} .td-bk.bk-below{background:#16a34a;border-color:#16a34a;color:#fff !important;}   /* 不能叫 up／down：跟全站漲跌字色 class 撞名會變紅底紅字 */
   .td-bkn{display:block;margin-top:1px;font-size:10.5px;color:var(--muted);font-weight:400;} .td-bk.red{background:#dc2626;border-color:#dc2626;color:#fff;} .td-b9fold{float:right;border:1px solid #c4b2e6;background:#fff;color:#6d28d9;border-radius:6px;padding:0 8px;font-size:12px;cursor:pointer;font-family:inherit;} .td-b9from{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:#4a4066;}
@@ -19962,7 +19963,7 @@ function tdB905PanelHtml(snap){
       '<span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '') + '</span><span class="x"></span></div>';
   }).join('');
   const opt = (k, label, tip) => '<button type="button" class="td-b9opt' + (tdB905[k] ? ' on' : '') + '" data-td-b905-opt="' + k + '" title="' + tip + '">' + label + '</button>';
-  const head = '<div class="td-b9head"><span class="t">時間</span><span class="s">股號・股名</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';
+  const head = '<div class="td-b9head"><span class="t">首次發生<br>時間</span><span class="s">股號・股名</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';   // 2026-11-01 使用者：時間欄標題改「首次發生時間」（今天第一次突破的 5 分K 收盤時間）
   return '<aside class="td-side wide b905"><div class="td-shead">📣 📈 1+2 突破廣播</div>' +
     '<div class="td-sinfo">' + (snap.live ? '盤中・5 分K 收完更新' : '⏮ 回放 ' + tdMd(snap.date) + ' 到 ' + snap.slot + '（跟上面時間軸同步）') + '</div>' +
     '<div class="td-b9opts">' + opt('snd', '🔊 聲音', '盤中有新的突破／跌破時，響一聲提示音') + opt('up', '▶ 突破', '提醒「突破」：有新的股票 5 分K 收盤同時站上 905 高與昨高') +
