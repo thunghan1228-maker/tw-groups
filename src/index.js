@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-01 16:10:35";
+const BUILD_STAMP = "2026-11-01 16:13:14";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1717,6 +1717,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .wk-tbl td{padding:12px 10px;border-bottom:1px solid #d9cdee;vertical-align:top;line-height:1.55;}
   .wk-tbl td.grp,.wk-tbl th.grp{white-space:nowrap;} .wk-tbl td.stk{min-width:170px;} .wk-tbl td.why{min-width:230px;font-size:13px;color:#3d3354;}
   .wk-stk{cursor:pointer;} .wk-stk:hover{text-decoration:underline;} .wk-stk b{font-weight:800;}
+  .wk-scope{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:6px 0 10px;font-size:13px;} .wk-scope-i{border:1px solid #c4b2e6;border-radius:999px;padding:3px 11px;background:#fff;color:#8b82a3;cursor:pointer;} .wk-scope-i.on{border-color:#7c3aed;color:#6d28d9;background:#f3ecff;font-weight:700;} .wk-scope-i input{accent-color:#7c3aed;}
   .wk-tg{display:block;font-size:11px;font-weight:600;color:#7c3aed;white-space:nowrap;}
   .wk-tiles6{grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;} .wk-tiles6 b{font-size:30px;} .wk-tiles6 b.wk-up{color:#dc2626;} .wk-tiles6 b.wk-down{color:#15803d;}
   @media (max-width:640px){.wk-tiles6{grid-template-columns:repeat(3,minmax(0,1fr));}}
@@ -13286,6 +13287,15 @@ document.getElementById('swingBody').addEventListener('change', (e) => {
     renderSwing();
     return;
   }
+  const mchk = e.target.closest('[data-mine-grp]');
+  if (mchk){
+    const name = mchk.dataset.mineGrp;
+    mineOff = mineOff.filter((x) => x !== name);
+    if (!mchk.checked) mineOff.push(name);
+    try { localStorage.setItem('mineOff', JSON.stringify(mineOff)); } catch (err) { /* 存不了就算了 */ }
+    renderSwing();
+    return;
+  }
   const msel = e.target.closest('#mineDateSel');
   if (msel){ wkState.mineDate = msel.value === (mineLatest() || '') ? '' : msel.value; renderSwing(); return; }
   const wsel = e.target.closest('#wkDateSel');
@@ -13545,12 +13555,26 @@ function wkPageHtml(){
 // 名單＝自選股裡「不是系統自動」的分組（wlIsAuto 排除 ⏰黑K・今天噴出・已噴在高檔・右肩打底、📊 三個均線分數分組）。自選股只存在使用者的瀏覽器，
 // 所以把分組＋代號用 POST 送後端算；指標與段落跟「收盤觀察股 週分析」同一套（沒有名單異動，多一個「自選分組」總覽與每檔「本週漲跌」）。
 const mineCache = {}, mineLoading = {}, mineFailed = {};
+// 系統自動換內容的分組（id 對得上 wlIsAuto；id 被同步弄亂的重複分組就用名字認：⏰ 四個觀察分組、📊 三個均線分數分組）不算自己的自選
+const MINE_AUTO_NAMES = ['黑K・黑龍符合', '今天噴出', '已噴在高檔', '右肩打底', '個股分數前20名', '前二十名常客', '雙榜交集'];
+const mineIsAuto = (g) => wlIsAuto(g) || /^[⏰📊]/.test(String(g.name || '').trim()) || MINE_AUTO_NAMES.some((n) => String(g.name || '').includes(n));
+let mineOff = [];     // 使用者在頁面上取消勾選的分組名（記在瀏覽器）
+try { mineOff = JSON.parse(localStorage.getItem('mineOff') || '[]') || []; } catch (e) { mineOff = []; }
+function mineEligible(){ return wl.data.groups.filter((g) => !mineIsAuto(g) && Array.isArray(g.items) && g.items.length); }
 function mineGroups(){
-  return wl.data.groups.filter((g) => !wlIsAuto(g) && Array.isArray(g.items) && g.items.length).map((g) => {
+  return mineEligible().filter((g) => !mineOff.includes(g.name)).map((g) => {
     const names = {};
     g.items.forEach((it) => { const nm = wlNameOf(it.code, it); if (nm && nm !== it.code) names[it.code] = nm; });
-    return { name: g.name, codes: g.items.map((it) => it.code), names };
+    return { name: g.name, codes: [...new Set(g.items.map((it) => it.code))], names };
   });
+}
+// 分析範圍：列出每個自己的分組，可勾掉不要算的（預設全勾）；總檔數是不重複的股票數
+function mineScopeHtml(){
+  const all = mineEligible();
+  const on = mineGroups();
+  const total = new Set(on.flatMap((g) => g.codes)).size;
+  return '<div class="wk-scope"><b>分析範圍</b>' + all.map((g) => '<label class="wk-scope-i' + (mineOff.includes(g.name) ? '' : ' on') + '"><input type="checkbox" data-mine-grp="' + wlEsc(g.name) + '"' + (mineOff.includes(g.name) ? '' : ' checked') + '> ' + wlEsc(g.name) + ' <small>' + new Set(g.items.map((it) => it.code)).size + '</small></label>').join('') +
+    '<span class="wk-mut">共 ' + total + ' 檔（不重複）</span></div>';
 }
 const mineKey = (groups) => JSON.stringify(groups.map((g) => [g.name, g.codes])) + '|' + (wkState.mineDate || '');
 function mineLatest(){ const d = mineData(true); return d && d.latest; }
@@ -13607,15 +13631,15 @@ function minePageHtml(){
   const back = '<a class="wk-back" data-wk-back>← 波段精選日報</a>';
   const groups = mineGroups();
   const head = '<div class="wk-tagrow"><span class="wk-tag">波段日報・週分析</span></div><h1 class="wk-h1">自選觀察股 週分析</h1>';
-  if (!groups.length) return '<div class="wk">' + back + head + '<div class="wk-empty">自選股裡還沒有自己的分組或股票（⏰黑K・今天噴出…等系統自動分組不算）。先用 ☆ 把股票加進「多觀察」「自選三」等分組，再回來看。</div></div>';
+  if (!groups.length) return '<div class="wk">' + back + head + mineScopeHtml() + '<div class="wk-empty">' + (mineEligible().length ? '分析範圍裡一個分組都沒勾，勾回來就會重新計算。' : '自選股裡還沒有自己的分組或股票（⏰黑K・今天噴出、📊 均線分數…等系統自動分組不算）。先用 ☆ 把股票加進「多觀察」「自選三」等分組，再回來看。') + '</div></div>';
   const d = mineData();
   if (!d){
     const f = mineFailed[mineKey(groups)];
-    return '<div class="wk">' + back + head + '<div class="wk-empty">' + (f ? '讀取失敗（' + wlEsc(f.msg) + '），30 秒後再試。' : '讀取中…（第一次要整理 ' + groups.reduce((n, g) => n + g.codes.length, 0) + ' 檔的月線、法人、籌碼、營收與四週表現，約幾秒）') + '</div></div>';
+    return '<div class="wk">' + back + head + mineScopeHtml() + '<div class="wk-empty">' + (f ? '讀取失敗（' + wlEsc(f.msg) + '），30 秒後再試。' : '讀取中…（第一次要整理 ' + groups.reduce((n, g) => n + g.codes.length, 0) + ' 檔的月線、法人、籌碼、營收與四週表現，約幾秒）') + '</div></div>';
   }
   const b = d.basis || {}, r = d.rules || {};
   const opts = (d.dates || []).slice().reverse().map((x) => '<option value="' + x + '"' + (x === d.date ? ' selected' : '') + '>' + x + spWd(x) + ' 收盤</option>').join('');
-  return '<div class="wk">' + back + head +
+  return '<div class="wk">' + back + head + mineScopeHtml() +
     '<div class="wk-sub">' + wkMd(d.date) + ' 收盤・自選分組 ' + (d.mine || []).map((g) => wlEsc(g.name) + ' ' + g.n).join('、') + '（共 ' + d.n + ' 檔）・以後在自選股新增分組或股票，這頁會自動跟著算。月營收 / 季報 + 均線分數 + 籌碼，方便每週整理自己的觀察股。</div>' +
     '<div class="wk-basis">📅 收盤 ' + d.date + '｜均線分數・健診 ' + (b.checkup || '—') + '｜法人 5 / 10 日 = 至 ' + wkMd(b.instTo) + '｜籌碼 = 集保週 ' + (b.chipWeek || '—') + '｜月營收 = ' + (b.revYm ? b.revYm.replace('-', '/') : '—') + '｜季報 = ' + (b.season || '—') + '｜本週漲跌 = ' + wkMd(d.weekBase) + ' 收盤 → ' + wkMd(d.date) + ' 收盤' +
     ' <select id="mineDateSel" class="sp-sel">' + opts + '</select></div>' +
@@ -16955,7 +16979,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-01 16:10:35';
+const BUILD_STAMP = '2026-11-01 16:13:14';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
