@@ -1964,7 +1964,7 @@
   .td-b9x{border:0;background:none;color:#94a3b8;cursor:pointer;font-size:12px;} .td-b9x:hover{color:#dc2626;}
   @media (max-width:900px){ .td-sidecol{order:-1;position:static;} .td-sides .td-side.wide{width:auto;flex:1 1 auto;} .td-b9head,.td-b9row{grid-template-columns:42px minmax(0,1fr) 90px 60px 56px 20px;} }
   .td-side.stop .td-b9head,.td-side.stop .td-b9row{grid-template-columns:46px minmax(0,1fr) 138px 70px 62px 24px;} .td-side.stop .td-b9row .b{white-space:nowrap;}
-  .td-bk.up{background:#dc2626;border-color:#dc2626;color:#fff;} .td-bk.dn{background:#16a34a;border-color:#16a34a;color:#fff;}
+  .td-bk.bk-above{background:#dc2626;border-color:#dc2626;color:#fff !important;} .td-bk.bk-below{background:#16a34a;border-color:#16a34a;color:#fff !important;}   /* 不能叫 up／down：跟全站漲跌字色 class 撞名會變紅底紅字 */
   .td-bkn{display:block;margin-top:1px;font-size:10.5px;color:var(--muted);font-weight:400;} .td-bk.red{background:#dc2626;border-color:#dc2626;color:#fff;} .td-b9fold{float:right;border:1px solid #c4b2e6;background:#fff;color:#6d28d9;border-radius:6px;padding:0 8px;font-size:12px;cursor:pointer;font-family:inherit;} .td-b9from{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:#4a4066;}
   .td-sides .td-side{width:292px;flex:0 0 292px;} .td-side.k12 .td-shead{background:#1d4ed8;} .td-side.k12 .td-sinfo{color:#1d4ed8;}
   .td-main{min-width:0;}
@@ -19917,9 +19917,9 @@ function tdB905Badge(lab, r){
   if (r.error) return '<span class="td-bk down">讀取失敗</span>';
   if (r.empty) return '<span class="td-bk">沒有5分K</span>';
   const lastOf = (type) => { const e = (r.ev || []).filter((x) => x.type === type); return e.length ? e[e.length - 1].t : ''; };
-  if (r.inside) return '<span class="td-bk up">在 ' + lab + ' 之上</span><small class="td-bkn">突破 ' + lastOf('up') + '</small>';
-  if (r.ev.length) return '<span class="td-bk dn">在 ' + lab + ' 之下</span><small class="td-bkn">跌破 ' + lastOf('down') + '</small>';
-  return '<span class="td-bk dn">在 ' + lab + ' 之下</span><small class="td-bkn">未突破</small>';
+  if (r.inside) return '<span class="td-bk bk-above">在 ' + lab + ' 之上</span><small class="td-bkn">突破 ' + lastOf('up') + '</small>';
+  if (r.ev.length) return '<span class="td-bk bk-below">在 ' + lab + ' 之下</span><small class="td-bkn">跌破 ' + lastOf('down') + '</small>';
+  return '<span class="td-bk bk-below">在 ' + lab + ' 之下</span><small class="td-bkn">未突破</small>';
 }
 function tdB905PanelHtml(snap){
   const date = snap.date, slot = snap.live ? null : snap.slot;
