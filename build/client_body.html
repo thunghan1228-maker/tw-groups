@@ -8335,7 +8335,8 @@ const bladeZoneSize = (n) => n <= 8 ? Math.ceil(n / 2) : n <= 12 ? Math.ceil(n /
 // 不算族群排名的族群（2026-10-16 使用者：老師沒有功率半導體（他的是二極體）、散裝（放在航運裡）、金融股）：
 // 族群綜合表、成分股視窗照常看得到，只是族群名次、首頁 183／188／193／199／283、盤中 333、刀劍空、強弱族群數都不算它們。
 // 2026-10-18 對老師 10/16 收盤的 199：金融股老師其實有算（見 fillGroupDailyRanks），放回族群排名
-const UNRANKED_GROUPS = new Set(['股期標的', '功率半導體', '散裝']);
+// 2026-11-01 使用者：老師「其他」那組（不在任何族群裡的股票，156 檔，沒有名次）也要有：成員照老師 11/01 15:23 那份，不排名，但報價、K 線、強勢股、機器人代碼照樣用得到
+const UNRANKED_GROUPS = new Set(['股期標的', '功率半導體', '散裝', '其他']);
 const rankedGroupsOf = (groups) => groups.filter((g) => !UNRANKED_GROUPS.has(g.name));
 function race333Model(){
   if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
