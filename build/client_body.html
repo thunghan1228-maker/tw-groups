@@ -62,7 +62,7 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.1fr) minmax(0, 1.25fr) minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(0, 1.4fr) minmax(0, 1.25fr);gap:8px;align-items:start;}   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.1fr) minmax(0, 1.25fr) minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.6fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -9865,6 +9865,7 @@ function homeRank4Html(){
     // 2026-10-16 使用者：第 4 欄續抱勿追高疊在河流多(34) 上面；第 5 欄馬火多(30)（155 疊在下面）；第 6 欄 30加33 疊在賽馬多(33) 上面（2026-10-20 使用者：30加33 跟續抱勿追高對調，馬火多再移到 30加33 左邊）
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
     '<div class="hr-stack">' +
+      homeFut75ColHtml() +   // 2026-11-01 使用者：股期黑龍(75) 放在續抱勿追高上面
       homeRedBox(homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : [], undefined, undefined, true, true)) +   // 2026-10-29 使用者：代號、股名、（族群名彩色）、漲跌幅、大戶力放最後；2026-10-20 使用者：族群漲幅 > 2%（12）搬到續抱勿追高下面；2026-10-21 使用者：12 又搬走，搬到發動右邊自己一欄
       // 2026-10-21 使用者：河流多(34) 搬到第 6 欄 30加33／賽馬多(33) 下面，一起放在紅框裡
     '</div>' +
@@ -9893,10 +9894,7 @@ function homeRank4Html(){
       homeWeak3ColHtml(m) +
     '</div>' +
     // 2026-10-19 使用者：個股漲 2%（22-5）排到族群漲幅 > 2%（12）前面；2026-10-20 使用者又對調回來：族群漲幅 > 2%（12，疊著股期黑龍 75、今日弱勢股）放在個股漲 > 2% 的左邊
-    '<div class="hr-stack">' +
-      // 2026-11-01 使用者：最後一欄的 1+2多・突破黑馬(44) 拿掉；股票期貨排名(155)、三落空搬到族群漲幅 > 2%(12) 下面，這欄只剩股期黑龍(75)
-      homeFut75ColHtml() +   // 2026-10-21 使用者：股期黑龍(75) 排到最後一欄 1+2多(44) 下面
-    '</div>' +
+    // 2026-11-01 使用者：最後一欄拿掉——1+2多・突破黑馬(44) 沒了、股票期貨排名(155)＋三落空搬到族群漲幅 > 2%(12) 下面、股期黑龍(75) 搬到續抱勿追高上面
     // 2026-10-21 使用者：最右邊一欄（個股漲 > 2%（22-5）＋隔日沖黑龍(80)）整欄拿掉；股期黑龍(75) 還在 188 下面
     '</div>' +
     '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
