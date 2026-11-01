@@ -50,6 +50,7 @@
 
   /* 左側：前六大族群。兩欄、由上往下排：第1~3在左欄、第4~6在右欄（2026-10-15 使用者：跟原本右邊各族群前三強／弱個股同一個順序） */
   .top6-grid{display:grid;grid-template-columns:repeat(6, minmax(0, 1fr));gap:6px;}
+  .top6-card.top6-other{border-style:dashed;opacity:.92;white-space:nowrap;} .top6-other .top6-head{display:flex;align-items:center;gap:6px;} .top6-other .top6-n{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;}
   .top6-card{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .12s ease;}
   .top6-card:hover{background:var(--panel-2);}
   .top6-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
@@ -17663,7 +17664,13 @@ function render(){
       '</div>';
   }
   const top6El = document.getElementById('top6Strip');
-  if (top6El) top6El.innerHTML = '<div class="top6-label">' + leftTitle + '</div><div class="top6-grid">' + side6Html + '</div>';
+  // 2026-11-01 使用者：「其他」（不在任何族群裡的股票，不排名）要能點開看清單——前六大族群後面多一格，平均漲跌照算、不編名次
+  const otherG = lastData.groups.find((g) => g.name === '其他');
+  const otherN = otherG ? otherG.stocks.filter((s) => s.price !== null && s.price !== undefined).length : 0;
+  const otherHtml = otherG ? '<div class="top6-card top6-other" data-group="其他" tabindex="0" role="button" title="不在任何族群裡的股票（老師的「其他」），不排名；點開看清單">' +
+    '<div class="top6-head"><span class="top6-name">其他</span><small class="top6-n">' + otherN + ' 檔</small></div>' +
+    '<div class="top6-chg ' + dirClass(otherG.avgChange) + '">' + fmt(otherG.avgChange) + '%</div></div>' : '';
+  if (top6El) top6El.innerHTML = '<div class="top6-label">' + leftTitle + '</div><div class="top6-grid">' + side6Html + otherHtml + '</div>';
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +

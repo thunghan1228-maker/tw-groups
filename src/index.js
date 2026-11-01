@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-01 15:32:33";
+const BUILD_STAMP = "2026-11-01 15:36:09";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -137,6 +137,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 
   /* 左側：前六大族群。兩欄、由上往下排：第1~3在左欄、第4~6在右欄（2026-10-15 使用者：跟原本右邊各族群前三強／弱個股同一個順序） */
   .top6-grid{display:grid;grid-template-columns:repeat(6, minmax(0, 1fr));gap:6px;}
+  .top6-card.top6-other{border-style:dashed;opacity:.92;white-space:nowrap;} .top6-other .top6-head{display:flex;align-items:center;gap:6px;} .top6-other .top6-n{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;}
   .top6-card{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .12s ease;}
   .top6-card:hover{background:var(--panel-2);}
   .top6-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
@@ -16801,7 +16802,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-01 15:32:33';
+const BUILD_STAMP = '2026-11-01 15:36:09';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -17752,7 +17753,13 @@ function render(){
       '</div>';
   }
   const top6El = document.getElementById('top6Strip');
-  if (top6El) top6El.innerHTML = '<div class="top6-label">' + leftTitle + '</div><div class="top6-grid">' + side6Html + '</div>';
+  // 2026-11-01 使用者：「其他」（不在任何族群裡的股票，不排名）要能點開看清單——前六大族群後面多一格，平均漲跌照算、不編名次
+  const otherG = lastData.groups.find((g) => g.name === '其他');
+  const otherN = otherG ? otherG.stocks.filter((s) => s.price !== null && s.price !== undefined).length : 0;
+  const otherHtml = otherG ? '<div class="top6-card top6-other" data-group="其他" tabindex="0" role="button" title="不在任何族群裡的股票（老師的「其他」），不排名；點開看清單">' +
+    '<div class="top6-head"><span class="top6-name">其他</span><small class="top6-n">' + otherN + ' 檔</small></div>' +
+    '<div class="top6-chg ' + dirClass(otherG.avgChange) + '">' + fmt(otherG.avgChange) + '%</div></div>' : '';
+  if (top6El) top6El.innerHTML = '<div class="top6-label">' + leftTitle + '</div><div class="top6-grid">' + side6Html + otherHtml + '</div>';
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
