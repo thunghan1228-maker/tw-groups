@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-02 11:12:00";
+const BUILD_STAMP = "2026-11-02 11:15:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -180,6 +180,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .hr-name{font-weight:700;}
   .hr-pinkname{display:contents;} .hr-pinkname .hr-name{background:#e8579a;color:#fff;font-weight:900;padding:1px 7px;border-radius:5px;}   /* 2026-10-21 使用者：30加33加34 的股名先改粉紅粗體字、又改成粉紅底白字 */
   .hr-rk{color:var(--muted);}
+  .hr-col .hr-row.hr-b905r,.hr-colw .hr-row.hr-b905r{padding-top:8px;padding-bottom:8px;row-gap:4px;}   /* 2026-11-02 使用者：首頁 905 突破廣播每列高一點、距離拉開 */
+  .hr-b905r .hr-ready{flex:0 0 100%;font-size:11px;color:#a78bfa;font-weight:600;line-height:1.3;}
   /* 2026-11-02 使用者：續抱勿追高、30加33加34 每列最前面的族群名次（5、9、12…）跟後面的代號貼在一起分不清楚 → 名次改白色亮一點、粗體、固定寬度靠右，右邊加一條細線跟代號隔開 */
   .hr-row > .hr-rk.hr-gr{color:#fff;font-weight:900;font-size:12px;min-width:1.7em;text-align:right;padding-right:5px;margin-right:2px;border-right:1px solid rgba(255,255,255,.45);flex-shrink:0;}
   .hr-hold{flex:0 0 auto;display:inline-block;margin-left:4px;min-width:3.3em;text-align:center;font-size:12px;font-weight:800;line-height:1.5;font-variant-numeric:tabular-nums;border-radius:5px;padding:0 4px;color:var(--muted);white-space:nowrap;}   /* 2026-10-22 使用者：首頁 30加33加34、183、12 三欄每檔後面的盤中大戶力；≥ +10% 紅底白字、≤ −10% 綠底白字 */
@@ -9980,6 +9982,8 @@ function home12BcastColHtml(){
 }
 // 首頁「905 突破廣播」（2026-11-01 使用者：905 突破也拉一欄到首頁，放在 1+2 突破廣播旁邊）。名單＝每日功課「905 突破（篩選後）」同一份：
 // 當天第一次站上 905 高＋大戶力 ≥ +10%＋漲幅 ≥ 2%＋族群在多方區，四個都成立才記（這台電腦盤中開著網頁時記，一天一次）；最近的在上面、最多 20 檔。
+// 2026-11-02 使用者：905 突破廣播只留 15 檔（不用那麼多）、每列高一點、距離拉開、每列最下面補「條件齊全」的時間
+const HOME905_MAX = 15;
 function home905BcastColHtml(){
   const date = sigCurrentDate();
   const seen = td905Seen(date);
@@ -9992,12 +9996,12 @@ function home905BcastColHtml(){
     const st = r.ev ? (r.inside ? '<span class="td-bk bk-above hr-bk">之上</span>' : '<span class="td-bk bk-below hr-bk">之下</span>') : '';
     const brkT = (r.ev && r.ev.length ? r.ev[0].t : '') || x.brk || x.t;   // 2026-11-02 使用者：首頁這欄的時間是第一次突破（5 分K 收盤站上 905 高）的時間，不是四個條件齊全的時間；排序照條件齊全的時間不變
     const tip = (x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + (r.ev ? (r.inside ? '・在 905 之上' : '・收回 905 之下') : '') + '・首次突破 ' + brkT + '・條件齊全 ' + x.t;
-    return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(wlNameOf(x.code)) + '" tabindex="0" role="button" title="' + wlEsc(tip) + '">' +
+    return '<div class="hr-row hr-stk hr-wrapold hr-b905r" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(wlNameOf(x.code)) + '" tabindex="0" role="button" title="' + wlEsc(tip) + '">' +
       '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(brkT) + '</span><span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(wlNameOf(x.code)) + '</span>' + st +
-      '<span class="hr-avg ' + (Number.isFinite(pct) ? dirClass(pct) : 'flat') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '') + '</span>' + homeHoldHtml(x.code) + '</div>';
+      '<span class="hr-avg ' + (Number.isFinite(pct) ? dirClass(pct) : 'flat') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '') + '</span>' + homeHoldHtml(x.code) + '<span class="hr-ready" title="四個條件第一次同時成立的時間">條件齊全 ' + wlEsc(x.t) + '</span></div>';
   };
-  return '<div class="hr-col"><div class="hr-title">🎯 905 突破廣播 <span class="hr-rk">' + (list.length > 20 ? '最新 20／共 ' : '') + list.length + ' 檔</span></div>' +
-    (list.length ? list.slice(0, 20).map(row).join('') : '<div class="hr-note">今天還沒有（大戶力 ≥ +10%、漲幅 ≥ 2%、族群在多方，且當天第一次站上 905 高才列）</div>') + '</div>';
+  return '<div class="hr-col"><div class="hr-title">🎯 905 突破廣播 <span class="hr-rk">' + (list.length > HOME905_MAX ? '最新 ' + HOME905_MAX + '／共 ' : '') + list.length + ' 檔</span></div>' +
+    (list.length ? list.slice(0, HOME905_MAX).map(row).join('') : '<div class="hr-note">今天還沒有（大戶力 ≥ +10%、漲幅 ≥ 2%、族群在多方，且當天第一次站上 905 高才列）</div>') + '</div>';
 }
 // 2026-10-20 使用者（截圖框給我看）：首頁這幾塊要加粗紅框——續抱勿追高＋族群漲幅 > 2%(12)、馬火多(30)、30加33＋賽馬多(33)、發動＋今日強勢股、1+2多(44)
 const homeRedBox = (html) => '<div class="hr-redbox">' + html + '</div>';
@@ -17158,7 +17162,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-02 11:12:00';
+const BUILD_STAMP = '2026-11-02 11:15:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
