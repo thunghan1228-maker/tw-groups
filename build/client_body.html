@@ -7652,14 +7652,17 @@ function sigView(){
 // 今日即時空同樣一顆「≤-10%」。兩頁各自記在這台瀏覽器；昨天／前天照那天收盤時的大戶力。
 const nowHf = (() => { try { return JSON.parse(localStorage.getItem('nowHf') || '{}') || {}; } catch (_){ return {}; } })();
 // 2026-11-02 使用者：開低VWAP上(88) 前天後面加「大戶力≥0」、開高VWAP下(87) 加「大戶力≤0」（同一套按鈕，門檻是 0）
-const NOW_HF_RULES = {
-  now: { min: HOLDER_HOT_PCT, label: '盤中大戶力≥' + HOLDER_HOT_PCT + '%' },
-  nowBear: { max: -HOLDER_HOT_PCT, label: '盤中大戶力≤-' + HOLDER_HOT_PCT + '%' },
-  gapDownAboveVwap: { min: 0, label: '大戶力≥0' },
-  gapUpBelowVwap: { max: 0, label: '大戶力≤0' },
-};
+// 注意：HOLDER_HOT_PCT 在後面才宣告（const），這裡一定要用函式、呼叫時才讀，頂層直接讀會 ReferenceError 讓整頁卡在讀取中（2026-11-02 出過一次）
+function nowHfRule(tab){
+  return ({
+    now: { min: HOLDER_HOT_PCT, label: '盤中大戶力≥' + HOLDER_HOT_PCT + '%' },
+    nowBear: { max: -HOLDER_HOT_PCT, label: '盤中大戶力≤-' + HOLDER_HOT_PCT + '%' },
+    gapDownAboveVwap: { min: 0, label: '大戶力≥0' },
+    gapUpBelowVwap: { max: 0, label: '大戶力≤0' },
+  })[tab] || null;
+}
 function nowHfFilter(view, tab){
-  const rule = NOW_HF_RULES[tab];
+  const rule = nowHfRule(tab);
   if (!rule || !nowHf[tab]) return null;
   const m = sigHolderMap(view);
   return (code) => {
@@ -7679,7 +7682,7 @@ function sigDayBarHtml(){
     btn(1, '昨天' + (past[0] ? ' ' + mmdd(past[0]) : ''), past[0]) +
     btn(2, '前天' + (past[1] ? ' ' + mmdd(past[1]) : ''), past[1]) +
     (tab === 'gapDownAboveVwap' || tab === 'gapUpBelowVwap'
-      ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (nowHf[tab] ? ' active' : '') + '" data-now-hf="' + tab + '" title="只看盤中大戶力 ' + (tab === 'gapDownAboveVwap' ? '≥ 0' : '≤ 0') + '% 的股票（昨天／前天照那天收盤時的大戶力；查不到大戶力的不列；再按一次全部顯示）">' + NOW_HF_RULES[tab].label + '</button>'
+      ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (nowHf[tab] ? ' active' : '') + '" data-now-hf="' + tab + '" title="只看盤中大戶力 ' + (tab === 'gapDownAboveVwap' ? '≥ 0' : '≤ 0') + '% 的股票（昨天／前天照那天收盤時的大戶力；查不到大戶力的不列；再按一次全部顯示）">' + nowHfRule(tab).label + '</button>'
       : tab === 'now' || tab === 'nowBear'
       ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (nowHf[tab] ? ' active' : '') + '" data-now-hf="' + tab + '" title="只看盤中大戶力 ' + (tab === 'now' ? '≥ +' : '≤ -') + HOLDER_HOT_PCT + '% 的股票（' + (tab === 'nowBear' ? '大戶力空名單跟訊號都套，最上面的刀劍空名單照原本' : '上面的大戶力名單跟下面的訊號都套') + '；昨天／前天照那天收盤時的大戶力；再按一次全部顯示）">盤中大戶力' + (tab === 'now' ? '≥' : '≤-') + HOLDER_HOT_PCT + '%</button>'
       : '') +

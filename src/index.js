@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-02 16:34:47";
+const BUILD_STAMP = "2026-11-02 16:39:13";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7741,14 +7741,17 @@ function sigView(){
 // 今日即時空同樣一顆「≤-10%」。兩頁各自記在這台瀏覽器；昨天／前天照那天收盤時的大戶力。
 const nowHf = (() => { try { return JSON.parse(localStorage.getItem('nowHf') || '{}') || {}; } catch (_){ return {}; } })();
 // 2026-11-02 使用者：開低VWAP上(88) 前天後面加「大戶力≥0」、開高VWAP下(87) 加「大戶力≤0」（同一套按鈕，門檻是 0）
-const NOW_HF_RULES = {
-  now: { min: HOLDER_HOT_PCT, label: '盤中大戶力≥' + HOLDER_HOT_PCT + '%' },
-  nowBear: { max: -HOLDER_HOT_PCT, label: '盤中大戶力≤-' + HOLDER_HOT_PCT + '%' },
-  gapDownAboveVwap: { min: 0, label: '大戶力≥0' },
-  gapUpBelowVwap: { max: 0, label: '大戶力≤0' },
-};
+// 注意：HOLDER_HOT_PCT 在後面才宣告（const），這裡一定要用函式、呼叫時才讀，頂層直接讀會 ReferenceError 讓整頁卡在讀取中（2026-11-02 出過一次）
+function nowHfRule(tab){
+  return ({
+    now: { min: HOLDER_HOT_PCT, label: '盤中大戶力≥' + HOLDER_HOT_PCT + '%' },
+    nowBear: { max: -HOLDER_HOT_PCT, label: '盤中大戶力≤-' + HOLDER_HOT_PCT + '%' },
+    gapDownAboveVwap: { min: 0, label: '大戶力≥0' },
+    gapUpBelowVwap: { max: 0, label: '大戶力≤0' },
+  })[tab] || null;
+}
 function nowHfFilter(view, tab){
-  const rule = NOW_HF_RULES[tab];
+  const rule = nowHfRule(tab);
   if (!rule || !nowHf[tab]) return null;
   const m = sigHolderMap(view);
   return (code) => {
@@ -7768,7 +7771,7 @@ function sigDayBarHtml(){
     btn(1, '昨天' + (past[0] ? ' ' + mmdd(past[0]) : ''), past[0]) +
     btn(2, '前天' + (past[1] ? ' ' + mmdd(past[1]) : ''), past[1]) +
     (tab === 'gapDownAboveVwap' || tab === 'gapUpBelowVwap'
-      ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (nowHf[tab] ? ' active' : '') + '" data-now-hf="' + tab + '" title="只看盤中大戶力 ' + (tab === 'gapDownAboveVwap' ? '≥ 0' : '≤ 0') + '% 的股票（昨天／前天照那天收盤時的大戶力；查不到大戶力的不列；再按一次全部顯示）">' + NOW_HF_RULES[tab].label + '</button>'
+      ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (nowHf[tab] ? ' active' : '') + '" data-now-hf="' + tab + '" title="只看盤中大戶力 ' + (tab === 'gapDownAboveVwap' ? '≥ 0' : '≤ 0') + '% 的股票（昨天／前天照那天收盤時的大戶力；查不到大戶力的不列；再按一次全部顯示）">' + nowHfRule(tab).label + '</button>'
       : tab === 'now' || tab === 'nowBear'
       ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (nowHf[tab] ? ' active' : '') + '" data-now-hf="' + tab + '" title="只看盤中大戶力 ' + (tab === 'now' ? '≥ +' : '≤ -') + HOLDER_HOT_PCT + '% 的股票（' + (tab === 'nowBear' ? '大戶力空名單跟訊號都套，最上面的刀劍空名單照原本' : '上面的大戶力名單跟下面的訊號都套') + '；昨天／前天照那天收盤時的大戶力；再按一次全部顯示）">盤中大戶力' + (tab === 'now' ? '≥' : '≤-') + HOLDER_HOT_PCT + '%</button>'
       : '') +
@@ -17189,7 +17192,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-02 16:34:47';
+const BUILD_STAMP = '2026-11-02 16:39:13';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
