@@ -1962,7 +1962,7 @@
   .td-b9sec{margin:8px 0 0;padding:6px 12px;background:#ede9fe;color:#4c1d95;font-weight:800;font-size:13px;border-top:1px solid var(--line);} .td-b9sec small{font-weight:400;color:#7d7399;} .td-b9sec.sys{background:#e0f2fe;color:#075985;}
   .td-b9head,.td-b9row{display:grid;grid-template-columns:46px minmax(0,1fr) 96px 70px 62px 24px;gap:0 6px;align-items:center;padding:6px 10px;border-top:1px solid var(--line);}
   .td-b9head{font-size:11px;color:var(--muted);font-weight:700;background:rgba(124,58,237,.05);} .td-b9row{cursor:pointer;font-size:13px;} .td-b9row:hover{background:rgba(124,58,237,.06);}
-  .td-b9row .t{color:#8b2c22;font-weight:800;font-size:12px;} .td-b9row .s small{display:block;color:var(--muted);font-size:11px;font-weight:400;} .td-b9row .p{text-align:right;font-weight:700;} .td-b9row .b{text-align:center;} .td-b9row .h{text-align:right;}
+  .td-b9row .t{color:#8b2c22;font-weight:800;font-size:12px;} .td-b9row .t small{display:block;color:var(--muted);font-size:10px;font-weight:400;line-height:1.2;white-space:nowrap;} .td-b9row .s small{display:block;color:var(--muted);font-size:11px;font-weight:400;} .td-b9row .p{text-align:right;font-weight:700;} .td-b9row .b{text-align:center;} .td-b9row .h{text-align:right;}
   .td-bk{display:inline-block;padding:1px 8px;border-radius:6px;border:1px solid #cbd5e1;color:#64748b;font-size:12px;font-weight:700;} .td-bk.on{background:#16a34a;border-color:#16a34a;color:#fff;} .td-bk.down{background:#fee2e2;border-color:#fca5a5;color:#b91c1c;}
   .td-b9x{border:0;background:none;color:#94a3b8;cursor:pointer;font-size:12px;} .td-b9x:hover{color:#dc2626;}
   @media (max-width:900px){ .td-sidecol{order:-1;position:static;} .td-sides .td-side.wide{width:auto;flex:1 1 auto;} .td-b9head,.td-b9row{grid-template-columns:42px minmax(0,1fr) 90px 60px 56px 20px;} }
@@ -19984,15 +19984,16 @@ function tdB905Calc(code, kind, date, slot, ttl){
   const h905 = dayBars[0].high;
   const thr = kind === 'c12' && Number.isFinite(yHigh) ? Math.max(h905, yHigh) : h905;
   const ev = [];
-  let inside = false, last = null;
+  let inside = false, last = null, p2 = '';
   dayBars.forEach((b) => {
     const t = endHm(b);
     if (slot && t > slot) return;      // 回放：只算到選的時段
     last = b;
+    if (!p2 && yClose && b.close / yClose - 1 >= TD905_PCT / 100) p2 = t;      // 第一次漲幅 ≥ 2% 的 5 分K 收盤時間（905 突破的「首次發生時間」用）
     if (!inside && b.close > thr){ inside = true; ev.push({ t, type: 'up', px: b.close }); }
     else if (inside && b.close < thr){ inside = false; ev.push({ t, type: 'down', px: b.close }); }
   });
-  return { h905, yHigh, yClose, thr, ev, inside, price: last ? last.close : null, high: dayBars.filter((b) => !slot || endHm(b) <= slot).reduce((m, b) => Math.max(m, b.high), 0),
+  return { h905, yHigh, yClose, thr, ev, inside, p2, price: last ? last.close : null, high: dayBars.filter((b) => !slot || endHm(b) <= slot).reduce((m, b) => Math.max(m, b.high), 0),
     pct: last && yClose ? (last.close / yClose - 1) * 100 : null, lastT: last ? endHm(last) : '' };
 }
 function tdSigEvents(date){
@@ -20089,6 +20090,21 @@ function tdFireAlert(title, list){
   if (tdB905.snd) { try { launchBeep(); } catch (_) { /* 出不了聲就算了 */ } }
   if (tdB905.notif && typeof Notification !== 'undefined' && Notification.permission === 'granted') { try { new Notification(title, { body: list.slice(0, 4).join('\n') }); } catch (_) { /* 通知失敗就算了 */ } }
 }
+// 2026-11-02 使用者：905 突破名單左邊的「首次發生時間」怪怪的，不是實際發生的時間。原本記的是「這台電腦第一次看到四個條件都成立的時間」，
+// 開頁面比較晚、或看到的那一輪比較晚，時間就比實際晚（華票 09:45 就成立，10:04 開頁面才記到 10:04）。改成回頭算：
+// 四個條件各自「第一次成立」的時間取最晚的那個＝四個條件第一次同時成立——① 第一次 5 分K 收盤站上 905 高（5 分K）② 第一次漲幅 ≥ 2%（5 分K 收盤）
+// ③ 大戶力第一次 ≥ +10%（跟盤中大戶力分頁「進名單」同一份時間軸）④ 族群在多方區（過去的名次沒有留，以看到的那一刻為準）。
+// 時間下面的小字＝最後才成立的那個條件。
+function td905When(code, r, date, cap){
+  const tl = holderTimelineFor(date);
+  if (tl === null && !holderTimelineAt[date]) return null;    // 大戶力時間軸還在抓
+  const s = tl && tl[code] && tl[code].bull;
+  const big = s && Number.isFinite(s.firstTs) ? new Date(s.firstTs + 8 * 3600e3).toISOString().slice(11, 16) : cap;
+  const brk = r.ev && r.ev.length ? r.ev[0].t : cap, p2 = r.p2 || cap;
+  const parts = [['站上905高', brk], ['漲幅≥' + TD905_PCT + '%', p2], ['大戶力≥' + TD905_BIG + '%', big]];
+  const last = parts.reduce((a, b) => (b[1] > a[1] ? b : a));
+  return { t: last[1] > cap ? cap : last[1], last: last[0], brk, p2, big };
+}
 function td905Tick(){
   if (!lastData || lastData.mock || lastData.heldClose || lastData.preopen || lastData.quoteDate !== twTodayStr() || !Array.isArray(lastData.groups)) return;
   const hm = new Date(Date.now() + 8 * 3600e3).toISOString().slice(11, 16);
@@ -20101,9 +20117,21 @@ function td905Tick(){
     const r = tdB905Calc(c.code, 'c905', date, null, 120e3);
     if (r.loading){ loading = true; return; }
     if (!r.inside || !r.ev || !r.ev.length) return;       // 現在要站在 905 高上面（當天已經突破過）
-    seen[c.code] = { t: hm, group: c.group, big: c.big, pct: c.pct, px: r.price, brk: r.ev[0].t };
+    const w = td905When(c.code, r, date, hm);
+    if (!w){ loading = true; return; }
+    seen[c.code] = { t: w.t, last: w.last, why: [w.brk, w.p2, w.big], group: c.group, big: c.big, pct: c.pct, px: r.price, brk: r.ev[0].t, v: 2 };
     changed = true;
     if (td905Cache.primed) fresh.push(hm + ' ' + c.code + ' ' + c.name + ' 905 突破（大戶力 ' + (c.big > 0 ? '+' : '') + c.big.toFixed(1) + '%、漲 ' + c.pct.toFixed(2) + '%、' + c.group + '）');
+  });
+  Object.keys(seen).forEach((code) => {       // 舊版記的（時間是「第一次看到」）：用實際時間改正一次
+    const x = seen[code];
+    if (x.v) return;
+    const r = tdB905Calc(code, 'c905', date, null, 120e3);
+    if (r.loading){ loading = true; return; }
+    const w = r.ev ? td905When(code, r, date, x.t) : null;
+    if (!w){ if (r.ev) loading = true; return; }
+    x.t = w.t; x.last = w.last; x.why = [w.brk, w.p2, w.big]; x.v = 2;
+    changed = true;
   });
   if (changed) td905Save();
   if (!loading) td905Cache.primed = true;      // 第一輪（開頁面時已經符合的）只記不響
@@ -20118,15 +20146,15 @@ function td905SectionHtml(snap){
     const r = tdB905Calc(x.code, 'c905', date, slot, 120e3);
     const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(x.code) : null;
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : (r.pct !== undefined && r.pct !== null ? r.pct : x.pct);
-    return '<div class="td-b9row" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(wlNameOf(x.code)) + '"><span class="t">' + wlEsc(x.t) + '</span>' +
+    return '<div class="td-b9row" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(wlNameOf(x.code)) + '"><span class="t"' + (x.why ? ' title="' + wlEsc('四個條件第一次同時成立的時間。站上 905 高 ' + x.why[0] + '・漲幅 ≥ ' + TD905_PCT + '% ' + x.why[1] + '・大戶力 ≥ +' + TD905_BIG + '% ' + x.why[2] + '；最晚成立的是「' + (x.last || '') + '」，族群在多方區以看到的那一刻為準') + '"' : '') + '>' + wlEsc(x.t) + (x.last ? '<small>' + wlEsc(x.last.replace(/≥.*$/, '')) + '</small>' : '') + '</span>' +
       '<span class="s"><b>' + wlEsc(x.code) + '</b> ' + wlEsc(wlNameOf(x.code)) + '<small>' + wlEsc(x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + '</small></span>' +
       '<span class="b">' + tdB905Badge('905', r) + '</span><span class="h">' + holderTagHtml(snap.live ? holderPctOf(x.code) : x.big, true) + '</span>' +
       '<span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '—') + '</span><span class="x"></span></div>';
   }).join('');
   const head = '<div class="td-b9head"><span class="t">首次發生<br>時間</span><span class="s">股號・股名・族群</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';
   return '<div class="td-b9sec s905">🎯 905 突破（篩選後） <b>' + list.length + '</b>　<small>四個條件都成立才列：當天第一次站上 905 高、大戶力 ≥ +' + TD905_BIG + '%、漲幅 ≥ ' + TD905_PCT + '%、族群在多方區（族群名次前一半）' +
-    (cand ? '；現在符合後三項的候選 ' + cand.length + ' 檔' : '') + '</small></div>' +
-    (list.length ? head + rows : '<div class="td-empty">' + (snap.live ? '目前沒有（四個條件都成立才會出現；盤中要開著網頁才記得到，時間＝這台電腦第一次看到的時間）' : '這個時段以前這台電腦沒有記到（905 要盤中開著網頁才會記）') + '</div>');
+    (cand ? '；現在符合後三項的候選 ' + cand.length + ' 檔' : '') + '<br>左邊時間＝四個條件第一次同時成立的時間，下面小字＝最後才成立的條件；右邊狀態下面的「突破 HH:MM」＝5 分K 收盤站上 905 高的時間（兩個時間本來就不同）' + '</small></div>' +
+    (list.length ? head + rows : '<div class="td-empty">' + (snap.live ? '目前沒有（四個條件都成立才會出現；盤中要開著網頁才記得到，時間＝四個條件第一次同時成立）' : '這個時段以前這台電腦沒有記到（905 要盤中開著網頁才會記）') + '</div>');
 }
 function tdSideTabsHtml(){
   return '<div class="td-stabs">' + TD_SIDE_TABS.map(([k, label]) => '<button type="button" class="td-stab' + (tdSideTab === k ? ' on' : '') + '" data-td-side="' + k + '">' + label + '</button>').join('') + '</div>';
