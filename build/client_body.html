@@ -1021,6 +1021,7 @@
   #signalTabsBar .signal-tab[data-kind="bigHolderForceBear"]{grid-area:4/1;} #signalTabsBar .signal-tab[data-kind="fourGateSell"]{grid-area:4/2;}
   #signalTabsBar .signal-tab[data-kind="mainForceFlipBear"]{grid-area:4/3;}
   /* 2026-11-02 使用者：開低VWAP上(88)／開高VWAP下(87)——手機／平板補在第 3、4 排最後一格（主力翻多／翻空右邊），一樣上下成對 */
+  #signalModalInner #signalTabsBar .signal-tab[data-kind^="gap"],#sgtBody #signalTabsBar .signal-tab[data-kind^="gap"]{letter-spacing:-.6px;overflow:hidden;}   /* 名稱比較長，數字不要被切掉 */
   #signalTabsBar .signal-tab[data-kind="gapDownAboveVwap"]{grid-area:3/4;} #signalTabsBar .signal-tab[data-kind="gapUpBelowVwap"]{grid-area:4/4;}
   /* 2026-10-13 使用者：平板／手機版 1+2多 跟醞釀對調——第 5 排 1+2多／盤中333／所有族群綜合表／醞釀，1+2多 正下方是創高黑龍 */
   #signalTabsBar .signal-tab[data-kind="combo12Bull"]{grid-area:5/1;} #signalTabsBar .signal-tab[data-kind="brewOnly"]{grid-area:5/4;}
@@ -4446,7 +4447,7 @@
       <ul>
         <li><b>今日即時多</b>：彙整多方向訊號的即時清單：最上面一塊是盤中大戶力多的名單（時間＝第一次進名單，早進名單的在上面、新進的往下排），下面是四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單依發生時間新到舊排序。也包含十大多族群裡大戶力 ≥ +10% 的股票（訊號寫「十大多族群」）。今日強勢股裡大戶力 ≥ +10% 的也會進來（訊號寫「今日強勢股」）。今天／昨天／前天後面的「盤中大戶力≥10%」按下去只看大戶力 ≥ +10% 的股票（上面的名單跟下面的訊號都套，再按一次全部顯示）；今日即時空同樣有「≤-10%」。</li>
         <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是新刀劍空(32)的即時名單（排法跟機器人代碼 32 一樣，一檔一列、時間在左、跑／回標籤，不分段、全部照時間排：早發生的在上面、最新發生的（進榜、跑、回）在最下面貼著兩條黑線，只有今天有；前面的 🔺＝多方打少、🔽＝中間段、🔰＝強空積極、♣＝收割區域），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。也包含十大空族群裡大戶力 ≤ −10% 的股票（訊號寫「十大空族群」）。今日弱勢股裡大戶力 ≤ −10% 的也會進來（訊號寫「今日弱勢股」）。</li>
-        <li><b>開低VWAP上(88)</b>（2026-11-02）：今天開低（開盤價低於昨天收盤），但盤中 1 分K收盤比 VWAP（今日均價＝當日累計成交金額 ÷ 成交量）高 1% 以上；09:05 以後收盤的 1 分K才算（開盤前幾分鐘 VWAP 還沒成形）。每檔一天只列一次，時間＝第一次符合的那根 1 分K收盤時間（例如 09:04 那根收在 09:05）；開平盤不算。盤中即時判斷（開盤價、VWAP 用永豐 tick 帶的當日開盤、均價），收盤後 13:40 起用當天完整 1 分K重播一次校正。只看族群裡的股票，不併進今日即時多。跟機器人代碼 88 同一份。可切今天／昨天／前天。</li>
+        <li><b>開低VWAP上(88)</b>（2026-11-02）：今天開低（開盤價低於昨天收盤），但盤中 1 分K收盤比 VWAP（今日均價＝當日累計成交金額 ÷ 成交量）高 1% 以上；09:05 以後收盤的 1 分K才算（開盤前幾分鐘 VWAP 還沒成形）。每檔一天只列一次，時間＝第一次符合的那根 1 分K收盤時間（例如 09:04 那根收在 09:05）；開平盤不算。盤中即時判斷（開盤價、VWAP 用永豐 tick 帶的當日開盤、均價），收盤後 13:40 起用當天完整 1 分K重播一次校正。只看族群裡的股票，不併進今日即時多。跟機器人代碼 88 同一份。可切今天／昨天／前天；前天後面的「大戶力≥0」按下去只看盤中大戶力 ≥ 0 的（87 是「大戶力≤0」，昨天／前天照那天收盤時的大戶力，再按一次全部顯示）。</li>
         <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。用今日即時行情篩：今天下跌（現價低於昨收）的不列，盤後也一樣（弱勢股反過來，今天上漲的不列），整族都不符合就不列那一族；週末、連假、開盤前還沒有「今天」，整份照列。⭐＝這族今天也有出現在強勢黑K選股（通常是比較強勢的族群）、👀＝這檔在強勢黑K選股名單裡。盤中均線分數、族群分數、族群名次都用現價當今天收盤即時重算（後端每 45 秒更新一次，新上市日K不足 240 天的算不出）、收盤後整表出來就用正式收盤分數；現價、漲跌、大戶力也是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
         <li><b>開高VWAP下(87)</b>（2026-11-02）：倒過來，今天開高（開盤價高於昨天收盤），但盤中 1 分K收盤比 VWAP 低 1% 以上（09:05 以後才算）。其他規則同 88，不併進今日即時空。跟機器人代碼 87 同一份。</li>
         <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面；按「大戶力 ≤ −10%」只看大戶在賣的。</li>
@@ -7650,12 +7651,20 @@ function sigView(){
 // 2026-10-14 使用者：今日即時多（今天／昨天／前天後面）加「盤中大戶力≥10%」，按下去只留大戶力 ≥ +10% 的股票（上面的大戶力名單跟下面的訊號都套）；
 // 今日即時空同樣一顆「≤-10%」。兩頁各自記在這台瀏覽器；昨天／前天照那天收盤時的大戶力。
 const nowHf = (() => { try { return JSON.parse(localStorage.getItem('nowHf') || '{}') || {}; } catch (_){ return {}; } })();
+// 2026-11-02 使用者：開低VWAP上(88) 前天後面加「大戶力≥0」、開高VWAP下(87) 加「大戶力≤0」（同一套按鈕，門檻是 0）
+const NOW_HF_RULES = {
+  now: { min: HOLDER_HOT_PCT, label: '盤中大戶力≥' + HOLDER_HOT_PCT + '%' },
+  nowBear: { max: -HOLDER_HOT_PCT, label: '盤中大戶力≤-' + HOLDER_HOT_PCT + '%' },
+  gapDownAboveVwap: { min: 0, label: '大戶力≥0' },
+  gapUpBelowVwap: { max: 0, label: '大戶力≤0' },
+};
 function nowHfFilter(view, tab){
-  if (!nowHf[tab]) return null;
+  const rule = NOW_HF_RULES[tab];
+  if (!rule || !nowHf[tab]) return null;
   const m = sigHolderMap(view);
   return (code) => {
     const h = m.get(code), v = h ? h.strengthPct : null;
-    return v !== null && v !== undefined && (tab === 'now' ? v >= HOLDER_HOT_PCT : v <= -HOLDER_HOT_PCT);
+    return v !== null && v !== undefined && ('min' in rule ? v >= rule.min : v <= rule.max);
   };
 }
 function sigDayBarHtml(){
@@ -7669,7 +7678,9 @@ function sigDayBarHtml(){
     btn(0, todayLabel, cur) +
     btn(1, '昨天' + (past[0] ? ' ' + mmdd(past[0]) : ''), past[0]) +
     btn(2, '前天' + (past[1] ? ' ' + mmdd(past[1]) : ''), past[1]) +
-    (tab === 'now' || tab === 'nowBear'
+    (tab === 'gapDownAboveVwap' || tab === 'gapUpBelowVwap'
+      ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (nowHf[tab] ? ' active' : '') + '" data-now-hf="' + tab + '" title="只看盤中大戶力 ' + (tab === 'gapDownAboveVwap' ? '≥ 0' : '≤ 0') + '% 的股票（昨天／前天照那天收盤時的大戶力；查不到大戶力的不列；再按一次全部顯示）">' + NOW_HF_RULES[tab].label + '</button>'
+      : tab === 'now' || tab === 'nowBear'
       ? '<button class="chart-tab hf-filter-btn brew-hf-btn' + (nowHf[tab] ? ' active' : '') + '" data-now-hf="' + tab + '" title="只看盤中大戶力 ' + (tab === 'now' ? '≥ +' : '≤ -') + HOLDER_HOT_PCT + '% 的股票（' + (tab === 'nowBear' ? '大戶力空名單跟訊號都套，最上面的刀劍空名單照原本' : '上面的大戶力名單跟下面的訊號都套') + '；昨天／前天照那天收盤時的大戶力；再按一次全部顯示）">盤中大戶力' + (tab === 'now' ? '≥' : '≤-') + HOLDER_HOT_PCT + '%</button>'
       : '') +
     '</div>';
@@ -17655,6 +17666,9 @@ function signalTabContent(active){
       const all = view.events.filter((e) => e.tabs.includes(active));
       const events = filterLargeOrderEvents(all);
       inner = bigOrderFilterBarHtml(all.length, events.length) + signalRowsHtml(events, view, { holder: true });
+    } else if (active === 'gapDownAboveVwap' || active === 'gapUpBelowVwap'){
+      const ok = nowHfFilter(view, active) || (() => true);   // 2026-11-02：「大戶力≥0／≤0」開著就只留大戶力符合的
+      inner = signalRowsHtml(view.events.filter((e) => e.tabs.includes(active) && ok(e.code)), view, { holder: true });
     } else inner = signalRowsHtml(view.events.filter((e) => e.tabs.includes(active)), view,
       // 2026-10-13 使用者：四項精選也加盤中大戶力（放漲跌幅左邊）；主力翻多／翻空也加（放訊號右邊，跟特大買賣單一樣）
       active === 'fourGateBuy' || active === 'fourGateSell' ? { holder: 'right' }
