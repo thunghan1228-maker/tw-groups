@@ -5190,14 +5190,31 @@ function drawChart(){
     if (isTxf){
       for (let i = allBars.length - 1; i >= 0; i--){ const d0 = new Date(allBars[i].ts), mod = d0.getHours() * 60 + d0.getMinutes(); if (mod >= 525 && mod < 825){ lastDayKey = dayKey(allBars[i].ts); break; } }
     }
+    // 2026-11-02 使用者：1 分K 只畫今天跟前一個交易日（兩天）的 09:01 紅虛線、10:30 紫線、12:00 橘紅線（5 分K 不動）。
+    // 冷門股 1 分K 沒成交那分鐘就沒有K棒（10:29、11:59 常常剛好沒有），所以 1 分K 用「那天第一根 ≥ 10:29／≥ 11:59」的K棒畫。
+    const m1Marks = new Map();   // allBars 索引 → 'open'／'1030'／'noon'
+    if (currentChart.tf === 'm1' && !isTxf){
+      const days = [];
+      allBars.forEach((b, gi) => { const k = dayKey(b.ts); if (!days.length || days[days.length - 1].k !== k) days.push({ k, start: gi, end: gi }); else days[days.length - 1].end = gi; });
+      days.slice(-2).forEach((day) => {
+        m1Marks.set(day.start, 'open');
+        let got1030 = false, gotNoon = false;
+        for (let gi = day.start + 1; gi <= day.end; gi++){
+          const d0 = new Date(allBars[gi].ts), mod = d0.getHours() * 60 + d0.getMinutes();
+          if (!got1030 && mod >= 10 * 60 + 29){ got1030 = true; if (mod < 11 * 60 + 59) m1Marks.set(gi, '1030'); }
+          if (!gotNoon && mod >= 11 * 60 + 59){ gotNoon = true; if (mod < 12 * 60 + 30) m1Marks.set(gi, 'noon'); break; }
+        }
+      });
+    }
     bars.forEach((b, i) => {
       const globalIdx = vStart + i;
       const prevBar = globalIdx > 0 ? allBars[globalIdx - 1] : null;
       const d = new Date(b.ts);
       const sessMin = d.getHours() * 60 + d.getMinutes();
-      const isDayOpen = isTxf ? (currentChart.tf === 'm5' || currentChart.tf === 'm1') && (sessMin === 525 || sessMin === 900) : (!prevBar || dayKey(prevBar.ts) !== dayKey(b.ts));
-      const is1030 = d.getHours() === 10 && d.getMinutes() === closeMin;
-      const isNoon = currentChart.tf === 'm5' && d.getHours() === 11 && d.getMinutes() === 55 && dayKey(b.ts) === lastDayKey;   // 5 分K 11:55～12:00 那根，只有今天（最後一個交易日）
+      const m1Mark = currentChart.tf === 'm1' && !isTxf ? m1Marks.get(globalIdx) : null;
+      const isDayOpen = currentChart.tf === 'm1' && !isTxf ? m1Mark === 'open' : isTxf ? (currentChart.tf === 'm5' || currentChart.tf === 'm1') && (sessMin === 525 || sessMin === 900) : (!prevBar || dayKey(prevBar.ts) !== dayKey(b.ts));
+      const is1030 = currentChart.tf === 'm1' && !isTxf ? m1Mark === '1030' : d.getHours() === 10 && d.getMinutes() === closeMin;
+      const isNoon = currentChart.tf === 'm1' && !isTxf ? m1Mark === 'noon' : currentChart.tf === 'm5' && d.getHours() === 11 && d.getMinutes() === 55 && dayKey(b.ts) === lastDayKey;   // 5 分K 11:55～12:00 那根，只有今天（最後一個交易日）
       if (!isDayOpen && !is1030 && !isNoon) return;
       const x = xAt(i);
       ctx.save();
@@ -5207,7 +5224,7 @@ function drawChart(){
       else { ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2; ctx.setLineDash([]); mark = '#c084fc'; }
       ctx.beginPath(); ctx.moveTo(x, padTop); ctx.lineTo(x, cssH - padBottom); ctx.stroke();
       ctx.restore();
-      axisMarks.push({ x, text: b.label, color: mark });
+      axisMarks.push({ x, text: m1Mark === '1030' ? '10:30' : m1Mark === 'noon' ? '12:00' : b.label, color: mark });   // 1 分K 冷門股那分鐘沒K棒時畫在下一根，時間軸照樣標 10:30／12:00
     });
 
     // 今天第一根5分K高低點（延伸到10:30）＋ 昨日高低點（延伸到今天整個範圍）
@@ -25561,7 +25578,10 @@ document.getElementById('botModal').addEventListener('click', (e) => {
   const run = t.closest('[data-bot-run]'); if (run){ botRun(run.dataset.botRun, { toggle: true }); return; }
   const x = t.closest('[data-bot-close]'); if (x){ botState.cols = botState.cols.filter((c) => c.key !== x.dataset.botClose); renderBot(); return; }
   if (t.closest('[data-bot-clear]')){ botState.cols = []; renderBot(); return; }
-  const st = t.closest('[data-bot-code]'); if (st){ openStockChart(st.dataset.botCode, st.dataset.botName); return; }
+  const st = t.closest('[data-bot-code]'); if (st){
+    const ck = (st.closest('.bot-col[data-col-key]') || {}).dataset;   // 機器人 88／87 的格子點開也預設 1 分鐘（2026-11-02）
+    openStockChart(st.dataset.botCode, st.dataset.botName, ck && (ck.colKey === '88' || ck.colKey === '87') ? 'm1' : undefined); return;
+  }
   const g = t.closest('[data-bot-group]'); if (g){ openGroupDetail(g.dataset.botGroup); }
 });
 document.getElementById('botModal').addEventListener('keydown', (e) => {
@@ -27946,7 +27966,11 @@ function signalBodyClick(e){
   // 使用者要求：K 線圖關掉之後訊號中心要還在，不用再去右上角重開。
   // 所以不關視窗，只讓它退到 K 線圖後面；closeStockChart 會把它拉回來。
   if (!useFloatingCharts()) document.getElementById('signalModal').classList.add('behind-chart');
-  openStockChart(row.dataset.code, row.dataset.name);
+  // 2026-11-02 使用者：從開低VWAP上(88)／開高VWAP下(87) 點開的 K 線圖預設 1 分鐘，其他分頁照舊（5 分鐘）
+  // 盤中訊號分頁（一格一格）的格子用 data-col-key 認是哪個分頁，訊號中心用目前選的分頁
+  const colEl = e.target.closest('.bot-col[data-col-key]');
+  const fromTab = colEl ? colEl.dataset.colKey : signalCenterState.activeTab;
+  openStockChart(row.dataset.code, row.dataset.name, fromTab === 'gapDownAboveVwap' || fromTab === 'gapUpBelowVwap' ? 'm1' : undefined);
 }
 document.getElementById('signalBody').addEventListener('click', signalBodyClick);
 document.getElementById('smClose').addEventListener('click', closeSignalCenter);
