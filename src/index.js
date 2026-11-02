@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-01 20:32:23";
+const BUILD_STAMP = "2026-11-02 08:45:49";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -8856,7 +8856,7 @@ function bladeSeenMap(){
   return bladeSeenCache.map;
 }
 function bladeRecordSeen(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:40 起也要有發生時間，所以盤前也記）
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:30 起（原本 08:40）也要有發生時間，所以盤前也記）
   const m = race333Model();
   if (!m) return;
   const map = bladeSeenMap();
@@ -8871,7 +8871,7 @@ function bladeRecordSeen(){
   }
 }
 // 2026-10-22 使用者：三落空（機器人代碼）每檔前面加發生時間（第一次進三落空的時間），時間近的排上面、早的在下面；
-// 跟刀劍空一樣是這台電腦用首頁報價即時算的，時間記在這台瀏覽器、一天一份（盤前撮合 08:40 起也記）
+// 跟刀劍空一樣是這台電腦用首頁報價即時算的，時間記在這台瀏覽器、一天一份（盤前撮合 08:30 起也記）
 function weakSeenKey(){ return 'weakSeen:' + twTodayStr(); }
 let weakSeenCache = null;
 function weakSeenMap(){
@@ -8914,7 +8914,7 @@ function race333SeenLists(m){
   return { over7: m.horses.filter((r) => r.pct > 7), triple: m.triple, both: m.both, horses: m.horses, rivers: m.rivers, fires: m.fires };
 }
 function raceRecordSeen(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:40 起也要有發生時間，所以盤前也記）
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:30 起（原本 08:40）也要有發生時間，所以盤前也記）
   const m = race333Model();
   if (!m) return;
   const all = raceSeenMap();
@@ -10079,7 +10079,7 @@ const HOME_OBS_REFRESH_MS = 60 * 1000;   // 2026-10-24 使用者：盤中要即�
 function homeObsColHtml(){
   const rep = obsState.report;
   const hm = obsNowHm();   // 只有盤中（09:00～13:35）才每分鐘重算；收盤後停在最後一次（2026-10-15 使用者問多久更新）
-  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';   // 盤前撮合（08:40 起）也算
+  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:30')) && hm <= '13:35';   // 盤前撮合（08:40 起）也算
   const stale = rep && live && document.visibilityState === 'visible' && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
   const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > (rep ? HOME_OBS_REFRESH_MS : 20000);   // 還沒算出過：20 秒就重試（2026-10-17）
   if (!obsState.loading && ((!rep && !obsState.error) || stale || retry)) setTimeout(() => obsRun(null, false, !!rep), 0);
@@ -17055,7 +17055,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-01 20:32:23';
+const BUILD_STAMP = '2026-11-02 08:45:49';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18131,7 +18131,7 @@ async function refresh(){
     } else if (Date.now() - lastDataFetchedAt.getTime() > STALE_WARNING_MS){
       updatedEl.textContent = '⚠ 報價可能已過期（最後成功更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + '）';
     } else if (lastData && lastData.preopen){
-      // 2026-10-22 使用者：要用即時價選股的功能從 08:40 盤前撮合就開始算，這時候的價格是試算價（還沒有成交量）
+      // 2026-10-22 使用者：要用即時價選股的功能從盤前撮合（08:30 起，原本 08:40）就開始算，這時候的價格是試算價（還沒有成交量）
       updatedEl.textContent = '盤前撮合（試算價）' + String(lastData.quoteTime || '').slice(0, 5) + '，09:00 開盤後換成真的成交價（' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + ' 更新）';
     } else if (lastData && lastData.heldClose && lastData.heldClose.session){
       // 休市日／開盤前：worker 給的是上一個交易日的日K收盤，不是即時報價（2026-10-04 使用者：週末 TWSE 測試盤假價）。
@@ -21375,7 +21375,7 @@ function obsWlTick(){
   if (obsState.loading || wl.loading || wl.busy) return;
   if (document.visibilityState !== 'visible') return;   // 看不到的分頁不重算（請求量警示 2026-10-28）
   const hm = obsNowHm();
-  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';
+  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:30')) && hm <= '13:35';
   if (!live) return;
   if (obsState.report && Date.now() - obsState.report.at < HOME_OBS_REFRESH_MS - 5000) return;
   obsRun(null, false, true);
@@ -28046,7 +28046,7 @@ async function fetchQuotesFromBackend(codes, timeoutMs) {
     data = { status: "ok", quotes: {}, quoteDate: null, quoteTime: null, preopen: false };
     for (const part of parts) {
       Object.assign(data.quotes, part.quotes);
-      if (part.preopen) data.preopen = true;   // 盤前撮合（08:40～09:00）：後端把 Shioaji 試撮價蓋上去的
+      if (part.preopen) data.preopen = true;   // 盤前撮合（08:30～09:00，2026-11-02 起；原本 08:40）：後端把 Shioaji 試撮價蓋上去的
       const stamp = (part.quoteDate || "") + " " + (part.quoteTime || "");
       if (stamp > (data.quoteDate || "") + " " + (data.quoteTime || "")) { data.quoteDate = part.quoteDate; data.quoteTime = part.quoteTime; }
     }
@@ -28261,7 +28261,7 @@ async function buildGroupsBody() {
     quoteMissing: held ? 0 : (meta.missing || 0),
     // 報價來源：hub＝後端報價中心（正常）、mis＝這裡直接抓證交所、backend＝直連失敗改後端代抓、mis+backend＝缺的拿後端補
     quoteSource: held ? "close" : (meta.source || "mis"),
-    // 盤前撮合（2026-10-22 使用者：用即時價選股的功能從 08:40 盤前試撮就開始算）：後端試撮資料夠多時不再暫留昨收（held=false），
+    // 盤前撮合（2026-10-22 使用者：用即時價選股的功能從盤前試撮（08:30 起，原本 08:40）就開始算）：後端試撮資料夠多時不再暫留昨收（held=false），
     // 報價是試算價（沒有成交量），前端各名單照盤中的邏輯算；用前一天收盤資料選股的功能不受影響
     preopen: !held && !!meta.preopen
   });

@@ -144,7 +144,7 @@ async function fetchQuotesFromBackend(codes, timeoutMs) {
     data = { status: "ok", quotes: {}, quoteDate: null, quoteTime: null, preopen: false };
     for (const part of parts) {
       Object.assign(data.quotes, part.quotes);
-      if (part.preopen) data.preopen = true;   // 盤前撮合（08:40～09:00）：後端把 Shioaji 試撮價蓋上去的
+      if (part.preopen) data.preopen = true;   // 盤前撮合（08:30～09:00，2026-11-02 起；原本 08:40）：後端把 Shioaji 試撮價蓋上去的
       const stamp = (part.quoteDate || "") + " " + (part.quoteTime || "");
       if (stamp > (data.quoteDate || "") + " " + (data.quoteTime || "")) { data.quoteDate = part.quoteDate; data.quoteTime = part.quoteTime; }
     }
@@ -359,7 +359,7 @@ async function buildGroupsBody() {
     quoteMissing: held ? 0 : (meta.missing || 0),
     // 報價來源：hub＝後端報價中心（正常）、mis＝這裡直接抓證交所、backend＝直連失敗改後端代抓、mis+backend＝缺的拿後端補
     quoteSource: held ? "close" : (meta.source || "mis"),
-    // 盤前撮合（2026-10-22 使用者：用即時價選股的功能從 08:40 盤前試撮就開始算）：後端試撮資料夠多時不再暫留昨收（held=false），
+    // 盤前撮合（2026-10-22 使用者：用即時價選股的功能從盤前試撮（08:30 起，原本 08:40）就開始算）：後端試撮資料夠多時不再暫留昨收（held=false），
     // 報價是試算價（沒有成交量），前端各名單照盤中的邏輯算；用前一天收盤資料選股的功能不受影響
     preopen: !held && !!meta.preopen
   });

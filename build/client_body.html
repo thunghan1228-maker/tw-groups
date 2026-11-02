@@ -8767,7 +8767,7 @@ function bladeSeenMap(){
   return bladeSeenCache.map;
 }
 function bladeRecordSeen(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:40 起也要有發生時間，所以盤前也記）
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:30 起（原本 08:40）也要有發生時間，所以盤前也記）
   const m = race333Model();
   if (!m) return;
   const map = bladeSeenMap();
@@ -8782,7 +8782,7 @@ function bladeRecordSeen(){
   }
 }
 // 2026-10-22 使用者：三落空（機器人代碼）每檔前面加發生時間（第一次進三落空的時間），時間近的排上面、早的在下面；
-// 跟刀劍空一樣是這台電腦用首頁報價即時算的，時間記在這台瀏覽器、一天一份（盤前撮合 08:40 起也記）
+// 跟刀劍空一樣是這台電腦用首頁報價即時算的，時間記在這台瀏覽器、一天一份（盤前撮合 08:30 起也記）
 function weakSeenKey(){ return 'weakSeen:' + twTodayStr(); }
 let weakSeenCache = null;
 function weakSeenMap(){
@@ -8825,7 +8825,7 @@ function race333SeenLists(m){
   return { over7: m.horses.filter((r) => r.pct > 7), triple: m.triple, both: m.both, horses: m.horses, rivers: m.rivers, fires: m.fires };
 }
 function raceRecordSeen(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:40 起也要有發生時間，所以盤前也記）
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:30 起（原本 08:40）也要有發生時間，所以盤前也記）
   const m = race333Model();
   if (!m) return;
   const all = raceSeenMap();
@@ -9990,7 +9990,7 @@ const HOME_OBS_REFRESH_MS = 60 * 1000;   // 2026-10-24 使用者：盤中要即�
 function homeObsColHtml(){
   const rep = obsState.report;
   const hm = obsNowHm();   // 只有盤中（09:00～13:35）才每分鐘重算；收盤後停在最後一次（2026-10-15 使用者問多久更新）
-  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';   // 盤前撮合（08:40 起）也算
+  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:30')) && hm <= '13:35';   // 盤前撮合（08:40 起）也算
   const stale = rep && live && document.visibilityState === 'visible' && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
   const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > (rep ? HOME_OBS_REFRESH_MS : 20000);   // 還沒算出過：20 秒就重試（2026-10-17）
   if (!obsState.loading && ((!rep && !obsState.error) || stale || retry)) setTimeout(() => obsRun(null, false, !!rep), 0);
@@ -18042,7 +18042,7 @@ async function refresh(){
     } else if (Date.now() - lastDataFetchedAt.getTime() > STALE_WARNING_MS){
       updatedEl.textContent = '⚠ 報價可能已過期（最後成功更新於 ' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + '）';
     } else if (lastData && lastData.preopen){
-      // 2026-10-22 使用者：要用即時價選股的功能從 08:40 盤前撮合就開始算，這時候的價格是試算價（還沒有成交量）
+      // 2026-10-22 使用者：要用即時價選股的功能從盤前撮合（08:30 起，原本 08:40）就開始算，這時候的價格是試算價（還沒有成交量）
       updatedEl.textContent = '盤前撮合（試算價）' + String(lastData.quoteTime || '').slice(0, 5) + '，09:00 開盤後換成真的成交價（' + lastDataFetchedAt.toLocaleTimeString('zh-TW') + ' 更新）';
     } else if (lastData && lastData.heldClose && lastData.heldClose.session){
       // 休市日／開盤前：worker 給的是上一個交易日的日K收盤，不是即時報價（2026-10-04 使用者：週末 TWSE 測試盤假價）。
@@ -21286,7 +21286,7 @@ function obsWlTick(){
   if (obsState.loading || wl.loading || wl.busy) return;
   if (document.visibilityState !== 'visible') return;   // 看不到的分頁不重算（請求量警示 2026-10-28）
   const hm = obsNowHm();
-  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:40')) && hm <= '13:35';
+  const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:30')) && hm <= '13:35';
   if (!live) return;
   if (obsState.report && Date.now() - obsState.report.at < HOME_OBS_REFRESH_MS - 5000) return;
   obsRun(null, false, true);
