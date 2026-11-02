@@ -21,6 +21,10 @@ LABELS = "#signalBody .signal-col-labels"
 TAB = '#signalTabsBar .signal-tab[data-kind="{}"]'
 
 TB = "下方工具列"
+# 905 突破名單是「盤中開著網頁才記得到」（存在這台瀏覽器），收盤後錄影是空的：錄影時照收盤那一刻符合條件的股票，用跟盤中記錄一樣的算法補進去（不阻塞，背景補）
+SEED905 = ("setTimeout(async () => { try { const date = twTodayStr(), seen = td905Seen(date); for (let k = 0; k < 10; k++) { td905Candidates().forEach((c) => { if (seen[c.code]) return;"
+           " const r = tdB905Calc(c.code, 'c905', date, null, 120e3); if (r.loading || !r.inside || !r.ev || !r.ev.length) return; const w = td905When(c.code, r, date, '13:30'); if (!w) return;"
+           " seen[c.code] = { t: w.t, last: w.last, why: [w.brk, w.p2, w.big], group: c.group, big: c.big, pct: c.pct, px: r.price, brk: r.ev[0].t, v: 2 }; }); await new Promise((r) => setTimeout(r, 1500)); } } catch (e) {} }, 0)")
 CLOSE_ALL = "document.querySelectorAll('.chips-modal').forEach((m) => { m.hidden = true; }); try { closeSignalCenter(); } catch (_) {} window.scrollTo(0, 0)"
 
 
@@ -289,7 +293,7 @@ VIDEOS += [
             tb_open("openHomeworkPanel", "裡面有四個分頁：空觀察、當沖多、多觀察和強勢黑K選股。系統自己把刀劍空、即將入獄、出獄、賽馬多、河流多、馬火多、族群名次這幾份清單交叉比對，只留下該盯的那幾檔，盤中每二十秒跟著首頁報價重算。",
                     "四份功課：自動交叉比對清單，盤中每 20 秒重算", target="#hwBody .hw-tabs"),
             {"say": "空觀察是今日功課，照老師的刀劍空流程：最上面一行寫今天要盯的有幾檔、分佈在幾個族群，再依多方、中間、強空、收割區四個段位，標出部位多少，收割區不追空。",
-             "cap": "空觀察：今天要盯幾檔、分幾個族群、各段位部位", "click": '#hwBody [data-hw-tab="today"]', "pick": "document.querySelector('#hwBody .td-sum')", "settle": 2000},
+             "cap": "空觀察：今天要盯幾檔、分幾個族群、各段位部位", "eval": SEED905, "click": '#hwBody [data-hw-tab="today"]', "pick": "document.querySelector('#hwBody .td-sum')", "settle": 2000},
             {"say": "下面這一排是統計：名單有幾個族群、幾檔，刀劍空幾檔、十二空幾檔，各段位幾檔，還有名單外的刀劍空、今天出獄股和即將入獄的股票。",
              "cap": "統計：族群數、刀劍空、12空、各段位、出獄股、即將入獄", "pick": "document.querySelector('#hwBody .td-counts')"},
             {"say": "有按鈕可以只留某個段位、只看隔日沖，也可以改看段位分區。回放那一排，可以回頭看每五分鐘的功課，灰色是這個時段還沒記到。",
@@ -308,10 +312,10 @@ VIDEOS += [
              "cap": "12空兩階段：① 剛轉弱（藍）｜② 不過前高可空（綠）", "pick": "document.querySelector('#hwBody .td-k12legend')"},
             {"say": "盤中有新的刀劍空或十二空，符合上面勾的參數，右下角就會跳出那一族的卡片，新進榜的標新，一檔一天只跳一次；選項列可以關掉，也可以打開提示音。",
              "cap": "新訊號跳出卡片（符合上面勾的參數才跳）；選項列：跳出卡片／提示音",
-             "eval": "(() => { try { const m = race333Model(); const sn = tdLiveSnap(m, 2); const pass = sn.rows.filter(tdPass); const t = pass.find((r) => r.g === '記憶體') || pass[0]; if (!t) return; tdAlert.on = true; tdAlert.date = twTodayStr(); tdAlert.sig = TD_PARAMS.map(([k]) => (tdState.params[k] ? 1 : 0)).join(''); tdAlert.seeded = { blade: true, k12: true }; tdAlert.seen = { blade: new Set(pass.filter((r) => r.code !== t.code).map((r) => r.code)), k12: new Set((sn.k12 || []).map((r) => r.code)) }; localStorage.removeItem('tdAlertSeen'); tdAlertTick(); } catch (e) {} })()",
+             "eval": "document.body.classList.add('tut-show-td'); (() => { try { const m = race333Model(); const sn = tdLiveSnap(m, 2); const pass = sn.rows.filter(tdPass); const t = pass.find((r) => r.g === '記憶體') || pass[0]; if (!t) return; tdAlert.on = true; tdAlert.date = twTodayStr(); tdAlert.sig = TD_PARAMS.map(([k]) => (tdState.params[k] ? 1 : 0)).join(''); tdAlert.seeded = { blade: true, k12: true }; tdAlert.seen = { blade: new Set(pass.filter((r) => r.code !== t.code).map((r) => r.code)), k12: new Set((sn.k12 || []).map((r) => r.code)) }; localStorage.removeItem('tdAlertSeen'); tdAlertTick(); } catch (e) {} })()",
              "pick": "document.querySelector('#tdAlertBox') || document.querySelector('#hwBody .td-opts')", "settle": 2500},
             {"say": "當沖多交叉四個來源：多功課、賽馬多、河流多，還有族群在多方區。有兩個以上點名才列，分成中四個、中三個、中兩個；空方的族群已經濾掉。",
-             "cap": "當沖多：4 個來源有 2 個以上點名；分中四／三／二個", "eval": "(() => { try { tdAlert.cards = []; tdAlertRender(); } catch (e) {} })()", "click": '#hwBody [data-hw-tab="long"]', "pick": "document.querySelector('#hwBody .lg-summary')", "settle": 2000},
+             "cap": "當沖多：4 個來源有 2 個以上點名；分中四／三／二個", "eval": "document.body.classList.remove('tut-show-td'); (() => { try { tdAlert.cards = []; tdAlertRender(); } catch (e) {} })()", "click": '#hwBody [data-hw-tab="long"]', "pick": "document.querySelector('#hwBody .lg-summary')", "settle": 2000},
             {"say": "上面的按鈕可以只留均線分數七分以上、濾掉續抱不追，或只留漲二到六趴的進場帶。",
              "cap": "篩選：均線 ≥7、濾掉續抱不追、只留 2～6%", "pick": "[...document.querySelectorAll('#hwBody .td-params')].pop()"},
             {"say": "多觀察是前一個交易日收盤的觀察股，挑三個重點族群，每一檔對照三日低和月線這兩條防守價，看現價有沒有跌破：紅色是跌破三日低，橘色是跌破月線。",
@@ -387,8 +391,8 @@ VIDEOS += [
         "key": "tb-chips", "title": "籌碼暴增雷達", "section": TB, "tab": None,
         "scenes": [
             tb_intro("籌碼暴增雷達", "籌碼暴增雷達，照老師雷達頁的版面，看大戶手上的股票是變多還是變少，再把我們的籌碼週報合在同一頁。", "「籌碼暴增雷達」：大戶手上的股票變多還變少"),
-            tb_open("openChipsPanel", "分頁有籌碼週報、主力大單、外資、投信、自營商、三大法人，還有法人連買、主力大單跟醞釀發動的交叉，以及放空籌碼。",
-                    "週報、主力大單、三大法人、∩醞釀發動、放空籌碼", pick=find("#chipsModal .chart-tab", "籌碼週報") + ".parentElement"),
+            tb_open("openChipsPanel", "分頁有籌碼暴增雷達、主力大單、外資、投信、自營商、三大法人，還有法人連買、主力大單跟醞釀發動的交叉，以及放空籌碼。",
+                    "籌碼暴增雷達、主力大單、三大法人、∩醞釀發動、放空籌碼", pick=find("#chipsModal .chart-tab", "籌碼暴增雷達") + ".parentElement"),
             {"say": "籌碼週報用集保的週資料：四百張以上的大戶，這週持股比上週多了總股數的幾趴。每週五結算、週六公布，整個下一週看到的都是同一份。",
              "cap": "集保 400 張以上大戶的週增減（每週五結算）", "pick": find("#chipsModal .rd-sec-title", "本週籌碼暴增榜")},
             {"say": "籌碼暴增代表主力在收貨。紅色是增加、綠色是減少，星星是連續兩週上榜；每一列最後的方塊是均線分數，十二分以上是實心金色。",
@@ -506,20 +510,36 @@ VIDEOS += [
         ],
     },
     {
-        "key": "tb-diag", "title": "選股・個股研究", "section": TB, "tab": None,
+        "key": "tb-diag", "title": "個股問診", "section": TB, "tab": None,
         "scenes": [
-            tb_intro("問診", "選股和個股研究，上面是條件選股，下面是個股研究。", "「選股・個股研究」：條件選股＋個股研究"),
-            tb_open("openDiagPanel", "系統選股：勾要用的條件、拉一下門檻，像均線分數、籌碼暴增、主動式ETF持有、法人買超，選出同時符合的名單。條件勾越多，名單越少、也越嚴格。",
-                    "勾條件、拉門檻，選出同時符合的名單", settle=4000, pick=find("#diagModal *", "均線分數 ≥")),
-            {"say": "懶得自己勾，可以直接按這一排的範本，像創高黑龍、強勢紅K、法人認養、籌碼暴增、河流便宜，一鍵帶入條件。",
-             "cap": "範本一鍵帶入：創高黑龍、法人認養、籌碼暴增…", "pick": find("#diagModal .scr-pre", "創高黑龍") + ".parentElement"},
-            {"say": "按開始篩選，下面就列出符合的股票；點名單任一列，會帶到下面的個股研究。",
-             "cap": "開始篩選 → 點一列帶到個股研究", "clickPick": find("#diagModal .scr-pre", "創高黑龍"), "click": "#diagModal .scr-go", "pick": visible("#diagModal table") + " || document.querySelector('#diagModal .scr-go')", "settle": 4000},
-            {"say": "個股研究打股號，一頁看完這一檔的強弱、七科體檢、三日低月線紅半這些防守線、日線圖、同族群對照、族群強度榜，還有一句結論。",
-             "cap": "個股研究：強弱、七科體檢、防守線、同族對照、結論",
+            tb_intro("問診", "個股問診，打一個股號，一次看那一檔的強弱、體檢、防守價和融資斷頭線。", "「個股問診」：打股號，一頁看完這一檔"),
+            tb_open("openDiagPanel", "最上面的搜尋列，打股號按問診。沒有打股號的時候，下面預設是融資斷頭線追蹤。",
+                    "打股號按「問診」；預設頁＝融資斷頭線追蹤", settle=5000, pick="document.querySelector('#diagModal .dg-search')"),
+            {"say": "融資斷頭線追蹤：借錢買股票的人，股價跌到某條線、融資維持率不夠，就會被斷頭。A是從最高點追進去的人的斷頭價，B是從五日平均價線追進去的人的斷頭價。盤中用即時價，算現價離斷頭價差幾趴。",
+             "cap": "融資斷頭線追蹤：A＝月高追、B＝五日線追；盤中即時算離斷頭價差", "pick": find("#diagModal .bl-section", "融資斷頭線追蹤")},
+            {"say": "賣壓狀態分四種：賣壓未釋放、略減還在觀察、釋放中、已洗掉一大半，按一下只看那一種。",
+             "cap": "賣壓狀態四種：未釋放／略減／釋放中／已洗掉一大半", "pick": "document.querySelector('#diagModal .mcl-pfilters')"},
+            {"say": "快速篩選可以只看離A、離B很近的，或落底訊號、回檔警示，還有盤中大戶力大於等於正十的股票。",
+             "cap": "快速篩選：離 A／B、落底訊號、回檔警示、大戶力 ≥ +10%", "pick": "document.querySelector('#diagModal .mcl-filters')"},
+            {"say": "每一列有現價、漲跌幅、離斷頭價差、賣壓狀態、落底訊號、回檔警示、大戶力和均線分數；欄位標題可以按，由大到小或由小到大排序。",
+             "cap": "每列：現價、漲跌幅、離斷頭價、賣壓、落底、回檔、大戶力、均線分數", "pick": "document.querySelector('#diagModal .hl-scroll')"},
+            {"say": "打股號問診，一頁看完這一檔的強弱、七科體檢、三日低月線紅半這些防守線、日線圖、同族群對照、族群強度榜，還有一句結論。",
+             "cap": "個股問診：強弱、七科體檢、防守線、同族對照、結論",
              "eval": "(() => { const i = document.getElementById('dgInput'); i.value = '2330'; const b = document.getElementById('dgRun'); if (b) b.click(); })()", "pick": "document.getElementById('dgInput').parentElement", "settle": 6000},
             {"say": "下面還有這家公司在做什麼的白話說明、近八季的財報，盤中十點以後還會整理今天在漲跌什麼。",
              "cap": "公司在做什麼、近 8 季財報、盤中今天在漲跌什麼", "pick": find("#diagModal *", "在做什麼")},
+        ],
+    },
+    {
+        "key": "tb-screener", "title": "系統選股", "section": TB, "tab": None,
+        "scenes": [
+            tb_intro("系統選股", "系統選股，勾條件、拉門檻，一次篩出同時符合的名單。", "「系統選股」：勾條件，篩出同時符合的名單"),
+            tb_open("openScreenerPanel", "條件有均線分數、籌碼暴增、主動式ETF持有、法人買超、處置股倒數、河流位置，還有融資斷頭線、賣壓狀態和形態；勾要用的、拉一下門檻。條件勾越多，名單越少，也越嚴格。",
+                    "勾條件、拉門檻：條件越多名單越少", settle=4000, pick="document.querySelector('#screenerModal .scr-grid')"),
+            {"say": "懶得自己勾，可以直接按這一排的範本，像創高黑龍、強勢紅K、法人認養、籌碼暴增、河流便宜，還有VCP收斂、W底、頭肩底這些形態，一鍵帶入條件。",
+             "cap": "範本一鍵帶入：創高黑龍、法人認養、籌碼暴增、形態…", "pick": find("#screenerModal .scr-pre", "創高黑龍") + ".parentElement"},
+            {"say": "按開始篩選，下面就列出符合的股票；點名單任一列，會打開個股問診，帶出那一檔。",
+             "cap": "開始篩選 → 點一列開個股問診", "clickPick": find("#screenerModal .scr-pre", "創高黑龍"), "click": "#screenerModal .scr-go", "pick": visible("#screenerModal table") + " || document.querySelector('#screenerModal .scr-go')", "settle": 4000},
         ],
     },
     {
@@ -590,7 +610,7 @@ BASIC_VIDEOS = [
         "key": "basic-home", "title": "首頁怎麼看", "section": BASIC, "tab": None,
         "scenes": [
             {"say": "首頁把所有族群，依照今天的平均漲跌幅排好，每十五秒自動更新一次。", "cap": "所有族群依平均漲跌幅排好，每 15 秒更新",
-             "eval": CLOSE_ALL + "; " + CLOSE_CHARTS, "target": "header .brand", "settle": 1200},
+             "eval": CLOSE_ALL + "; " + CLOSE_CHARTS + "; " + SEED905, "target": "header .brand", "settle": 1200},
             {"say": "上面這一塊是櫃買指數的盤勢：站上五分K的二十均線、又在第三根五分K低點之上，是強多；兩個都跌破是強空；一上一下就是個股震盪盤。後面的分數是指數的均線分數，六分是分水嶺。",
              "cap": "櫃買盤勢：強多／強空／個股震盪；均線分數 6 分是分水嶺", "target": "#otcStrengthBox"},
             {"say": "右邊是台指期近月：價位、漲跌點數和漲跌幅，漲紅跌綠，日盤夜盤自動切換，點一下可以打開K線圖。",
@@ -781,4 +801,87 @@ BASIC_VIDEOS = [
         ],
     },
 ]
+
+# 2026-11-02 使用者：有更新、漏掉說明的影片都補上——新增觀察股簡報、融資簡報、自選族群個股、籌碼日報三頁週分析
+_NEW_BASIC = [
+    {
+        "key": "basic-brief", "title": "觀察股簡報（本週誰最強、營收誰在加速）", "section": BASIC, "tab": None,
+        "scenes": [
+            {"say": "右上角的觀察股簡報，照老師影片的兩張投影片做成簡報：熱門族群，本週誰最強；還有營收，觀察股誰在加速。",
+             "cap": "📋 觀察股簡報：本週誰最強＋營收誰在加速", "eval": CLOSE_ALL + "; " + CLOSE_CHARTS, "target": "#briefBtn", "settle": 1200},
+            {"say": "上面這一張是熱門族群，本週誰最強。全部族群，從上週收盤到最新收盤的平均漲跌，排前十名，左邊是長條圖。",
+             "cap": "族群：本週（上週收盤→最新收盤）平均漲跌前 10 名", "eval": "openBriefPanel()", "pick": "document.querySelector('#briefBody .bf-slide .bf-card')", "settle": 4500},
+            {"say": "每個族群再抓強勢股：本週漲最多的，加上本週曾亮燈的；紅點就是本週有收盤漲停。點任何一檔，會打開K線圖。",
+             "cap": "每族強勢股；● ＝本週曾亮燈（收盤漲停）；點股票開 K 線", "pick": "document.querySelector('#briefBody .bf-gcard')"},
+            {"say": "再往下是本週發動股票：本週有發動，而且收盤還站在箱頂上的；盤中發動後收盤跌回箱頂下的不列。前面的時間是那天第一次發動，數字是本週漲跌。",
+             "cap": "本週發動股票：收盤還站在箱頂上的；時間＝第一次發動", "pick": find("#briefBody .bf-ct", "本週發動股票")},
+            {"say": "下面這一張是營收，觀察股誰在加速。全部族群照當月營收年增的中位數排前十名；每個族群的強勢股，是年增三成以上的，標出加速、放緩或年增為負，還有公布隔日的漲跌。",
+             "cap": "營收：族群年增中位數前 10；強勢股年增 ≥30%，加速／放緩、公布隔日漲跌", "pick": "document.querySelectorAll('#briefBody .bf-slide')[1]", "settle": 1500},
+            {"say": "簡報開著的時候，每分鐘用最新的資料重畫。這只整理位置和強弱，不是買賣建議。看完按叉叉關掉。",
+             "cap": "每分鐘自動更新；不是買賣建議", "pick": "document.getElementById('briefClose')"},
+        ],
+    },
+    {
+        "key": "basic-mb", "title": "融資簡報（融資還沒殺完？）", "section": BASIC, "tab": None,
+        "scenes": [
+            {"say": "右上角的融資簡報，照老師IG那七張融資還沒殺完做的，每天只盯一個數字：上市融資餘額。",
+             "cap": "💰 融資簡報：每天只盯上市融資餘額", "eval": CLOSE_ALL + "; " + CLOSE_CHARTS, "target": "#mbBtn", "settle": 1200},
+            {"say": "第一塊是這次跟上一次比：上一次大跌，融資從頂部退了多少；這次從高點退了多少，算出這次只退了上一次的幾趴。",
+             "cap": "這次 vs 上一次：融資退了多少、只退了上一次的幾 %", "eval": "openMbPanel()", "pick": "document.querySelector('#mbBody .bf-card')", "settle": 5000},
+            {"say": "這是融資餘額每天的增減長條圖，增加和減少用顏色分開，看最近一段時間，融資是在退還是又在加。",
+             "cap": "每天融資增減（億）長條圖", "pick": "document.querySelector('#mbBody .mb-bars')"},
+            {"say": "指數和融資的走勢放在一起，看誰先見頂、差幾天。",
+             "cap": "指數 vs 融資：誰先見頂、差幾天", "pick": "document.querySelector('#mbBody .mb-svg')"},
+            {"say": "最後是加權指數在均線的哪裡：月線、季線、半年線的位置。老師的看法是，A區看半年線附近，B彈看季線到月線之間，C看融資有沒有退到位；這裡只放均線位置，不寫死點位。",
+             "cap": "加權在月線／季線／半年線的位置（點位不寫死）", "pick": "document.querySelector('#mbBody .mb-ladder')"},
+            {"say": "這些數字都是用資料自己算出來的事實，每天晚上更新，不是買賣建議。看完按叉叉關掉。",
+             "cap": "資料每天晚上更新；不是買賣建議", "pick": "document.getElementById('mbClose')"},
+        ],
+    },
+    {
+        "key": "basic-wg", "title": "自選族群個股（一檔看整個族群）", "section": BASIC, "tab": None,
+        "scenes": [
+            {"say": "右上角的自選族群個股，輸入一檔股票，就開一格這檔所屬的族群排行。",
+             "cap": "⭐ 自選族群個股：輸入一檔，開出它所屬族群的排行", "eval": CLOSE_ALL + "; " + CLOSE_CHARTS, "target": "#wgBtn", "settle": 1200},
+            {"say": "在這裡輸入股號或名稱，按加入。例如二三三零，就會開出台積電所屬族群的漲幅排行，有多方線和空方線。",
+             "cap": "輸入股號或名稱 → 加入，開一格族群排行",
+             "eval": "openWgPanel(); setTimeout(() => { const i = document.getElementById('wgQ'); i.value = '2330'; document.querySelector('#wgBody [data-wg-go]').click(); }, 800)",
+             "pick": "document.querySelector('#wgBody .bot-q-row')", "settle": 5000},
+            {"say": "再輸入二三四四，又開一格；最多十格，一格一格往右排，每一格自己上下捲，開了哪幾格會記在這台電腦。",
+             "cap": "最多 10 格，一格一格往右排；開了哪幾格會記住",
+             "eval": "(() => { const i = document.getElementById('wgQ'); i.value = '2344'; document.querySelector('#wgBody [data-wg-go]').click(); })()",
+             "pick": "document.getElementById('wgColsBox')", "settle": 4500},
+            {"say": "每一檔後面多兩欄融資斷頭價：A是最高點追的，B是五日平均價線追的；下面小字是離現價差幾趴，已經跌破就標紅。欄位標題可以按，用來排序。",
+             "cap": "A／B 融資斷頭價＋離現價 %（已破標紅）；點欄位標題排序", "pick": "document.getElementById('wgColsBox')"},
+            {"say": "右上角的按鈕跟機器人代碼一樣：移到另一螢幕、最小化、最大化和關閉。",
+             "cap": "⧉ 移到另一螢幕、－ 最小化、▢ 最大化、✕ 關閉", "pick": "document.querySelector('#wgHead .bot-win-acts')"},
+        ],
+    },
+]
+_NEW_TB = [
+    {
+        "key": "tb-weekly", "title": "籌碼日報：三頁週分析（自選／季報EPS／收盤觀察股）", "section": TB, "tab": None,
+        "scenes": [
+            tb_open("openSwingPanel", "籌碼日報標題下面有三顆週分析按鈕：自選觀察股週分析、季報EPS，和收盤觀察股週分析。這支影片依序看一下。",
+                    "籌碼日報標題下面：三顆週分析按鈕", settle=4500, pick="document.querySelector('#swingBody .sp-wkbar')"),
+            {"say": "第一個是自選觀察股週分析，只算你自己的分組：預設是自選三和多觀察，之後新建的分組會自動加進來，上面可以勾選要算哪幾組。",
+             "cap": "自選觀察股 週分析：只算自己的分組（預設自選三＋多觀察）", "eval": "(() => { wlMutate((d) => { let g = d.groups.find((x) => x.name === '自選三'); if (!g){ g = { id: wlNewGroupId(d), name: '自選三', items: [] }; d.groups.push(g); } ['2330', '2317', '2454', '3017', '6505', '2603', '3231', '2382', '3037', '2308'].forEach((c) => { if (!g.items.some((it) => it.code === c)) g.items.push({ code: c, addedAt: twTodayStr() }); }); }); wkState.open = true; wkState.page = 'mine'; renderSwing(); document.getElementById('swingInner').scrollTop = 0; })()",
+             "pick": "document.querySelector('#swingBody .wk-h1')", "settle": 16000},
+            {"say": "下面依序是族群總覽、功課重點、高檔、月線下、危險個股，和近四週表現；近四週表現，最接近今天的那一週排在最上面。上面的目錄點了就跳過去。",
+             "cap": "族群總覽、功課重點、高檔、月線下、危險個股、近四週表現", "pick": "document.querySelector('#swingBody .wk-nav')"},
+            {"say": "第二個是季報EPS，分族群分析和多觀察分析：看單季EPS年增、毛利率往上幾個百分點，還有三率三升，和公布隔日的漲跌。",
+             "cap": "季報 EPS：單季 EPS 年增、毛利率▲、三率三升、公布隔日漲跌", "eval": "wkState.open = true; wkState.page = 'eps'; renderSwing(); document.getElementById('swingInner').scrollTop = 0",
+             "pick": "document.querySelector('#swingBody .wk-h1')", "settle": 5000},
+            {"say": "第三個是收盤觀察股週分析，名單來源是老師的：看名單異動、族群總覽，功課重點是一檔一張卡，還有高檔、月線下、危險個股和四週表現。",
+             "cap": "收盤觀察股 週分析：名單異動、族群總覽、功課重點、高檔、危險個股", "eval": "wkState.open = true; wkState.page = 'week'; renderSwing(); document.getElementById('swingInner').scrollTop = 0",
+             "pick": "document.querySelector('#swingBody .wk-h1')", "settle": 5000},
+            {"say": "按左上角的箭頭，就回到波段精選日報。",
+             "cap": "← 回到波段精選日報", "pick": "document.querySelector('#swingBody [data-wk-back]')"},
+        ],
+    },
+]
+_i = next(i for i, v in enumerate(BASIC_VIDEOS) if v["key"] == "basic-remind")
+BASIC_VIDEOS[_i + 1:_i + 1] = _NEW_BASIC
+_j = next(i for i, v in enumerate(VIDEOS) if v["key"] == "tb-swing")
+VIDEOS[_j + 1:_j + 1] = _NEW_TB
 VIDEOS = BASIC_VIDEOS + VIDEOS

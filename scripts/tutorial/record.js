@@ -9,9 +9,12 @@ const SITE = process.env.TUT_SITE || 'https://tw-groups.judystock.workers.dev';
 const SHOTS = path.join(__dirname, '.cache', 'shots');
 const code = fs.readFileSync(path.join(ROOT, 'src', 'index.js'), 'utf8');
 const { HTML_PAGE } = new Function(code.slice(0, code.indexOf('const CHUNK_SIZE')) + '\nreturn { GROUPS, HTML_PAGE };')();
-const live = (p) => new Promise((resolve, reject) => https.get(SITE + p, { headers: { 'user-agent': 'Mozilla/5.0 tutorial-recorder' } }, (res) => {
-  const cs = []; res.on('data', (c) => cs.push(c)); res.on('end', () => resolve([res.statusCode, res.headers['content-type'] || 'application/json', Buffer.concat(cs)]));
-}).on('error', reject));
+const live = (p, method = 'GET', payload = null) => new Promise((resolve, reject) => {
+  const r = https.request(SITE + p, { method, headers: Object.assign({ 'user-agent': 'Mozilla/5.0 tutorial-recorder' }, payload ? { 'content-type': 'application/json', 'content-length': Buffer.byteLength(payload) } : {}) }, (res) => {
+    const cs = []; res.on('data', (c) => cs.push(c)); res.on('end', () => resolve([res.statusCode, res.headers['content-type'] || 'application/json', Buffer.concat(cs)]));
+  });
+  r.on('error', reject); if (payload) r.write(payload); r.end();
+});   // 2026-11-02：自選觀察股 週分析是 POST（把自選分組送到後端算），錄影用的小伺服器也要轉 POST
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   if (url.pathname === '/'){ res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); return res.end(HTML_PAGE); }
@@ -19,7 +22,10 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/__tut/illus.js'){ res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8' }); return res.end(fs.readFileSync(path.join(__dirname, 'illus.js'))); }
   const shot = url.pathname.match(/^\/__tut\/shots\/([a-z]+)\.png$/);
   if (shot){ const f = path.join(SHOTS, shot[1] + '.png'); if (fs.existsSync(f)){ res.writeHead(200, { 'content-type': 'image/png' }); return res.end(fs.readFileSync(f)); } res.writeHead(404); return res.end(); }
-  try { const [st, ct, body] = await live(req.url); res.writeHead(st, { 'content-type': ct }); res.end(body); } catch (e) { res.writeHead(502); res.end('{}'); }
+  const chunks = []; req.on('data', (c) => chunks.push(c));
+  req.on('end', async () => {
+    try { const [st, ct, body] = await live(req.url, req.method, chunks.length ? Buffer.concat(chunks).toString() : null); res.writeHead(st, { 'content-type': ct }); res.end(body); } catch (e) { res.writeHead(502); res.end('{}'); }
+  });
 });
 const CSS = `
   #tutCap{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2147483000;max-width:90vw;background:rgba(15,15,22,.88);color:#fff;
@@ -28,7 +34,9 @@ const CSS = `
   #tutTitle{position:fixed;inset:0;z-index:2147483001;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
     background:linear-gradient(135deg,#3b0764,#7c3aed);color:#fff;font-family:"Noto Sans CJK TC","Noto Sans TC",sans-serif;}
   #tutTitle .t1{font-size:54px;font-weight:900;} #tutTitle .t2{font-size:26px;opacity:.9;}
-  .toast,#toastBox,#obsAlertBox,#launchAlertBox,#tutModal{display:none!important;}`;
+  .toast,#toastBox,#obsAlertBox,#launchAlertBox,#tutModal{display:none!important;}
+  .pk-alert,.launch-alert{display:none!important;}
+  body:not(.tut-show-td) #tdAlertBox{display:none!important;}`;   // 2026-11-02：盤中提醒小視窗（形態突破、落底回檔、融資斷頭價、自選股提醒）盤中會自己跳出來蓋住畫面，錄影時藏起來；每日功課的新訊號卡片（#tdAlertBox）只有那一段（加 tut-show-td）才顯示，其他影片藏起來
 (async () => {
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;
@@ -102,6 +110,7 @@ const CSS = `
   await page.waitForTimeout(2200);
   await page.evaluate(() => { const d = document.getElementById('tutTitle'); if (d) d.remove(); });
   for (const [i, sc] of spec.scenes.entries()){
+    if (process.env.TUT_DEBUG) console.error('[scene ' + i + '] ' + Math.round((Date.now() - t0) / 1000) + 's');
     if (sc.tab) await page.evaluate((k) => { openSignalCenter(); signalCenterState.activeTab = k; renderSignalCenter(); }, sc.tab);
     if (sc.eval) await page.evaluate(sc.eval);
     if (sc.clickPick){   // JS 運算式，回傳要點的元素（例如 __tutFind('#swingTabs .signal-tab', '籌碼面')）
@@ -135,6 +144,9 @@ const CSS = `
       const ok = await page.evaluate((sel) => { const el = document.querySelector(sel); if (!el) return false; el.scrollIntoView({ block: 'center' }); return true; }, sc.scroll);
       if (!ok) warnings.push('scene ' + i + ' scroll not found: ' + sc.scroll);
       await page.waitForTimeout(500);
+    }
+    if (sc.pick){   // 首頁那幾欄每 15 秒整塊重畫，標記可能在這一刻剛好被洗掉：框之前再確認一次，不在就重標
+      await page.evaluate((js) => { if (document.querySelector('[data-tutmark="1"]')) return; let el = null; try { el = eval(js); } catch (_){} if (el) el.setAttribute('data-tutmark', '1'); }, sc.pick);
     }
     const found = await page.evaluate(({ cap, target }) => {
       let c = document.getElementById('tutCap'); if (!c){ c = document.createElement('div'); c.id = 'tutCap'; document.body.appendChild(c); }

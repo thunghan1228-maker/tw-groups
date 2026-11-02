@@ -95,7 +95,16 @@ def main(args: list[str]) -> None:
     for video in VIDEOS:
         if args and video["key"] not in args:
             continue
-        info = build(video)
+        info = None
+        for attempt in (1, 2):   # 偶爾瀏覽器卡住（逾時）就再錄一次，兩次都失敗才跳過這支、繼續錄下一支
+            try:
+                info = build(video)
+                break
+            except Exception as exc:  # noqa: BLE001
+                print("  失敗（第", attempt, "次）：", video["key"], str(exc)[-300:], flush=True)
+        if info is None:
+            print("  跳過：", video["key"], flush=True)
+            continue
         if info.pop("warnings"):
             print("  注意：", video["key"], "有找不到的元素，看 .cache/raw/*.timeline.json")
         existing[video["key"]] = info
