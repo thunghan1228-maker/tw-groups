@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-02 10:52:55";
+const BUILD_STAMP = "2026-11-02 11:12:00";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -9990,9 +9990,10 @@ function home905BcastColHtml(){
     const q = getStockQuote(x.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : (r.pct !== undefined && r.pct !== null ? r.pct : x.pct);
     const st = r.ev ? (r.inside ? '<span class="td-bk bk-above hr-bk">之上</span>' : '<span class="td-bk bk-below hr-bk">之下</span>') : '';
-    const tip = (x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + (r.ev ? (r.inside ? '・在 905 之上' : '・收回 905 之下') : '') + '・首次突破 ' + (x.brk || '');
+    const brkT = (r.ev && r.ev.length ? r.ev[0].t : '') || x.brk || x.t;   // 2026-11-02 使用者：首頁這欄的時間是第一次突破（5 分K 收盤站上 905 高）的時間，不是四個條件齊全的時間；排序照條件齊全的時間不變
+    const tip = (x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + (r.ev ? (r.inside ? '・在 905 之上' : '・收回 905 之下') : '') + '・首次突破 ' + brkT + '・條件齊全 ' + x.t;
     return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(wlNameOf(x.code)) + '" tabindex="0" role="button" title="' + wlEsc(tip) + '">' +
-      '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(x.t) + '</span><span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(wlNameOf(x.code)) + '</span>' + st +
+      '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(brkT) + '</span><span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(wlNameOf(x.code)) + '</span>' + st +
       '<span class="hr-avg ' + (Number.isFinite(pct) ? dirClass(pct) : 'flat') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '') + '</span>' + homeHoldHtml(x.code) + '</div>';
   };
   return '<div class="hr-col"><div class="hr-title">🎯 905 突破廣播 <span class="hr-rk">' + (list.length > 20 ? '最新 20／共 ' : '') + list.length + ' 檔</span></div>' +
@@ -17157,7 +17158,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-02 10:52:55';
+const BUILD_STAMP = '2026-11-02 11:12:00';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

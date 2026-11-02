@@ -9901,9 +9901,10 @@ function home905BcastColHtml(){
     const q = getStockQuote(x.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : (r.pct !== undefined && r.pct !== null ? r.pct : x.pct);
     const st = r.ev ? (r.inside ? '<span class="td-bk bk-above hr-bk">之上</span>' : '<span class="td-bk bk-below hr-bk">之下</span>') : '';
-    const tip = (x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + (r.ev ? (r.inside ? '・在 905 之上' : '・收回 905 之下') : '') + '・首次突破 ' + (x.brk || '');
+    const brkT = (r.ev && r.ev.length ? r.ev[0].t : '') || x.brk || x.t;   // 2026-11-02 使用者：首頁這欄的時間是第一次突破（5 分K 收盤站上 905 高）的時間，不是四個條件齊全的時間；排序照條件齊全的時間不變
+    const tip = (x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + (r.ev ? (r.inside ? '・在 905 之上' : '・收回 905 之下') : '') + '・首次突破 ' + brkT + '・條件齊全 ' + x.t;
     return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(wlNameOf(x.code)) + '" tabindex="0" role="button" title="' + wlEsc(tip) + '">' +
-      '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(x.t) + '</span><span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(wlNameOf(x.code)) + '</span>' + st +
+      '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(brkT) + '</span><span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(wlNameOf(x.code)) + '</span>' + st +
       '<span class="hr-avg ' + (Number.isFinite(pct) ? dirClass(pct) : 'flat') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '') + '</span>' + homeHoldHtml(x.code) + '</div>';
   };
   return '<div class="hr-col"><div class="hr-title">🎯 905 突破廣播 <span class="hr-rk">' + (list.length > 20 ? '最新 20／共 ' : '') + list.length + ' 檔</span></div>' +
