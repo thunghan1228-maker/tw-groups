@@ -1020,6 +1020,8 @@
   #signalTabsBar .signal-tab[data-kind="mainForceFlipBull"]{grid-area:3/3;}
   #signalTabsBar .signal-tab[data-kind="bigHolderForceBear"]{grid-area:4/1;} #signalTabsBar .signal-tab[data-kind="fourGateSell"]{grid-area:4/2;}
   #signalTabsBar .signal-tab[data-kind="mainForceFlipBear"]{grid-area:4/3;}
+  /* 2026-11-02 使用者：開低VWAP上(88)／開高VWAP下(87)——手機／平板補在第 3、4 排最後一格（主力翻多／翻空右邊），一樣上下成對 */
+  #signalTabsBar .signal-tab[data-kind="gapDownAboveVwap"]{grid-area:3/4;} #signalTabsBar .signal-tab[data-kind="gapUpBelowVwap"]{grid-area:4/4;}
   /* 2026-10-13 使用者：平板／手機版 1+2多 跟醞釀對調——第 5 排 1+2多／盤中333／所有族群綜合表／醞釀，1+2多 正下方是創高黑龍 */
   #signalTabsBar .signal-tab[data-kind="combo12Bull"]{grid-area:5/1;} #signalTabsBar .signal-tab[data-kind="brewOnly"]{grid-area:5/4;}
   #signalTabsBar .signal-tab[data-kind="blackDragon"]{grid-area:6/1;}
@@ -1037,7 +1039,8 @@
   #signalTabsBar .signal-tab[data-kind="nowBear"]:hover{background:#166534;border-color:#166534;color:#fff;}
   #signalTabsBar .signal-tab[data-kind="nowBear"].active{background:#22c55e;border-color:#fff;color:#fff;box-shadow:0 0 0 2px #15803d;}
   #signalTabsBar .signal-tab[data-kind="now"] .sig-count,#signalTabsBar .signal-tab[data-kind="nowBear"] .sig-count{background:rgba(255,255,255,.25);color:#fff;}
-  @container (min-width: 1040px){ #signalTabsBar{grid-template-columns:repeat(7,minmax(0,1fr));} #signalTabsBar .signal-tab[data-kind]{grid-area:auto;} #signalModalInner #signalTabsBar .signal-tab,#sgtBody #signalTabsBar .signal-tab{font-size:16px;white-space:nowrap;} }
+  /* 2026-11-02 使用者：多了 88／87 → 電腦版一排 8 格（多空照樣上下成對），字 16→15px 才放得下「開低VWAP上(88)」 */
+  @container (min-width: 1040px){ #signalTabsBar{grid-template-columns:repeat(8,minmax(0,1fr));} #signalTabsBar .signal-tab[data-kind]{grid-area:auto;} #signalModalInner #signalTabsBar .signal-tab,#sgtBody #signalTabsBar .signal-tab{font-size:15px;white-space:nowrap;letter-spacing:-.3px;} }
   /* 盤後籌碼排行（2026-09-25 使用者：底部「盤後籌碼排行」先做） */
   .chips-modal{position:fixed;inset:0;z-index:102;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:10px;}
   .chips-modal[hidden]{display:none;}
@@ -4443,7 +4446,9 @@
       <ul>
         <li><b>今日即時多</b>：彙整多方向訊號的即時清單：最上面一塊是盤中大戶力多的名單（時間＝第一次進名單，早進名單的在上面、新進的往下排），下面是四項精選強多、1+2多、創高黑龍、主力翻多、盤中特大買單依發生時間新到舊排序。也包含十大多族群裡大戶力 ≥ +10% 的股票（訊號寫「十大多族群」）。今日強勢股裡大戶力 ≥ +10% 的也會進來（訊號寫「今日強勢股」）。今天／昨天／前天後面的「盤中大戶力≥10%」按下去只看大戶力 ≥ +10% 的股票（上面的名單跟下面的訊號都套，再按一次全部顯示）；今日即時空同樣有「≤-10%」。</li>
         <li><b>今日即時空</b>：彙整空方向訊號的即時清單：最上面一塊是新刀劍空(32)的即時名單（排法跟機器人代碼 32 一樣，一檔一列、時間在左、跑／回標籤，不分段、全部照時間排：早發生的在上面、最新發生的（進榜、跑、回）在最下面貼著兩條黑線，只有今天有；前面的 🔺＝多方打少、🔽＝中間段、🔰＝強空積極、♣＝收割區域），下面是盤中大戶力空、四項精選強空、主力翻空、盤中特大賣單依發生時間新到舊排序；跟今日即時多完全不重複。捲到刀劍空下面那兩條黑線時，畫面會固定在線上：自動更新後線不會跑掉，最新的訊號從線的正下方冒出來、舊的往下推。也包含十大空族群裡大戶力 ≤ −10% 的股票（訊號寫「十大空族群」）。今日弱勢股裡大戶力 ≤ −10% 的也會進來（訊號寫「今日弱勢股」）。</li>
+        <li><b>開低VWAP上(88)</b>（2026-11-02）：今天開低（開盤價低於昨天收盤），但盤中 1 分K收盤站上 VWAP（今日均價＝當日累計成交金額 ÷ 成交量）。每檔一天只列一次，時間＝第一次站上的那根 1 分K收盤時間（例如 09:02 那根收在 09:03）；開平盤不算。盤中即時判斷（開盤價、VWAP 用永豐 tick 帶的當日開盤、均價），收盤後 13:40 起用當天完整 1 分K重播一次校正。只看族群裡的股票，不併進今日即時多。跟機器人代碼 88 同一份。可切今天／昨天／前天。</li>
         <li><b>今日強勢股</b>：族群分數前十大（族群裡每檔均線分數的平均，跟均線分數排行同一套）裡、均線分數 ≥12 的股票，照族群名次排。用今日即時行情篩：今天下跌（現價低於昨收）的不列，盤後也一樣（弱勢股反過來，今天上漲的不列），整族都不符合就不列那一族；週末、連假、開盤前還沒有「今天」，整份照列。⭐＝這族今天也有出現在強勢黑K選股（通常是比較強勢的族群）、👀＝這檔在強勢黑K選股名單裡。盤中均線分數、族群分數、族群名次都用現價當今天收盤即時重算（後端每 45 秒更新一次，新上市日K不足 240 天的算不出）、收盤後整表出來就用正式收盤分數；現價、漲跌、大戶力也是即時的；按「大戶力 ≥ +10%」只看大戶力夠強的。</li>
+        <li><b>開高VWAP下(87)</b>（2026-11-02）：倒過來，今天開高（開盤價高於昨天收盤），但盤中 1 分K收盤跌破 VWAP。其他規則同 88，不併進今日即時空。跟機器人代碼 87 同一份。</li>
         <li><b>今日弱勢股</b>：倒過來，族群分數倒數十名裡、均線分數 ≤3 的股票，平均分最低的族群排最前面；按「大戶力 ≤ −10%」只看大戶在賣的。</li>
         <li><b>十大多族群</b>（原精選十大多空族群的多方）：今天漲幅前10大族群，各取大戶力最強的前5檔個股；按「大戶力≥10%」只看大戶力 ≥ +10% 的。</li>
         <li><b>十大空族群</b>（原精選十大多空族群的空方）：今天跌幅前10大族群，各取大戶力最負（賣超）的前5檔個股，名次從最弱的數；按「大戶力≤-10%」只看大戶力 ≤ −10% 的。</li>
@@ -7265,6 +7270,7 @@ const SIGNAL_KINDS = [
   // 2026-10-13 使用者：電腦版一排 7 格、多空上下成對——第 1 排多方（今日即時多、今日強勢股、十大多族群、盤中特大買單、盤中大戶力多、四項精選強多、主力翻多），
   // 第 2 排正下方是對應的空方（今日即時空、今日弱勢股、十大空族群、盤中特大賣單、盤中大戶力空、四項精選強空、主力翻空），後面依序排其他分頁。
   { key: 'now', label: '今日即時多' },      // 2026-10-04 使用者：拆成多／空兩頁，多方向留在這裡
+  { key: 'gapDownAboveVwap', label: '開低VWAP上(88)' },   // 2026-11-02 使用者：開低（開盤＜昨收）、1 分K收盤站上 VWAP；放今日即時多右邊、今日強勢股左邊（電腦版一排改 8 格）
   { key: 'strongStocks', label: '今日強勢股' },   // 2026-10-12 使用者：族群分數前十大＋均線分數高；2026-10-18 改名昨日強勢股；2026-10-19 使用者：改回今日強勢股（盤後後端用今天收盤重算分數，再用今日即時行情篩今天沒跌的）
   { key: 'groupHolderBull', label: '十大多族群' },
   { key: 'bigBuy', label: '盤中特大買單' },  // 2026-10-05 使用者：排到盤中333 右邊；2026-10-08 字改紅色（跟其他多方分頁同色）
@@ -7272,6 +7278,7 @@ const SIGNAL_KINDS = [
   { key: 'fourGateBuy', label: '四項精選強多' },
   { key: 'mainForceFlipBull', label: '主力翻多' },   // 2026-10-13 使用者：移到 1+2多 左邊
   { key: 'nowBear', label: '今日即時空' },  // 2026-10-04 使用者：刀劍空＋盤中大戶力空＋四項精選強空＋主力翻空＋盤中特大賣單集中這一頁
+  { key: 'gapUpBelowVwap', label: '開高VWAP下(87)' },     // 2026-11-02 使用者：開高（開盤＞昨收）、1 分K收盤跌破 VWAP；放今日即時空右邊、今日弱勢股左邊
   { key: 'weakStocks', label: '今日弱勢股' },     // 2026-10-12 使用者：倒過來，族群分數倒數十名＋均線分數低，放強勢股旁邊
   { key: 'groupHolderBear', label: '十大空族群' },
   { key: 'bigSell', label: '盤中特大賣單' },   // 2026-10-13 使用者：移到刀劍空(32) 右邊
@@ -7402,11 +7409,12 @@ function mapLargeOrderSignal(s){
   // 瞬間大單/特大買賣單分頁(那樣分頁會被污染成跟大單一樣的數字)。
   const klineInfo = KLINE_SIGNAL_INFO[kind];
   const isFlip = kind === 'mainForceFlipBull' || kind === 'mainForceFlipBear';
-  const isBuy = klineInfo ? klineInfo.side === 'bull' : (kind === 'instantLargeBuy' || kind === 'fourGateBuy' || kind === 'mainForceFlipBull');
+  const isGap = kind === 'gapDownAboveVwap' || kind === 'gapUpBelowVwap';   // 88／87（2026-11-02）：只進自己的分頁，不併進今日即時多／空
+  const isBuy = klineInfo ? klineInfo.side === 'bull' : (kind === 'instantLargeBuy' || kind === 'fourGateBuy' || kind === 'mainForceFlipBull' || kind === 'gapDownAboveVwap');
   const backendName = s.name && s.name !== s.ticker ? s.name : null;
   return {
     // 2026-10-04 使用者：今日即時拆成多／空兩頁，空方向的訊號（四項精選強空／主力翻空／特大賣單）進「今日即時空」，不再混在一起。
-    tabs: isFourGate ? [isBuy ? 'now' : 'nowBear', kind] : isFlip ? [isBuy ? 'now' : 'nowBear', isBuy ? 'mainForceFlipBull' : 'mainForceFlipBear'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : [isBuy ? 'now' : 'nowBear', isBuy ? 'bigBuy' : 'bigSell']),
+    tabs: isGap ? [kind] : isFourGate ? [isBuy ? 'now' : 'nowBear', kind] : isFlip ? [isBuy ? 'now' : 'nowBear', isBuy ? 'mainForceFlipBull' : 'mainForceFlipBear'] : (DEDICATED_KLINE_TABS.has(kind) ? ['now', kind] : [isBuy ? 'now' : 'nowBear', isBuy ? 'bigBuy' : 'bigSell']),
     time: new Date(s.barTs).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }),
     ts: s.barTs,
     code: s.ticker, name: backendName || lookupStockName(s.ticker), group: s.groupName, label: s.label, isBuy,
@@ -7589,7 +7597,7 @@ function holderEmptyHtml(view, title, sub){
 // 使用者 2026-09-25：訊號為零的分頁昨天的都沒留下來，要能看昨天、前天的資料來檢查。往日的訊號後端本來就
 // 每天保存（跟歷史查詢分頁同一條路），這裡讓每個訊號分頁都能直接切；休市日、開盤前或停止交易今天還沒有訊號時，
 // 比照大戶力分頁沿用上一個交易日（後端排行帶 heldFrom），按鈕寫「今天（mm/dd 收盤）」。
-const SIGNAL_DAY_TABS = new Set(['now', 'nowBear', 'fourGateBuy', 'fourGateSell', 'combo12Bull', 'blackDragon', 'mainForceFlipBull', 'mainForceFlipBear', 'bigBuy', 'bigSell']);
+const SIGNAL_DAY_TABS = new Set(['now', 'nowBear', 'gapDownAboveVwap', 'gapUpBelowVwap', 'fourGateBuy', 'fourGateSell', 'combo12Bull', 'blackDragon', 'mainForceFlipBull', 'mainForceFlipBear', 'bigBuy', 'bigSell']);
 let sigDayOffset = 0;
 const sigHistoryEvents = {};   // date -> events[]（抓過就留著）
 const sigHistoryLoading = {};
@@ -17494,8 +17502,8 @@ function stPanelHtml(side){
   return h;
 }
 const PURPLE_TAB_KEYS = new Set(['obsWatch', 'now', 'groupCombinedBoard', 'race333', 'brewOnly', 'launchOnly']);  // 2026-09-24 使用者：醞釀／發動也紫紅色；2026-09-26：盤中大戶力改回黑字；2026-10-08：今日即時多也紫色
-const GREEN_TAB_KEYS = new Set(['weakStocks', 'groupHolderBear', 'nowBear', 'bladeShort', 'kill193', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear']);  // 2026-10-04：今日即時空也綠字
-const RED_TAB_KEYS = new Set(['strongStocks', 'groupHolderBull', 'bigBuy', 'bigHolderForceBull', 'fourGateBuy', 'combo12Bull', 'blackDragon', 'mainForceFlipBull']);
+const GREEN_TAB_KEYS = new Set(['weakStocks', 'groupHolderBear', 'nowBear', 'bladeShort', 'kill193', 'bigSell', 'bigHolderForceBear', 'fourGateSell', 'mainForceFlipBear', 'gapUpBelowVwap']);  // 2026-10-04：今日即時空也綠字
+const RED_TAB_KEYS = new Set(['strongStocks', 'groupHolderBull', 'bigBuy', 'bigHolderForceBull', 'fourGateBuy', 'combo12Bull', 'blackDragon', 'mainForceFlipBull', 'gapDownAboveVwap']);
 // 資料抓回來要重畫：盤中訊號開著就重畫；盤中訊號分頁開著也跟著重畫
 // （2026-10-18 使用者：另開的盤中訊號分頁視窗，今日即時多、四項精選一直停在「讀取中」——抓回來只叫了盤中訊號重畫）
 function sigRefreshViews(){
@@ -17650,7 +17658,7 @@ function signalTabContent(active){
     } else inner = signalRowsHtml(view.events.filter((e) => e.tabs.includes(active)), view,
       // 2026-10-13 使用者：四項精選也加盤中大戶力（放漲跌幅左邊）；主力翻多／翻空也加（放訊號右邊，跟特大買賣單一樣）
       active === 'fourGateBuy' || active === 'fourGateSell' ? { holder: 'right' }
-        : active === 'mainForceFlipBull' || active === 'mainForceFlipBear' ? { holder: true } : null);
+        : active === 'mainForceFlipBull' || active === 'mainForceFlipBear' || active === 'gapDownAboveVwap' || active === 'gapUpBelowVwap' ? { holder: true } : null);
     return sigTabRet(key, sigDayBarHtml() + sigDayNoteHtml(view) + inner);
   } else {
     const events = todaySignalEvents.filter((e) => e.tabs.includes(active));
@@ -24197,7 +24205,7 @@ const BOT_CODES = [
   ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行，每族列漲幅前三大的股票（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：固定的族群裡，今天衝高 3% 以上、現價漲幅不超過 1.55%，而且三個條件到齊的股票：①1高＝破惡前的最高（不是開盤衝的那根）②5 分K 從 20MA 上面收盤跌破（破惡），現在還在 20MA 下面、20MA 往下彎（均下彎）③破惡之後的反彈（2）沒過 1高，過了 1高就拿掉、要再跌破才重新算；每列最前面是進名單的時間，新的在上面。每一檔分兩個階段：藍色「① 剛轉弱」＝剛跌破 20MA、20MA 下彎、還沒反彈（右邊寫 1高＝停損價）；綠色「② 不過前高可空」＝破了以後反彈出現「2」、沒過 1高（前高）→ 可以空，停損放 1高（還有一條篩選我們沒找到，所以會列得比實際多）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['183', '多族群排名：固定族群，往下掉的標 🔪⚔️，多方線以上列漲 5% 以上的 ⚠️ 個股'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
   ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'], ['三落空', '熄火落馬斷流：熄火空(30 顛倒)、落馬空(33 顛倒)、斷流空(34 顛倒) 三份都有、而且可放空（有券、非處置股）的弱勢股'],
-  ['44', '今天 1+2 多（突破黑馬）'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
+  ['44', '今天 1+2 多（突破黑馬）'], ['88', '開低站上 VWAP：今天開盤低於昨收、1 分K收盤站上 VWAP（偏多），跟訊號中心「開低VWAP上(88)」同一份'], ['87', '開高跌破 VWAP：今天開盤高於昨收、1 分K收盤跌破 VWAP（偏空），跟訊號中心「開高VWAP下(87)」同一份'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖雙週入榜黑龍：前兩個交易日上 811、今天收黑K（⭐＝兩週內又上榜幾次）'],
   ['81', '隔日沖買超排序（每天六點後更新）'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
@@ -24645,7 +24653,7 @@ function botAnswer(raw){
   if (!q) return null;
   // 2026-10-18 使用者：空方的（負號代碼 -12、-22…）跟隔日沖 811、813 的標題改綠底白字；
   // 同一天又加：空族群排名(199)、空族群必殺(193)、新刀劍空(32)、刀劍空(31)，連同終點戰法空(283／284／股號+3)
-  const bear = /^-/.test(q) || ['811', '813', '193', '199', '283', '284', '31', '32', '123', '三落空'].includes(q) || /^.+\+3$/.test(q);
+  const bear = /^-/.test(q) || ['811', '813', '193', '199', '283', '284', '31', '32', '123', '87', '三落空'].includes(q) || /^.+\+3$/.test(q);
   // 177 重點族群排名多空都有：標題左半綠、右半紅，白字（2026-10-18 使用者）
   const title = (t, sub) => '<div class="bot-title' + (bear ? ' bot-title-bear' + (['32', '123', '193', '199'].includes(q) ? ' bot-title-navy' : '') : q === '177' ? ' bot-title-split' : '') + '">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
   const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
@@ -24945,6 +24953,16 @@ function botAnswer(raw){
   if (q === '31'){
     const list = kill31Model();
     return wrap('🔪⚔️刀劍空(31)', (list || []).map((r) => botLine(botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' + r.mk))).join('') || botLine(list ? '目前沒有' : '讀取中…', 'bot-dim'));
+  }
+  if (q === '88' || q === '87'){
+    // 2026-11-02 使用者：88＝開低站上 VWAP（多）、87＝開高跌破 VWAP（空），跟訊號中心同名分頁同一份；時間＝第一次符合，新的在上面
+    const tab = q === '88' ? 'gapDownAboveVwap' : 'gapUpBelowVwap';
+    const seen = new Set();
+    const rows = sigCurrentEvents().filter((e) => (e.tabs || []).includes(tab)).sort((a, b) => (b.ts || 0) - (a.ts || 0)).filter((e) => !seen.has(e.code) && seen.add(e.code));
+    const pctOf = (e) => { const qq = getStockQuote(e.code); const v = qq && Number.isFinite(qq.changePercent) ? qq.changePercent : null; return Number.isFinite(v) ? v : null; };
+    return wrap(q === '88' ? '開低站上VWAP(88)' : '開高跌破VWAP(87)', rows.map((e) => { const v = pctOf(e); return botLine('<span style="color:#a78bfa;font-variant-numeric:tabular-nums">' + wlEsc(e.time || '--:--') + '</span> ' +
+      botStk(e.code, e.name, (v === null ? '' : ' <span class="' + dirClass(v) + '">' + botPct(v) + '</span>') + (e.group ? ' <span class="bot-dim">' + wlEsc(e.group) + '</span>' : ''))); }).join('') || botLine('今天還沒有', 'bot-dim'),
+      stamp + '・共 ' + rows.length + ' 檔・跟訊號中心同一份');
   }
   if (q === '44'){
     const ev = sigCurrentEvents().filter((e) => e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull'));
@@ -25574,7 +25592,7 @@ function sgtHistHtml(){
 }
 // 每格寬度（px）：照那個分頁一列要放的欄位量來定；表格（發動、醞釀、所有族群綜合表）最寬，強勢黑K選股最窄。要調寬窄改這裡
 const SGT_COL_W = {
-  now: 540, strongStocks: 580, groupHolderBull: 560, bigBuy: 540, bigHolderForceBull: 540, fourGateBuy: 540, mainForceFlipBull: 540,
+  now: 540, gapDownAboveVwap: 540, gapUpBelowVwap: 540, strongStocks: 580, groupHolderBull: 560, bigBuy: 540, bigHolderForceBull: 540, fourGateBuy: 540, mainForceFlipBull: 540,
   nowBear: 600, weakStocks: 580, groupHolderBear: 560, bigSell: 540, bigHolderForceBear: 540, fourGateSell: 540, mainForceFlipBear: 540,
   obsWatch: 420, launchOnly: 700, brewOnly: 740, race333: 600, groupCombinedBoard: 680, combo12Bull: 540, blackDragon: 540,
   bladeShort: 620, kill193: 440, history: 540,
