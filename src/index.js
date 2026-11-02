@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-02 09:47:36";
+const BUILD_STAMP = "2026-11-02 09:55:32";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -17157,7 +17157,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-02 09:47:36';
+const BUILD_STAMP = '2026-11-02 09:55:32';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25632,7 +25632,8 @@ const sgtEmptyTip = (i) => (i === sgtState.active ? '點上面的分頁名稱，
 function renderSgt(){
   const body = document.getElementById('sgtBody');
   const tops = {}, lefts = [];
-  body.querySelectorAll('.bot-col').forEach((el) => { tops[el.dataset.pane + ':' + el.dataset.colKey] = el.scrollTop; });
+  const anchors = {};
+  body.querySelectorAll('.bot-col').forEach((el) => { const k = el.dataset.pane + ':' + el.dataset.colKey; tops[k] = el.scrollTop; if (el.scrollTop > 0) anchors[k] = signalAnchor(el, el); });   // 換內容前記下畫面最上面看得到的那幾列（見 sgtReplaceCol）
   body.querySelectorAll('.bot-cols').forEach((b) => { lefts[+b.dataset.pane] = b.scrollLeft; });
   sgtState.panes.forEach((p) => p.cols.forEach((c) => { c.html = sgtTabHtml(c.key); }));
   const any = sgtState.panes.some((p) => p.cols.length);
@@ -25651,8 +25652,9 @@ function renderSgt(){
   body.querySelectorAll('.bot-col').forEach((el) => {
     const c = sgtState.panes[+el.dataset.pane].cols.find((x) => x.key === el.dataset.colKey);
     el._html = c ? c.html : '';
-    const t = tops[el.dataset.pane + ':' + el.dataset.colKey];
-    if (t) el.scrollTop = t;
+    const k = el.dataset.pane + ':' + el.dataset.colKey, t = tops[k];
+    if (t) sgtSetTop(el, t);
+    if (anchors[k]){ const n = signalFindAnchor(el, anchors[k]); if (n) sgtSetTop(el, el.scrollTop + n.node.getBoundingClientRect().top - n.y); }
   });
   body.querySelectorAll('.bot-cols').forEach((b) => { const l = lefts[+b.dataset.pane]; if (l) b.scrollLeft = l; });
   sgtSave();
@@ -25699,16 +25701,47 @@ function sgtRerender(){
   const flat = [];
   sgtState.panes.forEach((p, i) => p.cols.forEach((c) => flat.push([i, c])));
   if (els.length !== flat.length || els.some((el, j) => el.dataset.colKey !== flat[j][1].key || +el.dataset.pane !== flat[j][0])){ renderSgt(); return; }
+  let deferred = false;
   els.forEach((el, j) => {
     const c = flat[j][1];
     c.html = sgtTabHtml(c.key);
     if (el._html === c.html) return;
-    const top = el.scrollTop;
-    el.innerHTML = sgtColInner(c);
-    el._html = c.html;
-    el.scrollTop = top;
+    if (Date.now() - (el._userAt || 0) < SGT_SCROLL_IDLE_MS){ deferred = true; return; }   // 使用者正在捲這格：這一輪先不換，停下來再補（捲動中換內容會被打斷、跳位置）
+    sgtReplaceCol(el, c);
   });
+  if (deferred && !sgtDeferTimer) sgtDeferTimer = setTimeout(() => { sgtDeferTimer = null; try { sgtRerender(); } catch (_){} }, SGT_SCROLL_IDLE_MS + 100);
 }
+// 2026-11-02 使用者：盤中訊號（一格一格排的那個視窗，例如盤中大戶力空）捲到哪就要停在哪，新的訊號進來不要把正在看的那幾筆往下推。
+// 原本只記「捲了多少像素」，上面多一筆新的，正在看的就整個被往下擠；改成跟訊號中心單頁一樣用「畫面最上面看得到的那幾列」對齊：
+// 換完內容找到同一檔（代號＋時間＋訊號名稱）的那一列，把它放回原本在畫面上的位置，新的從上面進來、不動到正在看的地方。
+// 在最上面（沒捲動）的格子不動這個，新的照樣從最上面冒出來。使用者還在捲（1.2 秒內）先不換。
+const SGT_SCROLL_IDLE_MS = 1200;
+let sgtDeferTimer = null;
+function sgtSetTop(el, v){
+  if (!Number.isFinite(v) || Math.abs(el.scrollTop - v) < 1) return;
+  el._progAt = Date.now();
+  el.scrollTop = v;
+}
+function sgtReplaceCol(el, c){
+  const top = el.scrollTop;
+  const anchor = top > 0 ? signalAnchor(el, el) : null;
+  el.innerHTML = sgtColInner(c);
+  el._html = c.html;
+  sgtSetTop(el, top);
+  if (anchor){
+    const n = signalFindAnchor(el, anchor);
+    if (n) sgtSetTop(el, el.scrollTop + n.node.getBoundingClientRect().top - n.y);
+  }
+}
+(function(){
+  const body = document.getElementById('sgtBody');
+  if (!body) return;
+  body.addEventListener('scroll', (e) => {
+    const t = e.target;
+    if (!t || !t.classList || !t.classList.contains('bot-col')) return;
+    if (Date.now() - (t._progAt || 0) > 150) t._userAt = Date.now();   // 使用者自己捲的（不是程式設的）
+  }, { passive: true, capture: true });
+})();
 function sgtRun(key){
   const cols = sgtState.panes[sgtState.active].cols;
   const i = cols.findIndex((c) => c.key === key);

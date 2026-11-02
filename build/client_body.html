@@ -25543,7 +25543,8 @@ const sgtEmptyTip = (i) => (i === sgtState.active ? '點上面的分頁名稱，
 function renderSgt(){
   const body = document.getElementById('sgtBody');
   const tops = {}, lefts = [];
-  body.querySelectorAll('.bot-col').forEach((el) => { tops[el.dataset.pane + ':' + el.dataset.colKey] = el.scrollTop; });
+  const anchors = {};
+  body.querySelectorAll('.bot-col').forEach((el) => { const k = el.dataset.pane + ':' + el.dataset.colKey; tops[k] = el.scrollTop; if (el.scrollTop > 0) anchors[k] = signalAnchor(el, el); });   // 換內容前記下畫面最上面看得到的那幾列（見 sgtReplaceCol）
   body.querySelectorAll('.bot-cols').forEach((b) => { lefts[+b.dataset.pane] = b.scrollLeft; });
   sgtState.panes.forEach((p) => p.cols.forEach((c) => { c.html = sgtTabHtml(c.key); }));
   const any = sgtState.panes.some((p) => p.cols.length);
@@ -25562,8 +25563,9 @@ function renderSgt(){
   body.querySelectorAll('.bot-col').forEach((el) => {
     const c = sgtState.panes[+el.dataset.pane].cols.find((x) => x.key === el.dataset.colKey);
     el._html = c ? c.html : '';
-    const t = tops[el.dataset.pane + ':' + el.dataset.colKey];
-    if (t) el.scrollTop = t;
+    const k = el.dataset.pane + ':' + el.dataset.colKey, t = tops[k];
+    if (t) sgtSetTop(el, t);
+    if (anchors[k]){ const n = signalFindAnchor(el, anchors[k]); if (n) sgtSetTop(el, el.scrollTop + n.node.getBoundingClientRect().top - n.y); }
   });
   body.querySelectorAll('.bot-cols').forEach((b) => { const l = lefts[+b.dataset.pane]; if (l) b.scrollLeft = l; });
   sgtSave();
@@ -25610,16 +25612,47 @@ function sgtRerender(){
   const flat = [];
   sgtState.panes.forEach((p, i) => p.cols.forEach((c) => flat.push([i, c])));
   if (els.length !== flat.length || els.some((el, j) => el.dataset.colKey !== flat[j][1].key || +el.dataset.pane !== flat[j][0])){ renderSgt(); return; }
+  let deferred = false;
   els.forEach((el, j) => {
     const c = flat[j][1];
     c.html = sgtTabHtml(c.key);
     if (el._html === c.html) return;
-    const top = el.scrollTop;
-    el.innerHTML = sgtColInner(c);
-    el._html = c.html;
-    el.scrollTop = top;
+    if (Date.now() - (el._userAt || 0) < SGT_SCROLL_IDLE_MS){ deferred = true; return; }   // 使用者正在捲這格：這一輪先不換，停下來再補（捲動中換內容會被打斷、跳位置）
+    sgtReplaceCol(el, c);
   });
+  if (deferred && !sgtDeferTimer) sgtDeferTimer = setTimeout(() => { sgtDeferTimer = null; try { sgtRerender(); } catch (_){} }, SGT_SCROLL_IDLE_MS + 100);
 }
+// 2026-11-02 使用者：盤中訊號（一格一格排的那個視窗，例如盤中大戶力空）捲到哪就要停在哪，新的訊號進來不要把正在看的那幾筆往下推。
+// 原本只記「捲了多少像素」，上面多一筆新的，正在看的就整個被往下擠；改成跟訊號中心單頁一樣用「畫面最上面看得到的那幾列」對齊：
+// 換完內容找到同一檔（代號＋時間＋訊號名稱）的那一列，把它放回原本在畫面上的位置，新的從上面進來、不動到正在看的地方。
+// 在最上面（沒捲動）的格子不動這個，新的照樣從最上面冒出來。使用者還在捲（1.2 秒內）先不換。
+const SGT_SCROLL_IDLE_MS = 1200;
+let sgtDeferTimer = null;
+function sgtSetTop(el, v){
+  if (!Number.isFinite(v) || Math.abs(el.scrollTop - v) < 1) return;
+  el._progAt = Date.now();
+  el.scrollTop = v;
+}
+function sgtReplaceCol(el, c){
+  const top = el.scrollTop;
+  const anchor = top > 0 ? signalAnchor(el, el) : null;
+  el.innerHTML = sgtColInner(c);
+  el._html = c.html;
+  sgtSetTop(el, top);
+  if (anchor){
+    const n = signalFindAnchor(el, anchor);
+    if (n) sgtSetTop(el, el.scrollTop + n.node.getBoundingClientRect().top - n.y);
+  }
+}
+(function(){
+  const body = document.getElementById('sgtBody');
+  if (!body) return;
+  body.addEventListener('scroll', (e) => {
+    const t = e.target;
+    if (!t || !t.classList || !t.classList.contains('bot-col')) return;
+    if (Date.now() - (t._progAt || 0) > 150) t._userAt = Date.now();   // 使用者自己捲的（不是程式設的）
+  }, { passive: true, capture: true });
+})();
 function sgtRun(key){
   const cols = sgtState.panes[sgtState.active].cols;
   const i = cols.findIndex((c) => c.key === key);
