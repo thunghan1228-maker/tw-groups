@@ -6451,9 +6451,68 @@ async function refreshIdxChart(){
   redrawAll();
 }
 setInterval(() => { refreshIdxChart().catch(() => {}); }, 20000);
+// 2026-11-02 使用者：很多股票的 5 分K 停在 09:15、現在已經 09:38。個股的 5 分K／1 分K 圖打開時只抓一次，之後不會再更新
+// （只有日線和指數圖有盤中自動更新），圖開著就一直停在開圖那一刻。現在個股 5 分K／1 分K 盤中每 15 秒抓今天的 K 棒，
+// 依時間點接上去／換掉最後一根，圖開著就一直走。示範資料（後端一時連不上）的圖也順便每 15 秒重試真資料，最多 8 次。
+const LIVE_INTRADAY_REFRESH_MS = 15000;
+let liveIntradayBusy = false, liveDemoRetry = { key: '', n: 0 };
+async function refreshLiveIntraday(){
+  if (liveIntradayBusy) return;
+  const tf = currentChart.tf, code = currentChart.code;
+  if ((tf !== 'm5' && tf !== 'm1') || !code || isIdxCode(code)) return;
+  if (!Array.isArray(currentChart.bars) || !currentChart.bars.length) return;
+  if (document.visibilityState === 'hidden' || !twMarketLiveNow()) return;
+  if (!CHART_WINDOW_MODE && document.getElementById('chartModal').hidden) return;
+  if (currentChart.loadingToken) return;
+  const token = currentChart.requestToken;
+  if (!currentChart.isRealBars){
+    const key = code + '|' + tf;
+    if (liveDemoRetry.key !== key) liveDemoRetry = { key: key, n: 0 };
+    if (liveDemoRetry.n >= 8) return;
+    liveDemoRetry.n += 1;
+    switchTimeframe(tf).catch(() => {});
+    return;
+  }
+  liveIntradayBusy = true;
+  try {
+    let fresh;
+    try { fresh = await fetchRealBars(code, tf); } catch (e) { return; }
+    if (code !== currentChart.code || tf !== currentChart.tf || token !== currentChart.requestToken || !fresh.length) return;
+    const old = currentChart.bars;
+    const byTs = new Map(old.map((b) => [b.ts, b]));
+    let changed = false;
+    fresh.forEach((f) => {
+      const o = byTs.get(f.ts);
+      if (o && o.open === f.open && o.high === f.high && o.low === f.low && o.close === f.close && o.volume === f.volume && o.mainNet === f.mainNet && (f.bigNet === null || o.bigNet === f.bigNet)) return;
+      const nb = Object.assign({}, o || {}, f);
+      if (o){ if (f.bigNet === null) nb.bigNet = o.bigNet; if (f.prevRef === null) nb.prevRef = o.prevRef; }
+      byTs.set(f.ts, nb);
+      changed = true;
+    });
+    if (!changed) return;
+    const merged = Array.from(byTs.values()).sort((a, b) => a.ts - b.ts);
+    const before = old.length;
+    const { start, count } = visibleRange(before);
+    const atRight = start + count >= before;
+    const anchorTs = old[start] ? old[start].ts : null;
+    currentChart.bars = merged;
+    if (currentChart.viewCount != null){   // 使用者拉過、縮放過：看最右邊（最新）就跟著新的走，看別段就停在同一段
+      if (atRight) currentChart.viewStart = Math.max(0, merged.length - count);
+      else { const at = merged.findIndex((b) => b.ts === anchorTs); if (at >= 0) currentChart.viewStart = at; }
+    }
+    currentChart.force = TF_CONFIG[tf] && TF_CONFIG[tf].force ? chartForceSeries(merged) : currentChart.force;
+    currentChart.macd = computeMACD(merged);
+    currentChart.kd = chartComputeKd(tf, merged);
+    redrawAll();
+  } finally {
+    liveIntradayBusy = false;
+  }
+}
+setInterval(() => { refreshLiveIntraday().catch(() => {}); }, LIVE_INTRADAY_REFRESH_MS);
 
 async function switchTimeframe(tf){
   const requestToken = ++currentChart.requestToken;
+  currentChart.loadingToken = requestToken;   // 載入中（refreshLiveIntraday 不要在載入途中又重開一次）
   currentChart.tf = tf;
   document.querySelectorAll('.chart-tab').forEach((btn) => btn.classList.toggle('active', btn.dataset.tf === tf));
   const cfg = TF_CONFIG[tf];
@@ -6484,6 +6543,7 @@ async function switchTimeframe(tf){
   if (!bars) bars = generateOHLC(currentChart.code, tf);
   currentChart.bars = bars;
   currentChart.isRealBars = isReal;
+  currentChart.loadingToken = 0;
   if (tf === 'daily') currentChart.dailyBars = isReal ? bars : null;
   else if (!currentChart.dailyBars){
     // 分K的漲跌要對前一個交易日收盤：沒載過日線就背景抓一次（同一檔才用）

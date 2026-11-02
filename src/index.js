@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-02 09:43:03";
+const BUILD_STAMP = "2026-11-02 09:47:36";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6540,9 +6540,68 @@ async function refreshIdxChart(){
   redrawAll();
 }
 setInterval(() => { refreshIdxChart().catch(() => {}); }, 20000);
+// 2026-11-02 使用者：很多股票的 5 分K 停在 09:15、現在已經 09:38。個股的 5 分K／1 分K 圖打開時只抓一次，之後不會再更新
+// （只有日線和指數圖有盤中自動更新），圖開著就一直停在開圖那一刻。現在個股 5 分K／1 分K 盤中每 15 秒抓今天的 K 棒，
+// 依時間點接上去／換掉最後一根，圖開著就一直走。示範資料（後端一時連不上）的圖也順便每 15 秒重試真資料，最多 8 次。
+const LIVE_INTRADAY_REFRESH_MS = 15000;
+let liveIntradayBusy = false, liveDemoRetry = { key: '', n: 0 };
+async function refreshLiveIntraday(){
+  if (liveIntradayBusy) return;
+  const tf = currentChart.tf, code = currentChart.code;
+  if ((tf !== 'm5' && tf !== 'm1') || !code || isIdxCode(code)) return;
+  if (!Array.isArray(currentChart.bars) || !currentChart.bars.length) return;
+  if (document.visibilityState === 'hidden' || !twMarketLiveNow()) return;
+  if (!CHART_WINDOW_MODE && document.getElementById('chartModal').hidden) return;
+  if (currentChart.loadingToken) return;
+  const token = currentChart.requestToken;
+  if (!currentChart.isRealBars){
+    const key = code + '|' + tf;
+    if (liveDemoRetry.key !== key) liveDemoRetry = { key: key, n: 0 };
+    if (liveDemoRetry.n >= 8) return;
+    liveDemoRetry.n += 1;
+    switchTimeframe(tf).catch(() => {});
+    return;
+  }
+  liveIntradayBusy = true;
+  try {
+    let fresh;
+    try { fresh = await fetchRealBars(code, tf); } catch (e) { return; }
+    if (code !== currentChart.code || tf !== currentChart.tf || token !== currentChart.requestToken || !fresh.length) return;
+    const old = currentChart.bars;
+    const byTs = new Map(old.map((b) => [b.ts, b]));
+    let changed = false;
+    fresh.forEach((f) => {
+      const o = byTs.get(f.ts);
+      if (o && o.open === f.open && o.high === f.high && o.low === f.low && o.close === f.close && o.volume === f.volume && o.mainNet === f.mainNet && (f.bigNet === null || o.bigNet === f.bigNet)) return;
+      const nb = Object.assign({}, o || {}, f);
+      if (o){ if (f.bigNet === null) nb.bigNet = o.bigNet; if (f.prevRef === null) nb.prevRef = o.prevRef; }
+      byTs.set(f.ts, nb);
+      changed = true;
+    });
+    if (!changed) return;
+    const merged = Array.from(byTs.values()).sort((a, b) => a.ts - b.ts);
+    const before = old.length;
+    const { start, count } = visibleRange(before);
+    const atRight = start + count >= before;
+    const anchorTs = old[start] ? old[start].ts : null;
+    currentChart.bars = merged;
+    if (currentChart.viewCount != null){   // 使用者拉過、縮放過：看最右邊（最新）就跟著新的走，看別段就停在同一段
+      if (atRight) currentChart.viewStart = Math.max(0, merged.length - count);
+      else { const at = merged.findIndex((b) => b.ts === anchorTs); if (at >= 0) currentChart.viewStart = at; }
+    }
+    currentChart.force = TF_CONFIG[tf] && TF_CONFIG[tf].force ? chartForceSeries(merged) : currentChart.force;
+    currentChart.macd = computeMACD(merged);
+    currentChart.kd = chartComputeKd(tf, merged);
+    redrawAll();
+  } finally {
+    liveIntradayBusy = false;
+  }
+}
+setInterval(() => { refreshLiveIntraday().catch(() => {}); }, LIVE_INTRADAY_REFRESH_MS);
 
 async function switchTimeframe(tf){
   const requestToken = ++currentChart.requestToken;
+  currentChart.loadingToken = requestToken;   // 載入中（refreshLiveIntraday 不要在載入途中又重開一次）
   currentChart.tf = tf;
   document.querySelectorAll('.chart-tab').forEach((btn) => btn.classList.toggle('active', btn.dataset.tf === tf));
   const cfg = TF_CONFIG[tf];
@@ -6573,6 +6632,7 @@ async function switchTimeframe(tf){
   if (!bars) bars = generateOHLC(currentChart.code, tf);
   currentChart.bars = bars;
   currentChart.isRealBars = isReal;
+  currentChart.loadingToken = 0;
   if (tf === 'daily') currentChart.dailyBars = isReal ? bars : null;
   else if (!currentChart.dailyBars){
     // 分K的漲跌要對前一個交易日收盤：沒載過日線就背景抓一次（同一檔才用）
@@ -17097,7 +17157,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-02 09:43:03';
+const BUILD_STAMP = '2026-11-02 09:47:36';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
