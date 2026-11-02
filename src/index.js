@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-02 10:48:02";
+const BUILD_STAMP = "2026-11-02 10:52:55";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -17157,7 +17157,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-02 10:48:02';
+const BUILD_STAMP = '2026-11-02 10:52:55';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20235,15 +20235,17 @@ function td905SectionHtml(snap){
     const r = tdB905Calc(x.code, 'c905', date, slot, 120e3);
     const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(x.code) : null;
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : (r.pct !== undefined && r.pct !== null ? r.pct : x.pct);
-    return '<div class="td-b9row" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(wlNameOf(x.code)) + '"><span class="t"' + (x.why ? ' title="' + wlEsc('四個條件第一次同時成立的時間。站上 905 高 ' + x.why[0] + '・漲幅 ≥ ' + TD905_PCT + '% ' + x.why[1] + '・大戶力 ≥ +' + TD905_BIG + '% ' + x.why[2] + '；最晚成立的是「' + (x.last || '') + '」，族群在多方區以看到的那一刻為準') + '"' : '') + '>' + wlEsc(x.t) + (x.last ? '<small>' + wlEsc(x.last.replace(/≥.*$/, '')) + '</small>' : '') + '</span>' +
+    const brkT = (r.ev && r.ev.length ? r.ev[0].t : '') || x.brk || '—';       // 左邊＝第一次 5 分K 收盤站上 905 高的時間（突破時間）
+    const tip = x.why ? '條件齊全時間＝四個條件第一次同時成立：站上 905 高 ' + x.why[0] + '・漲幅 ≥ ' + TD905_PCT + '% ' + x.why[1] + '・大戶力 ≥ +' + TD905_BIG + '% ' + x.why[2] + '；最晚成立的是「' + (x.last || '') + '」（族群在多方區以看到的那一刻為準）' : '';
+    return '<div class="td-b9row" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(wlNameOf(x.code)) + '"><span class="t" title="第一次 5 分K 收盤站上 905 高的時間（突破時間）">' + wlEsc(brkT) + '</span>' +
       '<span class="s"><b>' + wlEsc(x.code) + '</b> ' + wlEsc(wlNameOf(x.code)) + '<small>' + wlEsc(x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + '</small></span>' +
-      '<span class="b">' + tdB905Badge('905', r) + '</span><span class="h">' + holderTagHtml(snap.live ? holderPctOf(x.code) : x.big, true) + '</span>' +
+      '<span class="b">' + tdB905Badge('905', r, '條件齊全 ' + wlEsc(x.t), tip) + '</span><span class="h">' + holderTagHtml(snap.live ? holderPctOf(x.code) : x.big, true) + '</span>' +
       '<span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '—') + '</span><span class="x"></span></div>';
   }).join('');
-  const head = '<div class="td-b9head"><span class="t">首次發生<br>時間</span><span class="s">股號・股名・族群</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';
+  const head = '<div class="td-b9head"><span class="t">突破<br>時間</span><span class="s">股號・股名・族群</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';
   return '<div class="td-b9sec s905">🎯 905 突破（篩選後） <b>' + list.length + '</b>　<small>四個條件都成立才列：當天第一次站上 905 高、大戶力 ≥ +' + TD905_BIG + '%、漲幅 ≥ ' + TD905_PCT + '%、族群在多方區（族群名次前一半）' +
-    (cand ? '；現在符合後三項的候選 ' + cand.length + ' 檔' : '') + '<br>左邊時間＝四個條件第一次同時成立的時間，下面小字＝最後才成立的條件；右邊狀態下面的「突破 HH:MM」＝5 分K 收盤站上 905 高的時間（兩個時間本來就不同）' + '</small></div>' +
-    (list.length ? head + rows : '<div class="td-empty">' + (snap.live ? '目前沒有（四個條件都成立才會出現；盤中要開著網頁才記得到，時間＝四個條件第一次同時成立）' : '這個時段以前這台電腦沒有記到（905 要盤中開著網頁才會記）') + '</div>');
+    (cand ? '；現在符合後三項的候選 ' + cand.length + ' 檔' : '') + '<br>左邊「突破時間」＝第一次 5 分K 收盤站上 905 高的時間；狀態下面的「條件齊全」＝四個條件第一次同時成立的時間（兩個時間本來就不同；名單照條件齊全的時間排，新的在上面，滑鼠移到小字上看三個條件各自的時間）' + '</small></div>' +
+    (list.length ? head + rows : '<div class="td-empty">' + (snap.live ? '目前沒有（四個條件都成立才會出現；盤中要開著網頁才記得到，條件齊全才會列入）' : '這個時段以前這台電腦沒有記到（905 要盤中開著網頁才會記）') + '</div>');
 }
 function tdSideTabsHtml(){
   return '<div class="td-stabs">' + TD_SIDE_TABS.map(([k, label]) => '<button type="button" class="td-stab' + (tdSideTab === k ? ' on' : '') + '" data-td-side="' + k + '">' + label + '</button>').join('') + '</div>';
@@ -20251,14 +20253,15 @@ function tdSideTabsHtml(){
 const tdPx = (v) => (Number.isFinite(v) ? String(+Number(v).toFixed(2)) : '—');
 // 狀態標籤（2026-11-01 使用者：不要打勾，改成「在 1+2 之上／之下」，之上紅底、之下綠底——漲紅跌綠）：之上＝現在 5 分K 收在線上；之下＝收在線下，
 // 小字寫「跌破 HH:MM」（突破過又收回來）或「未突破」。標籤下面小字寫最近一次突破／跌破的時間。線：1+2＝905 高與昨高較高的那條，905＝905 高。
-function tdB905Badge(lab, r){
+function tdB905Badge(lab, r, note, tip){   // note＝標籤下面小字改寫成這段（905 突破寫「條件齊全 HH:MM」），tip＝滑鼠移上去的說明
   if (r.loading) return '<span class="td-bk">讀取中</span>';
   if (r.error) return '<span class="td-bk down">讀取失敗</span>';
   if (r.empty) return '<span class="td-bk">沒有5分K</span>';
   const lastOf = (type) => { const e = (r.ev || []).filter((x) => x.type === type); return e.length ? e[e.length - 1].t : ''; };
-  if (r.inside) return '<span class="td-bk bk-above">在 ' + lab + ' 之上</span><small class="td-bkn">突破 ' + lastOf('up') + '</small>';
-  if (r.ev.length) return '<span class="td-bk bk-below">在 ' + lab + ' 之下</span><small class="td-bkn">跌破 ' + lastOf('down') + '</small>';
-  return '<span class="td-bk bk-below">在 ' + lab + ' 之下</span><small class="td-bkn">未突破</small>';
+  const sm = (txt) => '<small class="td-bkn"' + (tip ? ' title="' + wlEsc(tip) + '"' : '') + '>' + txt + '</small>';
+  if (r.inside) return '<span class="td-bk bk-above">在 ' + lab + ' 之上</span>' + sm(note || '突破 ' + lastOf('up'));
+  if (r.ev.length) return '<span class="td-bk bk-below">在 ' + lab + ' 之下</span>' + (note ? sm(note) + sm('跌破 ' + lastOf('down')) : sm('跌破 ' + lastOf('down')));
+  return '<span class="td-bk bk-below">在 ' + lab + ' 之下</span>' + sm(note || '未突破');
 }
 function tdB905PanelHtml(snap){
   const date = snap.date, slot = snap.live ? null : snap.slot;
