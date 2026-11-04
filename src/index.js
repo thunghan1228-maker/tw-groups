@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 00:33:25";
+const BUILD_STAMP = "2026-11-05 00:40:26";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -149,7 +149,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.1fr) minmax(0, 1.25fr) minmax(0, 2fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) minmax(0, 1.6fr);gap:8px;align-items:start;}   /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.0fr) minmax(0, 1.9fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) minmax(0, 1.6fr);gap:8px;align-items:start;}   /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -194,6 +194,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .hr-warn:not(.bear) .hr-stk{display:flex;align-items:baseline;gap:4px;white-space:nowrap;overflow:hidden;margin-right:0;} .hr-warn:not(.bear) .hr-stk > span:not(.hr-hold){margin-left:auto;} .hr-warn:not(.bear) .hr-stk > .hr-hold{margin-left:4px;}
   .hr-code{color:var(--muted);font-size:12px;}
   .hr-avg{margin-left:auto;font-size:12px;}
+  .hr-mfsub{flex:0 0 100%;font-size:10.5px;color:var(--muted);line-height:1.4;padding-left:2px;} .hr-mfsub b{font-weight:700;}   /* 2026-11-04 首頁疑似主力融資買進：第二行放融資增加、大單淨買 */
   .hr-bothsc{font-size:10px;font-weight:400;color:var(--muted);}   /* 2026-11-04 首頁雙榜交集：漲跌幅後面的均線分數 */
   .hr-sep{padding:3px 6px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;}
   .hr-note{padding:8px 10px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);}
@@ -9810,7 +9811,7 @@ function homeLongRowHtml(o){
 function homeLongColsHtml(){
   const m = race333Model();
   const head = (n, k) => '<div class="hr-title">🔥當沖多' + k + (n === null ? '' : ' <span class="hr-rk">' + (k === 1 ? '交集 ' + n + ' 檔' : '') + '</span>') + '</div>';
-  const wrap = (a, b) => ({ one: '<div class="hr-stack">' + a + '</div>', two: '<div class="hr-stack">' + b + '</div>' });   // 2026-10-28 使用者：欄位順序改成多觀察、當沖多2、當沖多1，所以兩欄分開回傳讓呼叫的人自己排
+  const wrap = (a, b) => ({ one: '<div class="hr-stack">' + homeRedBox(homeMfColHtml()) + a + '</div>', two: '<div class="hr-stack">' + b + '</div>' });   // 2026-10-28 使用者：欄位順序改成多觀察、當沖多2、當沖多1，所以兩欄分開回傳讓呼叫的人自己排
   const note = '<div class="hr-note">' + '中幾個＝被 ① 多功課 ② 賽馬多 ③ 河流多 ④ 族群在多方區 點名幾個；空方族群已濾掉，只中一個的不列</div>';
   if (!m) return wrap('<div class="hr-col">' + head(null, 1) + '<div class="hr-note">讀取中…（33／34 開盤後才有）</div></div>', '<div class="hr-col">' + head(null, 2) + '</div>');
   let model = null;
@@ -9899,6 +9900,41 @@ function homeDaytradeColsHtml(part){
   '</div>';
 }
 const homeFut75ColHtml = () => homeDaytradeColsHtml('75');   // 2026-10-18 使用者：股期黑龍(75) 移到最右邊 22-35 下面
+// 首頁「💰疑似主力融資買進」（2026-11-04 使用者：系統選股的「疑似主力融資買進」搬到首頁，放在第三欄當沖多1 的上面，每列要接盤中大戶力）：
+// 跟系統選股同一組條件（融資今天增加 ≥500 張 ＋ 大單淨買 ≥300 張）；資料是最新一個收完盤的交易日（融資融券晚上約 21:00 才公布），每 10 分鐘看一次。
+// 交易所不公開融資是誰借的，所以只是「疑似」：融資大增，同時盤中大單在買。
+const HOME_MF_QS = 'mup=500&mf=300';
+const homeMfState = { d: null, at: 0, loading: false, errAt: 0 };
+function homeMfLoad(){
+  if (homeMfState.loading) return;
+  if (homeMfState.d && Date.now() - homeMfState.at < 10 * 60e3) return;
+  if (homeMfState.errAt && Date.now() - homeMfState.errAt < 60e3) return;
+  homeMfState.loading = true;
+  fetch('/api/screener?' + HOME_MF_QS).then((r) => r.json().then((d) => ({ ok: r.ok, d }))).then(({ ok, d }) => {
+    if (ok && d && Array.isArray(d.rows) && d.params && 'mf' in d.params){ homeMfState.d = d; homeMfState.at = Date.now(); homeMfState.errAt = 0; }
+    else homeMfState.errAt = Date.now();
+  }).catch(() => { homeMfState.errAt = Date.now(); }).finally(() => { homeMfState.loading = false; try { render(); } catch (_){} });
+}
+function homeMfColHtml(){
+  homeMfLoad();
+  const d = homeMfState.d;
+  const tip = '融資今天增加 ≥500 張＋今天盤中大單淨買超 ≥300 張（跟系統選股「疑似主力融資買進」同一組）。交易所不公開融資是誰借的，這只是疑似，不是確定。';
+  const title = (n) => '<div class="hr-title" title="' + wlEsc(tip) + '">💰疑似主力融資買進' + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔</span>') + '</div>';
+  if (!d) return '<div class="hr-col">' + title(null) + '<div class="hr-note">' + (homeMfState.errAt ? '讀取失敗，稍後再試（後端更新後就有）' : '讀取中…') + '</div></div>';
+  const live = new Map();
+  try { (lastData.groups || []).forEach((g) => g.stocks.forEach((st) => { if (Number.isFinite(st.changePercent)) live.set(st.code, st.changePercent); })); } catch (_){ /* 報價還沒來 */ }
+  const rows = d.rows.slice().sort((a, b) => (b.mchg || 0) - (a.mchg || 0));
+  const md = d.date ? Number(d.date.slice(5, 7)) + '/' + d.date.slice(8, 10) : '';
+  const row = (r) => {
+    const pct = live.has(r.code) ? live.get(r.code) : r.chg;
+    return '<div class="hr-row hr-stk hr-wrapold" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc(md + ' 融資 ' + scrLots(r.mchg) + ' 張（餘額 ' + (r.mbal != null ? r.mbal.toLocaleString('en-US') : '—') + '）・大單淨買 ' + scrLots(r.mfnet) + ' 張' + (r.grp ? '・' + r.grp : '')) + '">' +
+      '<span class="hr-bear-pill ' + dirClass(pct) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' +
+      '<span class="hr-avg ' + dirClass(pct) + '">' + fmt(pct) + '%</span>' + homeHoldHtml(r.code) +
+      '<span class="hr-mfsub">融資 <b class="scr-up">' + scrLots(r.mchg) + '</b>・大單 <b class="scr-up">' + scrLots(r.mfnet) + '</b></span></div>';
+  };
+  return '<div class="hr-col">' + title(rows.length) + (rows.length ? rows.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') +
+    '<div class="hr-note">' + md + ' 收盤資料：融資增加 ≥500 張＋大單淨買 ≥300 張（融資融券晚上約 21:00 才公布）</div></div>';
+}
 // 首頁「📊雙榜交集」（2026-11-04 使用者：放在續抱勿追高下面、股期黑龍(75) 上面）：個股分數前 20 名 ∩ 前二十名常客，
 // 跟自選股的「📊雙榜交集」分組同一份（maWlApply），照個股分數名次排；盤中跟著 ma-rank 即時換，收盤後是收盤排行。
 let homeBothAt = 0, homeBothLoading = false;
@@ -10137,8 +10173,8 @@ function homeRank4Html(){
     // 2026-10-16 使用者：第 4 欄續抱勿追高疊在河流多(34) 上面；第 5 欄馬火多(30)（155 疊在下面）；第 6 欄 30加33 疊在賽馬多(33) 上面（2026-10-20 使用者：30加33 跟續抱勿追高對調，馬火多再移到 30加33 左邊）
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
     '<div class="hr-stack">' +
+      homeRedBox(homeBothColHtml()) +   // 2026-11-04 使用者（更正）：雙榜交集放在最上面、續抱勿追高在它正下面、股期黑龍(75) 在最下面，加粗紅框
       homeRedBox(homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : [], undefined, undefined, true, true)) +   // 2026-10-29 使用者：代號、股名、（族群名彩色）、漲跌幅、大戶力放最後；2026-10-20 使用者：族群漲幅 > 2%（12）搬到續抱勿追高下面；2026-10-21 使用者：12 又搬走，搬到發動右邊自己一欄
-      homeRedBox(homeBothColHtml()) +   // 2026-11-04 使用者：雙榜交集放在續抱勿追高下面、股期黑龍(75) 上面，用加粗紅框框起來
       homeFut75ColHtml() +   // 2026-11-01 使用者：股期黑龍(75) 放在續抱勿追高下面
       // 2026-10-21 使用者：河流多(34) 搬到第 6 欄 30加33／賽馬多(33) 下面，一起放在紅框裡
     '</div>' +
@@ -10210,8 +10246,9 @@ function homeRankFootHtml(total){
     ['🎯 905 突破廣播', '只要 5 分K 收盤站上 905 高（不用站上昨高）就列一筆「突破」，時間就是突破的那一刻（只列今天漲幅 ≥ ' + TD905_PCT + '%、族群在多方區的，不然全市場太多）；等到<b>四個條件齊全</b>——① 當天第一次站上 905 高　② 盤中大戶力 ≥ +' + TD905_BIG + '%　③ 今天漲幅 ≥ ' + TD905_PCT + '%　④ 族群在多方區（族群名次前一半，跟當沖多同一個算法）——再列一筆「✅ 條件齊全」，時間是四個條件第一次同時成立的時間（例：09:40 突破、12:35 大戶力到 +10%，就是 09:40 一筆「突破」、12:35 一筆「條件齊全」）。名單照時間排、新的在上面；「之上／之下」跟 1+2 一樣；首頁留最新 ' + HOME905_MAX + ' 筆，每日功課「905 突破」分頁全部列；盤中要開著網頁才記得到，記在這台電腦（換一台電腦會從頭記）'],
     ['⭐ 今日強勢股', '跟訊號中心「今日強勢股」同一份，放在發動下面，紅框框起來；每一列漲跌幅後面是盤中大戶力'],
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔'],
-    ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
-    ['📊雙榜交集', '放在續抱勿追高下面、股期黑龍(75) 上面：均線分數排行「個股分數前 20 名」跟「前二十名常客」兩個榜都有的股票（跟自選股裡的「📊雙榜交集」同一份），照分數名次排；加粗紅框；每列後面是今天漲跌幅、均線分數和盤中大戶力，滑過去看名次與常客次數'],
+    ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的（在雙榜交集正下面）'],
+    ['💰疑似主力融資買進', '放在第三欄、當沖多1 上面，加粗紅框：融資今天增加 ≥500 張＋今天盤中大單淨買超 ≥300 張（跟系統選股「疑似主力融資買進」同一組）。交易所不公開融資是誰借的，這只是疑似；資料是最新一個收完盤的交易日（融資融券晚上約 21:00 才公布）。每列：代號、名稱、今天漲跌幅、盤中大戶力，下面一行是融資增加張數和大單淨買張數'],
+    ['📊雙榜交集', '放在第四欄最上面（下面依序是續抱勿追高、股期黑龍(75)）：均線分數排行「個股分數前 20 名」跟「前二十名常客」兩個榜都有的股票（跟自選股裡的「📊雙榜交集」同一份），照分數名次排；加粗紅框；每列後面是今天漲跌幅、均線分數和盤中大戶力，滑過去看名次與常客次數'],
     ['👑30加33加34', '馬火多(30)、賽馬多(33)、河流多(34) 三份都有的（賽馬多、河流多只看族群名次前 ' + HOME_334_TOP_GROUPS + ' 名；三份各自的完整名單看訊號中心「盤中333」或機器人代碼 30／33／34）'],
     ['每一列', '族群名次、代號、名稱、今天漲跌幅；族排前面的在上面'],
     ['點股票', '開K線圖'],
@@ -17293,7 +17330,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 00:33:25';
+const BUILD_STAMP = '2026-11-05 00:40:26';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -27937,7 +27974,7 @@ function czItems(){
   return items;
 }
 // 首頁欄位：欄位是程式每 15 秒整個重畫的，所以每次畫完（MutationObserver）再依標題標記、收合；標題對不到的欄不管它
-const CZ_HOME_CARDS = [['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:strong', '今日強勢股'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
+const CZ_HOME_CARDS = [['hm:mf', '疑似主力融資買進'], ['hm:both', '雙榜交集'], ['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:strong', '今日強勢股'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
   ['hm:r183', '多族群排名(183)'], ['hm:g12', '族群漲幅'], ['hm:r44', '1+2多'], ['hm:t3', '三落空'], ['hm:r155', '股票期貨排名(155)'], ['hm:r75', '股期黑龍']];
 const CZ_HOME_JAIL = [['hm:jin', '今日入獄'], ['hm:jsoon', '即將出關'], ['hm:jout', '已出關']];
 function czApplyHome(){
