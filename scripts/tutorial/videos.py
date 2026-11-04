@@ -22,9 +22,7 @@ TAB = '#signalTabsBar .signal-tab[data-kind="{}"]'
 
 TB = "下方工具列"
 # 905 突破名單是「盤中開著網頁才記得到」（存在這台瀏覽器），收盤後錄影是空的：錄影時照收盤那一刻符合條件的股票，用跟盤中記錄一樣的算法補進去（不阻塞，背景補）
-SEED905 = ("setTimeout(async () => { try { const date = twTodayStr(), seen = td905Seen(date); for (let k = 0; k < 10; k++) { td905Candidates().forEach((c) => { if (seen[c.code]) return;"
-           " const r = tdB905Calc(c.code, 'c905', date, null, 120e3); if (r.loading || !r.inside || !r.ev || !r.ev.length) return; const w = td905When(c.code, r, date, '13:30'); if (!w) return;"
-           " seen[c.code] = { t: w.t, last: w.last, why: [w.brk, w.p2, w.big], group: c.group, big: c.big, pct: c.pct, px: r.price, brk: r.ev[0].t, v: 2 }; }); await new Promise((r) => setTimeout(r, 1500)); } } catch (e) {} }, 0)")
+SEED905 = "setTimeout(async () => { for (let k = 0; k < 12; k++) { try { td905Run('13:30', true); } catch (e) {} await new Promise((r) => setTimeout(r, 1500)); } }, 0)"
 CLOSE_ALL = "document.querySelectorAll('.chips-modal').forEach((m) => { m.hidden = true; }); try { closeSignalCenter(); } catch (_) {} window.scrollTo(0, 0)"
 
 
@@ -302,8 +300,8 @@ VIDEOS += [
              "cap": "功課廣播四個分頁：刀功課｜1+2 突破｜905 突破｜持股停損；刀功課＝刀劍空(32)＋12空(123)", "click": '#hwBody [data-td-side="blade"]', "pick": "document.querySelector('#hwBody .td-sidecol')", "settle": 1500},
             {"say": "一加二突破：全市場今天第一次五分K收盤，同時站上九零五高和昨天最高價的股票，系統自動算，不用自己貼名單。左邊是第一次發生的時間，狀態的之上是紅底，現在還站在線上；之下是綠底，突破後又收回線下。上面可以開關提示音、突破通知和跌破通知。",
              "cap": "1+2 突破：全市場自動算；紅底之上、綠底之下；可開提示音／突破／跌破通知", "click": '#hwBody [data-td-side="b12"]', "pick": "document.querySelector('#hwBody .td-sidecol')", "settle": 3500},
-            {"say": "九零五突破：只要站上九零五高就算，但這樣訊號太多，所以四個條件都成立才列：當天第一次五分K收盤站上九零五高、盤中大戶力正十以上、漲幅二趴以上，還有族群在多方區。左邊是第一次突破的時間，狀態下面的條件齊全，是四個條件第一次同時成立的時間，新的排在上面。盤中網頁要開著才記得到。",
-             "cap": "905 突破：站上 905 高＋大戶力 ≥+10＋漲幅 ≥2%＋族群在多方，四個都成立才列；左邊＝突破時間、下面＝條件齊全", "click": '#hwBody [data-td-side="b905"]', "pick": "document.querySelector('#hwBody .td-sidecol')", "settle": 3500},
+            {"say": "九零五突破：五分K收盤站上九零五高，就先列一筆突破，時間就是突破的那一刻，只列漲幅二趴以上、族群在多方區的。等大戶力也到正十以上，四個條件齊全，再列一筆條件齊全。名單照時間排，新的在上面。盤中網頁要開著才記得到。",
+             "cap": "905 突破：突破就列一筆；大戶力也 ≥+10（四個條件齊全）再列一筆「條件齊全」", "click": '#hwBody [data-td-side="b905"]', "pick": "document.querySelector('#hwBody .td-sidecol')", "settle": 3500},
             {"say": "持股停損：自動帶入你自選股裡自己的分組，最多二十檔，盤中一分K收盤跌破九零五低或三日低，就跳通知。",
              "cap": "持股停損：自選股分組自動帶入，1 分K 收盤跌破 905 低／三日低就通知", "click": '#hwBody [data-td-side="stop"]', "pick": "document.querySelector('#hwBody .td-sidecol')", "settle": 3000},
             {"say": "下面是一個一個的族群卡，每一檔前面的紫色時間，是這檔訊號第一次出現的時間。點族群名字可以看這個族群的成分股，點股號股名開K線圖。",
@@ -635,8 +633,8 @@ BASIC_VIDEOS = [
              "cap": "發動；今日強勢股", "pick": "document.querySelector('#app .home-rank4 > :nth-child(6)')"},
             {"say": "第七欄是一加二突破廣播：全市場今天第一次五分K收盤，同時站上九零五高和昨天最高價的股票。前面紫色的是第一次發生的時間；紅底的之上，是現在還站在線上；綠底的之下，是突破後又收回線下。首頁只留最新二十檔。",
              "cap": "1+2 突破廣播：同時站上 905 高與昨高；紅底之上、綠底之下", "pick": "document.querySelector('#app .home-rank4 > :nth-child(7)')"},
-            {"say": "第八欄是九零五突破廣播。只要站上九零五高就算，但這樣訊號太多，所以四個條件都成立才列：當天第一次五分K收盤站上九零五高、盤中大戶力正十以上、今天漲幅二趴以上，還有族群在多方區，也就是族群名次前一半。前面紫色的時間是第一次突破的時間；每一列下面的條件齊全，是四個條件第一次同時成立的時間，新的排在上面。首頁留最新十五檔，盤中網頁要開著才記得到。",
-             "cap": "905 突破廣播：站上 905 高＋大戶力 ≥+10＋漲幅 ≥2%＋族群在多方，四個都成立才列", "pick": "document.querySelector('#app .home-rank4 > :nth-child(8)')"},
+            {"say": "第八欄是九零五突破廣播。五分K收盤站上九零五高，就先列一筆突破，時間就是突破的那一刻；只列今天漲幅二趴以上、族群在多方區的。等到大戶力也到正十以上，四個條件齊全，再列一筆條件齊全，時間是四個條件第一次同時成立的時間。例如九點四十突破，十二點三十五大戶力到正十，就是九點四十一筆突破，十二點三十五一筆條件齊全。首頁留最新十五筆，盤中網頁要開著才記得到。",
+             "cap": "905 突破廣播：突破就列一筆；四個條件齊全（大戶力 ≥+10）再列一筆「條件齊全」", "pick": "document.querySelector('#app .home-rank4 > :nth-child(8)')"},
             {"say": "第九欄最上面是族群漲幅超過百分之二的族群，已經入選一八三的不再列；每個族群列漲幅前三大的股票，皇冠、銀牌、銅牌。",
              "cap": "族群漲幅 >2%(12)：每族列前三大", "pick": "document.querySelector('#app .home-rank4 > :nth-child(9)')"},
             {"say": "中間是股票期貨排名一五五，用股票期貨的漲跌排族群名次，開盤前就有。",

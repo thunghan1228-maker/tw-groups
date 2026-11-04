@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-04 23:20:55";
+const BUILD_STAMP = "2026-11-04 23:24:32";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -182,6 +182,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .hr-rk{color:var(--muted);}
   .hr-col .hr-row.hr-b905r,.hr-colw .hr-row.hr-b905r{padding-top:8px;padding-bottom:8px;row-gap:4px;}   /* 2026-11-02 使用者：首頁 905 突破廣播每列高一點、距離拉開 */
   .hr-b905r .hr-ready{flex:0 0 100%;font-size:11px;color:#a78bfa;font-weight:600;line-height:1.3;}
+  .hr-b905r.hr-b905ok .hr-ready{color:#fbbf24;font-weight:800;}   /* 2026-11-04：條件齊全那一筆的小字亮金色，跟單純「突破」那筆分開 */
   /* 2026-11-02 使用者：續抱勿追高、30加33加34 每列最前面的族群名次（5、9、12…）跟後面的代號貼在一起分不清楚 → 名次改白色亮一點、粗體、固定寬度靠右，右邊加一條細線跟代號隔開 */
   .hr-row > .hr-rk.hr-gr{color:#fff;font-weight:900;font-size:12px;min-width:1.7em;text-align:right;padding-right:5px;margin-right:2px;border-right:1px solid rgba(255,255,255,.45);flex-shrink:0;}
   .hr-hold{flex:0 0 auto;display:inline-block;margin-left:4px;min-width:3.3em;text-align:center;font-size:12px;font-weight:800;line-height:1.5;font-variant-numeric:tabular-nums;border-radius:5px;padding:0 4px;color:var(--muted);white-space:nowrap;}   /* 2026-10-22 使用者：首頁 30加33加34、183、12 三欄每檔後面的盤中大戶力；≥ +10% 紅底白字、≤ −10% 綠底白字 */
@@ -10022,7 +10023,7 @@ function home12BcastColHtml(){
   return '<div class="hr-col"><div class="hr-title">📈 1+2 突破廣播 <span class="hr-rk">' + (sys.length > 20 ? '最新 20／共 ' : '') + sys.length + ' 檔</span></div>' +
     (list.length ? list.map(row).join('') : '<div class="hr-note">今天還沒有</div>') + '</div>';
 }
-// 首頁「905 突破廣播」（2026-11-01 使用者：905 突破也拉一欄到首頁，放在 1+2 突破廣播旁邊）。名單＝每日功課「905 突破（篩選後）」同一份：
+// 首頁「905 突破廣播」（2026-11-01 使用者：905 突破也拉一欄到首頁，放在 1+2 突破廣播旁邊）。名單＝每日功課「905 突破」同一份（2026-11-04 起：突破就列一筆、條件齊全再列一筆）：
 // 當天第一次站上 905 高＋大戶力 ≥ +10%＋漲幅 ≥ 2%＋族群在多方區，四個都成立才記（這台電腦盤中開著網頁時記，一天一次）；最近的在上面、最多 20 檔。
 // 2026-11-02 使用者：905 突破廣播只留 15 檔（不用那麼多）、每列高一點、距離拉開、每列最下面補「條件齊全」的時間
 const HOME905_MAX = 15;
@@ -10030,20 +10031,20 @@ function home905BcastColHtml(){
   const date = sigCurrentDate();
   const seen = td905Seen(date);
   tdHomeAsked = Date.now();
-  const list = Object.keys(seen).map((code) => Object.assign({ code }, seen[code])).sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.code < b.code ? -1 : 1));
-  const row = (x) => {
-    const r = tdB905Calc(x.code, 'c905', date, null, 180e3);
-    const q = getStockQuote(x.code);
+  const events = td905Events(seen, null);   // 2026-11-04 使用者：突破就列、條件齊全再列一筆，兩種都照時間排
+  const row = (e) => {
+    const x = e.x, code = e.code;
+    const r = tdB905Calc(code, 'c905', date, null, 180e3);
+    const q = getStockQuote(code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : (r.pct !== undefined && r.pct !== null ? r.pct : x.pct);
     const st = r.ev ? (r.inside ? '<span class="td-bk bk-above hr-bk">之上</span>' : '<span class="td-bk bk-below hr-bk">之下</span>') : '';
-    const brkT = (r.ev && r.ev.length ? r.ev[0].t : '') || x.brk || x.t;   // 2026-11-02 使用者：首頁這欄的時間是第一次突破（5 分K 收盤站上 905 高）的時間，不是四個條件齊全的時間；排序照條件齊全的時間不變
-    const tip = (x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + (r.ev ? (r.inside ? '・在 905 之上' : '・收回 905 之下') : '') + '・首次突破 ' + brkT + '・條件齊全 ' + x.t;
-    return '<div class="hr-row hr-stk hr-wrapold hr-b905r" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(wlNameOf(x.code)) + '" tabindex="0" role="button" title="' + wlEsc(tip) + '">' +
-      '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(brkT) + '</span><span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(wlNameOf(x.code)) + '</span>' + st +
-      '<span class="hr-avg ' + (Number.isFinite(pct) ? dirClass(pct) : 'flat') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '') + '</span>' + homeHoldHtml(x.code) + '<span class="hr-ready" title="四個條件第一次同時成立的時間">條件齊全 ' + wlEsc(x.t) + '</span></div>';
+    const tip = (x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + (r.ev ? (r.inside ? '・在 905 之上' : '・收回 905 之下') : '') + '・' + td905EvTip(e);
+    return '<div class="hr-row hr-stk hr-wrapold hr-b905r' + (e.kind === 'ready' ? ' hr-b905ok' : '') + '" data-code="' + wlEsc(code) + '" data-name="' + wlEsc(wlNameOf(code)) + '" tabindex="0" role="button" title="' + wlEsc(tip) + '">' +
+      '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(e.t) + '</span><span class="hr-code">' + wlEsc(code) + '</span><span class="hr-name">' + wlEsc(wlNameOf(code)) + '</span>' + st +
+      '<span class="hr-avg ' + (Number.isFinite(pct) ? dirClass(pct) : 'flat') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '') + '</span>' + homeHoldHtml(code) + '<span class="hr-ready">' + (e.kind === 'ready' ? '✅ 條件齊全' : '突破') + '</span></div>';
   };
-  return '<div class="hr-col"><div class="hr-title">🎯 905 突破廣播 <span class="hr-rk">' + (list.length > HOME905_MAX ? '最新 ' + HOME905_MAX + '／共 ' : '') + list.length + ' 檔</span></div>' +
-    (list.length ? list.slice(0, HOME905_MAX).map(row).join('') : '<div class="hr-note">今天還沒有（大戶力 ≥ +10%、漲幅 ≥ 2%、族群在多方，且當天第一次站上 905 高才列）</div>') + '</div>';
+  return '<div class="hr-col"><div class="hr-title">🎯 905 突破廣播 <span class="hr-rk">' + (events.length > HOME905_MAX ? '最新 ' + HOME905_MAX + '／共 ' : '') + events.length + ' 筆</span></div>' +
+    (events.length ? events.slice(0, HOME905_MAX).map(row).join('') : '<div class="hr-note">今天還沒有（站上 905 高、漲幅 ≥ 2%、族群在多方就列「突破」；大戶力也 ≥ +10% 再列一筆「條件齊全」）</div>') + '</div>';
 }
 // 2026-10-20 使用者（截圖框給我看）：首頁這幾塊要加粗紅框——續抱勿追高＋族群漲幅 > 2%(12)、馬火多(30)、30加33＋賽馬多(33)、發動＋今日強勢股、1+2多(44)
 const homeRedBox = (html) => '<div class="hr-redbox">' + html + '</div>';
@@ -10172,7 +10173,7 @@ function homeRankFootHtml(total){
   hrHelpTable('🐎 個股欄（跟訊號中心「盤中333」同一份）', ['欄位', '列什麼'], [
     ['🔥當沖多1／2', '跟每日功課「當沖多」同一份：被 ① 多功課 ② 賽馬多 ③ 河流多 ④ 族群在多方區 點名兩個以上的股票（空方族群已濾掉），分中四個、中三個、中兩個，一欄放不下就接到第二欄；標「續抱不追」的（漲太多不追）不管中幾個，一律移到整份最下面，標記沒了就跳回原本那一段'],
     ['📈 1+2 突破廣播', '跟訊號中心「1+2多」同一份：全市場今天第一次 5 分K 收盤，同時站上「905 高」（開盤第一根 5 分K，09:00～09:05 的最高價）和「昨日最高價」的股票，一檔一天一次。前面紫色是第一次發生的時間；「之上」（紅底）＝現在 5 分K 還收在線上、「之下」（綠底）＝突破後又收回線下；首頁留最新 20 檔，每日功課「1+2 突破」分頁全部列'],
-    ['🎯 905 突破廣播', '只要站上 905 高（不用站上昨高），但這樣訊號太多，所以<b>四個條件都成立才列</b>：① 當天第一次 5 分K 收盤站上 905 高　② 盤中大戶力 ≥ +' + TD905_BIG + '%　③ 今天漲幅 ≥ ' + TD905_PCT + '%　④ 族群在多方區（族群名次前一半，跟當沖多同一個算法）。前面紫色時間＝第一次突破（5 分K 收盤站上 905 高）的時間；每一列最下面「條件齊全 HH:MM」＝四個條件第一次同時成立的時間，名單照條件齊全的時間排、新的在上面；「之上／之下」跟 1+2 一樣。首頁留最新 ' + HOME905_MAX + ' 檔，每日功課「905 突破」分頁全部列；盤中要開著網頁才記得到，記在這台電腦（換一台電腦會從頭記）'],
+    ['🎯 905 突破廣播', '只要 5 分K 收盤站上 905 高（不用站上昨高）就列一筆「突破」，時間就是突破的那一刻（只列今天漲幅 ≥ ' + TD905_PCT + '%、族群在多方區的，不然全市場太多）；等到<b>四個條件齊全</b>——① 當天第一次站上 905 高　② 盤中大戶力 ≥ +' + TD905_BIG + '%　③ 今天漲幅 ≥ ' + TD905_PCT + '%　④ 族群在多方區（族群名次前一半，跟當沖多同一個算法）——再列一筆「✅ 條件齊全」，時間是四個條件第一次同時成立的時間（例：09:40 突破、12:35 大戶力到 +10%，就是 09:40 一筆「突破」、12:35 一筆「條件齊全」）。名單照時間排、新的在上面；「之上／之下」跟 1+2 一樣；首頁留最新 ' + HOME905_MAX + ' 筆，每日功課「905 突破」分頁全部列；盤中要開著網頁才記得到，記在這台電腦（換一台電腦會從頭記）'],
     ['⭐ 今日強勢股', '跟訊號中心「今日強勢股」同一份，放在發動下面，紅框框起來；每一列漲跌幅後面是盤中大戶力'],
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
@@ -17213,7 +17214,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-04 23:20:55';
+const BUILD_STAMP = '2026-11-04 23:24:32';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20207,29 +20208,38 @@ function tdSysList(date, slot){
   return sys.sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.code < b.code ? -1 : 1));
 }
 // ---- 905 突破（2026-11-01 使用者：要做，但訊號太多，所以四個條件都成立才跳出）----
-// 條件：① 當天第一次 5 分K 收盤站上 905 高（開盤第一根 5 分K 的最高）② 盤中大戶力 ≥ +10% ③ 漲幅 ≥ 2% ④ 族群在多方區（族群名次前一半，跟當沖多同一個算法）。
-// 先用 ②③④（首頁報價就有）篩出候選，只替候選抓 5 分K 看 905 高；四個都成立的那一刻記下來（時間＝這台電腦第一次看到的時間，一天一次、記在這台電腦），
-// 之後一整天都留在名單上、狀態（在 905 之上／之下）照 5 分K 更新。回放只看得到那天這台電腦有開著網頁記到的。
+// 2026-11-04 使用者：905 突破一發生就要秀出來（例：大立 09:40 突破就在 09:40 出現），不要等四個條件；等到四個條件齊全（例：12:35）再秀一次、標「條件齊全」。
+// 現在每檔最多兩筆：① 突破＝第一次 5 分K 收盤站上 905 高（開盤第一根 5 分K 的最高）的那一刻就列（只列漲幅 ≥ 2%、族群在多方區的，不然全市場幾百檔太多，
+//   也要替每一檔抓 5 分K）；② 條件齊全＝再加上盤中大戶力 ≥ +10%（四個條件：站上 905 高、大戶力 ≥ +10%、漲幅 ≥ 2%、族群在多方區＝族群名次前一半，跟當沖多同一個算法）
+//   第一次同時成立的時間。名單照時間排（新的在上面）；狀態（在 905 之上／之下）照 5 分K 更新。記在這台電腦（盤中開著網頁時記，時間用 5 分K 回頭算）。
 const TD905_BIG = 10, TD905_PCT = 2;
 let td905Cache = { date: '', seen: null, primed: false };
+function td905Norm(o){   // 舊版（一檔一筆、四個條件齊全才記）轉成新格式：突破時間 brk＋條件齊全 ready
+  Object.keys(o).forEach((code) => {
+    const x = o[code];
+    if (!x || x.v === 3) return;
+    const t = x.t || x.brk || '';
+    o[code] = { brk: x.brk || (x.why && x.why[0]) || t, group: x.group, pct: x.pct, px: x.px, big: x.big, ready: { t, last: x.last || '', why: x.why || null }, v: 3 };
+  });
+  return o;
+}
 function td905Seen(date){
   if (td905Cache.date !== date){
     let o = {};
     try { o = JSON.parse(localStorage.getItem('td905Seen:' + date) || '{}') || {}; } catch (_) { o = {}; }
-    td905Cache = { date, seen: o, primed: false };
+    td905Cache = { date, seen: td905Norm(o), primed: false };
   }
   return td905Cache.seen;
 }
 function td905Save(){ try { localStorage.setItem('td905Seen:' + td905Cache.date, JSON.stringify(td905Cache.seen)); } catch (_) { /* 存不了就算了 */ } }
+// 候選＝漲幅 ≥ 2%、族群在多方區（名次前一半）；大戶力（可能還不到 +10%，或沒資料＝null）只用來判斷「條件齊全」
 function td905Candidates(){
   const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
   const half = Math.ceil(ranked.length / 2);
   const out = new Map();
   ranked.slice(0, half).forEach((g) => g.stocks.forEach((st) => {
     if (st.price === null || st.price === undefined || !Number.isFinite(st.changePercent) || st.changePercent < TD905_PCT) return;
-    const big = holderPctOf(st.code);
-    if (big === null || big < TD905_BIG) return;
-    if (!out.has(st.code)) out.set(st.code, { code: st.code, name: st.name, group: g.name, pct: st.changePercent, big });
+    if (!out.has(st.code)) out.set(st.code, { code: st.code, name: st.name, group: g.name, pct: st.changePercent, big: holderPctOf(st.code) });
   }));
   return Array.from(out.values());
 }
@@ -20238,11 +20248,8 @@ function tdFireAlert(title, list){
   if (tdB905.snd) { try { launchBeep(); } catch (_) { /* 出不了聲就算了 */ } }
   if (tdB905.notif && typeof Notification !== 'undefined' && Notification.permission === 'granted') { try { new Notification(title, { body: list.slice(0, 4).join('\\n') }); } catch (_) { /* 通知失敗就算了 */ } }
 }
-// 2026-11-02 使用者：905 突破名單左邊的「首次發生時間」怪怪的，不是實際發生的時間。原本記的是「這台電腦第一次看到四個條件都成立的時間」，
-// 開頁面比較晚、或看到的那一輪比較晚，時間就比實際晚（華票 09:45 就成立，10:04 開頁面才記到 10:04）。改成回頭算：
-// 四個條件各自「第一次成立」的時間取最晚的那個＝四個條件第一次同時成立——① 第一次 5 分K 收盤站上 905 高（5 分K）② 第一次漲幅 ≥ 2%（5 分K 收盤）
-// ③ 大戶力第一次 ≥ +10%（跟盤中大戶力分頁「進名單」同一份時間軸）④ 族群在多方區（過去的名次沒有留，以看到的那一刻為準）。
-// 時間下面的小字＝最後才成立的那個條件。
+// 條件齊全的時間：四個條件各自「第一次成立」的時間取最晚的那個（2026-11-02：不是「這台電腦第一次看到」，開頁面比較晚也不會晚記）——
+// ① 第一次 5 分K 收盤站上 905 高 ② 第一次漲幅 ≥ 2%（5 分K 收盤）③ 大戶力第一次 ≥ +10%（跟盤中大戶力分頁「進名單」同一份時間軸）④ 族群在多方區（過去的名次沒有留，以看到的那一刻為準）。
 function td905When(code, r, date, cap){
   const tl = holderTimelineFor(date);
   if (tl === null && !holderTimelineAt[date]) return null;    // 大戶力時間軸還在抓
@@ -20253,58 +20260,75 @@ function td905When(code, r, date, cap){
   const last = parts.reduce((a, b) => (b[1] > a[1] ? b : a));
   return { t: last[1] > cap ? cap : last[1], last: last[0], brk, p2, big };
 }
-function td905Tick(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.preopen || lastData.quoteDate !== twTodayStr() || !Array.isArray(lastData.groups)) return;
-  const hm = new Date(Date.now() + 8 * 3600e3).toISOString().slice(11, 16);
-  if (hm < '09:05' || hm > '13:35') return;
+function td905Run(hm, silent){
   const date = twTodayStr(), seen = td905Seen(date);
   let loading = false, changed = false;
   const fresh = [];
   td905Candidates().forEach((c) => {
-    if (seen[c.code]) return;
+    let x = seen[c.code];
+    if (x && x.ready) return;                                    // 兩筆都記了
     const r = tdB905Calc(c.code, 'c905', date, null, 120e3);
     if (r.loading){ loading = true; return; }
-    if (!r.inside || !r.ev || !r.ev.length) return;       // 現在要站在 905 高上面（當天已經突破過）
-    const w = td905When(c.code, r, date, hm);
-    if (!w){ loading = true; return; }
-    seen[c.code] = { t: w.t, last: w.last, why: [w.brk, w.p2, w.big], group: c.group, big: c.big, pct: c.pct, px: r.price, brk: r.ev[0].t, v: 2 };
-    changed = true;
-    if (td905Cache.primed) fresh.push(hm + ' ' + c.code + ' ' + c.name + ' 905 突破（大戶力 ' + (c.big > 0 ? '+' : '') + c.big.toFixed(1) + '%、漲 ' + c.pct.toFixed(2) + '%、' + c.group + '）');
-  });
-  Object.keys(seen).forEach((code) => {       // 舊版記的（時間是「第一次看到」）：用實際時間改正一次
-    const x = seen[code];
-    if (x.v) return;
-    const r = tdB905Calc(code, 'c905', date, null, 120e3);
-    if (r.loading){ loading = true; return; }
-    const w = r.ev ? td905When(code, r, date, x.t) : null;
-    if (!w){ if (r.ev) loading = true; return; }
-    x.t = w.t; x.last = w.last; x.why = [w.brk, w.p2, w.big]; x.v = 2;
-    changed = true;
+    if (!r.ev || !r.ev.length) return;                           // 今天還沒有 5 分K 收盤站上 905 高
+    if (!x){
+      x = seen[c.code] = { brk: r.ev[0].t, group: c.group, pct: c.pct, px: r.price, big: c.big, v: 3 };
+      changed = true;
+      if (td905Cache.primed && !silent) fresh.push(r.ev[0].t + ' ' + c.code + ' ' + c.name + ' 905 突破（漲 ' + c.pct.toFixed(2) + '%、' + c.group + '）');
+    }
+    if (c.big !== null && c.big !== undefined && c.big >= TD905_BIG){   // 大戶力也 ≥ +10%：四個條件齊全
+      const w = td905When(c.code, r, date, hm);
+      if (!w){ loading = true; return; }
+      x.ready = { t: w.t, last: w.last, why: [w.brk, w.p2, w.big] }; x.big = c.big;
+      changed = true;
+      if (td905Cache.primed && !silent) fresh.push(w.t + ' ' + c.code + ' ' + c.name + ' 905 條件齊全（大戶力 +' + c.big.toFixed(1) + '%、漲 ' + c.pct.toFixed(2) + '%、' + c.group + '）');
+    }
   });
   if (changed) td905Save();
-  if (!loading) td905Cache.primed = true;      // 第一輪（開頁面時已經符合的）只記不響
-  if (tdB905.up) tdFireAlert('905 突破', fresh);
+  if (!loading) td905Cache.primed = true;      // 第一輪（開頁面時已經有的）只記不響
+  if (tdB905.up && !silent) tdFireAlert('905 突破', fresh);
+}
+function td905Tick(){
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.preopen || lastData.quoteDate !== twTodayStr() || !Array.isArray(lastData.groups)) return;
+  const hm = new Date(Date.now() + 8 * 3600e3).toISOString().slice(11, 16);
+  if (hm < '09:05' || hm > '13:35') return;
+  td905Run(hm, false);
+}
+// 名單的每一筆：一檔最多兩筆（突破、條件齊全），照發生時間排，新的在上面；回放（slot）只列到那個時段
+function td905Events(seen, slot){
+  const ev = [];
+  Object.keys(seen).forEach((code) => {
+    const x = seen[code];
+    if (!x) return;
+    if (x.brk && (!slot || x.brk <= slot)) ev.push({ code, kind: 'brk', t: x.brk, x });
+    if (x.ready && x.ready.t && (!slot || x.ready.t <= slot)) ev.push({ code, kind: 'ready', t: x.ready.t, x });
+  });
+  return ev.sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.kind !== b.kind ? (a.kind === 'ready' ? -1 : 1) : a.code < b.code ? -1 : 1));
+}
+function td905EvTip(e){
+  const x = e.x, w = x.ready && x.ready.why;
+  if (e.kind === 'ready') return '條件齊全＝四個條件第一次同時成立' + (w ? '：站上 905 高 ' + w[0] + '・漲幅 ≥ ' + TD905_PCT + '% ' + w[1] + '・大戶力 ≥ +' + TD905_BIG + '% ' + w[2] + '；最晚成立的是「' + (x.ready.last || '') + '」（族群在多方區以看到的那一刻為準）' : '');
+  return '突破＝第一次 5 分K 收盤站上 905 高的時間' + (x.ready ? '；條件齊全的時間是 ' + x.ready.t : '；大戶力還沒到 +' + TD905_BIG + '%，到了會再列一筆「條件齊全」');
 }
 function td905SectionHtml(snap){
   const date = snap.date, slot = snap.live ? null : snap.slot;
   const seen = td905Seen(date);
-  const list = Object.keys(seen).map((code) => Object.assign({ code }, seen[code])).filter((x) => !slot || x.t <= slot).sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.code < b.code ? -1 : 1));
+  const events = td905Events(seen, slot);
+  const nBrk = events.filter((e) => e.kind === 'brk').length, nReady = events.length - nBrk;
   const cand = snap.live && lastData && Array.isArray(lastData.groups) ? td905Candidates() : null;
-  const rows = list.map((x) => {
-    const r = tdB905Calc(x.code, 'c905', date, slot, 120e3);
-    const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(x.code) : null;
+  const rows = events.map((e) => {
+    const x = e.x, code = e.code;
+    const r = tdB905Calc(code, 'c905', date, slot, 120e3);
+    const q = snap.live && typeof getStockQuote === 'function' ? getStockQuote(code) : null;
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : (r.pct !== undefined && r.pct !== null ? r.pct : x.pct);
-    const brkT = (r.ev && r.ev.length ? r.ev[0].t : '') || x.brk || '—';       // 左邊＝第一次 5 分K 收盤站上 905 高的時間（突破時間）
-    const tip = x.why ? '條件齊全時間＝四個條件第一次同時成立：站上 905 高 ' + x.why[0] + '・漲幅 ≥ ' + TD905_PCT + '% ' + x.why[1] + '・大戶力 ≥ +' + TD905_BIG + '% ' + x.why[2] + '；最晚成立的是「' + (x.last || '') + '」（族群在多方區以看到的那一刻為準）' : '';
-    return '<div class="td-b9row" data-hw-code="' + wlEsc(x.code) + '" data-hw-name="' + wlEsc(wlNameOf(x.code)) + '"><span class="t" title="第一次 5 分K 收盤站上 905 高的時間（突破時間）">' + wlEsc(brkT) + '</span>' +
-      '<span class="s"><b>' + wlEsc(x.code) + '</b> ' + wlEsc(wlNameOf(x.code)) + '<small>' + wlEsc(x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + '</small></span>' +
-      '<span class="b">' + tdB905Badge('905', r, '條件齊全 ' + wlEsc(x.t), tip) + '</span><span class="h">' + holderTagHtml(snap.live ? holderPctOf(x.code) : x.big, true) + '</span>' +
+    return '<div class="td-b9row" data-hw-code="' + wlEsc(code) + '" data-hw-name="' + wlEsc(wlNameOf(code)) + '"><span class="t" title="' + (e.kind === 'ready' ? '四個條件第一次同時成立的時間' : '第一次 5 分K 收盤站上 905 高的時間') + '">' + wlEsc(e.t) + '</span>' +
+      '<span class="s"><b>' + wlEsc(code) + '</b> ' + wlEsc(wlNameOf(code)) + '<small>' + wlEsc(x.group || '') + '・905高 ' + tdPx(r.h905) + '・現 ' + tdPx(r.price) + '</small></span>' +
+      '<span class="b">' + tdB905Badge('905', r, e.kind === 'ready' ? '✅ 條件齊全' : '突破', td905EvTip(e)) + '</span><span class="h">' + holderTagHtml(snap.live ? holderPctOf(code) : x.big, true) + '</span>' +
       '<span class="p ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + (Number.isFinite(pct) ? hwPct(pct) : '—') + '</span><span class="x"></span></div>';
   }).join('');
-  const head = '<div class="td-b9head"><span class="t">突破<br>時間</span><span class="s">股號・股名・族群</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';
-  return '<div class="td-b9sec s905">🎯 905 突破（篩選後） <b>' + list.length + '</b>　<small>四個條件都成立才列：當天第一次站上 905 高、大戶力 ≥ +' + TD905_BIG + '%、漲幅 ≥ ' + TD905_PCT + '%、族群在多方區（族群名次前一半）' +
-    (cand ? '；現在符合後三項的候選 ' + cand.length + ' 檔' : '') + '<br>左邊「突破時間」＝第一次 5 分K 收盤站上 905 高的時間；狀態下面的「條件齊全」＝四個條件第一次同時成立的時間（兩個時間本來就不同；名單照條件齊全的時間排，新的在上面，滑鼠移到小字上看三個條件各自的時間）' + '</small></div>' +
-    (list.length ? head + rows : '<div class="td-empty">' + (snap.live ? '目前沒有（四個條件都成立才會出現；盤中要開著網頁才記得到，條件齊全才會列入）' : '這個時段以前這台電腦沒有記到（905 要盤中開著網頁才會記）') + '</div>');
+  const head = '<div class="td-b9head"><span class="t">時間</span><span class="s">股號・股名・族群</span><span class="b">狀態</span><span class="h">大戶力</span><span class="p">今日%</span><span class="x"></span></div>';
+  return '<div class="td-b9sec s905">🎯 905 突破 <b>' + nBrk + '</b> 檔　<small>✅ 條件齊全 <b>' + nReady + '</b> 檔　每一檔最多兩筆：<b>突破</b>＝第一次 5 分K 收盤站上 905 高就列（只列漲幅 ≥ ' + TD905_PCT + '%、族群在多方區的）；<b>條件齊全</b>＝再加上盤中大戶力 ≥ +' + TD905_BIG + '%，四個條件（站上 905 高、大戶力 ≥ +' + TD905_BIG + '%、漲幅 ≥ ' + TD905_PCT + '%、族群在多方區＝族群名次前一半）第一次同時成立時，再列一筆' +
+    (cand ? '；現在漲幅 ≥ ' + TD905_PCT + '%、族群在多方的候選 ' + cand.length + ' 檔' : '') + '<br>名單照時間排，新的在上面；狀態「之上／之下」是現在 5 分K 收在 905 高上面／下面；滑鼠移到小字上看三個條件各自的時間</small></div>' +
+    (events.length ? head + rows : '<div class="td-empty">' + (snap.live ? '目前沒有（站上 905 高、漲幅 ≥ 2%、族群在多方就會出現；盤中要開著網頁才記得到）' : '這個時段以前這台電腦沒有記到（905 要盤中開著網頁才會記）') + '</div>');
 }
 function tdSideTabsHtml(){
   return '<div class="td-stabs">' + TD_SIDE_TABS.map(([k, label]) => '<button type="button" class="td-stab' + (tdSideTab === k ? ' on' : '') + '" data-td-side="' + k + '">' + label + '</button>').join('') + '</div>';
@@ -20357,7 +20381,7 @@ function tdB9OptsHtml(upTip){
 }
 function td905PanelHtml(snap){
   return '<aside class="td-side wide b905"><div class="td-shead">📣 🎯 905 突破廣播</div>' +
-    tdB9InfoHtml(snap) + tdB9OptsHtml('四個條件都成立的新股票（905 突破的條件見下面）') +
+    tdB9InfoHtml(snap) + tdB9OptsHtml('有新的 905 突破、或四個條件齊全的股票（條件見下面）') +
     '<div class="td-snote">這四顆只管盤中提醒（紫色＝開），顯示的內容不受影響。905 站上的股票比 1+2 多很多，所以要四個條件都成立才跳出。</div>' +
     '<div class="td-snote">905＝5 分K 收盤站上 905 高（開盤第一根 5 分K 的最高，不用過昨高）。狀態：在 905 之上（紅底）＝現在收在線上；在 905 之下（綠底）＝收在線下，小字寫「跌破」是突破過又收回來（假突破）。</div>' +
     td905SectionHtml(snap) +
@@ -21648,7 +21672,7 @@ const GUIDE_TOOLS = [
     b: ['不用貼名單，盤中跟著首頁報價每 20 秒重算', '多觀察挑三個族群看位置；防守價（三日低、月線）自動帶出來',
       '右邊的功課廣播分四個分頁：🔪 刀功課（新刀劍空 32、12空 123 兩欄）、📈 1+2 突破、🎯 905 突破、🛡 持股停損',
       '📈 1+2 突破：全市場今天第一次 5 分K 收盤同時站上 905 高與昨日最高價的股票；狀態「之上」（紅底）＝還收在線上、「之下」（綠底）＝突破後又收回線下',
-      '🎯 905 突破：站上 905 高，而且大戶力 ≥ +10%、今天漲幅 ≥ 2%、族群在多方區（名次前一半），<b>四個都成立才列</b>；左邊時間是第一次突破的時間，狀態下面的「條件齊全」是四個條件第一次同時成立的時間（盤中要開著網頁才記得到，記在這台電腦）',
+      '🎯 905 突破：5 分K 收盤站上 905 高就先列一筆「突破」（只列漲幅 ≥ 2%、族群在多方區的），等大戶力也 ≥ +10%（四個條件：站上 905 高、大戶力 ≥ +10%、漲幅 ≥ 2%、族群在多方區齊全）再列一筆「條件齊全」；盤中要開著網頁才記得到，記在這台電腦',
       '🛡 持股停損：自動帶入自選股裡你自己的分組（最多 20 檔），盤中 1 分K 收盤跌破 905 低或三日低就通知',
       '1+2 突破、905 突破也各有一欄放在首頁（1+2 突破廣播、905 突破廣播）；上面的參數按鈕只篩選下面的族群卡，不影響右邊的廣播'] },
   { t: '籌碼日報', label: '籌碼日報', v: 'tb-swing', v2: ['tb-weekly', '三頁週分析影片'], tags: ['盤後'], d: '收盤後的一份整理：今日摘要、產業、籌碼、技術、均線轉強、處置動態，還有主動式 ETF 持股雷達、營收面精選。',
