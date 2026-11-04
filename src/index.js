@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-04 23:31:06";
+const BUILD_STAMP = "2026-11-04 23:47:04";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -16802,6 +16802,11 @@ const SCR_CARDS = [
   { key: 'fut', title: '有股票期貨', desc: '期交所所有個股期貨的標的（一般 2,000 股或小型 100 股都算）。有期貨才好放空與避險。', check: true },
   { key: 'mini', title: '有小型股票期貨', desc: '契約是 100 股（一般股票期貨 2,000 股），只有約 47 檔高價股有 —— 小資金也能玩高價股。有小型的一定也有一般的。', check: true },
   { key: 'exdispo', title: '排除處置股', desc: '把處置中和明天起處置（交易所已公告、下一個交易日開始分盤）的股拿掉。「創高黑龍」預設有勾。', check: true },
+  // 2026-11-04 使用者：融資／融券「今天增減」也能當條件，門檻按鈕直接選（≥1000、1500、5000 張…），名單照增減張數排；融資融券彙總表證交所晚上（約 21:00）才公布
+  { key: 'mup', grp: 'mg', title: '融資今天增加 ≥', desc: '今天融資餘額比前一天多 ≥ 這個張數（散戶借錢買進、追價）。', choices: [500, 1000, 1500, 2000, 3000, 5000], def: 1000, unit: ' 張' },
+  { key: 'mdn', grp: 'mg', title: '融資今天減少 ≥', desc: '今天融資餘額比前一天少 ≥ 這個張數（融資退場、洗籌碼，或被斷頭）。', choices: [500, 1000, 1500, 2000, 3000, 5000], def: 1000, unit: ' 張' },
+  { key: 'sup', grp: 'mg', title: '融券今天增加 ≥', desc: '今天融券餘額比前一天多 ≥ 這個張數（放空的人變多）。融券交易所只給今日餘額，增減是跟前一個交易日的餘額相減。', choices: [100, 300, 500, 1000, 1500, 3000], def: 500, unit: ' 張' },
+  { key: 'sdn', grp: 'mg', title: '融券今天減少 ≥', desc: '今天融券餘額比前一天少 ≥ 這個張數（空單回補）。', choices: [100, 300, 500, 1000, 1500, 3000], def: 500, unit: ' 張' },
   // 2026-10-23 使用者：個股問診融資斷頭線名單的六顆快速篩選也放進系統選股。client:true＝後端 /api/screener 不認得，篩完後前端再拿 /api/margin-call 同一天的資料比對、跟其他條件取交集
   { key: 'mclP', client: true, title: '融資・A 已破（前幾天）', desc: '昨天以前就已經跌破 A 最高點追斷頭價的股（不含昨日新破）。A＝近 20 個交易日盤中最高 × 0.78（上櫃 × 0.65）。', check: true },
   { key: 'mclQ', client: true, title: '融資・B 已破（前幾天）', desc: '昨天以前就已經跌破 B 五日平均價線追斷頭價的股（不含昨日新破）。B＝月高那天的五日平均價 × 0.78（上櫃 × 0.65）。', check: true },
@@ -16845,6 +16850,10 @@ const SCR_PRESETS = [
   { name: '奇貨可居', p: { score: 10, etf: 1, fut: 1 } },
   { name: '雙劍出擊', p: { sword: 20 } },   // 2026-10-10 使用者：前 60 太寬（均1 籌2 也進得來），改前 20
   { name: '河流便宜', p: { score: 10, river: 2 } },
+  { name: '融資大增', p: { mup: 1000 }, sort: ['mchg', -1] },   // 2026-11-04 使用者：融資／融券今天增減，一鍵套用＋照增減張數排
+  { name: '融資大減', p: { mdn: 1000 }, sort: ['mchg', 1] },
+  { name: '融券大增', p: { sup: 500 }, sort: ['schg', -1] },
+  { name: '融券大減', p: { sdn: 500 }, sort: ['schg', 1] },
   { name: '近似落底', p: { mclT: 1 } },
   { name: '留意回檔', p: { mclR: 1 } },
   { name: 'VCP 收斂', p: { patVcp: 1 } },   // 2026-10-23 使用者：形態選股
@@ -16862,6 +16871,7 @@ scrState.on.score = true; scrState.on.exdispo = true; scrState.k = 'black'; scrS
 scrState.preset = '創高黑龍';
 const scrPct = (v, digits) => v === null || v === undefined ? '—' : ((v > 0 ? '+' : '') + (+v).toFixed(digits === undefined ? 2 : digits) + '%');
 const scrCls = (v) => v === null || v === undefined ? '' : (v > 0 ? 'scr-up' : (v < 0 ? 'scr-dn' : ''));
+const scrLots = (v) => v === null || v === undefined ? '—' : ((v > 0 ? '+' : '') + Number(v).toLocaleString('en-US'));
 function scrCount(){ return SCR_CARDS.filter((c) => !c.disabled && scrState.on[c.key]).length + ((scrState.k !== 'any' || scrState.kmin !== '' || scrState.kmax !== '') ? 1 : 0); }
 function scrQuery(){
   const q = new URLSearchParams();
@@ -16910,6 +16920,7 @@ async function scrRun(){
     const res = await fetch('/api/screener?' + scrQuery());
     const d = await res.json().catch(() => null);
     if (!res.ok) throw new Error((d && d.detail) || ('HTTP ' + res.status));
+    if (['mup', 'mdn', 'sup', 'sdn'].some((k) => scrState.on[k] && d.params && !(k in d.params))) throw new Error('後端還沒更新到支援「融資／融券今天增減」條件（更新完就有），先取消那幾張卡再篩');
     if (keys.length){
       const map = await scrMarginMap(d.date);
       const before = d.rows.length;
@@ -16945,13 +16956,16 @@ function scrApplyPreset(name){
     else { scrState.on[k] = true; if (typeof v === 'number' && !(SCR_CARDS.find((c) => c.key === k) || {}).check) scrState.val[k] = v; }
   });
   scrState.preset = name;
+  scrState.sortKey = ps.sort ? ps.sort[0] : 'score'; scrState.sortDir = ps.sort ? ps.sort[1] : -1;   // 融資／融券那幾組照增減張數排，其他組照均線分數
   scrRun();
 }
 function scrCardHtml(c){
   const on = !!scrState.on[c.key];
   let h = '<div class="scr-card' + (on ? ' on' : '') + (c.disabled ? ' off' : '') + '"><label class="scr-ct"><input type="checkbox" data-scr-on="' + c.key + '"' + (on ? ' checked' : '') + (c.disabled ? ' disabled' : '') + '> ' + c.title + '</label>' +
     '<div class="scr-cd">' + c.desc + '</div>';
-  if (!c.check){
+  if (c.choices){   // 門檻按鈕：點一顆＝選那個門檻並勾起來
+    h += '<div class="scr-kr">' + c.choices.map((n) => '<button type="button" class="scr-kb' + (on && scrState.val[c.key] === n ? ' on' : '') + '" data-scr-choice="' + c.key + ':' + n + '">≥ ' + n.toLocaleString('en-US') + '</button>').join('') + '</div>';
+  } else if (!c.check){
     const v = scrState.val[c.key];
     const shown = c.key === 'river' ? (v >= 2 ? '便宜以下' : '只要特價') : (v + c.unit);
     h += '<div class="scr-sl"><input type="range" min="' + c.min + '" max="' + c.max + '" step="' + c.step + '" value="' + v + '" data-scr-val="' + c.key + '"' + (c.disabled ? ' disabled' : '') + '><b>' + shown + '</b></div>';
@@ -16977,6 +16991,10 @@ function scrChips(p, mclKeys, patKeys){
   if (p.inst5 !== null) out.push('法人5日累積 ≥ ' + p.inst5 + '%');
   if (p.sword !== null) out.push('雙劍出擊 前 ' + p.sword + ' 名');
   if (p.dispo !== null) out.push('處置倒數 ≤ ' + p.dispo + ' 天');
+  if (p.mup != null) out.push('融資增加 ≥ ' + p.mup.toLocaleString('en-US') + ' 張');
+  if (p.mdn != null) out.push('融資減少 ≥ ' + p.mdn.toLocaleString('en-US') + ' 張');
+  if (p.sup != null) out.push('融券增加 ≥ ' + p.sup.toLocaleString('en-US') + ' 張');
+  if (p.sdn != null) out.push('融券減少 ≥ ' + p.sdn.toLocaleString('en-US') + ' 張');
   if (p.river !== null && p.river !== undefined) out.push('河流 ' + (p.river >= 2 ? '便宜以下' : '只要特價'));
   if (p.fut) out.push('股票期貨');
   if (p.mini) out.push('小型股期');
@@ -17026,6 +17044,7 @@ function scrTableHtml(d){
     th('score', '均線分數', p.score !== null) + th('chip', '籌碼暴增', p.chip !== null) + th('sword', '⚔ 雙劍', p.sword !== null) + th('etf', 'ETF 家數', p.etf !== null) +
     th('dispo', '處置倒數', p.dispo !== null || p.exdispo) + th('river', '河流區', p.river !== null && p.river !== undefined) + '<th class="' + (p.fut || p.mini ? 'act' : '') + '">股期</th>' +
     th('inst3', '法人3日%', p.inst3 !== null) + th('inst5', '法人5日%', p.inst5 !== null) + th('chg', 'K棒', kActive) +
+    th('mchg', '融資增減(張)', p.mup != null || p.mdn != null) + th('schg', '融券增減(張)', p.sup != null || p.sdn != null) +
     th('d1', 'D+1%') + th('d1h', 'D+1 高%') + th('d2', 'D+2%') + th('perf', '目前績效%') + (d.mclKeys ? '<th class="act">A 斷頭</th><th class="act">B 斷頭</th><th class="act">融資訊號</th>' : '') + (d.patKeys ? '<th class="act">形態（觸發價）</th>' : '') + '</tr></thead><tbody>';
   scrSortRows(d.rows).forEach((r) => {
     const inst = (x) => x ? '<span class="' + (x.buy ? 'scr-up' : 'scr-dn') + '">' + (x.buy ? '✓ ' : '') + x.pct + '%</span>' : '—';
@@ -17039,6 +17058,8 @@ function scrTableHtml(d){
       '<td>' + (r.riverName ? '<span class="riv-zone ' + RV_ZCLS[r.river] + '">' + r.riverName + '</span>' : '—') + '</td><td>' + (r.futLabel ? '<span class="scr-fut' + (r.mini ? ' mini' : '') + '">' + r.futLabel + '</span>' : '—') + '</td>' +
       '<td>' + inst(r.inst3) + '</td><td>' + inst(r.inst5) + '</td>' +
       '<td>' + (r.k === 'red' ? '🔴' : (r.k === 'black' ? '⚫' : '➖')) + ' <span class="' + scrCls(r.chg) + '">' + scrPct(r.chg) + '</span></td>' +
+      '<td class="' + scrCls(r.mchg) + '"' + (r.mbal != null ? ' title="融資餘額 ' + r.mbal.toLocaleString('en-US') + ' 張"' : '') + '>' + scrLots(r.mchg) + '</td>' +
+      '<td class="' + scrCls(r.schg) + '"' + (r.sbal != null ? ' title="融券餘額 ' + r.sbal.toLocaleString('en-US') + ' 張"' : '') + '>' + scrLots(r.schg) + '</td>' +
       '<td class="' + scrCls(r.d1) + '">' + scrPct(r.d1) + '</td><td class="' + scrCls(r.d1h) + '">' + scrPct(r.d1h) + '</td>' +
       '<td class="' + scrCls(r.d2) + '">' + scrPct(r.d2) + '</td><td class="' + scrCls(r.perf) + '">' + scrPct(r.perf) + '</td>' + (d.mclKeys ? scrMclCells(r.mcl) : '') + (d.patKeys ? scrPatCells(r.pat) : '') + '</tr>';
   });
@@ -17051,6 +17072,8 @@ function scrResultHtml(){
   if (!d) return '<div class="ma-legend">勾好條件按「開始篩選」，或點上面「一鍵套用」。</div>';
   let h = '<div class="scr-head"><b>符合名單</b>' + (scrState.preset ? '<span class="scr-badge">' + wlEsc(scrState.preset) + '</span>' : '') +
     '<span>' + d.count + ' 檔符合・資料日 ' + d.date + (d.mclKeys ? '・其他條件符合 ' + d.mclBefore + ' 檔，再比對融資斷頭線' : '') + (scrState.loading ? '・更新中…' : '') + '</span>' + scrChips(d.params, d.mclKeys, d.patKeys) + '</div>';
+  const mgOn = d.params && (d.params.mup != null || d.params.mdn != null || d.params.sup != null || d.params.sdn != null);
+  if (mgOn && d.marginReady === false) h += '<div class="ma-err">⏳ ' + d.date + ' 的融資融券資料還沒有 —— 證交所／櫃買的融資融券彙總表晚上約 21:00 才公布（公布後，後端約 20 分鐘內收進來），現在篩融資／融券增減會是空的。想先看前一個交易日，用上面的「回測指定日」挑前一天。</div>';
   h += d.latestDate
     ? '<div class="scr-info">📈 這批是 <b>' + d.date + '</b> 的名單，後面有 ' + d.next.length + ' 個交易日的表現：D+1＝' + (d.next[0] || '—') + (d.next[1] ? '、D+2＝' + d.next[1] : '') + '，目前績效算到 ' + d.latestDate + ' 收盤。</div>'
     : '<div class="scr-info">📈 這批是 <b>' + d.date + '</b> 的名單，還沒有事後績效 —— 要等下一個交易日收完盤才會出現 D+1；想馬上看績效，改用上面的「回測指定日」挑一天更早的。</div>';
@@ -17061,6 +17084,7 @@ function scrResultHtml(){
     '籌碼暴增：粗體＝有進雷達買超榜（>4），淡色＝沒上榜但實際的籌碼%（集保用資料日之前最近一週' + (d.chipWeek ? '：' + d.chipWeek : '') + '）。' +
     'K棒：🔴＝收盤高於開盤、⚫＝收盤低於開盤，旁邊是跟前一天收盤比的漲跌幅（可能收黑但還是漲）。D+1／D+2＝資料日之後的收盤漲跌；D+1 高%＝隔天盤中最高相對資料日收盤；目前績效＝資料日收盤一路算到最新收盤。價格用還原日K。' +
     '股期：期＝有股票期貨、小期＝有小型股票期貨（' + (d.futSource || '') + '）。點任一列會打開個股問診，帶出那一檔。' +
+    '融資／融券增減（張）：今天餘額比前一天多（＋、紅）或少（−、綠），滑過去看目前餘額；融券前一天沒存資料的股顯示「—」。表頭按一下照那欄排，再按一下反過來；晚上約 21:00 公布，公布前整欄是「—」。' +
     (d.mclKeys ? '融資斷頭線條件只看得到「族群裡有算出斷頭線」的股票（日K ≥24 根、有族群），不在族群裡的股票勾了就會被濾掉；賣壓狀態、近似落底、留意回檔的判斷跟個股問診名單同一套（滑過標籤看數字），融資餘額歷史只有約一個月，回測太早的日期會是「資料不足」。' : '') + '</div>';
   return h;
 }
@@ -17072,7 +17096,8 @@ function renderScreener(){
   box.innerHTML = '<div class="ma-sec scr-sec"><h3 class="scr-toggle" data-scr-toggle="1">' + (scrState.open ? '▾' : '▸') + ' 系統選股・條件選股 <small>勾要用的條件、拉一下門檻，選出同時符合的名單；點名單任一列看那檔完整資料</small></h3>' +
     (scrState.open
       ? '<div class="ma-note">🕐 每個交易日收盤、日K進來整表後更新 —— 條件來自均線分數、籌碼週報、主動式 ETF 持股與法人買賣超，所以跟著它們一起更新；名單上方會標出實際的資料日。條件勾越多，名單越少、也越嚴格。</div>' +
-        '<div class="scr-grid">' + SCR_CARDS.filter((c) => !c.client).map(scrCardHtml).join('') + scrKCardHtml() +
+        '<div class="scr-grid">' + SCR_CARDS.filter((c) => !c.client && !c.grp).map(scrCardHtml).join('') + scrKCardHtml() +
+          '<div class="scr-sub">💰 融資／融券今天增減 <small>今天比前一天多或少幾張，門檻按鈕直接選；四張卡彼此是「且」（勾融資增加＋融券增加＝兩個都要符合）。名單照增減張數排（表頭按一下換排序）。融資融券彙總表證交所晚上約 21:00 才公布，公布前這四張卡篩不到股票</small></div>' + SCR_CARDS.filter((c) => c.grp === 'mg').map(scrCardHtml).join('') +
           '<div class="scr-sub">💥 融資斷頭線條件 <small>跟「個股問診」融資名單的快速篩選同一套；只看得到有算出斷頭線的族群股（約 570 檔）。「賣壓」那四張卡彼此是「或」：勾兩張以上＝符合其中一種就列</small></div>' + SCR_CARDS.filter((c) => c.client && !c.pat).map(scrCardHtml).join('') +
           '<div class="scr-sub">📐 形態選股 <small>日K的波段高低點找出來的候選，每張卡算好觸發價（頸線／樞紐）；四張彼此是「或」。形態有主觀成分，會漏也會誤判，請看圖確認；回測：只有「突破觸發價之後」比大盤強一點，候選本身看不出優勢</small></div>' + SCR_CARDS.filter((c) => c.pat).map(scrCardHtml).join('') + '</div>' +
         '<div class="scr-presets">一鍵套用 ' + SCR_PRESETS.map((x) => '<button type="button" class="scr-pre' + (scrState.preset === x.name ? ' on' : '') + '" data-scr-preset="' + wlEsc(x.name) + '">' + x.name + '</button>').join('') + '</div>' +
@@ -17093,7 +17118,8 @@ function scrStockCardHtml(code){
     cell('雙劍', r.maHits && r.chipHits ? '均' + r.maHits + ' 籌' + r.chipHits : (r.maHits ? '均' + r.maHits : (r.chipHits ? '籌' + r.chipHits : '—'))) +
     cell('主動式 ETF', r.etf ? r.etf + ' 家持有' : '—') + cell('處置', r.dispo !== null ? '🔒 還關 ' + r.dispo + ' 天' : (r.upcoming ? '明天起處置' : '—')) +
     cell('股票期貨', r.futLabel || '—') + cell('河流區', r.riverName || '—') + cell('法人 3 日', inst(r.inst3)) + cell('法人 5 日', inst(r.inst5)) +
-    cell('K棒', (r.k === 'red' ? '🔴 紅K ' : (r.k === 'black' ? '⚫ 黑K ' : '')) + scrPct(r.chg)) + '</div>';
+    cell('K棒', (r.k === 'red' ? '🔴 紅K ' : (r.k === 'black' ? '⚫ 黑K ' : '')) + scrPct(r.chg)) +
+    cell('融資增減', r.mchg == null ? '—' : scrLots(r.mchg) + ' 張（餘額 ' + r.mbal.toLocaleString('en-US') + '）') + cell('融券增減', r.schg == null ? '—' : scrLots(r.schg) + ' 張（餘額 ' + r.sbal.toLocaleString('en-US') + '）') + '</div>';
 }
 async function scrLoadStock(code){
   if (!code || scrState.stockCode === code && scrState.stock) return;
@@ -17112,6 +17138,8 @@ document.getElementById('scrBody').addEventListener('click', (e) => {
   if (pre){ scrApplyPreset(pre.dataset.scrPreset); return; }
   if (t.closest('[data-scr-go]')){ scrState.preset = ''; scrRun(); return; }
   if (t.closest('[data-scr-clear]')){ scrState.on = {}; scrState.k = 'any'; scrState.kmin = ''; scrState.kmax = ''; scrState.preset = ''; renderScreener(); return; }
+  const ch = t.closest('[data-scr-choice]');
+  if (ch){ const [k, n] = ch.dataset.scrChoice.split(':'); scrState.val[k] = +n; scrState.on[k] = true; scrState.preset = ''; renderScreener(); return; }
   const kb = t.closest('[data-scr-k]');
   if (kb){ scrState.k = kb.dataset.scrK; scrState.preset = ''; renderScreener(); return; }
   const th = t.closest('[data-scr-sort]');
@@ -17217,7 +17245,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-04 23:31:06';
+const BUILD_STAMP = '2026-11-04 23:47:04';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -21699,8 +21727,8 @@ const GUIDE_TOOLS = [
     b: ['防守線：明日紅半、三日低、月線', '同時看籌碼、營收、本益比'] },
   { t: '個股問診', label: '問診', v: 'tb-diag', tags: ['盤後'], d: '打代號一頁看完這檔的均線、族群、籌碼、營收、估值，還有追高的人在哪裡斷頭。',
     b: ['個股問診會給一句結論和明天要守的價', '「這家公司在做什麼」用白話講產業，列出同族群、同產業公司（點了就換那一檔）', '季報：近 8 季營收、毛利率、營益率、淨利率、EPS，近四季 EPS 與本益比', '融資斷頭線：A 月高、B 五日線的斷頭價，加上這檔的融資餘額、月高以來是退場還是還在加', '盤中 10:00 後：今天在漲／跌什麼（盤中走勢、同族群有沒有一起動、當天新聞與公告、要留意的地方、後面看哪條防守線）'] },
-  { t: '系統選股', label: '系統選股', v: 'tb-screener', tags: ['盤後'], d: '勾條件、拉門檻，一次篩出同時符合的名單（均線分數、籌碼暴增、法人買超、處置、河流位置……）。',
-    b: ['選股條件越多，名單越少、越嚴格', '一鍵套用「創高黑龍」等現成的條件組合', '點名單任一列就打開個股問診看那一檔'] },
+  { t: '系統選股', label: '系統選股', v: 'tb-screener', tags: ['盤後'], d: '勾條件、拉門檻，一次篩出同時符合的名單（均線分數、籌碼暴增、法人買超、處置、河流位置、融資融券增減……）。',
+    b: ['選股條件越多，名單越少、越嚴格', '一鍵套用「創高黑龍」等現成的條件組合', '💰 融資／融券今天增減：按門檻鈕選 ≥500、1,000、1,500、5,000 張…，一鍵套用「融資大增／融資大減／融券大增／融券大減」，名單照增減張數排（表頭可換排序）；融資融券彙總表晚上約 21:00 才公布', '點名單任一列就打開個股問診看那一檔'] },
   { t: '營收成長榜', label: '營收成長榜', v: 'tb-revenue', tags: ['每月'], d: '每月 10 號前公司陸續公布上個月營收，這裡把全市場排好：誰年增最多、公布後股價怎麼反應。',
     b: ['一天更新三次，公布日自動記下來', '可以查單一檔的每月營收'] },
   { t: '處置監獄', label: '處置監獄', v: 'tb-jail', tags: ['盤後'], d: '哪些股票被關（處置）、什麼時候出獄、哪些快被關（嫌疑名單）。被處置的股票要分盤撮合，進出很不順，事先知道比較好。',
