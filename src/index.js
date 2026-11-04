@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-04 23:47:04";
+const BUILD_STAMP = "2026-11-05 00:20:32";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -194,6 +194,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .hr-warn:not(.bear) .hr-stk{display:flex;align-items:baseline;gap:4px;white-space:nowrap;overflow:hidden;margin-right:0;} .hr-warn:not(.bear) .hr-stk > span:not(.hr-hold){margin-left:auto;} .hr-warn:not(.bear) .hr-stk > .hr-hold{margin-left:4px;}
   .hr-code{color:var(--muted);font-size:12px;}
   .hr-avg{margin-left:auto;font-size:12px;}
+  .hr-bothsc{font-size:10px;font-weight:400;color:var(--muted);}   /* 2026-11-04 首頁雙榜交集：漲跌幅後面的均線分數 */
   .hr-sep{padding:3px 6px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;}
   .hr-note{padding:8px 10px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);}
   /* 首頁第二欄：當沖多（2026-10-19 使用者：取代 183 原本的位置；跟每日功課「當沖多」同一份：中四個／中三個／中兩個） */
@@ -9896,6 +9897,35 @@ function homeDaytradeColsHtml(part){
   '</div>';
 }
 const homeFut75ColHtml = () => homeDaytradeColsHtml('75');   // 2026-10-18 使用者：股期黑龍(75) 移到最右邊 22-35 下面
+// 首頁「📊雙榜交集」（2026-11-04 使用者：放在續抱勿追高下面、股期黑龍(75) 上面）：個股分數前 20 名 ∩ 前二十名常客，
+// 跟自選股的「📊雙榜交集」分組同一份（maWlApply），照個股分數名次排；盤中跟著 ma-rank 即時換，收盤後是收盤排行。
+let homeBothAt = 0, homeBothLoading = false;
+function homeBothLoad(){
+  try {
+    if (homeBothLoading || (maWlLast.rank && maWlLast.hits) || Date.now() - homeBothAt < 20000) return;
+    homeBothLoading = true; homeBothAt = Date.now();
+    Promise.all([maFetch('/api/ma-rank'), maFetch('/api/ma-rank-hits?' + MA_HIT_QS)]).then(([d, h]) => {
+      if (d && d.status === 'ok' && !d.teacher && Array.isArray(d.stocks) && d.stocks.length && (!d.latest || d.date === d.latest)) maWlLast.rank = d;
+      if (h && h.status === 'ok' && Array.isArray(h.rows) && h.rows.length) maWlLast.hits = h;
+    }).catch(() => {}).finally(() => { homeBothLoading = false; try { render(); } catch (_){} });
+  } catch (_){ /* 均線分數那組變數還沒建好（網頁剛開）：下一輪再試 */ }
+}
+function homeBothColHtml(){
+  let rk = null, ht = null;
+  try { rk = maWlLast.rank; ht = maWlLast.hits; } catch (_){ /* 還沒建好 */ }
+  const title = (n) => '<div class="hr-title" title="個股分數前 ' + MA_WL_TOP + ' 名 ∩ 前二十名常客（兩個榜都有的），照個股分數名次排；跟自選股的「📊雙榜交集」同一份">📊雙榜交集' + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔</span>') + '</div>';
+  if (!rk || !ht){ homeBothLoad(); return '<div class="hr-col">' + title(null) + '<div class="hr-note">讀取中…</div></div>'; }
+  const hitBy = {};
+  ht.rows.forEach((r) => { hitBy[r.code] = r; });
+  const list = rk.stocks.slice(0, MA_WL_TOP).map((r, i) => ({ r, i })).filter(({ r }) => hitBy[r.code]);
+  const row = ({ r, i }) => {
+    const h = hitBy[r.code], tip = '個股分數第 ' + (i + 1) + ' 名・' + r.sum + ' 分＋前二十名常客 ' + h.hits + '/' + ht.ndays + ' 次（近 5 日 ' + h.r5 + '/5）' + (r.grp ? '・' + r.grp : '');
+    return '<div class="hr-row hr-stk" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc(tip) + '">' +
+      '<span class="hr-bear-pill ' + dirClass(r.chg) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' +
+      '<span class="hr-avg ' + dirClass(r.chg) + '">' + fmt(r.chg) + '%<small class="hr-bothsc"> ' + r.sum + '分</small></span></div>';
+  };
+  return '<div class="hr-col">' + title(list.length) + (list.length ? list.map(row).join('') : '<div class="hr-note">目前沒有兩個榜都在的股票</div>') + '</div>';
+}
 function homeBladeColHtml(m){
   if (!m) return '';
   const mark = (r) => r.bladeMark || '';
@@ -10105,6 +10135,7 @@ function homeRank4Html(){
     // 漲停／買不到的也一起列（跟老師一樣），漲幅高的在上面
     '<div class="hr-stack">' +
       homeRedBox(homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : [], undefined, undefined, true, true)) +   // 2026-10-29 使用者：代號、股名、（族群名彩色）、漲跌幅、大戶力放最後；2026-10-20 使用者：族群漲幅 > 2%（12）搬到續抱勿追高下面；2026-10-21 使用者：12 又搬走，搬到發動右邊自己一欄
+      homeBothColHtml() +   // 2026-11-04 使用者：雙榜交集放在續抱勿追高下面、股期黑龍(75) 上面
       homeFut75ColHtml() +   // 2026-11-01 使用者：股期黑龍(75) 放在續抱勿追高下面
       // 2026-10-21 使用者：河流多(34) 搬到第 6 欄 30加33／賽馬多(33) 下面，一起放在紅框裡
     '</div>' +
@@ -10177,6 +10208,7 @@ function homeRankFootHtml(total){
     ['⭐ 今日強勢股', '跟訊號中心「今日強勢股」同一份，放在發動下面，紅框框起來；每一列漲跌幅後面是盤中大戶力'],
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的'],
+    ['📊雙榜交集', '放在續抱勿追高下面、股期黑龍(75) 上面：均線分數排行「個股分數前 20 名」跟「前二十名常客」兩個榜都有的股票（跟自選股裡的「📊雙榜交集」同一份），照分數名次排；每列後面是今天漲跌幅和均線分數，滑過去看名次與常客次數'],
     ['👑30加33加34', '馬火多(30)、賽馬多(33)、河流多(34) 三份都有的（賽馬多、河流多只看族群名次前 ' + HOME_334_TOP_GROUPS + ' 名；三份各自的完整名單看訊號中心「盤中333」或機器人代碼 30／33／34）'],
     ['每一列', '族群名次、代號、名稱、今天漲跌幅；族排前面的在上面'],
     ['點股票', '開K線圖'],
@@ -17245,7 +17277,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-04 23:47:04';
+const BUILD_STAMP = '2026-11-05 00:20:32';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
