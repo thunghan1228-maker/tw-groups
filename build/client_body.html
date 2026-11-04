@@ -5347,9 +5347,12 @@ function drawChart(){
     ctx.strokeStyle = currentChart.vwapColor;
     ctx.lineWidth = currentChart.vwapWidth;
     ctx.beginPath();
+    // 2026-11-04：VWAP 每天從開盤重算，多日圖上昨天收盤那點跟今天開盤那點不能連起來（連起來會斜斜拉過整個隔夜缺口）：換日就另起一段線
+    let vwapDay = null;
     vwapSeries.forEach((v, i) => {
-      const x = xAt(i), y = yAt(v);
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      const x = xAt(i), y = yAt(v), bar = allBars[vStart + i], day = bar ? taipeiDateStr(bar.ts) : vwapDay;
+      if (i === 0 || day !== vwapDay) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      vwapDay = day;
     });
     ctx.stroke();
   }
