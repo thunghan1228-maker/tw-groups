@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 00:53:17";
+const BUILD_STAMP = "2026-11-05 00:55:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -596,6 +596,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   /* 股票搜尋 */
   /* 2026-10-15 使用者：搜尋框縮小，能輸入就好 */
   .ssb-col{display:flex;flex-direction:column;gap:6px;flex:0 1 240px;max-width:240px;min-width:200px;} .ssb-col .stock-search-bar{max-width:none;flex:none;}   /* 2026-10-23 使用者：搜尋框下面放每日加權指數分析 */
+  .tx-detail{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:6px;background:#2563eb;color:#fff;font-size:11px;font-weight:700;line-height:1.5;cursor:pointer;white-space:nowrap;vertical-align:middle;}   /* 2026-11-04 使用者：加權指數後面「詳細分析」藍底白字按鈕，按下去才開 */
+  .tx-detail:hover{background:#1d4ed8;} .tx-detail:focus-visible{outline:2px solid #93c5fd;outline-offset:1px;}
   .tx-chip{display:block;width:100%;text-align:left;font:inherit;font-size:12.5px;color:var(--text);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:10px;padding:6px 10px;cursor:pointer;line-height:1.45;}
   .tx-chip:hover,.tx-chip[aria-expanded="true"]{background:var(--panel-2);}
   .tx-chip.t-bull{border-left-color:#ef4444;} .tx-chip.t-neutral{border-left-color:#f59e0b;} .tx-chip.t-bear{border-left-color:#22c55e;}
@@ -4027,7 +4029,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <span class="ssb-hint" id="stockSearchHint" hidden>查無此股票</span>
     </div>
     </div>
-    <button type="button" class="tx-chip" id="taiexChip" aria-haspopup="dialog" aria-expanded="false" title="每日加權指數分析：滑過去看、按一下固定打開"><span class="tx-l1">📈 加權指數分析　讀取中…</span></button>  <!-- 2026-10-23 使用者：每日加權指數分析，滑過去或按下去看；2026-10-29 使用者：移到搜尋框右邊（原本個股震盪的位置），個股震盪往右移 -->
+    <button type="button" class="tx-chip" id="taiexChip" aria-haspopup="dialog" aria-expanded="false" title="每日加權指數分析：按「詳細分析」打開（滑鼠經過不會自己跳出來）"><span class="tx-l1">📈 加權指數分析　讀取中…</span></button>  <!-- 2026-10-23 使用者：每日加權指數分析，滑過去或按下去看；2026-10-29 使用者：移到搜尋框右邊（原本個股震盪的位置），個股震盪往右移 -->
     <div class="market-strength-bar" id="otcStrengthBox"></div>
     <div class="market-strength-bar txf-box" id="txfBox" title="台指期近月（期交所日盤即時，每 20 秒更新）・點一下看 K 線圖"><span class="txf-l1"><b>台指期近月</b><small class="txf-sess">（日盤）</small>　讀取中…</span></div>  <!-- 2026-10-29 使用者：個股震盪右邊空白處加台指期近月：價位、漲跌點數、漲跌幅，漲紅跌綠平盤白字 -->
     <div class="signal-controls">
@@ -10218,7 +10220,7 @@ function homeRankFootHtml(total){
   return hrHelpTable('🧭 首頁上面那一排', ['項目', '說明'], [
     ['櫃買指數／加權指數', '今天的指數和漲跌點數（漲紅、跌綠、平盤白）；旁邊的分數＝指數的均線分數（滿分 15，算法跟個股一樣）：先寫當天分數和當天多空，3 日平均只當參考；6 分是分水嶺（剛好 6 分標「平」），偏多紅底白字、偏空綠底白字。點一下開 K 線圖（日線、5 分、1 分）'],
     ['台指期近月', '價位、漲跌點數、漲跌幅；日盤時間看日盤、夜盤時間切夜盤；點一下開 K 線圖（日線、5 分、1 分，日盤夜盤接在一起）'],
-    ['每日加權指數分析', '搜尋框下面那一條：滑過去看、按一下固定打開；收盤後約 15:30 更新（融資那句 21:40 後補日期）'],
+    ['每日加權指數分析', '搜尋框旁邊那一條：按藍底白字的「📊 詳細分析」才會打開（滑鼠經過不會自己跳出來；再按一下、按視窗外面或 Esc 關掉）；點第一行的價位看加權指數 K 線圖；收盤後約 15:30 更新（融資那句 21:40 後補日期）'],
     ['前六大族群、其他', '強勢／弱勢切換旁邊是漲幅或跌幅前六大的族群，最後一格「其他」＝不在任何族群的股票（154 檔），不排名，點開看清單；報價、K 線、強勢股、機器人代碼都能用'],
   ]) +
   hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
@@ -17331,7 +17333,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 00:53:17';
+const BUILD_STAMP = '2026-11-05 00:55:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -27502,7 +27504,7 @@ function renderTaiexChip(){
   const px = lv ? lv.price : a.close, pts = lv ? lv.change : a.pts, pctNow = lv ? lv.pct : a.pct;
   const txCls = pts > 0 ? 'tx-up' : pts < 0 ? 'tx-dn' : 'tx-flat';
   const lvTag = lv ? ' <small class="tx-lvtag">' + txMd(lv.date) + (lvOpen(lv) ? ' 即時' : ' 收盤') + '</small>' : '';
-  chip.innerHTML = '<span class="tx-l1" title="點一下看加權指數 K 線圖">📈 加權指數 ' + txN(px, 2) + ' <span class="' + txCls + '">' + txSg(pts, 2) + ' 點　' + txSg(pctNow) + '%</span>' + lvTag + '</span><span class="tx-l2"><span class="tx-state s-' + a.tone + '">' + a.title + '</span> ' + txMd(a.asOf) + ' 分析 ▸</span>' + (idxX('taiex') ? '<span class="tx-l3">' + idxPillHtml('taiex', true) + '</span>' : '');
+  chip.innerHTML = '<span class="tx-l1" title="點一下看加權指數 K 線圖">📈 加權指數 ' + txN(px, 2) + ' <span class="' + txCls + '">' + txSg(pts, 2) + ' 點　' + txSg(pctNow) + '%</span>' + lvTag + '</span><span class="tx-l2"><span class="tx-state s-' + a.tone + '">' + a.title + '</span> ' + txMd(a.asOf) + ' 分析 <span class="tx-detail" role="button" tabindex="0" title="打開加權指數詳細分析（滑鼠經過不會自己跳出來）">📊 詳細分析</span></span>' + (idxX('taiex') ? '<span class="tx-l3">' + idxPillHtml('taiex', true) + '</span>' : '');
   const pop = document.getElementById('taiexPop');
   if (pop && !pop.hidden) pop.innerHTML = taiexHtml(a);
 }
@@ -27528,19 +27530,13 @@ function taiexHide(force){
 (function initTaiex(){
   const chip = document.getElementById('taiexChip'), pop = document.getElementById('taiexPop');
   if (!chip || !pop) return;
-  const canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
-  const later = () => { clearTimeout(TAIEX.hideTimer); TAIEX.hideTimer = setTimeout(() => taiexHide(false), 220); };
-  if (canHover){
-    chip.addEventListener('mouseenter', () => { taiexLoad(false); taiexShow(); });
-    chip.addEventListener('mouseleave', later);
-    pop.addEventListener('mouseenter', () => clearTimeout(TAIEX.hideTimer));
-    pop.addEventListener('mouseleave', later);
-    document.addEventListener('mousemove', (e) => {   // 保險：滑鼠在視窗外面動就收（偶爾 mouseleave 會漏掉）
-      if (pop.hidden || TAIEX.pinned) return;
-      if (e.target.closest && e.target.closest('#taiexChip, #taiexPop')) clearTimeout(TAIEX.hideTimer); else if (!TAIEX.hideTimer || true) later();
-    });
-  }
+  // 2026-11-04 使用者：滑鼠經過就跳出來很煩 → 拿掉滑過去顯示；加權指數後面加藍底白字「📊 詳細分析」按鈕，按下去才打開（再按一下、按視窗外面或 Esc 關掉）
   chip.addEventListener('click', (e) => {
+    if (e.target.closest && e.target.closest('.tx-detail')){
+      if (!TAIEX.fu){ taiexLoad(true); return; }
+      if (TAIEX.pinned && !pop.hidden){ taiexHide(true); return; }
+      TAIEX.pinned = true; taiexShow(); return;
+    }
     if (e.target.closest && e.target.closest('.tx-l1') && TAIEX.fu){ taiexHide(true); openStockChart('IDX_TAIEX', '加權指數'); return; }   // 2026-10-29 使用者：點價位開加權指數 K 線圖；點下面那行（狀態、分析）才是分析視窗
     if (!TAIEX.fu){ taiexLoad(true); return; }
     if (TAIEX.pinned){ taiexHide(true); return; }
@@ -27548,6 +27544,7 @@ function taiexHide(force){
   });
   document.addEventListener('click', (e) => { if (TAIEX.pinned && !e.target.closest('#taiexChip, #taiexPop')) taiexHide(true); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pop.hidden) taiexHide(true); });
+  chip.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('.tx-detail')){ e.preventDefault(); e.target.click(); } });
   window.addEventListener('resize', () => { if (!pop.hidden) taiexShow(); });
   setTimeout(() => taiexLoad(true), 1200);
   setInterval(() => taiexLoad(false), 10 * 60e3);
