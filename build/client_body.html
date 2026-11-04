@@ -122,7 +122,8 @@
   .hr-lrow .l1 .hr-avg{margin-left:auto;}
   .hr-lrow .l2{display:flex;flex-wrap:wrap;align-items:center;gap:3px;margin-top:3px;font-size:11px;}
   .hr-lg-grp{border-radius:4px;padding:0 4px;font-weight:800;font-size:10.5px;background:#6b7280;color:#fff;white-space:nowrap;}
-  .hr-lg-grp.up{background:#dc2626;} .hr-lg-grp.down{background:#4ade80;color:#052e16;}
+  .hr-lg-grp.up{background:#dc2626;color:#fff;} .hr-lg-grp.down{background:#16a34a;color:#fff;}   /* 2026-11-04 使用者：族群今天平均漲跌幅 >0 紅底白字、<0 綠底白字（▲▼是漲跌，不是名次） */
+  .hr-lrow .l2 .hr-hold{margin-left:auto;}
   .hr-lg-src{display:inline-flex;gap:4px;font-weight:700;font-size:10.5px;} .hr-lg-src i{font-style:normal;}
   .hr-lg-src .s1{color:#c084fc;} .hr-lg-src .s2{color:#a78bfa;} .hr-lg-src .s3{color:#2dd4bf;} .hr-lg-src .s4{color:#fbbf24;}
   .hr-lg-hold{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-weight:700;}
@@ -9714,8 +9715,8 @@ function homeLongRowHtml(o){
   return '<div class="hr-lrow hr-stk' + (o.holdNo ? ' hold' : '') + '" data-code="' + o.code + '" data-name="' + wlEsc(o.name) + '" tabindex="0" role="button" title="' + wlEsc((o.group || '') + (o.rank ? '・族排第 ' + o.rank + ' 名' : '')) + '">' +
     '<div class="l1">' + tdMaBall(o.ma) + '<span class="hr-code">' + o.code + '</span><span class="hr-name">' + wlEsc(o.name) + '</span>' +
     '<span class="hr-avg ' + (Number.isFinite(o.pct) ? dirClass(o.pct) : '') + '">' + (o.lit ? '💡' : '') + (Number.isFinite(o.pct) ? fmt(o.pct) + '%' : '—') + '</span></div>' +
-    '<div class="l2"><span class="hr-lg-grp ' + (o.groupAvg > 0 ? 'up' : 'down') + '">' + wlEsc(o.group || '—') + (o.rank ? '(' + o.rank + ')' : '') + (o.groupAvg > 0 ? '▲' : '▼') + '</span>' +
-    '<span class="hr-lg-src">' + chip(1, '多', 's1') + chip(2, '賽', 's2') + chip(3, '河', 's3') + chip(4, '群', 's4') + '</span>' + (o.holdNo ? '<span class="hr-lg-hold">續抱不追</span>' : '') + (o.limitUp ? '<span class="hr-lg-hold">漲停</span>' : '') + '</div></div>';
+    '<div class="l2"><span class="hr-lg-grp ' + (o.groupAvg > 0 ? 'up' : (o.groupAvg < 0 ? 'down' : '')) + '" title="族群今天平均漲跌幅' + (Number.isFinite(o.groupAvg) ? ' ' + fmt(o.groupAvg) + '%' : '') + '">' + wlEsc(o.group || '—') + (o.rank ? '(' + o.rank + ')' : '') + (o.groupAvg > 0 ? '▲' : (o.groupAvg < 0 ? '▼' : '')) + '</span>' +
+    '<span class="hr-lg-src">' + chip(1, '多', 's1') + chip(2, '賽', 's2') + chip(3, '河', 's3') + chip(4, '群', 's4') + '</span>' + (o.holdNo ? '<span class="hr-lg-hold">續抱不追</span>' : '') + (o.limitUp ? '<span class="hr-lg-hold">漲停</span>' : '') + homeHoldHtml(o.code) + '</div></div>';   // 2026-11-04 使用者：當沖多1／2 每列最右邊接盤中大戶力；族群名稱紅底白字（族群今天漲）／綠底白字（族群今天跌）
 }
 // 2026-10-20 使用者：當沖多檔數太多，分成兩欄（當沖多1、當沖多2），都跟原本第二欄一樣寬；照排序前半放第 1 欄、後半放第 2 欄，
 // 中幾個那條標題跨欄時第 2 欄接著寫「（續）」。回傳兩個 .hr-stack（首頁每個 .hr-stack 是一欄）。
