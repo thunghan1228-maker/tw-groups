@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 17:45:23";
+const BUILD_STAMP = "2026-11-05 17:50:14";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5321,6 +5321,35 @@ function drawChart(){
     if (isTxf){
       for (let i = allBars.length - 1; i >= 0; i--){ const d0 = new Date(allBars[i].ts), mod = d0.getHours() * 60 + d0.getMinutes(); if (mod >= 525 && mod < 825){ lastDayKey = dayKey(allBars[i].ts); break; } }
     }
+    // 2026-11-05 使用者：亞洲期貨（日經、恒生、韓國）的 K 線也要跟個股 5 分K 一樣標台北時間 09:05 紅虛線、10:30 紫線、12:00 橘線、905 高／905 低；
+    // 期貨本來的「新交易日開盤」那條（日經 16:05、恒生 17:20…）保留，改成粉紅色虛線、時間字也粉紅色，跟台北早盤的線區別
+    const isFutTw = currentChart.code === 'IDX_FNK' || currentChart.code === 'IDX_FHSI' || currentChart.code === 'IDX_FKS';
+    const twMarks = new Map();   // allBars 索引 → 'open'／'1030'／'noon'（期貨用）
+    let futOpenIdx = -1, futEndIdx = -1;
+    if (isFutTw){
+      const byDay = new Map();
+      allBars.forEach((b, gi) => {
+        const d0 = new Date(b.ts), mod = d0.getHours() * 60 + d0.getMinutes(), k = d0.getFullYear() * 10000 + (d0.getMonth() + 1) * 100 + d0.getDate();
+        let e = byDay.get(k);
+        if (!e){ e = { open: -1, m1030: -1, noon: -1 }; byDay.set(k, e); }
+        if (e.open < 0 && mod >= 540 && mod < 570) e.open = gi;   // 台北 09:00 起的第一根（30 分鐘內）；恒生期貨 09:15 才開就用 09:15 那根
+        if (e.m1030 < 0 && mod >= 10 * 60 + closeMin && mod < 11 * 60 + 30) e.m1030 = gi;
+        if (e.noon < 0 && mod >= 11 * 60 + (currentChart.tf === 'm1' ? 59 : 55) && mod < 12 * 60 + 30) e.noon = gi;
+      });
+      const keys = Array.from(byDay.keys()).sort((a, c) => a - c);
+      const useKeys = currentChart.tf === 'm1' ? keys.slice(-3) : keys;
+      let noonKey = -1;
+      keys.forEach((k) => { if (byDay.get(k).noon >= 0) noonKey = k; });   // 橘線只畫最近一個有 12:00 的那天
+      useKeys.forEach((k) => {
+        const e = byDay.get(k);
+        if (e.open >= 0) twMarks.set(e.open, 'open');
+        if (e.m1030 >= 0) twMarks.set(e.m1030, '1030');
+        if (k === noonKey && e.noon >= 0) twMarks.set(e.noon, 'noon');
+      });
+      let openKey = -1;
+      keys.forEach((k) => { if (byDay.get(k).open >= 0) openKey = k; });   // 905 高低：最近一個有早盤開盤的那天
+      if (openKey >= 0){ const e = byDay.get(openKey); futOpenIdx = e.open; futEndIdx = e.m1030 >= 0 ? e.m1030 : allBars.length - 1; }
+    }
     // 2026-11-02 使用者：1 分K 只畫今天跟前一個交易日（兩天）的 09:01 紅虛線、10:30 紫線、12:00 橘紅線（5 分K 不動）。
     // 冷門股 1 分K 沒成交那分鐘就沒有K棒（10:29、11:59 常常剛好沒有），所以 1 分K 用「那天第一根 ≥ 10:29／≥ 11:59」的K棒畫。
     const m1Marks = new Map();   // allBars 索引 → 'open'／'1030'／'noon'
@@ -5343,6 +5372,21 @@ function drawChart(){
       const prevBar = globalIdx > 0 ? allBars[globalIdx - 1] : null;
       const d = new Date(b.ts);
       const sessMin = d.getHours() * 60 + d.getMinutes();
+      if (isFutTw){   // 亞洲期貨：台北早盤線（紅／紫／橘）＋新交易日開盤（粉紅）
+        const tm = twMarks.get(globalIdx), sess = !prevBar || dayKey(prevBar.ts) !== dayKey(b.ts);
+        if (!tm && !sess) return;
+        const fx = xAt(i);
+        ctx.save();
+        let fmark;
+        if (tm === 'noon'){ ctx.strokeStyle = '#ff5a1f'; ctx.lineWidth = 3; ctx.setLineDash([]); fmark = '#ff6a33'; }
+        else if (tm === '1030'){ ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2; ctx.setLineDash([]); fmark = '#c084fc'; }
+        else if (tm === 'open'){ ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); fmark = '#ef4444'; }
+        else { ctx.strokeStyle = '#f472b6'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); fmark = '#f472b6'; }   // 新交易日開盤：粉紅
+        ctx.beginPath(); ctx.moveTo(fx, padTop); ctx.lineTo(fx, cssH - padBottom); ctx.stroke();
+        ctx.restore();
+        axisMarks.push({ x: fx, text: tm === '1030' ? '10:30' : tm === 'noon' ? '12:00' : b.label, color: fmark });
+        return;
+      }
       const m1Mark = currentChart.tf === 'm1' && !isTxf ? m1Marks.get(globalIdx) : null;
       const isDayOpen = currentChart.tf === 'm1' && !isTxf ? m1Mark === 'open' : isTxf ? (currentChart.tf === 'm5' || currentChart.tf === 'm1') && (sessMin === 525 || sessMin === 900) : (!prevBar || dayKey(prevBar.ts) !== dayKey(b.ts));
       const is1030 = !noTwMarks && (currentChart.tf === 'm1' && !isTxf ? m1Mark === '1030' : d.getHours() === 10 && d.getMinutes() === closeMin);
@@ -5411,6 +5455,13 @@ function drawChart(){
         }
       }
 
+      if (currentChart.tf === 'm5' && isFutTw && futOpenIdx >= 0){   // 亞洲期貨：台北早盤第一根的高低線（905 高／905 低），跟個股一樣畫到 10:30
+        const fb = allBars[futOpenIdx];
+        const fh = drawHRangeLine(futOpenIdx, futEndIdx, fb.high, '#ef4444', 4.5, []);
+        const fd = drawHRangeLine(futOpenIdx, futEndIdx, fb.low, '#6366f1', 4.5, []);
+        labelHLine(fh, '905高 ' + (+fb.high.toFixed(2)), false);
+        labelHLine(fd, '905低 ' + (+fb.low.toFixed(2)), true);
+      }
       const prevEnd = todayStart - 1;
       if (prevEnd >= 0 && currentChart.code !== 'IDX_TXF'){   // 台指期日盤夜盤混在一起，前一天高低點的算法不適用
         const prevDay = dayKey2(allBars[prevEnd].ts);
@@ -17441,7 +17492,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 17:45:23';
+const BUILD_STAMP = '2026-11-05 17:50:14';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
