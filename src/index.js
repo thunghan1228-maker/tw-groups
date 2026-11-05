@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 17:50:14";
+const BUILD_STAMP = "2026-11-05 20:42:42";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3028,10 +3028,11 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .ma-q button{background:#f5b301;color:#1a1a1a;border:none;border-radius:8px;padding:8px 16px;font-weight:800;cursor:pointer;font-family:inherit;}
   .ma-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .ma-table{border-collapse:collapse;font-size:13px;width:100%;}
-  .ma-table th{font-size:12px;color:var(--muted);font-weight:700;padding:6px 6px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:center;}
+  .ma-table th{font-size:12px;color:var(--muted);font-weight:700;padding:6px 5px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:center;}
   .ma-table th small{display:block;font-weight:400;font-size:10px;}
   .ma-table th.sortable{cursor:pointer;}
-  .ma-table td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap;}
+  .ma-table td{padding:5px 5px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap;}
+  @media (max-width: 1000px){ .ma-table{font-size:12px;} .ma-table th,.ma-table td{padding-left:3px;padding-right:3px;} }
   .ma-table tr.hl td{background:rgba(245,179,1,.16);}
   .ma-table .rk{color:var(--muted);font-size:12px;}
   .ma-table .code{color:#dc2626;font-weight:700;cursor:pointer;letter-spacing:.04em;}
@@ -3301,7 +3302,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 
   /* 2026-10-23 使用者：均線分數排行、每月營收成長榜改成跟老師（zhuang.tw）一樣的淺色底版面：米白底、白卡片、紅褐標題；內容寬度跟老師頁差不多，表格比較寬就左右捲 */
   #maModal .chips-inner,#revModal .chips-inner{--bg:#f6f3ee;--panel:#fffdf9;--panel-2:#f4eee3;--line:#e6dbc9;--text:#2d241b;--muted:#7c6f60;--up:#b3261e;--down:#0f7b5a;--accent:#a63a2b;
-    background:#f6f3ee;color:var(--text);border:1px solid #d8ccb8;width:min(920px,96vw);padding:20px 26px 26px;box-shadow:0 14px 44px rgba(40,25,5,.45);letter-spacing:.02em;}
+    background:#f6f3ee;color:var(--text);border:1px solid #d8ccb8;width:min(1040px,98vw);padding:20px 18px 26px;box-shadow:0 14px 44px rgba(40,25,5,.45);letter-spacing:.02em;}   /* 2026-11-05 使用者：最後一欄「連續上榜 🔥」被切掉要橫向捲動才看得到——視窗加寬、左右留白縮小 */
   #maModal .chips-head,#revModal .chips-head{background:transparent;color:var(--text);padding:0;border-radius:0;margin-bottom:4px;align-items:flex-start;}
   #maModal .chips-head{flex-wrap:wrap;}
   #maModal .chips-head>div:first-child{flex:1 1 280px;min-width:0;}
@@ -17492,7 +17493,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 17:50:14';
+const BUILD_STAMP = '2026-11-05 20:42:42';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

@@ -2941,10 +2941,11 @@
   .ma-q button{background:#f5b301;color:#1a1a1a;border:none;border-radius:8px;padding:8px 16px;font-weight:800;cursor:pointer;font-family:inherit;}
   .ma-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .ma-table{border-collapse:collapse;font-size:13px;width:100%;}
-  .ma-table th{font-size:12px;color:var(--muted);font-weight:700;padding:6px 6px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:center;}
+  .ma-table th{font-size:12px;color:var(--muted);font-weight:700;padding:6px 5px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:center;}
   .ma-table th small{display:block;font-weight:400;font-size:10px;}
   .ma-table th.sortable{cursor:pointer;}
-  .ma-table td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap;}
+  .ma-table td{padding:5px 5px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap;}
+  @media (max-width: 1000px){ .ma-table{font-size:12px;} .ma-table th,.ma-table td{padding-left:3px;padding-right:3px;} }
   .ma-table tr.hl td{background:rgba(245,179,1,.16);}
   .ma-table .rk{color:var(--muted);font-size:12px;}
   .ma-table .code{color:#dc2626;font-weight:700;cursor:pointer;letter-spacing:.04em;}
@@ -3214,7 +3215,7 @@
 
   /* 2026-10-23 使用者：均線分數排行、每月營收成長榜改成跟老師（zhuang.tw）一樣的淺色底版面：米白底、白卡片、紅褐標題；內容寬度跟老師頁差不多，表格比較寬就左右捲 */
   #maModal .chips-inner,#revModal .chips-inner{--bg:#f6f3ee;--panel:#fffdf9;--panel-2:#f4eee3;--line:#e6dbc9;--text:#2d241b;--muted:#7c6f60;--up:#b3261e;--down:#0f7b5a;--accent:#a63a2b;
-    background:#f6f3ee;color:var(--text);border:1px solid #d8ccb8;width:min(920px,96vw);padding:20px 26px 26px;box-shadow:0 14px 44px rgba(40,25,5,.45);letter-spacing:.02em;}
+    background:#f6f3ee;color:var(--text);border:1px solid #d8ccb8;width:min(1040px,98vw);padding:20px 18px 26px;box-shadow:0 14px 44px rgba(40,25,5,.45);letter-spacing:.02em;}   /* 2026-11-05 使用者：最後一欄「連續上榜 🔥」被切掉要橫向捲動才看得到——視窗加寬、左右留白縮小 */
   #maModal .chips-head,#revModal .chips-head{background:transparent;color:var(--text);padding:0;border-radius:0;margin-bottom:4px;align-items:flex-start;}
   #maModal .chips-head{flex-wrap:wrap;}
   #maModal .chips-head>div:first-child{flex:1 1 280px;min-width:0;}
