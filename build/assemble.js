@@ -1047,16 +1047,31 @@ export default {
       // 首頁右上角國際指數框（2026-11-05 使用者）：日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體。Yahoo 圖表 API 的日線（近 5 天）取最新價、前一日收盤，Cloudflare 快取 15 秒。
       // live＝現在在這個市場的正常交易時段內、而且最新價是 30 分鐘內的；不是就當收盤（前端寫「11/05 收盤」）
       const LIST = [["n225", "^N225", "日經 225"], ["kospi", "^KS11", "韓國 KOSPI"], ["dji", "^DJI", "道瓊工業"], ["ixic", "^IXIC", "那斯達克"], ["sox", "^SOX", "費城半導體"], ["tsm", "TSM", "台積電 ADR"]];
+      // 2026-11-05 使用者：這幾個都要即時行情（有開盤、有在交易就要一直跳）。國際版 Yahoo 和台灣版 Yahoo（同一個來源、不同快取）一起問，取「最新價時間」較新的那個；
+      // 快取只留 5 秒（Cloudflare 不快取失敗的）。日經、韓國的行情 Yahoo 可能被交易所限制延遲，所以回傳 time（最新價的時間），前端會寫資料時間、落後就標「慢 N 分」
+      const twTick = async (sym) => {
+        try {
+          const r = await fetch("https://tw.stock.yahoo.com/_td-stock/api/resource/FinanceChartService.ApacLibraCharts;symbols=" + encodeURIComponent(JSON.stringify([sym])) + ";type=tick", {
+            headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" }, cf: { cacheTtlByStatus: { "200-299": 5, "300-599": 0 }, cacheEverything: true }
+          });
+          if (!r.ok) return null;
+          const c = (((await r.json()) || [])[0] || {}).chart || {};
+          const price = Number(c.quote && c.quote.price), rm = Number(c.meta && c.meta.regularMarketTime);
+          return Number.isFinite(price) && Number.isFinite(rm) ? { price, rm } : null;
+        } catch (e) { return null; }
+      };
       const one = async ([id, sym, name]) => {
         try {
-          const r = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?interval=1d&range=5d", {
+          const [r, tw] = await Promise.all([fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?interval=1d&range=5d", {
             headers: { "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)", Accept: "application/json" },
-            cf: { cacheTtlByStatus: { "200-299": 15, "300-599": 0 }, cacheEverything: true }
-          });
+            cf: { cacheTtlByStatus: { "200-299": 5, "300-599": 0 }, cacheEverything: true }
+          }), twTick(sym)]);
           if (!r.ok) return [id, { name, error: "HTTP " + r.status }];
           const m = ((((await r.json()) || {}).chart || {}).result || [])[0];
           const meta = (m && m.meta) || {}, q = (m && m.indicators && m.indicators.quote && m.indicators.quote[0]) || {}, stamps = (m && m.timestamp) || [];
-          const price = Number(meta.regularMarketPrice), rm = Number(meta.regularMarketTime), off = Number(meta.gmtoffset) || 0;
+          let price = Number(meta.regularMarketPrice), rm = Number(meta.regularMarketTime);
+          const off = Number(meta.gmtoffset) || 0;
+          if (tw && (!Number.isFinite(rm) || tw.rm > rm)) { price = tw.price; rm = tw.rm; }   // 台灣版比較新就用台灣版
           if (!Number.isFinite(price) || !Number.isFinite(rm)) return [id, { name, error: "沒有報價" }];
           const closes = [];
           for (let i = 0; i < stamps.length; i++) { const c = q.close && q.close[i]; if (Number.isFinite(c)) closes.push({ day: new Date((stamps[i] + off) * 1000).toISOString().slice(0, 10), close: c }); }
@@ -1066,16 +1081,16 @@ export default {
           const prev = n >= 2 && closes[n - 1].day === rmDay ? closes[n - 2].close : n >= 1 && closes[n - 1].day < rmDay ? closes[n - 1].close : Number(meta.chartPreviousClose);
           const reg = (meta.currentTradingPeriod && meta.currentTradingPeriod.regular) || {};
           const nowS = Math.floor(Date.now() / 1000);
-          const live = Number.isFinite(reg.start) && Number.isFinite(reg.end) && nowS >= reg.start && nowS <= reg.end && nowS - rm < 1800;
+          const live = Number.isFinite(reg.start) && Number.isFinite(reg.end) && nowS >= reg.start && nowS <= reg.end;   // 正常交易時段內就算盤中；最新價落後多久由前端看 time 自己標
           const change = Number.isFinite(prev) && prev > 0 ? price - prev : null;
-          return [id, { name, price, prev, change, pct: change !== null ? (change / prev) * 100 : null, time: rm, day: rmDay, live }];
+          return [id, { name, price, prev, change, pct: change !== null ? (change / prev) * 100 : null, time: rm, day: rmDay, live, src: tw && tw.rm > Number(meta.regularMarketTime) ? "tw" : "intl" }];
         } catch (e) { return [id, { name, error: String((e && e.message) || e).slice(0, 80) }]; }
       };
       const rows = await Promise.all(LIST.map(one));
       const items = {};
       rows.forEach(([id, v]) => { items[id] = v; });
       return new Response(JSON.stringify({ status: rows.some(([, v]) => !v.error) ? "ok" : "error", items, generatedAt: new Date().toISOString() }),
-        { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=10" } });
+        { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=3" } });
     }
     if (url.pathname === "/api/world-indices") {
       // 機器人代碼 70／71（2026-10-17 使用者：照對方機器人「亞洲股市／美國股市」）：Yahoo Finance 公開圖表 API，每檔一個請求、Cloudflare 快取 2 分鐘
@@ -1549,7 +1564,7 @@ export default {
           // 日經／韓國／道瓊／那斯達克／費半：Yahoo 公開圖表 API，日線一年、5 分 1 個月、1 分 5 天（沒有台股那套 13:30 集合競價併根、台灣版 Yahoo 覆蓋）。
           // 日線的 ts 用「台北時間的日期」：亞股、美股的日K開始時間換成台北都還在同一個日曆日
           const spec = tf === "1d" ? "interval=1d&range=1y" : tf === "5m" ? "interval=5m&range=1mo" : "interval=1m&range=5d";
-          const y = await upstreamJson("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(WORLD_IDX[idxId]) + "?" + spec, tf === "1d" ? 30 : 15);
+          const y = await upstreamJson("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(WORLD_IDX[idxId]) + "?" + spec, tf === "1d" ? 30 : 5);
           const r0 = y && y.chart && y.chart.result && y.chart.result[0];
           if (!r0) throw new Error("Yahoo 沒有 " + WORLD_IDX[idxId] + " 資料");
           const q = (r0.indicators && r0.indicators.quote && r0.indicators.quote[0]) || {};
@@ -1560,6 +1575,27 @@ export default {
             const nb = { ts: tf === "1d" ? taipeiDay(stamps[i]) + "T00:00:00+00:00" : stamps[i] * 1000, open: r2(b.open), high: r2(b.high), low: r2(b.low), close: r2(b.close), volume: (q.volume && q.volume[i]) || 0 };
             if (tf === "1d") nb.closeTime = "收盤";   // 日K 資訊列寫「2026/11/5 收盤」，不要套台股的 13:30
             bars.push(nb);   // 每天最後那根平的（收盤集合競價的官方收盤價）要留著，不然圖上的收盤跟官方差一截（韓國 5341 對 5383.8）
+          }
+          // 2026-11-05 使用者：要即時行情。分K 再問一次台灣版 Yahoo 的 1 分K（最近一個交易日），它的最後一根比國際版新的話，從它第一根開始換成台灣版的（5 分K 由 1 分K 合併）
+          if (tf !== "1d" && bars.length) {
+            try {
+              const tw = await upstreamJson("https://tw.stock.yahoo.com/_td-stock/api/resource/FinanceChartService.ApacLibraCharts;symbols=" + encodeURIComponent(JSON.stringify([WORLD_IDX[idxId]])) + ";type=tick", 5);
+              const c0 = tw && tw[0] && tw[0].chart, tq = c0 && c0.indicators && c0.indicators.quote && c0.indicators.quote[0], tst = (c0 && c0.timestamp) || [];
+              if (tq && tst.length) {
+                const step = tf === "5m" ? 300000 : 60000, merged = [];
+                for (let i = 0; i < tst.length; i++) {
+                  const b = { open: tq.open && tq.open[i], high: tq.high && tq.high[i], low: tq.low && tq.low[i], close: tq.close && tq.close[i] };
+                  if (!okBar(b)) continue;
+                  const key = Math.floor(tst[i] * 1000 / step) * step, last = merged[merged.length - 1], vol = Number(tq.volume && tq.volume[i]) || 0;
+                  if (last && last.ts === key) { last.high = Math.max(last.high, b.high); last.low = Math.min(last.low, b.low); last.close = b.close; last.volume += vol; }
+                  else merged.push({ ts: key, open: b.open, high: b.high, low: b.low, close: b.close, volume: vol });
+                }
+                if (merged.length && merged[merged.length - 1].ts > bars[bars.length - 1].ts) {
+                  const first = merged[0].ts;
+                  bars = bars.filter((x) => x.ts < first).concat(merged.map((x) => ({ ts: x.ts, open: r2(x.open), high: r2(x.high), low: r2(x.low), close: r2(x.close), volume: x.volume })));
+                }
+              }
+            } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
           }
         } else if (idxId === "txf") {
           // 台指期近月（2026-10-29 使用者）：近月合約自己會換（期交所 getQuoteList 的第一檔月合約，到期日收盤後下個月就變近月）。
