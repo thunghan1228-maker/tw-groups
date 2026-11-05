@@ -6221,19 +6221,19 @@ syncForceAlgoBtns();
 const IDX_CHARTS = { IDX_TAIEX: { id: 'taiex', name: '加權指數' }, IDX_OTC: { id: 'otc', name: '櫃買指數' }, IDX_TXF: { id: 'txf', name: '台指期近月' },
   IDX_N225: { id: 'n225', name: '日經 225' }, IDX_KOSPI: { id: 'kospi', name: '韓國 KOSPI' }, IDX_DJI: { id: 'dji', name: '道瓊工業' }, IDX_IXIC: { id: 'ixic', name: '那斯達克' }, IDX_SOX: { id: 'sox', name: '費城半導體' }, IDX_TSM: { id: 'tsm', name: '台積電 ADR' }, IDX_HSI: { id: 'hsi', name: '恒生指數' },
   IDX_FYM: { id: 'futym', name: '道瓊期貨' }, IDX_FNQ: { id: 'futnq', name: '那斯達克期貨' }, IDX_FNK: { id: 'futnk', name: '日經期貨' }, IDX_FHSI: { id: 'futhsi', name: '恒生期貨' },
-  IDX_TNX: { id: 'tnx', name: '美國10年期公債殖利率' } };
+  IDX_TNX: { id: 'tnx', name: '美國10年期公債殖利率' }, IDX_FKS: { id: 'futks', name: '韓國 KOSPI 200 期貨' } };
 // 2026-11-05 使用者：首頁右上角的國際指數（日經、韓國、道瓊、那斯達克、費半）也能點開 K 線圖（日線、5 分、1 分）。資料 Yahoo；沒有主力／融資，跟加權一樣副圖是空的；
 // 台股專用的時間線（905 高低、10:30 紫線、12:00 橘線）不畫，時間軸照台北時間（亞股 08:00～14:30、美股夜裡）
-const WORLD_IDX_CODES = ['IDX_N225', 'IDX_KOSPI', 'IDX_DJI', 'IDX_IXIC', 'IDX_SOX', 'IDX_TSM', 'IDX_HSI', 'IDX_FYM', 'IDX_FNQ', 'IDX_FNK', 'IDX_FHSI', 'IDX_TNX'];   // 2026-11-05 使用者：再加美國 10 年期公債殖利率（台積電 ADR 後面）   // 2026-11-05 使用者：再加台積電 ADR（美股 TSM）
+const WORLD_IDX_CODES = ['IDX_N225', 'IDX_KOSPI', 'IDX_DJI', 'IDX_IXIC', 'IDX_SOX', 'IDX_TSM', 'IDX_HSI', 'IDX_FYM', 'IDX_FNQ', 'IDX_FNK', 'IDX_FHSI', 'IDX_TNX', 'IDX_FKS'];   // 2026-11-05 使用者：再加美國 10 年期公債殖利率（台積電 ADR 後面）   // 2026-11-05 使用者：再加台積電 ADR（美股 TSM）
 const isWorldIdx = (c) => WORLD_IDX_CODES.indexOf(c) >= 0;
 // 2026-11-05 使用者：日經、韓國的 5 分K（跟個股一樣）要畫 10:30 紫色垂直線、12:00 橘色垂直線、905 高／905 低（開盤第一根的高低）、昨日高低虛線。時間照圖上的台北時間；美股指數、台積電 ADR 不畫這幾條
 const isWorldUs = (c) => isWorldIdx(c) && c !== 'IDX_N225' && c !== 'IDX_KOSPI' && c !== 'IDX_HSI';   // 亞洲三個（日經、韓國、恒生）畫台北時間 10:30／12:00 線和 905 高低；其他不畫
 // 國際指數的「交易日」＝那個市場自己的日期（日經／韓國用東京／首爾、美股用紐約）：美股夜盤 21:30～04:00 跨過台北午夜，用台北日期會把一個交易日切成兩天
 const WORLD_TZ = { IDX_N225: 'Asia/Tokyo', IDX_KOSPI: 'Asia/Seoul', IDX_DJI: 'America/New_York', IDX_IXIC: 'America/New_York', IDX_SOX: 'America/New_York', IDX_TSM: 'America/New_York', IDX_HSI: 'Asia/Hong_Kong',
-  IDX_FYM: 'America/New_York', IDX_FNQ: 'America/New_York', IDX_FNK: 'Asia/Tokyo', IDX_FHSI: 'Asia/Hong_Kong', IDX_TNX: 'America/New_York' };
+  IDX_FYM: 'America/New_York', IDX_FNQ: 'America/New_York', IDX_FNK: 'Asia/Tokyo', IDX_FHSI: 'Asia/Hong_Kong', IDX_TNX: 'America/New_York', IDX_FKS: 'Asia/Seoul' };
 // 期貨（幾乎 24 小時）的「交易日」：夜盤算隔天——CME 18:00（紐約）開盤、日經期貨 17:00（東京）、恒生期貨 17:15（香港）起算隔天，所以時間往後推 6／7 小時再取日期
 const WORLD_DAY_SHIFT = { IDX_FYM: 6 * 3600e3, IDX_FNQ: 6 * 3600e3, IDX_FNK: 7 * 3600e3, IDX_FHSI: 7 * 3600e3 };
-const isWorldFut = (c) => c === 'IDX_FYM' || c === 'IDX_FNQ' || c === 'IDX_FNK' || c === 'IDX_FHSI';
+const isWorldFut = (c) => c === 'IDX_FYM' || c === 'IDX_FNQ' || c === 'IDX_FNK' || c === 'IDX_FHSI' || c === 'IDX_FKS';
 function futLiveNow(){   // 期貨從週一清晨到週六清晨幾乎不停
   const t = new Date(Date.now() + 8 * 3600000), day = t.getUTCDay(), m = t.getUTCHours() * 60 + t.getUTCMinutes();
   return (day >= 2 && day <= 5) || (day === 1 && m >= 6 * 60) || (day === 6 && m < 6 * 60);
@@ -10238,7 +10238,7 @@ function homeRankFootHtml(total){
   return hrHelpTable('🧭 首頁上面那一排', ['項目', '說明'], [
     ['櫃買指數／加權指數', '今天的指數和漲跌點數（漲紅、跌綠、平盤白）；旁邊的分數＝指數的均線分數（滿分 15，算法跟個股一樣）：先寫當天分數和當天多空，3 日平均只當參考；6 分是分水嶺（剛好 6 分標「平」），偏多紅底白字、偏空綠底白字。點一下開 K 線圖（日線、5 分、1 分）'],
     ['台指期近月', '價位、漲跌點數、漲跌幅；日盤時間看日盤、夜盤時間切夜盤；點一下開 K 線圖（日線、5 分、1 分，日盤夜盤接在一起）'],
-    ['國際行情（標題列下面一排）', '日經 225、韓國 KOSPI、恒生、道瓊、那斯達克、費半、台積電 ADR（美股 TSM）、美國 10 年期公債殖利率（%，3 位小數，債券市場幾乎 24 小時在交易；5 分、1 分 K 線跟 Yahoo 的時段，日線最後一根跟即時行情走）：價位、漲跌點數、漲跌幅（漲紅跌綠），下面寫資料時間，休市寫收盤日；盤中每 10 秒更新，資料落後超過 3 分鐘會標「慢約 N 分」；日經、韓國台北時間 08:00～14:30 交易，恒生 09:30～16:00（12:00～13:00 午休），美股約 22:30～05:00（夏令 21:30～04:00）；點一下開 K 線圖（日線、5 分、1 分）。日經、韓國、恒生的 5 分K 跟個股一樣畫 10:30 紫線、12:00 橘線、905 高／905 低和昨日高低虛線（時間是圖上的台北時間）。行情來源 TradingView（即時）和 Yahoo，取最新的那個。日經、恒生、道瓊、那斯達克這四格最下面多一行「期貨」（日經 225 期貨、恒生期貨、道瓊 YM、那斯達克 NQ，幾乎 24 小時在交易，現貨休市時它還在跳；資料來自新浪財經，跟交易時間只差幾秒），點那一行開期貨 K 線圖（1 分、5 分、日線）；那斯達克期貨是那斯達克 100 的期貨，點位跟那斯達克綜合指數不同；韓國、費半、台積電 ADR 沒有可用的免費期貨資料'],
+    ['國際行情（標題列下面一排）', '日經 225、韓國 KOSPI、恒生、道瓊、那斯達克、費半、台積電 ADR（美股 TSM）、美國 10 年期公債殖利率（%，3 位小數，債券市場幾乎 24 小時在交易；5 分、1 分 K 線跟 Yahoo 的時段，日線最後一根跟即時行情走）：價位、漲跌點數、漲跌幅（漲紅跌綠），下面寫資料時間，休市寫收盤日；盤中每 10 秒更新，資料落後超過 3 分鐘會標「慢約 N 分」；日經、韓國台北時間 08:00～14:30 交易，恒生 09:30～16:00（12:00～13:00 午休），美股約 22:30～05:00（夏令 21:30～04:00）；點一下開 K 線圖（日線、5 分、1 分）。日經、韓國、恒生的 5 分K 跟個股一樣畫 10:30 紫線、12:00 橘線、905 高／905 低和昨日高低虛線（時間是圖上的台北時間）。行情來源 TradingView（即時）和 Yahoo，取最新的那個。日經、韓國、恒生、道瓊、那斯達克這五格最下面多一行「期貨」（日經 225 期貨、韓國 KOSPI 200 期貨、恒生期貨、道瓊 YM、那斯達克 NQ；日經、恒生、美股期貨幾乎 24 小時在交易，現貨休市時它還在跳，資料來自新浪財經；韓國期貨是韓國交易所日盤，台北 08:00～14:35，資料來自 Naver Finance，沒有夜盤；都跟交易時間只差幾秒），點那一行開期貨 K 線圖（1 分、5 分、日線）；那斯達克期貨是那斯達克 100 的期貨，點位跟那斯達克綜合指數不同；費半、台積電 ADR 沒有期貨'],
     ['每日加權指數分析', '搜尋框旁邊那一條：按藍底白字的「📊 詳細分析」才會打開（滑鼠經過不會自己跳出來；再按一下、按視窗外面或 Esc 關掉）；點第一行的價位看加權指數 K 線圖；收盤後約 15:30 更新（融資那句 21:40 後補日期）'],
     ['前六大族群、其他', '強勢／弱勢切換旁邊是漲幅或跌幅前六大的族群，最後一格「其他」＝不在任何族群的股票（154 檔），不排名，點開看清單；報價、K 線、強勢股、機器人代碼都能用'],
   ]) +
@@ -21924,7 +21924,7 @@ function guideHtml(){
     '<li>上方切 5 分／1 分／日線；⚙ 設定可以開關均線、VWAP、明天防守線（明日紅半、三日低、月線，只在日線）。</li>' +
     '<li>副圖有主力買賣力（可切老師版或單筆 20 張）、KD、融資（張）、融資維持率；滑過去會顯示那一根的開高低收、量、主力張數。</li>' +
     '<li>個股的 5 分K、1 分K 盤中每 15 秒自己更新，圖開著就一直走，不用重開；5 分K 上有 905高、905低 兩條線，線尾標價位。</li>' +
-    '<li>加權指數、櫃買指數、台指期近月、日經、韓國、恒生、道瓊、那斯達克、費半、台積電 ADR、美國 10 年期公債殖利率和四個期貨（日經、恒生、道瓊、那斯達克）也能開 K 線圖（日線、5 分、1 分）；日經、韓國、恒生的 5 分K 跟個股一樣有 10:30 紫線、12:00 橘線、905 高低。</li>' +
+    '<li>加權指數、櫃買指數、台指期近月、日經、韓國、恒生、道瓊、那斯達克、費半、台積電 ADR、美國 10 年期公債殖利率和五個期貨（日經、韓國、恒生、道瓊、那斯達克）也能開 K 線圖（日線、5 分、1 分）；日經、韓國、恒生的 5 分K 跟個股一樣有 10:30 紫線、12:00 橘線、905 高低。</li>' +
     '<li>圖上的小符號是各種盤中訊號出現的位置，滑過去看是哪一種。</li>' +
     '<li>時間軸下面的 ▲ 是扣底：今天這根不算，往前數 5 根、20 根（1 分線是 5 根、25 根）的位置，顏色跟那條均線一樣；均線那一列寫「▲5扣」「▲20扣」的扣底值。</li></ul></div>';
   html += '<h3 class="gd-h">紅色綠色代表什麼</h3><div class="gd-grid2"><div class="gd-card"><b class="up">紅色</b>＝漲、增加、買超、偏多。台股習慣紅色是漲，跟美股相反。</div>' +
@@ -27454,7 +27454,7 @@ document.getElementById('txfBox').addEventListener('click', () => { openStockCha
 const WORLDIDX = { d: null, at: 0, tried: 0, loading: false, err: 0 };
 // 2026-11-05 使用者：道瓊、那斯達克要看期貨（幾乎 24 小時在交易，現貨沒開盤時期貨在跳），日經、恒生有期貨也要。每個指數框最下面多一行「期貨」，點那一行開期貨 K 線圖（1 分、5 分、日線）。
 // 資料 /api/fut-live（新浪財經外盤期貨，跟交易時間只差幾秒；Yahoo、TradingView 的 CME 期貨固定慢 10 分鐘所以不用）。韓國 KOSPI、費半、台積電 ADR 沒有可用的免費期貨資料
-const WORLD_FUT_OF = { n225: ['nk', 'IDX_FNK'], hsi: ['hsi', 'IDX_FHSI'], dji: ['ym', 'IDX_FYM'], ixic: ['nq', 'IDX_FNQ'] };
+const WORLD_FUT_OF = { kospi: ['ks', 'IDX_FKS'], n225: ['nk', 'IDX_FNK'], hsi: ['hsi', 'IDX_FHSI'], dji: ['ym', 'IDX_FYM'], ixic: ['nq', 'IDX_FNQ'] };
 const FUTS = { d: null, at: 0, tried: 0, loading: false, err: 0 };
 function futLineHtml(id){
   const m = WORLD_FUT_OF[id];

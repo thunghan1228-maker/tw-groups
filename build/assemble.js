@@ -548,7 +548,58 @@ function tvExDay(sec, id) {   // 這個市場自己的日期 YYYY-MM-DD
 // 欄位：0 現價、4 最高、5 最低、6 時間（台北）、7 昨結算、8 開盤、12 日期、14 成交量。韓國 KOSPI 期貨、費半、台積電 ADR 沒有可用的免費期貨資料。
 const FUT_SINA = { ym: "YM", nq: "NQ", nk: "NK", hsi: "HSI" };
 const FUT_YAHOO = { ym: "YM=F", nq: "NQ=F", nk: "NKD=F" };
-const FUT_NAME = { ym: "道瓊期貨", nq: "那斯達克期貨", nk: "日經期貨", hsi: "恒生期貨" };
+const FUT_NAME = { ym: "道瓊期貨", nq: "那斯達克期貨", nk: "日經期貨", hsi: "恒生期貨", ks: "韓國 KOSPI 200 期貨" };
+// 韓國 KOSPI 200 期貨（2026-11-05 使用者問韓國有沒有期貨——有，韓國交易所日盤 09:00～15:35 韓國時間＝台北 08:00～14:35）：TradingView 的 KRX:K2I1! 延遲 20 分鐘、新浪沒有，
+// Naver Finance（韓國入口網站）的行情是即時（delayTime 0）：報價 polling API、1 分K、日K。沒有夜盤資料，收盤後就停在收盤價（前端寫休市）
+const NAVER_HEAD = { "User-Agent": "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120 Mobile", Referer: "https://m.stock.naver.com/" };
+const naverNum = (v) => Number(String(v == null ? "" : v).split(",").join(""));
+async function naverKospiFut() {
+  const cache = (globalThis.__naverF = globalThis.__naverF || {});
+  if (cache.at && Date.now() - cache.at < 2000 && cache.data) return cache.data;
+  try {
+    const r = await fetch("https://polling.finance.naver.com/api/realtime/domestic/index/FUT", { headers: NAVER_HEAD });
+    if (!r.ok) throw new Error("Naver HTTP " + r.status);
+    const d = (((await r.json()) || {}).datas || [])[0] || {};
+    const price = naverNum(d.closePrice), chg = naverNum(d.compareToPreviousClosePrice), t = Date.parse(d.localTradedAt) / 1000;
+    if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(chg) || !Number.isFinite(t)) throw new Error("Naver 資料不完整");
+    const out = { price, prev: price - chg, open: naverNum(d.openPrice), high: naverNum(d.highPrice), low: naverNum(d.lowPrice), volume: naverNum(d.accumulatedTradingVolume) || 0, time: t, date: String(d.localTradedAt || "").slice(0, 10), status: d.marketStatus };
+    cache.at = Date.now(); cache.data = out;
+    return out;
+  } catch (e) {
+    if (cache.data && Date.now() - cache.at < 60000) return cache.data;
+    return null;
+  }
+}
+async function naverKospiFutBars(tf) {   // Naver 的 K 棒時間是起算時間（韓國時間），1 分K 約 395 根一天；5 分K 由 1 分K 合併
+  const pad = (n) => String(n).padStart(2, "0");
+  const ymd = (ms) => { const d = new Date(ms + 9 * 3600000); return String(d.getUTCFullYear()) + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()); };
+  const iso = (s) => s.slice(0, 4) + "-" + s.slice(4, 6) + "-" + s.slice(6, 8);
+  if (tf === "1d") {
+    const r = await fetch("https://api.stock.naver.com/chart/domestic/index/FUT/day?startDateTime=" + ymd(Date.now() - 420 * 86400000) + "&endDateTime=" + ymd(Date.now()), { headers: NAVER_HEAD, cf: { cacheTtlByStatus: { "200-299": 20, "300-599": 0 }, cacheEverything: true } });
+    if (!r.ok) throw new Error("Naver 日K HTTP " + r.status);
+    const rows = await r.json();
+    const out = [];
+    for (const x of rows || []) { const o = Number(x.openPrice), h = Number(x.highPrice), l = Number(x.lowPrice), c = Number(x.closePrice); if ([o, h, l, c].every((n) => Number.isFinite(n) && n > 0)) out.push({ ts: iso(String(x.localDate)) + "T00:00:00+00:00", open: o, high: h, low: l, close: c, volume: Number(x.accumulatedTradingVolume) || 0, closeTime: "收盤" }); }
+    return out.slice(-300);
+  }
+  const r = await fetch("https://api.stock.naver.com/chart/domestic/index/FUT/minute?startDateTime=" + ymd(Date.now() - 8 * 86400000) + "0800&endDateTime=" + ymd(Date.now()) + "1700", { headers: NAVER_HEAD, cf: { cacheTtlByStatus: { "200-299": 2, "300-599": 0 }, cacheEverything: true } });
+  if (!r.ok) throw new Error("Naver 分K HTTP " + r.status);
+  const rows = await r.json();
+  const m1 = [];
+  for (const x of rows || []) {
+    const s = String(x.localDateTime), o = Number(x.openPrice), h = Number(x.highPrice), l = Number(x.lowPrice), c = Number(x.currentPrice);
+    const t = Date.parse(iso(s) + "T" + s.slice(8, 10) + ":" + s.slice(10, 12) + ":" + s.slice(12, 14) + "+09:00");
+    if (Number.isFinite(t) && [o, h, l, c].every((n) => Number.isFinite(n) && n > 0)) m1.push({ ts: t, open: o, high: h, low: l, close: c, volume: Number(x.accumulatedTradingVolume) || 0 });
+  }
+  if (tf === "1m") return m1;
+  const bucket = new Map();
+  for (const b of m1) {
+    const k = Math.floor(b.ts / 300000) * 300000, g = bucket.get(k);
+    if (!g) bucket.set(k, { ts: k, open: b.open, high: b.high, low: b.low, close: b.close, volume: b.volume });
+    else { g.high = Math.max(g.high, b.high); g.low = Math.min(g.low, b.low); g.close = b.close; g.volume += b.volume; }
+  }
+  return Array.from(bucket.values()).sort((a, c) => a.ts - c.ts);
+}
 const SINA_HEAD = { Referer: "https://finance.sina.com.cn", "User-Agent": "Mozilla/5.0" };
 async function sinaFutQuotes() {
   const cache = (globalThis.__sinaF = globalThis.__sinaF || {});
@@ -1132,6 +1183,9 @@ export default {
       // 首頁國際行情框裡的「期貨」那行（2026-11-05 使用者）：道瓊 YM、那斯達克 NQ、日經 NK、恒生 HSI。新浪即時；新浪抓不到的退回 Yahoo（慢 10 分，delayMin 會標）
       const sina = await sinaFutQuotes();
       const items = {};
+      const nv = await naverKospiFut();
+      if (nv) { const change = nv.price - nv.prev; items.ks = { name: FUT_NAME.ks, price: nv.price, prev: nv.prev, change, pct: nv.prev > 0 ? (change / nv.prev) * 100 : null, open: nv.open, high: nv.high, low: nv.low, time: nv.time, date: nv.date, src: "naver", delayMin: 0, status: nv.status }; }
+      else items.ks = { name: FUT_NAME.ks, error: "暫時抓不到" };
       await Promise.all(Object.keys(FUT_SINA).map(async (id) => {
         const q = sina[id];
         if (q) { const change = q.prev ? q.price - q.prev : null; items[id] = { name: FUT_NAME[id], price: q.price, prev: q.prev, change, pct: change !== null ? (change / q.prev) * 100 : null, open: q.open, high: q.high, low: q.low, time: q.time, date: q.date, src: "sina", delayMin: 0 }; return; }
@@ -1614,8 +1668,9 @@ export default {
       try {
         // 2026-11-05 使用者：右上角加日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體，點開也要有 K 線圖（日線、5 分、1 分）→ 都用 Yahoo（跟加權一樣的格式）
         const WORLD_IDX = { n225: "^N225", kospi: "^KS11", dji: "^DJI", ixic: "^IXIC", sox: "^SOX", tsm: "TSM", hsi: "^HSI", tnx: "^TNX" };   // tnx＝美國 10 年期公債殖利率（%）
+        const FUT_NAVER = idxId === "futks";   // 韓國 KOSPI 200 期貨（Naver）
         const FUT_BAR = idxId.indexOf("fut") === 0 ? FUT_SINA[idxId.slice(3)] : null;   // futym／futnq／futnk／futhsi：期貨 K 線（新浪）   // tsm＝台積電在美國掛牌的 ADR（紐約證交所 TSM，1 ADR＝5 股）
-        if ((idxId !== "taiex" && idxId !== "otc" && idxId !== "txf" && !WORLD_IDX[idxId] && !FUT_BAR) || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
+        if ((idxId !== "taiex" && idxId !== "otc" && idxId !== "txf" && !WORLD_IDX[idxId] && !FUT_BAR && !FUT_NAVER) || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
         const taipeiDay = (sec) => new Date((sec + 8 * 3600) * 1000).toISOString().slice(0, 10);
         const okBar = (b) => b && Number.isFinite(b.open) && Number.isFinite(b.high) && Number.isFinite(b.low) && Number.isFinite(b.close);
         const r2 = (v) => Math.round(v * 100) / 100;
@@ -1673,6 +1728,13 @@ export default {
                 }
               }
             } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
+          }
+        } else if (FUT_NAVER) {
+          bars = await naverKospiFutBars(tf);
+          const nq = await naverKospiFut();
+          if (nq && bars.length) {
+            if (tf !== "1d") bars.forEach((b) => { if (b.ts > Date.now() - 24 * 3600000) b.ref = nq.prev; });
+            else { const last = bars[bars.length - 1]; if (String(last.ts).slice(0, 10) === nq.date) last.ref = nq.prev; }
           }
         } else if (FUT_BAR) {
           // 期貨 K 線：新浪 1 分／5 分／日線（幾乎即時，最後一根就是正在走的）；新浪日線沒有的（日經）改用 Yahoo 的 NKD=F 日線。近 20 小時內的 K 棒帶 ref＝昨結算價，K 線圖標題的漲跌拿它算
@@ -1903,7 +1965,7 @@ export default {
           }
         }
         if (!bars.length) return Response.json({ status: "empty", error: "沒有資料", bars: [] }, { status: 200, headers: { "cache-control": "no-store" } });
-        return Response.json({ status: "ok", id: idxId, interval: tf, bars }, { headers: { "cache-control": "public, max-age=" + (FUT_BAR ? 2 : WORLD_IDX[idxId] ? 3 : tf === "1d" ? 30 : 10) } });   // 國際指數要即時：瀏覽器只留 3 秒
+        return Response.json({ status: "ok", id: idxId, interval: tf, bars }, { headers: { "cache-control": "public, max-age=" + (FUT_BAR || FUT_NAVER ? 2 : WORLD_IDX[idxId] ? 3 : tf === "1d" ? 30 : 10) } });   // 國際指數要即時：瀏覽器只留 3 秒
       } catch (err) {
         return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502, headers: { "cache-control": "no-store" } });
       }
