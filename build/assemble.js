@@ -478,7 +478,10 @@ async function txfMis(endpoint, body, ttlMs) {
       "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" }
   ];
   let lastErr = null;
-  for (let i = 0; i < 3; i++) {
+  // 2026-11-05：期交所直打從 10/30 起一直回 520，每次都白白試 3 次（含等待約 3 秒）才換後端代打，txf-live 一次要 9 秒、還多吃好幾個子請求。
+  // 3 次都失敗後 10 分鐘內先不直打、直接走後端代打；過了 10 分鐘再試一輪（直打恢復了就用回直打）
+  const directOk = Date.now() >= (globalThis.__txfDirectBadUntil || 0);
+  for (let i = 0; directOk && i < 3; i++) {
     try {
       const r = await fetch("https://mis.taifex.com.tw/futures/api/" + endpoint, { method: "POST", headers: heads[i % 2], body: JSON.stringify(body), cf: { cacheTtl: 0 } });
       if (!r.ok) {
@@ -487,12 +490,14 @@ async function txfMis(endpoint, body, ttlMs) {
       }
       const data = await r.json();
       cache[key] = { at: Date.now(), data };
+      globalThis.__txfDirectBadUntil = 0;
       return data;
     } catch (e) {
       lastErr = e;
       await new Promise((res) => setTimeout(res, 350));
     }
   }
+  if (directOk) globalThis.__txfDirectBadUntil = Date.now() + 600000;   // 走到這裡＝直打 3 次都失敗
   // 直接打期交所失敗（2026-10-30 起被回 520）就請後端（Railway）代打同一支 getQuoteList，回來的 JSON 跟期交所原樣一樣
   if (endpoint === "getQuoteList") {
     try {
@@ -1264,7 +1269,8 @@ const WORKER_ENTRY = {
           return t.charCodeAt(0) === 123 ? t : "null";
         } catch (e) { return "null"; }
       };
-      const parts = await Promise.all([sub("/api/world-idx"), sub("/api/fut-live"), sub("/api/taiex-live"), sub("/api/txf-live")]);
+      const limited = (p) => Promise.race([p, new Promise((res) => setTimeout(() => res("null"), 7000))]);   // 哪一份超過 7 秒就當這次沒有，不拖住其他三份
+      const parts = await Promise.all([limited(sub("/api/world-idx")), limited(sub("/api/fut-live")), limited(sub("/api/taiex-live")), limited(sub("/api/txf-live"))]);
       return new Response('{"status":"ok","world":' + parts[0] + ',"fut":' + parts[1] + ',"taiex":' + parts[2] + ',"txf":' + parts[3] + '}',
         { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" } });
     }
