@@ -543,6 +543,59 @@ const TV_TZ = { n225: "Asia/Tokyo", kospi: "Asia/Seoul", dji: "America/New_York"
 function tvExDay(sec, id) {   // 這個市場自己的日期 YYYY-MM-DD
   return new Intl.DateTimeFormat("en-CA", { timeZone: TV_TZ[id] || "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(sec * 1000));
 }
+// 2026-11-05 使用者：道瓊、那斯達克要看「期貨」（幾乎 24 小時在交易），日經、恒生有期貨也要。實測 Yahoo、TradingView 的 CME 期貨固定延遲 10 分鐘、
+// 大阪／港交所延遲 15 分鐘（交易所收費才即時）；新浪財經的外盤期貨報價（hf_ 開頭）和分K 跟交易時間只差幾秒，所以期貨用新浪（非官方公開介面，失敗就退回 Yahoo 延遲價）。
+// 欄位：0 現價、4 最高、5 最低、6 時間（台北）、7 昨結算、8 開盤、12 日期、14 成交量。韓國 KOSPI 期貨、費半、台積電 ADR 沒有可用的免費期貨資料。
+const FUT_SINA = { ym: "YM", nq: "NQ", nk: "NK", hsi: "HSI" };
+const FUT_YAHOO = { ym: "YM=F", nq: "NQ=F", nk: "NKD=F" };
+const FUT_NAME = { ym: "道瓊期貨", nq: "那斯達克期貨", nk: "日經期貨", hsi: "恒生期貨" };
+const SINA_HEAD = { Referer: "https://finance.sina.com.cn", "User-Agent": "Mozilla/5.0" };
+async function sinaFutQuotes() {
+  const cache = (globalThis.__sinaF = globalThis.__sinaF || {});
+  if (cache.at && Date.now() - cache.at < 2000 && cache.data) return cache.data;   // 同一個 isolate 2 秒內共用
+  try {
+    const r = await fetch("https://hq.sinajs.cn/list=" + Object.values(FUT_SINA).map((x) => "hf_" + x).join(","), { headers: SINA_HEAD });
+    if (!r.ok) throw new Error("Sina HTTP " + r.status);
+    const text = await r.text();
+    const out = {};
+    for (const id of Object.keys(FUT_SINA)) {
+      const part = text.split("hq_str_hf_" + FUT_SINA[id] + '="')[1];
+      if (!part) continue;
+      const f = part.split('"')[0].split(",");
+      const price = Number(f[0]), prev = Number(f[7]), t = Date.parse(f[12] + "T" + f[6] + "+08:00") / 1000;
+      if (!Number.isFinite(price) || price <= 0 || f.length < 13 || !Number.isFinite(t)) continue;
+      out[id] = { price, prev: Number.isFinite(prev) && prev > 0 ? prev : null, open: Number(f[8]), high: Number(f[4]), low: Number(f[5]), volume: Number(f[14]) || 0, time: t, date: f[12], src: "sina" };
+    }
+    cache.at = Date.now(); cache.data = out;
+    return out;
+  } catch (e) {
+    if (cache.data && Date.now() - cache.at < 60000) return cache.data;
+    return {};
+  }
+}
+async function sinaFutBars(sym, tf) {   // 新浪外盤期貨 K 線：1 分／5 分（約最近 1000 根）、日線；K 棒時間是台北時間（收盤時間）
+  const url = tf === "1d" ? "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20t=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=" + sym
+    : "https://gu.sina.cn/ft/api/jsonp.php/var%20t=/GlobalService.getMink?symbol=" + sym + "&type=" + (tf === "5m" ? "5" : "1");
+  const r = await fetch(url, { headers: SINA_HEAD, cf: { cacheTtlByStatus: { "200-299": tf === "1d" ? 30 : 2, "300-599": 0 }, cacheEverything: true } });
+  if (!r.ok) throw new Error("Sina K線 HTTP " + r.status);
+  const text = await r.text();
+  const a = text.indexOf("["), b = text.lastIndexOf("]");
+  if (a < 0 || b < a) return [];
+  const rows = JSON.parse(text.slice(a, b + 1));
+  const out = [];
+  for (const x of rows) {
+    const o = Number(tf === "1d" ? x.open : x.o), h = Number(tf === "1d" ? x.high : x.h), l = Number(tf === "1d" ? x.low : x.l), c = Number(tf === "1d" ? x.close : x.c), v = Number(tf === "1d" ? x.volume : x.v) || 0;
+    if (![o, h, l, c].every((n) => Number.isFinite(n) && n > 0)) continue;
+    const clamp = (n) => Math.min(Math.max(n, l), h);   // 新浪日經期貨日線的開盤價有時跑出當天高低之外，夾回去，K 棒才不會畫壞
+    if (tf === "1d") out.push({ ts: String(x.date) + "T00:00:00+00:00", open: clamp(o), high: h, low: l, close: clamp(c), volume: v, closeTime: "收盤" });
+    else {
+      // 新浪分K 的時間是「收盤時間」（5 分K 17:30 那根，17:26 就已經在走了），K 線圖的 ts 要是開始時間，往前推一根
+      const t = Date.parse(String(x.d).replace(" ", "T") + "+08:00") - (tf === "5m" ? 300000 : 60000);
+      if (Number.isFinite(t)) out.push({ ts: t, open: o, high: h, low: l, close: c, volume: v });
+    }
+  }
+  return tf === "1d" ? out.slice(-300) : out;
+}
 async function txfNearQuote() {
   const j = await txfMis("getQuoteList", { MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" }, 8000);
   const list = (j && j.RtData && j.RtData.QuoteList) || [];
@@ -1075,6 +1128,28 @@ export default {
       // 估值河流圖的股票清單（查詢建議用），5 分鐘快取
       return await proxyHanstockBars("/api/hub/river/list" + url.search, 300);
     }
+    if (url.pathname === "/api/fut-live") {
+      // 首頁國際行情框裡的「期貨」那行（2026-11-05 使用者）：道瓊 YM、那斯達克 NQ、日經 NK、恒生 HSI。新浪即時；新浪抓不到的退回 Yahoo（慢 10 分，delayMin 會標）
+      const sina = await sinaFutQuotes();
+      const items = {};
+      await Promise.all(Object.keys(FUT_SINA).map(async (id) => {
+        const q = sina[id];
+        if (q) { const change = q.prev ? q.price - q.prev : null; items[id] = { name: FUT_NAME[id], price: q.price, prev: q.prev, change, pct: change !== null ? (change / q.prev) * 100 : null, open: q.open, high: q.high, low: q.low, time: q.time, date: q.date, src: "sina", delayMin: 0 }; return; }
+        if (!FUT_YAHOO[id]) { items[id] = { name: FUT_NAME[id], error: "沒有報價" }; return; }
+        try {
+          const r = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(FUT_YAHOO[id]) + "?interval=5m&range=1d", {
+            headers: { "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)", Accept: "application/json" }, cf: { cacheTtlByStatus: { "200-299": 5, "300-599": 0 }, cacheEverything: true }
+          });
+          const m = ((((await r.json()) || {}).chart || {}).result || [])[0], meta = (m && m.meta) || {};
+          const price = Number(meta.regularMarketPrice), prev = Number(meta.previousClose), rm = Number(meta.regularMarketTime);
+          if (!Number.isFinite(price) || !Number.isFinite(rm)) throw new Error("沒有報價");
+          const change = Number.isFinite(prev) && prev > 0 ? price - prev : null;
+          items[id] = { name: FUT_NAME[id], price, prev: change !== null ? prev : null, change, pct: change !== null ? (change / prev) * 100 : null, time: rm, date: "", src: "yahoo", delayMin: 10 };
+        } catch (e) { items[id] = { name: FUT_NAME[id], error: String((e && e.message) || e).slice(0, 60) }; }
+      }));
+      return new Response(JSON.stringify({ status: Object.values(items).some((x) => !x.error) ? "ok" : "error", items, generatedAt: new Date().toISOString() }),
+        { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=2" } });
+    }
     if (url.pathname === "/api/world-idx") {
       // 首頁右上角國際指數框（2026-11-05 使用者）：日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體。Yahoo 圖表 API 的日線（近 5 天）取最新價、前一日收盤，Cloudflare 快取 15 秒。
       // live＝現在在這個市場的正常交易時段內、而且最新價是 30 分鐘內的；不是就當收盤（前端寫「11/05 收盤」）
@@ -1537,8 +1612,9 @@ export default {
       const tf = url.searchParams.get("tf") || "5m";
       try {
         // 2026-11-05 使用者：右上角加日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體，點開也要有 K 線圖（日線、5 分、1 分）→ 都用 Yahoo（跟加權一樣的格式）
-        const WORLD_IDX = { n225: "^N225", kospi: "^KS11", dji: "^DJI", ixic: "^IXIC", sox: "^SOX", tsm: "TSM", hsi: "^HSI" };   // tsm＝台積電在美國掛牌的 ADR（紐約證交所 TSM，1 ADR＝5 股）
-        if ((idxId !== "taiex" && idxId !== "otc" && idxId !== "txf" && !WORLD_IDX[idxId]) || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
+        const WORLD_IDX = { n225: "^N225", kospi: "^KS11", dji: "^DJI", ixic: "^IXIC", sox: "^SOX", tsm: "TSM", hsi: "^HSI" };
+        const FUT_BAR = idxId.indexOf("fut") === 0 ? FUT_SINA[idxId.slice(3)] : null;   // futym／futnq／futnk／futhsi：期貨 K 線（新浪）   // tsm＝台積電在美國掛牌的 ADR（紐約證交所 TSM，1 ADR＝5 股）
+        if ((idxId !== "taiex" && idxId !== "otc" && idxId !== "txf" && !WORLD_IDX[idxId] && !FUT_BAR) || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
         const taipeiDay = (sec) => new Date((sec + 8 * 3600) * 1000).toISOString().slice(0, 10);
         const okBar = (b) => b && Number.isFinite(b.open) && Number.isFinite(b.high) && Number.isFinite(b.low) && Number.isFinite(b.close);
         const r2 = (v) => Math.round(v * 100) / 100;
@@ -1596,6 +1672,23 @@ export default {
                 }
               }
             } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
+          }
+        } else if (FUT_BAR) {
+          // 期貨 K 線：新浪 1 分／5 分／日線（幾乎即時，最後一根就是正在走的）；新浪日線沒有的（日經）改用 Yahoo 的 NKD=F 日線。近 20 小時內的 K 棒帶 ref＝昨結算價，K 線圖標題的漲跌拿它算
+          const fid = idxId.slice(3);
+          try { bars = await sinaFutBars(FUT_BAR, tf); } catch (eS) { bars = []; }
+          if (!bars.length && tf === "1d" && FUT_YAHOO[fid]) {
+            const y = await upstreamJson("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(FUT_YAHOO[fid]) + "?interval=1d&range=1y", 30);
+            const r0 = y && y.chart && y.chart.result && y.chart.result[0], q = (r0 && r0.indicators && r0.indicators.quote && r0.indicators.quote[0]) || {}, st = (r0 && r0.timestamp) || [];
+            for (let i = 0; i < st.length; i++) { const b = { open: q.open && q.open[i], high: q.high && q.high[i], low: q.low && q.low[i], close: q.close && q.close[i] }; if (okBar(b)) bars.push({ ts: taipeiDay(st[i]) + "T00:00:00+00:00", open: r2(b.open), high: r2(b.high), low: r2(b.low), close: r2(b.close), volume: (q.volume && q.volume[i]) || 0, closeTime: "收盤" }); }
+          }
+          if (bars.length) {
+            const qf = (await sinaFutQuotes())[fid];
+            if (qf && tf !== "1d" && qf.prev) bars.forEach((b) => { if (b.ts > Date.now() - 20 * 3600000) b.ref = qf.prev; });
+            if (qf && tf === "1d") {   // 日線最後一根（目前交易日）的開高低收換成即時報價的：新浪日經日線的開盤價不準
+              const last = bars[bars.length - 1];
+              if (Math.abs(last.close - qf.price) / qf.price < 0.03 && Number.isFinite(qf.open) && qf.open > 0 && Number.isFinite(qf.high) && qf.high > 0 && Number.isFinite(qf.low) && qf.low > 0) { last.open = qf.open; last.high = Math.max(qf.high, qf.price); last.low = Math.min(qf.low, qf.price); last.close = qf.price; if (qf.prev) last.ref = qf.prev; }
+            }
           }
         } else if (WORLD_IDX[idxId]) {
           // 日經／韓國／道瓊／那斯達克／費半：Yahoo 公開圖表 API，日線一年、5 分 1 個月、1 分 5 天（沒有台股那套 13:30 集合競價併根、台灣版 Yahoo 覆蓋）。
@@ -1809,7 +1902,7 @@ export default {
           }
         }
         if (!bars.length) return Response.json({ status: "empty", error: "沒有資料", bars: [] }, { status: 200, headers: { "cache-control": "no-store" } });
-        return Response.json({ status: "ok", id: idxId, interval: tf, bars }, { headers: { "cache-control": "public, max-age=" + (WORLD_IDX[idxId] ? 3 : tf === "1d" ? 30 : 10) } });   // 國際指數要即時：瀏覽器只留 3 秒
+        return Response.json({ status: "ok", id: idxId, interval: tf, bars }, { headers: { "cache-control": "public, max-age=" + (FUT_BAR ? 2 : WORLD_IDX[idxId] ? 3 : tf === "1d" ? 30 : 10) } });   // 國際指數要即時：瀏覽器只留 3 秒
       } catch (err) {
         return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502, headers: { "cache-control": "no-store" } });
       }
