@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 17:42:15";
+const BUILD_STAMP = "2026-11-05 17:45:23";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -17441,7 +17441,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 17:42:15';
+const BUILD_STAMP = '2026-11-05 17:45:23';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -29395,6 +29395,73 @@ async function serveTutorialVideo(request, env, url) {
   return new Response(head ? null : buf, { headers: Object.assign({}, headers, { "content-length": String(size) }) });
 }
 
+// 2026-11-05 使用者：Worker 自己記錄每 10 秒的即時價。美債 10 年期殖利率幾乎 24 小時在交易，但 Yahoo ^TNX 的分K 只有芝加哥選擇權交易所那段時間，亞洲時段是空的。
+// 這個 Durable Object 用 alarm 每 10 秒向 TradingView 問一次即時價（TVC:US10Y），合成 1 分K，存在自己的儲存空間（每小時一個 key、留 4 天）；
+// 圖表的 5 分／1 分把 Yahoo 最後一根之後的接上記錄的 K 棒（見 /api/idx-bars/tnx）。只記有即時價、而且最新價 3 分鐘內有更新的時候。
+const REC_SYMS = ["tnx"];
+export class Recorder {
+  constructor(state, env) { this.state = state; this.env = env; }
+  async fetch(request) {
+    const url = new URL(request.url);
+    const al = await this.state.storage.getAlarm();
+    if (al === null) await this.state.storage.setAlarm(Date.now() + 500);   // 鬧鐘沒在跑就叫起來（第一次、或中斷過）
+    if (url.pathname === "/bars") return Response.json({ status: "ok", bars: await this.allBars(url.searchParams.get("sym") || "tnx") });
+    return Response.json({ status: "ok", alarm: al });
+  }
+  async alarm() {
+    try { await this.sample(); } catch (e) { /* 這次沒取到就算了，下一個 10 秒再取 */ }
+    await this.state.storage.setAlarm(Date.now() + 10000);
+  }
+  async sample() {
+    const tv = await tvQuotes();
+    const nowMs = Date.now();
+    for (const sym of REC_SYMS) {
+      const q = tv[sym];
+      if (!q || !Number.isFinite(q.price) || nowMs / 1000 - q.time > 180) continue;   // 沒有即時價（休市）就不記
+      const key = Math.floor(nowMs / 60000) * 60000;
+      let cur = await this.state.storage.get("cur:" + sym);
+      if (cur && cur.ts !== key) { await this.saveBar(sym, cur); cur = null; }   // 上一分鐘結束：存進那個小時的 key
+      if (!cur) cur = { ts: key, open: q.price, high: q.price, low: q.price, close: q.price, n: 1 };
+      else { cur.high = Math.max(cur.high, q.price); cur.low = Math.min(cur.low, q.price); cur.close = q.price; cur.n += 1; }
+      await this.state.storage.put("cur:" + sym, cur);
+    }
+  }
+  async saveBar(sym, bar) {
+    const hk = "bars:" + sym + ":" + new Date(bar.ts).toISOString().slice(0, 13);
+    const arr = (await this.state.storage.get(hk)) || [];
+    if (!arr.length || arr[arr.length - 1].ts < bar.ts) arr.push({ ts: bar.ts, open: bar.open, high: bar.high, low: bar.low, close: bar.close });
+    await this.state.storage.put(hk, arr);
+    if (new Date(bar.ts).getUTCMinutes() === 0) {   // 每小時清一次 4 天前的
+      const old = await this.state.storage.list({ prefix: "bars:" + sym + ":", end: "bars:" + sym + ":" + new Date(bar.ts - 4 * 86400000).toISOString().slice(0, 13) });
+      for (const k of old.keys()) await this.state.storage.delete(k);
+    }
+  }
+  async allBars(sym) {
+    const m = await this.state.storage.list({ prefix: "bars:" + sym + ":", limit: 120 });
+    const out = [];
+    for (const arr of m.values()) for (const b of arr) out.push(b);
+    const cur = await this.state.storage.get("cur:" + sym);
+    if (cur && (!out.length || out[out.length - 1].ts < cur.ts)) out.push({ ts: cur.ts, open: cur.open, high: cur.high, low: cur.low, close: cur.close });
+    return out;
+  }
+}
+let recPingAt = 0;
+function recorderStub(env) { return env && env.RECORDER ? env.RECORDER.get(env.RECORDER.idFromName("main")) : null; }
+async function recorderBars(env, sym) {   // 記錄的 1 分K（沒有綁定或失敗就是空的，圖照用 Yahoo）
+  try {
+    const stub = recorderStub(env);
+    if (!stub) return [];
+    const r = await stub.fetch("https://recorder/bars?sym=" + sym);
+    const j = await r.json();
+    return Array.isArray(j.bars) ? j.bars : [];
+  } catch (e) { return []; }
+}
+function recorderPing(env, ctx) {   // 確認鬧鐘有在跑；同一個 isolate 一分鐘最多叫一次
+  if (!env || !env.RECORDER || Date.now() - recPingAt < 60000) return;
+  recPingAt = Date.now();
+  const p = (async () => { try { await recorderStub(env).fetch("https://recorder/ping"); } catch (e) { /* 下次再叫 */ } })();
+  if (ctx && ctx.waitUntil) ctx.waitUntil(p);
+}
 export default {
   async fetch(request, env, ctx) {
     recordSampledRequest(env, ctx);
@@ -29696,6 +29763,13 @@ export default {
       // 估值河流圖的股票清單（查詢建議用），5 分鐘快取
       return await proxyHanstockBars("/api/hub/river/list" + url.search, 300);
     }
+    if (url.pathname === "/api/rec-status") {
+      // 看記錄器有沒有在跑：記了幾根 1 分K、最後一根的時間
+      const rec = await recorderBars(env, url.searchParams.get("sym") || "tnx");
+      recorderPing(env, ctx);
+      return Response.json({ status: env.RECORDER ? "ok" : "no-binding", n: rec.length, first: rec[0] ? new Date(rec[0].ts).toISOString() : null, last: rec.length ? new Date(rec[rec.length - 1].ts).toISOString() : null, lastBar: rec[rec.length - 1] || null },
+        { headers: { "cache-control": "no-store" } });
+    }
     if (url.pathname === "/api/fut-live") {
       // 首頁國際行情框裡的「期貨」那行（2026-11-05 使用者）：道瓊 YM、那斯達克 NQ、日經 NK、恒生 HSI。新浪即時；新浪抓不到的退回 Yahoo（慢 10 分，delayMin 會標）
       const sina = await sinaFutQuotes();
@@ -29738,6 +29812,7 @@ export default {
           return Number.isFinite(price) && Number.isFinite(rm) ? { price, rm } : null;
         } catch (e) { return null; }
       };
+      recorderPing(env, ctx);
       const tvAll = await tvQuotes();
       const one = async ([id, sym, name]) => {
         try {
@@ -30307,6 +30382,21 @@ export default {
               }
             } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
           }
+          // 美債 10 年期：Yahoo ^TNX 只有芝加哥選擇權交易所時段的分K，把 Worker 自己每 10 秒記錄的 1 分K（Durable Object）接在 Yahoo 最後一根後面
+          if (idxId === "tnx" && tf !== "1d") {
+            const rec = await recorderBars(env, "tnx");
+            if (rec.length) {
+              const step = tf === "5m" ? 300000 : 60000, bucket = new Map();
+              for (const b of rec) {
+                const k = Math.floor(b.ts / step) * step, g = bucket.get(k);
+                if (!g) bucket.set(k, { ts: k, open: b.open, high: b.high, low: b.low, close: b.close, volume: 0 });
+                else { g.high = Math.max(g.high, b.high); g.low = Math.min(g.low, b.low); g.close = b.close; }
+              }
+              const lastY = bars.length ? bars[bars.length - 1].ts : 0;
+              const add = Array.from(bucket.values()).sort((x, y) => x.ts - y.ts).filter((b) => b.ts > lastY).map((b) => ({ ts: b.ts, open: r2(b.open), high: r2(b.high), low: r2(b.low), close: r2(b.close), volume: 0 }));
+              bars = bars.concat(add);
+            }
+          }
           // TradingView 即時價（2 分鐘內有更新才算盤中）：分K 最後一根的收盤／高低換成它，過了這根的時間就接一根新的；日線今天那根的開高低收換成它的
           try {
             const tv = (await tvQuotes())[idxId];
@@ -30636,6 +30726,7 @@ export default {
     });
   },
   async scheduled(event, env, ctx) {
+    try { recPingAt = 0; recorderPing(env, ctx); } catch (err) { /* 叫醒記錄器失敗不影響下面的檢查 */ }
     try {
       const result = await checkUsageAnomaly(env);
       if (result && result.anomalous) {

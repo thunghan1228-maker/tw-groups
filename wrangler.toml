@@ -12,6 +12,15 @@ id = "d1563f4cd9344a00a60b386c7ce82778"
 [triggers]
 crons = ["*/15 * * * *"]
 
+# 2026-11-05 使用者：Worker 自己記錄每 10 秒的即時價（美債 10 年期殖利率的分K，Yahoo 沒有亞洲時段）：Durable Object 的 alarm 每 10 秒取價、合成 1 分K（SQLite 儲存，免費方案可用）
+[[durable_objects.bindings]]
+name = "RECORDER"
+class_name = "Recorder"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Recorder"]
+
 # 教學影片（2026-10-13）：public/tut-assets/*.mp4 跟影片清單 index.json；影片網址 /videos/*.mp4 由 Worker 處理 Range
 [assets]
 directory = "./public"
