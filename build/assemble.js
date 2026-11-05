@@ -945,9 +945,9 @@ function recorderPing(env, ctx) {   // 確認鬧鐘有在跑；同一個 isolate
   const p = (async () => { try { await recorderStub(env).fetch("https://recorder/ping"); } catch (e) { /* 下次再叫 */ } })();
   if (ctx && ctx.waitUntil) ctx.waitUntil(p);
 }
-export default {
+const WORKER_ENTRY = {
   async fetch(request, env, ctx) {
-    recordSampledRequest(env, ctx);
+    if (!request.headers.get("x-internal")) recordSampledRequest(env, ctx);   // /api/live-bundle 裡面呼叫的子請求不重複計數
     const url = new URL(request.url);
     if (url.pathname.indexOf("/videos/") === 0 || url.pathname.indexOf("/dojo-voice/") === 0) return await serveTutorialVideo(request, env, url);
     let barsRequest = null;
@@ -1252,6 +1252,21 @@ export default {
       recorderPing(env, ctx);
       return Response.json({ status: env.RECORDER ? "ok" : "no-binding", n: rec.length, first: rec[0] ? new Date(rec[0].ts).toISOString() : null, last: rec.length ? new Date(rec[rec.length - 1].ts).toISOString() : null, lastBar: rec[rec.length - 1] || null },
         { headers: { "cache-control": "no-store" } });
+    }
+    if (url.pathname === "/api/live-bundle") {
+      // 首頁右上角四份即時行情（國際指數、期貨、加權、台指期）合成一個請求（2026-11-05：Cloudflare 免費方案每天只有 10 萬個請求，
+      // 原本四份各自輪詢，一個分頁每分鐘 21 個）。裡面直接呼叫原本四條路由（函式呼叫，不是對外請求），子回應的文字原樣接起來，不再解析一次，省 CPU；
+      // 哪一份失敗就是 null，前端各自判斷。
+      const sub = async (path) => {
+        try {
+          const r = await WORKER_ENTRY.fetch(new Request(url.origin + path, { headers: { "x-internal": "1" } }), env, ctx);
+          const t = await r.text();
+          return t.charCodeAt(0) === 123 ? t : "null";
+        } catch (e) { return "null"; }
+      };
+      const parts = await Promise.all([sub("/api/world-idx"), sub("/api/fut-live"), sub("/api/taiex-live"), sub("/api/txf-live")]);
+      return new Response('{"status":"ok","world":' + parts[0] + ',"fut":' + parts[1] + ',"taiex":' + parts[2] + ',"txf":' + parts[3] + '}',
+        { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" } });
     }
     if (url.pathname === "/api/fut-live") {
       // 首頁國際行情框裡的「期貨」那行（2026-11-05 使用者）：道瓊 YM、那斯達克 NQ、日經 NK、恒生 HSI。新浪即時；新浪抓不到的退回 Yahoo（慢 10 分，delayMin 會標）
@@ -2224,6 +2239,7 @@ export default {
     }
   }
 };
+export default WORKER_ENTRY;
 `;
 
 const finalSource = serverPrelude + serverTail;

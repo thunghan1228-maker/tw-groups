@@ -27625,8 +27625,7 @@ async function taiexLiveLoad(){
   } catch (e) { /* 抓不到就用日資料 */ }
   finally { TAIEX_LIVE.loading = false; try { renderTaiexChip(); } catch (e) { /* 還沒畫過 */ } }
 }
-setTimeout(taiexLiveLoad, 1500);
-setInterval(() => { if (document.visibilityState === 'visible') taiexLiveLoad(); }, 20e3);
+// （2026-11-05 起不再自己輪詢，跟台指期、國際指數、期貨一起走 liveBundleLoad，見下面）
 // 2026-10-29 使用者：個股震盪右邊空白處加「台指期近月」：價位、漲跌點數、漲跌幅（先點數再幅度），漲紅跌綠平盤白字。
 // 資料 /api/txf-live（期交所 MIS 近月：日盤時間看日盤、夜盤時間 15:00～隔天 08:45 看夜盤；盤中即時、收盤後＝收盤價），每 20 秒更新，抓不到就留上一次的。
 const TXF = { d: null, at: 0, loading: false, err: 0 };
@@ -27653,8 +27652,7 @@ async function txfLoad(){
   } catch (e) { TXF.err += 1; /* 抓不到就留上一次 */ }
   finally { TXF.loading = false; txfRender(); }
 }
-setTimeout(txfLoad, 1200);
-setInterval(() => { if (document.visibilityState === 'visible') txfLoad(); }, 20e3);
+// （2026-11-05 起改走 liveBundleLoad）
 // 2026-10-29 使用者：點台指期近月這格開 K 線圖（日線、5 分、1 分，跟加權、櫃買一樣）；近月合約換月（到期日收盤後）期交所的近月自己就換了，名稱不用改
 document.getElementById('txfBox').addEventListener('click', () => { openStockChart('IDX_TXF', '台指期近月'); });
 // 2026-11-05 使用者：右上角第二排——日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體。價位、漲跌點數、漲跌幅（漲紅跌綠平盤白字）＋時間／收盤日；
@@ -27728,15 +27726,50 @@ async function worldIdxLoad(){
   } catch (e) { WORLDIDX.err += 1; /* 抓不到就留上一次 */ }
   finally { WORLDIDX.loading = false; worldIdxRender(); }
 }
-setTimeout(worldIdxLoad, 1500);
-// 有市場在交易（日經／韓國 08:00～14:30、美股夜裡）就每 10 秒更新，都休市就每分鐘看一次
+// 2026-11-05 Cloudflare 免費方案每天只有 10 萬個請求（11/02 超過、網站被擋到隔天重設）：原本加權、台指期、國際指數、期貨四份各自輪詢
+// （期貨約 6 秒一次，一個分頁每分鐘 21 個請求），而且每個浮動 K 線圖視窗（iframe）也各自跑一份，開兩個視窗就變三倍。
+// 改成：① /api/live-bundle 一個請求拿四份　② 使用者說只是看行情不用那麼準：期貨、國際指數 30 秒一次，台股日盤（09:00～13:35）20 秒，全部休市 60 秒
+// ③ 浮動 K 線圖、機器人、訊號等子視窗不跑（它們看不到這排行情）　④ 分頁在背景不跑，切回來才補抓。一個分頁每分鐘約 2 個請求。
+const LIVEB = { tried: 0, loading: false, fail: 0 };
+function liveBundleChild(){
+  const c = document.body.classList;
+  return CHART_WINDOW_MODE || ['chart-window-mode', 'bot-window-mode', 'signal-window-mode', 'sigtabs-window-mode', 'hw-window-mode', 'wg-window-mode'].some((k) => c.contains(k));
+}
+function liveBundleEvery(){
+  const tp = new Date(Date.now() + 8 * 3600e3), day = tp.getUTCDay(), hm = tp.getUTCHours() * 100 + tp.getUTCMinutes();
+  if (day >= 1 && day <= 5 && hm >= 900 && hm <= 1335) return 20e3;   // 台股日盤：加權、台指期看得到跳
+  const anyLive = futLiveNow() || WORLD_IDX_CODES.some((c) => worldIdxLiveNow(c));
+  return anyLive ? 30e3 : 60e3;
+}
+async function liveBundleLoad(){
+  if (LIVEB.loading || liveBundleChild()) return;
+  LIVEB.loading = true; LIVEB.tried = Date.now();
+  try {
+    const r = await fetch('/api/live-bundle');
+    const b = r.ok ? await r.json() : null;
+    if (!b || b.status !== 'ok') throw new Error('bundle');
+    const w = b.world, f = b.fut, t = b.taiex, x = b.txf, now = Date.now();
+    if (w && w.status === 'ok' && w.items){ WORLDIDX.d = w; WORLDIDX.at = now; WORLDIDX.err = 0; WORLDIDX.tried = now; } else WORLDIDX.err += 1;
+    if (f && f.status === 'ok' && f.items){ FUTS.d = f; FUTS.at = now; FUTS.err = 0; FUTS.tried = now; } else FUTS.err += 1;
+    if (t && t.status === 'ok' && Number.isFinite(t.price) && Number.isFinite(t.prevClose)){ TAIEX_LIVE.d = t; TAIEX_LIVE.at = now; }
+    if (x && x.status === 'ok' && Number.isFinite(x.price) && Number.isFinite(x.change)){ TXF.d = x; TXF.at = now; TXF.err = 0; } else TXF.err += 1;
+    LIVEB.fail = 0;
+  } catch (e) {
+    // 合併請求失敗（Worker 出錯等）：連續兩次就退回原本四個各自的請求（照 30 秒的節奏），等合併請求恢復
+    LIVEB.fail += 1;
+    if (LIVEB.fail >= 2){ taiexLiveLoad(); txfLoad(); futLoad(); worldIdxLoad(); }
+  } finally {
+    LIVEB.loading = false;
+    try { renderTaiexChip(); } catch (e) { /* 還沒畫過 */ }
+    txfRender(); worldIdxRender();
+  }
+}
+setTimeout(liveBundleLoad, 1200);
 setInterval(() => {
-  if (document.visibilityState !== 'visible') return;
-  const anyLive = WORLD_IDX_CODES.some((c) => worldIdxLiveNow(c));
-  if (Date.now() - WORLDIDX.tried >= (anyLive ? 9500 : 60e3)) worldIdxLoad();
-  if (Date.now() - FUTS.tried >= (futLiveNow() ? 4500 : 60e3)) futLoad();   // 期貨幾乎 24 小時在跳：每 5 秒更新
-}, 3000);
-setTimeout(futLoad, 1300);
+  if (document.visibilityState !== 'visible' || liveBundleChild()) return;
+  if (Date.now() - LIVEB.tried >= liveBundleEvery() - 1500) liveBundleLoad();
+}, 5000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && Date.now() - LIVEB.tried > 15e3) liveBundleLoad(); });
 document.getElementById('mktWorld').addEventListener('click', (e) => {
   const fut = e.target.closest('.mk-fut');
   if (fut && fut.dataset.fcode){ openStockChart(fut.dataset.fcode, IDX_CHARTS[fut.dataset.fcode].name); return; }   // 點「期貨」那行：開期貨 K 線圖
