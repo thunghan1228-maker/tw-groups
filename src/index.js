@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 22:37:39";
+const BUILD_STAMP = "2026-11-05 22:54:03";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3569,6 +3569,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .wl-gtab{padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;}
   .wl-gtab.active{background:#f5b301;border-color:#f5b301;color:#1a1a1a;}
   .wl-gtab.add{border-style:dashed;color:var(--muted);}
+  .wl-gtab.drop-before{box-shadow:-3px 0 0 #f5b301;} .wl-gtab.drop-after{box-shadow:3px 0 0 #f5b301;}   /* 拖曳分組換順序：放開會插在這一格的前面／後面 */
+  .wl-gops .wl-btn:disabled{opacity:.4;cursor:default;}
   .wl-gcount{display:inline-block;margin-left:6px;font-size:12px;opacity:.75;}
   .wl-gops{margin-left:auto;display:inline-flex;gap:6px;}
   .wl-add{display:flex;gap:6px;margin-bottom:6px;}
@@ -14971,11 +14973,33 @@ function wlSyncHtml(){
     '<span class="wl-sync-ops"><button class="wl-btn" id="wlSyncNow">立即同步</button>' + (wl.switching ? '' : '<button class="wl-btn" id="wlSwitchUser" title="同一台電腦給別人用：換成他的同步碼、看他的清單">換人使用</button>') +
     '<button class="wl-btn" id="wlKeyStop">這台停止同步</button></span>' + switchRow + '</div>';
 }
+// 2026-11-05 使用者：分組的順序要能自己調（例如把「股票期貨」從最後面移到前面）：選到那個分組，按「◀ 前移」「後移 ▶」；電腦上也可以直接拖曳分組鈕。順序存在 data.groups 的排列裡，跟著同步碼同步
+function wlMoveGroup(gid, dir){   // dir：-1＝往前（左）、+1＝往後（右）
+  wlMutate((data) => {
+    const i = data.groups.findIndex((g) => g.id === gid), j = i + dir;
+    if (i < 0 || j < 0 || j >= data.groups.length) return;
+    const [g] = data.groups.splice(i, 1);
+    data.groups.splice(j, 0, g);
+  });
+}
+function wlDropGroup(fromId, toId, after){   // 拖曳：把 fromId 放到 toId 的前面（after＝false）或後面
+  if (!fromId || !toId || fromId === toId) return;
+  wlMutate((data) => {
+    const i = data.groups.findIndex((g) => g.id === fromId);
+    if (i < 0) return;
+    const [g] = data.groups.splice(i, 1);
+    const j = data.groups.findIndex((x) => x.id === toId);
+    if (j < 0){ data.groups.splice(i, 0, g); return; }
+    data.groups.splice(after ? j + 1 : j, 0, g);
+  });
+}
 function wlTabsHtml(){
-  return '<div class="wl-groups">' + wl.data.groups.map((g) => '<button class="wl-gtab' + (g.id === wl.active ? ' active' : '') + '" data-gid="' + wlEsc(g.id) + '">' +
+  const gs = wl.data.groups, at = gs.findIndex((g) => g.id === wl.active);
+  return '<div class="wl-groups">' + gs.map((g) => '<button class="wl-gtab' + (g.id === wl.active ? ' active' : '') + '" data-gid="' + wlEsc(g.id) + '" draggable="true" title="點一下切換；可以拖曳換順序">' +
       wlEsc(g.name) + '<span class="wl-gcount">' + g.items.length + '</span></button>').join('') +
     '<button class="wl-gtab add" id="wlGroupAdd" title="新增一個分組">＋ 增加分組</button>' +
-    '<span class="wl-gops"><button class="wl-btn" id="wlGroupRename">改名</button><button class="wl-btn" id="wlGroupDelete">刪除這組</button></span></div>';
+    '<span class="wl-gops"><button class="wl-btn" id="wlGroupLeft" title="把目前這個分組往前（左）移一格"' + (at > 0 ? '' : ' disabled') + '>◀ 前移</button><button class="wl-btn" id="wlGroupRight" title="把目前這個分組往後（右）移一格"' + (at >= 0 && at < gs.length - 1 ? '' : ' disabled') + '>後移 ▶</button>' +
+    '<button class="wl-btn" id="wlGroupRename">改名</button><button class="wl-btn" id="wlGroupDelete">刪除這組</button></span></div>';
 }
 function renderWatch(){
   const body = document.getElementById('watchBody');
@@ -15625,6 +15649,35 @@ document.getElementById('watchBody').addEventListener('keydown', (e) => {
   else if (e.target.id === 'wlKeyInput'){ e.preventDefault(); wlSetKey(e.target.value); }
   else if (e.target.id === 'wlSwitchInput'){ e.preventDefault(); wlSetKey(e.target.value, { replace: true }); }
 });
+// 分組鈕拖曳換順序（電腦；手機用「◀ 前移」「後移 ▶」）
+(function(){
+  const body = document.getElementById('watchBody');
+  let dragGid = '';
+  const clear = () => body.querySelectorAll('.wl-gtab.drop-before, .wl-gtab.drop-after').forEach((x) => x.classList.remove('drop-before', 'drop-after'));
+  body.addEventListener('dragstart', (e) => {
+    const t = e.target.closest && e.target.closest('.wl-gtab[data-gid]');
+    if (!t) return;
+    dragGid = t.dataset.gid;
+    try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragGid); } catch (_){}
+  });
+  body.addEventListener('dragover', (e) => {
+    const t = e.target.closest && e.target.closest('.wl-gtab[data-gid]');
+    if (!dragGid || !t) return;
+    e.preventDefault();
+    clear();
+    const r = t.getBoundingClientRect();
+    t.classList.add(e.clientX > r.left + r.width / 2 ? 'drop-after' : 'drop-before');
+  });
+  body.addEventListener('drop', (e) => {
+    const t = e.target.closest && e.target.closest('.wl-gtab[data-gid]');
+    if (!dragGid || !t) return;
+    e.preventDefault();
+    const r = t.getBoundingClientRect(), from = dragGid;
+    dragGid = ''; clear();
+    wlDropGroup(from, t.dataset.gid, e.clientX > r.left + r.width / 2);
+  });
+  body.addEventListener('dragend', () => { dragGid = ''; clear(); });
+})();
 document.getElementById('watchBody').addEventListener('click', (e) => {
   if (e.target.closest('select, input')) return;
   if (e.target.closest('#wlAddBtn')){ wlSubmitAdd(); return; }
@@ -15656,6 +15709,11 @@ document.getElementById('watchBody').addEventListener('click', (e) => {
       mineNoteNew(data, newId);     // 自選觀察股週分析：自己新建的分組自動算進去
     });
     wl.active = newId || wl.active; wlSavePrefs(); renderWatch();
+    return;
+  }
+  if (e.target.closest('#wlGroupLeft') || e.target.closest('#wlGroupRight')){
+    const btn = e.target.closest('#wlGroupLeft') || e.target.closest('#wlGroupRight');
+    if (!btn.disabled) wlMoveGroup(wl.active, btn.id === 'wlGroupLeft' ? -1 : 1);
     return;
   }
   if (e.target.closest('#wlGroupRename')){
@@ -17543,7 +17601,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 22:37:39';
+const BUILD_STAMP = '2026-11-05 22:54:03';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22014,7 +22072,7 @@ const GUIDE_TOOLS = [
     b: ['🚨 今天入獄（最上面）：今天新公告、下一個交易日起進處置的股票（處置期間、幾分鐘撮合、解鎖日）；底下收著還在分盤交易的其他股票', '🔓 解鎖：接下來兩個交易日出關、恢復正常交易的', '⚠️ 連續警告：明天再被警告就可能分盤或延長處置，持有的要留意', '點代號開 K 線圖'] },
   { t: '自選股', label: '自選股', v: 'tb-watch', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
     b: ['換手機或電腦用「同步碼」就能帶過去', '一鍵健診：持股的防守價、明日紅半／三日低／月線一次算好', '各列表看到喜歡的股票，點「☆」會先跳出分組清單讓你選要加進哪一組',
-      '每個分組可看「融資斷頭」表（跟個股問診同一張）；欄位表頭可以按，由大到小／由小到大排序', '系統自動幫你整理的分組（個股分數前 20 名、前二十名常客、⏰ 觀察分組）盤中每分鐘跟著動'] },
+      '每個分組可看「融資斷頭」表（跟個股問診同一張）；欄位表頭可以按，由大到小／由小到大排序', '系統自動幫你整理的分組（個股分數前 20 名、前二十名常客、⏰ 觀察分組）盤中每分鐘跟著動', '分組順序可以自己調：選到那個分組，按「◀ 前移」「後移 ▶」（電腦也能直接拖曳分組鈕），順序會跟著同步碼同步'] },
   { t: '個股訊號追蹤', label: '個股盤中訊號追蹤', v: 'tb-track', tags: ['盤中'], d: '只看你自選股今天出現了哪些訊號，不用在一堆名單裡找。',
     b: ['自選股一出現新訊號就提醒（網頁要開著）', '不想追蹤的那檔按「關閉訊號」就不再跳；表頭「全部關閉」一次關掉', '點股票直接開 K 線圖'] },
   { t: '飆股雷達', label: 'K棒組合選股', v: 'tb-grail', tags: ['盤中', '固定時點'], d: '15 個選股邏輯（穿山鱷龍、黑龍短沖、黑飛舞、飛龍戰法）在固定時間點自動掃全市場，把符合的名單抓出來。',
