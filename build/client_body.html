@@ -2517,6 +2517,16 @@
   .fp-cbar::after{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;border-left:1px solid #b9ab99;}
   .fp-note{background:#f8f1e4;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--fp-text);margin:10px 0 4px;line-height:1.7;}
   .fp-foot{font-size:11px;color:var(--fp-muted);margin-top:12px;line-height:1.7;border-top:1px solid var(--fp-line);padding-top:10px;}
+  /* 外資／投信買賣超（2026-11-05）：買超榜、賣超榜並排（窄螢幕上下疊） */
+  .iv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:14px;align-items:start;}
+  .iv-col{min-width:0;} .iv-col .fp-h4{margin:8px 0 6px;} .iv-col .fp-h4.up{color:var(--fp-up);} .iv-col .fp-h4.down{color:var(--fp-down);}
+  .iv-tbl{min-width:0;font-size:12.5px;} .iv-tbl th,.iv-tbl td{padding:5px 6px;white-space:nowrap;} .iv-tbl td.iv-st{white-space:normal;min-width:120px;}
+  .iv-tbl td.iv-main{background:#fbf1de;} .iv-tbl .iv-rk{color:var(--fp-muted);} .iv-tbl .rm-code{color:#7b3fe4;}
+  .iv-otc{display:inline-block;border:1px solid #d9b98c;border-radius:4px;padding:0 3px;font-size:10px;color:#9a6b2f;background:#fff8ec;vertical-align:1px;}
+  .iv-sum{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;margin:6px 0 10px;color:var(--fp-text);} .iv-sum b{font-variant-numeric:tabular-nums;}
+  .iv-date{border:1px solid var(--fp-line);background:#fff;color:var(--fp-text);border-radius:999px;padding:4px 10px;font-size:13px;font-family:inherit;}
+  .fp-bar button:disabled{opacity:.4;cursor:default;}
+  @media (max-width: 640px){ .iv-grid{grid-template-columns:minmax(0,1fr);} }
   @media (max-width: 1100px){ .fp-cards{grid-template-columns:repeat(3,minmax(0,1fr));} }
   @media (max-width: 640px){ .fc-paper{padding:10px;} .fp-h1{font-size:24px;} .fp-cards{grid-template-columns:repeat(2,minmax(0,1fr));} .fp-card .fp-v{font-size:18px;} .fp-big{font-size:22px;} .fp-links{margin-left:0;} }
   @media (max-width: 640px){
@@ -10052,6 +10062,39 @@ function homeBladeColHtml(m){
     (n ? sec(m.bladeUpper) + '<div class="hr-sep">----↑(多方打少)↑----</div>' + sec(m.bladeMiddle) + '<div class="hr-sep">----↓(強空積極)↓----</div>' + sec(m.bladeLower) +
       '<div class="hr-sep">----↓(收割區域)↓----</div>' + sec(m.bladeHarvest) : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
 }
+// ---- 外資／投信買賣超前幾名（2026-11-05 使用者）：機器人 97（外資）、98（投信）買超賣超各前十；首頁 30加33加34 下面放投信買超前 15、今日強勢股下面放外資買超前 15 ----
+// 資料＝/api/inst-rank（證交所、櫃買中心收盤後公布的法人買賣超，所以開盤前、盤中看到的是前一個交易日的名單）；
+// 單位：買賣超張數；漲跌幅用即時報價（族群外的問 /api/watch-quotes，抓不到就用那天的漲跌幅）；大戶力是盤中大戶力，不在大戶力排行裡的顯示「—」。
+function instTopLists(who, nBuy, nSell){
+  const d = botFetchCache('instRank', '/api/inst-rank', 5 * 60e3);
+  if (!d) return { wait: true };
+  if (d.status !== 'ok' || !Array.isArray(d.rows)) return { error: d.message || (d.status === 'empty' ? '還沒有法人資料' : '法人資料暫時抓不到，等一下再試') };
+  const buy = d.rows.filter((r) => r[who] > 0).sort((a, b) => b[who] - a[who]).slice(0, nBuy);
+  const sell = nSell ? d.rows.filter((r) => r[who] < 0).sort((a, b) => a[who] - b[who]).slice(0, nSell) : [];
+  const codes = buy.concat(sell).map((r) => r.code);
+  const wq = codes.length ? botFetchCache('wqInst|' + codes.join(','), '/api/watch-quotes?codes=' + encodeURIComponent(codes.join(',')), 30e3) : null;
+  const pctOf = (r) => {
+    const hq = getStockQuote(r.code), wx = wq && wq.quotes ? wq.quotes[r.code] : null;
+    const v = hq && Number.isFinite(hq.changePercent) ? hq.changePercent : wx && Number.isFinite(wx.changePercent) ? wx.changePercent : null;
+    return v !== null ? v : Number.isFinite(r.p) ? r.p : null;
+  };
+  return { d, buy, sell, pctOf, md: Number(d.date.slice(5, 7)) + '/' + Number(d.date.slice(8, 10)), partial: !!(d.markets && d.markets.length < 2) };
+}
+const instLots = (v) => (v > 0 ? '+' : v < 0 ? '-' : '') + Math.abs(v).toLocaleString('zh-TW') + '張';
+function homeInstColHtml(who){
+  const nm = who === 'f' ? '外資' : '投信', ic = who === 'f' ? '🌏' : '🏛️';
+  const L = instTopLists(who, 15, 0);
+  const head = (extra) => '<div class="hr-col"><div class="hr-title" title="' + nm + '買超張數前 15 名（上市＋上櫃）。法人資料收盤後才公布，開盤前、盤中看到的是前一個交易日的名單；漲跌幅是即時的、後面是盤中大戶力">' + ic + nm + '買超前15' + (extra || '') + '</div>';
+  if (L.wait) return head() + '<div class="hr-note">讀取中…</div></div>';
+  if (L.error) return head() + '<div class="hr-note">' + wlEsc(L.error) + '</div></div>';
+  return head(' <span class="hr-rk">' + L.md + '</span>') + (L.partial ? '<div class="hr-note">上櫃還沒公布，先列上市</div>' : '') +
+    (L.buy.length ? L.buy.map((r) => {
+      const pct = L.pctOf(r);
+      return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + nm + '買超 ' + instLots(r[who]) + '・' + L.md + '">' +
+        '<span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name) + '</span><span class="hr-rk">' + instLots(r[who]) + '</span>' +
+        '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span>' + homeHoldHtml(r.code) + '</div>';
+    }).join('') : '<div class="hr-note">這天沒有買超的股票</div>') + '</div>';
+}
 // 首頁第一欄最上面的今日強勢股（2026-10-15 使用者：放在 183 上面，訊號中心的分頁照留）：跟訊號中心「今日強勢股」同一份，
 // 族群分數前十大裡均線分數 ≥12、今天沒下跌的；每族一行族群名次，下面列代號、名稱、均線分數、今天漲跌幅。
 function homeStrongColHtml(){
@@ -10254,12 +10297,13 @@ function homeRank4Html(){
     // 2026-10-22 使用者：首頁的馬火多(30)、賽馬多(33)、河流多(34) 三欄拿掉（機器人代碼 30／33／34、訊號中心「盤中333」還在；30加33加34 照舊）
     '<div class="hr-stack">' +
       homeRedBox('<div class="hr-pinkname">' + homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : [], '', 'yel', true) + '</div>') +
+      homeInstColHtml('t') +   // 2026-11-05 使用者：30加33加34 下面（188 的位置）加投信買超前 15（機器人 98 同一份資料）；開盤前是前一個交易日的名單
       homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +   // 2026-11-04 使用者：188 跟今日強勢股對調，188 放 30加33加34 下面（原本 2026-10-21 在發動下面）
     '</div>' +
     // 2026-10-16 使用者：188 疊到昨日強勢股下面；283 自己一欄，放在右邊
     '<div class="hr-stack">' +
       homeRedBox(homeLaunchColHtml()) +   // 2026-10-18 使用者：昨日強勢股上面加發動；2026-10-21 使用者：首頁的今日強勢股拿掉（訊號中心的分頁還在）
-      homeRedBox(homeStrongColHtml()) +   // 2026-10-28 使用者：盤中訊號的今日強勢股放在 30加33加34 下面，紅框框起來（跟訊號中心今日強勢股同一份）   // 三欄（30、33、34）都有才算；33、34 只看族群前 HOME_334_TOP_GROUPS 名（2026-10-22 使用者：首頁的 30／33／34 三欄拿掉，只留這欄）   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34   // 2026-11-04 使用者：今日強勢股搬到發動下面（原本在 30加33加34 下面）
+      homeRedBox(homeStrongColHtml()) + homeInstColHtml('f') +   // 2026-11-05 使用者：今日強勢股下面放外資買超前 15（機器人 97 同一份資料）；2026-10-28 使用者：盤中訊號的今日強勢股放在 30加33加34 下面，紅框框起來（跟訊號中心今日強勢股同一份）   // 三欄（30、33、34）都有才算；33、34 只看族群前 HOME_334_TOP_GROUPS 名（2026-10-22 使用者：首頁的 30／33／34 三欄拿掉，只留這欄）   // 2026-10-20 使用者：30加33加34 改成 30加33；2026-10-21 使用者：又改回 30加33加34   // 2026-11-04 使用者：今日強勢股搬到發動下面（原本在 30加33加34 下面）
     '</div>' +
     // 2026-11-01 使用者：每日功課的「1+2 突破廣播」單獨一欄，放在發動右邊、多族群排名(183) 前面（905 先不做）
     '<div class="hr-stack">' + homeRedBox(home12BcastColHtml()) + '</div>' +
@@ -10319,6 +10363,8 @@ function homeRankFootHtml(total){
     ['📈 1+2 突破廣播', '跟訊號中心「1+2多」同一份：全市場今天第一次 5 分K 收盤，同時站上「905 高」（開盤第一根 5 分K，09:00～09:05 的最高價）和「昨日最高價」的股票，一檔一天一次。前面紫色是第一次發生的時間；「之上」（紅底）＝現在 5 分K 還收在線上、「之下」（綠底）＝突破後又收回線下；首頁留最新 20 檔，每日功課「1+2 突破」分頁全部列'],
     ['🎯 905 突破廣播', '只要 5 分K 收盤站上 905 高（不用站上昨高）就列一筆「突破」，時間就是突破的那一刻（只列今天漲幅 ≥ ' + TD905_PCT + '%、族群在多方區的，不然全市場太多）；等到<b>四個條件齊全</b>——① 當天第一次站上 905 高　② 盤中大戶力 ≥ +' + TD905_BIG + '%　③ 今天漲幅 ≥ ' + TD905_PCT + '%　④ 族群在多方區（族群名次前一半，跟當沖多同一個算法）——再列一筆「✅ 條件齊全」，時間是四個條件第一次同時成立的時間（例：09:40 突破、12:35 大戶力到 +10%，就是 09:40 一筆「突破」、12:35 一筆「條件齊全」）。名單照時間排、新的在上面；「之上／之下」跟 1+2 一樣；首頁留最新 ' + HOME905_MAX + ' 筆，每日功課「905 突破」分頁全部列；盤中要開著網頁才記得到，記在這台電腦（換一台電腦會從頭記）'],
     ['⭐ 今日強勢股', '跟訊號中心「今日強勢股」同一份，放在發動下面，紅框框起來；每一列漲跌幅後面是盤中大戶力'],
+    ['🏛️投信買超前15', '放在 30加33加34 下面（188 上面）：投信買超張數前 15 名（上市＋上櫃），每列是買超張數、今天即時漲跌幅、盤中大戶力（不在大戶力排行範圍的顯示 —）。<b>更新時間</b>：證交所三大法人買賣超約 15:00 後公布、櫃買中心通常更晚（上櫃還沒進來時欄位上方會寫「上櫃還沒公布」，先列上市），後端每 15 分鐘收一次；所以開盤前、盤中看到的是<b>前一個交易日</b>的名單（標題旁的日期就是資料日），收盤後新名單進來會自動換。機器人代碼 98 有投信買超、賣超各前十'],
+    ['🌏外資買超前15', '放在今日強勢股下面：外資買超張數前 15 名（上市＋上櫃），格式、更新時間跟投信買超前15 一樣。機器人代碼 97 有外資買超、賣超各前十；研究室的「外資買賣超」「投信買賣超」分頁可以選日期往回查、上市上櫃分開看'],
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的（在雙榜交集正下面）'],
     ['💰疑似主力融資買進', '放在第三欄、當沖多1 上面，加粗紅框：融資今天增加 ≥500 張＋今天盤中大單淨買超 ≥300 張（跟系統選股「疑似主力融資買進」同一組）。交易所不公開融資是誰借的，這只是疑似；資料是最新一個收完盤的交易日，盤中名單不會變。<b>更新時間</b>：證交所約 21:00 才公布當天融資融券，後端 21:00 起每 20 分鐘抓一次、網頁每 10 分鐘看一次，所以大約 <b>21:00～22:00</b> 當天的名單才會出來，在那之前（含盤中）看到的是前一個交易日的名單，融資還沒公布時會寫 0 檔；只有每一檔的漲跌幅會跟著即時報價（含 08:30 起的盤前試撮）跳。每列：代號、名稱、今天漲跌幅、盤中大戶力，下面一行是融資增加張數和大單淨買張數'],
@@ -18368,7 +18414,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・30加33加34／188・發動／今日強勢股・1+2 突破廣播・905 突破廣播・族群漲幅(12)／155／三落空・183</div></div>' +
+        '<div class="section-head"><div class="section-title">多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・30加33加34／投信買超前15・188／發動・今日強勢股／外資買超前15・1+2 突破廣播・905 突破廣播・族群漲幅(12)／155／三落空・183</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -21916,10 +21962,10 @@ const GUIDE_TOOLS = [
     b: ['一週出獄時間表、今日入獄、嫌疑名單門檻', '打代號查前科：以前被關過幾次'] },
   { t: '估值河流圖', label: '估值河流圖', v: 'tb-river', tags: ['盤後'], d: '把股價放進本益比河道裡，看現在是便宜、合理還是貴。',
     b: ['河道四區＋分水嶺', '「均線分數 ≥10 × 便宜區」清單：位置強又不貴的'] },
-  { t: '研究室', label: '研究室', v: 'tb-lab', tags: ['大方向'], d: '盤勢以外的大方向，六個分頁：',
+  { t: '研究室', label: '研究室', v: 'tb-lab', tags: ['大方向'], d: '盤勢以外的大方向，八個分頁：',
     b: ['🌐 國際大事行事曆：非農、CPI、聯準會……台灣時間幾點公布、前值預期公布值，附名詞小學堂', '🛡 資金保護傘：融資水位、加權／櫃買是否跌破月線季線，合成「收傘／備傘／半開／全開」',
       '📉 外資空單：外資台指期淨未平倉＋當日增減、外資買權／賣權、散戶小台／微台多空比、P/C、三大法人現貨買賣超（每天 15:40 更新）',
-      '👥 內部人：董監、經理人每月加碼減碼，疊上 400 張大戶比', '🎫 抽籤股：可以抽籤的新股、增資股，承銷價、收盤、獲利空間、抽籤日，還有最近的中籤率', '🕯️ K棒道場：五堂型態課（紅劍、黑豹、黑飛舞、三角收斂、穿山惡龍）＋10 題真實日K考試，答完還能跑圖看後 10 天'] },
+      '👥 內部人：董監、經理人每月加碼減碼，疊上 400 張大戶比', '🎫 抽籤股：可以抽籤的新股、增資股，承銷價、收盤、獲利空間、抽籤日，還有最近的中籤率', '🕯️ K棒道場：五堂型態課（紅劍、黑豹、黑飛舞、三角收斂、穿山惡龍）＋10 題真實日K考試，答完還能跑圖看後 10 天', '💹 外資買賣超／🏛️ 投信買賣超：全市場（上市＋上櫃）買超、賣超排行，每天收盤後更新；可以選日期往回查、上市上櫃分開看、只看「外資＋投信同買／同賣」，附連續買賣天數、近 5 日累計'] },
 ];
 const GUIDE_FAQ = [
   ['資料多久更新一次？', '盤中報價、訊號每 15 秒更新；盤後資料（法人、處置、融資、營收、集保）在官方公布後自動抓進來，各工具頁面上都有寫資料日期。休市日不更新，沿用上一個交易日。'],
@@ -22129,7 +22175,7 @@ document.getElementById('guideBody').addEventListener('click', (e) => {
 // ---- 研究室：國際大事行事曆（2026-10-10 使用者：照老師 zhuang.tw/calendar 做，含名詞小學堂）----
 // 後端 /api/macro-calendar：TradingView 經濟日曆（美／中／日／歐）每小時更新公布值，加台指期結算、美股季度結算、公司法說。
 // 版面照老師：頁首更新時間 → 下一件大事倒數 → 全部／★★ 以上／只看大事篩選 → 依週分段的事件（前值／預期／公布）→ 小學堂。
-const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘'], ['fut', '📉 外資空單'], ['insider', '👥 內部人'], ['ipo', '🎫 抽籤股'], ['dojo', '🕯️ K棒道場']];   // 2026-10-17 使用者：抽籤股放研究室   // 2026-10-15 使用者：外資空單放資金保護傘旁邊
+const LAB_TABS = [['cal', '🌐 國際大事行事曆'], ['fund', '🛡 資金保護傘'], ['fut', '📉 外資空單'], ['insider', '👥 內部人'], ['ipo', '🎫 抽籤股'], ['dojo', '🕯️ K棒道場'], ['finv', '💹 外資買賣超'], ['tinv', '🏛️ 投信買賣超']];   // 2026-11-05 使用者：研究室右邊加外資買賣超、投信買賣超兩個分頁   // 2026-10-17 使用者：抽籤股放研究室   // 2026-10-15 使用者：外資空單放資金保護傘旁邊
 const MC_FLAGS = { US: '🇺🇸', CN: '🇨🇳', JP: '🇯🇵', EU: '🇪🇺', TW: '🇹🇼' };
 const MC_FILTERS = [['all', '全部'], ['2', '★★ 以上'], ['3', '只看大事 ★★★']];
 const labState = { tab: (() => { try { const t = localStorage.getItem('labTab'); return LAB_TABS.some((x) => x[0] === t) ? t : 'cal'; } catch (_){ return 'cal'; } })(), timer: null };
@@ -22776,17 +22822,92 @@ function ipoHtml(){
     '資料來源：證交所公開申購公告、櫃買中心興櫃行情、Yahoo Finance。只是整理公開資料，不是投資建議。</div>';
   return html;
 }
+// ---- 研究室：外資買賣超、投信買賣超（2026-11-05 使用者）----
+// /api/inst-rank：全市場（上市＋上櫃）一般股票的外資、投信買賣超（張）。可選日期往回查、上市／上櫃分開看、
+// 只看「外資＋投信同買／同賣」。排序、篩選都在前端做，換日期才重新抓。
+const ivState = { data: null, date: '', loading: false, error: null, loadedAt: 0, top: 50, both: false,
+  mkt: (() => { try { const v = localStorage.getItem('ivMkt'); return v === 'TSE' || v === 'OTC' ? v : 'all'; } catch (_){ return 'all'; } })() };
+async function ivLoad(force){
+  const d = ivState.data;
+  // 最新一天還有市場沒進來（上櫃常比上市晚）就 2 分鐘重抓一次，其他 5 分鐘
+  const incomplete = !!(d && !ivState.date && d.markets && d.markets.length < 2);
+  if (ivState.loading || (d && !force && Date.now() - ivState.loadedAt < (incomplete ? 2 : 5) * 60e3)) return;
+  ivState.loading = true; ivState.error = null;
+  renderLab();
+  try {
+    const r = await fetch('/api/inst-rank' + (ivState.date ? '?date=' + encodeURIComponent(ivState.date) : ''), { cache: 'no-store' });
+    const j = await r.json();
+    if (j.status !== 'ok' && j.status !== 'empty') throw new Error(j.message || j.detail || 'HTTP ' + r.status);
+    ivState.data = j; ivState.loadedAt = Date.now();
+  } catch (err){ ivState.error = String((err && err.message) || err); }
+  ivState.loading = false;
+  renderLab();
+}
+// who：'f' 外資、't' 投信。主角欄放最前面，另一方放旁邊，方便對照「同買／同賣」
+function ivHtml(who){
+  const d = ivState.data;
+  if (!d) return ivState.error ? '<div class="race-note">讀取失敗：' + wlEsc(ivState.error) + ' <button type="button" class="chart-tab" data-iv-reload="1">重試</button></div>' : '<div class="race-note">讀取中…</div>';
+  const other = who === 'f' ? 't' : 'f', name = who === 'f' ? '外資' : '投信', oname = who === 'f' ? '投信' : '外資';
+  const md = (iso) => (iso ? Number(iso.slice(5, 7)) + '/' + Number(iso.slice(8, 10)) : '—');
+  const dates = d.dates || [];
+  const mktLabel = { TSE: '上市', OTC: '上櫃' };
+  const missing = (item) => ['TSE', 'OTC'].filter((m) => !(item.markets || []).includes(m)).map((m) => mktLabel[m]);
+  const sel = '<select id="ivDate" class="iv-date" aria-label="日期">' + dates.map((x) => '<option value="' + x.date + '"' + (x.date === d.date ? ' selected' : '') + '>' +
+    x.date.replace(/-/g, '/') + '（' + fcWdTxt(x.date) + '）' + (missing(x).length ? '・' + missing(x).join('、') + '未到' : '') + '</option>').join('') + '</select>';
+  const at = dates.findIndex((x) => x.date === d.date);
+  const bar = '<div class="fp-bar"><span class="fp-desc" style="margin:0">日期</span>' +
+    '<button type="button" data-iv-step="1"' + (at >= 0 && at < dates.length - 1 ? '' : ' disabled') + ' title="前一個交易日">◀</button>' + sel +
+    '<button type="button" data-iv-step="-1"' + (at > 0 ? '' : ' disabled') + ' title="後一個交易日">▶</button>' +
+    (at > 0 ? '<button type="button" data-iv-latest="1">回到最新</button>' : '') +
+    '<span class="fp-desc" style="margin:0 0 0 8px">市場</span>' + [['all', '全部'], ['TSE', '上市'], ['OTC', '上櫃']].map(([k, t]) => '<button type="button" class="' + (ivState.mkt === k ? 'on' : '') + '" data-iv-mkt="' + k + '">' + t + '</button>').join('') +
+    '<span class="fp-desc" style="margin:0 0 0 8px">篩選</span><button type="button" class="' + (ivState.both ? 'on' : '') + '" data-iv-both="1" title="買超榜只留外資、投信都買超；賣超榜只留兩邊都賣超">外資＋投信 同買／同賣</button>' +
+    '<span class="fp-desc" style="margin:0 0 0 8px">顯示</span>' + [30, 50, 100].map((n) => '<button type="button" class="' + (ivState.top === n ? 'on' : '') + '" data-iv-top="' + n + '">前 ' + n + '</button>').join('') + '</div>';
+  let html = '<div class="fc-paper"><span class="fp-tag">法人籌碼</span><div class="fp-h1">' + name + '買賣超排行</div>' +
+    '<div class="fp-meta">資料日 <b>' + d.date.replace(/-/g, '/') + '（' + fcWdTxt(d.date) + '）</b>・單位：張（1 張＝1,000 股）・證交所三大法人買賣超日報、櫃買中心 <button type="button" class="mc-reload" data-iv-reload="1" title="重新整理">↻</button></div>' + bar;
+  if (d.status !== 'ok'){
+    return html + '<div class="fp-note">這一天沒有法人資料（休市，或還沒收進來）。</div></div>';
+  }
+  const gone = missing({ markets: d.markets });
+  if (gone.length) html += '<div class="fp-note">⏳ ' + gone.join('、') + ' ' + md(d.date) + ' 的' + name + '買賣超還沒公布（櫃買中心資料通常比證交所晚，收進來會自動更新），先看' + (d.markets || []).map((m) => mktLabel[m]).join('、') + '。</div>';
+  const inMkt = d.rows.filter((r) => ivState.mkt === 'all' || r.mkt === ivState.mkt);
+  const buyAll = inMkt.filter((r) => r[who] > 0), sellAll = inMkt.filter((r) => r[who] < 0);
+  const both = (r, sign) => (sign > 0 ? r.f > 0 && r.t > 0 : r.f < 0 && r.t < 0);
+  const sameBuy = inMkt.filter((r) => both(r, 1)).length, sameSell = inMkt.filter((r) => both(r, -1)).length;
+  const sum = (list) => list.reduce((a, r) => a + r[who], 0);
+  html += '<div class="iv-sum"><span>' + name + '買超 <b class="up">' + buyAll.length + '</b> 檔・合計 <b class="up">' + fcSigned(sum(buyAll), 0, ' 張') + '</b></span>' +
+    '<span>賣超 <b class="down">' + sellAll.length + '</b> 檔・合計 <b class="down">' + fcSigned(sum(sellAll), 0, ' 張') + '</b></span>' +
+    '<span>外資＋投信同買 <b class="up">' + sameBuy + '</b> 檔</span><span>同賣 <b class="down">' + sameSell + '</b> 檔</span></div>';
+  const one = (title, sign) => {
+    let list = (sign > 0 ? buyAll : sellAll).filter((r) => !ivState.both || both(r, sign));
+    list = list.sort((a, b) => sign * (b[who] - a[who])).slice(0, ivState.top);
+    const cell = (v) => '<td class="num ' + fcCls(v) + '">' + fcSigned(v, 0, '') + '</td>';
+    const streak = (v) => '<td class="num ' + fcCls(v) + '">' + (v ? (v > 0 ? '連買 ' : '連賣 ') + Math.abs(v) : '—') + '</td>';
+    const rows = list.map((r, i) => '<tr><td class="num iv-rk">' + (i + 1) + '</td><td class="iv-st"><span class="rm-code" data-iv-code="' + wlEsc(r.code) + '" data-iv-name="' + wlEsc(r.name) + '">' + wlEsc(r.code) + '</span> ' +
+      wlEsc(r.name) + (r.mkt === 'OTC' ? ' <small class="iv-otc">櫃</small>' : '') + (r.g ? ' <small class="rm-none">' + wlEsc(r.g) + '</small>' : '') + '</td>' +
+      '<td class="num iv-main ' + fcCls(r[who]) + '"><b>' + fcSigned(r[who], 0, '') + '</b></td>' + cell(r[other]) + streak(r[who + 's']) + cell(r[who + '5']) +
+      '<td class="num">' + (r.c === null || r.c === undefined ? '—' : fuNum(r.c, r.c < 100 ? 2 : 1)) + '</td>' +
+      '<td class="num ' + fcCls(r.p) + '">' + (r.p === null || r.p === undefined ? '—' : fcSigned(r.p, 2, '%')) + '</td></tr>').join('');
+    return '<div class="iv-col"><div class="fp-h4 ' + (sign > 0 ? 'up' : 'down') + '">' + title + ' <small class="rm-none">' + list.length + ' 檔' + (ivState.both ? '（外資＋投信同' + (sign > 0 ? '買' : '賣') + '）' : '') + '</small></div>' +
+      (list.length ? '<div class="fp-scroll"><table class="fp-rel iv-tbl"><thead><tr><th class="num">#</th><th>股票</th><th class="num">' + name + '</th><th class="num">' + oname + '</th><th class="num">' + name + '連續</th><th class="num">近 5 日</th><th class="num">收盤</th><th class="num">漲跌</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+        : '<div class="race-note">沒有符合的股票</div>') + '</div>';
+  };
+  html += '<div class="iv-grid">' + one(name + '買超排行', 1) + one(name + '賣超排行', -1) + '</div>';
+  html += '<div class="fp-foot">範圍是全市場一般股票（4 碼數字；ETF、特別股、權證不算）。外資含外資自營商、不含陸資以外的其他分類。「' + name + '連續」＝到所選日期為止連續買超（賣超）的天數；「近 5 日」＝所選日期起算 5 個交易日的累計（張）；' +
+    '「櫃」＝上櫃，其餘是上市。上櫃的資料來自櫃買中心，通常比上市晚一些才進來。往回查的日期最多到本站有存的那天。只是整理公開資料，不是投資建議。</div></div>';
+  return html;
+}
 function renderLab(){
   const body = document.getElementById('labBody');
   if (!body || document.getElementById('labModal').hidden) return;
+  if (document.activeElement && document.activeElement.id === 'ivDate') return;   // 日期下拉選單開著時不重畫（每分鐘的更新會把選單收掉）
   const pastOpen = !!body.querySelector('details.mc-pastweek[open]');
   const callsOpen = [...body.querySelectorAll('details[data-mc-calls][open]')].map((x) => x.dataset.mcCalls);
   body.innerHTML = '<div class="hw-tabs">' + LAB_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (labState.tab === k ? ' active' : '') + '" data-lab-tab="' + k + '">' + label + '</button>').join('') + '</div>' +
-    (labState.tab === 'fund' ? fuHtml() : labState.tab === 'fut' ? fcHtml() : labState.tab === 'insider' ? inHtml() : labState.tab === 'ipo' ? ipoHtml() : mcCalendarHtml());
+    (labState.tab === 'fund' ? fuHtml() : labState.tab === 'fut' ? fcHtml() : labState.tab === 'insider' ? inHtml() : labState.tab === 'ipo' ? ipoHtml() : labState.tab === 'finv' || labState.tab === 'tinv' ? ivHtml(labState.tab === 'finv' ? 'f' : 't') : mcCalendarHtml());
   if (pastOpen){ const det = body.querySelector('details.mc-pastweek'); if (det) det.open = true; }
   body.querySelectorAll('details[data-mc-calls]').forEach((x) => { if (callsOpen.includes(x.dataset.mcCalls)) x.open = true; });
 }
-function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else if (labState.tab === 'fut') fcLoad(false); else if (labState.tab === 'insider') inLoad(false); else if (labState.tab === 'ipo') ipoLoad(false); else mcLoad(false); }
+function labLoad(){ if (labState.tab === 'fund') fuLoad(false); else if (labState.tab === 'fut') fcLoad(false); else if (labState.tab === 'insider') inLoad(false); else if (labState.tab === 'ipo') ipoLoad(false); else if (labState.tab === 'finv' || labState.tab === 'tinv') ivLoad(false); else mcLoad(false); }
 // ===== K 棒型態道場（2026-10-30 使用者：照老師 zhuang.tw/kbar 做第一版）=====
 // 後端 /api/kbar-dojo/lessons、/api/kbar-dojo/quiz：用我們自己的日K歷史（還原後）掃出五種型態的真實案例；型態的量化條件是示範值，文字是我們自己寫的。
 const DOJO_PATS = [
@@ -23173,6 +23294,8 @@ document.getElementById('labModal').addEventListener('click', (e) => { if (e.tar
 document.getElementById('labBody').addEventListener('change', (e) => {
   const sel = e.target.closest('#inMonth');
   if (sel){ inState.month = sel.value; inLoad(true); }
+  const ivd = e.target.closest('#ivDate');
+  if (ivd){ const first = ivState.data && ivState.data.dates && ivState.data.dates[0]; ivState.date = first && first.date === ivd.value ? '' : ivd.value; ivd.blur(); ivLoad(true); }
 });
 // 外資空單的圖：滑鼠移到圖上看當天數字，移開就收
 document.getElementById('labBody').addEventListener('pointermove', (e) => {
@@ -23199,6 +23322,21 @@ document.getElementById('labBody').addEventListener('click', (e) => {
   if (tab){ labState.tab = tab.dataset.labTab; try { localStorage.setItem('labTab', labState.tab); } catch (_){} renderLab(); labLoad(); return; }
   if (t.closest('[data-fu-reload]')){ fuLoad(true); return; }
   if (t.closest('[data-ipo-reload]')){ ipoLoad(true); return; }
+  if (t.closest('[data-iv-reload]')){ ivLoad(true); return; }
+  const ivm = t.closest('[data-iv-mkt]');
+  if (ivm){ ivState.mkt = ivm.dataset.ivMkt; try { localStorage.setItem('ivMkt', ivState.mkt); } catch (_){} renderLab(); return; }
+  if (t.closest('[data-iv-both]')){ ivState.both = !ivState.both; renderLab(); return; }
+  const ivt = t.closest('[data-iv-top]');
+  if (ivt){ ivState.top = Number(ivt.dataset.ivTop) || 50; renderLab(); return; }
+  if (t.closest('[data-iv-latest]')){ ivState.date = ''; ivLoad(true); return; }
+  const ivs = t.closest('[data-iv-step]');
+  if (ivs && !ivs.disabled){   // 日期往前／往後一個交易日（dates 新的在前：+1＝更舊）
+    const list = (ivState.data && ivState.data.dates) || [], i = list.findIndex((x) => x.date === ivState.data.date), j = i + Number(ivs.dataset.ivStep);
+    if (i >= 0 && list[j]){ ivState.date = j === 0 ? '' : list[j].date; ivLoad(true); }
+    return;
+  }
+  const ivc = t.closest('[data-iv-code]');
+  if (ivc){ openStockChart(ivc.dataset.ivCode, ivc.dataset.ivName); return; }
   const ipoc = t.closest('[data-ipo-code]');
   if (ipoc){ openStockChart(ipoc.dataset.ipoCode, ipoc.dataset.ipoName); return; }
   if (t.closest('[data-fc-reload]')){ fcLoad(true); return; }
@@ -24572,7 +24710,7 @@ const BOT_CODES = [
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖雙週入榜黑龍：前兩個交易日上 811、今天收黑K（⭐＝兩週內又上榜幾次）'],
   ['81', '隔日沖買超排序（每天六點後更新）'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
-  ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
+  ['97', '外資買賣超前十大：買超、賣超各前十，每檔列張數、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：買超、賣超各前十，格式同 97'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
   ['2359', '股號或族群名：那族漲幅排行'], ['2359m', '那檔當天的隔日沖買賣超（2359m1＝前一天，最多 2359m9）'], ['235984', '那族的籌碼暴增排序（族群名＋84 也可以，例：低軌衛星84）'], ['2359g', '那檔過去五週籌碼增減%'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
 ];
 const botPct = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
@@ -25336,6 +25474,19 @@ function botAnswer(raw){
     const pctOf = (e) => { const qq = getStockQuote(e.code); const v = qq && Number.isFinite(qq.changePercent) ? qq.changePercent : [e.changePercent, e.pct, e.changePct].find((x) => Number.isFinite(x)); return Number.isFinite(v) ? v : null; };
     return wrap('1+2 多・突破黑馬(44)', rows.map((e) => { const v = pctOf(e); return botLine('<span style="color:#a78bfa;font-variant-numeric:tabular-nums">' + wlEsc(e.time || '--:--') + '</span> ' +
       botStk(e.code, e.name, v === null ? '' : ' <span class="' + dirClass(v) + '">' + botPct(v) + '</span>')); }).join('') || botLine('今天還沒有', 'bot-dim'), stamp + '・跟訊號中心「1+2多」同一份');
+  }
+  if (q === '97' || q === '98'){
+    // 2026-11-05 使用者：97＝外資買賣超前十大、98＝投信買賣超前十名；每檔除了漲跌幅，還要有大戶力。法人資料收盤後才公布，開盤前、盤中是前一個交易日的名單
+    const who = q === '97' ? 'f' : 't', nm = q === '97' ? '外資' : '投信', t = nm + '買賣超前十大(' + q + ')';
+    const L = instTopLists(who, 10, 10);
+    if (L.wait) return wrap(t, botLine('讀取中…', 'bot-dim'));
+    if (L.error) return wrap(t, botLine(L.error, 'bot-dim'));
+    const row = (r, i) => { const pct = L.pctOf(r);
+      return botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r[who]) + '">' + instLots(r[who]) + '</span> <span class="' + (pct === null ? 'bot-dim' : dirClass(pct)) + '">' + (pct === null ? '—' : botPct(pct)) + '</span>') + '</span><span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow'); };
+    return wrap(t, botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + botLine(nm + '買超前十', 'bot-head') + (L.buy.map(row).join('') || botLine('這天沒有', 'bot-dim')) +
+      botLine('------↓(' + nm + '賣超前十)↓------', 'bot-sep') + (L.sell.map(row).join('') || botLine('這天沒有', 'bot-dim')) +
+      botLine((L.partial ? '上櫃還沒公布，先列上市；' : '') + '張數＝' + nm + '買賣超（上市＋上櫃）；漲跌幅是即時；大戶力是盤中大戶力（不在大戶力排行範圍的顯示 —）', 'bot-dim'),
+      L.md + ' 收盤後資料（開盤前、盤中是前一個交易日）');
   }
   if (q === '84'){
     // 2026-10-29 照老師「籌碼暴增排序(84) 10/22」：買超榜（籌碼 % 一位小數）、SEP賣超、賣超榜；賣超榜股名後面的 ⭐＝往前連續幾週也在賣超榜
