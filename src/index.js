@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 08:51:32";
+const BUILD_STAMP = "2026-11-05 14:51:41";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -475,6 +475,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .cm-groups:empty{display:none;}
   .cm-group-tag{background:#7c3aed;color:#fff;font-size:12px;font-weight:700;border-radius:5px;padding:1px 7px;white-space:nowrap;}   /* 族群：紫底白字 */
   .cm-group-tag.cm-dt-tag{background:#ea580c;cursor:pointer;}   /* 2026-10-17 使用者：最近一份 811 有這檔就標「⚡隔日沖 %」，橘底白字，點了看隔日沖分點 */
+  .cm-data-badge.nodata{color:#fff;background:#dc2626;border-color:#dc2626;}
   .cm-data-badge{margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;vertical-align:middle;}
   .chart-info-bar{flex:1 1 100%;order:3;text-align:left;padding:0 2px;font-size:19px;font-weight:700;color:#fff5e0;font-variant-numeric:tabular-nums;}   /* 2026-10-28 使用者：資訊列兩行放在股名下面（原本夾在股名跟右邊按鈕中間、窄了就亂換行） */
   .chart-info-bar .cib-row{line-height:1.5;}
@@ -6310,7 +6311,8 @@ async function fetchRealBars(code, tf){
 // 後端主力大單的真正門檻（單筆成交 ≥ 幾張），從主力副圖 API 帶回來，副圖說明照這個寫，不再寫死示範文字。
 let mainForceMinLots = null;
 function forceNoteText(isReal){
-  if (!isReal) return '示範資料：後端連不上或這檔還沒有主力資料，先用模擬數字展示介面';
+  // 2026-11-05 使用者：K 線圖寫 00050 示範資料（0050 打成 00050）。查無這個代號和後端連不上要分開講，別都寫「示範資料」
+  if (!isReal) return currentChart.noData ? '查無這個代號的資料（代號打錯了嗎？例如 0050 不要打成 00050）。畫面是示範圖，不是真的行情' : '示範資料：後端暫時連不上，先用模擬數字展示介面，過一會兒重新整理';
   if (forceAlgo === 'teacher') return '大戶定義（老師版）：同一秒、同方向的成交併成一筆，滿 7 張算大戶；開盤第一筆一律算大戶賣（永豐逐筆成交，買進為正、賣出為負）。2026-10-19 起才有這份資料，更早的日子請切「單筆 20 張」';
   if (Number.isFinite(mainForceMinLots) && mainForceMinLots > 0) return '大戶定義：單筆成交 ≥ ' + mainForceMinLots + ' 張（永豐逐筆成交即時統計，買進為正、賣出為負）';
   return '大戶定義：單筆大單逐筆統計（永豐逐筆成交即時資料，門檻由後端設定）';
@@ -6656,17 +6658,30 @@ async function switchTimeframe(tf){
   let bars = null;
   let isReal = false;
   let livePromise = null;
+  let failErr = null;
   if (tf === 'm5'){
-    try { bars = await fetchRealBars5Range(currentChart.code); isReal = true; } catch (e) { bars = null; }
+    try { bars = await fetchRealBars5Range(currentChart.code); isReal = true; } catch (e) { bars = null; failErr = e; }
   } else if (tf === 'm1'){
-    try { bars = await fetchRealBars1Range(currentChart.code); isReal = true; } catch (e) { bars = null; }
+    try { bars = await fetchRealBars1Range(currentChart.code); isReal = true; } catch (e) { bars = null; failErr = e; }
   } else if (tf === 'daily'){
     // 官方日K先畫出來（不等即時報價，切到日線不會卡住幾秒）；即時報價同時去抓，回來後把今天盤中那根接上去
     // （見 fetchLiveDailyBar／applyLiveDailyBar）。
     livePromise = fetchLiveDailyBar(currentChart.code);
-    try { bars = await fetchRealDailyBars(currentChart.code); isReal = true; } catch (e) { bars = null; }
+    try { bars = await fetchRealDailyBars(currentChart.code); isReal = true; } catch (e) { bars = null; failErr = e; }
   }
   if (requestToken !== currentChart.requestToken) return; // 使用者已切到別的分頁/個股，這次結果作廢
+  if (!bars && tf !== 'daily' && !isIdxCode(currentChart.code)){
+    // 2026-11-05 使用者：K 線圖變示範資料。5 分K／1 分K 拿不到但日線有真資料，就改開日線，不要拿模擬的 K 棒給人看
+    try {
+      await fetchRealDailyBars(currentChart.code);
+      if (requestToken !== currentChart.requestToken) return;
+      showToast('這檔目前沒有 ' + (tf === 'm1' ? '1' : '5') + ' 分K資料，先顯示日線');
+      return switchTimeframe('daily');
+    } catch (e) { failErr = e; }
+    if (requestToken !== currentChart.requestToken) return;
+  }
+  // 查無資料（後端有回應但這個代號是空的）和後端連不上要分開講
+  currentChart.noData = !bars && !!failErr && /http 404|empty/.test(String(failErr.message || ''));
   if (!bars) bars = generateOHLC(currentChart.code, tf);
   currentChart.bars = bars;
   currentChart.isRealBars = isReal;
@@ -6680,7 +6695,10 @@ async function switchTimeframe(tf){
     }).catch(() => {});
   }
 
-  document.getElementById('cmDataBadge').hidden = isReal;
+  const dataBadge = document.getElementById('cmDataBadge');
+  dataBadge.hidden = isReal;
+  dataBadge.textContent = currentChart.noData ? '查無資料・示範圖' : '示範資料';
+  dataBadge.classList.toggle('nodata', !!currentChart.noData);
   document.getElementById('forceNote').textContent = forceNoteText(isReal);
 
   if (isReal){
@@ -6809,7 +6827,7 @@ function openChartWindow(code, name, tf, focusPat){
   el.className = 'chart-float';
   el.style.cssText = 'left:' + left + 'px;top:' + top + 'px;width:' + w + 'px;height:' + h + 'px;';
   el.innerHTML = '<div class="chart-float-head">' +
-      '<div class="chart-float-title">' + chartCodeLabel(code) + '<span class="cf-name">' + (isIdxCode(code) ? IDX_CHARTS[code].name : (name || '')) + '</span></div>' +
+      '<div class="chart-float-title">' + chartCodeLabel(code) + '<span class="cf-name">' + (isIdxCode(code) ? IDX_CHARTS[code].name : (name && name !== code ? name : '')) + '</span></div>' +
       '<div class="chart-float-actions">' +
         '<button type="button" data-act="popout" title="移到另一螢幕">⧉ 另開視窗</button>' +
         '<button type="button" data-act="min" title="最小化" aria-label="最小化">－</button>' +
@@ -6826,7 +6844,7 @@ function openChartWindow(code, name, tf, focusPat){
   el.querySelector('[data-act="min"]').addEventListener('click', () => minimizeChartWindow(id));
   el.querySelector('[data-act="max"]').addEventListener('click', () => toggleMaximizeChartWindow(id));
   el.querySelector('[data-act="popout"]').addEventListener('click', () => {
-    const popup = window.open(chartEmbedUrl(code, name, tf, focusPat), 'hanstockChart_' + code, 'width=1100,height=760');
+    const popup = window.open(chartEmbedUrl(win.code, win.name, tf, focusPat), 'hanstockChart_' + win.code, 'width=1100,height=760');
     if (popup){ popup.focus(); closeChartWindow(id); }
   });
   const head = el.querySelector('.chart-float-head');
@@ -6956,6 +6974,14 @@ window.addEventListener('message', (e) => {
     openBotPanel();
   } else if (e.data.type === 'hanstockChartFocus'){
     chartWindows.forEach((w) => { if (w.iframe.contentWindow === e.source) bringChartWindowToFront(w); });
+  } else if (e.data.type === 'hanstockChartTitle' && typeof e.data.code === 'string'){   // 視窗裡換股票：標題、記的代號跟著換
+    chartWindows.forEach((w) => {
+      if (w.iframe.contentWindow !== e.source) return;
+      w.code = e.data.code; w.name = String(e.data.name || '');
+      const t = w.el.querySelector('.chart-float-title');
+      if (t){ t.textContent = chartCodeLabel(w.code); if (w.name && w.name !== w.code){ const sp = document.createElement('span'); sp.className = 'cf-name'; sp.textContent = w.name; t.appendChild(sp); } }
+      w.iframe.title = w.code + ' K線圖';
+    });
   }
 });
 
@@ -7018,6 +7044,9 @@ function openStockChart(code, name, tf, focusPat){   // focusPat：形態名稱�
     panel.style.left = Math.max(0, (window.innerWidth - w) / 2) + 'px';
     panel.style.top = Math.max(10, (window.innerHeight - h) / 2) + 'px';
     attachChartInteraction();
+  }
+  if (CHART_WINDOW_MODE && window.parent !== window){   // 浮動視窗裡換了股票：通知父頁，標題列跟著換（不然標題還寫舊的那檔）
+    try { window.parent.postMessage({ type: 'hanstockChartTitle', code, name: isIdxCode(code) ? IDX_CHARTS[code].name : (name || '') }, location.origin); } catch (_){}
   }
   switchTimeframe(tf || 'm5');
 }
@@ -17342,7 +17371,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 08:51:32';
+const BUILD_STAMP = '2026-11-05 14:51:41';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18553,13 +18582,35 @@ document.getElementById('chartTabs').addEventListener('click', (e) => {
 window.addEventListener('resize', redrawAll);
 initWindowChrome();
 
+// 2026-11-05 使用者：K 線圖打 00050 → 整張示範資料（真正的是 0050）。族群裡沒有的代號先問後端有沒有日K：
+// 有→照開；空的→多打一個 0 就去掉再試（00050→0050）；還是空的就跟使用者說查無，不開假圖；後端連不上就照開（圖裡會寫連不上）。
+async function resolveChartStock(s){
+  if (!s || s.name !== s.code || isIdxCode(s.code)) return { stock: s };   // 族群裡有名字的股票一定存在
+  const probe = async (c) => {
+    try { await fetchRealDailyBars(c); return 'ok'; } catch (e) { return /http 404|empty/.test(String(e && e.message)) ? 'none' : 'err'; }
+  };
+  const st = await probe(s.code);
+  if (st !== 'none') return { stock: s };
+  if (/^0\\d{4}[A-Z]?$/.test(s.code)){
+    const alt = s.code.slice(1);
+    if (await probe(alt) === 'ok') return { stock: { code: alt, name: alt }, fixedFrom: s.code };
+  }
+  return { stock: null, missing: s.code };
+}
+async function openStockFromSearch(s, tf){
+  const r = await resolveChartStock(s);
+  if (!r.stock){ showToast('查無代號 ' + r.missing + ' 的資料，請確認有沒有打錯'); return false; }
+  if (r.fixedFrom) showToast('沒有 ' + r.fixedFrom + ' 這個代號，改開 ' + r.stock.code);
+  openStockChart(r.stock.code, r.stock.name, tf);
+  return true;
+}
 function triggerHomeStockSearch(){
   const input = document.getElementById('stockSearchInput');
   const hint = document.getElementById('stockSearchHint');
   const s = findStockByQuery(input.value);
   if (s){
     hint.hidden = true;
-    openStockChart(s.code, s.name);
+    openStockFromSearch(s);
   } else {
     hint.hidden = false;
   }
@@ -18573,7 +18624,7 @@ function triggerChartQuickSearch(){
   const s = findStockByQuery(input.value);
   if (s){
     input.value = '';
-    openStockChart(s.code, s.name, currentChart.tf);
+    openStockFromSearch(s, currentChart.tf);
   } else {
     showToast('查無此股票');
   }
