@@ -514,7 +514,7 @@ async function txfMis(endpoint, body, ttlMs) {
 // 2026-11-05 使用者提供的行情網站 TradingView：它網頁自己用的公開行情掃描介面（不用登入，一次問全部）。
 // 日經 TVC:NI225、韓國 TVC:KOSPI、那斯達克 TVC:IXIC、費半 TVC:SOX 是即時（streaming）；道瓊 DJ:DJI 匿名只有延遲 10 分、台積電 ADR NYSE:TSM 延遲 15 分，
 // 所以每個指數把 Yahoo 和 TradingView 的「最新價時間」比，誰新用誰（延遲的那個時間舊，自然輸給 Yahoo）。TradingView 沒有官方免費資料 API，這是非官方介面，失敗就回空、照用 Yahoo。
-const TV_SYMS = { n225: "TVC:NI225", kospi: "TVC:KOSPI", dji: "DJ:DJI", ixic: "TVC:IXIC", sox: "TVC:SOX", tsm: "NYSE:TSM", hsi: "TVC:HSI" };
+const TV_SYMS = { n225: "TVC:NI225", kospi: "TVC:KOSPI", dji: "DJ:DJI", ixic: "TVC:IXIC", sox: "TVC:SOX", tsm: "NYSE:TSM", hsi: "TVC:HSI", tnx: "TVC:US10Y" };   // 美國 10 年期公債殖利率：TVC:US10Y 即時（債券市場幾乎 24 小時），Yahoo ^TNX 只有芝加哥選擇權交易所的時段
 async function tvQuotes() {
   const cache = (globalThis.__tvQ = globalThis.__tvQ || {});
   if (cache.at && Date.now() - cache.at < 3000 && cache.data) return cache.data;   // 同一個 isolate 3 秒內共用，不是每個瀏覽器都打一次
@@ -539,7 +539,7 @@ async function tvQuotes() {
     return {};
   }
 }
-const TV_TZ = { n225: "Asia/Tokyo", kospi: "Asia/Seoul", dji: "America/New_York", ixic: "America/New_York", sox: "America/New_York", tsm: "America/New_York", hsi: "Asia/Hong_Kong" };
+const TV_TZ = { n225: "Asia/Tokyo", kospi: "Asia/Seoul", dji: "America/New_York", ixic: "America/New_York", sox: "America/New_York", tsm: "America/New_York", hsi: "Asia/Hong_Kong", tnx: "America/New_York" };
 function tvExDay(sec, id) {   // 這個市場自己的日期 YYYY-MM-DD
   return new Intl.DateTimeFormat("en-CA", { timeZone: TV_TZ[id] || "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(sec * 1000));
 }
@@ -1153,7 +1153,7 @@ export default {
     if (url.pathname === "/api/world-idx") {
       // 首頁右上角國際指數框（2026-11-05 使用者）：日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體。Yahoo 圖表 API 的日線（近 5 天）取最新價、前一日收盤，Cloudflare 快取 15 秒。
       // live＝現在在這個市場的正常交易時段內、而且最新價是 30 分鐘內的；不是就當收盤（前端寫「11/05 收盤」）
-      const LIST = [["n225", "^N225", "日經 225"], ["kospi", "^KS11", "韓國 KOSPI"], ["dji", "^DJI", "道瓊工業"], ["ixic", "^IXIC", "那斯達克"], ["sox", "^SOX", "費城半導體"], ["tsm", "TSM", "台積電 ADR"], ["hsi", "^HSI", "恒生指數"]];
+      const LIST = [["n225", "^N225", "日經 225"], ["kospi", "^KS11", "韓國 KOSPI"], ["dji", "^DJI", "道瓊工業"], ["ixic", "^IXIC", "那斯達克"], ["sox", "^SOX", "費城半導體"], ["tsm", "TSM", "台積電 ADR"], ["hsi", "^HSI", "恒生指數"], ["tnx", "^TNX", "美國10年期公債殖利率"]];
       // 2026-11-05 使用者：這幾個都要即時行情（有開盤、有在交易就要一直跳）。國際版 Yahoo 和台灣版 Yahoo（同一個來源、不同快取）一起問，取「最新價時間」較新的那個；
       // 快取只留 5 秒（Cloudflare 不快取失敗的）。日經、韓國的行情 Yahoo 可能被交易所限制延遲，所以回傳 time（最新價的時間），前端會寫資料時間、落後就標「慢 N 分」
       const twTick = async (sym) => {
@@ -1192,7 +1192,8 @@ export default {
           const prev = n >= 2 && closes[n - 1].day === rmDay ? closes[n - 2].close : n >= 1 && closes[n - 1].day < rmDay ? closes[n - 1].close : Number(meta.chartPreviousClose);
           const reg = (meta.currentTradingPeriod && meta.currentTradingPeriod.regular) || {};
           const nowS = Math.floor(Date.now() / 1000);
-          const live = Number.isFinite(reg.start) && Number.isFinite(reg.end) && nowS >= reg.start && nowS <= reg.end;   // 正常交易時段內就算盤中；最新價落後多久由前端看 time 自己標
+          const tvFresh = src.indexOf("tv:") === 0 && nowS - rm < 120;   // TradingView 即時價 2 分鐘內有更新＝正在交易（公債殖利率不在 Yahoo 的時段裡也在跳）
+          const live = tvFresh || (Number.isFinite(reg.start) && Number.isFinite(reg.end) && nowS >= reg.start && nowS <= reg.end);   // 正常交易時段內就算盤中；最新價落後多久由前端看 time 自己標
           const prevUse = Number.isFinite(tvPrev) && tvPrev > 0 ? tvPrev : prev;
           const change = Number.isFinite(prevUse) && prevUse > 0 ? price - prevUse : null;
           return [id, { name, price, prev: prevUse, change, pct: change !== null ? (change / prevUse) * 100 : null, time: rm, day: rmDay, live, src }];
@@ -1612,7 +1613,7 @@ export default {
       const tf = url.searchParams.get("tf") || "5m";
       try {
         // 2026-11-05 使用者：右上角加日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體，點開也要有 K 線圖（日線、5 分、1 分）→ 都用 Yahoo（跟加權一樣的格式）
-        const WORLD_IDX = { n225: "^N225", kospi: "^KS11", dji: "^DJI", ixic: "^IXIC", sox: "^SOX", tsm: "TSM", hsi: "^HSI" };
+        const WORLD_IDX = { n225: "^N225", kospi: "^KS11", dji: "^DJI", ixic: "^IXIC", sox: "^SOX", tsm: "TSM", hsi: "^HSI", tnx: "^TNX" };   // tnx＝美國 10 年期公債殖利率（%）
         const FUT_BAR = idxId.indexOf("fut") === 0 ? FUT_SINA[idxId.slice(3)] : null;   // futym／futnq／futnk／futhsi：期貨 K 線（新浪）   // tsm＝台積電在美國掛牌的 ADR（紐約證交所 TSM，1 ADR＝5 股）
         if ((idxId !== "taiex" && idxId !== "otc" && idxId !== "txf" && !WORLD_IDX[idxId] && !FUT_BAR) || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
         const taipeiDay = (sec) => new Date((sec + 8 * 3600) * 1000).toISOString().slice(0, 10);

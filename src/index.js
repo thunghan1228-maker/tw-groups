@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 17:30:23";
+const BUILD_STAMP = "2026-11-05 17:36:04";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -618,7 +618,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .mkt-row1 > .tx-chip{width:auto;flex:1 1 290px;max-width:340px;min-width:220px;align-self:stretch;}
   .mkt-row1 > #otcStrengthBox{flex:1 1 360px;max-width:none;align-self:stretch;}
   .mkt-row1 > .txf-box{flex:1 1 250px;max-width:300px;min-width:200px;align-self:stretch;}
-  .mkt-world{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;}
+  .mkt-world{flex:1 1 100%;max-width:none;min-width:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;} @media (min-width: 1560px){ .mkt-world{grid-template-columns:repeat(8,minmax(0,1fr));} }   /* 國際行情那排放在整個標題列下面、全寬，8 格等寬 */
   .mkt-world .mk-box{max-width:none;min-width:0;flex:none;align-self:stretch;border-left:4px solid var(--muted);padding:5px 10px;}
   .mkt-world .mk-box.up{border-left-color:#ef4444;} .mkt-world .mk-box.dn{border-left-color:#22c55e;}
   .mkt-world .mk-box .txf-l1{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;} .mkt-world .mk-box .txf-l2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -4052,6 +4052,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
     <div class="market-strength-bar" id="otcStrengthBox"></div>
     <div class="market-strength-bar txf-box" id="txfBox" title="台指期近月（期交所日盤即時，每 20 秒更新）・點一下看 K 線圖"><span class="txf-l1"><b>台指期近月</b><small class="txf-sess">（日盤）</small>　讀取中…</span></div>  <!-- 2026-10-29 使用者：個股震盪右邊空白處加台指期近月：價位、漲跌點數、漲跌幅，漲紅跌綠平盤白字 -->
     </div>
+    </div>
     <div class="mkt-world" id="mktWorld" aria-label="國際指數">
       <div class="market-strength-bar txf-box mk-box" id="mkN225" data-wcode="IDX_N225" data-wname="日經 225" data-wshort="日經 225" role="button" tabindex="0"><span class="txf-l1"><b>日經 225</b>　讀取中…</span></div>
       <div class="market-strength-bar txf-box mk-box" id="mkKOSPI" data-wcode="IDX_KOSPI" data-wname="韓國 KOSPI" data-wshort="韓國 KOSPI" role="button" tabindex="0"><span class="txf-l1"><b>韓國 KOSPI</b>　讀取中…</span></div>
@@ -4060,8 +4061,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <div class="market-strength-bar txf-box mk-box" id="mkIXIC" data-wcode="IDX_IXIC" data-wname="那斯達克" data-wshort="那斯達克" role="button" tabindex="0"><span class="txf-l1"><b>那斯達克</b>　讀取中…</span></div>
       <div class="market-strength-bar txf-box mk-box" id="mkSOX" data-wcode="IDX_SOX" data-wname="費城半導體" data-wshort="費半" role="button" tabindex="0"><span class="txf-l1"><b>費半</b>　讀取中…</span></div>
       <div class="market-strength-bar txf-box mk-box" id="mkTSM" data-wcode="IDX_TSM" data-wname="台積電 ADR" data-wshort="台積電 ADR" role="button" tabindex="0" title="台積電在美國掛牌的 ADR（紐約證交所 TSM，1 ADR＝5 股台積電）"><span class="txf-l1"><b>台積電 ADR</b>　讀取中…</span></div>
+      <div class="market-strength-bar txf-box mk-box" id="mkTNX" data-wcode="IDX_TNX" data-wname="美國10年期公債殖利率" data-wshort="美債10年期" role="button" tabindex="0" title="美國10年期公債殖利率（%）"><span class="txf-l1"><b>美債10年期</b>　讀取中…</span></div>
     </div>  <!-- 2026-11-05 使用者：右上角整排重排——第一排加權、櫃買、台指期近月；第二排日經、韓國、恒生、道瓊、那斯達克、費半、台積電 ADR，點一下都開 K 線圖 -->
-    </div>
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle guide-btn" id="czBtn" title="自訂畫面：選擇哪些按鈕要留著、哪些收起來（畫面比較精簡）">⊙ 自訂</button>  <!-- 2026-10-23 使用者：照莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，勾掉就收起來；全部顯示一鍵復原 -->
@@ -5214,16 +5215,16 @@ function updateChartInfoBar(bars, index){
   if (prevClose > 0){
     const amt = ib.close - prevClose;
     const sign = amt > 0 ? '+' : '';
-    change = sign + amt.toFixed(2);
+    change = sign + amt.toFixed(chartDecs(currentChart.code));
     changePct = sign + (amt / prevClose * 100).toFixed(2) + '%';   // 2026-10-28 使用者：漲跌幅另外一項寫「漲跌幅」，不要放在漲跌後面的括號裡
     changeColor = amt > 0 ? '#e6675f' : amt < 0 ? '#5fae6f' : null;
   }
   // 2026-10-28 使用者：資訊列分成兩行放在股名下面——第一行 時間／開／高／低，第二行 量／漲跌／漲跌幅／收（／大戶）
   const row1 = [
-    item(ib.fullLabel + (ib.liveNote ? '（' + ib.liveNote + '）' : '')), item('開' + ib.open.toFixed(2)), item('高' + ib.high.toFixed(2)), item('低' + ib.low.toFixed(2)),
+    item(ib.fullLabel + (ib.liveNote ? '（' + ib.liveNote + '）' : '')), item('開' + ib.open.toFixed(chartDecs(currentChart.code))), item('高' + ib.high.toFixed(chartDecs(currentChart.code))), item('低' + ib.low.toFixed(chartDecs(currentChart.code))),
   ];
   const row2 = [
-    item('量' + (isWorldIdx(currentChart.code) ? Math.round(ib.volume).toLocaleString('en-US') : Math.round(ib.volume) + '張')), item('漲跌' + change, changeColor), item('漲跌幅' + changePct, changeColor), item('收' + ib.close.toFixed(2), changeColor),
+    item('量' + (isWorldIdx(currentChart.code) ? Math.round(ib.volume).toLocaleString('en-US') : Math.round(ib.volume) + '張')), item('漲跌' + change, changeColor), item('漲跌幅' + changePct, changeColor), item('收' + ib.close.toFixed(chartDecs(currentChart.code)), changeColor),
   ];
   const fnet = barForceNet(ib);
   if (Number.isFinite(fnet)){
@@ -5300,7 +5301,7 @@ function drawChart(){
     const y = yAt(v);
     ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(cssW - PAD.right, y); ctx.stroke();
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.fillText(v.toFixed(1), cssW - PAD.right + 6, y);
+    ctx.fillText(v.toFixed(currentChart.code === 'IDX_TNX' ? 3 : 1), cssW - PAD.right + 6, y);
   }
 
   // 每天開盤第一根畫細的紅色虛線，10:30那根畫粗的紫色實線；整段已載入的多日範圍都畫，不隨縮放/平移消失
@@ -5660,7 +5661,7 @@ function drawChart(){
     ctx.fillStyle = '#12100f';
     ctx.font = '10px -apple-system, sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(tagPrice.toFixed(2), cssW - tagW / 2, ty + tagH / 2);
+    ctx.fillText(tagPrice.toFixed(chartDecs(currentChart.code)), cssW - tagW / 2, ty + tagH / 2);
     ctx.restore();
   }
 
@@ -6308,16 +6309,17 @@ syncForceAlgoBtns();
 // 格式跟個股的一樣；指數沒有主力、融資、籌碼，那幾個副圖就是空的。
 const IDX_CHARTS = { IDX_TAIEX: { id: 'taiex', name: '加權指數' }, IDX_OTC: { id: 'otc', name: '櫃買指數' }, IDX_TXF: { id: 'txf', name: '台指期近月' },
   IDX_N225: { id: 'n225', name: '日經 225' }, IDX_KOSPI: { id: 'kospi', name: '韓國 KOSPI' }, IDX_DJI: { id: 'dji', name: '道瓊工業' }, IDX_IXIC: { id: 'ixic', name: '那斯達克' }, IDX_SOX: { id: 'sox', name: '費城半導體' }, IDX_TSM: { id: 'tsm', name: '台積電 ADR' }, IDX_HSI: { id: 'hsi', name: '恒生指數' },
-  IDX_FYM: { id: 'futym', name: '道瓊期貨' }, IDX_FNQ: { id: 'futnq', name: '那斯達克期貨' }, IDX_FNK: { id: 'futnk', name: '日經期貨' }, IDX_FHSI: { id: 'futhsi', name: '恒生期貨' } };
+  IDX_FYM: { id: 'futym', name: '道瓊期貨' }, IDX_FNQ: { id: 'futnq', name: '那斯達克期貨' }, IDX_FNK: { id: 'futnk', name: '日經期貨' }, IDX_FHSI: { id: 'futhsi', name: '恒生期貨' },
+  IDX_TNX: { id: 'tnx', name: '美國10年期公債殖利率' } };
 // 2026-11-05 使用者：首頁右上角的國際指數（日經、韓國、道瓊、那斯達克、費半）也能點開 K 線圖（日線、5 分、1 分）。資料 Yahoo；沒有主力／融資，跟加權一樣副圖是空的；
 // 台股專用的時間線（905 高低、10:30 紫線、12:00 橘線）不畫，時間軸照台北時間（亞股 08:00～14:30、美股夜裡）
-const WORLD_IDX_CODES = ['IDX_N225', 'IDX_KOSPI', 'IDX_DJI', 'IDX_IXIC', 'IDX_SOX', 'IDX_TSM', 'IDX_HSI', 'IDX_FYM', 'IDX_FNQ', 'IDX_FNK', 'IDX_FHSI'];   // 2026-11-05 使用者：再加台積電 ADR（美股 TSM）
+const WORLD_IDX_CODES = ['IDX_N225', 'IDX_KOSPI', 'IDX_DJI', 'IDX_IXIC', 'IDX_SOX', 'IDX_TSM', 'IDX_HSI', 'IDX_FYM', 'IDX_FNQ', 'IDX_FNK', 'IDX_FHSI', 'IDX_TNX'];   // 2026-11-05 使用者：再加美國 10 年期公債殖利率（台積電 ADR 後面）   // 2026-11-05 使用者：再加台積電 ADR（美股 TSM）
 const isWorldIdx = (c) => WORLD_IDX_CODES.indexOf(c) >= 0;
 // 2026-11-05 使用者：日經、韓國的 5 分K（跟個股一樣）要畫 10:30 紫色垂直線、12:00 橘色垂直線、905 高／905 低（開盤第一根的高低）、昨日高低虛線。時間照圖上的台北時間；美股指數、台積電 ADR 不畫這幾條
 const isWorldUs = (c) => isWorldIdx(c) && c !== 'IDX_N225' && c !== 'IDX_KOSPI' && c !== 'IDX_HSI';   // 亞洲三個（日經、韓國、恒生）畫台北時間 10:30／12:00 線和 905 高低；其他不畫
 // 國際指數的「交易日」＝那個市場自己的日期（日經／韓國用東京／首爾、美股用紐約）：美股夜盤 21:30～04:00 跨過台北午夜，用台北日期會把一個交易日切成兩天
 const WORLD_TZ = { IDX_N225: 'Asia/Tokyo', IDX_KOSPI: 'Asia/Seoul', IDX_DJI: 'America/New_York', IDX_IXIC: 'America/New_York', IDX_SOX: 'America/New_York', IDX_TSM: 'America/New_York', IDX_HSI: 'Asia/Hong_Kong',
-  IDX_FYM: 'America/New_York', IDX_FNQ: 'America/New_York', IDX_FNK: 'Asia/Tokyo', IDX_FHSI: 'Asia/Hong_Kong' };
+  IDX_FYM: 'America/New_York', IDX_FNQ: 'America/New_York', IDX_FNK: 'Asia/Tokyo', IDX_FHSI: 'Asia/Hong_Kong', IDX_TNX: 'America/New_York' };
 // 期貨（幾乎 24 小時）的「交易日」：夜盤算隔天——CME 18:00（紐約）開盤、日經期貨 17:00（東京）、恒生期貨 17:15（香港）起算隔天，所以時間往後推 6／7 小時再取日期
 const WORLD_DAY_SHIFT = { IDX_FYM: 6 * 3600e3, IDX_FNQ: 6 * 3600e3, IDX_FNK: 7 * 3600e3, IDX_FHSI: 7 * 3600e3 };
 const isWorldFut = (c) => c === 'IDX_FYM' || c === 'IDX_FNQ' || c === 'IDX_FNK' || c === 'IDX_FHSI';
@@ -6332,7 +6334,9 @@ function worldSessionKey(code, ts){
   const f = worldDayFmt[tz] || (worldDayFmt[tz] = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }));
   return Number(f.format(new Date(ts + (WORLD_DAY_SHIFT[code] || 0))).split('-').join(''));
 }
-function worldIdxLiveNow(code){   // 這個市場現在有沒有在交易（台北時間；美股夏令 21:30～04:00、冬令 22:30～05:00，多抓一段）
+const chartDecs = (code) => (code === 'IDX_TNX' ? 3 : 2);   // 殖利率（4.622 %）顯示 3 位小數，其他 2 位
+function worldIdxLiveNow(code){
+  if (code === 'IDX_TNX') return futLiveNow();   // 公債殖利率從週一清晨到週六清晨幾乎不停   // 這個市場現在有沒有在交易（台北時間；美股夏令 21:30～04:00、冬令 22:30～05:00，多抓一段）
   const t = new Date(Date.now() + 8 * 3600000), day = t.getUTCDay(), m = t.getUTCHours() * 60 + t.getUTCMinutes();
   if (code === 'IDX_N225' || code === 'IDX_KOSPI') return day >= 1 && day <= 5 && m >= 7 * 60 + 55 && m <= 14 * 60 + 40;
   if (code === 'IDX_HSI') return day >= 1 && day <= 5 && m >= 9 * 60 + 25 && m <= 16 * 60 + 15;   // 香港 09:30～16:00（中間 12:00～13:00 午休；跟台北同一個時間）＋收盤競價
@@ -10323,7 +10327,7 @@ function homeRankFootHtml(total){
   return hrHelpTable('🧭 首頁上面那一排', ['項目', '說明'], [
     ['櫃買指數／加權指數', '今天的指數和漲跌點數（漲紅、跌綠、平盤白）；旁邊的分數＝指數的均線分數（滿分 15，算法跟個股一樣）：先寫當天分數和當天多空，3 日平均只當參考；6 分是分水嶺（剛好 6 分標「平」），偏多紅底白字、偏空綠底白字。點一下開 K 線圖（日線、5 分、1 分）'],
     ['台指期近月', '價位、漲跌點數、漲跌幅；日盤時間看日盤、夜盤時間切夜盤；點一下開 K 線圖（日線、5 分、1 分，日盤夜盤接在一起）'],
-    ['國際行情（第二排）', '日經 225、韓國 KOSPI、恒生、道瓊、那斯達克、費半、台積電 ADR（美股 TSM）：價位、漲跌點數、漲跌幅（漲紅跌綠），下面寫資料時間，休市寫收盤日；盤中每 10 秒更新，資料落後超過 3 分鐘會標「慢約 N 分」；日經、韓國台北時間 08:00～14:30 交易，恒生 09:30～16:00（12:00～13:00 午休），美股約 22:30～05:00（夏令 21:30～04:00）；點一下開 K 線圖（日線、5 分、1 分）。日經、韓國、恒生的 5 分K 跟個股一樣畫 10:30 紫線、12:00 橘線、905 高／905 低和昨日高低虛線（時間是圖上的台北時間）。行情來源 TradingView（即時）和 Yahoo，取最新的那個。日經、恒生、道瓊、那斯達克這四格最下面多一行「期貨」（日經 225 期貨、恒生期貨、道瓊 YM、那斯達克 NQ，幾乎 24 小時在交易，現貨休市時它還在跳；資料來自新浪財經，跟交易時間只差幾秒），點那一行開期貨 K 線圖（1 分、5 分、日線）；那斯達克期貨是那斯達克 100 的期貨，點位跟那斯達克綜合指數不同；韓國、費半、台積電 ADR 沒有可用的免費期貨資料'],
+    ['國際行情（標題列下面一排）', '日經 225、韓國 KOSPI、恒生、道瓊、那斯達克、費半、台積電 ADR（美股 TSM）、美國 10 年期公債殖利率（%，3 位小數，債券市場幾乎 24 小時在交易；5 分、1 分 K 線跟 Yahoo 的時段，日線最後一根跟即時行情走）：價位、漲跌點數、漲跌幅（漲紅跌綠），下面寫資料時間，休市寫收盤日；盤中每 10 秒更新，資料落後超過 3 分鐘會標「慢約 N 分」；日經、韓國台北時間 08:00～14:30 交易，恒生 09:30～16:00（12:00～13:00 午休），美股約 22:30～05:00（夏令 21:30～04:00）；點一下開 K 線圖（日線、5 分、1 分）。日經、韓國、恒生的 5 分K 跟個股一樣畫 10:30 紫線、12:00 橘線、905 高／905 低和昨日高低虛線（時間是圖上的台北時間）。行情來源 TradingView（即時）和 Yahoo，取最新的那個。日經、恒生、道瓊、那斯達克這四格最下面多一行「期貨」（日經 225 期貨、恒生期貨、道瓊 YM、那斯達克 NQ，幾乎 24 小時在交易，現貨休市時它還在跳；資料來自新浪財經，跟交易時間只差幾秒），點那一行開期貨 K 線圖（1 分、5 分、日線）；那斯達克期貨是那斯達克 100 的期貨，點位跟那斯達克綜合指數不同；韓國、費半、台積電 ADR 沒有可用的免費期貨資料'],
     ['每日加權指數分析', '搜尋框旁邊那一條：按藍底白字的「📊 詳細分析」才會打開（滑鼠經過不會自己跳出來；再按一下、按視窗外面或 Esc 關掉）；點第一行的價位看加權指數 K 線圖；收盤後約 15:30 更新（融資那句 21:40 後補日期）'],
     ['前六大族群、其他', '強勢／弱勢切換旁邊是漲幅或跌幅前六大的族群，最後一格「其他」＝不在任何族群的股票（154 檔），不排名，點開看清單；報價、K 線、強勢股、機器人代碼都能用'],
   ]) +
@@ -17437,7 +17441,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 17:30:23';
+const BUILD_STAMP = '2026-11-05 17:36:04';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22009,7 +22013,7 @@ function guideHtml(){
     '<li>上方切 5 分／1 分／日線；⚙ 設定可以開關均線、VWAP、明天防守線（明日紅半、三日低、月線，只在日線）。</li>' +
     '<li>副圖有主力買賣力（可切老師版或單筆 20 張）、KD、融資（張）、融資維持率；滑過去會顯示那一根的開高低收、量、主力張數。</li>' +
     '<li>個股的 5 分K、1 分K 盤中每 15 秒自己更新，圖開著就一直走，不用重開；5 分K 上有 905高、905低 兩條線，線尾標價位。</li>' +
-    '<li>加權指數、櫃買指數、台指期近月、日經、韓國、恒生、道瓊、那斯達克、費半、台積電 ADR 和四個期貨（日經、恒生、道瓊、那斯達克）也能開 K 線圖（日線、5 分、1 分）；日經、韓國、恒生的 5 分K 跟個股一樣有 10:30 紫線、12:00 橘線、905 高低。</li>' +
+    '<li>加權指數、櫃買指數、台指期近月、日經、韓國、恒生、道瓊、那斯達克、費半、台積電 ADR、美國 10 年期公債殖利率和四個期貨（日經、恒生、道瓊、那斯達克）也能開 K 線圖（日線、5 分、1 分）；日經、韓國、恒生的 5 分K 跟個股一樣有 10:30 紫線、12:00 橘線、905 高低。</li>' +
     '<li>圖上的小符號是各種盤中訊號出現的位置，滑過去看是哪一種。</li>' +
     '<li>時間軸下面的 ▲ 是扣底：今天這根不算，往前數 5 根、20 根（1 分線是 5 根、25 根）的位置，顏色跟那條均線一樣；均線那一列寫「▲5扣」「▲20扣」的扣底值。</li></ul></div>';
   html += '<h3 class="gd-h">紅色綠色代表什麼</h3><div class="gd-grid2"><div class="gd-card"><b class="up">紅色</b>＝漲、增加、買超、偏多。台股習慣紅色是漲，跟美股相反。</div>' +
@@ -27559,7 +27563,7 @@ function futLineHtml(id){
   return '<span class="mk-fut ' + (it.delayMin ? 'dl' : '') + '"' + attr + '><b>期貨</b> <b class="' + cls + '">' + txN(it.price, 2) + '</b> <span class="' + cls + '">' + sg(pct, 2) + '%</span>'
     + '<span class="mk-fut2"><span class="' + cls + '">' + sg(ch, 2) + '</span>　' + when + '</span></span>';
 }
-const WORLD_BOX_IDS = { n225: 'mkN225', kospi: 'mkKOSPI', dji: 'mkDJI', ixic: 'mkIXIC', sox: 'mkSOX', tsm: 'mkTSM', hsi: 'mkHSI' };
+const WORLD_BOX_IDS = { n225: 'mkN225', kospi: 'mkKOSPI', dji: 'mkDJI', ixic: 'mkIXIC', sox: 'mkSOX', tsm: 'mkTSM', hsi: 'mkHSI', tnx: 'mkTNX' };
 function worldIdxRender(){
   const sg = (v, n) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + txN(Math.abs(v), n);
   Object.keys(WORLD_BOX_IDS).forEach((id) => {
@@ -27572,14 +27576,15 @@ function worldIdxRender(){
       return;
     }
     const ch = Number.isFinite(it.change) ? it.change : 0, pct = Number.isFinite(it.pct) ? it.pct : 0;
+    const dec = it.price < 20 ? 3 : 2;   // 殖利率 4.867 % 用 3 位小數
     const cls = Math.abs(ch) < 0.0000001 ? 'ix-flat' : ch > 0 ? 'ix-up' : 'ix-dn';
     el.classList.toggle('up', ch > 0.0000001); el.classList.toggle('dn', ch < -0.0000001);
     const live = it.live && Date.now() - WORLDIDX.at < 120e3;
     const hm = new Date((it.time || 0) * 1000 + 8 * 3600e3).toISOString().slice(11, 16);   // 最新價的時間（台北時間）
     const lagMin = Math.max(0, Math.round((Date.now() / 1000 - (it.time || 0)) / 60));   // 最新價落後現在幾分鐘（交易時間內才有意義）
     const when = live ? '即時 ' + hm + (lagMin >= 3 ? '<span class="mk-lag">　慢約 ' + lagMin + ' 分</span>' : '') : String(it.day || '').slice(5).replace('-', '/') + ' 收盤';
-    el.innerHTML = '<span class="txf-l1"><b>' + nm + '</b> <b class="' + cls + '">' + txN(it.price, 2) + '</b></span>'
-      + '<span class="mk-chg ' + cls + '">' + sg(ch, 2) + '　' + sg(pct, 2) + '%</span><span class="txf-l2">' + when + '</span>' + futLineHtml(id);
+    el.innerHTML = '<span class="txf-l1"><b>' + nm + '</b> <b class="' + cls + '">' + txN(it.price, dec) + '</b></span>'
+      + '<span class="mk-chg ' + cls + '">' + sg(ch, dec) + '　' + sg(pct, 2) + '%</span><span class="txf-l2">' + when + '</span>' + futLineHtml(id);
     const srcName = String(it.src || '').indexOf('tv:') === 0 ? 'TradingView 即時行情' : 'Yahoo 行情';
     el.title = (el.dataset.wname || nm) + '（' + srcName + '，最新價時間 ' + hm + ' 台北時間' + (lagMin >= 3 && live ? '，比現在慢約 ' + lagMin + ' 分鐘' : '') + '）・點一下看 K 線圖';
   });
@@ -29026,7 +29031,7 @@ async function txfMis(endpoint, body, ttlMs) {
 // 2026-11-05 使用者提供的行情網站 TradingView：它網頁自己用的公開行情掃描介面（不用登入，一次問全部）。
 // 日經 TVC:NI225、韓國 TVC:KOSPI、那斯達克 TVC:IXIC、費半 TVC:SOX 是即時（streaming）；道瓊 DJ:DJI 匿名只有延遲 10 分、台積電 ADR NYSE:TSM 延遲 15 分，
 // 所以每個指數把 Yahoo 和 TradingView 的「最新價時間」比，誰新用誰（延遲的那個時間舊，自然輸給 Yahoo）。TradingView 沒有官方免費資料 API，這是非官方介面，失敗就回空、照用 Yahoo。
-const TV_SYMS = { n225: "TVC:NI225", kospi: "TVC:KOSPI", dji: "DJ:DJI", ixic: "TVC:IXIC", sox: "TVC:SOX", tsm: "NYSE:TSM", hsi: "TVC:HSI" };
+const TV_SYMS = { n225: "TVC:NI225", kospi: "TVC:KOSPI", dji: "DJ:DJI", ixic: "TVC:IXIC", sox: "TVC:SOX", tsm: "NYSE:TSM", hsi: "TVC:HSI", tnx: "TVC:US10Y" };   // 美國 10 年期公債殖利率：TVC:US10Y 即時（債券市場幾乎 24 小時），Yahoo ^TNX 只有芝加哥選擇權交易所的時段
 async function tvQuotes() {
   const cache = (globalThis.__tvQ = globalThis.__tvQ || {});
   if (cache.at && Date.now() - cache.at < 3000 && cache.data) return cache.data;   // 同一個 isolate 3 秒內共用，不是每個瀏覽器都打一次
@@ -29051,7 +29056,7 @@ async function tvQuotes() {
     return {};
   }
 }
-const TV_TZ = { n225: "Asia/Tokyo", kospi: "Asia/Seoul", dji: "America/New_York", ixic: "America/New_York", sox: "America/New_York", tsm: "America/New_York", hsi: "Asia/Hong_Kong" };
+const TV_TZ = { n225: "Asia/Tokyo", kospi: "Asia/Seoul", dji: "America/New_York", ixic: "America/New_York", sox: "America/New_York", tsm: "America/New_York", hsi: "Asia/Hong_Kong", tnx: "America/New_York" };
 function tvExDay(sec, id) {   // 這個市場自己的日期 YYYY-MM-DD
   return new Intl.DateTimeFormat("en-CA", { timeZone: TV_TZ[id] || "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(sec * 1000));
 }
@@ -29665,7 +29670,7 @@ export default {
     if (url.pathname === "/api/world-idx") {
       // 首頁右上角國際指數框（2026-11-05 使用者）：日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體。Yahoo 圖表 API 的日線（近 5 天）取最新價、前一日收盤，Cloudflare 快取 15 秒。
       // live＝現在在這個市場的正常交易時段內、而且最新價是 30 分鐘內的；不是就當收盤（前端寫「11/05 收盤」）
-      const LIST = [["n225", "^N225", "日經 225"], ["kospi", "^KS11", "韓國 KOSPI"], ["dji", "^DJI", "道瓊工業"], ["ixic", "^IXIC", "那斯達克"], ["sox", "^SOX", "費城半導體"], ["tsm", "TSM", "台積電 ADR"], ["hsi", "^HSI", "恒生指數"]];
+      const LIST = [["n225", "^N225", "日經 225"], ["kospi", "^KS11", "韓國 KOSPI"], ["dji", "^DJI", "道瓊工業"], ["ixic", "^IXIC", "那斯達克"], ["sox", "^SOX", "費城半導體"], ["tsm", "TSM", "台積電 ADR"], ["hsi", "^HSI", "恒生指數"], ["tnx", "^TNX", "美國10年期公債殖利率"]];
       // 2026-11-05 使用者：這幾個都要即時行情（有開盤、有在交易就要一直跳）。國際版 Yahoo 和台灣版 Yahoo（同一個來源、不同快取）一起問，取「最新價時間」較新的那個；
       // 快取只留 5 秒（Cloudflare 不快取失敗的）。日經、韓國的行情 Yahoo 可能被交易所限制延遲，所以回傳 time（最新價的時間），前端會寫資料時間、落後就標「慢 N 分」
       const twTick = async (sym) => {
@@ -29704,7 +29709,8 @@ export default {
           const prev = n >= 2 && closes[n - 1].day === rmDay ? closes[n - 2].close : n >= 1 && closes[n - 1].day < rmDay ? closes[n - 1].close : Number(meta.chartPreviousClose);
           const reg = (meta.currentTradingPeriod && meta.currentTradingPeriod.regular) || {};
           const nowS = Math.floor(Date.now() / 1000);
-          const live = Number.isFinite(reg.start) && Number.isFinite(reg.end) && nowS >= reg.start && nowS <= reg.end;   // 正常交易時段內就算盤中；最新價落後多久由前端看 time 自己標
+          const tvFresh = src.indexOf("tv:") === 0 && nowS - rm < 120;   // TradingView 即時價 2 分鐘內有更新＝正在交易（公債殖利率不在 Yahoo 的時段裡也在跳）
+          const live = tvFresh || (Number.isFinite(reg.start) && Number.isFinite(reg.end) && nowS >= reg.start && nowS <= reg.end);   // 正常交易時段內就算盤中；最新價落後多久由前端看 time 自己標
           const prevUse = Number.isFinite(tvPrev) && tvPrev > 0 ? tvPrev : prev;
           const change = Number.isFinite(prevUse) && prevUse > 0 ? price - prevUse : null;
           return [id, { name, price, prev: prevUse, change, pct: change !== null ? (change / prevUse) * 100 : null, time: rm, day: rmDay, live, src }];
@@ -30124,7 +30130,7 @@ export default {
       const tf = url.searchParams.get("tf") || "5m";
       try {
         // 2026-11-05 使用者：右上角加日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體，點開也要有 K 線圖（日線、5 分、1 分）→ 都用 Yahoo（跟加權一樣的格式）
-        const WORLD_IDX = { n225: "^N225", kospi: "^KS11", dji: "^DJI", ixic: "^IXIC", sox: "^SOX", tsm: "TSM", hsi: "^HSI" };
+        const WORLD_IDX = { n225: "^N225", kospi: "^KS11", dji: "^DJI", ixic: "^IXIC", sox: "^SOX", tsm: "TSM", hsi: "^HSI", tnx: "^TNX" };   // tnx＝美國 10 年期公債殖利率（%）
         const FUT_BAR = idxId.indexOf("fut") === 0 ? FUT_SINA[idxId.slice(3)] : null;   // futym／futnq／futnk／futhsi：期貨 K 線（新浪）   // tsm＝台積電在美國掛牌的 ADR（紐約證交所 TSM，1 ADR＝5 股）
         if ((idxId !== "taiex" && idxId !== "otc" && idxId !== "txf" && !WORLD_IDX[idxId] && !FUT_BAR) || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
         const taipeiDay = (sec) => new Date((sec + 8 * 3600) * 1000).toISOString().slice(0, 10);
