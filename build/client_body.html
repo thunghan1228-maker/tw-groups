@@ -5077,7 +5077,7 @@ function chartPrevClose(bars, index){
   if (Number.isFinite(bar.prevRef) && bar.prevRef > 0) return bar.prevRef;   // 台指期：即時報價給的昨結算價（日盤、夜盤各自的參考價）
   if (currentChart.tf === 'daily') return index > 0 ? bars[index - 1].close : null;
   const day = chartDayKey(bar.ts);
-  const daily = currentChart.dailyBars;
+  const daily = currentChart.isRealBars ? currentChart.dailyBars : null;   // 示範圖（模擬價）不能拿真的日線算漲跌（台指期 444 對 43203 變 −98.97%）
   if (Array.isArray(daily)){
     for (let i = daily.length - 1; i >= 0; i--){ if (chartDayKey(daily[i].ts) < day) return daily[i].close; }
   }
@@ -6581,7 +6581,7 @@ async function switchTimeframe(tf){
     try { bars = await fetchRealDailyBars(currentChart.code); isReal = true; } catch (e) { bars = null; failErr = e; }
   }
   if (requestToken !== currentChart.requestToken) return; // 使用者已切到別的分頁/個股，這次結果作廢
-  if (!bars && tf !== 'daily' && !isIdxCode(currentChart.code)){
+  if (!bars && tf !== 'daily'){
     // 2026-11-05 使用者：K 線圖變示範資料。5 分K／1 分K 拿不到但日線有真資料，就改開日線，不要拿模擬的 K 棒給人看
     try {
       await fetchRealDailyBars(currentChart.code);

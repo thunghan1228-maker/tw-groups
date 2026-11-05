@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 14:51:41";
+const BUILD_STAMP = "2026-11-05 16:37:55";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5166,7 +5166,7 @@ function chartPrevClose(bars, index){
   if (Number.isFinite(bar.prevRef) && bar.prevRef > 0) return bar.prevRef;   // 台指期：即時報價給的昨結算價（日盤、夜盤各自的參考價）
   if (currentChart.tf === 'daily') return index > 0 ? bars[index - 1].close : null;
   const day = chartDayKey(bar.ts);
-  const daily = currentChart.dailyBars;
+  const daily = currentChart.isRealBars ? currentChart.dailyBars : null;   // 示範圖（模擬價）不能拿真的日線算漲跌（台指期 444 對 43203 變 −98.97%）
   if (Array.isArray(daily)){
     for (let i = daily.length - 1; i >= 0; i--){ if (chartDayKey(daily[i].ts) < day) return daily[i].close; }
   }
@@ -6670,7 +6670,7 @@ async function switchTimeframe(tf){
     try { bars = await fetchRealDailyBars(currentChart.code); isReal = true; } catch (e) { bars = null; failErr = e; }
   }
   if (requestToken !== currentChart.requestToken) return; // 使用者已切到別的分頁/個股，這次結果作廢
-  if (!bars && tf !== 'daily' && !isIdxCode(currentChart.code)){
+  if (!bars && tf !== 'daily'){
     // 2026-11-05 使用者：K 線圖變示範資料。5 分K／1 分K 拿不到但日線有真資料，就改開日線，不要拿模擬的 K 棒給人看
     try {
       await fetchRealDailyBars(currentChart.code);
@@ -17371,7 +17371,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 14:51:41';
+const BUILD_STAMP = '2026-11-05 16:37:55';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -29880,6 +29880,12 @@ export default {
           const num = (v) => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
           const qd = String(near.CDate || "");
           const qDay = qd.slice(0, 4) + "-" + qd.slice(4, 6) + "-" + qd.slice(6, 8);
+          // 2026-11-05 使用者：台指期近月 5 分K 變示範資料。getQuoteList 有後端代打、getChartData1M 沒有，期交所對 Worker 一直回 520 →
+          // 抓分K 失敗（報價成功也一樣）就改用台灣版 Yahoo 的台指期近月 1 分K（跟期交所沒資料時同一條路）
+          let chartJ = null;
+          if (!yTx && (tf === "1m" || tf === "5m")) {
+            try { chartJ = await txfMis("getChartData1M", { SymbolID: near.SymbolID, CID: "TXF", MarketType: "0", SymbolType: "F", KindID: "1" }, 8000); } catch (eC) { yTx = await txfYahooTw(); }
+          }
           if (yTx && (tf === "1m" || tf === "5m")) {
             if (tf === "1m") bars = yTx.bars;
             else {
@@ -29908,7 +29914,7 @@ export default {
               }
               return out;
             };
-            const cj = await txfMis("getChartData1M", { SymbolID: near.SymbolID, CID: "TXF", MarketType: "0", SymbolType: "F", KindID: "1" }, 8000);
+            const cj = chartJ;
             const rt = (cj && cj.RtData) || {};
             const cd = String((rt.Quote && rt.Quote.CDate) || near.CDate || "");
             const dayBase = Date.UTC(Number(cd.slice(0, 4)), Number(cd.slice(4, 6)) - 1, Number(cd.slice(6, 8)));

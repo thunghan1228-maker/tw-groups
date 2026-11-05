@@ -1523,6 +1523,12 @@ export default {
           const num = (v) => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
           const qd = String(near.CDate || "");
           const qDay = qd.slice(0, 4) + "-" + qd.slice(4, 6) + "-" + qd.slice(6, 8);
+          // 2026-11-05 使用者：台指期近月 5 分K 變示範資料。getQuoteList 有後端代打、getChartData1M 沒有，期交所對 Worker 一直回 520 →
+          // 抓分K 失敗（報價成功也一樣）就改用台灣版 Yahoo 的台指期近月 1 分K（跟期交所沒資料時同一條路）
+          let chartJ = null;
+          if (!yTx && (tf === "1m" || tf === "5m")) {
+            try { chartJ = await txfMis("getChartData1M", { SymbolID: near.SymbolID, CID: "TXF", MarketType: "0", SymbolType: "F", KindID: "1" }, 8000); } catch (eC) { yTx = await txfYahooTw(); }
+          }
           if (yTx && (tf === "1m" || tf === "5m")) {
             if (tf === "1m") bars = yTx.bars;
             else {
@@ -1551,7 +1557,7 @@ export default {
               }
               return out;
             };
-            const cj = await txfMis("getChartData1M", { SymbolID: near.SymbolID, CID: "TXF", MarketType: "0", SymbolType: "F", KindID: "1" }, 8000);
+            const cj = chartJ;
             const rt = (cj && cj.RtData) || {};
             const cd = String((rt.Quote && rt.Quote.CDate) || near.CDate || "");
             const dayBase = Date.UTC(Number(cd.slice(0, 4)), Number(cd.slice(4, 6)) - 1, Number(cd.slice(6, 8)));
