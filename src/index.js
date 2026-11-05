@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 00:56:43";
+const BUILD_STAMP = "2026-11-05 08:51:32";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -9908,6 +9908,12 @@ const homeFut75ColHtml = () => homeDaytradeColsHtml('75');   // 2026-10-18 使�
 // 首頁「💰疑似主力融資買進」（2026-11-04 使用者：系統選股的「疑似主力融資買進」搬到首頁，放在第三欄當沖多1 的上面，每列要接盤中大戶力）：
 // 跟系統選股同一組條件（融資今天增加 ≥500 張 ＋ 大單淨買 ≥300 張）；資料是最新一個收完盤的交易日（融資融券晚上約 21:00 才公布），每 10 分鐘看一次。
 // 交易所不公開融資是誰借的，所以只是「疑似」：融資大增，同時盤中大單在買。
+// 首頁這幾欄的漲跌幅要跟著即時報價（含 08:30 起的盤前試撮價）跳動，不能用榜單／排行 API 回來那天的收盤漲跌（2026-11-04 使用者：雙榜交集沒跟著試撮跳）
+function homeLivePctMap(){
+  const m = new Map();
+  try { (lastData.groups || []).forEach((g) => g.stocks.forEach((st) => { if (st.price != null && Number.isFinite(st.changePercent)) m.set(st.code, st.changePercent); })); } catch (_){ /* 報價還沒來 */ }
+  return m;
+}
 const HOME_MF_QS = 'mup=500&mf=300';
 const homeMfState = { d: null, at: 0, loading: false, errAt: 0 };
 function homeMfLoad(){
@@ -9926,8 +9932,7 @@ function homeMfColHtml(){
   const tip = '融資今天增加 ≥500 張＋今天盤中大單淨買超 ≥300 張（跟系統選股「疑似主力融資買進」同一組）。交易所不公開融資是誰借的，這只是疑似，不是確定。';
   const title = (n) => '<div class="hr-title" title="' + wlEsc(tip) + '">💰疑似主力融資買進' + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔</span>') + '</div>';
   if (!d) return '<div class="hr-col">' + title(null) + '<div class="hr-note">' + (homeMfState.errAt ? '讀取失敗，稍後再試（後端更新後就有）' : '讀取中…') + '</div></div>';
-  const live = new Map();
-  try { (lastData.groups || []).forEach((g) => g.stocks.forEach((st) => { if (Number.isFinite(st.changePercent)) live.set(st.code, st.changePercent); })); } catch (_){ /* 報價還沒來 */ }
+  const live = homeLivePctMap();
   const rows = d.rows.slice().sort((a, b) => (b.mchg || 0) - (a.mchg || 0));
   const md = d.date ? Number(d.date.slice(5, 7)) + '/' + d.date.slice(8, 10) : '';
   const row = (r) => {
@@ -9961,12 +9966,14 @@ function homeBothColHtml(){
   const hitBy = {};
   ht.rows.forEach((r) => { hitBy[r.code] = r; });
   const list = rk.stocks.slice(0, MA_WL_TOP).map((r, i) => ({ r, i })).filter(({ r }) => hitBy[r.code]);
+  const live = homeLivePctMap();
   const row = ({ r, i }) => {
+    const pct = live.has(r.code) ? live.get(r.code) : r.chg;   // 即時（含盤前試撮）；沒有即時報價才退回排行那天的漲跌幅
     const h = hitBy[r.code], tip = '個股分數第 ' + (i + 1) + ' 名・' + r.sum + ' 分＋前二十名常客 ' + h.hits + '/' + ht.ndays + ' 次（近 5 日 ' + h.r5 + '/5）' + (r.grp ? '・' + r.grp : '');
     // 2026-11-04 使用者：雙榜交集加粗紅框，每列後面接盤中大戶力（跟續抱勿追高那些欄一樣的色塊）
     return '<div class="hr-row hr-stk hr-wrapold" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc(tip) + '">' +
       '<span class="hr-bear-pill hr-wht"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' +
-      '<span class="hr-avg ' + dirClass(r.chg) + '">' + fmt(r.chg) + '%<small class="hr-bothsc"> ' + r.sum + '分</small></span>' + homeHoldHtml(r.code) + '</div>';
+      '<span class="hr-avg ' + dirClass(pct) + '">' + fmt(pct) + '%<small class="hr-bothsc"> ' + r.sum + '分</small></span>' + homeHoldHtml(r.code) + '</div>';
   };
   return '<div class="hr-col">' + title(list.length) + (list.length ? list.map(row).join('') : '<div class="hr-note">目前沒有兩個榜都在的股票</div>') + '</div>';
 }
@@ -17335,7 +17342,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 00:56:43';
+const BUILD_STAMP = '2026-11-05 08:51:32';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
