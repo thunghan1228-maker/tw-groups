@@ -511,6 +511,38 @@ async function txfMis(endpoint, body, ttlMs) {
   if (hit && Date.now() - hit.at < 120000) return hit.data;
   throw lastErr;
 }
+// 2026-11-05 使用者提供的行情網站 TradingView：它網頁自己用的公開行情掃描介面（不用登入，一次問全部）。
+// 日經 TVC:NI225、韓國 TVC:KOSPI、那斯達克 TVC:IXIC、費半 TVC:SOX 是即時（streaming）；道瓊 DJ:DJI 匿名只有延遲 10 分、台積電 ADR NYSE:TSM 延遲 15 分，
+// 所以每個指數把 Yahoo 和 TradingView 的「最新價時間」比，誰新用誰（延遲的那個時間舊，自然輸給 Yahoo）。TradingView 沒有官方免費資料 API，這是非官方介面，失敗就回空、照用 Yahoo。
+const TV_SYMS = { n225: "TVC:NI225", kospi: "TVC:KOSPI", dji: "DJ:DJI", ixic: "TVC:IXIC", sox: "TVC:SOX", tsm: "NYSE:TSM" };
+async function tvQuotes() {
+  const cache = (globalThis.__tvQ = globalThis.__tvQ || {});
+  if (cache.at && Date.now() - cache.at < 3000 && cache.data) return cache.data;   // 同一個 isolate 3 秒內共用，不是每個瀏覽器都打一次
+  try {
+    const r = await fetch("https://scanner.tradingview.com/global/scan", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://tw.tradingview.com", "user-agent": "Mozilla/5.0" },
+      body: JSON.stringify({ symbols: { tickers: Object.values(TV_SYMS) }, columns: ["close", "open", "high", "low", "change_abs", "update_mode", "update_time", "last_bar_update_time"] })
+    });
+    if (!r.ok) throw new Error("TradingView HTTP " + r.status);
+    const j = await r.json();
+    const out = {};
+    for (const row of (j.data || [])) {
+      const id = Object.keys(TV_SYMS).find((k) => TV_SYMS[k] === row.s);
+      const d = row.d || [];
+      if (id && Number.isFinite(d[0]) && d[5] === "streaming") out[id] = { price: d[0], open: d[1], high: d[2], low: d[3], chg: d[4], mode: d[5], time: Math.max(Number(d[6]) || 0, Number(d[7]) || 0) };
+    }
+    cache.at = Date.now(); cache.data = out;   // 只收 update_mode＝streaming（即時）的；delayed_streaming（延遲 10／15 分）的不用，免得把延遲價當最新價
+    return out;
+  } catch (e) {
+    if (cache.data && Date.now() - cache.at < 60000) return cache.data;
+    return {};
+  }
+}
+const TV_TZ = { n225: "Asia/Tokyo", kospi: "Asia/Seoul", dji: "America/New_York", ixic: "America/New_York", sox: "America/New_York", tsm: "America/New_York" };
+function tvExDay(sec, id) {   // 這個市場自己的日期 YYYY-MM-DD
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TV_TZ[id] || "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(sec * 1000));
+}
 async function txfNearQuote() {
   const j = await txfMis("getQuoteList", { MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" }, 8000);
   const list = (j && j.RtData && j.RtData.QuoteList) || [];
@@ -1060,6 +1092,7 @@ export default {
           return Number.isFinite(price) && Number.isFinite(rm) ? { price, rm } : null;
         } catch (e) { return null; }
       };
+      const tvAll = await tvQuotes();
       const one = async ([id, sym, name]) => {
         try {
           const [r, tw] = await Promise.all([fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?interval=1d&range=5d", {
@@ -1071,7 +1104,10 @@ export default {
           const meta = (m && m.meta) || {}, q = (m && m.indicators && m.indicators.quote && m.indicators.quote[0]) || {}, stamps = (m && m.timestamp) || [];
           let price = Number(meta.regularMarketPrice), rm = Number(meta.regularMarketTime);
           const off = Number(meta.gmtoffset) || 0;
-          if (tw && (!Number.isFinite(rm) || tw.rm > rm)) { price = tw.price; rm = tw.rm; }   // 台灣版比較新就用台灣版
+          let src = "intl", tvPrev = null;
+          if (tw && (!Number.isFinite(rm) || tw.rm > rm)) { price = tw.price; rm = tw.rm; src = "tw"; }   // 台灣版比較新就用台灣版
+          const tv = tvAll[id];
+          if (tv && tv.time > (Number.isFinite(rm) ? rm : 0)) { price = tv.price; rm = tv.time; src = "tv:" + String(tv.mode || ""); if (Number.isFinite(tv.chg)) tvPrev = tv.price - tv.chg; }   // TradingView 比較新就用它（它的 change_abs 反推前一日收盤）
           if (!Number.isFinite(price) || !Number.isFinite(rm)) return [id, { name, error: "沒有報價" }];
           const closes = [];
           for (let i = 0; i < stamps.length; i++) { const c = q.close && q.close[i]; if (Number.isFinite(c)) closes.push({ day: new Date((stamps[i] + off) * 1000).toISOString().slice(0, 10), close: c }); }
@@ -1082,8 +1118,9 @@ export default {
           const reg = (meta.currentTradingPeriod && meta.currentTradingPeriod.regular) || {};
           const nowS = Math.floor(Date.now() / 1000);
           const live = Number.isFinite(reg.start) && Number.isFinite(reg.end) && nowS >= reg.start && nowS <= reg.end;   // 正常交易時段內就算盤中；最新價落後多久由前端看 time 自己標
-          const change = Number.isFinite(prev) && prev > 0 ? price - prev : null;
-          return [id, { name, price, prev, change, pct: change !== null ? (change / prev) * 100 : null, time: rm, day: rmDay, live, src: tw && tw.rm > Number(meta.regularMarketTime) ? "tw" : "intl" }];
+          const prevUse = Number.isFinite(tvPrev) && tvPrev > 0 ? tvPrev : prev;
+          const change = Number.isFinite(prevUse) && prevUse > 0 ? price - prevUse : null;
+          return [id, { name, price, prev: prevUse, change, pct: change !== null ? (change / prevUse) * 100 : null, time: rm, day: rmDay, live, src }];
         } catch (e) { return [id, { name, error: String((e && e.message) || e).slice(0, 80) }]; }
       };
       const rows = await Promise.all(LIST.map(one));
@@ -1597,6 +1634,22 @@ export default {
               }
             } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
           }
+          // TradingView 即時價（2 分鐘內有更新才算盤中）：分K 最後一根的收盤／高低換成它，過了這根的時間就接一根新的；日線今天那根的開高低收換成它的
+          try {
+            const tv = (await tvQuotes())[idxId];
+            if (tv && Number.isFinite(tv.price) && bars.length && Date.now() / 1000 - tv.time < 120) {
+              const p = r2(tv.price), last = bars[bars.length - 1];
+              if (tf === "1d") {
+                const lastDay = String(last.ts).slice(0, 10), day = tvExDay(tv.time, idxId);
+                if (day === lastDay) { last.close = p; if (Number.isFinite(tv.high)) last.high = r2(tv.high); if (Number.isFinite(tv.low)) last.low = r2(tv.low); if (Number.isFinite(tv.open)) last.open = r2(tv.open); }
+                else if (day > lastDay) bars.push({ ts: day + "T00:00:00+00:00", open: r2(Number.isFinite(tv.open) ? tv.open : p), high: r2(Number.isFinite(tv.high) ? tv.high : p), low: r2(Number.isFinite(tv.low) ? tv.low : p), close: p, volume: 0, closeTime: "收盤" });
+              } else {
+                const step = tf === "5m" ? 300 : 60, bk = Math.floor(tv.time / step) * step * 1000;
+                if (bk === last.ts) { last.close = p; last.high = Math.max(last.high, p); last.low = Math.min(last.low, p); }
+                else if (bk > last.ts && bk - last.ts <= step * 6000) bars.push({ ts: bk, open: last.close, high: Math.max(last.close, p), low: Math.min(last.close, p), close: p, volume: 0 });
+              }
+            }
+          } catch (tvErr) { /* 抓不到就維持 Yahoo 的 */ }
         } else if (idxId === "txf") {
           // 台指期近月（2026-10-29 使用者）：近月合約自己會換（期交所 getQuoteList 的第一檔月合約，到期日收盤後下個月就變近月）。
           // 1 分K／5 分K＝今天日盤（08:45～13:45，沒開盤就是最後一個交易日）：期交所只給當天；日線＝期交所官方每日行情的日盤（一般交易時段）近月，今天還沒進官方資料就用即時報價補一根
@@ -1756,7 +1809,7 @@ export default {
           }
         }
         if (!bars.length) return Response.json({ status: "empty", error: "沒有資料", bars: [] }, { status: 200, headers: { "cache-control": "no-store" } });
-        return Response.json({ status: "ok", id: idxId, interval: tf, bars }, { headers: { "cache-control": "public, max-age=" + (tf === "1d" ? 30 : 10) } });
+        return Response.json({ status: "ok", id: idxId, interval: tf, bars }, { headers: { "cache-control": "public, max-age=" + (WORLD_IDX[idxId] ? 3 : tf === "1d" ? 30 : 10) } });   // 國際指數要即時：瀏覽器只留 3 秒
       } catch (err) {
         return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502, headers: { "cache-control": "no-store" } });
       }

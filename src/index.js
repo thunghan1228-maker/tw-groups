@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 17:00:17";
+const BUILD_STAMP = "2026-11-05 17:03:11";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -622,7 +622,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .mkt-world .mk-box{max-width:none;min-width:0;flex:none;align-self:stretch;border-left:4px solid var(--muted);padding:5px 10px;}
   .mkt-world .mk-box.up{border-left-color:#ef4444;} .mkt-world .mk-box.dn{border-left-color:#22c55e;}
   .mkt-world .mk-box .txf-l1{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;} .mkt-world .mk-box .txf-l2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .mkt-world .mk-box:hover{background:var(--panel-2);}
+  .mkt-world .mk-box:hover{background:var(--panel-2);} .mk-lag{color:#f59e0b;font-weight:800;}
   .mkt-world .mk-box .mk-chg{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
   .txf-box{flex:0 1 auto;max-width:320px;min-width:170px;align-self:flex-start;display:block;line-height:1.45;cursor:pointer;}
   .txf-box .txf-l1{display:block;font-size:14px;font-weight:800;white-space:nowrap;} .txf-box .txf-sess{font-size:11px;font-weight:700;color:var(--muted);margin-right:2px;} .txf-box .txf-l2{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-top:1px;}
@@ -6625,7 +6625,7 @@ async function refreshIdxChart(){
   currentChart.kd = chartComputeKd(tf, bars);
   redrawAll();
 }
-setInterval(() => { refreshIdxChart().catch(() => {}); }, 20000);
+setInterval(() => { refreshIdxChart().catch(() => {}); }, 10000);   // 2026-11-05 使用者要即時行情：指數 K 線圖盤中每 10 秒更新（原本 20 秒）
 // 2026-11-02 使用者：很多股票的 5 分K 停在 09:15、現在已經 09:38。個股的 5 分K／1 分K 圖打開時只抓一次，之後不會再更新
 // （只有日線和指數圖有盤中自動更新），圖開著就一直停在開圖那一刻。現在個股 5 分K／1 分K 盤中每 15 秒抓今天的 K 棒，
 // 依時間點接上去／換掉最後一根，圖開著就一直走。示範資料（後端一時連不上）的圖也順便每 15 秒重試真資料，最多 8 次。
@@ -17417,7 +17417,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 17:00:17';
+const BUILD_STAMP = '2026-11-05 17:03:11';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -27516,7 +27516,7 @@ setInterval(() => { if (document.visibilityState === 'visible') txfLoad(); }, 20
 document.getElementById('txfBox').addEventListener('click', () => { openStockChart('IDX_TXF', '台指期近月'); });
 // 2026-11-05 使用者：右上角第二排——日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體。價位、漲跌點數、漲跌幅（漲紅跌綠平盤白字）＋時間／收盤日；
 // 資料 /api/world-idx（Yahoo，Worker 快取 15 秒），每 30 秒更新；點一下開 K 線圖（日線、5 分、1 分）。Yahoo 的行情可能比交易所慢一點，所以框上寫資料時間
-const WORLDIDX = { d: null, at: 0, loading: false, err: 0 };
+const WORLDIDX = { d: null, at: 0, tried: 0, loading: false, err: 0 };
 const WORLD_BOX_IDS = { n225: 'mkN225', kospi: 'mkKOSPI', dji: 'mkDJI', ixic: 'mkIXIC', sox: 'mkSOX', tsm: 'mkTSM' };
 function worldIdxRender(){
   const sg = (v, n) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + txN(Math.abs(v), n);
@@ -27534,24 +27534,31 @@ function worldIdxRender(){
     el.classList.toggle('up', ch > 0.0000001); el.classList.toggle('dn', ch < -0.0000001);
     const live = it.live && Date.now() - WORLDIDX.at < 120e3;
     const hm = new Date((it.time || 0) * 1000 + 8 * 3600e3).toISOString().slice(11, 16);   // 最新價的時間（台北時間）
-    const when = live ? '即時 ' + hm : String(it.day || '').slice(5).replace('-', '/') + ' 收盤';
+    const lagMin = Math.max(0, Math.round((Date.now() / 1000 - (it.time || 0)) / 60));   // 最新價落後現在幾分鐘（交易時間內才有意義）
+    const when = live ? '即時 ' + hm + (lagMin >= 3 ? '<span class="mk-lag">　慢約 ' + lagMin + ' 分</span>' : '') : String(it.day || '').slice(5).replace('-', '/') + ' 收盤';
     el.innerHTML = '<span class="txf-l1"><b>' + nm + '</b> <b class="' + cls + '">' + txN(it.price, 2) + '</b></span>'
       + '<span class="mk-chg ' + cls + '">' + sg(ch, 2) + ' 點　' + sg(pct, 2) + '%</span><span class="txf-l2">' + when + '</span>';
-    el.title = nm + '（Yahoo 行情，資料時間 ' + hm + ' 台北時間，可能比交易所慢一點）・點一下看 K 線圖';
+    const srcName = String(it.src || '').indexOf('tv:') === 0 ? 'TradingView 即時行情' : 'Yahoo 行情';
+    el.title = nm + '（' + srcName + '，最新價時間 ' + hm + ' 台北時間' + (lagMin >= 3 && live ? '，比現在慢約 ' + lagMin + ' 分鐘' : '') + '）・點一下看 K 線圖';
   });
 }
 async function worldIdxLoad(){
   if (WORLDIDX.loading) return;
-  WORLDIDX.loading = true;
+  WORLDIDX.loading = true; WORLDIDX.tried = Date.now();
   try {
-    const r = await fetch('/api/world-idx');
+    const r = await fetch('/api/world-idx?_=' + Date.now());
     const d = r.ok ? await r.json() : null;
     if (d && d.status === 'ok' && d.items){ WORLDIDX.d = d; WORLDIDX.at = Date.now(); WORLDIDX.err = 0; } else WORLDIDX.err += 1;
   } catch (e) { WORLDIDX.err += 1; /* 抓不到就留上一次 */ }
   finally { WORLDIDX.loading = false; worldIdxRender(); }
 }
 setTimeout(worldIdxLoad, 1500);
-setInterval(() => { if (document.visibilityState === 'visible') worldIdxLoad(); }, 30e3);
+// 有市場在交易（日經／韓國 08:00～14:30、美股夜裡）就每 10 秒更新，都休市就每分鐘看一次
+setInterval(() => {
+  if (document.visibilityState !== 'visible') return;
+  const anyLive = WORLD_IDX_CODES.some((c) => worldIdxLiveNow(c));
+  if (Date.now() - WORLDIDX.tried >= (anyLive ? 9500 : 60e3)) worldIdxLoad();
+}, 3000);
 document.getElementById('mktWorld').addEventListener('click', (e) => {
   const box = e.target.closest('.mk-box');
   if (box) openStockChart(box.dataset.wcode, box.dataset.wname);
@@ -28960,6 +28967,38 @@ async function txfMis(endpoint, body, ttlMs) {
   if (hit && Date.now() - hit.at < 120000) return hit.data;
   throw lastErr;
 }
+// 2026-11-05 使用者提供的行情網站 TradingView：它網頁自己用的公開行情掃描介面（不用登入，一次問全部）。
+// 日經 TVC:NI225、韓國 TVC:KOSPI、那斯達克 TVC:IXIC、費半 TVC:SOX 是即時（streaming）；道瓊 DJ:DJI 匿名只有延遲 10 分、台積電 ADR NYSE:TSM 延遲 15 分，
+// 所以每個指數把 Yahoo 和 TradingView 的「最新價時間」比，誰新用誰（延遲的那個時間舊，自然輸給 Yahoo）。TradingView 沒有官方免費資料 API，這是非官方介面，失敗就回空、照用 Yahoo。
+const TV_SYMS = { n225: "TVC:NI225", kospi: "TVC:KOSPI", dji: "DJ:DJI", ixic: "TVC:IXIC", sox: "TVC:SOX", tsm: "NYSE:TSM" };
+async function tvQuotes() {
+  const cache = (globalThis.__tvQ = globalThis.__tvQ || {});
+  if (cache.at && Date.now() - cache.at < 3000 && cache.data) return cache.data;   // 同一個 isolate 3 秒內共用，不是每個瀏覽器都打一次
+  try {
+    const r = await fetch("https://scanner.tradingview.com/global/scan", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://tw.tradingview.com", "user-agent": "Mozilla/5.0" },
+      body: JSON.stringify({ symbols: { tickers: Object.values(TV_SYMS) }, columns: ["close", "open", "high", "low", "change_abs", "update_mode", "update_time", "last_bar_update_time"] })
+    });
+    if (!r.ok) throw new Error("TradingView HTTP " + r.status);
+    const j = await r.json();
+    const out = {};
+    for (const row of (j.data || [])) {
+      const id = Object.keys(TV_SYMS).find((k) => TV_SYMS[k] === row.s);
+      const d = row.d || [];
+      if (id && Number.isFinite(d[0]) && d[5] === "streaming") out[id] = { price: d[0], open: d[1], high: d[2], low: d[3], chg: d[4], mode: d[5], time: Math.max(Number(d[6]) || 0, Number(d[7]) || 0) };
+    }
+    cache.at = Date.now(); cache.data = out;   // 只收 update_mode＝streaming（即時）的；delayed_streaming（延遲 10／15 分）的不用，免得把延遲價當最新價
+    return out;
+  } catch (e) {
+    if (cache.data && Date.now() - cache.at < 60000) return cache.data;
+    return {};
+  }
+}
+const TV_TZ = { n225: "Asia/Tokyo", kospi: "Asia/Seoul", dji: "America/New_York", ixic: "America/New_York", sox: "America/New_York", tsm: "America/New_York" };
+function tvExDay(sec, id) {   // 這個市場自己的日期 YYYY-MM-DD
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TV_TZ[id] || "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(sec * 1000));
+}
 async function txfNearQuote() {
   const j = await txfMis("getQuoteList", { MarketType: "0", SymbolType: "F", KindID: "1", CID: "TXF", ExpireMonth: "", RowSize: "全部", PageNo: "", SortColumn: "", AscDesc: "A" }, 8000);
   const list = (j && j.RtData && j.RtData.QuoteList) || [];
@@ -29509,6 +29548,7 @@ export default {
           return Number.isFinite(price) && Number.isFinite(rm) ? { price, rm } : null;
         } catch (e) { return null; }
       };
+      const tvAll = await tvQuotes();
       const one = async ([id, sym, name]) => {
         try {
           const [r, tw] = await Promise.all([fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?interval=1d&range=5d", {
@@ -29520,7 +29560,10 @@ export default {
           const meta = (m && m.meta) || {}, q = (m && m.indicators && m.indicators.quote && m.indicators.quote[0]) || {}, stamps = (m && m.timestamp) || [];
           let price = Number(meta.regularMarketPrice), rm = Number(meta.regularMarketTime);
           const off = Number(meta.gmtoffset) || 0;
-          if (tw && (!Number.isFinite(rm) || tw.rm > rm)) { price = tw.price; rm = tw.rm; }   // 台灣版比較新就用台灣版
+          let src = "intl", tvPrev = null;
+          if (tw && (!Number.isFinite(rm) || tw.rm > rm)) { price = tw.price; rm = tw.rm; src = "tw"; }   // 台灣版比較新就用台灣版
+          const tv = tvAll[id];
+          if (tv && tv.time > (Number.isFinite(rm) ? rm : 0)) { price = tv.price; rm = tv.time; src = "tv:" + String(tv.mode || ""); if (Number.isFinite(tv.chg)) tvPrev = tv.price - tv.chg; }   // TradingView 比較新就用它（它的 change_abs 反推前一日收盤）
           if (!Number.isFinite(price) || !Number.isFinite(rm)) return [id, { name, error: "沒有報價" }];
           const closes = [];
           for (let i = 0; i < stamps.length; i++) { const c = q.close && q.close[i]; if (Number.isFinite(c)) closes.push({ day: new Date((stamps[i] + off) * 1000).toISOString().slice(0, 10), close: c }); }
@@ -29531,8 +29574,9 @@ export default {
           const reg = (meta.currentTradingPeriod && meta.currentTradingPeriod.regular) || {};
           const nowS = Math.floor(Date.now() / 1000);
           const live = Number.isFinite(reg.start) && Number.isFinite(reg.end) && nowS >= reg.start && nowS <= reg.end;   // 正常交易時段內就算盤中；最新價落後多久由前端看 time 自己標
-          const change = Number.isFinite(prev) && prev > 0 ? price - prev : null;
-          return [id, { name, price, prev, change, pct: change !== null ? (change / prev) * 100 : null, time: rm, day: rmDay, live, src: tw && tw.rm > Number(meta.regularMarketTime) ? "tw" : "intl" }];
+          const prevUse = Number.isFinite(tvPrev) && tvPrev > 0 ? tvPrev : prev;
+          const change = Number.isFinite(prevUse) && prevUse > 0 ? price - prevUse : null;
+          return [id, { name, price, prev: prevUse, change, pct: change !== null ? (change / prevUse) * 100 : null, time: rm, day: rmDay, live, src }];
         } catch (e) { return [id, { name, error: String((e && e.message) || e).slice(0, 80) }]; }
       };
       const rows = await Promise.all(LIST.map(one));
@@ -30046,6 +30090,22 @@ export default {
               }
             } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
           }
+          // TradingView 即時價（2 分鐘內有更新才算盤中）：分K 最後一根的收盤／高低換成它，過了這根的時間就接一根新的；日線今天那根的開高低收換成它的
+          try {
+            const tv = (await tvQuotes())[idxId];
+            if (tv && Number.isFinite(tv.price) && bars.length && Date.now() / 1000 - tv.time < 120) {
+              const p = r2(tv.price), last = bars[bars.length - 1];
+              if (tf === "1d") {
+                const lastDay = String(last.ts).slice(0, 10), day = tvExDay(tv.time, idxId);
+                if (day === lastDay) { last.close = p; if (Number.isFinite(tv.high)) last.high = r2(tv.high); if (Number.isFinite(tv.low)) last.low = r2(tv.low); if (Number.isFinite(tv.open)) last.open = r2(tv.open); }
+                else if (day > lastDay) bars.push({ ts: day + "T00:00:00+00:00", open: r2(Number.isFinite(tv.open) ? tv.open : p), high: r2(Number.isFinite(tv.high) ? tv.high : p), low: r2(Number.isFinite(tv.low) ? tv.low : p), close: p, volume: 0, closeTime: "收盤" });
+              } else {
+                const step = tf === "5m" ? 300 : 60, bk = Math.floor(tv.time / step) * step * 1000;
+                if (bk === last.ts) { last.close = p; last.high = Math.max(last.high, p); last.low = Math.min(last.low, p); }
+                else if (bk > last.ts && bk - last.ts <= step * 6000) bars.push({ ts: bk, open: last.close, high: Math.max(last.close, p), low: Math.min(last.close, p), close: p, volume: 0 });
+              }
+            }
+          } catch (tvErr) { /* 抓不到就維持 Yahoo 的 */ }
         } else if (idxId === "txf") {
           // 台指期近月（2026-10-29 使用者）：近月合約自己會換（期交所 getQuoteList 的第一檔月合約，到期日收盤後下個月就變近月）。
           // 1 分K／5 分K＝今天日盤（08:45～13:45，沒開盤就是最後一個交易日）：期交所只給當天；日線＝期交所官方每日行情的日盤（一般交易時段）近月，今天還沒進官方資料就用即時報價補一根
@@ -30205,7 +30265,7 @@ export default {
           }
         }
         if (!bars.length) return Response.json({ status: "empty", error: "沒有資料", bars: [] }, { status: 200, headers: { "cache-control": "no-store" } });
-        return Response.json({ status: "ok", id: idxId, interval: tf, bars }, { headers: { "cache-control": "public, max-age=" + (tf === "1d" ? 30 : 10) } });
+        return Response.json({ status: "ok", id: idxId, interval: tf, bars }, { headers: { "cache-control": "public, max-age=" + (WORLD_IDX[idxId] ? 3 : tf === "1d" ? 30 : 10) } });   // 國際指數要即時：瀏覽器只留 3 秒
       } catch (err) {
         return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502, headers: { "cache-control": "no-store" } });
       }

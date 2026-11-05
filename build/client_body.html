@@ -535,7 +535,7 @@
   .mkt-world .mk-box{max-width:none;min-width:0;flex:none;align-self:stretch;border-left:4px solid var(--muted);padding:5px 10px;}
   .mkt-world .mk-box.up{border-left-color:#ef4444;} .mkt-world .mk-box.dn{border-left-color:#22c55e;}
   .mkt-world .mk-box .txf-l1{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;} .mkt-world .mk-box .txf-l2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .mkt-world .mk-box:hover{background:var(--panel-2);}
+  .mkt-world .mk-box:hover{background:var(--panel-2);} .mk-lag{color:#f59e0b;font-weight:800;}
   .mkt-world .mk-box .mk-chg{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
   .txf-box{flex:0 1 auto;max-width:320px;min-width:170px;align-self:flex-start;display:block;line-height:1.45;cursor:pointer;}
   .txf-box .txf-l1{display:block;font-size:14px;font-weight:800;white-space:nowrap;} .txf-box .txf-sess{font-size:11px;font-weight:700;color:var(--muted);margin-right:2px;} .txf-box .txf-l2{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-top:1px;}
@@ -6536,7 +6536,7 @@ async function refreshIdxChart(){
   currentChart.kd = chartComputeKd(tf, bars);
   redrawAll();
 }
-setInterval(() => { refreshIdxChart().catch(() => {}); }, 20000);
+setInterval(() => { refreshIdxChart().catch(() => {}); }, 10000);   // 2026-11-05 使用者要即時行情：指數 K 線圖盤中每 10 秒更新（原本 20 秒）
 // 2026-11-02 使用者：很多股票的 5 分K 停在 09:15、現在已經 09:38。個股的 5 分K／1 分K 圖打開時只抓一次，之後不會再更新
 // （只有日線和指數圖有盤中自動更新），圖開著就一直停在開圖那一刻。現在個股 5 分K／1 分K 盤中每 15 秒抓今天的 K 棒，
 // 依時間點接上去／換掉最後一根，圖開著就一直走。示範資料（後端一時連不上）的圖也順便每 15 秒重試真資料，最多 8 次。
@@ -27427,7 +27427,7 @@ setInterval(() => { if (document.visibilityState === 'visible') txfLoad(); }, 20
 document.getElementById('txfBox').addEventListener('click', () => { openStockChart('IDX_TXF', '台指期近月'); });
 // 2026-11-05 使用者：右上角第二排——日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體。價位、漲跌點數、漲跌幅（漲紅跌綠平盤白字）＋時間／收盤日；
 // 資料 /api/world-idx（Yahoo，Worker 快取 15 秒），每 30 秒更新；點一下開 K 線圖（日線、5 分、1 分）。Yahoo 的行情可能比交易所慢一點，所以框上寫資料時間
-const WORLDIDX = { d: null, at: 0, loading: false, err: 0 };
+const WORLDIDX = { d: null, at: 0, tried: 0, loading: false, err: 0 };
 const WORLD_BOX_IDS = { n225: 'mkN225', kospi: 'mkKOSPI', dji: 'mkDJI', ixic: 'mkIXIC', sox: 'mkSOX', tsm: 'mkTSM' };
 function worldIdxRender(){
   const sg = (v, n) => (v > 0.0000001 ? '+' : v < -0.0000001 ? '−' : '') + txN(Math.abs(v), n);
@@ -27445,24 +27445,31 @@ function worldIdxRender(){
     el.classList.toggle('up', ch > 0.0000001); el.classList.toggle('dn', ch < -0.0000001);
     const live = it.live && Date.now() - WORLDIDX.at < 120e3;
     const hm = new Date((it.time || 0) * 1000 + 8 * 3600e3).toISOString().slice(11, 16);   // 最新價的時間（台北時間）
-    const when = live ? '即時 ' + hm : String(it.day || '').slice(5).replace('-', '/') + ' 收盤';
+    const lagMin = Math.max(0, Math.round((Date.now() / 1000 - (it.time || 0)) / 60));   // 最新價落後現在幾分鐘（交易時間內才有意義）
+    const when = live ? '即時 ' + hm + (lagMin >= 3 ? '<span class="mk-lag">　慢約 ' + lagMin + ' 分</span>' : '') : String(it.day || '').slice(5).replace('-', '/') + ' 收盤';
     el.innerHTML = '<span class="txf-l1"><b>' + nm + '</b> <b class="' + cls + '">' + txN(it.price, 2) + '</b></span>'
       + '<span class="mk-chg ' + cls + '">' + sg(ch, 2) + ' 點　' + sg(pct, 2) + '%</span><span class="txf-l2">' + when + '</span>';
-    el.title = nm + '（Yahoo 行情，資料時間 ' + hm + ' 台北時間，可能比交易所慢一點）・點一下看 K 線圖';
+    const srcName = String(it.src || '').indexOf('tv:') === 0 ? 'TradingView 即時行情' : 'Yahoo 行情';
+    el.title = nm + '（' + srcName + '，最新價時間 ' + hm + ' 台北時間' + (lagMin >= 3 && live ? '，比現在慢約 ' + lagMin + ' 分鐘' : '') + '）・點一下看 K 線圖';
   });
 }
 async function worldIdxLoad(){
   if (WORLDIDX.loading) return;
-  WORLDIDX.loading = true;
+  WORLDIDX.loading = true; WORLDIDX.tried = Date.now();
   try {
-    const r = await fetch('/api/world-idx');
+    const r = await fetch('/api/world-idx?_=' + Date.now());
     const d = r.ok ? await r.json() : null;
     if (d && d.status === 'ok' && d.items){ WORLDIDX.d = d; WORLDIDX.at = Date.now(); WORLDIDX.err = 0; } else WORLDIDX.err += 1;
   } catch (e) { WORLDIDX.err += 1; /* 抓不到就留上一次 */ }
   finally { WORLDIDX.loading = false; worldIdxRender(); }
 }
 setTimeout(worldIdxLoad, 1500);
-setInterval(() => { if (document.visibilityState === 'visible') worldIdxLoad(); }, 30e3);
+// 有市場在交易（日經／韓國 08:00～14:30、美股夜裡）就每 10 秒更新，都休市就每分鐘看一次
+setInterval(() => {
+  if (document.visibilityState !== 'visible') return;
+  const anyLive = WORLD_IDX_CODES.some((c) => worldIdxLiveNow(c));
+  if (Date.now() - WORLDIDX.tried >= (anyLive ? 9500 : 60e3)) worldIdxLoad();
+}, 3000);
 document.getElementById('mktWorld').addEventListener('click', (e) => {
   const box = e.target.closest('.mk-box');
   if (box) openStockChart(box.dataset.wcode, box.dataset.wname);
