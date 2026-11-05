@@ -1043,6 +1043,40 @@ export default {
       // 估值河流圖的股票清單（查詢建議用），5 分鐘快取
       return await proxyHanstockBars("/api/hub/river/list" + url.search, 300);
     }
+    if (url.pathname === "/api/world-idx") {
+      // 首頁右上角國際指數框（2026-11-05 使用者）：日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體。Yahoo 圖表 API 的日線（近 5 天）取最新價、前一日收盤，Cloudflare 快取 15 秒。
+      // live＝現在在這個市場的正常交易時段內、而且最新價是 30 分鐘內的；不是就當收盤（前端寫「11/05 收盤」）
+      const LIST = [["n225", "^N225", "日經 225"], ["kospi", "^KS11", "韓國 KOSPI"], ["dji", "^DJI", "道瓊工業"], ["ixic", "^IXIC", "那斯達克"], ["sox", "^SOX", "費城半導體"], ["tsm", "TSM", "台積電 ADR"]];
+      const one = async ([id, sym, name]) => {
+        try {
+          const r = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?interval=1d&range=5d", {
+            headers: { "User-Agent": "Mozilla/5.0 (compatible; tw-groups/1.0)", Accept: "application/json" },
+            cf: { cacheTtlByStatus: { "200-299": 15, "300-599": 0 }, cacheEverything: true }
+          });
+          if (!r.ok) return [id, { name, error: "HTTP " + r.status }];
+          const m = ((((await r.json()) || {}).chart || {}).result || [])[0];
+          const meta = (m && m.meta) || {}, q = (m && m.indicators && m.indicators.quote && m.indicators.quote[0]) || {}, stamps = (m && m.timestamp) || [];
+          const price = Number(meta.regularMarketPrice), rm = Number(meta.regularMarketTime), off = Number(meta.gmtoffset) || 0;
+          if (!Number.isFinite(price) || !Number.isFinite(rm)) return [id, { name, error: "沒有報價" }];
+          const closes = [];
+          for (let i = 0; i < stamps.length; i++) { const c = q.close && q.close[i]; if (Number.isFinite(c)) closes.push({ day: new Date((stamps[i] + off) * 1000).toISOString().slice(0, 10), close: c }); }
+          const rmDay = new Date((rm + off) * 1000).toISOString().slice(0, 10);
+          const n = closes.length;
+          // 最後一根日K跟最新報價同一天（正常）→ 前一日收盤＝倒數第二根；日K還沒接上今天（報價比較新）→ 前一日收盤＝最後一根
+          const prev = n >= 2 && closes[n - 1].day === rmDay ? closes[n - 2].close : n >= 1 && closes[n - 1].day < rmDay ? closes[n - 1].close : Number(meta.chartPreviousClose);
+          const reg = (meta.currentTradingPeriod && meta.currentTradingPeriod.regular) || {};
+          const nowS = Math.floor(Date.now() / 1000);
+          const live = Number.isFinite(reg.start) && Number.isFinite(reg.end) && nowS >= reg.start && nowS <= reg.end && nowS - rm < 1800;
+          const change = Number.isFinite(prev) && prev > 0 ? price - prev : null;
+          return [id, { name, price, prev, change, pct: change !== null ? (change / prev) * 100 : null, time: rm, day: rmDay, live }];
+        } catch (e) { return [id, { name, error: String((e && e.message) || e).slice(0, 80) }]; }
+      };
+      const rows = await Promise.all(LIST.map(one));
+      const items = {};
+      rows.forEach(([id, v]) => { items[id] = v; });
+      return new Response(JSON.stringify({ status: rows.some(([, v]) => !v.error) ? "ok" : "error", items, generatedAt: new Date().toISOString() }),
+        { headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "public, max-age=10" } });
+    }
     if (url.pathname === "/api/world-indices") {
       // 機器人代碼 70／71（2026-10-17 使用者：照對方機器人「亞洲股市／美國股市」）：Yahoo Finance 公開圖表 API，每檔一個請求、Cloudflare 快取 2 分鐘
       const LIST = [
@@ -1450,7 +1484,9 @@ export default {
       const idxId = url.pathname.slice("/api/idx-bars/".length);
       const tf = url.searchParams.get("tf") || "5m";
       try {
-        if ((idxId !== "taiex" && idxId !== "otc" && idxId !== "txf") || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
+        // 2026-11-05 使用者：右上角加日經 225、韓國 KOSPI、道瓊、那斯達克、費城半導體，點開也要有 K 線圖（日線、5 分、1 分）→ 都用 Yahoo（跟加權一樣的格式）
+        const WORLD_IDX = { n225: "^N225", kospi: "^KS11", dji: "^DJI", ixic: "^IXIC", sox: "^SOX", tsm: "TSM" };   // tsm＝台積電在美國掛牌的 ADR（紐約證交所 TSM，1 ADR＝5 股）
+        if ((idxId !== "taiex" && idxId !== "otc" && idxId !== "txf" && !WORLD_IDX[idxId]) || (tf !== "1d" && tf !== "5m" && tf !== "1m")) return Response.json({ status: "error", error: "不支援的指數或週期" }, { status: 400 });
         const taipeiDay = (sec) => new Date((sec + 8 * 3600) * 1000).toISOString().slice(0, 10);
         const okBar = (b) => b && Number.isFinite(b.open) && Number.isFinite(b.high) && Number.isFinite(b.low) && Number.isFinite(b.close);
         const r2 = (v) => Math.round(v * 100) / 100;
@@ -1508,6 +1544,22 @@ export default {
                 }
               }
             } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
+          }
+        } else if (WORLD_IDX[idxId]) {
+          // 日經／韓國／道瓊／那斯達克／費半：Yahoo 公開圖表 API，日線一年、5 分 1 個月、1 分 5 天（沒有台股那套 13:30 集合競價併根、台灣版 Yahoo 覆蓋）。
+          // 日線的 ts 用「台北時間的日期」：亞股、美股的日K開始時間換成台北都還在同一個日曆日
+          const spec = tf === "1d" ? "interval=1d&range=1y" : tf === "5m" ? "interval=5m&range=1mo" : "interval=1m&range=5d";
+          const y = await upstreamJson("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(WORLD_IDX[idxId]) + "?" + spec, tf === "1d" ? 30 : 15);
+          const r0 = y && y.chart && y.chart.result && y.chart.result[0];
+          if (!r0) throw new Error("Yahoo 沒有 " + WORLD_IDX[idxId] + " 資料");
+          const q = (r0.indicators && r0.indicators.quote && r0.indicators.quote[0]) || {};
+          const stamps = r0.timestamp || [];
+          for (let i = 0; i < stamps.length; i++) {
+            const b = { open: q.open && q.open[i], high: q.high && q.high[i], low: q.low && q.low[i], close: q.close && q.close[i] };
+            if (!okBar(b)) continue;
+            const nb = { ts: tf === "1d" ? taipeiDay(stamps[i]) + "T00:00:00+00:00" : stamps[i] * 1000, open: r2(b.open), high: r2(b.high), low: r2(b.low), close: r2(b.close), volume: (q.volume && q.volume[i]) || 0 };
+            if (tf === "1d") nb.closeTime = "收盤";   // 日K 資訊列寫「2026/11/5 收盤」，不要套台股的 13:30
+            bars.push(nb);   // 每天最後那根平的（收盤集合競價的官方收盤價）要留著，不然圖上的收盤跟官方差一截（韓國 5341 對 5383.8）
           }
         } else if (idxId === "txf") {
           // 台指期近月（2026-10-29 使用者）：近月合約自己會換（期交所 getQuoteList 的第一檔月合約，到期日收盤後下個月就變近月）。
