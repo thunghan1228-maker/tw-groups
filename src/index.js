@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 22:54:03";
+const BUILD_STAMP = "2026-11-05 23:20:07";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3571,6 +3571,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .wl-gtab.add{border-style:dashed;color:var(--muted);}
   .wl-gtab.drop-before{box-shadow:-3px 0 0 #f5b301;} .wl-gtab.drop-after{box-shadow:3px 0 0 #f5b301;}   /* 拖曳分組換順序：放開會插在這一格的前面／後面 */
   .wl-gops .wl-btn:disabled{opacity:.4;cursor:default;}
+  .wl-add #wlImportFut,.wl-add #wlImportSmall{white-space:nowrap;}
   .wl-gcount{display:inline-block;margin-left:6px;font-size:12px;opacity:.75;}
   .wl-gops{margin-left:auto;display:inline-flex;gap:6px;}
   .wl-add{display:flex;gap:6px;margin-bottom:6px;}
@@ -15001,13 +15002,28 @@ function wlTabsHtml(){
     '<span class="wl-gops"><button class="wl-btn" id="wlGroupLeft" title="把目前這個分組往前（左）移一格"' + (at > 0 ? '' : ' disabled') + '>◀ 前移</button><button class="wl-btn" id="wlGroupRight" title="把目前這個分組往後（右）移一格"' + (at >= 0 && at < gs.length - 1 ? '' : ' disabled') + '>後移 ▶</button>' +
     '<button class="wl-btn" id="wlGroupRename">改名</button><button class="wl-btn" id="wlGroupDelete">刪除這組</button></span></div>';
 }
+// 2026-11-05 使用者：券商軟體裡的兩份清單各做一個按鈕，按一下全部加進目前這組（原本就在組裡的略過；指數期貨不算）：
+// 「股票期貨」＝綜合股期清單 50 檔；「小型股票期貨」＝小型股票期貨清單 21 檔（兩份不一樣，國巨、群聯、南電、穩懋、台光電兩邊都有）
+const WL_FUT_STOCK = [['2330', '台積電'], ['2303', '聯電'], ['2344', '華邦電'], ['3260', '威剛'], ['2408', '南亞科'], ['3006', '晶豪科'], ['8299', '群聯'], ['8150', '南茂'], ['6770', '力積電'], ['2327', '國巨*'], ['2492', '華新科'], ['6173', '信昌電'], ['1802', '台玻'], ['1717', '長興'], ['3037', '欣興'], ['3189', '景碩'], ['2383', '台光電'], ['8358', '金居'], ['2313', '華通'], ['6274', '台燿'], ['6213', '聯茂'], ['8046', '南電'], ['2368', '金像電'], ['4958', '臻鼎-KY'], ['3081', '聯亞'], ['6505', '台塑化'], ['1301', '台塑'], ['1303', '南亞'], ['1326', '台化'], ['1503', '士電'], ['6282', '康舒'], ['2337', '旺宏'], ['2367', '燿華'], ['2489', '瑞軒'], ['2329', '華泰'], ['2360', '致茂'], ['2603', '長榮'], ['2605', '新興'], ['2485', '兆赫'], ['2455', '全新'], ['8086', '宏捷科'], ['3105', '穩懋'], ['6285', '啟碁'], ['4919', '新唐'], ['5347', '世界'], ['3673', 'TPK-KY'], ['2486', '一詮'], ['5425', '台半'], ['2481', '強茂'], ['3665', '貿聯-KY']];
+const WL_FUT_SMALL = [['2357', '華碩'], ['3034', '聯詠'], ['2454', '聯發科'], ['2308', '台達電'], ['2345', '智邦'], ['6669', '緯穎'], ['3661', '世芯-KY'], ['2059', '川湖'], ['8299', '群聯'], ['3711', '日月光投控'], ['6488', '環球晶'], ['2383', '台光電'], ['3105', '穩懋'], ['3653', '健策'], ['3017', '奇鋐'], ['2327', '國巨*'], ['6223', '旺矽'], ['3443', '創意'], ['8046', '南電'], ['3324', '雙鴻'], ['3008', '大立光']];
+function wlImportList(list, label){
+  const g = wlTargetGroup();
+  // 目前這組的名字跟清單對不上（例如把小型股票期貨加進「股票期貨」）先問一聲，免得搞混
+  const match = label === '小型股票期貨' ? g.name.indexOf('小型股票期貨') >= 0 : (g.name.indexOf('股票期貨') >= 0 && g.name.indexOf('小型') < 0);
+  if (!match && !window.confirm('目前這組是「' + g.name + '」，不是「' + label + '」。\\n還是要把這 ' + list.length + ' 檔' + label + '加進「' + g.name + '」嗎？')) return;
+  const have = new Set(g.items.map((it) => it.code));
+  const fresh = list.filter(([c]) => !have.has(c)).length;
+  wlAddCodes(list.map(([code, name]) => ({ code, name })), g.id);
+  wl.addNote = fresh ? '已把 ' + fresh + ' 檔' + label + '加進「' + g.name + '」' + (list.length - fresh ? '（另外 ' + (list.length - fresh) + ' 檔原本就在）' : '') : '這 ' + list.length + ' 檔' + label + '都已經在「' + g.name + '」裡了';
+  renderWatch();
+}
 function renderWatch(){
   const body = document.getElementById('watchBody');
   if (!body) return;
   const g = wlGroup();
   body.innerHTML = wlSyncHtml() + wlTabsHtml() +
     '<div class="wl-add"><input type="text" id="wlAddInput" autocomplete="off" placeholder="輸入代號或名稱加入「' + wlEsc(wlTargetGroup().name) + '」，可一次貼多檔：2330 2317 3707">' +
-    '<button class="wl-btn primary" id="wlAddBtn">加入</button></div>' +
+    '<button class="wl-btn primary" id="wlAddBtn">加入</button><button class="wl-btn" id="wlImportFut" title="把綜合股期清單的 ' + WL_FUT_STOCK.length + ' 檔股票期貨標的一次加進目前這組，原本就在的略過">＋ 匯入股票期貨 ' + WL_FUT_STOCK.length + ' 檔</button><button class="wl-btn" id="wlImportSmall" title="把小型股票期貨清單的 ' + WL_FUT_SMALL.length + ' 檔標的一次加進目前這組，原本就在的略過">＋ 匯入小型股票期貨 ' + WL_FUT_SMALL.length + ' 檔</button></div>' +
     (wl.addNote ? '<div class="wl-hint">' + wlEsc(wl.addNote) + '</div>' : '') +
     (/^(ma20|mahit|maboth)$/.test(String(g.id)) ? '<div class="wl-hint">這組是均線分數排行自動帶進來的：盤中每分鐘換成當下的名單（用現價當今天收盤即時重算），收盤後是正式的；手動加的下次會被換掉。備註＝名次・分數，「也在…」＝同時在另一個榜；「📊雙榜交集」＝個股分數前 20 名跟前二十名常客兩個榜都有的。</div>' : '') +
     (/^obs\\d$/.test(String(g.id)) ? '<div class="wl-hint">這組是「強勢黑K選股」自動帶進來的：盤中每分鐘換成當下的名單（強勢黑K選股列幾檔這裡就幾檔），' +
@@ -15681,6 +15697,8 @@ document.getElementById('watchBody').addEventListener('keydown', (e) => {
 document.getElementById('watchBody').addEventListener('click', (e) => {
   if (e.target.closest('select, input')) return;
   if (e.target.closest('#wlAddBtn')){ wlSubmitAdd(); return; }
+  if (e.target.closest('#wlImportFut')){ wlImportList(WL_FUT_STOCK, '股票期貨'); return; }
+  if (e.target.closest('#wlImportSmall')){ wlImportList(WL_FUT_SMALL, '小型股票期貨'); return; }
   if (e.target.closest('#wlKeySet')){ wlSetKey((document.getElementById('wlKeyInput') || {}).value); return; }
   if (e.target.closest('#wlKeyGen') || e.target.closest('#wlSwitchGen')){
     const input = document.getElementById(e.target.closest('#wlKeyGen') ? 'wlKeyInput' : 'wlSwitchInput');
@@ -17601,7 +17619,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 22:54:03';
+const BUILD_STAMP = '2026-11-05 23:20:07';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22072,7 +22090,7 @@ const GUIDE_TOOLS = [
     b: ['🚨 今天入獄（最上面）：今天新公告、下一個交易日起進處置的股票（處置期間、幾分鐘撮合、解鎖日）；底下收著還在分盤交易的其他股票', '🔓 解鎖：接下來兩個交易日出關、恢復正常交易的', '⚠️ 連續警告：明天再被警告就可能分盤或延長處置，持有的要留意', '點代號開 K 線圖'] },
   { t: '自選股', label: '自選股', v: 'tb-watch', tags: ['盤中'], d: '把常看的股票收起來，分組、看即時報價，也能記成本算損益。',
     b: ['換手機或電腦用「同步碼」就能帶過去', '一鍵健診：持股的防守價、明日紅半／三日低／月線一次算好', '各列表看到喜歡的股票，點「☆」會先跳出分組清單讓你選要加進哪一組',
-      '每個分組可看「融資斷頭」表（跟個股問診同一張）；欄位表頭可以按，由大到小／由小到大排序', '系統自動幫你整理的分組（個股分數前 20 名、前二十名常客、⏰ 觀察分組）盤中每分鐘跟著動', '分組順序可以自己調：選到那個分組，按「◀ 前移」「後移 ▶」（電腦也能直接拖曳分組鈕），順序會跟著同步碼同步'] },
+      '每個分組可看「融資斷頭」表（跟個股問診同一張）；欄位表頭可以按，由大到小／由小到大排序', '系統自動幫你整理的分組（個股分數前 20 名、前二十名常客、⏰ 觀察分組）盤中每分鐘跟著動', '「＋ 匯入股票期貨」「＋ 匯入小型股票期貨」：按一下把股票期貨（50 檔）、小型股票期貨（21 檔）的標的加進目前這組，原本就在的略過', '分組順序可以自己調：選到那個分組，按「◀ 前移」「後移 ▶」（電腦也能直接拖曳分組鈕），順序會跟著同步碼同步'] },
   { t: '個股訊號追蹤', label: '個股盤中訊號追蹤', v: 'tb-track', tags: ['盤中'], d: '只看你自選股今天出現了哪些訊號，不用在一堆名單裡找。',
     b: ['自選股一出現新訊號就提醒（網頁要開著）', '不想追蹤的那檔按「關閉訊號」就不再跳；表頭「全部關閉」一次關掉', '點股票直接開 K 線圖'] },
   { t: '飆股雷達', label: 'K棒組合選股', v: 'tb-grail', tags: ['盤中', '固定時點'], d: '15 個選股邏輯（穿山鱷龍、黑龍短沖、黑飛舞、飛龍戰法）在固定時間點自動掃全市場，把符合的名單抓出來。',
