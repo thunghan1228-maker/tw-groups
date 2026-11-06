@@ -6605,7 +6605,7 @@ setInterval(() => { refreshLiveDailyBar().catch(() => {}); }, LIVE_DAILY_REFRESH
 // 2026-10-29 指數 K 線圖（IDX_TAIEX／IDX_OTC）盤中每 20 秒整份重抓目前的週期（日線最後一根、5 分、1 分都會跟著走），圖開著、頁面看得到才抓
 let lastIdxRefreshAt = 0;
 async function refreshIdxChart(){
-  if (!isWorldFut(currentChart.code) && Date.now() - lastIdxRefreshAt < 9000) return;   // 期貨 5 秒一次，其他指數 10 秒一次
+  if (Date.now() - lastIdxRefreshAt < (isWorldFut(currentChart.code) ? 9000 : 14000)) return;   // 2026-11-06 省 Cloudflare 請求數：期貨 10 秒一次、其他指數 15 秒一次（原本 5／10 秒）
   lastIdxRefreshAt = Date.now();
   if (!isIdxCode(currentChart.code) || !currentChart.isRealBars || !Array.isArray(currentChart.bars) || !currentChart.bars.length) return;
   if (document.visibilityState === 'hidden' || (isWorldFut(currentChart.code) ? !futLiveNow() : isWorldIdx(currentChart.code) ? !worldIdxLiveNow(currentChart.code) : (!twMarketLiveNow() && !(currentChart.code === 'IDX_TXF' && txfSessionLiveNow())))) return;
@@ -9765,6 +9765,7 @@ function home155ColHtml(){
 // 出關日用後端 /api/jail 的 releaseDays（今天前後各 5 個交易日）；後端還沒給就用週表（週一晚上會少上週四、五出關的）。
 const homeJailState = { at: 0, loading: false, quotes: {}, qAt: 0, qLoading: false };
 function homeJailLoad(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   if (homeJailState.loading || jlState.loading || Date.now() - homeJailState.at < 10 * 60e3) return;
   homeJailState.loading = true;
   fetch('/api/jail').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok'){ jlState.data = d; try { render(); } catch (_){} try { botRerunCols(); } catch (_){} try { remindOnData(); } catch (_){} } })
@@ -19530,6 +19531,7 @@ function renderK12AlertBox(){
   if (newBody && keepTop) newBody.scrollTop = keepTop;
 }
 async function k12AlertTick(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   if (!lastData || !lastData.groups || !lastData.groups.length) return;
   const now = new Date(Date.now() + 8 * 3600000);
   const day = now.getUTCDay(), minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
@@ -20187,6 +20189,7 @@ function tdSlotNow(){
   return String(Math.floor(slot / 60)).padStart(2, '0') + ':' + String(slot % 60).padStart(2, '0');
 }
 async function tdRecordTick(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   try {
     if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;
     const slot = tdSlotNow(), key = twTodayStr() + ' ' + slot;
@@ -20599,6 +20602,7 @@ function td905When(code, r, date, cap){
   return { t: last[1] > cap ? cap : last[1], last: last[0], brk, p2, big };
 }
 function td905Run(hm, silent){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   const date = twTodayStr(), seen = td905Seen(date);
   let loading = false, changed = false;
   const fresh = [];
@@ -21926,6 +21930,7 @@ function obsSyncWatchlist(rep){
 }
 // 盤中每分鐘自己重算一次，讓自選股的 ⏰ 四個分組即時跟著動（2026-10-24 使用者：不要等到盤後）；不依賴首頁那欄有沒有顯示
 function obsWlTick(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   if (obsState.loading || wl.loading || wl.busy) return;
   if (document.visibilityState !== 'visible') return;   // 看不到的分頁不重算（請求量警示 2026-10-28）
   const hm = obsNowHm();
@@ -27317,6 +27322,7 @@ const mclWatch = { rows: null, at: 0, loading: false };
 const MCL_TOUCH_SEEN_KEY = 'mclTouchSeen';
 let mclTouchLines = [];
 async function mclWatchLoad(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   if (mclWatch.loading || (mclWatch.rows && Date.now() - mclWatch.at < 60 * 60 * 1000)) return;
   mclWatch.loading = true;
   try {
@@ -28118,6 +28124,7 @@ function maHitsSyncWatchlist(d){
   return maWlApply();
 }
 async function maWlTick(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   if (maWlLoading || wl.loading || wl.busy) return;
   if (document.visibilityState !== 'visible') return;   // 2026-10-28：看不到的分頁不每分鐘打 API（請求量警示），回到畫面時下面的 visibilitychange 會馬上補一次
   if (wl.key && !wl.syncedAt) return;                       // 有同步碼但雲端那份還沒讀回來：先不動，免得蓋掉

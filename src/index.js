@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-05 23:20:07";
+const BUILD_STAMP = "2026-11-06 10:28:01";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -6694,7 +6694,7 @@ setInterval(() => { refreshLiveDailyBar().catch(() => {}); }, LIVE_DAILY_REFRESH
 // 2026-10-29 指數 K 線圖（IDX_TAIEX／IDX_OTC）盤中每 20 秒整份重抓目前的週期（日線最後一根、5 分、1 分都會跟著走），圖開著、頁面看得到才抓
 let lastIdxRefreshAt = 0;
 async function refreshIdxChart(){
-  if (!isWorldFut(currentChart.code) && Date.now() - lastIdxRefreshAt < 9000) return;   // 期貨 5 秒一次，其他指數 10 秒一次
+  if (Date.now() - lastIdxRefreshAt < (isWorldFut(currentChart.code) ? 9000 : 14000)) return;   // 2026-11-06 省 Cloudflare 請求數：期貨 10 秒一次、其他指數 15 秒一次（原本 5／10 秒）
   lastIdxRefreshAt = Date.now();
   if (!isIdxCode(currentChart.code) || !currentChart.isRealBars || !Array.isArray(currentChart.bars) || !currentChart.bars.length) return;
   if (document.visibilityState === 'hidden' || (isWorldFut(currentChart.code) ? !futLiveNow() : isWorldIdx(currentChart.code) ? !worldIdxLiveNow(currentChart.code) : (!twMarketLiveNow() && !(currentChart.code === 'IDX_TXF' && txfSessionLiveNow())))) return;
@@ -9854,6 +9854,7 @@ function home155ColHtml(){
 // 出關日用後端 /api/jail 的 releaseDays（今天前後各 5 個交易日）；後端還沒給就用週表（週一晚上會少上週四、五出關的）。
 const homeJailState = { at: 0, loading: false, quotes: {}, qAt: 0, qLoading: false };
 function homeJailLoad(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   if (homeJailState.loading || jlState.loading || Date.now() - homeJailState.at < 10 * 60e3) return;
   homeJailState.loading = true;
   fetch('/api/jail').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.status === 'ok'){ jlState.data = d; try { render(); } catch (_){} try { botRerunCols(); } catch (_){} try { remindOnData(); } catch (_){} } })
@@ -17619,7 +17620,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-05 23:20:07';
+const BUILD_STAMP = '2026-11-06 10:28:01';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19619,6 +19620,7 @@ function renderK12AlertBox(){
   if (newBody && keepTop) newBody.scrollTop = keepTop;
 }
 async function k12AlertTick(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   if (!lastData || !lastData.groups || !lastData.groups.length) return;
   const now = new Date(Date.now() + 8 * 3600000);
   const day = now.getUTCDay(), minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
@@ -20276,6 +20278,7 @@ function tdSlotNow(){
   return String(Math.floor(slot / 60)).padStart(2, '0') + ':' + String(slot % 60).padStart(2, '0');
 }
 async function tdRecordTick(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   try {
     if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;
     const slot = tdSlotNow(), key = twTodayStr() + ' ' + slot;
@@ -20688,6 +20691,7 @@ function td905When(code, r, date, cap){
   return { t: last[1] > cap ? cap : last[1], last: last[0], brk, p2, big };
 }
 function td905Run(hm, silent){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   const date = twTodayStr(), seen = td905Seen(date);
   let loading = false, changed = false;
   const fresh = [];
@@ -22015,6 +22019,7 @@ function obsSyncWatchlist(rep){
 }
 // 盤中每分鐘自己重算一次，讓自選股的 ⏰ 四個分組即時跟著動（2026-10-24 使用者：不要等到盤後）；不依賴首頁那欄有沒有顯示
 function obsWlTick(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   if (obsState.loading || wl.loading || wl.busy) return;
   if (document.visibilityState !== 'visible') return;   // 看不到的分頁不重算（請求量警示 2026-10-28）
   const hm = obsNowHm();
@@ -27406,6 +27411,7 @@ const mclWatch = { rows: null, at: 0, loading: false };
 const MCL_TOUCH_SEEN_KEY = 'mclTouchSeen';
 let mclTouchLines = [];
 async function mclWatchLoad(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   if (mclWatch.loading || (mclWatch.rows && Date.now() - mclWatch.at < 60 * 60 * 1000)) return;
   mclWatch.loading = true;
   try {
@@ -28207,6 +28213,7 @@ function maHitsSyncWatchlist(d){
   return maWlApply();
 }
 async function maWlTick(){
+  if (CHART_WINDOW_MODE) return;   // 2026-11-06 浮動 K 線圖視窗只做自己的圖，不跑儀表板輪詢（省 Cloudflare 請求數）
   if (maWlLoading || wl.loading || wl.busy) return;
   if (document.visibilityState !== 'visible') return;   // 2026-10-28：看不到的分頁不每分鐘打 API（請求量警示），回到畫面時下面的 visibilitychange 會馬上補一次
   if (wl.key && !wl.syncedAt) return;                       // 有同步碼但雲端那份還沒讀回來：先不動，免得蓋掉
@@ -29720,7 +29727,8 @@ async function serveTutorialVideo(request, env, url) {
 // 2026-11-05 使用者：Worker 自己記錄每 10 秒的即時價。美債 10 年期殖利率幾乎 24 小時在交易，但 Yahoo ^TNX 的分K 只有芝加哥選擇權交易所那段時間，亞洲時段是空的。
 // 這個 Durable Object 用 alarm 每 10 秒向 TradingView 問一次即時價（TVC:US10Y），合成 1 分K，存在自己的儲存空間（每小時一個 key、留 4 天）；
 // 圖表的 5 分／1 分把 Yahoo 最後一根之後的接上記錄的 K 棒（見 /api/idx-bars/tnx）。只記有即時價、而且最新價 3 分鐘內有更新的時候。
-const REC_SYMS = ["tnx"];
+// 2026-11-06 使用者要日經、韓國、恒生的 1 分／5 分 K 圖也即時：Yahoo 這三個指數的分K 慢約 15 分鐘（報價是即時的、圖慢），一起記錄（TradingView 即時價，休市／暫停交易時沒有新價就不記）
+const REC_SYMS = ["tnx", "n225", "kospi", "hsi"];
 export class Recorder {
   constructor(state, env) { this.state = state; this.env = env; }
   async fetch(request) {
@@ -30724,9 +30732,10 @@ const WORKER_ENTRY = {
               }
             } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
           }
-          // 美債 10 年期：Yahoo ^TNX 只有芝加哥選擇權交易所時段的分K，把 Worker 自己每 10 秒記錄的 1 分K（Durable Object）接在 Yahoo 最後一根後面
-          if (idxId === "tnx" && tf !== "1d") {
-            const rec = await recorderBars(env, "tnx");
+          // 美債 10 年期：Yahoo ^TNX 只有芝加哥選擇權交易所時段的分K；日經／韓國／恒生：Yahoo 分K 慢約 15 分鐘。
+          // 把 Worker 自己每 10 秒記錄的 1 分K（Durable Object）接在 Yahoo 最後一根後面
+          if (REC_SYMS.indexOf(idxId) >= 0 && tf !== "1d") {
+            const rec = await recorderBars(env, idxId);
             if (rec.length) {
               const step = tf === "5m" ? 300000 : 60000, bucket = new Map();
               for (const b of rec) {

@@ -886,7 +886,8 @@ async function serveTutorialVideo(request, env, url) {
 // 2026-11-05 使用者：Worker 自己記錄每 10 秒的即時價。美債 10 年期殖利率幾乎 24 小時在交易，但 Yahoo ^TNX 的分K 只有芝加哥選擇權交易所那段時間，亞洲時段是空的。
 // 這個 Durable Object 用 alarm 每 10 秒向 TradingView 問一次即時價（TVC:US10Y），合成 1 分K，存在自己的儲存空間（每小時一個 key、留 4 天）；
 // 圖表的 5 分／1 分把 Yahoo 最後一根之後的接上記錄的 K 棒（見 /api/idx-bars/tnx）。只記有即時價、而且最新價 3 分鐘內有更新的時候。
-const REC_SYMS = ["tnx"];
+// 2026-11-06 使用者要日經、韓國、恒生的 1 分／5 分 K 圖也即時：Yahoo 這三個指數的分K 慢約 15 分鐘（報價是即時的、圖慢），一起記錄（TradingView 即時價，休市／暫停交易時沒有新價就不記）
+const REC_SYMS = ["tnx", "n225", "kospi", "hsi"];
 export class Recorder {
   constructor(state, env) { this.state = state; this.env = env; }
   async fetch(request) {
@@ -1890,9 +1891,10 @@ const WORKER_ENTRY = {
               }
             } catch (twErr) { /* 台灣版抓不到就用國際版 */ }
           }
-          // 美債 10 年期：Yahoo ^TNX 只有芝加哥選擇權交易所時段的分K，把 Worker 自己每 10 秒記錄的 1 分K（Durable Object）接在 Yahoo 最後一根後面
-          if (idxId === "tnx" && tf !== "1d") {
-            const rec = await recorderBars(env, "tnx");
+          // 美債 10 年期：Yahoo ^TNX 只有芝加哥選擇權交易所時段的分K；日經／韓國／恒生：Yahoo 分K 慢約 15 分鐘。
+          // 把 Worker 自己每 10 秒記錄的 1 分K（Durable Object）接在 Yahoo 最後一根後面
+          if (REC_SYMS.indexOf(idxId) >= 0 && tf !== "1d") {
+            const rec = await recorderBars(env, idxId);
             if (rec.length) {
               const step = tf === "5m" ? 300000 : 60000, bucket = new Map();
               for (const b of rec) {
