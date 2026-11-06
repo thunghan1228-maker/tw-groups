@@ -16793,10 +16793,7 @@ function mclChips(xs, mode){
 function mclSummaryHtml(sm, mode){
   sm = sm || {};
   const lab = (color, text) => '<b style="color:' + color + '">' + text + '</b>';
-  if (mode === 'remind'){   // 2026-11-06 使用者：今日提醒拿掉「A 線已破」「B 線 5% 內」兩個欄位（名單太長）；只留今日新破（有才顯示），個股問診用的 diag 模式不動
-    return (sm.aNew || []).length || (sm.bNew || []).length
-      ? '<div class="race-note" style="line-height:2.1">' + lab('#60a5fa', '今日新破') + '　' + lab('#60a5fa', 'A：') + mclChips(sm.aNew, mode) + '　' + lab('#60a5fa', 'B：') + mclChips(sm.bNew, mode) + '</div>' : '';
-  }
+  if (mode === 'remind') return '';   // 2026-11-06 使用者：今日提醒的「A 線已破」「B 線 5% 內」「今日新破」都拿掉（名單太長），只留容易回檔、接近底部；個股問診用的 diag 模式不動
   return '<div class="race-note" style="line-height:2.1"><b>你的股票在哪一條線上？</b><br>' + lab('#22c55e', 'A 線已破・' + (sm.aBroken || []).length + ' 檔') + '　' + mclChips(sm.aBroken, mode) +
     '<br>' + lab('#f472b6', 'B 線 5% 內・' + (sm.bWithin || []).length + ' 檔') + '　' + mclChips(sm.bWithin, mode) +
     ((sm.aNew || []).length || (sm.bNew || []).length ? '<br>' + lab('#60a5fa', '今日新破') + '　' + lab('#60a5fa', 'A：') + mclChips(sm.aNew, mode) + '　' + lab('#60a5fa', 'B：') + mclChips(sm.bNew, mode) : '') + '</div>';
