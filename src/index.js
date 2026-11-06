@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-06 21:47:28";
+const BUILD_STAMP = "2026-11-06 21:57:25";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -17644,7 +17644,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-06 21:47:28';
+const BUILD_STAMP = '2026-11-06 21:57:25';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -29763,6 +29763,15 @@ async function serveTutorialVideo(request, env, url) {
 // 圖表的 5 分／1 分把 Yahoo 最後一根之後的接上記錄的 K 棒（見 /api/idx-bars/tnx）。只記有即時價、而且最新價 3 分鐘內有更新的時候。
 // 2026-11-06 使用者要日經、韓國、恒生的 1 分／5 分 K 圖也即時：Yahoo 這三個指數的分K 慢約 15 分鐘（報價是即時的、圖慢），一起記錄（TradingView 即時價，休市／暫停交易時沒有新價就不記）
 const REC_SYMS = ["tnx", "n225", "kospi", "hsi"];
+// 2026-11-06 例行檢查：日經收盤（台北 14:30）後 TradingView 偶爾還會更新時間（結算價之類），記錄器就記出一排平的 K 棒（14:45、18:31…）。
+// 日經／韓國／恒生只在開盤時段才記、才接即時價（台北時間分鐘數：日經、韓國 08:00～14:35，恒生 09:30～16:10，週一到週五）；美債殖利率幾乎 24 小時，不限
+const REC_SESSION = { n225: [480, 875], kospi: [480, 875], hsi: [570, 970] };
+function recInSession(sym, ms) {
+  const w = REC_SESSION[sym];
+  if (!w) return true;
+  const t = new Date(ms + 8 * 3600000), day = t.getUTCDay(), m = t.getUTCHours() * 60 + t.getUTCMinutes();
+  return day >= 1 && day <= 5 && m >= w[0] && m <= w[1];
+}
 export class Recorder {
   constructor(state, env) { this.state = state; this.env = env; }
   async fetch(request) {
@@ -29781,7 +29790,7 @@ export class Recorder {
     const nowMs = Date.now();
     for (const sym of REC_SYMS) {
       const q = tv[sym];
-      if (!q || !Number.isFinite(q.price) || nowMs / 1000 - q.time > 180) continue;   // 沒有即時價（休市）就不記
+      if (!q || !Number.isFinite(q.price) || nowMs / 1000 - q.time > 180 || !recInSession(sym, nowMs)) continue;   // 沒有即時價（休市）、不在開盤時段就不記
       const key = Math.floor(nowMs / 60000) * 60000;
       let cur = await this.state.storage.get("cur:" + sym);
       if (cur && cur.ts !== key) { await this.saveBar(sym, cur); cur = null; }   // 上一分鐘結束：存進那個小時的 key
@@ -30769,7 +30778,7 @@ const WORKER_ENTRY = {
           // 美債 10 年期：Yahoo ^TNX 只有芝加哥選擇權交易所時段的分K；日經／韓國／恒生：Yahoo 分K 慢約 15 分鐘。
           // 把 Worker 自己每 10 秒記錄的 1 分K（Durable Object）接在 Yahoo 最後一根後面
           if (REC_SYMS.indexOf(idxId) >= 0 && tf !== "1d") {
-            const rec = await recorderBars(env, idxId);
+            const rec = (await recorderBars(env, idxId)).filter((b) => recInSession(idxId, b.ts));   // 收盤後記下的平 K 棒不要
             if (rec.length) {
               const step = tf === "5m" ? 300000 : 60000, bucket = new Map();
               for (const b of rec) {
@@ -30785,7 +30794,7 @@ const WORKER_ENTRY = {
           // TradingView 即時價（2 分鐘內有更新才算盤中）：分K 最後一根的收盤／高低換成它，過了這根的時間就接一根新的；日線今天那根的開高低收換成它的
           try {
             const tv = (await tvQuotes())[idxId];
-            if (tv && Number.isFinite(tv.price) && bars.length && Date.now() / 1000 - tv.time < 120) {
+            if (tv && Number.isFinite(tv.price) && bars.length && Date.now() / 1000 - tv.time < 120 && (tf === "1d" || recInSession(idxId, Date.now()))) {
               const p = r2(tv.price), last = bars[bars.length - 1];
               if (tf === "1d") {
                 const lastDay = String(last.ts).slice(0, 10), day = tvExDay(tv.time, idxId);
