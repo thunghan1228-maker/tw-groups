@@ -2844,6 +2844,18 @@
   .jl-badge.hi{border-color:#dc2626;color:#dc2626;background:rgba(220,38,38,.08);}
   .jl-badge.lo{border-color:#16a34a;color:#16a34a;background:rgba(22,163,74,.08);}
   .jl-badge.first{border-color:#b45309;color:#b45309;}
+  /* 處置機率表（2026-11-06）：機率那顆球——極高／高紅、中／中低黃、低綠；跌多的「低於」、漲多的「高於」 */
+  .jl-tier{display:inline-flex;align-items:center;gap:5px;font-weight:700;white-space:nowrap;}
+  .jl-tier i{width:11px;height:11px;border-radius:50%;display:inline-block;background:#9ca3af;box-shadow:inset 0 -2px 3px rgba(0,0,0,.28);}
+  .jl-tier.t0 i,.jl-tier.t1 i{background:#e11d48;} .jl-tier.t2 i,.jl-tier.t3 i{background:#f5b301;} .jl-tier.t4 i{background:#22c55e;}
+  .jl-tier.t0{color:#fb7185;}
+  .jl-otwrap{overflow-x:auto;} .jl-otbl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums;}
+  .jl-otbl th{text-align:left;color:var(--muted);font-weight:700;font-size:12.5px;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .jl-otbl th small{font-weight:600;font-size:11px;margin-left:2px;}
+  .jl-otbl td{padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .jl-dir{color:var(--muted);font-size:11px;font-weight:600;margin-right:3px;}
+  .jl-upmark{font-size:10.5px;color:#f87171;border:1px solid #f87171;border-radius:4px;padding:0 3px;margin-left:4px;}
+  .hr-jail-card .hr-help-tbl td.jl-o{white-space:normal;max-width:none;color:var(--text);font-weight:600;} .hr-jail-card .hr-help-tbl td.jl-o .jl-dir{display:block;margin:0;}
   .jl-sub{font-size:12px;color:var(--muted);}
   .jl-why{font-size:11px;color:var(--muted);margin-top:2px;}
   .jl-status{font-size:13px;margin:2px 0 4px;}
@@ -9866,11 +9878,22 @@ function homeJailHelpHtml(){
         : list.length ? list.map((x) => row(x, wdHead, n)).join('')
         : '<tr><td colspan="' + n + '">' + empty + '</td></tr>') + '</tbody></table></div>';
   };
+  // 2026-11-06 使用者：老師的處置機率表（第一次第一款：機率、週一收盤低於、週二累計低於）也放首頁，疊在嫌疑名單下面
+  const outlookCard = () => {
+    const dd = jlState.data, list = dd && dd.status === 'ok' ? (dd.firstTime || []) : null;
+    const body = !list ? '<tr><td colspan="5">讀取中…</td></tr>' : !list.length ? '<tr><td colspan="5">今天沒有第一次觸及第一款的股票</td></tr>'
+      : list.map((f) => { const o = f.outlook;
+        return '<tr class="hr-stk" data-code="' + wlEsc(f.code) + '" data-name="' + wlEsc(f.name) + '" tabindex="0" role="button" title="' + wlEsc(f.name + '：' + (o ? '週一 ' + o.mon.text + '／週二 ' + o.tue.text : '日K資料不足')) + '"><td>' + wlEsc(f.code) + '</td><td>' + wlEsc(f.name) + '</td><td>' + (o ? jlTierHtml(o.tier) : '—') + '</td>'
+          + (o ? '<td class="jl-o">' + jlOutCell(o, o.mon) + '</td><td class="jl-o">' + jlOutCell(o, o.tue) + '</td>' : '<td class="jl-o" colspan="2">日K不足</td>') + '</tr>'; }).join('');
+    return '<div class="hr-help-card hr-jail-card"><div class="hr-help-title">🆕 第一次第一款・處置機率' + (list ? ' <small>' + list.length + ' 檔・' + jlTierCounts(list) + '</small>' : '') + '</div>' +
+      '<table class="hr-help-tbl"><thead><tr><th>代號</th><th>名稱</th><th>機率</th><th class="jl-o" title="週一收盤的漲跌幅低於這個數字就會再被注意（漲多的標高於）">週一收盤低於</th><th class="jl-o" title="假設週一平盤，週二累計的漲跌幅低於這個數字就會再被注意">週二累計低於</th></tr></thead><tbody>' + body + '</tbody></table>' +
+      '<div class="hr-note">連 3 天被注意才會處置，所以週一、週二都要再中一次；「漲停也會中」＝收漲停也躲不掉。依公開收盤價推算，非預測。</div></div>';
+  };
   // 2026-10-16 使用者：三欄由上到下——今日入獄→即將入獄→嫌疑名單（同一欄疊三張）｜即將出關→犯罪集團｜已出關
   const col = (html) => '<div class="hr-jail-col">' + html + '</div>';
   return col(card('🔒 今日入獄' + (m && m.todayStart ? ' <small>' + jlMd(m.todayStart) + ' 生效・新進處置</small>' : ''), '出關日', m ? m.todayIn : [], '今天沒有新進處置', '處置') +
       card('🔒 即將入獄' + (m && m.inRange ? ' <small>' + m.inRange + '</small>' : ''), '入獄日', m ? m.soonIn : [], '目前沒有', '星期') +
-      card('🔍 嫌疑名單' + (m ? ' <small>' + wlEsc(m.nextMd || '') + '(' + wlEsc(m.nextWeekday || '') + ') 收盤再符合就會被關</small>' : ''), '機率', m ? m.suspects : [], '明天沒有一次就會被關的股票', '')) +
+      card('🔍 嫌疑名單' + (m ? ' <small>' + wlEsc(m.nextMd || '') + '(' + wlEsc(m.nextWeekday || '') + ') 收盤再符合就會被關</small>' : ''), '機率', m ? m.suspects : [], '明天沒有一次就會被關的股票', '') + outlookCard()) +
     col(card('🔓 即將出關', '出關日', m ? m.soonOut : [], '未來 3 個交易日沒有', '星期') +
       card('🏴 犯罪集團 <small>同族群 2 檔以上被關或即將被關＝資金熱區</small>', '出關日', m ? m.gangs : [], '目前沒有同族群 2 檔以上一起被關', '')) +
     col(card('🎉 已出關', '第幾天', m ? m.out : [], '最近 3 個交易日沒有', ''));
@@ -22045,7 +22068,7 @@ const GUIDE_TOOLS = [
   { t: '營收成長榜', label: '營收成長榜', v: 'tb-revenue', tags: ['每月'], d: '每月 10 號前公司陸續公布上個月營收，這裡把全市場排好：誰年增最多、公布後股價怎麼反應。',
     b: ['一天更新三次，公布日自動記下來', '可以查單一檔的每月營收'] },
   { t: '處置監獄', label: '處置監獄', v: 'tb-jail', tags: ['盤後'], d: '哪些股票被關（處置）、什麼時候出獄、哪些快被關（嫌疑名單）。被處置的股票要分盤撮合，進出很不順，事先知道比較好。',
-    b: ['一週出獄時間表、今日入獄、嫌疑名單門檻', '打代號查前科：以前被關過幾次'] },
+    b: ['一週出獄時間表、今日入獄、嫌疑名單門檻', '🆕 第一次第一款・處置機率：極高／高／中／中低／低，附週一收盤、週二累計的門檻（漲停也會中、要跌幾 % 才會中），首頁最下面也有', '打代號查前科：以前被關過幾次'] },
   { t: '估值河流圖', label: '估值河流圖', v: 'tb-river', tags: ['盤後'], d: '把股價放進本益比河道裡，看現在是便宜、合理還是貴。',
     b: ['河道四區＋分水嶺', '「均線分數 ≥10 × 便宜區」清單：位置強又不貴的'] },
   { t: '研究室', label: '研究室', v: 'tb-lab', tags: ['大方向'], d: '盤勢以外的大方向，八個分頁：',
@@ -23503,6 +23526,12 @@ const jlMd = (iso) => { const p = String(iso || '').split('-'); return p.length 
 const jlCardStock = (code, name, market) => '<button type="button" class="jl-stk" data-jl-code="' + rdEsc(code) + '" data-jl-name="' + rdEsc(name || '') + '">'
   + '<b>' + rdEsc(name || code) + '</b> <small>' + rdEsc(code) + '・' + rdEsc(market || '') + '</small></button>';
 const jlNew = (on) => on ? '<span class="jl-newtag">新</span>' : '';
+// 2026-11-06 使用者：老師的「處置機率」表（機率 極高／高／中／中低／低、股號股名、週一收盤低於、週二累計低於（假設週一平盤））放進處置監獄和首頁。
+// 後端 /api/jail 的 firstTime 每檔有 outlook：tier、side（down＝跌多的、收盤低於門檻就中；up＝漲多的、高於就中）、mon／tue 各有 text。
+const JL_TIER_CLS = { '極高': 't0', '高': 't1', '中': 't2', '中低': 't3', '低': 't4' };
+const jlTierHtml = (tier) => '<span class="jl-tier ' + (JL_TIER_CLS[tier] || '') + '"><i></i>' + rdEsc(tier || '—') + '</span>';
+const jlOutCell = (o, cell) => (o.side === 'up' && !cell.always && cell.pct !== null ? '<small class="jl-dir">高於</small>' : '') + rdEsc(cell.text);
+const jlTierCounts = (list) => ['極高', '高', '中', '中低', '低'].map((t) => t + ' ' + (list || []).filter((f) => f.outlook && f.outlook.tier === t).length).join('・');
 const jlClauseText = (list) => (list || []).map((c) => '第' + ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三'][c] + '款').join('、');
 function jlTime(iso){
   if (!iso) return '—';
@@ -23604,9 +23633,13 @@ function renderJail(){
       + '<div class="jl-th"><div class="jl-th-h">📐 明天門檻</div>' + (s.lines.length ? s.lines.map(jlLineHtml).join('') : '<div class="jl-line note">' + (s.missingBars ? '今天的日K還沒進來，門檻晚一點算' : '明天再被公布一次注意就會' + (s.jailed ? '延長' : '被關')) + '</div>') + '</div></div>').join('') + '</div>'
       + '<div class="jl-copy"><div class="jl-copy-h">📋 可直接複製貼上 <button type="button" data-jl-copy>複製</button></div><textarea id="jlCopyText" readonly rows="8">' + rdEsc(d.copyText || '') + '</textarea></div>'
       : '<div class="jl-note">明天沒有一次就會被關的股票</div>');
-  const first = '<div class="jl-h">🆕 今日第一次第一款 <small>10 個營業日內首次觸及第一款（累積會走向處置）</small></div>'
-    + (d.firstTime.length ? '<div class="jl-grid">' + d.firstTime.map((f) => '<div class="jl-card"><div class="jl-card-h">' + jlCardStock(f.code, f.name, f.market)
-      + '<span class="jl-badge first">🆕 第一次</span></div><div class="jl-sub">10日第一次・參考日 ' + rdEsc(jlMd(d.dataDate)) + '</div></div>').join('') + '</div>'
+  const fRows = d.firstTime.map((f) => { const o = f.outlook;
+    return '<tr><td>' + (o ? jlTierHtml(o.tier) : '<span class="jl-sub">—</span>') + '</td><td>' + jlStock(f.code, f.name, (f.market === '上櫃' ? ' <small class="jl-sub">櫃</small>' : '') + (o && o.side === 'up' ? '<span class="jl-upmark">漲多</span>' : '')) + '</td>'
+      + (o ? '<td>' + jlOutCell(o, o.mon) + '</td><td>' + jlOutCell(o, o.tue) + '</td>' : '<td colspan="2" class="jl-sub">日K資料不足（新上市或今天的日K還沒進來），算不出門檻</td>') + '</tr>'; }).join('');
+  const first = '<div class="jl-h">🆕 今日第一次第一款・處置機率 <small>10 個營業日內首次觸及第一款（累積會走向處置）</small></div>'
+    + '<div class="jl-box">第一次觸及第一款，要走到處置得<b>連 3 個營業日都被注意</b>：週一、週二都要再中一次。<b>週一收盤低於</b>＝週一收盤的漲跌幅（對今天收盤）低於這個數字就會再中；<b>週二累計低於</b>＝假設週一平盤，週二累計的漲跌幅低於這個數字就會再中。'
+    + '「<b>漲停也會中</b>」＝收到漲停也躲不掉；「<b>要跌 X%</b>」＝要跌 X% 才會中。漲多的股票（標「漲多」）相反：收盤<b>高於</b>門檻才中。機率依公開收盤價推算（第一款價格那條），非預測、非買賣建議。</div>'
+    + (d.firstTime.length ? '<div class="jl-note">' + jlTierCounts(d.firstTime) + '</div><div class="jl-otwrap"><table class="jl-otbl"><thead><tr><th>機率</th><th>股號 股名</th><th>週一收盤低於</th><th>週二累計低於<small>（假設週一平盤）</small></th></tr></thead><tbody>' + fRows + '</tbody></table></div>'
       : '<div class="jl-note">今天沒有第一次觸及第一款的股票</div>');
   const index = '<div class="jl-h">📇 個股處置前科索引 <small>近 3 個月曾被處置、近 25 個交易日曾被注意的股，點股號看該股處置紀錄與出關日</small></div>'
     + '<details class="jl-index"><summary>展開全部 ' + d.index.length + ' 檔個股索引</summary><div class="jl-index-grid">'
