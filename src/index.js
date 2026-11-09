@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-09 21:14:28";
+const BUILD_STAMP = "2026-11-09 21:21:13";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -149,7 +149,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) minmax(0, 1.6fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) minmax(0, 1.6fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -219,10 +219,14 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .hr-lg-src .s1{color:#c084fc;} .hr-lg-src .s2{color:#a78bfa;} .hr-lg-src .s3{color:#2dd4bf;} .hr-lg-src .s4{color:#fbbf24;}
   .hr-lg-hold{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-weight:700;}
   /* 首頁飆股雷達欄（2026-10-15）：分類標題紅底、族群名黃色，每檔後面帶符號；名稱太長截掉，符號和漲跌幅不截 */
-  .hr-row.hr-pkw{display:block;padding:4px 8px 5px;white-space:normal;}
-  .hr-pkw .l1{display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;} .hr-pkw .l1 .hr-name{min-width:0;overflow:hidden;text-overflow:ellipsis;} .hr-pkw .l1 .hr-pkw-px{margin-left:auto;font-weight:700;} .hr-pkw .l1 .hr-avg{margin-left:0;min-width:4.6em;text-align:right;}
-  .hr-pkw .l2{display:flex;flex-wrap:wrap;align-items:center;gap:1px 8px;margin-top:2px;font-size:10.5px;line-height:1.35;color:var(--muted);}
+  .hr-row.hr-pkw{display:block;padding:3px 8px 4px;white-space:normal;} .hr-pkw .l1 .hr-code{flex:0 0 auto;}
+  .hr-row.hr-obs{flex-wrap:wrap;row-gap:1px;} .hr-row.hr-obs .hr-avg{margin-left:auto;}
+  .hr-row .hr-l2{flex:0 0 100%;display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);} .hr-row .hr-l2 i{font-style:normal;} .hr-row .hr-l2 .hr-hold{margin-left:0;font-size:11.5px;}   /* 2026-11-09 使用者：大戶力放在個股下面一行 */
+  .hr-pkw .l2 .hr-hold{margin-left:0;font-size:11.5px;}
+  .hr-pkw .l1{display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;} .hr-pkw .l1 .hr-name{min-width:0;overflow:hidden;text-overflow:ellipsis;} .hr-pkw .l1 .hr-avg{margin-left:auto;text-align:right;}
+  .hr-pkw .l2{display:flex;align-items:center;gap:4px;margin-top:1px;font-size:10.5px;line-height:1.35;color:var(--muted);} .hr-pkw .l2 i{font-style:normal;}
   .hr-pkw-c i{font-style:normal;color:var(--muted);margin-right:2px;} .hr-pkw-c b{font-weight:700;color:var(--text,#e5e7eb);} .hr-pkw-c b.up{color:var(--up);} .hr-pkw-c b.down{color:var(--down);}
+  .hr-pkw-tg{background:#374151;color:#fff;border:0;border-radius:4px;padding:1px 6px;font-size:10.5px;cursor:pointer;margin-left:4px;} .hr-pkw-mode{padding-top:0;}
   .hr-pkw-g{background:#6b7280;color:#fff;border-radius:4px;padding:0 4px;font-weight:700;font-size:10px;}
   .hr-pkw-b{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-size:10px;font-weight:700;white-space:nowrap;} .hr-pkw-s{color:#fbbf24;font-size:11px;}   /* 2026-11-09 首頁最上面的「觀察中・等收黑」 */
   .hr-obs-cat{padding:4px 8px;font-size:12px;font-weight:800;background:#7c3aed;color:#fff;border-top:1px solid var(--line);}   /* 2026-10-18 使用者：【1】【2】【3】改紫底白字 */
@@ -10558,17 +10562,31 @@ const homeObsCats = (ks = HOME_OBS_CATS) => ks.map((k) => OBS_CATS.find(([c]) =>
 const HOME_OBS_REFRESH_MS = 60 * 1000;   // 2026-10-24 使用者：盤中要即時，原本 5 分鐘改每分鐘重算（也同步自選股的 ⏰ 四個分組）
 // 2026-11-09 使用者：創高黑龍選股（手動）「今天」分頁的「② 觀察中・等收黑」名單搬到首頁第一欄最上面（原本的多觀察【1】～【5】往下移）。
 // 資料跟那個視窗同一份（/api/picker 今天分頁、你在「模組」存的參數和手動勾的名單），收盤後每天晚上換新的一天；漲跌幅跟首頁報價一起更新。
+// 預設規則／我的設定：創高黑龍選股視窗的參數和手動勾的名單存在這台瀏覽器（localStorage），平常視窗和無痕視窗看到的名單就不一樣（2026-11-09 使用者：無痕有 11 檔、平常的瀏覽器跑不出來）。
+// 首頁這塊預設用「預設規則、不帶手動名單」（跟無痕視窗一樣）；參數或名單跟預設不同時，才出現「改看我的設定」切換。
+let pkHomeMine = false;
+try { pkHomeMine = localStorage.getItem('pkHomeMine') === '1'; } catch (_) {}
+const PK_QUERY_KEYS = ['hi', 'within', 'score', 'sdays', 'spct', 'stimes', 'val', 'mcap', 'track', 'weekN', 'wsort', 'swaps', 'swapFrom', 'black', 'bscore', 'lots', 'rma', 'xma', 'tpr', 'per', 'maxpos', 'start', 'scope', 'exdispo', 'fri', 'full', 'norebuy', 'addon', 'reduce', 'feeOn', 'fee'];
+function pkCustomDiff(){
+  const diff = PK_QUERY_KEYS.filter((k) => pkParams[k] !== PK_DEFAULTS[k]);
+  const lists = Object.keys(pkLists).filter((d) => Array.isArray(pkLists[d]) && pkLists[d].length).length;
+  return { n: diff.length, keys: diff, lists, any: diff.length > 0 || lists > 0 };
+}
+// 暫時換成預設規則算出 query／發請求（pkQuery、pkEnsure 開頭都是同步讀全域，之後才 await）
+function pkWithHomeRules(fn){
+  const keep = { params: pkParams, lists: pkLists, stars: pkStars, date: pkState.date };
+  pkState.date = null;
+  if (!pkHomeMine){ pkParams = Object.assign({}, PK_DEFAULTS); pkLists = {}; pkStars = []; }
+  try { return fn(); } finally { pkParams = keep.params; pkLists = keep.lists; pkStars = keep.stars; pkState.date = keep.date; }
+}
 function homePickWatchHtml(){
-  let query = '', saveDate = pkState.date;
-  pkState.date = null;               // 首頁一律看最新一天（不跟著視窗裡翻到的日期）
-  try { query = pkQuery('today'); } finally { pkState.date = saveDate; }
+  const query = pkWithHomeRules(() => pkQuery('today'));
   const d = pkState.cache[query] || null;
-  if (!d && !pkState.loading[query]){
+  if ((!d || pkStale(query)) && !pkState.loading[query]){
     const err = pkState.errors[query];
     if (!err || Date.now() - err.at >= 20000){
       setTimeout(() => {
-        const keep = pkState.date; pkState.date = null;
-        let pr; try { pr = pkEnsure('today'); } finally { pkState.date = keep; }
+        let pr; try { pr = pkWithHomeRules(() => pkEnsure('today')); } catch (_) { pr = null; }
         Promise.resolve(pr).then(() => { try { render(); } catch (_){} });
       }, 0);
     }
@@ -10579,18 +10597,17 @@ function homePickWatchHtml(){
   const row = (r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : r.changePct;
-    const px = q && q.price != null ? q.price : r.close;
-    const chip = (label, v, digits) => '<span class="hr-pkw-c"><i>' + label + '</i><b class="' + (v === null || v === undefined || isNaN(v) ? '' : dirClass(v)) + '">' + swPct(v, digits) + '</b></span>';
-    const plain = (label, v) => '<span class="hr-pkw-c"><i>' + label + '</i><b>' + (v === null || v === undefined || v === '' ? '—' : v) + '</b></span>';
-    return '<div class="hr-row hr-stk hr-pkw" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc((r.group || '') + '・綜合 ' + (r.combo ?? '—') + '・均線分 ' + (r.score ?? '—') + '・創高 ' + (r.hiLen ?? '—') + ' 天') + '">' +
+    return '<div class="hr-row hr-stk hr-pkw" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc((r.group || '') + '・綜合 ' + (r.combo ?? '—') + '・均線分 ' + (r.score ?? '—') + '・創高 ' + (r.hiLen ?? '—') + ' 天・週籌碼 ' + swPct(r.weekPct) + '・營收年增 ' + swPct(r.revYoy, 1)) + '">' +
       '<div class="l1"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>' +
       (r.black ? '<span class="hr-pkw-b" title="資料日收黑（收盤 < 開盤）">收黑</span>' : '') + (pkStars.includes(r.code) ? '<span class="hr-pkw-s">★</span>' : '') +
-      '<span class="hr-pkw-px">' + pkPrice(px) + '</span>' +
-      '<span class="hr-avg ' + (pct === null || pct === undefined ? 'flat' : dirClass(pct)) + '">' + (pct === null || pct === undefined ? '—' : fmt(pct) + '%') + '</span>' + homeHoldHtml(r.code) + '</div>' +
-      '<div class="l2">' + (r.group ? '<span class="hr-pkw-g">' + wlEsc(r.group) + '</span>' : '') + plain('綜合', r.combo) + plain('均線分', r.score) + plain('創高', r.hiLen ? r.hiLen + '天' : null) + chip('週籌碼', r.weekPct) + chip('營收年增', r.revYoy, 1) + '</div></div>';
+      '<span class="hr-avg ' + (pct === null || pct === undefined ? 'flat' : dirClass(pct)) + '">' + (pct === null || pct === undefined ? '—' : fmt(pct) + '%') + '</span></div>' +
+      '<div class="l2"><i>大戶力</i>' + homeHoldHtml(r.code) + '</div></div>';   // 2026-11-09 使用者：只留代號、股名、漲跌幅、盤中大戶力（其他資訊放在滑過去的提示）
   };
   const free = Math.max(0, (d.sim.maxpos || 6) - (d.sim.holdings || []).length);
-  return title(watch.length) + '<div class="hr-note">資料 ' + wlEsc(swMmdd(d.date)) + ' 收盤・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・綜合分高的在上面</div>' +
+  const cd = pkCustomDiff();
+  const mode = cd.any ? '<div class="hr-note hr-pkw-mode">' + (pkHomeMine ? '⚙ 用你在選股視窗存的參數／名單' : '規則：預設（跟無痕視窗一樣）') +
+    ' <button class="hr-pkw-tg" data-pkw-toggle="1" title="你存的參數有 ' + cd.n + ' 項跟預設不同、手動名單 ' + cd.lists + ' 週">' + (pkHomeMine ? '改回預設' : '改看我的設定') + '</button></div>' : '';
+  return title(watch.length) + '<div class="hr-note">資料 ' + wlEsc(swMmdd(d.date)) + ' 收盤・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・綜合分高的在上面</div>' + mode +
     (watch.length ? watch.map(row).join('') : '<div class="hr-note">目前沒有</div>');
 }
 function homeObsColHtml(){
@@ -10607,7 +10624,7 @@ function homeObsColHtml(){
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : x.pct;
     return '<div class="hr-row hr-stk hr-obs" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(x.name) + '" tabindex="0" role="button" title="' + wlEsc(x.grp + '・' + x.code + x.name + obsMarks(x)) + '">' +
       '<span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(x.name) + '</span><span class="hr-obs-mk">' + obsMarksHtml(x) + '</span>' +
-      '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span>' + homeHoldHtml(x.code) + '</div>';   // 2026-11-09 使用者：多觀察每一檔也要有大戶力
+      '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span><div class="hr-l2"><i>大戶力</i>' + homeHoldHtml(x.code) + '</div></div>';   // 2026-11-09 使用者：多觀察每一檔也要有大戶力、放在個股下面一行
   };
   const listHtml = (list) => obsGroupLines(list).map(([g, xs]) => {
     const avg = homeGroupAvg(g);   // 「其他」或族群表沒有的就照原本黃字、不能點
@@ -17690,7 +17707,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-09 21:14:28';
+const BUILD_STAMP = '2026-11-09 21:21:13';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -18804,6 +18821,11 @@ document.getElementById('top6Strip').addEventListener('keydown', (e) => {
   if (groupEl){ e.preventDefault(); openGroupDetail(groupEl.dataset.group); }
 });
 document.getElementById('app').addEventListener('click', (e) => {
+  if (e.target.closest('[data-pkw-toggle]')){
+    pkHomeMine = !pkHomeMine;
+    try { localStorage.setItem('pkHomeMine', pkHomeMine ? '1' : '0'); } catch (_) {}
+    render(); return;
+  }
   const row = e.target.closest('.stock-row[data-code], .hr-stk[data-code]');
   if (row){ openStockChart(row.dataset.code, row.dataset.name); return; }
   const groupEl = e.target.closest('[data-group]');
@@ -19002,7 +19024,7 @@ try {
   pkStars = JSON.parse(localStorage.getItem('pickerStars') || '[]') || [];
   pkDone = JSON.parse(localStorage.getItem('pickerDone') || '{}') || {};
 } catch (e) { /* 讀不到就用預設 */ }
-let pkState = { tab: 'today', sub: 'week', date: null, week: null, cache: {}, order: [], loading: {}, errors: {}, sort: 'combo',
+let pkState = { tab: 'today', sub: 'week', date: null, week: null, cache: {}, at: {}, order: [], loading: {}, errors: {}, sort: 'combo',
   pick: null, logTab: 'module', showMissed: false, showBlack: false, showRecent: false, weekFilter: 'all' };
 function pkSave(){
   try {
@@ -19032,7 +19054,7 @@ function pkQuery(view){
 function pkData(view){ return pkState.cache[pkQuery(view)] || null; }
 async function pkEnsure(view){
   const query = pkQuery(view);
-  if (pkState.cache[query] || pkState.loading[query]) return;
+  if ((pkState.cache[query] && !pkStale(query)) || pkState.loading[query]) return;
   const err = pkState.errors[query];
   if (err && Date.now() - err.at < 20000) return;
   pkState.loading[query] = true;
@@ -19043,6 +19065,7 @@ async function pkEnsure(view){
     if (!res.ok) throw new Error((data && (data.detail || data.error)) || ('http ' + res.status));
     if (!data || !data.status) throw new Error('bad payload');
     pkState.cache[query] = data;
+    pkState.at[query] = Date.now();
     pkState.order.push(query);
     while (pkState.order.length > 24) delete pkState.cache[pkState.order.shift()];
     delete pkState.errors[query];
@@ -19053,7 +19076,9 @@ async function pkEnsure(view){
   }
   if (!document.getElementById('pickerModal').hidden) renderPicker();
 }
-function pkClear(){ pkState.cache = {}; pkState.order = []; pkState.errors = {}; }
+function pkClear(){ pkState.cache = {}; pkState.at = {}; pkState.order = []; pkState.errors = {}; }
+const PK_TTL_MS = 5 * 60 * 1000;   // 2026-11-09 快取 5 分鐘後會重抓（頁面開著跨過晚上重算，名單才會換成新的一天）
+const pkStale = (query) => !!pkState.cache[query] && Date.now() - (pkState.at[query] || 0) >= PK_TTL_MS;
 const pkNum = (v, d) => (v === null || v === undefined || isNaN(v) ? '—' : Number(v).toFixed(d === undefined ? 1 : d));
 const pkMoney = (v) => (v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(1) + ' 萬');
 const pkWd = (d) => '日一二三四五六'[new Date(d + 'T00:00:00').getDay()] || '';
@@ -19338,6 +19363,7 @@ function renderPicker(){
   } else {
     const data = pkData(pkState.tab);
     if (!data){ pkEnsure(pkState.tab); html += pkStatus(pkState.tab); }
+    else if (pkStale(pkQuery(pkState.tab))) pkEnsure(pkState.tab);   // 舊的先顯示，背景重抓
     else if (data.status !== 'ok') html += '<div class="race-note">' + (data.reason || '還沒有資料') + '</div>';
     else html += pkState.tab === 'today' ? pkTodayHtml(data) : pkState.tab === 'picks' ? pkPicksHtml(data) : pkPerfHtml(data);
   }
