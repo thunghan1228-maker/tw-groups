@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-09 18:02:58";
+const BUILD_STAMP = "2026-11-09 21:10:59";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -219,6 +219,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .hr-lg-src .s1{color:#c084fc;} .hr-lg-src .s2{color:#a78bfa;} .hr-lg-src .s3{color:#2dd4bf;} .hr-lg-src .s4{color:#fbbf24;}
   .hr-lg-hold{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-weight:700;}
   /* 首頁飆股雷達欄（2026-10-15）：分類標題紅底、族群名黃色，每檔後面帶符號；名稱太長截掉，符號和漲跌幅不截 */
+  .hr-pkw-b{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-size:10px;font-weight:700;white-space:nowrap;} .hr-pkw-s{color:#fbbf24;font-size:11px;}   /* 2026-11-09 首頁最上面的「觀察中・等收黑」 */
   .hr-obs-cat{padding:4px 8px;font-size:12px;font-weight:800;background:#7c3aed;color:#fff;border-top:1px solid var(--line);}   /* 2026-10-18 使用者：【1】【2】【3】改紫底白字 */
   .hr-obs-cat small{font-weight:600;opacity:.9;} .hr-obs-cat + .hr-note{padding:3px 8px;}   /* 2026-10-22 空的分類（只有一個 —）不要留那麼多空白 */
   .hr-obs-sub{padding:3px 8px 0;font-size:12px;font-weight:700;color:#4ade80;border-top:1px solid var(--line);}   /* 2026-10-19 【5】有點深的兩個小標 */
@@ -10550,6 +10551,38 @@ const HOME_OBS_CATS = [1, 2, 3, 4, 5];   // 首頁顯示順序（2026-10-20 使�
 const HOME_OBS_FOOT_CATS = [1, 2, 3];     // 首頁最下面的說明表照舊只講前三類（使用者：4、5 的說明、跟上次名單比、移出原因都不用搬過來，留在跳出來的畫面）
 const homeObsCats = (ks = HOME_OBS_CATS) => ks.map((k) => OBS_CATS.find(([c]) => c === k)).filter(Boolean);
 const HOME_OBS_REFRESH_MS = 60 * 1000;   // 2026-10-24 使用者：盤中要即時，原本 5 分鐘改每分鐘重算（也同步自選股的 ⏰ 四個分組）
+// 2026-11-09 使用者：創高黑龍選股（手動）「今天」分頁的「② 觀察中・等收黑」名單搬到首頁第一欄最上面（原本的多觀察【1】～【5】往下移）。
+// 資料跟那個視窗同一份（/api/picker 今天分頁、你在「模組」存的參數和手動勾的名單），收盤後每天晚上換新的一天；漲跌幅跟首頁報價一起更新。
+function homePickWatchHtml(){
+  let query = '', saveDate = pkState.date;
+  pkState.date = null;               // 首頁一律看最新一天（不跟著視窗裡翻到的日期）
+  try { query = pkQuery('today'); } finally { pkState.date = saveDate; }
+  const d = pkState.cache[query] || null;
+  if (!d && !pkState.loading[query]){
+    const err = pkState.errors[query];
+    if (!err || Date.now() - err.at >= 20000){
+      setTimeout(() => {
+        const keep = pkState.date; pkState.date = null;
+        let pr; try { pr = pkEnsure('today'); } finally { pkState.date = keep; }
+        Promise.resolve(pr).then(() => { try { render(); } catch (_){} });
+      }, 0);
+    }
+  }
+  const title = (n) => '<div class="hr-title" title="跟「創高黑龍選股（手動）→ 今天 → ② 觀察中・等收黑」同一份；名單裡的股票哪天收黑，收盤買第 1 批">👁觀察中・等收黑' + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔</span>') + '</div>';
+  if (!d || d.status !== 'ok' || !d.sim) return title(null) + '<div class="hr-note">' + (pkState.errors[query] ? '算不出來：' + wlEsc(pkState.errors[query].msg) : '計算中…（第一次要把特徵載進記憶體，稍等幾秒）') + '</div>';
+  const watch = pkRankRows((d.sim.watch || []).map((r) => Object.assign({}, r)));
+  const row = (r) => {
+    const q = getStockQuote(r.code);
+    const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : r.changePct;
+    return '<div class="hr-row hr-stk hr-pkw" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc((r.group || '') + '・綜合 ' + (r.combo ?? '—') + '・均線分 ' + (r.score ?? '—') + '・創高 ' + (r.hiLen ?? '—') + ' 天') + '">' +
+      '<span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>' +
+      (r.black ? '<span class="hr-pkw-b" title="資料日收黑（收盤 < 開盤）">收黑</span>' : '') + (pkStars.includes(r.code) ? '<span class="hr-pkw-s">★</span>' : '') +
+      '<span class="hr-avg ' + (pct === null || pct === undefined ? 'flat' : dirClass(pct)) + '">' + (pct === null || pct === undefined ? '—' : fmt(pct) + '%') + '</span></div>';
+  };
+  const free = Math.max(0, (d.sim.maxpos || 6) - (d.sim.holdings || []).length);
+  return title(watch.length) + '<div class="hr-note">資料 ' + wlEsc(swMmdd(d.date)) + ' 收盤・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・綜合分高的在上面</div>' +
+    (watch.length ? watch.map(row).join('') : '<div class="hr-note">目前沒有</div>');
+}
 function homeObsColHtml(){
   const rep = obsState.report;
   const hm = obsNowHm();   // 只有盤中（09:00～13:35）才每分鐘重算；收盤後停在最後一次（2026-10-15 使用者問多久更新）
@@ -10558,7 +10591,7 @@ function homeObsColHtml(){
   const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > (rep ? HOME_OBS_REFRESH_MS : 20000);   // 還沒算出過：20 秒就重試（2026-10-17）
   if (!obsState.loading && ((!rep && !obsState.error) || stale || retry)) setTimeout(() => obsRun(null, false, !!rep), 0);
   const title = '<div class="hr-title">📡多觀察(等黑K買進)';   // 2026-10-19 使用者：首頁這欄的標題「強勢黑K選股」改叫「多觀察(等黑K買進)」
-  if (!rep) return '<div class="hr-col">' + title + '</div><div class="hr-note">' + (obsState.error ? '算不出來：' + wlEsc(obsState.error) : '計算中…') + '</div></div>';
+  if (!rep) return '<div class="hr-col">' + homePickWatchHtml() + title + '</div><div class="hr-note">' + (obsState.error ? '算不出來：' + wlEsc(obsState.error) : '計算中…') + '</div></div>';
   const row = (x) => {
     const q = getStockQuote(x.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : x.pct;
@@ -10586,7 +10619,7 @@ function homeObsColHtml(){
     body += listHtml(list);
   });
   const at = new Date(rep.at + 8 * 3600000).toISOString().slice(11, 16);
-  return '<div class="hr-col">' + title + ' <span class="hr-rk">' + n + ' 檔・' + at + '</span></div>' + body + '</div>';
+  return '<div class="hr-col">' + homePickWatchHtml() + title + ' <span class="hr-rk">' + n + ' 檔・' + at + '</span></div>' + body + '</div>';
 }
 function homeObsFootHtml(){
   return hrHelpTable('📡 強勢黑K選股（跟訊號中心同一份）', ['分類', '怎麼做'],
@@ -17647,7 +17680,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-09 18:02:58';
+const BUILD_STAMP = '2026-11-09 21:10:59';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
