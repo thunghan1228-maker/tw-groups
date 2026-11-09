@@ -62,7 +62,7 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.25fr) minmax(0, 1.9fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) minmax(0, 1.6fr);gap:8px;align-items:start;}   /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.0fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) minmax(0, 1.6fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -126,6 +126,8 @@
   .hr-lg-grp{border-radius:4px;padding:0 4px;font-weight:800;font-size:10.5px;background:#6b7280;color:#fff;white-space:nowrap;}
   .hr-lg-grp.up{background:#dc2626;color:#fff;} .hr-lg-grp.down{background:#16a34a;color:#fff;}   /* 2026-11-04 使用者：族群今天平均漲跌幅 >0 紅底白字、<0 綠底白字（▲▼是漲跌，不是名次） */
   .hr-lrow .l2 .hr-hold{margin-left:auto;}
+  .hr-lrow .l3{display:flex;flex-wrap:wrap;align-items:center;gap:3px 4px;margin-top:2px;font-size:10px;line-height:1.3;}   /* 2026-11-09 使用者：多／賽／河／群 名次、續抱不追、漲停放到每檔下面一行、字小一點，欄位才能縮窄 */
+  .hr-lrow .l3 .hr-lg-src{font-size:10px;} .hr-lrow .l3 .hr-lg-hold{font-size:10px;padding:0 3px;}
   .hr-lg-src{display:inline-flex;gap:4px;font-weight:700;font-size:10.5px;} .hr-lg-src i{font-style:normal;}
   .hr-lg-src .s1{color:#c084fc;} .hr-lg-src .s2{color:#a78bfa;} .hr-lg-src .s3{color:#2dd4bf;} .hr-lg-src .s4{color:#fbbf24;}
   .hr-lg-hold{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-weight:700;}
@@ -9907,7 +9909,8 @@ function homeLongRowHtml(o){
     '<div class="l1">' + tdMaBall(o.ma) + '<span class="hr-code">' + o.code + '</span><span class="hr-name">' + wlEsc(o.name) + '</span>' +
     '<span class="hr-avg ' + (Number.isFinite(o.pct) ? dirClass(o.pct) : '') + '">' + (o.lit ? '💡' : '') + (Number.isFinite(o.pct) ? fmt(o.pct) + '%' : '—') + '</span></div>' +
     '<div class="l2"><span class="hr-lg-grp ' + (o.groupAvg > 0 ? 'up' : (o.groupAvg < 0 ? 'down' : '')) + '" title="族群今天平均漲跌幅' + (Number.isFinite(o.groupAvg) ? ' ' + fmt(o.groupAvg) + '%' : '') + '">' + wlEsc(o.group || '—') + (o.rank ? '(' + o.rank + ')' : '') + (Number.isFinite(o.groupAvg) ? ' ' + fmt(o.groupAvg) + '%' : '') + '</span>' +   // 2026-11-04 使用者：照其他欄（族群漲幅>2%、183）的規則，族群名稱後面接名次和族群整體漲跌幅，漲紅底白字、跌綠底白字
-    '<span class="hr-lg-src">' + chip(1, '多', 's1') + chip(2, '賽', 's2') + chip(3, '河', 's3') + chip(4, '群', 's4') + '</span>' + (o.holdNo ? '<span class="hr-lg-hold">續抱不追</span>' : '') + (o.limitUp ? '<span class="hr-lg-hold">漲停</span>' : '') + homeHoldHtml(o.code) + '</div></div>';   // 2026-11-04 使用者：當沖多1／2 每列最右邊接盤中大戶力；族群名稱紅底白字（族群今天漲）／綠底白字（族群今天跌）
+    homeHoldHtml(o.code) + '</div>' +
+    '<div class="l3"><span class="hr-lg-src">' + chip(1, '多', 's1') + chip(2, '賽', 's2') + chip(3, '河', 's3') + chip(4, '群', 's4') + '</span>' + (o.holdNo ? '<span class="hr-lg-hold">續抱不追</span>' : '') + (o.limitUp ? '<span class="hr-lg-hold">漲停</span>' : '') + '</div></div>';   // 2026-11-04 使用者：當沖多1／2 每列最右邊接盤中大戶力；族群名稱紅底白字（族群今天漲）／綠底白字（族群今天跌）
 }
 // 2026-10-20 使用者：當沖多檔數太多，分成兩欄（當沖多1、當沖多2），都跟原本第二欄一樣寬；照排序前半放第 1 欄、後半放第 2 欄，
 // 中幾個那條標題跨欄時第 2 欄接著寫「（續）」。回傳兩個 .hr-stack（首頁每個 .hr-stack 是一欄）。
