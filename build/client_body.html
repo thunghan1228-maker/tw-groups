@@ -132,6 +132,11 @@
   .hr-lg-src .s1{color:#c084fc;} .hr-lg-src .s2{color:#a78bfa;} .hr-lg-src .s3{color:#2dd4bf;} .hr-lg-src .s4{color:#fbbf24;}
   .hr-lg-hold{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-weight:700;}
   /* 首頁飆股雷達欄（2026-10-15）：分類標題紅底、族群名黃色，每檔後面帶符號；名稱太長截掉，符號和漲跌幅不截 */
+  .hr-row.hr-pkw{display:block;padding:4px 8px 5px;white-space:normal;}
+  .hr-pkw .l1{display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;} .hr-pkw .l1 .hr-name{min-width:0;overflow:hidden;text-overflow:ellipsis;} .hr-pkw .l1 .hr-pkw-px{margin-left:auto;font-weight:700;} .hr-pkw .l1 .hr-avg{margin-left:0;min-width:4.6em;text-align:right;}
+  .hr-pkw .l2{display:flex;flex-wrap:wrap;align-items:center;gap:1px 8px;margin-top:2px;font-size:10.5px;line-height:1.35;color:var(--muted);}
+  .hr-pkw-c i{font-style:normal;color:var(--muted);margin-right:2px;} .hr-pkw-c b{font-weight:700;color:var(--text,#e5e7eb);} .hr-pkw-c b.up{color:var(--up);} .hr-pkw-c b.down{color:var(--down);}
+  .hr-pkw-g{background:#6b7280;color:#fff;border-radius:4px;padding:0 4px;font-weight:700;font-size:10px;}
   .hr-pkw-b{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-size:10px;font-weight:700;white-space:nowrap;} .hr-pkw-s{color:#fbbf24;font-size:11px;}   /* 2026-11-09 首頁最上面的「觀察中・等收黑」 */
   .hr-obs-cat{padding:4px 8px;font-size:12px;font-weight:800;background:#7c3aed;color:#fff;border-top:1px solid var(--line);}   /* 2026-10-18 使用者：【1】【2】【3】改紫底白字 */
   .hr-obs-cat small{font-weight:600;opacity:.9;} .hr-obs-cat + .hr-note{padding:3px 8px;}   /* 2026-10-22 空的分類（只有一個 —）不要留那麼多空白 */
@@ -10485,10 +10490,15 @@ function homePickWatchHtml(){
   const row = (r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : r.changePct;
+    const px = q && q.price != null ? q.price : r.close;
+    const chip = (label, v, digits) => '<span class="hr-pkw-c"><i>' + label + '</i><b class="' + (v === null || v === undefined || isNaN(v) ? '' : dirClass(v)) + '">' + swPct(v, digits) + '</b></span>';
+    const plain = (label, v) => '<span class="hr-pkw-c"><i>' + label + '</i><b>' + (v === null || v === undefined || v === '' ? '—' : v) + '</b></span>';
     return '<div class="hr-row hr-stk hr-pkw" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc((r.group || '') + '・綜合 ' + (r.combo ?? '—') + '・均線分 ' + (r.score ?? '—') + '・創高 ' + (r.hiLen ?? '—') + ' 天') + '">' +
-      '<span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>' +
+      '<div class="l1"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>' +
       (r.black ? '<span class="hr-pkw-b" title="資料日收黑（收盤 < 開盤）">收黑</span>' : '') + (pkStars.includes(r.code) ? '<span class="hr-pkw-s">★</span>' : '') +
-      '<span class="hr-avg ' + (pct === null || pct === undefined ? 'flat' : dirClass(pct)) + '">' + (pct === null || pct === undefined ? '—' : fmt(pct) + '%') + '</span></div>';
+      '<span class="hr-pkw-px">' + pkPrice(px) + '</span>' +
+      '<span class="hr-avg ' + (pct === null || pct === undefined ? 'flat' : dirClass(pct)) + '">' + (pct === null || pct === undefined ? '—' : fmt(pct) + '%') + '</span>' + homeHoldHtml(r.code) + '</div>' +
+      '<div class="l2">' + (r.group ? '<span class="hr-pkw-g">' + wlEsc(r.group) + '</span>' : '') + plain('綜合', r.combo) + plain('均線分', r.score) + plain('創高', r.hiLen ? r.hiLen + '天' : null) + chip('週籌碼', r.weekPct) + chip('營收年增', r.revYoy, 1) + '</div></div>';
   };
   const free = Math.max(0, (d.sim.maxpos || 6) - (d.sim.holdings || []).length);
   return title(watch.length) + '<div class="hr-note">資料 ' + wlEsc(swMmdd(d.date)) + ' 收盤・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・綜合分高的在上面</div>' +
@@ -10508,7 +10518,7 @@ function homeObsColHtml(){
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : x.pct;
     return '<div class="hr-row hr-stk hr-obs" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(x.name) + '" tabindex="0" role="button" title="' + wlEsc(x.grp + '・' + x.code + x.name + obsMarks(x)) + '">' +
       '<span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(x.name) + '</span><span class="hr-obs-mk">' + obsMarksHtml(x) + '</span>' +
-      '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span></div>';
+      '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span>' + homeHoldHtml(x.code) + '</div>';   // 2026-11-09 使用者：多觀察每一檔也要有大戶力
   };
   const listHtml = (list) => obsGroupLines(list).map(([g, xs]) => {
     const avg = homeGroupAvg(g);   // 「其他」或族群表沒有的就照原本黃字、不能點
