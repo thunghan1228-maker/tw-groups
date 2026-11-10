@@ -772,7 +772,10 @@ async function proxyHanstockPost(pathname, request) {
 // 2026-10-15 一天約 5 萬次請求又用到寫入上限的一半，再降到 0.002（一天 10 萬次請求也只寫 200 次）。
 const USAGE_SAMPLE_RATE = 0.002;
 const USAGE_BUCKET_MINUTES = 15;
-const DEFAULT_USAGE_ANOMALY_THRESHOLD = 5000; // 每15分鐘估計請求數超過這個值才發警報；可用環境變數USAGE_ANOMALY_THRESHOLD覆蓋
+// 2026-11-10 使用者：5000 比平常開盤時段（09:00～11:00，5～9 個分頁／裝置同時開）的用量還低，每天早上都響 → 調高到 8000，另外加「全天累計」警報。
+const DEFAULT_USAGE_ANOMALY_THRESHOLD = 8000; // 每15分鐘估計請求數超過這個值才發警報；可用環境變數USAGE_ANOMALY_THRESHOLD覆蓋
+// 全天累計警報：Cloudflare 免費方案一天 10 萬次請求、每天 00:00 UTC（台灣 08:00）重新計算，所以這裡也照 UTC 日加總；超過 8 萬次發一次（當天不再重複）。可用環境變數USAGE_DAILY_THRESHOLD覆蓋
+const DEFAULT_USAGE_DAILY_THRESHOLD = 80000;
 
 function usageBucketKey(date) {
   const d = new Date(date);
@@ -837,11 +840,43 @@ async function usageToday(env, date) {
   const body = {
     status: "ok", date: twDate, asOf: date ? null : twNow.toISOString().slice(11, 16), estimatedRequests: total, byHour, peak15m: peak,
     sampleRate: USAGE_SAMPLE_RATE, alertThreshold15m: parseInt(env.USAGE_ANOMALY_THRESHOLD, 10) || DEFAULT_USAGE_ANOMALY_THRESHOLD,
+    alertThresholdDaily: parseInt(env.USAGE_DAILY_THRESHOLD, 10) || DEFAULT_USAGE_DAILY_THRESHOLD,
     freePlanDailyLimit: 100000,
     note: "每 " + Math.round(1 / USAGE_SAMPLE_RATE) + " 個請求抽樣記 1 次再乘回去，是估計值；時間是台灣時間；5 分鐘更新一次"
   };
   usageMemo[twDate] = { at: Date.now(), body };
   return body;
+}
+
+// 全天累計（UTC 日，跟 Cloudflare 免費方案的計算日一致）：把今天 00:00 UTC 到現在的 15 分鐘 bucket 加起來（最多 96 次 KV 讀取，排程每 15 分鐘一次）。
+// 超過門檻時在 KV 記一個旗標（USAGE_KV 一天只多寫這 1 次），當天不再重複通知。
+async function checkDailyUsage(env, nowMs) {
+  if (!env.USAGE_KV) return null;
+  const now = nowMs === undefined ? Date.now() : nowMs;
+  const day = new Date(now).toISOString().slice(0, 10);
+  const startUtc = Date.parse(day + "T00:00:00Z");
+  const keys = [];
+  for (let t = startUtc; t <= now; t += USAGE_BUCKET_MINUTES * 60000) keys.push(usageBucketKey(new Date(t)));
+  const values = await Promise.all(keys.map((k) => env.USAGE_KV.get(k).catch(() => null)));
+  const total = values.reduce((a, v) => a + (parseInt(v || "0", 10) || 0), 0);
+  const threshold = parseInt(env.USAGE_DAILY_THRESHOLD, 10) || DEFAULT_USAGE_DAILY_THRESHOLD;
+  const flagKey = "reqalert-day:" + day;
+  let alreadyNotified = false;
+  if (total > threshold) alreadyNotified = !!(await env.USAGE_KV.get(flagKey).catch(() => null));
+  return { day: day, flagKey: flagKey, estimatedRequests: total, threshold: threshold, anomalous: total > threshold && !alreadyNotified };
+}
+
+async function notifyDiscordDailyUsage(env, result) {
+  if (!env.DISCORD_WEBHOOK_URL) return;
+  const message = "⚠️ tw-groups 全天請求量偏高｜UTC 日 " + result.day + "（台灣時間 08:00 起算）" +
+    "｜累計估計 " + result.estimatedRequests + "（抽樣估算，非精確值）" +
+    "｜門檻 " + result.threshold + "（免費方案一天上限約 100000）";
+  await fetch(env.DISCORD_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ content: message })
+  });
+  await env.USAGE_KV.put(result.flagKey, "1", { expirationTtl: 172800 }).catch(() => {});
 }
 
 async function notifyDiscordUsageAnomaly(env, result) {
@@ -2253,6 +2288,12 @@ const WORKER_ENTRY = {
       }
     } catch (err) {
       // 排程檢查本身失敗時不重試；靠Cloudflare自己的Cron執行記錄追蹤即可。
+    }
+    try {
+      const daily = await checkDailyUsage(env);   // 2026-11-10 全天累計超過 8 萬次發一次警報（兩個檢查各自 try，互不影響）
+      if (daily && daily.anomalous) await notifyDiscordDailyUsage(env, daily);
+    } catch (err) {
+      // 同上：失敗就等下一輪。
     }
   }
 };
