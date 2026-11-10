@@ -2399,6 +2399,23 @@ const WORKER_ENTRY = {
       });
     }
     if (url.pathname === "/api/groups") {
+      // 2026-11-10 使用者：半夜打開首頁一直「資料讀取中」——收盤後證交所即時報價介面常整段很慢（第一輪每段等 8 秒＋重抓，整份要 15 秒），
+      // 而且這時候報價早就不會動。平日 08:25～13:50 以外（收盤後、夜裡、週末）把算好的整份放進 Cloudflare 邊緣快取 10 分鐘，同一個機房的下一個人直接拿，不用再等一輪。
+      const twNowG = new Date(Date.now() + 8 * 3600000), hmG = twNowG.getUTCHours() * 100 + twNowG.getUTCMinutes(), dowG = twNowG.getUTCDay();
+      const offHoursG = !(dowG >= 1 && dowG <= 5 && hmG >= 825 && hmG <= 1350);
+      const edgeKeyG = new Request(url.origin + "/__edge/groups-offhours");
+      if (offHoursG && typeof caches !== "undefined" && caches.default) {
+        try {
+          const hitG = await caches.default.match(edgeKeyG);
+          if (hitG && Date.now() - Number(hitG.headers.get("x-built-at") || 0) < 600000) {
+            return new Response(await hitG.text(), { headers: { "content-type": "application/json", "x-groups-memo": "edge" } });
+          }
+        } catch (e) { /* 邊緣快取讀不到就照常算 */ }
+      }
+      const putEdgeG = (body) => {
+        if (!offHoursG || typeof caches === "undefined" || !caches.default || !ctx || !ctx.waitUntil) return;
+        ctx.waitUntil(caches.default.put(edgeKeyG, new Response(body, { headers: { "content-type": "application/json", "x-built-at": String(Date.now()), "cache-control": "public, max-age=600" } })).catch(() => {}));
+      };
       const age = groupsMemo ? Date.now() - groupsMemo.at : Infinity;
       const memoResp = (state) => new Response(groupsMemo.body, { headers: { "content-type": "application/json", "x-groups-memo": state, "x-groups-age": String(Math.round(age / 1000)) } });
       if (age < GROUPS_MEMO_MS) return memoResp("hit");
@@ -2408,6 +2425,7 @@ const WORKER_ENTRY = {
       }
       try {
         const body = await refreshGroups();
+        putEdgeG(body);
         return new Response(body, { headers: { "content-type": "application/json", "x-groups-memo": "miss" } });
       } catch (err) {
         return Response.json({ error: String(err) }, { status: 502 });
