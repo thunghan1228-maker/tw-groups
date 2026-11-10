@@ -892,6 +892,114 @@ async function notifyDiscordUsageAnomaly(env, result) {
   });
 }
 
+// ---- 13:00 建議（2026-11-10 使用者：改成後端 13:00 自動存，每台裝置看到同一份）----
+// 排程（每 15 分鐘）在交易日 13:00～13:25 之間算一次存進 KV（key sg13:日期），沒存過才算；網頁來問時若今天還沒有（排程漏了）也會當場算一次補上。
+// 買進（全市場）：技術＝均線分數、籌碼＝當週集保大戶變化 %、營收＝最新月營收年增，三項各自在全市場排百分位、平均＝綜合分；
+// 門檻：均線分數 >=9、週籌碼 >0、營收年增 >0、非處置股、現在沒漲停、今天漲跌幅在 -5%~+9.5%；照綜合分高到低排，同分比盤中大戶力，取前 5 檔。
+// 另外把全部股票 13:00 當時的 [股名, 價, 漲跌幅, 均線分數, 週籌碼, 營收年增, 大戶力] 一起存（table），前端用它對自己的自選股分組算賣出建議（不用把持股傳給後端）。
+const SG13_N = 5, SG13_MIN_SCORE = 9, SG13_MAX_PCT = 9.5, SG13_MIN_PCT = -5;
+let sg13Inflight = null;
+function sg13Pctile(rows, key) {
+  const v = rows.filter((r) => r[key] !== null && Number.isFinite(r[key])).sort((a, b) => a[key] - b[key]);
+  const m = new Map();
+  v.forEach((r, i) => m.set(r.code, v.length <= 1 ? 1 : i / (v.length - 1)));
+  return m;
+}
+// 純計算（好測試）：sc＝/api/hub/screener、rv＝/api/hub/revenue、mf＝盤中大戶力排行、groups＝/api/groups 的 groups
+function sg13Compute(sc, rv, mf, groups, date, hm, quoteDate) {
+  const yi = rv.fields.indexOf("yoy"), yoy = new Map();
+  rv.rows.forEach((r) => { const v = Number(r[yi]); if (r[yi] !== null && Number.isFinite(v)) yoy.set(String(r[0]), v); });
+  const hold = new Map();
+  ((mf && mf.ranking) || []).forEach((r) => { const v = Number(r.strengthPct); if (Number.isFinite(v)) hold.set(String(r.code), v); });
+  const quote = new Map();
+  (groups || []).forEach((g) => (g.stocks || []).forEach((st) => {
+    if (st.price !== null && st.price !== undefined && Number.isFinite(st.changePercent) && !quote.has(st.code)) quote.set(st.code, st);
+  }));
+  const rows = sc.rows.map((r) => ({ code: r.code, name: r.name, grp: r.grp || "", score: Number.isFinite(r.score) ? r.score : null,
+    chip: Number.isFinite(r.chip) ? r.chip : null, yoy: yoy.has(r.code) ? yoy.get(r.code) : null, dispo: !!r.dispo }));
+  const pt = sg13Pctile(rows, "score"), pc = sg13Pctile(rows, "chip"), pf = sg13Pctile(rows, "yoy");
+  const buy = [];
+  rows.forEach((r) => {
+    if (!pt.has(r.code) || !pc.has(r.code) || !pf.has(r.code)) return;
+    if (r.score < SG13_MIN_SCORE || !(r.chip > 0) || !(r.yoy > 0) || r.dispo) return;
+    const q = quote.get(r.code);
+    if (!q || q.limitUp || q.changePercent >= SG13_MAX_PCT || q.changePercent <= SG13_MIN_PCT) return;
+    buy.push({ code: r.code, name: r.name, grp: r.grp, px: q.price, pct: q.changePercent,
+      combo: Math.round(100 * (pt.get(r.code) + pc.get(r.code) + pf.get(r.code)) / 3), score: r.score, chip: r.chip, yoy: r.yoy,
+      hold: hold.has(r.code) ? hold.get(r.code) : null });
+  });
+  buy.sort((a, b) => b.combo - a.combo || (b.hold === null ? -1e9 : b.hold) - (a.hold === null ? -1e9 : a.hold) || b.score - a.score);
+  const table = {};
+  rows.forEach((r) => {
+    const q = quote.get(r.code);
+    table[r.code] = [r.name, q ? q.price : null, q ? q.changePercent : null, r.score, r.chip, r.yoy, hold.has(r.code) ? hold.get(r.code) : null];
+  });
+  return { v: 1, date: date, hm: hm, dataDate: sc.date || "", chipWeek: sc.chipWeek || "", revMonth: rv.month || "", quoteDate: quoteDate || "",
+    universe: rows.length, candN: buy.length, buy: buy.slice(0, SG13_N), table: table };
+}
+async function sg13Fetch(path) {
+  const r = await proxyHanstockBars(path, 0);
+  if (!r.ok) throw new Error("HanStock " + path + " " + r.status);
+  return JSON.parse(await r.text());
+}
+async function sg13BuildAndSave(env) {
+  const tw = new Date(Date.now() + 8 * 3600000);
+  const date = tw.toISOString().slice(0, 10), hm = tw.toISOString().slice(11, 16);
+  const [sc, rv, mf, gbody] = await Promise.all([
+    sg13Fetch("/api/hub/screener"), sg13Fetch("/api/hub/revenue"), sg13Fetch("/api/hub/main-force/ranking?limit=1000").catch(() => null), refreshGroups()
+  ]);
+  const g = JSON.parse(gbody);
+  if (!sc || !Array.isArray(sc.rows) || !sc.rows.length || !rv || !Array.isArray(rv.rows) || !Array.isArray(rv.fields)) throw new Error("資料不完整");
+  if (g.quoteDate !== date) return null;   // 今天沒開盤（假日）或報價還是舊的，不存
+  const snap = sg13Compute(sc, rv, mf, g.groups, date, hm, g.quoteDate);
+  if (env && env.USAGE_KV) {
+    await env.USAGE_KV.put("sg13:" + date, JSON.stringify(snap), { expirationTtl: 30 * 86400 });
+    await env.USAGE_KV.put("sg13:latest", date, { expirationTtl: 30 * 86400 });
+  }
+  return snap;
+}
+// 今天的快照：KV 有就直接回；沒有且已過 13:00（交易日）就當場算一次（同一時間只算一份）
+async function sg13Today(env, allowBuild) {
+  const tw = new Date(Date.now() + 8 * 3600000);
+  const date = tw.toISOString().slice(0, 10), hm = tw.toISOString().slice(11, 16), dow = tw.getUTCDay();
+  if (!env || !env.USAGE_KV) return null;
+  const raw = await env.USAGE_KV.get("sg13:" + date);
+  if (raw) return JSON.parse(raw);
+  if (!allowBuild || dow < 1 || dow > 5 || hm < "13:00") return null;
+  if (!sg13Inflight) sg13Inflight = sg13BuildAndSave(env).finally(() => { sg13Inflight = null; });
+  return await sg13Inflight;
+}
+async function sg13Cron(env) {
+  const tw = new Date(Date.now() + 8 * 3600000), hm = tw.toISOString().slice(11, 16), dow = tw.getUTCDay();
+  if (dow < 1 || dow > 5 || hm < "13:00" || hm > "13:25") return;
+  await sg13Today(env, true);
+}
+// GET /api/suggest13?date=YYYY-MM-DD&codes=2330,2034：回快照（不含 table），codes 給了就附上這幾檔的 table
+async function sg13Response(env, url) {
+  const headers = { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" };
+  if (!env || !env.USAGE_KV) return new Response(JSON.stringify({ status: "missing" }), { headers });
+  const qd = url.searchParams.get("date");
+  let snap = null;
+  if (qd) {
+    if (!(qd.length === 10 && qd[4] === "-" && qd[7] === "-")) return new Response(JSON.stringify({ status: "error", error: "date 要 YYYY-MM-DD" }), { status: 422, headers });
+    const raw = await env.USAGE_KV.get("sg13:" + qd);
+    snap = raw ? JSON.parse(raw) : null;
+  } else {
+    snap = await sg13Today(env, true);
+    if (!snap) {
+      const latest = await env.USAGE_KV.get("sg13:latest");
+      const raw = latest ? await env.USAGE_KV.get("sg13:" + latest) : null;
+      snap = raw ? JSON.parse(raw) : null;
+    }
+  }
+  if (!snap) return new Response(JSON.stringify({ status: "empty" }), { headers });
+  const codes = String(url.searchParams.get("codes") || "").split(",").map((c) => c.trim().toUpperCase()).filter((c) => c).slice(0, 60);
+  const table = {};
+  codes.forEach((c) => { if (snap.table && snap.table[c]) table[c] = snap.table[c]; });
+  const out = Object.assign({}, snap, { table: table });
+  return new Response(JSON.stringify({ status: "ok", snap: out }), { headers });
+}
+
 // 教學影片（2026-10-13 使用者：訊號教學、下方工具列各功能做影音教學）：mp4 放在 Workers 靜態檔案 public/tut-assets/，
 // 網址用 /videos/<名字>.mp4 經過這裡：iPhone／iPad 的 Safari 播影片一定要 Range（206 分段），靜態檔案有沒有支援文件沒寫，這裡自己切。
 // 2026-10-30 使用者：K 棒道場每堂課的「語音課程」mp3 放在 public/tut-assets/dj/，網址 /dojo-voice/<型態>.mp3，同樣要 Range（iPhone 播音檔也要）
@@ -2245,6 +2353,13 @@ const WORKER_ENTRY = {
         return Response.json({ status: "error", error: String(err), entries: [] }, { status: 502 });
       }
     }
+    if (url.pathname === "/api/suggest13") {
+      try {
+        return await sg13Response(env, url);
+      } catch (err) {
+        return Response.json({ status: "error", error: String(err) }, { status: 502 });
+      }
+    }
     if (url.pathname === "/api/usage") {
       if (!env || !env.USAGE_KV) return Response.json({ status: "missing", message: "沒有綁定 USAGE_KV" });
       const day = url.searchParams.get("date");
@@ -2294,6 +2409,11 @@ const WORKER_ENTRY = {
       if (daily && daily.anomalous) await notifyDiscordDailyUsage(env, daily);
     } catch (err) {
       // 同上：失敗就等下一輪。
+    }
+    try {
+      await sg13Cron(env);   // 2026-11-10 13:00 建議：交易日 13:00～13:25 算一次存 KV（13:00 沒成功 13:15 再試）
+    } catch (err) {
+      // 算失敗就等下一輪（13:15）；網頁來問時也會補算。
     }
   }
 };
