@@ -895,9 +895,9 @@ async function notifyDiscordUsageAnomaly(env, result) {
 // ---- 13:00 建議（2026-11-10 使用者：改成後端 13:00 自動存，每台裝置看到同一份）----
 // 排程（每 15 分鐘）在交易日 13:00～13:25 之間算一次存進 KV（key sg13:日期），沒存過才算；網頁來問時若今天還沒有（排程漏了）也會當場算一次補上。
 // 買進（全市場）：技術＝均線分數、籌碼＝當週集保大戶變化 %、營收＝最新月營收年增，三項各自在全市場排百分位、平均＝綜合分；
-// 門檻：均線分數 >=9、週籌碼 >0、營收年增 >0、非處置股、現在沒漲停、今天漲跌幅在 -5%~+9.5%；照綜合分高到低排，同分比盤中大戶力，取前 5 檔。
+// 門檻：均線分數 >=7、週籌碼 >0、營收年增 >0、非處置股、現在沒漲停、今天漲跌幅在 -5%~+9.5%；照綜合分高到低排，同分比盤中大戶力，取前 10 檔。
 // 另外把全部股票 13:00 當時的 [股名, 價, 漲跌幅, 均線分數, 週籌碼, 營收年增, 大戶力] 一起存（table），前端用它對自己的自選股分組算賣出建議（不用把持股傳給後端）。
-const SG13_N = 5, SG13_MIN_SCORE = 9, SG13_MAX_PCT = 9.5, SG13_MIN_PCT = -5;
+const SG13_N = 10, SG13_MIN_SCORE = 7, SG13_MAX_PCT = 9.5, SG13_MIN_PCT = -5, SG13_VERSION = 2;   // 2026-11-10 使用者：建議買進改 10 檔；均線分數門檻 9 → 7（≥9 全市場常只剩 5 檔上下）
 let sg13Inflight = null;
 function sg13Pctile(rows, key) {
   const v = rows.filter((r) => r[key] !== null && Number.isFinite(r[key])).sort((a, b) => a[key] - b[key]);
@@ -934,7 +934,7 @@ function sg13Compute(sc, rv, mf, groups, date, hm, quoteDate) {
     const q = quote.get(r.code);
     table[r.code] = [r.name, q ? q.price : null, q ? q.changePercent : null, r.score, r.chip, r.yoy, hold.has(r.code) ? hold.get(r.code) : null];
   });
-  return { v: 1, date: date, hm: hm, dataDate: sc.date || "", chipWeek: sc.chipWeek || "", revMonth: rv.month || "", quoteDate: quoteDate || "",
+  return { v: SG13_VERSION, date: date, hm: hm, dataDate: sc.date || "", chipWeek: sc.chipWeek || "", revMonth: rv.month || "", quoteDate: quoteDate || "",
     universe: rows.length, candN: buy.length, buy: buy.slice(0, SG13_N), table: table };
 }
 async function sg13Fetch(path) {
@@ -964,8 +964,9 @@ async function sg13Today(env, allowBuild) {
   const date = tw.toISOString().slice(0, 10), hm = tw.toISOString().slice(11, 16), dow = tw.getUTCDay();
   if (!env || !env.USAGE_KV) return null;
   const raw = await env.USAGE_KV.get("sg13:" + date);
-  if (raw) return JSON.parse(raw);
-  if (!allowBuild || dow < 1 || dow > 5 || hm < "13:00") return null;
+  const old = raw ? JSON.parse(raw) : null;
+  if (old && old.v === SG13_VERSION) return old;
+  if (!allowBuild || dow < 1 || dow > 5 || hm < "13:00") return old;   // 規則改過（版本不同）的舊快照，13:00 後有人來問或排程跑到就重算一次
   if (!sg13Inflight) sg13Inflight = sg13BuildAndSave(env).finally(() => { sg13Inflight = null; });
   return await sg13Inflight;
 }
