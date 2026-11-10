@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-10 23:42:16";
+const BUILD_STAMP = "2026-11-10 23:57:43";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -10630,7 +10630,9 @@ setInterval(sg13Rerender, 5000);
 function homeRank4Html(){
   const h = homeRankRows();
   if (!h) return '<div class="hr-note">族群行情載入中…</div>';
-  if (!h.hasDaily) return '<div class="hr-note">還沒拿到族群昨天的名次，等一下就會出來。</div>';
+  // 2026-11-10 後端（HanStock）整個掛掉時拿不到族群昨天的名次：原本整個首頁只剩這一行字、什麼欄位都沒有。
+  // 現在照樣畫各欄（報價是 Worker 自己抓的、不靠後端），只是名次升降符號（🔺🔽）、靠昨天名次的標記先略過，上面多一行提示
+  const noDailyNote = h.hasDaily ? '' : '<div class="hr-note">還沒拿到族群昨天的名次（後端暫時連不上或還在載入），名次升降先不顯示，其他欄位照常；後端恢復後會自動補上。</div>';
   const m = race333Model();
   // 183＝188 同一批 13 族，多方線以上的族群底下列 ⚠️ 個股。老師 10/15 10:04 只有軍工 ⚠️2429銘旺科（+7%），
   // 10:33 加上光學鏡頭 ⚠️6209今國光（10:02 才 +3.9% 沒列、10:32 +7% 就列），大毅 +4.7%、台表科 +4.7% 都沒列；
@@ -10642,7 +10644,7 @@ function homeRank4Html(){
   const rows183 = h.rows.filter((r) => RANK183_GROUPS.has(r.name)).map((r) => Object.assign({}, r, { swordMark: r.drop !== null && r.drop > 0 ? (mk183.get(r.name) || '') : '' }));   // 2026-10-21 使用者：183 多加幾個族群
   // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／199 疊在同一欄）、193、刀劍空(32)、33、34、188、177
   const homeLong = homeLongColsHtml();
-  return '<div class="home-rank4">' +
+  return noDailyNote + '<div class="home-rank4">' +
     // 2026-10-16 使用者：183 排第二欄、昨日強勢股排第六欄；2026-10-19 使用者：第二欄換成當沖多（取代 183 的位置），183 搬到今日強勢股下面
     // 2026-10-28 使用者：欄位順序改成 ①多觀察(等黑K買進) ②當沖多2 ③當沖多1 ④今日強勢股（盤中訊號裡的今日強勢股，多一欄），其他後面不變
     // （2026-10-20 使用者：當沖多檔數太多，分成兩欄；2026-10-21 使用者排前三欄 當沖多1、當沖多2、多觀察；2026-10-16 多觀察原本是第一欄）
@@ -17940,7 +17942,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-10 23:42:16';
+const BUILD_STAMP = '2026-11-10 23:57:43';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
