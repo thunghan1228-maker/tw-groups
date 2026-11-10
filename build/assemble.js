@@ -120,6 +120,28 @@ async function fetchQuotes(codes) {
   return await fetchQuotesFromBackend(codes);
 }
 
+// ---- 後端（HanStock／Railway）連不上時別讓 Worker 跟著慢（2026-11-10 後端掛了：Railway 每個請求空等 15 秒才回 502，
+// 首頁 /api/groups 因為等後端的 session-close 變成 15 秒才回、首頁一直「資料讀取中」；台指期近月走後端代打也超過 live-bundle 的 7 秒上限，一直「暫時抓不到」）。
+// 這幾個「後端只是備援／附加」的呼叫改成短逾時，失敗後 30 秒內直接略過（斷路器），Worker 自己的資料照常回。純轉送後端的路由（K 線、選股…）不受影響、照舊。
+const HS_BASE = "https://hanstock-production-b872.up.railway.app";
+const HS_BREAKER_MS = 30000;
+async function hsFetchShort(path, init, timeoutMs) {
+  if (Date.now() < (globalThis.__hsDownUntil || 0)) throw new Error("後端暫時連不上（30 秒內略過）");
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs || 4000);
+  try {
+    const r = await fetch(HS_BASE + path, Object.assign({}, init || {}, { signal: ctrl.signal }));
+    if (r.status === 502 || r.status === 503 || r.status === 504) globalThis.__hsDownUntil = Date.now() + HS_BREAKER_MS;
+    else globalThis.__hsDownUntil = 0;
+    return r;
+  } catch (e) {
+    globalThis.__hsDownUntil = Date.now() + HS_BREAKER_MS;
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // 後端報價中心一次最多 600 檔（2026-10-12 族群表加「其他」後變 650 檔）：每 400 檔一批同時問，批次切法固定，後端各批各自共用快取
 const BACKEND_QUOTE_BATCH = 400;
 async function fetchBackendQuoteBatch(codes, signal) {
@@ -297,10 +319,10 @@ async function fetchQuotesFromMis(codes) {
 async function fetchSessionClose() {
   // 後端的「該不該顯示上一個交易日收盤」快照（休市日整天、交易日 08:45 前 held=true，附族群成員那天的
   // 日K收盤／漲跌／成交量／漲跌停）。邊緣快取 2 分鐘；抓不到或格式不對就回 null，/api/groups 照舊用即時報價。
-  const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/session-close", {
+  const resp = await hsFetchShort("/api/hub/session-close", {
     headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
     cf: { cacheTtl: 120, cacheEverything: true }
-  });
+  }, 4000);
   if (!resp.ok) return null;
   const data = await resp.json();
   return data && data.status === "ok" ? data : null;
@@ -501,8 +523,8 @@ async function txfMis(endpoint, body, ttlMs) {
   // 直接打期交所失敗（2026-10-30 起被回 520）就請後端（Railway）代打同一支 getQuoteList，回來的 JSON 跟期交所原樣一樣
   if (endpoint === "getQuoteList") {
     try {
-      const r2 = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/txf-mis?market=" + encodeURIComponent(String(body.MarketType || "0")),
-        { headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0" }, cf: { cacheTtl: 0 } });
+      const r2 = await hsFetchShort("/api/hub/txf-mis?market=" + encodeURIComponent(String(body.MarketType || "0")),
+        { headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0" }, cf: { cacheTtl: 0 } }, 4000);
       if (r2.ok) {
         const data = await r2.json();
         cache[key] = { at: Date.now(), data };

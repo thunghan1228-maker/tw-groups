@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-10 23:57:43";
+const BUILD_STAMP = "2026-11-11 00:14:43";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -17942,7 +17942,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-10 23:57:43';
+const BUILD_STAMP = '2026-11-11 00:14:43';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -29307,6 +29307,28 @@ async function fetchQuotes(codes) {
   return await fetchQuotesFromBackend(codes);
 }
 
+// ---- 後端（HanStock／Railway）連不上時別讓 Worker 跟著慢（2026-11-10 後端掛了：Railway 每個請求空等 15 秒才回 502，
+// 首頁 /api/groups 因為等後端的 session-close 變成 15 秒才回、首頁一直「資料讀取中」；台指期近月走後端代打也超過 live-bundle 的 7 秒上限，一直「暫時抓不到」）。
+// 這幾個「後端只是備援／附加」的呼叫改成短逾時，失敗後 30 秒內直接略過（斷路器），Worker 自己的資料照常回。純轉送後端的路由（K 線、選股…）不受影響、照舊。
+const HS_BASE = "https://hanstock-production-b872.up.railway.app";
+const HS_BREAKER_MS = 30000;
+async function hsFetchShort(path, init, timeoutMs) {
+  if (Date.now() < (globalThis.__hsDownUntil || 0)) throw new Error("後端暫時連不上（30 秒內略過）");
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs || 4000);
+  try {
+    const r = await fetch(HS_BASE + path, Object.assign({}, init || {}, { signal: ctrl.signal }));
+    if (r.status === 502 || r.status === 503 || r.status === 504) globalThis.__hsDownUntil = Date.now() + HS_BREAKER_MS;
+    else globalThis.__hsDownUntil = 0;
+    return r;
+  } catch (e) {
+    globalThis.__hsDownUntil = Date.now() + HS_BREAKER_MS;
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // 後端報價中心一次最多 600 檔（2026-10-12 族群表加「其他」後變 650 檔）：每 400 檔一批同時問，批次切法固定，後端各批各自共用快取
 const BACKEND_QUOTE_BATCH = 400;
 async function fetchBackendQuoteBatch(codes, signal) {
@@ -29484,10 +29506,10 @@ async function fetchQuotesFromMis(codes) {
 async function fetchSessionClose() {
   // 後端的「該不該顯示上一個交易日收盤」快照（休市日整天、交易日 08:45 前 held=true，附族群成員那天的
   // 日K收盤／漲跌／成交量／漲跌停）。邊緣快取 2 分鐘；抓不到或格式不對就回 null，/api/groups 照舊用即時報價。
-  const resp = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/session-close", {
+  const resp = await hsFetchShort("/api/hub/session-close", {
     headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0 (+https://tw-groups.judystock.workers.dev)" },
     cf: { cacheTtl: 120, cacheEverything: true }
-  });
+  }, 4000);
   if (!resp.ok) return null;
   const data = await resp.json();
   return data && data.status === "ok" ? data : null;
@@ -29688,8 +29710,8 @@ async function txfMis(endpoint, body, ttlMs) {
   // 直接打期交所失敗（2026-10-30 起被回 520）就請後端（Railway）代打同一支 getQuoteList，回來的 JSON 跟期交所原樣一樣
   if (endpoint === "getQuoteList") {
     try {
-      const r2 = await fetch("https://hanstock-production-b872.up.railway.app/api/hub/txf-mis?market=" + encodeURIComponent(String(body.MarketType || "0")),
-        { headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0" }, cf: { cacheTtl: 0 } });
+      const r2 = await hsFetchShort("/api/hub/txf-mis?market=" + encodeURIComponent(String(body.MarketType || "0")),
+        { headers: { Accept: "application/json", "User-Agent": "tw-groups/1.0" }, cf: { cacheTtl: 0 } }, 4000);
       if (r2.ok) {
         const data = await r2.json();
         cache[key] = { at: Date.now(), data };
