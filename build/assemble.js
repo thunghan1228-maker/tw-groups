@@ -2275,8 +2275,15 @@ const WORKER_ENTRY = {
         const tp = new Date(Date.now() + 8 * 3600000);
         const hm = tp.getUTCHours() * 100 + tp.getUTCMinutes();
         const wantNight = hm >= 1500 || hm < 845;      // 夜盤（15:00～隔天 05:00）和夜盤收盤後到日盤開盤前，看夜盤
-        const dayQ = (await quotes("0")).find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null) || null;
-        const nightQ = (wantNight || !dayQ) ? ((await quotes("1")).find((x) => /^TXF[A-L][0-9]-M$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null) || null) : null;
+        // 2026-11-10 期交所直打一直回 520、後端又掛掉時，這一段加起來要 8 秒以上，超過首頁 live-bundle 每份 7 秒的上限，台指期近月就一直「暫時抓不到」：
+        // 期交所這段整體最多等 3.5 秒，超過就當失敗、直接走下面的 Yahoo 備援（約 2～3 秒）
+        const pickQ = async () => {
+          const dayQ0 = (await quotes("0")).find((x) => /^TXF[A-L][0-9]-F$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null) || null;
+          const nightQ0 = (wantNight || !dayQ0) ? ((await quotes("1")).find((x) => /^TXF[A-L][0-9]-M$/.test(String(x.SymbolID || "")) && num(x.CLastPrice) !== null) || null) : null;
+          return { dayQ: dayQ0, nightQ: nightQ0 };
+        };
+        const picked = await Promise.race([pickQ(), new Promise((resolve, reject) => setTimeout(() => reject(new Error("期交所報價太慢（超過 3.5 秒）")), 3500))]);
+        const dayQ = picked.dayQ, nightQ = picked.nightQ;
         const q = wantNight ? (nightQ || dayQ) : (dayQ || nightQ);
         if (!q) {
           const last = await txfLastDayClose();
