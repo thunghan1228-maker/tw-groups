@@ -10513,7 +10513,16 @@ function sg13Render(){
 function sg13Rerender(){ try { sg13Render(); } catch (_) { /* 重畫失敗就等下一輪 */ } }
 document.getElementById('sg13Btn').addEventListener('click', () => { document.getElementById('sgModal').hidden = false; sg13Render(); });
 document.getElementById('sgClose').addEventListener('click', () => { document.getElementById('sgModal').hidden = true; });
-document.getElementById('sgModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.currentTarget.hidden = true; });
+document.getElementById('sgModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget){ e.currentTarget.hidden = true; return; }
+  const row = e.target.closest('.sg13-row[data-code]');   // 2026-11-10 使用者：點個股名稱或代號開 K 線圖
+  if (row) openStockChart(row.dataset.code, row.dataset.name);
+});
+document.getElementById('sgModal').addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const row = e.target.closest('.sg13-row[data-code]');
+  if (row){ e.preventDefault(); openStockChart(row.dataset.code, row.dataset.name); }
+});
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape'){ const m = document.getElementById('sgModal'); if (m && !m.hidden) m.hidden = true; } });
 setInterval(sg13Rerender, 5000);
 function homeRank4Html(){
