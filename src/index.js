@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-10 09:29:27";
+const BUILD_STAMP = "2026-11-10 10:47:18";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -10045,8 +10045,8 @@ function homeLongColsHtml(){
   return wrap('<div class="hr-col">' + head(multi, 1) + colBody(0, cut) + '</div>',
     '<div class="hr-col">' + head(multi, 2) + colBody(cut, rows.length) + note + '</div>');
 }
-function homeStockColHtml(title, list, emptyText, titleCls, hold, showGroup){
-  const rows = list.slice().sort((a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面
+function homeStockColHtml(title, list, emptyText, titleCls, hold, showGroup, byPct){
+  const rows = list.slice().sort(byPct ? (a, b) => b.pct - a.pct || a.groupRank - b.groupRank : (a, b) => a.groupRank - b.groupRank || b.pct - a.pct);   // 照老師：族排前面的在上面；byPct（30加33加34，2026-11-10 使用者）＝照漲跌幅排、漲越多越上面
   return '<div class="hr-col"><div class="hr-title' + (titleCls ? ' ' + titleCls : '') + '">' + title + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>' +
     (rows.length ? rows.map((r) => homeStockRowHtml(r, hold, showGroup)).join('') : '<div class="hr-note">' + (emptyText || '目前沒有符合的股票') + '</div>') + '</div>';
 }
@@ -10162,12 +10162,13 @@ function homeBothLoad(){
 function homeBothColHtml(){
   let rk = null, ht = null;
   try { rk = maWlLast.rank; ht = maWlLast.hits; } catch (_){ /* 還沒建好 */ }
-  const title = (n) => '<div class="hr-title" title="個股分數前 ' + MA_WL_TOP + ' 名 ∩ 前二十名常客（兩個榜都有的），照個股分數名次排；跟自選股的「📊雙榜交集」同一份">📊雙榜交集' + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔</span>') + '</div>';
+  const title = (n) => '<div class="hr-title" title="個股分數前 ' + MA_WL_TOP + ' 名 ∩ 前二十名常客（兩個榜都有的），照今天即時漲跌幅排（漲越多越上面）；跟自選股的「📊雙榜交集」同一份（那邊照個股分數名次排）">📊雙榜交集' + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔</span>') + '</div>';
   if (!rk || !ht){ homeBothLoad(); return '<div class="hr-col">' + title(null) + '<div class="hr-note">讀取中…</div></div>'; }
   const hitBy = {};
   ht.rows.forEach((r) => { hitBy[r.code] = r; });
-  const list = rk.stocks.slice(0, MA_WL_TOP).map((r, i) => ({ r, i })).filter(({ r }) => hitBy[r.code]);
   const live = homeLivePctMap();
+  const pctOfB = (r) => { const v = live.has(r.code) ? live.get(r.code) : r.chg; return Number.isFinite(v) ? v : -1e9; };
+  const list = rk.stocks.slice(0, MA_WL_TOP).map((r, i) => ({ r, i })).filter(({ r }) => hitBy[r.code]).sort((a, b) => pctOfB(b.r) - pctOfB(a.r) || a.i - b.i);   // 2026-11-10 使用者：照即時漲跌幅排、漲越多越上面（同幅度照個股分數名次）
   const row = ({ r, i }) => {
     const pct = live.has(r.code) ? live.get(r.code) : r.chg;   // 即時（含盤前試撮）；沒有即時報價才退回排行那天的漲跌幅
     const h = hitBy[r.code], tip = '個股分數第 ' + (i + 1) + ' 名・' + r.sum + ' 分＋前二十名常客 ' + h.hits + '/' + ht.ndays + ' 次（近 5 日 ' + h.r5 + '/5）' + (r.grp ? '・' + r.grp : '');
@@ -10430,7 +10431,7 @@ function homeRank4Html(){
     '</div>' +
     // 2026-10-22 使用者：首頁的馬火多(30)、賽馬多(33)、河流多(34) 三欄拿掉（機器人代碼 30／33／34、訊號中心「盤中333」還在；30加33加34 照舊）
     '<div class="hr-stack">' +
-      homeRedBox('<div class="hr-pinkname">' + homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : [], '', 'yel', true) + '</div>') +
+      homeRedBox('<div class="hr-pinkname">' + homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : [], '', 'yel', true, false, true) + '</div>') +
       homeInstColHtml('t') +   // 2026-11-05 使用者：30加33加34 下面（188 的位置）加投信買超前 15（機器人 98 同一份資料）；開盤前是前一個交易日的名單
       homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +   // 2026-11-04 使用者：188 跟今日強勢股對調，188 放 30加33加34 下面（原本 2026-10-21 在發動下面）
     '</div>' +
@@ -10502,8 +10503,8 @@ function homeRankFootHtml(total){
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔'],
     ['🚀續抱勿追高', '賽馬多(33) 裡今天漲超過 7% 的（在雙榜交集正下面）'],
     ['💰疑似主力融資買進', '放在第三欄、當沖多1 上面，加粗紅框：融資今天增加 ≥500 張＋今天盤中大單淨買超 ≥300 張（跟系統選股「疑似主力融資買進」同一組）；名單照今天即時漲跌幅排、漲越多的越上面（自動換位置）。交易所不公開融資是誰借的，這只是疑似；資料是最新一個收完盤的交易日，盤中名單不會變。<b>更新時間</b>：證交所約 21:00 才公布當天融資融券，後端 21:00 起每 20 分鐘抓一次、網頁每 10 分鐘看一次，所以大約 <b>21:00～22:00</b> 當天的名單才會出來，在那之前（含盤中）看到的是前一個交易日的名單，融資還沒公布時會寫 0 檔；只有每一檔的漲跌幅會跟著即時報價（含 08:30 起的盤前試撮）跳。每列：代號、名稱、今天漲跌幅、盤中大戶力，下面一行是融資增加張數和大單淨買張數'],
-    ['📊雙榜交集', '放在第四欄最上面（下面依序是續抱勿追高、股期黑龍(75)）：均線分數排行「個股分數前 20 名」跟「前二十名常客」兩個榜都有的股票（跟自選股裡的「📊雙榜交集」同一份），照分數名次排；加粗紅框；每列後面是今天漲跌幅、均線分數和盤中大戶力，滑過去看名次與常客次數。<b>更新時間</b>：09:05 以前（含盤前試撮）是昨天收盤的排行、名單不會變；<b>09:05～14:05</b> 後端用現價當今天收盤即時重算分數（快取 45 秒），網頁約每 1 分鐘重抓一次，名單會跟著換；14:05 以後到收盤正式排行出來之前停在最後一次盤中的結果，官方日K進來後（後端日K收集器每小時檢查一次，約下午 3～4 點）換成當天收盤正式排行；非盤中時網頁 25 分鐘才看一次。每一檔的漲跌幅每 15 秒跟著即時報價跳'],
-    ['👑30加33加34', '馬火多(30)、賽馬多(33)、河流多(34) 三份都有的（賽馬多、河流多只看族群名次前 ' + HOME_334_TOP_GROUPS + ' 名；三份各自的完整名單看訊號中心「盤中333」或機器人代碼 30／33／34）'],
+    ['📊雙榜交集', '放在第四欄最上面（下面依序是續抱勿追高、股期黑龍(75)）：均線分數排行「個股分數前 20 名」跟「前二十名常客」兩個榜都有的股票（跟自選股裡的「📊雙榜交集」同一份），首頁這欄照今天即時漲跌幅排、漲越多越上面；加粗紅框；每列後面是今天漲跌幅、均線分數和盤中大戶力，滑過去看名次與常客次數。<b>更新時間</b>：09:05 以前（含盤前試撮）是昨天收盤的排行、名單不會變；<b>09:05～14:05</b> 後端用現價當今天收盤即時重算分數（快取 45 秒），網頁約每 1 分鐘重抓一次，名單會跟著換；14:05 以後到收盤正式排行出來之前停在最後一次盤中的結果，官方日K進來後（後端日K收集器每小時檢查一次，約下午 3～4 點）換成當天收盤正式排行；非盤中時網頁 25 分鐘才看一次。每一檔的漲跌幅每 15 秒跟著即時報價跳'],
+    ['👑30加33加34', '馬火多(30)、賽馬多(33)、河流多(34) 三份都有的，<b>名單照今天即時漲跌幅排、漲越多越上面</b>（賽馬多、河流多只看族群名次前 ' + HOME_334_TOP_GROUPS + ' 名；三份各自的完整名單看訊號中心「盤中333」或機器人代碼 30／33／34）'],
     ['每一列', '族群名次、代號、名稱、今天漲跌幅；族排前面的在上面'],
     ['點股票', '開K線圖'],
   ]) +
@@ -10594,7 +10595,8 @@ function homePickWatchHtml(){
   }
   const title = (n) => '<div class="hr-title" title="跟「創高黑龍選股（手動）→ 今天 → ② 觀察中・等收黑」同一份；名單裡的股票哪天收黑，收盤買第 1 批">👁觀察中・等收黑' + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔</span>') + '</div>';
   if (!d || d.status !== 'ok' || !d.sim) return title(null) + '<div class="hr-note">' + (pkState.errors[query] ? '算不出來：' + wlEsc(pkState.errors[query].msg) : '計算中…（第一次要把特徵載進記憶體，稍等幾秒）') + '</div>';
-  const watch = pkRankRows((d.sim.watch || []).map((r) => Object.assign({}, r)));
+  const pctOfW = (r) => { const q = getStockQuote(r.code); const v = q && Number.isFinite(q.changePercent) ? q.changePercent : r.changePct; return Number.isFinite(v) ? v : -1e9; };
+  const watch = pkRankRows((d.sim.watch || []).map((r) => Object.assign({}, r))).sort((a, b) => pctOfW(b) - pctOfW(a));   // 2026-11-10 使用者：照即時漲跌幅排、漲越多越上面（同幅度維持綜合分順序）
   const row = (r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : r.changePct;
@@ -10608,7 +10610,7 @@ function homePickWatchHtml(){
   const cd = pkCustomDiff();
   const mode = cd.any ? '<div class="hr-note hr-pkw-mode">' + (pkHomeMine ? '⚙ 用你在選股視窗存的參數／名單' : '規則：預設（跟無痕視窗一樣）') +
     ' <button class="hr-pkw-tg" data-pkw-toggle="1" title="你存的參數有 ' + cd.n + ' 項跟預設不同、手動名單 ' + cd.lists + ' 週">' + (pkHomeMine ? '改回預設' : '改看我的設定') + '</button></div>' : '';
-  return title(watch.length) + '<div class="hr-note">資料 ' + wlEsc(swMmdd(d.date)) + ' 收盤・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・綜合分高的在上面</div>' + mode +
+  return title(watch.length) + '<div class="hr-note">資料 ' + wlEsc(swMmdd(d.date)) + ' 收盤・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・照漲跌幅排、漲越多越上面</div>' + mode +
     (watch.length ? watch.map(row).join('') : '<div class="hr-note">目前沒有</div>');
 }
 function homeObsColHtml(){
@@ -17708,7 +17710,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-10 09:29:27';
+const BUILD_STAMP = '2026-11-10 10:47:18';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
