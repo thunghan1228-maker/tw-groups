@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-11 12:33:13";
+const BUILD_STAMP = "2026-11-11 16:00:45";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -228,18 +228,6 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .hr-pkw-c i{font-style:normal;color:var(--muted);margin-right:2px;} .hr-pkw-c b{font-weight:700;color:var(--text,#e5e7eb);} .hr-pkw-c b.up{color:var(--up);} .hr-pkw-c b.down{color:var(--down);}
   .hr-pkw-tg{background:#374151;color:#fff;border:0;border-radius:4px;padding:1px 6px;font-size:10.5px;cursor:pointer;margin-left:4px;} .hr-pkw-mode{padding-top:0;}
   .hr-pkw-g{background:#6b7280;color:#fff;border-radius:4px;padding:0 4px;font-weight:700;font-size:10px;}
-  #sgModal .sg13{border:0;padding:0;margin:0;background:none;} #sgModal .chips-inner{max-width:1100px;}
-  .sg13{border:2px solid #c9a98c;border-radius:8px;margin:4px 0 8px;padding:6px 8px 6px;background:rgba(201,169,140,.06);}   /* 2026-11-10 使用者：13:00 建議（買進（符合的全部）＋賣出） */
-  .sg13-head{font-size:14px;margin-bottom:4px;} .sg13-head b{font-size:15px;} .sg13-note{font-size:11px;color:var(--muted);margin-left:6px;}
-  .sg13-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;} @media (max-width:900px){ .sg13-cols{grid-template-columns:minmax(0,1fr);} }
-  .sg13-col{min-width:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;}
-  .sg13-title{padding:3px 8px;font-size:12.5px;font-weight:800;color:#fff;background:#b91c1c;} .sg13-title.sell{background:#15803d;} .sg13-title .hr-rk{color:#fff;opacity:.9;}
-  .sg13-row{padding:3px 8px 4px;border-top:1px solid var(--line);cursor:pointer;font-variant-numeric:tabular-nums;} .sg13-row:hover{background:rgba(201,169,140,0.10);}
-  .sg13-l1{display:flex;align-items:baseline;gap:6px;white-space:nowrap;overflow:hidden;font-size:13px;} .sg13-l1 .hr-name{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;}
-  .sg13-l1 .hr-avg{margin-left:0;} .sg13-l1 .hr-hold{margin-left:2px;} .sg13-px{margin-left:auto;font-weight:700;} .sg13-then{color:var(--muted);font-size:11px;} .sg13-arrow{color:var(--muted);font-size:11px;}
-  .sg13-sub{font-size:10.5px;color:var(--muted);line-height:1.35;} .sg13-sub b{color:var(--text);} .sg13-sub.sell{color:#fbbf24;}
-  .sg13-src{padding:3px 8px;font-size:10.5px;color:var(--muted);line-height:1.4;border-top:1px solid var(--line);} .sg13-warn{color:#fbbf24;}
-  .sg13-foot{margin-top:4px;font-size:10.5px;color:var(--muted);line-height:1.4;}
   .hr-pkw-b{background:#b91c1c;color:#fff;border-radius:4px;padding:0 4px;font-size:10px;font-weight:700;white-space:nowrap;} .hr-pkw-s{color:#fbbf24;font-size:11px;}   /* 2026-11-09 首頁最上面的「觀察中・等收黑」 */
   .hr-obs-cat{padding:4px 8px;font-size:12px;font-weight:800;background:#7c3aed;color:#fff;border-top:1px solid var(--line);}   /* 2026-10-18 使用者：【1】【2】【3】改紫底白字 */
   .hr-obs-cat small{font-weight:600;opacity:.9;} .hr-obs-cat + .hr-note{padding:3px 8px;}   /* 2026-10-22 空的分類（只有一個 —）不要留那麼多空白 */
@@ -4116,7 +4104,6 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle guide-btn" id="czBtn" title="自訂畫面：選擇哪些按鈕要留著、哪些收起來（畫面比較精簡）">⊙ 自訂</button>  <!-- 2026-10-23 使用者：照莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，勾掉就收起來；全部顯示一鍵復原 -->
-      <button class="alert-toggle guide-btn" id="sg13Btn" title="每個交易日 12:40 後端自動算：綜合籌碼、技術、營收的建議買進（符合的全部列出），加上自選股分組的建議賣出">🕐 12:40 建議</button>  <!-- 2026-11-10 使用者：13:00 建議做成單獨項目放機器人代碼旁邊，打開才顯示、不佔首頁版面 -->
       <button class="alert-toggle guide-btn" id="botBtn">🤖 機器人代碼</button>  <!-- 2026-10-17 使用者：照對方 Line 機器人的代碼（12／22／B／a／70…）做一個輸入代碼的面板 -->
       <button class="alert-toggle guide-btn" id="briefBtn">📋 觀察股簡報</button>  <!-- 2026-10-24 使用者：照老師影片兩張投影片（營收觀察股誰在加速、族群本週誰最強）做新版面，名單用自選股 -->
       <button class="alert-toggle guide-btn" id="mbBtn">💰 融資簡報</button>  <!-- 2026-10-24 使用者：照老師 IG 那 7 張融資還沒殺完做的獨立簡報 -->
@@ -4252,19 +4239,6 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="cm-icon-btn" id="mbClose" aria-label="關閉">✕</button>
     </div>
     <div id="mbBody"></div>
-  </div>
-</div>
-<!-- 2026-11-11 使用者：13:00 建議改 12:40 建議（單獨項目，放機器人代碼旁邊，打開才算／才顯示） -->
-<div class="chips-modal" id="sgModal" hidden>
-  <div class="chips-inner" id="sgInner">
-    <div class="chips-head">
-      <div>
-        <div class="chips-title">🕐 12:40 建議</div>
-        <div class="chips-sub">交易日 12:40 後端自動算一次：綜合籌碼面、技術面、營收面的建議買進（符合的全部列出）（全市場）＋自選股分組的建議賣出，每台裝置看到同一份。</div>
-      </div>
-      <button class="cm-icon-btn" id="sgClose" aria-label="關閉">✕</button>
-    </div>
-    <div id="sgBody"></div>
   </div>
 </div>
 <!-- 2026-10-10 使用者：照老師「均線分數排行 滿分 15」（zhuang.tw/ma）做（下方導覽列「均線分數排行」，手機／iPad 放上排第 6 顆） -->
@@ -10424,209 +10398,6 @@ function home225ColHtml(skip = 5){
   return '<div class="hr-col"><div class="hr-title">💎個股漲 &gt; 2%・扣前 ' + skip + '(22-' + skip + ') <span class="hr-rk">共 ' + all.length + ' 檔</span></div>' +
     (page.length ? page.map(row).join('') : '<div class="hr-note">' + (all.length ? '漲 2% 以上的不到 ' + (skip + 1) + ' 檔' : '目前沒有個股漲超過 2%') + '</div>') + '</div>';
 }
-// ---- 12:40 建議（2026-11-10 使用者：一點鐘算一次、放首頁，綜合籌碼面、技術面、營收面列 5 檔左右建議買進；也要有建議賣出）----
-// 買進（全市場）：技術＝均線分數、籌碼＝當週集保大戶變化 %、營收＝最新公布的月營收年增，三項各自在全市場排百分位、平均＝綜合分（100＝三項都第一）；
-//   門檻：均線分數 ≥9、週籌碼 >0、營收年增 >0、不是處置股、現在沒漲停（買不到）、今天漲跌幅在 −5%～+9.5% 之間；照綜合分高到低排，同分比盤中大戶力，取前 5 檔。
-// 賣出：自選股裡自己的分組（＝持股停損監控的範圍）；12:40 價格跌破三日低（持股停損，只用官方日K），或下面四項符合兩項以上：均線分數 ≤6、週籌碼 <0、盤中大戶力 ≤ −10%、今天跌 ≥3%。
-// 2026-11-10 使用者：改成後端 12:40 自動算、存進 KV（Worker 排程，/api/suggest13），每台裝置看到同一份；買進名單是後端算好的，賣出名單由這裡拿後端存的「12:40 全部股票當時的分數、價格」對自己的自選股分組算。
-// 後端連不上時才退回這台瀏覽器自己算（下面 sg13Load／sg13Compute／sg13Freeze，存在 localStorage）。12:40 前顯示上一個交易日的那份。不是買賣建議，條件寫在區塊下面。
-const SG13_KEY = 'sg13Snap', SG13_MIN_SCORE = 7, SG13_MAX_PCT = 9.5, SG13_MIN_PCT = -5;   // 2026-11-10 使用者：符合的全部列出、不限檔數（均線分數門檻 9 → 7）
-const sg13 = { rows: null, date: '', chipWeek: '', revMonth: '', at: 0, loading: false, errAt: 0, snap: null, pendSince: 0,
-  srv: { d: null, at: 0, loading: false, errAt: 0, key: '' }, stop: {}, stopErr: {} };
-try { const j = JSON.parse(localStorage.getItem(SG13_KEY) || 'null'); if (j && j.date && Array.isArray(j.buy)) sg13.snap = j; } catch (_) { /* 讀不到就重算 */ }
-function sg13Load(){
-  if (sg13.loading) return;
-  if (sg13.rows && Date.now() - sg13.at < 10 * 60e3) return;
-  if (sg13.errAt && Date.now() - sg13.errAt < 60e3) return;
-  sg13.loading = true;
-  Promise.all([fetch('/api/screener').then((r) => r.json()), fetch('/api/revenue').then((r) => r.json())]).then(([sc, rv]) => {
-    if (!sc || !Array.isArray(sc.rows) || !sc.rows.length || !rv || !Array.isArray(rv.rows) || !Array.isArray(rv.fields)) throw new Error('bad');
-    const yi = rv.fields.indexOf('yoy'), yoy = new Map();
-    rv.rows.forEach((r) => { const v = Number(r[yi]); if (r[yi] !== null && Number.isFinite(v)) yoy.set(String(r[0]), v); });
-    sg13.rows = sc.rows.map((r) => ({ code: r.code, name: r.name, grp: r.grp || '', score: Number.isFinite(r.score) ? r.score : null, chip: Number.isFinite(r.chip) ? r.chip : null,
-      yoy: yoy.has(r.code) ? yoy.get(r.code) : null, dispo: !!r.dispo }));
-    sg13.date = sc.date || ''; sg13.chipWeek = sc.chipWeek || ''; sg13.revMonth = rv.month || ''; sg13.at = Date.now(); sg13.errAt = 0;
-  }).catch(() => { sg13.errAt = Date.now(); }).finally(() => { sg13.loading = false; sg13Rerender(); });
-}
-function sg13Pctile(rows, key){
-  const v = rows.filter((r) => r[key] !== null && Number.isFinite(r[key])).sort((a, b) => a[key] - b[key]);
-  const m = new Map(); v.forEach((r, i) => m.set(r.code, v.length <= 1 ? 1 : i / (v.length - 1)));
-  return m;
-}
-function sg13Compute(date){
-  const rows = sg13.rows;
-  if (!rows || !lastData) return null;
-  const pt = sg13Pctile(rows, 'score'), pc = sg13Pctile(rows, 'chip'), pf = sg13Pctile(rows, 'yoy');
-  const quoteOf = (code) => getStockQuote(code);
-  const buy = [];
-  rows.forEach((r) => {
-    if (!pt.has(r.code) || !pc.has(r.code) || !pf.has(r.code)) return;
-    if (r.score < SG13_MIN_SCORE || !(r.chip > 0) || !(r.yoy > 0) || r.dispo) return;
-    const q = quoteOf(r.code);
-    if (!q || q.limitUp || !Number.isFinite(q.changePercent) || q.changePercent >= SG13_MAX_PCT || q.changePercent <= SG13_MIN_PCT) return;
-    const hp = holderPctOf(r.code);
-    buy.push({ code: r.code, name: r.name, grp: r.grp, px: q.price, pct: q.changePercent, combo: Math.round(100 * (pt.get(r.code) + pc.get(r.code) + pf.get(r.code)) / 3),
-      score: r.score, chip: r.chip, yoy: r.yoy, hold: hp });
-  });
-  buy.sort((a, b) => b.combo - a.combo || (b.hold === null ? -1e9 : b.hold) - (a.hold === null ? -1e9 : a.hold) || b.score - a.score);
-  // 賣出：自選股分組裡的股票
-  const byCode = new Map(rows.map((r) => [r.code, r]));
-  const codes = tdStopCodes();
-  let pending = false;
-  const sell = [];
-  codes.forEach((code) => {
-    const r = byCode.get(code), q = quoteOf(code), hp = holderPctOf(code);
-    const reasons = [];
-    const lw = sg13Low3Reason(code, date, q ? q.price : null);
-    if (lw.pending) pending = true; else if (lw.reason) reasons.push(lw.reason);
-    const soft = [];
-    if (r && r.score !== null && r.score <= 6) soft.push('均線分數 ' + r.score);
-    if (r && r.chip !== null && r.chip < 0) soft.push('週籌碼 ' + swPct(r.chip));
-    if (hp !== null && hp <= -10) soft.push('盤中大戶力 ' + (Math.round(hp * 10) / 10) + '%');
-    if (q && Number.isFinite(q.changePercent) && q.changePercent <= -3) soft.push('今天 ' + fmt(q.changePercent) + '%');
-    if (soft.length >= 2) reasons.push(soft.join('、'));
-    if (reasons.length) sell.push({ code, name: (r && r.name) || wlNameOf(code), px: q ? q.price : null, pct: q && Number.isFinite(q.changePercent) ? q.changePercent : null, reasons,
-      stop: reasons.some((x) => x.indexOf('持股停損') === 0) });
-  });
-  sell.sort((a, b) => (b.stop ? 1 : 0) - (a.stop ? 1 : 0) || b.reasons.length - a.reasons.length || (a.pct === null ? 0 : a.pct) - (b.pct === null ? 0 : b.pct));
-  return { buy: buy, sell, pending, holdN: codes.length, candN: buy.length, universe: rows.length };
-}
-function sg13Freeze(date, hm, r){
-  const pick = (x) => Object.assign({}, x);
-  sg13.snap = { date, hm, buy: r.buy.map(pick), sell: r.sell.map(pick), holdN: r.holdN, candN: r.candN, universe: r.universe, dataDate: sg13.date, chipWeek: sg13.chipWeek, revMonth: sg13.revMonth };
-  try { localStorage.setItem(SG13_KEY, JSON.stringify(sg13.snap)); } catch (_) { /* 存不了就算了，下次打開重算 */ }
-}
-function sg13RowHtml(x, kind){
-  const q = getStockQuote(x.code), now = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
-  const pctTxt = (v) => (v === null || v === undefined ? '—' : fmt(v) + '%');
-  const arrow = x.pct !== null && x.pct !== undefined && now !== null ? '<span class="sg13-then">' + pctTxt(x.pct) + '</span><span class="sg13-arrow">→</span>' : '';
-  const sub = kind === 'buy'
-    ? '<div class="sg13-sub">綜合 <b>' + x.combo + '</b>・技 ' + x.score + '・籌 ' + swPct(x.chip) + '・營收 ' + swPct(x.yoy, 1) + (x.grp ? '・' + wlEsc(x.grp) : '') + '</div>'
-    : '<div class="sg13-sub sell">' + x.reasons.map(wlEsc).join('；') + '</div>';
-  return '<div class="sg13-row hr-stk" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(x.name || '') + '" tabindex="0" role="button">' +
-    '<div class="sg13-l1"><span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(x.name || x.code) + '</span>' +
-    (x.px !== null && x.px !== undefined ? '<span class="sg13-px">' + pkPrice(x.px) + '</span>' : '') +
-    arrow + '<span class="hr-avg ' + (now === null ? 'flat' : dirClass(now)) + '">' + pctTxt(now) + '</span>' + homeHoldHtml(x.code) + '</div>' + sub + '</div>';
-}
-// 持股停損（賣出條件之一）：12:40 價格跌破前三個交易日最低價（三日低）。只用官方日K＋快照裡 12:40 當時的價格，每台裝置算出來都一樣。
-// 2026-11-10 使用者：電腦、手機、iPad 的賣出名單不一樣——原本還有「跌破 905 低」要看 1 分K，後端只有訂閱過的股票有完整 1 分K、先問的裝置拿到空的，
-// 各台抓到的不同，所以拿掉 905 低（持股停損的 905 低照舊在「每日功課」的持股停損分頁看）。
-function sg13Low3Reason(code, date, px){
-  const d1 = tdJ('d1|' + code, '/api/bars1d/' + code, 1800e3);
-  if (!d1) return { pending: true };
-  if (d1.status !== 'ok') return { err: true };
-  if (!Number.isFinite(px)) return {};
-  const prev = (d1.bars || []).filter((b) => String(b.ts).slice(0, 10) < date);
-  if (prev.length < 3) return {};
-  const low3 = Math.min(...prev.slice(-3).map((b) => b.low));
-  return Number.isFinite(low3) && px < low3 ? { reason: '持股停損：12:40 價 ' + pkPrice(px) + ' 跌破三日低 ' + pkPrice(low3) } : {};
-}
-function sg13SrvLoad(codes){
-  const srv = sg13.srv;
-  if (srv.loading) return;
-  srv.loading = true; srv.key = codes.join(',');
-  fetch('/api/suggest13?codes=' + encodeURIComponent(srv.key)).then((r) => r.json()).then((d) => {
-    if (!d || (d.status !== 'ok' && d.status !== 'empty')) throw new Error('bad');
-    srv.d = d; srv.at = Date.now(); srv.errAt = 0;
-  }).catch(() => { srv.errAt = Date.now(); }).finally(() => { srv.loading = false; sg13Rerender(); });
-}
-// 後端存的快照 table［股名, 12:40 價, 12:40 漲跌幅, 均線分數, 週籌碼, 營收年增, 12:40 大戶力］對自選股分組算賣出建議；
-// 持股停損（跌破 905 低／三日低）用 12:40 以前的 1 分K：12:40 一過就固定了，算出來就記著，不再重抓（不然盤後每分鐘重抓每檔 1 分K）
-function sg13SellFromTable(snap, codes){
-  const sell = []; let pending = false, errN = 0;
-  codes.forEach((code) => {
-    const t = snap.table && snap.table[code];
-    const reasons = [];
-    const lw = sg13Low3Reason(code, snap.date, t ? t[1] : null);
-    if (lw.pending) pending = true; else if (lw.err) errN++; else if (lw.reason) reasons.push(lw.reason);
-    const soft = [];
-    if (t && t[3] !== null && t[3] <= 6) soft.push('均線分數 ' + t[3]);
-    if (t && t[4] !== null && t[4] < 0) soft.push('週籌碼 ' + swPct(t[4]));
-    if (t && t[6] !== null && t[6] <= -10) soft.push('盤中大戶力 ' + (Math.round(t[6] * 10) / 10) + '%');
-    if (t && t[2] !== null && t[2] <= -3) soft.push('今天 ' + fmt(t[2]) + '%');
-    if (soft.length >= 2) reasons.push(soft.join('、'));
-    if (reasons.length) sell.push({ code, name: (t && t[0]) || wlNameOf(code), px: t ? t[1] : null, pct: t ? t[2] : null, reasons, stop: reasons.some((x) => x.indexOf('持股停損') === 0) });
-  });
-  sell.sort((a, b) => (b.stop ? 1 : 0) - (a.stop ? 1 : 0) || b.reasons.length - a.reasons.length || (a.pct === null ? 0 : a.pct) - (b.pct === null ? 0 : b.pct));
-  return { sell, pending, errN };
-}
-// 賣出欄的來源說明：用了哪幾個自選股分組、幾檔、同步碼（跟別台裝置比對，不一樣就是各台的自選股不同）、三日低沒查到的檔數
-function sg13SellSrcHtml(codes, errN){
-  let grp = '';
-  try { grp = mineGroups().map((g) => wlEsc(g.name) + ' ' + g.codes.length).join('、'); } catch (_) { /* 自選股還沒載入 */ }
-  const key = wl && wl.key ? wl.key.slice(0, 2) + '•••' + wl.key.slice(-1) : '';
-  return '<div class="sg13-src">自選股分組：' + (grp || '（無）') + '（共 ' + codes.length + ' 檔）・' + (key ? '同步碼 ' + wlEsc(key) : '這台沒設同步碼（只看這台自己的自選股）') +
-    (errN ? '<br><span class="sg13-warn">' + errN + ' 檔的日K暫時抓不到（資料來源忙碌），會自動重試，抓到前先不判斷三日低</span>' : '') + '</div>';
-}
-function sg13LocalSnap(today, hm, afterOne){   // 後端連不上時的備案：這台瀏覽器自己算、存在 localStorage
-  if (afterOne && (!sg13.snap || sg13.snap.date !== today)){
-    sg13Load();
-    if (sg13.rows && !sg13.loading){
-      tdHomeAsked = Date.now();    // 持股停損要的 1 分K 抓到後重畫首頁
-      const r = sg13Compute(today);
-      if (r){
-        if (!sg13.pendSince) sg13.pendSince = Date.now();
-        if (!r.pending || Date.now() - sg13.pendSince > 90e3){ sg13Freeze(today, hm, r); sg13.pendSince = 0; }
-      }
-    }
-  }
-  return sg13.snap;
-}
-function homeSuggestHtml(){
-  if (!lastData || lastData.mock) return '';
-  const today = twTodayStr(), hm = obsNowHm(), dow = new Date(Date.now() + 8 * 3600000).getUTCDay();
-  const trading = dow >= 1 && dow <= 5, afterOne = trading && hm >= '12:40';
-  const codes = tdStopCodes(), srv = sg13.srv;
-  let snap = srv.d && srv.d.status === 'ok' ? srv.d.snap : null;
-  // 向後端要：今天的還沒出來（12:40 後）30 秒問一次，其他 10 分鐘一次；自選股分組變了也重問（table 只回這幾檔）
-  const wait = afterOne && !(snap && snap.date === today) ? 30e3 : 10 * 60e3;
-  if ((!srv.at || Date.now() - srv.at > wait || srv.key !== codes.join(',')) && !srv.loading && (!srv.errAt || Date.now() - srv.errAt > 60e3)) setTimeout(() => sg13SrvLoad(codes), 0);
-  let fromLocal = false, sell = [], pending = false, holdN = codes.length, errN = 0;
-  if (snap){
-    const r = sg13SellFromTable(snap, codes); sell = r.sell; pending = r.pending; errN = r.errN;
-  } else if (srv.errAt){        // 後端連不上：退回這台自己算
-    snap = sg13LocalSnap(today, hm, afterOne);
-    if (snap){ fromLocal = true; sell = snap.sell || []; holdN = snap.holdN; }
-  }
-  const isToday = !!snap && snap.date === today;
-  const head = (note) => '<div class="sg13-head"><b>🕐 12:40 建議</b> <span class="sg13-note">' + note + '</span></div>';
-  const foot = '<div class="sg13-foot">買進（全市場）：技術＝均線分數、籌碼＝當週集保大戶變化、營收＝最新月營收年增，三項各自在全市場排百分位、平均＝綜合分（100＝三項都第一）。門檻：均線分數 ≥' + SG13_MIN_SCORE +
-    '、週籌碼 >0、營收年增 >0、非處置股、現在沒漲停、今天漲跌幅在 ' + SG13_MIN_PCT + '%～+' + SG13_MAX_PCT + '% 之間；同分比盤中大戶力。賣出：自選股分組裡的股票，12:40 價格跌破三日低（前三個交易日最低價），或「均線分數 ≤6、週籌碼 <0、盤中大戶力 ≤ −10%、今天跌 ≥3%」符合兩項以上。' +
-    '交易日 12:40 後端自動算一次存起來（每台裝置看到同一份），當天不再變，箭頭後面是「現在」的漲跌。依規則排出來的參考名單，不是買賣建議。</div>';
-  if (!snap){
-    return '<div class="sg13">' + head(srv.errAt && !srv.d ? '後端暫時連不上，稍後再試' : afterOne ? '計算中…（後端 12:40 自動算，稍等幾秒）' : trading ? '12:40 開出名單（現在 ' + hm + '）' : '下個交易日 12:40 開出名單') + foot + '</div>';
-  }
-  const col = (title, cls, list, kind, empty, extra) => '<div class="sg13-col"><div class="sg13-title ' + cls + '">' + title + ' <span class="hr-rk">' + list.length + ' 檔</span></div>' + (extra || '') +
-    (list.length ? list.map((x) => sg13RowHtml(x, kind)).join('') : '<div class="hr-note">' + empty + '</div>') + '</div>';
-  const note = (isToday ? '今天 ' : swMmdd(snap.date) + ' ') + snap.hm + ' 算的' + (fromLocal ? '（後端連不上，這台自己算的）' : isToday && snap.hm > '13:10' ? '（排程沒跑到，晚了才補算，用算的當下報價）' : '') + (isToday ? '' : '・12:40 前先看上一個交易日的') +
-    '・全市場 ' + snap.universe + ' 檔裡符合的有 ' + snap.candN + ' 檔・資料：均線分數 ' + wlEsc(swMmdd(snap.dataDate || '')) + '、週籌碼 ' + wlEsc(swMmdd(snap.chipWeek || '')) + ' 那週、營收 ' + wlEsc(String(snap.revMonth || '').slice(5)) + ' 月';
-  const sellEmpty = pending ? '檢查持股停損中…' : holdN ? '自選股分組裡的 ' + holdN + ' 檔都沒有符合賣出條件' : '還沒有自選股分組：把持股放進自選股的分組，這裡才會列賣出建議';
-  return '<div class="sg13">' + head(note) + '<div class="sg13-cols">' + col('✅ 建議買進', 'buy', snap.buy, 'buy', '今天沒有股票同時符合技術、籌碼、營收三項門檻') +
-    col('⚠️ 建議賣出', 'sell', sell, 'sell', sellEmpty, sg13SellSrcHtml(codes, errN)) + '</div>' + foot + '</div>';
-}
-// 12:40 建議視窗（2026-11-10 使用者：做成單獨項目、放在機器人代碼旁邊，打開才顯示；首頁版面不放）：打開才向後端要、才檢查持股停損；開著每 5 秒用最新報價重畫
-function sg13Render(){
-  const m = document.getElementById('sgModal'), body = document.getElementById('sgBody'), inner = document.getElementById('sgInner');
-  if (!m || m.hidden || !body) return;
-  const top = inner ? inner.scrollTop : 0;
-  body.innerHTML = homeSuggestHtml() || '<div class="race-note">報價還沒載入，稍等一下…</div>';
-  if (inner) inner.scrollTop = top;
-}
-function sg13Rerender(){ try { sg13Render(); } catch (_) { /* 重畫失敗就等下一輪 */ } }
-document.getElementById('sg13Btn').addEventListener('click', () => { document.getElementById('sgModal').hidden = false; sg13Render(); });
-document.getElementById('sgClose').addEventListener('click', () => { document.getElementById('sgModal').hidden = true; });
-document.getElementById('sgModal').addEventListener('click', (e) => {
-  if (e.target === e.currentTarget){ e.currentTarget.hidden = true; return; }
-  const row = e.target.closest('.sg13-row[data-code]');   // 2026-11-10 使用者：點個股名稱或代號開 K 線圖
-  if (row) openStockChart(row.dataset.code, row.dataset.name);
-});
-document.getElementById('sgModal').addEventListener('keydown', (e) => {
-  if (e.key !== 'Enter' && e.key !== ' ') return;
-  const row = e.target.closest('.sg13-row[data-code]');
-  if (row){ e.preventDefault(); openStockChart(row.dataset.code, row.dataset.name); }
-});
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape'){ const m = document.getElementById('sgModal'); if (m && !m.hidden) m.hidden = true; } });
-setInterval(sg13Rerender, 5000);
 function homeRank4Html(){
   const h = homeRankRows();
   if (!h) return '<div class="hr-note">族群行情載入中…</div>';
@@ -10729,7 +10500,6 @@ function homeRankFootHtml(total){
     ['📈 1+2 突破廣播', '跟訊號中心「1+2多」同一份：全市場今天第一次 5 分K 收盤，同時站上「905 高」（開盤第一根 5 分K，09:00～09:05 的最高價）和「昨日最高價」的股票，一檔一天一次。前面紫色是第一次發生的時間；「之上」（紅底）＝現在 5 分K 還收在線上、「之下」（綠底）＝突破後又收回線下；首頁留最新 20 檔，每日功課「1+2 突破」分頁全部列'],
     ['🎯 905 突破廣播', '只要 5 分K 收盤站上 905 高（不用站上昨高）就列一筆「突破」，時間就是突破的那一刻（只列今天漲幅 ≥ ' + TD905_PCT + '%、族群在多方區的，不然全市場太多）；等到<b>四個條件齊全</b>——① 當天第一次站上 905 高　② 盤中大戶力 ≥ +' + TD905_BIG + '%　③ 今天漲幅 ≥ ' + TD905_PCT + '%　④ 族群在多方區（族群名次前一半，跟當沖多同一個算法）——再列一筆「✅ 條件齊全」，時間是四個條件第一次同時成立的時間（例：09:40 突破、12:35 大戶力到 +10%，就是 09:40 一筆「突破」、12:35 一筆「條件齊全」）。名單照時間排、新的在上面；「之上／之下」跟 1+2 一樣；首頁留最新 ' + HOME905_MAX + ' 筆，每日功課「905 突破」分頁全部列；盤中要開著網頁才記得到，記在這台電腦（換一台電腦會從頭記）'],
     ['⭐ 今日強勢股', '跟訊號中心「今日強勢股」同一份，放在發動下面，紅框框起來；每一列漲跌幅後面是盤中大戶力'],
-    ['🕐12:40 建議', '放在首頁右上角、機器人代碼旁邊的「🕐 12:40 建議」按鈕，點開才顯示（不佔首頁版面）：每個交易日 13:00 算一次，左邊「建議買進」（符合的全部列出）（全市場）、右邊「建議賣出」（你自選股分組裡的股票）。<b>買進</b>：技術＝均線分數、籌碼＝當週集保大戶變化 %、營收＝最新公布的月營收年增，三項各自在全市場排百分位、平均＝綜合分（100＝三項都第一）；門檻：均線分數 ≥7、週籌碼 >0、營收年增 >0、不是處置股、現在沒漲停、今天漲跌幅在 −5%～+9.5% 之間；照綜合分由高到低排，同分比盤中大戶力，符合的全部列出、不限檔數。<b>賣出</b>：自選股分組裡的股票 13:00 價格跌破三日低（前三個交易日最低價，用官方日K算，每台裝置結果一樣），或「均線分數 ≤6、週籌碼 <0、盤中大戶力 ≤ −10%、今天跌 ≥3%」四項符合兩項以上，會寫出原因。每個交易日 13:00 由後端（Worker 排程）自動算一次、存起來，每台裝置看到同一份，當天不再變，箭頭前面是 13:00 當時的漲跌、後面是現在的；13:00 前看到的是上一個交易日的那份；賣出名單是拿後端存的「13:00 全部股票當時的分數、價格」對你自己的自選股分組算的（持股不會傳到後端）。後端連不上時才退回這台瀏覽器自己算。依規則排出來的參考名單，不是買賣建議。'],
     ['🏛️投信買超前15', '放在 30加33加34 下面（188 上面）：投信買超張數前 15 名（上市＋上櫃），<b>名單裡照今天即時漲跌幅排、漲越多的越上面（自動換位置）</b>，每列是買超張數、今天即時漲跌幅、盤中大戶力（不在大戶力排行範圍的顯示 —）。<b>更新時間</b>：證交所三大法人買賣超約 15:00 後公布、櫃買中心通常更晚（上櫃還沒進來時欄位上方會寫「上櫃還沒公布」，先列上市），後端每 15 分鐘收一次；所以開盤前、盤中看到的是<b>前一個交易日</b>的名單（標題旁的日期就是資料日），收盤後新名單進來會自動換。機器人代碼 98 有投信賣超、買超各前十（賣超在上、買超在下，單位是金額億元）'],
     ['🌏外資買超前15', '放在今日強勢股下面：外資買超張數前 15 名（上市＋上櫃），格式、排序（照即時漲跌幅、漲越多越上面）、更新時間跟投信買超前15 一樣。機器人代碼 97 有外資賣超、買超各前十（賣超在上、買超在下，單位是金額億元）；研究室的「外資買賣超」「投信買賣超」分頁可以選日期往回查、上市上櫃分開看'],
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔'],
@@ -17942,7 +17712,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-11 12:33:13';
+const BUILD_STAMP = '2026-11-11 16:00:45';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -28850,7 +28620,7 @@ document.getElementById('maBody').addEventListener('keydown', (e) => {
 // 可收的項目：下方工具列每一顆、右上角的自選族群個股／今日提醒／新手教學／機器人代碼／盤中訊號分頁／影片教學、首頁那排欄位（當沖多1／2…股期黑龍 13 塊）與下面的處置欄、說明卡片。不能收的：盤中訊號、提醒開啟（核心）、自訂按鈕本身。
 // 收起來只是不顯示（功能都還在，從別的地方打開照樣可以）；設定存在這台裝置的 localStorage，「全部顯示」清掉。
 const CZ_KEY = 'czHidden';
-const CZ_HEADER_IDS = ['wgBtn', 'briefBtn', 'mbBtn', 'remindBtn', 'dojoBtn', 'guideBtn', 'botBtn', 'sg13Btn', 'sgtBtn', 'tutBtn'];
+const CZ_HEADER_IDS = ['wgBtn', 'briefBtn', 'mbBtn', 'remindBtn', 'dojoBtn', 'guideBtn', 'botBtn', 'sgtBtn', 'tutBtn'];
 let czMode = false;
 function czLoad(){ try { const v = JSON.parse(localStorage.getItem(CZ_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; } catch (_){ return []; } }
 function czSave(){ try { if (czHidden.size) localStorage.setItem(CZ_KEY, JSON.stringify([...czHidden])); else localStorage.removeItem(CZ_KEY); } catch (_){} }
@@ -30099,115 +29869,6 @@ async function notifyDiscordUsageAnomaly(env, result) {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ content: message })
   });
-}
-
-// ---- 12:40 建議（2026-11-10 使用者：改成後端自動存，每台裝置看到同一份；2026-11-11 使用者：時間從 13:00 提早到 12:40）----
-// 排程（每天 12:40 一次專用的，加上每 15 分鐘那個當備援）在交易日 12:40～13:25 之間算一次存進 KV（key sg13:日期），沒存過才算；網頁來問時若今天還沒有（排程漏了）也會當場算一次補上。
-// 買進（全市場）：技術＝均線分數、籌碼＝當週集保大戶變化 %、營收＝最新月營收年增，三項各自在全市場排百分位、平均＝綜合分；
-// 門檻：均線分數 >=7、週籌碼 >0、營收年增 >0、非處置股、現在沒漲停、今天漲跌幅在 -5%~+9.5%；照綜合分高到低排，同分比盤中大戶力，符合的全部列出（不限檔數）。
-// 另外把全部股票 13:00 當時的 [股名, 價, 漲跌幅, 均線分數, 週籌碼, 營收年增, 大戶力] 一起存（table），前端用它對自己的自選股分組算賣出建議（不用把持股傳給後端）。
-const SG13_MIN_SCORE = 7, SG13_MAX_PCT = 9.5, SG13_MIN_PCT = -5, SG13_VERSION = 4;   // 2026-11-10 使用者：符合的全部列出（不限檔數）；均線分數門檻 9 → 7；版本改了當天的舊快照會重算
-let sg13Inflight = null;
-function sg13Pctile(rows, key) {
-  const v = rows.filter((r) => r[key] !== null && Number.isFinite(r[key])).sort((a, b) => a[key] - b[key]);
-  const m = new Map();
-  v.forEach((r, i) => m.set(r.code, v.length <= 1 ? 1 : i / (v.length - 1)));
-  return m;
-}
-// 純計算（好測試）：sc＝/api/hub/screener、rv＝/api/hub/revenue、mf＝盤中大戶力排行、groups＝/api/groups 的 groups
-function sg13Compute(sc, rv, mf, groups, date, hm, quoteDate) {
-  const yi = rv.fields.indexOf("yoy"), yoy = new Map();
-  rv.rows.forEach((r) => { const v = Number(r[yi]); if (r[yi] !== null && Number.isFinite(v)) yoy.set(String(r[0]), v); });
-  const hold = new Map();
-  ((mf && mf.ranking) || []).forEach((r) => { const v = Number(r.strengthPct); if (Number.isFinite(v)) hold.set(String(r.code), v); });
-  const quote = new Map();
-  (groups || []).forEach((g) => (g.stocks || []).forEach((st) => {
-    if (st.price !== null && st.price !== undefined && Number.isFinite(st.changePercent) && !quote.has(st.code)) quote.set(st.code, st);
-  }));
-  const rows = sc.rows.map((r) => ({ code: r.code, name: r.name, grp: r.grp || "", score: Number.isFinite(r.score) ? r.score : null,
-    chip: Number.isFinite(r.chip) ? r.chip : null, yoy: yoy.has(r.code) ? yoy.get(r.code) : null, dispo: !!r.dispo }));
-  const pt = sg13Pctile(rows, "score"), pc = sg13Pctile(rows, "chip"), pf = sg13Pctile(rows, "yoy");
-  const buy = [];
-  rows.forEach((r) => {
-    if (!pt.has(r.code) || !pc.has(r.code) || !pf.has(r.code)) return;
-    if (r.score < SG13_MIN_SCORE || !(r.chip > 0) || !(r.yoy > 0) || r.dispo) return;
-    const q = quote.get(r.code);
-    if (!q || q.limitUp || q.changePercent >= SG13_MAX_PCT || q.changePercent <= SG13_MIN_PCT) return;
-    buy.push({ code: r.code, name: r.name, grp: r.grp, px: q.price, pct: q.changePercent,
-      combo: Math.round(100 * (pt.get(r.code) + pc.get(r.code) + pf.get(r.code)) / 3), score: r.score, chip: r.chip, yoy: r.yoy,
-      hold: hold.has(r.code) ? hold.get(r.code) : null });
-  });
-  buy.sort((a, b) => b.combo - a.combo || (b.hold === null ? -1e9 : b.hold) - (a.hold === null ? -1e9 : a.hold) || b.score - a.score);
-  const table = {};
-  rows.forEach((r) => {
-    const q = quote.get(r.code);
-    table[r.code] = [r.name, q ? q.price : null, q ? q.changePercent : null, r.score, r.chip, r.yoy, hold.has(r.code) ? hold.get(r.code) : null];
-  });
-  return { v: SG13_VERSION, date: date, hm: hm, dataDate: sc.date || "", chipWeek: sc.chipWeek || "", revMonth: rv.month || "", quoteDate: quoteDate || "",
-    universe: rows.length, candN: buy.length, buy: buy, table: table };
-}
-async function sg13Fetch(path) {
-  const r = await proxyHanstockBars(path, 0);
-  if (!r.ok) throw new Error("HanStock " + path + " " + r.status);
-  return JSON.parse(await r.text());
-}
-async function sg13BuildAndSave(env) {
-  const tw = new Date(Date.now() + 8 * 3600000);
-  const date = tw.toISOString().slice(0, 10), hm = tw.toISOString().slice(11, 16);
-  const [sc, rv, mf, gbody] = await Promise.all([
-    sg13Fetch("/api/hub/screener"), sg13Fetch("/api/hub/revenue"), sg13Fetch("/api/hub/main-force/ranking?limit=1000").catch(() => null), refreshGroups()
-  ]);
-  const g = JSON.parse(gbody);
-  if (!sc || !Array.isArray(sc.rows) || !sc.rows.length || !rv || !Array.isArray(rv.rows) || !Array.isArray(rv.fields)) throw new Error("資料不完整");
-  if (g.quoteDate !== date) return null;   // 今天沒開盤（假日）或報價還是舊的，不存
-  const snap = sg13Compute(sc, rv, mf, g.groups, date, hm, g.quoteDate);
-  if (env && env.USAGE_KV) {
-    await env.USAGE_KV.put("sg13:" + date, JSON.stringify(snap), { expirationTtl: 30 * 86400 });
-    await env.USAGE_KV.put("sg13:latest", date, { expirationTtl: 30 * 86400 });
-  }
-  return snap;
-}
-// 今天的快照：KV 有就直接回；沒有且已過 13:00（交易日）就當場算一次（同一時間只算一份）
-async function sg13Today(env, allowBuild) {
-  const tw = new Date(Date.now() + 8 * 3600000);
-  const date = tw.toISOString().slice(0, 10), hm = tw.toISOString().slice(11, 16), dow = tw.getUTCDay();
-  if (!env || !env.USAGE_KV) return null;
-  const raw = await env.USAGE_KV.get("sg13:" + date);
-  const old = raw ? JSON.parse(raw) : null;
-  if (old && old.v === SG13_VERSION) return old;
-  if (!allowBuild || dow < 1 || dow > 5 || hm < "12:40") return old;   // 規則改過（版本不同）的舊快照，12:40 後有人來問或排程跑到就重算一次
-  if (!sg13Inflight) sg13Inflight = sg13BuildAndSave(env).finally(() => { sg13Inflight = null; });
-  return await sg13Inflight;
-}
-async function sg13Cron(env) {
-  const tw = new Date(Date.now() + 8 * 3600000), hm = tw.toISOString().slice(11, 16), dow = tw.getUTCDay();
-  if (dow < 1 || dow > 5 || hm < "12:40" || hm > "13:25") return;
-  await sg13Today(env, true);
-}
-// GET /api/suggest13?date=YYYY-MM-DD&codes=2330,2034：回快照（不含 table），codes 給了就附上這幾檔的 table
-async function sg13Response(env, url) {
-  const headers = { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" };
-  if (!env || !env.USAGE_KV) return new Response(JSON.stringify({ status: "missing" }), { headers });
-  const qd = url.searchParams.get("date");
-  let snap = null;
-  if (qd) {
-    if (!(qd.length === 10 && qd[4] === "-" && qd[7] === "-")) return new Response(JSON.stringify({ status: "error", error: "date 要 YYYY-MM-DD" }), { status: 422, headers });
-    const raw = await env.USAGE_KV.get("sg13:" + qd);
-    snap = raw ? JSON.parse(raw) : null;
-  } else {
-    snap = await sg13Today(env, true);
-    if (!snap) {
-      const latest = await env.USAGE_KV.get("sg13:latest");
-      const raw = latest ? await env.USAGE_KV.get("sg13:" + latest) : null;
-      snap = raw ? JSON.parse(raw) : null;
-    }
-  }
-  if (!snap) return new Response(JSON.stringify({ status: "empty" }), { headers });
-  const codes = String(url.searchParams.get("codes") || "").split(",").map((c) => c.trim().toUpperCase()).filter((c) => c).slice(0, 60);
-  const table = {};
-  codes.forEach((c) => { if (snap.table && snap.table[c]) table[c] = snap.table[c]; });
-  const out = Object.assign({}, snap, { table: table });
-  return new Response(JSON.stringify({ status: "ok", snap: out }), { headers });
 }
 
 // 教學影片（2026-10-13 使用者：訊號教學、下方工具列各功能做影音教學）：mp4 放在 Workers 靜態檔案 public/tut-assets/，
@@ -31570,13 +31231,6 @@ const WORKER_ENTRY = {
         return Response.json({ status: "error", error: String(err), entries: [] }, { status: 502 });
       }
     }
-    if (url.pathname === "/api/suggest13") {
-      try {
-        return await sg13Response(env, url);
-      } catch (err) {
-        return Response.json({ status: "error", error: String(err) }, { status: 502 });
-      }
-    }
     if (url.pathname === "/api/usage") {
       if (!env || !env.USAGE_KV) return Response.json({ status: "missing", message: "沒有綁定 USAGE_KV" });
       const day = url.searchParams.get("date");
@@ -31630,10 +31284,6 @@ const WORKER_ENTRY = {
     });
   },
   async scheduled(event, env, ctx) {
-    if (event && event.cron === "40 4 * * 1-5") {   // 12:40 建議專用排程（台灣 12:40＝UTC 04:40，週一到週五）：只算建議，不跑下面的用量檢查
-      try { await sg13Cron(env); } catch (err) { /* 失敗就等 12:45 那個每 15 分鐘的排程再試 */ }
-      return;
-    }
     try { recPingAt = 0; recorderPing(env, ctx); } catch (err) { /* 叫醒記錄器失敗不影響下面的檢查 */ }
     try {
       const result = await checkUsageAnomaly(env);
@@ -31648,11 +31298,6 @@ const WORKER_ENTRY = {
       if (daily && daily.anomalous) await notifyDiscordDailyUsage(env, daily);
     } catch (err) {
       // 同上：失敗就等下一輪。
-    }
-    try {
-      await sg13Cron(env);   // 12:40 建議：交易日 12:40～13:25 算一次存 KV（12:40 專用排程沒成功，12:45 這個每 15 分鐘的排程再試）
-    } catch (err) {
-      // 算失敗就等下一輪（13:15）；網頁來問時也會補算。
     }
   }
 };
