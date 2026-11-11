@@ -7181,9 +7181,13 @@ function groupRiseMarks(g){
 // 刀劍空（31／32）排處置股用的判斷：老師的處置名單比官方慢——開始處置後要到第二個交易日才開始排除：
 // 2026-10-20 08:07～09:18 大量（10/20 起處置）、蔚華科（10/19 起處置）都還在他的 31／32 裡；10/19 大量（10/20 才開始）也在。
 // 所以「處置開始日 ≥ 昨天（上一個交易日）」的先不當處置股，照樣列在名單裡。
+// 2026-11-11 老師 18:09 收盤的 32：景碩（11/10 起處置）、全新（11/11 起處置）都沒列——收盤後他的處置名單已經更新、當天（含）以前開始處置的全部排除；
+// 上面那個「晚一天才排除」只有盤中／開盤前（10/20 08:07～09:18 的觀察）才套用，所以 13:35 以後（交易日、報價日是今天）不再放過剛開始處置的股票。
 function bladeDisp(code){
   const f = stockFlags && stockFlags[code];
   if (!f || !f.disposition) return false;
+  const afterClose = !!lastData && lastData.quoteDate === twTodayStr() && obsNowHm() >= '13:35';
+  if (afterClose && f.dispositionStart && f.dispositionStart <= twTodayStr()) return true;
   const base = groupDailyChanges && groupDailyChanges.dates && groupDailyChanges.dates[0];
   if (f.dispositionStart && base && f.dispositionStart >= base) return false;
   return true;
