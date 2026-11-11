@@ -4027,7 +4027,7 @@
     <div class="signal-controls">
       <button class="signal-badge-btn" id="signalBadgeBtn"><span>⚠ 盤中訊號</span><span class="sb-count" id="signalBadgeCount">0</span></button>
       <button class="alert-toggle guide-btn" id="czBtn" title="自訂畫面：選擇哪些按鈕要留著、哪些收起來（畫面比較精簡）">⊙ 自訂</button>  <!-- 2026-10-23 使用者：照莊爸網站左側「自訂」，按下去每個項目前面出現勾選框，勾掉就收起來；全部顯示一鍵復原 -->
-      <button class="alert-toggle guide-btn" id="sg13Btn" title="每個交易日 13:00 後端自動算：綜合籌碼、技術、營收的建議買進（符合的全部列出），加上自選股分組的建議賣出">🕐 13:00 建議</button>  <!-- 2026-11-10 使用者：13:00 建議做成單獨項目放機器人代碼旁邊，打開才顯示、不佔首頁版面 -->
+      <button class="alert-toggle guide-btn" id="sg13Btn" title="每個交易日 12:40 後端自動算：綜合籌碼、技術、營收的建議買進（符合的全部列出），加上自選股分組的建議賣出">🕐 12:40 建議</button>  <!-- 2026-11-10 使用者：13:00 建議做成單獨項目放機器人代碼旁邊，打開才顯示、不佔首頁版面 -->
       <button class="alert-toggle guide-btn" id="botBtn">🤖 機器人代碼</button>  <!-- 2026-10-17 使用者：照對方 Line 機器人的代碼（12／22／B／a／70…）做一個輸入代碼的面板 -->
       <button class="alert-toggle guide-btn" id="briefBtn">📋 觀察股簡報</button>  <!-- 2026-10-24 使用者：照老師影片兩張投影片（營收觀察股誰在加速、族群本週誰最強）做新版面，名單用自選股 -->
       <button class="alert-toggle guide-btn" id="mbBtn">💰 融資簡報</button>  <!-- 2026-10-24 使用者：照老師 IG 那 7 張融資還沒殺完做的獨立簡報 -->
@@ -4165,13 +4165,13 @@
     <div id="mbBody"></div>
   </div>
 </div>
-<!-- 2026-11-10 使用者：13:00 建議（單獨項目，放機器人代碼旁邊，打開才算／才顯示） -->
+<!-- 2026-11-11 使用者：13:00 建議改 12:40 建議（單獨項目，放機器人代碼旁邊，打開才算／才顯示） -->
 <div class="chips-modal" id="sgModal" hidden>
   <div class="chips-inner" id="sgInner">
     <div class="chips-head">
       <div>
-        <div class="chips-title">🕐 13:00 建議</div>
-        <div class="chips-sub">交易日 13:00 後端自動算一次：綜合籌碼面、技術面、營收面的建議買進（符合的全部列出）（全市場）＋自選股分組的建議賣出，每台裝置看到同一份。</div>
+        <div class="chips-title">🕐 12:40 建議</div>
+        <div class="chips-sub">交易日 12:40 後端自動算一次：綜合籌碼面、技術面、營收面的建議買進（符合的全部列出）（全市場）＋自選股分組的建議賣出，每台裝置看到同一份。</div>
       </div>
       <button class="cm-icon-btn" id="sgClose" aria-label="關閉">✕</button>
     </div>
@@ -10335,12 +10335,12 @@ function home225ColHtml(skip = 5){
   return '<div class="hr-col"><div class="hr-title">💎個股漲 &gt; 2%・扣前 ' + skip + '(22-' + skip + ') <span class="hr-rk">共 ' + all.length + ' 檔</span></div>' +
     (page.length ? page.map(row).join('') : '<div class="hr-note">' + (all.length ? '漲 2% 以上的不到 ' + (skip + 1) + ' 檔' : '目前沒有個股漲超過 2%') + '</div>') + '</div>';
 }
-// ---- 13:00 建議（2026-11-10 使用者：一點鐘算一次、放首頁，綜合籌碼面、技術面、營收面列 5 檔左右建議買進；也要有建議賣出）----
+// ---- 12:40 建議（2026-11-10 使用者：一點鐘算一次、放首頁，綜合籌碼面、技術面、營收面列 5 檔左右建議買進；也要有建議賣出）----
 // 買進（全市場）：技術＝均線分數、籌碼＝當週集保大戶變化 %、營收＝最新公布的月營收年增，三項各自在全市場排百分位、平均＝綜合分（100＝三項都第一）；
 //   門檻：均線分數 ≥9、週籌碼 >0、營收年增 >0、不是處置股、現在沒漲停（買不到）、今天漲跌幅在 −5%～+9.5% 之間；照綜合分高到低排，同分比盤中大戶力，取前 5 檔。
-// 賣出：自選股裡自己的分組（＝持股停損監控的範圍）；13:00 價格跌破三日低（持股停損，只用官方日K），或下面四項符合兩項以上：均線分數 ≤6、週籌碼 <0、盤中大戶力 ≤ −10%、今天跌 ≥3%。
-// 2026-11-10 使用者：改成後端 13:00 自動算、存進 KV（Worker 排程，/api/suggest13），每台裝置看到同一份；買進名單是後端算好的，賣出名單由這裡拿後端存的「13:00 全部股票當時的分數、價格」對自己的自選股分組算。
-// 後端連不上時才退回這台瀏覽器自己算（下面 sg13Load／sg13Compute／sg13Freeze，存在 localStorage）。13:00 前顯示上一個交易日的那份。不是買賣建議，條件寫在區塊下面。
+// 賣出：自選股裡自己的分組（＝持股停損監控的範圍）；12:40 價格跌破三日低（持股停損，只用官方日K），或下面四項符合兩項以上：均線分數 ≤6、週籌碼 <0、盤中大戶力 ≤ −10%、今天跌 ≥3%。
+// 2026-11-10 使用者：改成後端 12:40 自動算、存進 KV（Worker 排程，/api/suggest13），每台裝置看到同一份；買進名單是後端算好的，賣出名單由這裡拿後端存的「12:40 全部股票當時的分數、價格」對自己的自選股分組算。
+// 後端連不上時才退回這台瀏覽器自己算（下面 sg13Load／sg13Compute／sg13Freeze，存在 localStorage）。12:40 前顯示上一個交易日的那份。不是買賣建議，條件寫在區塊下面。
 const SG13_KEY = 'sg13Snap', SG13_MIN_SCORE = 7, SG13_MAX_PCT = 9.5, SG13_MIN_PCT = -5;   // 2026-11-10 使用者：符合的全部列出、不限檔數（均線分數門檻 9 → 7）
 const sg13 = { rows: null, date: '', chipWeek: '', revMonth: '', at: 0, loading: false, errAt: 0, snap: null, pendSince: 0,
   srv: { d: null, at: 0, loading: false, errAt: 0, key: '' }, stop: {}, stopErr: {} };
@@ -10419,7 +10419,7 @@ function sg13RowHtml(x, kind){
     (x.px !== null && x.px !== undefined ? '<span class="sg13-px">' + pkPrice(x.px) + '</span>' : '') +
     arrow + '<span class="hr-avg ' + (now === null ? 'flat' : dirClass(now)) + '">' + pctTxt(now) + '</span>' + homeHoldHtml(x.code) + '</div>' + sub + '</div>';
 }
-// 持股停損（賣出條件之一）：13:00 價格跌破前三個交易日最低價（三日低）。只用官方日K＋快照裡 13:00 當時的價格，每台裝置算出來都一樣。
+// 持股停損（賣出條件之一）：12:40 價格跌破前三個交易日最低價（三日低）。只用官方日K＋快照裡 12:40 當時的價格，每台裝置算出來都一樣。
 // 2026-11-10 使用者：電腦、手機、iPad 的賣出名單不一樣——原本還有「跌破 905 低」要看 1 分K，後端只有訂閱過的股票有完整 1 分K、先問的裝置拿到空的，
 // 各台抓到的不同，所以拿掉 905 低（持股停損的 905 低照舊在「每日功課」的持股停損分頁看）。
 function sg13Low3Reason(code, date, px){
@@ -10430,7 +10430,7 @@ function sg13Low3Reason(code, date, px){
   const prev = (d1.bars || []).filter((b) => String(b.ts).slice(0, 10) < date);
   if (prev.length < 3) return {};
   const low3 = Math.min(...prev.slice(-3).map((b) => b.low));
-  return Number.isFinite(low3) && px < low3 ? { reason: '持股停損：13:00 價 ' + pkPrice(px) + ' 跌破三日低 ' + pkPrice(low3) } : {};
+  return Number.isFinite(low3) && px < low3 ? { reason: '持股停損：12:40 價 ' + pkPrice(px) + ' 跌破三日低 ' + pkPrice(low3) } : {};
 }
 function sg13SrvLoad(codes){
   const srv = sg13.srv;
@@ -10441,8 +10441,8 @@ function sg13SrvLoad(codes){
     srv.d = d; srv.at = Date.now(); srv.errAt = 0;
   }).catch(() => { srv.errAt = Date.now(); }).finally(() => { srv.loading = false; sg13Rerender(); });
 }
-// 後端存的快照 table［股名, 13:00 價, 13:00 漲跌幅, 均線分數, 週籌碼, 營收年增, 13:00 大戶力］對自選股分組算賣出建議；
-// 持股停損（跌破 905 低／三日低）用 13:00 以前的 1 分K：13:00 一過就固定了，算出來就記著，不再重抓（不然盤後每分鐘重抓每檔 1 分K）
+// 後端存的快照 table［股名, 12:40 價, 12:40 漲跌幅, 均線分數, 週籌碼, 營收年增, 12:40 大戶力］對自選股分組算賣出建議；
+// 持股停損（跌破 905 低／三日低）用 12:40 以前的 1 分K：12:40 一過就固定了，算出來就記著，不再重抓（不然盤後每分鐘重抓每檔 1 分K）
 function sg13SellFromTable(snap, codes){
   const sell = []; let pending = false, errN = 0;
   codes.forEach((code) => {
@@ -10486,10 +10486,10 @@ function sg13LocalSnap(today, hm, afterOne){   // 後端連不上時的備案：
 function homeSuggestHtml(){
   if (!lastData || lastData.mock) return '';
   const today = twTodayStr(), hm = obsNowHm(), dow = new Date(Date.now() + 8 * 3600000).getUTCDay();
-  const trading = dow >= 1 && dow <= 5, afterOne = trading && hm >= '13:00';
+  const trading = dow >= 1 && dow <= 5, afterOne = trading && hm >= '12:40';
   const codes = tdStopCodes(), srv = sg13.srv;
   let snap = srv.d && srv.d.status === 'ok' ? srv.d.snap : null;
-  // 向後端要：今天的還沒出來（13:00 後）30 秒問一次，其他 10 分鐘一次；自選股分組變了也重問（table 只回這幾檔）
+  // 向後端要：今天的還沒出來（12:40 後）30 秒問一次，其他 10 分鐘一次；自選股分組變了也重問（table 只回這幾檔）
   const wait = afterOne && !(snap && snap.date === today) ? 30e3 : 10 * 60e3;
   if ((!srv.at || Date.now() - srv.at > wait || srv.key !== codes.join(',')) && !srv.loading && (!srv.errAt || Date.now() - srv.errAt > 60e3)) setTimeout(() => sg13SrvLoad(codes), 0);
   let fromLocal = false, sell = [], pending = false, holdN = codes.length, errN = 0;
@@ -10500,22 +10500,22 @@ function homeSuggestHtml(){
     if (snap){ fromLocal = true; sell = snap.sell || []; holdN = snap.holdN; }
   }
   const isToday = !!snap && snap.date === today;
-  const head = (note) => '<div class="sg13-head"><b>🕐 13:00 建議</b> <span class="sg13-note">' + note + '</span></div>';
+  const head = (note) => '<div class="sg13-head"><b>🕐 12:40 建議</b> <span class="sg13-note">' + note + '</span></div>';
   const foot = '<div class="sg13-foot">買進（全市場）：技術＝均線分數、籌碼＝當週集保大戶變化、營收＝最新月營收年增，三項各自在全市場排百分位、平均＝綜合分（100＝三項都第一）。門檻：均線分數 ≥' + SG13_MIN_SCORE +
-    '、週籌碼 >0、營收年增 >0、非處置股、現在沒漲停、今天漲跌幅在 ' + SG13_MIN_PCT + '%～+' + SG13_MAX_PCT + '% 之間；同分比盤中大戶力。賣出：自選股分組裡的股票，13:00 價格跌破三日低（前三個交易日最低價），或「均線分數 ≤6、週籌碼 <0、盤中大戶力 ≤ −10%、今天跌 ≥3%」符合兩項以上。' +
-    '交易日 13:00 後端自動算一次存起來（每台裝置看到同一份），當天不再變，箭頭後面是「現在」的漲跌。依規則排出來的參考名單，不是買賣建議。</div>';
+    '、週籌碼 >0、營收年增 >0、非處置股、現在沒漲停、今天漲跌幅在 ' + SG13_MIN_PCT + '%～+' + SG13_MAX_PCT + '% 之間；同分比盤中大戶力。賣出：自選股分組裡的股票，12:40 價格跌破三日低（前三個交易日最低價），或「均線分數 ≤6、週籌碼 <0、盤中大戶力 ≤ −10%、今天跌 ≥3%」符合兩項以上。' +
+    '交易日 12:40 後端自動算一次存起來（每台裝置看到同一份），當天不再變，箭頭後面是「現在」的漲跌。依規則排出來的參考名單，不是買賣建議。</div>';
   if (!snap){
-    return '<div class="sg13">' + head(srv.errAt && !srv.d ? '後端暫時連不上，稍後再試' : afterOne ? '計算中…（後端 13:00 自動算，稍等幾秒）' : trading ? '13:00 開出名單（現在 ' + hm + '）' : '下個交易日 13:00 開出名單') + foot + '</div>';
+    return '<div class="sg13">' + head(srv.errAt && !srv.d ? '後端暫時連不上，稍後再試' : afterOne ? '計算中…（後端 12:40 自動算，稍等幾秒）' : trading ? '12:40 開出名單（現在 ' + hm + '）' : '下個交易日 12:40 開出名單') + foot + '</div>';
   }
   const col = (title, cls, list, kind, empty, extra) => '<div class="sg13-col"><div class="sg13-title ' + cls + '">' + title + ' <span class="hr-rk">' + list.length + ' 檔</span></div>' + (extra || '') +
     (list.length ? list.map((x) => sg13RowHtml(x, kind)).join('') : '<div class="hr-note">' + empty + '</div>') + '</div>';
-  const note = (isToday ? '今天 ' : swMmdd(snap.date) + ' ') + snap.hm + ' 算的' + (fromLocal ? '（後端連不上，這台自己算的）' : isToday && snap.hm > '13:30' ? '（排程沒跑到，晚了才補算，用算的當下報價）' : '') + (isToday ? '' : '・13:00 前先看上一個交易日的') +
+  const note = (isToday ? '今天 ' : swMmdd(snap.date) + ' ') + snap.hm + ' 算的' + (fromLocal ? '（後端連不上，這台自己算的）' : isToday && snap.hm > '13:10' ? '（排程沒跑到，晚了才補算，用算的當下報價）' : '') + (isToday ? '' : '・12:40 前先看上一個交易日的') +
     '・全市場 ' + snap.universe + ' 檔裡符合的有 ' + snap.candN + ' 檔・資料：均線分數 ' + wlEsc(swMmdd(snap.dataDate || '')) + '、週籌碼 ' + wlEsc(swMmdd(snap.chipWeek || '')) + ' 那週、營收 ' + wlEsc(String(snap.revMonth || '').slice(5)) + ' 月';
   const sellEmpty = pending ? '檢查持股停損中…' : holdN ? '自選股分組裡的 ' + holdN + ' 檔都沒有符合賣出條件' : '還沒有自選股分組：把持股放進自選股的分組，這裡才會列賣出建議';
   return '<div class="sg13">' + head(note) + '<div class="sg13-cols">' + col('✅ 建議買進', 'buy', snap.buy, 'buy', '今天沒有股票同時符合技術、籌碼、營收三項門檻') +
     col('⚠️ 建議賣出', 'sell', sell, 'sell', sellEmpty, sg13SellSrcHtml(codes, errN)) + '</div>' + foot + '</div>';
 }
-// 13:00 建議視窗（2026-11-10 使用者：做成單獨項目、放在機器人代碼旁邊，打開才顯示；首頁版面不放）：打開才向後端要、才檢查持股停損；開著每 5 秒用最新報價重畫
+// 12:40 建議視窗（2026-11-10 使用者：做成單獨項目、放在機器人代碼旁邊，打開才顯示；首頁版面不放）：打開才向後端要、才檢查持股停損；開著每 5 秒用最新報價重畫
 function sg13Render(){
   const m = document.getElementById('sgModal'), body = document.getElementById('sgBody'), inner = document.getElementById('sgInner');
   if (!m || m.hidden || !body) return;
@@ -10640,7 +10640,7 @@ function homeRankFootHtml(total){
     ['📈 1+2 突破廣播', '跟訊號中心「1+2多」同一份：全市場今天第一次 5 分K 收盤，同時站上「905 高」（開盤第一根 5 分K，09:00～09:05 的最高價）和「昨日最高價」的股票，一檔一天一次。前面紫色是第一次發生的時間；「之上」（紅底）＝現在 5 分K 還收在線上、「之下」（綠底）＝突破後又收回線下；首頁留最新 20 檔，每日功課「1+2 突破」分頁全部列'],
     ['🎯 905 突破廣播', '只要 5 分K 收盤站上 905 高（不用站上昨高）就列一筆「突破」，時間就是突破的那一刻（只列今天漲幅 ≥ ' + TD905_PCT + '%、族群在多方區的，不然全市場太多）；等到<b>四個條件齊全</b>——① 當天第一次站上 905 高　② 盤中大戶力 ≥ +' + TD905_BIG + '%　③ 今天漲幅 ≥ ' + TD905_PCT + '%　④ 族群在多方區（族群名次前一半，跟當沖多同一個算法）——再列一筆「✅ 條件齊全」，時間是四個條件第一次同時成立的時間（例：09:40 突破、12:35 大戶力到 +10%，就是 09:40 一筆「突破」、12:35 一筆「條件齊全」）。名單照時間排、新的在上面；「之上／之下」跟 1+2 一樣；首頁留最新 ' + HOME905_MAX + ' 筆，每日功課「905 突破」分頁全部列；盤中要開著網頁才記得到，記在這台電腦（換一台電腦會從頭記）'],
     ['⭐ 今日強勢股', '跟訊號中心「今日強勢股」同一份，放在發動下面，紅框框起來；每一列漲跌幅後面是盤中大戶力'],
-    ['🕐13:00 建議', '放在首頁右上角、機器人代碼旁邊的「🕐 13:00 建議」按鈕，點開才顯示（不佔首頁版面）：每個交易日 13:00 算一次，左邊「建議買進」（符合的全部列出）（全市場）、右邊「建議賣出」（你自選股分組裡的股票）。<b>買進</b>：技術＝均線分數、籌碼＝當週集保大戶變化 %、營收＝最新公布的月營收年增，三項各自在全市場排百分位、平均＝綜合分（100＝三項都第一）；門檻：均線分數 ≥7、週籌碼 >0、營收年增 >0、不是處置股、現在沒漲停、今天漲跌幅在 −5%～+9.5% 之間；照綜合分由高到低排，同分比盤中大戶力，符合的全部列出、不限檔數。<b>賣出</b>：自選股分組裡的股票 13:00 價格跌破三日低（前三個交易日最低價，用官方日K算，每台裝置結果一樣），或「均線分數 ≤6、週籌碼 <0、盤中大戶力 ≤ −10%、今天跌 ≥3%」四項符合兩項以上，會寫出原因。每個交易日 13:00 由後端（Worker 排程）自動算一次、存起來，每台裝置看到同一份，當天不再變，箭頭前面是 13:00 當時的漲跌、後面是現在的；13:00 前看到的是上一個交易日的那份；賣出名單是拿後端存的「13:00 全部股票當時的分數、價格」對你自己的自選股分組算的（持股不會傳到後端）。後端連不上時才退回這台瀏覽器自己算。依規則排出來的參考名單，不是買賣建議。'],
+    ['🕐12:40 建議', '放在首頁右上角、機器人代碼旁邊的「🕐 12:40 建議」按鈕，點開才顯示（不佔首頁版面）：每個交易日 13:00 算一次，左邊「建議買進」（符合的全部列出）（全市場）、右邊「建議賣出」（你自選股分組裡的股票）。<b>買進</b>：技術＝均線分數、籌碼＝當週集保大戶變化 %、營收＝最新公布的月營收年增，三項各自在全市場排百分位、平均＝綜合分（100＝三項都第一）；門檻：均線分數 ≥7、週籌碼 >0、營收年增 >0、不是處置股、現在沒漲停、今天漲跌幅在 −5%～+9.5% 之間；照綜合分由高到低排，同分比盤中大戶力，符合的全部列出、不限檔數。<b>賣出</b>：自選股分組裡的股票 13:00 價格跌破三日低（前三個交易日最低價，用官方日K算，每台裝置結果一樣），或「均線分數 ≤6、週籌碼 <0、盤中大戶力 ≤ −10%、今天跌 ≥3%」四項符合兩項以上，會寫出原因。每個交易日 13:00 由後端（Worker 排程）自動算一次、存起來，每台裝置看到同一份，當天不再變，箭頭前面是 13:00 當時的漲跌、後面是現在的；13:00 前看到的是上一個交易日的那份；賣出名單是拿後端存的「13:00 全部股票當時的分數、價格」對你自己的自選股分組算的（持股不會傳到後端）。後端連不上時才退回這台瀏覽器自己算。依規則排出來的參考名單，不是買賣建議。'],
     ['🏛️投信買超前15', '放在 30加33加34 下面（188 上面）：投信買超張數前 15 名（上市＋上櫃），<b>名單裡照今天即時漲跌幅排、漲越多的越上面（自動換位置）</b>，每列是買超張數、今天即時漲跌幅、盤中大戶力（不在大戶力排行範圍的顯示 —）。<b>更新時間</b>：證交所三大法人買賣超約 15:00 後公布、櫃買中心通常更晚（上櫃還沒進來時欄位上方會寫「上櫃還沒公布」，先列上市），後端每 15 分鐘收一次；所以開盤前、盤中看到的是<b>前一個交易日</b>的名單（標題旁的日期就是資料日），收盤後新名單進來會自動換。機器人代碼 98 有投信賣超、買超各前十（賣超在上、買超在下，單位是金額億元）'],
     ['🌏外資買超前15', '放在今日強勢股下面：外資買超張數前 15 名（上市＋上櫃），格式、排序（照即時漲跌幅、漲越多越上面）、更新時間跟投信買超前15 一樣。機器人代碼 97 有外資賣超、買超各前十（賣超在上、買超在下，單位是金額億元）；研究室的「外資買賣超」「投信買賣超」分頁可以選日期往回查、上市上櫃分開看'],
     ['🚀發動', '跟訊號中心「發動」同一份：今天突破箱頂的股票，前面是第一次發動的時間，最新的在最上面，有幾檔列幾檔'],

@@ -914,12 +914,12 @@ async function notifyDiscordUsageAnomaly(env, result) {
   });
 }
 
-// ---- 13:00 建議（2026-11-10 使用者：改成後端 13:00 自動存，每台裝置看到同一份）----
-// 排程（每 15 分鐘）在交易日 13:00～13:25 之間算一次存進 KV（key sg13:日期），沒存過才算；網頁來問時若今天還沒有（排程漏了）也會當場算一次補上。
+// ---- 12:40 建議（2026-11-10 使用者：改成後端自動存，每台裝置看到同一份；2026-11-11 使用者：時間從 13:00 提早到 12:40）----
+// 排程（每天 12:40 一次專用的，加上每 15 分鐘那個當備援）在交易日 12:40～13:25 之間算一次存進 KV（key sg13:日期），沒存過才算；網頁來問時若今天還沒有（排程漏了）也會當場算一次補上。
 // 買進（全市場）：技術＝均線分數、籌碼＝當週集保大戶變化 %、營收＝最新月營收年增，三項各自在全市場排百分位、平均＝綜合分；
 // 門檻：均線分數 >=7、週籌碼 >0、營收年增 >0、非處置股、現在沒漲停、今天漲跌幅在 -5%~+9.5%；照綜合分高到低排，同分比盤中大戶力，符合的全部列出（不限檔數）。
 // 另外把全部股票 13:00 當時的 [股名, 價, 漲跌幅, 均線分數, 週籌碼, 營收年增, 大戶力] 一起存（table），前端用它對自己的自選股分組算賣出建議（不用把持股傳給後端）。
-const SG13_MIN_SCORE = 7, SG13_MAX_PCT = 9.5, SG13_MIN_PCT = -5, SG13_VERSION = 3;   // 2026-11-10 使用者：符合的全部列出（不限檔數）；均線分數門檻 9 → 7；版本改了當天的舊快照會重算
+const SG13_MIN_SCORE = 7, SG13_MAX_PCT = 9.5, SG13_MIN_PCT = -5, SG13_VERSION = 4;   // 2026-11-10 使用者：符合的全部列出（不限檔數）；均線分數門檻 9 → 7；版本改了當天的舊快照會重算
 let sg13Inflight = null;
 function sg13Pctile(rows, key) {
   const v = rows.filter((r) => r[key] !== null && Number.isFinite(r[key])).sort((a, b) => a[key] - b[key]);
@@ -988,13 +988,13 @@ async function sg13Today(env, allowBuild) {
   const raw = await env.USAGE_KV.get("sg13:" + date);
   const old = raw ? JSON.parse(raw) : null;
   if (old && old.v === SG13_VERSION) return old;
-  if (!allowBuild || dow < 1 || dow > 5 || hm < "13:00") return old;   // 規則改過（版本不同）的舊快照，13:00 後有人來問或排程跑到就重算一次
+  if (!allowBuild || dow < 1 || dow > 5 || hm < "12:40") return old;   // 規則改過（版本不同）的舊快照，12:40 後有人來問或排程跑到就重算一次
   if (!sg13Inflight) sg13Inflight = sg13BuildAndSave(env).finally(() => { sg13Inflight = null; });
   return await sg13Inflight;
 }
 async function sg13Cron(env) {
   const tw = new Date(Date.now() + 8 * 3600000), hm = tw.toISOString().slice(11, 16), dow = tw.getUTCDay();
-  if (dow < 1 || dow > 5 || hm < "13:00" || hm > "13:25") return;
+  if (dow < 1 || dow > 5 || hm < "12:40" || hm > "13:25") return;
   await sg13Today(env, true);
 }
 // GET /api/suggest13?date=YYYY-MM-DD&codes=2330,2034：回快照（不含 table），codes 給了就附上這幾檔的 table
@@ -2443,6 +2443,10 @@ const WORKER_ENTRY = {
     });
   },
   async scheduled(event, env, ctx) {
+    if (event && event.cron === "40 4 * * 1-5") {   // 12:40 建議專用排程（台灣 12:40＝UTC 04:40，週一到週五）：只算建議，不跑下面的用量檢查
+      try { await sg13Cron(env); } catch (err) { /* 失敗就等 12:45 那個每 15 分鐘的排程再試 */ }
+      return;
+    }
     try { recPingAt = 0; recorderPing(env, ctx); } catch (err) { /* 叫醒記錄器失敗不影響下面的檢查 */ }
     try {
       const result = await checkUsageAnomaly(env);
@@ -2459,7 +2463,7 @@ const WORKER_ENTRY = {
       // 同上：失敗就等下一輪。
     }
     try {
-      await sg13Cron(env);   // 2026-11-10 13:00 建議：交易日 13:00～13:25 算一次存 KV（13:00 沒成功 13:15 再試）
+      await sg13Cron(env);   // 12:40 建議：交易日 12:40～13:25 算一次存 KV（12:40 專用排程沒成功，12:45 這個每 15 分鐘的排程再試）
     } catch (err) {
       // 算失敗就等下一輪（13:15）；網頁來問時也會補算。
     }
