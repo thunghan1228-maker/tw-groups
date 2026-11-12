@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-12 18:06:31";
+const BUILD_STAMP = "2026-11-12 18:12:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -10196,7 +10196,11 @@ function homeDaytradeColsHtml(part){
     '<span class="hr-bear-pill ' + color + '"><span class="hr-code">' + code + '</span><span class="hr-name">' + wlEsc(name) + '</span></span><span class="hr-avg ' + color + '">' + right + '</span></div>';
   const m80 = part === '75' ? null : dtModel80(), m75 = part === '75' ? dtModel75() : null;
   if (part === '75'){
-    const b75 = m75.wait ? note(m75.wait) : (m75.rows.map((x) => stk(x.code, (x.jailed ? '*' : '') + x.name, fmt(x.chg) + '%', x.jailed ? '處置中' : '', dirClass(x.chg))).join('') || note('目前沒有'));
+    // 2026-11-12 使用者：首頁股期黑龍(75) 每檔加盤中大戶力（漲跌幅後面；欄位不夠寬時跟漲跌幅一起換到下一行靠右）
+    const stk75 = (x) => '<div class="hr-row hr-stk hr-wrapold" data-code="' + x.code + '" data-name="' + wlEsc(x.name) + '" tabindex="0" role="button"' + (x.jailed ? ' title="處置中"' : '') + '>' +
+      '<span class="hr-bear-pill ' + dirClass(x.chg) + '"><span class="hr-code">' + x.code + '</span><span class="hr-name">' + wlEsc((x.jailed ? '*' : '') + x.name) + '</span></span>' +
+      '<span class="hr-tail"><span class="hr-avg ' + dirClass(x.chg) + '">' + fmt(x.chg) + '%</span>' + homeHoldHtml(x.code) + '</span></div>';
+    const b75 = m75.wait ? note(m75.wait) : (m75.rows.map(stk75).join('') || note('目前沒有'));
     return col('🐉股期黑龍(75)', '有股票期貨、均線分數 ≥ 10、今天收黑K；*＝處置中；槓桿大，防守黑K低點', b75, m75.rows ? m75.rows.length : undefined);
   }
   const b80 = m80.wait ? note(m80.wait) : (m80.rows.map((x) => stk(x.code, x.name, fmt(x.chg) + '%' + (x.n > 0 ? '⭐'.repeat(Math.min(x.n, 5)) : ''), md(x.listedOn) + ' 上 811 名單' + (x.n > 0 ? '，更早以前還上榜 ' + x.n + ' 次' : ''), dirClass(x.chg))).join('') || note('前兩個交易日上榜的今天沒有收黑'));
@@ -10317,6 +10321,42 @@ function instTopLists(who, nBuy, nSell, by){   // by＝'amount'：照買賣超�
 const instAmount = (r, who) => (Number.isFinite(r.c) ? r[who] * 1000 * r.c / 1e8 : 0);
 const instAmtTxt = (v) => (v > 0 ? '+' : v < 0 ? '-' : '') + (Math.abs(v) >= 100 ? Math.abs(v).toFixed(0) : Math.abs(v) >= 10 ? Math.abs(v).toFixed(1) : Math.abs(v).toFixed(2)) + '億';
 const instLots = (v) => (v > 0 ? '+' : v < 0 ? '-' : '') + Math.abs(v).toLocaleString('zh-TW') + '張';
+// 2026-11-12 使用者：99＝外資跟投信同步買超／同步賣超前 N 大（機器人 99、首頁續抱勿追高下面那欄共用）；排名照兩家合計買賣超金額（億元，張數 × 收盤價概算）
+function inst99Lists(n){
+  const d = botFetchCache('instRank', '/api/inst-rank', 5 * 60e3);
+  if (!d) return { wait: true };
+  if (d.status !== 'ok' || !Array.isArray(d.rows)) return { error: d.message || (d.status === 'empty' ? '還沒有法人資料' : '法人資料暫時抓不到，等一下再試') };
+  const both = (r) => instAmount(r, 'f') + instAmount(r, 't');
+  const buy = d.rows.filter((r) => r.f > 0 && r.t > 0).sort((a, b) => both(b) - both(a) || (b.f + b.t) - (a.f + a.t)).slice(0, n);
+  const sell = d.rows.filter((r) => r.f < 0 && r.t < 0).sort((a, b) => both(a) - both(b) || (a.f + a.t) - (b.f + b.t)).slice(0, n);
+  const codes = buy.concat(sell).map((r) => r.code);
+  const wq = codes.length ? botFetchCache('wqInst|' + codes.join(','), '/api/watch-quotes?codes=' + encodeURIComponent(codes.join(',')), 30e3) : null;
+  const pctOf = (r) => {
+    const hq = getStockQuote(r.code), wx = wq && wq.quotes ? wq.quotes[r.code] : null;
+    const v = hq && Number.isFinite(hq.changePercent) ? hq.changePercent : wx && Number.isFinite(wx.changePercent) ? wx.changePercent : null;
+    return v !== null ? v : Number.isFinite(r.p) ? r.p : null;
+  };
+  return { d, buy, sell, pctOf, md: Number(d.date.slice(5, 7)) + '/' + Number(d.date.slice(8, 10)), partial: !!(d.markets && d.markets.length < 2) };
+}
+// 金額不到 0.01 億（顯示會變 0.00億）就直接寫張數；滑過去看張數
+const inst99Amt = (r, who, lab) => '<span class="' + dirClass(r[who]) + '" title="' + lab + ' ' + instLots(r[who]) + '">' + lab + ' ' + (Number.isFinite(r.c) && Math.abs(instAmount(r, who)) >= 0.005 ? instAmtTxt(instAmount(r, who)) : instLots(r[who])) + '</span>';
+// 首頁「外資投信同步買賣超(99)」：放在續抱勿追高下面；首頁是同步買超在上、同步賣超在下（機器人 99 是賣超在上）
+function home99ColHtml(){
+  const L = inst99Lists(10);
+  const head = (extra) => '<div class="hr-col"><div class="hr-title" title="外資、投信同一天都買超（或都賣超）的前 10 名，照兩家合計金額排（億元＝張數 × 收盤價，概算）。法人資料收盤後才公布，開盤前、盤中看到的是前一個交易日的；漲跌幅、大戶力是即時的。跟機器人 99 同一份">🤝外資投信同步(99)' + (extra || '') + '</div>';
+  if (L.wait) return head() + '<div class="hr-note">讀取中…</div></div>';
+  if (L.error) return head() + '<div class="hr-note">' + wlEsc(L.error) + '</div></div>';
+  const row = (r) => {
+    const pct = L.pctOf(r);
+    return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc(lookupStockGroup(r.code)) + '">' +
+      '<span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name) + '</span>' +
+      '<span class="hr-tail"><span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span>' + homeHoldHtml(r.code) + '</span>' +
+      '<div class="hr-l2 hr-chip3">' + inst99Amt(r, 'f', '外') + inst99Amt(r, 't', '投') + '</div></div>';
+  };
+  return head(' <span class="hr-rk">' + L.md + '</span>') + (L.partial ? '<div class="hr-note">上櫃還沒公布，先列上市</div>' : '') +
+    '<div class="hr-sep">▲ 同步買超前 10</div>' + (L.buy.map(row).join('') || '<div class="hr-note">這天沒有</div>') +
+    '<div class="hr-sep">▼ 同步賣超前 10</div>' + (L.sell.map(row).join('') || '<div class="hr-note">這天沒有</div>') + '</div>';
+}
 function homeInstColHtml(who){
   const nm = who === 'f' ? '外資' : '投信', ic = who === 'f' ? '🌏' : '🏛️';
   const L = instTopLists(who, 15, 0);
@@ -10616,6 +10656,7 @@ function homeRank4Html(){
     '<div class="hr-stack">' +
       homeRedBox(homeBothColHtml()) +   // 2026-11-04 使用者（更正）：雙榜交集放在最上面、續抱勿追高在它正下面、股期黑龍(75) 在最下面，加粗紅框
       homeRedBox(homeStockColHtml('🚀續抱勿追高', m ? m.horses.filter((r) => r.pct > 7) : [], undefined, undefined, true, true)) +   // 2026-10-29 使用者：代號、股名、（族群名彩色）、漲跌幅、大戶力放最後；2026-10-20 使用者：族群漲幅 > 2%（12）搬到續抱勿追高下面；2026-10-21 使用者：12 又搬走，搬到發動右邊自己一欄
+      homeRedBox(home99ColHtml()) +   // 2026-11-12 使用者：機器人 99（外資投信同步買賣超）放在續抱勿追高下面，首頁買超在上、賣超在下
       homeFut75ColHtml() +   // 2026-11-01 使用者：股期黑龍(75) 放在續抱勿追高下面
       // 2026-10-21 使用者：河流多(34) 搬到第 6 欄 30加33／賽馬多(33) 下面，一起放在紅框裡
     '</div>' +
@@ -17901,7 +17942,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-12 18:06:31';
+const BUILD_STAMP = '2026-11-12 18:12:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25988,20 +26029,11 @@ function botAnswer(raw){
     // 2026-11-12 使用者：99＝外資跟投信同步買超前十大、同步賣超前十大；同步賣超放上面、同步買超放下面（跟 97／98 一樣）。
     // 排名照兩家合計買賣超金額（億元，張數 × 收盤價概算），每檔列外資、投信各自的金額（滑過去看張數）、漲跌幅、盤中大戶力
     const t = '外資投信同步買賣超前十大(99)';
-    const d = botFetchCache('instRank', '/api/inst-rank', 5 * 60e3);
-    if (!d) return wrap(t, botLine('讀取中…', 'bot-dim'));
-    if (d.status !== 'ok' || !Array.isArray(d.rows)) return wrap(t, botLine(d.message || (d.status === 'empty' ? '還沒有法人資料' : '法人資料暫時抓不到，等一下再試'), 'bot-dim'));
-    const both = (r) => instAmount(r, 'f') + instAmount(r, 't');
-    const buy = d.rows.filter((r) => r.f > 0 && r.t > 0).sort((a, b) => both(b) - both(a) || (b.f + b.t) - (a.f + a.t)).slice(0, 10);
-    const sell = d.rows.filter((r) => r.f < 0 && r.t < 0).sort((a, b) => both(a) - both(b) || (a.f + a.t) - (b.f + b.t)).slice(0, 10);
-    const codes = buy.concat(sell).map((r) => r.code);
-    const wq = codes.length ? botFetchCache('wqInst|' + codes.join(','), '/api/watch-quotes?codes=' + encodeURIComponent(codes.join(',')), 30e3) : null;
-    const pctOf = (r) => {
-      const hq = getStockQuote(r.code), wx = wq && wq.quotes ? wq.quotes[r.code] : null;
-      const v = hq && Number.isFinite(hq.changePercent) ? hq.changePercent : wx && Number.isFinite(wx.changePercent) ? wx.changePercent : null;
-      return v !== null ? v : Number.isFinite(r.p) ? r.p : null;
-    };
-    const amt = (r, who, lab) => '<span class="' + dirClass(r[who]) + '" title="' + lab + ' ' + instLots(r[who]) + '">' + lab + ' ' + (Number.isFinite(r.c) && Math.abs(instAmount(r, who)) >= 0.005 ? instAmtTxt(instAmount(r, who)) : instLots(r[who])) + '</span>';   // 金額不到 0.01 億（顯示會變 0.00億）就直接寫張數
+    const L = inst99Lists(10);
+    if (L.wait) return wrap(t, botLine('讀取中…', 'bot-dim'));
+    if (L.error) return wrap(t, botLine(L.error, 'bot-dim'));
+    const { d, buy, sell, pctOf } = L;
+    const amt = inst99Amt;
     const row = (r, i) => { const pct = pctOf(r);
       return botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' ' + amt(r, 'f', '外') + ' ' + amt(r, 't', '投') + ' <span class="' + (pct === null ? 'bot-dim' : dirClass(pct)) + '">' + (pct === null ? '—' : botPct(pct)) + '</span>') + '</span><span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow'); };
     const md = Number(d.date.slice(5, 7)) + '/' + Number(d.date.slice(8, 10));
