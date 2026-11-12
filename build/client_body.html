@@ -10413,15 +10413,15 @@ function homeHolderLvlColHtml(min){   // min＝20 或 −20
   const HOME_HOLDER_MIN_CHG = 2.5;
   // 2026-11-12 使用者：≤ −20% 那份也一樣——只留跌幅超過 2.5% 的（跌 < −2.5%）
   const chgOk = (code) => { const q = getStockQuote(code); return !!q && Number.isFinite(q.changePercent) && (bull ? q.changePercent > HOME_HOLDER_MIN_CHG : q.changePercent < -HOME_HOLDER_MIN_CHG); };
-  // 2026-11-12 使用者：再多一層均線分數（滿分 15，用現價當今天收盤即時算，跟均線分數排行同一套）：≥ +20% 要 ≥ 9 分、≤ −20% 要 ≤ 9 分；算不出分數的不列
+  // 2026-11-12 使用者：再多一層均線分數（滿分 15，用現價當今天收盤即時算，跟均線分數排行同一套）：≥ +20% 要 ≥ 9 分、≤ −20% 要 < 9 分（使用者 11-12 改成嚴格相反，9 分只會出現在多方那份）；算不出分數的不列
   const HOME_HOLDER_MA = 9;
   const maOf = (code) => { const q = getStockQuote(code); return wlScoreOf(code, q ? Number(q.price) : NaN); };
-  const maOk = (code) => { const sc = maOf(code); return Number.isFinite(sc) && (bull ? sc >= HOME_HOLDER_MA : sc <= HOME_HOLDER_MA); };
+  const maOk = (code) => { const sc = maOf(code); return Number.isFinite(sc) && (bull ? sc >= HOME_HOLDER_MA : sc < HOME_HOLDER_MA); };
   const rows = (mainForceRanking || []).filter((r) => { const v = Number(r.strengthPct); return Number.isFinite(v) && (bull ? v >= min : v <= min) && chgOk(r.code) && maOk(r.code); })
     .sort(bull
       ? (a, b) => { const pa = getStockQuote(a.code).changePercent, pb = getStockQuote(b.code).changePercent; return pa - pb || b.strengthPct - a.strengthPct; }   // 2026-11-12 使用者：≥ +20% 依漲跌幅排，漲得少的在上面、漲得多的在下面
       : (a, b) => { const pa = getStockQuote(a.code).changePercent, pb = getStockQuote(b.code).changePercent; return pb - pa || a.strengthPct - b.strengthPct; });   // 2026-11-12 使用者：≤ −20% 也依漲跌幅排，跌得少的在上面、跌得多的在下面
-  const title = '<div class="hr-title' + (bull ? '' : ' bear') + '">盤中大戶力 ' + (bull ? '≥ +' : '≤ −') + Math.abs(min) + '%' + (bull ? '・漲幅 > ' : '・跌幅 > ') + HOME_HOLDER_MIN_CHG + '%・均線 ' + (bull ? '≥ ' : '≤ ') + HOME_HOLDER_MA + ' 分' + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>';
+  const title = '<div class="hr-title' + (bull ? '' : ' bear') + '">盤中大戶力 ' + (bull ? '≥ +' : '≤ −') + Math.abs(min) + '%' + (bull ? '・漲幅 > ' : '・跌幅 > ') + HOME_HOLDER_MIN_CHG + '%・均線 ' + (bull ? '≥ ' : '< ') + HOME_HOLDER_MA + ' 分' + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>';
   const row = (r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
