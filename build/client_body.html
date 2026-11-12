@@ -10252,14 +10252,14 @@ function inst99Lists(n){
 }
 // 金額不到 0.01 億（顯示會變 0.00億）就直接寫張數；滑過去看張數
 const inst99Amt = (r, who, lab) => '<span class="' + dirClass(r[who]) + '" title="' + lab + ' ' + instLots(r[who]) + '">' + lab + ' ' + (Number.isFinite(r.c) && Math.abs(instAmount(r, who)) >= 0.005 ? instAmtTxt(instAmount(r, who)) : instLots(r[who])) + '</span>';
-// 2026-11-12 使用者：99 加「續強／續弱」——同步買超的股票，前一個交易日收盤大戶力 ≥ 0 標續強；同步賣超的股票，前一個交易日收盤大戶力 ≤ 0 標續弱（同天使用者：跟盤中大戶力 ±20% 統一，原本 < 0）。
+// 2026-11-12 使用者：99 加「續強／續弱」——同步買超的股票，前一個交易日收盤大戶力 ≥ 0 標續強；同步賣超的股票，前一個交易日收盤大戶力 < 0 標續弱（剛好 0% 不算；同天使用者定案，跟盤中大戶力 ±20% 統一）。
 // 前一個交易日收盤大戶力跟首頁盤中大戶力 ±20% 的續強續弱同一份（homeHolderPrevDay：那天的最終排行，只有 67 族的股票）
 function inst99XqTag(code, buySide, cls){
   const prevDay = homeHolderPrevDay();
   const pv = prevDay ? prevDay.map.get(code) : undefined;
-  if (!Number.isFinite(pv) || !(buySide ? pv >= 0 : pv <= 0)) return '';   // 2026-11-12 使用者：跟首頁盤中大戶力 ±20% 統一，續弱＝≤ 0
+  if (!Number.isFinite(pv) || !(buySide ? pv >= 0 : pv < 0)) return '';   // 2026-11-12 使用者：跟首頁盤中大戶力 ±20% 統一，續弱＝< 0（剛好 0% 不算）
   const md = Number(prevDay.date.slice(5, 7)) + '/' + Number(prevDay.date.slice(8, 10));
-  return '<span class="' + cls + ' ' + (buySide ? 'up' : 'down') + '" title="' + md + ' 收盤大戶力 ' + (pv > 0 ? '+' : '') + pv.toFixed(1) + '%' + (buySide ? '（≥ 0）' : '（≤ 0）') + '">' + (buySide ? '續強' : '續弱') + '</span>';
+  return '<span class="' + cls + ' ' + (buySide ? 'up' : 'down') + '" title="' + md + ' 收盤大戶力 ' + (pv > 0 ? '+' : '') + pv.toFixed(1) + '%' + (buySide ? '（≥ 0）' : '（< 0）') + '">' + (buySide ? '續強' : '續弱') + '</span>';
 }
 // 首頁「外資投信同步買賣超(99)」：放在續抱勿追高下面；首頁是同步買超在上、同步賣超在下（機器人 99 是賣超在上）
 function home99ColHtml(){
@@ -10485,7 +10485,7 @@ function homeChips3Of(code){
   }
   return null;
 }
-// 2026-11-12 使用者：首頁盤中大戶力 ≥ +20%／≤ −20% 的股票，前一個交易日「收盤」大戶力 ≥ 0 就標「續強」、≤ 0 就標「續弱」（一開始是 ±20，同天改成 0）。
+// 2026-11-12 使用者：首頁盤中大戶力 ≥ +20%／≤ −20% 的股票，前一個交易日「收盤」大戶力 ≥ 0 就標「續強」、< 0 就標「續弱」（一開始是 ±20，同天改成 0；剛好 0% 不算續弱）。
 // 前一天收盤大戶力＝後端那天的最終排行（/api/main-force-ranking?trade_date=，跟盤中同一套算法）；前一天是哪天看 chips-daily 的主力資料日期。
 function homeHolderPrevDay(){
   const cur = mainForceRankingInfo && mainForceRankingInfo.tradeDate;
@@ -10523,10 +10523,10 @@ function homeHolderLvlColHtml(min){   // min＝20 或 −20
   const prevDay = homeHolderPrevDay();
   const xqTag = (code) => {   // 前一個交易日收盤大戶力也過 ±20% → 續強／續弱（放在大戶力色塊正下方，這一行最右邊）
     const pv = prevDay ? prevDay.map.get(code) : undefined;
-    // 2026-11-12 使用者（改）：前一天收盤大戶力 ≥ 0 就算續強、≤ 0 就算續弱（原本要 ≥ +20／≤ −20）
-    if (!Number.isFinite(pv) || !(bull ? pv >= 0 : pv <= 0)) return '';
+    // 2026-11-12 使用者（改）：前一天收盤大戶力 ≥ 0 就算續強、< 0 就算續弱（剛好 0% 不算；原本要 ≥ +20／≤ −20）
+    if (!Number.isFinite(pv) || !(bull ? pv >= 0 : pv < 0)) return '';
     const md = Number(prevDay.date.slice(5, 7)) + '/' + Number(prevDay.date.slice(8, 10));
-    return '<span class="hr-xq ' + (bull ? 'up' : 'down') + '" title="' + md + ' 收盤大戶力 ' + (pv > 0 ? '+' : '') + pv.toFixed(1) + '%（' + (bull ? '≥ 0' : '≤ 0') + '），今天盤中 ' + (bull ? '≥ +' : '≤ −') + Math.abs(min) + '%">' + (bull ? '續強' : '續弱') + '</span>';
+    return '<span class="hr-xq ' + (bull ? 'up' : 'down') + '" title="' + md + ' 收盤大戶力 ' + (pv > 0 ? '+' : '') + pv.toFixed(1) + '%（' + (bull ? '≥ 0' : '< 0') + '），今天盤中 ' + (bull ? '≥ +' : '≤ −') + Math.abs(min) + '%">' + (bull ? '續強' : '續弱') + '</span>';
   };
   const row = (r) => {
     const q = getStockQuote(r.code);
@@ -25961,7 +25961,7 @@ function botAnswer(raw){
     const md = Number(d.date.slice(5, 7)) + '/' + Number(d.date.slice(8, 10));
     return wrap(t, botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + botLine('外資投信同步賣超前十', 'bot-head') + (sell.map((r, i) => row(r, i, false)).join('') || botLine('這天沒有', 'bot-dim')) +
       botLine('------↓(外資投信同步買超前十)↓------', 'bot-sep') + (buy.map((r, i) => row(r, i, true)).join('') || botLine('這天沒有', 'bot-dim')) +
-      botLine((d.markets && d.markets.length < 2 ? '上櫃還沒公布，先列上市；' : '') + '同步＝外資、投信同一天都買超（或都賣超）；續強＝同步買超、前一個交易日收盤大戶力 ≥ 0，續弱＝同步賣超、前一個交易日收盤大戶力 ≤ 0；排名照兩家合計金額（億元＝張數 × 收盤價，是概算，滑過去看張數）；上市＋上櫃；漲跌幅是即時；大戶力是盤中大戶力（不在大戶力排行範圍的顯示 —）', 'bot-dim'),
+      botLine((d.markets && d.markets.length < 2 ? '上櫃還沒公布，先列上市；' : '') + '同步＝外資、投信同一天都買超（或都賣超）；續強＝同步買超、前一個交易日收盤大戶力 ≥ 0，續弱＝同步賣超、前一個交易日收盤大戶力 < 0；排名照兩家合計金額（億元＝張數 × 收盤價，是概算，滑過去看張數）；上市＋上櫃；漲跌幅是即時；大戶力是盤中大戶力（不在大戶力排行範圍的顯示 —）', 'bot-dim'),
       md + ' 收盤後資料（開盤前、盤中是前一個交易日）');
   }
   if (q === '84'){
