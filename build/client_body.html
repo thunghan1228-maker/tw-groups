@@ -202,6 +202,7 @@
   .bot-col[data-col-key="199"],.bot-col[data-col-key="193"],.bot-col[data-col-key="32"],.bot-col[data-col-key="123"],.bot-col[data-col-key="177"],.bot-col[data-col-key="三落空"]{outline:3px solid #22c55e;outline-offset:-3px;}   /* 2026-10-22 使用者：三落空也加綠框 */
   .bot-col[data-col-key="199"]{min-width:196px;}   /* 2026-11-12 多了「均」大戶力，稍微放寬一點，才接得在漲跌幅後面 */
   .bot-col[data-col-key="三落空"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}
+  .bot-col[data-col-key="99"]{flex-basis:calc((100% - 72px) / 10 * 2.5);min-width:420px;}   /* 2026-11-12 使用者：99 外資投信同步買賣超，每檔要放外資、投信兩個金額＋漲跌幅＋大戶力，加寬才排得進一行 */
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
   .bot-col-x:hover{background:#e81123;border-color:#e81123;color:#fff;}
   .bot-cols-hint{color:var(--muted);font-size:13px;margin:0 2px 10px;}
@@ -25094,7 +25095,7 @@ const BOT_CODES = [
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖雙週入榜黑龍：前兩個交易日上 811、今天收黑K，只看族群表裡的股票（含「其他」那組）（⭐＝兩週內又上榜幾次）'],
   ['81', '隔日沖買超排序（每天六點後更新）'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
-  ['97', '外資買賣超前十大：賣超前十在上、買超前十在下（金額越大越靠上），每檔列買賣超金額（億元）、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：格式同 97'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
+  ['97', '外資買賣超前十大：賣超前十在上、買超前十在下（金額越大越靠上），每檔列買賣超金額（億元）、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：格式同 97'], ['99', '外資、投信同步買賣超前十大：同步賣超前十在上、同步買超前十在下（兩家合計金額越大越靠上），每檔列外資、投信各自的買賣超金額（億元）、漲跌幅、盤中大戶力'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
   ['2359', '股號或族群名：那族漲幅排行'], ['2359m', '那檔當天的隔日沖買賣超（2359m1＝前一天，最多 2359m9）'], ['235984', '那族的籌碼暴增排序（族群名＋84 也可以，例：低軌衛星84）'], ['2359g', '那檔過去五週籌碼增減%'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
 ];
 const botPct = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
@@ -25893,6 +25894,32 @@ function botAnswer(raw){
       botLine('------↓(' + nm + '買超前十)↓------', 'bot-sep') + (L.buy.map(row).join('') || botLine('這天沒有', 'bot-dim')) +
       botLine((L.partial ? '上櫃還沒公布，先列上市；' : '') + '金額（億元）＝' + nm + '買賣超張數 × 收盤價，是概算（滑過去看張數）；上市＋上櫃；漲跌幅是即時；大戶力是盤中大戶力（不在大戶力排行範圍的顯示 —）', 'bot-dim'),
       L.md + ' 收盤後資料（開盤前、盤中是前一個交易日）');
+  }
+  if (q === '99'){
+    // 2026-11-12 使用者：99＝外資跟投信同步買超前十大、同步賣超前十大；同步賣超放上面、同步買超放下面（跟 97／98 一樣）。
+    // 排名照兩家合計買賣超金額（億元，張數 × 收盤價概算），每檔列外資、投信各自的金額（滑過去看張數）、漲跌幅、盤中大戶力
+    const t = '外資投信同步買賣超前十大(99)';
+    const d = botFetchCache('instRank', '/api/inst-rank', 5 * 60e3);
+    if (!d) return wrap(t, botLine('讀取中…', 'bot-dim'));
+    if (d.status !== 'ok' || !Array.isArray(d.rows)) return wrap(t, botLine(d.message || (d.status === 'empty' ? '還沒有法人資料' : '法人資料暫時抓不到，等一下再試'), 'bot-dim'));
+    const both = (r) => instAmount(r, 'f') + instAmount(r, 't');
+    const buy = d.rows.filter((r) => r.f > 0 && r.t > 0).sort((a, b) => both(b) - both(a) || (b.f + b.t) - (a.f + a.t)).slice(0, 10);
+    const sell = d.rows.filter((r) => r.f < 0 && r.t < 0).sort((a, b) => both(a) - both(b) || (a.f + a.t) - (b.f + b.t)).slice(0, 10);
+    const codes = buy.concat(sell).map((r) => r.code);
+    const wq = codes.length ? botFetchCache('wqInst|' + codes.join(','), '/api/watch-quotes?codes=' + encodeURIComponent(codes.join(',')), 30e3) : null;
+    const pctOf = (r) => {
+      const hq = getStockQuote(r.code), wx = wq && wq.quotes ? wq.quotes[r.code] : null;
+      const v = hq && Number.isFinite(hq.changePercent) ? hq.changePercent : wx && Number.isFinite(wx.changePercent) ? wx.changePercent : null;
+      return v !== null ? v : Number.isFinite(r.p) ? r.p : null;
+    };
+    const amt = (r, who, lab) => '<span class="' + dirClass(r[who]) + '" title="' + lab + ' ' + instLots(r[who]) + '">' + lab + ' ' + (Number.isFinite(r.c) && Math.abs(instAmount(r, who)) >= 0.005 ? instAmtTxt(instAmount(r, who)) : instLots(r[who])) + '</span>';   // 金額不到 0.01 億（顯示會變 0.00億）就直接寫張數
+    const row = (r, i) => { const pct = pctOf(r);
+      return botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' ' + amt(r, 'f', '外') + ' ' + amt(r, 't', '投') + ' <span class="' + (pct === null ? 'bot-dim' : dirClass(pct)) + '">' + (pct === null ? '—' : botPct(pct)) + '</span>') + '</span><span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow'); };
+    const md = Number(d.date.slice(5, 7)) + '/' + Number(d.date.slice(8, 10));
+    return wrap(t, botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + botLine('外資投信同步賣超前十', 'bot-head') + (sell.map(row).join('') || botLine('這天沒有', 'bot-dim')) +
+      botLine('------↓(外資投信同步買超前十)↓------', 'bot-sep') + (buy.map(row).join('') || botLine('這天沒有', 'bot-dim')) +
+      botLine((d.markets && d.markets.length < 2 ? '上櫃還沒公布，先列上市；' : '') + '同步＝外資、投信同一天都買超（或都賣超）；排名照兩家合計金額（億元＝張數 × 收盤價，是概算，滑過去看張數）；上市＋上櫃；漲跌幅是即時；大戶力是盤中大戶力（不在大戶力排行範圍的顯示 —）', 'bot-dim'),
+      md + ' 收盤後資料（開盤前、盤中是前一個交易日）');
   }
   if (q === '84'){
     // 2026-10-29 照老師「籌碼暴增排序(84) 10/22」：買超榜（籌碼 % 一位小數）、SEP賣超、賣超榜；賣超榜股名後面的 ⭐＝往前連續幾週也在賣超榜
