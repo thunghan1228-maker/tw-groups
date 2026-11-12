@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-12 17:58:14";
+const BUILD_STAMP = "2026-11-12 18:06:31";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -17901,7 +17901,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-12 17:58:14';
+const BUILD_STAMP = '2026-11-12 18:06:31';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -29584,6 +29584,27 @@ async function buildGroupsBody() {
   return body;
 }
 
+// 2026-11-12 使用者：手機收盤後打開首頁一直「資料讀取中」——邊緣快取每個機房各一份、只放 10 分鐘，過期後第一個打開的人要等
+// Worker 重抓證交所（晚上常 15 秒以上）。收盤後（平日 08:25～13:50 以外）另外把整份存進 KV（全球共用一份），
+// 排程每 15 分鐘在收盤後重抓一次放進去；首頁邊緣快取沒中就先拿 KV 這份（20 分鐘內的才算），不用等證交所。
+const GROUPS_KV_KEY = "groups-offhours";
+const GROUPS_KV_MAX_AGE_MS = 20 * 60 * 1000;
+function groupsOffHoursNow() {
+  const tw = new Date(Date.now() + 8 * 3600000), hm = tw.getUTCHours() * 100 + tw.getUTCMinutes(), dow = tw.getUTCDay();
+  return !(dow >= 1 && dow <= 5 && hm >= 825 && hm <= 1350);
+}
+async function groupsKvGet(env) {
+  if (!env || !env.USAGE_KV || !env.USAGE_KV.getWithMetadata) return null;
+  const r = await env.USAGE_KV.getWithMetadata(GROUPS_KV_KEY);
+  const at = r && r.metadata ? Number(r.metadata.at) : 0;
+  if (!r || !r.value || !at || Date.now() - at > GROUPS_KV_MAX_AGE_MS) return null;
+  return { body: r.value, at };
+}
+async function groupsKvPut(env, body) {
+  if (!env || !env.USAGE_KV || !body) return;
+  await env.USAGE_KV.put(GROUPS_KV_KEY, body, { metadata: { at: Date.now() }, expirationTtl: 86400 });
+}
+
 function refreshGroups() {
   if (!groupsInflight) {
     groupsInflight = buildGroupsBody()
@@ -31488,8 +31509,7 @@ const WORKER_ENTRY = {
     if (url.pathname === "/api/groups") {
       // 2026-11-10 使用者：半夜打開首頁一直「資料讀取中」——收盤後證交所即時報價介面常整段很慢（第一輪每段等 8 秒＋重抓，整份要 15 秒），
       // 而且這時候報價早就不會動。平日 08:25～13:50 以外（收盤後、夜裡、週末）把算好的整份放進 Cloudflare 邊緣快取 10 分鐘，同一個機房的下一個人直接拿，不用再等一輪。
-      const twNowG = new Date(Date.now() + 8 * 3600000), hmG = twNowG.getUTCHours() * 100 + twNowG.getUTCMinutes(), dowG = twNowG.getUTCDay();
-      const offHoursG = !(dowG >= 1 && dowG <= 5 && hmG >= 825 && hmG <= 1350);
+      const offHoursG = groupsOffHoursNow();
       const edgeKeyG = new Request(url.origin + "/__edge/groups-offhours");
       if (offHoursG && typeof caches !== "undefined" && caches.default) {
         try {
@@ -31499,10 +31519,20 @@ const WORKER_ENTRY = {
           }
         } catch (e) { /* 邊緣快取讀不到就照常算 */ }
       }
-      const putEdgeG = (body) => {
+      const putEdgeG = (body, builtAt) => {
         if (!offHoursG || typeof caches === "undefined" || !caches.default || !ctx || !ctx.waitUntil) return;
-        ctx.waitUntil(caches.default.put(edgeKeyG, new Response(body, { headers: { "content-type": "application/json", "x-built-at": String(Date.now()), "cache-control": "public, max-age=600" } })).catch(() => {}));
+        ctx.waitUntil(caches.default.put(edgeKeyG, new Response(body, { headers: { "content-type": "application/json", "x-built-at": String(builtAt || Date.now()), "cache-control": "public, max-age=600" } })).catch(() => {}));
       };
+      // 收盤後邊緣快取沒中：先拿 KV 那份（全球共用、排程每 15 分鐘更新），不用等證交所
+      if (offHoursG && !(groupsMemo && Date.now() - groupsMemo.at < GROUPS_STALE_MS)) {
+        try {
+          const kvG = await groupsKvGet(env);
+          if (kvG) {
+            putEdgeG(kvG.body, kvG.at);
+            return new Response(kvG.body, { headers: { "content-type": "application/json", "x-groups-memo": "kv", "x-groups-age": String(Math.round((Date.now() - kvG.at) / 1000)) } });
+          }
+        } catch (e) { /* KV 讀不到就照常算 */ }
+      }
       const age = groupsMemo ? Date.now() - groupsMemo.at : Infinity;
       const memoResp = (state) => new Response(groupsMemo.body, { headers: { "content-type": "application/json", "x-groups-memo": state, "x-groups-age": String(Math.round(age / 1000)) } });
       if (age < GROUPS_MEMO_MS) return memoResp("hit");
@@ -31513,6 +31543,7 @@ const WORKER_ENTRY = {
       try {
         const body = await refreshGroups();
         putEdgeG(body);
+        if (offHoursG && ctx && ctx.waitUntil) ctx.waitUntil(groupsKvPut(env, body).catch(() => {}));   // KV 那份過期了（少見）才會走到這裡，順便補一份
         return new Response(body, { headers: { "content-type": "application/json", "x-groups-memo": "miss" } });
       } catch (err) {
         return Response.json({ error: String(err) }, { status: 502 });
@@ -31524,6 +31555,9 @@ const WORKER_ENTRY = {
   },
   async scheduled(event, env, ctx) {
     try { recPingAt = 0; recorderPing(env, ctx); } catch (err) { /* 叫醒記錄器失敗不影響下面的檢查 */ }
+    if (groupsOffHoursNow()) {
+      try { await groupsKvPut(env, await refreshGroups()); } catch (err) { /* 收盤後首頁快照抓不到就等下一輪，首頁照舊自己算 */ }
+    }
     try {
       const result = await checkUsageAnomaly(env);
       if (result && result.anomalous) {
