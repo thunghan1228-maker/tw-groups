@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-12 14:02:23";
+const BUILD_STAMP = "2026-11-12 14:13:53";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5331,6 +5331,47 @@ function drawChart(){
   mclLines.filter((t) => t.far < 0).sort((a, b) => a.v - b.v).forEach((t, i) => { t.edgeY = yAt(lo) - 3 - i * 14; });   // 太遠的線貼下緣，一條一條往上疊（隔 14px，標籤不重疊）
   mclLines.filter((t) => t.far > 0).sort((a, b) => b.v - a.v).forEach((t, i) => { t.edgeY = yAt(hi) + 3 + i * 14; });
 
+  // 2026-11-12 使用者：圖上的文字標籤（斷頭價 A／B、明日防守線、905 高低、形態頸線）會蓋到 K 棒 → 自己找空白的地方放。
+  // placeLabel(寬, 高, [候選的框上緣 y…], 從哪邊找)：'right'＝從右邊往左找、'left'＝從左邊往右找、數字＝從那個 x 往兩邊找最近的；
+  // 每個 x 依序試候選的 y（通常是線的上面、線的下面），第一個「沒蓋到任何 K 棒（含上下影線）、也沒蓋到別的標籤」的位置就用；
+  // 整排都放不下才退一步只避開別的標籤，再不行就放原本的位置。xLo／xHi 可以限制找的範圍（905 高低只在那條線附近找）。
+  const lblSlotW = plotW / bars.length, lblHalf = Math.max(2, lblSlotW * 0.62) / 2 + 2;
+  const lblBars = bars.map((b, i) => ({ x: xAt(i), top: yAt(b.high) - 2, bot: yAt(b.low) + 2 }));
+  const lblPlaced = [], lblQueue = [];
+  const lblLineYs = defLines.map((d) => yAt(d.v)).concat(mclLines.map((t) => (t.far ? t.edgeY : yAt(t.v))));   // 其他橫線穿過標籤中間也不好看，能避就避
+  const lblHitsLine = (y, h) => lblLineYs.some((ly) => ly > y + 2 && ly < y + h - 2);
+  const lblHitsLabel = (x, y, w, h) => lblPlaced.some((q) => x < q.x + q.w + 3 && x + w + 3 > q.x && y < q.y + q.h + 1 && y + h + 1 > q.y);
+  const lblHitsBar = (x, y, w, h) => {
+    const i0 = Math.max(0, Math.floor((x - lblHalf - PAD.left) / lblSlotW)), i1 = Math.min(lblBars.length - 1, Math.floor((x + w + lblHalf - PAD.left) / lblSlotW));
+    for (let i = i0; i <= i1; i++){
+      const b = lblBars[i];
+      if (b.x + lblHalf > x && b.x - lblHalf < x + w && b.bot > y && b.top < y + h) return true;
+    }
+    return false;
+  };
+  const placeLabel = (w, h, yList, side, xLo, xHi) => {
+    const xMin = Math.max(PAD.left + 2, xLo === undefined ? -Infinity : xLo), xMax = Math.min(cssW - PAD.right - w - 2, xHi === undefined ? Infinity : xHi);
+    const ys = [];
+    yList.forEach((y) => { const c = Math.max(padTop, Math.min(cssH - padBottom - h, y)); if (!ys.includes(c)) ys.push(c); });
+    const xs = [], STEP = 6;
+    if (xMax >= xMin){
+      if (side === 'left') for (let x = xMin; x <= xMax; x += STEP) xs.push(x);
+      else if (side === 'right') for (let x = xMax; x >= xMin; x -= STEP) xs.push(x);
+      else {
+        const a = Math.max(xMin, Math.min(xMax, side));
+        for (let d = 0; a + d <= xMax || a - d >= xMin; d += STEP){ if (a + d <= xMax) xs.push(a + d); if (d && a - d >= xMin) xs.push(a - d); }
+      }
+    }
+    let hit = null;
+    const scan = (ok) => { for (const x of xs){ for (const y of ys){ if (ok(x, y)) return { x, y }; } } return null; };
+    hit = scan((x, y) => !lblHitsLine(y, h) && !lblHitsBar(x, y, w, h) && !lblHitsLabel(x, y, w, h))   // ① 不蓋 K 棒、不蓋別的標籤、也不被別條橫線穿過
+      || scan((x, y) => !lblHitsBar(x, y, w, h) && !lblHitsLabel(x, y, w, h))                             // ② 至少不蓋 K 棒、不蓋別的標籤
+      || scan((x, y) => !lblHitsLabel(x, y, w, h));                                                        // ③ 整排都是 K 棒：只避開別的標籤
+    if (!hit) hit = { x: xs.length ? xs[0] : Math.max(PAD.left + 2, Math.min(cssW - PAD.right - w - 2, typeof side === 'number' ? side : PAD.left + 2)), y: ys[0] };
+    lblPlaced.push({ x: hit.x, y: hit.y, w, h });
+    return hit;
+  };
+
   ctx.strokeStyle = 'rgba(168,156,143,0.15)';
   ctx.fillStyle = '#a89c8f';
   ctx.font = '10px -apple-system, sans-serif';
@@ -5460,14 +5501,14 @@ function drawChart(){
       if (!pos) return;
       ctx.save();
       ctx.font = 'bold 13px -apple-system, "PingFang TC", "Noto Sans TC", sans-serif';
-      const tw = ctx.measureText(text).width + 10, rightEdge = cssW - PAD.right - 2;
-      const toRight = pos.x2 + 6 + tw <= rightEdge;
-      const bx = toRight ? pos.x2 + 6 : Math.max(PAD.left + 2, pos.x2 - 6 - tw);
-      const by = Math.max(padTop + 8, Math.min(cssH - padBottom - 8, pos.y + (below ? 12 : -12)));
+      const tw = ctx.measureText(text).width + 10;
+      // 2026-11-12 使用者：標籤不要蓋到 K 棒——從線尾巴往兩邊找最近的空位（只在這條線附近找，先試線的上面／下面原本那一側，再試另一側）
+      const yUp = pos.y - 21, yDn = pos.y + 3;
+      const at = placeLabel(tw, 18, below ? [yDn, yUp] : [yUp, yDn], pos.x2 + 6, pos.x1 - tw - 6);
       ctx.fillStyle = 'rgba(18,16,15,0.62)';
-      ctx.fillRect(bx, by - 9, tw, 18);
+      ctx.fillRect(at.x, at.y, tw, 18);
       ctx.fillStyle = '#ffffff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(text, bx + 5, by + 0.5);
+      ctx.fillText(text, at.x + 5, at.y + 9.5);
       ctx.restore();
     };
     if (allBars.length){
@@ -5595,11 +5636,14 @@ function drawChart(){
       const text = '明日 ' + t.label + ' ' + t.v.toFixed(2);
       ctx.font = 'bold 10px -apple-system, sans-serif';
       const tw = ctx.measureText(text).width + 8;
-      const ly = t.ty - 8;
-      ctx.fillStyle = 'rgba(18,16,15,0.78)';
-      ctx.fillRect(PAD.left + 2, ly - 7, tw, 14);
-      ctx.fillStyle = DEF; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(text, PAD.left + 6, ly);
+      const at = placeLabel(tw, 14, [t.y - 15, t.y + 2], 'left');   // 2026-11-12 使用者：不要蓋到 K 棒，從左邊往右找空位（線的上面放不下就放線的下面）
+      lblQueue.push(() => {
+        ctx.font = 'bold 10px -apple-system, sans-serif';
+        ctx.fillStyle = 'rgba(18,16,15,0.78)';
+        ctx.fillRect(at.x, at.y, tw, 14);
+        ctx.fillStyle = DEF; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText(text, at.x + 4, at.y + 7);
+      });
       const tagY = Math.max(padTop, Math.min(cssH - padBottom - 14, t.ty - 7));
       ctx.fillStyle = 'rgba(18,16,15,0.92)';
       ctx.fillRect(cssW - PAD.right + 1, tagY, PAD.right - 2, 14);
@@ -5612,7 +5656,7 @@ function drawChart(){
     ctx.restore();
   }
 
-  // 融資斷頭價 A／B：虛線橫跨整張圖；標籤靠右（避開左邊的防守線標籤），右邊價格軸放同色框價位
+  // 融資斷頭價 A／B：虛線橫跨整張圖；標籤靠右（避開左邊的防守線標籤）、自動避開 K 棒，右邊價格軸放同色框價位
   if (mclLines.length){
     ctx.save();
     mclLines.forEach((t) => {
@@ -5623,11 +5667,14 @@ function drawChart(){
       const text = (t.far < 0 ? '↓ ' : t.far > 0 ? '↑ ' : '') + t.label + ' ' + t.v.toFixed(2) + (t.gap === null ? '' : t.gap < 0 ? '（已破）' : '（差 ' + t.gap.toFixed(1) + '%）');
       ctx.font = 'bold 10px -apple-system, sans-serif';
       const tw = ctx.measureText(text).width + 8;
-      const ly = Math.max(padTop + 8, Math.min(cssH - padBottom - 8, y - 9));
-      ctx.fillStyle = 'rgba(18,16,15,0.78)';
-      ctx.fillRect(cssW - PAD.right - tw - 2, ly - 7, tw, 14);
-      ctx.fillStyle = t.color; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(text, cssW - PAD.right - tw + 2, ly);
+      const at = placeLabel(tw, 14, [y - 16, y + 2], 'right');   // 2026-11-12 使用者：斷頭價 A／B 的字蓋到最右邊的 K 棒 → 從右邊往左找第一個沒蓋到 K 棒的空位
+      lblQueue.push(() => {
+        ctx.font = 'bold 10px -apple-system, sans-serif';
+        ctx.fillStyle = 'rgba(18,16,15,0.78)';
+        ctx.fillRect(at.x, at.y, tw, 14);
+        ctx.fillStyle = t.color; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText(text, at.x + 4, at.y + 7);
+      });
       if (t.far) return;   // 貼邊的線不在價格軸上的真實位置，右邊不放價位框（價位寫在線上的標籤裡）
       const tagY = Math.max(padTop, Math.min(cssH - padBottom - 14, y - 7));
       ctx.fillStyle = 'rgba(18,16,15,0.92)';
@@ -5639,6 +5686,8 @@ function drawChart(){
     });
     ctx.restore();
   }
+
+  if (lblQueue.length){ ctx.save(); ctx.setLineDash([]); ctx.globalAlpha = 1; lblQueue.forEach((fn) => fn()); ctx.restore(); }   // 防守線、斷頭價的文字標籤：等所有橫線畫完再畫，才不會被線劃過去
 
   // 形態標註（日線）：轉折點連線＋圓點＋標籤（低1／頸／低2、左肩／頭／右肩、A／B／C、高1／低1…），再畫一條頸線（樞紐）虛線一路拉到右邊
   const patItems = currentChart.tf === 'daily' && currentChart.patOn ? chartPatItems() : [];
@@ -5674,8 +5723,9 @@ function drawChart(){
         const text = it.name + ' ' + ln.label + ' ' + Number(ln.price).toFixed(2);
         ctx.font = 'bold 11px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
         const tw = ctx.measureText(text).width + 10;
-        ctx.fillStyle = 'rgba(18,16,15,0.88)'; ctx.fillRect(Math.max(PAD.left + 2, x0 + 6), y - 20, tw, 16);
-        ctx.fillStyle = '#f97316'; ctx.fillText(text, Math.max(PAD.left + 2, x0 + 6) + 5, y - 12);
+        const at = placeLabel(tw, 16, [y - 20, y + 4], Math.max(PAD.left + 2, x0 + 6), Math.max(PAD.left + 2, x0 + 6));   // 2026-11-12：從頸線起點往右找不蓋 K 棒的位置
+        ctx.fillStyle = 'rgba(18,16,15,0.88)'; ctx.fillRect(at.x, at.y, tw, 16);
+        ctx.fillStyle = '#f97316'; ctx.fillText(text, at.x + 5, at.y + 8);
       }
     });
     ctx.restore();
@@ -17718,7 +17768,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-12 14:02:23';
+const BUILD_STAMP = '2026-11-12 14:13:53';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
