@@ -10409,9 +10409,12 @@ function home225ColHtml(skip = 5){
 // 2026-11-12 使用者：首頁最後一欄＝盤中大戶力 ≥ +20%（上面）、盤中大戶力 ≤ −20%（下面）；跟盤中訊號中心的「大戶力 ≥ +20／≤ −20」篩選同一份（mainForceRanking）
 function homeHolderLvlColHtml(min){   // min＝20 或 −20
   const bull = min > 0;
-  const rows = (mainForceRanking || []).filter((r) => { const v = Number(r.strengthPct); return Number.isFinite(v) && (bull ? v >= min : v <= min); })
+  // 2026-11-12 使用者：首頁「盤中大戶力 ≥ +20%」只留漲幅 > 2.5% 的（只有首頁這一欄，盤中訊號中心不變）
+  const HOME_HOLDER_MIN_CHG = 2.5;
+  const chgOk = (code) => { if (!bull) return true; const q = getStockQuote(code); return !!q && Number.isFinite(q.changePercent) && q.changePercent > HOME_HOLDER_MIN_CHG; };
+  const rows = (mainForceRanking || []).filter((r) => { const v = Number(r.strengthPct); return Number.isFinite(v) && (bull ? v >= min : v <= min) && chgOk(r.code); })
     .sort((a, b) => (bull ? b.strengthPct - a.strengthPct : a.strengthPct - b.strengthPct));
-  const title = '<div class="hr-title' + (bull ? '' : ' bear') + '">盤中大戶力 ' + (bull ? '≥ +' : '≤ −') + Math.abs(min) + '% <span class="hr-rk">' + rows.length + ' 檔</span></div>';
+  const title = '<div class="hr-title' + (bull ? '' : ' bear') + '">盤中大戶力 ' + (bull ? '≥ +' : '≤ −') + Math.abs(min) + '%' + (bull ? '・漲幅 > ' + HOME_HOLDER_MIN_CHG + '%' : '') + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>';
   const row = (r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
