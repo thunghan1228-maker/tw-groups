@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-12 17:30:04";
+const BUILD_STAMP = "2026-11-12 17:38:14";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -224,6 +224,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   /* 首頁飆股雷達欄（2026-10-15）：分類標題紅底、族群名黃色，每檔後面帶符號；名稱太長截掉，符號和漲跌幅不截 */
   .hr-row.hr-pkw{display:block;padding:3px 8px 4px;white-space:normal;} .hr-pkw .l1 .hr-code{flex:0 0 auto;}
   .hr-row.hr-obs{flex-wrap:wrap;row-gap:1px;} .hr-row.hr-obs .hr-avg{margin-left:auto;}
+  .hr-row .hr-chip3{gap:6px;font-size:11px;} .hr-row .hr-chip3 b{font-weight:700;} .hr-row .hr-chip3 .hr-c3d{opacity:.75;}   /* 2026-11-12 使用者：首頁盤中大戶力 ≥ +20% 每檔下面一行 投信／外資／主力 買賣超（張） */
   .hr-row .hr-l2{flex:0 0 100%;display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);} .hr-row .hr-l2 i{font-style:normal;} .hr-row .hr-l2 .hr-hold{margin-left:0;font-size:11.5px;}   /* 2026-11-09 使用者：大戶力放在個股下面一行 */
   .hr-pkw .l2 .hr-hold{margin-left:0;font-size:11.5px;}
   .hr-pkw .l1{display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;} .hr-pkw .l1 .hr-name{min-width:0;overflow:hidden;text-overflow:ellipsis;} .hr-pkw .l1 .hr-avg{margin-left:auto;text-align:right;}
@@ -10496,6 +10497,37 @@ function home225ColHtml(skip = 5){
     (page.length ? page.map(row).join('') : '<div class="hr-note">' + (all.length ? '漲 2% 以上的不到 ' + (skip + 1) + ' 檔' : '目前沒有個股漲超過 2%') + '</div>') + '</div>';
 }
 // 2026-11-12 使用者：首頁最後一欄＝盤中大戶力 ≥ +20%（上面）、盤中大戶力 ≤ −20%（下面）；跟盤中訊號中心的「大戶力 ≥ +20／≤ −20」篩選同一份（mainForceRanking）
+// 2026-11-12 使用者：首頁「盤中大戶力 ≥ +20%」每檔下面多一行 投信、外資、主力 買賣超張數（照這個順序）。
+// 法人、主力大單都是收盤後才有：盤中顯示前一個交易日的，收盤後新的一天進來就自動換（5 分鐘重抓一次 /api/chips-daily）。
+// 主力＝我們自己用永豐逐筆算的主力大單淨額（盤後籌碼排行同一份）。chips-daily 只有 67 族的股票；不在裡面的用 /api/inst-rank（全市場，只有外資投信）。
+// 上櫃法人常比上市晚進來：最新那天這檔還沒有法人資料，整行改用前一個有資料的交易日，行首標日期。
+function homeChips3Of(code){
+  const d = botFetchCache('chipsHome', '/api/chips-daily', 5 * 60e3);
+  if (!d || d.status !== 'ok' || !d.stocks || !d.date) return null;
+  const pick = (x) => (x && Number.isFinite(x.foreign) ? { t: x.trust, f: x.foreign, m: x.mf && Number.isFinite(x.mf.net) ? x.mf.net : null } : null);
+  const cur = pick(d.stocks[code]);
+  if (cur) return Object.assign(cur, { date: d.date });
+  const prevDate = (Array.isArray(d.institutionalDates) ? d.institutionalDates : []).find((x) => x < d.date);
+  if (prevDate){
+    const p = botFetchCache('chipsHome|' + prevDate, '/api/chips-daily?date=' + encodeURIComponent(prevDate), 30 * 60e3);
+    const old = p && p.status === 'ok' && p.stocks ? pick(p.stocks[code]) : null;
+    if (old) return Object.assign(old, { date: prevDate });
+  }
+  const ir = botFetchCache('instRank', '/api/inst-rank', 5 * 60e3);
+  if (ir && ir.status === 'ok' && Array.isArray(ir.rows)){
+    if (!ir._byCode) ir._byCode = new Map(ir.rows.map((r) => [r.code, r]));
+    const r = ir._byCode.get(code);
+    if (r) return { t: r.t, f: r.f, m: null, date: ir.date };
+  }
+  return null;
+}
+function homeChips3Html(code, latestDate){
+  const c = homeChips3Of(code);
+  const v = (label, n) => '<span>' + label + ' <b class="' + (Number.isFinite(n) ? dirClass(n) : 'flat') + '">' + (Number.isFinite(n) ? (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(Math.round(n)).toLocaleString('zh-TW') : '—') + '</b></span>';
+  const md = (x) => Number(x.slice(5, 7)) + '/' + Number(x.slice(8, 10));
+  const tag = c && c.date && c.date !== latestDate ? '<span class="hr-c3d">' + md(c.date) + '</span>' : '';
+  return '<div class="hr-l2 hr-chip3" title="投信／外資／主力大單 買賣超（張）' + (c && c.date ? '・' + c.date : '') + '">' + tag + v('投', c ? c.t : null) + v('外', c ? c.f : null) + v('主', c ? c.m : null) + '</div>';
+}
 function homeHolderLvlColHtml(min){   // min＝20 或 −20
   const bull = min > 0;
   // 2026-11-12 使用者：首頁「盤中大戶力 ≥ +20%」只留漲幅 > 2.5% 的（只有首頁這一欄，盤中訊號中心不變）
@@ -10516,10 +10548,13 @@ function homeHolderLvlColHtml(min){   // min＝20 或 −20
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
     return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(lookupStockGroup(r.code)) + '">' +
       '<span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>' +
-      '<span class="hr-tail"><span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '<small class="hr-bothsc"> ' + maOf(r.code) + '分</small></span>' + homeHoldHtml(r.code) + '</span></div>';
+      '<span class="hr-tail"><span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '<small class="hr-bothsc"> ' + maOf(r.code) + '分</small></span>' + homeHoldHtml(r.code) + '</span>' + (bull ? homeChips3Html(r.code, chipsLatest) : '') + '</div>';
   };
   const empty = brewLaunchData ? '目前沒有' : '均線資料讀取中…';
-  return '<div class="hr-col">' + title + (rows.length ? rows.map(row).join('') : '<div class="hr-note">' + empty + '</div>') + '</div>';
+  const cd = bull ? botFetchCache('chipsHome', '/api/chips-daily', 5 * 60e3) : null;
+  const chipsLatest = cd && cd.status === 'ok' ? cd.date : '';
+  const chipsNote = bull && rows.length ? '<div class="hr-note" title="每檔下面一行：投信／外資／主力大單 買賣超（張）；收盤後才公布，盤中是前一個交易日的">投／外／主 買賣超（張）' + (chipsLatest ? ' ' + Number(chipsLatest.slice(5, 7)) + '/' + Number(chipsLatest.slice(8, 10)) : '・讀取中…') + '</div>' : '';
+  return '<div class="hr-col">' + title + chipsNote + (rows.length ? rows.map(row).join('') : '<div class="hr-note">' + empty + '</div>') + '</div>';
 }
 function homeHolderLastColHtml(){ return homeHolderLvlColHtml(20) + homeHolderLvlColHtml(-20); }
 function homeRank4Html(){
@@ -17837,7 +17872,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-12 17:30:04';
+const BUILD_STAMP = '2026-11-12 17:38:14';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
