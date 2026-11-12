@@ -10459,12 +10459,12 @@ function homeHolderLvlColHtml(min){   // min＝20 或 −20
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
     return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(lookupStockGroup(r.code)) + '">' +
       '<span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>' +
-      '<span class="hr-tail"><span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '<small class="hr-bothsc"> ' + maOf(r.code) + '分</small></span>' + homeHoldHtml(r.code) + '</span>' + (bull ? homeChips3Html(r.code, chipsLatest) : '') + '</div>';
+      '<span class="hr-tail"><span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '<small class="hr-bothsc"> ' + maOf(r.code) + '分</small></span>' + homeHoldHtml(r.code) + '</span>' + homeChips3Html(r.code, chipsLatest) + '</div>';   // 2026-11-12 使用者：≤ −20% 那份也加
   };
   const empty = brewLaunchData ? '目前沒有' : '均線資料讀取中…';
-  const cd = bull ? botFetchCache('chipsHome', '/api/chips-daily', 5 * 60e3) : null;
+  const cd = botFetchCache('chipsHome', '/api/chips-daily', 5 * 60e3);
   const chipsLatest = cd && cd.status === 'ok' ? cd.date : '';
-  const chipsNote = bull && rows.length ? '<div class="hr-note" title="每檔下面一行：投信／外資／主力大單 買賣超（張）；收盤後才公布，盤中是前一個交易日的">投／外／主 買賣超（張）' + (chipsLatest ? ' ' + Number(chipsLatest.slice(5, 7)) + '/' + Number(chipsLatest.slice(8, 10)) : '・讀取中…') + '</div>' : '';
+  const chipsNote = rows.length ? '<div class="hr-note" title="每檔下面一行：投信／外資／主力大單 買賣超（張）；收盤後才公布，盤中是前一個交易日的">投／外／主 買賣超（張）' + (chipsLatest ? ' ' + Number(chipsLatest.slice(5, 7)) + '/' + Number(chipsLatest.slice(8, 10)) : '・讀取中…') + '</div>' : '';
   return '<div class="hr-col">' + title + chipsNote + (rows.length ? rows.map(row).join('') : '<div class="hr-note">' + empty + '</div>') + '</div>';
 }
 function homeHolderLastColHtml(){ return homeHolderLvlColHtml(20) + homeHolderLvlColHtml(-20); }
