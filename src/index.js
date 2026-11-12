@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-11 18:13:32";
+const BUILD_STAMP = "2026-11-12 14:02:23";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -278,7 +278,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bot-col > .bot-msg{padding:8px 9px;} .bot-col .bot-line{font-size:12.5px;line-height:1.6;} .bot-col .bot-title{font-size:13.5px;padding-right:18px;}
   .bot-col.flash > .bot-msg{border-color:#7c3aed;box-shadow:inset 0 0 0 1px #7c3aed;}
   /* 2026-10-18 使用者：32 新刀劍空後面多了「回／跑 HH:MM」（照老師刀功課廣播），那格放寬，一檔一行放得下 */
-  .bot-col[data-col-key="32"]{flex-basis:calc((100% - 72px) / 10 * 1.7);min-width:290px;}
+  .bot-col[data-col-key="32"]{flex-basis:calc((100% - 72px) / 10 * 2.1);min-width:350px;}   /* 2026-11-12 使用者：股票名稱被擠到顯示不全（騰輝電子-KY、印能科技…）→ 再加寬 */
   /* 2026-10-20 使用者（截圖綠框）：機器人代碼 199／193／32／123／177 這幾格加粗綠框——用代碼認，關掉再打開、位置換了也都有；outline 往內畫，不改欄寬 */
   .bot-col[data-col-key="199"],.bot-col[data-col-key="193"],.bot-col[data-col-key="32"],.bot-col[data-col-key="123"],.bot-col[data-col-key="177"],.bot-col[data-col-key="三落空"]{outline:3px solid #22c55e;outline-offset:-3px;}   /* 2026-10-22 使用者：三落空也加綠框 */
   .bot-col[data-col-key="三落空"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}
@@ -2220,6 +2220,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .b32-grp{grid-area:g;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .b32-pct{grid-area:p;justify-self:end;font-weight:800;font-size:12.5px;}
   .b32-h{grid-area:h;justify-self:end;align-self:center;}
+  .b32-row.bh .b32-h .hf-tag b{width:66px;box-sizing:border-box;text-align:center;display:inline-block;}
   .b32-row.k12{grid-template-columns:38px minmax(0,1fr) auto auto;grid-template-areas:"t s h p" "t g h st" "t l l l";}
   .b32-lvrow{grid-area:l;display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:2px;}
   /* 盤中訊號中心「新刀劍空(32)」分頁（淺色底）：同一份 .b32-row 排法 */
@@ -9363,7 +9364,8 @@ function bladeGoneRowHtml(x){
 // 2026-10-22 使用者：盤中訊號「新刀劍空(32)」分頁的排法、選股內容、族群都要跟機器人代碼 32 一模一樣——所以兩邊共用這一個函式，
 // 連盤中紀錄還沒有的時候（盤前撮合、剛開盤）也一樣：分段（強空積極→收割區域→多方打少→中間段，強空歸強空、多方歸多方），
 // 每列照樣是 b32-row（左邊時間＝這台電腦第一次看到它進名單的時間），每段內時間近的排上面、早的在下面。回傳的 sectioned＝這種分段畫面。
-function bladeBotListHtml(m, holderFilter, oldestFirst){
+function bladeBotListHtml(m, holderFilter, oldestFirst, opts){
+  const bareHolder = !!(opts && opts.bareHolder);   // 2026-11-12 使用者：機器人 32 每列不要再寫「大戶力」三個字（整欄最上面寫一次），才不會擠到股票名稱
   let tl = bladeTimeline(m);
   const sectioned = !tl;
   const liveBy = new Map(), harvestSet = new Set((m.bladeHarvest || []).map((r) => r.code));
@@ -9387,12 +9389,12 @@ function bladeBotListHtml(m, holderFilter, oldestFirst){
     const gname = r ? r.groupName : (x.row.g || ''), grank = r ? r.groupRank : x.row.gr;
     const zone = r ? (harvestSet.has(x.code) ? '♣' : bladeRankMark(r.groupRank, m.total)) : '';
     const big = bigOf(x);
-    return '<div class="b32-row' + (gone ? ' gone' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(name) + '">' +
+    return '<div class="b32-row' + (gone ? ' gone' : '') + (bareHolder ? ' bh' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(name) + '">' +
       '<span class="b32-time">' + x.first + '</span>' +
       '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(name) + '</span>' + (r && r.bladeMark ? r.bladeMark : '') + '</span>' +
       '<span class="b32-grp">' + wlEsc(gname) + (grank ? '・' + grank + zone : '') + '</span>' +
       '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
-      '<span class="b32-h">' + holderTagHtml(big !== null ? big : holderPctOf(x.code), true) + '</span>' +
+      '<span class="b32-h">' + holderTagHtml(big !== null ? big : holderPctOf(x.code), true, bareHolder) + '</span>' +
       (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + '</div>';
   };
   if (sectioned){
@@ -17716,7 +17718,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-11 18:13:32';
+const BUILD_STAMP = '2026-11-12 14:02:23';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25713,8 +25715,8 @@ function botAnswer(raw){
     const tl = bladeTimeline(m);
     // 2026-10-19 使用者：排法照「刀功課廣播」——不分段，一檔一列：左邊最早進榜時間（越晚進榜越上面，同時間照股號）、
     // 股號股名下面接族群（名次＋🔺🔽🔰♣）、右邊漲跌幅跟大戶%、最下面「跑／回 HH:MM」；跑掉的紅色刪除線夾在裡面照時間排。底色跟顏色照機器人原本的黑底。
-    const bl = bladeBotListHtml(m);
-    return wrap('🔪⚔️新刀劍空(32)', (bl.html || botLine('目前沒有', 'bot-dim')) + botLine(bladeLegend(bl) + tdParamsNote(), 'bot-dim'), stamp + '・' + bladeCountTxt(bl));
+    const bl = bladeBotListHtml(m, null, false, { bareHolder: true });
+    return wrap('🔪⚔️新刀劍空(32)', (bl.html ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + bl.html : botLine('目前沒有', 'bot-dim')) + botLine(bladeLegend(bl) + tdParamsNote(), 'bot-dim'), stamp + '・' + bladeCountTxt(bl));
   }
   // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
   // 最後附櫃買多空（漲跌幅）；34 再附漲 7% 以上沒列的檔數；處置股名字前面 *
