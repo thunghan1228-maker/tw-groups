@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-12 17:42:32";
+const BUILD_STAMP = "2026-11-12 17:46:48";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -224,6 +224,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   /* 首頁飆股雷達欄（2026-10-15）：分類標題紅底、族群名黃色，每檔後面帶符號；名稱太長截掉，符號和漲跌幅不截 */
   .hr-row.hr-pkw{display:block;padding:3px 8px 4px;white-space:normal;} .hr-pkw .l1 .hr-code{flex:0 0 auto;}
   .hr-row.hr-obs{flex-wrap:wrap;row-gap:1px;} .hr-row.hr-obs .hr-avg{margin-left:auto;}
+  .hr-row .hr-c3all{display:inline-flex;align-items:baseline;gap:4px;padding:0 4px;border-radius:3px;color:#fff;} .hr-row .hr-c3all.buy{background:#dc2626;} .hr-row .hr-c3all.sell{background:#15803d;} .hr-row .hr-c3all .hr-code,.hr-row .hr-c3all .hr-name{color:#fff;}   /* 2026-11-12 使用者：投信／外資／主力 三個同步買超＝紅底白字、同步賣超＝綠底白字 */
   .hr-row .hr-chip3{gap:6px;font-size:11px;} .hr-row .hr-chip3 b{font-weight:700;} .hr-row .hr-chip3 .hr-c3d{opacity:.75;}   /* 2026-11-12 使用者：首頁盤中大戶力 ≥ +20% 每檔下面一行 投信／外資／主力 買賣超（張） */
   .hr-row .hr-l2{flex:0 0 100%;display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);} .hr-row .hr-l2 i{font-style:normal;} .hr-row .hr-l2 .hr-hold{margin-left:0;font-size:11.5px;}   /* 2026-11-09 使用者：大戶力放在個股下面一行 */
   .hr-pkw .l2 .hr-hold{margin-left:0;font-size:11.5px;}
@@ -10546,8 +10547,14 @@ function homeHolderLvlColHtml(min){   // min＝20 或 −20
   const row = (r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
+    // 2026-11-12 使用者：投信、外資、主力三個同步買超（≥ +20% 那份）→ 代號股名紅底白字；三個同步賣超（≤ −20% 那份）→ 綠底白字。
+    // 其中一個是 0（照畫面上四捨五入到整張的數字）、另外兩個同步也算；有一個反方向、或兩個以上是 0、或缺資料（不在 67 族沒有主力）都不算
+    const c3 = homeChips3Of(r.code);
+    const c3v = c3 ? [c3.t, c3.f, c3.m].map((v) => (Number.isFinite(v) ? Math.round(v) : NaN)) : [];
+    const all3 = c3v.length === 3 && c3v.every(Number.isFinite) && c3v.filter((v) => (bull ? v > 0 : v < 0)).length >= 2 && !c3v.some((v) => (bull ? v < 0 : v > 0));
     return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(lookupStockGroup(r.code)) + '">' +
-      '<span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>' +
+      (all3 ? '<span class="hr-c3all ' + (bull ? 'buy' : 'sell') + '" title="投信、外資、主力' + (bull ? '同步買超' : '同步賣超') + '（其中一個是 0 也算）">' : '') +
+      '<span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>' + (all3 ? '</span>' : '') +
       '<span class="hr-tail"><span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '<small class="hr-bothsc"> ' + maOf(r.code) + '分</small></span>' + homeHoldHtml(r.code) + '</span>' + homeChips3Html(r.code, chipsLatest) + '</div>';   // 2026-11-12 使用者：≤ −20% 那份也加
   };
   const empty = brewLaunchData ? '目前沒有' : '均線資料讀取中…';
@@ -17872,7 +17879,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-12 17:42:32';
+const BUILD_STAMP = '2026-11-12 17:46:48';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
