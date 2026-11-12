@@ -10413,19 +10413,24 @@ function homeHolderLvlColHtml(min){   // min＝20 或 −20
   const HOME_HOLDER_MIN_CHG = 2.5;
   // 2026-11-12 使用者：≤ −20% 那份也一樣——只留跌幅超過 2.5% 的（跌 < −2.5%）
   const chgOk = (code) => { const q = getStockQuote(code); return !!q && Number.isFinite(q.changePercent) && (bull ? q.changePercent > HOME_HOLDER_MIN_CHG : q.changePercent < -HOME_HOLDER_MIN_CHG); };
-  const rows = (mainForceRanking || []).filter((r) => { const v = Number(r.strengthPct); return Number.isFinite(v) && (bull ? v >= min : v <= min) && chgOk(r.code); })
+  // 2026-11-12 使用者：再多一層均線分數（滿分 15，用現價當今天收盤即時算，跟均線分數排行同一套）：≥ +20% 要 ≥ 9 分、≤ −20% 要 ≤ 9 分；算不出分數的不列
+  const HOME_HOLDER_MA = 9;
+  const maOf = (code) => { const q = getStockQuote(code); return wlScoreOf(code, q ? Number(q.price) : NaN); };
+  const maOk = (code) => { const sc = maOf(code); return Number.isFinite(sc) && (bull ? sc >= HOME_HOLDER_MA : sc <= HOME_HOLDER_MA); };
+  const rows = (mainForceRanking || []).filter((r) => { const v = Number(r.strengthPct); return Number.isFinite(v) && (bull ? v >= min : v <= min) && chgOk(r.code) && maOk(r.code); })
     .sort(bull
       ? (a, b) => { const pa = getStockQuote(a.code).changePercent, pb = getStockQuote(b.code).changePercent; return pa - pb || b.strengthPct - a.strengthPct; }   // 2026-11-12 使用者：≥ +20% 依漲跌幅排，漲得少的在上面、漲得多的在下面
       : (a, b) => { const pa = getStockQuote(a.code).changePercent, pb = getStockQuote(b.code).changePercent; return pb - pa || a.strengthPct - b.strengthPct; });   // 2026-11-12 使用者：≤ −20% 也依漲跌幅排，跌得少的在上面、跌得多的在下面
-  const title = '<div class="hr-title' + (bull ? '' : ' bear') + '">盤中大戶力 ' + (bull ? '≥ +' : '≤ −') + Math.abs(min) + '%' + (bull ? '・漲幅 > ' : '・跌幅 > ') + HOME_HOLDER_MIN_CHG + '%' + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>';
+  const title = '<div class="hr-title' + (bull ? '' : ' bear') + '">盤中大戶力 ' + (bull ? '≥ +' : '≤ −') + Math.abs(min) + '%' + (bull ? '・漲幅 > ' : '・跌幅 > ') + HOME_HOLDER_MIN_CHG + '%・均線 ' + (bull ? '≥ ' : '≤ ') + HOME_HOLDER_MA + ' 分' + ' <span class="hr-rk">' + rows.length + ' 檔</span></div>';
   const row = (r) => {
     const q = getStockQuote(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null;
     return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(lookupStockGroup(r.code)) + '">' +
       '<span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>' +
-      '<span class="hr-tail"><span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span>' + homeHoldHtml(r.code) + '</span></div>';
+      '<span class="hr-tail"><span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '<small class="hr-bothsc"> ' + maOf(r.code) + '分</small></span>' + homeHoldHtml(r.code) + '</span></div>';
   };
-  return '<div class="hr-col">' + title + (rows.length ? rows.map(row).join('') : '<div class="hr-note">目前沒有</div>') + '</div>';
+  const empty = brewLaunchData ? '目前沒有' : '均線資料讀取中…';
+  return '<div class="hr-col">' + title + (rows.length ? rows.map(row).join('') : '<div class="hr-note">' + empty + '</div>') + '</div>';
 }
 function homeHolderLastColHtml(){ return homeHolderLvlColHtml(20) + homeHolderLvlColHtml(-20); }
 function homeRank4Html(){
