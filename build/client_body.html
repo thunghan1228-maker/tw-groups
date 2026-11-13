@@ -8784,6 +8784,9 @@ function k12Effective(k){
 // 12:50 老師只列台玻 +0.6%、台塑化、驊宏資；我們多列尖點 +6.3%、精測 +3.2%、有成精密 +1.6%（高點都 ≥ 4%、也都在 5 分K 20MA 下彎）。
 // 三檔多的現在漲幅都比老師最高那檔（+0.6%）高，所以現價漲超過 +1% 的先不列（只有這一份樣本，門檻 1% 是猜的，下次對）
 const K12_MAX_PCT = 4;   // 2026-11-09 老師 13:30 列了凌群 +3.37%、東捷資訊 +3.28%、驊宏資 +2.45%（原本 10/20 照老師 13:00 只放到 1.55）、華經 +5.15% 沒列 → 放寬到 4；之後有新樣本再調
+// 2026-11-13 老師 13:30 的 123 列了創意 +9.54%、世芯-KY +9.39%（IP 第 2 名）、零壹 +5.34%、力新 +4.90%（資訊第 4 名）——都是族群前 10 名（🔺）；
+// 同一份沒列精測 +4.38%、中揚光 +4.24%、康全電訊 +5.78%（族群 17～31 名）。所以「現價漲超過 4% 不列」只管族群第 11 名以後的。
+const k12PctOk = (pct, groupRank, total) => !Number.isFinite(pct) || pct <= K12_MAX_PCT || bladeRankMark(groupRank, total) === '🔺';
 const BLADE_PRIOR_RISE = 3;      // 刀劍空：昨天（🔪）或前天（⚔️）要漲這麼多以上，今天殺下來才算（2026-10-15 照老師）
 const FIRE_MIN_PCT = 2;       // 馬火多：今天至少漲這麼多才算有力道
 const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停鎖死）買不到，另列
@@ -19881,7 +19884,7 @@ function k12AlertEligible(k){
     if (gi < 0) return;
     const s = quote.get(it.code);
     const pct = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
-    if (Number.isFinite(pct) && pct > K12_MAX_PCT) return;
+    if (!k12PctOk(pct, gi + 1, ranked.length)) return;
     out.push({ code: it.code, name: (s && s.name) || it.name, group: ranked[gi].name, pct, h1: it.high1, h2: it.high2, key: it.code + '|' + it.high1 });
   });
   return out;
@@ -20532,7 +20535,7 @@ function tdLiveSnap(m, peek){   // peek＝跳出通知用：1＝只讀手上已�
     if (gi < 0) return;
     const g = ranked[gi], s = quote.get(it.code);
     const pct12 = s && Number.isFinite(s.changePercent) ? s.changePercent : it.pct;
-    if (Number.isFinite(pct12) && pct12 > K12_MAX_PCT) return;
+    if (!k12PctOk(pct12, gi + 1, ranked.length)) return;
     if (!marks.has(g.name)) marks.set(g.name, groupBladeMarks(g));
     const bm = marks.get(g.name).get(it.code);
     k12Base.push({ code: it.code, name: (s && s.name) || it.name, pct: pct12, price: s ? s.price : it.close,
