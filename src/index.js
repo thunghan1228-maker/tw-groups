@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-13 23:22:06";
+const BUILD_STAMP = "2026-11-13 23:27:54";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -9511,13 +9511,14 @@ function bladeBotListHtml(m, holderFilter, oldestFirst, opts){
     const gname = r ? r.groupName : (x.row.g || ''), grank = r ? r.groupRank : x.row.gr;
     const zone = r ? (harvestSet.has(x.code) ? '♣' : bladeRankMark(r.groupRank, m.total)) : '';
     const big = bigOf(x);
-    return '<div class="b32-row' + (gone ? ' gone' : '') + (bareHolder ? ' bh' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(name) + '">' +
+    const flags = bot777FlagTags(x.code);   // 2026-11-13 使用者：32 也標股期／小期、禁空／停券（跟 777 同一套）
+    return '<div class="b32-row' + (gone ? ' gone' : '') + (bareHolder ? ' bh' : '') + (flags ? ' k12' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(name) + '">' +
       '<span class="b32-time">' + x.first + '</span>' +
       '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(name) + '</span>' + (r && r.bladeMark ? r.bladeMark : '') + '</span>' +
       '<span class="b32-grp">' + wlEsc(gname) + (grank ? '・' + grank + zone : '') + '</span>' +
       '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
       '<span class="b32-h">' + holderTagHtml(big !== null ? big : holderPctOf(x.code), true, bareHolder) + '</span>' +
-      (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + '</div>';
+      (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + (flags ? '<span class="b32-lvrow b777-sigrow">' + flags + '</span>' : '') + '</div>';
   };
   if (sectioned){
     const xsOf = (l) => l.map((r) => tl.get(r.code)).filter((x) => x && passHolder(x))
@@ -18025,7 +18026,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-13 23:22:06';
+const BUILD_STAMP = '2026-11-13 23:27:54';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25339,6 +25340,12 @@ function bot777FlagTags(code){
   if (f.disposition) out.push('<span class="b777-flag disp" title="' + wlEsc('處置股' + (f.dispositionUntil ? '，處置至 ' + f.dispositionUntil : '')) + '">處置</span>');
   return out.join('');
 }
+// 123 那一列的階段行（① 剛轉弱／② 不過前高可空）後面接股期／小期、禁空／停券；沒有階段行時自己開一行（2026-11-13 使用者：123 也標）
+function k12LvWithFlags(stageHtml, code){
+  const fl = bot777FlagTags(code);
+  if (!fl) return stageHtml || '';
+  return stageHtml ? stageHtml.replace(/<\\/span>$/, fl + '</span>') : '<span class="b32-lvrow b777-sigrow">' + fl + '</span>';
+}
 function bot777ParamsHtml(){
   const allOn = TD_PARAMS.every(([k]) => bot777Params[k]);
   const btn = (k, label, on) => '<button type="button" class="b777-p' + (on ? ' on' : '') + '" data-bot777-param="' + k + '">' + (on ? '☑' : '☐') + ' ' + label + '</button>';
@@ -26176,7 +26183,7 @@ function botAnswer(raw){
         '<span class="b32-grp">' + wlEsc(r.g || '12空') + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, live.total)) : '') + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(r.big !== null && r.big !== undefined ? r.big : holderPctOf(x.code), true) + '</span>' +
-        (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + stage(r) + '</div>';
+        (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + k12LvWithFlags(stage(r), x.code) + '</div>';
     };
     const inCnt = list.filter((x) => x.inNow).length, goneCnt = list.length - inCnt;
     const c = tdK12Counts(list.filter((x) => x.inNow).map((x) => x.row));

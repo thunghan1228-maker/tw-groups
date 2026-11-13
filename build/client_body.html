@@ -9422,13 +9422,14 @@ function bladeBotListHtml(m, holderFilter, oldestFirst, opts){
     const gname = r ? r.groupName : (x.row.g || ''), grank = r ? r.groupRank : x.row.gr;
     const zone = r ? (harvestSet.has(x.code) ? '♣' : bladeRankMark(r.groupRank, m.total)) : '';
     const big = bigOf(x);
-    return '<div class="b32-row' + (gone ? ' gone' : '') + (bareHolder ? ' bh' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(name) + '">' +
+    const flags = bot777FlagTags(x.code);   // 2026-11-13 使用者：32 也標股期／小期、禁空／停券（跟 777 同一套）
+    return '<div class="b32-row' + (gone ? ' gone' : '') + (bareHolder ? ' bh' : '') + (flags ? ' k12' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(name) + '">' +
       '<span class="b32-time">' + x.first + '</span>' +
       '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(name) + '</span>' + (r && r.bladeMark ? r.bladeMark : '') + '</span>' +
       '<span class="b32-grp">' + wlEsc(gname) + (grank ? '・' + grank + zone : '') + '</span>' +
       '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
       '<span class="b32-h">' + holderTagHtml(big !== null ? big : holderPctOf(x.code), true, bareHolder) + '</span>' +
-      (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + '</div>';
+      (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + (flags ? '<span class="b32-lvrow b777-sigrow">' + flags + '</span>' : '') + '</div>';
   };
   if (sectioned){
     const xsOf = (l) => l.map((r) => tl.get(r.code)).filter((x) => x && passHolder(x))
@@ -25250,6 +25251,12 @@ function bot777FlagTags(code){
   if (f.disposition) out.push('<span class="b777-flag disp" title="' + wlEsc('處置股' + (f.dispositionUntil ? '，處置至 ' + f.dispositionUntil : '')) + '">處置</span>');
   return out.join('');
 }
+// 123 那一列的階段行（① 剛轉弱／② 不過前高可空）後面接股期／小期、禁空／停券；沒有階段行時自己開一行（2026-11-13 使用者：123 也標）
+function k12LvWithFlags(stageHtml, code){
+  const fl = bot777FlagTags(code);
+  if (!fl) return stageHtml || '';
+  return stageHtml ? stageHtml.replace(/<\/span>$/, fl + '</span>') : '<span class="b32-lvrow b777-sigrow">' + fl + '</span>';
+}
 function bot777ParamsHtml(){
   const allOn = TD_PARAMS.every(([k]) => bot777Params[k]);
   const btn = (k, label, on) => '<button type="button" class="b777-p' + (on ? ' on' : '') + '" data-bot777-param="' + k + '">' + (on ? '☑' : '☐') + ' ' + label + '</button>';
@@ -26087,7 +26094,7 @@ function botAnswer(raw){
         '<span class="b32-grp">' + wlEsc(r.g || '12空') + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, live.total)) : '') + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(r.big !== null && r.big !== undefined ? r.big : holderPctOf(x.code), true) + '</span>' +
-        (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + stage(r) + '</div>';
+        (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + k12LvWithFlags(stage(r), x.code) + '</div>';
     };
     const inCnt = list.filter((x) => x.inNow).length, goneCnt = list.length - inCnt;
     const c = tdK12Counts(list.filter((x) => x.inNow).map((x) => x.row));
