@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-13 22:37:02";
+const BUILD_STAMP = "2026-11-13 22:50:03";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -290,6 +290,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bot-col[data-col-key="199"],.bot-col[data-col-key="193"],.bot-col[data-col-key="32"],.bot-col[data-col-key="123"],.bot-col[data-col-key="177"],.bot-col[data-col-key="三落空"]{outline:3px solid #22c55e;outline-offset:-3px;}   /* 2026-10-22 使用者：三落空也加綠框 */
   .bot-col[data-col-key="199"]{min-width:196px;}   /* 2026-11-12 多了「均」大戶力，稍微放寬一點，才接得在漲跌幅後面 */
   .bot-col[data-col-key="三落空"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}
+  .b193-t{display:inline-block;min-width:38px;margin-right:4px;font-size:11.5px;font-weight:800;color:#7c3aed;font-variant-numeric:tabular-nums;} .b193-t.none{color:var(--muted);font-weight:600;}
+  .b193-back{display:inline-block;background:#2563eb;color:#fff;border-radius:5px;padding:0 5px;font-size:10.5px;font-weight:800;vertical-align:1px;}   /* 2026-11-13 193 每行最前面的訊號時間、回榜標籤 */
   .b777-sigrow{gap:4px 6px;} .b777-sig{display:inline-block;font-size:11px;font-weight:800;border-radius:5px;padding:0 5px;color:#fff;white-space:nowrap;}
   .b777-sig.s32{background:#7c3aed;} .b777-sig.s12{background:#2563eb;}   /* 2026-11-13 777 每檔標是哪種訊號：紫＝刀劍空、藍＝12空 */
   .b777-params{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 2px 6px;} .b777-plabel{font-size:11.5px;color:var(--muted);margin-right:2px;}
@@ -18021,7 +18023,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-13 22:37:02';
+const BUILD_STAMP = '2026-11-13 22:50:03';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25900,7 +25902,7 @@ function botAnswer(raw){
   if (!h) return wrap(raw, botLine('族群行情載入中…', 'bot-dim'));
   const rankLine = (r) => botLine(botGrpPill(r.name, '-(' + r.rank + ')' + (r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? BOT_UP_IC + (-r.drop) : '－') : '') + (r.mk || '') + ' ' + botPct(r.avg), r.avg));
   // 193、199 用：族群那一列後面接「族均」大戶力（2026-11-12 使用者）
-  const rankLineH = (r) => botLine(botGrpPill(r.name, '-(' + r.rank + ')' + (r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? BOT_UP_IC + (-r.drop) : '－') : '') + (r.mk || '') + ' ' + botPct(r.avg), r.avg) + botGrpHolderTag(r.name), 'bot-grow');
+  const rankLineH = (r) => botLine((r.pre || '') + botGrpPill(r.name, '-(' + r.rank + ')' + (r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? BOT_UP_IC + (-r.drop) : '－') : '') + (r.mk || '') + ' ' + botPct(r.avg), r.avg) + botGrpHolderTag(r.name), 'bot-grow');
   // 2026-11-13 使用者：首頁的「💰疑似主力融資買進」做成機器人代碼 14（原本 14＝族群漲 4% 以上，改掉）——跟首頁那欄同一份資料、同一個排法
   if (q === '14'){
     const t = '💰疑似主力融資買進(14)';
@@ -26087,7 +26089,19 @@ function botAnswer(raw){
     if (!k) return wrap('空族群必殺(193)', botLine('讀取中…', 'bot-dim'));
     // 2026-11-13 使用者：機器人 193 照老師的排法——空方線以上的族群在上面、「------↓(空方)↓------」下面是空方線以下的，兩段都照族群名次排；
     // 族群底下的 ⚠️ 個股也照老師：跌得少的在前（訊號中心、複製文字維持原本的跌幅大在上）
-    const line = (r) => rankLineH({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark }) + (r.members.length ? botLine(r.members.slice().sort((a, b) => b.pct - a.pct || (a.code < b.code ? -1 : 1)).map((x) => '<span class="b193-m"><span class="b193-r1">⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + '</span>' + holderTagHtml(holderPctOf(x.code), false, true) + '</span>').join(''), 'bot-sub b193-wrap') : '');
+    // 2026-11-13 使用者：193 每一行最前面加訊號發生的時間——⚠️ 個股＝進刀劍空(32) 的時間（掉出去又回榜的再標「回 HH:MM」，跟機器人 32 同一份紀錄）；
+    // 族群那一行＝族裡 ⚠️ 個股最新發生的時間（族裡沒有 ⚠️ 個股的寫 --:--）
+    let tl193 = null;
+    try { tl193 = bladeTimeline(race333Model()); } catch (_){ tl193 = null; }
+    const hm193 = (v) => (/^\\d\\d:\\d\\d$/.test(v || '') ? v : '');
+    const firstOf = (code) => { const x = tl193 ? tl193.get(code) : null; return x ? hm193(x.first) : ''; };
+    const backOf = (code) => { const x = tl193 ? tl193.get(code) : null; return x && x.inNow ? hm193(x.back) : ''; };
+    const evOf = (code) => { const f = firstOf(code), b = backOf(code); return b > f ? b : f; };
+    const tSpan = (t) => '<span class="b193-t' + (t ? '' : ' none') + '">' + (t || '--:--') + '</span>';
+    const line = (r) => {
+      const gt = r.members.reduce((mx, x) => { const v = evOf(x.code); return v > mx ? v : mx; }, '');
+      return rankLineH({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark, pre: tSpan(gt) }) + (r.members.length ? botLine(r.members.slice().sort((a, b) => b.pct - a.pct || (a.code < b.code ? -1 : 1)).map((x) => '<span class="b193-m"><span class="b193-r1">' + tSpan(firstOf(x.code)) + '⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + (backOf(x.code) ? ' <span class="b193-back">回 ' + backOf(x.code) + '</span>' : '') + '</span>' + holderTagHtml(holderPctOf(x.code), false, true) + '</span>').join(''), 'bot-sub b193-wrap') : '');
+    };
     const byRank = (l) => l.slice().sort((a, b) => a.rank - b.rank);
     return wrap('空族群必殺(193)', botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + byRank(k.upper).map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + byRank(k.lower).map(line).join('') + botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + (kill193OtcTail() ? botLine(kill193OtcTail(), 'bot-sub') : ''));
   }
