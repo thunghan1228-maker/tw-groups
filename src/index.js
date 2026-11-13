@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 00:30:00";
+const BUILD_STAMP = "2026-11-14 01:08:46";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -626,6 +626,19 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .signal-badge-btn:hover{background:#6d28d9;border-color:#6d28d9;}
   .sb-count{background:#fff;color:#5b21b6;border-radius:999px;min-width:28px;padding:1px 9px;text-align:center;font-size:15px;font-weight:800;}
   .alert-toggle{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;}
+  /* 2026-11-14 使用者：首頁改白底（預設；按鈕「🌙 黑底／☀️ 白底」切換，記在這台瀏覽器）。整頁換一組淺色變數，
+     彈出的視窗（K 線、族群明細、各功能面板）照舊用原本的深色變數，不跟著變；原本給黑底用的白字（股號、族群名次）改深色 */
+  body.home-light{--bg:#f3f4f6; --panel:#ffffff; --panel-2:#f1f3f5; --line:#d6dae0; --text:#16181b; --muted:#5b6068; --up:#d0342c; --down:#15803d; --accent:#8a6d3f; background:var(--bg); color:var(--text);}
+  body.home-light .chips-modal,body.home-light .signal-modal,body.home-light .group-modal,body.home-light .chart-modal,body.home-light #chartWindows,body.home-light #toastBox{
+    --bg:#12100f; --panel:#1c1815; --panel-2:#241f1a; --line:#3a322b; --text:#f1ece6; --muted:#a89c8f; --up:#e6675f; --down:#5fae6f; --accent:#c9a98c; color:var(--text);}
+  body.home-light .hr-title:not(.yel):not(.bear){background:#ece6df;color:#2b2420;}
+  body.home-light .hr-row .hr-code,body.home-light .hr-lrow .hr-code,body.home-light .hr-bear-pill.hr-wht .hr-code,body.home-light .hr-bear-pill.hr-wht .hr-name{color:#111;text-shadow:none;}
+  body.home-light .hr-row .hr-c3all .hr-code,body.home-light .hr-row .hr-c3all .hr-name{color:#fff;}
+  body.home-light .hr-row .hr-name{color:#1a1c1f;}
+  body.home-light .hr-row > .hr-rk.hr-gr{color:#111;border-right-color:rgba(0,0,0,.25);}
+  body.home-light .hr-lg-src .s4,body.home-light .hr-b905r.hr-b905ok .hr-ready{color:#b45309;}
+  body.home-light .hr-lg-src .s1{color:#9333ea;} body.home-light .hr-lg-src .s2,body.home-light .hr-b905r .hr-ready{color:#7c3aed;}
+  #themeToggle.on{background:#f59e0b;border-color:#f59e0b;color:#fff;}
   .alert-toggle.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
   /* 2026-10-15 使用者：個股震盪這塊縮小，不用那麼大 */
   .market-strength-bar{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;flex-wrap:wrap;flex:1 1 320px;max-width:560px;}
@@ -4168,6 +4181,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="alert-toggle guide-btn" id="dojoBtn">🕯️ K棒道場</button>  <!-- 2026-10-30 使用者：K 棒型態道場放首頁這排，今日提醒右邊、新手教學左邊（研究室的「🕯️ K棒道場」分頁也還在） -->
       <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>
       <button class="alert-toggle guide-btn" id="tutBtn">🎬 影片教學</button>  <!-- 2026-10-13 使用者：訊號教學、工具列各功能的影音教學（女聲旁白＋字幕） -->  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照老師新手教學頁） -->
+      <button class="alert-toggle" id="themeToggle" title="首頁換白底／黑底（記在這台瀏覽器）">☀️ 白底</button>  <!-- 2026-11-14 使用者：首頁試白底 -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
   </div>
@@ -18132,7 +18146,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 00:30:00';
+const BUILD_STAMP = '2026-11-14 01:08:46';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19414,6 +19428,22 @@ function syncAlertToggle(){
   btn.setAttribute('aria-pressed', String(alertsEnabled));
 }
 syncAlertToggle();
+// 2026-11-14 使用者：首頁白底／黑底切換（預設白底；按了記在這台瀏覽器）
+(function(){
+  const btn = document.getElementById('themeToggle');
+  const apply = (on) => {
+    document.body.classList.toggle('home-light', on);
+    if (btn){ btn.classList.toggle('on', on); btn.textContent = on ? '🌙 黑底' : '☀️ 白底'; }
+  };
+  let on = true;   // 2026-11-14 使用者看過預覽：首頁改成白底（預設）；按「🌙 黑底」切回黑底的記在這台瀏覽器
+  try { on = localStorage.getItem('homeLight') !== '0'; } catch (_){}
+  apply(on);
+  if (btn) btn.addEventListener('click', () => {
+    on = !document.body.classList.contains('home-light');
+    apply(on);
+    try { localStorage.setItem('homeLight', on ? '1' : '0'); } catch (_){}
+  });
+})();
 document.getElementById('alertToggle').addEventListener('click', () => {
   alertsEnabled = !alertsEnabled;
   try { localStorage.setItem('alertsEnabled', alertsEnabled ? '1' : '0'); } catch (e) { /* 記不住就算了 */ }
