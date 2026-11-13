@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-13 22:21:33";
+const BUILD_STAMP = "2026-11-13 22:25:06";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1323,6 +1323,25 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   body.sigtabs-window-mode #sgtInner > .chips-head{cursor:default;border-radius:0;}
   body.sigtabs-window-mode #sgtMin{display:none;}
   #botModal.bot-front:not(.behind-group):not(.behind-chart){z-index:103;}
+  /* 2026-11-13 使用者：機器人代碼整個視窗改白底（標題列照舊）——跟盤中訊號分頁一樣用一組淺色變數，格子裡的字、列、標籤跟著換色；
+     原本寫死給黑底用的淺色字（黃色族群名、淡紫時間、淡綠分隔線、橘色提醒…）改成白底看得清楚的深一點的顏色 */
+  #botInner{--bg:#f3f4f6; --panel:#ffffff; --panel-2:#f1f3f5; --line:#d6dae0; --text:#1a1c1f; --muted:#5b6068; --accent:#8a6d3f; --up:#c0392b; --down:#15803d;
+    color:var(--text);background:#eceef1;}
+  #botBody .bot-msg{background:#fff;border-color:#d6dae0;}
+  #botBody .bot-grp{color:#a16207;}
+  #botBody .bot-help-code{color:#6d28d9;}
+  #botBody .bot-line.bot-warn{color:#c2410c;}
+  #botBody .bot-line.bot-sep.bot-sep-bear,#botBody .b32-sep.bear{color:#15803d;}
+  #botBody .bot-gavg.up b{color:#dc2626;} #botBody .bot-gavg.down b{color:#15803d;} #botBody .bot-gavg.hot b{color:#fff;}
+  #botBody .b32-time{color:#7c3aed;} #botBody span[style*="#a78bfa"]{color:#7c3aed!important;}   /* 44 等代碼前面那個淡紫時間（寫在行內樣式） */
+  #botBody .b32-lv{color:#b45309;} #botBody .b32-lv.s1,#botBody .b32-cnt.s1{color:#1d4ed8;} #botBody .b32-lv.s2,#botBody .b32-cnt.s2{color:#15803d;}
+  #botBody .b32-row.gone .b32-stk{color:#dc2626;}
+  #botBody .b777-p{color:#374151;border-color:#cbd5e1;} #botBody .b777-p.on{color:#fff;border-color:#7c3aed;}
+  #botBody .rm-code{color:#6d28d9;} #botBody .rm-red{color:#dc2626;}
+  #botBody .bot-gpill.down{background:#16a34a;} #botBody .bot-gpill.down,#botBody .bot-gpill.down span,#botBody .bot-gpill.down b{color:#fff!important;}
+  #botInner .bot-cols-grip::before{background:#a3a7ae;}
+  #botInner .bot-cols-grip::after{background:#d4d7dc;color:#33333a;}
+  #botInner .bot-cols-grip:hover::after,#botInner .bot-cols-grip:active::after{background:#7c3aed;color:#fff;}
   #botInner{position:absolute;pointer-events:auto;min-width:280px;min-height:240px;max-width:100vw;max-height:100vh;padding-top:0;}
   #botInner > .chips-head{position:sticky;top:0;z-index:3;margin:0 -14px 10px;border-radius:13px 13px 0 0;cursor:move;touch-action:none;-webkit-user-select:none;user-select:none;}
   .bot-win-acts{display:flex;gap:4px;flex-shrink:0;align-items:center;}
@@ -17994,7 +18013,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-13 22:21:33';
+const BUILD_STAMP = '2026-11-13 22:25:06';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
