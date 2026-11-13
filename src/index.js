@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-13 22:50:03";
+const BUILD_STAMP = "2026-11-13 23:22:06";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -293,7 +293,9 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .b193-t{display:inline-block;min-width:38px;margin-right:4px;font-size:11.5px;font-weight:800;color:#7c3aed;font-variant-numeric:tabular-nums;} .b193-t.none{color:var(--muted);font-weight:600;}
   .b193-back{display:inline-block;background:#2563eb;color:#fff;border-radius:5px;padding:0 5px;font-size:10.5px;font-weight:800;vertical-align:1px;}   /* 2026-11-13 193 每行最前面的訊號時間、回榜標籤 */
   .b777-sigrow{gap:4px 6px;} .b777-sig{display:inline-block;font-size:11px;font-weight:800;border-radius:5px;padding:0 5px;color:#fff;white-space:nowrap;}
-  .b777-sig.s32{background:#7c3aed;} .b777-sig.s12{background:#2563eb;}   /* 2026-11-13 777 每檔標是哪種訊號：紫＝刀劍空、藍＝12空 */
+  .b777-sig.s32{background:#7c3aed;} .b777-sig.s12{background:#2563eb;}
+  .b777-flag{display:inline-block;font-size:11px;font-weight:800;border-radius:5px;padding:0 5px;color:#fff;white-space:nowrap;}
+  .b777-flag.fut{background:#be185d;} .b777-flag.mini{background:#c026d3;} .b777-flag.stop{background:#c2410c;} .b777-flag.stop2{background:#9a3412;} .b777-flag.disp{background:#4b5563;}   /* 2026-11-13 777 股期／小期／禁空／停券／處置 */   /* 2026-11-13 777 每檔標是哪種訊號：紫＝刀劍空、藍＝12空 */
   .b777-params{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 2px 6px;} .b777-plabel{font-size:11.5px;color:var(--muted);margin-right:2px;}
   .b777-p{font:inherit;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:12px;border:1px solid rgba(148,163,184,.45);background:transparent;color:#cbd5e1;cursor:pointer;white-space:nowrap;}
   .b777-p.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}   /* 2026-11-13 使用者：機器人 777 上面的五個勾選 */
@@ -18023,7 +18025,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-13 22:50:03';
+const BUILD_STAMP = '2026-11-13 23:22:06';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25321,6 +25323,22 @@ function bot777Pass(row){
   if (p.max7 && !(Number.isFinite(row.pct) && row.pct > -7)) return false;
   return true;
 }
+// 2026-11-13 使用者：777 每檔標「股期／小期」（有股票期貨、小型股票期貨），不能放空的標起來：停券＋不可現股當沖＝禁空（融券、現沖都空不了）、只停券＝停券、
+// 只不可當沖＝不可當沖；處置股標處置。資料同刀劍空第二行的交易條件（永豐個股資訊）；某一項抓不到就不標那項
+function bot777FlagTags(code){
+  const f = stockFlags && stockFlags[code];
+  if (!f) return '';
+  const out = [];
+  if (f.hasMiniStockFutures) out.push('<span class="b777-flag mini" title="有小型股票期貨">📈小期</span>');
+  if (f.hasStockFutures) out.push('<span class="b777-flag fut" title="有股票期貨">📈股期</span>');
+  if (f.shortable === false && f.dayTradeEligible === false) out.push('<span class="b777-flag stop" title="目前不可融券、也不可現股當沖：放空不了">⛔禁空</span>');
+  else {
+    if (f.shortable === false) out.push('<span class="b777-flag stop" title="目前不可融券（停券）">⛔停券</span>');
+    if (f.dayTradeEligible === false) out.push('<span class="b777-flag stop2" title="不可現股當沖">不可當沖</span>');
+  }
+  if (f.disposition) out.push('<span class="b777-flag disp" title="' + wlEsc('處置股' + (f.dispositionUntil ? '，處置至 ' + f.dispositionUntil : '')) + '">處置</span>');
+  return out.join('');
+}
 function bot777ParamsHtml(){
   const allOn = TD_PARAMS.every(([k]) => bot777Params[k]);
   const btn = (k, label, on) => '<button type="button" class="b777-p' + (on ? ' on' : '') + '" data-bot777-param="' + k + '">' + (on ? '☑' : '☐') + ' ' + label + '</button>';
@@ -26069,7 +26087,7 @@ function botAnswer(raw){
         '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + botPct(r.pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(big, true, true) + '</span>' +
-        '<span class="b32-lvrow b777-sigrow">' + (it.r32 ? sigTag(it.r32, false) : '') + (it.r12 ? sigTag(it.r12, true) + stage12(it.r12) : '') + '</span></div>';
+        '<span class="b32-lvrow b777-sigrow">' + (it.r32 ? sigTag(it.r32, false) : '') + (it.r12 ? sigTag(it.r12, true) + stage12(it.r12) : '') + bot777FlagTags(r.code) + '</span></div>';
     };
     const grpHead = (g) => {
       const gg = (lastData.groups || []).find((x) => x.name === g.name);
@@ -26081,7 +26099,7 @@ function botAnswer(raw){
       botLine('🔪刀劍空 ' + rows32.length + ' 檔・🔵12空 ' + rows12.length + ' 檔・合計 ' + items.size + ' 檔／' + groups.length + ' 族', 'bot-sep') +
       (items.size ? groups.map((g) => grpHead(g) + g.list.map(rowHtml).join('')).join('') : botLine('目前沒有', 'bot-dim')) +
       (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail() + (live.otcPct !== null && live.otcPct !== undefined ? '　櫃買 ' + wlEsc(otc) + ' ' + botPct(live.otcPct) : ''), 'bot-warn') : '') +
-      botLine('跟每日功課下面的族群卡同一份（段位照功課面板勾的；上面那排勾選是 777 自己的，不影響每日功課）・刀劍空、12空 混在一起不分段：族群照族裡最新發生的訊號排（剛進榜或回榜的那一族跳到最上面），族裡每檔也照它最新的訊號排・左邊時間＝這檔最新發生的訊號時間，下面標是哪一種訊號（第一次出現的時間、回＝掉出去又回榜）・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
+      botLine('跟每日功課下面的族群卡同一份（段位照功課面板勾的；上面那排勾選是 777 自己的，不影響每日功課）・刀劍空、12空 混在一起不分段：族群照族裡最新發生的訊號排（剛進榜或回榜的那一族跳到最上面），族裡每檔也照它最新的訊號排・左邊時間＝這檔最新發生的訊號時間，下面標是哪一種訊號（第一次出現的時間、回＝掉出去又回榜）・📈股期／📈小期＝有股票期貨／小型股期・⛔禁空＝停券又不可現股當沖、⛔停券＝不可融券・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
     return wrap(t, body, tdMd(live.date) + ' ' + (live.slot || ''));
   }
   if (q === '193'){
