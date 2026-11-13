@@ -9607,9 +9607,14 @@ function kill193Model(){
     const horse = drop !== null && drop < 0 && groupRiseMarks(g).size > 0;
     // 族群名次後面的記號：往下掉的標 🔪⚔️、往上的標 🐎（老師 199 的寫法）
     const mark = drop !== null && drop > 0 ? swordMark : horse ? '🐎' : '';
-    return { name: g.name, rank: i + 1, prev, drop, avg: g.avgChange, members, sword, swordList, swordMark, horse, mark };
+    return { name: g.name, rank: i + 1, prev, drop, avg: g.avgChange, members, frac, sword, swordList, swordMark, horse, mark };
   });
-  const falling = rows.filter((r) => KILL193_ONLY_GROUPS.has(r.name) && r.drop !== null && r.drop >= KILL193_MIN_DROP && (r.drop >= KILL193_BIG_DROP || (r.swordList && r.avg < 0)));   // 名次只掉 1～4 名的要族群今天平均是跌的（10/29 13:31 PA 排第 2 🔽1 老師沒列）
+  // 名次只掉 1～4 名的要族群今天平均是跌的（10/29 13:31 PA 排第 2 🔽1 老師沒列）——只限空方線以上；
+  // 2026-11-13 老師 21:30 的 193 列了記憶體-(45)🔽1⚔️all（空方線以下、今天平均還漲 1.16%）：空方線以下、平均還在漲的，族裡八成以上收在開盤價以下（⚔️0.8）就列
+  // （同一份沒列台塑四寶：我們算 37 名🔽1⚔️0.6，他算 36 名、名次沒掉）
+  const KILL193_UP_LOWER_FRAC = 0.8;
+  const falling = rows.filter((r) => KILL193_ONLY_GROUPS.has(r.name) && r.drop !== null && r.drop >= KILL193_MIN_DROP
+    && (r.drop >= KILL193_BIG_DROP || (r.swordList && (r.avg < 0 || (r.rank > half && r.frac >= KILL193_UP_LOWER_FRAC)))));
   return {
     upper: falling.filter((r) => r.rank <= half),
     // 2026-10-19 使用者：空方線以下那段跌幅大的排上面（-2.64 在 -2.45 上面），跌幅小的往下；機器人 193、訊號中心 193、複製文字都是這個順序
