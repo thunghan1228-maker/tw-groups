@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-13 23:27:54";
+const BUILD_STAMP = "2026-11-14 00:21:10";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -295,6 +295,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .b777-sigrow{gap:4px 6px;} .b777-sig{display:inline-block;font-size:11px;font-weight:800;border-radius:5px;padding:0 5px;color:#fff;white-space:nowrap;}
   .b777-sig.s32{background:#7c3aed;} .b777-sig.s12{background:#2563eb;}
   .b777-flag{display:inline-block;font-size:11px;font-weight:800;border-radius:5px;padding:0 5px;color:#fff;white-space:nowrap;}
+  .b777-flag.f23{background:#fef3c7;color:#92400e;font-weight:700;}   /* 2026-11-13 火多多每檔下面：昨天、前天漲跌 */
   .b777-flag.fut{background:#be185d;} .b777-flag.mini{background:#c026d3;} .b777-flag.stop{background:#c2410c;} .b777-flag.stop2{background:#9a3412;} .b777-flag.disp{background:#4b5563;}   /* 2026-11-13 777 股期／小期／禁空／停券／處置 */   /* 2026-11-13 777 每檔標是哪種訊號：紫＝刀劍空、藍＝12空 */
   .b777-params{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 2px 6px;} .b777-plabel{font-size:11.5px;color:var(--muted);margin-right:2px;}
   .b777-p{font:inherit;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:12px;border:1px solid rgba(148,163,184,.45);background:transparent;color:#cbd5e1;cursor:pointer;white-space:nowrap;}
@@ -9340,6 +9341,109 @@ function bladeRecordSeen(){
     } catch (_){}
   }
 }
+// ---- 火多多(23)（2026-11-13 使用者：跟新刀劍空(32) 剛好顛倒的多方版）----
+// 族群：跟 32 一樣那 27 族（199 的 23 族＋軍工、石英、聯電股＋AI眼鏡；太陽能、設備股不看），名次一樣用 66 族排。
+// 每族取「多方段」（族裡最強的一段：8 檔以下前一半、9～12 檔前 1/3、13 檔以上前 5 檔），處置股不列、量 10 張以上。
+// 🐎 馬＝昨天跌 3% 以上、今天拉上來；🚀 火箭＝前天跌 3% 以上（對應 32 的 🔪 刀、⚔️ 劍）；兩個都有只標 🐎。
+// 只有 🐎 沒有 🚀 的：要在「空方打多」那段，或今天漲跌幅不低於櫃買；族裡最強第 4、5 檔：昨天或前天要跌過 5% 以上（標 🌱）；
+// 族群明細要有記號：🐎／🚀 要在族裡最強 3 檔、而且昨天／前天在族裡後一半（原本弱、今天轉強）。今天跌的也會列。
+// 分段（顛倒 32）：追高區（今天已漲 5% 以上、或漲 9.5% 以上／漲停，不追）；強多積極＝族群前 20 名（使用者 11/13 定：只取前 20，不是純顛倒的 1～41）；
+// 中間＝倒數第 11～25 名；空方打多＝倒數第 6～10 名；倒數 5 名不列（追高區例外）。
+const FIRE23_PRIOR_DROP = 3, FIRE23_BEGINNER_DROP = 5, FIRE23_CHASE_PCT = 5, FIRE23_MAX_PCT = 9.5, FIRE23_TOP = 20;
+function fire23Marks(g){
+  const out = new Map();
+  const rolled = bladeRolled();
+  const sd = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
+  const priced = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent));
+  const today = priced.slice().sort((a, b) => b.changePercent - a.changePercent);
+  const n = today.length;
+  const rankBy = (idx) => {
+    const w = priced.filter((s) => sd[s.code] && Number.isFinite((sd[s.code].pct || [])[idx]));
+    const srt = w.slice().sort((a, b) => sd[b.code].pct[idx] - sd[a.code].pct[idx]);
+    return { n: w.length, m: new Map(srt.map((s, i) => [s.code, i + 1])) };
+  };
+  const y = rankBy(0), y2 = rankBy(1);
+  today.forEach((s, i) => {
+    const pos = i + 1;   // 1＝族裡最強
+    if (pos > bladeZoneSize(n)) return;
+    if (bladeDisp(s.code)) return;
+    const p = (sd[s.code] && sd[s.code].pct) || [];
+    const ry = y.m.get(s.code), r2 = y2.m.get(s.code);
+    const horse0 = pos <= 3 && p[0] <= -FIRE23_PRIOR_DROP && ry && ry > y.n / 2 ? ry - pos : 0;
+    const rocket0 = pos <= 3 && p[1] <= -FIRE23_PRIOR_DROP && r2 && r2 > y2.n / 2 ? r2 - pos : 0;
+    const horse = rolled ? 0 : horse0, rocket = rolled ? horse0 : rocket0;
+    let mk = horse > 0 ? '🐎' : rocket > 0 ? '🚀' : '';
+    if (!mk && Math.min(Number.isFinite(p[0]) ? p[0] : Infinity, rolled || !Number.isFinite(p[1]) ? Infinity : p[1]) <= -FIRE23_BEGINNER_DROP) mk = '🌱';
+    if (mk) out.set(s.code, { mk, horse, rocket, pos, ry, r2, y: p[0], y2: p[1] });
+  });
+  return out;
+}
+function fire23Model(){
+  if (!lastData || lastData.mock || !Array.isArray(lastData.groups) || !lastData.groups.length) return null;
+  const groups = rankedGroupsOf(lastData.groups);
+  const total = groups.length;
+  const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
+  const sdAll = groupDailyChanges && groupDailyChanges.stocks ? groupDailyChanges.stocks : {};
+  const hasDaily = Object.keys(sdAll).length > 0;
+  const otcPct = otcStrengthLatest && Number.isFinite(otcStrengthLatest.changePct) ? otcStrengthLatest.changePct : null;
+  const aboveOtc = (r) => otcPct === null || r.pct >= otcPct;
+  const upTo = Math.max(1, Math.round(total * 10 / 67)), shortFrom = Math.max(1, Math.round(total * 26 / 67)), skip = Math.max(1, Math.round(total * 5 / 67));
+  const cand = new Map();
+  ranked.forEach((g, gi) => {
+    if (!BLADE_GROUPS.has(g.name) || BLADE32_SKIP.has(g.name)) return;
+    const priced = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent)).slice().sort((a, b) => b.changePercent - a.changePercent);
+    const zone = bladeZoneSize(priced.length);
+    const gm = fire23Marks(g);
+    priced.slice(0, zone).forEach((s, j) => {
+      if (bladeDisp(s.code) || cand.has(s.code)) return;
+      const p = (sdAll[s.code] && sdAll[s.code].pct) || [];
+      const yv = Number.isFinite(p[0]) ? p[0] : null, y2v = Number.isFinite(p[1]) ? p[1] : null;
+      cand.set(s.code, { code: s.code, name: s.name, pct: s.changePercent, price: s.price, volume: Number.isFinite(s.volume) ? s.volume : null,
+        limitUp: !!s.limitUp, groupName: g.name, groupRank: gi + 1, ir: total - gi, pos: j + 1, yesterday: yv, dayBefore: y2v, gm: gm.get(s.code) || null });
+    });
+  });
+  const chase = (r) => r.pct >= FIRE23_CHASE_PCT || r.pct >= FIRE23_MAX_PCT || r.limitUp;
+  const inSpaceTop = (r) => r.ir <= upTo;   // 空方打多（倒數第 6～10 名）
+  const horseOk = (r) => r.yesterday !== null && r.yesterday <= -FIRE23_PRIOR_DROP;
+  const rocketOk = (r) => r.dayBefore !== null && r.dayBefore <= -FIRE23_PRIOR_DROP;
+  const base = Array.from(cand.values()).filter((r) => (r.ir > skip || chase(r)) && (!hasDaily || r.gm)
+    && (!hasDaily || ((horseOk(r) || rocketOk(r)) && (rocketOk(r) || inSpaceTop(r) || aboveOtc(r))
+      && (r.pos <= 3 || Math.min(r.yesterday ?? 0, r.dayBefore ?? 0) <= -FIRE23_BEGINNER_DROP)))
+    && (r.volume === null || r.volume >= BLADE_MIN_VOLUME));
+  base.forEach((r) => { const x = r.gm; r.mark = chase(r) ? '🔥' : r.pos <= 3 && x && (x.horse || x.rocket) ? (x.horse ? '🐎' : '🚀') : '🌱'; });
+  const chaseL = base.filter(chase), live = base.filter((r) => !chase(r));
+  return { total, otcPct, hasDaily,
+    strong: live.filter((r) => r.groupRank <= FIRE23_TOP && r.ir >= shortFrom),    // 強多積極（族群前 20 名）
+    middle: live.filter((r) => r.ir > upTo && r.ir < shortFrom),                    // 中間（倒數第 11～25）
+    spaceTop: live.filter(inSpaceTop),                                              // 空方打多（倒數第 6～10）
+    chase: chaseL };
+}
+// 火多多(23) 每檔第一次進名單的時間：跟刀劍空一樣是這台電腦用首頁報價即時算的，時間記在這台瀏覽器、一天一份（首頁報價每 15 秒回來就記一次）
+function fire23SeenKey(){ return 'fire23Seen:' + twTodayStr(); }
+let fire23SeenCache = null;
+function fire23SeenMap(){
+  if (!fire23SeenCache || fire23SeenCache.key !== fire23SeenKey()){
+    let map = {};
+    try { map = JSON.parse(localStorage.getItem(fire23SeenKey()) || '{}') || {}; } catch (_){ map = {}; }
+    fire23SeenCache = { key: fire23SeenKey(), map };
+  }
+  return fire23SeenCache.map;
+}
+function fire23RecordSeen(){
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;
+  const m = fire23Model();
+  if (!m) return;
+  const map = fire23SeenMap();
+  let changed = false;
+  const now = Date.now();
+  [].concat(m.strong, m.middle, m.spaceTop, m.chase).forEach((r) => { if (!map[r.code]){ map[r.code] = now; changed = true; } });
+  if (changed){
+    try {
+      localStorage.setItem(fire23SeenKey(), JSON.stringify(map));
+      Object.keys(localStorage).filter((k) => k.startsWith('fire23Seen:') && k !== fire23SeenKey()).forEach((k) => localStorage.removeItem(k));
+    } catch (_){}
+  }
+}
 // 2026-10-22 使用者：三落空（機器人代碼）每檔前面加發生時間（第一次進三落空的時間），時間近的排上面、早的在下面；
 // 跟刀劍空一樣是這台電腦用首頁報價即時算的，時間記在這台瀏覽器、一天一份（盤前撮合 08:30 起也記）
 function weakSeenKey(){ return 'weakSeen:' + twTodayStr(); }
@@ -18026,7 +18130,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-13 23:27:54';
+const BUILD_STAMP = '2026-11-14 00:21:10';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19070,6 +19174,7 @@ async function refresh(){
     try { checkLaunchNotifications(); } catch (e) { /* 通知失敗不影響畫面 */ }
     try { obsTick(); } catch (e) { /* 盤中形態觀察股跳窗失敗不影響畫面 */ }
     try { bladeRecordSeen(); } catch (e) { /* 刀劍空出現時間記不起來不影響畫面 */ }
+    try { fire23RecordSeen(); } catch (e) { /* 火多多出現時間記不起來不影響畫面 */ }
     try { weakRecordSeen(); } catch (e) { /* 三落空出現時間記不起來不影響畫面 */ }
     tdAlertTick();   // 刀劍空(32) 新訊號跳出卡片（自己 try/catch）
     try { td905Tick(); } catch (e) { /* 905 突破記不起來不影響畫面 */ }
@@ -25302,7 +25407,7 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 // 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
 const botState = { cols: [], restored: false, restoring: false, pendTops: null, world: null, worldAt: 0, worldLoading: false, cache: {} };   // cols＝開著的格子 [{cmd, key, html}]，照點的順序
 const BOT_CODES = [
-  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行，每族列漲幅前三大的股票（13＝3%，以此類推；1＝1%；14 改成疑似主力融資買進）'], ['14', '💰疑似主力融資買進：融資增加 ≥500 張＋大單淨買 ≥300 張（跟首頁那欄同一份），每檔接大戶力'], ['123', '1️⃣2️⃣空：固定的族群裡，今天衝高 2.75% 以上、現價漲幅不超過 4%，而且三個條件到齊的股票：①1高＝破惡前的最高（不是開盤衝的那根）②5 分K 從 20MA 上面收盤跌破（破惡），現在還在 20MA 下面、20MA 往下彎（均下彎）③破惡之後的反彈（2）沒過 1高，過了 1高就拿掉、要再跌破才重新算；每列最前面是進名單的時間，新的在上面。每一檔分兩個階段：藍色「① 剛轉弱」＝剛跌破 20MA、20MA 下彎、還沒反彈（右邊寫 1高＝停損價）；綠色「② 不過前高可空」＝破了以後反彈出現「2」、沒過 1高（前高）→ 可以空，停損放 1高（還有一條篩選我們沒找到，所以會列得比實際多）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
+  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行，每族列漲幅前三大的股票（13＝3%，以此類推；1＝1%；14 改成疑似主力融資買進）'], ['14', '💰疑似主力融資買進：融資增加 ≥500 張＋大單淨買 ≥300 張（跟首頁那欄同一份），每檔接大戶力'], ['123', '1️⃣2️⃣空：固定的族群裡，今天衝高 2.75% 以上、現價漲幅不超過 4%，而且三個條件到齊的股票：①1高＝破惡前的最高（不是開盤衝的那根）②5 分K 從 20MA 上面收盤跌破（破惡），現在還在 20MA 下面、20MA 往下彎（均下彎）③破惡之後的反彈（2）沒過 1高，過了 1高就拿掉、要再跌破才重新算；每列最前面是進名單的時間，新的在上面。每一檔分兩個階段：藍色「① 剛轉弱」＝剛跌破 20MA、20MA 下彎、還沒反彈（右邊寫 1高＝停損價）；綠色「② 不過前高可空」＝破了以後反彈出現「2」、沒過 1高（前高）→ 可以空，停損放 1高（還有一條篩選我們沒找到，所以會列得比實際多）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部；23 改成火多多）'], ['23', '🔥火多多：跟新刀劍空(32) 顛倒的多方版——同樣 27 族、每族最強的一段，🐎 昨天大跌今天拉上來／🚀 前天大跌；分強多積極（族群前 20）、中間、空方打多、追高區'],, ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['183', '多族群排名：固定族群，往下掉的標 🔪⚔️，多方線以上列漲 5% 以上的 ⚠️ 個股'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
   ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'], ['三落空', '熄火落馬斷流：熄火空(30 顛倒)、落馬空(33 顛倒)、斷流空(34 顛倒) 三份都有、而且可放空（有券、非處置股）的弱勢股'],
   ['44', '今天 1+2 多（突破黑馬）'], ['88', '開低站上 VWAP：今天開盤低於昨收、09:05 後 1 分K收盤高於 VWAP 1% 以上（偏多），跟訊號中心「開低VWAP上(88)」同一份'], ['87', '開高跌破 VWAP：今天開盤高於昨收、09:05 後 1 分K收盤低於 VWAP 1% 以上（偏空），跟訊號中心「開高VWAP下(87)」同一份'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
@@ -25973,6 +26078,35 @@ function botAnswer(raw){
     }).join('') || botLine('目前沒有族群跌超過 ' + th + '%', 'bot-dim'));
   }
   // 2N[-K]：個股💎漲幅排行
+  // 2026-11-13 使用者：23＝火多多（跟新刀劍空(32) 顛倒的多方版；原本 23＝個股漲 3% 以上，改掉）。排法照 32：分段、每段照時間排（最近的在上面）
+  if (q === '23'){
+    const t = '🔥火多多(23)';
+    const fm = fire23Model();
+    if (!fm) return wrap(t, botLine('讀取中…', 'bot-dim'));
+    try { fire23RecordSeen(); } catch (_){}
+    const seen = fire23SeenMap();
+    const hm = (code) => (seen[code] ? new Date(seen[code] + 8 * 3600e3).toISOString().slice(11, 16) : '--:--');
+    const byTime = (l) => l.slice().sort((a, b) => (seen[b.code] || 0) - (seen[a.code] || 0) || b.pct - a.pct);
+    const zoneMk = (r) => (r.groupRank <= Math.round(fm.total * 10 / 67) ? '🔺' : r.ir <= Math.round(fm.total * 10 / 67) ? '🔻' : '🔽');
+    const row = (r) => '<div class="b32-row bh k12" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
+      '<span class="b32-time">' + hm(r.code) + '</span>' +
+      '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + r.mark + '</span>' +
+      '<span class="b32-grp">' + wlEsc(r.groupName) + '・' + r.groupRank + zoneMk(r) + '</span>' +
+      '<span class="b32-pct ' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' +
+      '<span class="b32-h">' + holderTagHtml(holderPctOf(r.code), true, true) + '</span>' +
+      '<span class="b32-lvrow b777-sigrow"><span class="b777-flag f23">' + (r.yesterday !== null ? '昨 ' + botPct(r.yesterday) : '') + (r.dayBefore !== null ? '・前天 ' + botPct(r.dayBefore) : '') + '</span>' + bot777FlagTags(r.code) + '</span></div>';
+    const sec = (title, l, cls) => botLine(title + '　' + l.length + ' 檔', 'bot-sep' + (cls ? ' ' + cls : '')) + (l.length ? byTime(l).map(row).join('') : botLine('目前沒有', 'bot-dim'));
+    const n = fm.strong.length + fm.middle.length + fm.spaceTop.length + fm.chase.length;
+    const otcT = kill193OtcTail();
+    return wrap(t, botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') +
+      sec('----↓(強多積極・族群前 ' + FIRE23_TOP + ' 名)↓----', fm.strong, 'f23-strong') +
+      sec('----↓(中間・族群倒數第 11～25 名)↓----', fm.middle) +
+      sec('----↓(空方打多・族群倒數第 6～10 名)↓----', fm.spaceTop) +
+      sec('----↓(追高區・今天已漲 ' + FIRE23_CHASE_PCT + '% 以上／漲停，不追)↓----', fm.chase) +
+      (otcT ? botLine('------↓(櫃買)↓------', 'bot-sep') + botLine(otcT + (fm.otcPct !== null ? '　櫃買 ' + botPct(fm.otcPct) : ''), 'bot-warn') : '') +
+      botLine('跟新刀劍空(32) 剛好顛倒的多方版：同樣那 27 族、每族最強的一段；🐎＝昨天跌 ' + FIRE23_PRIOR_DROP + '% 以上今天拉上來、🚀＝前天跌 ' + FIRE23_PRIOR_DROP + '% 以上（要在族裡最強 3 檔、昨天／前天在族裡後一半）、🌱＝最強第 4、5 檔前兩天跌過 ' + FIRE23_BEGINNER_DROP + '% 以上、🔥＝追高區；只有 🐎 的要在空方打多或比櫃買強；族群倒數 5 名不列・左邊時間＝這台電腦第一次看到它進名單的時間（頁面開著才記得到），每段內最近的在上面', 'bot-dim'),
+      (fm.hasDaily ? '' : '日K還沒載入，🐎🚀 條件先不看・') + '今天 ' + n + ' 檔');
+  }
   mm = /^2([1-9])?(?:-(\\d{1,3}))?$/.exec(q);
   if (mm){
     const th = mm[1] ? Number(mm[1]) : 0, skip = mm[2] ? Number(mm[2]) : 0;
