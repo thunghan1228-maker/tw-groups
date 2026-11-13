@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-13 22:11:37";
+const BUILD_STAMP = "2026-11-13 22:15:44";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -17991,7 +17991,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-13 22:11:37';
+const BUILD_STAMP = '2026-11-13 22:15:44';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25939,16 +25939,20 @@ function botAnswer(raw){
     if (!live || !seq) return wrap(t, botLine('讀取中…', 'bot-dim'));
     const firstAt = tdFirstAt(seq);
     const hmOf = (r, k12) => { const v = firstAt.get((k12 ? 'k12:' : '') + r.code); return /^\\d\\d:\\d\\d$/.test(v || '') ? v : ''; };
-    const upTo = Math.max(1, Math.round((live.total || 67) * 10 / 67));
+    // 2026-11-13 使用者：族群照「最新發生的訊號」排——族裡有股票剛進榜或掉出去又回榜（回 HH:MM），那一族就跳到最上面；不分楚河漢界上下
+    let ev32 = new Map(), ev12 = new Map();
+    try { ev32 = new Map(tdBroadcast(seq, 'blade').map((x) => [x.code, x])); ev12 = new Map(tdBroadcast(seq, 'k12').map((x) => [x.code, x])); } catch (_){}
+    const backOf = (r, k12) => { const x = (k12 ? ev12 : ev32).get(r.code); return x && x.inNow && /^\\d\\d:\\d\\d$/.test(x.back || '') ? x.back : ''; };
+    const evOf = (r, k12) => { const f = hmOf(r, k12), bk = backOf(r, k12); return bk > f ? bk : f; };
     const pass = (r) => tdPass(r) && tdCardHoldPass(r);
     const rows32 = TD_ZONES.filter((z) => tdState.zones[z.key]).flatMap((z) => live.rows.filter((r) => r.zone === z.key)).filter(pass);
     const rows12 = live.k12.filter(pass);
     const groupsOf = (rows, k12) => {
       const by = new Map();
       rows.forEach((r) => { const g = r.g || '—'; if (!by.has(g)) by.set(g, []); by.get(g).push(r); });
-      const timeOf = (l) => l.reduce((mx, r) => { const v = hmOf(r, k12); return v > mx ? v : mx; }, '');
+      const timeOf = (l) => l.reduce((mx, r) => { const v = evOf(r, k12); return v > mx ? v : mx; }, '');
       return Array.from(by.entries()).map(([name, l]) => ({ name, gr: l[0].gr || 99, time: timeOf(l),
-        list: l.slice().sort((a, b) => (hmOf(b, k12) > hmOf(a, k12) ? 1 : hmOf(b, k12) < hmOf(a, k12) ? -1 : (a.pct ?? 0) - (b.pct ?? 0))) }))
+        list: l.slice().sort((a, b) => (evOf(b, k12) > evOf(a, k12) ? 1 : evOf(b, k12) < evOf(a, k12) ? -1 : (a.pct ?? 0) - (b.pct ?? 0))) }))
         .sort((a, b) => (b.time > a.time ? 1 : b.time < a.time ? -1 : a.gr - b.gr));
     };
     const zoneMk = (r) => (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, live.total));
@@ -25962,7 +25966,7 @@ function botAnswer(raw){
         '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + (/[🔪⚔️🔰]/u.test(r.mk || '') ? r.mk : '') + '</span>' +
         '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + botPct(r.pct) + '</span>' +
-        '<span class="b32-h">' + holderTagHtml(big, true, true) + '</span>' + (k12 ? stage12(r) : '') + '</div>';
+        '<span class="b32-h">' + holderTagHtml(big, true, true) + '</span>' + (backOf(r, k12) ? '<span class="b32-tag back">回 ' + backOf(r, k12) + '</span>' : '') + (k12 ? stage12(r) : '') + '</div>';
     };
     const grpHead = (g, k12) => {
       const gg = (lastData.groups || []).find((x) => x.name === g.name);
@@ -25971,15 +25975,14 @@ function botAnswer(raw){
     };
     const block = (gs, k12) => gs.map((g) => grpHead(g, k12) + g.list.map((r) => rowHtml(r, k12)).join('')).join('');
     const g32 = groupsOf(rows32, false);
-    const up32 = g32.filter((g) => g.gr <= upTo), low32 = g32.filter((g) => g.gr > upTo);
     const otc = live.otcLabel || '';
     const body = botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') +
       botLine('🔪⚔️ 刀劍空(32)　' + rows32.length + ' 檔／' + g32.length + ' 族', 'bot-sep') +
-      (rows32.length ? block(up32, false) + botLine('------楚河漢界・以下為中間、強空區------', 'bot-sep bot-sep-bear') + block(low32, false) : botLine('目前沒有', 'bot-dim')) +
+      (rows32.length ? block(g32, false) : botLine('目前沒有', 'bot-dim')) +
       botLine('🔵 12空(123)　' + rows12.length + ' 檔／' + groupsOf(rows12, true).length + ' 族', 'bot-sep') +
       (rows12.length ? block(groupsOf(rows12, true), true) : botLine('目前沒有衝高後跌破 MA20 下彎的', 'bot-dim')) +
       (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail() + (live.otcPct !== null && live.otcPct !== undefined ? '　櫃買 ' + wlEsc(otc) + ' ' + botPct(live.otcPct) : ''), 'bot-warn') : '') +
-      botLine('跟每日功課下面的族群卡同一份（功課面板勾的段位、參數、大戶力按鈕照樣篩）・一族一段，族群照族裡最新那檔的訊號時間排、最近的在上面（刀劍空分楚河漢界上下兩邊）・族裡每檔左邊＝訊號第一次出現的時間，最近的在上面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
+      botLine('跟每日功課下面的族群卡同一份（功課面板勾的段位、參數、大戶力按鈕照樣篩）・一族一段，族群照族裡最新發生的訊號排（剛進榜或回榜的那一族跳到最上面，不分楚河漢界）・族裡每檔左邊＝訊號第一次出現的時間、回＝掉出去又回榜的時間，最近發生的在上面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
     return wrap(t, body, tdMd(live.date) + ' ' + (live.slot || ''));
   }
   if (q === '193'){
