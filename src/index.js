@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-13 21:51:38";
+const BUILD_STAMP = "2026-11-13 22:11:37";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -290,6 +290,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bot-col[data-col-key="199"],.bot-col[data-col-key="193"],.bot-col[data-col-key="32"],.bot-col[data-col-key="123"],.bot-col[data-col-key="177"],.bot-col[data-col-key="三落空"]{outline:3px solid #22c55e;outline-offset:-3px;}   /* 2026-10-22 使用者：三落空也加綠框 */
   .bot-col[data-col-key="199"]{min-width:196px;}   /* 2026-11-12 多了「均」大戶力，稍微放寬一點，才接得在漲跌幅後面 */
   .bot-col[data-col-key="三落空"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}
+  .bot-col[data-col-key="777"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：777 功課卡片條列，每檔一列要放時間、股名、族群、漲跌幅、大戶% */
   .bot-col[data-col-key="99"]{flex-basis:calc((100% - 72px) / 10 * 2.5);min-width:420px;}   /* 2026-11-12 使用者：99 外資投信同步買賣超，每檔要放外資、投信兩個金額＋漲跌幅＋大戶力，加寬才排得進一行 */
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
   .bot-col-x:hover{background:#e81123;border-color:#e81123;color:#fff;}
@@ -17990,7 +17991,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-13 21:51:38';
+const BUILD_STAMP = '2026-11-13 22:11:37';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25273,7 +25274,7 @@ const BOT_CODES = [
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖雙週入榜黑龍：前兩個交易日上 811、今天收黑K，只看族群表裡的股票（含「其他」那組）（⭐＝兩週內又上榜幾次）'],
   ['81', '隔日沖買超排序（每天六點後更新）'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
-  ['97', '外資買賣超前十大：賣超前十在上、買超前十在下（金額越大越靠上），每檔列買賣超金額（億元）、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：格式同 97'], ['99', '外資、投信同步買賣超前十大：同步賣超前十在上、同步買超前十在下（兩家合計金額越大越靠上），每檔列外資、投信各自的買賣超金額（億元）、漲跌幅、盤中大戶力'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
+  ['97', '外資買賣超前十大：賣超前十在上、買超前十在下（金額越大越靠上），每檔列買賣超金額（億元）、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：格式同 97'], ['99', '外資、投信同步買賣超前十大：同步賣超前十在上、同步買超前十在下（兩家合計金額越大越靠上），每檔列外資、投信各自的買賣超金額（億元）、漲跌幅、盤中大戶力'], ['777', '每日功課的族群卡（刀劍空(32)、12空(123)）條列：一族一段、族群和族裡每檔都照訊號時間排（最近的在上），每檔接大戶%'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
   ['2359', '股號或族群名：那族漲幅排行'], ['2359m', '那檔當天的隔日沖買賣超（2359m1＝前一天，最多 2359m9）'], ['235984', '那族的籌碼暴增排序（族群名＋84 也可以，例：低軌衛星84）'], ['2359g', '那檔過去五週籌碼增減%'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
 ];
 const botPct = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
@@ -25923,6 +25924,63 @@ function botAnswer(raw){
     const rows = h.rows.filter((r) => KILL193_GROUPS.has(r.name)).map((r) => ({ ...r, mk: mkOf.get(r.name) || '' }));
     const bear = rows.filter((r) => r.rank > h.half).sort((a, b) => a.avg - b.avg), rest = rows.filter((r) => r.rank <= h.half);   // 2026-10-19 使用者：空方那段跌幅大的排上面
     return wrap('空族群排名(199)', (bear.length ? botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + bear.map(rankLineH).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') : '') + rest.map(rankLineH).join(''));
+  }
+  if (q === '777'){
+    // 2026-11-13 使用者：每日功課下面那兩塊族群卡（刀劍空(32)、12空(123)）改成條列式——一族一段、不混在一起；
+    // 族群照「訊號出現時間」排（族裡最晚那檔的時間，最近的在上面；刀劍空那塊照卡片一樣分楚河漢界上下兩邊），族裡每檔也照時間、最近的在上面。
+    // 跟卡片同一份資料、同一套篩選（功課面板勾的段位、參數、大戶力按鈕），每檔接大戶%（卡片上那個）。
+    const t = '📋功課卡片條列(777)';
+    const m7 = race333Model();
+    if (!m7) return wrap(t, botLine('讀取中…', 'bot-dim'));
+    bladeTrackRefresh();
+    let live = null, seq = null;
+    botFetchCache('kill12', '/api/kill12', 15e3);   // 12空 名單（tdLiveSnap(…, 2) 只讀手上已經有的，要先抓）
+    try { live = tdLiveSnap(m7, 2); seq = tdTodaySeq(m7); } catch (_){ live = null; }
+    if (!live || !seq) return wrap(t, botLine('讀取中…', 'bot-dim'));
+    const firstAt = tdFirstAt(seq);
+    const hmOf = (r, k12) => { const v = firstAt.get((k12 ? 'k12:' : '') + r.code); return /^\\d\\d:\\d\\d$/.test(v || '') ? v : ''; };
+    const upTo = Math.max(1, Math.round((live.total || 67) * 10 / 67));
+    const pass = (r) => tdPass(r) && tdCardHoldPass(r);
+    const rows32 = TD_ZONES.filter((z) => tdState.zones[z.key]).flatMap((z) => live.rows.filter((r) => r.zone === z.key)).filter(pass);
+    const rows12 = live.k12.filter(pass);
+    const groupsOf = (rows, k12) => {
+      const by = new Map();
+      rows.forEach((r) => { const g = r.g || '—'; if (!by.has(g)) by.set(g, []); by.get(g).push(r); });
+      const timeOf = (l) => l.reduce((mx, r) => { const v = hmOf(r, k12); return v > mx ? v : mx; }, '');
+      return Array.from(by.entries()).map(([name, l]) => ({ name, gr: l[0].gr || 99, time: timeOf(l),
+        list: l.slice().sort((a, b) => (hmOf(b, k12) > hmOf(a, k12) ? 1 : hmOf(b, k12) < hmOf(a, k12) ? -1 : (a.pct ?? 0) - (b.pct ?? 0))) }))
+        .sort((a, b) => (b.time > a.time ? 1 : b.time < a.time ? -1 : a.gr - b.gr));
+    };
+    const zoneMk = (r) => (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, live.total));
+    const stage12 = (r) => (!Number.isFinite(r.h1) ? '' : Number.isFinite(r.h2)
+      ? '<span class="b32-lvrow"><span class="b32-lv s2">② 不過前高可空</span><span class="b32-lv">2 ' + tdK12Px(r.h2) + '</span><span class="b32-lv">1高 ' + tdK12Px(r.h1) + ' 停損</span></span>'
+      : '<span class="b32-lvrow"><span class="b32-lv s1">① 剛轉弱</span><span class="b32-lv">1高 ' + tdK12Px(r.h1) + ' 停損</span></span>');
+    const rowHtml = (r, k12) => {
+      const big = r.big !== null && r.big !== undefined ? r.big : holderPctOf(r.code);
+      return '<div class="b32-row bh' + (k12 ? ' k12' : '') + '" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
+        '<span class="b32-time">' + (hmOf(r, k12) || '--:--') + '</span>' +
+        '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + (/[🔪⚔️🔰]/u.test(r.mk || '') ? r.mk : '') + '</span>' +
+        '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + '</span>' +
+        '<span class="b32-pct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + botPct(r.pct) + '</span>' +
+        '<span class="b32-h">' + holderTagHtml(big, true, true) + '</span>' + (k12 ? stage12(r) : '') + '</div>';
+    };
+    const grpHead = (g, k12) => {
+      const gg = (lastData.groups || []).find((x) => x.name === g.name);
+      return botLine(botGrpPill(g.name, ' (' + (g.gr < 99 ? g.gr + bladeRankMark(g.gr, live.total) : '—') + ')', gg ? gg.avgChange : 0) +
+        ' <span class="bot-dim">命中 ' + g.list.length + ' / 族內 ' + (gg ? gg.stocks.length : '—') + (g.time ? '・最新 ' + g.time : '') + '</span>', 'bot-head');
+    };
+    const block = (gs, k12) => gs.map((g) => grpHead(g, k12) + g.list.map((r) => rowHtml(r, k12)).join('')).join('');
+    const g32 = groupsOf(rows32, false);
+    const up32 = g32.filter((g) => g.gr <= upTo), low32 = g32.filter((g) => g.gr > upTo);
+    const otc = live.otcLabel || '';
+    const body = botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') +
+      botLine('🔪⚔️ 刀劍空(32)　' + rows32.length + ' 檔／' + g32.length + ' 族', 'bot-sep') +
+      (rows32.length ? block(up32, false) + botLine('------楚河漢界・以下為中間、強空區------', 'bot-sep bot-sep-bear') + block(low32, false) : botLine('目前沒有', 'bot-dim')) +
+      botLine('🔵 12空(123)　' + rows12.length + ' 檔／' + groupsOf(rows12, true).length + ' 族', 'bot-sep') +
+      (rows12.length ? block(groupsOf(rows12, true), true) : botLine('目前沒有衝高後跌破 MA20 下彎的', 'bot-dim')) +
+      (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail() + (live.otcPct !== null && live.otcPct !== undefined ? '　櫃買 ' + wlEsc(otc) + ' ' + botPct(live.otcPct) : ''), 'bot-warn') : '') +
+      botLine('跟每日功課下面的族群卡同一份（功課面板勾的段位、參數、大戶力按鈕照樣篩）・一族一段，族群照族裡最新那檔的訊號時間排、最近的在上面（刀劍空分楚河漢界上下兩邊）・族裡每檔左邊＝訊號第一次出現的時間，最近的在上面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
+    return wrap(t, body, tdMd(live.date) + ' ' + (live.slot || ''));
   }
   if (q === '193'){
     const k = kill193Model();
