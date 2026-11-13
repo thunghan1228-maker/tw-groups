@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-13 21:38:28";
+const BUILD_STAMP = "2026-11-13 21:41:22";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -9499,10 +9499,35 @@ function bladeBotListHtml(m, holderFilter, oldestFirst, opts){
     return { html, count: n, goneCnt: 0, sectioned: true };
   }
   const goneCnt = list.filter((x) => !x.inNow).length;
+  // 2026-11-13 使用者：機器人 32 分段照老師的廣播（多方打少／中間／強空積極／收割區域），但每檔前面是時間（不是族群名次），
+  // 每段內照時間排、最近發生的在上面、早的在下面；跑（劃掉）、回照樣留在它那段裡照時間排。
+  // 在榜的照現在在哪一段；跑掉的照它最後的族群名次分段（前 10 名多方打少、11～25 中間、26 以後強空積極）
+  if (opts && opts.teacherSections){
+    const setOf = (l) => new Set((l || []).map((r) => r.code));
+    const upS = setOf(m.bladeUpper), midS = setOf(m.bladeMiddle), lowS = setOf(m.bladeLower);
+    const secOf = (x) => {
+      if (x.inNow){
+        if (harvestSet.has(x.code)) return 'harvest';
+        if (upS.has(x.code)) return 'upper';
+        if (midS.has(x.code)) return 'middle';
+        if (lowS.has(x.code)) return 'lower';
+      }
+      const gr = x.row && Number.isFinite(x.row.gr) ? x.row.gr : null;
+      const mk = gr ? bladeRankMark(gr, m.total) : '🔰';
+      return mk === '🔺' ? 'upper' : mk === '🔽' ? 'middle' : 'lower';
+    };
+    const by = { upper: [], middle: [], lower: [], harvest: [] };
+    list.forEach((x) => by[secOf(x)].push(x));
+    const sep = (t, cls) => '<div class="b32-sep' + (cls ? ' ' + cls : '') + '">' + t + '</div>';
+    const html = by.upper.map(rowHtml).join('') + sep('----↑(多方打少)↑----') + by.middle.map(rowHtml).join('') +
+      sep('----↓(強空積極)↓----', 'bear') + by.lower.map(rowHtml).join('') + sep('----↓(收割區域)↓----') + by.harvest.map(rowHtml).join('');
+    return { html, count: list.length, goneCnt, teacherSections: true };
+  }
   return { html: list.map(rowHtml).join(''), count: list.length, goneCnt };
 }
 const BLADE_BOT_LEGEND_SECT = '左邊時間＝這檔進名單的時間（沒有盤中紀錄時是這台電腦第一次看到它的時間）・每段內時間越近的越上面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割';
-const bladeLegend = (bl, old) => (bl.sectioned ? BLADE_BOT_LEGEND_SECT : old ? BLADE_BOT_LEGEND_OLD : BLADE_BOT_LEGEND);
+const BLADE_BOT_LEGEND_TS = '分段照老師廣播：多方打少（族群前 10 名）／中間（11～25 名）／強空積極（26 名以後）／收割區域・左邊時間＝最早進榜・每段內最近發生的在上面、早的在下面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（轉強，要跑，劃掉）・回＝掉出去又回榜（跑掉的照最後的族群名次分段）・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割';
+const bladeLegend = (bl, old) => (bl.teacherSections ? BLADE_BOT_LEGEND_TS : bl.sectioned ? BLADE_BOT_LEGEND_SECT : old ? BLADE_BOT_LEGEND_OLD : BLADE_BOT_LEGEND);
 const bladeCountTxt = (bl) => '今天 ' + bl.count + ' 檔' + (bl.sectioned ? '' : '，在榜 ' + (bl.count - bl.goneCnt) + '、消失 ' + bl.goneCnt);
 const BLADE_BOT_LEGEND = '左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（轉強，要跑）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割';
 const BLADE_BOT_LEGEND_OLD = '左邊時間＝最早進榜・排序＝最近發生的在最下面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（轉強，要跑）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割';
@@ -17962,7 +17987,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-13 21:38:28';
+const BUILD_STAMP = '2026-11-13 21:41:22';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25899,8 +25924,11 @@ function botAnswer(raw){
   if (q === '193'){
     const k = kill193Model();
     if (!k) return wrap('空族群必殺(193)', botLine('讀取中…', 'bot-dim'));
-    const line = (r) => rankLineH({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark }) + (r.members.length ? botLine(r.members.map((x) => '<span class="b193-m"><span class="b193-r1">⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + '</span>' + holderTagHtml(holderPctOf(x.code), false, true) + '</span>').join(''), 'bot-sub b193-wrap') : '');
-    return wrap('空族群必殺(193)', botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + k.lower.map(line).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') + k.upper.map(line).join('') + botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + (kill193OtcTail() ? botLine(kill193OtcTail(), 'bot-sub') : ''));
+    // 2026-11-13 使用者：機器人 193 照老師的排法——空方線以上的族群在上面、「------↓(空方)↓------」下面是空方線以下的，兩段都照族群名次排；
+    // 族群底下的 ⚠️ 個股也照老師：跌得少的在前（訊號中心、複製文字維持原本的跌幅大在上）
+    const line = (r) => rankLineH({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark }) + (r.members.length ? botLine(r.members.slice().sort((a, b) => b.pct - a.pct || (a.code < b.code ? -1 : 1)).map((x) => '<span class="b193-m"><span class="b193-r1">⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + '</span>' + holderTagHtml(holderPctOf(x.code), false, true) + '</span>').join(''), 'bot-sub b193-wrap') : '');
+    const byRank = (l) => l.slice().sort((a, b) => a.rank - b.rank);
+    return wrap('空族群必殺(193)', botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + byRank(k.upper).map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + byRank(k.lower).map(line).join('') + botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + (kill193OtcTail() ? botLine(kill193OtcTail(), 'bot-sub') : ''));
   }
   if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\\+3$/.test(q)){
     let list = zone283List(h);
@@ -25962,6 +25990,7 @@ function botAnswer(raw){
     const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
     return wrap(title, (list.length ? botLine('<span class="b32-cnt s1">① 剛轉弱 ' + c.s1 + ' 檔（還沒反彈）</span><span class="b32-cnt s2">② 不過前高可空 ' + c.s2 + ' 檔（反彈沒過 1高）</span>', 'bot-dim') : '') +
       (list.length ? list.map(rowHtml).join('') : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
+      (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail(), 'bot-warn') : '') +   // 2026-11-13 使用者：照老師的 123，最後接櫃買那行
       (list.length ? botLine('跟「功課廣播 12空(123)」同一份・左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（劃掉）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・① 剛轉弱＝剛跌破 20MA、20MA 下彎、還沒反彈，1高＝破惡前最高當停損價・② 不過前高可空＝破了以後反彈沒過 1高' + tdParamsNote(), 'bot-dim') : ''),
       (when ? '5 分K算到 ' + when + '・' : '') + '今天 ' + list.length + ' 檔，在榜 ' + inCnt + '、消失 ' + goneCnt);
   }
@@ -25975,8 +26004,11 @@ function botAnswer(raw){
     const tl = bladeTimeline(m);
     // 2026-10-19 使用者：排法照「刀功課廣播」——不分段，一檔一列：左邊最早進榜時間（越晚進榜越上面，同時間照股號）、
     // 股號股名下面接族群（名次＋🔺🔽🔰♣）、右邊漲跌幅跟大戶%、最下面「跑／回 HH:MM」；跑掉的紅色刪除線夾在裡面照時間排。底色跟顏色照機器人原本的黑底。
-    const bl = bladeBotListHtml(m, null, false, { bareHolder: true });
-    return wrap('🔪⚔️新刀劍空(32)', (bl.html ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + bl.html : botLine('目前沒有', 'bot-dim')) + botLine(bladeLegend(bl) + tdParamsNote(), 'bot-dim'), stamp + '・' + bladeCountTxt(bl));
+    // 2026-11-13 使用者：分段照老師（多方打少／中間／強空積極／收割區域），每段內照時間排；最後照老師接櫃買那行
+    const bl = bladeBotListHtml(m, null, false, { bareHolder: true, teacherSections: true });
+    const otcT = kill193OtcTail();
+    return wrap('🔪⚔️新刀劍空(32)', (bl.html ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + bl.html : botLine('目前沒有', 'bot-dim')) +
+      (otcT ? botLine('------↓(櫃買)↓------', 'bot-sep') + botLine(otcT, 'bot-warn') : '') + botLine(bladeLegend(bl) + tdParamsNote(), 'bot-dim'), stamp + '・' + bladeCountTxt(bl));
   }
   // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
   // 最後附櫃買多空（漲跌幅）；34 再附漲 7% 以上沒列的檔數；處置股名字前面 *
