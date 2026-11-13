@@ -203,6 +203,9 @@
   .bot-col[data-col-key="199"],.bot-col[data-col-key="193"],.bot-col[data-col-key="32"],.bot-col[data-col-key="123"],.bot-col[data-col-key="177"],.bot-col[data-col-key="三落空"]{outline:3px solid #22c55e;outline-offset:-3px;}   /* 2026-10-22 使用者：三落空也加綠框 */
   .bot-col[data-col-key="199"]{min-width:196px;}   /* 2026-11-12 多了「均」大戶力，稍微放寬一點，才接得在漲跌幅後面 */
   .bot-col[data-col-key="三落空"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}
+  .b777-params{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 2px 6px;} .b777-plabel{font-size:11.5px;color:var(--muted);margin-right:2px;}
+  .b777-p{font:inherit;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:12px;border:1px solid rgba(148,163,184,.45);background:transparent;color:#cbd5e1;cursor:pointer;white-space:nowrap;}
+  .b777-p.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}   /* 2026-11-13 使用者：機器人 777 上面的五個勾選 */
   .bot-col[data-col-key="777"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：777 功課卡片條列，每檔一列要放時間、股名、族群、漲跌幅、大戶% */
   .bot-col[data-col-key="99"]{flex-basis:calc((100% - 72px) / 10 * 2.5);min-width:420px;}   /* 2026-11-12 使用者：99 外資投信同步買賣超，每檔要放外資、投信兩個金額＋漲跌幅＋大戶力，加寬才排得進一行 */
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
@@ -25188,6 +25191,23 @@ const BOT_CODES = [
   ['97', '外資買賣超前十大：賣超前十在上、買超前十在下（金額越大越靠上），每檔列買賣超金額（億元）、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：格式同 97'], ['99', '外資、投信同步買賣超前十大：同步賣超前十在上、同步買超前十在下（兩家合計金額越大越靠上），每檔列外資、投信各自的買賣超金額（億元）、漲跌幅、盤中大戶力'], ['777', '每日功課的族群卡（刀劍空(32)、12空(123)）條列：一族一段、族群和族裡每檔都照訊號時間排（最近的在上），每檔接大戶%'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
   ['2359', '股號或族群名：那族漲幅排行'], ['2359m', '那檔當天的隔日沖買賣超（2359m1＝前一天，最多 2359m9）'], ['235984', '那族的籌碼暴增排序（族群名＋84 也可以，例：低軌衛星84）'], ['2359g', '那檔過去五週籌碼增減%'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
 ];
+// 2026-11-13 使用者：機器人 777 上面放每日功課那五個勾選（大戶≤-10、均線≥7、最高≥3%、最大>-7%、全勾），在 777 這裡勾就篩 777（自己記在這台瀏覽器，不動每日功課的）
+const BOT777_KEY = 'bot777Params';
+const bot777Params = (() => { try { const v = JSON.parse(localStorage.getItem(BOT777_KEY) || '{}') || {}; return { big: !!v.big, ma7: !!v.ma7, high3: !!v.high3, max7: !!v.max7 }; } catch (_){ return { big: false, ma7: false, high3: false, max7: false }; } })();
+function bot777Save(){ try { localStorage.setItem(BOT777_KEY, JSON.stringify(bot777Params)); } catch (_){} }
+function bot777Pass(row){
+  const p = bot777Params;
+  if (p.big && !(row.big !== null && row.big !== undefined && row.big <= -10)) return false;
+  if (p.ma7 && !(row.ma !== null && row.ma !== undefined && row.ma >= 7)) return false;
+  if (p.high3 && !(row.hi !== null && row.hi !== undefined && row.hi >= 3)) return false;
+  if (p.max7 && !(Number.isFinite(row.pct) && row.pct > -7)) return false;
+  return true;
+}
+function bot777ParamsHtml(){
+  const allOn = TD_PARAMS.every(([k]) => bot777Params[k]);
+  const btn = (k, label, on) => '<button type="button" class="b777-p' + (on ? ' on' : '') + '" data-bot777-param="' + k + '">' + (on ? '☑' : '☐') + ' ' + label + '</button>';
+  return '<div class="bot-line b777-params"><span class="b777-plabel">篩選</span>' + TD_PARAMS.map(([k, label]) => btn(k, label, bot777Params[k])).join('') + btn('all', '全勾', allOn) + '</div>';
+}
 const botPct = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
 const botStk = (code, name, rest) => '<span class="bot-stk" data-bot-code="' + wlEsc(code) + '" data-bot-name="' + wlEsc(name || '') + '">' + wlEsc(code) + ' ' + wlEsc(name || '') + '</span>' + (rest || '');
 const botGrp = (name, rest) => '<span class="bot-grp" data-bot-group="' + wlEsc(name) + '">' + wlEsc(name) + '</span>' + (rest || '');
@@ -25855,7 +25875,7 @@ function botAnswer(raw){
     try { ev32 = new Map(tdBroadcast(seq, 'blade').map((x) => [x.code, x])); ev12 = new Map(tdBroadcast(seq, 'k12').map((x) => [x.code, x])); } catch (_){}
     const backOf = (r, k12) => { const x = (k12 ? ev12 : ev32).get(r.code); return x && x.inNow && /^\d\d:\d\d$/.test(x.back || '') ? x.back : ''; };
     const evOf = (r, k12) => { const f = hmOf(r, k12), bk = backOf(r, k12); return bk > f ? bk : f; };
-    const pass = (r) => tdPass(r) && tdCardHoldPass(r);
+    const pass = bot777Pass;   // 2026-11-13 使用者：777 自己的勾選（上面那排），不跟每日功課的參數連動
     const rows32 = TD_ZONES.filter((z) => tdState.zones[z.key]).flatMap((z) => live.rows.filter((r) => r.zone === z.key)).filter(pass);
     const rows12 = live.k12.filter(pass);
     const groupsOf = (rows, k12) => {
@@ -25887,13 +25907,13 @@ function botAnswer(raw){
     const block = (gs, k12) => gs.map((g) => grpHead(g, k12) + g.list.map((r) => rowHtml(r, k12)).join('')).join('');
     const g32 = groupsOf(rows32, false);
     const otc = live.otcLabel || '';
-    const body = botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') +
+    const body = bot777ParamsHtml() + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') +
       botLine('🔪⚔️ 刀劍空(32)　' + rows32.length + ' 檔／' + g32.length + ' 族', 'bot-sep') +
       (rows32.length ? block(g32, false) : botLine('目前沒有', 'bot-dim')) +
       botLine('🔵 12空(123)　' + rows12.length + ' 檔／' + groupsOf(rows12, true).length + ' 族', 'bot-sep') +
       (rows12.length ? block(groupsOf(rows12, true), true) : botLine('目前沒有衝高後跌破 MA20 下彎的', 'bot-dim')) +
       (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail() + (live.otcPct !== null && live.otcPct !== undefined ? '　櫃買 ' + wlEsc(otc) + ' ' + botPct(live.otcPct) : ''), 'bot-warn') : '') +
-      botLine('跟每日功課下面的族群卡同一份（功課面板勾的段位、參數、大戶力按鈕照樣篩）・一族一段，族群照族裡最新發生的訊號排（剛進榜或回榜的那一族跳到最上面，不分楚河漢界）・族裡每檔左邊＝訊號第一次出現的時間、回＝掉出去又回榜的時間，最近發生的在上面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
+      botLine('跟每日功課下面的族群卡同一份（段位照功課面板勾的；上面那排勾選是 777 自己的，不影響每日功課）・一族一段，族群照族裡最新發生的訊號排（剛進榜或回榜的那一族跳到最上面，不分楚河漢界）・族裡每檔左邊＝訊號第一次出現的時間、回＝掉出去又回榜的時間，最近發生的在上面・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
     return wrap(t, body, tdMd(live.date) + ' ' + (live.slot || ''));
   }
   if (q === '193'){
@@ -26635,6 +26655,13 @@ document.getElementById('botPop').addEventListener('click', () => popOutBot());
 document.getElementById('botInner').addEventListener('pointerdown', () => { if (!botWindowMode()) document.getElementById('botModal').classList.add('bot-front'); }, true);
 document.getElementById('botModal').addEventListener('click', (e) => {
   const t = e.target;
+  const p7 = t.closest('[data-bot777-param]');
+  if (p7){
+    const k = p7.dataset.bot777Param;
+    if (k === 'all'){ const allOn = TD_PARAMS.every(([kk]) => bot777Params[kk]); TD_PARAMS.forEach(([kk]) => { bot777Params[kk] = !allOn; }); }
+    else bot777Params[k] = !bot777Params[k];
+    bot777Save(); botRerunCols(); return;
+  }
   if (t.closest('[data-bot-go]')){ const i = document.getElementById('botQ'); botRun(i ? i.value : ''); if (i) i.value = ''; return; }
   const run = t.closest('[data-bot-run]'); if (run){ botRun(run.dataset.botRun, { toggle: true }); return; }
   const x = t.closest('[data-bot-close]'); if (x){ botState.cols = botState.cols.filter((c) => c.key !== x.dataset.botClose); renderBot(); return; }
