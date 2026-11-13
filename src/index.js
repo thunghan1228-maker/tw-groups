@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 00:25:46";
+const BUILD_STAMP = "2026-11-14 00:30:00";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -18132,7 +18132,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 00:25:46';
+const BUILD_STAMP = '2026-11-14 00:30:00';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20819,6 +20819,8 @@ async function tdRecordTick(){
     const strip = (r) => ({ code: r.code, name: r.name, zone: r.zone || undefined, g: r.g, gr: r.gr, mk: r.mk, pct: r.pct, price: r.price, ma: r.ma, big: r.big, avg: r.avg, hi: r.hi });
     const body = { date: twTodayStr(), slot, total: snap.total, otcLabel: snap.otcLabel, otcPct: snap.otcPct, quoteTime: String(lastData.quoteTime || '').slice(0, 8),
       rows: snap.rows.map(strip), k12: snap.k12Tracked ? snap.k12.map(strip) : [] };
+    // 2026-11-13 使用者：火多多(23) 也一起記（後端收 f23；機器人 23 的「第一次進名單」時間跨電腦一樣）
+    try { const fm = fire23Model(); if (fm) body.f23 = [].concat(fm.strong, fm.middle, fm.spaceTop, fm.chase).map((r) => ({ code: r.code, name: r.name, g: r.groupName, gr: r.groupRank, mk: r.mark, pct: r.pct })); } catch (_){}
     const res = await fetch('/api/homework-snapshot', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     if (res.ok || res.status === 422) tdRec.done.add(key);
   } catch (_){ /* 下一分鐘再試 */ } finally { tdRec.busy = false; }
@@ -26086,18 +26088,36 @@ function botAnswer(raw){
     const fm = fire23Model();
     if (!fm) return wrap(t, botLine('讀取中…', 'bot-dim'));
     try { fire23RecordSeen(); } catch (_){}
+    // 時間：後端每 5 分鐘的紀錄（f23，誰的網站開著都記得到）裡第一次出現的時段；紀錄沒有的才用這台電腦第一次看到的時間
+    bladeTrackRefresh();
+    const recFirst = new Map();
+    try {
+      const bd = bladeTrack.data;
+      if (bd && bd.date === (lastData && lastData.quoteDate) && bd.slots) Object.keys(bd.slots).sort().forEach((sl) => (bd.slots[sl].f23 || []).forEach((x) => { if (!recFirst.has(x.code)) recFirst.set(x.code, sl); }));
+    } catch (_){}
     const seen = fire23SeenMap();
-    const hm = (code) => (seen[code] ? new Date(seen[code] + 8 * 3600e3).toISOString().slice(11, 16) : '--:--');
-    const byTime = (l) => l.slice().sort((a, b) => (seen[b.code] || 0) - (seen[a.code] || 0) || b.pct - a.pct);
+    const hm = (code) => recFirst.get(code) || (seen[code] ? new Date(seen[code] + 8 * 3600e3).toISOString().slice(11, 16) : '');
+    const byTime = (l) => l.slice().sort((a, b) => (hm(b.code) > hm(a.code) ? 1 : hm(b.code) < hm(a.code) ? -1 : b.pct - a.pct));
     const zoneMk = (r) => (r.groupRank <= Math.round(fm.total * 10 / 67) ? '🔺' : r.ir <= Math.round(fm.total * 10 / 67) ? '🔻' : '🔽');
     const row = (r) => '<div class="b32-row bh k12" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
-      '<span class="b32-time">' + hm(r.code) + '</span>' +
+      '<span class="b32-time">' + (hm(r.code) || '--:--') + '</span>' +
       '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + r.mark + '</span>' +
       '<span class="b32-grp">' + wlEsc(r.groupName) + '・' + r.groupRank + zoneMk(r) + '</span>' +
       '<span class="b32-pct ' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>' +
       '<span class="b32-h">' + holderTagHtml(holderPctOf(r.code), true, true) + '</span>' +
       '<span class="b32-lvrow b777-sigrow"><span class="b777-flag f23">' + (r.yesterday !== null ? '昨 ' + botPct(r.yesterday) : '') + (r.dayBefore !== null ? '・前天 ' + botPct(r.dayBefore) : '') + '</span>' + bot777FlagTags(r.code) + '</span></div>';
-    const sec = (title, l, cls) => botLine(title + '　' + l.length + ' 檔', 'bot-sep' + (cls ? ' ' + cls : '')) + (l.length ? byTime(l).map(row).join('') : botLine('目前沒有', 'bot-dim'));
+    // 2026-11-13 使用者：每段裡面再依族群分開——族群照族裡最新那檔的時間排（最近的在上面），族裡每檔也照時間排
+    const grpBlock = (l) => {
+      const by = new Map();
+      l.forEach((r) => { if (!by.has(r.groupName)) by.set(r.groupName, []); by.get(r.groupName).push(r); });
+      const gs = Array.from(by.entries()).map(([name, list]) => ({ name, gr: list[0].groupRank, time: list.reduce((mx, r) => (hm(r.code) > mx ? hm(r.code) : mx), ''), list: byTime(list) }))
+        .sort((x, y) => (y.time > x.time ? 1 : y.time < x.time ? -1 : x.gr - y.gr));
+      return gs.map((g) => {
+        const gg = (lastData.groups || []).find((x) => x.name === g.name);
+        return botLine(botGrpPill(g.name, ' (' + g.gr + ')', gg ? gg.avgChange : 0) + ' <span class="bot-dim">' + g.list.length + ' 檔' + (g.time ? '・最新 ' + g.time : '') + '</span>', 'bot-head') + g.list.map(row).join('');
+      }).join('');
+    };
+    const sec = (title, l, cls) => botLine(title + '　' + l.length + ' 檔', 'bot-sep' + (cls ? ' ' + cls : '')) + (l.length ? grpBlock(l) : botLine('目前沒有', 'bot-dim'));
     const n = fm.strong.length + fm.middle.length + fm.spaceTop.length + fm.chase.length;
     const otcT = kill193OtcTail();
     return wrap(t, botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') +
@@ -26106,7 +26126,7 @@ function botAnswer(raw){
       sec('----↓(空方打多・族群倒數第 6～10 名)↓----', fm.spaceTop) +
       sec('----↓(追高區・今天已漲 ' + FIRE23_CHASE_PCT + '% 以上／漲停，不追)↓----', fm.chase) +
       (otcT ? botLine('------↓(櫃買)↓------', 'bot-sep') + botLine(otcT + (fm.otcPct !== null ? '　櫃買 ' + botPct(fm.otcPct) : ''), 'bot-warn') : '') +
-      botLine('跟新刀劍空(32) 剛好顛倒的多方版：同樣那 27 族、每族最強的一段；🐎＝昨天跌 ' + FIRE23_PRIOR_DROP + '% 以上今天拉上來、🚀＝前天跌 ' + FIRE23_PRIOR_DROP + '% 以上（要在族裡最強 3 檔、昨天／前天在族裡後一半）、🌱＝最強第 4、5 檔前兩天跌過 ' + FIRE23_BEGINNER_DROP + '% 以上、🔥＝追高區；只有 🐎 的要在空方打多或比櫃買強；族群倒數 5 名不列・左邊時間＝這台電腦第一次看到它進名單的時間（頁面開著才記得到），每段內最近的在上面', 'bot-dim'),
+      botLine('跟新刀劍空(32) 剛好顛倒的多方版：同樣那 27 族、每族最強的一段；🐎＝昨天跌 ' + FIRE23_PRIOR_DROP + '% 以上今天拉上來、🚀＝前天跌 ' + FIRE23_PRIOR_DROP + '% 以上（要在族裡最強 3 檔、昨天／前天在族裡後一半）、🌱＝最強第 4、5 檔前兩天跌過 ' + FIRE23_BEGINNER_DROP + '% 以上、🔥＝追高區；只有 🐎 的要在空方打多或比櫃買強；族群倒數 5 名不列・每段裡面依族群分開，族群照族裡最新那檔的時間排、族裡每檔也照時間排（最近的在上面）・左邊時間＝第一次進名單的時段（盤中每 5 分鐘記一次，誰的網站開著都記得到；後端還沒記到的用這台電腦第一次看到的時間）', 'bot-dim'),
       (fm.hasDaily ? '' : '日K還沒載入，🐎🚀 條件先不看・') + '今天 ' + n + ' 檔');
   }
   mm = /^2([1-9])?(?:-(\\d{1,3}))?$/.exec(q);
