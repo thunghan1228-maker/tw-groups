@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-13 22:31:06";
+const BUILD_STAMP = "2026-11-13 22:34:21";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -297,6 +297,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bot-col[data-col-key="99"]{flex-basis:calc((100% - 72px) / 10 * 2.5);min-width:420px;}   /* 2026-11-12 使用者：99 外資投信同步買賣超，每檔要放外資、投信兩個金額＋漲跌幅＋大戶力，加寬才排得進一行 */
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
   .bot-col-x:hover{background:#e81123;border-color:#e81123;color:#fff;}
+  .bot-col-xq{position:absolute;top:6px;right:34px;z-index:2;background:#fff7ed;border:1px solid #f97316;color:#c2410c;border-radius:6px;font-size:11px;font-weight:800;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
+  .bot-col-xq:hover{background:#f97316;color:#fff;}   /* 2026-11-13 使用者：每格的「XQ」匯出按鈕 */
   .bot-cols-hint{color:var(--muted);font-size:13px;margin:0 2px 10px;}
   .bot-cols-grip{height:20px;margin:-4px 0 10px;cursor:ns-resize;touch-action:none;position:relative;-webkit-user-select:none;user-select:none;}
   .bot-cols-grip::before{content:'';position:absolute;left:0;right:0;top:9px;height:2px;border-radius:1px;background:#4a4a52;}
@@ -10290,7 +10292,7 @@ function homeMfLoad(){
   fetch('/api/screener?' + HOME_MF_QS).then((r) => r.json().then((d) => ({ ok: r.ok, d }))).then(({ ok, d }) => {
     if (ok && d && Array.isArray(d.rows) && d.params && 'mf' in d.params){ homeMfState.d = d; homeMfState.at = Date.now(); homeMfState.errAt = 0; }
     else homeMfState.errAt = Date.now();
-  }).catch(() => { homeMfState.errAt = Date.now(); }).finally(() => { homeMfState.loading = false; try { render(); } catch (_){} });
+  }).catch(() => { homeMfState.errAt = Date.now(); }).finally(() => { homeMfState.loading = false; try { render(); } catch (_){} try { botRerunCols(); } catch (_){} });   // 機器人 14 也用這份
 }
 function homeMfColHtml(){
   homeMfLoad();
@@ -18017,7 +18019,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-13 22:31:06';
+const BUILD_STAMP = '2026-11-13 22:34:21';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25293,7 +25295,7 @@ function closeRiverPanel(){ document.getElementById('rivModal').hidden = true; }
 // 8 隔日沖券商（2359m、81、811、813）要券商分點資料：證交所擋程式、FinMind 要付費，先不做。
 const botState = { cols: [], restored: false, restoring: false, pendTops: null, world: null, worldAt: 0, worldLoading: false, cache: {} };   // cols＝開著的格子 [{cmd, key, html}]，照點的順序
 const BOT_CODES = [
-  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行，每族列漲幅前三大的股票（13＝3%，以此類推；1＝1%）'], ['123', '1️⃣2️⃣空：固定的族群裡，今天衝高 2.75% 以上、現價漲幅不超過 4%，而且三個條件到齊的股票：①1高＝破惡前的最高（不是開盤衝的那根）②5 分K 從 20MA 上面收盤跌破（破惡），現在還在 20MA 下面、20MA 往下彎（均下彎）③破惡之後的反彈（2）沒過 1高，過了 1高就拿掉、要再跌破才重新算；每列最前面是進名單的時間，新的在上面。每一檔分兩個階段：藍色「① 剛轉弱」＝剛跌破 20MA、20MA 下彎、還沒反彈（右邊寫 1高＝停損價）；綠色「② 不過前高可空」＝破了以後反彈出現「2」、沒過 1高（前高）→ 可以空，停損放 1高（還有一條篩選我們沒找到，所以會列得比實際多）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
+  ['-12', '族群跌 2% 以上排行（-13＝跌 3%，以此類推；-1＝跌 1%）'], ['12', '族群漲 2% 以上排行，每族列漲幅前三大的股票（13＝3%，以此類推；1＝1%；14 改成疑似主力融資買進）'], ['14', '💰疑似主力融資買進：融資增加 ≥500 張＋大單淨買 ≥300 張（跟首頁那欄同一份），每檔接大戶力'], ['123', '1️⃣2️⃣空：固定的族群裡，今天衝高 2.75% 以上、現價漲幅不超過 4%，而且三個條件到齊的股票：①1高＝破惡前的最高（不是開盤衝的那根）②5 分K 從 20MA 上面收盤跌破（破惡），現在還在 20MA 下面、20MA 往下彎（均下彎）③破惡之後的反彈（2）沒過 1高，過了 1高就拿掉、要再跌破才重新算；每列最前面是進名單的時間，新的在上面。每一檔分兩個階段：藍色「① 剛轉弱」＝剛跌破 20MA、20MA 下彎、還沒反彈（右邊寫 1高＝停損價）；綠色「② 不過前高可空」＝破了以後反彈出現「2」、沒過 1高（前高）→ 可以空，停損放 1高（還有一條篩選我們沒找到，所以會列得比實際多）'], ['-22', '個股跌 2% 以上排行（-24＝跌 4%；-2＝跌的全部；-22-5＝扣掉前 5 檔）'], ['22', '個股💎漲 2% 以上排行（24＝4%；2＝漲的全部）'], ['22-5', '扣掉前 5 檔，看後面的'], ['22-35', '扣掉前 35 檔，看後面的'],
   ['177', '重點族群排名（水平之上＋往上做多、之下＋往下做空）'], ['188', '前一天重點多觀察族群'], ['183', '多族群排名：固定族群，往下掉的標 🔪⚔️，多方線以上列漲 5% 以上的 ⚠️ 個股'], ['199', '前一天重點空觀察族群'], ['193', '199＋刀劍空綜合必殺空'],
   ['283', '終點戰法空'], ['284', '終點戰法空，只看 199 的族群'], ['30', '盤中符合🐎🚀（偏多）'], ['31', '盤中符合🔪⚔️（偏空）'], ['32', '新刀劍空'], ['33', '賽馬多（續抱不追以上是漲 7% 以上的）'], ['34', '河流多（漲 7% 以上的不列，最下面附檔數）'], ['三落空', '熄火落馬斷流：熄火空(30 顛倒)、落馬空(33 顛倒)、斷流空(34 顛倒) 三份都有、而且可放空（有券、非處置股）的弱勢股'],
   ['44', '今天 1+2 多（突破黑馬）'], ['88', '開低站上 VWAP：今天開盤低於昨收、09:05 後 1 分K收盤高於 VWAP 1% 以上（偏多），跟訊號中心「開低VWAP上(88)」同一份'], ['87', '開高跌破 VWAP：今天開盤高於昨收、09:05 後 1 分K收盤低於 VWAP 1% 以上（偏空），跟訊號中心「開高VWAP下(87)」同一份'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
@@ -25552,7 +25554,28 @@ function botRerunCols(){
   });
 }
 const botColHasChart = (html) => /class="bot-chart bc-show"/.test(html || '');
-const botColX = (key) => '<button type="button" class="bot-col-x" data-bot-close="' + wlEsc(key) + '" title="收掉這格">✕</button>';
+// 2026-11-13 使用者：機器人每一格加「XQ」按鈕：把這格現在的股票匯出成 XQ 自選股的匯入檔（CSV，一行一個「代號.TW」，跑掉／劃掉的不算），
+// 到 XQ「自選股 → 修改商品 → 匯入」選這個檔就加進去（格式照網路上 XQ 使用者分享的做法，不是官方說明）
+const botColX = (key) => '<button type="button" class="bot-col-xq" data-bot-xq="' + wlEsc(key) + '" title="把這格的股票匯出成 XQ 自選股匯入檔（CSV，一行一個代號.TW；跑掉的不算）">XQ</button>' +
+  '<button type="button" class="bot-col-x" data-bot-close="' + wlEsc(key) + '" title="收掉這格">✕</button>';
+function botXqExport(col, key){
+  const seen = new Set(), codes = [];
+  col.querySelectorAll('[data-bot-code]').forEach((el) => {
+    if (el.closest('.gone, .blade-gone')) return;
+    const c = String(el.dataset.botCode || '').trim().toUpperCase();
+    if (!/^[0-9][0-9A-Z]{3,5}$/.test(c) || seen.has(c)) return;
+    seen.add(c); codes.push(c);
+  });
+  if (!codes.length){ try { showToast('這格沒有股票可以匯出'); } catch (_){} return; }
+  const day = twTodayStr().replace(/-/g, '');
+  const blob = new Blob([codes.map((c) => c + '.TW').join('\\r\\n') + '\\r\\n'], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'XQ_' + String(key).replace(/[^0-9A-Za-z_-]/g, '') + '_' + day + '.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  try { showToast('已匯出 ' + codes.length + ' 檔給 XQ（' + a.download + '）：到 XQ 自選股 → 修改商品 → 匯入'); } catch (_){}
+}
 function botStockGroups(code){
   return rankedGroupsOf(lastData.groups).filter((g) => g.stocks.some((s) => s.code === code));
 }
@@ -25876,6 +25899,24 @@ function botAnswer(raw){
   const rankLine = (r) => botLine(botGrpPill(r.name, '-(' + r.rank + ')' + (r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? BOT_UP_IC + (-r.drop) : '－') : '') + (r.mk || '') + ' ' + botPct(r.avg), r.avg));
   // 193、199 用：族群那一列後面接「族均」大戶力（2026-11-12 使用者）
   const rankLineH = (r) => botLine(botGrpPill(r.name, '-(' + r.rank + ')' + (r.drop !== null ? (r.drop > 0 ? '🔽' + r.drop : r.drop < 0 ? BOT_UP_IC + (-r.drop) : '－') : '') + (r.mk || '') + ' ' + botPct(r.avg), r.avg) + botGrpHolderTag(r.name), 'bot-grow');
+  // 2026-11-13 使用者：首頁的「💰疑似主力融資買進」做成機器人代碼 14（原本 14＝族群漲 4% 以上，改掉）——跟首頁那欄同一份資料、同一個排法
+  if (q === '14'){
+    const t = '💰疑似主力融資買進(14)';
+    homeMfLoad();
+    const d = homeMfState.d;
+    if (!d) return wrap(t, botLine(homeMfState.errAt ? '讀取失敗，稍後再試' : '讀取中…', 'bot-dim'));
+    const live = homeLivePctMap();
+    const pctOf = (r) => { const v = live.has(r.code) ? live.get(r.code) : r.chg; return Number.isFinite(v) ? v : null; };
+    const rows = d.rows.slice().sort((a, b) => (pctOf(b) ?? -1e9) - (pctOf(a) ?? -1e9) || (b.mchg || 0) - (a.mchg || 0));
+    const md = d.date ? Number(d.date.slice(5, 7)) + '/' + d.date.slice(8, 10) : '';
+    const line = (r, i) => { const pct = pctOf(r);
+      return botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' <span class="' + (pct === null ? 'bot-dim' : dirClass(pct)) + '">' + (pct === null ? '—' : botPct(pct)) + '</span>') +
+        '<br><span class="bot-dim" style="font-size:11.5px">融資 <b class="up">' + scrLots(r.mchg) + '</b> 張・大單淨買 <b class="up">' + scrLots(r.mfnet) + '</b> 張</span></span>' +
+        '<span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow'); };
+    return wrap(t, botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + (rows.length ? rows.map(line).join('') : botLine('目前沒有符合的股票', 'bot-dim')) +
+      botLine(md + ' 收盤資料：融資增加 ≥500 張＋今天盤中大單淨買 ≥300 張（跟首頁、系統選股「疑似主力融資買進」同一組；融資融券晚上約 21:00 才公布）・照即時漲跌幅排，漲越多越上面・交易所不公開融資是誰借的，只是疑似', 'bot-dim'),
+      md + ' 收盤資料・' + rows.length + ' 檔');
+  }
   // 1N：族群漲幅排行
   mm = /^1([1-9])?$/.exec(q);
   if (mm){
@@ -26767,6 +26808,8 @@ document.getElementById('botPop').addEventListener('click', () => popOutBot());
 document.getElementById('botInner').addEventListener('pointerdown', () => { if (!botWindowMode()) document.getElementById('botModal').classList.add('bot-front'); }, true);
 document.getElementById('botModal').addEventListener('click', (e) => {
   const t = e.target;
+  const xq = t.closest('[data-bot-xq]');
+  if (xq){ const col = xq.closest('.bot-col'); if (col) botXqExport(col, xq.dataset.botXq); return; }
   const p7 = t.closest('[data-bot777-param]');
   if (p7){
     const k = p7.dataset.bot777Param;
