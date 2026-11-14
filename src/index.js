@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 13:03:13";
+const BUILD_STAMP = "2026-11-14 13:04:31";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1355,6 +1355,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   body.sigtabs-window-mode #sgtInner > .chips-head{cursor:default;border-radius:0;}
   body.sigtabs-window-mode #sgtMin{display:none;}
   #botModal.bot-front:not(.behind-group):not(.behind-chart){z-index:103;}
+  #grailModal.gr-auto-front:not(.behind-group):not(.behind-chart){z-index:104;}   /* 2026-11-14 盤中自動跳出來的飆股雷達蓋在機器人等面板上面 */
   /* 2026-11-13 使用者：機器人代碼整個視窗改白底（標題列照舊）——跟盤中訊號分頁一樣用一組淺色變數，格子裡的字、列、標籤跟著換色；
      原本寫死給黑底用的淺色字（黃色族群名、淡紫時間、淡綠分隔線、橘色提醒…）改成白底看得清楚的深一點的顏色 */
   #botInner{--bg:#f3f4f6; --panel:#ffffff; --panel-2:#f1f3f5; --line:#d6dae0; --text:#1a1c1f; --muted:#5b6068; --accent:#8a6d3f; --up:#c0392b; --down:#15803d;
@@ -18180,7 +18181,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 13:03:13';
+const BUILD_STAMP = '2026-11-14 13:04:31';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20495,7 +20496,7 @@ function openGrailPanel(){
   renderGrail();
   grLoad(false);
 }
-function closeGrailPanel(){ document.getElementById('grailModal').hidden = true; }
+function closeGrailPanel(){ const m = document.getElementById('grailModal'); m.hidden = true; m.classList.remove('gr-auto-front'); }
 document.getElementById('grailClose').addEventListener('click', closeGrailPanel);
 document.getElementById('grailModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeGrailPanel(); });
 document.getElementById('grailBody').addEventListener('click', (e) => {
@@ -20552,6 +20553,37 @@ setInterval(() => {
   if (day < 1 || day > 5 || minutes < 8 * 60 + 30 || minutes > 18 * 60 + 30) return;
   grLoad(false);
 }, 90000);
+// 2026-11-14 使用者：盤中 11:30、12:00、12:30、13:00、13:20 自動打開飆股雷達。上一輪打開的還開著（沒看）就先關掉、
+// 再重新打開成最新的（名單會變）：切回最新那天、每張卡跳到最新一輪、強制重抓、捲回最上面、蓋在其他面板上面。
+// 每個時間點過了 15 分鐘內打開網頁也會跳（11:30～11:44 之間打開還是會跳）；每台電腦／手機各自記，同一台開好幾個分頁只跳一次。
+const GR_AUTO_SLOTS = ['11:30', '12:00', '12:30', '13:00', '13:20'], GR_AUTO_WINDOW_MIN = 15, GR_AUTO_KEY = 'grAutoShown';
+function grAutoTick(){
+  if (/-window-mode/.test(document.body.className)) return;   // 另開的 K 線圖、機器人、功課視窗不跳
+  const t = new Date(Date.now() + 8 * 3600000), day = t.getUTCDay(), now = t.getUTCHours() * 60 + t.getUTCMinutes();
+  if (day < 1 || day > 5) return;
+  const today = twTodayStr();
+  if (!(lastData && lastData.quoteDate === today)) return;   // 今天有開盤（假日、颱風假不跳）
+  const toMin = (hm) => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5));
+  const slot = GR_AUTO_SLOTS.slice().reverse().find((hm) => now >= toMin(hm) && now < toMin(hm) + GR_AUTO_WINDOW_MIN);
+  if (!slot) return;
+  let shown = {};
+  try { shown = JSON.parse(localStorage.getItem(GR_AUTO_KEY) || '{}') || {}; } catch (_){}
+  const key = today + ' ' + slot;
+  if (shown[key]) return;
+  shown = Object.fromEntries(Object.entries(shown).filter(([k]) => k.slice(0, 10) === today));   // 只留今天的
+  shown[key] = Date.now();
+  try { localStorage.setItem(GR_AUTO_KEY, JSON.stringify(shown)); } catch (_){}
+  const m = document.getElementById('grailModal');
+  if (!m.hidden) closeGrailPanel();   // 上一輪沒看：舊的關掉
+  grState.follow = true; grState.date = null; grState.sel = {}; grState.fold = {};
+  m.classList.add('gr-auto-front');
+  openGrailPanel();
+  grLoad(true);
+  const inner = m.querySelector('.chips-inner'); if (inner) inner.scrollTop = 0;
+  try { showToast('📡 ' + slot + ' 飆股雷達自動更新（名單有變動）'); } catch (_){}
+}
+setInterval(grAutoTick, 20000);
+setTimeout(grAutoTick, 8000);
 // ---- 每日功課（2026-10-10 使用者：照老師「空觀察／當沖多／多觀察功課」做自動版，不用貼清單）----
 // 老師的三頁是學員把 LINE 與機器人回的清單貼進去交叉比對；這些清單我們系統本來就算得出來，這裡直接自動交叉：
 // 空觀察＝刀劍空(32) ∩ 即將入獄（處置監獄嫌疑名單）∩ 今天出獄 ∩ 做空族群（昨天漲最多的族群）；
