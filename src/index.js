@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 18:00:01";
+const BUILD_STAMP = "2026-11-14 18:05:11";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -448,7 +448,9 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   body.home-light .hr-title.ss-title{background:#fff;}
   .hss-row{display:grid;grid-template-columns:minmax(0,1fr) 22px 56px 64px 66px 28px;gap:0 5px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
   .hss-row.hr-stk{cursor:pointer;} .hss-row.hr-stk:hover{background:rgba(124,58,237,.06);} .hss-row.hsc-head{border-top:0;padding:2px 6px;}
-  .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-n{text-align:center;font-weight:900;color:#b91c1c;} .hss-px{text-align:right;font-weight:800;}
+  .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-n{text-align:center;font-weight:900;color:#b91c1c;} .hss-px{text-align:right;font-weight:900;color:#0b0d10;-webkit-text-stroke:.35px currentColor;font-size:13px;}   /* 2026-11-14 使用者：成交價黑色、粗一點 */
+  .b32-stk.b777-stk{display:flex;align-items:center;gap:2px;} .b777-stk .bot-stk{min-width:0;overflow:hidden;text-overflow:ellipsis;} .b777-px{margin-left:auto;padding-left:8px;font-weight:900;color:#0b0d10;-webkit-text-stroke:.35px currentColor;font-size:13.5px;font-variant-numeric:tabular-nums;}
+  .t240-n:not(.up):not(.down) > b,.dyn-table td:not(.dyn-stk) > b{font-weight:900;color:#0b0d10;-webkit-text-stroke:.3px currentColor;}   /* 2026-11-14 使用者：成交價都粗一點、黑色 */
   .ss-tags{display:flex;gap:3px;margin-top:1px;} .ss-tag{font-size:10px;font-weight:800;line-height:1.35;padding:0 4px;border-radius:3px;color:#fff;background:#6b7280;}
   .ss-t1{background:#7c3aed;} .ss-t2{background:#dc2626;} .ss-t3{background:#ea580c;} .ss-t4{background:#0891b2;}
   .hsc-row{display:grid;grid-template-columns:minmax(0,1fr) 74px 66px 30px;gap:0 6px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
@@ -18362,7 +18364,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 18:00:01';
+const BUILD_STAMP = '2026-11-14 18:05:11';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26870,7 +26872,7 @@ function botAnswerRaw(raw){
       const mk = it.r32 && /[🔪⚔️🔰]/u.test(it.r32.mk || '') ? it.r32.mk : (it.r12 && /[🔪⚔️🔰]/u.test(it.r12.mk || '') ? it.r12.mk : '');
       return '<div class="b32-row bh k12" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
         '<span class="b32-time">' + (itEv(it) || '--:--') + '</span>' +
-        '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + '</span>' +
+        '<span class="b32-stk b777-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + (() => { const q7 = getStockQuote(r.code); const p7 = q7 && Number.isFinite(q7.price) ? q7.price : null; return '<span class="b777-px" title="即時成交價">' + (p7 === null ? '—' : p7 >= 1000 ? p7.toFixed(0) : p7 >= 100 ? p7.toFixed(1) : p7.toFixed(2)) + '</span>'; })() + '</span>' +   // 2026-11-14 使用者：777 股名右邊空的地方放即時成交價
         '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + botPct(r.pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(big, true, true) + '</span>' +

@@ -361,7 +361,9 @@
   body.home-light .hr-title.ss-title{background:#fff;}
   .hss-row{display:grid;grid-template-columns:minmax(0,1fr) 22px 56px 64px 66px 28px;gap:0 5px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
   .hss-row.hr-stk{cursor:pointer;} .hss-row.hr-stk:hover{background:rgba(124,58,237,.06);} .hss-row.hsc-head{border-top:0;padding:2px 6px;}
-  .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-n{text-align:center;font-weight:900;color:#b91c1c;} .hss-px{text-align:right;font-weight:800;}
+  .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-n{text-align:center;font-weight:900;color:#b91c1c;} .hss-px{text-align:right;font-weight:900;color:#0b0d10;-webkit-text-stroke:.35px currentColor;font-size:13px;}   /* 2026-11-14 使用者：成交價黑色、粗一點 */
+  .b32-stk.b777-stk{display:flex;align-items:center;gap:2px;} .b777-stk .bot-stk{min-width:0;overflow:hidden;text-overflow:ellipsis;} .b777-px{margin-left:auto;padding-left:8px;font-weight:900;color:#0b0d10;-webkit-text-stroke:.35px currentColor;font-size:13.5px;font-variant-numeric:tabular-nums;}
+  .t240-n:not(.up):not(.down) > b,.dyn-table td:not(.dyn-stk) > b{font-weight:900;color:#0b0d10;-webkit-text-stroke:.3px currentColor;}   /* 2026-11-14 使用者：成交價都粗一點、黑色 */
   .ss-tags{display:flex;gap:3px;margin-top:1px;} .ss-tag{font-size:10px;font-weight:800;line-height:1.35;padding:0 4px;border-radius:3px;color:#fff;background:#6b7280;}
   .ss-t1{background:#7c3aed;} .ss-t2{background:#dc2626;} .ss-t3{background:#ea580c;} .ss-t4{background:#0891b2;}
   .hsc-row{display:grid;grid-template-columns:minmax(0,1fr) 74px 66px 30px;gap:0 6px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
@@ -26781,7 +26783,7 @@ function botAnswerRaw(raw){
       const mk = it.r32 && /[🔪⚔️🔰]/u.test(it.r32.mk || '') ? it.r32.mk : (it.r12 && /[🔪⚔️🔰]/u.test(it.r12.mk || '') ? it.r12.mk : '');
       return '<div class="b32-row bh k12" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
         '<span class="b32-time">' + (itEv(it) || '--:--') + '</span>' +
-        '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + '</span>' +
+        '<span class="b32-stk b777-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + (() => { const q7 = getStockQuote(r.code); const p7 = q7 && Number.isFinite(q7.price) ? q7.price : null; return '<span class="b777-px" title="即時成交價">' + (p7 === null ? '—' : p7 >= 1000 ? p7.toFixed(0) : p7 >= 100 ? p7.toFixed(1) : p7.toFixed(2)) + '</span>'; })() + '</span>' +   // 2026-11-14 使用者：777 股名右邊空的地方放即時成交價
         '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + botPct(r.pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(big, true, true) + '</span>' +
