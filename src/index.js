@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 17:45:00";
+const BUILD_STAMP = "2026-11-14 17:48:00";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -149,7 +149,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) 300px 210px 290px;gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) 360px 300px 210px 290px;gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -434,9 +434,9 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   /* 2026-11-14 使用者：183 右邊多兩欄：「強勢股觀察中・等收黑」（210px，原本在第一欄最上面）、「強勢紅K」＋下面疊創高黑龍（290px）；原本 10 欄寬度不變、整排變寬，往右拉看最右邊 */
   @media (min-width: 1701px){
     .home-rank-scroll{overflow-x:auto;padding-bottom:6px;}
-    .home-rank4{width:calc(100% + 824px);}
+    .home-rank4{width:calc(100% + 1192px);}
     .home-rank-scroll{cursor:grab;} .home-rank-scroll .hr-stk,.home-rank-scroll button,.home-rank-scroll [data-bot-code],.home-rank-scroll [data-group],.home-rank-scroll [data-bot-group]{cursor:pointer;}
-    .home-rank4.hx{width:calc(100% + 824px + var(--hx-w));grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) 300px 210px 290px var(--hx-cols);}
+    .home-rank4.hx{width:calc(100% + 1192px + var(--hx-w));grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) 360px 300px 210px 290px var(--hx-cols);}
   }
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2 .hr-code,.hot2 .hr-name{color:inherit!important;} .hr-pkw .l1 .hot2{display:inline-flex;gap:5px;min-width:0;overflow:hidden;} .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
@@ -11020,6 +11020,12 @@ function homeXBarHtml(){
     homeXCols.map((c, i) => '<span class="hx-chip">' + wlEsc(c) + (i > 0 ? '<button type="button" data-hx-move="' + i + ':-1" title="往左移">◀</button>' : '') + (i < homeXCols.length - 1 ? '<button type="button" data-hx-move="' + i + ':1" title="往右移">▶</button>' : '') + '<button type="button" data-hx-del="' + i + '" title="拿掉這欄">✕</button></span>').join('') +
     '<span class="hx-n">' + (10 + homeXCols.length) + ' / 20 欄</span></div>';
 }
+// 首頁固定的機器人欄位（跟加欄位一樣的畫法，但不能拿掉）
+function homeFixedBotColHtml(c){
+  let html = '';
+  try { html = botAnswer(c) || ''; } catch (err){ html = '<div class="hr-note">這一欄暫時畫不出來</div>'; }
+  return '<div class="hr-stack home-xcol home-fixcol" data-hx-key="' + wlEsc(c) + '"><div class="home-botcol"><div class="hx-head"><span>🤖 ' + wlEsc(c) + '</span></div>' + html + '</div></div>';
+}
 function homeXColsHtml(){
   return homeXCols.map((c, i) => {
     let html = '';
@@ -11094,6 +11100,7 @@ function homeRank4Html(){
     // 2026-10-19 使用者：個股漲 2%（22-5）排到族群漲幅 > 2%（12）前面；2026-10-20 使用者又對調回來：族群漲幅 > 2%（12，疊著股期黑龍 75、今日弱勢股）放在個股漲 > 2% 的左邊
     // 2026-11-01 使用者：最後一欄拿掉——1+2多・突破黑馬(44) 沒了、股票期貨排名(155)＋三落空搬到族群漲幅 > 2%(12) 下面、股期黑龍(75) 搬到續抱勿追高上面
     // 2026-10-21 使用者：最右邊一欄（個股漲 > 2%（22-5）＋隔日沖黑龍(80)）整欄拿掉；股期黑龍(75) 還在 188 下面
+    homeFixedBotColHtml('777') +   // 2026-11-14 使用者：機器人 777（功課卡片條列）放在強中強左邊、183 右邊；跟 32 重複的照樣閃綠
     '<div class="hr-stack">' + homeRedBox(homeSsColHtml()) + '</div>' +   // 2026-11-14 使用者：強中強（四份重複兩份以上）放在 183 右邊
     '<div class="hr-col">' + homePickWatchHtml() + '</div>' +   // 2026-11-14 使用者：「👁強勢股觀察中・等收黑」從第一欄最上面搬到 183 右邊、強勢紅K 左邊，自己一欄
     '<div class="hr-stack">' + homeRedBox(homeScrColHtml('red')) + homeRedBox(homeScrColHtml('dragon')) + '</div>' +   // 2026-11-14 使用者：最後一欄（183 右邊）＝強勢紅K，創高黑龍疊在它下面
@@ -18352,7 +18359,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 17:45:00';
+const BUILD_STAMP = '2026-11-14 17:48:00';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19318,7 +19325,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・30加33加34／投信買超前15・188／發動・今日強勢股／外資買超前15・1+2 突破廣播・905 突破廣播・族群漲幅(12)／155／三落空・183・強中強・強勢股觀察中・強勢紅K／創高黑龍</div></div>' +
+        '<div class="section-head"><div class="section-title">多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・30加33加34／投信買超前15・188／發動・今日強勢股／外資買超前15・1+2 突破廣播・905 突破廣播・族群漲幅(12)／155／三落空・183・777・強中強・強勢股觀察中・強勢紅K／創高黑龍</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
