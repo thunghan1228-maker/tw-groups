@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 16:59:15";
+const BUILD_STAMP = "2026-11-14 17:04:04";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4230,7 +4230,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .dyn-table th.l,.dyn-table td.l{text-align:left;}
   .dyn-table tr.dyn-row{cursor:pointer;} .dyn-table tr.dyn-row:hover{background:rgba(124,58,237,.06);}
   .dyn-table .dyn-stk,.dyn-table .dyn-stk b{color:#0b0d10;font-weight:900;-webkit-text-stroke:.3px currentColor;}
-  .dyn-rk{font-size:10.5px;color:var(--muted);}
+  .dyn-rk{font-size:10.5px;color:var(--muted);} .dyn-table td.dyn-ma{font-weight:800;}
   .dyn-foot{font-size:12px;color:var(--muted);line-height:1.6;margin:10px 2px;}
   .dyn-table th.dyn-sortable{cursor:pointer;user-select:none;} .dyn-table th.dyn-sortable:hover{color:#7c3aed;} .dyn-table th.dyn-sortable.on{color:#7c3aed;} .dyn-si{font-style:normal;opacity:.45;font-size:10px;}
   .dyn-side{margin:2px 0 4px;} .dyn-live{color:#dc2626;} .dyn-new{display:inline-block;font-size:11px;font-weight:800;color:#3b2f00;background:#facc15;border-radius:4px;padding:0 5px;}
@@ -18330,7 +18330,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 16:59:15';
+const BUILD_STAMP = '2026-11-14 17:04:04';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -30107,14 +30107,14 @@ function dynPulseHtml(kind){
   if (!list.length) return h + '<div class="race-note">目前沒有</div>';
   const T = kind;
   const rowsS = dynSorted(T, list, { days: daysOf, px: (o) => o.px, chg: (o) => o.chgNow, mom: momOf, val: valOf, gm: (o) => (o.group ? m.gmom.get(o.group) : null), score: (o) => o.score, holder: (o) => holderPctOf(o.code) });
-  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr>' + dynTh(T, 'days', '上榜' + (kind === 'day' ? '(天)' : '(週)')) + '<th class="l">股票</th>' + dynTh(T, 'px', '價格') + dynTh(T, 'chg', '漲跌幅') + dynTh(T, 'mom', '動能') + dynTh(T, 'val', '成交金額(億)') + dynTh(T, 'gm', '族群・族群動能', 'l') + dynTh(T, 'score', '均線') + dynTh(T, 'holder', '大戶力') + '</tr></thead><tbody>' +
+  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr>' + dynTh(T, 'days', '上榜' + (kind === 'day' ? '(天)' : '(週)')) + '<th class="l">股票</th>' + dynTh(T, 'px', '價格') + dynTh(T, 'chg', '漲跌幅') + dynTh(T, 'score', '均線') + dynTh(T, 'mom', '動能') + dynTh(T, 'val', '成交金額(億)') + dynTh(T, 'gm', '族群・族群動能', 'l') + dynTh(T, 'holder', '大戶力') + '</tr></thead><tbody>' +
     rowsS.map((o) => {
       const mv = momOf(o), bv = baseOf(o), dd = daysOf(o), gm = o.group ? m.gmom.get(o.group) : null;
       return '<tr class="dyn-row" data-code="' + wlEsc(o.code) + '" data-name="' + wlEsc(o.name || '') + '"><td>' + (dd <= 1 ? '<span class="dyn-new">新</span>' : dd) + '</td>' + dynStk(o) +
-        '<td><b>' + dynPx(o.px) + '</b></td><td>' + dynPct(o.chgNow) + '</td>' +
+        '<td><b>' + dynPx(o.px) + '</b></td><td>' + dynPct(o.chgNow) + '</td><td class="dyn-ma">' + (o.score ?? '—') + '</td>' +   // 2026-11-14 使用者：日／週動能的均線放在動能左邊
         '<td><span class="dyn-mom ' + (mv >= 0 ? 'up' : 'down') + '">' + mv.toFixed(1) + '</span>' + (Number.isFinite(bv) ? '<div class="dyn-rk">' + (mv - bv >= 0 ? '+' : '') + (mv - bv).toFixed(2) + '</div>' : '') + '</td>' +
         '<td>' + (Number.isFinite(valOf(o)) ? valOf(o).toFixed(valOf(o) >= 100 ? 0 : 1) : '—') + '</td>' +
-        '<td class="l">' + dynGrp(o) + (gm !== null && gm !== undefined ? ' <span class="' + (gm >= 0 ? 'up' : 'down') + '">' + gm.toFixed(1) + '</span>' : '') + '</td><td>' + (o.score ?? '—') + '</td><td>' + holderTagHtml(holderPctOf(o.code), false, true) + '</td></tr>';
+        '<td class="l">' + dynGrp(o) + (gm !== null && gm !== undefined ? ' <span class="' + (gm >= 0 ? 'up' : 'down') + '">' + gm.toFixed(1) + '</span>' : '') + '</td><td>' + holderTagHtml(holderPctOf(o.code), false, true) + '</td></tr>';
     }).join('') + '</tbody></table></div>';
   return h + '<div class="dyn-foot">動能＝1.4 ×（價格 ÷ ' + (kind === 'day' ? '8 日' : '8 週') + '指數平均線 − 1）× 100（還原股價，本站算法；App 的動能沒公開，這是對過走勢最接近的）。' +
     '動能底下小字＝跟' + (kind === 'day' ? '前一天' : '上一週') + '比；上榜＝連續幾' + (kind === 'day' ? '天' : '週') + '都在名單上（新＝這' + (kind === 'day' ? '天' : '週') + '剛上）；族群動能＝同族群每檔動能的平均。' +
@@ -30134,11 +30134,11 @@ function dynInstHtml(){
   const stk = (v) => (v > 0 ? '連買 ' + v : v < 0 ? '連賣 ' + (-v) : '—');
   const T = 'inst';
   const augI = list.map((r) => { const hq = live ? getStockQuote(r.code) : null; return Object.assign({}, r, { px: hq && Number.isFinite(hq.price) ? hq.price : r.close, chgNow: hq && Number.isFinite(hq.changePercent) ? hq.changePercent : r.chg }); });
-  const rowsI = dynSorted(T, augI, { px: (r) => r.px, chg: (r) => r.chgNow, mom: (r) => r.mom, val: (r) => r.val, f: (r) => r.f, t: (r) => r.t, f5: (r) => r.f5, t5: (r) => r.t5, holder: (r) => holderPctOf(r.code) });
-  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr><th class="l">股票</th>' + dynTh(T, 'px', '價格') + dynTh(T, 'chg', '漲跌幅') + dynTh(T, 'mom', '日動能') + dynTh(T, 'val', '成交金額(億)') + dynTh(T, 'f', '外資(張)') + dynTh(T, 't', '投信(張)') + dynTh(T, 'f5', '外資 5 日') + dynTh(T, 't5', '投信 5 日') + '<th class="l">族群</th>' + dynTh(T, 'holder', '大戶力') + '</tr></thead><tbody>' +
+  const rowsI = dynSorted(T, augI, { px: (r) => r.px, chg: (r) => r.chgNow, score: (r) => r.score, mom: (r) => r.mom, val: (r) => r.val, f: (r) => r.f, t: (r) => r.t, f5: (r) => r.f5, t5: (r) => r.t5, holder: (r) => holderPctOf(r.code) });
+  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr><th class="l">股票</th>' + dynTh(T, 'px', '價格') + dynTh(T, 'chg', '漲跌幅') + dynTh(T, 'score', '均線') + dynTh(T, 'mom', '日動能') + dynTh(T, 'val', '成交金額(億)') + dynTh(T, 'f', '外資(張)') + dynTh(T, 't', '投信(張)') + dynTh(T, 'f5', '外資 5 日') + dynTh(T, 't5', '投信 5 日') + '<th class="l">族群</th>' + dynTh(T, 'holder', '大戶力') + '</tr></thead><tbody>' +
     rowsI.map((r) => {
       const px = r.px, chg = r.chgNow;
-      return '<tr class="dyn-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '">' + dynStk(r) + '<td><b>' + dynPx(px) + '</b></td><td>' + dynPct(chg) + '</td>' +
+      return '<tr class="dyn-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '">' + dynStk(r) + '<td><b>' + dynPx(px) + '</b></td><td>' + dynPct(chg) + '</td><td class="dyn-ma">' + (r.score ?? '—') + '</td>' +   // 2026-11-14 使用者：法人動能加均線分數，放在日動能前面
         '<td><span class="dyn-mom ' + (r.mom >= 0 ? 'up' : 'down') + '">' + (Number.isFinite(r.mom) ? r.mom.toFixed(1) : '—') + '</span></td><td>' + (Number.isFinite(r.val) ? r.val.toFixed(1) : '—') + '</td>' +
         '<td>' + lots(r.f) + '<div class="dyn-rk">' + stk(r.fs) + '</div></td><td>' + lots(r.t) + '<div class="dyn-rk">' + stk(r.ts) + '</div></td><td>' + lots(r.f5) + '</td><td>' + lots(r.t5) + '</td>' +
         '<td class="l">' + dynGrp(r) + '</td><td>' + holderTagHtml(holderPctOf(r.code), false, true) + '</td></tr>';
