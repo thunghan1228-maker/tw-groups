@@ -10968,7 +10968,7 @@ function homePickWatchHtml(){
       }, 0);
     }
   }
-  const title = (n) => '<div class="hr-title" title="跟「創高黑龍選股（手動）→ 今天 → ② 觀察中・等收黑」同一份；名單裡的股票哪天收黑，收盤買第 1 批">👁觀察中・等收黑' + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔</span>') + '</div>';
+  const title = (n) => '<div class="hr-title" title="跟「創高黑龍選股（手動）→ 今天 → ② 觀察中・等收黑」同一份；名單裡的股票哪天收黑，收盤買第 1 批">👁強勢股觀察中・等收黑' + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔</span>') + '</div>';
   if (!d || d.status !== 'ok' || !d.sim) return title(null) + '<div class="hr-note">' + (pkState.errors[query] ? '算不出來：' + wlEsc(pkState.errors[query].msg) : '計算中…（第一次要把特徵載進記憶體，稍等幾秒）') + '</div>';
   const pctOfW = (r) => { const q = getStockQuote(r.code); const v = q && Number.isFinite(q.changePercent) ? q.changePercent : r.changePct; return Number.isFinite(v) ? v : -1e9; };
   const watch = pkRankRows((d.sim.watch || []).map((r) => Object.assign({}, r))).sort((a, b) => pctOfW(b) - pctOfW(a));   // 2026-11-10 使用者：照即時漲跌幅排、漲越多越上面（同幅度維持綜合分順序）
