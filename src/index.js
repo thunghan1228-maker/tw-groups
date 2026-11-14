@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 17:41:05";
+const BUILD_STAMP = "2026-11-14 17:45:00";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -443,6 +443,9 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   @media (prefers-reduced-motion: reduce){ .hot2{animation-duration:2.4s;} }
   @keyframes hotbearblink{0%,100%{background:#16a34a;color:#fff;box-shadow:0 0 0 2px #16a34a;}50%{background:#bbf7d0;color:#14532d;box-shadow:0 0 0 2px #bbf7d0;}}
   .hotbear,#botBody .bot-stk.hotbear,body.home-light .home-botcol .bot-stk.hotbear,#botBody .b32-row.gone .b32-stk .bot-stk.hotbear{animation:hotbearblink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 777 跟 32 重複就閃綠 */
+  @keyframes ssblink{0%,100%{background:#dc2626;color:#fff;}50%{background:#fecaca;color:#7f1d1d;}}
+  .ss-blink{display:inline-block;animation:ssblink 1s ease-in-out infinite;border-radius:5px;padding:1px 8px;font-weight:900;}
+  body.home-light .hr-title.ss-title{background:#fff;}
   .hss-row{display:grid;grid-template-columns:minmax(0,1fr) 22px 62px 64px 26px;gap:0 5px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
   .hss-row.hr-stk{cursor:pointer;} .hss-row.hr-stk:hover{background:rgba(124,58,237,.06);} .hss-row.hsc-head{border-top:0;padding:2px 6px;}
   .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-n{text-align:center;font-weight:900;color:#b91c1c;}
@@ -18349,7 +18352,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 17:41:05';
+const BUILD_STAMP = '2026-11-14 17:45:00';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26586,7 +26589,7 @@ function botAnswerRaw(raw){
   }
   // 2026-11-14 使用者：強中強＝888（強勢股觀察中、強勢紅K、240、260 四份重複兩份以上；跟首頁那欄同一份）
   if (q === '888'){
-    const t = '💪強中強(888)';
+    const t = '<span class="ss-blink">💪強中強(888)</span>';
     const list = ssList();
     if (!list.length) return wrap(t, botLine('讀取中…（四份名單都讀進來才算得出來）', 'bot-dim'));
     const rows = botSortRows('888', list, { n: (r) => r.n, px: (r) => r.px, chg: (r) => r.chg, score: (r) => r.score, holder: (r) => holderPctOf(r.code) });
@@ -30138,7 +30141,7 @@ const ssTagsHtml = (tags) => tags.map((t) => { const x = SS_TAG[t] || [t, '']; r
 const SS_TIP = '強勢股觀察中・等收黑、強勢紅K、熱門趨勢概念股(240)、日動能強勢(260) 四份名單，同一檔出現在兩份以上（觀＝強勢股觀察中、紅＝強勢紅K）';
 function homeSsColHtml(){
   const rows = botSortRows('home_ss', ssList(), { n: (r) => r.n, chg: (r) => r.chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
-  const title = '<div class="hr-title" title="' + wlEsc(SS_TIP) + '">💪強中強 <span class="hr-rk">' + rows.length + ' 檔</span></div>';
+  const title = '<div class="hr-title ss-title" title="' + wlEsc(SS_TIP) + '"><span class="ss-blink">💪強中強 ' + rows.length + ' 檔</span></div>';   // 2026-11-14 使用者：標題「強中強 N 檔」紅底白字閃
   if (!rows.length) return '<div class="hr-col">' + title + '<div class="hr-note">讀取中…（四份名單都讀進來才算得出來）</div></div>';
   const head = '<div class="hss-row hsc-head"><span>' + botSortTh('home_ss', '', '股票') + '</span>' + botSortTh('home_ss', 'n', '份') + botSortTh('home_ss', 'chg', '漲跌') + botSortTh('home_ss', 'holder', '大戶力') + botSortTh('home_ss', 'score', '均線') + '</div>';
   const row = (r) => '<div class="hss-row hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(r.group + '・同時在「' + r.tags.join('」「') + '」') + '">' +
