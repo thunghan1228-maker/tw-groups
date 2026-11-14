@@ -26413,7 +26413,8 @@ function botAnswer(raw){
     const md = m.date ? Number(m.date.slice(5, 7)) + '/' + m.date.slice(8, 10) : '';
     return wrap(t, trendParamsHtml() + (rows.length ? head + rows.map(line).join('') : botLine('目前沒有符合的股票（可以把上面的門檻放寬）', 'bot-dim')) +
       botLine((botSortState['240'] ? '照你點的欄位排；點「#　股票」回到照 240 日漲幅排。' : '照 240 日漲幅排、漲最多的在上面（欄位名稱點一下可以排序）。') + '240日最高＝最近 240 個交易日最高的<b>收盤價</b>；240日漲幅＝跟 240 個交易日前的收盤比（還原股價，跟 App 同算法）。' + (m.live ? '盤中用即時價重算（現價破前高就是 🆕新高）。' : md + ' 收盤資料，開盤後用即時價重算。') +
-        'App 另外看「新聞熱度」我們沒有，改用 5 日均成交值當門檻；資料每天收盤後更新', 'bot-dim'),
+        'App 另外看「新聞熱度」我們沒有，改用 5 日均成交值當門檻；資料每天收盤後更新', 'bot-dim') +
+      botLine('<span class="t240-new">🆕新高</span>＝收盤（盤中用現價）就是 240 日最高收盤，創新高；沒標的寫「離高 −1.2%」＝離 240 日最高還差多少', 'bot-dim'),
       (m.live ? stamp + '・即時' : md + ' 收盤') + '・' + m.rows.length + ' 檔');
   }
   // 動能排行（暫定代碼 250；2026-11-14 使用者：照券商 App「動能選股 → 動能排行」）
@@ -26475,7 +26476,10 @@ function botAnswer(raw){
     const md = m.d.date ? Number(m.d.date.slice(5, 7)) + '/' + m.d.date.slice(8, 10) : '';
     return wrap(t, sideBtns + (rows.length ? head + rows.map(line).join('') : botLine('目前沒有', 'bot-dim')) +
       botLine((strong ? '強勢＝動能 ≥ +' : '弱勢＝動能 ≤ −') + m.MIN + '，照' + (kind === 'day' ? '今天' : '這週') + '成交金額排（欄位名稱點一下可以排序）。動能＝1.4 ×（價格 ÷ ' + (kind === 'day' ? '8 日' : '8 週') + '指數平均線 − 1）× 100（本站算法）；動能底下小字＝跟' + (kind === 'day' ? '前一天' : '上一週') + '比。' +
-        (m.live ? '盤中每 15 秒用現價重算、名單跟著行情換。' : '開盤後用即時價重算、名單跟著變。'), 'bot-dim'),
+        (m.live ? '盤中每 15 秒用現價重算、名單跟著行情換。' : '開盤後用即時價重算、名單跟著變。'), 'bot-dim') +
+      // 2026-11-14 使用者：說明「新」是什麼意思
+      botLine('<span class="dyn-new">新</span>＝' + (kind === 'day' ? '今天第一天上這張名單（今天動能到 ' + (strong ? '+' : '−') + m.MIN + '、前一個交易日還沒到）；「上榜 3 天」＝已經連續 3 天都在名單上'
+        : '這一週第一次上這張名單（這週的週動能到 ' + (strong ? '+' : '−') + m.MIN + '、上一週還沒到），整排都是「新」就是這些股票這週才轉' + (strong ? '強' : '弱') + '；「上榜 3 週」＝已經連續 3 週都在名單上') + '。盤中名單跟著行情變，今天才衝上來的就會出現「新」', 'bot-dim'),
       (m.live ? stamp + '・● 即時' : md + ' 收盤') + '・' + list.length + ' 檔');
   }
   if (q === '280'){
