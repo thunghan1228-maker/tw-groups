@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 16:02:45";
+const BUILD_STAMP = "2026-11-14 16:13:53";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -18183,7 +18183,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 16:02:45';
+const BUILD_STAMP = '2026-11-14 16:13:53';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26279,7 +26279,7 @@ function botAnswer(raw){
     const line = (r, i) => botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' <b>' + fmtPx(r.px) + '</b> <span class="' + (Number.isFinite(r.chgNow) ? dirClass(r.chgNow) : 'bot-dim') + '">' + (Number.isFinite(r.chgNow) ? botPct(r.chgNow) : '—') + '</span>' +
         (r.dist >= -1e-9 ? ' <span class="t240-new">🆕新高</span>' : '')) +
       '<br><span class="bot-dim" style="font-size:11.5px">240日最高 <b>' + fmtPx(r.hiNow) + '</b>・240日漲幅 <b class="up">' + botPct(r.gainNow) + '</b>' + (r.dist < -1e-9 ? '・離高 ' + r.dist.toFixed(1) + '%' : '') +
-      '<br>' + wlEsc(r.group || '—') + '・均線 ' + (r.score ?? '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
+      '<br>' + wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '—') + '・均線 ' + (r.score ?? '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
       '<span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow');
     const md = m.date ? Number(m.date.slice(5, 7)) + '/' + m.date.slice(8, 10) : '';
     return wrap(t, trendParamsHtml() + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + (m.rows.length ? m.rows.map(line).join('') : botLine('目前沒有符合的股票（可以把上面的門檻放寬）', 'bot-dim')) +
@@ -26305,7 +26305,7 @@ function botAnswer(raw){
       return botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' <b>' + (Number.isFinite(px) ? (px >= 1000 ? px.toFixed(0) : px >= 100 ? px.toFixed(1) : px.toFixed(2)) : '—') + '</b> ' + pctSpan(chg) +
           (r.miss ? ' <span class="t240-miss">缺' + r.miss.join('') + '</span>' : '')) +
         '<br><span class="bot-dim" style="font-size:11.5px">週 ' + pctSpan(r.wtd) + '・月 ' + pctSpan(r.mtd) + '・季 ' + pctSpan(r.qtd) + '・年 ' + pctSpan(r.ytd) +
-        '<br>' + wlEsc(r.group || '—') + '・均線 ' + (r.score ?? '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
+        '<br>' + wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '—') + '・均線 ' + (r.score ?? '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
         '<span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow');
     };
     const md = d.date ? Number(d.date.slice(5, 7)) + '/' + d.date.slice(8, 10) : '';

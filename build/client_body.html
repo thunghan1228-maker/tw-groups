@@ -26190,7 +26190,7 @@ function botAnswer(raw){
     const line = (r, i) => botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' <b>' + fmtPx(r.px) + '</b> <span class="' + (Number.isFinite(r.chgNow) ? dirClass(r.chgNow) : 'bot-dim') + '">' + (Number.isFinite(r.chgNow) ? botPct(r.chgNow) : '—') + '</span>' +
         (r.dist >= -1e-9 ? ' <span class="t240-new">🆕新高</span>' : '')) +
       '<br><span class="bot-dim" style="font-size:11.5px">240日最高 <b>' + fmtPx(r.hiNow) + '</b>・240日漲幅 <b class="up">' + botPct(r.gainNow) + '</b>' + (r.dist < -1e-9 ? '・離高 ' + r.dist.toFixed(1) + '%' : '') +
-      '<br>' + wlEsc(r.group || '—') + '・均線 ' + (r.score ?? '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
+      '<br>' + wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '—') + '・均線 ' + (r.score ?? '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
       '<span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow');
     const md = m.date ? Number(m.date.slice(5, 7)) + '/' + m.date.slice(8, 10) : '';
     return wrap(t, trendParamsHtml() + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + (m.rows.length ? m.rows.map(line).join('') : botLine('目前沒有符合的股票（可以把上面的門檻放寬）', 'bot-dim')) +
@@ -26216,7 +26216,7 @@ function botAnswer(raw){
       return botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' <b>' + (Number.isFinite(px) ? (px >= 1000 ? px.toFixed(0) : px >= 100 ? px.toFixed(1) : px.toFixed(2)) : '—') + '</b> ' + pctSpan(chg) +
           (r.miss ? ' <span class="t240-miss">缺' + r.miss.join('') + '</span>' : '')) +
         '<br><span class="bot-dim" style="font-size:11.5px">週 ' + pctSpan(r.wtd) + '・月 ' + pctSpan(r.mtd) + '・季 ' + pctSpan(r.qtd) + '・年 ' + pctSpan(r.ytd) +
-        '<br>' + wlEsc(r.group || '—') + '・均線 ' + (r.score ?? '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
+        '<br>' + wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '—') + '・均線 ' + (r.score ?? '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
         '<span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow');
     };
     const md = d.date ? Number(d.date.slice(5, 7)) + '/' + d.date.slice(8, 10) : '';
