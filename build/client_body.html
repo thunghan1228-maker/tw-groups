@@ -26027,7 +26027,9 @@ function botAnswer(raw){
         '<br><span class="bot-dim" style="font-size:11.5px">融資 <b class="up">' + scrLots(r.mchg) + '</b> 張・大單淨買 <b class="up">' + scrLots(r.mfnet) + '</b> 張</span></span>' +
         '<span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow'); };
     return wrap(t, botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + (rows.length ? rows.map(line).join('') : botLine('目前沒有符合的股票', 'bot-dim')) +
-      botLine(md + ' 收盤資料：融資增加 ≥500 張＋今天盤中大單淨買 ≥300 張（跟首頁、系統選股「疑似主力融資買進」同一組；融資融券晚上約 21:00 才公布）・照即時漲跌幅排，漲越多越上面・交易所不公開融資是誰借的，只是疑似', 'bot-dim'),
+      botLine(md + ' 收盤資料：融資增加 ≥500 張＋今天盤中大單淨買 ≥300 張（跟首頁、系統選股「疑似主力融資買進」同一組；融資融券晚上約 21:00 才公布）・照即時漲跌幅排，漲越多越上面・交易所不公開融資是誰借的，只是疑似', 'bot-dim') +
+      // 2026-11-14 使用者：14 下面也寫每天幾點更新
+      botLine('🕒 <b>每天更新時間</b>：要等融資公布——上市約 <b>21:00～21:20</b>（後端 21:00 起每 20 分鐘抓一次）、上櫃約 <b>21:50</b> 以後（排程抓，可能晚一點）；網頁每 10 分鐘自動看一次，大約 <b>21:30～22:00</b> 換成當天的名單；21:00 以前（含盤中）是前一個交易日的名單，只有漲跌幅跟著即時跳', 'bot-dim'),
       md + ' 收盤資料・' + rows.length + ' 檔');
   }
   // 2026-11-14 使用者：首頁第一欄最上面的「👁觀察中・等收黑」做成機器人代碼 82——跟首頁那塊同一份（預設規則／「改看我的設定」切換也一樣）、同一個排法（照即時漲跌幅、漲越多越上面）

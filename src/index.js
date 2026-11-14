@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 13:02:33";
+const BUILD_STAMP = "2026-11-14 13:03:13";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -18180,7 +18180,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 13:02:33';
+const BUILD_STAMP = '2026-11-14 13:03:13';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26116,7 +26116,9 @@ function botAnswer(raw){
         '<br><span class="bot-dim" style="font-size:11.5px">融資 <b class="up">' + scrLots(r.mchg) + '</b> 張・大單淨買 <b class="up">' + scrLots(r.mfnet) + '</b> 張</span></span>' +
         '<span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow'); };
     return wrap(t, botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + (rows.length ? rows.map(line).join('') : botLine('目前沒有符合的股票', 'bot-dim')) +
-      botLine(md + ' 收盤資料：融資增加 ≥500 張＋今天盤中大單淨買 ≥300 張（跟首頁、系統選股「疑似主力融資買進」同一組；融資融券晚上約 21:00 才公布）・照即時漲跌幅排，漲越多越上面・交易所不公開融資是誰借的，只是疑似', 'bot-dim'),
+      botLine(md + ' 收盤資料：融資增加 ≥500 張＋今天盤中大單淨買 ≥300 張（跟首頁、系統選股「疑似主力融資買進」同一組；融資融券晚上約 21:00 才公布）・照即時漲跌幅排，漲越多越上面・交易所不公開融資是誰借的，只是疑似', 'bot-dim') +
+      // 2026-11-14 使用者：14 下面也寫每天幾點更新
+      botLine('🕒 <b>每天更新時間</b>：要等融資公布——上市約 <b>21:00～21:20</b>（後端 21:00 起每 20 分鐘抓一次）、上櫃約 <b>21:50</b> 以後（排程抓，可能晚一點）；網頁每 10 分鐘自動看一次，大約 <b>21:30～22:00</b> 換成當天的名單；21:00 以前（含盤中）是前一個交易日的名單，只有漲跌幅跟著即時跳', 'bot-dim'),
       md + ' 收盤資料・' + rows.length + ' 檔');
   }
   // 2026-11-14 使用者：首頁第一欄最上面的「👁觀察中・等收黑」做成機器人代碼 82——跟首頁那塊同一份（預設規則／「改看我的設定」切換也一樣）、同一個排法（照即時漲跌幅、漲越多越上面）
