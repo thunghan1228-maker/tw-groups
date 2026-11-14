@@ -364,7 +364,7 @@
   body.home-light .hr-title.ss-title{background:#fff;}
   .hss-row{display:grid;grid-template-columns:minmax(0,1fr) 48px 54px 58px 22px;grid-template-areas:"nm nm nm nm nm" "tg n pc h m";gap:2px 4px;align-items:center;padding:6px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
   .hss-row.hr-stk{cursor:pointer;} .hss-row.hr-stk:hover{background:rgba(124,58,237,.06);} .hss-row.hsc-head{border-top:0;padding:2px 6px;}
-  .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-name{grid-area:nm;font-size:13.5px;white-space:normal!important;overflow:visible!important;} .hss-tg{grid-area:tg;} .hss-row .hss-n{grid-area:n;} .hss-row .hss-pc{grid-area:pc;} .hss-row .hsc-h{grid-area:h;} .hss-row .hsc-ma{grid-area:m;}
+  .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-time{display:inline-block;min-width:38px;margin-right:4px;color:#7c3aed;font-weight:800;font-size:12px;font-variant-numeric:tabular-nums;} .hss-name{grid-area:nm;font-size:13.5px;white-space:normal!important;overflow:visible!important;} .hss-tg{grid-area:tg;} .hss-row .hss-n{grid-area:n;} .hss-row .hss-pc{grid-area:pc;} .hss-row .hsc-h{grid-area:h;} .hss-row .hsc-ma{grid-area:m;}
   .hss-row.hsc-head{grid-template-areas:"tg n pc h m";} .hss-row.hsc-head > span:first-child{grid-area:tg;} .hss-row.hsc-head > .bsort:nth-of-type(1){grid-area:n;} .hss-row.hsc-head > .hss-pch{grid-area:pc;} .hss-row.hsc-head > .bsort:nth-last-of-type(2){grid-area:h;} .hss-row.hsc-head > .bsort:last-child{grid-area:m;} .hss-n{text-align:center;font-weight:900;color:#b91c1c;} .hss-px{text-align:right;font-weight:900;color:#0b0d10;-webkit-text-stroke:.35px currentColor;font-size:13.5px;} .hss-pc,.hss-pch{display:flex;flex-direction:column;align-items:flex-end;line-height:1.3;} .hss-chg{font-size:12px;font-weight:700;} .hss-pch .bsort{padding:0;}   /* 2026-11-14 使用者：成交價黑色、粗一點 */
   .b32-row.b777r{grid-template-columns:38px minmax(0,1fr) 70px 56px;} .bot-line.b777-hhead{display:grid;grid-template-columns:38px minmax(0,1fr) 70px 56px;gap:0 8px;padding:0 2px 2px;} .b777-hh{font-size:12px;font-weight:900;color:#0b0d10;white-space:nowrap;} .b777-hh.r{text-align:right;} .b777-hh.c{text-align:center;} body:not(.home-light) .home-botcol .b777-hh{color:var(--text);}   /* 2026-11-14 使用者：777 欄位標題：成交價、大戶力、漲跌幅（粗黑） */
   .b32-stk.b777-stk{display:flex;align-items:center;gap:2px;} .b777-stk .bot-stk{min-width:0;overflow:hidden;text-overflow:ellipsis;} .b777-px{margin-left:auto;padding-left:8px;font-weight:900;color:#0b0d10;-webkit-text-stroke:.35px currentColor;font-size:13.5px;font-variant-numeric:tabular-nums;}
@@ -21061,6 +21061,7 @@ async function tdRecordTick(){
     const body = { date: twTodayStr(), slot, total: snap.total, otcLabel: snap.otcLabel, otcPct: snap.otcPct, quoteTime: String(lastData.quoteTime || '').slice(0, 8),
       rows: snap.rows.map(strip), k12: snap.k12Tracked ? snap.k12.map(strip) : [] };
     // 2026-11-13 使用者：火多多(23) 也一起記（後端收 f23；機器人 23 的「第一次進名單」時間跨電腦一樣）
+    try { body.ss = ssList().map((r) => ({ code: r.code, name: r.name, tags: r.tags })); } catch (_){}   // 2026-11-14 使用者：強中強(888) 也記，才有「兩份同時符合」最早的時間
     try { const fm = fire23Model(); if (fm) body.f23 = [].concat(fm.strong, fm.middle, fm.spaceTop, fm.chase).map((r) => ({ code: r.code, name: r.name, g: r.groupName, gr: r.groupRank, mk: r.mark, pct: r.pct })); } catch (_){}
     const res = await fetch('/api/homework-snapshot', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     if (res.ok || res.status === 422) tdRec.done.add(key);
@@ -26589,15 +26590,15 @@ function botAnswerRaw(raw){
     const t = '<span class="ss-blink">💪強中強(888)</span>';
     const list = ssList();
     if (!list.length) return wrap(t, botLine('讀取中…（四份名單都讀進來才算得出來）', 'bot-dim'));
-    const rows = botSortRows('888', list, { n: (r) => r.n, px: (r) => r.px, chg: (r) => r.chg, score: (r) => r.score, holder: (r) => holderPctOf(r.code) });
+    const rows = botSortRows('888', list, { t: (r) => ssMin(r.t), n: (r) => r.n, px: (r) => r.px, chg: (r) => r.chg, score: (r) => r.score, holder: (r) => holderPctOf(r.code) });
     const fmtPx = (v) => (Number.isFinite(v) ? (v >= 1000 ? v.toFixed(0) : v >= 100 ? v.toFixed(1) : v.toFixed(2)) : '—');
-    const head = botLine('<span>' + botSortTh('888', '', '#　股票') + '</span>' + botSortTh('888', 'n', '符合數量') + botSortTh('888', 'px', '價格') + botSortTh('888', 'chg', '漲跌幅') + botSortTh('888', 'score', '均線') + botSortTh('888', 'holder', '大戶力'), 'ss-brow t240-head');
-    const line = (r, i) => botLine('<span class="t240-c1">' + (i + 1) + ' ' + botStk(r.code, r.name, ' ' + ssTagsHtml(r.tags)) + '<br><span class="bot-dim" style="font-size:11.5px">' + wlEsc(r.group || '—') + '</span></span>' +
+    const head = botLine('<span>' + botSortTh('888', 't', '時間') + '　' + botSortTh('888', '', '股票') + '</span>' + botSortTh('888', 'n', '符合數量') + botSortTh('888', 'px', '價格') + botSortTh('888', 'chg', '漲跌幅') + botSortTh('888', 'score', '均線') + botSortTh('888', 'holder', '大戶力'), 'ss-brow t240-head');
+    const line = (r, i) => botLine('<span class="t240-c1"><span class="hss-time" title="四份名單裡第一次有兩份同時符合的時間">' + (r.t || '--:--') + '</span>' + botStk(r.code, r.name, ' ' + ssTagsHtml(r.tags)) + '<br><span class="bot-dim" style="font-size:11.5px">' + wlEsc(r.group || '—') + '</span></span>' +
       '<span class="t240-n hss-n">' + r.n + '</span><span class="t240-n"><b>' + fmtPx(r.px) + '</b></span>' +
       '<span class="t240-n ' + (Number.isFinite(r.chg) ? dirClass(r.chg) : 'bot-dim') + '">' + (Number.isFinite(r.chg) ? botPct(r.chg) : '—') + '</span>' +
       '<span class="t240-n t240-ma">' + (r.score ?? '—') + '</span><span class="t240-n">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'ss-brow');
     return wrap(t, head + rows.map(line).join('') +
-      botLine('四份名單：<span class="ss-tag ss-t1">觀</span>強勢股觀察中・等收黑(82)、<span class="ss-tag ss-t2">紅</span>強勢紅K（系統選股）、<span class="ss-tag ss-t3">240</span>熱門趨勢概念股（即時）、<span class="ss-tag ss-t4">260</span>日動能強勢（即時）；同一檔出現在兩份以上就列進來，照份數多、漲多排（欄位名稱點一下可以排序）。240、260 盤中跟著行情變，名單也會跟著換', 'bot-dim'),
+      botLine('四份名單：<span class="ss-tag ss-t1">觀</span>強勢股觀察中・等收黑(82)、<span class="ss-tag ss-t2">紅</span>強勢紅K（系統選股）、<span class="ss-tag ss-t3">240</span>熱門趨勢概念股（即時）、<span class="ss-tag ss-t4">260</span>日動能強勢（即時）；同一檔出現在兩份以上就列進來；左邊時間＝第一次有兩份同時符合的時間，照時間排、最近的在上面（欄位名稱點一下可以排序）。240、260 盤中跟著行情變，名單也會跟著換', 'bot-dim'),
       list.length + ' 檔');
   }
   // 2026-11-14 使用者：日動能＝260、週動能＝270（即時，盤中跟著行情重算、名單跟著換）、法人動能＝280；跟「📈動能選股」面板同一份、強弱／名單切換也是同一組
@@ -30126,30 +30127,57 @@ function hot2Map(){
 function hot2Of(code){ try { return hot2Map().get(code) || null; } catch (_){ return null; } }
 // 2026-11-14 使用者：四份重複兩份以上的整理成一欄「強中強」（首頁 183 右邊；機器人代碼 888）
 const SS_TAG = { '強勢股觀察中': ['觀', 'ss-t1'], '強勢紅K': ['紅', 'ss-t2'], '240': ['240', 'ss-t3'], '260': ['260', 'ss-t4'] };
+// 2026-11-14 使用者：強中強加「發生時間」＝四份名單裡第一次有兩份同時符合的時間（有三、四份的也是看兩份剛符合那一刻），照時間排、最近的在上面。
+// 時間來源：每日功課每 5 分鐘紀錄裡的強中強名單（ss，大家看到的一樣；雲端自動開網頁會記），再跟這台電腦第一次看到的時間比，取早的。
+const SS_SEEN_KEY = 'ssSeen';
+let ssSeen = { date: '', m: {} };
+try { const v = JSON.parse(localStorage.getItem(SS_SEEN_KEY) || 'null'); if (v && typeof v === 'object' && v.m) ssSeen = v; } catch (_){}
+function ssNoteSeen(codes){
+  if (!lastData || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記盤中
+  const day = lastData.quoteDate;
+  if (ssSeen.date !== day) ssSeen = { date: day, m: {} };
+  let changed = false;
+  codes.forEach((c) => { if (!ssSeen.m[c]){ ssSeen.m[c] = Date.now(); changed = true; } });
+  if (changed){ try { localStorage.setItem(SS_SEEN_KEY, JSON.stringify(ssSeen)); } catch (_){} }
+}
+function ssFirstMap(){
+  const out = new Map(), day = lastData && lastData.quoteDate;
+  if (!day) return out;
+  const d = bladeTrack.data;
+  if (d && d.date === day && d.slots) Object.keys(d.slots).sort().forEach((sl) => { (d.slots[sl].ss || []).forEach((r) => { if (r && r.code && !out.has(r.code)) out.set(r.code, sl); }); });
+  if (ssSeen.date === day) Object.entries(ssSeen.m).forEach(([c, ts]) => { const hm = new Date(ts + 8 * 3600e3).toISOString().slice(11, 16); if (!out.has(c) || hm < out.get(c)) out.set(c, hm); });
+  return out;
+}
+const ssMin = (t) => (/^\d\d:\d\d$/.test(t || '') ? Number(t.slice(0, 2)) * 60 + Number(t.slice(3)) : NaN);
 function ssList(){
   const mp = hot2Map(), info = hot2Cache.info || new Map();
+  try { bladeTrackRefresh(); ssNoteSeen([...mp.keys()]); } catch (_){}
+  const first = ssFirstMap();
   return [...mp].map(([code, tags]) => {
     const o = info.get(code) || {}, q = getStockQuote(code);
     return { code, name: o.name || (WL_GROUP_INDEX[code] && WL_GROUP_INDEX[code].name) || code, tags, n: tags.length, score: o.score, group: o.group || (WL_GROUP_INDEX[code] && WL_GROUP_INDEX[code].group) || '',
+      t: first.get(code) || '',
       chg: q && Number.isFinite(q.changePercent) ? q.changePercent : o.chg, px: q && Number.isFinite(q.price) ? q.price : (Number.isFinite(o.px) ? o.px : null) };
-  }).sort((a, b) => b.n - a.n || (b.chg ?? -1e9) - (a.chg ?? -1e9));
+  }).sort((a, b) => (a.t !== b.t ? (!a.t ? 1 : !b.t ? -1 : b.t > a.t ? 1 : -1) : 0) || b.n - a.n || (b.chg ?? -1e9) - (a.chg ?? -1e9));
 }
+// 以前存的「照符合數量排」重設一次，讓大家一打開就是照時間排（之後自己點的照樣記住）
+try { if (!localStorage.getItem('ssSortReset1')){ delete botSortState.home_ss; delete botSortState['888']; localStorage.setItem('botSort', JSON.stringify(botSortState)); localStorage.setItem('ssSortReset1', '1'); } } catch (_){}
 const ssTagsHtml = (tags) => tags.map((t) => { const x = SS_TAG[t] || [t, '']; return '<span class="ss-tag ' + x[1] + '" title="' + wlEsc(t) + '">' + x[0] + '</span>'; }).join('');
 const SS_TIP = '強勢股觀察中・等收黑、強勢紅K、熱門趨勢概念股(240)、日動能強勢(260) 四份名單，同一檔出現在兩份以上（觀＝強勢股觀察中、紅＝強勢紅K）';
 function homeSsColHtml(){
-  const rows = botSortRows('home_ss', ssList(), { n: (r) => r.n, px: (r) => r.px, chg: (r) => r.chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
+  const rows = botSortRows('home_ss', ssList(), { t: (r) => ssMin(r.t), n: (r) => r.n, px: (r) => r.px, chg: (r) => r.chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
   const title = '<div class="hr-title ss-title" title="' + wlEsc(SS_TIP) + '"><span class="ss-blink">💪強中強 ' + rows.length + ' 檔（888）</span></div>';   // 2026-11-14 使用者：標題「強中強 N 檔」紅底白字閃
   if (!rows.length) return '<div class="hr-col">' + title + '<div class="hr-note">讀取中…（四份名單都讀進來才算得出來）</div></div>';
-  const head = '<div class="hss-row hsc-head"><span>' + botSortTh('home_ss', '', '股票') + '</span>' + botSortTh('home_ss', 'n', '符合數量') + '<span class="hss-pch">' + botSortTh('home_ss', 'px', '成交價') + botSortTh('home_ss', 'chg', '漲跌幅') + '</span>' + botSortTh('home_ss', 'holder', '大戶力') + botSortTh('home_ss', 'score', '均線') + '</div>';
+  const head = '<div class="hss-row hsc-head"><span>' + botSortTh('home_ss', 't', '時間') + '　' + botSortTh('home_ss', '', '股票') + '</span>' + botSortTh('home_ss', 'n', '符合數量') + '<span class="hss-pch">' + botSortTh('home_ss', 'px', '成交價') + botSortTh('home_ss', 'chg', '漲跌幅') + '</span>' + botSortTh('home_ss', 'holder', '大戶力') + botSortTh('home_ss', 'score', '均線') + '</div>';
   const row = (r) => '<div class="hss-row hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(r.group + '・同時在「' + r.tags.join('」「') + '」') + '">' +
     // 2026-11-14 使用者（iPad 股名還是被蓋住）：每檔分兩行——第一行只放代號股名（整列寬），第二行放標籤、份數、成交價／漲跌幅、大戶力、均線
-    '<span class="hss-name hsc-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name) + '</span><span class="ss-tags hss-tg">' + ssTagsHtml(r.tags) + '</span>' +
+    '<span class="hss-name hsc-stk"><span class="hss-time" title="四份名單裡第一次有兩份同時符合的時間">' + (r.t || '--:--') + '</span><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name) + '</span><span class="ss-tags hss-tg">' + ssTagsHtml(r.tags) + '</span>' +
     '<span class="hss-n">' + r.n + '</span>' +
     // 2026-11-14 使用者（iPad 太擠、股名被蓋住）：成交價在上、漲跌幅在下，分兩行
     '<span class="hss-pc"><span class="hss-px">' + (Number.isFinite(r.px) ? (r.px >= 1000 ? r.px.toFixed(0) : r.px >= 100 ? r.px.toFixed(1) : r.px.toFixed(2)) : '—') + '</span>' +
     '<span class="hss-chg ' + (Number.isFinite(r.chg) ? dirClass(r.chg) : '') + '">' + (Number.isFinite(r.chg) ? (r.chg > 0 ? '+' : '') + r.chg.toFixed(2) + '%' : '—') + '</span></span>' +
     '<span class="hsc-h">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span><span class="hsc-ma">' + (r.score ?? '—') + '</span></div>';
-  return '<div class="hr-col">' + title + '<div class="hr-note">四份裡重複兩份以上：觀＝強勢股觀察中、紅＝強勢紅K、240、260；照符合數量多→漲多排</div>' + head + rows.map(row).join('') + '</div>';
+  return '<div class="hr-col">' + title + '<div class="hr-note">四份裡重複兩份以上：觀＝強勢股觀察中、紅＝強勢紅K、240、260；時間＝第一次有兩份同時符合，最近的在上面</div>' + head + rows.map(row).join('') + '</div>';
 }
 const hot2Title = (tags) => '同時在「' + tags.join('」「') + '」' + tags.length + ' 份名單（強勢股觀察中、強勢紅K、240、260 四份裡出現 2 份以上就閃）';
 const botStkHot = (code, name, rest) => { const tg = hot2Of(code); const h = botStk(code, name, rest); return tg ? h.replace('<span class="bot-stk"', '<span class="bot-stk hot2" title="' + wlEsc(hot2Title(tg)) + '"') : h; };
