@@ -352,6 +352,8 @@
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
   @media (prefers-reduced-motion: reduce){ .hot2{animation-duration:2.4s;} }
+  @keyframes hotbearblink{0%,100%{background:#16a34a;color:#fff;box-shadow:0 0 0 2px #16a34a;}50%{background:#bbf7d0;color:#14532d;box-shadow:0 0 0 2px #bbf7d0;}}
+  .hotbear,#botBody .bot-stk.hotbear,body.home-light .home-botcol .bot-stk.hotbear,#botBody .b32-row.gone .b32-stk .bot-stk.hotbear{animation:hotbearblink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 777 跟 32 重複就閃綠 */
   .hsc-row{display:grid;grid-template-columns:minmax(0,1fr) 74px 66px 30px;gap:0 6px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
   .hsc-row.hr-stk{cursor:pointer;} .hsc-row.hr-stk:hover{background:rgba(124,58,237,.06);}
   .hsc-head{border-top:0;padding:2px 6px;} .hsc-head .bsort{text-align:right;} .hsc-head > span .bsort{text-align:left;}
@@ -26207,7 +26209,41 @@ function botStockCard(code, raw, wrap){
 function botNorm(raw){
   return String(raw || '').trim().replace(/[０-９Ａ-Ｚａ-ｚ＋－]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[−–—]/g, '-').replace(/\s+/g, '').toUpperCase();
 }
+// 2026-11-14 使用者：機器人 777 跟 32 兩份名單都有的股票，代號股名閃綠色（空方）。
+// 777、32 的名單照當下畫出來的格子算（777 的篩選勾選也算進去；32 裡「跑掉」劃掉的不算），3 秒內重算一次；首頁加的 777／32 欄位一樣會閃。
+const hotBearCache = { at: 0, set: new Set(), busy: false };
+function hotBearSet(){
+  if (hotBearCache.busy || Date.now() - hotBearCache.at < 3000) return hotBearCache.set;
+  hotBearCache.busy = true; hotBearCache.at = Date.now();
+  try {
+    const codesOf = (q) => {
+      const tpl = document.createElement('template');
+      tpl.innerHTML = botAnswerRaw(q) || '';
+      const out = new Set();
+      tpl.content.querySelectorAll('[data-bot-code]').forEach((el) => { if (!el.closest('.gone, .blade-gone')) out.add(String(el.dataset.botCode || '').toUpperCase()); });
+      return out;
+    };
+    const a = codesOf('777'), b = codesOf('32');
+    hotBearCache.set = new Set([...a].filter((c) => b.has(c)));
+  } catch (_){} finally { hotBearCache.busy = false; }
+  return hotBearCache.set;
+}
 function botAnswer(raw){
+  const html = botAnswerRaw(raw);
+  const k = botNorm(raw);
+  if (!html || (k !== '777' && k !== '32') || hotBearCache.busy) return html;
+  const set = hotBearSet();
+  if (!set.size) return html;
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html;
+  tpl.content.querySelectorAll('[data-bot-code]').forEach((el) => {
+    if (!set.has(String(el.dataset.botCode || '').toUpperCase()) || el.closest('.gone, .blade-gone')) return;
+    const tgt = el.classList.contains('bot-stk') ? el : el.querySelector('.bot-stk');
+    if (tgt){ tgt.classList.add('hotbear'); tgt.title = '777 跟 32 兩份名單都有'; }
+  });
+  return tpl.innerHTML;
+}
+function botAnswerRaw(raw){
   const q = botNorm(raw);
   if (!q) return null;
   // 2026-10-18 使用者：空方的（負號代碼 -12、-22…）跟隔日沖 811、813 的標題改綠底白字；
