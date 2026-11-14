@@ -1,0 +1,52 @@
+name: 盤中自動開網頁記錄
+
+# 2026-11-14 使用者：每日功課的 5 分鐘紀錄（刀劍空、12空、火多多名單）原本要有人開著網頁才記得到，
+# 11/13 只記到 11:05，之後進榜的（777 的聯茂）就沒有時間。改成交易日在 GitHub 開一個看不見的瀏覽器，從開盤前一直開到 13:41。
+# GitHub 排程常常晚到（有時晚好幾個小時），所以排好幾班：同一時間只會跑一班，已經在跑的話後面那班等它跑完、
+# 收盤後才輪到的那班一開始就會發現過了 13:41，直接結束。
+on:
+  schedule:
+    - cron: "37 0 * * 1-5"   # 08:37 台北
+    - cron: "7 1 * * 1-5"    # 09:07
+    - cron: "37 1 * * 1-5"   # 09:37
+    - cron: "7 2 * * 1-5"    # 10:07
+    - cron: "37 2 * * 1-5"   # 10:37
+    - cron: "7 3 * * 1-5"    # 11:07
+    - cron: "37 3 * * 1-5"   # 11:37
+    - cron: "7 4 * * 1-5"    # 12:07
+    - cron: "37 4 * * 1-5"   # 12:37
+    - cron: "7 5 * * 1-5"    # 13:07
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: "測試用：只開幾分鐘（空白＝開到 13:41）"
+        required: false
+        default: ""
+      force:
+        description: "測試用：1＝週末／收盤後也照開"
+        required: false
+        default: ""
+
+concurrency:
+  group: homework-recorder
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Keep the site open and let it record
+        env:
+          MINUTES: ${{ inputs.minutes }}
+          FORCE: ${{ inputs.force }}
+        run: node scripts/homework_recorder.js
