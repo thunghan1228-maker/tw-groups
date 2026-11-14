@@ -66,9 +66,27 @@ def build(video: dict) -> dict:
     subprocess.run(["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", ";".join(filters), "-map", "0:v", "-map", "[aout]",
                     "-c:v", "libx264", "-preset", "medium", "-crf", "28", "-pix_fmt", "yuv420p", "-r", "25",
                     "-c:a", "aac", "-b:a", "80k", "-shortest", "-movflags", "+faststart", str(dest)], check=True)
+    shrink_to_limit(dest)
     Path(tl["raw"]).unlink(missing_ok=True)
     return {"key": video["key"], "title": video["title"], "section": video["section"], "file": dest.name,
             "duration": round(duration(dest), 1), "tab": video.get("tab"), "warnings": tl["warnings"]}
+
+
+MAX_BYTES = 24 * 1024 * 1024   # Cloudflare Workers 靜態檔案一個最多 25 MiB，超過整次部署會失敗（2026-11-15 首頁影片 25.6 MiB）
+
+
+def shrink_to_limit(dest: Path) -> None:
+    """影片超過 MAX_BYTES 就把畫質再壓一點（音訊照抄），直到放得進去。"""
+    for crf in (31, 34, 37):
+        if dest.stat().st_size <= MAX_BYTES:
+            return
+        tmp = dest.with_suffix(".tmp.mp4")
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(dest), "-c:v", "libx264", "-preset", "medium", "-crf", str(crf), "-pix_fmt", "yuv420p",
+                        "-r", "25", "-c:a", "copy", "-movflags", "+faststart", str(tmp)], check=True)
+        tmp.replace(dest)
+        print(f"  {dest.name} 太大，壓成 crf {crf}：{dest.stat().st_size / 1048576:.1f} MiB", flush=True)
+    if dest.stat().st_size > MAX_BYTES:
+        print(f"  注意： {dest.name} 還是超過 {MAX_BYTES / 1048576:.0f} MiB，部署會失敗", flush=True)
 
 
 def write_index(entries: dict) -> int:
