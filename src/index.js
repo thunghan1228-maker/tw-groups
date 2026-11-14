@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 10:32:12";
+const BUILD_STAMP = "2026-11-14 10:32:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4137,6 +4137,27 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bl-table .combo-holder .sig-label .hf-amt::before{content:'・';opacity:.7;}
   /* 2026-10-03 使用者：醞釀／發動這張表的盤中大戶力欄只留百分比，金額拿掉 */
   .bl-table .combo-holder .sig-label .hf-amt{display:none;}
+  /* 2026-11-14 使用者：首頁下面那排 16 個面板內容全部改白底（原本黑底的 9 個：問診、健診、飆股雷達、自選股、處置監獄、創高黑選股、盤中訊號追蹤、研究室、系統選股；其他 7 個本來就是淺色版面），股號、股名改粗黑字。K棒道場、K線圖視窗維持深色（K 棒配色是照黑底調的） */
+  :is(#diagModal,#checkupModal,#grailModal,#watchModal,#jailModal,#pickerModal,#trackModal,#labModal,#screenerModal) .chips-inner{--bg:#f3f4f6;--panel:#ffffff;--panel-2:#eef0f3;--line:#d6dae0;--text:#16181b;--muted:#5b6068;--up:#d0342c;--down:#15803d;--accent:#8a6d3f;background:var(--bg);color:var(--text);box-shadow:0 12px 40px rgba(0,0,0,.35);}
+  #watchInner > .chips-head{background:#33333a;color:#fff;}
+  /* 16 個面板裡的股號、股名：粗黑字（微軟正黑體只有一種粗體，加一點描邊看起來才會更粗） */
+  :is(#diagModal .dg-head :is(.dg-code,.dg-name), #diagModal .dg-stk :is(b,.dg-nm), #diagModal .pf-chip, #diagModal .ck-tag.dg-link,
+  #hwModal :is(.td-stk,.td-stk b,.td-rchip:not(.blade),.td-glink),
+  #swingModal :is(.nmx,.sw-dcode,.sw-dname,.sp-code,.sp-nm,.sw-code,.sw-name),
+  #checkupModal :is(.ck-code,.ck-name),
+  #grailModal :is(.gr-chip,.gr-chip small,.gr-code,.gr-name b),
+  #chipsModal :is(.rd-lrow,.rd-srow) > :is(.rd-c:first-child,.rd-n), #chipsModal .rd-card-head :is(.rd-name,.rd-code), #chipsModal tr.rd-crow > td:nth-child(2), #chipsModal tr.rd-crow > td:nth-child(3) > span,
+  :is(#jailModal,#revModal) :is(.jl-stk,.jl-stk .jl-code), #revModal .rv-card.t0 .n,
+  #maModal td.code, #maModal .nm, #maModal tr.ma-hrow > td:nth-child(3),
+  #heilongModal td.l > b,
+  #pickerModal .pk-name :is(b,small), #pickerModal .pk-act-main > b,
+  :is(#trackModal,#watchModal) :is(td.wl-stock,.wl-name),
+  #rivModal td > span.code, #rivModal td:has(> span.code), #rivModal .scr-pre,
+  #labModal .mc-co:not(.mine),
+  #screenerModal tr.scr-row > td.code, #screenerModal tr.scr-row > td.code + td){color:#0b0d10;font-weight:900;-webkit-text-stroke:.3px currentColor;}
+  #revModal .rv-card:not(.t0) .n, #swingModal .sp-etfrow .nm, #hwModal .td-rchip.blade, #labModal .mc-co.mine{font-weight:900;}
+  :is(#diagModal .ck-tag.dg-link .muted, #diagModal .ck-tag.dg-link .dg-pill, #labModal .mc-co small, #hwModal .td-rchip small){-webkit-text-stroke:0;font-weight:500;}
+  #diagModal .ck-tag.dg-link .dg-pill{font-weight:700;}
 </style>
 </head>
 <body>
@@ -18148,7 +18169,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 10:32:12';
+const BUILD_STAMP = '2026-11-14 10:32:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
