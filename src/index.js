@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 18:05:11";
+const BUILD_STAMP = "2026-11-14 18:08:26";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -446,9 +446,10 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   @keyframes ssblink{0%,100%{background:#dc2626;color:#fff;}50%{background:#fecaca;color:#7f1d1d;}}
   .ss-blink{display:inline-block;animation:ssblink 1s ease-in-out infinite;border-radius:5px;padding:1px 8px;font-weight:900;}
   body.home-light .hr-title.ss-title{background:#fff;}
-  .hss-row{display:grid;grid-template-columns:minmax(0,1fr) 22px 56px 64px 66px 28px;gap:0 5px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
+  .hss-row{display:grid;grid-template-columns:minmax(110px,1fr) 22px 70px 68px 28px;gap:0 6px;align-items:center;padding:6px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
   .hss-row.hr-stk{cursor:pointer;} .hss-row.hr-stk:hover{background:rgba(124,58,237,.06);} .hss-row.hsc-head{border-top:0;padding:2px 6px;}
-  .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-n{text-align:center;font-weight:900;color:#b91c1c;} .hss-px{text-align:right;font-weight:900;color:#0b0d10;-webkit-text-stroke:.35px currentColor;font-size:13px;}   /* 2026-11-14 使用者：成交價黑色、粗一點 */
+  .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-n{text-align:center;font-weight:900;color:#b91c1c;} .hss-px{text-align:right;font-weight:900;color:#0b0d10;-webkit-text-stroke:.35px currentColor;font-size:13.5px;} .hss-pc,.hss-pch{display:flex;flex-direction:column;align-items:flex-end;line-height:1.3;} .hss-chg{font-size:12px;font-weight:700;} .hss-pch .bsort{padding:0;}   /* 2026-11-14 使用者：成交價黑色、粗一點 */
+  .b32-row.b777r{grid-template-columns:38px minmax(0,1fr) 70px 56px;} .bot-line.b777-hhead{display:grid;grid-template-columns:38px minmax(0,1fr) 70px 56px;gap:0 8px;padding:0 2px 2px;} .b777-hh{font-size:12px;font-weight:900;color:#0b0d10;white-space:nowrap;} .b777-hh.r{text-align:right;} .b777-hh.c{text-align:center;} body:not(.home-light) .home-botcol .b777-hh{color:var(--text);}   /* 2026-11-14 使用者：777 欄位標題：成交價、大戶力、漲跌幅（粗黑） */
   .b32-stk.b777-stk{display:flex;align-items:center;gap:2px;} .b777-stk .bot-stk{min-width:0;overflow:hidden;text-overflow:ellipsis;} .b777-px{margin-left:auto;padding-left:8px;font-weight:900;color:#0b0d10;-webkit-text-stroke:.35px currentColor;font-size:13.5px;font-variant-numeric:tabular-nums;}
   .t240-n:not(.up):not(.down) > b,.dyn-table td:not(.dyn-stk) > b{font-weight:900;color:#0b0d10;-webkit-text-stroke:.3px currentColor;}   /* 2026-11-14 使用者：成交價都粗一點、黑色 */
   .ss-tags{display:flex;gap:3px;margin-top:1px;} .ss-tag{font-size:10px;font-weight:800;line-height:1.35;padding:0 4px;border-radius:3px;color:#fff;background:#6b7280;}
@@ -11062,7 +11063,7 @@ function homeRank4Html(){
     // 2026-10-28 使用者（又改）：今日強勢股放在第五欄 30加33加34 的下面，一樣用紅框框起來（先前排第四欄／疊在當沖多1 下面都拿掉）
     // 2026-11-14 使用者：首頁順序改成 777、強中強、強勢股觀察中、強勢紅K（下面疊創高黑龍）、動能選股的熱門趨勢概念股(240)、日動能(260)、週動能(270)，其他照原本順序往後排
     homeFixedBotColHtml('777', true) +   // 功課卡片條列（跟 32 重複的照樣閃綠）
-    '<div class="hr-stack">' + homeRedBox(homeSsColHtml()) + '</div>' +   // 強中強（四份重複兩份以上）
+    '<div class="hr-stack hx-wide">' + homeRedBox(homeSsColHtml()) + '</div>' +   // 強中強（四份重複兩份以上；iPad／手機佔兩格寬）
     '<div class="hr-col">' + homePickWatchHtml() + '</div>' +   // 👁強勢股觀察中・等收黑
     '<div class="hr-stack">' + homeRedBox(homeScrColHtml('red')) + homeRedBox(homeScrColHtml('dragon')) + '</div>' +   // 強勢紅K，創高黑龍疊在下面
     homeFixedBotColHtml('240', true) + homeFixedBotColHtml('260', true) + homeFixedBotColHtml('270', true) +
@@ -18364,7 +18365,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 18:05:11';
+const BUILD_STAMP = '2026-11-14 18:08:26';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26870,7 +26871,7 @@ function botAnswerRaw(raw){
       const r = baseOf(it);
       const big = r.big !== null && r.big !== undefined ? r.big : holderPctOf(r.code);
       const mk = it.r32 && /[🔪⚔️🔰]/u.test(it.r32.mk || '') ? it.r32.mk : (it.r12 && /[🔪⚔️🔰]/u.test(it.r12.mk || '') ? it.r12.mk : '');
-      return '<div class="b32-row bh k12" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
+      return '<div class="b32-row bh k12 b777r" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
         '<span class="b32-time">' + (itEv(it) || '--:--') + '</span>' +
         '<span class="b32-stk b777-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + (() => { const q7 = getStockQuote(r.code); const p7 = q7 && Number.isFinite(q7.price) ? q7.price : null; return '<span class="b777-px" title="即時成交價">' + (p7 === null ? '—' : p7 >= 1000 ? p7.toFixed(0) : p7 >= 100 ? p7.toFixed(1) : p7.toFixed(2)) + '</span>'; })() + '</span>' +   // 2026-11-14 使用者：777 股名右邊空的地方放即時成交價
         '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + '</span>' +
@@ -26884,7 +26885,7 @@ function botAnswerRaw(raw){
         ' <span class="bot-dim">命中 ' + g.list.length + ' / 族內 ' + (gg ? gg.stocks.length : '—') + (g.time ? '・最新 ' + g.time : '') + '</span>', 'bot-head');
     };
     const otc = live.otcLabel || '';
-    const body = bot777ParamsHtml() + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') +
+    const body = bot777ParamsHtml() + botLine('<span></span><span class="b777-hh r">成交價</span><span class="b777-hh c">大戶力</span><span class="b777-hh r">漲跌幅</span>', 'b777-hhead') +
       botLine('🔪刀劍空 ' + rows32.length + ' 檔・🔵12空 ' + rows12.length + ' 檔・合計 ' + items.size + ' 檔／' + groups.length + ' 族', 'bot-sep') +
       (items.size ? groups.map((g) => grpHead(g) + g.list.map(rowHtml).join('')).join('') : botLine('目前沒有', 'bot-dim')) +
       (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail() + (live.otcPct !== null && live.otcPct !== undefined ? '　櫃買 ' + wlEsc(otc) + ' ' + botPct(live.otcPct) : ''), 'bot-warn') : '') +
@@ -30157,12 +30158,13 @@ function homeSsColHtml(){
   const rows = botSortRows('home_ss', ssList(), { n: (r) => r.n, px: (r) => r.px, chg: (r) => r.chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
   const title = '<div class="hr-title ss-title" title="' + wlEsc(SS_TIP) + '"><span class="ss-blink">💪強中強 ' + rows.length + ' 檔</span></div>';   // 2026-11-14 使用者：標題「強中強 N 檔」紅底白字閃
   if (!rows.length) return '<div class="hr-col">' + title + '<div class="hr-note">讀取中…（四份名單都讀進來才算得出來）</div></div>';
-  const head = '<div class="hss-row hsc-head"><span>' + botSortTh('home_ss', '', '股票') + '</span>' + botSortTh('home_ss', 'n', '份') + botSortTh('home_ss', 'px', '成交價') + botSortTh('home_ss', 'chg', '漲跌') + botSortTh('home_ss', 'holder', '大戶力') + botSortTh('home_ss', 'score', '均線') + '</div>';
+  const head = '<div class="hss-row hsc-head"><span>' + botSortTh('home_ss', '', '股票') + '</span>' + botSortTh('home_ss', 'n', '份') + '<span class="hss-pch">' + botSortTh('home_ss', 'px', '成交價') + botSortTh('home_ss', 'chg', '漲跌幅') + '</span>' + botSortTh('home_ss', 'holder', '大戶力') + botSortTh('home_ss', 'score', '均線') + '</div>';
   const row = (r) => '<div class="hss-row hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(r.group + '・同時在「' + r.tags.join('」「') + '」') + '">' +
     '<span class="hss-c1"><span class="hsc-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name) + '</span><span class="ss-tags">' + ssTagsHtml(r.tags) + '</span></span>' +
     '<span class="hss-n">' + r.n + '</span>' +
-    '<span class="hss-px">' + (Number.isFinite(r.px) ? (r.px >= 1000 ? r.px.toFixed(0) : r.px >= 100 ? r.px.toFixed(1) : r.px.toFixed(2)) : '—') + '</span>' +   // 2026-11-14 使用者：強中強加即時成交價
-    '<span class="hsc-k ' + (Number.isFinite(r.chg) ? dirClass(r.chg) : '') + '">' + (Number.isFinite(r.chg) ? (r.chg > 0 ? '+' : '') + r.chg.toFixed(2) + '%' : '—') + '</span>' +
+    // 2026-11-14 使用者（iPad 太擠、股名被蓋住）：成交價在上、漲跌幅在下，分兩行
+    '<span class="hss-pc"><span class="hss-px">' + (Number.isFinite(r.px) ? (r.px >= 1000 ? r.px.toFixed(0) : r.px >= 100 ? r.px.toFixed(1) : r.px.toFixed(2)) : '—') + '</span>' +
+    '<span class="hss-chg ' + (Number.isFinite(r.chg) ? dirClass(r.chg) : '') + '">' + (Number.isFinite(r.chg) ? (r.chg > 0 ? '+' : '') + r.chg.toFixed(2) + '%' : '—') + '</span></span>' +
     '<span class="hsc-h">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span><span class="hsc-ma">' + (r.score ?? '—') + '</span></div>';
   return '<div class="hr-col">' + title + '<div class="hr-note">四份裡重複兩份以上：觀＝強勢股觀察中、紅＝強勢紅K、240、260；照份數多→漲多排</div>' + head + rows.map(row).join('') + '</div>';
 }
