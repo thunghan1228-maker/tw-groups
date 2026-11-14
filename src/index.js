@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-15 00:43:49";
+const BUILD_STAMP = "2026-11-15 01:06:02";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -311,6 +311,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   @keyframes obspink{0%,100%{background:#ec4899;color:#fff;box-shadow:0 0 0 2px #ec4899;}50%{background:#9d174d;color:#fff;box-shadow:0 0 0 2px #9d174d;}}
   @keyframes obsblue{0%,100%{background:#2563eb;color:#fff;box-shadow:0 0 0 2px #2563eb;}50%{background:#1e3a8a;color:#fff;box-shadow:0 0 0 2px #1e3a8a;}}
   .obs-nm{border-radius:4px;padding:0 3px;} .obs-blink.pink{animation:obspink 1s ease-in-out infinite;} .obs-blink.blue{animation:obsblue 1s ease-in-out infinite;} .obs-blink b{color:inherit;}   /* 2026-11-14 收盤觀察股粉紅閃、盤前空觀察藍閃 */
+  .dt-warn{display:inline-flex;align-items:center;vertical-align:-2px;margin-left:3px;flex:0 0 auto;} .dt-warn svg{width:15px;height:13px;display:block;}   /* 2026-11-15 前一日隔日沖買盤 */
   .b999-sec{font-size:13px;font-weight:900;color:#fff;border-radius:6px;padding:4px 8px;margin:8px 0 2px;} .b999-sec.s32{background:#7c3aed;} .b999-sec.s12{background:#2563eb;} .b999-sec b{font-size:14px;}
   .b999-ov{font-size:11px;font-weight:800;color:#15803d;border:1px solid #16a34a;border-radius:5px;padding:0 4px;white-space:nowrap;} .b32-tag.b999-ev{position:static;}   /* 2026-11-14 999 重疊空 */
   .b777-flag{display:inline-block;font-size:11px;font-weight:800;border-radius:5px;padding:0 5px;color:#fff;white-space:nowrap;}
@@ -9806,7 +9807,7 @@ function bladeBotListHtml(m, holderFilter, oldestFirst, opts){
     const flags = bot777FlagTags(x.code);   // 2026-11-13 使用者：32 也標股期／小期、禁空／停券（跟 777 同一套）
     return '<div class="b32-row' + (gone ? ' gone' : '') + (bareHolder ? ' bh' : '') + (flags ? ' k12' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(name) + '">' +
       '<span class="b32-time">' + x.first + '</span>' +
-      '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(name) + '</span>' + (r && r.bladeMark ? r.bladeMark : '') + '</span>' +
+      '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(name) + '</span>' + (r && r.bladeMark ? r.bladeMark : '') + dtWarnHtml(x.code, true) + '</span>' +
       '<span class="b32-grp">' + wlEsc(gname) + (grank ? '・' + grank + zone : '') + '</span>' +
       '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
       '<span class="b32-h">' + holderTagHtml(big !== null ? big : holderPctOf(x.code), true, bareHolder) + '</span>' +
@@ -11059,13 +11060,13 @@ function homeScrColHtml(kind){
   const m20Html = (r) => { const x = m20Of(r); if (!x) return '<span class="hsc-m20c muted" title="月線資料讀取中或日K不足">—</span>';
     const up = x.gap >= 0; return '<span class="hsc-m20c ' + (up ? 'up' : 'down') + '" title="' + wlEsc('月線（20日均線）' + x.ma.toFixed(2) + '，' + (up ? '在上面 ' : '在下面 ') + Math.abs(x.gap).toFixed(1) + '%') + '">' + (up ? '↑' : '↓') + '</span>'; };
   const row = (r) => '<div class="hsc-row hsc-m20 hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc((r.grp || '') + '・' + md + ' 收盤 ' + (r.close ?? '')) + '">' +
-    (kind === 'red' && hot2Of(r.code) ? '<span class="hsc-stk"><b class="hot2" title="' + wlEsc(hot2Title(hot2Of(r.code))) + '">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</b></span>'
-      : '<span class="hsc-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name || '') + '</span>') +   // 2026-11-14 使用者：強勢紅K／240／260 重複 2 份以上就閃
+    (kind === 'red' && hot2Of(r.code) ? '<span class="hsc-stk"><b class="hot2" title="' + wlEsc(hot2Title(hot2Of(r.code))) + '">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</b>' + dtWarnHtml(r.code, false) + '</span>'
+      : '<span class="hsc-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name || '') + dtWarnHtml(r.code, false) + '</span>') +   // 2026-11-14 使用者：強勢紅K／240／260 重複 2 份以上就閃
     m20Html(r) +
     '<span class="hsc-k"><i class="hsc-dot ' + (r.k === 'red' ? 'red' : r.k === 'black' ? 'black' : '') + '">●</i><span class="' + (Number.isFinite(r.chg) ? dirClass(r.chg) : '') + '">' + (Number.isFinite(r.chg) ? (r.chg > 0 ? '+' : '') + r.chg.toFixed(2) + '%' : '—') + '</span></span>' +
     '<span class="hsc-h">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>' +
     '<span class="hsc-ma">' + (r.score ?? '—') + '</span></div>';
-  return '<div class="hr-col">' + title(d.rows.length, md) + (d.rows.length ? head + rows.map(row).join('') : '<div class="hr-note">這天沒有符合的</div>') + '</div>';
+  return '<div class="hr-col">' + title(d.rows.length, md) + '<div class="hr-note">' + dtWarnNote(false) + '</div>' + (d.rows.length ? head + rows.map(row).join('') : '<div class="hr-note">這天沒有符合的</div>') + '</div>';
 }
 const HOME_X_MAX = 10, HOME_X_KEY = 'homeXCols';
 // 2026-11-14 使用者：預設（第一次打開、新的瀏覽器／手機／iPad、無痕）就是 13 欄＝原本 10 欄＋240、260、270；自己改過（含全部拿掉）就照自己的
@@ -11330,7 +11331,7 @@ function homePickWatchHtml(){
     return '<div class="hr-row hr-stk hr-pkw" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc((r.group || '') + '・綜合 ' + (r.combo ?? '—') + '・均線分 ' + (r.score ?? '—') + '・創高 ' + (r.hiLen ?? '—') + ' 天・週籌碼 ' + swPct(r.weekPct) + '・營收年增 ' + swPct(r.revYoy, 1)) + '">' +
       (hot2Of(r.code) ? '<div class="l1"><span class="hot2" title="' + wlEsc(hot2Title(hot2Of(r.code))) + '"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span></span>'
         : '<div class="l1"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>') +   // 2026-11-14 使用者：四份名單重複 2 份以上就閃
-      (r.black ? '<span class="hr-pkw-b" title="資料日收黑（收盤 < 開盤）">收黑</span>' : '') + (pkStars.includes(r.code) ? '<span class="hr-pkw-s">★</span>' : '') +
+      (r.black ? '<span class="hr-pkw-b" title="資料日收黑（收盤 < 開盤）">收黑</span>' : '') + (pkStars.includes(r.code) ? '<span class="hr-pkw-s">★</span>' : '') + dtWarnHtml(r.code, false) +
       '<span class="hr-avg ' + (pct === null || pct === undefined ? 'flat' : dirClass(pct)) + '">' + (pct === null || pct === undefined ? '—' : fmt(pct) + '%') + '</span></div>' +
       '<div class="l2"><i>大戶力</i>' + homeHoldHtml(r.code) + '</div></div>';   // 2026-11-09 使用者：只留代號、股名、漲跌幅、盤中大戶力（其他資訊放在滑過去的提示）
   };
@@ -11338,7 +11339,7 @@ function homePickWatchHtml(){
   const cd = pkCustomDiff();
   const mode = cd.any ? '<div class="hr-note hr-pkw-mode">' + (pkHomeMine ? '⚙ 用你在選股視窗存的參數／名單' : '規則：預設（跟無痕視窗一樣）') +
     ' <button class="hr-pkw-tg" data-pkw-toggle="1" title="你存的參數有 ' + cd.n + ' 項跟預設不同、手動名單 ' + cd.lists + ' 週">' + (pkHomeMine ? '改回預設' : '改看我的設定') + '</button></div>' : '';
-  return title(watch.length) + '<div class="hr-note">資料 ' + wlEsc(swMmdd(d.date)) + ' 收盤・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・照漲跌幅排、漲越多越上面</div>' + mode +
+  return title(watch.length) + '<div class="hr-note">資料 ' + wlEsc(swMmdd(d.date)) + ' 收盤・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・照漲跌幅排、漲越多越上面；' + dtWarnNote(false) + '</div>' + mode +
     (watch.length ? watch.map(row).join('') : '<div class="hr-note">目前沒有</div>');
 }
 function homeObsColHtml(){
@@ -18439,7 +18440,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-15 00:43:49';
+const BUILD_STAMP = '2026-11-15 01:06:02';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25954,6 +25955,22 @@ function botWorldLoad(){
     .catch(() => {}).finally(() => { botState.worldLoading = false; });
 }
 // 機器人要另外抓的資料（隔日沖、單檔分點、開盤量）：抓到就重跑最後一個查詢
+// 2026-11-15 使用者：多方五欄（強中強、收盤觀察股、強勢股觀察中、強勢紅K／創高黑龍、240）和空方五欄（777、32、123、盤前空觀察、空中空 999）
+// 的股票，只要也在機器人 811（前一日隔日沖買超）裡，股名旁邊加三角形警告標誌：多方黃色、空方綠色；每欄說明寫「▲＝前一日隔日沖買盤」
+const dt811 = { src: null, set: new Set(), day: '' };
+function dt811Set(){
+  try {
+    const dt = botFetchCache('dt', '/api/daytrade', 5 * 60e3);
+    if (dt !== dt811.src){ dt811.src = dt; dt811.set = dt && dt.status === 'ok' && dt.day && Array.isArray(dt.day.rows) ? new Set(dt.day.rows.map((r) => String(r.code))) : new Set(); dt811.day = dt && dt.day ? dt.day.date || '' : ''; }
+  } catch (_){}
+  return dt811.set;
+}
+const dtWarnSvg = (bear) => '<svg viewBox="0 0 18 16" aria-hidden="true"><path d="M9 1.2 L17 14.8 H1 Z" fill="' + (bear ? '#16a34a' : '#facc15') + '" stroke="' + (bear ? '#14532d' : '#111') + '" stroke-width="1.3" stroke-linejoin="round"/><text x="9" y="13.2" text-anchor="middle" font-size="9.5" font-weight="900" fill="' + (bear ? '#fff' : '#111') + '">!</text></svg>';
+function dtWarnHtml(code, bear){
+  if (!dt811Set().has(String(code))) return '';
+  return '<span class="dt-warn" title="' + wlEsc('前一日隔日沖買盤（機器人 811 有這檔' + (dt811.day ? '，' + dt811.day.slice(5).replace('-', '/') + ' 的資料' : '') + '）') + '">' + dtWarnSvg(bear) + '</span>';
+}
+const dtWarnNote = (bear) => '<span class="dt-warn">' + dtWarnSvg(bear) + '</span>＝前一日隔日沖買盤（811）';
 function botFetchCache(key, url, ttl){
   const c = botState.cache;
   const e = c[key];
@@ -26427,9 +26444,16 @@ function hotBearSet(){
   } catch (_){} finally { hotBearCache.busy = false; }
   return hotBearCache.set;
 }
+const DT_NOTE_KEYS = { '777': true, '32': true, '123': true, '999': true, '240': false, '888': false };   // true＝空方（綠三角形）
+function dtNoteInsert(html, bear){   // 標題下面加一行「▲＝前一日隔日沖買盤（811）」
+  const i = html.indexOf('class="bot-title');
+  const j = i >= 0 ? html.indexOf('</div>', i) : -1;
+  return j < 0 ? html : html.slice(0, j + 6) + '<div class="bot-line bot-dim dt-note">' + dtWarnNote(bear) + '</div>' + html.slice(j + 6);
+}
 function botAnswer(raw){
-  const html = botAnswerRaw(raw);
+  let html = botAnswerRaw(raw);
   const k = botNorm(raw);
+  if (html && Object.prototype.hasOwnProperty.call(DT_NOTE_KEYS, k)) html = dtNoteInsert(html, DT_NOTE_KEYS[k]);
   if (!html || (k !== '777' && k !== '32' && k !== '123') || hotBearCache.busy) return html;
   const set = hotBearSet();
   if (!set.size) return html;
@@ -26638,7 +26662,7 @@ function botAnswerRaw(raw){
     const G = { px: (r) => r.px, chg: (r) => r.chgNow, gain: (r) => r.gainNow, score: (r) => r.score, holder: (r) => holderPctOf(r.code) };
     const rows = botSortRows('240', m.rows, G);
     const head = botLine('<span>' + botSortTh('240', '', '#　股票') + '</span>' + botSortTh('240', 'px', '價格') + botSortTh('240', 'chg', '漲跌幅') + botSortTh('240', 'gain', '240日漲幅') + botSortTh('240', 'score', '均線') + botSortTh('240', 'holder', '大戶力'), 't240-row t240-head');
-    const line = (r, i) => botLine('<span class="t240-c1">' + (i + 1) + ' ' + botStkHot(r.code, r.name, r.dist >= -1e-9 ? ' <span class="t240-new">🆕新高</span>' : '') +
+    const line = (r, i) => botLine('<span class="t240-c1">' + (i + 1) + ' ' + botStkHot(r.code, r.name, (r.dist >= -1e-9 ? ' <span class="t240-new">🆕新高</span>' : '') + dtWarnHtml(r.code, false)) +
         '<br><span class="bot-dim" style="font-size:11px">240日最高 <b>' + fmtPx(r.hiNow) + '</b>' + (r.dist < -1e-9 ? '・離高 ' + r.dist.toFixed(1) + '%' : '') + '・' +
         wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
       '<span class="t240-n"><b>' + fmtPx(r.px) + '</b></span>' +
@@ -26731,7 +26755,7 @@ function botAnswerRaw(raw){
       const mk = /[🔪⚔️🔰]/u.test(r.mk || '') ? r.mk : (it.r12 && /[🔪⚔️🔰]/u.test(it.r12.mk || '') ? it.r12.mk : '');
       return '<div class="b32-row bh k12" data-bot-code="' + wlEsc(code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
         '<span class="b32-time">' + (it.ev || '--:--') + '</span>' +
-        '<span class="b32-stk"><span class="bot-stk">' + wlEsc(code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + '</span>' +
+        '<span class="b32-stk"><span class="bot-stk">' + wlEsc(code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + dtWarnHtml(code, true) + '</span>' +
         '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(big, true, true) + '</span>' +
@@ -27012,7 +27036,7 @@ function botAnswerRaw(raw){
       const mk = it.r32 && /[🔪⚔️🔰]/u.test(it.r32.mk || '') ? it.r32.mk : (it.r12 && /[🔪⚔️🔰]/u.test(it.r12.mk || '') ? it.r12.mk : '');
       return '<div class="b32-row bh k12 b777r" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
         '<span class="b32-time">' + (itEv(it) || '--:--') + '</span>' +
-        '<span class="b32-stk b777-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + (() => { const q7 = getStockQuote(r.code); const p7 = q7 && Number.isFinite(q7.price) ? q7.price : null; return '<span class="b777-px" title="即時成交價">' + (p7 === null ? '—' : p7 >= 1000 ? p7.toFixed(0) : p7 >= 100 ? p7.toFixed(1) : p7.toFixed(2)) + '</span>'; })() + '</span>' +   // 2026-11-14 使用者：777 股名右邊空的地方放即時成交價
+        '<span class="b32-stk b777-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + dtWarnHtml(r.code, true) + (() => { const q7 = getStockQuote(r.code); const p7 = q7 && Number.isFinite(q7.price) ? q7.price : null; return '<span class="b777-px" title="即時成交價">' + (p7 === null ? '—' : p7 >= 1000 ? p7.toFixed(0) : p7 >= 100 ? p7.toFixed(1) : p7.toFixed(2)) + '</span>'; })() + '</span>' +   // 2026-11-14 使用者：777 股名右邊空的地方放即時成交價
         '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + botPct(r.pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(big, true, true) + '</span>' +
@@ -27101,7 +27125,7 @@ function botAnswerRaw(raw){
       const r = x.row, gone = !x.inNow, pct = pctNow(x);
       return '<div class="b32-row k12' + (gone ? ' gone' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
         '<span class="b32-time">' + x.first + '</span>' +
-        '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(r.name || '') + '</span>' + (/[🔪⚔️🔰]/u.test(r.mk || '') ? r.mk : '') + '</span>' +
+        '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(r.name || '') + '</span>' + (/[🔪⚔️🔰]/u.test(r.mk || '') ? r.mk : '') + dtWarnHtml(x.code, true) + '</span>' +
         '<span class="b32-grp">' + wlEsc(r.g || '12空') + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, live.total)) : '') + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(r.big !== null && r.big !== undefined ? r.big : holderPctOf(x.code), true) + '</span>' +
@@ -30327,13 +30351,13 @@ function homeSsColHtml(){
   const head = '<div class="hss-row hsc-head"><span>' + botSortTh('home_ss', 't', '時間') + '　' + botSortTh('home_ss', '', '股票') + '</span>' + botSortTh('home_ss', 'n', '符合數量') + '<span class="hss-pch">' + botSortTh('home_ss', 'px', '成交價') + botSortTh('home_ss', 'chg', '漲跌幅') + '</span>' + botSortTh('home_ss', 'holder', '大戶力') + botSortTh('home_ss', 'score', '均線') + '</div>';
   const row = (r) => '<div class="hss-row hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(r.group + '・同時在「' + r.tags.join('」「') + '」') + '">' +
     // 2026-11-14 使用者（iPad 股名還是被蓋住）：每檔分兩行——第一行只放代號股名（整列寬），第二行放標籤、份數、成交價／漲跌幅、大戶力、均線
-    '<span class="hss-name hsc-stk"><span class="hss-time" title="四份名單裡第一次有兩份同時符合的時間">' + (r.t || '--:--') + '</span><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name) + '</span><span class="ss-tags hss-tg">' + ssTagsHtml(r.tags) + '</span>' +
+    '<span class="hss-name hsc-stk"><span class="hss-time" title="四份名單裡第一次有兩份同時符合的時間">' + (r.t || '--:--') + '</span><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name) + dtWarnHtml(r.code, false) + '</span><span class="ss-tags hss-tg">' + ssTagsHtml(r.tags) + '</span>' +
     '<span class="hss-n">' + r.n + '</span>' +
     // 2026-11-14 使用者（iPad 太擠、股名被蓋住）：成交價在上、漲跌幅在下，分兩行
     '<span class="hss-pc"><span class="hss-px">' + (Number.isFinite(r.px) ? (r.px >= 1000 ? r.px.toFixed(0) : r.px >= 100 ? r.px.toFixed(1) : r.px.toFixed(2)) : '—') + '</span>' +
     '<span class="hss-chg ' + (Number.isFinite(r.chg) ? dirClass(r.chg) : '') + '">' + (Number.isFinite(r.chg) ? (r.chg > 0 ? '+' : '') + r.chg.toFixed(2) + '%' : '—') + '</span></span>' +
     '<span class="hsc-h">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span><span class="hsc-ma">' + (r.score ?? '—') + '</span></div>';
-  return '<div class="hr-col">' + title + '<div class="hr-note">四份裡重複兩份以上：觀＝強勢股觀察中、紅＝強勢紅K、240、260；時間＝第一次有兩份同時符合，最近的在上面</div>' + head + rows.map(row).join('') + '</div>';
+  return '<div class="hr-col">' + title + '<div class="hr-note">四份裡重複兩份以上：觀＝強勢股觀察中、紅＝強勢紅K、240、260；時間＝第一次有兩份同時符合，最近的在上面；' + dtWarnNote(false) + '</div>' + head + rows.map(row).join('') + '</div>';
 }
 // ---- 盤前空觀察／收盤觀察股（2026-11-14 使用者：首頁兩欄，名單每天由使用者貼給 Claude，更新 public/obs-lists.json）----
 // 盤前空觀察放在空中空(999) 左邊、收盤觀察股放在強中強(888) 右邊；每檔列漲跌幅、盤中大戶力、均線分數（即時，跟個股問診同一套），
@@ -30449,7 +30473,7 @@ function homeObsListColHtml(kind){
   const grpLabel = (g) => { const gr = g.noRank ? null : obsGroupRank(g.name); return wlEsc(g.name) + (gr ? '<span class="obs-rank' + (gr.bear ? ' bear' : '') + '">(' + gr.rank + ')</span>' : ''); };
   const row = (it, showGrp) => {
     const tags = pre ? it.hit.map((x) => '<span class="obs-tag b">' + wlEsc(x) + '</span>').join('') : (it.hit.length ? '<span class="ss-tags">' + ssTagsHtml(it.hit) + '</span>' : '');
-    const nmHtml = '<span class="obs-nm' + (it.hit.length ? ' obs-blink ' + (pre ? 'blue' : 'pink') + '" title="' + wlEsc('跟「' + it.hit.join('」「') + '」相同' + (it.t ? '，' + it.t + ' 開始' : '')) : '') + '"><b>' + wlEsc(it.code) + '</b> ' + wlEsc(it.name) + '</span>';
+    const nmHtml = '<span class="obs-nm' + (it.hit.length ? ' obs-blink ' + (pre ? 'blue' : 'pink') + '" title="' + wlEsc('跟「' + it.hit.join('」「') + '」相同' + (it.t ? '，' + it.t + ' 開始' : '')) : '') + '"><b>' + wlEsc(it.code) + '</b> ' + wlEsc(it.name) + '</span>' + dtWarnHtml(it.code, pre);
     const sub = (showGrp ? '<span class="obs-g">' + it.groups.map(grpLabel).join('・') + '</span>' : '') + tags;
     return '<div class="obs-row hr-stk" data-code="' + wlEsc(it.code) + '" data-name="' + wlEsc(it.name) + '" tabindex="0" role="button">' +
       '<span class="obs-t">' + (it.hit.length ? (it.t || '--:--') : '') + '</span>' +
@@ -30474,7 +30498,7 @@ function homeObsListColHtml(kind){
         return '<div class="obs-grp">' + grpLabel(g) + ' <small>' + rest.length + ' 檔</small></div>' + rest.map((it) => row(it, false)).join('');
       }).join('');
   }
-  return '<div class="hr-col obs-col ' + kind + '">' + title + (d.notes || []).map((n) => '<div class="obs-note">' + wlEsc(n) + '</div>').join('') + head + body + '</div>';
+  return '<div class="hr-col obs-col ' + kind + '">' + title + (d.notes || []).map((n) => '<div class="obs-note">' + wlEsc(n) + '</div>').join('') + '<div class="obs-note">' + dtWarnNote(pre) + '</div>' + head + body + '</div>';
 }
 const hot2Title = (tags) => '同時在「' + tags.join('」「') + '」' + tags.length + ' 份名單（強勢股觀察中、強勢紅K、240、260 四份裡出現 2 份以上就閃）';
 const botStkHot = (code, name, rest) => { const tg = hot2Of(code); const h = botStk(code, name, rest); return tg ? h.replace('<span class="bot-stk"', '<span class="bot-stk hot2" title="' + wlEsc(hot2Title(tg)) + '"') : h; };
