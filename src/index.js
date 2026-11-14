@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 16:34:32";
+const BUILD_STAMP = "2026-11-14 16:43:48";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4185,6 +4185,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .dyn-table .dyn-stk,.dyn-table .dyn-stk b{color:#0b0d10;font-weight:900;-webkit-text-stroke:.3px currentColor;}
   .dyn-rk{font-size:10.5px;color:var(--muted);}
   .dyn-foot{font-size:12px;color:var(--muted);line-height:1.6;margin:10px 2px;}
+  .dyn-table th.dyn-sortable{cursor:pointer;user-select:none;} .dyn-table th.dyn-sortable:hover{color:#7c3aed;} .dyn-table th.dyn-sortable.on{color:#7c3aed;} .dyn-si{font-style:normal;opacity:.45;font-size:10px;}
   .dyn-side{margin:2px 0 4px;} .dyn-live{color:#dc2626;} .dyn-new{display:inline-block;font-size:11px;font-weight:800;color:#3b2f00;background:#facc15;border-radius:4px;padding:0 5px;}
   .dyn-mom{display:inline-block;min-width:44px;text-align:center;font-weight:900;color:#fff;border-radius:5px;padding:1px 6px;} .dyn-mom.up{background:#b91c1c;} .dyn-mom.down{background:#15803d;}
 </style>
@@ -18214,7 +18215,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 16:34:32';
+const BUILD_STAMP = '2026-11-14 16:43:48';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -29792,6 +29793,23 @@ const dynPx = (v) => (Number.isFinite(v) ? (v >= 1000 ? v.toFixed(0) : v >= 100 
 const dynPct = (v) => (Number.isFinite(v) ? '<span class="' + dirClass(v) + '">' + botPct(v) + '</span>' : '<span class="muted">—</span>');
 const dynGrp = (r) => wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '—');
 const dynStk = (r) => '<td class="l dyn-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name || '') + '</td>';
+// 2026-11-14 使用者：表頭點一下排序，再點一下切換大到小／小到大（每個分頁各記一份，記在這台）；點「#」／「上榜」回到原本的排法
+dynState.sort = {};
+try { dynState.sort = JSON.parse(localStorage.getItem('dynSort') || '{}') || {}; } catch (_){}
+function dynTh(tab, key, label, cls){
+  const s0 = dynState.sort[tab], on = !!(key && s0 && s0.k === key);
+  return '<th class="dyn-sortable' + (cls ? ' ' + cls : '') + (on ? ' on' : '') + '" data-dyn-sort="' + key + '" data-dyn-sort-tab="' + tab + '" title="' + (key ? '點一下排序，再點一下切換大到小／小到大' : '回到原本的排法') + '">' + label + (key ? (on ? (s0.asc ? ' ▲' : ' ▼') : ' <i class="dyn-si">⇅</i>') : '') + '</th>';
+}
+function dynSorted(tab, list, getters){
+  const s0 = dynState.sort[tab];
+  const g = s0 && getters[s0.k];
+  if (!g) return list;
+  return list.slice().sort((a, b) => {
+    const va = g(a), vb = g(b), na = !Number.isFinite(va), nb = !Number.isFinite(vb);
+    if (na || nb) return na - nb;
+    return s0.asc ? va - vb : vb - va;
+  });
+}
 function dynMomData(){
   const key = 'momRank|' + momParams.top;
   const d = botFetchCache(key, '/api/momentum-rank?top=' + momParams.top, 10 * 60e3);
@@ -29805,8 +29823,10 @@ function dynHotHtml(){
   const md = m.date ? swMmdd(m.date) : '';
   h += '<div class="dyn-meta">' + (m.live ? '盤中即時重算' : md + ' 收盤') + '・<b>' + m.rows.length + '</b> 檔・照 240 日漲幅排</div>';
   if (!m.rows.length) return h + '<div class="race-note">目前沒有符合的股票（可以把上面的門檻放寬）</div>';
-  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr><th>#</th><th class="l">股票</th><th>價格</th><th>漲跌幅</th><th>240日最高</th><th>240日漲幅</th><th>離高</th><th class="l">族群</th><th>均線</th><th>成交值(億)</th><th>大戶力</th></tr></thead><tbody>' +
-    m.rows.map((r, i) => '<tr class="dyn-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '"><td>' + (i + 1) + '</td>' + dynStk(r) +
+  const T = 'hot';
+  const hotRows = dynSorted(T, m.rows, { px: (r) => r.px, chg: (r) => r.chgNow, hi: (r) => r.hiNow, gain: (r) => r.gainNow, dist: (r) => r.dist, score: (r) => r.score, val: (r) => r.val5, holder: (r) => holderPctOf(r.code) });
+  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr>' + dynTh(T, '', '#') + '<th class="l">股票</th>' + dynTh(T, 'px', '價格') + dynTh(T, 'chg', '漲跌幅') + dynTh(T, 'hi', '240日最高') + dynTh(T, 'gain', '240日漲幅') + dynTh(T, 'dist', '離高') + '<th class="l">族群</th>' + dynTh(T, 'score', '均線') + dynTh(T, 'val', '成交值(億)') + dynTh(T, 'holder', '大戶力') + '</tr></thead><tbody>' +
+    hotRows.map((r, i) => '<tr class="dyn-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '"><td>' + (i + 1) + '</td>' + dynStk(r) +
       '<td><b>' + dynPx(r.px) + '</b></td><td>' + dynPct(r.chgNow) + '</td><td>' + dynPx(r.hiNow) + '</td><td>' + dynPct(r.gainNow) + '</td>' +
       '<td>' + (r.dist >= -1e-9 ? '<span class="t240-new">🆕新高</span>' : r.dist.toFixed(1) + '%') + '</td><td class="l">' + dynGrp(r) + '</td><td>' + (r.score ?? '—') + '</td>' +
       '<td>' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + '</td><td>' + holderTagHtml(holderPctOf(r.code), false, true) + '</td></tr>').join('') + '</tbody></table></div>';
@@ -29818,19 +29838,21 @@ function dynRankHtml(){
   if (!d) return h + '<div class="race-note">讀取中…</div>';
   if (d.status !== 'ok' || !Array.isArray(d.rows)) return h + '<div class="race-note">' + (d.detail === 'Not Found' ? '後端還沒更新' : '資料暫時抓不到，等一下再試') + '</div>';
   const live = !!(lastData && lastData.quoteDate && lastData.quoteDate > d.date);
+  const aug = (r) => { const hq = live ? getStockQuote(r.code) : null; return Object.assign({}, r, { px: hq && Number.isFinite(hq.price) ? hq.price : r.close, chgNow: hq && Number.isFinite(hq.changePercent) ? hq.changePercent : r.chg }); };
+  const T = 'rank', G = { px: (r) => r.px, chg: (r) => r.chgNow, wtd: (r) => r.wtd, mtd: (r) => r.mtd, qtd: (r) => r.qtd, ytd: (r) => r.ytd, score: (r) => r.score, val: (r) => r.val5, holder: (r) => holderPctOf(r.code) };
   const row = (r, i) => {
-    const hq = live ? getStockQuote(r.code) : null;
-    const px = hq && Number.isFinite(hq.price) ? hq.price : r.close, chg = hq && Number.isFinite(hq.changePercent) ? hq.changePercent : r.chg;
+    const px = r.px, chg = r.chgNow;
     return '<tr class="dyn-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '"><td>' + (i + 1) + '</td>' + dynStk(r) +
       '<td><b>' + dynPx(px) + '</b>' + (r.miss ? ' <span class="t240-miss">缺' + r.miss.join('') + '</span>' : '') + '</td><td>' + dynPct(chg) + '</td>' +
       ['wtd', 'mtd', 'qtd', 'ytd'].map((k) => '<td>' + dynPct(r[k]) + '<div class="dyn-rk">第 ' + (r[k + 'Rank'] ?? '—') + ' 名</div></td>').join('') +
       '<td class="l">' + dynGrp(r) + '</td><td>' + (r.score ?? '—') + '</td><td>' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + '</td><td>' + holderTagHtml(holderPctOf(r.code), false, true) + '</td></tr>';
   };
-  const head = '<thead><tr><th>#</th><th class="l">股票</th><th>價格</th><th>漲跌幅</th><th>週漲幅</th><th>月漲幅</th><th>季漲幅</th><th>年漲幅</th><th class="l">族群</th><th>均線</th><th>成交值(億)</th><th>大戶力</th></tr></thead>';
+  const head = '<thead><tr>' + dynTh(T, '', '#') + '<th class="l">股票</th>' + dynTh(T, 'px', '價格') + dynTh(T, 'chg', '漲跌幅') + dynTh(T, 'wtd', '週漲幅') + dynTh(T, 'mtd', '月漲幅') + dynTh(T, 'qtd', '季漲幅') + dynTh(T, 'ytd', '年漲幅') + '<th class="l">族群</th>' + dynTh(T, 'score', '均線') + dynTh(T, 'val', '成交值(億)') + dynTh(T, 'holder', '大戶力') + '</tr></thead>';
   const c = d.cuts || {};
-  const almost = momParams.almost && Array.isArray(d.almost) ? d.almost : [];
+  const almost = dynSorted(T, (momParams.almost && Array.isArray(d.almost) ? d.almost : []).map(aug), G);
+  const mainRows = dynSorted(T, d.rows.map(aug), G);
   h += '<div class="dyn-meta">' + swMmdd(d.date) + ' 收盤・<b>' + d.rows.length + '</b> 檔・前 ' + momParams.top + '% 門檻（全市場一般股 ' + (d.universe || '—') + ' 檔）：週 ≥ ' + botPct(c.wtd) + '、月 ≥ ' + botPct(c.mtd) + '、季 ≥ ' + botPct(c.qtd) + '、年 ≥ ' + botPct(c.ytd) + '</div>';
-  h += d.rows.length ? '<div class="dyn-wrap"><table class="dyn-table">' + head + '<tbody>' + d.rows.map(row).join('') + '</tbody></table></div>' : '<div class="race-note">今天沒有四個漲幅都在前 ' + momParams.top + '% 又創高的股票</div>';
+  h += d.rows.length ? '<div class="dyn-wrap"><table class="dyn-table">' + head + '<tbody>' + mainRows.map(row).join('') + '</tbody></table></div>' : '<div class="race-note">今天沒有四個漲幅都在前 ' + momParams.top + '% 又創高的股票</div>';
   if (almost.length) h += '<div class="dyn-sub">差一個：創高、四個漲幅裡三個在前 ' + momParams.top + '%（' + almost.length + ' 檔）</div><div class="dyn-wrap"><table class="dyn-table">' + head + '<tbody>' + almost.map(row).join('') + '</tbody></table></div>';
   return h + '<div class="dyn-foot">週／月／季／年＝本週／本月／本季／今年以來的漲幅（還原現金股利，跟 App 同算法），四個都在全市場前 ' + momParams.top + '%，而且收盤是 240 日最高收盤（創高）。11/13 App 選的 4 檔我們對上 3 檔（騰雲的年漲幅差一點點，在「差一個」裡）。每天收盤後更新' + (live ? '；價格、漲跌幅是即時的' : '') + '。</div>';
 }
@@ -29904,8 +29926,10 @@ function dynPulseHtml(kind){
   let h = sideBtns + '<div class="dyn-meta">' + (m.live ? '<b class="dyn-live">● 即時</b>（' + new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', hour12: false }) + '，用現價重算，' + (kind === 'week' ? (m.sameWeek ? '這週還沒過完' : '新的一週') + '，' : '') + '名單跟著行情換）' : md + ' 收盤') +
     '・' + (strong ? '動能 ≥ +' : '動能 ≤ −') + m.MIN + '・照' + (kind === 'day' ? '今天' : '這週') + '成交金額排・<b>' + list.length + '</b> 檔</div>';
   if (!list.length) return h + '<div class="race-note">目前沒有</div>';
-  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr><th>上榜' + (kind === 'day' ? '(天)' : '(週)') + '</th><th class="l">股票</th><th>價格</th><th>漲跌幅</th><th>動能</th><th>成交金額(億)</th><th class="l">族群・族群動能</th><th>均線</th><th>大戶力</th></tr></thead><tbody>' +
-    list.map((o) => {
+  const T = kind;
+  const rowsS = dynSorted(T, list, { days: daysOf, px: (o) => o.px, chg: (o) => o.chgNow, mom: momOf, val: valOf, gm: (o) => (o.group ? m.gmom.get(o.group) : null), score: (o) => o.score, holder: (o) => holderPctOf(o.code) });
+  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr>' + dynTh(T, 'days', '上榜' + (kind === 'day' ? '(天)' : '(週)')) + '<th class="l">股票</th>' + dynTh(T, 'px', '價格') + dynTh(T, 'chg', '漲跌幅') + dynTh(T, 'mom', '動能') + dynTh(T, 'val', '成交金額(億)') + dynTh(T, 'gm', '族群・族群動能', 'l') + dynTh(T, 'score', '均線') + dynTh(T, 'holder', '大戶力') + '</tr></thead><tbody>' +
+    rowsS.map((o) => {
       const mv = momOf(o), bv = baseOf(o), dd = daysOf(o), gm = o.group ? m.gmom.get(o.group) : null;
       return '<tr class="dyn-row" data-code="' + wlEsc(o.code) + '" data-name="' + wlEsc(o.name || '') + '"><td>' + (dd <= 1 ? '<span class="dyn-new">新</span>' : dd) + '</td>' + dynStk(o) +
         '<td><b>' + dynPx(o.px) + '</b></td><td>' + dynPct(o.chgNow) + '</td>' +
@@ -29929,10 +29953,12 @@ function dynInstHtml(){
   if (!list.length) return h + '<div class="race-note">這天沒有</div>';
   const lots = (v) => (Number.isFinite(v) ? '<span class="' + (v > 0 ? 'up' : v < 0 ? 'down' : '') + '">' + (v > 0 ? '+' : '') + v.toLocaleString() + '</span>' : '—');
   const stk = (v) => (v > 0 ? '連買 ' + v : v < 0 ? '連賣 ' + (-v) : '—');
-  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr><th class="l">股票</th><th>價格</th><th>漲跌幅</th><th>日動能</th><th>成交金額(億)</th><th>外資(張)</th><th>投信(張)</th><th>外資 5 日</th><th>投信 5 日</th><th class="l">族群</th><th>大戶力</th></tr></thead><tbody>' +
-    list.map((r) => {
-      const hq = live ? getStockQuote(r.code) : null;
-      const px = hq && Number.isFinite(hq.price) ? hq.price : r.close, chg = hq && Number.isFinite(hq.changePercent) ? hq.changePercent : r.chg;
+  const T = 'inst';
+  const augI = list.map((r) => { const hq = live ? getStockQuote(r.code) : null; return Object.assign({}, r, { px: hq && Number.isFinite(hq.price) ? hq.price : r.close, chgNow: hq && Number.isFinite(hq.changePercent) ? hq.changePercent : r.chg }); });
+  const rowsI = dynSorted(T, augI, { px: (r) => r.px, chg: (r) => r.chgNow, mom: (r) => r.mom, val: (r) => r.val, f: (r) => r.f, t: (r) => r.t, f5: (r) => r.f5, t5: (r) => r.t5, holder: (r) => holderPctOf(r.code) });
+  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr><th class="l">股票</th>' + dynTh(T, 'px', '價格') + dynTh(T, 'chg', '漲跌幅') + dynTh(T, 'mom', '日動能') + dynTh(T, 'val', '成交金額(億)') + dynTh(T, 'f', '外資(張)') + dynTh(T, 't', '投信(張)') + dynTh(T, 'f5', '外資 5 日') + dynTh(T, 't5', '投信 5 日') + '<th class="l">族群</th>' + dynTh(T, 'holder', '大戶力') + '</tr></thead><tbody>' +
+    rowsI.map((r) => {
+      const px = r.px, chg = r.chgNow;
       return '<tr class="dyn-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '">' + dynStk(r) + '<td><b>' + dynPx(px) + '</b></td><td>' + dynPct(chg) + '</td>' +
         '<td><span class="dyn-mom ' + (r.mom >= 0 ? 'up' : 'down') + '">' + (Number.isFinite(r.mom) ? r.mom.toFixed(1) : '—') + '</span></td><td>' + (Number.isFinite(r.val) ? r.val.toFixed(1) : '—') + '</td>' +
         '<td>' + lots(r.f) + '<div class="dyn-rk">' + stk(r.fs) + '</div></td><td>' + lots(r.t) + '<div class="dyn-rk">' + stk(r.ts) + '</div></td><td>' + lots(r.f5) + '</td><td>' + lots(r.t5) + '</td>' +
@@ -29957,6 +29983,13 @@ document.getElementById('dynBody').addEventListener('click', (e) => {
   const t = e.target;
   const tab = t.closest('[data-dyn-tab]');
   if (tab){ dynState.tab = tab.dataset.dynTab; try { localStorage.setItem('dynTab', dynState.tab); } catch (_){} renderDyn(); return; }
+  const so = t.closest('[data-dyn-sort]');
+  if (so){
+    const k = so.dataset.dynSort, tb = so.dataset.dynSortTab, cur = dynState.sort[tb];
+    if (!k) delete dynState.sort[tb]; else if (cur && cur.k === k) cur.asc = !cur.asc; else dynState.sort[tb] = { k, asc: false };
+    try { localStorage.setItem('dynSort', JSON.stringify(dynState.sort)); } catch (_){}
+    renderDyn(); return;
+  }
   const sd = t.closest('[data-dyn-side]'); if (sd){ dynState.side = sd.dataset.dynSide; renderDyn(); return; }
   const si = t.closest('[data-dyn-inst]'); if (si){ dynState.inst = si.dataset.dynInst; renderDyn(); return; }
   const tp = t.closest('[data-trend-p]');
