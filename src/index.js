@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 23:56:55";
+const BUILD_STAMP = "2026-11-15 00:06:19";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -149,7 +149,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:360px 310px 310px 300px 330px 310px 280px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:360px 310px 310px 300px 330px 310px 300px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -299,9 +299,11 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .obs-col{min-width:0;border-radius:10px;overflow:hidden;} .obs-col.pre{outline:3px solid #16a34a;} .obs-col.close{outline:3px solid #dc2626;}   /* 2026-11-14 盤前空觀察／收盤觀察股 */
   .hr-title.obs-title{color:#fff;font-size:14.5px;} .hr-title.obs-title.pre{background:#15803d!important;} .hr-title.obs-title.close{background:#b91c1c!important;} .hr-title.obs-title small{color:#fff;opacity:.9;font-size:11.5px;font-weight:700;}
   .obs-note{font-size:11.5px;color:var(--muted);padding:2px 8px;line-height:1.45;} .obs-note:first-of-type{padding-top:5px;}
-  .obs-row{display:grid;grid-template-columns:minmax(0,1fr) 54px 56px 24px;gap:0 4px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
-  .obs-row.hr-stk{cursor:pointer;} .obs-row.hr-stk:hover{background:rgba(124,58,237,.06);} .obs-row > span:not(.obs-stk){text-align:right;white-space:nowrap;}
-  .obs-head{font-size:11px;font-weight:800;color:var(--muted);border-top:0;margin-top:4px;} .obs-head > span:first-child{text-align:left;}
+  .obs-row{display:grid;grid-template-columns:34px minmax(0,1fr) 52px 56px 22px;gap:0 4px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
+  .obs-row.hr-stk{cursor:pointer;} .obs-row.hr-stk:hover{background:rgba(124,58,237,.06);} .obs-row > span:not(.obs-stk):not(.obs-t){text-align:right;white-space:nowrap;}
+  .obs-t{color:#7c3aed;font-weight:800;font-size:11.5px;font-variant-numeric:tabular-nums;} .obs-sub{display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;width:100%;font-size:11px;font-weight:600;color:var(--muted);} .obs-g{white-space:nowrap;}
+  .obs-head .bsort{font-size:11px;} .obs-row.obs-head > span{text-align:left;} .obs-head > .bsort:first-child{text-align:left;} .obs-grp.obs-hit{color:#fff;} .obs-grp.obs-hit.pre{background:#1d4ed8;} .obs-grp.obs-hit.close{background:#db2777;} .obs-grp.obs-hit small{color:#fff;opacity:.9;}
+  .obs-head{font-size:11px;font-weight:800;color:var(--muted);border-top:0;margin-top:4px;}
   .obs-stk{min-width:0;font-weight:700;font-size:13px;display:flex;flex-wrap:wrap;align-items:center;column-gap:4px;overflow:hidden;} .obs-stk .obs-tag{margin-left:0;} .obs-stk b{font-weight:900;} .obs-pct{font-weight:800;} .obs-ma{font-weight:800;}
   .obs-grp{font-weight:900;font-size:13px;padding:5px 6px 3px;background:var(--panel-2);border-top:1px solid var(--line);} .obs-grp small{color:var(--muted);font-weight:700;font-size:11px;}
   .obs-rank{color:#b91c1c;} .obs-rank.bear{color:#15803d;}
@@ -450,9 +452,9 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   /* 2026-11-14 使用者：183 右邊多兩欄：「強勢股觀察中・等收黑」（210px，原本在第一欄最上面）、「強勢紅K」＋下面疊創高黑龍（290px）；原本 10 欄寬度不變、整排變寬，往右拉看最右邊 */
   @media (min-width: 1701px){
     .home-rank-scroll{overflow-x:auto;padding-bottom:6px;}
-    .home-rank4{width:calc(100% + 4016px);}   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px） */
+    .home-rank4{width:calc(100% + 4036px);}   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px） */
     .home-rank-scroll{cursor:grab;} .home-rank-scroll .hr-stk,.home-rank-scroll button,.home-rank-scroll [data-bot-code],.home-rank-scroll [data-group],.home-rank-scroll [data-bot-group]{cursor:pointer;}
-    .home-rank4.hx{width:calc(100% + 4016px + var(--hx-w));grid-template-columns:360px 310px 310px 300px 330px 310px 280px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
+    .home-rank4.hx{width:calc(100% + 4036px + var(--hx-w));grid-template-columns:360px 310px 310px 300px 330px 310px 300px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
   }
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2 .hr-code,.hot2 .hr-name{color:inherit!important;} .hr-pkw .l1 .hot2{display:inline-flex;gap:5px;min-width:0;overflow:hidden;} .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
@@ -18402,7 +18404,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 23:56:55';
+const BUILD_STAMP = '2026-11-15 00:06:19';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -21178,7 +21180,8 @@ async function tdRecordTick(){
     const body = { date: twTodayStr(), slot, total: snap.total, otcLabel: snap.otcLabel, otcPct: snap.otcPct, quoteTime: String(lastData.quoteTime || '').slice(0, 8),
       rows: snap.rows.map(strip), k12: snap.k12Tracked ? snap.k12.map(strip) : [] };
     // 2026-11-13 使用者：火多多(23) 也一起記（後端收 f23；機器人 23 的「第一次進名單」時間跨電腦一樣）
-    try { body.ss = ssList().map((r) => ({ code: r.code, name: r.name, tags: r.tags })); } catch (_){}   // 2026-11-14 使用者：強中強(888) 也記，才有「兩份同時符合」最早的時間
+    try { body.ss = ssList().map((r) => ({ code: r.code, name: r.name, tags: r.tags })); } catch (_){}
+    try { hot2Map(); const info = hot2Cache.info || new Map(); body.h4 = [...(hot2Cache.from || new Map())].map(([code, tags]) => ({ code, name: (info.get(code) || {}).name || '', tags })); } catch (_){}   // 2026-11-14：四份任何一份有的（收盤觀察股的符合時間）   // 2026-11-14 使用者：強中強(888) 也記，才有「兩份同時符合」最早的時間
     try { const fm = fire23Model(); if (fm) body.f23 = [].concat(fm.strong, fm.middle, fm.spaceTop, fm.chase).map((r) => ({ code: r.code, name: r.name, g: r.groupName, gr: r.groupRank, mk: r.mark, pct: r.pct })); } catch (_){}
     const res = await fetch('/api/homework-snapshot', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     if (res.ok || res.status === 422) tdRec.done.add(key);
@@ -30340,10 +30343,34 @@ function obsGroupRank(name){
   const r = h.rows.find((x) => x.name === name) || h.rows.find((x) => x.name.includes(name) || name.includes(x.name));
   return r ? { rank: r.rank, total: h.total, bear: r.rank > h.half } : null;
 }
+// 2026-11-14 使用者（又改）：兩欄裡會閃的（符合的）抽到最上面一塊，照「開始符合的時間」排，最晚發生的在上面、早的在下面；
+// 沒符合的照原本的族群分塊列在下面。表頭（時間、漲跌幅、大戶力、均線）點一下可以排序（全部攤平排），點「股票」回到原本的排法。
+// 符合時間：盤前空觀察＝現在還在的刀劍空(32)／12空(123) 進榜（或跑掉又回來）時間裡最早的那個（5 分鐘紀錄，跟 777／999 同一份）；
+// 收盤觀察股＝四份名單（觀／紅K／240／260）第一次有任何一份同時有它的時間（5 分鐘紀錄裡的 h4，再跟這台電腦第一次看到的時間比，取早的）。
+const H4_SEEN_KEY = 'h4Seen';
+let h4Seen = { date: '', m: {} };
+try { const v = JSON.parse(localStorage.getItem(H4_SEEN_KEY) || 'null'); if (v && typeof v === 'object' && v.m) h4Seen = v; } catch (_){}
+function h4NoteSeen(codes){
+  if (!lastData || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;
+  const day = lastData.quoteDate;
+  if (h4Seen.date !== day) h4Seen = { date: day, m: {} };
+  let changed = false;
+  codes.forEach((c) => { if (!h4Seen.m[c]){ h4Seen.m[c] = Date.now(); changed = true; } });
+  if (changed){ try { localStorage.setItem(H4_SEEN_KEY, JSON.stringify(h4Seen)); } catch (_){} }
+}
+function h4FirstMap(){
+  const out = new Map(), day = lastData && lastData.quoteDate;
+  if (!day) return out;
+  const d = bladeTrack.data;
+  if (d && d.date === day && d.slots) Object.keys(d.slots).sort().forEach((sl) => { (d.slots[sl].h4 || []).forEach((r) => { if (r && r.code && !out.has(r.code)) out.set(r.code, sl); }); });
+  if (h4Seen.date === day) Object.entries(h4Seen.m).forEach(([c, ts]) => { const hm = new Date(ts + 8 * 3600e3).toISOString().slice(11, 16); if (!out.has(c) || hm < out.get(c)) out.set(c, hm); });
+  return out;
+}
 function homeObsListColHtml(kind){
   obsListsLoad();
   if (!brewLaunchData){ try { refreshBrewLaunch(false); } catch (_){} }
   const pre = kind === 'pre', d = obsLists.d && obsLists.d[pre ? 'preShort' : 'close'];
+  const col = pre ? 'obs_pre' : 'obs_close';
   const md = (v) => (v ? String(v).slice(5).replace('-', '/') : '');
   const title = '<div class="hr-title obs-title ' + kind + '">' + (pre ? '🔻盤前空觀察' : '📌收盤觀察股') + (d ? ' <small>' + md(d.date) + (pre ? ' 盤前' : ' 收盤') + (d.source ? '・' + wlEsc(d.source) : '') + '</small>' : '') + '</div>';
   if (!d) return '<div class="hr-col obs-col ' + kind + '">' + title + '<div class="hr-note">' + (obsLists.at ? '還沒有名單' : '讀取中…') + '</div></div>';
@@ -30352,33 +30379,67 @@ function homeObsListColHtml(kind){
   obsExtraQuotes([...new Set(allCodes)]);
   // 2026-11-14 使用者：收盤觀察股跟「強勢股觀察中・等收黑、強勢紅K、240、260」任何一份相同 → 粉紅底白字閃；
   // 盤前空觀察跟「777、32、123」任何一份相同 → 藍底白字閃；股名後面的小標籤寫是哪幾份
-  let hitOf = () => [];
+  let hitOf = () => [], timeOf = () => '';
+  const hmOk = (v) => /^\\d\\d:\\d\\d$/.test(v || '');
   try {
-    if (pre){ hotBearSet(); const w = hotBearCache.anyWhere || new Map(); hitOf = (c) => w.get(c) || []; }
-    else { hot2Map(); const f = hot2Cache.from || new Map(); hitOf = (c) => f.get(c) || []; }
+    bladeTrackRefresh();
+    if (pre){
+      hotBearSet(); const w = hotBearCache.anyWhere || new Map(); hitOf = (c) => w.get(c) || [];
+      const m9 = race333Model(), seq = m9 ? tdTodaySeq(m9) : null, tl32 = new Map(), tl12 = new Map();
+      if (seq){ tdBroadcast(seq, 'blade').forEach((x) => tl32.set(x.code, x)); tdBroadcast(seq, 'k12').forEach((x) => tl12.set(x.code, x)); }
+      timeOf = (c) => [tl32.get(c), tl12.get(c)].filter((x) => x && x.inNow).map((x) => (hmOk(x.back) ? x.back : x.first)).filter(hmOk).sort()[0] || '';
+    } else {
+      hot2Map(); const f = hot2Cache.from || new Map(); hitOf = (c) => f.get(c) || [];
+      h4NoteSeen([...f.keys()]);
+      const first = h4FirstMap(); timeOf = (c) => first.get(c) || '';
+    }
   } catch (_){}
-  const row = (code, name0) => {
-    const q = obsQuote(code), nm = name0 || names[code] || (q && q.name) || (WL_GROUP_INDEX[code] && WL_GROUP_INDEX[code].name) || '';
-    const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null, px = q && q.price > 0 ? q.price : null;
-    const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[code] : null;
-    let ma = null; try { ma = info && px ? maScoreFromSums(info, px, brewLaunchData.rules) : null; } catch (_){}
-    if (ma === null || ma === undefined) ma = obsScoreFallback(code);
-    const hit = hitOf(code);
-    const tags = pre ? hit.map((x) => '<span class="obs-tag b">' + wlEsc(x) + '</span>').join('') : (hit.length ? '<span class="ss-tags">' + ssTagsHtml(hit) + '</span>' : '');
-    const nmHtml = '<span class="obs-nm' + (hit.length ? ' obs-blink ' + (pre ? 'blue' : 'pink') + '" title="' + wlEsc('跟「' + hit.join('」「') + '」相同') : '') + '"><b>' + wlEsc(code) + '</b> ' + wlEsc(nm) + '</span>';
-    return '<div class="obs-row hr-stk" data-code="' + wlEsc(code) + '" data-name="' + wlEsc(nm) + '" tabindex="0" role="button">' +
-      '<span class="obs-stk">' + nmHtml + tags + '</span>' +
-      '<span class="obs-pct ' + (pct === null ? '' : dirClass(pct)) + '">' + (pct === null ? '—' : (pct > 0 ? '+' : '') + pct.toFixed(2) + '%') + '</span>' +
-      '<span class="obs-h">' + holderTagHtml(holderPctOf(code), false, true) + '</span>' +
-      '<span class="obs-ma">' + (ma === null || ma === undefined ? '—' : ma) + '</span></div>';
+  // 每檔整理一次（同一檔在兩個族群就合成一檔，族群都寫）
+  const items = new Map(), order = [];
+  (d.groups || []).forEach((g, gi) => (g.stocks || []).forEach(([c0, n]) => {
+    const c = String(c0);
+    let it = items.get(c);
+    if (!it){
+      const q = obsQuote(c), px = q && q.price > 0 ? q.price : null;
+      const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[c] : null;
+      let ma = null; try { ma = info && px ? maScoreFromSums(info, px, brewLaunchData.rules) : null; } catch (_){}
+      if (ma === null || ma === undefined) ma = obsScoreFallback(c);
+      const hit = hitOf(c);
+      it = { code: c, name: n || names[c] || (q && q.name) || (WL_GROUP_INDEX[c] && WL_GROUP_INDEX[c].name) || '', groups: [], gi, hit, t: hit.length ? timeOf(c) : '',
+        chg: q && Number.isFinite(q.changePercent) ? q.changePercent : null, holder: holderPctOf(c), ma: Number.isFinite(ma) ? ma : null };
+      items.set(c, it); order.push(it);
+    }
+    it.groups.push(g);
+  }));
+  const grpLabel = (g) => { const gr = g.noRank ? null : obsGroupRank(g.name); return wlEsc(g.name) + (gr ? '<span class="obs-rank' + (gr.bear ? ' bear' : '') + '">(' + gr.rank + ')</span>' : ''); };
+  const row = (it, showGrp) => {
+    const tags = pre ? it.hit.map((x) => '<span class="obs-tag b">' + wlEsc(x) + '</span>').join('') : (it.hit.length ? '<span class="ss-tags">' + ssTagsHtml(it.hit) + '</span>' : '');
+    const nmHtml = '<span class="obs-nm' + (it.hit.length ? ' obs-blink ' + (pre ? 'blue' : 'pink') + '" title="' + wlEsc('跟「' + it.hit.join('」「') + '」相同' + (it.t ? '，' + it.t + ' 開始' : '')) : '') + '"><b>' + wlEsc(it.code) + '</b> ' + wlEsc(it.name) + '</span>';
+    const sub = (showGrp ? '<span class="obs-g">' + it.groups.map(grpLabel).join('・') + '</span>' : '') + tags;
+    return '<div class="obs-row hr-stk" data-code="' + wlEsc(it.code) + '" data-name="' + wlEsc(it.name) + '" tabindex="0" role="button">' +
+      '<span class="obs-t">' + (it.hit.length ? (it.t || '--:--') : '') + '</span>' +
+      '<span class="obs-stk">' + nmHtml + (sub ? '<span class="obs-sub">' + sub + '</span>' : '') + '</span>' +
+      '<span class="obs-pct ' + (it.chg === null ? '' : dirClass(it.chg)) + '">' + (it.chg === null ? '—' : (it.chg > 0 ? '+' : '') + it.chg.toFixed(2) + '%') + '</span>' +
+      '<span class="obs-h">' + holderTagHtml(it.holder, false, true) + '</span>' +
+      '<span class="obs-ma">' + (it.ma === null ? '—' : it.ma) + '</span></div>';
   };
-  const head = '<div class="obs-row obs-head"><span>股票</span><span>漲跌幅</span><span>大戶力</span><span>均線</span></div>';
-  const groups = (d.groups || []).map((g) => {
-    const gr = g.noRank ? null : obsGroupRank(g.name);
-    return '<div class="obs-grp">' + wlEsc(g.name) + (gr ? ' <span class="obs-rank' + (gr.bear ? ' bear' : '') + '" title="今天族群排名（共 ' + gr.total + ' 族）">(' + gr.rank + ')</span>' : '') + ' <small>' + (g.stocks || []).length + ' 檔</small></div>' +
-      (g.stocks || []).map(([c, n]) => row(String(c), n)).join('');
-  }).join('');
-  return '<div class="hr-col obs-col ' + kind + '">' + title + (d.notes || []).map((n) => '<div class="obs-note">' + wlEsc(n) + '</div>').join('') + head + groups + '</div>';
+  const head = '<div class="obs-row obs-head">' + botSortTh(col, 't', '時間') + '<span>' + botSortTh(col, '', '股票') + '</span>' + botSortTh(col, 'chg', '漲跌幅') + botSortTh(col, 'holder', '大戶力') + botSortTh(col, 'ma', '均線') + '</div>';
+  const tMin = (t) => (hmOk(t) ? Number(t.slice(0, 2)) * 60 + Number(t.slice(3)) : NaN);
+  const s0 = botSortState[col];
+  let body;
+  if (s0 && s0.k){
+    body = botSortRows(col, order, { t: (it) => (it.hit.length ? tMin(it.t) : NaN), chg: (it) => it.chg, holder: (it) => it.holder, ma: (it) => it.ma }).map((it) => row(it, true)).join('');
+  } else {
+    const hits = order.filter((it) => it.hit.length).sort((a, b) => (a.t !== b.t ? (!a.t ? 1 : !b.t ? -1 : b.t > a.t ? 1 : -1) : a.gi - b.gi));
+    const hitSet = new Set(hits.map((it) => it.code));
+    body = (hits.length ? '<div class="obs-grp obs-hit ' + kind + '">⚡ 符合 ' + hits.length + ' 檔 <small>最晚發生的在上面</small></div>' + hits.map((it) => row(it, true)).join('') : '') +
+      (d.groups || []).map((g) => {
+        const rest = (g.stocks || []).map(([c]) => items.get(String(c))).filter((it, i, arr) => it && !hitSet.has(it.code) && arr.indexOf(it) === i);
+        if (!rest.length) return '';
+        return '<div class="obs-grp">' + grpLabel(g) + ' <small>' + rest.length + ' 檔</small></div>' + rest.map((it) => row(it, false)).join('');
+      }).join('');
+  }
+  return '<div class="hr-col obs-col ' + kind + '">' + title + (d.notes || []).map((n) => '<div class="obs-note">' + wlEsc(n) + '</div>').join('') + head + body + '</div>';
 }
 const hot2Title = (tags) => '同時在「' + tags.join('」「') + '」' + tags.length + ' 份名單（強勢股觀察中、強勢紅K、240、260 四份裡出現 2 份以上就閃）';
 const botStkHot = (code, name, rest) => { const tg = hot2Of(code); const h = botStk(code, name, rest); return tg ? h.replace('<span class="bot-stk"', '<span class="bot-stk hot2" title="' + wlEsc(hot2Title(tg)) + '"') : h; };
