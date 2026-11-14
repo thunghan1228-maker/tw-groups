@@ -5755,8 +5755,8 @@ function drawChart(){
   if (vwapSeries){
     ctx.save();
     ctx.strokeStyle = currentChart.vwapColor;
-    ctx.lineWidth = currentChart.vwapWidth;
-    if (currentChart.tf === 'm5') ctx.setLineDash([8, 5]);   // 2026-11-14 使用者：5 分K 的 VWAP 黃線改虛線（粗細不變）
+    ctx.lineWidth = currentChart.vwapWidth + (currentChart.tf === 'm1' ? 1 : 0);   // 2026-11-15 使用者：1 分K 的 VWAP 再粗一點
+    if (currentChart.tf === 'm5' || currentChart.tf === 'm1') ctx.setLineDash([8, 5]);   // 2026-11-14 使用者：5 分K 的 VWAP 黃線改虛線（粗細不變）；2026-11-15 1 分K 也改虛線
     ctx.beginPath();
     // 2026-11-04：VWAP 每天從開盤重算，多日圖上昨天收盤那點跟今天開盤那點不能連起來（連起來會斜斜拉過整個隔夜缺口）：換日就另起一段線
     let vwapDay = null;
