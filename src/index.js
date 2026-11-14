@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 21:59:47";
+const BUILD_STAMP = "2026-11-14 22:01:48";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -441,7 +441,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2 .hr-code,.hot2 .hr-name{color:inherit!important;} .hr-pkw .l1 .hot2{display:inline-flex;gap:5px;min-width:0;overflow:hidden;} .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
   @media (prefers-reduced-motion: reduce){ .hot2{animation-duration:2.4s;} }
-  @keyframes hotbearblink{0%,100%{background:#16a34a;color:#fff;box-shadow:0 0 0 2px #16a34a;}50%{background:#bbf7d0;color:#14532d;box-shadow:0 0 0 2px #bbf7d0;}}
+  @keyframes hotbearblink{0%,100%{background:#16a34a;color:#fff;box-shadow:0 0 0 2px #16a34a;}50%{background:#14532d;color:#fff;box-shadow:0 0 0 2px #14532d;}}   /* 2026-11-14 使用者：綠底白字閃（亮綠↔深綠，字一直是白的） */
   .hotbear,#botBody .bot-stk.hotbear,body.home-light .home-botcol .bot-stk.hotbear,#botBody .b32-row.gone .b32-stk .bot-stk.hotbear{animation:hotbearblink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 777 跟 32 重複就閃綠 */
   @keyframes ssblink{0%,100%{background:#dc2626;color:#fff;}50%{background:#fecaca;color:#7f1d1d;}}
   .ss-blink{display:inline-block;animation:ssblink 1s ease-in-out infinite;border-radius:5px;padding:1px 8px;font-weight:900;}
@@ -11064,7 +11064,7 @@ function homeRank4Html(){
     // （2026-10-20 使用者：當沖多檔數太多，分成兩欄；2026-10-21 使用者排前三欄 當沖多1、當沖多2、多觀察；2026-10-16 多觀察原本是第一欄）
     // 2026-10-28 使用者（又改）：今日強勢股放在第五欄 30加33加34 的下面，一樣用紅框框起來（先前排第四欄／疊在當沖多1 下面都拿掉）
     // 2026-11-14 使用者：首頁順序改成 777、強中強、強勢股觀察中、強勢紅K（下面疊創高黑龍）、動能選股的熱門趨勢概念股(240)、日動能(260)、週動能(270)，其他照原本順序往後排
-    homeFixedBotColHtml('777', true) +   // 功課卡片條列（跟 32 重複的照樣閃綠）
+    homeFixedBotColHtml('777', true) +   // 功課卡片條列（777／32／123 兩份以上都有的閃綠）
     // 2026-11-14 使用者：777 右邊加機器人 32（新刀劍空），32 右邊再加 123（12空）
     homeFixedBotColHtml('32', true) + homeFixedBotColHtml('123', true) +
     '<div class="hr-stack hx-wide">' + homeRedBox(homeSsColHtml()) + '</div>' +   // 強中強（四份重複兩份以上；iPad／手機佔兩格寬）
@@ -18369,7 +18369,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 21:59:47';
+const BUILD_STAMP = '2026-11-14 22:01:48';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26331,7 +26331,7 @@ function botStockCard(code, raw, wrap){
 function botNorm(raw){
   return String(raw || '').trim().replace(/[０-９Ａ-Ｚａ-ｚ＋－]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[−–—]/g, '-').replace(/\\s+/g, '').toUpperCase();
 }
-// 2026-11-14 使用者：機器人 777 跟 32 兩份名單都有的股票，代號股名閃綠色（空方）。
+// 2026-11-14 使用者：機器人 777 跟 32 兩份名單都有的股票，代號股名閃綠色（空方）；同一天又加 123：777、32、123 三份有兩份以上都有就閃。
 // 777、32 的名單照當下畫出來的格子算（777 的篩選勾選也算進去；32 裡「跑掉」劃掉的不算），3 秒內重算一次；首頁加的 777／32 欄位一樣會閃。
 const hotBearCache = { at: 0, set: new Set(), busy: false };
 function hotBearSet(){
@@ -26345,15 +26345,19 @@ function hotBearSet(){
       tpl.content.querySelectorAll('[data-bot-code]').forEach((el) => { if (!el.closest('.gone, .blade-gone')) out.add(String(el.dataset.botCode || '').toUpperCase()); });
       return out;
     };
-    const a = codesOf('777'), b = codesOf('32');
-    hotBearCache.set = new Set([...a].filter((c) => b.has(c)));
+    // 2026-11-14 使用者：再加 123（12空）——777、32、123 三份裡有兩份以上都有的就閃（綠底白字）
+    const lists = [['777', codesOf('777')], ['32', codesOf('32')], ['123', codesOf('123')]];
+    const cnt = new Map();
+    lists.forEach(([name, set]) => set.forEach((c) => { const v = cnt.get(c) || []; v.push(name); cnt.set(c, v); }));
+    hotBearCache.where = new Map([...cnt].filter(([, v]) => v.length >= 2));
+    hotBearCache.set = new Set(hotBearCache.where.keys());
   } catch (_){} finally { hotBearCache.busy = false; }
   return hotBearCache.set;
 }
 function botAnswer(raw){
   const html = botAnswerRaw(raw);
   const k = botNorm(raw);
-  if (!html || (k !== '777' && k !== '32') || hotBearCache.busy) return html;
+  if (!html || (k !== '777' && k !== '32' && k !== '123') || hotBearCache.busy) return html;
   const set = hotBearSet();
   if (!set.size) return html;
   const tpl = document.createElement('template');
@@ -26361,7 +26365,7 @@ function botAnswer(raw){
   tpl.content.querySelectorAll('[data-bot-code]').forEach((el) => {
     if (!set.has(String(el.dataset.botCode || '').toUpperCase()) || el.closest('.gone, .blade-gone')) return;
     const tgt = el.classList.contains('bot-stk') ? el : el.querySelector('.bot-stk');
-    if (tgt){ tgt.classList.add('hotbear'); tgt.title = '777 跟 32 兩份名單都有'; }
+    if (tgt){ tgt.classList.add('hotbear'); tgt.title = (hotBearCache.where && hotBearCache.where.get(String(el.dataset.botCode || '').toUpperCase()) || []).join('、') + ' 都有'; }
   });
   return tpl.innerHTML;
 }
@@ -30160,7 +30164,7 @@ const ssTagsHtml = (tags) => tags.map((t) => { const x = SS_TAG[t] || [t, '']; r
 const SS_TIP = '強勢股觀察中・等收黑、強勢紅K、熱門趨勢概念股(240)、日動能強勢(260) 四份名單，同一檔出現在兩份以上（觀＝強勢股觀察中、紅＝強勢紅K）';
 function homeSsColHtml(){
   const rows = botSortRows('home_ss', ssList(), { n: (r) => r.n, px: (r) => r.px, chg: (r) => r.chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
-  const title = '<div class="hr-title ss-title" title="' + wlEsc(SS_TIP) + '"><span class="ss-blink">💪強中強 ' + rows.length + ' 檔</span></div>';   // 2026-11-14 使用者：標題「強中強 N 檔」紅底白字閃
+  const title = '<div class="hr-title ss-title" title="' + wlEsc(SS_TIP) + '"><span class="ss-blink">💪強中強 ' + rows.length + ' 檔（888）</span></div>';   // 2026-11-14 使用者：標題「強中強 N 檔」紅底白字閃
   if (!rows.length) return '<div class="hr-col">' + title + '<div class="hr-note">讀取中…（四份名單都讀進來才算得出來）</div></div>';
   const head = '<div class="hss-row hsc-head"><span>' + botSortTh('home_ss', '', '股票') + '</span>' + botSortTh('home_ss', 'n', '符合數量') + '<span class="hss-pch">' + botSortTh('home_ss', 'px', '成交價') + botSortTh('home_ss', 'chg', '漲跌幅') + '</span>' + botSortTh('home_ss', 'holder', '大戶力') + botSortTh('home_ss', 'score', '均線') + '</div>';
   const row = (r) => '<div class="hss-row hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(r.group + '・同時在「' + r.tags.join('」「') + '」') + '">' +
