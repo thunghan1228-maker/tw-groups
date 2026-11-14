@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 16:53:37";
+const BUILD_STAMP = "2026-11-14 16:55:45";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -306,8 +306,13 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bot-col[data-col-key="777"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：777 功課卡片條列，每檔一列要放時間、股名、族群、漲跌幅、大戶% */
   .bot-col:is([data-col-key="82"],[data-col-key="14"],[data-col-key="80"]){flex-basis:calc((100% - 72px) / 10 * 1.6);min-width:270px;}   /* 2026-11-14 使用者：觀察中・等收黑(82)、疑似主力融資買進(14) 每檔一行放代號股名漲跌＋大戶力，太窄會被擠成兩行 */
   #botBody .bot-line.b83-cat{background:#7c3aed;color:#fff;font-size:15px;font-weight:900;line-height:1.5;padding:5px 9px;border-radius:6px;margin:8px 0 4px;} #botBody .b83-cat small{font-size:12.5px;font-weight:700;color:#fff;opacity:.92;}   /* 2026-11-14 使用者：83 的【1】～【5】紫底白字、字加大 */
+  .bot-line.t240-row{display:grid;grid-template-columns:minmax(0,1fr) 54px 60px 66px 34px 64px;gap:0 6px;align-items:center;padding:4px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;}   /* 2026-11-14 使用者：240 表格式 */
+  .t240-c1{min-width:0;} .t240-n{text-align:right;white-space:nowrap;font-size:12.5px;} .t240-ma{font-weight:800;}
+  .bot-line.t240-head{border-top:0;padding:2px 0;position:sticky;top:0;z-index:2;background:var(--panel);}
+  .bsort{font:inherit;font-size:11px;font-weight:700;color:var(--muted);background:transparent;border:0;padding:2px 0;cursor:pointer;text-align:right;white-space:nowrap;}
+  .t240-head > span .bsort{text-align:left;} .bsort:hover,.bsort.on{color:#7c3aed;} .bsort i{font-style:normal;opacity:.45;font-size:10px;margin-left:1px;}
   .bot-col[data-col-key="250"]{flex-basis:calc((100% - 72px) / 10 * 2.3);min-width:390px;} .t240-miss{font-size:11px;font-weight:800;color:#b45309;border:1px solid #f59e0b;border-radius:4px;padding:0 4px;}
-  .bot-col[data-col-key="240"]{flex-basis:calc((100% - 72px) / 10 * 2.3);min-width:390px;} .t240-new{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:4px;padding:0 4px;}   /* 2026-11-14 熱門趨勢概念股 */
+  .bot-col[data-col-key="240"]{flex-basis:calc((100% - 72px) / 10 * 3);min-width:470px;} .t240-new{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:4px;padding:0 4px;}   /* 2026-11-14 熱門趨勢概念股 */
   .bot-col[data-col-key="83"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}   /* 2026-11-14 多觀察(83) 每檔後面有 ①區1★●▲ 符號，再寬一點才排得進一行 */
   .bot-col[data-col-key="99"]{flex-basis:calc((100% - 72px) / 10 * 2.5);min-width:420px;}   /* 2026-11-12 使用者：99 外資投信同步買賣超，每檔要放外資、投信兩個金額＋漲跌幅＋大戶力，加寬才排得進一行 */
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
@@ -10937,7 +10942,7 @@ const HOME_X_MAX = 10, HOME_X_KEY = 'homeXCols';
 let homeXCols = [];
 try { const v = JSON.parse(localStorage.getItem(HOME_X_KEY) || '[]'); if (Array.isArray(v)) homeXCols = v.filter((c) => typeof c === 'string' && c.trim()).map((c) => c.slice(0, 20)).slice(0, HOME_X_MAX); } catch (_){}
 function homeXSave(){ try { localStorage.setItem(HOME_X_KEY, JSON.stringify(homeXCols)); } catch (_){} }
-const homeXWide = (k) => (/^(32|123|777|23|240|250|99|83|82|14|80|193|199)$/.test(k) ? 360 : 300);
+const homeXWide = (k) => (k === '240' ? 470 : /^(32|123|777|23|250|99|83|82|14|80|193|199)$/.test(k) ? 360 : 300);
 function homeXAdd(raw){
   const cmd = String(raw || '').trim().slice(0, 20), key = botNorm(cmd);
   if (!key) return;
@@ -18283,7 +18288,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 16:53:37';
+const BUILD_STAMP = '2026-11-14 16:55:45';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19408,6 +19413,7 @@ document.getElementById('app').addEventListener('click', (e) => {
   const hd = t.closest('[data-hx-del]'); if (hd){ homeXCols.splice(Number(hd.dataset.hxDel), 1); homeXSave(); render(); return; }
   const hm = t.closest('[data-hx-move]'); if (hm){ const [i, d] = hm.dataset.hxMove.split(':').map(Number), j = i + d; if (j >= 0 && j < homeXCols.length){ [homeXCols[i], homeXCols[j]] = [homeXCols[j], homeXCols[i]]; homeXSave(); render(); } return; }
   if (t.closest('.home-botcol')){   // 加到首頁的機器人欄位：跟機器人那格一樣的點法
+    const bs = t.closest('[data-bsort]'); if (bs){ botSortClick(bs); render(); try { botRerunCols(); } catch (_){} return; }
     const mp = t.closest('[data-mom-p]');
     if (mp){ const [k, v] = mp.dataset.momP.split(':'); if (k === 'top') momParams.top = Number(v); else if (k === 'almost') momParams.almost = v === '1'; momSave(); render(); try { botRerunCols(); } catch (_){} return; }
     const tp = t.closest('[data-trend-p]');
@@ -25741,6 +25747,23 @@ function momParamsHtml(){
   return '<div class="bot-line b777-params"><span class="b777-plabel">四個漲幅都在前</span>' + MOM_TOPS.map((v) => '<button type="button" class="b777-p' + (momParams.top === v ? ' on' : '') + '" data-mom-p="top:' + v + '">' + v + '%</button>').join('') +
     '<button type="button" class="b777-p' + (momParams.almost ? ' on' : '') + '" data-mom-p="almost:' + (momParams.almost ? 0 : 1) + '">' + (momParams.almost ? '☑' : '☐') + ' 差一個的也列</button></div>';
 }
+// 機器人格子的欄位排序（2026-11-14 使用者：240 的欄位名稱點一下排序、再點切換大到小／小到大；記在這台）
+let botSortState = {};
+try { botSortState = JSON.parse(localStorage.getItem('botSort') || '{}') || {}; } catch (_){}
+function botSortTh(col, k, label){
+  const s0 = botSortState[col], on = !!(k && s0 && s0.k === k);
+  return '<button type="button" class="bsort' + (on ? ' on' : '') + '" data-bsort="' + col + ':' + k + '" title="' + (k ? '點一下排序，再點一下切換大到小／小到大' : '回到原本的排法') + '">' + label + (k ? (on ? (s0.asc ? '▲' : '▼') : '<i>⇅</i>') : '') + '</button>';
+}
+function botSortRows(col, list, getters){
+  const s0 = botSortState[col], g = s0 && getters[s0.k];
+  if (!g) return list;
+  return list.slice().sort((a, b) => { const va = g(a), vb = g(b), na = !Number.isFinite(va), nb = !Number.isFinite(vb); if (na || nb) return na - nb; return s0.asc ? va - vb : vb - va; });
+}
+function botSortClick(el){
+  const [col, k] = el.dataset.bsort.split(':'), cur = botSortState[col];
+  if (!k) delete botSortState[col]; else if (cur && cur.k === k) cur.asc = !cur.asc; else botSortState[col] = { k, asc: false };
+  try { localStorage.setItem('botSort', JSON.stringify(botSortState)); } catch (_){}
+}
 function bot777ParamsHtml(){
   const allOn = TD_PARAMS.every(([k]) => bot777Params[k]);
   const btn = (k, label, on) => '<button type="button" class="b777-p' + (on ? ' on' : '') + '" data-bot777-param="' + k + '">' + (on ? '☑' : '☐') + ' ' + label + '</button>';
@@ -26413,14 +26436,21 @@ function botAnswer(raw){
     const m = trendModel();
     if (m.wait) return wrap(t, trendParamsHtml() + botLine(m.wait, 'bot-dim'));
     const fmtPx = (v) => (Number.isFinite(v) ? (v >= 1000 ? v.toFixed(0) : v >= 100 ? v.toFixed(1) : v.toFixed(2)) : '—');
-    const line = (r, i) => botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' <b>' + fmtPx(r.px) + '</b> <span class="' + (Number.isFinite(r.chgNow) ? dirClass(r.chgNow) : 'bot-dim') + '">' + (Number.isFinite(r.chgNow) ? botPct(r.chgNow) : '—') + '</span>' +
-        (r.dist >= -1e-9 ? ' <span class="t240-new">🆕新高</span>' : '')) +
-      '<br><span class="bot-dim" style="font-size:11.5px">240日最高 <b>' + fmtPx(r.hiNow) + '</b>・240日漲幅 <b class="up">' + botPct(r.gainNow) + '</b>' + (r.dist < -1e-9 ? '・離高 ' + r.dist.toFixed(1) + '%' : '') +
-      '<br>' + wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '—') + '・均線 ' + (r.score ?? '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
-      '<span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow');
+    // 2026-11-14 使用者：價格、漲跌幅、240日漲幅、均線、大戶力各自一欄（表格式、加寬），欄位名稱點一下排序、再點切換大到小／小到大
+    const G = { px: (r) => r.px, chg: (r) => r.chgNow, gain: (r) => r.gainNow, score: (r) => r.score, holder: (r) => holderPctOf(r.code) };
+    const rows = botSortRows('240', m.rows, G);
+    const head = botLine('<span>' + botSortTh('240', '', '#　股票') + '</span>' + botSortTh('240', 'px', '價格') + botSortTh('240', 'chg', '漲跌幅') + botSortTh('240', 'gain', '240日漲幅') + botSortTh('240', 'score', '均線') + botSortTh('240', 'holder', '大戶力'), 't240-row t240-head');
+    const line = (r, i) => botLine('<span class="t240-c1">' + (i + 1) + ' ' + botStk(r.code, r.name, r.dist >= -1e-9 ? ' <span class="t240-new">🆕新高</span>' : '') +
+        '<br><span class="bot-dim" style="font-size:11.5px">240日最高 <b>' + fmtPx(r.hiNow) + '</b>' + (r.dist < -1e-9 ? '・離高 ' + r.dist.toFixed(1) + '%' : '') + '・' +
+        wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
+      '<span class="t240-n"><b>' + fmtPx(r.px) + '</b></span>' +
+      '<span class="t240-n ' + (Number.isFinite(r.chgNow) ? dirClass(r.chgNow) : 'bot-dim') + '">' + (Number.isFinite(r.chgNow) ? botPct(r.chgNow) : '—') + '</span>' +
+      '<span class="t240-n up"><b>' + botPct(r.gainNow) + '</b></span>' +
+      '<span class="t240-n t240-ma">' + (r.score ?? '—') + '</span>' +
+      '<span class="t240-n">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 't240-row');
     const md = m.date ? Number(m.date.slice(5, 7)) + '/' + m.date.slice(8, 10) : '';
-    return wrap(t, trendParamsHtml() + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + (m.rows.length ? m.rows.map(line).join('') : botLine('目前沒有符合的股票（可以把上面的門檻放寬）', 'bot-dim')) +
-      botLine('照 240 日漲幅排、漲最多的在上面。240日最高＝最近 240 個交易日最高的<b>收盤價</b>；240日漲幅＝跟 240 個交易日前的收盤比（還原股價，跟 App 同算法）。' + (m.live ? '盤中用即時價重算（現價破前高就是 🆕新高）。' : md + ' 收盤資料，開盤後用即時價重算。') +
+    return wrap(t, trendParamsHtml() + (rows.length ? head + rows.map(line).join('') : botLine('目前沒有符合的股票（可以把上面的門檻放寬）', 'bot-dim')) +
+      botLine((botSortState['240'] ? '照你點的欄位排；點「#　股票」回到照 240 日漲幅排。' : '照 240 日漲幅排、漲最多的在上面（欄位名稱點一下可以排序）。') + '240日最高＝最近 240 個交易日最高的<b>收盤價</b>；240日漲幅＝跟 240 個交易日前的收盤比（還原股價，跟 App 同算法）。' + (m.live ? '盤中用即時價重算（現價破前高就是 🆕新高）。' : md + ' 收盤資料，開盤後用即時價重算。') +
         'App 另外看「新聞熱度」我們沒有，改用 5 日均成交值當門檻；資料每天收盤後更新', 'bot-dim'),
       (m.live ? stamp + '・即時' : md + ' 收盤') + '・' + m.rows.length + ' 檔');
   }
@@ -27493,6 +27523,7 @@ document.getElementById('botModal').addEventListener('click', (e) => {
   const t = e.target;
   const xq = t.closest('[data-bot-xq]');
   if (xq){ const col = xq.closest('.bot-col'); if (col) botXqExport(col, xq.dataset.botXq); return; }
+  const bs = t.closest('[data-bsort]'); if (bs){ botSortClick(bs); botRerunCols(); try { render(); } catch (_){} return; }
   const mp = t.closest('[data-mom-p]');
   if (mp){ const [k, v] = mp.dataset.momP.split(':'); if (k === 'top') momParams.top = Number(v); else if (k === 'almost') momParams.almost = v === '1'; momSave(); botRerunCols(); return; }
   const tp = t.closest('[data-trend-p]');
