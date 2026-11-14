@@ -5504,7 +5504,7 @@ function drawChart(){
     ctx.fillText(v.toFixed(currentChart.code === 'IDX_TNX' ? 3 : 1), cssW - PAD.right + 6, y);
   }
 
-  // 每天開盤第一根畫細的紅色虛線，10:30那根畫粗的紫色實線；整段已載入的多日範圍都畫，不隨縮放/平移消失
+  // 每天開盤第一根畫細的紅色虛線（整段已載入的多日範圍都畫，不隨縮放/平移消失）；10:30那根畫粗的紫色實線（5 分K 只畫最近一天，2026-11-14）
   // 5分線／1分線都適用；「今天第一根K高低點」只在5分線畫（1分線的第一根意義不大）
   // 2026-10-29 使用者：① 5 分K 今天 12:00 那根（11:55～12:00）畫一條橘紅色粗實線（只畫今天，之前的日子不畫）；
   // ② 這幾條垂直線下面的時間軸都標時間（開盤那條 09:05、紫線 10:30、橘紅線 12:00）；
@@ -5540,10 +5540,12 @@ function drawChart(){
       const useKeys = currentChart.tf === 'm1' ? keys.slice(-3) : keys;
       let noonKey = -1;
       keys.forEach((k) => { if (byDay.get(k).noon >= 0) noonKey = k; });   // 橘線只畫最近一個有 12:00 的那天
+      let key1030 = -1;
+      keys.forEach((k) => { if (byDay.get(k).m1030 >= 0) key1030 = k; });   // 2026-11-14 使用者：5 分K 的 10:30 紫線也只畫最近一天
       useKeys.forEach((k) => {
         const e = byDay.get(k);
         if (e.open >= 0) twMarks.set(e.open, 'open');
-        if (e.m1030 >= 0) twMarks.set(e.m1030, '1030');
+        if (e.m1030 >= 0 && (currentChart.tf !== 'm5' || k === key1030)) twMarks.set(e.m1030, '1030');
         if (k === noonKey && e.noon >= 0) twMarks.set(e.noon, 'noon');
       });
       let openKey = -1;
@@ -5589,7 +5591,8 @@ function drawChart(){
       }
       const m1Mark = currentChart.tf === 'm1' && !isTxf ? m1Marks.get(globalIdx) : null;
       const isDayOpen = currentChart.tf === 'm1' && !isTxf ? m1Mark === 'open' : isTxf ? (currentChart.tf === 'm5' || currentChart.tf === 'm1') && (sessMin === 525 || sessMin === 900) : (!prevBar || dayKey(prevBar.ts) !== dayKey(b.ts));
-      const is1030 = !noTwMarks && (currentChart.tf === 'm1' && !isTxf ? m1Mark === '1030' : d.getHours() === 10 && d.getMinutes() === closeMin);
+      // 2026-11-14 使用者：5 分K 的 10:30 紫線只留最近一天（今天／最後一個交易日），之前的日子不畫；開盤第一根的紅虛線每天照畫
+      const is1030 = !noTwMarks && (currentChart.tf === 'm1' && !isTxf ? m1Mark === '1030' : d.getHours() === 10 && d.getMinutes() === closeMin && (currentChart.tf !== 'm5' || dayKey(b.ts) === lastDayKey));
       const isNoon = !noTwMarks && (currentChart.tf === 'm1' && !isTxf ? m1Mark === 'noon' : currentChart.tf === 'm5' && d.getHours() === 11 && d.getMinutes() === 55 && dayKey(b.ts) === lastDayKey);   // 5 分K 11:55～12:00 那根，只有今天（最後一個交易日）
       if (!isDayOpen && !is1030 && !isNoon) return;
       const x = xAt(i);

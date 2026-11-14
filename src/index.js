@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 22:38:19";
+const BUILD_STAMP = "2026-11-14 22:50:26";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5593,7 +5593,7 @@ function drawChart(){
     ctx.fillText(v.toFixed(currentChart.code === 'IDX_TNX' ? 3 : 1), cssW - PAD.right + 6, y);
   }
 
-  // 每天開盤第一根畫細的紅色虛線，10:30那根畫粗的紫色實線；整段已載入的多日範圍都畫，不隨縮放/平移消失
+  // 每天開盤第一根畫細的紅色虛線（整段已載入的多日範圍都畫，不隨縮放/平移消失）；10:30那根畫粗的紫色實線（5 分K 只畫最近一天，2026-11-14）
   // 5分線／1分線都適用；「今天第一根K高低點」只在5分線畫（1分線的第一根意義不大）
   // 2026-10-29 使用者：① 5 分K 今天 12:00 那根（11:55～12:00）畫一條橘紅色粗實線（只畫今天，之前的日子不畫）；
   // ② 這幾條垂直線下面的時間軸都標時間（開盤那條 09:05、紫線 10:30、橘紅線 12:00）；
@@ -5629,10 +5629,12 @@ function drawChart(){
       const useKeys = currentChart.tf === 'm1' ? keys.slice(-3) : keys;
       let noonKey = -1;
       keys.forEach((k) => { if (byDay.get(k).noon >= 0) noonKey = k; });   // 橘線只畫最近一個有 12:00 的那天
+      let key1030 = -1;
+      keys.forEach((k) => { if (byDay.get(k).m1030 >= 0) key1030 = k; });   // 2026-11-14 使用者：5 分K 的 10:30 紫線也只畫最近一天
       useKeys.forEach((k) => {
         const e = byDay.get(k);
         if (e.open >= 0) twMarks.set(e.open, 'open');
-        if (e.m1030 >= 0) twMarks.set(e.m1030, '1030');
+        if (e.m1030 >= 0 && (currentChart.tf !== 'm5' || k === key1030)) twMarks.set(e.m1030, '1030');
         if (k === noonKey && e.noon >= 0) twMarks.set(e.noon, 'noon');
       });
       let openKey = -1;
@@ -5678,7 +5680,8 @@ function drawChart(){
       }
       const m1Mark = currentChart.tf === 'm1' && !isTxf ? m1Marks.get(globalIdx) : null;
       const isDayOpen = currentChart.tf === 'm1' && !isTxf ? m1Mark === 'open' : isTxf ? (currentChart.tf === 'm5' || currentChart.tf === 'm1') && (sessMin === 525 || sessMin === 900) : (!prevBar || dayKey(prevBar.ts) !== dayKey(b.ts));
-      const is1030 = !noTwMarks && (currentChart.tf === 'm1' && !isTxf ? m1Mark === '1030' : d.getHours() === 10 && d.getMinutes() === closeMin);
+      // 2026-11-14 使用者：5 分K 的 10:30 紫線只留最近一天（今天／最後一個交易日），之前的日子不畫；開盤第一根的紅虛線每天照畫
+      const is1030 = !noTwMarks && (currentChart.tf === 'm1' && !isTxf ? m1Mark === '1030' : d.getHours() === 10 && d.getMinutes() === closeMin && (currentChart.tf !== 'm5' || dayKey(b.ts) === lastDayKey));
       const isNoon = !noTwMarks && (currentChart.tf === 'm1' && !isTxf ? m1Mark === 'noon' : currentChart.tf === 'm5' && d.getHours() === 11 && d.getMinutes() === 55 && dayKey(b.ts) === lastDayKey);   // 5 分K 11:55～12:00 那根，只有今天（最後一個交易日）
       if (!isDayOpen && !is1030 && !isNoon) return;
       const x = xAt(i);
@@ -18376,7 +18379,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 22:38:19';
+const BUILD_STAMP = '2026-11-14 22:50:26';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
