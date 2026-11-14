@@ -4098,7 +4098,8 @@
   .dyn-table .dyn-stk,.dyn-table .dyn-stk b{color:#0b0d10;font-weight:900;-webkit-text-stroke:.3px currentColor;}
   .dyn-rk{font-size:10.5px;color:var(--muted);}
   .dyn-foot{font-size:12px;color:var(--muted);line-height:1.6;margin:10px 2px;}
-  .dyn-todo{line-height:1.8;}
+  .dyn-side{margin:2px 0 4px;} .dyn-live{color:#dc2626;} .dyn-new{display:inline-block;font-size:11px;font-weight:800;color:#3b2f00;background:#facc15;border-radius:4px;padding:0 5px;}
+  .dyn-mom{display:inline-block;min-width:44px;text-align:center;font-weight:900;color:#fff;border-radius:5px;padding:1px 6px;} .dyn-mom.up{background:#b91c1c;} .dyn-mom.down{background:#15803d;}
 </style>
 
 <header>
@@ -4423,7 +4424,7 @@
     <div class="chips-head">
       <div>
         <div class="chips-title">📈 動能選股</div>
-        <div class="chips-sub">照券商 App「動能選股」做：熱門趨勢概念股（240 日新高附近、240 日漲幅大）、動能排行（週／月／季／年漲幅都在全市場前 5%＋創高）。點股票開 K 線圖；機器人代碼 240、250 是同一份。</div>
+        <div class="chips-sub">照券商 App「動能選股」「動能節奏測驗」做：熱門趨勢概念股、動能排行（盤後）、日動能／週動能（即時，盤中跟著行情重算）、法人動能。點股票開 K 線圖；機器人代碼 240、250 是同一份。</div>
       </div>
       <button class="cm-icon-btn" id="dynClose" aria-label="關閉">✕</button>
     </div>
@@ -26230,7 +26231,7 @@ function botAnswer(raw){
   }
   // 動能排行（暫定代碼 250；2026-11-14 使用者：照券商 App「動能選股 → 動能排行」）
   if (q === '250'){
-    const t = '📈動能選股｜🚀動能排行(250)';
+    const t = '📈動能選股｜🚀動能排行（盤後）(250)';
     const key = 'momRank|' + momParams.top;
     const d = botFetchCache(key, '/api/momentum-rank?top=' + momParams.top, 10 * 60e3);
     if (!d) return wrap(t, momParamsHtml() + botLine('讀取中…', 'bot-dim'));
@@ -29694,8 +29695,9 @@ czApply();
 // 熱門趨勢概念股、動能排行跟機器人 240／250 同一份資料、同一組門檻（改了兩邊一起變）。
 // 日動能／週動能／法人動能：App 的「動能」分數沒公開算法，拿 5 檔的走勢圖試過最接近的是「收盤跟 6～8 日指數平均線的乖離 × 1.4」，
 // 但奇鋐的週動能 App 7.7、這樣算 0.2，對不起來；上榜條件又被 VIP 鎖住，所以先不放假數字。
-const DYN_TABS = [['hot', '🔥 熱門趨勢概念股'], ['rank', '🚀 動能排行'], ['day', '日動能'], ['week', '週動能'], ['inst', '法人動能']];
-const dynState = { tab: 'hot' };
+const DYN_TABS = [['hot', '🔥 熱門趨勢概念股'], ['rank', '🚀 動能排行（盤後）'], ['day', '⚡ 日動能（即時）'], ['week', '⚡ 週動能（即時）'], ['inst', '🏛️ 法人動能']];   // 2026-11-14 使用者：日／週動能後面寫（即時）、動能排行寫（盤後），一看就知道哪個會跳
+const DYN_INST = [['priceVolHigh', '價量創新高'], ['trustFresh', '投信剛買準突破'], ['trustStreak', '投信動能連買'], ['foreignStreak', '外資動能連買']];
+const dynState = { tab: 'hot', side: 'strong', inst: 'priceVolHigh' };
 try { const t0 = localStorage.getItem('dynTab'); if (DYN_TABS.some(([k]) => k === t0)) dynState.tab = t0; } catch (_){}
 const dynPx = (v) => (Number.isFinite(v) ? (v >= 1000 ? v.toFixed(0) : v >= 100 ? v.toFixed(1) : v.toFixed(2)) : '—');
 const dynPct = (v) => (Number.isFinite(v) ? '<span class="' + dirClass(v) + '">' + botPct(v) + '</span>' : '<span class="muted">—</span>');
@@ -29743,19 +29745,118 @@ function dynRankHtml(){
   if (almost.length) h += '<div class="dyn-sub">差一個：創高、四個漲幅裡三個在前 ' + momParams.top + '%（' + almost.length + ' 檔）</div><div class="dyn-wrap"><table class="dyn-table">' + head + '<tbody>' + almost.map(row).join('') + '</tbody></table></div>';
   return h + '<div class="dyn-foot">週／月／季／年＝本週／本月／本季／今年以來的漲幅（還原現金股利，跟 App 同算法），四個都在全市場前 ' + momParams.top + '%，而且收盤是 240 日最高收盤（創高）。11/13 App 選的 4 檔我們對上 3 檔（騰雲的年漲幅差一點點，在「差一個」裡）。每天收盤後更新' + (live ? '；價格、漲跌幅是即時的' : '') + '。</div>';
 }
-function dynTodoHtml(tab){
-  const name = tab === 'day' ? '日動能' : tab === 'week' ? '週動能' : '法人動能';
-  return '<div class="race-note dyn-todo"><b>' + name + '：算法還在對，先不放數字</b><br>' +
-    (tab === 'inst' ? 'App 的法人動能底下分「價量創新高、投信剛買準突破、投信動能連買…」，內容都被 VIP 鎖住，只看得到名稱；要做的話得照名稱用我們的法人資料自己定條件。'
-      : 'App 的「動能」分數沒有公開算法。拿中信金、富喬、奇鋐、聯發科、南亞的走勢圖試過，最接近的是「收盤跟 6～8 日指數平均線的乖離 × 1.4」（中信金、富喬走勢對得上），但奇鋐的週動能 App 是 7.7、這樣算只有 0.2，對不起來；哪些股票上榜、「上榜（天）」怎麼算也被鎖住。') +
-    '<br>多傳幾張 App 的畫面（同一檔每天的動能數字、或沒上鎖的名單）就可以再對。</div>';
+function pulseData(){
+  const d = botFetchCache('mPulse', '/api/momentum-pulse', 10 * 60e3);
+  if (d && (d.status !== 'ok' || !Array.isArray(d.rows))){ const e = botState.cache.mPulse; if (e && !e.loading && Date.now() - e.at > 60e3) delete botState.cache.mPulse; }
+  return d;
+}
+function isoWeekKey(day){
+  const t = new Date(day + 'T00:00:00Z'), dn = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - dn);
+  const y0 = Date.UTC(t.getUTCFullYear(), 0, 1);
+  return t.getUTCFullYear() + '-W' + String(Math.ceil(((t - y0) / 86400000 + 1) / 7)).padStart(2, '0');
+}
+function pulseModel(){
+  const d = pulseData();
+  if (!d) return { wait: '讀取中…' };
+  if (d.status !== 'ok' || !Array.isArray(d.rows)) return { wait: d.detail === 'Not Found' ? '後端還沒更新（PR 合併後幾分鐘就會有）' : '資料暫時抓不到，等一下再試' };
+  const live = !!(lastData && lastData.quoteDate && lastData.quoteDate > d.date);
+  const qmap = new Map();
+  if (lastData && Array.isArray(lastData.groups)) lastData.groups.forEach((g) => g.stocks.forEach((st) => { if (st.price != null && !qmap.has(st.code)) qmap.set(st.code, st); }));
+  const ci = {}; d.cols.forEach((c, i) => { ci[c] = i; });
+  let wq = null;
+  if (live){
+    const need = d.rows.filter((r) => !qmap.has(r[ci.code])).sort((a, b) => (b[ci.val5] || 0) - (a[ci.val5] || 0)).slice(0, 200).map((r) => r[ci.code]);
+    if (need.length) wq = botFetchCache('wqPulse|' + need.join(','), '/api/watch-quotes?codes=' + encodeURIComponent(need.join(',')), 30e3);
+  }
+  const sameWeek = live && isoWeekKey(lastData.quoteDate) === d.week;
+  const A = 2 / (d.rule.ema + 1), K = d.rule.k, MIN = d.rule.min;
+  const all = [];
+  d.rows.forEach((r) => {
+    const o = {}; d.cols.forEach((c, i) => { o[c] = r[i]; });
+    if (live){
+      const q = qmap.get(o.code) || (wq && wq.quotes ? wq.quotes[o.code] : null);
+      const p = q && Number.isFinite(q.price) && q.price > 0 ? q.price : null;
+      if (p === null || !o.emaD) return;
+      const vol = Number.isFinite(q.volume) ? q.volume : 0;
+      o.px = p; o.chgNow = Number.isFinite(q.changePercent) ? q.changePercent : null;
+      o.dNow = K * (p / (A * p + (1 - A) * o.emaD) - 1) * 100; o.dBase = o.dm;
+      o.valNow = p * vol * 1000 / 1e8;
+      const ew = sameWeek ? o.emaWd : o.emaWl;
+      o.wNow = ew ? K * (p / (A * p + (1 - A) * ew) - 1) * 100 : null; o.wBase = sameWeek ? o.wmDone : o.wm;
+      o.wvalNow = (sameWeek ? (o.wval || 0) : 0) + o.valNow;
+      o.dDays = (s2) => (s2 ? (o.dNow >= MIN ? o.dS + 1 : 0) : (o.dNow <= -MIN ? o.dW + 1 : 0));
+      o.wDays = (s2) => { const b = sameWeek ? (s2 ? o.wSd : o.wWd) : (s2 ? o.wSl : o.wWl); return s2 ? (o.wNow >= MIN ? b + 1 : 0) : (o.wNow <= -MIN ? b + 1 : 0); };
+    } else {
+      o.px = o.close; o.chgNow = o.chg; o.dNow = o.dm; o.dBase = o.dmPrev; o.valNow = o.val;
+      o.wNow = o.wm; o.wBase = o.wmDone; o.wvalNow = o.wval;
+      o.dDays = (s2) => (s2 ? o.dS : o.dW); o.wDays = (s2) => (s2 ? o.wSl : o.wWl);
+    }
+    all.push(o);
+  });
+  const gs = new Map();
+  all.forEach((o) => { if (o.group){ const a = gs.get(o.group) || []; a.push(o.dNow); gs.set(o.group, a); } });
+  const gmom = new Map([...gs].map(([g, v]) => [g, v.reduce((x, y) => x + y, 0) / v.length]));
+  const top = d.rule.top || 40;
+  const pick = (key, valKey, strong) => all.filter((o) => Number.isFinite(o[key]) && (strong ? o[key] >= MIN : o[key] <= -MIN)).sort((a, b) => (b[valKey] || 0) - (a[valKey] || 0)).slice(0, top);
+  return { d, live, sameWeek, gmom, MIN, priced: all.length,
+    day: { strong: pick('dNow', 'valNow', true), weak: pick('dNow', 'valNow', false) },
+    week: { strong: pick('wNow', 'wvalNow', true), weak: pick('wNow', 'wvalNow', false) } };
+}
+function dynPulseHtml(kind){
+  const m = pulseModel();
+  const sideBtns = '<div class="hw-tabs dyn-side">' + [['strong', '強勢'], ['weak', '弱勢']].map(([k, l]) => '<button type="button" class="chart-tab signal-tab' + (dynState.side === k ? ' active' : '') + '" data-dyn-side="' + k + '">' + l + '</button>').join('') + '</div>';
+  if (m.wait) return sideBtns + '<div class="race-note">' + wlEsc(m.wait) + '</div>';
+  const strong = dynState.side === 'strong';
+  const list = (kind === 'day' ? m.day : m.week)[strong ? 'strong' : 'weak'];
+  const md = swMmdd(m.d.date);
+  const momOf = (o) => (kind === 'day' ? o.dNow : o.wNow), baseOf = (o) => (kind === 'day' ? o.dBase : o.wBase);
+  const valOf = (o) => (kind === 'day' ? o.valNow : o.wvalNow), daysOf = (o) => (kind === 'day' ? o.dDays(strong) : o.wDays(strong));
+  let h = sideBtns + '<div class="dyn-meta">' + (m.live ? '<b class="dyn-live">● 即時</b>（' + new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', hour12: false }) + '，用現價重算，' + (kind === 'week' ? (m.sameWeek ? '這週還沒過完' : '新的一週') + '，' : '') + '名單跟著行情換）' : md + ' 收盤') +
+    '・' + (strong ? '動能 ≥ +' : '動能 ≤ −') + m.MIN + '・照' + (kind === 'day' ? '今天' : '這週') + '成交金額排・<b>' + list.length + '</b> 檔</div>';
+  if (!list.length) return h + '<div class="race-note">目前沒有</div>';
+  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr><th>上榜' + (kind === 'day' ? '(天)' : '(週)') + '</th><th class="l">股票</th><th>價格</th><th>漲跌幅</th><th>動能</th><th>成交金額(億)</th><th class="l">族群・族群動能</th><th>均線</th><th>大戶力</th></tr></thead><tbody>' +
+    list.map((o) => {
+      const mv = momOf(o), bv = baseOf(o), dd = daysOf(o), gm = o.group ? m.gmom.get(o.group) : null;
+      return '<tr class="dyn-row" data-code="' + wlEsc(o.code) + '" data-name="' + wlEsc(o.name || '') + '"><td>' + (dd <= 1 ? '<span class="dyn-new">新</span>' : dd) + '</td>' + dynStk(o) +
+        '<td><b>' + dynPx(o.px) + '</b></td><td>' + dynPct(o.chgNow) + '</td>' +
+        '<td><span class="dyn-mom ' + (mv >= 0 ? 'up' : 'down') + '">' + mv.toFixed(1) + '</span>' + (Number.isFinite(bv) ? '<div class="dyn-rk">' + (mv - bv >= 0 ? '+' : '') + (mv - bv).toFixed(2) + '</div>' : '') + '</td>' +
+        '<td>' + (Number.isFinite(valOf(o)) ? valOf(o).toFixed(valOf(o) >= 100 ? 0 : 1) : '—') + '</td>' +
+        '<td class="l">' + dynGrp(o) + (gm !== null && gm !== undefined ? ' <span class="' + (gm >= 0 ? 'up' : 'down') + '">' + gm.toFixed(1) + '</span>' : '') + '</td><td>' + (o.score ?? '—') + '</td><td>' + holderTagHtml(holderPctOf(o.code), false, true) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+  return h + '<div class="dyn-foot">動能＝1.4 ×（價格 ÷ ' + (kind === 'day' ? '8 日' : '8 週') + '指數平均線 − 1）× 100（還原股價，本站算法；App 的動能沒公開，這是對過走勢最接近的）。' +
+    '動能底下小字＝跟' + (kind === 'day' ? '前一天' : '上一週') + '比；上榜＝連續幾' + (kind === 'day' ? '天' : '週') + '都在名單上（新＝這' + (kind === 'day' ? '天' : '週') + '剛上）；族群動能＝同族群每檔動能的平均。' +
+    (m.live ? '盤中每 15 秒跟著報價重算（族群表外的股票先問成交值大的 200 檔，其他盤中不列）。' : '開盤後會用即時價重算、名單跟著變。') + '</div>';
+}
+function dynInstHtml(){
+  const d = pulseData();
+  const subs = '<div class="hw-tabs dyn-side">' + DYN_INST.map(([k, l]) => '<button type="button" class="chart-tab signal-tab' + (dynState.inst === k ? ' active' : '') + '" data-dyn-inst="' + k + '">' + l + '</button>').join('') + '</div>';
+  if (!d) return subs + '<div class="race-note">讀取中…</div>';
+  if (d.status !== 'ok' || !d.inst) return subs + '<div class="race-note">' + (d.detail === 'Not Found' ? '後端還沒更新（PR 合併後幾分鐘就會有）' : '資料暫時抓不到，等一下再試') + '</div>';
+  const list = (d.inst.lists || {})[dynState.inst] || [];
+  const live = !!(lastData && lastData.quoteDate && lastData.quoteDate > d.date);
+  const rule = { priceVolHigh: '收盤是 240 日最高收盤、成交量是近 20 日最大、外資＋投信合計買超', trustFresh: '投信連買第 1～2 天（再之前 5 天沒買）、收盤在 60 日最高收盤的 95%～100%（快突破、還沒過）', trustStreak: '投信連買 ≥ 3 天、日動能 > 0', foreignStreak: '外資連買 ≥ 3 天、日動能 > 0' }[dynState.inst];
+  let h = subs + '<div class="dyn-meta">' + wlEsc(rule) + '・法人資料 ' + (d.inst.date ? swMmdd(d.inst.date) : '—') + '・<b>' + list.length + '</b> 檔・照成交金額排</div>';
+  if (!list.length) return h + '<div class="race-note">這天沒有</div>';
+  const lots = (v) => (Number.isFinite(v) ? '<span class="' + (v > 0 ? 'up' : v < 0 ? 'down' : '') + '">' + (v > 0 ? '+' : '') + v.toLocaleString() + '</span>' : '—');
+  const stk = (v) => (v > 0 ? '連買 ' + v : v < 0 ? '連賣 ' + (-v) : '—');
+  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr><th class="l">股票</th><th>價格</th><th>漲跌幅</th><th>日動能</th><th>成交金額(億)</th><th>外資(張)</th><th>投信(張)</th><th>外資 5 日</th><th>投信 5 日</th><th class="l">族群</th><th>大戶力</th></tr></thead><tbody>' +
+    list.map((r) => {
+      const hq = live ? getStockQuote(r.code) : null;
+      const px = hq && Number.isFinite(hq.price) ? hq.price : r.close, chg = hq && Number.isFinite(hq.changePercent) ? hq.changePercent : r.chg;
+      return '<tr class="dyn-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '">' + dynStk(r) + '<td><b>' + dynPx(px) + '</b></td><td>' + dynPct(chg) + '</td>' +
+        '<td><span class="dyn-mom ' + (r.mom >= 0 ? 'up' : 'down') + '">' + (Number.isFinite(r.mom) ? r.mom.toFixed(1) : '—') + '</span></td><td>' + (Number.isFinite(r.val) ? r.val.toFixed(1) : '—') + '</td>' +
+        '<td>' + lots(r.f) + '<div class="dyn-rk">' + stk(r.fs) + '</div></td><td>' + lots(r.t) + '<div class="dyn-rk">' + stk(r.ts) + '</div></td><td>' + lots(r.f5) + '</td><td>' + lots(r.t5) + '</td>' +
+        '<td class="l">' + dynGrp(r) + '</td><td>' + holderTagHtml(holderPctOf(r.code), false, true) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+  return h + '<div class="dyn-foot">法人動能是本站規則（App 的內容被鎖，只看得到分頁名稱）：外資、投信買賣超是收盤後公布的（上市約 15:00、上櫃約 17:00），盤中看到的是前一個交易日的名單，價格、漲跌幅是即時的。</div>';
 }
 function renderDyn(){
   const body = document.getElementById('dynBody');
   if (!body) return;
   const inner = document.getElementById('dynInner'), top = inner ? inner.scrollTop : 0;
   const tabs = '<div class="hw-tabs">' + DYN_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (dynState.tab === k ? ' active' : '') + '" data-dyn-tab="' + k + '">' + label + '</button>').join('') + '</div>';
-  body.innerHTML = tabs + (dynState.tab === 'hot' ? dynHotHtml() : dynState.tab === 'rank' ? dynRankHtml() : dynTodoHtml(dynState.tab));
+  body.innerHTML = tabs + (dynState.tab === 'hot' ? dynHotHtml() : dynState.tab === 'rank' ? dynRankHtml() : dynState.tab === 'inst' ? dynInstHtml() : dynPulseHtml(dynState.tab));
   if (inner) inner.scrollTop = top;
 }
 function dynRerender(){ const m = document.getElementById('dynModal'); if (m && !m.hidden) renderDyn(); }
@@ -29767,6 +29868,8 @@ document.getElementById('dynBody').addEventListener('click', (e) => {
   const t = e.target;
   const tab = t.closest('[data-dyn-tab]');
   if (tab){ dynState.tab = tab.dataset.dynTab; try { localStorage.setItem('dynTab', dynState.tab); } catch (_){} renderDyn(); return; }
+  const sd = t.closest('[data-dyn-side]'); if (sd){ dynState.side = sd.dataset.dynSide; renderDyn(); return; }
+  const si = t.closest('[data-dyn-inst]'); if (si){ dynState.inst = si.dataset.dynInst; renderDyn(); return; }
   const tp = t.closest('[data-trend-p]');
   if (tp){ const [k, v] = tp.dataset.trendP.split(':'); if (k in trendParams){ trendParams[k] = Number(v); trendSave(); renderDyn(); try { botRerunCols(); } catch (_){} } return; }
   const mp = t.closest('[data-mom-p]');
