@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 10:23:11";
+const BUILD_STAMP = "2026-11-14 10:32:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -303,7 +303,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bot-col[data-col-key="23"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：火多多(23) 太窄看不到股號股名 → 跟 777 一樣寬 */
   .bot-col:has(.b32-row){min-width:330px;}   /* 一檔一列（時間、股名、族群、漲跌、大戶力）的格子至少這麼寬，股名才不會被擠掉 */
   .bot-col[data-col-key="777"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：777 功課卡片條列，每檔一列要放時間、股名、族群、漲跌幅、大戶% */
-  .bot-col:is([data-col-key="82"],[data-col-key="14"]){flex-basis:calc((100% - 72px) / 10 * 1.6);min-width:270px;}   /* 2026-11-14 使用者：觀察中・等收黑(82)、疑似主力融資買進(14) 每檔一行放代號股名漲跌＋大戶力，太窄會被擠成兩行 */
+  .bot-col:is([data-col-key="82"],[data-col-key="14"],[data-col-key="80"]){flex-basis:calc((100% - 72px) / 10 * 1.6);min-width:270px;}   /* 2026-11-14 使用者：觀察中・等收黑(82)、疑似主力融資買進(14) 每檔一行放代號股名漲跌＋大戶力，太窄會被擠成兩行 */
+  .bot-col[data-col-key="83"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}   /* 2026-11-14 多觀察(83) 每檔後面有 ①區1★●▲ 符號，再寬一點才排得進一行 */
   .bot-col[data-col-key="99"]{flex-basis:calc((100% - 72px) / 10 * 2.5);min-width:420px;}   /* 2026-11-12 使用者：99 外資投信同步買賣超，每檔要放外資、投信兩個金額＋漲跌幅＋大戶力，加寬才排得進一行 */
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
   .bot-col-x:hover{background:#e81123;border-color:#e81123;color:#fff;}
@@ -18147,7 +18148,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 10:23:11';
+const BUILD_STAMP = '2026-11-14 10:32:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25448,7 +25449,7 @@ const BOT_CODES = [
   ['44', '今天 1+2 多（突破黑馬）'], ['88', '開低站上 VWAP：今天開盤低於昨收、09:05 後 1 分K收盤高於 VWAP 1% 以上（偏多），跟訊號中心「開低VWAP上(88)」同一份'], ['87', '開高跌破 VWAP：今天開盤高於昨收、09:05 後 1 分K收盤低於 VWAP 1% 以上（偏空），跟訊號中心「開高VWAP下(87)」同一份'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖雙週入榜黑龍：前兩個交易日上 811、今天收黑K，只看族群表裡的股票（含「其他」那組）（⭐＝兩週內又上榜幾次）'],
-  ['81', '隔日沖買超排序（每天六點後更新）'], ['82', '👁觀察中・等收黑：首頁第一欄最上面那份（跟創高黑龍選股（手動）→ 今天 → ② 觀察中・等收黑 同一份），照即時漲跌幅排、漲越多越上面，每檔接大戶力'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
+  ['81', '隔日沖買超排序（每天六點後更新）'], ['83', '📡多觀察(等黑K買進)：首頁那欄的【1】黑K出現・黑龍系統符合【2】今天噴出【3】已噴在高檔【4】右肩打底【5】有點深，同一份、同族群排一起，每檔接大戶力'], ['82', '👁觀察中・等收黑：首頁第一欄最上面那份（跟創高黑龍選股（手動）→ 今天 → ② 觀察中・等收黑 同一份），照即時漲跌幅排、漲越多越上面，每檔接大戶力'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
   ['97', '外資買賣超前十大：賣超前十在上、買超前十在下（金額越大越靠上），每檔列買賣超金額（億元）、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：格式同 97'], ['99', '外資、投信同步買賣超前十大：同步賣超前十在上、同步買超前十在下（兩家合計金額越大越靠上），每檔列外資、投信各自的買賣超金額（億元）、漲跌幅、盤中大戶力'], ['777', '每日功課的族群卡（刀劍空(32)、12空(123)）條列：一族一段、族群和族裡每檔都照訊號時間排（最近的在上），每檔接大戶%'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
   ['2359', '股號或族群名：那族漲幅排行'], ['2359m', '那檔當天的隔日沖買賣超（2359m1＝前一天，最多 2359m9）'], ['235984', '那族的籌碼暴增排序（族群名＋84 也可以，例：低軌衛星84）'], ['2359g', '那檔過去五週籌碼增減%'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
 ];
@@ -26114,6 +26115,42 @@ function botAnswer(raw){
       botLine(md + ' 收盤・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・跟首頁、創高黑龍選股（手動）「今天 → ② 觀察中・等收黑」同一份：名單裡的股票哪天收黑，收盤買第 1 批・照即時漲跌幅排，漲越多越上面' + (pkHomeMine ? '・⚙ 用你在選股視窗存的參數／名單' : ''), 'bot-dim'),
       md + ' 收盤・' + watch.length + ' 檔');
   }
+  // 2026-11-14 使用者：首頁「📡多觀察(等黑K買進)」的【1】～【5】做成機器人代碼 83——跟首頁那欄同一份（同一次計算、同一個分類和符號、同族群排一起）
+  if (q === '83'){
+    const t = '📡多觀察(等黑K買進)(83)';
+    const rep = obsState.report;
+    const hm = obsNowHm();
+    const live = !!(lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr()) && (hm >= '09:00' || (!!lastData.preopen && hm >= '08:30')) && hm <= '13:35';
+    const stale = rep && live && Date.now() - rep.at > HOME_OBS_REFRESH_MS;
+    const retry = obsState.error && Date.now() - (obsState.errorAt || 0) > (rep ? HOME_OBS_REFRESH_MS : 20000);
+    if (!obsState.loading && ((!rep && !obsState.error) || stale || retry)) setTimeout(() => { Promise.resolve(obsRun(null, false, !!rep)).then(() => { try { botRerunCols(); } catch (_){} }); }, 0);
+    if (!rep) return wrap(t, botLine(obsState.error ? '算不出來：' + wlEsc(obsState.error) : '計算中…', 'bot-dim'));
+    const row = (x) => { const q2 = getStockQuote(x.code); const pct = q2 && Number.isFinite(q2.changePercent) ? q2.changePercent : x.pct;
+      return botLine('<span>' + botStk(x.code, x.name, ' <span class="hr-obs-mk">' + obsMarksHtml(x) + '</span> <span class="' + (pct === null || pct === undefined ? 'bot-dim' : dirClass(pct)) + '">' + (pct === null || pct === undefined ? '—' : botPct(pct)) + '</span>') + '</span>' +
+        '<span class="bot-tail">' + holderTagHtml(holderPctOf(x.code), false, true) + '</span>', 'bot-hrow'); };
+    const listHtml = (list) => obsGroupLines(list).map(([g, xs]) => {
+      const avg = homeGroupAvg(g);
+      return botLine(avg === null ? '<b>' + wlEsc(g) + '</b>' : botGrpPill(g, ' ' + botPct(avg), avg)) + xs.map(row).join('');
+    }).join('');
+    let body = '', n = 0;
+    homeObsCats().forEach(([k, name, act]) => {
+      const list = rep.items.filter((x) => x.cat === k);
+      n += list.length;
+      body += botLine('【' + k + '】' + wlEsc(name) + ' <small>' + list.length + ' 檔・' + wlEsc(act) + '</small>', 'bot-head');
+      if (!list.length){ body += botLine('—', 'bot-dim'); return; }
+      if (k === 5){
+        [['▼今天剛破月線（昨天還沒破）', list.filter((x) => x.newBreak)], ['▼已破月線（昨天就在月線下）', list.filter((x) => !x.newBreak)]].forEach(([h2, l]) => {
+          if (l.length) body += botLine(h2, 'bot-dim') + listHtml(l);
+        });
+        return;
+      }
+      body += listHtml(list);
+    });
+    const at = new Date(rep.at + 8 * 3600000).toISOString().slice(11, 16);
+    return wrap(t, botLine('<span class="hf-colhead" style="float:right">大戶力</span>', 'bot-hhead') + body +
+      botLine('跟首頁「📡多觀察(等黑K買進)」同一份：盤中（09:00～13:35）每分鐘重算，收盤後停在最後一次・符號：★☆● 紅、▲ 粉紅、✗三K低／▼ 綠、↑ 深紅（意思同首頁說明）', 'bot-dim'),
+      n + ' 檔・' + at);
+  }
   // 1N：族群漲幅排行
   mm = /^1([1-9])?$/.exec(q);
   if (mm){
@@ -26580,7 +26617,9 @@ function botAnswer(raw){
     const pctSpan = (v) => ' <span class="' + dirClass(v) + '">' + botPct(v) + '</span>';
     if (q === '75') return wrap(t, (m.rows.map((x) => botLine((x.jailed ? '*' : '') + botStk(x.code, x.name, pctSpan(x.chg)))).join('') || botLine('目前沒有', 'bot-dim')) +
       botLine('------------', 'bot-sep') + botLine('⚠️ *代表處置中', 'bot-dim') + botLine('⚠️ 槓桿大，防守黑K低點', 'bot-warn'), when);
-    return wrap(t, botLine('跌幅排行', 'bot-head') + (m.rows.map((x) => botLine(botStk(x.code, x.name, pctSpan(x.chg) + (x.n > 0 ? ' ' + '⭐'.repeat(Math.min(x.n, 10)) : '')))).join('') || botLine('目前沒有', 'bot-dim')) +
+    // 2026-11-14 使用者：80 每檔加大戶力（最右邊）
+    return wrap(t, botLine('跌幅排行（跌少的在上）<span class="hf-colhead" style="float:right">大戶力</span>', 'bot-head') + (m.rows.map((x) => botLine('<span>' + botStk(x.code, x.name, pctSpan(x.chg) + (x.n > 0 ? ' ' + '⭐'.repeat(Math.min(x.n, 10)) : '')) + '</span>' +
+      '<span class="bot-tail">' + holderTagHtml(holderPctOf(x.code), false, true) + '</span>', 'bot-hrow')).join('') || botLine('目前沒有', 'bot-dim')) +
       botLine('------------', 'bot-sep') + botLine('前兩個交易日（' + m.days.map((d) => Number(d.slice(5, 7)) + '/' + d.slice(8)).join('、') + '）上 811 名單、今天收黑K（現價低於開盤）', 'bot-dim') + botLine('⭐ 更早以前還上榜過的次數', 'bot-dim') +
       botLine('👍 每天中午 12 點後再查（盤中用即時價看收黑）', 'bot-dim'), when);
   }
