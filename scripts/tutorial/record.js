@@ -148,12 +148,14 @@ const CSS = `
     if (sc.pick){   // 首頁那幾欄每 15 秒整塊重畫，標記可能在這一刻剛好被洗掉：框之前再確認一次，不在就重標
       await page.evaluate((js) => { if (document.querySelector('[data-tutmark="1"]')) return; let el = null; try { el = eval(js); } catch (_){} if (el) el.setAttribute('data-tutmark', '1'); }, sc.pick);
     }
-    const found = await page.evaluate(({ cap, target }) => {
+    const found = await page.evaluate(({ cap, target, pick }) => {
       let c = document.getElementById('tutCap'); if (!c){ c = document.createElement('div'); c.id = 'tutCap'; document.body.appendChild(c); }
       c.textContent = cap;
       Object.assign(c.style, { top: '', bottom: '' });   // 預設在下方
       let b = document.getElementById('tutBox');
-      const el = target ? document.querySelector(target) : null;
+      let el = target ? document.querySelector(target) : null;
+      // 首頁每 15 秒整塊重畫，標記可能剛好在上一步之後被洗掉：畫框這一刻再照 pick 找一次
+      if (!el && pick){ try { el = eval(pick); } catch (_){ el = null; } if (el) el.setAttribute('data-tutmark', '1'); }
       if (!el){ if (b) b.remove(); return !target; }
       if (!b){ b = document.createElement('div'); b.id = 'tutBox'; document.body.appendChild(b); }
       const r = el.getBoundingClientRect();
@@ -164,7 +166,7 @@ const CSS = `
       const overlap = r.right > cr.left && r.left < cr.right && r.bottom > cr.top && r.top < cr.bottom;
       if (overlap && r.height < window.innerHeight * 0.4) Object.assign(c.style, { top: '18px', bottom: 'auto' });
       return true;
-    }, { cap: sc.cap, target: sc.target || null });
+    }, { cap: sc.cap, target: sc.target || null, pick: sc.pick || null });
     if (!found) warnings.push('scene ' + i + ' target not found: ' + sc.target);
     timeline.push({ at: (Date.now() - t0) / 1000, dur: sc.dur, audio: sc.audio });
     await page.waitForTimeout(Math.round(sc.dur * 1000) + 450);
