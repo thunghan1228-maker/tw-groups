@@ -1791,6 +1791,10 @@ const WORKER_ENTRY = {
       // 單檔斷頭價 A／B（2026-10-23 使用者：K線圖日線畫線、5 分K 離線近才畫），每天收盤後才會變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/margin-line" + url.search, 300);
     }
+    if (url.pathname === "/api/trend-high") {
+      // 熱門趨勢概念股（2026-11-14 使用者：照券商 App「動能選股 → 熱門趨勢概念股」做機器人代碼）：240 日最高收盤、240 日漲幅，收盤後才變，快取 5 分鐘
+      return await proxyHanstockBars("/api/hub/trend-high", 300);
+    }
     if (url.pathname === "/api/inst-rank") {
       // 研究室「外資買賣超」「投信買賣超」（2026-11-05 使用者）：全市場一般股票的外資、投信買賣超（張）；沒指定日期＝最新一天（收盤後上櫃常晚進來，快取 1 分鐘），往日不會再變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/inst-rank" + url.search, url.searchParams.get("date") ? 300 : 60);

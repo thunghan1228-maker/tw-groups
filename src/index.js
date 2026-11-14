@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 13:04:31";
+const BUILD_STAMP = "2026-11-14 15:57:15";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -306,6 +306,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bot-col[data-col-key="777"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：777 功課卡片條列，每檔一列要放時間、股名、族群、漲跌幅、大戶% */
   .bot-col:is([data-col-key="82"],[data-col-key="14"],[data-col-key="80"]){flex-basis:calc((100% - 72px) / 10 * 1.6);min-width:270px;}   /* 2026-11-14 使用者：觀察中・等收黑(82)、疑似主力融資買進(14) 每檔一行放代號股名漲跌＋大戶力，太窄會被擠成兩行 */
   #botBody .bot-line.b83-cat{background:#7c3aed;color:#fff;font-size:15px;font-weight:900;line-height:1.5;padding:5px 9px;border-radius:6px;margin:8px 0 4px;} #botBody .b83-cat small{font-size:12.5px;font-weight:700;color:#fff;opacity:.92;}   /* 2026-11-14 使用者：83 的【1】～【5】紫底白字、字加大 */
+  .bot-col[data-col-key="240"]{flex-basis:calc((100% - 72px) / 10 * 2.3);min-width:390px;} .t240-new{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:4px;padding:0 4px;}   /* 2026-11-14 熱門趨勢概念股 */
   .bot-col[data-col-key="83"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}   /* 2026-11-14 多觀察(83) 每檔後面有 ①區1★●▲ 符號，再寬一點才排得進一行 */
   .bot-col[data-col-key="99"]{flex-basis:calc((100% - 72px) / 10 * 2.5);min-width:420px;}   /* 2026-11-12 使用者：99 外資投信同步買賣超，每檔要放外資、投信兩個金額＋漲跌幅＋大戶力，加寬才排得進一行 */
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
@@ -18181,7 +18182,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 13:04:31';
+const BUILD_STAMP = '2026-11-14 15:57:15';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25513,7 +25514,7 @@ const BOT_CODES = [
   ['44', '今天 1+2 多（突破黑馬）'], ['88', '開低站上 VWAP：今天開盤低於昨收、09:05 後 1 分K收盤高於 VWAP 1% 以上（偏多），跟訊號中心「開低VWAP上(88)」同一份'], ['87', '開高跌破 VWAP：今天開盤高於昨收、09:05 後 1 分K收盤低於 VWAP 1% 以上（偏空），跟訊號中心「開高VWAP下(87)」同一份'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖前兩日其中一日入榜黑龍：前兩個交易日上 811、今天收黑K，只看族群表裡的股票（含「其他」那組）（⭐＝兩週內又上榜幾次）'],
-  ['81', '隔日沖買超排序（每天六點後更新）'], ['83', '📡多觀察(等黑K買進)：首頁那欄的【1】黑K出現・黑龍系統符合【2】今天噴出【3】已噴在高檔【4】右肩打底【5】有點深，同一份、同族群排一起，每檔接大戶力'], ['82', '👁強勢股觀察中・等收黑：首頁第一欄最上面那份（跟創高黑龍選股（手動）→ 今天 → ② 強勢股觀察中・等收黑 同一份），照即時漲跌幅排、漲越多越上面，每檔接大戶力'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
+  ['240', '🔥熱門趨勢概念股（代碼暫定）：照券商 App「動能選股→熱門趨勢概念股」——收盤（盤中用即時價）在 240 日最高收盤附近、240 日漲幅大的股票（還原股價，跟 App 同算法）；App 的新聞熱度我們沒有，用 5 日均成交值當門檻，格子上面三排按鈕可以調'], ['81', '隔日沖買超排序（每天六點後更新）'], ['83', '📡多觀察(等黑K買進)：首頁那欄的【1】黑K出現・黑龍系統符合【2】今天噴出【3】已噴在高檔【4】右肩打底【5】有點深，同一份、同族群排一起，每檔接大戶力'], ['82', '👁強勢股觀察中・等收黑：首頁第一欄最上面那份（跟創高黑龍選股（手動）→ 今天 → ② 強勢股觀察中・等收黑 同一份），照即時漲跌幅排、漲越多越上面，每檔接大戶力'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
   ['97', '外資買賣超前十大：賣超前十在上、買超前十在下（金額越大越靠上），每檔列買賣超金額（億元）、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：格式同 97'], ['99', '外資、投信同步買賣超前十大：同步賣超前十在上、同步買超前十在下（兩家合計金額越大越靠上），每檔列外資、投信各自的買賣超金額（億元）、漲跌幅、盤中大戶力'], ['777', '每日功課的族群卡（刀劍空(32)、12空(123)）條列：一族一段、族群和族裡每檔都照訊號時間排（最近的在上），每檔接大戶%'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
   ['2359', '股號或族群名：那族漲幅排行'], ['2359m', '那檔當天的隔日沖買賣超（2359m1＝前一天，最多 2359m9）'], ['235984', '那族的籌碼暴增排序（族群名＋84 也可以，例：低軌衛星84）'], ['2359g', '那檔過去五週籌碼增減%'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
 ];
@@ -25550,6 +25551,47 @@ function k12LvWithFlags(stageHtml, code){
   const fl = bot777FlagTags(code);
   if (!fl) return stageHtml || '';
   return stageHtml ? stageHtml.replace(/<\\/span>$/, fl + '</span>') : '<span class="b32-lvrow b777-sigrow">' + fl + '</span>';
+}
+// 2026-11-14 使用者：照券商 App「動能選股 → 熱門趨勢概念股」做機器人代碼（代碼號碼使用者還在想，先用 240）。
+// 240日最高＝最近 240 個交易日最高的收盤價、240日漲幅＝跟 240 個交易日前的收盤比（還原股價），後端 /api/trend-high 算好；
+// 盤中（報價日比後端資料新）用即時價重算：240日最高＝max(前 239 天最高收盤, 現價)、240日漲幅＝現價 ÷ 下一天的基準價 − 1。
+// App 還看「新聞熱度」，我們沒有新聞資料，用 5 日均成交值當熱度門檻；三個門檻都能在格子上面點選（記在這台）。
+const TREND_KEY = 'trendParams';
+const TREND_OPTS = { near: [[0, '創新高'], [1, '1%'], [2, '2%'], [3, '3%'], [5, '5%']], gain: [[30, '30%'], [50, '50%'], [80, '80%'], [100, '100%']], val: [[0, '不限'], [1, '1億'], [3, '3億'], [5, '5億'], [10, '10億']] };
+const trendParams = (() => { const d = { near: 2, gain: 50, val: 3 }; try { const v = JSON.parse(localStorage.getItem(TREND_KEY) || '{}') || {}; Object.keys(d).forEach((k) => { if (TREND_OPTS[k].some(([x]) => x === v[k])) d[k] = v[k]; }); } catch (_){} return d; })();
+function trendSave(){ try { localStorage.setItem(TREND_KEY, JSON.stringify(trendParams)); } catch (_){} }
+function trendParamsHtml(){
+  const grp = (k, label) => '<span class="b777-plabel">' + label + '</span>' + TREND_OPTS[k].map(([v, l]) => '<button type="button" class="b777-p' + (trendParams[k] === v ? ' on' : '') + '" data-trend-p="' + k + ':' + v + '">' + l + '</button>').join('');
+  return '<div class="bot-line b777-params">' + grp('near', '離240日高 ≤') + '</div><div class="bot-line b777-params">' + grp('gain', '240日漲幅 ≥') + '</div><div class="bot-line b777-params">' + grp('val', '5日均成交值 ≥') + '</div>';
+}
+function trendModel(){
+  const d = botFetchCache('trendHigh', '/api/trend-high', 10 * 60e3);
+  if (!d) return { wait: '讀取中…' };
+  if (d.status !== 'ok' || !Array.isArray(d.rows)){ const e = botState.cache.trendHigh; if (e && !e.loading && Date.now() - e.at > 60e3) delete botState.cache.trendHigh; }   // 抓不到：1 分鐘後再試（不用等 10 分鐘）
+  if (d.status !== 'ok' || !Array.isArray(d.rows)) return { wait: d.status === 'empty' ? '還沒有資料' : (d.detail === 'Not Found' || d.error === 'Not Found' ? '後端還沒更新（PR 合併後幾分鐘就會有）' : '資料暫時抓不到，等一下再試') };
+  const live = !!(lastData && lastData.quoteDate && lastData.quoteDate > d.date);
+  // 族群表外的股票首頁沒有報價：照成交值大的先問（一次最多 200 檔）
+  let wq = null;
+  if (live){
+    const need = d.rows.filter((r) => !getStockQuote(r.code)).sort((a, b) => (b.val5 || 0) - (a.val5 || 0)).slice(0, 200).map((r) => r.code);
+    if (need.length) wq = botFetchCache('wqTrend|' + need.join(','), '/api/watch-quotes?codes=' + encodeURIComponent(need.join(',')), 30e3);
+  }
+  const rows = d.rows.map((r) => {
+    let px = r.close, chg = r.chg, hi = r.hi240, gain = r.g240, isLive = false;
+    if (live){
+      const hq = getStockQuote(r.code), wx = wq && wq.quotes ? wq.quotes[r.code] : null;
+      const p = hq && Number.isFinite(hq.price) ? hq.price : wx && Number.isFinite(wx.price) ? wx.price : null;
+      const c = hq && Number.isFinite(hq.changePercent) ? hq.changePercent : wx && Number.isFinite(wx.changePercent) ? wx.changePercent : null;
+      if (p !== null && p > 0 && Number.isFinite(r.hi239)){
+        px = p; chg = c; hi = Math.max(r.hi239, p); gain = Number.isFinite(r.b239) && r.b239 > 0 ? (p / r.b239 - 1) * 100 : null; isLive = true;
+      }
+    }
+    const dist = Number.isFinite(px) && Number.isFinite(hi) && hi > 0 ? (px / hi - 1) * 100 : null;
+    return Object.assign({}, r, { px, chgNow: chg, hiNow: hi, gainNow: gain, dist, isLive });
+  });
+  const pass = rows.filter((r) => r.dist !== null && r.dist >= -trendParams.near - 1e-9 && Number.isFinite(r.gainNow) && r.gainNow >= trendParams.gain && (r.val5 || 0) >= trendParams.val)
+    .sort((a, b) => b.gainNow - a.gainNow);
+  return { rows: pass, date: d.date, live };
 }
 function bot777ParamsHtml(){
   const allOn = TD_PARAMS.every(([k]) => bot777Params[k]);
@@ -26216,6 +26258,23 @@ function botAnswer(raw){
     return wrap(t, botLine('<span class="hf-colhead" style="float:right">大戶力</span>', 'bot-hhead') + body +
       botLine('跟首頁「📡多觀察(等黑K買進)」同一份：盤中（09:00～13:35）每分鐘重算，收盤後停在最後一次・符號：★☆● 紅、▲ 粉紅、✗三K低／▼ 綠、↑ 深紅（意思同首頁說明）', 'bot-dim'),
       n + ' 檔・' + at);
+  }
+  // 熱門趨勢概念股（暫定代碼 240；2026-11-14 使用者：照券商 App「動能選股 → 熱門趨勢概念股」）
+  if (q === '240'){
+    const t = '🔥熱門趨勢概念股(240)';
+    const m = trendModel();
+    if (m.wait) return wrap(t, trendParamsHtml() + botLine(m.wait, 'bot-dim'));
+    const fmtPx = (v) => (Number.isFinite(v) ? (v >= 1000 ? v.toFixed(0) : v >= 100 ? v.toFixed(1) : v.toFixed(2)) : '—');
+    const line = (r, i) => botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' <b>' + fmtPx(r.px) + '</b> <span class="' + (Number.isFinite(r.chgNow) ? dirClass(r.chgNow) : 'bot-dim') + '">' + (Number.isFinite(r.chgNow) ? botPct(r.chgNow) : '—') + '</span>' +
+        (r.dist >= -1e-9 ? ' <span class="t240-new">🆕新高</span>' : '')) +
+      '<br><span class="bot-dim" style="font-size:11.5px">240日最高 <b>' + fmtPx(r.hiNow) + '</b>・240日漲幅 <b class="up">' + botPct(r.gainNow) + '</b>' + (r.dist < -1e-9 ? '・離高 ' + r.dist.toFixed(1) + '%' : '') +
+      '<br>' + wlEsc(r.group || '—') + '・均線 ' + (r.score ?? '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
+      '<span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow');
+    const md = m.date ? Number(m.date.slice(5, 7)) + '/' + m.date.slice(8, 10) : '';
+    return wrap(t, trendParamsHtml() + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + (m.rows.length ? m.rows.map(line).join('') : botLine('目前沒有符合的股票（可以把上面的門檻放寬）', 'bot-dim')) +
+      botLine('照 240 日漲幅排、漲最多的在上面。240日最高＝最近 240 個交易日最高的<b>收盤價</b>；240日漲幅＝跟 240 個交易日前的收盤比（還原股價，跟 App 同算法）。' + (m.live ? '盤中用即時價重算（現價破前高就是 🆕新高）。' : md + ' 收盤資料，開盤後用即時價重算。') +
+        'App 另外看「新聞熱度」我們沒有，改用 5 日均成交值當門檻；資料每天收盤後更新', 'bot-dim'),
+      (m.live ? stamp + '・即時' : md + ' 收盤') + '・' + m.rows.length + ' 檔');
   }
   // 1N：族群漲幅排行
   mm = /^1([1-9])?$/.exec(q);
@@ -27255,6 +27314,8 @@ document.getElementById('botModal').addEventListener('click', (e) => {
   const t = e.target;
   const xq = t.closest('[data-bot-xq]');
   if (xq){ const col = xq.closest('.bot-col'); if (col) botXqExport(col, xq.dataset.botXq); return; }
+  const tp = t.closest('[data-trend-p]');
+  if (tp){ const [k, v] = tp.dataset.trendP.split(':'); if (k in trendParams){ trendParams[k] = Number(v); trendSave(); botRerunCols(); } return; }
   const p7 = t.closest('[data-bot777-param]');
   if (p7){
     const k = p7.dataset.bot777Param;
@@ -31677,6 +31738,10 @@ const WORKER_ENTRY = {
     if (url.pathname === "/api/margin-line") {
       // 單檔斷頭價 A／B（2026-10-23 使用者：K線圖日線畫線、5 分K 離線近才畫），每天收盤後才會變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/margin-line" + url.search, 300);
+    }
+    if (url.pathname === "/api/trend-high") {
+      // 熱門趨勢概念股（2026-11-14 使用者：照券商 App「動能選股 → 熱門趨勢概念股」做機器人代碼）：240 日最高收盤、240 日漲幅，收盤後才變，快取 5 分鐘
+      return await proxyHanstockBars("/api/hub/trend-high", 300);
     }
     if (url.pathname === "/api/inst-rank") {
       // 研究室「外資買賣超」「投信買賣超」（2026-11-05 使用者）：全市場一般股票的外資、投信買賣超（張）；沒指定日期＝最新一天（收盤後上櫃常晚進來，快取 1 分鐘），往日不會再變，快取 5 分鐘
