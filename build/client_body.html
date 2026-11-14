@@ -687,17 +687,19 @@
     :root{--tb-h:200px;}
     .toolbar-bottom{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow-x:visible;}
     .toolbar-bottom .tb-btn{min-width:0;padding:7px 2px 6px;text-wrap:balance;}
-    .toolbar-bottom .tb-btn:nth-child(-n+12){border-bottom:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom .tb-btn:nth-child(-n+16){border-bottom:1px solid rgba(255,255,255,0.16);}
     .toolbar-bottom .tb-btn:nth-child(4n){border-right:none;}
+    .toolbar-bottom .tb-btn:nth-child(17){grid-column:1 / -1;border-right:none;}   /* 2026-11-14 第 17 顆「動能選股」：手機／iPad 直放 4 顆一排，最後一顆自己一整排 */
   }
   /* 2026-10-24 使用者（iPad 字太小、整頁放大）：平板橫放（版面寬 ≥ 760px）下方導覽列改 8 顆一排、兩排就好，
      不然放大後 4 排會吃掉三分之一個畫面；直放（窄）照舊 4 排。 */
   @media (min-width: 760px) and (max-width: 1500px) and (pointer: coarse){
-    .toolbar-bottom{grid-template-columns:repeat(8,minmax(0,1fr));}
-    .toolbar-bottom .tb-btn:nth-child(-n+12){border-bottom:none;}
-    .toolbar-bottom .tb-btn:nth-child(-n+8){border-bottom:1px solid rgba(255,255,255,0.16);}
+    .toolbar-bottom{grid-template-columns:repeat(9,minmax(0,1fr));}   /* 2026-11-14 第 17 顆加進來：9 顆一排，兩排（9＋8） */
+    .toolbar-bottom .tb-btn:nth-child(-n+16){border-bottom:none;}
+    .toolbar-bottom .tb-btn:nth-child(-n+9){border-bottom:1px solid rgba(255,255,255,0.16);}
     .toolbar-bottom .tb-btn:nth-child(4n){border-right:1px solid rgba(255,255,255,0.16);}
-    .toolbar-bottom .tb-btn:nth-child(8n){border-right:none;}
+    .toolbar-bottom .tb-btn:nth-child(9n){border-right:none;}
+    .toolbar-bottom .tb-btn:nth-child(17){grid-column:auto;border-right:1px solid rgba(255,255,255,0.16);}
   }
   .toast{position:fixed;left:50%;bottom:calc(var(--tb-h) + 16px);transform:translateX(-50%) translateY(12px);background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:200;white-space:nowrap;}
   /* 版本戳記（右上角小字）與「有新版本」提示：加到主畫面的網頁沒有重新整理鈕，靠這個知道自己在跑哪一版。 */
@@ -4063,7 +4065,7 @@
   /* 2026-10-03 使用者：醞釀／發動這張表的盤中大戶力欄只留百分比，金額拿掉 */
   .bl-table .combo-holder .sig-label .hf-amt{display:none;}
   /* 2026-11-14 使用者：首頁下面那排 16 個面板內容全部改白底（原本黑底的 9 個：問診、健診、飆股雷達、自選股、處置監獄、創高黑選股、盤中訊號追蹤、研究室、系統選股；其他 7 個本來就是淺色版面），股號、股名改粗黑字。K棒道場、K線圖視窗維持深色（K 棒配色是照黑底調的） */
-  :is(#diagModal,#checkupModal,#grailModal,#watchModal,#jailModal,#pickerModal,#trackModal,#labModal,#screenerModal) .chips-inner{--bg:#f3f4f6;--panel:#ffffff;--panel-2:#eef0f3;--line:#d6dae0;--text:#16181b;--muted:#5b6068;--up:#d0342c;--down:#15803d;--accent:#8a6d3f;background:var(--bg);color:var(--text);box-shadow:0 12px 40px rgba(0,0,0,.35);}
+  :is(#diagModal,#checkupModal,#grailModal,#watchModal,#jailModal,#pickerModal,#trackModal,#labModal,#screenerModal,#dynModal) .chips-inner{--bg:#f3f4f6;--panel:#ffffff;--panel-2:#eef0f3;--line:#d6dae0;--text:#16181b;--muted:#5b6068;--up:#d0342c;--down:#15803d;--accent:#8a6d3f;background:var(--bg);color:var(--text);box-shadow:0 12px 40px rgba(0,0,0,.35);}
   #watchInner > .chips-head{background:#33333a;color:#fff;}
   /* 16 個面板裡的股號、股名：粗黑字（微軟正黑體只有一種粗體，加一點描邊看起來才會更粗） */
   :is(#diagModal .dg-head :is(.dg-code,.dg-name), #diagModal .dg-stk :is(b,.dg-nm), #diagModal .pf-chip, #diagModal .ck-tag.dg-link,
@@ -4083,6 +4085,20 @@
   #revModal .rv-card:not(.t0) .n, #swingModal .sp-etfrow .nm, #hwModal .td-rchip.blade, #labModal .mc-co.mine{font-weight:900;}
   :is(#diagModal .ck-tag.dg-link .muted, #diagModal .ck-tag.dg-link .dg-pill, #labModal .mc-co small, #hwModal .td-rchip small){-webkit-text-stroke:0;font-weight:500;}
   #diagModal .ck-tag.dg-link .dg-pill{font-weight:700;}
+  /* 2026-11-14 動能選股面板 */
+  #dynBody .b777-p{color:#374151;border-color:#cbd5e1;} #dynBody .b777-p.on{color:#fff;border-color:#7c3aed;} #dynBody .b777-plabel{color:#5b6068;}
+  .dyn-params{margin:2px 0 6px;} .dyn-meta{font-size:12.5px;color:var(--muted);margin:6px 2px;} .dyn-meta b{color:var(--text);}
+  .dyn-sub{font-size:13px;font-weight:800;margin:14px 2px 4px;color:#b45309;}
+  .dyn-wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;}
+  .dyn-table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;}
+  .dyn-table th{font-size:11.5px;color:var(--muted);font-weight:700;padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--panel-2);}
+  .dyn-table td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .dyn-table th.l,.dyn-table td.l{text-align:left;}
+  .dyn-table tr.dyn-row{cursor:pointer;} .dyn-table tr.dyn-row:hover{background:rgba(124,58,237,.06);}
+  .dyn-table .dyn-stk,.dyn-table .dyn-stk b{color:#0b0d10;font-weight:900;-webkit-text-stroke:.3px currentColor;}
+  .dyn-rk{font-size:10.5px;color:var(--muted);}
+  .dyn-foot{font-size:12px;color:var(--muted);line-height:1.6;margin:10px 2px;}
+  .dyn-todo{line-height:1.8;}
 </style>
 
 <header>
@@ -4401,6 +4417,19 @@
     <div id="remindBody"></div>
   </div>
 </div>
+<!-- 2026-11-14 使用者：照券商 App「動能選股」做一個面板（第 17 顆）：熱門趨勢概念股、動能排行（機器人 240／250 同一份），日動能／週動能／法人動能算法還在對 -->
+<div class="chips-modal" id="dynModal" hidden>
+  <div class="chips-inner" id="dynInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">📈 動能選股</div>
+        <div class="chips-sub">照券商 App「動能選股」做：熱門趨勢概念股（240 日新高附近、240 日漲幅大）、動能排行（週／月／季／年漲幅都在全市場前 5%＋創高）。點股票開 K 線圖；機器人代碼 240、250 是同一份。</div>
+      </div>
+      <button class="cm-icon-btn" id="dynClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="dynBody"></div>
+  </div>
+</div>
 <div class="chips-modal" id="rivModal" hidden>
   <div class="chips-inner" id="rivInner">
     <div class="chips-head">
@@ -4603,6 +4632,7 @@
   <button class="tb-btn" data-label="估值河流圖"><span class="tb-icon">河</span>估值河流圖</button>  <!-- 2026-10-10 使用者：第 13 顆「估值河流圖」（本站版） -->
   <button class="tb-btn" data-label="研究室"><span class="tb-icon">室</span>研究室</button>  <!-- 2026-10-10 使用者：第 15 顆「研究室」（國際大事行事曆＋名詞小學堂，之後放資金保護傘、內部人），放上排 → 上 8 下 7；2026-10-13 使用者：移到最後面（估值河流圖右邊） -->
   <button class="tb-btn" data-label="系統選股"><span class="tb-icon">篩</span>系統選股</button>  <!-- 2026-10-23 使用者：系統選股從個股問診拆出來，放最後一顆（研究室後面） -->
+  <button class="tb-btn" data-label="動能選股"><span class="tb-icon">動</span>動能選股</button>  <!-- 2026-11-14 使用者：第 17 顆「動能選股」（熱門趨勢概念股、動能排行…） -->
 </div>
 
 <div class="signal-modal" id="signalModal" hidden>
@@ -22619,7 +22649,7 @@ const GUIDE_TOOLS = [
       '盤中 333、十大多族群／十大空族群、所有族群綜合表：一眼看哪些族群在漲、族群裡誰最強', '盤中大戶力、四項精選、主力翻多／翻空、特大買賣單、刀劍空(32)、創高黑龍、1+2多：各種訊號分開看',
       '最後一頁「訊號教學」把每個訊號的條件寫清楚'] },
   { t: '🤖 機器人代碼', open: 'bot', v: 'basic-bot', tags: ['盤中', '盤後'], d: '右上角「🤖 機器人代碼」。打一個代碼就回一份名單（像 LINE 機器人）：族群漲跌排行、重點族群、刀劍空、賽馬、河流、處置、隔日沖、籌碼暴增、國際行情。',
-    b: ['上面一排是全部代碼，點一下就查；也可以打股號（例：2330）或族群名（例：低軌衛星）', '點一個代碼開一格，結果一格一格往右排（最多 10 格，照點的順序）；同一個代碼再點一次就收掉，「全部收掉」一次清空；柱狀圖不顯示，只列名稱跟漲跌幅', '全部代碼的說明一直留在最下面（點代碼直接查）', '盤中跟首頁一樣每 15 秒自動更新，開著的格子都跟著重算', '關掉再打開，會回到上次最後看的畫面：開著哪幾格、捲到哪、視窗位置大小、有沒有移到另一個螢幕（電腦、手機、iPad 各自記）',
+    b: ['上面一排是全部代碼，點一下就查；也可以打股號（例：2330）或族群名（例：低軌衛星）', '點一個代碼開一格，結果一格一格往右排（最多 20 格，照點的順序）；同一個代碼再點一次就收掉，「全部收掉」一次清空；柱狀圖不顯示，只列名稱跟漲跌幅', '全部代碼的說明一直留在最下面（點代碼直接查）', '盤中跟首頁一樣每 15 秒自動更新，開著的格子都跟著重算', '關掉再打開，會回到上次最後看的畫面：開著哪幾格、捲到哪、視窗位置大小、有沒有移到另一個螢幕（電腦、手機、iPad 各自記）',
       '族群那一條點下去看成分股，股票點下去開 K 線圖', '右上角 ⧉ 移到另一螢幕（可以拖到外接螢幕）、－ 最小化、▢ 最大化、✕ 關閉；標題列拖著走，四邊四角拉大小',
       '每個代碼在做什麼，看下面「🤖 機器人代碼一覽」'] },
   { t: '📶 盤中訊號分頁', open: 'sgt', v: 'basic-sgt', tags: ['盤中', '每 15 秒'], d: '右上角「📶 盤中訊號分頁」。把盤中訊號中心的每個分頁做成一格一格，像機器人代碼一樣往右排，可以同時看好幾個分頁。',
@@ -25552,7 +25582,7 @@ function botFetchCache(key, url, ttl){
   const e = c[key];
   if (e && (e.loading || Date.now() - e.at < ttl)) return e.data;
   c[key] = { loading: true, at: Date.now(), data: e ? e.data : null };
-  const done = () => { botRerunCols(); try { wgRerun(); } catch (_){} try { chartDaytradeTagRefresh(); } catch (_){} clearTimeout(dtRenderTimer); dtRenderTimer = setTimeout(() => { try { render(); } catch (_){} }, 400); };   // 首頁 813／80／75 欄也要重畫
+  const done = () => { botRerunCols(); try { dynRerender(); } catch (_){} try { wgRerun(); } catch (_){} try { chartDaytradeTagRefresh(); } catch (_){} clearTimeout(dtRenderTimer); dtRenderTimer = setTimeout(() => { try { render(); } catch (_){} }, 400); };   // 首頁 813／80／75 欄也要重畫
   fetch(url).then((r) => r.json()).then((d) => { c[key] = { at: Date.now(), data: d }; done(); })
     .catch((err) => { c[key] = { at: Date.now(), data: { status: 'error', message: '抓不到資料（' + String((err && err.message) || err).slice(0, 40) + '）' } }; done(); });
   return e ? e.data : null;
@@ -26787,7 +26817,7 @@ function botAnswer(raw){
 }
 // 2026-10-17 使用者：結果一格一格往右排（最多 10 格，照點的順序：先點 12 就在第一格、再點 193 在第二格）；
 // 上面的代碼再點一次那格就收掉（toggle）。從輸入框、K 線標籤、新手教學進來的，已經開著就原地重算、閃一下。
-const BOT_MAX_COLS = 10;
+const BOT_MAX_COLS = 20;   // 2026-11-14 使用者：10 格不夠，改 20 格（前 10 格排滿畫面，之後往右拉；不設無限：每格盤中每 15 秒重算，太多手機會慢）
 function botRun(cmd, opts){
   const key = botNorm(cmd);
   if (!key) return;
@@ -26798,7 +26828,7 @@ function botRun(cmd, opts){
     renderBot(); botShowCol(key);
     return;
   }
-  if (botState.cols.length >= BOT_MAX_COLS){ showToast('最多 10 格，先收掉一格（再點一次那個代碼，或按格子右上角 ✕）'); return; }
+  if (botState.cols.length >= BOT_MAX_COLS){ showToast('最多 20 格，先收掉一格（再點一次那個代碼，或按格子右上角 ✕）'); return; }
   const html = botAnswer(cmd);
   if (!html) return;
   botState.cols.push({ cmd: String(cmd).trim(), key, html });
@@ -26939,7 +26969,7 @@ function renderBot(){
       : '<button type="button" class="bot-chip bot-chip-sync" data-bot-sync="1" title="電腦、手機、iPad 開著的格子要一樣：先設自選股的同步碼，每台輸入同一組碼">🔄 設定跨裝置同步</button>') + '</div>' +
     (botState.cols.length ? '<div class="bot-cols">' + botState.cols.map((c) => '<div class="bot-col' + (botColHasChart(c.html) ? ' bot-col-wide' : '') + '" data-col-key="' + wlEsc(c.key) + '">' + botColX(c.key) + c.html + '</div>').join('') + '</div>' +
       '<div class="bot-cols-grip" title="拉著往下拖，格子變長；往上拖變短（點兩下回到自動）"></div>'
-      : '<div class="bot-cols-hint">點上面的代碼，結果一格一格往右排（最多 10 格）；同一個代碼再點一次就收掉。</div>') +
+      : '<div class="bot-cols-hint">點上面的代碼，結果一格一格往右排（最多 20 格）；同一個代碼再點一次就收掉。</div>') +
     botHelpHtml();
   sizeBotCols();
   body.querySelectorAll('.bot-col').forEach((el, i) => { el._botHtml = botState.cols[i] && botState.cols[i].html; if (tops[el.dataset.colKey]) el.scrollTop = tops[el.dataset.colKey]; });
@@ -26961,7 +26991,7 @@ function botHelpHtml(){
     botLine('隔日沖分點：凱基-台北、凱基-城中、富邦證券、統一、群益金鼎、港商野村、國票-敦北法人等 18 個（照對方名單對出來的），資料來源富邦證券主力進出。', 'bot-dim') +
     '<div class="bot-title" style="margin-top:12px">🧭 操作方式</div>' +
     [
-      '<b>一格一格排</b>：點上面的代碼（或在輸入框打代碼、股號、族群名按送出）就開一格，照點的順序往右排，<b>最多 10 格</b>；手機一次看一格，左右滑',
+      '<b>一格一格排</b>：點上面的代碼（或在輸入框打代碼、股號、族群名按送出）就開一格，照點的順序往右排，<b>最多 20 格</b>（前 10 格排滿畫面，之後往右拉）；手機一次看一格，左右滑',
       '<b>收掉</b>：同一個代碼再點一次那格就收掉；格子右上角 ✕ 收單格；「全部收掉」一次清空。開著的代碼按鈕是紫色',
       '<b>點進去看</b>：族群那一條點了看成分股，股票點了開 K 線圖；每格自己上下捲',
       '<b>拉長格子</b>：格子下面那條灰色把手拉著往下拖，格子變長、一次看比較多；往上拖變短；點兩下回到自動（貼齊視窗底部）。拉的高度會記住',
@@ -27018,7 +27048,7 @@ function botRestoreView(){
 // （後端每個值最多 50 字，所以切成 botCols0～botCols4；botColsAt＝最後改的時間）。
 // 這台開／關格子、全部收掉 → 1.5 秒後送上去；開網頁、切回這個分頁、機器人開著時每 30 秒跟雲端對一次，
 // 雲端那份比這台新就換成雲端的格子。捲到哪、視窗位置大小、拉長的高度還是各台記各台的。
-const BOT_SYNC_STR_KEY = 'botSyncStr', BOT_SYNC_AT_KEY = 'botSyncAt', BOT_SYNC_PARTS = 5;
+const BOT_SYNC_STR_KEY = 'botSyncStr', BOT_SYNC_AT_KEY = 'botSyncAt', BOT_SYNC_PARTS = 9;   // 20 格 × 每個代碼最多 20 字＋分隔 ≈ 420 字，每段 50 字 → 9 段
 let botSyncTimer = null;
 function botColsStr(cols){ return (cols || botState.cols).map((c) => String(c.cmd || c).trim()).filter(Boolean).join('|'); }
 function botSyncLocal(){ return { str: String(botLoad(BOT_SYNC_STR_KEY) || ''), at: Number(botLoad(BOT_SYNC_AT_KEY)) || 0 }; }
@@ -29660,6 +29690,91 @@ document.addEventListener('click', (e) => {
   czSave(); czApply();
 }, true);
 czApply();
+// ---- 📈 動能選股（2026-11-14 使用者：照券商 App「動能選股」做一個面板，第 17 顆）----
+// 熱門趨勢概念股、動能排行跟機器人 240／250 同一份資料、同一組門檻（改了兩邊一起變）。
+// 日動能／週動能／法人動能：App 的「動能」分數沒公開算法，拿 5 檔的走勢圖試過最接近的是「收盤跟 6～8 日指數平均線的乖離 × 1.4」，
+// 但奇鋐的週動能 App 7.7、這樣算 0.2，對不起來；上榜條件又被 VIP 鎖住，所以先不放假數字。
+const DYN_TABS = [['hot', '🔥 熱門趨勢概念股'], ['rank', '🚀 動能排行'], ['day', '日動能'], ['week', '週動能'], ['inst', '法人動能']];
+const dynState = { tab: 'hot' };
+try { const t0 = localStorage.getItem('dynTab'); if (DYN_TABS.some(([k]) => k === t0)) dynState.tab = t0; } catch (_){}
+const dynPx = (v) => (Number.isFinite(v) ? (v >= 1000 ? v.toFixed(0) : v >= 100 ? v.toFixed(1) : v.toFixed(2)) : '—');
+const dynPct = (v) => (Number.isFinite(v) ? '<span class="' + dirClass(v) + '">' + botPct(v) + '</span>' : '<span class="muted">—</span>');
+const dynGrp = (r) => wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '—');
+const dynStk = (r) => '<td class="l dyn-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name || '') + '</td>';
+function dynMomData(){
+  const key = 'momRank|' + momParams.top;
+  const d = botFetchCache(key, '/api/momentum-rank?top=' + momParams.top, 10 * 60e3);
+  if (d && (d.status !== 'ok' || !Array.isArray(d.rows))){ const e = botState.cache[key]; if (e && !e.loading && Date.now() - e.at > 60e3) delete botState.cache[key]; }
+  return d;
+}
+function dynHotHtml(){
+  const m = trendModel();
+  let h = '<div class="dyn-params">' + trendParamsHtml() + '</div>';
+  if (m.wait) return h + '<div class="race-note">' + wlEsc(m.wait) + '</div>';
+  const md = m.date ? swMmdd(m.date) : '';
+  h += '<div class="dyn-meta">' + (m.live ? '盤中即時重算' : md + ' 收盤') + '・<b>' + m.rows.length + '</b> 檔・照 240 日漲幅排</div>';
+  if (!m.rows.length) return h + '<div class="race-note">目前沒有符合的股票（可以把上面的門檻放寬）</div>';
+  h += '<div class="dyn-wrap"><table class="dyn-table"><thead><tr><th>#</th><th class="l">股票</th><th>價格</th><th>漲跌幅</th><th>240日最高</th><th>240日漲幅</th><th>離高</th><th class="l">族群</th><th>均線</th><th>成交值(億)</th><th>大戶力</th></tr></thead><tbody>' +
+    m.rows.map((r, i) => '<tr class="dyn-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '"><td>' + (i + 1) + '</td>' + dynStk(r) +
+      '<td><b>' + dynPx(r.px) + '</b></td><td>' + dynPct(r.chgNow) + '</td><td>' + dynPx(r.hiNow) + '</td><td>' + dynPct(r.gainNow) + '</td>' +
+      '<td>' + (r.dist >= -1e-9 ? '<span class="t240-new">🆕新高</span>' : r.dist.toFixed(1) + '%') + '</td><td class="l">' + dynGrp(r) + '</td><td>' + (r.score ?? '—') + '</td>' +
+      '<td>' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + '</td><td>' + holderTagHtml(holderPctOf(r.code), false, true) + '</td></tr>').join('') + '</tbody></table></div>';
+  return h + '<div class="dyn-foot">240日最高＝最近 240 個交易日最高的收盤價；240日漲幅＝跟 240 個交易日前的收盤比（還原現金股利，跟 App 同算法；App 那 6 檔對上 5 檔，華南金有配股票股利還差一點）。App 另外看「新聞熱度」我們沒有，改用 5 日均成交值當門檻。</div>';
+}
+function dynRankHtml(){
+  const d = dynMomData();
+  let h = '<div class="dyn-params">' + momParamsHtml() + '</div>';
+  if (!d) return h + '<div class="race-note">讀取中…</div>';
+  if (d.status !== 'ok' || !Array.isArray(d.rows)) return h + '<div class="race-note">' + (d.detail === 'Not Found' ? '後端還沒更新' : '資料暫時抓不到，等一下再試') + '</div>';
+  const live = !!(lastData && lastData.quoteDate && lastData.quoteDate > d.date);
+  const row = (r, i) => {
+    const hq = live ? getStockQuote(r.code) : null;
+    const px = hq && Number.isFinite(hq.price) ? hq.price : r.close, chg = hq && Number.isFinite(hq.changePercent) ? hq.changePercent : r.chg;
+    return '<tr class="dyn-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '"><td>' + (i + 1) + '</td>' + dynStk(r) +
+      '<td><b>' + dynPx(px) + '</b>' + (r.miss ? ' <span class="t240-miss">缺' + r.miss.join('') + '</span>' : '') + '</td><td>' + dynPct(chg) + '</td>' +
+      ['wtd', 'mtd', 'qtd', 'ytd'].map((k) => '<td>' + dynPct(r[k]) + '<div class="dyn-rk">第 ' + (r[k + 'Rank'] ?? '—') + ' 名</div></td>').join('') +
+      '<td class="l">' + dynGrp(r) + '</td><td>' + (r.score ?? '—') + '</td><td>' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + '</td><td>' + holderTagHtml(holderPctOf(r.code), false, true) + '</td></tr>';
+  };
+  const head = '<thead><tr><th>#</th><th class="l">股票</th><th>價格</th><th>漲跌幅</th><th>週漲幅</th><th>月漲幅</th><th>季漲幅</th><th>年漲幅</th><th class="l">族群</th><th>均線</th><th>成交值(億)</th><th>大戶力</th></tr></thead>';
+  const c = d.cuts || {};
+  const almost = momParams.almost && Array.isArray(d.almost) ? d.almost : [];
+  h += '<div class="dyn-meta">' + swMmdd(d.date) + ' 收盤・<b>' + d.rows.length + '</b> 檔・前 ' + momParams.top + '% 門檻（全市場一般股 ' + (d.universe || '—') + ' 檔）：週 ≥ ' + botPct(c.wtd) + '、月 ≥ ' + botPct(c.mtd) + '、季 ≥ ' + botPct(c.qtd) + '、年 ≥ ' + botPct(c.ytd) + '</div>';
+  h += d.rows.length ? '<div class="dyn-wrap"><table class="dyn-table">' + head + '<tbody>' + d.rows.map(row).join('') + '</tbody></table></div>' : '<div class="race-note">今天沒有四個漲幅都在前 ' + momParams.top + '% 又創高的股票</div>';
+  if (almost.length) h += '<div class="dyn-sub">差一個：創高、四個漲幅裡三個在前 ' + momParams.top + '%（' + almost.length + ' 檔）</div><div class="dyn-wrap"><table class="dyn-table">' + head + '<tbody>' + almost.map(row).join('') + '</tbody></table></div>';
+  return h + '<div class="dyn-foot">週／月／季／年＝本週／本月／本季／今年以來的漲幅（還原現金股利，跟 App 同算法），四個都在全市場前 ' + momParams.top + '%，而且收盤是 240 日最高收盤（創高）。11/13 App 選的 4 檔我們對上 3 檔（騰雲的年漲幅差一點點，在「差一個」裡）。每天收盤後更新' + (live ? '；價格、漲跌幅是即時的' : '') + '。</div>';
+}
+function dynTodoHtml(tab){
+  const name = tab === 'day' ? '日動能' : tab === 'week' ? '週動能' : '法人動能';
+  return '<div class="race-note dyn-todo"><b>' + name + '：算法還在對，先不放數字</b><br>' +
+    (tab === 'inst' ? 'App 的法人動能底下分「價量創新高、投信剛買準突破、投信動能連買…」，內容都被 VIP 鎖住，只看得到名稱；要做的話得照名稱用我們的法人資料自己定條件。'
+      : 'App 的「動能」分數沒有公開算法。拿中信金、富喬、奇鋐、聯發科、南亞的走勢圖試過，最接近的是「收盤跟 6～8 日指數平均線的乖離 × 1.4」（中信金、富喬走勢對得上），但奇鋐的週動能 App 是 7.7、這樣算只有 0.2，對不起來；哪些股票上榜、「上榜（天）」怎麼算也被鎖住。') +
+    '<br>多傳幾張 App 的畫面（同一檔每天的動能數字、或沒上鎖的名單）就可以再對。</div>';
+}
+function renderDyn(){
+  const body = document.getElementById('dynBody');
+  if (!body) return;
+  const inner = document.getElementById('dynInner'), top = inner ? inner.scrollTop : 0;
+  const tabs = '<div class="hw-tabs">' + DYN_TABS.map(([k, label]) => '<button type="button" class="chart-tab signal-tab' + (dynState.tab === k ? ' active' : '') + '" data-dyn-tab="' + k + '">' + label + '</button>').join('') + '</div>';
+  body.innerHTML = tabs + (dynState.tab === 'hot' ? dynHotHtml() : dynState.tab === 'rank' ? dynRankHtml() : dynTodoHtml(dynState.tab));
+  if (inner) inner.scrollTop = top;
+}
+function dynRerender(){ const m = document.getElementById('dynModal'); if (m && !m.hidden) renderDyn(); }
+function openDynPanel(){ document.getElementById('dynModal').hidden = false; renderDyn(); }
+function closeDynPanel(){ document.getElementById('dynModal').hidden = true; }
+document.getElementById('dynClose').addEventListener('click', closeDynPanel);
+document.getElementById('dynModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeDynPanel(); });
+document.getElementById('dynBody').addEventListener('click', (e) => {
+  const t = e.target;
+  const tab = t.closest('[data-dyn-tab]');
+  if (tab){ dynState.tab = tab.dataset.dynTab; try { localStorage.setItem('dynTab', dynState.tab); } catch (_){} renderDyn(); return; }
+  const tp = t.closest('[data-trend-p]');
+  if (tp){ const [k, v] = tp.dataset.trendP.split(':'); if (k in trendParams){ trendParams[k] = Number(v); trendSave(); renderDyn(); try { botRerunCols(); } catch (_){} } return; }
+  const mp = t.closest('[data-mom-p]');
+  if (mp){ const [k, v] = mp.dataset.momP.split(':'); if (k === 'top') momParams.top = Number(v); else if (k === 'almost') momParams.almost = v === '1'; momSave(); renderDyn(); try { botRerunCols(); } catch (_){} return; }
+  const row = t.closest('tr.dyn-row');
+  if (row) openStockChart(row.dataset.code, row.dataset.name);
+});
+setInterval(() => { if (document.visibilityState === 'visible') dynRerender(); }, 15000);   // 開著的時候跟著即時報價、資料進來更新
 document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     if (btn.dataset.label === '自選股'){ openWatchPanel(); return; }        // 2026-10-05 使用者：自選股
@@ -29677,6 +29792,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '創高黑選股'){ openPickerPanel(); return; } // 2026-10-04 使用者：創高黑選股
     if (btn.dataset.label === '健診'){ openCheckupPanel(); return; }    // 2026-09-28 使用者：每日持股健診
     if (btn.dataset.label === '問診'){ openDiagPanel(); return; }
+    if (btn.dataset.label === '動能選股'){ openDynPanel(); return; }   // 2026-11-14 使用者：動能選股面板
     if (btn.dataset.label === '系統選股'){ openScreenerPanel(); return; }   // 2026-10-23 使用者：系統選股從個股問診拆出來       // 2026-09-28 使用者：個股問診
     showToast('「' + btn.dataset.label + '」功能開發中');
   });
