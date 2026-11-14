@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 10:51:20";
+const BUILD_STAMP = "2026-11-14 10:54:43";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2290,6 +2290,9 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .b32-grp{grid-area:g;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .b32-pct{grid-area:p;justify-self:end;font-weight:800;font-size:12.5px;}
   .b32-h{grid-area:h;justify-self:end;align-self:center;}
+  .b32-pct{min-width:54px;text-align:right;}   /* 2026-11-14 漲跌幅欄固定寬，每列的大戶力、漲跌幅才會上下對齊（23 的欄位標題也靠這個對齊） */
+  .bot-line.b32-ghd{display:grid;grid-template-columns:minmax(0,1fr) 66px 54px;gap:0 8px;align-items:end;padding:0 2px;}
+  .b32-ghd-g{min-width:0;} .b32-ghd-h,.b32-ghd-p{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;line-height:1.3;} .b32-ghd-h{text-align:center;} .b32-ghd-p{text-align:right;}
   .b32-row.bh .b32-h .hf-tag b{width:66px;box-sizing:border-box;text-align:center;display:inline-block;}
   .b32-row.k12{grid-template-columns:38px minmax(0,1fr) auto auto;grid-template-areas:"t s h p" "t g h st" "t l l l";}
   .b32-lvrow{grid-area:l;display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:2px;}
@@ -18170,7 +18173,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 10:51:20';
+const BUILD_STAMP = '2026-11-14 10:54:43';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26225,6 +26228,8 @@ function botAnswer(raw){
       '<span class="b32-h">' + holderTagHtml(holderPctOf(r.code), true, true) + '</span>' +
       '<span class="b32-lvrow b777-sigrow"><span class="b777-flag f23">' + (r.yesterday !== null ? '昨 ' + botPct(r.yesterday) : '') + (r.dayBefore !== null ? '・前天 ' + botPct(r.dayBefore) : '') + '</span>' + bot777FlagTags(r.code) + '</span></div>';
     // 2026-11-13 使用者：每段裡面再依族群分開——族群照族裡最新那檔的時間排（最近的在上面），族裡每檔也照時間排
+    // 2026-11-14 使用者：「大戶力」標題往左下移、跟下面每檔的大戶力對齊，右邊再加「漲跌幅」對齊下面的漲跌幅——寫在整欄第一個族群那一列的右邊
+    let colHd = false;
     const grpBlock = (l) => {
       const by = new Map();
       l.forEach((r) => { if (!by.has(r.groupName)) by.set(r.groupName, []); by.get(r.groupName).push(r); });
@@ -26232,13 +26237,15 @@ function botAnswer(raw){
         .sort((x, y) => (y.time > x.time ? 1 : y.time < x.time ? -1 : x.gr - y.gr));
       return gs.map((g) => {
         const gg = (lastData.groups || []).find((x) => x.name === g.name);
-        return botLine(botGrpPill(g.name, ' (' + g.gr + ')', gg ? gg.avgChange : 0) + ' <span class="bot-dim">' + g.list.length + ' 檔' + (g.time ? '・最新 ' + g.time : '') + '</span>', 'bot-head') + g.list.map(row).join('');
+        const gl = botGrpPill(g.name, ' (' + g.gr + ')', gg ? gg.avgChange : 0) + ' <span class="bot-dim">' + g.list.length + ' 檔' + (g.time ? '・最新 ' + g.time : '') + '</span>';
+        const hd = !colHd; colHd = true;
+        return (hd ? botLine('<span class="b32-ghd-g">' + gl + '</span><span class="b32-ghd-h">大戶力</span><span class="b32-ghd-p">漲跌幅</span>', 'bot-head b32-ghd') : botLine(gl, 'bot-head')) + g.list.map(row).join('');
       }).join('');
     };
     const sec = (title, l, cls) => botLine(title + '　' + l.length + ' 檔', 'bot-sep' + (cls ? ' ' + cls : '')) + (l.length ? grpBlock(l) : botLine('目前沒有', 'bot-dim'));
     const n = fm.strong.length + fm.middle.length + fm.spaceTop.length + fm.chase.length;
     const otcT = kill193OtcTail();
-    return wrap(t, botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') +
+    return wrap(t,
       sec('----↓(強多積極・族群前 ' + FIRE23_TOP + ' 名)↓----', fm.strong, 'f23-strong') +
       sec('----↓(中間・族群倒數第 11～25 名)↓----', fm.middle) +
       sec('----↓(空方打多・族群倒數第 6～10 名)↓----', fm.spaceTop) +
