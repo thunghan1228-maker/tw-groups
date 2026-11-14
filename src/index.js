@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 17:34:17";
+const BUILD_STAMP = "2026-11-14 17:41:05";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -149,7 +149,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) 210px 290px;gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) 300px 210px 290px;gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -313,6 +313,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .t240-head > span .bsort{text-align:left;} .bsort:hover,.bsort.on{color:#7c3aed;} .bsort i{font-style:normal;opacity:.45;font-size:10px;margin-left:1px;}
   .bot-col[data-col-key="250"]{flex-basis:calc((100% - 72px) / 10 * 2.3);min-width:390px;} .t240-miss{font-size:11px;font-weight:800;color:#b45309;border:1px solid #f59e0b;border-radius:4px;padding:0 4px;}
   .bot-col:is([data-col-key="240"],[data-col-key="260"],[data-col-key="270"],[data-col-key="280"]){flex-basis:calc((100% - 72px) / 10 * 3);min-width:470px;}
+  .bot-line.ss-brow{display:grid;grid-template-columns:minmax(0,1fr) 36px 54px 60px 34px 64px;gap:0 6px;align-items:center;padding:4px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;}
+  .bot-col[data-col-key="888"]{flex-basis:calc((100% - 72px) / 10 * 3);min-width:470px;}
   .bot-line.tp-row{display:grid;grid-template-columns:minmax(0,1fr) 54px 60px 34px 56px 64px;gap:0 6px;align-items:center;padding:4px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;}   /* 2026-11-14 機器人 260／270／280 表格式 */
   .tp-row .dyn-mom{min-width:40px;padding:0 4px;font-size:12px;} .t240-new{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:4px;padding:0 4px;}   /* 2026-11-14 熱門趨勢概念股 */
   .bot-col[data-col-key="83"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}   /* 2026-11-14 多觀察(83) 每檔後面有 ①區1★●▲ 符號，再寬一點才排得進一行 */
@@ -432,15 +434,20 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   /* 2026-11-14 使用者：183 右邊多兩欄：「強勢股觀察中・等收黑」（210px，原本在第一欄最上面）、「強勢紅K」＋下面疊創高黑龍（290px）；原本 10 欄寬度不變、整排變寬，往右拉看最右邊 */
   @media (min-width: 1701px){
     .home-rank-scroll{overflow-x:auto;padding-bottom:6px;}
-    .home-rank4{width:calc(100% + 516px);}
+    .home-rank4{width:calc(100% + 824px);}
     .home-rank-scroll{cursor:grab;} .home-rank-scroll .hr-stk,.home-rank-scroll button,.home-rank-scroll [data-bot-code],.home-rank-scroll [data-group],.home-rank-scroll [data-bot-group]{cursor:pointer;}
-    .home-rank4.hx{width:calc(100% + 516px + var(--hx-w));grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) 210px 290px var(--hx-cols);}
+    .home-rank4.hx{width:calc(100% + 824px + var(--hx-w));grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) 300px 210px 290px var(--hx-cols);}
   }
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2 .hr-code,.hot2 .hr-name{color:inherit!important;} .hr-pkw .l1 .hot2{display:inline-flex;gap:5px;min-width:0;overflow:hidden;} .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
   @media (prefers-reduced-motion: reduce){ .hot2{animation-duration:2.4s;} }
   @keyframes hotbearblink{0%,100%{background:#16a34a;color:#fff;box-shadow:0 0 0 2px #16a34a;}50%{background:#bbf7d0;color:#14532d;box-shadow:0 0 0 2px #bbf7d0;}}
   .hotbear,#botBody .bot-stk.hotbear,body.home-light .home-botcol .bot-stk.hotbear,#botBody .b32-row.gone .b32-stk .bot-stk.hotbear{animation:hotbearblink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 777 跟 32 重複就閃綠 */
+  .hss-row{display:grid;grid-template-columns:minmax(0,1fr) 22px 62px 64px 26px;gap:0 5px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
+  .hss-row.hr-stk{cursor:pointer;} .hss-row.hr-stk:hover{background:rgba(124,58,237,.06);} .hss-row.hsc-head{border-top:0;padding:2px 6px;}
+  .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-n{text-align:center;font-weight:900;color:#b91c1c;}
+  .ss-tags{display:flex;gap:3px;margin-top:1px;} .ss-tag{font-size:10px;font-weight:800;line-height:1.35;padding:0 4px;border-radius:3px;color:#fff;background:#6b7280;}
+  .ss-t1{background:#7c3aed;} .ss-t2{background:#dc2626;} .ss-t3{background:#ea580c;} .ss-t4{background:#0891b2;}
   .hsc-row{display:grid;grid-template-columns:minmax(0,1fr) 74px 66px 30px;gap:0 6px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
   .hsc-row.hr-stk{cursor:pointer;} .hsc-row.hr-stk:hover{background:rgba(124,58,237,.06);}
   .hsc-head{border-top:0;padding:2px 6px;} .hsc-head .bsort{text-align:right;} .hsc-head > span .bsort{text-align:left;}
@@ -10992,7 +10999,7 @@ const HOME_X_DEFAULT = ['240', '260', '270'];
 let homeXCols = HOME_X_DEFAULT.slice();
 try { const raw = localStorage.getItem(HOME_X_KEY); if (raw !== null){ const v = JSON.parse(raw); if (Array.isArray(v)) homeXCols = v.filter((c) => typeof c === 'string' && c.trim()).map((c) => c.slice(0, 20)).slice(0, HOME_X_MAX); } } catch (_){}
 function homeXSave(){ try { localStorage.setItem(HOME_X_KEY, JSON.stringify(homeXCols)); } catch (_){} }
-const homeXWide = (k) => (/^(240|260|270|280)$/.test(k) ? 470 : /^(32|123|777|23|250|99|83|82|14|80|193|199)$/.test(k) ? 360 : 300);
+const homeXWide = (k) => (/^(240|260|270|280|888)$/.test(k) ? 470 : /^(32|123|777|23|250|99|83|82|14|80|193|199)$/.test(k) ? 360 : 300);
 function homeXAdd(raw){
   const cmd = String(raw || '').trim().slice(0, 20), key = botNorm(cmd);
   if (!key) return;
@@ -11084,6 +11091,7 @@ function homeRank4Html(){
     // 2026-10-19 使用者：個股漲 2%（22-5）排到族群漲幅 > 2%（12）前面；2026-10-20 使用者又對調回來：族群漲幅 > 2%（12，疊著股期黑龍 75、今日弱勢股）放在個股漲 > 2% 的左邊
     // 2026-11-01 使用者：最後一欄拿掉——1+2多・突破黑馬(44) 沒了、股票期貨排名(155)＋三落空搬到族群漲幅 > 2%(12) 下面、股期黑龍(75) 搬到續抱勿追高上面
     // 2026-10-21 使用者：最右邊一欄（個股漲 > 2%（22-5）＋隔日沖黑龍(80)）整欄拿掉；股期黑龍(75) 還在 188 下面
+    '<div class="hr-stack">' + homeRedBox(homeSsColHtml()) + '</div>' +   // 2026-11-14 使用者：強中強（四份重複兩份以上）放在 183 右邊
     '<div class="hr-col">' + homePickWatchHtml() + '</div>' +   // 2026-11-14 使用者：「👁強勢股觀察中・等收黑」從第一欄最上面搬到 183 右邊、強勢紅K 左邊，自己一欄
     '<div class="hr-stack">' + homeRedBox(homeScrColHtml('red')) + homeRedBox(homeScrColHtml('dragon')) + '</div>' +   // 2026-11-14 使用者：最後一欄（183 右邊）＝強勢紅K，創高黑龍疊在它下面
     homeXColsHtml() +   // 2026-11-14 使用者：加的機器人代碼欄位接在最右邊
@@ -18341,7 +18349,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 17:34:17';
+const BUILD_STAMP = '2026-11-14 17:41:05';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19307,7 +19315,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・30加33加34／投信買超前15・188／發動・今日強勢股／外資買超前15・1+2 突破廣播・905 突破廣播・族群漲幅(12)／155／三落空・183・強勢股觀察中・強勢紅K／創高黑龍</div></div>' +
+        '<div class="section-head"><div class="section-title">多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・30加33加34／投信買超前15・188／發動・今日強勢股／外資買超前15・1+2 突破廣播・905 突破廣播・族群漲幅(12)／155／三落空・183・強中強・強勢股觀察中・強勢紅K／創高黑龍</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -25714,7 +25722,7 @@ const BOT_CODES = [
   ['44', '今天 1+2 多（突破黑馬）'], ['88', '開低站上 VWAP：今天開盤低於昨收、09:05 後 1 分K收盤高於 VWAP 1% 以上（偏多），跟訊號中心「開低VWAP上(88)」同一份'], ['87', '開高跌破 VWAP：今天開盤高於昨收、09:05 後 1 分K收盤低於 VWAP 1% 以上（偏空），跟訊號中心「開高VWAP下(87)」同一份'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖前兩日其中一日入榜黑龍：前兩個交易日上 811、今天收黑K，只看族群表裡的股票（含「其他」那組）（⭐＝兩週內又上榜幾次）'],
-  ['240', '📈動能選股｜🔥熱門趨勢概念股（即時，代碼暫定）：照券商 App「動能選股→熱門趨勢概念股」——收盤（盤中用即時價）在 240 日最高收盤附近、240 日漲幅大的股票（還原股價，跟 App 同算法）；App 的新聞熱度我們沒有，用 5 日均成交值當門檻，格子上面三排按鈕可以調'], ['260', '📈動能選股｜⚡日動能（即時）：動能＝1.4×(價格÷8 日指數平均線−1)×100，強勢 ≥ +6／弱勢 ≤ −6，照今天成交金額排；盤中每 15 秒用現價重算、名單跟著換；均線、動能、大戶力都能點欄位排序'], ['270', '📈動能選股｜⚡週動能（即時）：同日動能算法換成週K（8 週指數平均線），照這週累計成交金額排、上榜幾週；盤中即時重算'], ['280', '📈動能選股｜🏛️法人動能：價量創新高／投信剛買準突破／投信動能連買／外資動能連買四張名單（外資、投信收盤後公布）'], ['250', '📈動能選股｜🚀動能排行（代碼暫定）：照券商 App「動能選股→動能排行」——本週、本月、本季、今年以來的漲幅都在全市場前 5%，而且收盤創 240 日新高的強勢股（還原股價，跟 App 同算法）；前幾 % 可以在格子上面點，也能列「差一個」的'], ['81', '隔日沖買超排序（每天六點後更新）'], ['83', '📡多觀察(等黑K買進)：首頁那欄的【1】黑K出現・黑龍系統符合【2】今天噴出【3】已噴在高檔【4】右肩打底【5】有點深，同一份、同族群排一起，每檔接大戶力'], ['82', '👁強勢股觀察中・等收黑：首頁第一欄最上面那份（跟創高黑龍選股（手動）→ 今天 → ② 強勢股觀察中・等收黑 同一份），照即時漲跌幅排、漲越多越上面，每檔接大戶力'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
+  ['240', '📈動能選股｜🔥熱門趨勢概念股（即時，代碼暫定）：照券商 App「動能選股→熱門趨勢概念股」——收盤（盤中用即時價）在 240 日最高收盤附近、240 日漲幅大的股票（還原股價，跟 App 同算法）；App 的新聞熱度我們沒有，用 5 日均成交值當門檻，格子上面三排按鈕可以調'], ['888', '💪強中強：強勢股觀察中(82)、強勢紅K、熱門趨勢概念股(240)、日動能(260) 四份名單重複兩份以上的股票（首頁 183 右邊那欄同一份）'], ['260', '📈動能選股｜⚡日動能（即時）：動能＝1.4×(價格÷8 日指數平均線−1)×100，強勢 ≥ +6／弱勢 ≤ −6，照今天成交金額排；盤中每 15 秒用現價重算、名單跟著換；均線、動能、大戶力都能點欄位排序'], ['270', '📈動能選股｜⚡週動能（即時）：同日動能算法換成週K（8 週指數平均線），照這週累計成交金額排、上榜幾週；盤中即時重算'], ['280', '📈動能選股｜🏛️法人動能：價量創新高／投信剛買準突破／投信動能連買／外資動能連買四張名單（外資、投信收盤後公布）'], ['250', '📈動能選股｜🚀動能排行（代碼暫定）：照券商 App「動能選股→動能排行」——本週、本月、本季、今年以來的漲幅都在全市場前 5%，而且收盤創 240 日新高的強勢股（還原股價，跟 App 同算法）；前幾 % 可以在格子上面點，也能列「差一個」的'], ['81', '隔日沖買超排序（每天六點後更新）'], ['83', '📡多觀察(等黑K買進)：首頁那欄的【1】黑K出現・黑龍系統符合【2】今天噴出【3】已噴在高檔【4】右肩打底【5】有點深，同一份、同族群排一起，每檔接大戶力'], ['82', '👁強勢股觀察中・等收黑：首頁第一欄最上面那份（跟創高黑龍選股（手動）→ 今天 → ② 強勢股觀察中・等收黑 同一份），照即時漲跌幅排、漲越多越上面，每檔接大戶力'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
   ['97', '外資買賣超前十大：賣超前十在上、買超前十在下（金額越大越靠上），每檔列買賣超金額（億元）、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：格式同 97'], ['99', '外資、投信同步買賣超前十大：同步賣超前十在上、同步買超前十在下（兩家合計金額越大越靠上），每檔列外資、投信各自的買賣超金額（億元）、漲跌幅、盤中大戶力'], ['777', '每日功課的族群卡（刀劍空(32)、12空(123)）條列：一族一段、族群和族裡每檔都照訊號時間排（最近的在上），每檔接大戶%'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
   ['2359', '股號或族群名：那族漲幅排行'], ['2359m', '那檔當天的隔日沖買賣超（2359m1＝前一天，最多 2359m9）'], ['235984', '那族的籌碼暴增排序（族群名＋84 也可以，例：低軌衛星84）'], ['2359g', '那檔過去五週籌碼增減%'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
 ];
@@ -26575,6 +26583,22 @@ function botAnswerRaw(raw){
       botLine('前 ' + momParams.top + '% 門檻（全市場一般股 ' + (d.universe || '—') + ' 檔）：週 ≥ ' + botPct(c.wtd) + '、月 ≥ ' + botPct(c.mtd) + '、季 ≥ ' + botPct(c.qtd) + '、年 ≥ ' + botPct(c.ytd), 'bot-dim') +
       botLine('週／月／季／年＝本週／本月／本季／今年以來的漲幅（還原股價，跟 App 同算法），四個都在全市場前 ' + momParams.top + '%，而且收盤是 240 日最高收盤（創高）。' + md + ' 收盤資料，每天收盤後更新' + (live ? '；價格、漲跌幅是即時的' : ''), 'bot-dim'),
       md + ' 收盤・' + d.rows.length + ' 檔');
+  }
+  // 2026-11-14 使用者：強中強＝888（強勢股觀察中、強勢紅K、240、260 四份重複兩份以上；跟首頁那欄同一份）
+  if (q === '888'){
+    const t = '💪強中強(888)';
+    const list = ssList();
+    if (!list.length) return wrap(t, botLine('讀取中…（四份名單都讀進來才算得出來）', 'bot-dim'));
+    const rows = botSortRows('888', list, { n: (r) => r.n, px: (r) => r.px, chg: (r) => r.chg, score: (r) => r.score, holder: (r) => holderPctOf(r.code) });
+    const fmtPx = (v) => (Number.isFinite(v) ? (v >= 1000 ? v.toFixed(0) : v >= 100 ? v.toFixed(1) : v.toFixed(2)) : '—');
+    const head = botLine('<span>' + botSortTh('888', '', '#　股票') + '</span>' + botSortTh('888', 'n', '份數') + botSortTh('888', 'px', '價格') + botSortTh('888', 'chg', '漲跌幅') + botSortTh('888', 'score', '均線') + botSortTh('888', 'holder', '大戶力'), 'ss-brow t240-head');
+    const line = (r, i) => botLine('<span class="t240-c1">' + (i + 1) + ' ' + botStk(r.code, r.name, ' ' + ssTagsHtml(r.tags)) + '<br><span class="bot-dim" style="font-size:11.5px">' + wlEsc(r.group || '—') + '</span></span>' +
+      '<span class="t240-n hss-n">' + r.n + '</span><span class="t240-n"><b>' + fmtPx(r.px) + '</b></span>' +
+      '<span class="t240-n ' + (Number.isFinite(r.chg) ? dirClass(r.chg) : 'bot-dim') + '">' + (Number.isFinite(r.chg) ? botPct(r.chg) : '—') + '</span>' +
+      '<span class="t240-n t240-ma">' + (r.score ?? '—') + '</span><span class="t240-n">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'ss-brow');
+    return wrap(t, head + rows.map(line).join('') +
+      botLine('四份名單：<span class="ss-tag ss-t1">觀</span>強勢股觀察中・等收黑(82)、<span class="ss-tag ss-t2">紅</span>強勢紅K（系統選股）、<span class="ss-tag ss-t3">240</span>熱門趨勢概念股（即時）、<span class="ss-tag ss-t4">260</span>日動能強勢（即時）；同一檔出現在兩份以上就列進來，照份數多、漲多排（欄位名稱點一下可以排序）。240、260 盤中跟著行情變，名單也會跟著換', 'bot-dim'),
+      list.length + ' 檔');
   }
   // 2026-11-14 使用者：日動能＝260、週動能＝270（即時，盤中跟著行情重算、名單跟著換）、法人動能＝280；跟「📈動能選股」面板同一份、強弱／名單切換也是同一組
   if (q === '260' || q === '270'){
@@ -30088,18 +30112,42 @@ const hot2Cache = { at: 0, map: new Map() };
 function hot2Map(){
   if (Date.now() - hot2Cache.at < 3000) return hot2Cache.map;
   hot2Cache.at = Date.now();
-  const cnt = new Map(), from = new Map();
-  const add = (codes, tag) => new Set(codes).forEach((c) => { cnt.set(c, (cnt.get(c) || 0) + 1); from.set(c, (from.get(c) || []).concat(tag)); });
-  try { homeScrLoad('red'); const d = homeScrState.red.d; if (d && Array.isArray(d.rows)) add(d.rows.map((r) => r.code), '強勢紅K'); } catch (_){}
-  try { const pq = pkWithHomeRules(() => pkQuery('today')), pd = pkState.cache[pq]; if (pd && pd.status === 'ok' && pd.sim) add((pd.sim.watch || []).map((r) => r.code), '強勢股觀察中'); } catch (_){}
-  try { const m = trendModel(); if (!m.wait) add(m.rows.map((r) => r.code), '240'); } catch (_){}
-  try { const m = pulseModel(); if (!m.wait) add(m.day.strong.map((o) => o.code), '260'); } catch (_){}
+  const cnt = new Map(), from = new Map(), info = new Map();
+  const add = (rows, tag) => { const seen = new Set(); rows.forEach((r) => { const c = r.code; if (!c || seen.has(c)) return; seen.add(c); cnt.set(c, (cnt.get(c) || 0) + 1); from.set(c, (from.get(c) || []).concat(tag)); const o = info.get(c) || {}; if (!o.name && r.name) o.name = r.name; if (o.score == null && r.score != null) o.score = r.score; if (!o.group && (r.group || r.grp)) o.group = r.group || r.grp; if (o.chg == null && Number.isFinite(r.chgNow != null ? r.chgNow : r.chg)) o.chg = r.chgNow != null ? r.chgNow : r.chg; info.set(c, o); }); };
+  try { const pq = pkWithHomeRules(() => pkQuery('today')), pd = pkState.cache[pq]; if (pd && pd.status === 'ok' && pd.sim) add((pd.sim.watch || []).map((r) => ({ code: r.code, name: r.name, score: r.score, group: r.group, chg: r.changePct })), '強勢股觀察中'); } catch (_){}
+  try { homeScrLoad('red'); const d = homeScrState.red.d; if (d && Array.isArray(d.rows)) add(d.rows, '強勢紅K'); } catch (_){}
+  try { const m = trendModel(); if (!m.wait) add(m.rows, '240'); } catch (_){}
+  try { const m = pulseModel(); if (!m.wait) add(m.day.strong, '260'); } catch (_){}
   const out = new Map();
   cnt.forEach((n, c) => { if (n >= 2) out.set(c, from.get(c)); });
-  hot2Cache.map = out;
+  hot2Cache.map = out; hot2Cache.info = info;
   return out;
 }
 function hot2Of(code){ try { return hot2Map().get(code) || null; } catch (_){ return null; } }
+// 2026-11-14 使用者：四份重複兩份以上的整理成一欄「強中強」（首頁 183 右邊；機器人代碼 888）
+const SS_TAG = { '強勢股觀察中': ['觀', 'ss-t1'], '強勢紅K': ['紅', 'ss-t2'], '240': ['240', 'ss-t3'], '260': ['260', 'ss-t4'] };
+function ssList(){
+  const mp = hot2Map(), info = hot2Cache.info || new Map();
+  return [...mp].map(([code, tags]) => {
+    const o = info.get(code) || {}, q = getStockQuote(code);
+    return { code, name: o.name || (WL_GROUP_INDEX[code] && WL_GROUP_INDEX[code].name) || code, tags, n: tags.length, score: o.score, group: o.group || (WL_GROUP_INDEX[code] && WL_GROUP_INDEX[code].group) || '',
+      chg: q && Number.isFinite(q.changePercent) ? q.changePercent : o.chg, px: q && Number.isFinite(q.price) ? q.price : null };
+  }).sort((a, b) => b.n - a.n || (b.chg ?? -1e9) - (a.chg ?? -1e9));
+}
+const ssTagsHtml = (tags) => tags.map((t) => { const x = SS_TAG[t] || [t, '']; return '<span class="ss-tag ' + x[1] + '" title="' + wlEsc(t) + '">' + x[0] + '</span>'; }).join('');
+const SS_TIP = '強勢股觀察中・等收黑、強勢紅K、熱門趨勢概念股(240)、日動能強勢(260) 四份名單，同一檔出現在兩份以上（觀＝強勢股觀察中、紅＝強勢紅K）';
+function homeSsColHtml(){
+  const rows = botSortRows('home_ss', ssList(), { n: (r) => r.n, chg: (r) => r.chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
+  const title = '<div class="hr-title" title="' + wlEsc(SS_TIP) + '">💪強中強 <span class="hr-rk">' + rows.length + ' 檔</span></div>';
+  if (!rows.length) return '<div class="hr-col">' + title + '<div class="hr-note">讀取中…（四份名單都讀進來才算得出來）</div></div>';
+  const head = '<div class="hss-row hsc-head"><span>' + botSortTh('home_ss', '', '股票') + '</span>' + botSortTh('home_ss', 'n', '份') + botSortTh('home_ss', 'chg', '漲跌') + botSortTh('home_ss', 'holder', '大戶力') + botSortTh('home_ss', 'score', '均線') + '</div>';
+  const row = (r) => '<div class="hss-row hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(r.group + '・同時在「' + r.tags.join('」「') + '」') + '">' +
+    '<span class="hss-c1"><span class="hsc-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name) + '</span><span class="ss-tags">' + ssTagsHtml(r.tags) + '</span></span>' +
+    '<span class="hss-n">' + r.n + '</span>' +
+    '<span class="hsc-k ' + (Number.isFinite(r.chg) ? dirClass(r.chg) : '') + '">' + (Number.isFinite(r.chg) ? (r.chg > 0 ? '+' : '') + r.chg.toFixed(2) + '%' : '—') + '</span>' +
+    '<span class="hsc-h">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span><span class="hsc-ma">' + (r.score ?? '—') + '</span></div>';
+  return '<div class="hr-col">' + title + '<div class="hr-note">四份裡重複兩份以上：觀＝強勢股觀察中、紅＝強勢紅K、240、260；照份數多→漲多排</div>' + head + rows.map(row).join('') + '</div>';
+}
 const hot2Title = (tags) => '同時在「' + tags.join('」「') + '」' + tags.length + ' 份名單（強勢股觀察中、強勢紅K、240、260 四份裡出現 2 份以上就閃）';
 const botStkHot = (code, name, rest) => { const tg = hot2Of(code); const h = botStk(code, name, rest); return tg ? h.replace('<span class="bot-stk"', '<span class="bot-stk hot2" title="' + wlEsc(hot2Title(tg)) + '"') : h; };
 const dynStk = (r) => { const tg = hot2Of(r.code); return '<td class="l dyn-stk"><b' + (tg ? ' class="hot2" title="' + wlEsc(hot2Title(tg)) + '"' : '') + '>' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</b></td>'; };
