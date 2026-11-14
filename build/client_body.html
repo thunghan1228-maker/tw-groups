@@ -62,7 +62,7 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:360px 310px 310px 300px 330px 310px 300px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:360px 310px 310px 300px 330px 310px 300px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -365,9 +365,9 @@
   /* 2026-11-14 使用者：183 右邊多兩欄：「強勢股觀察中・等收黑」（210px，原本在第一欄最上面）、「強勢紅K」＋下面疊創高黑龍（290px）；原本 10 欄寬度不變、整排變寬，往右拉看最右邊 */
   @media (min-width: 1701px){
     .home-rank-scroll{overflow-x:auto;padding-bottom:6px;}
-    .home-rank4{width:calc(100% + 4036px);}   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px） */
+    .home-rank4{width:calc(100% + 4076px);}   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px） */
     .home-rank-scroll{cursor:grab;} .home-rank-scroll .hr-stk,.home-rank-scroll button,.home-rank-scroll [data-bot-code],.home-rank-scroll [data-group],.home-rank-scroll [data-bot-group]{cursor:pointer;}
-    .home-rank4.hx{width:calc(100% + 4036px + var(--hx-w));grid-template-columns:360px 310px 310px 300px 330px 310px 300px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
+    .home-rank4.hx{width:calc(100% + 4076px + var(--hx-w));grid-template-columns:360px 310px 310px 300px 330px 310px 300px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
   }
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2 .hr-code,.hot2 .hr-name{color:inherit!important;} .hr-pkw .l1 .hot2{display:inline-flex;gap:5px;min-width:0;overflow:hidden;} .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
@@ -388,6 +388,8 @@
   .ss-t1{background:#7c3aed;} .ss-t2{background:#dc2626;} .ss-t3{background:#ea580c;} .ss-t4{background:#0891b2;}
   .hsc-row{display:grid;grid-template-columns:minmax(0,1fr) 74px 66px 30px;gap:0 6px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
   .hsc-row.hr-stk{cursor:pointer;} .hsc-row.hr-stk:hover{background:rgba(124,58,237,.06);}
+  .hsc-row.hsc-m20{grid-template-columns:minmax(0,1fr) 30px 70px 62px 26px;gap:0 5px;} .hsc-m20c{text-align:center;font-size:17px;font-weight:900;line-height:1;} .hsc-m20c.up{color:#dc2626;} .hsc-m20c.down{color:#16a34a;}
+  .hsc-m20.hsc-head > .bsort:nth-of-type(1){text-align:center;line-height:1.1;white-space:normal;font-size:10.5px;}   /* 2026-11-15 強勢紅K／創高黑龍「月線之上」 */
   .hsc-head{border-top:0;padding:2px 6px;} .hsc-head .bsort{text-align:right;} .hsc-head > span .bsort{text-align:left;}
   .hsc-stk{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800;} .hsc-stk b{font-weight:900;}
   body.home-light .hsc-stk,body.home-light .hsc-stk b{color:#0b0d10;-webkit-text-stroke:.3px currentColor;}
@@ -10930,17 +10932,47 @@ function homeScrLoad(kind){
     if (ok && d && Array.isArray(d.rows)){ st.d = d; st.at = Date.now(); st.errAt = 0; } else st.errAt = Date.now();
   }).catch(() => { st.errAt = Date.now(); }).finally(() => { st.loading = false; try { render(); } catch (_){} });
 }
+// 月線（20 日均線）要「前 19 天收盤合計」：均線基底資料沒有的股票，用日K（/api/bars1d）自己算，一天抓一次
+const m20Extra = { m: {}, busy: new Set() };
+function m20ExtraSum(code){
+  const day = lastData && lastData.quoteDate;
+  if (!day) return null;
+  const e = m20Extra.m[code];
+  if (e && e.day === day) return e.sum;
+  if (m20Extra.busy.has(code) || (e && e.failAt && Date.now() - e.failAt < 10 * 60e3)) return null;
+  m20Extra.busy.add(code);
+  fetch('/api/bars1d/' + encodeURIComponent(code)).then((r) => r.json()).then((d) => {
+    const closes = (d && Array.isArray(d.bars) ? d.bars : []).filter((b) => String(b.ts).slice(0, 10) < day && Number.isFinite(b.close)).map((b) => b.close);
+    if (closes.length >= 19) m20Extra.m[code] = { day, sum: closes.slice(-19).reduce((a, v) => a + v, 0) };
+    else m20Extra.m[code] = { day: '', failAt: Date.now() };
+  }).catch(() => { m20Extra.m[code] = { day: '', failAt: Date.now() }; }).finally(() => { m20Extra.busy.delete(code); try { render(); } catch (_){} });
+  return null;
+}
 function homeScrColHtml(kind){
   homeScrLoad(kind);
   const cfg = HOME_SCR[kind], st = homeScrState[kind], d = st.d, col = 'home_' + kind;
   const title = (n, md) => '<div class="hr-title" title="' + wlEsc(cfg.tip) + '">' + cfg.title + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔' + (md ? '・' + md + ' 收盤' : '') + '</span>') + '</div>';
   if (!d) return '<div class="hr-col">' + title(null) + '<div class="hr-note">' + (st.errAt ? '讀取失敗，稍後再試' : '讀取中…') + '</div></div>';
   const md = d.date ? Number(d.date.slice(5, 7)) + '/' + Number(d.date.slice(8, 10)) : '';
-  const rows = botSortRows(col, d.rows, { k: (r) => r.chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
-  const head = '<div class="hsc-row hsc-head"><span>' + botSortTh(col, '', '股票') + '</span>' + botSortTh(col, 'k', 'K棒') + botSortTh(col, 'holder', '大戶力') + botSortTh(col, 'score', '均線') + '</div>';
-  const row = (r) => '<div class="hsc-row hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc((r.grp || '') + '・' + md + ' 收盤 ' + (r.close ?? '')) + '">' +
+  // 2026-11-15 使用者：K棒左邊加一欄「月線之上」：現價（盤中即時、收盤後＝收盤）在月線（20 日均線，今天用現價算）之上 ↑、之下 ↓
+  if (!brewLaunchData){ try { refreshBrewLaunch(false); } catch (_){} }
+  const m20Of = (r) => {
+    const q = getStockQuote(r.code), px = q && q.price > 0 ? q.price : (r.close > 0 ? r.close : null);
+    const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[r.code] : null;
+    let sum19 = info && info.maSums && Number.isFinite(Number(info.maSums[20])) ? Number(info.maSums[20]) : null;
+    if (sum19 === null && brewLaunchData) sum19 = m20ExtraSum(r.code);   // 不在均線基底的（例如精材）：抓日K自己算前 19 天收盤合計
+    if (!px || sum19 === null) return null;
+    const ma = (sum19 + px) / 20;
+    return ma > 0 ? { ma, gap: (px / ma - 1) * 100 } : null;
+  };
+  const rows = botSortRows(col, d.rows, { m20: (r) => { const x = m20Of(r); return x ? x.gap : NaN; }, k: (r) => r.chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
+  const head = '<div class="hsc-row hsc-m20 hsc-head"><span>' + botSortTh(col, '', '股票') + '</span>' + botSortTh(col, 'm20', '月線<br>之上') + botSortTh(col, 'k', 'K棒') + botSortTh(col, 'holder', '大戶力') + botSortTh(col, 'score', '均線') + '</div>';
+  const m20Html = (r) => { const x = m20Of(r); if (!x) return '<span class="hsc-m20c muted" title="月線資料讀取中或日K不足">—</span>';
+    const up = x.gap >= 0; return '<span class="hsc-m20c ' + (up ? 'up' : 'down') + '" title="' + wlEsc('月線（20日均線）' + x.ma.toFixed(2) + '，' + (up ? '在上面 ' : '在下面 ') + Math.abs(x.gap).toFixed(1) + '%') + '">' + (up ? '↑' : '↓') + '</span>'; };
+  const row = (r) => '<div class="hsc-row hsc-m20 hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc((r.grp || '') + '・' + md + ' 收盤 ' + (r.close ?? '')) + '">' +
     (kind === 'red' && hot2Of(r.code) ? '<span class="hsc-stk"><b class="hot2" title="' + wlEsc(hot2Title(hot2Of(r.code))) + '">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</b></span>'
       : '<span class="hsc-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name || '') + '</span>') +   // 2026-11-14 使用者：強勢紅K／240／260 重複 2 份以上就閃
+    m20Html(r) +
     '<span class="hsc-k"><i class="hsc-dot ' + (r.k === 'red' ? 'red' : r.k === 'black' ? 'black' : '') + '">●</i><span class="' + (Number.isFinite(r.chg) ? dirClass(r.chg) : '') + '">' + (Number.isFinite(r.chg) ? (r.chg > 0 ? '+' : '') + r.chg.toFixed(2) + '%' : '—') + '</span></span>' +
     '<span class="hsc-h">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>' +
     '<span class="hsc-ma">' + (r.score ?? '—') + '</span></div>';
