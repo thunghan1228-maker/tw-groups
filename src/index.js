@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 21:52:15";
+const BUILD_STAMP = "2026-11-14 21:55:38";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -149,7 +149,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:360px 360px 360px 380px 210px 290px 470px 470px 470px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:360px 360px 360px 310px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -306,17 +306,17 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bot-col[data-col-key="777"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：777 功課卡片條列，每檔一列要放時間、股名、族群、漲跌幅、大戶% */
   .bot-col:is([data-col-key="82"],[data-col-key="14"],[data-col-key="80"]){flex-basis:calc((100% - 72px) / 10 * 1.6);min-width:270px;}   /* 2026-11-14 使用者：觀察中・等收黑(82)、疑似主力融資買進(14) 每檔一行放代號股名漲跌＋大戶力，太窄會被擠成兩行 */
   #botBody .bot-line.b83-cat{background:#7c3aed;color:#fff;font-size:15px;font-weight:900;line-height:1.5;padding:5px 9px;border-radius:6px;margin:8px 0 4px;} #botBody .b83-cat small{font-size:12.5px;font-weight:700;color:#fff;opacity:.92;}   /* 2026-11-14 使用者：83 的【1】～【5】紫底白字、字加大 */
-  .bot-line.t240-row{display:grid;grid-template-columns:minmax(0,1fr) 54px 60px 66px 34px 64px;gap:0 6px;align-items:center;padding:4px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;}   /* 2026-11-14 使用者：240 表格式 */
+  .bot-line.t240-row{display:grid;grid-template-columns:minmax(0,1fr) 44px 50px 58px 26px 54px;gap:0 4px;align-items:center;padding:4px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;}   /* 2026-11-14 使用者：240 表格式 */
   .t240-c1{min-width:0;} .t240-n{text-align:right;white-space:nowrap;font-size:12.5px;} .t240-ma{font-weight:800;}
   .bot-line.t240-head{border-top:0;padding:2px 0;position:sticky;top:0;z-index:2;background:var(--panel);}
   .bsort{font:inherit;font-size:11px;font-weight:700;color:var(--muted);background:transparent;border:0;padding:2px 0;cursor:pointer;text-align:right;white-space:nowrap;}
   .t240-head > span .bsort{text-align:left;} .bsort:hover,.bsort.on{color:#7c3aed;} .bsort i{font-style:normal;opacity:.45;font-size:10px;margin-left:1px;}
   .bot-col[data-col-key="250"]{flex-basis:calc((100% - 72px) / 10 * 2.3);min-width:390px;} .t240-miss{font-size:11px;font-weight:800;color:#b45309;border:1px solid #f59e0b;border-radius:4px;padding:0 4px;}
-  .bot-col:is([data-col-key="240"],[data-col-key="260"],[data-col-key="270"],[data-col-key="280"]){flex-basis:calc((100% - 72px) / 10 * 3);min-width:470px;}
+  .bot-col:is([data-col-key="240"],[data-col-key="260"],[data-col-key="270"],[data-col-key="280"]){flex-basis:calc((100% - 72px) / 10 * 2.6);min-width:400px;}   /* 2026-11-14 使用者：壓緊一點 */
   .bot-line.ss-brow{display:grid;grid-template-columns:minmax(0,1fr) 60px 54px 60px 34px 64px;gap:0 6px;align-items:center;padding:4px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;}
   .bot-col[data-col-key="888"]{flex-basis:calc((100% - 72px) / 10 * 3);min-width:470px;}
-  .bot-line.tp-row{display:grid;grid-template-columns:minmax(0,1fr) 54px 60px 34px 56px 64px;gap:0 6px;align-items:center;padding:4px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;}   /* 2026-11-14 機器人 260／270／280 表格式 */
-  .tp-row .dyn-mom{min-width:40px;padding:0 4px;font-size:12px;} .t240-new{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:4px;padding:0 4px;}   /* 2026-11-14 熱門趨勢概念股 */
+  .bot-line.tp-row{display:grid;grid-template-columns:minmax(0,1fr) 44px 50px 24px 46px 54px;gap:0 4px;align-items:center;padding:4px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;}   /* 2026-11-14 機器人 260／270／280 表格式 */
+  .tp-row .dyn-mom{min-width:36px;padding:0 3px;font-size:12px;} .t240-new{font-size:11px;font-weight:800;color:#fff;background:#dc2626;border-radius:4px;padding:0 4px;white-space:nowrap;} .t240-c1 .dyn-new,.t240-c1 .t240-days{white-space:nowrap;}   /* 2026-11-14 熱門趨勢概念股 */
   .bot-col[data-col-key="83"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}   /* 2026-11-14 多觀察(83) 每檔後面有 ①區1★●▲ 符號，再寬一點才排得進一行 */
   .bot-col[data-col-key="99"]{flex-basis:calc((100% - 72px) / 10 * 2.5);min-width:420px;}   /* 2026-11-12 使用者：99 外資投信同步買賣超，每檔要放外資、投信兩個金額＋漲跌幅＋大戶力，加寬才排得進一行 */
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
@@ -434,9 +434,9 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   /* 2026-11-14 使用者：183 右邊多兩欄：「強勢股觀察中・等收黑」（210px，原本在第一欄最上面）、「強勢紅K」＋下面疊創高黑龍（290px）；原本 10 欄寬度不變、整排變寬，往右拉看最右邊 */
   @media (min-width: 1701px){
     .home-rank-scroll{overflow-x:auto;padding-bottom:6px;}
-    .home-rank4{width:calc(100% + 3442px);}   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px） */
+    .home-rank4{width:calc(100% + 3182px);}   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px） */
     .home-rank-scroll{cursor:grab;} .home-rank-scroll .hr-stk,.home-rank-scroll button,.home-rank-scroll [data-bot-code],.home-rank-scroll [data-group],.home-rank-scroll [data-bot-group]{cursor:pointer;}
-    .home-rank4.hx{width:calc(100% + 3442px + var(--hx-w));grid-template-columns:360px 360px 360px 380px 210px 290px 470px 470px 470px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
+    .home-rank4.hx{width:calc(100% + 3182px + var(--hx-w));grid-template-columns:360px 360px 360px 310px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
   }
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2 .hr-code,.hot2 .hr-name{color:inherit!important;} .hr-pkw .l1 .hot2{display:inline-flex;gap:5px;min-width:0;overflow:hidden;} .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
@@ -446,7 +446,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   @keyframes ssblink{0%,100%{background:#dc2626;color:#fff;}50%{background:#fecaca;color:#7f1d1d;}}
   .ss-blink{display:inline-block;animation:ssblink 1s ease-in-out infinite;border-radius:5px;padding:1px 8px;font-weight:900;}
   body.home-light .hr-title.ss-title{background:#fff;}
-  .hss-row{display:grid;grid-template-columns:minmax(0,1fr) 58px 68px 66px 28px;grid-template-areas:"nm nm nm nm nm" "tg n pc h m";gap:2px 6px;align-items:center;padding:6px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
+  .hss-row{display:grid;grid-template-columns:minmax(0,1fr) 48px 54px 58px 22px;grid-template-areas:"nm nm nm nm nm" "tg n pc h m";gap:2px 4px;align-items:center;padding:6px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
   .hss-row.hr-stk{cursor:pointer;} .hss-row.hr-stk:hover{background:rgba(124,58,237,.06);} .hss-row.hsc-head{border-top:0;padding:2px 6px;}
   .hss-c1{min-width:0;display:flex;flex-direction:column;} .hss-name{grid-area:nm;font-size:13.5px;white-space:normal!important;overflow:visible!important;} .hss-tg{grid-area:tg;} .hss-row .hss-n{grid-area:n;} .hss-row .hss-pc{grid-area:pc;} .hss-row .hsc-h{grid-area:h;} .hss-row .hsc-ma{grid-area:m;}
   .hss-row.hsc-head{grid-template-areas:"tg n pc h m";} .hss-row.hsc-head > span:first-child{grid-area:tg;} .hss-row.hsc-head > .bsort:nth-of-type(1){grid-area:n;} .hss-row.hsc-head > .hss-pch{grid-area:pc;} .hss-row.hsc-head > .bsort:nth-last-of-type(2){grid-area:h;} .hss-row.hsc-head > .bsort:last-child{grid-area:m;} .hss-n{text-align:center;font-weight:900;color:#b91c1c;} .hss-px{text-align:right;font-weight:900;color:#0b0d10;-webkit-text-stroke:.35px currentColor;font-size:13.5px;} .hss-pc,.hss-pch{display:flex;flex-direction:column;align-items:flex-end;line-height:1.3;} .hss-chg{font-size:12px;font-weight:700;} .hss-pch .bsort{padding:0;}   /* 2026-11-14 使用者：成交價黑色、粗一點 */
@@ -11007,7 +11007,7 @@ const HOME_X_FIXED = new Set(['240', '260', '270', '777', '32', '123']);
 let homeXCols = HOME_X_DEFAULT.slice();
 try { const raw = localStorage.getItem(HOME_X_KEY); if (raw !== null){ const v = JSON.parse(raw); if (Array.isArray(v)) homeXCols = v.filter((c) => typeof c === 'string' && c.trim() && !HOME_X_FIXED.has(botNorm(c))).map((c) => c.slice(0, 20)).slice(0, HOME_X_MAX); } } catch (_){}
 function homeXSave(){ try { localStorage.setItem(HOME_X_KEY, JSON.stringify(homeXCols)); } catch (_){} }
-const homeXWide = (k) => (/^(240|260|270|280|888)$/.test(k) ? 470 : /^(32|123|777|23|250|99|83|82|14|80|193|199)$/.test(k) ? 360 : 300);
+const homeXWide = (k) => (/^(240|260|270|280|888)$/.test(k) ? 400 : /^(32|123|777|23|250|99|83|82|14|80|193|199)$/.test(k) ? 360 : 300);
 function homeXAdd(raw){
   const cmd = String(raw || '').trim().slice(0, 20), key = botNorm(cmd);
   if (!key) return;
@@ -18368,7 +18368,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 21:52:15';
+const BUILD_STAMP = '2026-11-14 21:55:38';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26560,7 +26560,7 @@ function botAnswerRaw(raw){
     const rows = botSortRows('240', m.rows, G);
     const head = botLine('<span>' + botSortTh('240', '', '#　股票') + '</span>' + botSortTh('240', 'px', '價格') + botSortTh('240', 'chg', '漲跌幅') + botSortTh('240', 'gain', '240日漲幅') + botSortTh('240', 'score', '均線') + botSortTh('240', 'holder', '大戶力'), 't240-row t240-head');
     const line = (r, i) => botLine('<span class="t240-c1">' + (i + 1) + ' ' + botStkHot(r.code, r.name, r.dist >= -1e-9 ? ' <span class="t240-new">🆕新高</span>' : '') +
-        '<br><span class="bot-dim" style="font-size:11.5px">240日最高 <b>' + fmtPx(r.hiNow) + '</b>' + (r.dist < -1e-9 ? '・離高 ' + r.dist.toFixed(1) + '%' : '') + '・' +
+        '<br><span class="bot-dim" style="font-size:11px">240日最高 <b>' + fmtPx(r.hiNow) + '</b>' + (r.dist < -1e-9 ? '・離高 ' + r.dist.toFixed(1) + '%' : '') + '・' +
         wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '—') + '・成交值 ' + (Number.isFinite(r.val5) ? r.val5.toFixed(1) : '—') + ' 億</span></span>' +
       '<span class="t240-n"><b>' + fmtPx(r.px) + '</b></span>' +
       '<span class="t240-n ' + (Number.isFinite(r.chgNow) ? dirClass(r.chgNow) : 'bot-dim') + '">' + (Number.isFinite(r.chgNow) ? botPct(r.chgNow) : '—') + '</span>' +
@@ -26637,8 +26637,8 @@ function botAnswerRaw(raw){
     const head = botLine('<span>' + botSortTh(q, '', '#　股票') + '</span>' + botSortTh(q, 'px', '價格') + botSortTh(q, 'chg', '漲跌幅') + botSortTh(q, 'score', '均線') + botSortTh(q, 'mom', '動能') + botSortTh(q, 'holder', '大戶力'), 'tp-row t240-head');
     const line = (o, i) => {
       const mv = momOf(o), bv = baseOf(o), dd = daysOf(o), gm = o.group ? m.gmom.get(o.group) : null, v = valOf(o);
-      return botLine('<span class="t240-c1">' + (i + 1) + ' ' + (kind === 'day' ? botStkHot : botStk)(o.code, o.name, ' ' + (dd <= 1 ? '<span class="dyn-new">新</span>' : '<span class="bot-dim" style="font-size:11px">上榜 ' + dd + (kind === 'day' ? ' 天' : ' 週') + '</span>')) +
-          '<br><span class="bot-dim" style="font-size:11.5px">' + wlEsc(o.group || (WL_GROUP_INDEX[o.code] && WL_GROUP_INDEX[o.code].group) || '—') + (Number.isFinite(gm) ? ' 族動能 <b class="' + (gm >= 0 ? 'up' : 'down') + '">' + gm.toFixed(1) + '</b>' : '') +
+      return botLine('<span class="t240-c1">' + (i + 1) + ' ' + (kind === 'day' ? botStkHot : botStk)(o.code, o.name, ' ' + (dd <= 1 ? '<span class="dyn-new">新</span>' : '<span class="bot-dim t240-days" style="font-size:11px">上榜 ' + dd + (kind === 'day' ? ' 天' : ' 週') + '</span>')) +
+          '<br><span class="bot-dim" style="font-size:11px">' + wlEsc(o.group || (WL_GROUP_INDEX[o.code] && WL_GROUP_INDEX[o.code].group) || '—') + (Number.isFinite(gm) ? ' 族動能 <b class="' + (gm >= 0 ? 'up' : 'down') + '">' + gm.toFixed(1) + '</b>' : '') +
           '・成交 ' + (Number.isFinite(v) ? v.toFixed(v >= 100 ? 0 : 1) : '—') + ' 億</span></span>' +
         '<span class="t240-n"><b>' + fmtPx(o.px) + '</b></span>' +
         '<span class="t240-n ' + (Number.isFinite(o.chgNow) ? dirClass(o.chgNow) : 'bot-dim') + '">' + (Number.isFinite(o.chgNow) ? botPct(o.chgNow) : '—') + '</span>' +
