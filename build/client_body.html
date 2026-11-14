@@ -62,7 +62,7 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:minmax(0, 1.6fr) 290px 290px minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -340,11 +340,20 @@
   .hr-jail-card .hr-help-tbl td:first-child{padding-left:6px!important;} .hr-jail-card .hr-help-tbl td:last-child,.hr-jail-card .hr-help-tbl th:last-child{padding-right:6px!important;}
   /* 2026-11-14 使用者：首頁加欄位（機器人代碼），共 20 欄、左右滑 */
   .home-rank-scroll{position:relative;}
+  /* 2026-11-14 使用者：首頁第 2、3 欄加「創高黑龍」「強勢紅K」（各 290px），原本 10 欄寬度不變、整排變寬，往右拉看最右邊 */
   @media (min-width: 1701px){
-    .home-rank-scroll.hx-on{overflow-x:auto;padding-bottom:6px;}
-    .home-rank-scroll.hx-on{cursor:grab;} .home-rank-scroll.hx-on .hr-stk,.home-rank-scroll.hx-on button,.home-rank-scroll.hx-on [data-bot-code],.home-rank-scroll.hx-on [data-group],.home-rank-scroll.hx-on [data-bot-group]{cursor:pointer;}
-    .home-rank4.hx{width:calc(100% + var(--hx-w));grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
+    .home-rank-scroll{overflow-x:auto;padding-bottom:6px;}
+    .home-rank4{width:calc(100% + 596px);}
+    .home-rank-scroll{cursor:grab;} .home-rank-scroll .hr-stk,.home-rank-scroll button,.home-rank-scroll [data-bot-code],.home-rank-scroll [data-group],.home-rank-scroll [data-bot-group]{cursor:pointer;}
+    .home-rank4.hx{width:calc(100% + 596px + var(--hx-w));grid-template-columns:minmax(0, 1.6fr) 290px 290px minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
   }
+  .hsc-row{display:grid;grid-template-columns:minmax(0,1fr) 74px 66px 30px;gap:0 6px;align-items:center;padding:4px 6px;border-top:1px solid var(--line);font-size:12.5px;font-variant-numeric:tabular-nums;}
+  .hsc-row.hr-stk{cursor:pointer;} .hsc-row.hr-stk:hover{background:rgba(124,58,237,.06);}
+  .hsc-head{border-top:0;padding:2px 6px;} .hsc-head .bsort{text-align:right;} .hsc-head > span .bsort{text-align:left;}
+  .hsc-stk{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800;} .hsc-stk b{font-weight:900;}
+  body.home-light .hsc-stk,body.home-light .hsc-stk b{color:#0b0d10;-webkit-text-stroke:.3px currentColor;}
+  .hsc-k{text-align:right;white-space:nowrap;} .hsc-dot{font-style:normal;margin-right:3px;font-size:11px;} .hsc-dot.black{color:#111;} body:not(.home-light) .hsc-dot.black{color:#d1d5db;} .hsc-dot.red{color:#dc2626;}
+  .hsc-h{text-align:right;} .hsc-ma{text-align:right;font-weight:800;}
   .hx-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:2px 0 8px;font-size:12.5px;color:var(--muted);}
   .hx-bar b{color:var(--text);} .hx-tip{font-size:11.5px;}
   .hx-bar input{width:90px;font:inherit;padding:3px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);}
@@ -10849,6 +10858,37 @@ function homeHolderLastColHtml(){ return homeHolderLvlColHtml(20) + homeHolderLv
 // 2026-11-14 使用者：首頁像機器人一樣多放欄位、左右滑——原本固定 10 欄，再加最多 10 欄（共 20 欄）；加的欄位是機器人代碼（32、777、240…），
 // 內容跟機器人那格同一份、跟著首頁每 15 秒更新。電腦（寬 > 1700px）原本 10 欄照舊排滿畫面，加的欄位接在右邊、往右拉／滑鼠按住拖著看；
 // iPad、手機原本就是 4 欄／2 欄往下排，加的欄位接在後面。加了哪幾欄記在這台（localStorage homeXCols）。
+// 2026-11-14 使用者：系統選股的「創高黑龍」「強勢紅K」兩組一鍵套用名單搬到首頁第 2、3 欄（其他欄位往右遞延）；
+// 每檔：代號股名、K棒（資料日收黑／收紅＋漲跌幅）、盤中大戶力、均線分數，欄位名稱點一下排序、再點切換大到小／小到大（記在這台）。
+// 名單跟系統選股同一份（/api/screener 同樣的條件，收盤後的資料，盤中不變），每 10 分鐘看一次有沒有新的。
+const HOME_SCR = {
+  dragon: { title: '🐉創高黑龍', qs: 'score=10&exdispo=1&k=black&kmin=-10&kmax=3', tip: '系統選股「創高黑龍」：均線分數 ≥ 10、收黑K（漲跌 −10%～+3%）、排除處置' },
+  red: { title: '🔴強勢紅K', qs: 'score=12&k=red&kmin=5', tip: '系統選股「強勢紅K」：均線分數 ≥ 12、收紅K、漲幅 ≥ 5%' },
+};
+const homeScrState = { dragon: { d: null, at: 0, loading: false, errAt: 0 }, red: { d: null, at: 0, loading: false, errAt: 0 } };
+function homeScrLoad(kind){
+  const st = homeScrState[kind];
+  if (st.loading || (st.d && Date.now() - st.at < 10 * 60e3) || (st.errAt && Date.now() - st.errAt < 60e3)) return;
+  st.loading = true;
+  fetch('/api/screener?' + HOME_SCR[kind].qs).then((r) => r.json().then((d) => ({ ok: r.ok, d }))).then(({ ok, d }) => {
+    if (ok && d && Array.isArray(d.rows)){ st.d = d; st.at = Date.now(); st.errAt = 0; } else st.errAt = Date.now();
+  }).catch(() => { st.errAt = Date.now(); }).finally(() => { st.loading = false; try { render(); } catch (_){} });
+}
+function homeScrColHtml(kind){
+  homeScrLoad(kind);
+  const cfg = HOME_SCR[kind], st = homeScrState[kind], d = st.d, col = 'home_' + kind;
+  const title = (n, md) => '<div class="hr-title" title="' + wlEsc(cfg.tip) + '">' + cfg.title + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔' + (md ? '・' + md + ' 收盤' : '') + '</span>') + '</div>';
+  if (!d) return '<div class="hr-col">' + title(null) + '<div class="hr-note">' + (st.errAt ? '讀取失敗，稍後再試' : '讀取中…') + '</div></div>';
+  const md = d.date ? Number(d.date.slice(5, 7)) + '/' + Number(d.date.slice(8, 10)) : '';
+  const rows = botSortRows(col, d.rows, { k: (r) => r.chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
+  const head = '<div class="hsc-row hsc-head"><span>' + botSortTh(col, '', '股票') + '</span>' + botSortTh(col, 'k', 'K棒') + botSortTh(col, 'holder', '大戶力') + botSortTh(col, 'score', '均線') + '</div>';
+  const row = (r) => '<div class="hsc-row hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc((r.grp || '') + '・' + md + ' 收盤 ' + (r.close ?? '')) + '">' +
+    '<span class="hsc-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name || '') + '</span>' +
+    '<span class="hsc-k"><i class="hsc-dot ' + (r.k === 'red' ? 'red' : r.k === 'black' ? 'black' : '') + '">●</i><span class="' + (Number.isFinite(r.chg) ? dirClass(r.chg) : '') + '">' + (Number.isFinite(r.chg) ? (r.chg > 0 ? '+' : '') + r.chg.toFixed(2) + '%' : '—') + '</span></span>' +
+    '<span class="hsc-h">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>' +
+    '<span class="hsc-ma">' + (r.score ?? '—') + '</span></div>';
+  return '<div class="hr-col">' + title(d.rows.length, md) + (d.rows.length ? head + rows.map(row).join('') : '<div class="hr-note">這天沒有符合的</div>') + '</div>';
+}
 const HOME_X_MAX = 10, HOME_X_KEY = 'homeXCols';
 let homeXCols = [];
 try { const v = JSON.parse(localStorage.getItem(HOME_X_KEY) || '[]'); if (Array.isArray(v)) homeXCols = v.filter((c) => typeof c === 'string' && c.trim()).map((c) => c.slice(0, 20)).slice(0, HOME_X_MAX); } catch (_){}
@@ -10903,6 +10943,8 @@ function homeRank4Html(){
     // （2026-10-20 使用者：當沖多檔數太多，分成兩欄；2026-10-21 使用者排前三欄 當沖多1、當沖多2、多觀察；2026-10-16 多觀察原本是第一欄）
     // 2026-10-28 使用者（又改）：今日強勢股放在第五欄 30加33加34 的下面，一樣用紅框框起來（先前排第四欄／疊在當沖多1 下面都拿掉）
     homeObsColHtml() +
+    '<div class="hr-stack">' + homeRedBox(homeScrColHtml('dragon')) + '</div>' +   // 2026-11-14 使用者：第 2 欄＝創高黑龍（系統選股一鍵套用那組）
+    '<div class="hr-stack">' + homeRedBox(homeScrColHtml('red')) + '</div>' +   // 2026-11-14 使用者：第 3 欄＝強勢紅K，其他欄位往右遞延
     homeLong.one +   // 2026-11-04 使用者：當沖多1、當沖多2 對調——第二欄當沖多1
     homeLong.two +   // 第三欄當沖多2（上面是疑似主力融資買進）
     // 2026-10-16 使用者：第 4 欄續抱勿追高疊在河流多(34) 上面；第 5 欄馬火多(30)（155 疊在下面）；第 6 欄 30加33 疊在賽馬多(33) 上面（2026-10-20 使用者：30加33 跟續抱勿追高對調，馬火多再移到 30加33 左邊）
@@ -19165,7 +19207,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・30加33加34／投信買超前15・188／發動・今日強勢股／外資買超前15・1+2 突破廣播・905 突破廣播・族群漲幅(12)／155／三落空・183</div></div>' +
+        '<div class="section-head"><div class="section-title">多觀察(等黑K買進)・創高黑龍・強勢紅K・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・30加33加34／投信買超前15・188／發動・今日強勢股／外資買超前15・1+2 突破廣播・905 突破廣播・族群漲幅(12)／155／三落空・183</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -19320,6 +19362,7 @@ document.getElementById('top6Strip').addEventListener('keydown', (e) => {
 document.getElementById('app').addEventListener('click', (e) => {
   if (homePanSwallow){ homePanSwallow = false; e.stopPropagation(); e.preventDefault(); return; }
   const t = e.target;
+  const bsg = t.closest('[data-bsort]'); if (bsg){ botSortClick(bsg); render(); try { botRerunCols(); } catch (_){} return; }
   if (t.closest('[data-hx-go]')){ const i = document.getElementById('hxQ'); homeXAdd(i ? i.value : ''); const j = document.getElementById('hxQ'); if (j) j.value = ''; return; }
   const hd = t.closest('[data-hx-del]'); if (hd){ homeXCols.splice(Number(hd.dataset.hxDel), 1); homeXSave(); render(); return; }
   const hm = t.closest('[data-hx-move]'); if (hm){ const [i, d] = hm.dataset.hxMove.split(':').map(Number), j = i + d; if (j >= 0 && j < homeXCols.length){ [homeXCols[i], homeXCols[j]] = [homeXCols[j], homeXCols[i]]; homeXSave(); render(); } return; }
@@ -19348,7 +19391,7 @@ document.getElementById('app').addEventListener('click', (e) => {
 let homePan = null, homePanSwallow = false;
 document.getElementById('app').addEventListener('pointerdown', (e) => {
   if (e.pointerType !== 'mouse' || e.button !== 0) return;
-  const sc = e.target.closest('.home-rank-scroll.hx-on');
+  const sc = e.target.closest('.home-rank-scroll');
   if (!sc || sc.scrollWidth <= sc.clientWidth || e.target.closest('button, input, select, textarea, a')) return;
   homePan = { x: e.clientX, left: sc.scrollLeft, sc, moved: false };
 });
