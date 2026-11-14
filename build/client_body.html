@@ -217,6 +217,7 @@
   .bot-col:has(.b32-row){min-width:330px;}   /* 一檔一列（時間、股名、族群、漲跌、大戶力）的格子至少這麼寬，股名才不會被擠掉 */
   .bot-col[data-col-key="777"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：777 功課卡片條列，每檔一列要放時間、股名、族群、漲跌幅、大戶% */
   .bot-col:is([data-col-key="82"],[data-col-key="14"],[data-col-key="80"]){flex-basis:calc((100% - 72px) / 10 * 1.6);min-width:270px;}   /* 2026-11-14 使用者：觀察中・等收黑(82)、疑似主力融資買進(14) 每檔一行放代號股名漲跌＋大戶力，太窄會被擠成兩行 */
+  #botBody .bot-line.b83-cat{background:#7c3aed;color:#fff;font-size:15px;font-weight:900;line-height:1.5;padding:5px 9px;border-radius:6px;margin:8px 0 4px;} #botBody .b83-cat small{font-size:12.5px;font-weight:700;color:#fff;opacity:.92;}   /* 2026-11-14 使用者：83 的【1】～【5】紫底白字、字加大 */
   .bot-col[data-col-key="83"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}   /* 2026-11-14 多觀察(83) 每檔後面有 ①區1★●▲ 符號，再寬一點才排得進一行 */
   .bot-col[data-col-key="99"]{flex-basis:calc((100% - 72px) / 10 * 2.5);min-width:420px;}   /* 2026-11-12 使用者：99 外資投信同步買賣超，每檔要放外資、投信兩個金額＋漲跌幅＋大戶力，加寬才排得進一行 */
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
@@ -26068,7 +26069,7 @@ function botAnswer(raw){
     homeObsCats().forEach(([k, name, act]) => {
       const list = rep.items.filter((x) => x.cat === k);
       n += list.length;
-      body += botLine('【' + k + '】' + wlEsc(name) + ' <small>' + list.length + ' 檔・' + wlEsc(act) + '</small>', 'bot-head');
+      body += botLine('【' + k + '】' + wlEsc(name) + ' <small>' + list.length + ' 檔・' + wlEsc(act) + '</small>', 'bot-head b83-cat');   // 2026-11-14 使用者：分類標題改紫底白字、字加大（同首頁）
       if (!list.length){ body += botLine('—', 'bot-dim'); return; }
       if (k === 5){
         [['▼今天剛破月線（昨天還沒破）', list.filter((x) => x.newBreak)], ['▼已破月線（昨天就在月線下）', list.filter((x) => !x.newBreak)]].forEach(([h2, l]) => {

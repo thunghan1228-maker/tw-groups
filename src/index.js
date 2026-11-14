@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 10:32:52";
+const BUILD_STAMP = "2026-11-14 10:51:20";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -304,6 +304,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bot-col:has(.b32-row){min-width:330px;}   /* 一檔一列（時間、股名、族群、漲跌、大戶力）的格子至少這麼寬，股名才不會被擠掉 */
   .bot-col[data-col-key="777"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：777 功課卡片條列，每檔一列要放時間、股名、族群、漲跌幅、大戶% */
   .bot-col:is([data-col-key="82"],[data-col-key="14"],[data-col-key="80"]){flex-basis:calc((100% - 72px) / 10 * 1.6);min-width:270px;}   /* 2026-11-14 使用者：觀察中・等收黑(82)、疑似主力融資買進(14) 每檔一行放代號股名漲跌＋大戶力，太窄會被擠成兩行 */
+  #botBody .bot-line.b83-cat{background:#7c3aed;color:#fff;font-size:15px;font-weight:900;line-height:1.5;padding:5px 9px;border-radius:6px;margin:8px 0 4px;} #botBody .b83-cat small{font-size:12.5px;font-weight:700;color:#fff;opacity:.92;}   /* 2026-11-14 使用者：83 的【1】～【5】紫底白字、字加大 */
   .bot-col[data-col-key="83"]{flex-basis:calc((100% - 72px) / 10 * 2);min-width:340px;}   /* 2026-11-14 多觀察(83) 每檔後面有 ①區1★●▲ 符號，再寬一點才排得進一行 */
   .bot-col[data-col-key="99"]{flex-basis:calc((100% - 72px) / 10 * 2.5);min-width:420px;}   /* 2026-11-12 使用者：99 外資投信同步買賣超，每檔要放外資、投信兩個金額＋漲跌幅＋大戶力，加寬才排得進一行 */
   .bot-col-x{position:absolute;top:6px;right:6px;z-index:2;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);border-radius:6px;font-size:11px;line-height:1;padding:3px 6px;cursor:pointer;font-family:inherit;}
@@ -18169,7 +18170,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 10:32:52';
+const BUILD_STAMP = '2026-11-14 10:51:20';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -26157,7 +26158,7 @@ function botAnswer(raw){
     homeObsCats().forEach(([k, name, act]) => {
       const list = rep.items.filter((x) => x.cat === k);
       n += list.length;
-      body += botLine('【' + k + '】' + wlEsc(name) + ' <small>' + list.length + ' 檔・' + wlEsc(act) + '</small>', 'bot-head');
+      body += botLine('【' + k + '】' + wlEsc(name) + ' <small>' + list.length + ' 檔・' + wlEsc(act) + '</small>', 'bot-head b83-cat');   // 2026-11-14 使用者：分類標題改紫底白字、字加大（同首頁）
       if (!list.length){ body += botLine('—', 'bot-dim'); return; }
       if (k === 5){
         [['▼今天剛破月線（昨天還沒破）', list.filter((x) => x.newBreak)], ['▼已破月線（昨天就在月線下）', list.filter((x) => !x.newBreak)]].forEach(([h2, l]) => {
