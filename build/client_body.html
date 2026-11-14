@@ -333,6 +333,39 @@
   .hr-jail-card .hr-help-tbl th,.hr-jail-card .hr-help-tbl td{padding:3px 2px!important;}
   .hr-jail-card .hr-help-tbl .jl-wd{padding:3px 0!important;}
   .hr-jail-card .hr-help-tbl td:first-child{padding-left:6px!important;} .hr-jail-card .hr-help-tbl td:last-child,.hr-jail-card .hr-help-tbl th:last-child{padding-right:6px!important;}
+  /* 2026-11-14 使用者：首頁加欄位（機器人代碼），共 20 欄、左右滑 */
+  .home-rank-scroll{position:relative;}
+  @media (min-width: 1701px){
+    .home-rank-scroll.hx-on{overflow-x:auto;padding-bottom:6px;}
+    .home-rank-scroll.hx-on{cursor:grab;} .home-rank-scroll.hx-on .hr-stk,.home-rank-scroll.hx-on button,.home-rank-scroll.hx-on [data-bot-code],.home-rank-scroll.hx-on [data-group],.home-rank-scroll.hx-on [data-bot-group]{cursor:pointer;}
+    .home-rank4.hx{width:calc(100% + var(--hx-w));grid-template-columns:minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
+  }
+  .hx-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:2px 0 8px;font-size:12.5px;color:var(--muted);}
+  .hx-bar b{color:var(--text);} .hx-tip{font-size:11.5px;}
+  .hx-bar input{width:90px;font:inherit;padding:3px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);}
+  .hx-bar button{font:inherit;font-weight:700;padding:3px 10px;border-radius:6px;border:1px solid #7c3aed;background:#7c3aed;color:#fff;cursor:pointer;} .hx-bar button[disabled]{opacity:.45;cursor:not-allowed;}
+  .hx-chip{display:inline-flex;align-items:center;gap:2px;padding:1px 4px 1px 9px;border-radius:999px;background:#ede9fe;color:#5b21b6;font-weight:800;}
+  .hx-chip button{border:0;background:transparent;color:#5b21b6;padding:0 4px;font-size:11px;}
+  .hx-n{margin-left:auto;font-weight:700;}
+  .home-botcol{background:var(--panel);border:2px solid #7c3aed;border-radius:10px;padding:4px 6px 8px;min-width:0;}
+  .home-botcol .hx-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:2px;}
+  .home-botcol .hx-head button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;}
+  .home-botcol .bot-msg{border:0;padding:0;margin:0;background:transparent;} .home-botcol .bot-q{display:none;}
+  body.home-light .home-botcol .bot-msg{background:#fff;border-color:#d6dae0;}
+  body.home-light .home-botcol .bot-grp{color:#a16207;}
+  body.home-light .home-botcol .bot-stk{font-weight:900;color:#0b0d10;letter-spacing:.2px;-webkit-text-stroke:.35px currentColor;font-size:13.5px;}   /* 微軟正黑體只有一種粗體，再描一點邊才看得出更粗；字大 1px */
+  body.home-light .home-botcol .b32-stk{font-size:13.5px;}
+  body.home-light .home-botcol .b32-row.gone .b32-stk .bot-stk{color:#dc2626;}
+  body.home-light .home-botcol .bot-help-code{color:#6d28d9;}
+  body.home-light .home-botcol .bot-line.bot-warn{color:#c2410c;}
+  body.home-light .home-botcol .bot-line.bot-sep.bot-sep-bear,body.home-light .home-botcol .b32-sep.bear{color:#15803d;}
+  body.home-light .home-botcol .bot-gavg.up b{color:#dc2626;} body.home-light .home-botcol .bot-gavg.down b{color:#15803d;} body.home-light .home-botcol .bot-gavg.hot b{color:#fff;}
+  body.home-light .home-botcol .b32-time{color:#7c3aed;} body.home-light .home-botcol span[style*="#a78bfa"]{color:#7c3aed!important;}   /* 44 等代碼前面那個淡紫時間（寫在行內樣式） */
+  body.home-light .home-botcol .b32-lv{color:#b45309;} body.home-light .home-botcol .b32-lv.s1,body.home-light .home-botcol .b32-cnt.s1{color:#1d4ed8;} body.home-light .home-botcol .b32-lv.s2,body.home-light .home-botcol .b32-cnt.s2{color:#15803d;}
+  body.home-light .home-botcol .b32-row.gone .b32-stk{color:#dc2626;}
+  body.home-light .home-botcol .b777-p{color:#374151;border-color:#cbd5e1;} body.home-light .home-botcol .b777-p.on{color:#fff;border-color:#7c3aed;}
+  body.home-light .home-botcol .rm-code{color:#6d28d9;} body.home-light .home-botcol .rm-red{color:#dc2626;}
+  body.home-light .home-botcol .bot-gpill.down{background:#16a34a;} body.home-light .home-botcol .bot-gpill.down,body.home-light .home-botcol .bot-gpill.down span,body.home-light .home-botcol .bot-gpill.down b{color:#fff!important;}
   .hr-jail-card .hr-help-tbl td:nth-child(2){max-width:4.2em!important;}
   .hr-jail-card .jl-hold{padding:0 2px!important;} .hr-jail-card .limit-pill{padding:0 2px;}
   .hr-jail-card .hr-help-tbl .jl-n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700;}
@@ -10808,6 +10841,38 @@ function homeHolderLvlColHtml(min){   // min＝20 或 −20
   return '<div class="hr-col">' + title + chipsNote + (rows.length ? rows.map(row).join('') : '<div class="hr-note">' + empty + '</div>') + '</div>';
 }
 function homeHolderLastColHtml(){ return homeHolderLvlColHtml(20) + homeHolderLvlColHtml(-20); }
+// 2026-11-14 使用者：首頁像機器人一樣多放欄位、左右滑——原本固定 10 欄，再加最多 10 欄（共 20 欄）；加的欄位是機器人代碼（32、777、240…），
+// 內容跟機器人那格同一份、跟著首頁每 15 秒更新。電腦（寬 > 1700px）原本 10 欄照舊排滿畫面，加的欄位接在右邊、往右拉／滑鼠按住拖著看；
+// iPad、手機原本就是 4 欄／2 欄往下排，加的欄位接在後面。加了哪幾欄記在這台（localStorage homeXCols）。
+const HOME_X_MAX = 10, HOME_X_KEY = 'homeXCols';
+let homeXCols = [];
+try { const v = JSON.parse(localStorage.getItem(HOME_X_KEY) || '[]'); if (Array.isArray(v)) homeXCols = v.filter((c) => typeof c === 'string' && c.trim()).map((c) => c.slice(0, 20)).slice(0, HOME_X_MAX); } catch (_){}
+function homeXSave(){ try { localStorage.setItem(HOME_X_KEY, JSON.stringify(homeXCols)); } catch (_){} }
+const homeXWide = (k) => (/^(32|123|777|23|240|250|99|83|82|14|80|193|199)$/.test(k) ? 360 : 300);
+function homeXAdd(raw){
+  const cmd = String(raw || '').trim().slice(0, 20), key = botNorm(cmd);
+  if (!key) return;
+  if (homeXCols.some((c) => botNorm(c) === key)){ showToast('這個代碼已經在首頁了'); return; }
+  if (homeXCols.length >= HOME_X_MAX){ showToast('首頁最多 20 欄（原本 10 欄＋加 10 欄），先拿掉一欄'); return; }
+  let html = '';
+  try { html = botAnswer(cmd) || ''; } catch (_){}
+  if (!html || html.includes('看不懂這個代碼')){ showToast('看不懂這個代碼：「' + cmd + '」（跟機器人代碼一樣，例：32、777、240、2330）'); return; }
+  homeXCols.push(cmd); homeXSave(); render();
+  setTimeout(() => { const sc = document.querySelector('.home-rank-scroll'); if (sc) sc.scrollLeft = sc.scrollWidth; }, 50);
+}
+function homeXBarHtml(){
+  return '<div class="hx-bar"><b>➕ 首頁加欄位</b><span class="hx-tip">輸入機器人代碼（例：32、777、240、2330），原本 10 欄＋最多再加 ' + HOME_X_MAX + ' 欄（共 20 欄），加的接在最右邊、往右拉／滑鼠按住拖著看</span>' +
+    '<input id="hxQ" placeholder="代碼" autocomplete="off" maxlength="20"><button type="button" data-hx-go="1"' + (homeXCols.length >= HOME_X_MAX ? ' disabled' : '') + '>加入</button>' +
+    homeXCols.map((c, i) => '<span class="hx-chip">' + wlEsc(c) + (i > 0 ? '<button type="button" data-hx-move="' + i + ':-1" title="往左移">◀</button>' : '') + (i < homeXCols.length - 1 ? '<button type="button" data-hx-move="' + i + ':1" title="往右移">▶</button>' : '') + '<button type="button" data-hx-del="' + i + '" title="拿掉這欄">✕</button></span>').join('') +
+    '<span class="hx-n">' + (10 + homeXCols.length) + ' / 20 欄</span></div>';
+}
+function homeXColsHtml(){
+  return homeXCols.map((c, i) => {
+    let html = '';
+    try { html = botAnswer(c) || ''; } catch (err){ html = '<div class="hr-note">這一欄暫時畫不出來</div>'; }
+    return '<div class="hr-stack home-xcol" data-hx-key="' + wlEsc(botNorm(c)) + '"><div class="home-botcol"><div class="hx-head"><span>🤖 ' + wlEsc(c) + '</span><button type="button" data-hx-del="' + i + '" title="從首頁拿掉這欄">✕</button></div>' + html + '</div></div>';
+  }).join('');
+}
 function homeRank4Html(){
   const h = homeRankRows();
   if (!h) return '<div class="hr-note">族群行情載入中…</div>';
@@ -10825,7 +10890,9 @@ function homeRank4Html(){
   const rows183 = h.rows.filter((r) => RANK183_GROUPS.has(r.name)).map((r) => Object.assign({}, r, { swordMark: r.drop !== null && r.drop > 0 ? (mk183.get(r.name) || '') : '' }));   // 2026-10-21 使用者：183 多加幾個族群
   // 2026-10-15 使用者：順序改成 183、（續抱勿追高／30加33加34／199 疊在同一欄）、193、刀劍空(32)、33、34、188、177
   const homeLong = homeLongColsHtml();
-  return noDailyNote + '<div class="home-rank4">' +
+  const hxW = homeXCols.map((c) => homeXWide(botNorm(c)));
+  return noDailyNote + homeXBarHtml() + '<div class="home-rank-scroll' + (homeXCols.length ? ' hx-on' : '') + '"><div class="home-rank4' + (homeXCols.length ? ' hx' : '') + '"' +
+    (homeXCols.length ? ' style="--hx-cols:' + hxW.map((w) => w + 'px').join(' ') + ';--hx-w:' + hxW.reduce((a, w) => a + w + 8, 0) + 'px"' : '') + '>' +
     // 2026-10-16 使用者：183 排第二欄、昨日強勢股排第六欄；2026-10-19 使用者：第二欄換成當沖多（取代 183 的位置），183 搬到今日強勢股下面
     // 2026-10-28 使用者：欄位順序改成 ①多觀察(等黑K買進) ②當沖多2 ③當沖多1 ④今日強勢股（盤中訊號裡的今日強勢股，多一欄），其他後面不變
     // （2026-10-20 使用者：當沖多檔數太多，分成兩欄；2026-10-21 使用者排前三欄 當沖多1、當沖多2、多觀察；2026-10-16 多觀察原本是第一欄）
@@ -10873,7 +10940,8 @@ function homeRank4Html(){
     // 2026-10-19 使用者：個股漲 2%（22-5）排到族群漲幅 > 2%（12）前面；2026-10-20 使用者又對調回來：族群漲幅 > 2%（12，疊著股期黑龍 75、今日弱勢股）放在個股漲 > 2% 的左邊
     // 2026-11-01 使用者：最後一欄拿掉——1+2多・突破黑馬(44) 沒了、股票期貨排名(155)＋三落空搬到族群漲幅 > 2%(12) 下面、股期黑龍(75) 搬到續抱勿追高上面
     // 2026-10-21 使用者：最右邊一欄（個股漲 > 2%（22-5）＋隔日沖黑龍(80)）整欄拿掉；股期黑龍(75) 還在 188 下面
-    '</div>' +
+    homeXColsHtml() +   // 2026-11-14 使用者：加的機器人代碼欄位接在最右邊
+    '</div></div>' +
     '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }
 // 首頁最下面的說明（2026-10-15 使用者：一段一段字太亂，整理成表格）：族群排名欄、個股欄、強勢黑K選股、符號各一張
@@ -19087,6 +19155,8 @@ function render(){
     '<div class="top6-head"><span class="top6-name">其他</span><small class="top6-n">' + otherN + ' 檔</small></div>' +
     '<div class="top6-chg ' + dirClass(otherG.avgChange) + '">' + fmt(otherG.avgChange) + '%</div></div>' : '';
   if (top6El) top6El.innerHTML = '<div class="top6-label">' + leftTitle + '</div><div class="top6-grid">' + side6Html + otherHtml + '</div>';
+  const hxOld = document.querySelector('.home-rank-scroll'), hxLeft = hxOld ? hxOld.scrollLeft : 0;
+  const hxIn = document.getElementById('hxQ'), hxVal = hxIn ? hxIn.value : '', hxFocus = !!(hxIn && document.activeElement === hxIn);
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
@@ -19094,6 +19164,8 @@ function render(){
         homeRank4Html() +
       '</div>' +
     '</div>';
+  { const sc = document.querySelector('.home-rank-scroll'); if (sc && hxLeft) sc.scrollLeft = hxLeft;
+    const qi = document.getElementById('hxQ'); if (qi){ qi.value = hxVal; if (hxFocus){ qi.focus(); try { qi.setSelectionRange(hxVal.length, hxVal.length); } catch (_){} } } }
   // #updatedAt文字由refresh()統一負責(要能反映抓資料成功/失敗、是否過期)，
   // 這裡不再重複覆蓋——舊版這裡不管資料是真的還是demo都硬寫死「模擬資料」，
   // 本身就是誤導。
@@ -19241,6 +19313,21 @@ document.getElementById('top6Strip').addEventListener('keydown', (e) => {
   if (groupEl){ e.preventDefault(); openGroupDetail(groupEl.dataset.group); }
 });
 document.getElementById('app').addEventListener('click', (e) => {
+  if (homePanSwallow){ homePanSwallow = false; e.stopPropagation(); e.preventDefault(); return; }
+  const t = e.target;
+  if (t.closest('[data-hx-go]')){ const i = document.getElementById('hxQ'); homeXAdd(i ? i.value : ''); const j = document.getElementById('hxQ'); if (j) j.value = ''; return; }
+  const hd = t.closest('[data-hx-del]'); if (hd){ homeXCols.splice(Number(hd.dataset.hxDel), 1); homeXSave(); render(); return; }
+  const hm = t.closest('[data-hx-move]'); if (hm){ const [i, d] = hm.dataset.hxMove.split(':').map(Number), j = i + d; if (j >= 0 && j < homeXCols.length){ [homeXCols[i], homeXCols[j]] = [homeXCols[j], homeXCols[i]]; homeXSave(); render(); } return; }
+  if (t.closest('.home-botcol')){   // 加到首頁的機器人欄位：跟機器人那格一樣的點法
+    const mp = t.closest('[data-mom-p]');
+    if (mp){ const [k, v] = mp.dataset.momP.split(':'); if (k === 'top') momParams.top = Number(v); else if (k === 'almost') momParams.almost = v === '1'; momSave(); render(); try { botRerunCols(); } catch (_){} return; }
+    const tp = t.closest('[data-trend-p]');
+    if (tp){ const [k, v] = tp.dataset.trendP.split(':'); if (k in trendParams){ trendParams[k] = Number(v); trendSave(); render(); try { botRerunCols(); } catch (_){} } return; }
+    const p7 = t.closest('[data-bot777-param]');
+    if (p7){ const k = p7.dataset.bot777Param; if (k === 'all'){ const allOn = TD_PARAMS.every(([kk]) => bot777Params[kk]); TD_PARAMS.forEach(([kk]) => { bot777Params[kk] = !allOn; }); } else bot777Params[k] = !bot777Params[k]; bot777Save(); render(); try { botRerunCols(); } catch (_){} return; }
+    const st = t.closest('[data-bot-code]'); if (st){ openStockChart(st.dataset.botCode, st.dataset.botName); return; }
+    const g = t.closest('[data-bot-group]'); if (g){ openGroupDetail(g.dataset.botGroup); return; }
+  }
   if (e.target.closest('[data-pkw-toggle]')){
     pkHomeMine = !pkHomeMine;
     try { localStorage.setItem('pkHomeMine', pkHomeMine ? '1' : '0'); } catch (_) {}
@@ -19251,7 +19338,25 @@ document.getElementById('app').addEventListener('click', (e) => {
   const groupEl = e.target.closest('[data-group]');
   if (groupEl) openGroupDetail(groupEl.dataset.group);
 });
+// 首頁欄位左右拖（滑鼠按住拖，跟機器人格子一樣；拖超過 5px 這次放開不算點擊）
+let homePan = null, homePanSwallow = false;
+document.getElementById('app').addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'mouse' || e.button !== 0) return;
+  const sc = e.target.closest('.home-rank-scroll.hx-on');
+  if (!sc || sc.scrollWidth <= sc.clientWidth || e.target.closest('button, input, select, textarea, a')) return;
+  homePan = { x: e.clientX, left: sc.scrollLeft, sc, moved: false };
+});
+window.addEventListener('pointermove', (e) => {
+  if (!homePan) return;
+  const dx = e.clientX - homePan.x;
+  if (!homePan.moved && Math.abs(dx) < 5) return;
+  homePan.moved = true;
+  homePan.sc.scrollLeft = homePan.left - dx;
+  try { window.getSelection().removeAllRanges(); } catch (_){}
+});
+window.addEventListener('pointerup', () => { if (homePan && homePan.moved) homePanSwallow = true; homePan = null; setTimeout(() => { homePanSwallow = false; }, 0); });
 document.getElementById('app').addEventListener('keydown', (e) => {
+  if (e.target && e.target.id === 'hxQ'){ if (e.key === 'Enter'){ e.preventDefault(); homeXAdd(e.target.value); const j = document.getElementById('hxQ'); if (j) j.value = ''; } return; }
   if (e.key !== 'Enter' && e.key !== ' ') return;
   const row = e.target.closest('.stock-row[data-code], .hr-stk[data-code]');
   if (row){ e.preventDefault(); openStockChart(row.dataset.code, row.dataset.name); return; }
