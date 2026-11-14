@@ -190,6 +190,7 @@
   .bot-chip:hover{border-color:#7c3aed;}
   .bot-chip.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}   /* 這個代碼的格子開著（再點一次收掉） */
   .bot-chip-clear{color:var(--muted);border-style:dashed;}
+  .bot-chip-sync{border-style:dashed;color:#2563eb;} #botBody .bot-chip-sync.ok,.bot-chip-sync.ok{border-style:solid;border-color:#16a34a;color:#15803d;background:#f0fdf4;}   /* 2026-11-14 機器人格子跨裝置同步 */
   /* 結果格子：最多 10 格往右排，每格 1/10 寬（太窄就左右捲），高度貼齊視窗底部、每格自己上下捲 */
   .bot-cols{position:relative;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;margin-bottom:10px;height:70vh;}
   .bot-col{position:relative;flex:0 0 calc((100% - 72px) / 10);min-width:170px;overflow:auto;border-radius:12px;}
@@ -16106,6 +16107,7 @@ function wlAfterChange(){
   }
   wlRefreshStars();
   try { renderTrack(); } catch (e) { /* 個股訊號追蹤重畫失敗不影響畫面 */ }
+  try { botSyncPull(); } catch (e) { /* 機器人格子同步失敗不影響自選股 */ }
 }
 document.getElementById('watchClose').addEventListener('click', closeWatchPanel);
 document.getElementById('watchModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeWatchPanel(); });
@@ -26784,7 +26786,9 @@ function renderBot(){
   const open = new Set(botState.cols.map((c) => c.key));
   body.innerHTML = '<div class="bot-q-row"><input id="botQ" placeholder="輸入代碼或股名，例：12、22、2359B2、華新科、70" value="' + wlEsc(keep) + '" autocomplete="off"><button type="button" data-bot-go="1">送出</button></div>' +
     '<div class="bot-chips">' + botCodesSorted().filter(([c]) => !/^2359/.test(c)).map(([c, d]) => '<button type="button" class="bot-chip' + (open.has(botNorm(c)) ? ' on' : '') + '" data-bot-run="' + c + '" title="' + wlEsc(d) + '">' + c + '</button>').join('') +
-    (botState.cols.length ? '<button type="button" class="bot-chip bot-chip-clear" data-bot-clear="1" title="開著的格子全部收掉">全部收掉</button>' : '') + '</div>' +
+    (botState.cols.length ? '<button type="button" class="bot-chip bot-chip-clear" data-bot-clear="1" title="開著的格子全部收掉">全部收掉</button>' : '') +
+    (wl.key ? '<button type="button" class="bot-chip bot-chip-sync ok" data-bot-sync="1" title="開著哪幾格跟手機、iPad 同步（用自選股的同步碼，每台輸入同一組碼）；點一下馬上跟雲端對一次">🔄 跨裝置同步中</button>'
+      : '<button type="button" class="bot-chip bot-chip-sync" data-bot-sync="1" title="電腦、手機、iPad 開著的格子要一樣：先設自選股的同步碼，每台輸入同一組碼">🔄 設定跨裝置同步</button>') + '</div>' +
     (botState.cols.length ? '<div class="bot-cols">' + botState.cols.map((c) => '<div class="bot-col' + (botColHasChart(c.html) ? ' bot-col-wide' : '') + '" data-col-key="' + wlEsc(c.key) + '">' + botColX(c.key) + c.html + '</div>').join('') + '</div>' +
       '<div class="bot-cols-grip" title="拉著往下拖，格子變長；往上拖變短（點兩下回到自動）"></div>'
       : '<div class="bot-cols-hint">點上面的代碼，結果一格一格往右排（最多 10 格）；同一個代碼再點一次就收掉。</div>') +
@@ -26815,7 +26819,8 @@ function botHelpHtml(){
       '<b>拉長格子</b>：格子下面那條灰色把手拉著往下拖，格子變長、一次看比較多；往上拖變短；點兩下回到自動（貼齊視窗底部）。拉的高度會記住',
       '<b>自動更新</b>：盤中跟首頁一樣每 15 秒更新，開著的格子都跟著重算；捲到哪、輸入框打到一半都不會被打斷',
       '<b>視窗</b>：右上角 ⧉ 移到另一螢幕（另開一個視窗，可以拖到外接螢幕；那邊按「↩ 移回主畫面」回來）、－ 最小化（縮到下面，點一下還原）、▢ 最大化、✕ 關閉；標題列拖著走，四邊四角都能拉大小',
-      '<b>記憶</b>：關掉再打開，會回到上次最後看的畫面——開著哪幾格、捲到哪、視窗位置大小、有沒有放大、有沒有移到另一個螢幕都一樣；電腦、手機、iPad 各自記在自己那台',
+      '<b>記憶</b>：關掉再打開，會回到上次最後看的畫面——開著哪幾格、捲到哪、視窗位置大小、有沒有放大、有沒有移到另一個螢幕都一樣',
+      '<b>跨裝置同步</b>：電腦、手機、iPad 輸入同一個自選股同步碼，開著哪幾格（照順序）會自動一樣——哪一台改了，其他台開著機器人 30 秒內跟著換、沒開的下次打開就是新的；捲到哪、視窗大小還是各台記各台的',
     ].map((t) => botLine('・' + t)).join('') + '</div>';
 }
 // ---- 機器人面板的視窗（2026-10-17 使用者：右上角要有 Windows 視窗的 ✕、最小化、放大；可以拖來拖去、上下左右拉大小，
@@ -26836,6 +26841,7 @@ function botSaveView(){
   Object.entries(botState.pendTops || {}).forEach(([k, v]) => { if (open.has(k)) tops[k] = v; });   // 資料還在讀、還沒捲到位的
   body.querySelectorAll('.bot-col').forEach((el) => { if (el.scrollTop) tops[el.dataset.colKey] = Math.round(el.scrollTop); });
   botStore(BOT_VIEW_KEY, { cols: botState.cols.map((c) => c.cmd), left: box ? Math.round(box.scrollLeft) : 0, tops });
+  try { botSyncNoteLocal(); } catch (_){}
 }
 // 等族群資料進來再開格子（不然會是空的）；v＝存起來的畫面（捲到哪）
 function botRunWhenReady(list, v, quiet){
@@ -26859,6 +26865,62 @@ function botRestoreView(){
   const v = botLoad(BOT_VIEW_KEY);
   if (v && Array.isArray(v.cols)) botRunWhenReady(v.cols, v, true);
 }
+// ---- 機器人格子跨裝置同步（2026-11-14 使用者：電腦開著哪幾格，手機、iPad 也要自動一樣）----
+// 用自選股的同步碼（wl.key，同一個碼就是同一個人）：開著的代碼用 | 串起來，存在雲端那份清單的 settings 裡
+// （後端每個值最多 50 字，所以切成 botCols0～botCols4；botColsAt＝最後改的時間）。
+// 這台開／關格子、全部收掉 → 1.5 秒後送上去；開網頁、切回這個分頁、機器人開著時每 30 秒跟雲端對一次，
+// 雲端那份比這台新就換成雲端的格子。捲到哪、視窗位置大小、拉長的高度還是各台記各台的。
+const BOT_SYNC_STR_KEY = 'botSyncStr', BOT_SYNC_AT_KEY = 'botSyncAt', BOT_SYNC_PARTS = 5;
+let botSyncTimer = null;
+function botColsStr(cols){ return (cols || botState.cols).map((c) => String(c.cmd || c).trim()).filter(Boolean).join('|'); }
+function botSyncLocal(){ return { str: String(botLoad(BOT_SYNC_STR_KEY) || ''), at: Number(botLoad(BOT_SYNC_AT_KEY)) || 0 }; }
+function botSyncRemote(){
+  const st = (wl && wl.data && wl.data.settings) || {};
+  if (!Number.isFinite(Number(st.botColsAt)) || !st.botColsAt) return null;
+  let str = '';
+  for (let i = 0; i < BOT_SYNC_PARTS; i++) str += typeof st['botCols' + i] === 'string' ? st['botCols' + i] : '';
+  return { str, at: Number(st.botColsAt) };
+}
+// 格子有變（botSaveView 每次重畫都會叫）：跟上次記的不一樣才算這台改了
+function botSyncNoteLocal(){
+  const str = botColsStr(), loc = botSyncLocal();
+  if (str === loc.str && loc.at) return;
+  botStore(BOT_SYNC_STR_KEY, str); botStore(BOT_SYNC_AT_KEY, String(Date.now()));
+  clearTimeout(botSyncTimer);
+  botSyncTimer = setTimeout(botSyncPush, 1500);
+}
+function botSyncPush(){
+  if (!wl.key) return;
+  const { str, at } = botSyncLocal();
+  const rem = botSyncRemote();
+  if (rem && rem.at >= at) return;   // 雲端已經是這份或更新的
+  wlMutate((data) => {
+    data.settings = data.settings || {};
+    for (let i = 0; i < BOT_SYNC_PARTS; i++) data.settings['botCols' + i] = str.slice(i * 50, (i + 1) * 50);
+    data.settings.botColsAt = at;
+  });
+}
+// 雲端讀回來（wlAfterChange 每次都會叫）：雲端比這台新 → 換成雲端那份格子
+function botSyncPull(){
+  if (!wl.key) return;
+  const rem = botSyncRemote(), loc = botSyncLocal();
+  if (!rem){ if (loc.at && !wl.loading && !wl.busy) botSyncPush(); return; }   // 雲端還沒有：把這台的送上去
+  if (rem.at <= loc.at) return;
+  botStore(BOT_SYNC_STR_KEY, rem.str); botStore(BOT_SYNC_AT_KEY, String(rem.at));
+  if (rem.str === botColsStr()) return;
+  const cmds = rem.str ? rem.str.split('|').map((x) => x.trim().slice(0, 20)).filter(Boolean).slice(0, BOT_MAX_COLS) : [];
+  const old = botLoad(BOT_VIEW_KEY) || {}, tops = {};
+  Object.entries(old.tops || {}).forEach(([k, v]) => { if (cmds.some((c) => botNorm(c) === k)) tops[k] = v; });
+  botStore(BOT_VIEW_KEY, { cols: cmds, left: 0, tops });
+  const m = document.getElementById('botModal');
+  botState.cols = [];
+  if (m && !m.hidden){ if (cmds.length) botRunWhenReady(cmds, { tops }, true); renderBot(); }   // 先開始回復（restoring）再重畫，不然空的格子會被當成這台改的又送上去
+  else botState.restored = false;   // 機器人沒開著：下次打開就是雲端這份
+}
+// 機器人開著：每 30 秒跟雲端對一次（別台改了這台跟著換）
+setInterval(() => {
+  if (wl.key && document.visibilityState === 'visible' && !document.getElementById('botModal').hidden && !wl.loading && !wl.busy) wlLoad();
+}, 30000);
 function botWindowMode(){ return document.body.classList.contains('bot-window-mode'); }
 function botPopWindow(){ return botPopWin && !botPopWin.closed ? botPopWin : null; }
 function botHashQuery(){   // #bot-panel=12|193|34：帶過來的格子
@@ -27068,6 +27130,11 @@ document.getElementById('botModal').addEventListener('click', (e) => {
   const run = t.closest('[data-bot-run]'); if (run){ botRun(run.dataset.botRun, { toggle: true }); return; }
   const x = t.closest('[data-bot-close]'); if (x){ botState.cols = botState.cols.filter((c) => c.key !== x.dataset.botClose); renderBot(); return; }
   if (t.closest('[data-bot-clear]')){ botState.cols = []; renderBot(); return; }
+  if (t.closest('[data-bot-sync]')){
+    if (wl.key){ botSyncPush(); if (!wl.queue.length) wlLoad(); showToast('跟雲端對過了：別台輸入同一個同步碼，開著的格子就會一樣'); }
+    else { openWatchPanel(); showToast('在自選股最上面「同步碼」按「幫我產生」→「開始同步」；手機、iPad 也在自選股輸入同一組碼，機器人開著的格子就會同步'); }
+    return;
+  }
   const st = t.closest('[data-bot-code]'); if (st){
     const ck = (st.closest('.bot-col[data-col-key]') || {}).dataset;   // 機器人 88／87 的格子點開也預設 1 分鐘（2026-11-02）
     openStockChart(st.dataset.botCode, st.dataset.botName, ck && (ck.colKey === '88' || ck.colKey === '87') ? 'm1' : undefined); return;
