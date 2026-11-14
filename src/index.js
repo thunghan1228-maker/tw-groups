@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-14 22:50:26";
+const BUILD_STAMP = "2026-11-14 23:07:20";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5620,9 +5620,10 @@ function drawChart(){
       allBars.forEach((b, gi) => {
         const d0 = new Date(b.ts), mod = d0.getHours() * 60 + d0.getMinutes(), k = d0.getFullYear() * 10000 + (d0.getMonth() + 1) * 100 + d0.getDate();
         let e = byDay.get(k);
-        if (!e){ e = { open: -1, m1030: -1, noon: -1 }; byDay.set(k, e); }
+        if (!e){ e = { open: -1, m1030: -1, m1100: -1, noon: -1 }; byDay.set(k, e); }
         if (e.open < 0 && mod >= 540 && mod < 570) e.open = gi;   // 台北 09:00 起的第一根（30 分鐘內）；恒生期貨 09:15 才開就用 09:15 那根
         if (e.m1030 < 0 && mod >= 10 * 60 + closeMin && mod < 11 * 60 + 30) e.m1030 = gi;
+        if (e.m1100 < 0 && mod >= 10 * 60 + 55 && mod < 11 * 60 + 30) e.m1100 = gi;   // 2026-11-14 使用者：5 分K 11:00 紫色細虛線（收盤時間 11:00 那根＝10:55～11:00）
         if (e.noon < 0 && mod >= 11 * 60 + (currentChart.tf === 'm1' ? 59 : 55) && mod < 12 * 60 + 30) e.noon = gi;
       });
       const keys = Array.from(byDay.keys()).sort((a, c) => a - c);
@@ -5631,10 +5632,13 @@ function drawChart(){
       keys.forEach((k) => { if (byDay.get(k).noon >= 0) noonKey = k; });   // 橘線只畫最近一個有 12:00 的那天
       let key1030 = -1;
       keys.forEach((k) => { if (byDay.get(k).m1030 >= 0) key1030 = k; });   // 2026-11-14 使用者：5 分K 的 10:30 紫線也只畫最近一天
+      let key1100 = -1;
+      keys.forEach((k) => { if (byDay.get(k).m1100 >= 0) key1100 = k; });
       useKeys.forEach((k) => {
         const e = byDay.get(k);
         if (e.open >= 0) twMarks.set(e.open, 'open');
         if (e.m1030 >= 0 && (currentChart.tf !== 'm5' || k === key1030)) twMarks.set(e.m1030, '1030');
+        if (currentChart.tf === 'm5' && k === key1100 && e.m1100 >= 0 && !twMarks.has(e.m1100)) twMarks.set(e.m1100, '1100');
         if (k === noonKey && e.noon >= 0) twMarks.set(e.noon, 'noon');
       });
       let openKey = -1;
@@ -5671,11 +5675,12 @@ function drawChart(){
         let fmark;
         if (tm === 'noon'){ ctx.strokeStyle = '#ff5a1f'; ctx.lineWidth = 3; ctx.setLineDash([]); fmark = '#ff6a33'; }
         else if (tm === '1030'){ ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2; ctx.setLineDash([]); fmark = '#c084fc'; }
+        else if (tm === '1100'){ ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); fmark = '#a855f7'; }
         else if (tm === 'open'){ ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); fmark = '#ef4444'; }
         else { ctx.strokeStyle = '#f472b6'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); fmark = '#f472b6'; }   // 新交易日開盤：粉紅
         ctx.beginPath(); ctx.moveTo(fx, padTop); ctx.lineTo(fx, cssH - padBottom); ctx.stroke();
         ctx.restore();
-        axisMarks.push({ x: fx, text: tm === '1030' ? '10:30' : tm === 'noon' ? '12:00' : b.label, color: fmark });
+        axisMarks.push({ x: fx, text: tm === '1030' ? '10:30' : tm === '1100' ? '11:00' : tm === 'noon' ? '12:00' : b.label, color: fmark });
         return;
       }
       const m1Mark = currentChart.tf === 'm1' && !isTxf ? m1Marks.get(globalIdx) : null;
@@ -5683,16 +5688,19 @@ function drawChart(){
       // 2026-11-14 使用者：5 分K 的 10:30 紫線只留最近一天（今天／最後一個交易日），之前的日子不畫；開盤第一根的紅虛線每天照畫
       const is1030 = !noTwMarks && (currentChart.tf === 'm1' && !isTxf ? m1Mark === '1030' : d.getHours() === 10 && d.getMinutes() === closeMin && (currentChart.tf !== 'm5' || dayKey(b.ts) === lastDayKey));
       const isNoon = !noTwMarks && (currentChart.tf === 'm1' && !isTxf ? m1Mark === 'noon' : currentChart.tf === 'm5' && d.getHours() === 11 && d.getMinutes() === 55 && dayKey(b.ts) === lastDayKey);   // 5 分K 11:55～12:00 那根，只有今天（最後一個交易日）
-      if (!isDayOpen && !is1030 && !isNoon) return;
+      // 2026-11-14 使用者：5 分K 在 11:00 再加一條紫色細虛線（跟開盤紅虛線一樣粗），跟 10:30 一樣只畫最近一天
+      const is1100 = !noTwMarks && currentChart.tf === 'm5' && d.getHours() === 10 && d.getMinutes() === 55 && dayKey(b.ts) === lastDayKey;
+      if (!isDayOpen && !is1030 && !isNoon && !is1100) return;
       const x = xAt(i);
       ctx.save();
       let mark;
       if (isDayOpen){ ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); mark = '#ef4444'; }
       else if (isNoon){ ctx.strokeStyle = '#ff5a1f'; ctx.lineWidth = 3; ctx.setLineDash([]); mark = '#ff6a33'; }
+      else if (is1100){ ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); mark = '#a855f7'; }
       else { ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2; ctx.setLineDash([]); mark = '#c084fc'; }
       ctx.beginPath(); ctx.moveTo(x, padTop); ctx.lineTo(x, cssH - padBottom); ctx.stroke();
       ctx.restore();
-      axisMarks.push({ x, text: m1Mark === '1030' ? '10:30' : m1Mark === 'noon' ? '12:00' : b.label, color: mark });   // 1 分K 冷門股那分鐘沒K棒時畫在下一根，時間軸照樣標 10:30／12:00
+      axisMarks.push({ x, text: m1Mark === '1030' ? '10:30' : m1Mark === 'noon' ? '12:00' : is1100 ? '11:00' : b.label, color: mark });   // 1 分K 冷門股那分鐘沒K棒時畫在下一根，時間軸照樣標 10:30／12:00
     });
 
     // 今天第一根5分K高低點（延伸到10:30）＋ 昨日高低點（延伸到今天整個範圍）
@@ -18379,7 +18387,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-14 22:50:26';
+const BUILD_STAMP = '2026-11-14 23:07:20';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
