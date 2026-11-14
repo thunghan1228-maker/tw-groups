@@ -1791,6 +1791,10 @@ const WORKER_ENTRY = {
       // 單檔斷頭價 A／B（2026-10-23 使用者：K線圖日線畫線、5 分K 離線近才畫），每天收盤後才會變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/margin-line" + url.search, 300);
     }
+    if (url.pathname === "/api/momentum-rank") {
+      // 動能排行（2026-11-14 使用者：照券商 App「動能選股 → 動能排行」）：週／月／季／年漲幅前 N%＋創高，收盤後才變，快取 5 分鐘
+      return await proxyHanstockBars("/api/hub/momentum-rank" + url.search, 300);
+    }
     if (url.pathname === "/api/trend-high") {
       // 熱門趨勢概念股（2026-11-14 使用者：照券商 App「動能選股 → 熱門趨勢概念股」做機器人代碼）：240 日最高收盤、240 日漲幅，收盤後才變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/trend-high", 300);
