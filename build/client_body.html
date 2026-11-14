@@ -62,7 +62,7 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:360px 360px 360px 310px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:360px 310px 310px 310px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -347,9 +347,9 @@
   /* 2026-11-14 使用者：183 右邊多兩欄：「強勢股觀察中・等收黑」（210px，原本在第一欄最上面）、「強勢紅K」＋下面疊創高黑龍（290px）；原本 10 欄寬度不變、整排變寬，往右拉看最右邊 */
   @media (min-width: 1701px){
     .home-rank-scroll{overflow-x:auto;padding-bottom:6px;}
-    .home-rank4{width:calc(100% + 3182px);}   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px） */
+    .home-rank4{width:calc(100% + 3082px);}   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px） */
     .home-rank-scroll{cursor:grab;} .home-rank-scroll .hr-stk,.home-rank-scroll button,.home-rank-scroll [data-bot-code],.home-rank-scroll [data-group],.home-rank-scroll [data-bot-group]{cursor:pointer;}
-    .home-rank4.hx{width:calc(100% + 3182px + var(--hx-w));grid-template-columns:360px 360px 360px 310px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
+    .home-rank4.hx{width:calc(100% + 3082px + var(--hx-w));grid-template-columns:360px 310px 310px 310px 210px 290px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
   }
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2 .hr-code,.hot2 .hr-name{color:inherit!important;} .hr-pkw .l1 .hot2{display:inline-flex;gap:5px;min-width:0;overflow:hidden;} .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
@@ -2286,6 +2286,7 @@
   .b32-ghd-g{min-width:0;} .b32-ghd-h,.b32-ghd-p{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;line-height:1.3;} .b32-ghd-h{text-align:center;} .b32-ghd-p{text-align:right;}
   .b32-row.bh .b32-h .hf-tag b{width:66px;box-sizing:border-box;text-align:center;display:inline-block;}
   .b32-row.k12{grid-template-columns:38px minmax(0,1fr) auto auto;grid-template-areas:"t s h p" "t g h st" "t l l l";}
+  .home-botcol .b32-row:not(.b777r){grid-template-columns:34px minmax(0,1fr) auto auto;gap:0 5px;} .home-botcol .b32-row.bh:not(.b777r) .b32-h .hf-tag b{width:58px;}   /* 2026-11-14 使用者：首頁 32、123 壓緊（欄寬 360→310，時間欄、間距、大戶力框縮小，股名才不會被截掉） */
   .b32-lvrow{grid-area:l;display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:2px;}
   /* 盤中訊號中心「新刀劍空(32)」分頁（淺色底）：同一份 .b32-row 排法 */
   .bcr[data-bot-code]{cursor:pointer;} .bcr[data-bot-code]:hover{background:rgba(255,255,255,.07);}   /* 柱狀圖的股號、股名可以點 */
