@@ -1791,6 +1791,10 @@ const WORKER_ENTRY = {
       // 單檔斷頭價 A／B（2026-10-23 使用者：K線圖日線畫線、5 分K 離線近才畫），每天收盤後才會變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/margin-line" + url.search, 300);
     }
+    if (url.pathname === "/api/extra-holder") {
+      // 族群表以外股票的收盤後大戶力（2026-11-15 使用者：精材、敬鵬…盤中沒訂逐筆，後端收盤後用歷史逐筆補算），快取 1 分鐘
+      return await proxyHanstockBars("/api/hub/extra-holder" + url.search, 60);
+    }
     if (url.pathname === "/api/momentum-pulse") {
       // 日動能／週動能／法人動能（2026-11-14 使用者：照 App「動能節奏測驗」，本站規則）：收盤後才變（盤中由網頁用即時價重算），快取 2 分鐘
       return await proxyHanstockBars("/api/hub/momentum-pulse", 120);

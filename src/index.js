@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-15 01:06:02";
+const BUILD_STAMP = "2026-11-15 11:06:22";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -8520,8 +8520,36 @@ let holderPctSrc = null, holderPctMap = null;
 function holderPctOf(code){
   if (holderPctSrc !== mainForceRanking){ holderPctSrc = mainForceRanking; holderPctMap = new Map((mainForceRanking || []).map((r) => [r.code, r])); }
   const h = holderPctMap.get(code), v = h ? Number(h.strengthPct) : NaN;
-  return Number.isFinite(v) ? v : null;
+  if (Number.isFinite(v)) return v;
+  // 2026-11-15 使用者：族群表以外的股票（精材、敬鵬…）盤中沒訂逐筆，大戶力是後端收盤後用歷史逐筆補算的；
+  // 只在跟大戶力排行同一個交易日時才補（盤中排行是今天、補算的還是昨天，不混用，照樣「—」）
+  const x = h || !extraHolder ? null : extraHolder.items[code];
+  if (x && Number.isFinite(x.pct) && extraHolder.date && mainForceRankingInfo && extraHolder.date === mainForceRankingInfo.tradeDate) return x.pct;
+  return null;
 }
+var extraHolder = { date: null, items: {}, at: 0, loading: false, codes: '', pending: 0 };   // var：holderPctOf 在這行之前被叫到也不會出錯
+function extraHolderRefresh(){
+  if (!mainForceRankingLoaded || extraHolder.loading || document.hidden) return;
+  holderPctOf('0000');   // 確保 holderPctMap 是最新的
+  const codes = new Set();
+  document.querySelectorAll('.home-rank4 [data-code], .home-rank4 [data-bot-code], #botBody [data-bot-code]').forEach((el) => {
+    const c = String(el.dataset.code || el.dataset.botCode || '').toUpperCase();
+    if (/^\\d{4}[0-9A-Z]?$/.test(c) && !holderPctMap.has(c)) codes.add(c);
+  });
+  const key = [...codes].sort().slice(0, 150).join(',');
+  if (!key) return;
+  if (key === extraHolder.codes && Date.now() - extraHolder.at < (extraHolder.pending > 0 ? 30e3 : 10 * 60e3)) return;
+  extraHolder.loading = true; extraHolder.codes = key;   // 先記下來：後端失敗也照 10 分鐘的間隔再試，不要每 20 秒打一次
+  fetch('/api/extra-holder?codes=' + encodeURIComponent(key)).then((r) => r.json()).then((d) => {
+    if (!d || d.status !== 'ok') return;
+    if (d.tradeDate !== extraHolder.date) extraHolder.items = {};
+    extraHolder.date = d.tradeDate || null;
+    Object.assign(extraHolder.items, d.items || {});
+    extraHolder.pending = Number(d.pending) || 0;
+  }).catch(() => {}).finally(() => { extraHolder.loading = false; extraHolder.at = Date.now(); try { render(); } catch (_){} try { botRerunCols(); } catch (_){} });
+}
+setInterval(extraHolderRefresh, 20e3);
+setTimeout(extraHolderRefresh, 8e3);
 function holderTagHtml(v, block, bare){   // bare＝不寫「大戶力」三個字（整欄最上面寫一次標題就好，2026-10-22 使用者：193、三落空）
   const has = v !== null && v !== undefined && Number.isFinite(Number(v));
   const r1 = has ? Math.round(Number(v) * 10) / 10 : 0;   // 四捨五入到 0.0% 的畫灰色（不是跌）
@@ -18440,7 +18468,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-15 01:06:02';
+const BUILD_STAMP = '2026-11-15 11:06:22';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -32744,6 +32772,10 @@ const WORKER_ENTRY = {
     if (url.pathname === "/api/margin-line") {
       // 單檔斷頭價 A／B（2026-10-23 使用者：K線圖日線畫線、5 分K 離線近才畫），每天收盤後才會變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/margin-line" + url.search, 300);
+    }
+    if (url.pathname === "/api/extra-holder") {
+      // 族群表以外股票的收盤後大戶力（2026-11-15 使用者：精材、敬鵬…盤中沒訂逐筆，後端收盤後用歷史逐筆補算），快取 1 分鐘
+      return await proxyHanstockBars("/api/hub/extra-holder" + url.search, 60);
     }
     if (url.pathname === "/api/momentum-pulse") {
       // 日動能／週動能／法人動能（2026-11-14 使用者：照 App「動能節奏測驗」，本站規則）：收盤後才變（盤中由網頁用即時價重算），快取 2 分鐘
