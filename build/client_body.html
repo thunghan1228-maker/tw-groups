@@ -2993,6 +2993,67 @@
   .gr-paper .gr-up{color:var(--gp-up);} .gr-paper .gr-down{color:var(--gp-down);}
   .gr-paper .gr-foot{font-size:11px;color:var(--gp-muted);border-top:1px solid var(--gp-line);margin-top:12px;padding-top:8px;line-height:1.7;}
   @media(max-width:640px){ .gr-slots{margin-left:0;} .gr-sec-h{font-size:20px;} .gr-cal{display:none;} }
+  /* 2026-11-15 使用者：處置監獄照老師新版排版——整頁米色紙、大字襯線標題、卡片式；前科查詢左右兩欄（入獄紀錄／最近任款）、第一次第一款改卡片、上面每日名單日期切換 */
+  #jailModal .chips-inner{width:min(1240px,97vw);max-width:none;height:95vh;max-height:95vh;background:#f5f1ea;color:#2b2420;padding:0;display:flex;flex-direction:column;}
+  #jailModal .chips-head{padding:8px 14px;border-bottom:1px solid #e3d9cb;background:#f5f1ea;} #jailModal .chips-title{display:none;} #jailModal .chips-sub{display:none;}
+  #jailModal #jailBody{flex:1 1 auto;overflow-y:auto;padding:10px 18px 30px;}
+  #jailModal .jlp{max-width:1120px;margin:0 auto;--jl-red:#a3322a;--jl-paper:#fffdf8;--jl-line:#e7dfd3;--jl-ink:#2b2420;--jl-mute:#7a6e63;font-size:14px;}
+  #jailModal .jlp .jl-kicker{display:inline-block;border:1px solid var(--jl-red);color:var(--jl-red);padding:6px 18px;font-size:13px;letter-spacing:.3em;margin:8px 0 10px;}
+  #jailModal .jlp .jl-title{font-family:"Noto Serif TC","Songti TC","PMingLiU",serif;font-weight:900;color:var(--jl-red);font-size:clamp(28px,4.6vw,52px);line-height:1.15;margin:0 0 10px;}
+  #jailModal .jlp .jl-meta{font-size:13px;color:var(--jl-mute);margin:0 0 10px;}
+  #jailModal .jlp .jl-pill{display:inline-block;border:1px solid var(--jl-line);background:#f8f0dc;color:#6b5a3c;border-radius:999px;padding:5px 16px;font-size:13px;margin:0 0 12px;}
+  #jailModal .jlp .jl-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 0 16px;}
+  #jailModal .jlp .jl-tabs > span{font-size:14px;color:var(--jl-ink);margin-right:2px;}
+  #jailModal .jlp .jl-tab{border:1px solid var(--jl-line);background:var(--jl-paper);color:var(--jl-ink);border-radius:999px;padding:5px 16px;font-size:14px;cursor:pointer;font-family:inherit;}
+  #jailModal .jlp .jl-tab.on{border-color:var(--jl-red);color:var(--jl-red);font-weight:800;}
+  #jailModal .jlp .jl-box{background:var(--jl-paper);border:1px solid var(--jl-line);border-left:4px solid var(--jl-red);border-radius:2px;padding:14px 20px;margin:10px 0;font-size:14.5px;line-height:1.95;color:var(--jl-ink);}
+  #jailModal .jlp .jl-box b{color:var(--jl-red);}
+  #jailModal .jlp .jl-h{font-family:"Noto Serif TC","Songti TC","PMingLiU",serif;font-size:clamp(22px,2.6vw,32px);font-weight:900;color:var(--jl-ink);margin:34px 0 12px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;}
+  #jailModal .jlp .jl-h small{font-family:inherit;font-size:14px;font-weight:400;color:var(--jl-mute);}
+  #jailModal .jlp .jl-note{font-size:13px;color:var(--jl-mute);margin:6px 0;}
+  #jailModal .jlp .jl-q input{flex:0 1 360px;background:var(--jl-paper);color:var(--jl-ink);border:1px solid var(--jl-line);border-radius:6px;padding:12px 16px;font-size:18px;letter-spacing:.06em;}
+  #jailModal .jlp .jl-q button{background:#211c18;color:#fff;border-radius:2px;padding:10px 26px;font-size:16px;}
+  #jailModal .jlp .jl-week{background:var(--jl-paper);border:1px solid var(--jl-line);border-radius:2px;padding:14px 16px;margin:0;border-bottom:0;}
+  #jailModal .jlp .jl-week:last-child{border-bottom:1px solid var(--jl-line);}
+  #jailModal .jlp .jl-week-h{font-family:"Noto Serif TC","Songti TC",serif;color:var(--jl-red);font-size:18px;margin:0 0 10px;}
+  #jailModal .jlp .jl-days{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+  #jailModal .jlp .jl-day{background:var(--jl-paper);border:1px solid var(--jl-line);border-radius:8px;padding:10px 14px;min-height:96px;font-size:15px;}
+  #jailModal .jlp .jl-day-h{font-size:17px;font-weight:600;margin-bottom:8px;}
+  #jailModal .jlp .jl-cnt{width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--jl-red);color:var(--jl-red);border-radius:50%;font-size:13px;font-weight:600;}
+  #jailModal .jlp .jl-stk{font-size:15px;line-height:1.9;color:var(--jl-ink);}
+  #jailModal .jlp .jl-code{color:var(--jl-red);}
+  #jailModal .jlp .jl-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;}
+  #jailModal .jlp .jl-card{background:var(--jl-paper);border:1px solid var(--jl-line);border-radius:2px;padding:14px 18px;box-shadow:0 1px 0 rgba(0,0,0,.03);}
+  #jailModal .jlp .jl-card-h .jl-stk b{font-family:"Noto Serif TC","Songti TC",serif;font-size:20px;font-weight:900;}
+  #jailModal .jlp .jl-card-h .jl-stk small{font-size:13px;color:var(--jl-mute);}
+  #jailModal .jlp .jl-badge{font-size:12.5px;padding:3px 12px;}
+  #jailModal .jlp .jl-badge.hi{border-color:#e7a7a1;color:#b42318;background:#fdecea;} #jailModal .jlp .jl-badge.lo{border-color:#a7dcb7;color:#15803d;background:#e9f7ee;}
+  #jailModal .jlp .jl-badge.first{border-color:var(--jl-red);color:var(--jl-red);background:#fff;}
+  #jailModal .jlp .jl-status{font-size:14.5px;color:var(--jl-ink);padding:4px 0 10px;border-bottom:1px dashed var(--jl-line);margin-bottom:8px;}
+  #jailModal .jlp .jl-th{background:none;border:0;padding:0;} #jailModal .jlp .jl-th-h{font-size:14px;color:var(--jl-mute);font-weight:400;}
+  #jailModal .jlp .jl-line{font-size:14.5px;line-height:1.9;} #jailModal .jlp .jl-line b{color:var(--jl-red);font-weight:600;}
+  #jailModal .jlp .jl-copy{background:var(--jl-paper);border:1px solid var(--jl-line);border-radius:12px;padding:12px 16px;margin-top:14px;}
+  #jailModal .jlp .jl-copy textarea{background:#fff;border:1px solid var(--jl-line);border-radius:6px;font-size:14px;line-height:1.8;}
+  #jailModal .jlp .jl-copy-h button{border:1px solid var(--jl-red);color:var(--jl-red);background:#fff;border-radius:999px;padding:3px 16px;}
+  #jailModal .jlp .jl-index summary{background:var(--jl-paper);border:1px solid var(--jl-line);border-radius:12px;padding:12px 16px;color:var(--jl-red);cursor:pointer;}
+  #jailModal .jlp .jl-foot{border-top:1px solid var(--jl-line);margin-top:30px;padding-top:12px;font-size:12.5px;color:var(--jl-mute);}
+  /* 前科查詢：左右兩欄 */
+  #jailModal .jlp .jl-q2{background:var(--jl-paper);border:1px solid var(--jl-line);padding:18px 24px;margin:12px 0;}
+  #jailModal .jlp .jl-q2-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:10px;}
+  #jailModal .jlp .jl-q2-h > b{font-family:"Noto Serif TC","Songti TC",serif;font-size:24px;font-weight:900;}
+  #jailModal .jlp .jl-q2-h small{font-size:14px;color:var(--jl-mute);}
+  #jailModal .jlp .jl-q2-h .jl-tierpill{margin-left:auto;border:1px solid #e7a7a1;background:#fdecea;color:#b42318;border-radius:999px;padding:4px 14px;font-size:13px;white-space:nowrap;}
+  #jailModal .jlp .jl-q2-v{border:1px solid #9fd3b2;background:#eef8f1;color:#166534;border-radius:8px;padding:14px 18px;font-size:16px;font-weight:700;margin:6px 0 14px;}
+  #jailModal .jlp .jl-q2-v.hi{border-color:#e7a7a1;background:#fdecea;color:#b42318;} #jailModal .jlp .jl-q2-v.lo{border-color:#f3d48a;background:#fdf6e3;color:#92400e;}
+  #jailModal .jlp .jl-q2-v.jail{border-color:#e7a7a1;background:#fdecea;color:#b42318;}
+  #jailModal .jlp .jl-q2-th{margin:-6px 0 14px;padding:0 4px;}
+  #jailModal .jlp .jl-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px 40px;} @media (max-width:760px){ #jailModal .jlp .jl-2col{grid-template-columns:1fr;} }
+  #jailModal .jlp .jl-colh{font-family:"Noto Serif TC","Songti TC",serif;font-size:17px;font-weight:900;margin:4px 0 6px;} #jailModal .jlp .jl-colh small{font-size:13px;font-weight:400;color:var(--jl-mute);margin-left:6px;}
+  #jailModal .jlp .jl-rec{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 2px;border-bottom:1px solid var(--jl-line);font-size:15px;font-variant-numeric:tabular-nums;}
+  #jailModal .jlp .jl-rec .jl-dtag{border:1px solid #e7a7a1;color:#b42318;background:#fdecea;border-radius:4px;padding:1px 8px;font-size:12px;}
+  #jailModal .jlp .jl-rec.x{color:#9b9189;} #jailModal .jlp .jl-rec .ok{color:#15803d;font-weight:800;margin-right:6px;} #jailModal .jlp .jl-rec .no{color:#9b9189;margin-right:6px;}
+  /* 第一次第一款：卡片 */
+  #jailModal .jlp .jl-fcard .jl-sub2{font-size:14.5px;color:var(--jl-ink);margin-top:6px;} #jailModal .jlp .jl-fcard .jl-out{font-size:12.5px;color:var(--jl-mute);margin-top:4px;line-height:1.7;}
   /* 處置監獄（2026-10-09 使用者：照老師「處置股・出獄與嫌疑名單」做）：說明框、出獄週表、犯罪集團、入獄／嫌疑卡片、門檻、前科查詢 */
   .jl-meta{font-size:12px;color:var(--muted);margin:2px 0 6px;}
   .jl-pill{display:inline-block;font-size:12px;border:1px solid var(--line);background:var(--panel-2);border-radius:999px;padding:3px 10px;margin-bottom:8px;color:var(--muted);}
@@ -24417,7 +24478,18 @@ document.getElementById('labBody').addEventListener('click', (e) => {
 // 後端 /api/jail：證交所／櫃買公開的注意股、處置股公告（上市直抓、上櫃走鏡像），每天晚上公告出來後更新。
 // 段落照老師頁面的順序：前科查詢、一週出獄時間表、犯罪集團、今日入獄、嫌疑名單（明天門檻＋可複製文字）、今日第一次第一款、
 // 前科索引、常見問題。前科查詢不限次數（/api/jail-stock）。
-const jlState = { data: null, loading: false, error: null, query: null, queryCode: '', queryLoading: false };
+const jlState = { data: null, loading: false, error: null, query: null, queryCode: '', queryLoading: false, view: null, past: {}, pastLoading: null };
+// 2026-11-15 使用者：照老師新版上面那排「每日名單」——今天、前幾個交易日可以切換看當天的名單（/api/jail?date=）；首頁等其他地方照樣用今天的 jlState.data
+function jlViewData(){ return jlState.view ? jlState.past[jlState.view] || null : jlState.data; }
+async function jlLoadPast(day){
+  if (!day || jlState.past[day] || jlState.pastLoading === day) return;
+  jlState.pastLoading = day;
+  try {
+    const res = await fetch('/api/jail?date=' + encodeURIComponent(day));
+    jlState.past[day] = res.ok ? await res.json() : { status: 'error', message: 'HTTP ' + res.status };
+  } catch (e){ jlState.past[day] = { status: 'error', message: e.message || String(e) }; }
+  finally { jlState.pastLoading = null; if (!document.getElementById('jailModal').hidden) renderJail(); }
+}
 async function jlLoad(){
   if (jlState.loading) return;
   jlState.loading = true;
@@ -24481,33 +24553,39 @@ function jlLineHtml(line){
   return '<div class="jl-line">' + text + today + '</div>';
 }
 function jailQueryHtml(){
+  // 2026-11-15 使用者：照老師新版——名稱＋等級徽章、明天判定框（綠＝明天無明確達標）、左「入獄紀錄 近 90 日」右「最近任款 10 營業日」
   const q = jlState.query;
   if (jlState.queryLoading) return '<div class="jl-note">查詢中…</div>';
   if (!q) return '';
   if (q.status === 'error') return '<div class="jl-note">查詢失敗（' + rdEsc(q.message || '') + '），請稍後再試。</div>';
   if (q.status !== 'ok') return '<div class="jl-note">查無「' + rdEsc(jlState.queryCode) + '」的處置／注意紀錄——收錄近半年的注意股、處置股。</div>';
   const v = q.verdict || {};
-  const verdict = v.kind === 'suspect'
-    ? '<div class="jl-verdict ' + (v.high ? 'hi' : 'lo') + '">' + (v.high ? '🔴 高機率' : '🟢 低機率') + '・' + rdEsc(v.text) + '</div>'
-      + '<div class="jl-th"><div class="jl-th-h">📐 明天（' + rdEsc(q.nextMd) + '）門檻</div>' + (v.lines || []).map(jlLineHtml).join('') + '</div>'
-    : '<div class="jl-verdict ' + (v.kind === 'jailed' ? 'jail' : 'ok') + '">' + rdEsc(v.text || '') + '</div>';
-  const records = (q.records || []).length
-    ? '<table class="jl-table"><tr><th>公布</th><th>處置期間</th><th>出獄</th><th>原因</th><th>措施</th></tr>'
-      + q.records.map((r) => '<tr><td>' + rdEsc((r.announce || '').slice(5)) + '</td><td>' + rdEsc(r.start.slice(5)) + '～' + rdEsc(r.end.slice(5))
-        + (r.days ? '（' + r.days + ' 日' + (r.minutes ? '・' + r.minutes + ' 分盤' : '') + '）' : '') + '</td><td><b>' + rdEsc(r.release.slice(5)) + '</b></td><td>'
-        + rdEsc(r.condition || '') + '</td><td>' + rdEsc(r.measure || '') + '</td></tr>').join('') + '</table>'
-    : '<div class="jl-note">近半年沒有被處置過</div>';
-  const att = (q.attention || []).length
-    ? '<div class="jl-att">' + q.attention.map((a) => '<span title="' + rdEsc(a.info || '') + '"><b>' + rdEsc(a.md) + '</b> ' + rdEsc(jlClauseText(a.clauses)) + '</span>').join('') + '</div>'
-    : '<div class="jl-note">近 30 個交易日沒有注意紀錄</div>';
-  return '<div class="jl-card jl-qcard">'
-    + '<div class="jl-card-h"><b>' + rdEsc(q.name) + '</b> <small>' + rdEsc(q.code) + '・' + rdEsc(q.market) + '</small>'
-    + '<span class="jl-tier ' + rdEsc(q.tier.key) + '">' + q.tier.icon + ' ' + rdEsc(q.tier.label) + '</span>'
-    + '<button type="button" class="jl-chart" data-jl-chart="' + rdEsc(q.code) + '" data-jl-name="' + rdEsc(q.name) + '">K線圖</button></div>'
-    + '<div class="jl-sub">處置前科 ' + q.jailCount + ' 次' + (q.latestClause ? '・最近任款 ' + rdEsc(q.latestClause.md) + ' ' + rdEsc(jlClauseText(q.latestClause.clauses)) : '') + '</div>'
-    + '<div class="jl-sec-t">明天判定</div>' + verdict
-    + '<div class="jl-sec-t">處置紀錄</div>' + records
-    + '<div class="jl-sec-t">近 30 個交易日注意（滑鼠移上去看內容）</div>' + att
+  const dash = (iso) => String(iso || '').slice(5);
+  let verdict;
+  if (v.kind === 'suspect') verdict = '<div class="jl-q2-v ' + (v.high ? 'hi' : 'lo') + '">' + (v.high ? '🔴 高機率會被關' : '🟡 有機會被關') + '・' + rdEsc(v.text) + '</div>'
+    + '<div class="jl-q2-th"><div class="jl-th-h">📐 明天（' + rdEsc(q.nextMd) + '）門檻</div>' + (v.lines || []).map(jlLineHtml).join('') + '</div>';
+  else if (v.kind === 'jailed') verdict = '<div class="jl-q2-v jail">🔒 ' + rdEsc(v.text || '處置中') + '</div>';
+  else verdict = '<div class="jl-q2-v">✅ 明天無明確達標</div>';
+  const cut90 = (() => { const d = new Date(String(q.dataDate || '') + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() - 90); return d.toISOString().slice(0, 10); })();
+  const recs = (q.records || []).filter((r) => (r.start || '') >= cut90);
+  const recHtml = recs.length ? recs.map((r) => '<div class="jl-rec" title="' + rdEsc('公布 ' + (r.announce || '') + '・' + (r.condition || '') + '・' + (r.measure || '') + '・' + (r.release || '').slice(5) + ' 出獄') + '"><span>' + rdEsc(dash(r.start)) + ' ~ ' + rdEsc(dash(r.end)) + '</span><span class="jl-dtag">處置</span></div>').join('')
+    : '<div class="jl-rec x"><span>近 90 日沒有被處置過</span></div>';
+  // 近 10 個營業日（往回數 10 個平日，國定假日會多算幾天，誤差不大）
+  const cut10 = (() => { const d = new Date(String(q.dataDate || '') + 'T00:00:00Z'); let n = 0; while (n < 9){ d.setUTCDate(d.getUTCDate() - 1); if (d.getUTCDay() % 6) n++; } return d.toISOString().slice(0, 10); })();
+  const att = (q.attention || []).filter((a) => (a.date || '') >= cut10);
+  // 第十三款（資訊面）不算進處置累計：照老師標「✗ 無效（資訊面）」；其他款照列
+  const attHtml = att.length ? att.map((a) => { const cl = (a.clauses || []).filter((c) => c !== 13);
+    return cl.length
+      ? '<div class="jl-rec" title="' + rdEsc(a.info || '') + '"><span><span class="ok">✓</span>' + rdEsc(dash(a.date)) + '　' + rdEsc(jlClauseText(cl)) + '</span></div>'
+      : '<div class="jl-rec x" title="' + rdEsc(a.info || '') + '"><span><span class="no">✗</span>' + rdEsc(dash(a.date)) + '　無效（' + ((a.clauses || []).includes(13) ? '資訊面' : '不計入處置') + '）</span></div>'; }).join('')
+    : '<div class="jl-rec x"><span>近 10 個營業日沒有注意紀錄</span></div>';
+  return '<div class="jl-q2">'
+    + '<div class="jl-q2-h"><b>' + rdEsc(q.name) + '</b><small>' + rdEsc(q.code) + '・' + rdEsc(q.market) + '</small>'
+    + '<button type="button" class="jl-chart" data-jl-chart="' + rdEsc(q.code) + '" data-jl-name="' + rdEsc(q.name) + '">K線圖</button>'
+    + '<span class="jl-tierpill">' + q.tier.icon + ' ' + rdEsc(q.tier.label) + (q.jailCount ? '・被關 ' + q.jailCount + ' 次' : '') + '</span></div>'
+    + verdict
+    + '<div class="jl-2col"><div><div class="jl-colh">📅 入獄紀錄<small>近 90 日</small></div>' + recHtml + '</div>'
+    + '<div><div class="jl-colh">📋 最近任款<small>10 營業日</small></div>' + attHtml + '</div></div>'
     + '</div>';
 }
 function renderJailQuery(){
@@ -24526,20 +24604,23 @@ function jailWeeksHtml(d){
 }
 function renderJail(){
   const body = document.getElementById('jailBody');
-  const d = jlState.data;
+  if (jlState.view && !jlState.past[jlState.view]) jlLoadPast(jlState.view);
+  const d = jlViewData();
+  const wrapP = (html) => '<div class="jlp">' + html + '</div>';
   if (!d){
-    body.innerHTML = '<div class="race-note">' + (jlState.error ? '載入失敗（' + rdEsc(jlState.error) + '）' : '載入中…') + '</div>';
+    body.innerHTML = wrapP(jlTabsHtml() + '<div class="race-note">' + (jlState.error && !jlState.view ? '載入失敗（' + rdEsc(jlState.error) + '）' : '載入中…') + '</div>');
     return;
   }
   if (d.status !== 'ok'){
-    body.innerHTML = '<div class="race-note">' + rdEsc(d.message || '處置／注意資料還在抓，晚一點再看') + '</div>';
+    body.innerHTML = wrapP(jlTabsHtml() + '<div class="race-note">' + rdEsc(d.message || '處置／注意資料還在抓，晚一點再看') + '</div>');
     return;
   }
   const next = rdEsc(d.nextMd) + '(' + rdEsc(d.nextWeekday) + ')';
   const marketDates = d.marketDates || {};
   const lag = marketDates.OTC && marketDates.OTC < d.dataDate ? '<div class="jl-note">上櫃今天的公告還沒進來（櫃買資料 ' + rdEsc(marketDates.OTC) + '），上櫃的嫌疑名單晚一點才會出現。</div>' : '';
-  const head = '<div class="jl-meta">資料快照 ' + rdEsc(d.dataDate) + '・本頁更新於 ' + rdEsc(jlTime(d.updatedAt)) + '｜來源：證交所 / 櫃買中心 公開處置公告</div>'
-    + '<div class="jl-pill">🕐 每日更新 —— 處置、出獄日皆為證交所 / 櫃買公開公告；本頁每天晚上公告出來後更新，不是即時報價。</div>'
+  const head = '<div class="jl-kicker">工具・處置監獄</div><div class="jl-title">處置股・出獄與嫌疑名單</div>'
+    + '<div class="jl-meta">資料快照 ' + rdEsc(d.dataDate) + '・本頁更新於 ' + rdEsc(jlTime(d.updatedAt)) + '｜來源：證交所 / 櫃買中心 公開處置公告</div>'
+    + '<div class="jl-pill">🕐 每日更新 —— 處置、出獄日皆為證交所 / 櫃買公開公告；本頁每天晚上公告出來後更新，不是即時報價。</div>' + jlTabsHtml()
     + '<div class="jl-box"><b>什麼是處置？</b>一檔股票短期漲跌太兇 / 週轉太高，證交所會列「注意」；累積多次就「<b>處置</b>」—— 改成<b>分盤集合競價</b>讓它冷靜。<br>'
     + '<b>2026/8/10 新制</b>：撮合由舊制每 5 / 20 分鐘加快到<b>約每 2 分鐘一次</b>，處置期間也由 10 個營業日縮短為 <b>5 個營業日</b>（當沖比重過高加重為 7 日），期滿次一交易日「<b>出獄</b>」恢復正常。</div>';
   const query = '<div class="jl-h">🔎 個股前科查詢 <small>打股號 → 看它的處置前科・最近任款・明天判定</small></div>'
@@ -24568,13 +24649,16 @@ function renderJail(){
       + '<div class="jl-th"><div class="jl-th-h">📐 明天門檻</div>' + (s.lines.length ? s.lines.map(jlLineHtml).join('') : '<div class="jl-line note">' + (s.missingBars ? '今天的日K還沒進來，門檻晚一點算' : '明天再被公布一次注意就會' + (s.jailed ? '延長' : '被關')) + '</div>') + '</div></div>').join('') + '</div>'
       + '<div class="jl-copy"><div class="jl-copy-h">📋 可直接複製貼上 <button type="button" data-jl-copy>複製</button></div><textarea id="jlCopyText" readonly rows="8">' + rdEsc(d.copyText || '') + '</textarea></div>'
       : '<div class="jl-note">明天沒有一次就會被關的股票</div>');
-  const fRows = d.firstTime.map((f) => { const o = f.outlook;
-    return '<tr><td>' + (o ? jlTierHtml(o.tier) : '<span class="jl-sub">—</span>') + '</td><td>' + jlStock(f.code, f.name, (f.market === '上櫃' ? ' <small class="jl-sub">櫃</small>' : '') + (o && o.side === 'up' ? '<span class="jl-upmark">漲多</span>' : '')) + '</td>'
-      + (o ? '<td>' + jlOutCell(o, o.mon) + '</td><td>' + jlOutCell(o, o.tue) + '</td>' : '<td colspan="2" class="jl-sub">日K資料不足（新上市或今天的日K還沒進來），算不出門檻</td>') + '</tr>'; }).join('');
-  const first = '<div class="jl-h">🆕 今日第一次第一款・處置機率 <small>10 個營業日內首次觸及第一款（累積會走向處置）</small></div>'
+  // 2026-11-15 使用者：照老師新版改成卡片（名稱、股號・市場、「🆕 第一次」、10日第一次・參考日）；我們多的處置機率、週一／週二門檻放在卡片下面小字
+  const fCards = d.firstTime.map((f) => { const o = f.outlook;
+    return '<div class="jl-card jl-fcard"><div class="jl-card-h">' + jlCardStock(f.code, f.name, f.market) + '<span class="jl-badge first">🆕 第一次</span></div>'
+      + '<div class="jl-sub2">10日第一次・參考日 ' + rdEsc(jlMd(d.dataDate)) + (o && o.side === 'up' ? '・<span class="jl-upmark">漲多</span>' : '') + '</div>'
+      + (o ? '<div class="jl-out">處置機率 ' + jlTierHtml(o.tier) + '<br>週一收盤' + (o.side === 'up' ? '高於' : '低於') + '：' + jlOutCell(o, o.mon) + '<br>週二累計' + (o.side === 'up' ? '高於' : '低於') + '（假設週一平盤）：' + jlOutCell(o, o.tue) + '</div>'
+        : '<div class="jl-out">日K資料不足，算不出門檻</div>') + '</div>'; }).join('');
+  const first = '<div class="jl-h">🆕 今日第一次第一款 <small>10 個營業日內首次觸及第一款（累積會走向處置）</small></div>'
     + '<div class="jl-box">第一次觸及第一款，要走到處置得<b>連 3 個營業日都被注意</b>：週一、週二都要再中一次。<b>週一收盤低於</b>＝週一收盤的漲跌幅（對今天收盤）低於這個數字就會再中；<b>週二累計低於</b>＝假設週一平盤，週二累計的漲跌幅低於這個數字就會再中。'
     + '「<b>漲停也會中</b>」＝收到漲停也躲不掉；「<b>要跌 X%</b>」＝要跌 X% 才會中。漲多的股票（標「漲多」）相反：收盤<b>高於</b>門檻才中。機率依公開收盤價推算（第一款價格那條），非預測、非買賣建議。</div>'
-    + (d.firstTime.length ? '<div class="jl-note">' + jlTierCounts(d.firstTime) + '</div><div class="jl-otwrap"><table class="jl-otbl"><thead><tr><th>機率</th><th>股號 股名</th><th>週一收盤低於</th><th>週二累計低於<small>（假設週一平盤）</small></th></tr></thead><tbody>' + fRows + '</tbody></table></div>'
+    + (d.firstTime.length ? '<div class="jl-note">處置機率：' + jlTierCounts(d.firstTime) + '</div><div class="jl-grid">' + fCards + '</div>'
       : '<div class="jl-note">今天沒有第一次觸及第一款的股票</div>');
   const index = '<div class="jl-h">📇 個股處置前科索引 <small>近 3 個月曾被處置、近 25 個交易日曾被注意的股，點股號看該股處置紀錄與出關日</small></div>'
     + '<details class="jl-index"><summary>展開全部 ' + d.index.length + ' 檔個股索引</summary><div class="jl-index-grid">'
@@ -24586,8 +24670,18 @@ function renderJail(){
        ['怎麼查某檔股票有沒有被處置、什麼時候出關？', '用本頁「個股前科查詢」輸入股號，可看到它目前是否在處置中、過去的處置前科與出關日；資料每天依證交所 / 櫃買中心公開處置公告更新。']]
       .map(([q, a]) => '<div class="jl-box"><b class="jl-faq-q">' + q + '</b>' + a + '</div>').join('');
   const foot = '<div class="jl-foot">資料來源：臺灣證券交易所 / 證券櫃檯買賣中心 公開注意、處置公告（每日快照，非即時報價）。本頁整理公開交易制度資訊供教學參考，<b>不構成任何買賣建議</b>；投資有風險，盈虧自負。</div>';
-  body.innerHTML = head + lag + (jlState.error ? '<div class="race-note">更新失敗（' + rdEsc(jlState.error) + '），先顯示上一次的資料</div>' : '')
-    + query + weeks + gangs + newJail + suspects + first + index + faq + foot;
+  body.innerHTML = '<div class="jlp">' + head + lag + (jlState.error ? '<div class="race-note">更新失敗（' + rdEsc(jlState.error) + '），先顯示上一次的資料</div>' : '')
+    + (jlState.view ? '' : query) + weeks + gangs + newJail + suspects + first + index + faq + foot + '</div>';
+}
+function jlTabsHtml(){
+  // 每日名單：今天＋前 5 個交易日（後端 recentDays 給；後端還沒有就不顯示）
+  const base = jlState.data;
+  const days = base && Array.isArray(base.recentDays) ? base.recentDays : [];
+  if (!days.length) return '';
+  const wk = ['日', '一', '二', '三', '四', '五', '六'];
+  const lab = (iso) => { const t = new Date(iso + 'T00:00:00Z'); return jlMd(iso) + '(' + wk[t.getUTCDay()] + ')'; };
+  return '<div class="jl-tabs"><span>📅 每日名單</span><button type="button" class="jl-tab' + (jlState.view ? '' : ' on') + '" data-jl-view="">今天</button>'
+    + days.filter((x) => x !== base.dataDate).slice(0, 5).map((x) => '<button type="button" class="jl-tab' + (jlState.view === x ? ' on' : '') + '" data-jl-view="' + rdEsc(x) + '">' + rdEsc(lab(x)) + '</button>').join('') + '</div>';
 }
 function openJailPanel(){
   document.getElementById('jailModal').hidden = false;
@@ -24601,6 +24695,8 @@ document.getElementById('jailBody').addEventListener('click', (e) => {
   const t = e.target;
   const chart = t.closest('[data-jl-chart]');
   if (chart){ openStockChart(chart.dataset.jlChart, chart.dataset.jlName); return; }
+  const tab = t.closest('[data-jl-view]');
+  if (tab){ jlState.view = tab.dataset.jlView || null; renderJail(); const b = document.getElementById('jailBody'); if (b) b.scrollTop = 0; return; }
   const stk = t.closest('[data-jl-code]');
   if (stk){ const input = document.getElementById('jlQ'); if (input) input.value = stk.dataset.jlCode; jlQuery(stk.dataset.jlCode); return; }
   if (t.closest('[data-jl-go]')){ jlQuery((document.getElementById('jlQ') || {}).value); return; }
