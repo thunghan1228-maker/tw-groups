@@ -10957,7 +10957,7 @@ function homeHolderLastColHtml(){ return homeHolderLvlColHtml(20) + homeHolderLv
 // 名單跟系統選股同一份（/api/screener 同樣的條件，收盤後的資料，盤中不變），每 10 分鐘看一次有沒有新的。
 const HOME_SCR = {
   dragon: { title: '🐉創高黑龍', qs: 'score=10&exdispo=1&k=black&kmin=-10&kmax=3', tip: '系統選股「創高黑龍」：均線分數 ≥ 10、收黑K（漲跌 −10%～+3%）、排除處置' },
-  red: { title: '🔴強勢紅K', qs: 'score=12&k=red&kmin=5', tip: '系統選股「強勢紅K」：均線分數 ≥ 12、收紅K、漲幅 ≥ 5%' },
+  red: { title: '🔴強勢紅K', qs: 'score=10&k=red&kmin=5', tip: '系統選股「強勢紅K」：均線分數 ≥ 10、收紅K、漲幅 ≥ 5%' },   // 2026-11-15 使用者：均線分數門檻 12 → 10
 };
 const homeScrState = { dragon: { d: null, at: 0, loading: false, errAt: 0 }, red: { d: null, at: 0, loading: false, errAt: 0 } };
 function homeScrLoad(kind){
@@ -17971,7 +17971,7 @@ const SCR_MCL_TESTS = {
 const SCR_MCL_PRESS_KEYS = ['mclSno', 'mclSslight', 'mclSing', 'mclSdone'];   // 這四個彼此是「或」
 const SCR_PRESETS = [
   { name: '創高黑龍', p: { score: 10, exdispo: 1, k: 'black', kmin: -10, kmax: 3 } },
-  { name: '強勢紅K', p: { score: 12, k: 'red', kmin: 5 } },
+  { name: '強勢紅K', p: { score: 10, k: 'red', kmin: 5 } },   // 2026-11-15 使用者：12 → 10（跟首頁那欄同一份）
   { name: '法人認養', p: { inst3: 5, inst5: 10 } },
   { name: 'ETF 共識', p: { etf: 3 } },
   { name: '籌碼暴增', p: { chip: 5 } },
@@ -30565,7 +30565,7 @@ function pulseModel(){
   const gs = new Map();
   all.forEach((o) => { if (o.group){ const a = gs.get(o.group) || []; a.push(o.dNow); gs.set(o.group, a); } });
   const gmom = new Map([...gs].map(([g, v]) => [g, v.reduce((x, y) => x + y, 0) / v.length]));
-  const top = d.rule.top || 40;
+  const top = 80;   // 2026-11-15 使用者：日動能／週動能從前 40 名放寬到前 80 名（德淵 4720 動能夠強、成交值排第 54 被擠掉）
   const pick = (key, valKey, strong) => all.filter((o) => Number.isFinite(o[key]) && (strong ? o[key] >= MIN : o[key] <= -MIN)).sort((a, b) => (b[valKey] || 0) - (a[valKey] || 0)).slice(0, top);
   return { d, live, sameWeek, gmom, MIN, priced: all.length,
     day: { strong: pick('dNow', 'valNow', true), weak: pick('dNow', 'valNow', false) },
