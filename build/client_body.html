@@ -8489,6 +8489,11 @@ function grpColor(name){
   }
   return c;
 }
+// 2026-11-15 使用者：強中強（和強勢股觀察中）的族群名稱，同一個族群同一個顏色（底色用 grpColor，字黑色；「其他」灰色）
+function grpPillStyle(name){
+  const n = String(name || '其他');
+  return n === '其他' ? 'background:#e5e7eb;border-color:#cbd5e1;color:#374151' : 'background:' + grpColor(n) + ';border-color:' + grpColor(n) + ';color:#111';
+}
 function grpTagHtml(name, extra){
   return name ? '<span class="grp-c" style="color:' + grpColor(name) + '" title="' + wlEsc(name) + '">' + wlEsc(name) + (extra || '') + '</span>' : '';
 }
@@ -11274,7 +11279,7 @@ function homePickWatchHtml(){
         : '<div class="l1"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span>') +   // 2026-11-14 使用者：四份名單重複 2 份以上就閃
       (r.black ? '<span class="hr-pkw-b" title="資料日收黑（收盤 < 開盤）">收黑</span>' : '') + (pkStars.includes(r.code) ? '<span class="hr-pkw-s">★</span>' : '') + dtWarnHtml(r.code, false) +
       '<span class="hr-avg ' + (pct === null || pct === undefined ? 'flat' : dirClass(pct)) + '">' + (pct === null || pct === undefined ? '—' : fmt(pct) + '%') + '</span></div>' +
-      '<div class="l2"><i>大戶力</i>' + homeHoldHtml(r.code) + '<span class="hr-pkw-g" title="族群">' + wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '其他') + '</span></div></div>';   // 2026-11-15 使用者：第二行右邊加族群名稱   // 2026-11-09 使用者：只留代號、股名、漲跌幅、盤中大戶力（其他資訊放在滑過去的提示）
+      '<div class="l2"><i>大戶力</i>' + homeHoldHtml(r.code) + '<span class="hr-pkw-g" title="族群" style="' + grpPillStyle(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '其他') + '">' + wlEsc(r.group || (WL_GROUP_INDEX[r.code] && WL_GROUP_INDEX[r.code].group) || '其他') + '</span></div></div>';   // 2026-11-15 使用者：第二行右邊加族群名稱   // 2026-11-09 使用者：只留代號、股名、漲跌幅、盤中大戶力（其他資訊放在滑過去的提示）
   };
   const free = Math.max(0, (d.sim.maxpos || 6) - (d.sim.holdings || []).length);
   const cd = pkCustomDiff();
@@ -30293,7 +30298,7 @@ function homeSsColHtml(){
   const row = (r) => '<div class="hss-row hr-stk" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc(r.group + '・同時在「' + r.tags.join('」「') + '」') + '">' +
     // 2026-11-14 使用者（iPad 股名還是被蓋住）：每檔分兩行——第一行只放代號股名（整列寬），第二行放標籤、份數、成交價／漲跌幅、大戶力、均線
     '<span class="hss-name hsc-stk"><span class="hss-time" title="四份名單裡第一次有兩份同時符合的時間">' + (r.t || '--:--') + '</span><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name) + dtWarnHtml(r.code, false) +
-      '<span class="hss-grp" title="族群">' + wlEsc(r.group || '其他') + '</span></span><span class="ss-tags hss-tg">' + ssTagsHtml(r.tags) + '</span>' +
+      '<span class="hss-grp" title="族群" style="' + grpPillStyle(r.group || '其他') + '">' + wlEsc(r.group || '其他') + '</span></span><span class="ss-tags hss-tg">' + ssTagsHtml(r.tags) + '</span>' +
     '<span class="hss-n">' + r.n + '</span>' +
     // 2026-11-14 使用者（iPad 太擠、股名被蓋住）：成交價在上、漲跌幅在下，分兩行
     '<span class="hss-pc"><span class="hss-px">' + (Number.isFinite(r.px) ? (r.px >= 1000 ? r.px.toFixed(0) : r.px >= 100 ? r.px.toFixed(1) : r.px.toFixed(2)) : '—') + '</span>' +
