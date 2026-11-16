@@ -35,44 +35,77 @@ const log = (...a) => console.log('[' + hm() + ']', ...a);
   });
 
   let page = null, openedAt = 0;
+  async function newPage(){
+    const p = await ctx.newPage();
+    p.on('pageerror', (e) => log('網頁錯誤：' + String(e.message || e).slice(0, 200)));
+    await p.addInitScript(() => { try { localStorage.setItem('guideSeen', '1'); } catch (_){} });
+    try { await p.goto(SITE, { waitUntil: 'domcontentloaded', timeout: 90e3 }); } catch (e) { log('開網頁失敗：' + String(e).slice(0, 200)); }
+    return p;
+  }
+  const readState = (p) => p.evaluate(() => ({
+    qd: typeof lastData !== 'undefined' && lastData ? lastData.quoteDate : null,
+    qt: typeof lastData !== 'undefined' && lastData && !lastData.mock ? String(lastData.quoteTime || '') : '',
+    held: !!(typeof lastData !== 'undefined' && lastData && lastData.heldClose),
+    slot: typeof tdSlotNow === 'function' ? tdSlotNow() : null,
+    rec: typeof tdRec !== 'undefined' ? tdRec.done.size : null,
+  }));
+  // 直接換一個新分頁（第一次、舊分頁已經壞掉讀不到）
   async function open(why){
     if (page) await page.close().catch(() => {});
-    page = await ctx.newPage();
-    page.on('pageerror', (e) => log('網頁錯誤：' + String(e.message || e).slice(0, 200)));
-    await page.addInitScript(() => { try { localStorage.setItem('guideSeen', '1'); } catch (_){} });
-    try { await page.goto(SITE, { waitUntil: 'domcontentloaded', timeout: 90e3 }); } catch (e) { log('開網頁失敗：' + String(e).slice(0, 200)); }
+    page = await newPage();
     openedAt = Date.now();
     log('開網頁' + (why ? '（' + why + '）' : ''));
   }
+  // 先開新分頁、等它拿到報價才關舊的；新的 2 分鐘內拿不到就關掉新的、留著舊的。
+  // 2026-11-16 12:33 證交所報價卡住 5 分鐘 → 直接重開 → 新網頁 21 分鐘都抓不到報價，舊網頁那份「舊但能用」的報價也丟了，
+  // 12:35～12:50 四個時段沒記到。舊的留著至少還能照上一筆報價每 5 分鐘送紀錄。
+  async function swap(why, oldSt){
+    log('試開新網頁（' + why + '）');
+    const fresh = await newPage();
+    const needToday = !!(oldSt && oldSt.qd === today());
+    const until = Date.now() + 120e3;
+    let st = null;
+    while (Date.now() < until){
+      await sleep(10e3);
+      try { st = await readState(fresh); } catch (e) { st = null; }
+      if (st && st.qt && (!needToday || st.qd === today())) break;
+      st = null;
+    }
+    if (!st){ await fresh.close().catch(() => {}); log('新網頁 2 分鐘還拿不到報價，先留著舊的'); return; }
+    const old = page;
+    page = fresh;
+    openedAt = Date.now();
+    await old.close().catch(() => {});
+    log('換成新網頁（' + why + '，行情 ' + st.qt + '）');
+  }
   await open('第一次');
 
-  let lastQt = '', stale = 0, notToday = 0;
+  let lastQt = '', stale = 0, noData = 0, notToday = 0;
   while (!done()){
     await sleep(60e3);
     let st;
-    try {
-      st = await page.evaluate(() => ({
-        qd: typeof lastData !== 'undefined' && lastData ? lastData.quoteDate : null,
-        qt: typeof lastData !== 'undefined' && lastData ? String(lastData.quoteTime || '') : '',
-        held: !!(typeof lastData !== 'undefined' && lastData && lastData.heldClose),
-        slot: typeof tdSlotNow === 'function' ? tdSlotNow() : null,
-        rec: typeof tdRec !== 'undefined' ? tdRec.done.size : null,
-      }));
-    } catch (e) { st = { err: String(e).slice(0, 200) }; }
+    try { st = await readState(page); } catch (e) { st = { err: String(e).slice(0, 200) }; }
     log('狀態', JSON.stringify(st));
     const now = hm();
     if (st.err){ await open('讀不到網頁狀態'); continue; }
-    // 盤中報價時間 5 分鐘沒動＝網頁卡住了，重開
-    if (now >= '09:02' && now <= '13:30' && st.qd === today()){
+    const trading = now >= '09:02' && now <= '13:30';
+    // 盤中報價時間 5 分鐘沒動：可能是網頁卡住，也可能是證交所那邊卡住——試開新網頁，拿得到報價才換
+    if (trading && st.qd === today()){
       stale = st.qt && st.qt === lastQt ? stale + 1 : 0;
-      if (stale >= 5){ stale = 0; await open('報價 5 分鐘沒更新'); continue; }
+      if (stale >= 5){ stale = 0; await swap('報價 5 分鐘沒更新', st); continue; }
     }
+    // 盤中網頁手上完全沒有報價（剛開就一直抓失敗）3 分鐘：也試開新網頁
+    noData = trading && !st.qt ? noData + 1 : 0;
+    if (noData >= 3){ noData = 0; await swap('網頁 3 分鐘都沒有報價', st); continue; }
     lastQt = st.qt;
     // 09:30 以後報價日期一直不是今天＝今天休市（颱風假、國定假日），收工
     if (!FORCE && now >= '09:30' && st.qd && st.qd !== today()){
       if (++notToday >= 10){ log('報價日期一直是 ' + st.qd + '，今天應該沒開盤，收工'); break; }
     } else notToday = 0;
-    if (Date.now() - openedAt > RELOAD_EVERY_MS) await open('定期重開');
+    if (Date.now() - openedAt > RELOAD_EVERY_MS){
+      await swap('定期重開', st);
+      openedAt = Math.max(openedAt, Date.now() - RELOAD_EVERY_MS + 10 * 60e3);   // 新網頁拿不到報價就 10 分鐘後再試
+    }
   }
 
   // 收工前看一下今天後端存了幾個時段（一天 09:05～13:30 共 54 個）
