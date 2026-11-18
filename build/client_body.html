@@ -30525,16 +30525,17 @@ function homeObsListColHtml(kind){
   } catch (_){}
   // 每檔整理一次（同一檔在兩個族群就合成一檔，族群都寫）
   const items = new Map(), order = [];
-  (d.groups || []).forEach((g, gi) => (g.stocks || []).forEach(([c0, n]) => {
+  (d.groups || []).forEach((g, gi) => (g.stocks || []).forEach(([c0, n, note]) => {   // 第三格＝股名後面的小字（2026-11-18 使用者：出獄股寫出獄日「5475德宏(11/4)」）
     const c = String(c0);
     let it = items.get(c);
+    if (it && note && !it.note) it.note = String(note);
     if (!it){
       const q = obsQuote(c), px = q && q.price > 0 ? q.price : null;
       const info = brewLaunchData && brewLaunchData.stocks ? brewLaunchData.stocks[c] : null;
       let ma = null; try { ma = info && px ? maScoreFromSums(info, px, brewLaunchData.rules) : null; } catch (_){}
       if (ma === null || ma === undefined) ma = obsScoreFallback(c);
       const hit = hitOf(c);
-      it = { code: c, name: n || names[c] || (q && q.name) || (WL_GROUP_INDEX[c] && WL_GROUP_INDEX[c].name) || '', groups: [], gi, hit, t: hit.length ? timeOf(c) : '',
+      it = { code: c, name: n || names[c] || (q && q.name) || (WL_GROUP_INDEX[c] && WL_GROUP_INDEX[c].name) || '', note: note ? String(note) : '', groups: [], gi, hit, t: hit.length ? timeOf(c) : '',
         chg: q && Number.isFinite(q.changePercent) ? q.changePercent : null, holder: holderPctOf(c), ma: Number.isFinite(ma) ? ma : null };
       items.set(c, it); order.push(it);
     }
@@ -30543,7 +30544,7 @@ function homeObsListColHtml(kind){
   const grpLabel = (g) => { const gr = g.noRank ? null : obsGroupRank(g.name); return wlEsc(g.name) + (gr ? '<span class="obs-rank' + (gr.bear ? ' bear' : '') + '">(' + gr.rank + ')</span>' : ''); };
   const row = (it, showGrp) => {
     const tags = pre ? it.hit.map((x) => '<span class="obs-tag b">' + wlEsc(x) + '</span>').join('') : (it.hit.length ? '<span class="ss-tags">' + ssTagsHtml(it.hit) + '</span>' : '');
-    const nmHtml = '<span class="obs-nm' + (it.hit.length ? ' obs-blink ' + (pre ? 'blue' : 'pink') + '" title="' + wlEsc('跟「' + it.hit.join('」「') + '」相同' + (it.t ? '，' + it.t + ' 開始' : '')) : '') + '"><b>' + wlEsc(it.code) + '</b> ' + wlEsc(it.name) + '</span>' + dtWarnHtml(it.code, pre);
+    const nmHtml = '<span class="obs-nm' + (it.hit.length ? ' obs-blink ' + (pre ? 'blue' : 'pink') + '" title="' + wlEsc('跟「' + it.hit.join('」「') + '」相同' + (it.t ? '，' + it.t + ' 開始' : '')) : '') + '"><b>' + wlEsc(it.code) + '</b> ' + wlEsc(it.name) + '</span>' + (it.note ? '<small class="bot-dim" style="font-size:11px">(' + wlEsc(it.note) + ')</small>' : '') + dtWarnHtml(it.code, pre);
     const sub = (showGrp ? '<span class="obs-g">' + it.groups.map(grpLabel).join('・') + '</span>' : '') + tags;
     return '<div class="obs-row hr-stk" data-code="' + wlEsc(it.code) + '" data-name="' + wlEsc(it.name) + '" tabindex="0" role="button">' +
       '<span class="obs-t">' + (it.hit.length ? (it.t || '--:--') : '') + '</span>' +
