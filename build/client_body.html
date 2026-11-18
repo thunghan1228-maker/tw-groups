@@ -19577,6 +19577,7 @@ document.getElementById('app').addEventListener('click', (e) => {
   if (t.closest('.home-botcol')){   // 加到首頁的機器人欄位：跟機器人那格一樣的點法
     const bs = t.closest('[data-bsort]'); if (bs){ botSortClick(bs); render(); try { botRerunCols(); } catch (_){} return; }
     const bds = t.closest('[data-dyn-side]'); if (bds){ dynState.side = bds.dataset.dynSide; render(); try { botRerunCols(); dynRerender(); } catch (_){} return; }
+    const bdh = t.closest('[data-dyn-hold]'); if (bdh){ dynState.hold = !dynState.hold; try { localStorage.setItem('dynHold', dynState.hold ? '1' : '0'); } catch (_){} render(); try { botRerunCols(); } catch (_){} return; }
     const bdi = t.closest('[data-dyn-inst]'); if (bdi){ dynState.inst = bdi.dataset.dynInst; render(); try { botRerunCols(); dynRerender(); } catch (_){} return; }
     const mp = t.closest('[data-mom-p]');
     if (mp){ const [k, v] = mp.dataset.momP.split(':'); if (k === 'top') momParams.top = Number(v); else if (k === 'almost') momParams.almost = v === '1'; momSave(); render(); try { botRerunCols(); } catch (_){} return; }
@@ -26829,11 +26830,14 @@ function botAnswerRaw(raw){
   if (q === '260' || q === '270'){
     const kind = q === '260' ? 'day' : 'week', nm = kind === 'day' ? '日動能' : '週動能';
     const t = '📈動能選股｜⚡' + nm + '（即時）(' + q + ')';
-    const sideBtns = '<div class="bot-line b777-params">' + [['strong', '強勢'], ['weak', '弱勢']].map(([k, l]) => '<button type="button" class="b777-p' + (dynState.side === k ? ' on' : '') + '" data-dyn-side="' + k + '">' + l + '</button>').join('') + '</div>';
+    const strong = dynState.side === 'strong';
+    const holdLbl = strong ? '大戶力 ≥ +10%' : '大戶力 ≤ −10%';
+    const sideBtns = '<div class="bot-line b777-params">' + [['strong', '強勢'], ['weak', '弱勢']].map(([k, l]) => '<button type="button" class="b777-p' + (dynState.side === k ? ' on' : '') + '" data-dyn-side="' + k + '">' + l + '</button>').join('') +
+      '<button type="button" class="b777-p' + (dynState.hold ? ' on' : '') + '" data-dyn-hold="1" title="只看大戶力夠' + (strong ? '強' : '弱') + '的（大戶力還沒有數字的先不列）">' + (dynState.hold ? '☑ ' : '☐ ') + holdLbl + '</button></div>';
     const m = pulseModel();
     if (m.wait) return wrap(t, sideBtns + botLine(m.wait, 'bot-dim'));
-    const strong = dynState.side === 'strong';
-    const list = (kind === 'day' ? m.day : m.week)[strong ? 'strong' : 'weak'];
+    const list0 = (kind === 'day' ? m.day : m.week)[strong ? 'strong' : 'weak'];
+    const list = dynState.hold ? list0.filter((o) => { const hp = holderPctOf(o.code); return Number.isFinite(hp) && (strong ? hp >= 10 : hp <= -10); }) : list0;
     const momOf = (o) => (kind === 'day' ? o.dNow : o.wNow), baseOf = (o) => (kind === 'day' ? o.dBase : o.wBase);
     const valOf = (o) => (kind === 'day' ? o.valNow : o.wvalNow), daysOf = (o) => (kind === 'day' ? o.dDays(strong) : o.wDays(strong));
     const rows = botSortRows(q, list, { px: (o) => o.px, chg: (o) => o.chgNow, score: (o) => o.score, mom: momOf, holder: (o) => holderPctOf(o.code) });
@@ -26857,7 +26861,7 @@ function botAnswerRaw(raw){
       // 2026-11-14 使用者：說明「新」是什麼意思
       botLine('<span class="dyn-new">新</span>＝' + (kind === 'day' ? '今天第一天上這張名單（今天動能到 ' + (strong ? '+' : '−') + m.MIN + '、前一個交易日還沒到）；「上榜 3 天」＝已經連續 3 天都在名單上'
         : '這一週第一次上這張名單（這週的週動能到 ' + (strong ? '+' : '−') + m.MIN + '、上一週還沒到），整排都是「新」就是這些股票這週才轉' + (strong ? '強' : '弱') + '；「上榜 3 週」＝已經連續 3 週都在名單上') + '。盤中名單跟著行情變，今天才衝上來的就會出現「新」', 'bot-dim'),
-      (m.live ? stamp + '・● 即時' : md + ' 收盤') + '・' + list.length + ' 檔');
+      (m.live ? stamp + '・● 即時' : md + ' 收盤') + '・' + list.length + ' 檔' + (dynState.hold ? '（' + holdLbl + '，共 ' + list0.length + ' 檔）' : ''));
   }
   if (q === '280'){
     const t = '📈動能選股｜🏛️法人動能(280)';
@@ -27925,6 +27929,7 @@ document.getElementById('botModal').addEventListener('click', (e) => {
   if (xq){ const col = xq.closest('.bot-col'); if (col) botXqExport(col, xq.dataset.botXq); return; }
   const bs = t.closest('[data-bsort]'); if (bs){ botSortClick(bs); botRerunCols(); try { render(); } catch (_){} return; }
   const bds = t.closest('[data-dyn-side]'); if (bds){ dynState.side = bds.dataset.dynSide; botRerunCols(); try { dynRerender(); render(); } catch (_){} return; }
+  const bdh = t.closest('[data-dyn-hold]'); if (bdh){ dynState.hold = !dynState.hold; try { localStorage.setItem('dynHold', dynState.hold ? '1' : '0'); } catch (_){} botRerunCols(); try { render(); } catch (_){} return; }
   const bdi = t.closest('[data-dyn-inst]'); if (bdi){ dynState.inst = bdi.dataset.dynInst; botRerunCols(); try { dynRerender(); render(); } catch (_){} return; }
   const mp = t.closest('[data-mom-p]');
   if (mp){ const [k, v] = mp.dataset.momP.split(':'); if (k === 'top') momParams.top = Number(v); else if (k === 'almost') momParams.almost = v === '1'; momSave(); botRerunCols(); return; }
@@ -30343,7 +30348,9 @@ czApply();
 // 但奇鋐的週動能 App 7.7、這樣算 0.2，對不起來；上榜條件又被 VIP 鎖住，所以先不放假數字。
 const DYN_TABS = [['hot', '🔥 熱門趨勢概念股（即時）'], ['rank', '🚀 動能排行（盤後）'], ['day', '⚡ 日動能（即時）'], ['week', '⚡ 週動能（即時）'], ['inst', '🏛️ 法人動能']];   // 2026-11-14 使用者：日／週動能後面寫（即時）、動能排行寫（盤後），一看就知道哪個會跳
 const DYN_INST = [['priceVolHigh', '價量創新高'], ['trustFresh', '投信剛買準突破'], ['trustStreak', '投信動能連買'], ['foreignStreak', '外資動能連買']];
-const dynState = { tab: 'hot', side: 'strong', inst: 'priceVolHigh' };
+const dynState = { tab: 'hot', side: 'strong', inst: 'priceVolHigh', hold: false };
+// 2026-11-18 使用者：首頁 260／270 強勢多一個「大戶力 ≥ +10%」、弱勢多一個「大戶力 ≤ −10%」篩選，記在這台電腦
+try { dynState.hold = localStorage.getItem('dynHold') === '1'; } catch (_){}
 try { const t0 = localStorage.getItem('dynTab'); if (DYN_TABS.some(([k]) => k === t0)) dynState.tab = t0; } catch (_){}
 const dynPx = (v) => (Number.isFinite(v) ? (v >= 1000 ? v.toFixed(0) : v >= 100 ? v.toFixed(1) : v.toFixed(2)) : '—');
 const dynPct = (v) => (Number.isFinite(v) ? '<span class="' + dirClass(v) + '">' + botPct(v) + '</span>' : '<span class="muted">—</span>');

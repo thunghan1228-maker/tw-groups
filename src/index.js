@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-18 22:19:28";
+const BUILD_STAMP = "2026-11-18 22:46:07";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -18538,7 +18538,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-18 22:19:28';
+const BUILD_STAMP = '2026-11-18 22:46:07';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19666,6 +19666,7 @@ document.getElementById('app').addEventListener('click', (e) => {
   if (t.closest('.home-botcol')){   // 加到首頁的機器人欄位：跟機器人那格一樣的點法
     const bs = t.closest('[data-bsort]'); if (bs){ botSortClick(bs); render(); try { botRerunCols(); } catch (_){} return; }
     const bds = t.closest('[data-dyn-side]'); if (bds){ dynState.side = bds.dataset.dynSide; render(); try { botRerunCols(); dynRerender(); } catch (_){} return; }
+    const bdh = t.closest('[data-dyn-hold]'); if (bdh){ dynState.hold = !dynState.hold; try { localStorage.setItem('dynHold', dynState.hold ? '1' : '0'); } catch (_){} render(); try { botRerunCols(); } catch (_){} return; }
     const bdi = t.closest('[data-dyn-inst]'); if (bdi){ dynState.inst = bdi.dataset.dynInst; render(); try { botRerunCols(); dynRerender(); } catch (_){} return; }
     const mp = t.closest('[data-mom-p]');
     if (mp){ const [k, v] = mp.dataset.momP.split(':'); if (k === 'top') momParams.top = Number(v); else if (k === 'almost') momParams.almost = v === '1'; momSave(); render(); try { botRerunCols(); } catch (_){} return; }
@@ -26918,11 +26919,14 @@ function botAnswerRaw(raw){
   if (q === '260' || q === '270'){
     const kind = q === '260' ? 'day' : 'week', nm = kind === 'day' ? '日動能' : '週動能';
     const t = '📈動能選股｜⚡' + nm + '（即時）(' + q + ')';
-    const sideBtns = '<div class="bot-line b777-params">' + [['strong', '強勢'], ['weak', '弱勢']].map(([k, l]) => '<button type="button" class="b777-p' + (dynState.side === k ? ' on' : '') + '" data-dyn-side="' + k + '">' + l + '</button>').join('') + '</div>';
+    const strong = dynState.side === 'strong';
+    const holdLbl = strong ? '大戶力 ≥ +10%' : '大戶力 ≤ −10%';
+    const sideBtns = '<div class="bot-line b777-params">' + [['strong', '強勢'], ['weak', '弱勢']].map(([k, l]) => '<button type="button" class="b777-p' + (dynState.side === k ? ' on' : '') + '" data-dyn-side="' + k + '">' + l + '</button>').join('') +
+      '<button type="button" class="b777-p' + (dynState.hold ? ' on' : '') + '" data-dyn-hold="1" title="只看大戶力夠' + (strong ? '強' : '弱') + '的（大戶力還沒有數字的先不列）">' + (dynState.hold ? '☑ ' : '☐ ') + holdLbl + '</button></div>';
     const m = pulseModel();
     if (m.wait) return wrap(t, sideBtns + botLine(m.wait, 'bot-dim'));
-    const strong = dynState.side === 'strong';
-    const list = (kind === 'day' ? m.day : m.week)[strong ? 'strong' : 'weak'];
+    const list0 = (kind === 'day' ? m.day : m.week)[strong ? 'strong' : 'weak'];
+    const list = dynState.hold ? list0.filter((o) => { const hp = holderPctOf(o.code); return Number.isFinite(hp) && (strong ? hp >= 10 : hp <= -10); }) : list0;
     const momOf = (o) => (kind === 'day' ? o.dNow : o.wNow), baseOf = (o) => (kind === 'day' ? o.dBase : o.wBase);
     const valOf = (o) => (kind === 'day' ? o.valNow : o.wvalNow), daysOf = (o) => (kind === 'day' ? o.dDays(strong) : o.wDays(strong));
     const rows = botSortRows(q, list, { px: (o) => o.px, chg: (o) => o.chgNow, score: (o) => o.score, mom: momOf, holder: (o) => holderPctOf(o.code) });
@@ -26946,7 +26950,7 @@ function botAnswerRaw(raw){
       // 2026-11-14 使用者：說明「新」是什麼意思
       botLine('<span class="dyn-new">新</span>＝' + (kind === 'day' ? '今天第一天上這張名單（今天動能到 ' + (strong ? '+' : '−') + m.MIN + '、前一個交易日還沒到）；「上榜 3 天」＝已經連續 3 天都在名單上'
         : '這一週第一次上這張名單（這週的週動能到 ' + (strong ? '+' : '−') + m.MIN + '、上一週還沒到），整排都是「新」就是這些股票這週才轉' + (strong ? '強' : '弱') + '；「上榜 3 週」＝已經連續 3 週都在名單上') + '。盤中名單跟著行情變，今天才衝上來的就會出現「新」', 'bot-dim'),
-      (m.live ? stamp + '・● 即時' : md + ' 收盤') + '・' + list.length + ' 檔');
+      (m.live ? stamp + '・● 即時' : md + ' 收盤') + '・' + list.length + ' 檔' + (dynState.hold ? '（' + holdLbl + '，共 ' + list0.length + ' 檔）' : ''));
   }
   if (q === '280'){
     const t = '📈動能選股｜🏛️法人動能(280)';
@@ -28014,6 +28018,7 @@ document.getElementById('botModal').addEventListener('click', (e) => {
   if (xq){ const col = xq.closest('.bot-col'); if (col) botXqExport(col, xq.dataset.botXq); return; }
   const bs = t.closest('[data-bsort]'); if (bs){ botSortClick(bs); botRerunCols(); try { render(); } catch (_){} return; }
   const bds = t.closest('[data-dyn-side]'); if (bds){ dynState.side = bds.dataset.dynSide; botRerunCols(); try { dynRerender(); render(); } catch (_){} return; }
+  const bdh = t.closest('[data-dyn-hold]'); if (bdh){ dynState.hold = !dynState.hold; try { localStorage.setItem('dynHold', dynState.hold ? '1' : '0'); } catch (_){} botRerunCols(); try { render(); } catch (_){} return; }
   const bdi = t.closest('[data-dyn-inst]'); if (bdi){ dynState.inst = bdi.dataset.dynInst; botRerunCols(); try { dynRerender(); render(); } catch (_){} return; }
   const mp = t.closest('[data-mom-p]');
   if (mp){ const [k, v] = mp.dataset.momP.split(':'); if (k === 'top') momParams.top = Number(v); else if (k === 'almost') momParams.almost = v === '1'; momSave(); botRerunCols(); return; }
@@ -30432,7 +30437,9 @@ czApply();
 // 但奇鋐的週動能 App 7.7、這樣算 0.2，對不起來；上榜條件又被 VIP 鎖住，所以先不放假數字。
 const DYN_TABS = [['hot', '🔥 熱門趨勢概念股（即時）'], ['rank', '🚀 動能排行（盤後）'], ['day', '⚡ 日動能（即時）'], ['week', '⚡ 週動能（即時）'], ['inst', '🏛️ 法人動能']];   // 2026-11-14 使用者：日／週動能後面寫（即時）、動能排行寫（盤後），一看就知道哪個會跳
 const DYN_INST = [['priceVolHigh', '價量創新高'], ['trustFresh', '投信剛買準突破'], ['trustStreak', '投信動能連買'], ['foreignStreak', '外資動能連買']];
-const dynState = { tab: 'hot', side: 'strong', inst: 'priceVolHigh' };
+const dynState = { tab: 'hot', side: 'strong', inst: 'priceVolHigh', hold: false };
+// 2026-11-18 使用者：首頁 260／270 強勢多一個「大戶力 ≥ +10%」、弱勢多一個「大戶力 ≤ −10%」篩選，記在這台電腦
+try { dynState.hold = localStorage.getItem('dynHold') === '1'; } catch (_){}
 try { const t0 = localStorage.getItem('dynTab'); if (DYN_TABS.some(([k]) => k === t0)) dynState.tab = t0; } catch (_){}
 const dynPx = (v) => (Number.isFinite(v) ? (v >= 1000 ? v.toFixed(0) : v >= 100 ? v.toFixed(1) : v.toFixed(2)) : '—');
 const dynPct = (v) => (Number.isFinite(v) ? '<span class="' + dirClass(v) + '">' + botPct(v) + '</span>' : '<span class="muted">—</span>');
