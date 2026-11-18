@@ -234,6 +234,8 @@
   .b777-params{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 2px 6px;} .b777-plabel{font-size:11.5px;color:var(--muted);margin-right:2px;}
   .b777-p{font:inherit;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:12px;border:1px solid rgba(148,163,184,.45);background:transparent;color:#cbd5e1;cursor:pointer;white-space:nowrap;}
   .b777-p.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}   /* 2026-11-13 使用者：機器人 777 上面的五個勾選 */
+  body.home-light .grp-c.grp-y{color:var(--grp-dk)!important;}   /* 2026-11-18 偏黃的族群字在白底改深色 */
+  .hr-bhold{padding:5px 8px 3px;} body.home-light .hr-bhold .b777-p{color:#374151;border-color:#cbd5e1;} body.home-light .hr-bhold .b777-p.on{color:#fff;border-color:#7c3aed;}   /* 2026-11-18 905／1+2 突破廣播上面的「大戶力 ≥ +10%」 */
   .bot-col[data-col-key="23"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：火多多(23) 太窄看不到股號股名 → 跟 777 一樣寬 */
   .bot-col:has(.b32-row){min-width:330px;}   /* 一檔一列（時間、股名、族群、漲跌、大戶力）的格子至少這麼寬，股名才不會被擠掉 */
   .bot-col[data-col-key="777"]{flex-basis:calc((100% - 72px) / 10 * 2.2);min-width:380px;}   /* 2026-11-13 使用者：777 功課卡片條列，每檔一列要放時間、股名、族群、漲跌幅、大戶% */
@@ -752,6 +754,7 @@
   #toolbarBottom.cz-empty:not(.cz-keep){display:none;}
   /* 首頁那排欄位（當沖多、多觀察、續抱勿追高、30加33加34、發動、188、183、族群漲幅、1+2多、三落空、155、75）與下面的處置欄、說明卡片也能收：
      沒收的欄平分寬度（--cz-n＝還看得到幾欄）；整欄都收光的那一欄不佔位置；自訂模式下全部照常顯示（收起來的半透明）才點得到 */
+  body:not(.cz-mode) .cz-box-off{display:none!important;} body.cz-mode .home-botcol.cz-off{display:block!important;}   /* 2026-11-18 機器人欄也能收、紅框裡兩塊都收就整個紅框收 */
   body.cz-mode .hr-col.cz-off,body.cz-mode .hr-help-card.cz-off{display:block!important;} body.cz-mode .hr-redbox.cz-off,body.cz-mode .hr-jail-col.cz-off{display:flex!important;}
   body:not(.cz-mode) .cz-unit-off{display:none!important;}
   body.cz-mode .home-rank4 [data-cz]::before,body.cz-mode .hr-help [data-cz]::before{left:auto;right:6px;top:6px;}
@@ -8558,7 +8561,10 @@ function grpPillStyle(name){
   return n === '其他' ? 'background:#e5e7eb;border-color:#cbd5e1;color:#374151' : 'background:' + grpColor(n) + ';border-color:' + grpColor(n) + ';color:#111';
 }
 function grpTagHtml(name, extra){
-  return name ? '<span class="grp-c" style="color:' + grpColor(name) + '" title="' + wlEsc(name) + '">' + wlEsc(name) + (extra || '') + '</span>' : '';
+  if (!name) return '';
+  // 2026-11-18 使用者：三落空的「光學鏡頭」黃字在白底看不清楚——偏黃的族群色（色相 30～90）在白底模式改成同色相的深色
+  const c = grpColor(name), hue = Number((/hsl\((\d+)/.exec(c) || [])[1]), yel = hue >= 30 && hue <= 90;
+  return '<span class="grp-c' + (yel ? ' grp-y' : '') + '" style="color:' + c + (yel ? ';--grp-dk:hsl(' + hue + ',90%,30%)' : '') + '" title="' + wlEsc(name) + '">' + wlEsc(name) + (extra || '') + '</span>';
 }
 function sigHolderMap(view){
   const date = view && view.date;
@@ -10828,12 +10834,26 @@ function homeWeak3ColHtml(m){
   // 2026-10-22 使用者：三落空欄每檔前面加發生時間（第一次進三落空的時間，這台電腦記的），時間近的排上面、早的在下面
   const seenW = weakSeenMap();
   const hmW = (ts) => (ts ? new Date(ts + 8 * 3600e3).toISOString().slice(11, 16) : '--:--');
-  const rows = m.weakTriple.slice().sort((a, b) => (Math.floor((seenW[b.code] || 0) / 60000) - Math.floor((seenW[a.code] || 0) / 60000)) || b.groupRank - a.groupRank || a.pct - b.pct);
+  const rows0 = m.weakTriple.slice().sort((a, b) => (Math.floor((seenW[b.code] || 0) / 60000) - Math.floor((seenW[a.code] || 0) / 60000)) || b.groupRank - a.groupRank || a.pct - b.pct);
+  const rows = homeColHoldFilter('w3', rows0);   // 2026-11-18 使用者：三落空加「大戶力 ≤ −10%」篩選
+  let bw3 = new Map(); try { hotBearSet(); bw3 = hotBearCache.blinkWhere || new Map(); } catch (_){}   // 2026-11-18 跟 777／32／123 重複的閃綠
   const row = (r) => '<div class="hr-row hr-stk hr-wrapold" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + hmW(seenW[r.code]) + ' 進三落空・' + wlEsc(r.groupName) + '・族排第 ' + r.groupRank + ' 名（共 ' + m.total + ' 族）">' +
-    '<span class="hr-rk" style="color:#a78bfa">' + hmW(seenW[r.code]) + '</span><span class="hr-rk hr-gr">' + r.groupRank + '</span><span class="hr-bear-pill ' + dirClass(r.pct) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' + grpTagHtml(r.groupName) + '<span class="hr-tail">' +
+    '<span class="hr-rk" style="color:#a78bfa">' + hmW(seenW[r.code]) + '</span><span class="hr-rk hr-gr">' + r.groupRank + '</span><span class="hr-bear-pill ' + dirClass(r.pct) + (bw3.has(String(r.code).toUpperCase()) ? ' hotbear" title="' + wlEsc(bw3.get(String(r.code).toUpperCase()).join('、') + ' 都有') : '') + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' + grpTagHtml(r.groupName) + '<span class="hr-tail">' +
     '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' + homeHoldHtml(r.code) + '</span></div>';
-  return '<div class="hr-col"><div class="hr-title bear" title="' + tip + '">三落空<span class="hr-rk">' + rows.length + ' 檔</span></div>' +
-    (rows.length ? rows.map(row).join('') : '<div class="hr-note">目前沒有符合的股票</div>') + '</div>';
+  return '<div class="hr-col"><div class="hr-title bear" title="' + tip + '">三落空<span class="hr-rk">' + rows.length + ' 檔' + (homeColHold.w3 ? '／共 ' + rows0.length : '') + '</span></div>' + homeColHoldBtn('w3') +
+    (rows.length ? rows.map(row).join('') : '<div class="hr-note">' + (rows0.length ? '目前沒有大戶力 ≤ −10% 的' : '目前沒有符合的股票') + '</div>') + '</div>';
+}
+// 2026-11-18 使用者：首頁 30加33加34 加「大戶力 ≥ +10%」、三落空加「大戶力 ≤ −10%」篩選（各欄自己切，記在這台電腦）
+var homeColHold = {};
+try { homeColHold = JSON.parse(localStorage.getItem('colHold') || '{}') || {}; } catch (_){ homeColHold = {}; }
+var HOME_COL_HOLD = { '334': { lbl: '大戶力 ≥ +10%', ok: (v) => v >= 10 }, w3: { lbl: '大戶力 ≤ −10%', ok: (v) => v <= -10 } };
+function homeColHoldFilter(k, list){
+  if (!homeColHold[k]) return list;
+  return list.filter((r) => { const v = holderPctOf(r.code); return Number.isFinite(v) && HOME_COL_HOLD[k].ok(v); });
+}
+function homeColHoldBtn(k){
+  const on = !!homeColHold[k];
+  return '<div class="hr-bhold"><button type="button" class="b777-p' + (on ? ' on' : '') + '" data-col-hold="' + k + '" title="只看' + HOME_COL_HOLD[k].lbl + '的（大戶力還沒有數字的先不列；記在這台電腦）">' + (on ? '☑ ' : '☐ ') + HOME_COL_HOLD[k].lbl + '</button></div>';
 }
 function home44ColHtml(){
   const ev = sigCurrentEvents().filter((e) => e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull'));
@@ -10865,9 +10885,38 @@ function home12BcastColHtml(){
       '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(x.t || '--:--') + '</span><span class="hr-code">' + wlEsc(x.code) + '</span><span class="hr-name">' + wlEsc(x.name || wlNameOf(x.code)) + '</span>' + st +
       '<span class="hr-avg ' + (Number.isFinite(pct) ? dirClass(pct) : 'flat') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '') + '</span>' + homeHoldHtml(x.code) + '</div>';
   };
-  const list = sys.slice(0, 20);
-  return '<div class="hr-col"><div class="hr-title">📈 1+2 突破廣播 <span class="hr-rk">' + (sys.length > 20 ? '最新 20／共 ' : '') + sys.length + ' 檔</span></div>' +
-    (list.length ? list.map(row).join('') : '<div class="hr-note">今天還沒有</div>') + '</div>';
+  // 2026-11-18 使用者：只列現在還在「之上」的（突破後收回之下的不列）；上面多一個「大戶力 ≥ +10%」篩選
+  const f = homeBcastFilter(sys.map((x) => ({ x, code: x.code, r: tdB905Calc(x.code, 'c12', date, null, 180e3) })));
+  const list = f.keep.slice(0, 20).map((it) => it.x);
+  return '<div class="hr-col"><div class="hr-title">📈 1+2 突破廣播 <span class="hr-rk">之上 ' + (f.keep.length > 20 ? '最新 20／共 ' : '') + f.keep.length + ' 檔</span></div>' + homeBcastHoldBtn() +
+    (list.length ? list.map(row).join('') : '<div class="hr-note">' + (sys.length ? '現在沒有在之上' + (homeBcastHold ? '、大戶力 ≥ +10%' : '') + '的' : '今天還沒有') + '</div>') + homeBcastFoot(f, sys.length, '檔') + '</div>';
+}
+// 905／1+2 突破廣播共用：只留現在 5 分K 還收在線上（之上）的；開著「大戶力 ≥ +10%」再篩大戶力。只看最近 HOME_BCAST_SCAN 筆（每檔要抓 5 分K）
+var HOME_BCAST_SCAN = 60;   // var：首頁第一次畫的時候這幾行可能還沒跑到
+var homeBcastHold = false;
+try { homeBcastHold = localStorage.getItem('bcastHold') === '1'; } catch (_){}
+function homeBcastFilter(items){
+  const keep = [];
+  let loading = 0, below = 0, weak = 0;
+  items.slice(0, HOME_BCAST_SCAN).forEach((it) => {
+    const r = it.r || {};
+    if (!r.ev){ if (r.loading) loading += 1; return; }
+    if (!r.inside){ below += 1; return; }
+    if (homeBcastHold){ const hp = holderPctOf(it.code); if (!(Number.isFinite(hp) && hp >= 10)){ weak += 1; return; } }
+    keep.push(it);
+  });
+  return { keep, loading, below, weak };
+}
+function homeBcastHoldBtn(){
+  return '<div class="hr-bhold"><button type="button" class="b777-p' + (homeBcastHold ? ' on' : '') + '" data-bcast-hold="1" title="只看大戶力 ≥ +10% 的（905、1+2 兩欄一起切，記在這台電腦）">' + (homeBcastHold ? '☑ ' : '☐ ') + '大戶力 ≥ +10%</button></div>';
+}
+function homeBcastFoot(f, total, unit){
+  const bits = [];
+  if (f.below) bits.push('收回之下 ' + f.below + ' ' + unit + '不列');
+  if (f.weak) bits.push('大戶力不到 +10% 的 ' + f.weak + ' ' + unit + '不列');
+  if (f.loading) bits.push('還有 ' + f.loading + ' ' + unit + '在算');
+  if (total > HOME_BCAST_SCAN) bits.push('只看最近 ' + HOME_BCAST_SCAN + ' ' + unit);
+  return bits.length ? '<div class="hr-note" style="font-size:11px">' + bits.join('・') + '</div>' : '';
 }
 // 首頁「905 突破廣播」（2026-11-01 使用者：905 突破也拉一欄到首頁，放在 1+2 突破廣播旁邊）。名單＝每日功課「905 突破」同一份（2026-11-04 起：突破就列一筆、條件齊全再列一筆）：
 // 當天第一次站上 905 高＋大戶力 ≥ +10%＋漲幅 ≥ 2%＋族群在多方區，四個都成立才記（這台電腦盤中開著網頁時記，一天一次）；最近的在上面、最多 20 檔。
@@ -10889,8 +10938,11 @@ function home905BcastColHtml(){
       '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(e.t) + '</span><span class="hr-code">' + wlEsc(code) + '</span><span class="hr-name">' + wlEsc(wlNameOf(code)) + '</span>' + st +
       '<span class="hr-avg ' + (Number.isFinite(pct) ? dirClass(pct) : 'flat') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '') + '</span>' + homeHoldHtml(code) + '<span class="hr-ready">' + (e.kind === 'ready' ? '✅ 條件齊全' : '突破') + '</span></div>';
   };
-  return '<div class="hr-col"><div class="hr-title">🎯 905 突破廣播 <span class="hr-rk">' + (events.length > HOME905_MAX ? '最新 ' + HOME905_MAX + '／共 ' : '') + events.length + ' 筆</span></div>' +
-    (events.length ? events.slice(0, HOME905_MAX).map(row).join('') : '<div class="hr-note">今天還沒有（站上 905 高、漲幅 ≥ 2%、族群在多方就列「突破」；大戶力也 ≥ +10% 再列一筆「條件齊全」）</div>') + '</div>';
+  // 2026-11-18 使用者：只列現在還在「之上」的（突破後收回之下的不列）；上面多一個「大戶力 ≥ +10%」篩選
+  const f = homeBcastFilter(events.map((e) => ({ e, code: e.code, r: tdB905Calc(e.code, 'c905', date, null, 180e3) })));
+  const shown = f.keep.slice(0, HOME905_MAX).map((it) => it.e);
+  return '<div class="hr-col"><div class="hr-title">🎯 905 突破廣播 <span class="hr-rk">之上 ' + (f.keep.length > HOME905_MAX ? '最新 ' + HOME905_MAX + '／共 ' : '') + f.keep.length + ' 筆</span></div>' + homeBcastHoldBtn() +
+    (shown.length ? shown.map(row).join('') : '<div class="hr-note">' + (events.length ? '現在沒有在之上' + (homeBcastHold ? '、大戶力 ≥ +10%' : '') + '的' : '今天還沒有（站上 905 高、漲幅 ≥ 2%、族群在多方就列「突破」；大戶力也 ≥ +10% 再列一筆「條件齊全」）') + '</div>') + homeBcastFoot(f, events.length, '筆') + '</div>';
 }
 // 2026-10-20 使用者（截圖框給我看）：首頁這幾塊要加粗紅框——續抱勿追高＋族群漲幅 > 2%(12)、馬火多(30)、30加33＋賽馬多(33)、發動＋今日強勢股、1+2多(44)
 const homeRedBox = (html) => '<div class="hr-redbox">' + html + '</div>';
@@ -11154,7 +11206,15 @@ function homeRank4Html(){
     // 2026-11-18 使用者：30加33加34 這欄（下面疊投信買超前 15、188）搬到 1+2 突破廣播右邊（原本在雙榜交集右邊）
     // 2026-10-22 使用者：首頁的馬火多(30)、賽馬多(33)、河流多(34) 三欄拿掉（機器人代碼 30／33／34、訊號中心「盤中333」還在；30加33加34 照舊）
     '<div class="hr-stack">' +
-      homeRedBox('<div class="hr-pinkname">' + homeStockColHtml('👑30加33加34', m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : [], '', 'yel', true, false, true) + '</div>') +
+      homeRedBox('<div class="hr-pinkname">' + (() => {   // 2026-11-18 使用者：30加33加34 加「大戶力 ≥ +10%」篩選（標題下面）
+        const all334 = m ? m.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : [];
+        const html = homeStockColHtml('👑30加33加34', homeColHoldFilter('334', all334), homeColHold['334'] && all334.length ? '目前沒有大戶力 ≥ +10% 的' : '', 'yel', true, false, true);
+        const i = html.indexOf('</div>', html.indexOf('hr-title')) + 6;
+        const tpl = document.createElement('template');   // 2026-11-18 跟觀／紅／240／260 重複的股名閃紅
+        tpl.innerHTML = html.slice(0, i) + homeColHoldBtn('334') + html.slice(i);
+        tpl.content.querySelectorAll('.hr-row[data-code]').forEach((row) => { const tg = hot2Of(row.dataset.code), nm = row.querySelector('.hr-name'); if (tg && nm){ nm.classList.add('hot2'); nm.title = hot2Title(tg); } });
+        return tpl.innerHTML;
+      })() + '</div>') +
       homeInstColHtml('t') +   // 2026-11-05 使用者：30加33加34 下面（188 的位置）加投信買超前 15（機器人 98 同一份資料）；開盤前是前一個交易日的名單
       homeRankColHtml('多族群排名(188)', rows188, h.half, '------↑(多方)↑------', '沒有資料') +   // 2026-11-04 使用者：188 跟今日強勢股對調，188 放 30加33加34 下面（原本 2026-10-21 在發動下面）
     '</div>' +
@@ -19573,6 +19633,8 @@ document.getElementById('app').addEventListener('click', (e) => {
   const bsg = t.closest('[data-bsort]'); if (bsg){ botSortClick(bsg); render(); try { botRerunCols(); } catch (_){} return; }
   if (t.closest('[data-hx-go]')){ const i = document.getElementById('hxQ'); homeXAdd(i ? i.value : ''); const j = document.getElementById('hxQ'); if (j) j.value = ''; return; }
   const hd = t.closest('[data-hx-del]'); if (hd){ homeXCols.splice(Number(hd.dataset.hxDel), 1); homeXSave(); render(); return; }
+  const bck = t.closest('[data-col-hold]'); if (bck){ const k = bck.dataset.colHold; homeColHold[k] = !homeColHold[k]; try { localStorage.setItem('colHold', JSON.stringify(homeColHold)); } catch (_){} render(); return; }   // 2026-11-18 30加33加34／三落空的大戶力篩選
+  const bch = t.closest('[data-bcast-hold]'); if (bch){ homeBcastHold = !homeBcastHold; try { localStorage.setItem('bcastHold', homeBcastHold ? '1' : '0'); } catch (_){} render(); return; }   // 2026-11-18 905／1+2 突破廣播「大戶力 ≥ +10%」
   const hm = t.closest('[data-hx-move]'); if (hm){ const [i, d] = hm.dataset.hxMove.split(':').map(Number), j = i + d; if (j >= 0 && j < homeXCols.length){ [homeXCols[i], homeXCols[j]] = [homeXCols[j], homeXCols[i]]; homeXSave(); render(); } return; }
   if (t.closest('.home-botcol')){   // 加到首頁的機器人欄位：跟機器人那格一樣的點法
     const bs = t.closest('[data-bsort]'); if (bs){ botSortClick(bs); render(); try { botRerunCols(); } catch (_){} return; }
@@ -26486,6 +26548,10 @@ function hotBearSet(){
     hotBearCache.where = new Map([...cnt].filter(([, v]) => v.length >= 2));
     hotBearCache.anyWhere = cnt;   // 每檔在 777／32／123 哪幾份（一份的也有；盤前空觀察閃藍用）
     hotBearCache.set = new Set(hotBearCache.where.keys());
+    // 2026-11-18 使用者：三落空也算一份——股名閃綠看四份（777、32、123、三落空）裡兩份以上；空中空(999) 照舊只看 777／32／123
+    const cnt4 = new Map([...cnt].map(([c, v]) => [c, v.slice()]));
+    try { const m3 = race333Model(); (m3 ? m3.weakTriple : []).forEach((r) => { const c = String(r.code || '').toUpperCase(); if (!c) return; const v = cnt4.get(c) || []; if (!v.includes('三落空')){ v.push('三落空'); cnt4.set(c, v); } }); } catch (_){}
+    hotBearCache.blinkWhere = new Map([...cnt4].filter(([, v]) => v.length >= 2));
   } catch (_){} finally { hotBearCache.busy = false; }
   return hotBearCache.set;
 }
@@ -26500,14 +26566,15 @@ function botAnswer(raw){
   const k = botNorm(raw);
   if (html && Object.prototype.hasOwnProperty.call(DT_NOTE_KEYS, k)) html = dtNoteInsert(html, DT_NOTE_KEYS[k]);
   if (!html || (k !== '777' && k !== '32' && k !== '123') || hotBearCache.busy) return html;
-  const set = hotBearSet();
-  if (!set.size) return html;
+  hotBearSet();
+  const bw = hotBearCache.blinkWhere || hotBearCache.where || new Map();   // 2026-11-18 閃綠多算三落空
+  if (!bw.size) return html;
   const tpl = document.createElement('template');
   tpl.innerHTML = html;
   tpl.content.querySelectorAll('[data-bot-code]').forEach((el) => {
-    if (!set.has(String(el.dataset.botCode || '').toUpperCase()) || el.closest('.gone, .blade-gone')) return;
+    if (!bw.has(String(el.dataset.botCode || '').toUpperCase()) || el.closest('.gone, .blade-gone')) return;
     const tgt = el.classList.contains('bot-stk') ? el : el.querySelector('.bot-stk');
-    if (tgt){ tgt.classList.add('hotbear'); tgt.title = (hotBearCache.where && hotBearCache.where.get(String(el.dataset.botCode || '').toUpperCase()) || []).join('、') + ' 都有'; }
+    if (tgt){ tgt.classList.add('hotbear'); tgt.title = (bw.get(String(el.dataset.botCode || '').toUpperCase()) || []).join('、') + ' 都有'; }
   });
   return tpl.innerHTML;
 }
@@ -30234,7 +30301,11 @@ function czItems(){
   return items;
 }
 // 首頁欄位：欄位是程式每 15 秒整個重畫的，所以每次畫完（MutationObserver）再依標題標記、收合；標題對不到的欄不管它
-const CZ_HOME_CARDS = [['hm:mf', '疑似主力融資買進'], ['hm:both', '雙榜交集'], ['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:strong', '今日強勢股'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
+// 2026-11-18 使用者：首頁每一欄右上角都要有打勾（原本只有底下那幾欄有）；前面這幾個先比（標題裡會帶到別欄名字的要排前面，例：強中強的說明有「強勢股觀察中」）
+const CZ_HOME_CARDS = [['hm:b32', '新刀劍空(32)'], ['hm:b123', '空(123)'], ['hm:b777', '(777)'], ['hm:b999', '（999）'], ['hm:b240', '(240)'], ['hm:b260', '(260)'], ['hm:b270', '(270)'],
+  ['hm:ss', '強中強'], ['hm:pre', '盤前空觀察'], ['hm:close', '收盤觀察股'], ['hm:b905', '905突破廣播'], ['hm:b12', '1+2突破廣播'], ['hm:hup', '盤中大戶力≥'], ['hm:hdn', '盤中大戶力≤'],
+  ['hm:s99', '外資投信同步'], ['hm:t15', '投信買超前15'], ['hm:f15', '外資買超前15'], ['hm:pick', '強勢股觀察中'], ['hm:red', '強勢紅K'], ['hm:dragon', '創高黑龍'],
+  ['hm:mf', '疑似主力融資買進'], ['hm:both', '雙榜交集'], ['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:strong', '今日強勢股'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
   ['hm:r183', '多族群排名(183)'], ['hm:g12', '族群漲幅'], ['hm:r44', '1+2多'], ['hm:t3', '三落空'], ['hm:r155', '股票期貨排名(155)'], ['hm:r75', '股期黑龍']];
 const CZ_HOME_JAIL = [['hm:jin', '今日入獄'], ['hm:jsoon', '即將出關'], ['hm:jout', '已出關']];
 // 首頁每一欄原本的寬度（跟 CSS .home-rank4 的 grid-template-columns 同一份，順序＝欄的順序）；收掉幾欄時照這個排，不平分
@@ -30243,20 +30314,29 @@ const HOME_TRACKS = ['310px', '310px', '360px', '300px', '330px', '310px', '300p
 function czApplyHome(){
   const root = document.querySelector('#app .home-rank4');
   if (root){
-    const cards = root.querySelectorAll(':scope > .hr-col, :scope > .hr-stack > .hr-col, :scope > .hr-stack > .hr-redbox');
+    // 一個紅框裡有兩塊以上（例：盤中大戶力 ≥+20%／≤−20%）就各自一個勾；機器人欄（32、123、777、999、240、260、270）也算
+    const cards = [];
+    root.querySelectorAll(':scope > .hr-col, :scope > .hr-stack > .hr-col, :scope > .hr-stack > .home-botcol, :scope > .hr-stack > .hr-redbox').forEach((el) => {
+      const inner = el.matches('.hr-redbox') ? Array.from(el.children).filter((c) => c.matches('.hr-col')) : [];
+      if (inner.length >= 2) inner.forEach((c) => cards.push(c)); else cards.push(el);
+    });
     cards.forEach((el) => {
-      const head = el.textContent.replace(/\s+/g, '').slice(0, 28);
+      const head = el.textContent.replace(/\s+/g, '').slice(0, 44);
       const hit = CZ_HOME_CARDS.find(([, t]) => head.includes(t));
       if (hit){ el.dataset.cz = hit[0]; el.classList.toggle('cz-off', czHidden.has(hit[0])); }
     });
+    root.querySelectorAll(':scope > .hr-stack > .hr-redbox').forEach((box) => {   // 紅框裡每塊都收了，紅框本身也收
+      const inner = Array.from(box.children).filter((c) => c.matches('.hr-col[data-cz]'));
+      box.classList.toggle('cz-box-off', inner.length >= 2 && inner.every((c) => c.classList.contains('cz-off')));
+    });
     let visible = 0;
     Array.from(root.children).forEach((unit) => {
-      const cs = unit.matches('.hr-stack') ? Array.from(unit.children).filter((c) => c.matches('.hr-col, .hr-redbox')) : [unit];
-      const off = cs.length > 0 && cs.every((c) => c.classList.contains('cz-off'));
+      const cs = unit.matches('.hr-stack') ? Array.from(unit.children).filter((c) => c.matches('.hr-col, .hr-redbox, .home-botcol')) : [unit];
+      const off = cs.length > 0 && cs.every((c) => c.classList.contains('cz-off') || c.classList.contains('cz-box-off'));
       unit.classList.toggle('cz-unit-off', off);
       if (!off) visible += 1;
     });
-    const some = czHidden.size > 0 && Array.from(cards).some((c) => c.classList.contains('cz-off'));
+    const some = czHidden.size > 0 && cards.some((c) => c.classList.contains('cz-off'));
     const fluid = some && !czMode && visible > 0;
     if (fluid){   // 還看得到的欄照原本寬度排（固定寬的照舊，彈性寬的分剩下的空間）
       const hx = String(root.style.getPropertyValue('--hx-cols') || '').trim().split(/\s+/).filter(Boolean);
@@ -30371,9 +30451,14 @@ function hot2Map(){
   const out = new Map();
   cnt.forEach((n, c) => { if (n >= 2) out.set(c, from.get(c)); });
   hot2Cache.map = out; hot2Cache.info = info; hot2Cache.from = from;   // from＝每檔在哪幾份（一份的也有；收盤觀察股閃粉紅用）
+  // 2026-11-18 使用者：30加33加34 也算一份——股名閃紅看五份（觀、紅、240、260、30加33加34）裡兩份以上；強中強(888) 照舊只看四份
+  const from5 = new Map(from), blink = new Map();
+  try { const m3 = race333Model(); (m3 ? m3.triple.filter((r) => r.groupRank <= HOME_334_TOP_GROUPS && r.riverGroupRank <= HOME_334_TOP_GROUPS) : []).forEach((r) => { if (r.code && !(from5.get(r.code) || []).includes('30加33加34')) from5.set(r.code, (from5.get(r.code) || []).concat('30加33加34')); }); } catch (_){}
+  from5.forEach((tags, c) => { if (tags.length >= 2) blink.set(c, tags); });
+  hot2Cache.blink = blink;
   return out;
 }
-function hot2Of(code){ try { return hot2Map().get(code) || null; } catch (_){ return null; } }
+function hot2Of(code){ try { hot2Map(); return (hot2Cache.blink || hot2Cache.map).get(code) || null; } catch (_){ return null; } }
 // 2026-11-14 使用者：四份重複兩份以上的整理成一欄「強中強」（首頁 183 右邊；機器人代碼 888）
 const SS_TAG = { '強勢股觀察中': ['觀', 'ss-t1'], '強勢紅K': ['紅', 'ss-t2'], '240': ['240', 'ss-t3'], '260': ['260', 'ss-t4'] };
 // 2026-11-14 使用者：強中強加「發生時間」＝四份名單裡第一次有兩份同時符合的時間（有三、四份的也是看兩份剛符合那一刻），照時間排、最近的在上面。
@@ -30571,7 +30656,7 @@ function homeObsListColHtml(kind){
   }
   return '<div class="hr-col obs-col ' + kind + '">' + title + (d.notes || []).map((n) => '<div class="obs-note">' + wlEsc(n) + '</div>').join('') + '<div class="obs-note">' + dtWarnNote(pre) + '</div>' + head + body + '</div>';
 }
-const hot2Title = (tags) => '同時在「' + tags.join('」「') + '」' + tags.length + ' 份名單（強勢股觀察中、強勢紅K、240、260 四份裡出現 2 份以上就閃）';
+const hot2Title = (tags) => '同時在「' + tags.join('」「') + '」' + tags.length + ' 份名單（強勢股觀察中、強勢紅K、240、260、30加33加34 五份裡出現 2 份以上就閃）';
 const botStkHot = (code, name, rest) => { const tg = hot2Of(code); const h = botStk(code, name, rest); return tg ? h.replace('<span class="bot-stk"', '<span class="bot-stk hot2" title="' + wlEsc(hot2Title(tg)) + '"') : h; };
 const dynStk = (r) => { const tg = hot2Of(r.code); return '<td class="l dyn-stk"><b' + (tg ? ' class="hot2" title="' + wlEsc(hot2Title(tg)) + '"' : '') + '>' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</b></td>'; };
 // 2026-11-14 使用者：表頭點一下排序，再點一下切換大到小／小到大（每個分頁各記一份，記在這台）；點「#」／「上榜」回到原本的排法
