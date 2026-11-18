@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-15 22:07:33";
+const BUILD_STAMP = "2026-11-18 22:19:28";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -843,7 +843,9 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   body:not(.cz-mode) .cz-unit-off{display:none!important;}
   body.cz-mode .home-rank4 [data-cz]::before,body.cz-mode .hr-help [data-cz]::before{left:auto;right:6px;top:6px;}
   body.cz-mode .home-rank4 [data-cz],body.cz-mode .hr-help [data-cz]{outline:1px dashed rgba(124,58,237,.7);outline-offset:-2px;}
-  @media (min-width:1701px){ .home-rank4.cz-fluid{grid-template-columns:repeat(var(--cz-n),minmax(0,1fr));} }
+  /* 2026-11-18 使用者「個股名稱跟代號跑掉了」：原本收掉任何一欄，剩下的欄就全部平分寬度，32／123／777／240／260／270 這些固定寬的欄被擠窄（股名剩「3…」、代號直排）、
+     強勢股觀察中反而被撐寬。改成照原本每欄的寬度（--cz-tracks 由 czApplyHome 依還看得到的欄排出來），只把收掉的那幾欄拿掉 */
+  @media (min-width:1701px){ .home-rank4.cz-fluid{grid-template-columns:var(--cz-tracks);width:calc(100% + var(--cz-fixed));} }
   .cz-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tb-h) + 12px);z-index:130;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;max-width:min(760px,94vw);background:#3b2a73;color:#fff;border:1px solid #7c3aed;border-radius:12px;padding:9px 14px;font-size:12.5px;line-height:1.6;box-shadow:0 8px 28px rgba(0,0,0,.5);}
   .cz-bar .cz-tab{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-weight:800;} .cz-bar .cz-tab[hidden]{display:none;} .cz-bar .cz-tab button{width:30px;height:30px;padding:0;border-radius:999px;font-size:17px;line-height:1;} .cz-bar .cz-tab b{min-width:3.2em;text-align:center;color:#fde68a;}
   .cz-bar[hidden]{display:none;} .cz-bar a{color:#c4b5fd;font-weight:800;text-decoration:underline;cursor:pointer;white-space:nowrap;} .cz-bar #czCount{color:#fde68a;font-weight:700;margin-left:6px;}
@@ -18536,7 +18538,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-15 22:07:33';
+const BUILD_STAMP = '2026-11-18 22:19:28';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -30319,6 +30321,9 @@ function czItems(){
 const CZ_HOME_CARDS = [['hm:mf', '疑似主力融資買進'], ['hm:both', '雙榜交集'], ['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:strong', '今日強勢股'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
   ['hm:r183', '多族群排名(183)'], ['hm:g12', '族群漲幅'], ['hm:r44', '1+2多'], ['hm:t3', '三落空'], ['hm:r155', '股票期貨排名(155)'], ['hm:r75', '股期黑龍']];
 const CZ_HOME_JAIL = [['hm:jin', '今日入獄'], ['hm:jsoon', '即將出關'], ['hm:jout', '已出關']];
+// 首頁每一欄原本的寬度（跟 CSS .home-rank4 的 grid-template-columns 同一份，順序＝欄的順序）；收掉幾欄時照這個排，不平分
+const HOME_TRACKS = ['310px', '310px', '360px', '300px', '330px', '310px', '300px', '210px', '330px', '420px', '400px', '400px',
+  'minmax(0, 1.6fr)', 'minmax(0, 1.6fr)', 'minmax(0, 1.5fr)', 'minmax(0, 1.95fr)', 'minmax(0, 1.5fr)', 'minmax(0, 1.6fr)', 'minmax(0, 1.3fr)', 'minmax(0, 1.3fr)', 'minmax(0, 1.3fr)', 'minmax(0, 1.4fr)'];
 function czApplyHome(){
   const root = document.querySelector('#app .home-rank4');
   if (root){
@@ -30336,7 +30341,22 @@ function czApplyHome(){
       if (!off) visible += 1;
     });
     const some = czHidden.size > 0 && Array.from(cards).some((c) => c.classList.contains('cz-off'));
-    root.classList.toggle('cz-fluid', some && !czMode && visible > 0);
+    const fluid = some && !czMode && visible > 0;
+    if (fluid){   // 還看得到的欄照原本寬度排（固定寬的照舊，彈性寬的分剩下的空間）
+      const hx = String(root.style.getPropertyValue('--hx-cols') || '').trim().split(/\\s+/).filter(Boolean);
+      const tracks = [];
+      let fixedPx = 0;
+      Array.from(root.children).forEach((unit, i) => {
+        if (unit.classList.contains('cz-unit-off')) return;
+        const t = i < HOME_TRACKS.length ? HOME_TRACKS[i] : (hx[i - HOME_TRACKS.length] || 'minmax(0, 1.4fr)');
+        tracks.push(t);
+        const px = /^(\\d+(?:\\.\\d+)?)px$/.exec(t);
+        if (px) fixedPx += Number(px[1]) + 8;
+      });
+      root.style.setProperty('--cz-tracks', tracks.join(' '));
+      root.style.setProperty('--cz-fixed', fixedPx + 'px');
+    }
+    root.classList.toggle('cz-fluid', fluid);
     root.style.setProperty('--cz-n', String(Math.max(visible, 1)));
     root.classList.toggle('cz-unit-off', some && visible === 0);
   }
