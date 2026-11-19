@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-19 13:56:40";
+const BUILD_STAMP = "2026-11-19 15:10:05";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -9621,7 +9621,7 @@ function bladeSeenMap(){
   return bladeSeenCache.map;
 }
 function bladeRecordSeen(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:30 起（原本 08:40）也要有發生時間，所以盤前也記）
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr() || afterSession()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:30 起（原本 08:40）也要有發生時間，所以盤前也記）
   const m = race333Model();
   if (!m) return;
   const map = bladeSeenMap();
@@ -9724,7 +9724,7 @@ function fire23SeenMap(){
   return fire23SeenCache.map;
 }
 function fire23RecordSeen(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr() || afterSession()) return;
   const m = fire23Model();
   if (!m) return;
   const map = fire23SeenMap();
@@ -9751,7 +9751,7 @@ function weakSeenMap(){
   return weakSeenCache.map;
 }
 function weakRecordSeen(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr() || afterSession()) return;
   const m = race333Model();
   if (!m) return;
   const map = weakSeenMap();
@@ -9782,7 +9782,7 @@ function race333SeenLists(m){
   return { over7: m.horses.filter((r) => r.pct > 7), triple: m.triple, both: m.both, horses: m.horses, rivers: m.rivers, fires: m.fires };
 }
 function raceRecordSeen(){
-  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:30 起（原本 08:40）也要有發生時間，所以盤前也記）
+  if (!lastData || lastData.mock || lastData.heldClose || lastData.quoteDate !== twTodayStr() || afterSession()) return;   // 只記今天盤中的（2026-10-22 使用者：盤前撮合 08:30 起（原本 08:40）也要有發生時間，所以盤前也記）
   const m = race333Model();
   if (!m) return;
   const all = raceSeenMap();
@@ -9860,7 +9860,9 @@ function tdTodaySeq(m){
       sn.k12 = (i === seq.length - 1 && !liveSession && live.k12 && live.k12.length > 1) ? live.k12 : good;
     } else good = sn.k12 || [];
   });
-  if (!seq.length || (liveSession && seq[seq.length - 1][0] <= live.slot)) seq.push([live.slot || '最新', live]);
+  // 2026-11-19 使用者：收盤後 14:30 盤後定價又更新一次報價，被當成盤中變動記出一堆「跑 14:30」——收盤後已經有 13:30 的紀錄就不再接最新那份
+  const afterClose = String(lastData && lastData.quoteTime || '') > '13:30:59';
+  if (!seq.length || (liveSession && (seq[seq.length - 1][0] < live.slot || (seq[seq.length - 1][0] === live.slot && !afterClose)))) seq.push([live.slot || '最新', live]);
   return seq;
 }
 function tdParamsNote(){ return ''; }   // 2026-11-01 使用者：功課面板的參數只篩選下面的族群卡，不再影響機器人 32／123 與功課廣播，所以不用提醒
@@ -18630,7 +18632,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-19 13:56:40';
+const BUILD_STAMP = '2026-11-19 15:10:05';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -21370,7 +21372,7 @@ function tdLiveSnap(m, peek){   // peek＝跳出通知用：1＝只讀手上已�
   const k12 = k12Base.map((r) => { const row = tdLiveRow(r, r.pct <= -BLADE_HARVEST_PCT ? 'harvest' : '', big); if (row.hi === null && Number.isFinite(r.dayHighPct)) row.hi = r.dayHighPct; return row; });
   rows.forEach((row) => { if (row.hi === null){ const kr = k12.find((x) => x.code === row.code); if (kr) row.hi = kr.hi; } });
   try { if (k && k.status === 'ok' && k.tracked) k12NoteSeen(k12); } catch (_){}
-  return { live: true, date: lastData.quoteDate, slot: lastData.quoteTime ? String(lastData.quoteTime).slice(0, 5) : '', total: m.total, otcLabel: m.otcLabel || '', otcPct: m.otcPct,
+  return { live: true, date: lastData.quoteDate, slot: lastData.quoteTime ? sessHm(lastData.quoteTime) : '', total: m.total, otcLabel: m.otcLabel || '', otcPct: m.otcPct,
     rows, k12, k12Tracked: !!(k && k.status === 'ok' && k.tracked), k12Loaded: !!(k && k.status === 'ok'), big };
 }
 function tdRecSnap(rec, date, slot){
@@ -21380,6 +21382,10 @@ function tdRecSnap(rec, date, slot){
 }
 // 盤中每 5 分鐘送一份上去（09:05～13:30；首頁開著就會送，不用開每日功課）；同一時段後端只收第一份
 const tdRec = { done: new Set(), busy: false };
+// 盤中時間上限 13:30（2026-11-19 使用者：收盤後 14:30 盤後定價那次更新不要算成盤中的時間）
+// 收盤後（報價時間過了 13:35）：14:30 盤後定價那次報價更新不要再記「第一次出現」的時間
+function afterSession(){ return String(lastData && lastData.quoteTime || '') > '13:35:59'; }
+function sessHm(qt){ const hm = String(qt || '').slice(0, 5); return hm > '13:30' ? '13:30' : hm; }
 function tdSlotNow(){
   const now = new Date(Date.now() + 8 * 3600e3);
   const mins = now.getUTCHours() * 60 + now.getUTCMinutes();
@@ -23151,7 +23157,7 @@ function obsRerender(){
 }
 function obsTick(){
   // 交易日盤中（首頁報價是今天的、不是休市暫留收盤）才跳；每個時段一天只跳一次，時段過後 20 分鐘內打開網頁也會補跳
-  if (!lastData || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;
+  if (!lastData || lastData.heldClose || lastData.quoteDate !== twTodayStr() || afterSession()) return;
   const today = twTodayStr(), hm = obsNowHm();
   const due = OBS_SLOTS.filter((t) => hm >= t && hm < obsAddMin(t, 20)).pop();
   if (!due) return;
@@ -26531,7 +26537,7 @@ function botRankChart(g, h, me, opts){   // opts：title／sub／foot＝改標�
   });
   const trail = botRankTrailData(g);
   const closed = lastData && String(lastData.quoteTime || '') >= '13:30';
-  const stampTxt = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
+  const stampTxt = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + sessHm(lastData.quoteTime) : '';
   const preOpen = !closed && !!lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr() && String(lastData.quoteTime || '') < '09:00';   // 2026-10-22 盤前撮合（試算價）
   let html = botBarChart(rows, { title: opts.title || g.name + ' 族群排名', sub: opts.sub || n + '檔・' + stampTxt + (closed ? ' 收盤' : preOpen ? ' 盤前試算' : ' 盤中快照'),
     sub2: trail ? '族群排名走勢 ' + trail.ranks.join('→') + trail.arrows.join('') : '', right: '多方 ' + topEnd, rightSub: '空方 ' + (n - botStart), wide: true,
@@ -26708,7 +26714,7 @@ function botAnswerRaw(raw){
   // 177 重點族群排名多空都有：標題左半綠、右半紅，白字（2026-10-18 使用者）
   // 2026-11-14 使用者：空中空(999) 標題不要藍底（跟強中強一樣，只有「空中空 N 檔（999）」那塊綠底白字閃）
   const title = (t, sub) => '<div class="bot-title' + (bear && q !== '999' ? ' bot-title-bear' + (['32', '123', '193', '199'].includes(q) ? ' bot-title-navy' : '') : q === '177' ? ' bot-title-split' : '') + '">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
-  const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
+  const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + sessHm(lastData.quoteTime) : '';
   const wrap = (t, body, sub) => '<div class="bot-msg' + (bear ? ' bot-bear' : '') + '"><div class="bot-q">' + wlEsc(raw) + '</div>' + title(t, sub || stamp) + body + '</div>';
   // 不用首頁報價的：國際行情
   if (q === '70' || q === '71'){
@@ -28780,7 +28786,7 @@ function wgGroupChart(g, me){
   const ranked = rankedGroupsOf(lastData.groups).slice().sort((a, b) => b.avgChange - a.avgChange);
   const rank = ranked.findIndex((x) => x.name === g.name) + 1;
   const closed = lastData && String(lastData.quoteTime || '') >= '13:30';
-  const stampTxt = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + String(lastData.quoteTime || '').slice(0, 5) : '';
+  const stampTxt = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + sessHm(lastData.quoteTime) : '';
   if (!brewLaunchData && !wgState.maWait){ wgState.maWait = true; refreshBrewLaunch().catch(() => {}).finally(() => { wgState.maWait = false; if (brewLaunchData) wgRerun(); }); }   // 均線分數要用醞釀／發動那份均線基底
   const order = wgOrderFn();
   const sc = WG_SORT_COLS[wgState.sortKey] || WG_SORT_COLS.pct, custom = !(wgState.sortKey === 'pct' && wgState.sortDir < 0);
@@ -30588,7 +30594,7 @@ const SS_SEEN_KEY = 'ssSeen';
 let ssSeen = { date: '', m: {} };
 try { const v = JSON.parse(localStorage.getItem(SS_SEEN_KEY) || 'null'); if (v && typeof v === 'object' && v.m) ssSeen = v; } catch (_){}
 function ssNoteSeen(codes){
-  if (!lastData || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;   // 只記盤中
+  if (!lastData || lastData.heldClose || lastData.quoteDate !== twTodayStr() || afterSession()) return;   // 只記盤中
   const day = lastData.quoteDate;
   if (ssSeen.date !== day) ssSeen = { date: day, m: {} };
   let changed = false;
@@ -30686,7 +30692,7 @@ const H4_SEEN_KEY = 'h4Seen';
 let h4Seen = { date: '', m: {} };
 try { const v = JSON.parse(localStorage.getItem(H4_SEEN_KEY) || 'null'); if (v && typeof v === 'object' && v.m) h4Seen = v; } catch (_){}
 function h4NoteSeen(codes){
-  if (!lastData || lastData.heldClose || lastData.quoteDate !== twTodayStr()) return;
+  if (!lastData || lastData.heldClose || lastData.quoteDate !== twTodayStr() || afterSession()) return;
   const day = lastData.quoteDate;
   if (h4Seen.date !== day) h4Seen = { date: day, m: {} };
   let changed = false;
