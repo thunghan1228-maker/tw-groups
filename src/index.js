@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-18 23:32:51";
+const BUILD_STAMP = "2026-11-19 13:45:40";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -11189,10 +11189,24 @@ function m20ExtraSum(code){
   }).catch(() => { m20Extra.m[code] = { day: '', failAt: Date.now() }; }).finally(() => { m20Extra.busy.delete(code); try { render(); } catch (_){} });
   return null;
 }
+// 2026-11-19 使用者：盤後選股的名單（強勢紅K、創高黑龍、強勢股觀察中）是前一天收盤選的，但行情要看即時的——
+// 族群表以外的股票首頁報價沒有，另外問 /api/watch-quotes（盤中 15 秒、收盤後 10 分鐘更新一次）
+var homeLiveQ = {};   // var：首頁第一次畫的時候這行可能還沒跑到
+function homeLiveQuotes(key, codes){
+  const e = homeLiveQ[key] || (homeLiveQ[key] = { codes: '', q: {}, at: 0, loading: false });
+  const need = codes.filter(Boolean).slice().sort().join(',');
+  const live = lastData && !lastData.heldClose && lastData.quoteDate === twTodayStr();
+  if (need && !e.loading && !(need === e.codes && Date.now() - e.at < (live ? 15e3 : 10 * 60e3))){
+    e.loading = true; e.codes = need;
+    fetch('/api/watch-quotes?codes=' + encodeURIComponent(need)).then((r) => r.json()).then((d) => { if (d && d.quotes) e.q = d.quotes; })
+      .catch(() => {}).finally(() => { e.loading = false; e.at = Date.now(); try { render(); } catch (_){} });
+  }
+  return e.q;
+}
 function homeScrColHtml(kind){
   homeScrLoad(kind);
   const cfg = HOME_SCR[kind], st = homeScrState[kind], d = st.d, col = 'home_' + kind;
-  const title = (n, md) => '<div class="hr-title" title="' + wlEsc(cfg.tip) + '">' + cfg.title + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔' + (md ? '・' + md + ' 收盤' : '') + '</span>') + '</div>';
+  const title = (n, md) => '<div class="hr-title" title="' + wlEsc(cfg.tip) + '">' + cfg.title + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔' + (md ? '・' + md + ' 收盤（盤後選股）' : '') + '</span>') + '</div>';   // 2026-11-19 使用者：標明是盤後選股
   if (!d) return '<div class="hr-col">' + title(null) + '<div class="hr-note">' + (st.errAt ? '讀取失敗，稍後再試' : '讀取中…') + '</div></div>';
   const md = d.date ? Number(d.date.slice(5, 7)) + '/' + Number(d.date.slice(8, 10)) : '';
   // 2026-11-15 使用者：K棒左邊加一欄「月線之上」：現價（盤中即時、收盤後＝收盤）在月線（20 日均線，今天用現價算）之上 ↑、之下 ↓
@@ -11206,7 +11220,18 @@ function homeScrColHtml(kind){
     const ma = (sum19 + px) / 20;
     return ma > 0 ? { ma, gap: (px / ma - 1) * 100 } : null;
   };
-  const rows = botSortRows(col, d.rows, { m20: (r) => { const x = m20Of(r); return x ? x.gap : NaN; }, k: (r) => r.chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
+  // 2026-11-19 使用者：名單是前一天收盤選的，K棒（漲跌、紅黑）改看今天即時的；名單那天還沒過完（收盤當天）就照名單那天
+  const liveDay = !!(lastData && lastData.quoteDate && d.date && lastData.quoteDate > d.date);
+  const lq = liveDay ? homeLiveQuotes('scr_' + kind, d.rows.map((r) => r.code)) : {};
+  const kOf = (r) => {
+    const q = lq[r.code];
+    if (liveDay && q && q.price > 0 && Number.isFinite(q.changePercent)){
+      const o = Number(q.open);
+      return { chg: q.changePercent, k: o > 0 ? (q.price > o ? 'red' : q.price < o ? 'black' : '') : '', live: true };
+    }
+    return { chg: r.chg, k: r.k, live: false };
+  };
+  const rows = botSortRows(col, d.rows, { m20: (r) => { const x = m20Of(r); return x ? x.gap : NaN; }, k: (r) => kOf(r).chg, holder: (r) => holderPctOf(r.code), score: (r) => r.score });
   const head = '<div class="hsc-row hsc-m20 hsc-head"><span>' + botSortTh(col, '', '股票') + '</span>' + botSortTh(col, 'm20', '月線<br>之上') + botSortTh(col, 'k', 'K棒') + botSortTh(col, 'holder', '大戶力') + botSortTh(col, 'score', '均線') + '</div>';
   const m20Html = (r) => { const x = m20Of(r); if (!x) return '<span class="hsc-m20c muted" title="月線資料讀取中或日K不足">—</span>';
     const up = x.gap >= 0; return '<span class="hsc-m20c ' + (up ? 'up' : 'down') + '" title="' + wlEsc('月線（20日均線）' + x.ma.toFixed(2) + '，' + (up ? '在上面 ' : '在下面 ') + Math.abs(x.gap).toFixed(1) + '%') + '">' + (up ? '↑' : '↓') + '</span>'; };
@@ -11214,10 +11239,10 @@ function homeScrColHtml(kind){
     (kind === 'red' && hot2Of(r.code) ? '<span class="hsc-stk"><b class="hot2" title="' + wlEsc(hot2Title(hot2Of(r.code))) + '">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</b>' + dtWarnHtml(r.code, false) + '</span>'
       : '<span class="hsc-stk"><b>' + wlEsc(r.code) + '</b> ' + wlEsc(r.name || '') + dtWarnHtml(r.code, false) + '</span>') +   // 2026-11-14 使用者：強勢紅K／240／260 重複 2 份以上就閃
     m20Html(r) +
-    '<span class="hsc-k"><i class="hsc-dot ' + (r.k === 'red' ? 'red' : r.k === 'black' ? 'black' : '') + '">●</i><span class="' + (Number.isFinite(r.chg) ? dirClass(r.chg) : '') + '">' + (Number.isFinite(r.chg) ? (r.chg > 0 ? '+' : '') + r.chg.toFixed(2) + '%' : '—') + '</span></span>' +
+    ((kx) => '<span class="hsc-k" title="' + (kx.live ? '今天即時' : md + ' 收盤') + '"><i class="hsc-dot ' + (kx.k === 'red' ? 'red' : kx.k === 'black' ? 'black' : '') + '">●</i><span class="' + (Number.isFinite(kx.chg) ? dirClass(kx.chg) : '') + '">' + (Number.isFinite(kx.chg) ? (kx.chg > 0 ? '+' : '') + kx.chg.toFixed(2) + '%' : '—') + '</span></span>')(kOf(r)) +
     '<span class="hsc-h">' + holderTagHtml(holderPctOf(r.code), false, true) + '</span>' +
     '<span class="hsc-ma">' + (r.score ?? '—') + '</span></div>';
-  return '<div class="hr-col">' + title(d.rows.length, md) + '<div class="hr-note">' + dtWarnNote(false) + '</div>' + (d.rows.length ? head + rows.map(row).join('') : '<div class="hr-note">這天沒有符合的</div>') + '</div>';
+  return '<div class="hr-col">' + title(d.rows.length, md) + '<div class="hr-note">盤後選股：名單是 ' + md + ' 收盤後選出的；' + (liveDay ? 'K棒、月線之上、大戶力是今天即時行情' : 'K棒是 ' + md + ' 收盤') + '</div><div class="hr-note">' + dtWarnNote(false) + '</div>' + (d.rows.length ? head + rows.map(row).join('') : '<div class="hr-note">這天沒有符合的</div>') + '</div>';
 }
 const HOME_X_MAX = 10, HOME_X_KEY = 'homeXCols';
 // 2026-11-14 使用者：預設（第一次打開、新的瀏覽器／手機／iPad、無痕）就是 13 欄＝原本 10 欄＋240、260、270；自己改過（含全部拿掉）就照自己的
@@ -11482,10 +11507,14 @@ function homePickWatchHtml(){
   }
   const title = (n) => '<div class="hr-title" title="跟「創高黑龍選股（手動）→ 今天 → ② 強勢股觀察中・等收黑」同一份；名單裡的股票哪天收黑，收盤買第 1 批">👁強勢股觀察中・等收黑' + (n === null ? '' : ' <span class="hr-rk">' + n + ' 檔</span>') + '</div>';
   if (!d || d.status !== 'ok' || !d.sim) return title(null) + '<div class="hr-note">' + (pkState.errors[query] ? '算不出來：' + wlEsc(pkState.errors[query].msg) : '計算中…（第一次要把特徵載進記憶體，稍等幾秒）') + '</div>';
-  const pctOfW = (r) => { const q = getStockQuote(r.code); const v = q && Number.isFinite(q.changePercent) ? q.changePercent : r.changePct; return Number.isFinite(v) ? v : -1e9; };
+  // 2026-11-19 使用者：名單是盤後資料沒錯，但漲跌幅要看即時行情——族群表以外的（敬鵬、沛爾生醫…）首頁報價沒有，另外問即時報價
+  const liveW = !!(lastData && lastData.quoteDate && d.date && lastData.quoteDate > d.date);
+  const lqW = liveW ? homeLiveQuotes('pick', (d.sim.watch || []).map((r) => r.code).filter((c) => !getStockQuote(c))) : {};
+  const quoteW = (code) => getStockQuote(code) || (lqW[code] && lqW[code].price > 0 ? lqW[code] : null);
+  const pctOfW = (r) => { const q = quoteW(r.code); const v = q && Number.isFinite(q.changePercent) ? q.changePercent : r.changePct; return Number.isFinite(v) ? v : -1e9; };
   const watch = pkRankRows((d.sim.watch || []).map((r) => Object.assign({}, r))).sort((a, b) => pctOfW(b) - pctOfW(a));   // 2026-11-10 使用者：照即時漲跌幅排、漲越多越上面（同幅度維持綜合分順序）
   const row = (r) => {
-    const q = getStockQuote(r.code);
+    const q = quoteW(r.code);
     const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : r.changePct;
     return '<div class="hr-row hr-stk hr-pkw" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name || '') + '" tabindex="0" role="button" title="' + wlEsc((r.group || '') + '・綜合 ' + (r.combo ?? '—') + '・均線分 ' + (r.score ?? '—') + '・創高 ' + (r.hiLen ?? '—') + ' 天・週籌碼 ' + swPct(r.weekPct) + '・營收年增 ' + swPct(r.revYoy, 1)) + '">' +
       (hot2Of(r.code) ? '<div class="l1"><span class="hot2" title="' + wlEsc(hot2Title(hot2Of(r.code))) + '"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name || r.code) + '</span></span>'
@@ -11498,7 +11527,7 @@ function homePickWatchHtml(){
   const cd = pkCustomDiff();
   const mode = cd.any ? '<div class="hr-note hr-pkw-mode">' + (pkHomeMine ? '⚙ 用你在選股視窗存的參數／名單' : '規則：預設（跟無痕視窗一樣）') +
     ' <button class="hr-pkw-tg" data-pkw-toggle="1" title="你存的參數有 ' + cd.n + ' 項跟預設不同、手動名單 ' + cd.lists + ' 週">' + (pkHomeMine ? '改回預設' : '改看我的設定') + '</button></div>' : '';
-  return title(watch.length) + '<div class="hr-note">資料 ' + wlEsc(swMmdd(d.date)) + ' 收盤・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・照漲跌幅排、漲越多越上面；' + dtWarnNote(false) + '</div>' + mode +
+  return title(watch.length) + '<div class="hr-note">名單 ' + wlEsc(swMmdd(d.date)) + ' 收盤後選出（盤後選股）' + (liveW ? '、漲跌幅即時' : '') + '・' + (free ? '還有 ' + free + ' 個空位' : '滿檔') + '・照漲跌幅排、漲越多越上面；' + dtWarnNote(false) + '</div>' + mode +
     (watch.length ? watch.map(row).join('') : '<div class="hr-note">目前沒有</div>');
 }
 function homeObsColHtml(){
@@ -18599,7 +18628,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-18 23:32:51';
+const BUILD_STAMP = '2026-11-19 13:45:40';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
