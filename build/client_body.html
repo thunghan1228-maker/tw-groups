@@ -10638,7 +10638,12 @@ function homeMfLoad(){
   if (homeMfState.d && Date.now() - homeMfState.at < 10 * 60e3) return;
   if (homeMfState.errAt && Date.now() - homeMfState.errAt < 60e3) return;
   homeMfState.loading = true;
-  fetch('/api/screener?' + HOME_MF_QS).then((r) => r.json().then((d) => ({ ok: r.ok, d }))).then(({ ok, d }) => {
+  // 2026-11-19 使用者：還沒更新前看最後一個有資料的交易日——今天的融資晚上才公布，還沒出來就看前一個交易日（跟融資增加股票一樣），不要顯示今天 0 檔
+  const get = (qs) => fetch('/api/screener?' + HOME_MF_QS + qs).then((r) => r.json().then((d) => ({ ok: r.ok, d })));
+  get('').then(({ ok, d }) => {
+    if (!ok || !d || !Array.isArray(d.rows) || d.marginReady || !Array.isArray(d.dates) || d.dates.length < 2) return { ok, d };
+    return get('&date=' + encodeURIComponent(d.dates[d.dates.length - 2]));
+  }).then(({ ok, d }) => {
     if (ok && d && Array.isArray(d.rows) && d.params && 'mf' in d.params){ homeMfState.d = d; homeMfState.at = Date.now(); homeMfState.errAt = 0; }
     else homeMfState.errAt = Date.now();
   }).catch(() => { homeMfState.errAt = Date.now(); }).finally(() => { homeMfState.loading = false; try { render(); } catch (_){} try { botRerunCols(); } catch (_){} });   // 機器人 14 也用這份
