@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-19 15:56:36";
+const BUILD_STAMP = "2026-11-19 16:05:17";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -9462,8 +9462,17 @@ function race333Model(){
   const weakTriple = weak33.filter((r) => weakFireMap.has(r.code) && weakRiverMap.has(r.code))
     .map((r) => Object.assign({}, r, { fireGroupRank: weakFireMap.get(r.code).groupRank, riverGroupRank: weakRiverMap.get(r.code).groupRank }))
     .sort((a, b) => b.groupRank - a.groupRank || a.pct - b.pct);
+  // 2026-11-19 使用者：「三落空怎麼可能 0 檔」——大跌天（櫃買 −7%）後段族群最弱的幾乎都跌停鎖死，被「熄火空不含跌停／跌超過 FIRE_MAX_PCT%」
+  // 「落馬空不含跌停」「斷流空跌幅不超過 7%」排除（空不到），三落空就變 0 檔。三落空本身不變；把這三個條件拿掉後三份都有的另列 weakTripleLocked
+  // （跌停鎖死／跌太深・空不到），讓人看得出不是卡住；不算進三落空、不閃綠、不記發生時間。
+  const weak30Deep = weakList((g, rk) => rk >= total - fireGroupTop + 1, (n) => Math.ceil(n / 3),
+    (r) => r.pct <= -FIRE_MIN_PCT && belowOtc(r) && (r.belowYesterday || r.belowDayBefore !== null) && (r.volume === null || r.volume >= FIRE_MIN_VOLUME));
+  const weak33Deep = weakList((g, rk) => HORSE_GROUPS.has(g.name) && rk >= total - horseLimit + 1, (n) => Math.max(1, Math.round(n / 3)), (r) => belowOtc(r));
+  const deep30 = new Set(weak30Deep.map((r) => r.code)), deep34 = new Set(weak34All.map((r) => r.code)), tripleCodes = new Set(weakTriple.map((r) => r.code));
+  const weakTripleLocked = weak33Deep.filter((r) => deep30.has(r.code) && deep34.has(r.code) && !tripleCodes.has(r.code))
+    .sort((a, b) => b.groupRank - a.groupRank || a.pct - b.pct);
   return {
-    fires, fireLocked, fireGroupTop, bladeUpper, bladeMiddle, bladeLower, bladeHarvest, both, triple, weak30, weak33, weak34, weak34Over, weakTriple,
+    fires, fireLocked, fireGroupTop, bladeUpper, bladeMiddle, bladeLower, bladeHarvest, both, triple, weak30, weak33, weak34, weak34Over, weakTriple, weakTripleLocked,
     total, half, otcPct, otcLabel: otcStrengthLatest ? otcStrengthLatest.label : null, hasDaily, bladeShortFrom,
     dates: groupDailyChanges && groupDailyChanges.dates ? groupDailyChanges.dates : [],
     horseLimit, riverLimit, horses,
@@ -10937,8 +10946,14 @@ function homeWeak3ColHtml(m){
   const row = (r) => '<div class="hr-row hr-stk hr-wrapold" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + hmW(seenW[r.code]) + ' 進三落空・' + wlEsc(r.groupName) + '・族排第 ' + r.groupRank + ' 名（共 ' + m.total + ' 族）">' +
     '<span class="hr-rk" style="color:#a78bfa">' + hmW(seenW[r.code]) + '</span><span class="hr-rk hr-gr">' + r.groupRank + '</span><span class="hr-bear-pill ' + dirClass(r.pct) + (bw3.has(String(r.code).toUpperCase()) ? ' hotbear" title="' + wlEsc(bw3.get(String(r.code).toUpperCase()).join('、') + ' 都有') : '') + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' + grpTagHtml(r.groupName) + '<span class="hr-tail">' +
     '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' + homeHoldHtml(r.code) + '</span></div>';
+  // 2026-11-19 使用者：大跌天三落空 0 檔看起來像卡住——跌停鎖死／跌太深（空不到）的另列在下面，灰色、不算檔數
+  const lock0 = m.weakTripleLocked || [], lock = homeColHoldFilter('w3', lock0);
+  const lockRow = (r) => '<div class="hr-row hr-stk hr-wrapold" style="opacity:.6" data-code="' + r.code + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + (r.limitDown ? '跌停鎖死' : '跌超過 ' + FIRE_MAX_PCT + '%') + '・空不到・' + wlEsc(r.groupName) + '・族排第 ' + r.groupRank + ' 名（共 ' + m.total + ' 族）">' +
+    '<span class="hr-rk" style="color:#a78bfa">' + (r.limitDown ? '跌停' : '太深') + '</span><span class="hr-rk hr-gr">' + r.groupRank + '</span><span class="hr-bear-pill ' + dirClass(r.pct) + '"><span class="hr-code">' + r.code + '</span><span class="hr-name">' + wlEsc(r.name) + '</span></span>' + grpTagHtml(r.groupName) + '<span class="hr-tail">' +
+    '<span class="hr-avg ' + dirClass(r.pct) + '">' + fmt(r.pct) + '%</span>' + homeHoldHtml(r.code) + '</span></div>';
+  const lockHtml = lock.length ? '<div class="hr-sep" title="三份名單都有，但跌停鎖死或跌太深（熄火空跌超過 ' + FIRE_MAX_PCT + '%、斷流空跌超過 7%），空不到，所以不算進三落空">----↓(跌停鎖死／跌太深・空不到 ' + lock.length + ' 檔)↓----</div>' + lock.map(lockRow).join('') : '';
   return '<div class="hr-col"><div class="hr-title bear" title="' + tip + '">三落空<span class="hr-rk">' + rows.length + ' 檔' + (homeColHold.w3 ? '／共 ' + rows0.length : '') + '</span></div>' + homeColHoldBtn('w3') +
-    (rows.length ? rows.map(row).join('') : '<div class="hr-note">' + (rows0.length ? '目前沒有大戶力 ≤ −10% 的' : '目前沒有符合的股票') + '</div>') + '</div>';
+    (rows.length ? rows.map(row).join('') : '<div class="hr-note">' + (rows0.length ? '目前沒有大戶力 ≤ −10% 的' : lock0.length ? '目前沒有空得到的（下面是跌停鎖死／跌太深的）' : '目前沒有符合的股票') + '</div>') + lockHtml + '</div>';
 }
 // 2026-11-18 使用者：首頁 30加33加34 加「大戶力 ≥ +10%」、三落空加「大戶力 ≤ −10%」篩選（各欄自己切，記在這台電腦）
 var homeColHold = {};
@@ -18673,7 +18688,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-19 15:56:36';
+const BUILD_STAMP = '2026-11-19 16:05:17';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -27465,7 +27480,10 @@ function botAnswerRaw(raw){
     // 時間近的排上面、早的在下面；同一分鐘照族群名次（越大越弱的在上面）、再照跌幅
     const rows = m.weakTriple.slice().sort((a, b) => (Math.floor((seenW[b.code] || 0) / 60000) - Math.floor((seenW[a.code] || 0) / 60000)) || b.groupRank - a.groupRank || a.pct - b.pct);
     return wrap('三落空', (rows.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') : '') + (rows.map((r) => botLine('<span><span style="color:#a78bfa;font-variant-numeric:tabular-nums">' + hmW(seenW[r.code]) + '</span> ' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>') + '</span><span class="bot-tail">' + grpTagHtml(r.groupName) + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow')).join('') || botLine('目前沒有', 'bot-dim')) +
-      botLine('熄火空 ' + m.weak30.length + '・落馬空 ' + m.weak33.length + '・斷流空 ' + m.weak34.length + (m.weak34Over.length ? '（跌超過 7% 的 ' + m.weak34Over.length + ' 檔不列入，列在最下面）' : '') + '；三份都有、可放空（有券、非處置股）才列，前面數字＝族群名次（越大越弱）', 'bot-dim') + otcFoot() + weakOverHtml(m),
+      botLine('熄火空 ' + m.weak30.length + '・落馬空 ' + m.weak33.length + '・斷流空 ' + m.weak34.length + (m.weak34Over.length ? '（跌超過 7% 的 ' + m.weak34Over.length + ' 檔不列入，列在最下面）' : '') + '；三份都有、可放空（有券、非處置股）才列，前面數字＝族群名次（越大越弱）', 'bot-dim') +
+      ((m.weakTripleLocked || []).length ? botLine('跌停鎖死／跌太深・空不到 ' + m.weakTripleLocked.length + ' 檔（三份都有，但不算進三落空）', 'bot-dim') +
+        m.weakTripleLocked.map((r) => botLine('<span style="opacity:.6"><span style="color:#a78bfa">' + (r.limitDown ? '跌停' : '太深') + '</span> ' + r.groupRank + ' ' + botStk(r.code, r.name, ' <span class="' + dirClass(r.pct) + '">' + botPct(r.pct) + '</span>') + '</span><span class="bot-tail">' + grpTagHtml(r.groupName) + holderTagHtml(holderPctOf(r.code), false, true) + '</span>', 'bot-hrow')).join('') : '') +
+      otcFoot() + weakOverHtml(m),
       stamp + '・熄火落馬斷流');
   }
   if (q === '31'){
