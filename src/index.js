@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-19 15:52:03";
+const BUILD_STAMP = "2026-11-19 15:56:36";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -11283,7 +11283,7 @@ function homeFixedBotColHtml(c, wide, extra){   // extra＝疊在這欄下面的
   // 2026-11-14 使用者：空中空(999) 上面不要小字「🤖 999」（標題後面已經寫 999），標題才會跟右邊強中強對齊
   return '<div class="hr-stack home-xcol home-fixcol' + (wide ? ' hx-wide' : '') + '" data-hx-key="' + wlEsc(c) + '"><div class="home-botcol' + (c === '999' ? ' hx-nohead' : '') + '">' + (c === '999' ? '' : '<div class="hx-head"><span>🤖 ' + wlEsc(c) + '</span></div>') + html + '</div>' + (extra || '') + '</div>';
 }
-// 2026-11-19 使用者：首頁 12空(123) 下面加「融資增加股票（盤後・前一天）」：系統選股「融資大增」（融資增加 ≥ 1,000 張）那份，
+// 2026-11-19 使用者：首頁加「融資增加股票（盤後・前一天）」：系統選股「融資大增」（融資增加 ≥ 1,000 張）那份（先放 123 下面，同一天改疊在空中空(999) 下面），
 // 融資是收盤後晚上才公布，盤中看的是前一個交易日的；代號股名、即時漲跌幅、盤中大戶力
 var homeMup = { d: null, at: 0, loading: false, errAt: 0 };
 function homeMupLoad(){
@@ -11351,11 +11351,11 @@ function homeRank4Html(){
     // 2026-10-28 使用者（又改）：今日強勢股放在第五欄 30加33加34 的下面，一樣用紅框框起來（先前排第四欄／疊在當沖多1 下面都拿掉）
     // 2026-11-14 使用者：首頁順序改成 777、強中強、強勢股觀察中、強勢紅K（下面疊創高黑龍）、動能選股的熱門趨勢概念股(240)、日動能(260)、週動能(270)，其他照原本順序往後排
     // 2026-11-14 使用者：777 右邊加機器人 32（新刀劍空），32 右邊再加 123（12空）；2026-11-15 使用者：順序改成 32、123、777（777 放第三欄）
-    // 2026-11-19 使用者：123 下面疊「融資增加股票（盤後・前一天）」；193（空族群必殺）放在 123 右邊、777 左邊
-    homeFixedBotColHtml('32', true) + homeFixedBotColHtml('123', true, homeRedBox(homeMarginUpColHtml())) + homeFixedBotColHtml('193', true) +
+    // 2026-11-19 使用者：193（空族群必殺）放在 123 右邊、777 左邊（融資增加股票改疊在空中空(999) 下面）
+    homeFixedBotColHtml('32', true) + homeFixedBotColHtml('123', true) + homeFixedBotColHtml('193', true) +
     homeFixedBotColHtml('777', true) +   // 功課卡片條列（777／32／123 兩份以上都有的閃綠）
     '<div class="hr-stack">' + homeObsListColHtml('pre') + '</div>' +   // 2026-11-14 使用者：盤前空觀察（使用者每天給名單）放在空中空(999) 左邊
-    homeFixedBotColHtml('999', true) +   // 2026-11-14 使用者：空中空(999)＝777／32／123 重疊的，放在強中強(888) 左邊
+    homeFixedBotColHtml('999', true, homeRedBox(homeMarginUpColHtml())) +   // 2026-11-19 使用者：融資增加股票（盤後・前一天）疊在空中空下面   // 2026-11-14 使用者：空中空(999)＝777／32／123 重疊的，放在強中強(888) 左邊
     '<div class="hr-stack hx-wide">' + homeRedBox(homeSsColHtml()) + '</div>' +   // 強中強（四份重複兩份以上；iPad／手機佔兩格寬）
     '<div class="hr-stack">' + homeObsListColHtml('close') + '</div>' +   // 2026-11-14 使用者：收盤觀察股（使用者每天給名單）放在強中強(888) 右邊
     // 2026-11-18 使用者：905 突破廣播、1+2 突破廣播搬到收盤觀察股右邊（原本在發動右邊、183 前面；905 在左、1+2 在右不變）
@@ -18673,7 +18673,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-19 15:52:03';
+const BUILD_STAMP = '2026-11-19 15:56:36';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19639,7 +19639,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">新刀劍空(32)・12空(123)／融資增加股票・空族群必殺(193)・777・盤前空觀察・空中空(999)・強中強(888)・收盤觀察股・905 突破廣播・1+2 突破廣播・30加33加34／投信買超前15・188・三落空・強勢股觀察中・強勢紅K／創高黑龍・熱門趨勢概念股(240)・日動能(260)・週動能(270)・多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・盤中大戶力・發動／今日強勢股／外資買超前15・183／族群漲幅(12)／155</div></div>' +
+        '<div class="section-head"><div class="section-title">新刀劍空(32)・12空(123)・空族群必殺(193)・777・盤前空觀察・空中空(999)／融資增加股票・強中強(888)・收盤觀察股・905 突破廣播・1+2 突破廣播・30加33加34／投信買超前15・188・三落空・強勢股觀察中・強勢紅K／創高黑龍・熱門趨勢概念股(240)・日動能(260)・週動能(270)・多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・盤中大戶力・發動／今日強勢股／外資買超前15・183／族群漲幅(12)／155</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
