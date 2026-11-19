@@ -11283,7 +11283,8 @@ try { homeTurnTab = localStorage.getItem('turnTab') === 'dt' ? 'dt' : 'turn'; } 
 const HOME_TURN_TOP = 20;
 function homeTurnColHtml(){
   const dt = homeTurnTab === 'dt';
-  const d = dt ? botFetchCache('dtRank', '/api/daytrade-rank?top=' + HOME_TURN_TOP, 5 * 60e3) : botFetchCache('turnRank', '/api/turnover-rank?top=' + HOME_TURN_TOP, 60e3);
+  const dtD = botFetchCache('dtRank', '/api/daytrade-rank?top=' + HOME_TURN_TOP, 5 * 60e3), turnD = botFetchCache('turnRank', '/api/turnover-rank?top=' + HOME_TURN_TOP, 60e3);   // 兩邊都先抓好，切換馬上有
+  const d = dt ? dtD : turnD;
   const md = (v) => (v ? Number(String(v).slice(5, 7)) + '/' + Number(String(v).slice(8, 10)) : '');
   const ok = !!(d && d.status === 'ok' && Array.isArray(d.rows));
   const tip = dt ? '最近一個收盤日的熱門當沖標的：當沖成交張數前 ' + HOME_TURN_TOP + ' 名，當沖占比＝當沖成交股數 ÷ 那天總成交股數（證交所、櫃買中心收盤後晚上公布；＊＝暫停現股賣出後現款買進當沖）'
