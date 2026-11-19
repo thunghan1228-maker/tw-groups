@@ -1807,6 +1807,14 @@ const WORKER_ENTRY = {
       // 熱門趨勢概念股（2026-11-14 使用者：照券商 App「動能選股 → 熱門趨勢概念股」做機器人代碼）：240 日最高收盤、240 日漲幅，收盤後才變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/trend-high", 300);
     }
+    if (url.pathname === "/api/turnover-rank") {
+      // 首頁「週轉率高」（2026-11-19 使用者）：今天成交量 ÷ 已發行股數前幾名；後端盤中 3 分鐘、盤外 15 分鐘快取，這裡再快取 1 分鐘
+      return await proxyHanstockBars("/api/hub/turnover-rank" + url.search, 60);
+    }
+    if (url.pathname === "/api/daytrade-rank") {
+      // 首頁「現股當沖」（2026-11-19 使用者）：最近一個收盤日當沖張數前幾名＋當沖占比；晚上才公布，快取 2 分鐘
+      return await proxyHanstockBars("/api/hub/daytrade-rank" + url.search, 120);
+    }
     if (url.pathname === "/api/inst-rank") {
       // 研究室「外資買賣超」「投信買賣超」（2026-11-05 使用者）：全市場一般股票的外資、投信買賣超（張）；沒指定日期＝最新一天（收盤後上櫃常晚進來，快取 1 分鐘），往日不會再變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/inst-rank" + url.search, url.searchParams.get("date") ? 300 : 60);
