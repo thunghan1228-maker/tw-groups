@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-20 14:59:43";
+const BUILD_STAMP = "2026-11-20 15:03:37";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -10990,6 +10990,8 @@ function homeWeak3ColHtml(m){
 }
 // 2026-11-18 使用者：首頁 30加33加34 加「大戶力 ≥ +10%」、三落空加「大戶力 ≤ −10%」篩選（各欄自己切，記在這台電腦）
 var homeColHold = {};
+var f23Hold = false;   // 2026-11-20 使用者：火多多(23)「大戶力 ≥ 0」篩選
+try { f23Hold = localStorage.getItem('f23Hold') === '1'; } catch (_){ f23Hold = false; }
 try { homeColHold = JSON.parse(localStorage.getItem('colHold') || '{}') || {}; } catch (_){ homeColHold = {}; }
 var HOME_COL_HOLD = { '334': { lbl: '大戶力 ≥ +10%', ok: (v) => v >= 10 }, w3: { lbl: '大戶力 ≤ −10%', ok: (v) => v <= -10 } };
 function homeColHoldFilter(k, list){
@@ -18781,7 +18783,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-20 14:59:43';
+const BUILD_STAMP = '2026-11-20 15:03:37';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19906,6 +19908,7 @@ document.getElementById('app').addEventListener('click', (e) => {
   if (t.closest('[data-hx-go]')){ const i = document.getElementById('hxQ'); homeXAdd(i ? i.value : ''); const j = document.getElementById('hxQ'); if (j) j.value = ''; return; }
   const hd = t.closest('[data-hx-del]'); if (hd){ homeXCols.splice(Number(hd.dataset.hxDel), 1); homeXSave(); render(); return; }
   const bck = t.closest('[data-col-hold]'); if (bck){ const k = bck.dataset.colHold; homeColHold[k] = !homeColHold[k]; try { localStorage.setItem('colHold', JSON.stringify(homeColHold)); } catch (_){} render(); return; }   // 2026-11-18 30加33加34／三落空的大戶力篩選
+  const bf23 = t.closest('[data-f23-hold]'); if (bf23){ f23Hold = !f23Hold; try { localStorage.setItem('f23Hold', f23Hold ? '1' : '0'); } catch (_){} render(); try { botRerunCols(); } catch (_){} return; }   // 2026-11-20 火多多「大戶力 ≥ 0」
   const btt = t.closest('[data-turn-tab]'); if (btt){ homeTurnTab = btt.dataset.turnTab === 'dt' ? 'dt' : 'turn'; try { localStorage.setItem('turnTab', homeTurnTab); } catch (_){} render(); return; }   // 2026-11-19 週轉率高／現股當沖切換
   const bch = t.closest('[data-bcast-hold]'); if (bch){ homeBcastHold = !homeBcastHold; try { localStorage.setItem('bcastHold', homeBcastHold ? '1' : '0'); } catch (_){} render(); return; }   // 2026-11-18 905／1+2 突破廣播「大戶力 ≥ +10%」
   const hm = t.closest('[data-hx-move]'); if (hm){ const [i, d] = hm.dataset.hxMove.split(':').map(Number), j = i + d; if (j >= 0 && j < homeXCols.length){ [homeXCols[i], homeXCols[j]] = [homeXCols[j], homeXCols[i]]; homeXSave(); render(); } return; }
@@ -27299,17 +27302,21 @@ function botAnswerRaw(raw){
         return (hd ? botLine('<span class="b32-ghd-g">' + gl + '</span><span class="b32-ghd-p">漲跌幅</span><span class="b32-ghd-h">大戶力</span>', 'bot-head b32-ghd f23hd') : botLine(gl, 'bot-head')) + g.list.map(row).join('');
       }).join('');
     };
-    const sec = (title, l, cls) => botLine(title + '　' + l.length + ' 檔', 'bot-sep' + (cls ? ' ' + cls : '')) + (l.length ? grpBlock(l) : botLine('目前沒有', 'bot-dim'));
-    const n = fm.strong.length + fm.middle.length + fm.spaceTop.length + fm.chase.length;
+    // 2026-11-20 使用者：火多多上面加「大戶力 ≥ 0」篩選（按一下切換，記在這台；大戶力還沒有數字的先不列）
+    const holdOk = (r) => { if (!f23Hold) return true; const hp = holderPctOf(r.code); return Number.isFinite(hp) && hp >= 0; };
+    const nAll = fm.strong.length + fm.middle.length + fm.spaceTop.length + fm.chase.length;
+    const sec = (title, l0, cls) => { const l = l0.filter(holdOk); return botLine(title + '　' + l.length + ' 檔', 'bot-sep' + (cls ? ' ' + cls : '')) + (l.length ? grpBlock(l) : botLine(l0.length ? '目前沒有大戶力 ≥ 0 的' : '目前沒有', 'bot-dim')); };
+    const n = [fm.strong, fm.middle, fm.spaceTop, fm.chase].reduce((a, l) => a + l.filter(holdOk).length, 0);
     const otcT = kill193OtcTail();
-    return wrap(t,
+    const holdBtn = '<div class="bot-line b777-params"><button type="button" class="b777-p' + (f23Hold ? ' on' : '') + '" data-f23-hold="1" title="只看大戶力 ≥ 0 的（大戶力還沒有數字的先不列；機器人跟首頁一起切，記在這台電腦）">' + (f23Hold ? '☑ ' : '☐ ') + '大戶力 ≥ 0</button></div>';
+    return wrap(t, holdBtn +
       sec('----↓(強多積極・族群前 ' + FIRE23_TOP + ' 名)↓----', fm.strong, 'f23-strong') +
       sec('----↓(中間・族群倒數第 11～25 名)↓----', fm.middle) +
       sec('----↓(空方打多・族群倒數第 6～10 名)↓----', fm.spaceTop) +
       sec('----↓(追高區・今天已漲 ' + FIRE23_CHASE_PCT + '% 以上／漲停，不追)↓----', fm.chase) +
       (otcT ? botLine('------↓(櫃買)↓------', 'bot-sep') + botLine(otcT + (fm.otcPct !== null ? '　櫃買 ' + botPct(fm.otcPct) : ''), 'bot-warn') : '') +
       botLine('跟新刀劍空(32) 剛好顛倒的多方版：同樣那 27 族、每族最強的一段；🐎＝昨天跌 ' + FIRE23_PRIOR_DROP + '% 以上今天拉上來、🚀＝前天跌 ' + FIRE23_PRIOR_DROP + '% 以上（要在族裡最強 3 檔、昨天／前天在族裡後一半）、🌱＝最強第 4、5 檔前兩天跌過 ' + FIRE23_BEGINNER_DROP + '% 以上、🔥＝追高區；只有 🐎 的要在空方打多或比櫃買強；族群倒數 5 名不列・每段裡面依族群分開，族群照族裡最新那檔的時間排、族裡每檔也照時間排（最近的在上面）・左邊時間＝第一次進名單的時段（盤中每 5 分鐘記一次，誰的網站開著都記得到；後端還沒記到的用這台電腦第一次看到的時間）', 'bot-dim'),
-      (fm.hasDaily ? '' : '日K還沒載入，🐎🚀 條件先不看・') + '今天 ' + n + ' 檔');
+      (fm.hasDaily ? '' : '日K還沒載入，🐎🚀 條件先不看・') + '今天 ' + n + ' 檔' + (f23Hold ? '（大戶力 ≥ 0；共 ' + nAll + ' 檔）' : ''));
   }
   mm = /^2([1-9])?(?:-(\\d{1,3}))?$/.exec(q);
   if (mm){
@@ -28277,6 +28284,7 @@ document.getElementById('botModal').addEventListener('click', (e) => {
   const bs = t.closest('[data-bsort]'); if (bs){ botSortClick(bs); botRerunCols(); try { render(); } catch (_){} return; }
   const bds = t.closest('[data-dyn-side]'); if (bds){ dynState.side = bds.dataset.dynSide; botRerunCols(); try { dynRerender(); render(); } catch (_){} return; }
   const bdh = t.closest('[data-dyn-hold]'); if (bdh){ dynState.hold = !dynState.hold; try { localStorage.setItem('dynHold', dynState.hold ? '1' : '0'); } catch (_){} botRerunCols(); try { render(); } catch (_){} return; }
+  const bf23 = t.closest('[data-f23-hold]'); if (bf23){ f23Hold = !f23Hold; try { localStorage.setItem('f23Hold', f23Hold ? '1' : '0'); } catch (_){} botRerunCols(); try { render(); } catch (_){} return; }   // 2026-11-20 火多多「大戶力 ≥ 0」（機器人那邊）
   const bdi = t.closest('[data-dyn-inst]'); if (bdi){ dynState.inst = bdi.dataset.dynInst; botRerunCols(); try { dynRerender(); render(); } catch (_){} return; }
   const mp = t.closest('[data-mom-p]');
   if (mp){ const [k, v] = mp.dataset.momP.split(':'); if (k === 'top') momParams.top = Number(v); else if (k === 'almost') momParams.almost = v === '1'; momSave(); botRerunCols(); return; }
