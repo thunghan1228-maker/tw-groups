@@ -1811,6 +1811,10 @@ const WORKER_ENTRY = {
       // 首頁「週轉率高」（2026-11-19 使用者）：今天成交量 ÷ 已發行股數前幾名；後端盤中 3 分鐘、盤外 15 分鐘快取，這裡再快取 1 分鐘
       return await proxyHanstockBars("/api/hub/turnover-rank" + url.search, 60);
     }
+    if (url.pathname === "/api/turnover-watch") {
+      // 首頁第一欄「週轉率觀察」（2026-11-21 使用者）：自己報價組合那份股票的即時週轉率、成交值、股期、當沖占比；後端盤中 3 分鐘快取，這裡再 1 分鐘
+      return await proxyHanstockBars("/api/hub/turnover-watch" + url.search, 60);
+    }
     if (url.pathname === "/api/daytrade-rank") {
       // 首頁「現股當沖」（2026-11-19 使用者）：最近一個收盤日當沖張數前幾名＋當沖占比；晚上才公布，快取 2 分鐘
       return await proxyHanstockBars("/api/hub/daytrade-rank" + url.search, 120);
