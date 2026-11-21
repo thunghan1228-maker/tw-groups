@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-21 17:01:44";
+const BUILD_STAMP = "2026-11-21 17:09:37";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -213,6 +213,9 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .hr-row .hr-turn2{color:#f59e0b;font-weight:700;margin-right:6px;}
   .hr-ttcol .hr-row .hr-l2{flex-wrap:wrap;row-gap:2px;}
   .hr-row .hr-mdn{margin-left:auto;margin-right:8px;font-size:12px;font-weight:700;color:#4ade80;font-variant-numeric:tabular-nums;white-space:nowrap;} body.home-light .hr-row .hr-mdn{color:#15803d;}   /* 2026-11-21 融資大減的減少張數 */
+  .tw-g{display:grid;grid-template-columns:18px minmax(0,1fr) 58px 64px 62px;column-gap:4px;align-items:center;}   /* 2026-11-21 週轉率觀察：#、股票、漲跌幅、週轉率／成交值／當沖占比、大戶力 對齊 */
+  .tw-hd{padding:2px 6px;font-size:11px;font-weight:700;color:var(--muted);border-top:1px solid var(--line);} .tw-hd span:nth-child(n+3){text-align:right;} .tw-hd span:last-child{text-align:center;}
+  .hr-row.tw-row{display:grid;} .tw-row .tw-stk{min-width:0;display:flex;align-items:center;gap:2px;overflow:hidden;white-space:nowrap;} .tw-row .hr-avg{text-align:right;margin-left:0;} .tw-row .hr-turn{text-align:right;margin-left:0;} .tw-row .hr-hold{margin-left:0;justify-self:center;} .tw-row .tw-l2{grid-column:2 / -1;}
   .tw-tag{font-style:normal;font-size:10px;font-weight:800;line-height:14px;padding:0 3px;margin-left:3px;border-radius:3px;background:#1d4ed8;color:#fff;} .tw-tag.mini{background:#7c3aed;}   /* 2026-11-21 週轉率觀察：期＝有股期、小＝有小型股期 */   /* 窄的時候第二行換行，不要把法人／當沖占比切掉 */
   body.home-light .hr-row .hr-turn,body.home-light .hr-row .hr-turn2{color:#b45309;}
   /* 首頁第二欄：當沖多（2026-10-19 使用者：取代 183 原本的位置；跟每日功課「當沖多」同一份：中四個／中三個／中兩個） */
@@ -11390,44 +11393,54 @@ function twListLoad(){
 }
 var twTop = 50;
 try { const v = Number(localStorage.getItem('twTop')); if ([20, 30, 50].includes(v)) twTop = v; } catch (_){ /* 用預設 */ }
+// 2026-11-21 使用者：加「我的名單／全市場」切換（全市場＝上市上櫃一般個股週轉率前 50，成交最熱絡、當沖占比最高也從全市場挑）
+var twScope = 'mine';
+try { twScope = localStorage.getItem('twScope') === 'market' ? 'market' : 'mine'; } catch (_){ /* 用預設 */ }
 function homeTurnWatchColHtml(){
   twListLoad();
-  const L = twList.d;
-  const tip = '自己報價組合那份股票照週轉率（成交量 ÷ 股本）排；期＝有股票期貨、小＝有小型股票期貨；成交值＝量 × 現價估的；當沖占比＝前一個交易日當沖股數 ÷ 成交股數';
-  const title = (extra) => '<div class="hr-title" title="' + wlEsc(tip) + '">🔄週轉率觀察' + (extra || '') + '</div>';
-  if (!L) return '<div class="hr-col hr-ttcol">' + title() + '<div class="hr-note">' + (twList.at ? '還沒有名單' : '讀取中…') + '</div></div>';
+  const L = twList.d, mkt = twScope === 'market';
+  const tip = (mkt ? '全市場一般個股' : '自己報價組合那份股票') + '照週轉率（成交量 ÷ 股本）排；期＝有股票期貨、小＝有小型股票期貨；成交值＝量 × 現價估的；當沖占比＝前一個交易日當沖股數 ÷ 成交股數';
+  const title = (extra) => '<div class="hr-title" title="' + wlEsc(tip) + '">🔄週轉率觀察' + (mkt ? '・全市場' : '') + (extra || '') + '</div>';
+  const scopeBtns = '<div class="hr-bhold hr-ttabs">' + [['mine', '我的名單'], ['market', '全市場']].map(([k, l]) => '<button type="button" class="b777-p' + (twScope === k ? ' on' : '') + '" data-tw-scope="' + k + '">' + l + '</button>').join('') + '</div>';
+  const topBtns = '<div class="hr-bhold hr-ttabs">' + [20, 30, 50].map((n) => '<button type="button" class="b777-p' + (twTop === n ? ' on' : '') + '" data-tw-top="' + n + '">前 ' + n + '</button>').join('') + '</div>';
   const grpOf = {}, codes = [];
-  L.groups.forEach((g) => (g.codes || []).forEach((c) => { c = String(c); if (!grpOf[c]){ grpOf[c] = g.name; codes.push(c); } }));
-  const d = botFetchCache('turnWatch', '/api/turnover-watch?codes=' + codes.join(','), 60e3);
+  if (L) L.groups.forEach((g) => (g.codes || []).forEach((c) => { c = String(c); if (!grpOf[c]){ grpOf[c] = g.name; codes.push(c); } }));
+  if (!mkt && !L) return '<div class="hr-col hr-ttcol">' + title() + scopeBtns + '<div class="hr-note">' + (twList.at ? '還沒有名單' : '讀取中…') + '</div></div>';
+  const d = mkt ? botFetchCache('turnWatchMkt', '/api/turnover-watch?scope=market', 60e3) : botFetchCache('turnWatch', '/api/turnover-watch?codes=' + codes.join(','), 60e3);
   const md = (v) => (v ? Number(String(v).slice(5, 7)) + '/' + Number(String(v).slice(8, 10)) : '');
   const ok = !!(d && d.status === 'ok' && Array.isArray(d.rows));
-  const topBtns = '<div class="hr-bhold hr-ttabs">' + [20, 30, 50].map((n) => '<button type="button" class="b777-p' + (twTop === n ? ' on' : '') + '" data-tw-top="' + n + '">前 ' + n + '</button>').join('') + '</div>';
-  const head = title(' <span class="hr-rk">' + codes.length + ' 檔' + (ok && d.date ? '・' + md(d.date) : '') + '</span>') + topBtns + homeUpdHtml('tw', ok ? d.date : null);
-  if (!ok) return '<div class="hr-col hr-ttcol">' + head + '<div class="hr-note">' + (d ? wlEsc(d.message || '讀取失敗，稍後再試') : '讀取中…') + '</div></div>';
-  const lq = homeLiveQuotes('tw', d.rows.map((r) => r.code).filter((c) => !getStockQuote(c)));
+  const head = title(' <span class="hr-rk">' + (mkt ? (ok && d.universe ? d.universe + ' 檔裡' : '') : codes.length + ' 檔') + (ok && d.date ? '・' + md(d.date) : '') + '</span>') + scopeBtns + topBtns + homeUpdHtml('tw', ok ? d.date : null);
+  if (!ok) return '<div class="hr-col hr-ttcol">' + head + '<div class="hr-note">' + (d ? wlEsc(d.message || (mkt ? '全市場資料讀取失敗，稍後再試' : '讀取失敗，稍後再試')) : '讀取中…') + '</div></div>';
+  const all = d.rows.concat(d.hot || [], d.dtTop || []);
+  const lq = homeLiveQuotes('tw' + (mkt ? 'm' : ''), Array.from(new Set(all.map((r) => r.code))).filter((c) => !getStockQuote(c)));
   const pctOf = (r) => { const q = getStockQuote(r.code) || (lq[r.code] && lq[r.code].price > 0 ? lq[r.code] : null); return q && Number.isFinite(q.changePercent) ? q.changePercent : (Number.isFinite(r.chg) ? r.chg : null); };
+  const grpName = (c) => grpOf[c] || (WL_GROUP_INDEX[c] && WL_GROUP_INDEX[c].group) || '';
   const tags = (r) => (r.std ? '<i class="tw-tag">期</i>' : '') + (r.mini ? '<i class="tw-tag mini">小</i>' : '');
   const fmtTurn = (r) => (Number.isFinite(r.turnover) ? r.turnover.toFixed(2) + '%' : '—');
   const fmtVal = (r) => (Number.isFinite(r.value) ? (r.value >= 100 ? r.value.toFixed(0) : r.value.toFixed(1)) + '億' : '—');
   const fmtDt = (r) => (Number.isFinite(r.dtRatio) ? r.dtRatio.toFixed(0) + '%' : '—');
+  const mainLbl = { turn: '週轉率', val: '成交值', dt: '當沖占比' };
+  // 2026-11-21 使用者：每段上面寫欄位名稱（漲跌幅、週轉率／成交值／當沖占比、大戶力），一欄一欄對齊
+  const hdRow = (main) => '<div class="tw-g tw-hd"><span>#</span><span>股票</span><span>漲跌幅</span><span>' + mainLbl[main] + '</span><span>大戶力</span></div>';
   const row = (main) => (r, i) => {
     const pct = pctOf(r);
     const big = main === 'val' ? fmtVal(r) : main === 'dt' ? fmtDt(r) : fmtTurn(r);
     const l2 = [main !== 'turn' ? '<i>週轉</i>' + fmtTurn(r) : '', main !== 'val' ? '<i>成交</i>' + fmtVal(r) : '', main !== 'dt' ? '<i>當沖</i>' + fmtDt(r) : ''].filter(Boolean).join(' ');
-    return '<div class="hr-row hr-stk hr-wrapold" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc((grpOf[r.code] || '') + '・週轉率 ' + fmtTurn(r) + '・成交 ' + (r.volume || 0).toLocaleString('en-US') + ' 張（' + fmtVal(r) + '）' + (Number.isFinite(r.dtRatio) ? '・當沖占比 ' + r.dtRatio + '%（' + md(d.dtDate) + '）' : '') + (r.std ? '・有股票期貨' : '') + (r.mini ? '・有小型股票期貨' : '')) + '">' +
-      '<span class="hr-rk">' + (i + 1) + '</span><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name) + '</span>' + tags(r) + dtWarnHtml(r.code, false) +
+    return '<div class="hr-row hr-stk tw-g tw-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc(grpName(r.code) + '・週轉率 ' + fmtTurn(r) + '・成交 ' + (r.volume || 0).toLocaleString('en-US') + ' 張（' + fmtVal(r) + '）' + (Number.isFinite(r.dtRatio) ? '・當沖占比 ' + r.dtRatio + '%（' + md(d.dtDate) + '）' : '') + (r.std ? '・有股票期貨' : '') + (r.mini ? '・有小型股票期貨' : '')) + '">' +
+      '<span class="hr-rk">' + (i + 1) + '</span>' +
+      '<span class="tw-stk"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name) + '</span>' + tags(r) + dtWarnHtml(r.code, false) + '</span>' +
       '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span>' +
-      '<span class="hr-turn">' + big + '</span>' +
-      '<div class="hr-l2">' + l2 + '<i>' + wlEsc(grpOf[r.code] || '') + '</i><i>大戶力</i>' + homeHoldHtml(r.code) + '</div></div>';
+      '<span class="hr-turn">' + big + '</span>' + homeHoldHtml(r.code) +
+      '<div class="hr-l2 tw-l2">' + l2 + '<i>' + wlEsc(grpName(r.code)) + '</i></div></div>';
   };
   const rows = d.rows;
-  const hot = rows.filter((r) => Number.isFinite(r.value)).slice().sort((a, b) => b.value - a.value).slice(0, 10);
-  const dtTop = rows.filter((r) => Number.isFinite(r.dtRatio) && (r.dtVolume || 0) >= 1000).slice().sort((a, b) => b.dtRatio - a.dtRatio).slice(0, 10);
+  const hot = d.hot || rows.filter((r) => Number.isFinite(r.value)).slice().sort((a, b) => b.value - a.value).slice(0, 10);
+  const dtTop = d.dtTop || rows.filter((r) => Number.isFinite(r.dtRatio) && (r.dtVolume || 0) >= 1000).slice().sort((a, b) => b.dtRatio - a.dtRatio).slice(0, 10);
   const note = '<div class="hr-note">' + (d.source === 'mis' && d.asOf ? '證交所即時量・資料時間 ' + wlEsc(String(d.asOf).slice(0, 5)) : md(d.date) + ' 收盤') + (d.dtDate ? '・當沖占比是 ' + md(d.dtDate) + ' 的' : '') + '・期＝有股期、小＝有小型股期</div>';
   return '<div class="hr-col hr-ttcol">' + head + note +
-    '<div class="hr-sep">----↓(週轉率前 ' + Math.min(twTop, rows.length) + ')↓----</div>' + rows.slice(0, twTop).map(row('turn')).join('') +
-    '<div class="hr-sep">----↓(成交最熱絡・成交值前 10)↓----</div>' + (hot.length ? hot.map(row('val')).join('') : '<div class="hr-note">—</div>') +
-    '<div class="hr-sep">----↓(當沖占比最高・成交 ≥ 1,000 張)↓----</div>' + (dtTop.length ? dtTop.map(row('dt')).join('') : '<div class="hr-note">還沒有當沖資料</div>') + '</div>';
+    '<div class="hr-sep">----↓(週轉率前 ' + Math.min(twTop, rows.length) + ')↓----</div>' + hdRow('turn') + rows.slice(0, twTop).map(row('turn')).join('') +
+    '<div class="hr-sep">----↓(成交最熱絡・成交值前 10)↓----</div>' + (hot.length ? hdRow('val') + hot.map(row('val')).join('') : '<div class="hr-note">—</div>') +
+    '<div class="hr-sep">----↓(當沖占比最高・成交 ≥ 1,000 張)↓----</div>' + (dtTop.length ? hdRow('dt') + dtTop.map(row('dt')).join('') : '<div class="hr-note">還沒有當沖資料</div>') + '</div>';
 }
 // 2026-11-19 使用者：強中強(888) 下面加一欄「週轉率高」（每天前 20 檔，當沖最愛），跟「現股當沖」兩個按鈕切換、放同一欄
 // （照券商 App「當沖選股」的高週轉振幅排行、現股當沖個股排行榜）。
@@ -18843,7 +18856,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-21 17:01:44';
+const BUILD_STAMP = '2026-11-21 17:09:37';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19969,6 +19982,7 @@ document.getElementById('app').addEventListener('click', (e) => {
   const hd = t.closest('[data-hx-del]'); if (hd){ homeXCols.splice(Number(hd.dataset.hxDel), 1); homeXSave(); render(); return; }
   const bck = t.closest('[data-col-hold]'); if (bck){ const k = bck.dataset.colHold; homeColHold[k] = !homeColHold[k]; try { localStorage.setItem('colHold', JSON.stringify(homeColHold)); } catch (_){} render(); return; }   // 2026-11-18 30加33加34／三落空的大戶力篩選
   const bf23 = t.closest('[data-f23-hold]'); if (bf23){ f23Hold = !f23Hold; try { localStorage.setItem('f23Hold', f23Hold ? '1' : '0'); } catch (_){} render(); try { botRerunCols(); } catch (_){} return; }   // 2026-11-20 火多多「大戶力 ≥ 0」
+  const bts = t.closest('[data-tw-scope]'); if (bts){ twScope = bts.dataset.twScope === 'market' ? 'market' : 'mine'; try { localStorage.setItem('twScope', twScope); } catch (_){} render(); return; }   // 2026-11-21 週轉率觀察「我的名單／全市場」
   const btw = t.closest('[data-tw-top]'); if (btw){ twTop = Number(btw.dataset.twTop) || 50; try { localStorage.setItem('twTop', String(twTop)); } catch (_){} render(); return; }   // 2026-11-21 週轉率觀察前 20／30／50
   const btt = t.closest('[data-turn-tab]'); if (btt){ homeTurnTab = btt.dataset.turnTab === 'dt' ? 'dt' : 'turn'; try { localStorage.setItem('turnTab', homeTurnTab); } catch (_){} render(); return; }   // 2026-11-19 週轉率高／現股當沖切換
   const bch = t.closest('[data-bcast-hold]'); if (bch){ homeBcastHold = !homeBcastHold; try { localStorage.setItem('bcastHold', homeBcastHold ? '1' : '0'); } catch (_){} render(); return; }   // 2026-11-18 905／1+2 突破廣播「大戶力 ≥ +10%」
