@@ -1811,6 +1811,10 @@ const WORKER_ENTRY = {
       // 首頁「週轉率高」（2026-11-19 使用者）：今天成交量 ÷ 已發行股數前幾名；後端盤中 3 分鐘、盤外 15 分鐘快取，這裡再快取 1 分鐘
       return await proxyHanstockBars("/api/hub/turnover-rank" + url.search, 60);
     }
+    if (url.pathname === "/api/stock-futures-rank") {
+      // 首頁股期成交量前 30（2026-11-22 使用者）：收盤後一天換一次，快取 5 分鐘
+      return await proxyHanstockBars("/api/hub/stock-futures-rank" + url.search, 300);
+    }
     if (url.pathname === "/api/revenue-tech") {
       // 首頁營收＋技術面（2026-11-22 使用者）：收盤後／營收公布才變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/revenue-tech" + url.search, 300);
