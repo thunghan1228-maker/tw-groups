@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-22 23:18:39";
+const BUILD_STAMP = "2026-11-22 23:37:29";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -19009,7 +19009,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-22 23:18:39';
+const BUILD_STAMP = '2026-11-22 23:37:29';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25541,13 +25541,62 @@ function mbLineSvg(rows, key, color, hiDate, hiVal, fmt, lastLabel){
 }
 // 2026-11-22 使用者：大盤融資維持率從首頁搬到融資簡報最前面。後端 /api/hub/margin-maintenance：上市所有融資股票市值（每檔融資餘額 × 收盤價）
 // ÷ 融資借款，證交所 21:00 後公布融資才算當天；130% 是個股追繳線。打開簡報時抓，10 分鐘內不重抓。
-const mrState = { d: null, at: 0, loading: false };
+const mrState = { d: null, k: null, at: 0, loading: false };
 function mbRatioLoad(){
   if (mrState.loading || (mrState.at && Date.now() - mrState.at < 10 * 60e3)) return;
   mrState.loading = true;
-  fetch('/api/margin-maintenance?days=20').then((r) => r.json()).then((d) => { mrState.d = d; })
-    .catch((err) => { mrState.d = { status: 'error', message: '讀取失敗（' + String((err && err.message) || err).slice(0, 40) + '）' }; })
-    .finally(() => { mrState.loading = false; mrState.at = Date.now(); mbRerender(); });
+  // 2026-11-22 使用者：維持率上面再放加權指數日K、日期對齊互相對照（加權日K＝/api/idx-bars/taiex，跟 K 線圖同一份）
+  const ratio = fetch('/api/margin-maintenance?days=20').then((r) => r.json()).then((d) => { mrState.d = d; })
+    .catch((err) => { mrState.d = { status: 'error', message: '讀取失敗（' + String((err && err.message) || err).slice(0, 40) + '）' }; });
+  const k = fetch('/api/idx-bars/taiex?tf=1d').then((r) => r.json()).then((d) => { mrState.k = d && Array.isArray(d.bars) ? d.bars : null; }).catch(() => { mrState.k = null; });
+  Promise.all([ratio, k]).finally(() => { mrState.loading = false; mrState.at = Date.now(); mbRerender(); });
+}
+// 加權日K（上）跟維持率（下）共用同一條日期軸：同樣的 viewBox 寬度、同樣的左右留白，第 i 天在兩張圖的 x 一樣，上下對得起來
+const MR_W = 420, MR_L = 12, MR_R = 58;
+function mrX(i, n){ return MR_L + (MR_W - MR_L - MR_R) * (n < 2 ? 0.5 : i / (n - 1)); }
+function mrAxis(dates, y){
+  const n = dates.length, step = n > 14 ? 3 : n > 8 ? 2 : 1;
+  return dates.map((d, i) => (i % step === 0 || i === n - 1) && !(i !== n - 1 && n - 1 - i < step) ? '<text x="' + mrX(i, n).toFixed(1) + '" y="' + y + '" text-anchor="middle" font-size="10.5" fill="#7c6f60">' + briefMd(d) + '</text>' : '').join('') +
+    dates.map((d, i) => '<line x1="' + mrX(i, n).toFixed(1) + '" x2="' + mrX(i, n).toFixed(1) + '" y1="8" y2="' + (y - 14) + '" stroke="#eee3d2" stroke-width="1"/>').join('');
+}
+function mrCandleSvg(dates, bars){
+  const H = 190, T = 22, B = 30, n = dates.length;
+  const by = {};
+  (bars || []).forEach((b) => { by[String(b.ts).slice(0, 10)] = b; });
+  const rows = dates.map((d) => by[d] || null);
+  const got = rows.filter(Boolean);
+  if (got.length < 2) return '<div class="bf-none">加權日K讀取中…</div>';
+  const lo = Math.min(...got.map((b) => b.low)), hi = Math.max(...got.map((b) => b.high)), span = (hi - lo) || 1;
+  const y = (v) => T + (H - T - B) * (1 - (v - lo) / span);
+  const bw = Math.max(3, Math.min(12, (MR_W - MR_L - MR_R) / n * 0.6));
+  const num = (v) => Math.round(v).toLocaleString('en-US');
+  let g = mrAxis(dates, H - 8);
+  rows.forEach((b, i) => {
+    if (!b) return;
+    const x = mrX(i, n), up = b.close >= b.open, c = up ? '#d92d20' : '#12805c';
+    const top = y(Math.max(b.open, b.close)), h = Math.max(1.2, Math.abs(y(b.open) - y(b.close)));
+    g += '<g><title>' + briefMd(dates[i]) + ' 開 ' + num(b.open) + '・高 ' + num(b.high) + '・低 ' + num(b.low) + '・收 ' + num(b.close) + '</title>' +
+      '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + y(b.high).toFixed(1) + '" y2="' + y(b.low).toFixed(1) + '" stroke="' + c + '" stroke-width="1.4"/>' +
+      '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" fill="' + (up ? '#fffdf9' : c) + '" stroke="' + c + '" stroke-width="1.4"/></g>';
+  });
+  const hiI = rows.findIndex((b) => b && b.high === hi), loI = rows.findIndex((b) => b && b.low === lo), last = rows.map((b, i) => [b, i]).filter((x) => x[0]).pop();
+  const lab = (i, v, txt, dy) => '<text x="' + Math.min(MR_W - MR_R - 2, Math.max(MR_L + 2, mrX(i, n))).toFixed(1) + '" y="' + (y(v) + dy).toFixed(1) + '" text-anchor="' + (i > n * 0.6 ? 'end' : 'start') + '" font-size="11.5" font-weight="800" fill="#1f1a14">' + txt + '</text>';
+  g += lab(hiI, hi, num(hi) + '（' + briefMd(dates[hiI]) + '）', -6) + (loI !== last[1] ? lab(loI, lo, num(lo) + '（' + briefMd(dates[loI]) + '）', 15) : '');
+  g += '<text x="' + (mrX(last[1], n) + bw / 2 + 4).toFixed(1) + '" y="' + (y(last[0].close) + 4).toFixed(1) + '" font-size="11.5" font-weight="900" fill="' + (last[0].close >= last[0].open ? '#d92d20' : '#12805c') + '">' + num(last[0].close) + '</text>';
+  return '<svg class="mb-svg" viewBox="0 0 ' + MR_W + ' ' + H + '" role="img">' + g + '</svg>';
+}
+function mrRatioSvg(dates, ratios){
+  const H = 170, T = 24, B = 30, n = dates.length;
+  const lo = Math.min(...ratios), hi = Math.max(...ratios), span = (hi - lo) || 1;
+  const y = (v) => T + (H - T - B) * (1 - (v - lo) / span);
+  let g = mrAxis(dates, H - 8);
+  g += '<polyline points="' + ratios.map((v, i) => mrX(i, n).toFixed(1) + ',' + y(v).toFixed(1)).join(' ') + '" fill="none" stroke="#5b3fd6" stroke-width="2.4" stroke-linejoin="round"/>';
+  g += ratios.map((v, i) => '<g><title>' + briefMd(dates[i]) + ' 維持率 ' + v.toFixed(2) + '%</title><circle cx="' + mrX(i, n).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="3.2" fill="#fffdf9" stroke="#5b3fd6" stroke-width="2"/></g>').join('');
+  const hiI = ratios.indexOf(hi), loI = ratios.lastIndexOf(lo);
+  const lab = (i, v, txt, dy) => '<text x="' + Math.min(MR_W - MR_R - 2, Math.max(MR_L + 2, mrX(i, n))).toFixed(1) + '" y="' + (y(v) + dy).toFixed(1) + '" text-anchor="' + (i > n * 0.6 ? 'end' : 'start') + '" font-size="11.5" font-weight="800" fill="#5b3fd6">' + txt + '</text>';
+  g += lab(hiI, hi, hi.toFixed(1) + '%（' + briefMd(dates[hiI]) + '）', -8) + (loI !== n - 1 ? lab(loI, lo, lo.toFixed(1) + '%（' + briefMd(dates[loI]) + '）', 16) : '');
+  g += '<text x="' + (mrX(n - 1, n) + 7).toFixed(1) + '" y="' + (y(ratios[n - 1]) + 4).toFixed(1) + '" font-size="11.5" font-weight="900" fill="#5b3fd6">' + ratios[n - 1].toFixed(1) + '%</text>';
+  return '<svg class="mb-svg" viewBox="0 0 ' + MR_W + ' ' + H + '" role="img">' + g + '</svg>';
 }
 function mbRatioHtml(){
   mbRatioLoad();
@@ -25557,8 +25606,7 @@ function mbRatioHtml(){
   const L = d.latest, asc = d.series.slice().reverse();
   const lv = L.ratio >= 160 ? ['正常', '#12805c'] : L.ratio >= 150 ? ['偏低', '#a16207'] : L.ratio >= 140 ? ['警戒', '#ea580c'] : ['危險', '#d92d20'];
   const sg = (v, dp, unit) => (Number.isFinite(v) ? '<span class="' + mbCls(v) + '">' + (v > 0 ? '▲' : v < 0 ? '▼' : '') + Math.abs(v).toFixed(dp) + unit + '</span>' : '—');
-  const hi = asc.reduce((a, x) => (x.ratio > a.ratio ? x : a), asc[0]);
-  const line = asc.length >= 2 ? mbLineSvg(asc.map((x) => ({ d: x.date, r: x.ratio })), 'r', '#5b3fd6', hi.date, hi.ratio, (v) => v.toFixed(1) + '%', L.ratio.toFixed(1) + '%（' + briefMd(L.date) + '）') : '';
+  const dates = asc.map((x) => x.date);
   const big = '<div class="bf-card"><div class="bf-ct">' + briefMd(L.date) + ' 收盤<small>上市</small></div>' +
     '<div class="mr2-big"><b style="color:' + lv[1] + '">' + L.ratio.toFixed(2) + '%</b><span class="mr2-lv" style="color:' + lv[1] + '">' + lv[0] + '</span><span class="mr2-chg">比前一天 ' + sg(L.change, 2, '%') + '</span></div>' +
     '<div class="mb-stats" style="margin-top:10px"><div class="mb-stat"><small>融資餘額</small><b>' + mbNum(L.marginAmount, 1) + ' 億</b><span class="mb-p">' + sg(L.amountChange, 1, ' 億') + '</span></div>' +
@@ -25568,7 +25616,10 @@ function mbRatioHtml(){
   const table = '<div class="bf-card"><div class="bf-ct">最近 ' + Math.min(10, asc.length) + ' 個交易日<small>%／億元</small></div><table class="mb-ladder"><tbody>' +
     d.series.slice(0, 10).map((x, i) => { const p = d.series[i + 1]; return '<tr' + (i === 0 ? ' class="me"' : '') + '><td>' + briefMd(x.date) + '</td><td>' + x.ratio.toFixed(2) + '%</td><td>' + (p ? sg(x.ratio - p.ratio, 2, '%') : '') + '</td><td>' + mbNum(x.marginAmount, 0) + ' 億</td></tr>'; }).join('') +
     '</tbody></table></div>';
-  const chart = '<div class="bf-card"><div class="bf-ct">維持率走勢<small>近 ' + asc.length + ' 個交易日</small></div>' + line + '</div>';
+  // 2026-11-22 使用者：右邊上面加權指數日K、下面維持率走勢，日期對齊互相對照（從 ' + briefMd(dates[0]) + ' 起）
+  const span = briefMd(dates[0]) + '～' + briefMd(dates[dates.length - 1]) + '・' + dates.length + ' 個交易日';
+  const chart = '<div class="bf-card"><div class="bf-ct">加權指數 日K<small>' + span + '</small></div>' + mrCandleSvg(dates, mrState.k) + '</div>' +
+    (asc.length >= 2 ? '<div class="bf-card"><div class="bf-ct">大盤融資維持率走勢<small>同一段日期，上下對齊</small></div>' + mrRatioSvg(dates, asc.map((x) => x.ratio)) + '</div>' : '');
   return '<div class="bf-slide">' + head + '<div class="bf-sub">證交所融資融券＋收盤價自己算・晚上 21:00 後更新・資料到 ' + briefMd(L.date) + '</div>' +
     '<div class="bf-grid"><div class="bf-col">' + big + table + '</div><div class="bf-col">' + chart + '</div></div></div>';
 }
