@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-22 10:55:00";
+const BUILD_STAMP = "2026-11-22 13:25:08";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -11611,7 +11611,8 @@ function homeRank4Html(){
     homeFixedBotColHtml('23', true) +   // 2026-11-20 使用者：火多多(23) 放強中強(888) 右邊、收盤觀察股左邊
     '<div class="hr-stack">' + homeObsListColHtml('close') + '</div>' +   // 2026-11-14 使用者：收盤觀察股（使用者每天給名單）放在強中強(888) 右邊
     // 2026-11-18 使用者：905 突破廣播、1+2 突破廣播搬到收盤觀察股右邊（原本在發動右邊、183 前面；905 在左、1+2 在右不變）
-    '<div class="hr-stack">' + homeRedBox(home905BcastColHtml()) + homeRedBox(homeTrustBigColHtml()) + '</div>' +   // 2026-11-22 使用者：大戶＋投信同買／同賣放 905 突破廣播下面（905 這欄 190px → 380px 才放得下）
+    '<div class="hr-stack hx-wide">' + homeRedBox(home905BcastColHtml()) + homeRedBox(homeTrustBigColHtml()) + '</div>' +   // 2026-11-22 使用者：iPhone 上大戶＋投信那張被擠到看不到代號名稱 → iPad／手機佔兩格寬
+      // 2026-11-22 使用者：大戶＋投信同買／同賣放 905 突破廣播下面（905 這欄 190px → 380px 才放得下）
     '<div class="hr-stack">' + homeRedBox(home12BcastColHtml()) + '</div>' +
     // 2026-11-18 使用者：30加33加34 這欄（下面疊投信買超前 15、188）搬到 1+2 突破廣播右邊（原本在雙榜交集右邊）
     // 2026-10-22 使用者：首頁的馬火多(30)、賽馬多(33)、河流多(34) 三欄拿掉（機器人代碼 30／33／34、訊號中心「盤中333」還在；30加33加34 照舊）
@@ -18926,7 +18927,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-22 10:55:00';
+const BUILD_STAMP = '2026-11-22 13:25:08';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
