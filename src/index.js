@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-22 14:37:52";
+const BUILD_STAMP = "2026-11-22 15:15:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -10725,6 +10725,7 @@ const HOME_UPD = {
   daily: '收盤後約 15:00 更新（盤後選股）',
   manual: '名單手動更新（拿到新名單才換）',
   turn: '盤中約每 3 分鐘更新（證交所即時成交量）',
+  stkflow: '每天收盤後更新：期交所大額交易人未沖銷部位約 15:00～16:00 公布（系統 13:50 起每 20 分鐘看一次）',   // 2026-11-22 股期買進／賣出
   stkfut: '每天收盤後更新：期交所約 14:00～16:00 公布當天股期行情（系統 13:50 起每 20 分鐘看一次；成交量含前一晚盤後）',   // 2026-11-22 股期成交量
   revtech: '技術面收盤後約 15:00 更新（上櫃約 17:00）；營收每月 1～10 號陸續公布，抓到就換',   // 2026-11-22 營收＋技術面
   tw: '週轉率、成交值盤中約每 3 分鐘更新；當沖占比晚上約 19:40（上櫃 20:45）後換成當天的',
@@ -11557,34 +11558,58 @@ function homeRevTechColHtml(){
 // 2026-11-22 使用者：股票期貨成交量前 30 名排行（包括小型股期），註明每天更新時間；自己一欄放在週轉率觀察左邊（首頁最左邊）。
 // 後端 /api/hub/stock-futures-rank：期交所每日行情，契約為單位（一般、小型分開，小型標「小」、ETF 期貨標「ETF」），
 // 成交量＝全部月份、前一晚盤後＋當天一般時段；未平倉、近月漲跌用一般時段；收盤後期交所公布才換（系統 13:50 起每 20 分鐘看一次）。
+// 2026-11-22 使用者：再分「買進前 30」「賣出前 30」（上面三個按鈕切換、記在這台）：期交所大額交易人未沖銷部位，
+// 全部月份前十大交易人（多單 − 空單）比前一個交易日增加＝買進、減少＝賣出，照金額（口數 × 每口股數 × 近月收盤）排。
+var sfTab = 'vol';
+try { const v = localStorage.getItem('sfTab'); if (v === 'buy' || v === 'sell') sfTab = v; } catch (_){ /* 存不了就用預設 */ }
 function homeStkFutColHtml(){
   const d = botFetchCache('stkFut', '/api/stock-futures-rank?top=30', 10 * 60e3);
   const ok = !!(d && d.status === 'ok' && Array.isArray(d.rows));
+  const flow = sfTab !== 'vol', sell = sfTab === 'sell';
   const md = (v) => (v ? Number(String(v).slice(5, 7)) + '/' + Number(String(v).slice(8, 10)) : '');
-  const tip = '期交所每日行情：每個股票期貨契約（一般 2,000 股、小型 100 股分開算）全部月份的成交口數，前一晚盤後＋當天一般時段加總；未平倉＝一般時段收盤；期貨漲跌＝近月';
-  const title = '<div class="hr-title" title="' + wlEsc(tip) + '">📊股期成交量' + (ok ? ' <span class="hr-rk">前 ' + d.rows.length + '・' + md(d.date) + '</span>' : '') + '</div>';
-  const upd = homeUpdHtml('stkfut', ok ? d.date : null);
-  if (!ok) return '<div class="hr-col hr-ttcol">' + title + upd + '<div class="hr-note">' + (d ? wlEsc(d.message || '讀取失敗，稍後再試') : '讀取中…') + '</div></div>';
+  const tip = flow ? '期交所「大額交易人未沖銷部位」：全部月份前十大交易人的多單 − 空單＝淨部位，比前一個交易日增加＝買進、減少＝賣出（也可能是回補或平倉）；照金額＝口數 × 每口股數 × 近月收盤排，一般、小型股期分開算'
+    : '期交所每日行情：每個股票期貨契約（一般 2,000 股、小型 100 股分開算）全部月份的成交口數，前一晚盤後＋當天一般時段加總；未平倉＝一般時段收盤；期貨漲跌＝近月';
+  const list = ok ? (flow ? (sell ? d.sell : d.buy) || [] : d.rows) : [];
+  const day = ok ? (flow ? d.flowDate : d.date) : null;
+  const title = '<div class="hr-title" title="' + wlEsc(tip) + '">' + (flow ? (sell ? '📉股期賣出' : '📈股期買進') : '📊股期成交量') + (ok ? ' <span class="hr-rk">前 ' + list.length + '・' + md(day) + '</span>' : '') + '</div>';
+  const tabs = '<div class="hr-bhold hr-ttabs">' + [['vol', '成交量'], ['buy', '買進前 30'], ['sell', '賣出前 30']].map(([k, l]) =>
+    '<button type="button" class="b777-p' + (sfTab === k ? ' on' : '') + '" data-sf-tab="' + k + '">' + l + '</button>').join('') + '</div>';
+  const upd = homeUpdHtml(flow ? 'stkflow' : 'stkfut', day);
+  if (!ok) return '<div class="hr-col hr-ttcol">' + title + tabs + upd + '<div class="hr-note">' + (d ? wlEsc(d.message || '讀取失敗，稍後再試') : '讀取中…') + '</div></div>';
   const n = (v) => (Number.isFinite(v) ? v.toLocaleString('en-US') : '—');
+  const sg = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toLocaleString('en-US');
+  const amt = (v) => (Number.isFinite(v) ? (v > 0 ? '+' : v < 0 ? '−' : '') + (Math.abs(v) >= 10 ? Math.abs(v).toFixed(1) : Math.abs(v).toFixed(2)) : '—');
   const tag = (r) => (r.kind === 'mini' ? '<i class="tw-tag mini">小</i>' : r.kind === 'etf' ? '<i class="tw-tag">ETF</i>' : '');
-  const hd = '<div class="tw-g sf-g tw-hd"><span>#</span><span>股票期貨</span><span>成交(口)</span><span>未平倉</span><span>期貨漲跌</span><span>大戶力</span></div>';
-  const row = (r) => {
+  const per = (r) => (r.kind === 'mini' ? '（小型，每口 100 股）' : r.kind === 'etf' ? '（ETF 期貨，每口 ' + n(r.shares) + ' 股）' : '（每口 2,000 股）');
+  const stk = (r) => '<span class="hr-rk">' + r.rank + '</span>' +
+    '<span class="tw-stk"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.kind === 'etf' ? String(r.name || '').replace(/ETF$/, '') : r.name) + '</span>' + tag(r) + '</span>';
+  const pctHold = (r) => '<span class="hr-avg ' + (Number.isFinite(r.chg) ? dirClass(r.chg) : 'flat') + '">' + (Number.isFinite(r.chg) ? fmt(r.chg) + '%' : '—') + '</span>' + homeHoldHtml(r.code);
+  const open = (r, t) => '<div class="hr-row hr-stk tw-g sf-g tw-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc(t) + '">';
+  const volRow = (r) => {
     const vs = Number.isFinite(r.prevVolume) && r.prevVolume > 0 ? Math.round((r.volume / r.prevVolume - 1) * 100) : null;
     const mv = r.prevRank ? r.prevRank - r.rank : null;
     const mon = r.month ? Number(String(r.month).slice(4, 6)) + '月' : '';
-    return '<div class="hr-row hr-stk tw-g sf-g tw-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' +
-      wlEsc(r.contract + '・' + r.name + (r.kind === 'mini' ? '（小型，每口 100 股）' : r.kind === 'etf' ? '（ETF 期貨，每口 ' + n(r.shares) + ' 股）' : '（每口 2,000 股）') + '・成交 ' + n(r.volume) + ' 口（盤後 ' + n(r.night) + '）・未平倉 ' + n(r.oi) + ' 口' + (r.prevVolume !== null ? '・前一天 ' + n(r.prevVolume) + ' 口、第 ' + (r.prevRank || '—') + ' 名' : '')) + '">' +
-      '<span class="hr-rk">' + r.rank + '</span>' +
-      '<span class="tw-stk"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.kind === 'etf' ? String(r.name || '').replace(/ETF$/, '') : r.name) + '</span>' + tag(r) + '</span>' +
-      '<span class="hr-turn">' + n(r.volume) + '</span><span class="hr-turn sf-oi">' + n(r.oi) + '</span>' +
-      '<span class="hr-avg ' + (Number.isFinite(r.chg) ? dirClass(r.chg) : 'flat') + '">' + (Number.isFinite(r.chg) ? fmt(r.chg) + '%' : '—') + '</span>' + homeHoldHtml(r.code) +
+    return open(r, r.contract + '・' + r.name + per(r) + '・成交 ' + n(r.volume) + ' 口（盤後 ' + n(r.night) + '）・未平倉 ' + n(r.oi) + ' 口' + (r.prevVolume !== null ? '・前一天 ' + n(r.prevVolume) + ' 口、第 ' + (r.prevRank || '—') + ' 名' : '')) +
+      stk(r) + '<span class="hr-turn">' + n(r.volume) + '</span><span class="hr-turn sf-oi">' + n(r.oi) + '</span>' + pctHold(r) +
       '<div class="hr-l2 tw-l2"><i>' + wlEsc(r.contract) + '</i><i>近月 ' + mon + '</i>' + (Number.isFinite(r.last) ? r.last.toLocaleString('en-US') : '—') +
       (r.night ? '<i>盤後</i>' + n(r.night) + '口' : '') +
       (vs !== null ? '<i>量比前一天</i><span class="' + (vs > 0 ? 'up' : vs < 0 ? 'down' : '') + '">' + (vs > 0 ? '+' : '') + vs + '%</span>' : '') +
       (mv ? '<i>名次</i><span class="' + (mv > 0 ? 'up' : 'down') + '">' + (mv > 0 ? '↑' : '↓') + Math.abs(mv) + '</span>' : r.prevRank === null && d.prevDate ? '<i>新進榜</i>' : '') + '</div></div>';
   };
-  const note = '<div class="hr-note">' + md(d.date) + ' 股期 ' + n(d.contracts) + ' 個契約共 ' + n(d.totalVolume) + ' 口；一般、小型分開排（小＝小型股期 100 股）；成交含前一晚盤後；大戶力是現股即時</div>';
-  return '<div class="hr-col hr-ttcol">' + title + upd + note + hd + d.rows.map(row).join('') + '</div>';
+  const flowRow = (r) => {
+    const cls = r.change > 0 ? 'up' : 'down';
+    const side = (v) => (v > 0 ? '淨多 ' + n(v) : v < 0 ? '淨空 ' + n(-v) : '0');
+    return open(r, r.contract + '・' + r.name + per(r) + '・前十大交易人淨部位 ' + side(r.prevNet) + ' → ' + side(r.net) + ' 口（' + sg(r.change) + ' 口、約 ' + n(r.lots) + ' 張、' + amt(r.amount) + ' 億）・多單 ' + n(r.buy10) + '、空單 ' + n(r.sell10) + '・全市場未平倉 ' + n(r.oi)) +
+      stk(r) + '<span class="hr-turn ' + cls + '">' + sg(r.change) + '</span><span class="hr-turn ' + cls + '">' + amt(r.amount) + '</span>' + pctHold(r) +
+      '<div class="hr-l2 tw-l2"><i>' + wlEsc(r.contract) + '</i><i>前十大</i>' + side(r.net) + '口<i>前一天</i>' + side(r.prevNet) +
+      (Number.isFinite(r.instNet) ? '<i>其中法人</i>' + side(r.instNet) : '') + '<i>約</i>' + n(Math.abs(r.lots)) + '張</div></div>';
+  };
+  const hd = flow ? '<div class="tw-g sf-g tw-hd"><span>#</span><span>股票期貨</span><span>增減(口)</span><span>金額(億)</span><span>期貨漲跌</span><span>大戶力</span></div>'
+    : '<div class="tw-g sf-g tw-hd"><span>#</span><span>股票期貨</span><span>成交(口)</span><span>未平倉</span><span>期貨漲跌</span><span>大戶力</span></div>';
+  const note = flow
+    ? '<div class="hr-note">' + (d.flowPrevDate ? md(d.flowPrevDate) + ' → ' + md(d.flowDate) + ' 前十大交易人淨部位（多單 − 空單）' + (sell ? '減少' : '增加') + '最多的；照金額排，一般、小型分開（小＝100 股）；增加也可能是空單回補、減少也可能是多單平倉' : '大額交易人資料還不夠兩天，明天收盤後才有') + '</div>'
+    : '<div class="hr-note">' + md(d.date) + ' 股期 ' + n(d.contracts) + ' 個契約共 ' + n(d.totalVolume) + ' 口；一般、小型分開排（小＝小型股期 100 股）；成交含前一晚盤後；大戶力是現股即時</div>';
+  return '<div class="hr-col hr-ttcol">' + title + tabs + upd + note + (list.length ? hd + list.map(flow ? flowRow : volRow).join('') : '') + '</div>';
 }
 // 2026-11-19 使用者：強中強(888) 下面加一欄「週轉率高」（每天前 20 檔，當沖最愛），跟「現股當沖」兩個按鈕切換、放同一欄
 // （照券商 App「當沖選股」的高週轉振幅排行、現股當沖個股排行榜）。
@@ -19004,7 +19029,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-22 14:37:52';
+const BUILD_STAMP = '2026-11-22 15:15:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20132,6 +20157,7 @@ document.getElementById('app').addEventListener('click', (e) => {
   const bf23 = t.closest('[data-f23-hold]'); if (bf23){ f23Hold = !f23Hold; try { localStorage.setItem('f23Hold', f23Hold ? '1' : '0'); } catch (_){} render(); try { botRerunCols(); } catch (_){} return; }   // 2026-11-20 火多多「大戶力 ≥ 0」
   const bts = t.closest('[data-tw-scope]'); if (bts){ twScope = bts.dataset.twScope === 'market' ? 'market' : 'mine'; try { localStorage.setItem('twScope', twScope); } catch (_){} render(); return; }   // 2026-11-21 週轉率觀察「我的名單／全市場」
   const btw = t.closest('[data-tw-top]'); if (btw){ twTop = Number(btw.dataset.twTop) || 50; try { localStorage.setItem('twTop', String(twTop)); } catch (_){} render(); return; }   // 2026-11-21 週轉率觀察前 20／30／50
+  const bsf = t.closest('[data-sf-tab]'); if (bsf){ const v = bsf.dataset.sfTab; sfTab = v === 'buy' || v === 'sell' ? v : 'vol'; try { localStorage.setItem('sfTab', sfTab); } catch (_){} render(); return; }   // 2026-11-22 股期 成交量／買進／賣出切換
   const btb = t.closest('[data-tb-side]'); if (btb){ tbSide = btb.dataset.tbSide === 'sell' ? 'sell' : 'buy'; try { localStorage.setItem('tbSide', tbSide); } catch (_){} render(); return; }   // 2026-11-22 大戶＋投信 同買／同賣切換
   const btt = t.closest('[data-turn-tab]'); if (btt){ homeTurnTab = btt.dataset.turnTab === 'dt' ? 'dt' : 'turn'; try { localStorage.setItem('turnTab', homeTurnTab); } catch (_){} render(); return; }   // 2026-11-19 週轉率高／現股當沖切換
   const bch = t.closest('[data-bcast-hold]'); if (bch){ homeBcastHold = !homeBcastHold; try { localStorage.setItem('bcastHold', homeBcastHold ? '1' : '0'); } catch (_){} render(); return; }   // 2026-11-18 905／1+2 突破廣播「大戶力 ≥ +10%」
@@ -30816,7 +30842,7 @@ function czItems(){
 }
 // 首頁欄位：欄位是程式每 15 秒整個重畫的，所以每次畫完（MutationObserver）再依標題標記、收合；標題對不到的欄不管它
 // 2026-11-18 使用者：首頁每一欄右上角都要有打勾（原本只有底下那幾欄有）；前面這幾個先比（標題裡會帶到別欄名字的要排前面，例：強中強的說明有「強勢股觀察中」）
-const CZ_HOME_CARDS = [['hm:tw', '週轉率觀察'], ['hm:sf', '股期成交量'], ['hm:rt', '營收＋技術面'], ['hm:tb', '大戶＋投信同'], ['hm:b32', '新刀劍空(32)'], ['hm:b123', '空(123)'], ['hm:b193', '空族群必殺(193)'], ['hm:mr', '大盤融資維持率'], ['hm:mup', '融資增加股票'], ['hm:mdn', '融資大減股票'], ['hm:b777', '(777)'], ['hm:b999', '（999）'], ['hm:b240', '(240)'], ['hm:b260', '(260)'], ['hm:b270', '(270)'],
+const CZ_HOME_CARDS = [['hm:tw', '週轉率觀察'], ['hm:sf', '股期成交量'], ['hm:sf', '股期買進'], ['hm:sf', '股期賣出'], ['hm:rt', '營收＋技術面'], ['hm:tb', '大戶＋投信同'], ['hm:b32', '新刀劍空(32)'], ['hm:b123', '空(123)'], ['hm:b193', '空族群必殺(193)'], ['hm:mr', '大盤融資維持率'], ['hm:mup', '融資增加股票'], ['hm:mdn', '融資大減股票'], ['hm:b777', '(777)'], ['hm:b999', '（999）'], ['hm:b240', '(240)'], ['hm:b260', '(260)'], ['hm:b270', '(270)'],
   ['hm:ss', '強中強'], ['hm:b23', '火多多(23)'], ['hm:turn', '週轉率高'], ['hm:turn', '現股當沖'], ['hm:pre', '盤前空觀察'], ['hm:close', '收盤觀察股'], ['hm:b905', '905突破廣播'], ['hm:b12', '1+2突破廣播'], ['hm:hup', '盤中大戶力≥'], ['hm:hdn', '盤中大戶力≤'],
   ['hm:s99', '外資投信同步'], ['hm:t15', '投信買超前15'], ['hm:f15', '外資買超前15'], ['hm:pick', '強勢股觀察中'], ['hm:red', '強勢紅K'], ['hm:dragon', '創高黑龍'],
   ['hm:mf', '疑似主力融資買進'], ['hm:both', '雙榜交集'], ['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:strong', '今日強勢股'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
