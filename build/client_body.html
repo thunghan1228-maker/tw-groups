@@ -11551,8 +11551,8 @@ function homeRank4Html(){
     // 2026-11-14 使用者：首頁順序改成 777、強中強、強勢股觀察中、強勢紅K（下面疊創高黑龍）、動能選股的熱門趨勢概念股(240)、日動能(260)、週動能(270)，其他照原本順序往後排
     // 2026-11-14 使用者：777 右邊加機器人 32（新刀劍空），32 右邊再加 123（12空）；2026-11-15 使用者：順序改成 32、123、777（777 放第三欄）
     // 2026-11-19 使用者：193（空族群必殺）放在 123 右邊、777 左邊（融資增加股票改疊在空中空(999) 下面）
-    '<div class="hr-stack">' + homeRedBox(homeTurnWatchColHtml()) + '</div>' +
-    '<div class="hr-stack">' + homeRedBox(homeRevTechColHtml()) + '</div>' +   // 2026-11-22 使用者：首頁第二欄加「營收＋技術面」綜合評分前 20   // 2026-11-21 使用者：首頁第一欄放週轉率觀察（自己報價組合那份股票）
+    '<div class="hr-stack hx-wide">' + homeRedBox(homeTurnWatchColHtml()) + '</div>' +   // 2026-11-22：手機上週轉率觀察也被擠到看不到名稱 → iPad／手機佔兩格寬
+    '<div class="hr-stack hx-wide">' + homeRedBox(homeRevTechColHtml()) + '</div>' +   // 2026-11-22 使用者：iPhone 上營收＋技術面代號名稱被遮 → iPad／手機佔兩格寬   // 2026-11-22 使用者：首頁第二欄加「營收＋技術面」綜合評分前 20   // 2026-11-21 使用者：首頁第一欄放週轉率觀察（自己報價組合那份股票）
     homeFixedBotColHtml('32', true) + homeFixedBotColHtml('123', true) + homeFixedBotColHtml('193', true) +
     homeFixedBotColHtml('777', true) +   // 功課卡片條列（777／32／123 兩份以上都有的閃綠）
     '<div class="hr-stack">' + homeObsListColHtml('pre') + '</div>' +   // 2026-11-14 使用者：盤前空觀察（使用者每天給名單）放在空中空(999) 左邊
