@@ -1811,6 +1811,10 @@ const WORKER_ENTRY = {
       // 首頁「週轉率高」（2026-11-19 使用者）：今天成交量 ÷ 已發行股數前幾名；後端盤中 3 分鐘、盤外 15 分鐘快取，這裡再快取 1 分鐘
       return await proxyHanstockBars("/api/hub/turnover-rank" + url.search, 60);
     }
+    if (url.pathname === "/api/trust-big") {
+      // 首頁大戶＋投信同買／同賣（2026-11-22 使用者）：收盤後才變，快取 2 分鐘
+      return await proxyHanstockBars("/api/hub/trust-big" + url.search, 120);
+    }
     if (url.pathname === "/api/margin-maintenance") {
       // 首頁大盤融資維持率（2026-11-21 使用者）：一天只變一次（證交所 21:00 後），快取 5 分鐘
       return await proxyHanstockBars("/api/hub/margin-maintenance" + url.search, 300);
