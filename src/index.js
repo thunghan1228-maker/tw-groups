@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-23 09:09:23";
+const BUILD_STAMP = "2026-11-23 10:59:46";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1245,7 +1245,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .race-otc.up{color:var(--up);} .race-otc.down{color:var(--down);}
   /* 內嵌／獨立視窗的圖表模式：只顯示 K 線圖、填滿整個視窗 */
   body.chart-window-mode{padding-bottom:0;overflow:hidden;}
-  body.chart-window-mode > *:not(.chart-modal):not(.wl-pick):not(.toast){display:none!important;}   /* 2026-10-30 使用者：浮動 K 線圖標題的 ☆ 按了沒反應——加入自選股的分組清單（.wl-pick）和「已加入」提示（.toast）也被這條藏起來了 */
+  body.chart-window-mode > *:not(.chart-modal):not(.wl-pick):not(.toast):not(#rcModal){display:none!important;}   /* 2026-10-30 使用者：浮動 K 線圖標題的 ☆ 按了沒反應——加入自選股的分組清單（.wl-pick）和「已加入」提示（.toast）也被這條藏起來了 */
   body.chart-window-mode .chart-modal{background:none;}
   body.chart-window-mode .chart-modal-inner{left:0!important;top:0!important;right:0;bottom:0;width:auto!important;height:auto!important;max-width:none;max-height:none;border-radius:0;border:0;resize:none;}
   body.chart-window-mode .chart-modal-head{cursor:default;}
@@ -3585,6 +3585,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .pk-alert-sub:not(.on){border-color:#9ca3af;background:#f3f4f6;color:#6b7280;}   /* 2026-11-23 跳出視窗標題列「這個提醒：開／關」 */
   .alert-toggle.alert-sub-top:not(.on){opacity:.65;text-decoration:line-through;}
   #rcModal .chips-inner{--bg:#ffffff;--panel:#ffffff;--line:#e5e7eb;--text:#1f2937;--muted:#6b7280;background:#fff;color:#1f2937;border:1px solid #d1d5db;width:min(900px,97vw);height:auto;max-height:95vh;padding:16px 20px 18px;}   /* 2026-11-23 個股月營收圖：白底 */
+  #rcModal{z-index:260;}   /* 2026-11-23 使用者：K線圖上按「📊 營收」沒反應——浮動 K 線圖那層 z-index 102 會蓋住，營收圖要在最上面 */
   #rcModal .cm-icon-btn{background:#fff;color:#1f2937;border-color:#d1d5db;flex:0 0 auto;}
   .rc-head{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;position:relative;padding-right:46px;} .rc-titles{flex:1 1 260px;min-width:0;} .rc-head #rcClose{position:absolute;top:0;right:0;}
   .rc-title{font-size:22px;font-weight:900;color:#111827;} .rc-sub{font-size:12.5px;color:#6b7280;margin-top:2px;}
@@ -19048,7 +19049,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-23 09:09:23';
+const BUILD_STAMP = '2026-11-23 10:59:46';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -25759,7 +25760,9 @@ function rcLoad(code){
 function openRevChart(code, name){
   code = String(code || '').trim().toUpperCase();
   rcState.code = code; rcState.name = name || '';
-  document.getElementById('rcModal').hidden = false;
+  const modal = document.getElementById('rcModal');
+  modal.classList.remove('behind-chart');   // 2026-11-23：手機開過 K 線圖，面板會被標成退到 K 線圖後面，營收圖要在前面
+  modal.hidden = false;
   if (/^[0-9]{4,6}[A-Z]?$/.test(code)) rcLoad(code);
   renderRevChart();
 }
@@ -25867,7 +25870,14 @@ function renderRevChart(){
 }
 document.getElementById('rcClose').addEventListener('click', () => { document.getElementById('rcModal').hidden = true; });
 document.getElementById('rcModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.currentTarget.hidden = true; });
-document.getElementById('cmRevBtn').addEventListener('click', () => { const st = document.getElementById('cmStar'); openRevChart((st && st.dataset.code) || document.getElementById('cmCode').textContent, (st && st.dataset.name) || document.getElementById('cmName').textContent); });
+document.getElementById('cmRevBtn').addEventListener('click', () => {
+  const st = document.getElementById('cmStar');
+  const code = (st && st.dataset.code) || currentChart.code || document.getElementById('cmCode').textContent;
+  const name = (st && st.dataset.name) || currentChart.name || document.getElementById('cmName').textContent;
+  // 2026-11-23 使用者：K線圖上按「📊 營收」沒反應——電腦版 K 線圖是浮動小視窗（獨立頁面，只留 K 線圖），營收圖改在主畫面打開
+  if (CHART_WINDOW_MODE){ try { if (window.parent && window.parent !== window && typeof window.parent.openRevChart === 'function'){ window.parent.openRevChart(code, name); return; } } catch (_){ /* 叫不到主畫面就在這裡開 */ } }
+  openRevChart(code, name);
+});
 // ---- 營收成長榜（2026-10-09 使用者：照老師「每月營收成長榜 學員版」做一模一樣的）----
 // 後端 /api/revenue?month=：公開資訊觀測站「每月營業收入彙總表」（排程主機每天 12:30／18:30／23:30 抓），公布日＝我們第一次抓到的日期，
 // 收盤、成交量、公布隔日漲跌用我們的日K。段落照老師的順序：查個股營收、族群分析、多觀察分析（我們用自選股）、
