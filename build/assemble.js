@@ -1811,6 +1811,10 @@ const WORKER_ENTRY = {
       // 首頁「週轉率高」（2026-11-19 使用者）：今天成交量 ÷ 已發行股數前幾名；後端盤中 3 分鐘、盤外 15 分鐘快取，這裡再快取 1 分鐘
       return await proxyHanstockBars("/api/hub/turnover-rank" + url.search, 60);
     }
+    if (url.pathname === "/api/stock-futures-live") {
+      // 首頁股期那欄的即時近月（2026-11-23 使用者：期貨那欄也沒動）：後端代打期交所 MIS（Worker 直接打常被回 520），快取 10 秒
+      return await proxyHanstockBars("/api/hub/stock-futures-live", 10);
+    }
     if (url.pathname === "/api/stock-futures-rank") {
       // 首頁股期成交量前 30（2026-11-22 使用者）：收盤後一天換一次，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/stock-futures-rank" + url.search, 300);

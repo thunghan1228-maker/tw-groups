@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-23 09:08:57";
+const BUILD_STAMP = "2026-11-23 09:09:23";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -11580,6 +11580,10 @@ function homeStkFutColHtml(){
     : '期交所每日行情：每個股票期貨契約（一般 2,000 股、小型 100 股分開算）全部月份的成交口數，前一晚盤後＋當天一般時段加總；未平倉＝一般時段收盤；期貨漲跌＝近月';
   const list = ok ? (flow ? (sell ? d.sell : d.buy) || [] : d.rows) : [];
   const day = ok ? (flow ? d.flowDate : d.date) : null;
+  // 2026-11-23 使用者：盤前撮合了，期貨那欄也沒動——期貨漲跌改用期交所即時近月（日盤 08:45 起；後端 /api/hub/stock-futures-live，15 秒）；名次照舊用前一天的量
+  const lv = botFetchCache('stkFutLive', '/api/stock-futures-live', 20e3);
+  const LQ = lv && lv.status === 'ok' && lv.quotes ? lv.quotes : {};
+  const liveOf = (r) => { const q = LQ[r.contract]; return q && Number.isFinite(q.last) ? q : null; };
   const title = '<div class="hr-title" title="' + wlEsc(tip) + '">' + (flow ? (sell ? '📉股期賣出' : '📈股期買進') : '📊股期成交量') + (ok ? ' <span class="hr-rk">前 ' + list.length + '・' + md(day) + '</span>' : '') + '</div>';
   const tabs = '<div class="hr-bhold hr-ttabs">' + [['vol', '成交量'], ['buy', '買進前 30'], ['sell', '賣出前 30']].map(([k, l]) =>
     '<button type="button" class="b777-p' + (sfTab === k ? ' on' : '') + '" data-sf-tab="' + k + '">' + l + '</button>').join('') + '</div>';
@@ -11592,7 +11596,11 @@ function homeStkFutColHtml(){
   const per = (r) => (r.kind === 'mini' ? '（小型，每口 100 股）' : r.kind === 'etf' ? '（ETF 期貨，每口 ' + n(r.shares) + ' 股）' : '（每口 2,000 股）');
   const stk = (r) => '<span class="hr-rk">' + r.rank + '</span>' +
     '<span class="tw-stk"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.kind === 'etf' ? String(r.name || '').replace(/ETF$/, '') : r.name) + '</span>' + tag(r) + '</span>';
-  const pctHold = (r) => '<span class="hr-avg ' + (Number.isFinite(r.chg) ? dirClass(r.chg) : 'flat') + '">' + (Number.isFinite(r.chg) ? fmt(r.chg) + '%' : '—') + '</span>' + homeHoldHtml(r.code);
+  const pctHold = (r) => {
+    const q = liveOf(r), v = q && Number.isFinite(q.pct) ? q.pct : r.chg;
+    return '<span class="hr-avg ' + (Number.isFinite(v) ? dirClass(v) : 'flat') + '"' + (q ? ' title="期交所即時近月 ' + wlEsc(q.symbol || '') + '・' + (q.time || '') + '"' : '') + '>' + (Number.isFinite(v) ? fmt(v) + '%' : '—') + '</span>' + homeHoldHtml(r.code);
+  };
+  const liveL2 = (r) => { const q = liveOf(r); return q ? '<i>即時</i><b class="' + (Number.isFinite(q.pct) ? dirClass(q.pct) : '') + '">' + q.last.toLocaleString('en-US') + '</b>' + (Number.isFinite(q.volume) ? '<i>今日</i>' + q.volume.toLocaleString('en-US') + '口' : '') : ''; };
   const open = (r, t) => '<div class="hr-row hr-stk tw-g sf-g tw-row" data-code="' + wlEsc(r.code) + '" data-name="' + wlEsc(r.name) + '" tabindex="0" role="button" title="' + wlEsc(t) + '">';
   const volRow = (r) => {
     const vs = Number.isFinite(r.prevVolume) && r.prevVolume > 0 ? Math.round((r.volume / r.prevVolume - 1) * 100) : null;
@@ -11600,7 +11608,7 @@ function homeStkFutColHtml(){
     const mon = r.month ? Number(String(r.month).slice(4, 6)) + '月' : '';
     return open(r, r.contract + '・' + r.name + per(r) + '・成交 ' + n(r.volume) + ' 口（盤後 ' + n(r.night) + '）・未平倉 ' + n(r.oi) + ' 口' + (r.prevVolume !== null ? '・前一天 ' + n(r.prevVolume) + ' 口、第 ' + (r.prevRank || '—') + ' 名' : '')) +
       stk(r) + '<span class="hr-turn">' + n(r.volume) + '</span><span class="hr-turn sf-oi">' + n(r.oi) + '</span>' + pctHold(r) +
-      '<div class="hr-l2 tw-l2"><i>' + wlEsc(r.contract) + '</i><i>近月 ' + mon + '</i>' + (Number.isFinite(r.last) ? r.last.toLocaleString('en-US') : '—') +
+      '<div class="hr-l2 tw-l2"><i>' + wlEsc(r.contract) + '</i>' + liveL2(r) + '<i>' + (liveOf(r) ? md(d.date) + ' 收' : '近月 ' + mon) + '</i>' + (Number.isFinite(r.last) ? r.last.toLocaleString('en-US') : '—') +
       (r.night ? '<i>盤後</i>' + n(r.night) + '口' : '') +
       (vs !== null ? '<i>量比前一天</i><span class="' + (vs > 0 ? 'up' : vs < 0 ? 'down' : '') + '">' + (vs > 0 ? '+' : '') + vs + '%</span>' : '') +
       (mv ? '<i>名次</i><span class="' + (mv > 0 ? 'up' : 'down') + '">' + (mv > 0 ? '↑' : '↓') + Math.abs(mv) + '</span>' : r.prevRank === null && d.prevDate ? '<i>新進榜</i>' : '') + '</div></div>';
@@ -11610,7 +11618,7 @@ function homeStkFutColHtml(){
     const side = (v) => (v > 0 ? '淨多 ' + n(v) : v < 0 ? '淨空 ' + n(-v) : '0');
     return open(r, r.contract + '・' + r.name + per(r) + '・前十大交易人淨部位 ' + side(r.prevNet) + ' → ' + side(r.net) + ' 口（' + sg(r.change) + ' 口、約 ' + n(r.lots) + ' 張、' + amt(r.amount) + ' 億）・多單 ' + n(r.buy10) + '、空單 ' + n(r.sell10) + '・全市場未平倉 ' + n(r.oi)) +
       stk(r) + '<span class="hr-turn ' + cls + '">' + sg(r.change) + '</span><span class="hr-turn ' + cls + '">' + amt(r.amount) + '</span>' + pctHold(r) +
-      '<div class="hr-l2 tw-l2"><i>' + wlEsc(r.contract) + '</i><i>前十大</i>' + side(r.net) + '口<i>前一天</i>' + side(r.prevNet) +
+      '<div class="hr-l2 tw-l2"><i>' + wlEsc(r.contract) + '</i>' + liveL2(r) + '<i>前十大</i>' + side(r.net) + '口<i>前一天</i>' + side(r.prevNet) +
       (Number.isFinite(r.instNet) ? '<i>其中法人</i>' + side(r.instNet) : '') + '<i>約</i>' + n(Math.abs(r.lots)) + '張</div></div>';
   };
   const hd = flow ? '<div class="tw-g sf-g tw-hd"><span>#</span><span>股票期貨</span><span>增減(口)</span><span>金額(億)</span><span>期貨漲跌</span><span>大戶力</span></div>'
@@ -11618,7 +11626,8 @@ function homeStkFutColHtml(){
   const note = flow
     ? '<div class="hr-note">' + (d.flowPrevDate ? md(d.flowPrevDate) + ' → ' + md(d.flowDate) + ' 前十大交易人淨部位（多單 − 空單）' + (sell ? '減少' : '增加') + '最多的；照金額排，一般、小型分開（小＝100 股）；增加也可能是空單回補、減少也可能是多單平倉' : '大額交易人資料還不夠兩天，明天收盤後才有') + '</div>'
     : '<div class="hr-note">' + md(d.date) + ' 股期 ' + n(d.contracts) + ' 個契約共 ' + n(d.totalVolume) + ' 口；一般、小型分開排（小＝小型股期 100 股）；成交含前一晚盤後；大戶力是現股即時</div>';
-  return '<div class="hr-col hr-ttcol">' + title + tabs + upd + note + (list.length ? hd + list.map(flow ? flowRow : volRow).join('') : '') + '</div>';
+  const liveNote = lv && lv.status === 'ok' && lv.asOf ? '<div class="hr-note">期貨漲跌是期交所即時近月（' + wlEsc(lv.asOf.slice(0, 5)) + '）；名次、成交、未平倉是 ' + md(d.date) + ' 收盤</div>' : '';
+  return '<div class="hr-col hr-ttcol">' + title + tabs + upd + note + liveNote + (list.length ? hd + list.map(flow ? flowRow : volRow).join('') : '') + '</div>';
 }
 // 2026-11-19 使用者：強中強(888) 下面加一欄「週轉率高」（每天前 20 檔，當沖最愛），跟「現股當沖」兩個按鈕切換、放同一欄
 // （照券商 App「當沖選股」的高週轉振幅排行、現股當沖個股排行榜）。
@@ -19039,7 +19048,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-23 09:08:57';
+const BUILD_STAMP = '2026-11-23 09:09:23';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -33709,6 +33718,10 @@ const WORKER_ENTRY = {
     if (url.pathname === "/api/turnover-rank") {
       // 首頁「週轉率高」（2026-11-19 使用者）：今天成交量 ÷ 已發行股數前幾名；後端盤中 3 分鐘、盤外 15 分鐘快取，這裡再快取 1 分鐘
       return await proxyHanstockBars("/api/hub/turnover-rank" + url.search, 60);
+    }
+    if (url.pathname === "/api/stock-futures-live") {
+      // 首頁股期那欄的即時近月（2026-11-23 使用者：期貨那欄也沒動）：後端代打期交所 MIS（Worker 直接打常被回 520），快取 10 秒
+      return await proxyHanstockBars("/api/hub/stock-futures-live", 10);
     }
     if (url.pathname === "/api/stock-futures-rank") {
       // 首頁股期成交量前 30（2026-11-22 使用者）：收盤後一天換一次，快取 5 分鐘
