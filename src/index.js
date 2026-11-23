@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-22 23:45:15";
+const BUILD_STAMP = "2026-11-23 09:04:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3581,6 +3581,9 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .mb-stat small{display:block;font-size:12px;color:#7c6f60;line-height:1.4;}
   .mb-stat b{display:block;font-size:22px;line-height:1.35;color:#2d241b;} .mb-stat .mb-p{font-size:13px;font-weight:700;}
   .mb-neg{color:#12805c;} .mb-pos{color:#d92d20;}
+  .pk-alert-sub{margin-left:8px;font:inherit;font-size:12px;font-weight:800;padding:2px 10px;border-radius:999px;border:1px solid #16a34a;background:#dcfce7;color:#166534;cursor:pointer;white-space:nowrap;}
+  .pk-alert-sub:not(.on){border-color:#9ca3af;background:#f3f4f6;color:#6b7280;}   /* 2026-11-23 跳出視窗標題列「這個提醒：開／關」 */
+  .alert-toggle.alert-sub-top:not(.on){opacity:.65;text-decoration:line-through;}
   .mr2-big{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;} .mr2-big b{font-size:44px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1;} .mr2-lv{font-size:15px;font-weight:900;border:2px solid currentColor;border-radius:8px;padding:1px 8px;} .mr2-chg{margin-left:auto;font-size:15px;font-weight:800;color:#3a3128;}   /* 2026-11-22 融資簡報最前面的大盤融資維持率 */
   .mb-chip{display:inline-block;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;background:#f1ecfb;color:#5b3fd6;}
   .mb-note{background:#fbf4de;border:1px solid #e8d9a8;border-radius:14px;padding:10px 16px;font-size:13.5px;line-height:1.8;color:#2d241b;}
@@ -4418,6 +4421,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="alert-toggle guide-btn" id="guideBtn">📖 新手教學</button>
       <button class="alert-toggle guide-btn" id="tutBtn">🎬 影片教學</button>  <!-- 2026-10-13 使用者：訊號教學、工具列各功能的影音教學（女聲旁白＋字幕） -->  <!-- 2026-10-10 使用者：做一頁適合本站的新手教學（照老師新手教學頁） -->
       <button class="alert-toggle" id="themeToggle" title="首頁換白底／黑底（記在這台瀏覽器）">☀️ 白底</button>  <!-- 2026-11-14 使用者：首頁試白底 -->
+      <button class="alert-toggle alert-sub-top" data-alert-sub="mcl" aria-pressed="true" title="融資斷頭價・盤中提醒：關掉就不再跳出來（記在這台）">💥 斷頭價提醒 開</button>  <!-- 2026-11-23 使用者：這兩個盤中跳出來的提醒各自一個開關 -->
+      <button class="alert-toggle alert-sub-top" data-alert-sub="sig" aria-pressed="true" title="落底訊號／回檔警示・盤中提醒：關掉就不再跳出來（記在這台）">📉 落底回檔提醒 開</button>
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
   </div>
@@ -19010,7 +19015,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-22 23:45:15';
+const BUILD_STAMP = '2026-11-23 09:04:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19132,6 +19137,33 @@ function makeAlertDraggable(el, headSel, key, opts){
 // 大小、隱藏狀態記在這台瀏覽器（位置由 makeAlertDraggable 記）。內容（innerHTML）每次有新提醒都會整個重畫，所以事件綁在常駐的 el 上、
 // 把手用 MutationObserver 在重畫後補回去。
 const ALERT_CTL_HTML = '<span class="pk-alert-ctl"><button type="button" class="pk-alert-min" title="隱藏（只留標題列，再按一次展開）">－</button><button type="button" class="pk-alert-max" title="放大（再按一次還原）">⛶</button><button type="button" class="pk-alert-close" aria-label="關閉">✕</button></span>';
+// 2026-11-23 使用者：融資斷頭價・盤中提醒、落底訊號／回檔警示・盤中提醒這兩個盤中跳出來的視窗，要各自可以關掉／打開
+// （視窗標題列一顆、最上排「提醒開啟」旁邊各一顆，同一個設定，記在這台）；關掉只是不再跳出來，其他提醒照舊，總開關「提醒開啟」關了一樣全部不跳
+const ALERT_SUB = { mcl: true, sig: true };
+const ALERT_SUB_KEY = { mcl: 'alertMclOn', sig: 'alertSigOn' };
+const ALERT_SUB_NAME = { mcl: '💥 斷頭價提醒', sig: '📉 落底回檔提醒' };
+try { for (const k of Object.keys(ALERT_SUB)) ALERT_SUB[k] = localStorage.getItem(ALERT_SUB_KEY[k]) !== '0'; } catch (_){ /* 讀不到就預設開 */ }
+function alertSubBtnHtml(k){
+  const on = ALERT_SUB[k];
+  return '<button type="button" class="pk-alert-sub' + (on ? ' on' : '') + '" data-alert-sub="' + k + '" aria-pressed="' + on + '" title="' + (on ? '按一下關掉：之後不再跳出這個提醒' : '按一下打開：之後有新的又會跳出來') + '">' + (on ? '🔔 這個提醒：開' : '🔕 這個提醒：關') + '</button>';
+}
+function syncAlertSubBtns(){
+  document.querySelectorAll('[data-alert-sub]').forEach((b) => {
+    const k = b.dataset.alertSub, on = !!ALERT_SUB[k];
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+    b.textContent = b.classList.contains('pk-alert-sub') ? (on ? '🔔 這個提醒：開' : '🔕 這個提醒：關') : ALERT_SUB_NAME[k] + (on ? ' 開' : ' 關');
+  });
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-alert-sub]');
+  if (!b) return;
+  e.stopPropagation();
+  const k = b.dataset.alertSub;
+  ALERT_SUB[k] = !ALERT_SUB[k];
+  try { localStorage.setItem(ALERT_SUB_KEY[k], ALERT_SUB[k] ? '1' : '0'); } catch (_){}
+  syncAlertSubBtns();
+  try { showToast(ALERT_SUB_NAME[k] + (ALERT_SUB[k] ? '已打開：有新的會跳出來' : '已關掉：不再跳出來（最上排或視窗標題列再按一次打開）')); } catch (_){}
+}, true);
 function makeAlertWindow(el, posKey){
   const K = posKey + 'Win', MINW = 340, MINH = 120;
   let st = {};
@@ -20342,6 +20374,7 @@ function syncAlertToggle(){
   btn.setAttribute('aria-pressed', String(alertsEnabled));
 }
 syncAlertToggle();
+syncAlertSubBtns();   // 2026-11-23 最上排兩個單獨開關的字（開／關）
 // 2026-11-14 使用者：首頁白底／黑底切換（預設白底；按了記在這台瀏覽器）
 (function(){
   const btn = document.getElementById('themeToggle');
@@ -29868,7 +29901,7 @@ function mclTouchNotify(events){
     makeAlertWindow(el, 'mclTouchPos');
   }
   const nHit = mclTouchLines.filter((l) => l.touch).length, nBroke = mclTouchLines.filter((l) => l.broke).length;
-  el.innerHTML = '<div class="pk-alert-head">💥 融資斷頭價・盤中提醒（觸及 ' + nHit + '・已破 ' + nBroke + '・接近 ' + (mclTouchLines.length - nHit - nBroke) + '）' + ALERT_CTL_HTML + '</div>' +
+  el.innerHTML = '<div class="pk-alert-head">💥 融資斷頭價・盤中提醒（觸及 ' + nHit + '・已破 ' + nBroke + '・接近 ' + (mclTouchLines.length - nHit - nBroke) + '）' + alertSubBtnHtml('mcl') + ALERT_CTL_HTML + '</div>' +
     '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th>大戶力<div class="dg-sub">盤中即時</div></th><th class="l">事件</th><th>漲跌幅</th><th>現價</th><th>斷頭價 A<div class="dg-sub">月高</div></th><th>斷頭價 B<div class="dg-sub">五日平均價線</div></th><th>融資餘額（張）<div class="dg-sub">今＝今天增減</div></th><th>月高後<div class="dg-sub">融資增減 %</div></th><th class="l">賣壓狀態</th></tr></thead><tbody>' + mclTouchLines.map((l) => l.html).join('') + '</tbody></table></div>' +
     '<div class="mt-foot">一檔一種事件今天只跳一次：觸及 A／B＝今天現價碰到斷頭價、已破 A／B＝昨天收盤以前就破了（盤前已破，不是今天才碰到）、近 A／B ' + MCL_NEAR_ALERT_PCT + '% 內＝離 A 月高斷頭價（或 B 五日平均價線斷頭價）≤' + MCL_NEAR_ALERT_PCT + '%。融資餘額是證交所／櫃買晚上才公布的資料，盤中用的是前一個交易日收盤後的數字。大戶力是盤中即時的（大戶淨額 ÷ 近 5 日均成交值）。點股號開 K 線圖。</div>';
   try { launchBeep(); } catch (_){}
@@ -29886,6 +29919,7 @@ function mclTouchTick(opts){
   try { mclTouchHoldRefresh(); trkAlertRefresh(); } catch (_){}
   if (!opts.force && (CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || botWindowMode() || sgtWindowMode())) return;
   if (!alertsEnabled && !opts.force) return;
+  if (!ALERT_SUB.mcl && !opts.force) return;   // 2026-11-23 使用者：這個提醒單獨關掉了
   const live = opts.live !== undefined ? opts.live : mclSessionLive();
   if (!live) return;
   if (!mclWatch.rows){ mclWatchLoad(); return; }
@@ -29973,7 +30007,7 @@ function mclSigNotify(events){
     makeAlertWindow(el, 'mclSigPos');
   }
   const nBt = mclSigLines.filter((l) => l.kind === 'bottom').length, nPl = mclSigLines.length - nBt;
-  el.innerHTML = '<div class="pk-alert-head">📉 落底訊號／回檔警示・盤中提醒（落底 ' + nBt + '・回檔 ' + nPl + '）' + ALERT_CTL_HTML + '</div>' +
+  el.innerHTML = '<div class="pk-alert-head">📉 落底訊號／回檔警示・盤中提醒（落底 ' + nBt + '・回檔 ' + nPl + '）' + alertSubBtnHtml('sig') + ALERT_CTL_HTML + '</div>' +
     '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票</th><th>大戶力<div class="dg-sub">盤中即時</div></th><th class="l">訊號</th><th>現價</th><th class="l">今天的數字</th><th class="l">賣壓狀態</th><th>融資餘額（張）<div class="dg-sub">今＝昨天增減</div></th></tr></thead><tbody>' + mclSigLines.map((l) => l.html).join('') + '</tbody></table></div>' +
     '<div class="mt-foot">盤中用「今天到目前」的開高低現價＋累計量，當成今天那根暫時的日K，用跟名單一樣的公式重算（名單上的是前一個收盤日算的）。累計量是到目前為止的量，爆量（≥ 前 20 日均量 2 倍）要等量真的累計到才成立，所以早盤會偏晚才報；收黑、長上影到收盤前還會變，一檔一種今天只跳一次。融資餘額、賣壓狀態是證交所／櫃買前一晚公布的數字，盤中不會變。不是買賣建議。</div>';
   try { launchBeep(); } catch (_){}
@@ -29985,6 +30019,7 @@ function mclSigTick(opts){
   opts = opts || {};
   if (!opts.force && (CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || botWindowMode() || sgtWindowMode())) return;
   if (!alertsEnabled && !opts.force) return;
+  if (!ALERT_SUB.sig && !opts.force) return;   // 2026-11-23 使用者：這個提醒單獨關掉了
   const live = opts.live !== undefined ? opts.live : mclSessionLive();
   if (!live) return;
   if (!mclWatch.rows){ mclWatchLoad(); return; }
