@@ -11666,7 +11666,10 @@ function homeRank4Html(){
     // 2026-11-20 使用者：盤中大戶力 ≥ +20% / ≤ −20% 這欄搬到強勢股觀察中・等收黑左邊（原本 2026-11-12 放在雙榜交集右邊、發動左邊）
     '<div class="hr-stack">' + homeRedBox(homeHolderLastColHtml()) + '</div>' +
     '<div class="hr-col">' + homePickWatchHtml() + '</div>' +   // 👁強勢股觀察中・等收黑
-    '<div class="hr-stack">' + homeRedBox(homeScrColHtml('red')) + homeRedBox(homeScrColHtml('dragon')) + '</div>' +   // 強勢紅K，創高黑龍疊在下面
+    '<div class="hr-stack">' + homeRedBox(homeScrColHtml('red')) +   // 強勢紅K，創高黑龍疊在下面
+      // 2026-11-23 使用者：創高黑龍上面加多族群排名(183)（跟最右邊那欄同一份）
+      homeRedBox(homeRankColHtml('多族群排名(183)', rows183, h.half, '------↑(多方)↑------', '沒有資料', fireOf, undefined, 'yel', true)) +
+      homeRedBox(homeScrColHtml('dragon')) + '</div>' +
     homeFixedBotColHtml('240', true) + homeFixedBotColHtml('260', true) + homeFixedBotColHtml('270', true) +
     homeObsColHtml() +
     homeLong.one +   // 2026-11-04 使用者：當沖多1、當沖多2 對調——第二欄當沖多1
