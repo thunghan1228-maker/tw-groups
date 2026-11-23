@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-23 15:20:58";
+const BUILD_STAMP = "2026-11-23 15:50:18";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4989,6 +4989,61 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 </div>
 
 <script>
+// ---- 省請求數（2026-11-23）：Cloudflare 免費方案一天 10 萬次請求，11/23 14:18 用完、整站被擋到隔天 08:00（Error 1027）。
+// 使用者：「做」——盤中看得到的分頁照舊即時；看不到的分頁（切到別的分頁、視窗縮小、手機鎖螢幕）先不抓，切回來再補抓；
+// 收盤後到隔天盤前（平日 13:40～08:25、週末整天）同一個網址 60 秒內只抓一次、用剛剛那份；夜盤期貨、國際指數照舊。
+// 盤中同一個網址 2 秒內重複的（好幾塊各自問同一份）合併成一次。網址帶 force=1／refresh=1 的照舊直接抓。
+function twLiveSession(){   // 平日 08:25～13:40（盤前試撮到收盤後一點點）
+  const d = new Date(Date.now() + 8 * 3600000), wd = d.getUTCDay(), hm = d.getUTCHours() * 60 + d.getUTCMinutes();
+  return wd >= 1 && wd <= 5 && hm >= 8 * 60 + 25 && hm <= 13 * 60 + 40;
+}
+(function(){
+  if (!window.fetch) return;
+  const nativeFetch = window.fetch.bind(window);
+  const NIGHT_KEEP = /^\\/api\\/(txf-live|fut-live|idx-bars|world-idx|world-indices|taiex-live)/;
+  const cache = new Map();      // GET 網址 → { at, res }（沒人讀過的那份，每次給 clone）
+  const inflight = new Map();   // GET 網址 → 正在抓的 promise（同一份大家共用）
+  let waiters = [];             // 分頁看不到時先排著，切回來再抓
+  const visible = () => document.visibilityState !== 'hidden';
+  document.addEventListener('visibilitychange', () => {
+    if (!visible() || !waiters.length) return;
+    const w = waiters; waiters = [];
+    w.forEach((go) => go());
+  });
+  const abortErr = () => { try { return new DOMException('Aborted', 'AbortError'); } catch (_){ const e = new Error('Aborted'); e.name = 'AbortError'; return e; } };
+  window.fetch = function(input, init){
+    let u;
+    try { u = new URL(typeof input === 'string' ? input : (input && input.url) || String(input), location.href); } catch (_){ return nativeFetch(input, init); }
+    if (u.origin !== location.origin || u.pathname.indexOf('/api/') !== 0) return nativeFetch(input, init);
+    const method = String((init && init.method) || (input && typeof input === 'object' && input.method) || 'GET').toUpperCase();
+    const signal = (init && init.signal) || (input && typeof input === 'object' && input.signal) || null;
+    const run = () => {
+      if (method !== 'GET' || /[?&](force|refresh|fresh)=1/.test(u.search) || (init && (init.cache === 'no-store' || init.cache === 'reload'))) return nativeFetch(input, init);
+      const key = u.pathname + u.search;
+      const ttl = twLiveSession() || NIGHT_KEEP.test(u.pathname) ? 2000 : 60000;
+      const hit = cache.get(key);
+      if (hit && Date.now() - hit.at < ttl) return Promise.resolve(hit.res.clone());
+      if (!signal && inflight.has(key)) return inflight.get(key).then((r) => r.clone());
+      const p = nativeFetch(input, init).then((r) => {
+        if (inflight.get(key) === p) inflight.delete(key);
+        if (r.ok){
+          cache.delete(key); cache.set(key, { at: Date.now(), res: r });
+          while (cache.size > 200) cache.delete(cache.keys().next().value);
+        }
+        return r;
+      }, (e) => { if (inflight.get(key) === p) inflight.delete(key); throw e; });
+      if (!signal) inflight.set(key, p);
+      return p.then((r) => r.clone());
+    };
+    if (visible()) return run();
+    return new Promise((resolve, reject) => {
+      if (signal && signal.aborted){ reject(abortErr()); return; }
+      const go = () => { if (signal && signal.aborted) return; run().then(resolve, reject); };
+      waiters.push(go);
+      if (signal) signal.addEventListener('abort', () => { waiters = waiters.filter((f) => f !== go); reject(abortErr()); }, { once: true });
+    });
+  };
+})();
 const GROUPS = ${JSON.stringify(GROUPS)};
 const ALL_CODES = [...new Set(GROUPS.flatMap((g) => g.stocks.map((s) => s.code)))];
 
@@ -19054,7 +19109,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-23 15:20:58';
+const BUILD_STAMP = '2026-11-23 15:50:18';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22117,8 +22172,11 @@ let tdJTimer = 0, tdSigTimer = 0, tdHomeAsked = 0;
 function tdJ(key, url, ttl){
   const e = tdJCache[key];
   if (e && (e.loading || Date.now() - e.at < ttl)) return e.data;
-  tdJCache[key] = { loading: true, at: Date.now(), data: e ? e.data : null };
-  const bad = (d) => ({ at: Date.now() - ttl + 15000, data: d || { status: 'error', bars: [] } });    // 讀失敗的 15 秒後再試，不要壓整個快取時間
+  const fails = e && e.fails ? e.fails : 0;
+  tdJCache[key] = { loading: true, at: Date.now(), data: e ? e.data : null, fails };
+  // 讀失敗的 15 秒後再試，不要壓整個快取時間；2026-11-23 省請求數：一直失敗（一直回空的）就 15→30→60→120→240 秒、最多 5 分鐘再試
+  // （原本每 15 秒一直問，首頁 905／1+2 那幾十檔回空的，一個分頁一小時就問好幾千次）
+  const bad = (d) => ({ at: Date.now() - ttl + Math.min(15000 * Math.pow(2, fails), 300e3), fails: fails + 1, data: d || { status: 'error', bars: [] } });
   fetch(url).then((r) => r.json().catch(() => null)).then((d) => { tdJCache[key] = d && d.status === 'ok' && !(Array.isArray(d.bars) && !d.bars.length) ? { at: Date.now(), data: d } : bad(d); })   // 後端第一次被問到沒訂閱的股票會先回空的（它同時去訂閱），15 秒後再問一次就有了
     .catch(() => { tdJCache[key] = bad(null); })
     .finally(() => {
@@ -22130,7 +22188,22 @@ function tdJ(key, url, ttl){
 // 一檔股在某天（到某個時段為止）的 905 高、昨高、突破／跌破時間。kind：'c12'＝1+2（要同時過 905 高與昨高）、'c905'＝905（只過 905 高）
 function tdB905Calc(code, kind, date, slot, ttl){
   const d1 = tdJ('d1|' + code, '/api/bars1d/' + code, 1800e3);
-  const m5 = date === twTodayStr() ? tdJ('m5|' + code, '/api/bars/' + code, ttl || 60e3) : tdJ('m5r|' + code, '/api/bars5range/' + code, 1800e3);
+  let m5;
+  if (date === twTodayStr()){
+    // 2026-11-23 省請求數：收盤後（13:40 以後、週末）今天的 5 分K 不會再變，30 分鐘才重抓。
+    // 盤中：現價跟上一份 5 分K 算出來的「之上／之下」同一邊（也沒有剛漲到 2% 還沒記到時間）就 10 分鐘才重抓；
+    // 換邊了（可能新突破／跌破）照舊 2～3 分鐘就抓——首頁 905／1+2 兩欄一天下來兩百多檔，原本每檔每 2～3 分鐘抓一次
+    let t5 = twLiveSession() ? (ttl || 60e3) : 1800e3;
+    const c = tdJCache['m5|' + code], q = getStockQuote(code);
+    if (t5 < 600e3 && !slot && c && c.data && d1 && q && q.price > 0){
+      const r0 = tdB905From(d1, c.data, kind, date, null);
+      if (r0.ev && (q.price > r0.thr) === r0.inside && (r0.p2 || !(Number.isFinite(q.changePercent) && q.changePercent >= TD905_PCT))) t5 = 600e3;
+    }
+    m5 = tdJ('m5|' + code, '/api/bars/' + code, t5);
+  } else m5 = tdJ('m5r|' + code, '/api/bars5range/' + code, 1800e3);
+  return tdB905From(d1, m5, kind, date, slot);
+}
+function tdB905From(d1, m5, kind, date, slot){
   if (!d1 || !m5) return { loading: true };
   if (d1.status !== 'ok' || m5.status !== 'ok') return { error: true };
   const dayBars = (m5.bars || []).filter((b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10) === date).sort((a, b) => a.ts - b.ts);
