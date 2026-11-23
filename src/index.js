@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-23 09:04:12";
+const BUILD_STAMP = "2026-11-23 09:08:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3584,6 +3584,18 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .pk-alert-sub{margin-left:8px;font:inherit;font-size:12px;font-weight:800;padding:2px 10px;border-radius:999px;border:1px solid #16a34a;background:#dcfce7;color:#166534;cursor:pointer;white-space:nowrap;}
   .pk-alert-sub:not(.on){border-color:#9ca3af;background:#f3f4f6;color:#6b7280;}   /* 2026-11-23 跳出視窗標題列「這個提醒：開／關」 */
   .alert-toggle.alert-sub-top:not(.on){opacity:.65;text-decoration:line-through;}
+  #rcModal .chips-inner{--bg:#ffffff;--panel:#ffffff;--line:#e5e7eb;--text:#1f2937;--muted:#6b7280;background:#fff;color:#1f2937;border:1px solid #d1d5db;width:min(900px,97vw);height:auto;max-height:95vh;padding:16px 20px 18px;}   /* 2026-11-23 個股月營收圖：白底 */
+  #rcModal .cm-icon-btn{background:#fff;color:#1f2937;border-color:#d1d5db;flex:0 0 auto;}
+  .rc-head{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;position:relative;padding-right:46px;} .rc-titles{flex:1 1 260px;min-width:0;} .rc-head #rcClose{position:absolute;top:0;right:0;}
+  .rc-title{font-size:22px;font-weight:900;color:#111827;} .rc-sub{font-size:12.5px;color:#6b7280;margin-top:2px;}
+  .rc-scores{display:flex;gap:10px;flex:0 0 auto;}
+  .rc-box{border:2px solid #6d28d9;border-radius:12px;padding:4px 14px 6px;text-align:center;min-width:150px;} .rc-box.tech{border-color:#1d4ed8;}
+  .rc-box .rc-pill{display:inline-block;background:#6d28d9;color:#fff;font-size:12px;font-weight:800;border-radius:999px;padding:1px 12px;} .rc-box.tech .rc-pill{background:#1d4ed8;}
+  .rc-box b{display:block;font-size:30px;font-weight:900;color:#111827;line-height:1.15;} .rc-box b small{font-size:13px;font-weight:600;color:#6b7280;margin-left:4px;}
+  .rc-box .rc-parts{font-size:11.5px;color:#374151;white-space:nowrap;}
+  .rc-svg{width:100%;height:auto;display:block;margin-top:6px;} .rc-note{font-size:12px;color:#6b7280;margin-top:6px;line-height:1.5;}
+  .rc-open{cursor:pointer;color:#7c3aed!important;font-weight:800;font-style:normal;text-decoration:underline;}
+  @media (max-width: 640px){ .rc-title{font-size:18px;} .rc-box{min-width:0;padding:3px 6px 5px;} .rc-box b{font-size:24px;} .rc-scores{width:100%;} .rc-box{flex:1 1 0;} .rc-box .rc-parts{font-size:10.5px;white-space:normal;} }
   .mr2-big{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;} .mr2-big b{font-size:44px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1;} .mr2-lv{font-size:15px;font-weight:900;border:2px solid currentColor;border-radius:8px;padding:1px 8px;} .mr2-chg{margin-left:auto;font-size:15px;font-weight:800;color:#3a3128;}   /* 2026-11-22 融資簡報最前面的大盤融資維持率 */
   .mb-chip{display:inline-block;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800;background:#f1ecfb;color:#5b3fd6;}
   .mb-note{background:#fbf4de;border:1px solid #e8d9a8;border-radius:14px;padding:10px 16px;font-size:13.5px;line-height:1.8;color:#2d241b;}
@@ -4551,6 +4563,17 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
     <div id="mbBody"></div>
   </div>
 </div>
+<!-- 2026-11-23 使用者：個股月營收圖（月營收柱＋月底股價、單季三率、月增、年增，右上基本面／技術面分數） -->
+<div class="chips-modal" id="rcModal" hidden>
+  <div class="chips-inner" id="rcInner">
+    <div class="rc-head">
+      <div class="rc-titles"><div class="rc-title" id="rcTitle">月營收 / 月增 / 年增</div><div class="rc-sub" id="rcSub"></div></div>
+      <div class="rc-scores" id="rcScores"></div>
+      <button class="cm-icon-btn" id="rcClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="rcBody"></div>
+  </div>
+</div>
 <!-- 2026-10-10 使用者：照老師「均線分數排行 滿分 15」（zhuang.tw/ma）做（下方導覽列「均線分數排行」，手機／iPad 放上排第 6 顆） -->
 <div class="chips-modal" id="maModal" hidden>
   <div class="chips-inner" id="maInner">
@@ -4808,6 +4831,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <div class="cm-right">
         <div class="cm-actions">
           <input type="text" class="cm-quick-search" id="cmQuickSearch" placeholder="輸入代號切換">
+          <button class="cm-go-btn" id="cmRevBtn" aria-label="個股月營收圖" title="這檔的月營收／月增／年增＋股價、三率、基本面／技術面分數">📊 營收</button>   <!-- 2026-11-23 使用者：個股月營收圖 -->
           <button class="cm-go-btn" id="cmQuickSearchGoBtn" aria-label="進入分K">進入分K</button>
           <button class="cm-icon-btn" id="cmSettingsToggle" aria-label="指標設定" aria-pressed="false">⚙</button>
           <button class="cm-icon-btn" id="cmMax" aria-label="放大／還原視窗" aria-pressed="false">⛶</button>
@@ -11534,7 +11558,7 @@ function homeRevTechColHtml(){
       '<span class="tw-stk"><span class="hr-code">' + wlEsc(r.code) + '</span><span class="hr-name">' + wlEsc(r.name) + '</span>' + dtWarnHtml(r.code, false) + '</span>' +
       '<span class="hr-turn rt-total' + (r.total >= 80 ? ' hot' : '') + '">' + r.total + '</span><span class="hr-turn">' + r.rev + '</span><span class="hr-turn">' + r.tech + '</span>' +
       '<span class="hr-avg ' + (pct === null ? 'flat' : dirClass(pct)) + '">' + (pct === null ? '—' : fmt(pct) + '%') + '</span>' +
-      '<div class="hr-l2 tw-l2"><i>' + mon(r.revMonth) + '年增</i>' + pc(r.yoy) + (accel ? '🚀' : '') + '<i>累計</i>' + pc(r.cumYoy) + '<i>月增</i>' + pc(r.mom) + '<i>均線</i>' + r.score2 + '/15<i>大戶力</i>' + homeHoldHtml(r.code) + (r.group ? '<i>' + wlEsc(r.group) + '</i>' : '') + '</div></div>';
+      '<div class="hr-l2 tw-l2"><i>' + mon(r.revMonth) + '年增</i>' + pc(r.yoy) + (accel ? '🚀' : '') + '<i>累計</i>' + pc(r.cumYoy) + '<i>月增</i>' + pc(r.mom) + '<i>均線</i>' + r.score2 + '/15<i>大戶力</i>' + homeHoldHtml(r.code) + (r.group ? '<i>' + wlEsc(r.group) + '</i>' : '') + '<i class="rc-open" data-rc-code="' + wlEsc(r.code) + '" data-rc-name="' + wlEsc(r.name) + '" title="看這檔的月營收／月增／年增圖">📊營收圖</i></div></div>';
   };
   const months = Object.entries(d.revMonths || {}).map(([m, n]) => mon(m) + ' ' + n + ' 家').join('、');
   const note = '<div class="hr-note">技術面 ' + md(d.date) + ' 收盤；營收用各家最新公布的月份（' + wlEsc(months) + '）・只看 5 日均成交值 ≥ 5,000 萬' + (liveDay ? '；漲跌幅是今天即時' : '') + '・🚀＝年增比上月多 10 個百分點以上</div>';
@@ -19015,7 +19039,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-23 09:04:12';
+const BUILD_STAMP = '2026-11-23 09:08:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20163,6 +20187,7 @@ document.getElementById('top6Strip').addEventListener('keydown', (e) => {
 document.getElementById('app').addEventListener('click', (e) => {
   if (homePanSwallow){ homePanSwallow = false; e.stopPropagation(); e.preventDefault(); return; }
   const t = e.target;
+  const brc = t.closest('[data-rc-code]'); if (brc){ e.stopPropagation(); e.preventDefault(); openRevChart(brc.dataset.rcCode, brc.dataset.rcName); return; }   // 2026-11-23 個股月營收圖
   const bsg = t.closest('[data-bsort]'); if (bsg){ botSortClick(bsg); render(); try { botRerunCols(); } catch (_){} return; }
   if (t.closest('[data-hx-go]')){ const i = document.getElementById('hxQ'); homeXAdd(i ? i.value : ''); const j = document.getElementById('hxQ'); if (j) j.value = ''; return; }
   const hd = t.closest('[data-hx-del]'); if (hd){ homeXCols.splice(Number(hd.dataset.hxDel), 1); homeXSave(); render(); return; }
@@ -25711,6 +25736,129 @@ function openMbPanel(){
 document.getElementById('mbBtn').addEventListener('click', openMbPanel);
 document.getElementById('mbClose').addEventListener('click', () => { document.getElementById('mbModal').hidden = true; });
 document.getElementById('mbModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.currentTarget.hidden = true; });
+// ---- 個股月營收圖（2026-11-23 使用者：我們也要做出這種個股的營收圖）----
+// 後端 /api/hub/revenue-chart：近 34 個月月營收（億）、月增、年增、月底收盤（未還原）、單季三率，基本面／技術面分數。
+// 一張 SVG 四層共用同一條月份軸：① 月營收柱（最近 3 個月深紫、去年同期橘框）＋月底收盤線（右軸）② 單季利益率 ③ 月增 ④ 年增；淡紫底＝最近 3 個月。
+const rcState = { code: '', name: '', data: {}, loading: {} };
+function rcLoad(code){
+  if (rcState.loading[code] || (rcState.data[code] && Date.now() - rcState.data[code].at < 30 * 60e3)) return;
+  rcState.loading[code] = true;
+  fetch('/api/revenue-chart?code=' + encodeURIComponent(code)).then((r) => r.json()).then((d) => { rcState.data[code] = { at: Date.now(), d }; })
+    .catch((err) => { rcState.data[code] = { at: Date.now() - 29 * 60e3, d: { status: 'error', message: '讀取失敗（' + String((err && err.message) || err).slice(0, 40) + '）' } }; })
+    .finally(() => { rcState.loading[code] = false; if (rcState.code === code) renderRevChart(); });
+}
+function openRevChart(code, name){
+  code = String(code || '').trim().toUpperCase();
+  rcState.code = code; rcState.name = name || '';
+  document.getElementById('rcModal').hidden = false;
+  if (/^[0-9]{4,6}[A-Z]?$/.test(code)) rcLoad(code);
+  renderRevChart();
+}
+function rcNice(v){ if (!(v > 0)) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))), f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
+function rcFmt(v){ return Math.abs(v) >= 100 ? v.toFixed(1) : Math.abs(v) >= 10 ? v.toFixed(2) : v.toFixed(2); }
+function rcSvg(d){
+  const W = 820, LM = 58, RM = 58, PW = W - LM - RM, ms = d.months, n = ms.length;
+  const bw = PW / n, cx = (i) => LM + bw * (i + 0.5), barW = Math.max(3, bw * 0.72);
+  const esc = (v) => wlEsc(v);
+  const ymLabel = (ym) => ym.slice(2, 4) + '/' + ym.slice(5, 7);
+  const last3 = new Set(ms.slice(-3).map((m) => m.ym));
+  const lastYear = new Set(ms.slice(-3).map((m) => { const y = Number(m.ym.slice(0, 4)) - 1; return y + m.ym.slice(4); }));
+  const sign = (v) => (v > 0 ? '+' : '') + (Math.abs(v) >= 10 ? Math.round(v) : v.toFixed(1)) + '%';
+  let g = '', y0 = 8;
+  // ① 月營收＋月底收盤
+  const A = { top: 40, h: 230 };
+  const revTop = Math.max(1, ...ms.map((m) => m.rev || 0)) * 1.05, revStep = rcNice(revTop / 3), revMax = Math.ceil(revTop / revStep) * revStep;   // 跟對方一樣 0／20／40／60 這種刻度
+  const ry = (v) => A.top + A.h * (1 - v / revMax);
+  const closes = ms.map((m) => m.close).filter((v) => Number.isFinite(v));
+  const pLo0 = closes.length ? Math.min(...closes) : 0, pHi0 = closes.length ? Math.max(...closes) : 1;
+  const pStep = rcNice((pHi0 - pLo0 || pHi0 || 1) / 4), pLo = Math.max(0, Math.floor(pLo0 / pStep) * pStep - pStep), pHi = Math.ceil(pHi0 / pStep) * pStep + pStep * 0.3;
+  const py = (v) => A.top + A.h * (1 - (v - pLo) / (pHi - pLo));
+  g += '<rect x="' + LM + '" y="' + y0 + '" width="12" height="12" fill="#6d28d9"/><text x="' + (LM + 17) + '" y="' + (y0 + 11) + '" font-size="12.5" fill="#1f2937">月營收(億,左軸)</text>' +
+    '<line x1="' + (LM + 150) + '" x2="' + (LM + 178) + '" y1="' + (y0 + 6) + '" y2="' + (y0 + 6) + '" stroke="#1d4ed8" stroke-width="2.5"/><text x="' + (LM + 184) + '" y="' + (y0 + 11) + '" font-size="12.5" fill="#1d4ed8">月底收盤(元,右軸・未還原)</text>';
+  const band = (top, h) => '<rect x="' + (cx(n - 3) - bw / 2).toFixed(1) + '" y="' + top + '" width="' + (bw * 3).toFixed(1) + '" height="' + h + '" fill="#ede9fe" opacity=".75"/>';
+  g += band(A.top - 6, A.h + 6);
+  for (let v = 0; v <= revMax + 1e-6; v += revStep){ const yy = ry(v).toFixed(1); g += '<line x1="' + LM + '" x2="' + (W - RM) + '" y1="' + yy + '" y2="' + yy + '" stroke="#f3f4f6"/><text x="' + (LM - 6) + '" y="' + (Number(yy) + 4) + '" text-anchor="end" font-size="11" fill="#4b5563">' + Math.round(v) + '</text>'; }
+  for (let v = Math.ceil(pLo / pStep) * pStep; v <= pHi; v += pStep){ g += '<text x="' + (W - RM + 6) + '" y="' + (py(v) + 4).toFixed(1) + '" font-size="11" fill="#1d4ed8">' + Math.round(v) + '</text>'; }
+  g += '<text transform="translate(16,' + (A.top + A.h / 2) + ') rotate(-90)" text-anchor="middle" font-size="12" font-weight="700" fill="#1f2937">月營收(億)</text>' +
+    '<text transform="translate(' + (W - 10) + ',' + (A.top + A.h / 2) + ') rotate(90)" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">股價(元)</text>';
+  ms.forEach((m, i) => {
+    if (!Number.isFinite(m.rev)) return;
+    const recent = last3.has(m.ym), ly = lastYear.has(m.ym), top = ry(m.rev);
+    g += '<g><title>' + esc(m.ym.replace('-', '/') + ' 營收 ' + m.rev + ' 億' + (Number.isFinite(m.mom) ? '・月增 ' + sign(m.mom) : '') + (Number.isFinite(m.yoy) ? '・年增 ' + sign(m.yoy) : '') + (Number.isFinite(m.close) ? '・月底收盤 ' + m.close : '')) + '</title>' +
+      '<rect x="' + (cx(i) - barW / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + (A.top + A.h - top).toFixed(1) + '" fill="' + (recent ? '#5b21b6' : '#c4b5fd') + '"' + (ly ? ' stroke="#f59e0b" stroke-width="2.4"' : '') + '/></g>';
+  });
+  const lyIdx = ms.map((m, i) => (lastYear.has(m.ym) ? i : -1)).filter((i) => i >= 0);
+  if (lyIdx.length){ const topLy = Math.min(...lyIdx.map((i) => ry(ms[i].rev || 0))); g += '<text x="' + cx(lyIdx[1] ?? lyIdx[0]).toFixed(1) + '" y="' + (topLy - 8).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#b45309">去年同期</text>'; }
+  const lastRev = ms[n - 1].rev;
+  if (Number.isFinite(lastRev)) g += '<text x="' + (cx(n - 1) + barW / 2).toFixed(1) + '" y="' + (ry(lastRev) - 6).toFixed(1) + '" text-anchor="end" font-size="12.5" font-weight="800" fill="#111827">' + Number(lastRev).toPrecision(4) + '</text>';
+  const pts = ms.map((m, i) => (Number.isFinite(m.close) ? cx(i).toFixed(1) + ',' + py(m.close).toFixed(1) : null)).filter(Boolean);
+  if (pts.length > 1) g += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="#1d4ed8" stroke-width="2.2" stroke-linejoin="round"/>';
+  ms.forEach((m, i) => { if (Number.isFinite(m.close)) g += '<circle cx="' + cx(i).toFixed(1) + '" cy="' + py(m.close).toFixed(1) + '" r="2.6" fill="#1d4ed8"/>'; });
+  // ② 單季利益率
+  const B = { top: A.top + A.h + 46, h: 110 };
+  const qs = (d.quarters || []).map((q) => Object.assign({}, q, { i: ms.findIndex((m) => m.ym === q.ym) })).filter((q) => q.i >= 0);
+  const qVals = qs.flatMap((q) => [q.gm, q.om, q.nm]).filter((v) => Number.isFinite(v));
+  const bLo = Math.min(0, ...(qVals.length ? qVals : [0])), bHi = rcNice(Math.max(10, ...(qVals.length ? qVals : [10])) * 1.1);
+  const bStep = rcNice((bHi - bLo) / 3), bLo2 = Math.floor(bLo / bStep) * bStep;
+  const by = (v) => B.top + B.h * (1 - (v - bLo2) / (bHi - bLo2));
+  g += '<text x="' + LM + '" y="' + (B.top - 18) + '" font-size="12.5" font-weight="700" fill="#1f2937">利益率 %(單季)</text>' +
+    [['毛利率', '#7c3aed'], ['營益率', '#d97706'], ['淨利率', '#0891b2']].map(([l, c], k) => '<circle cx="' + (LM + 120 + k * 78) + '" cy="' + (B.top - 22) + '" r="5" fill="' + c + '"/><text x="' + (LM + 128 + k * 78) + '" y="' + (B.top - 18) + '" font-size="12.5" fill="' + c + '">' + l + '</text>').join('');
+  g += band(B.top - 4, B.h + 8);
+  for (let v = bLo2; v <= bHi + 1e-6; v += bStep){ g += '<line x1="' + LM + '" x2="' + (W - RM) + '" y1="' + by(v).toFixed(1) + '" y2="' + by(v).toFixed(1) + '" stroke="' + (v === 0 ? '#9ca3af' : '#f3f4f6') + '"/><text x="' + (LM - 6) + '" y="' + (by(v) + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#4b5563">' + Math.round(v) + '</text>'; }
+  g += '<text transform="translate(16,' + (B.top + B.h / 2) + ') rotate(-90)" text-anchor="middle" font-size="12" font-weight="700" fill="#1f2937">利益率 %</text>';
+  if (!qs.length) g += '<text x="' + (LM + PW / 2) + '" y="' + (B.top + B.h / 2) + '" text-anchor="middle" font-size="12" fill="#9ca3af">還沒有季報資料</text>';
+  [['gm', '#7c3aed', '毛利率'], ['om', '#d97706', '營益率'], ['nm', '#0891b2', '淨利率']].forEach(([k, c, l]) => {
+    const pp = qs.filter((q) => Number.isFinite(q[k]));
+    if (pp.length > 1) g += '<polyline points="' + pp.map((q) => cx(q.i).toFixed(1) + ',' + by(q[k]).toFixed(1)).join(' ') + '" fill="none" stroke="' + c + '" stroke-width="2"/>';
+    pp.forEach((q) => { g += '<g><title>' + esc((q.label || q.season) + ' ' + l + ' ' + q[k] + '%') + '</title><circle cx="' + cx(q.i).toFixed(1) + '" cy="' + by(q[k]).toFixed(1) + '" r="3.6" fill="' + c + '"/></g>'; });
+  });
+  // ③ 月增 ④ 年增
+  const barsPanel = (P, key, title, lim, recent) => {
+    const vals = ms.map((m) => m[key]).filter((v) => Number.isFinite(v));
+    const lo = lim.lo(vals), hi = lim.hi(vals);
+    const yy = (v) => P.top + P.h * (1 - (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo));
+    let h = '<text x="' + LM + '" y="' + (P.top - 14) + '" font-size="12.5" font-weight="700" fill="#5b21b6">' + title + ' 近 3 個月：' + recent.map((v) => (Number.isFinite(v) ? sign(v) : '—')).join(' / ') + '</text>';
+    h += band(P.top - 4, P.h + 8);
+    const step = rcNice((hi - lo) / 3);
+    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-6; v += step){ h += '<line x1="' + LM + '" x2="' + (W - RM) + '" y1="' + yy(v).toFixed(1) + '" y2="' + yy(v).toFixed(1) + '" stroke="' + (v === 0 ? '#6b7280' : '#f3f4f6') + '"/><text x="' + (LM - 6) + '" y="' + (yy(v) + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#4b5563">' + Math.round(v) + '</text>'; }
+    h += '<text transform="translate(16,' + (P.top + P.h / 2) + ') rotate(-90)" text-anchor="middle" font-size="12" font-weight="700" fill="#1f2937">' + title + ' %</text>';
+    ms.forEach((m, i) => {
+      const v = m[key];
+      if (!Number.isFinite(v)) return;
+      const a = yy(0), b = yy(v), up = v >= 0, clipped = v > hi || v < lo;
+      h += '<g><title>' + esc(m.ym.replace('-', '/') + ' ' + title + ' ' + sign(v)) + '</title><rect x="' + (cx(i) - barW / 2).toFixed(1) + '" y="' + Math.min(a, b).toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + Math.max(1, Math.abs(a - b)).toFixed(1) + '" fill="' + (up ? '#dc2626' : '#16a34a') + '"/></g>';
+      if (clipped || (key === 'yoy' && i === n - 1) || Math.abs(v) >= 0.8 * Math.max(Math.abs(hi), Math.abs(lo))) h += '<text x="' + cx(i).toFixed(1) + '" y="' + (up ? b - 4 : b + 12).toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#111827">' + sign(v) + '</text>';
+      if (key === 'yoy' && Number.isFinite(m.yoyMove) && m.yoyMove <= -10 && v > 0) h += '<g><title>' + esc(m.ym.replace('-', '/') + ' 年增比上個月少 ' + Math.abs(m.yoyMove).toFixed(1) + ' 個百分點（放緩）') + '</title><rect x="' + (cx(i) - 8).toFixed(1) + '" y="' + (b - 19).toFixed(1) + '" width="16" height="14" rx="3" fill="#fef3c7" stroke="#d97706"/><text x="' + cx(i).toFixed(1) + '" y="' + (b - 8).toFixed(1) + '" text-anchor="middle" font-size="10" font-weight="800" fill="#92400e">緩</text></g>';
+    });
+    return h;
+  };
+  const C = { top: B.top + B.h + 50, h: 110 }, D = { top: C.top + C.h + 50, h: 120 };
+  const symLim = (vals) => Math.min(50, Math.max(20, Math.ceil(Math.max(0, ...vals.map(Math.abs)) / 10) * 10));
+  g += barsPanel(C, 'mom', '月增', { lo: (v) => -symLim(v), hi: (v) => symLim(v) }, d.recent.mom);
+  g += barsPanel(D, 'yoy', '年增', { lo: (v) => Math.max(-50, Math.min(-25, Math.floor(Math.min(0, ...v) / 25) * 25)), hi: (v) => Math.min(100, Math.max(25, Math.ceil(Math.max(0, ...v) / 25) * 25)) }, d.recent.yoy);
+  // 月份軸
+  const axisY = D.top + D.h + 20;
+  ms.forEach((m, i) => { if (m.ym.endsWith('-01') || m.ym.endsWith('-07')) g += '<text x="' + cx(i).toFixed(1) + '" y="' + axisY + '" text-anchor="middle" font-size="11.5" fill="#374151">' + ymLabel(m.ym) + '</text>'; });
+  return '<svg class="rc-svg" viewBox="0 0 ' + W + ' ' + (axisY + 8) + '" role="img">' + g + '</svg>';
+}
+function renderRevChart(){
+  const code = rcState.code, box = rcState.data[code], d = box && box.d;
+  const name = (d && d.name) || rcState.name || '';
+  document.getElementById('rcTitle').textContent = code + ' ' + name + ' 月營收 / 月增 / 年增';
+  const body = document.getElementById('rcBody'), scores = document.getElementById('rcScores'), sub = document.getElementById('rcSub');
+  if (!/^[0-9]{4,6}[A-Z]?$/.test(code)){ sub.textContent = ''; scores.innerHTML = ''; body.innerHTML = '<div class="rc-note">只有個股有月營收（指數、期貨沒有）。</div>'; return; }
+  if (!d || d.status !== 'ok'){ sub.textContent = ''; scores.innerHTML = ''; body.innerHTML = '<div class="rc-note">' + (d ? wlEsc(d.message || '查不到這檔的月營收') : '讀取中…（第一次打開要抓 3 年資料，約幾秒）') + '</div>'; return; }
+  const latest = d.latest.replace('-', '/');
+  sub.textContent = '淡紫底 = ' + latest + ' 往回 3 個月；橘框 = 去年同期' + (d.group ? '・' + d.group : d.industry ? '・' + d.industry : '');
+  const f = d.scores.fundamental || {}, t = d.scores.technical;
+  const v = (x) => (x === null || x === undefined ? '—' : x);
+  scores.innerHTML = '<div class="rc-box" title="基本面＝年增、月增（最近 3 個月平均）、利益率（最新一季三率水準＋比去年同季改善）在全市場排第幾（百分位）的平均"><span class="rc-pill">基本面</span><b>' + v(f.score) + '<small>/ 100</small></b><div class="rc-parts">年增 ' + v(f.yoy) + '・月增 ' + v(f.mom) + '・利益率 ' + v(f.margin) + '</div></div>' +
+    '<div class="rc-box tech" title="技術面＝（基期分＋均線分數 × 100 ÷ 15）÷ 2；基期分＝收盤在一年（240 個交易日，還原價）高低點之間的位置，越接近低點分數越高"><span class="rc-pill">技術面</span><b>' + (t ? t.score : '—') + '<small>/ 100</small></b><div class="rc-parts">' + (t ? '基期 ' + t.base + '・均線 ' + t.score2 + '/15' : '還沒有技術面資料') + '</div></div>';
+  body.innerHTML = rcSvg(d) + '<div class="rc-note">月營收：公開資訊觀測站（FinMind）；月底收盤未還原除權息；利益率是單季財報。「緩」＝年增比上個月少 10 個百分點以上。分數是我們自己的算法，滑過分數框看怎麼算、滑過柱子看那個月的數字。</div>';
+}
+document.getElementById('rcClose').addEventListener('click', () => { document.getElementById('rcModal').hidden = true; });
+document.getElementById('rcModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.currentTarget.hidden = true; });
+document.getElementById('cmRevBtn').addEventListener('click', () => { const st = document.getElementById('cmStar'); openRevChart((st && st.dataset.code) || document.getElementById('cmCode').textContent, (st && st.dataset.name) || document.getElementById('cmName').textContent); });
 // ---- 營收成長榜（2026-10-09 使用者：照老師「每月營收成長榜 學員版」做一模一樣的）----
 // 後端 /api/revenue?month=：公開資訊觀測站「每月營業收入彙總表」（排程主機每天 12:30／18:30／23:30 抓），公布日＝我們第一次抓到的日期，
 // 收盤、成交量、公布隔日漲跌用我們的日K。段落照老師的順序：查個股營收、族群分析、多觀察分析（我們用自選股）、
@@ -33565,6 +33713,10 @@ const WORKER_ENTRY = {
     if (url.pathname === "/api/stock-futures-rank") {
       // 首頁股期成交量前 30（2026-11-22 使用者）：收盤後一天換一次，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/stock-futures-rank" + url.search, 300);
+    }
+    if (url.pathname === "/api/revenue-chart") {
+      // 個股月營收圖（2026-11-23 使用者）：後端點開才抓 FinMind、存 6 小時，這裡快取 10 分鐘
+      return await proxyHanstockBars("/api/hub/revenue-chart" + url.search, 600);
     }
     if (url.pathname === "/api/revenue-tech") {
       // 首頁營收＋技術面（2026-11-22 使用者）：收盤後／營收公布才變，快取 5 分鐘

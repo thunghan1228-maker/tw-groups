@@ -1815,6 +1815,10 @@ const WORKER_ENTRY = {
       // 首頁股期成交量前 30（2026-11-22 使用者）：收盤後一天換一次，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/stock-futures-rank" + url.search, 300);
     }
+    if (url.pathname === "/api/revenue-chart") {
+      // 個股月營收圖（2026-11-23 使用者）：後端點開才抓 FinMind、存 6 小時，這裡快取 10 分鐘
+      return await proxyHanstockBars("/api/hub/revenue-chart" + url.search, 600);
+    }
     if (url.pathname === "/api/revenue-tech") {
       // 首頁營收＋技術面（2026-11-22 使用者）：收盤後／營收公布才變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/revenue-tech" + url.search, 300);
