@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-24 18:08:57";
+const BUILD_STAMP = "2026-11-24 21:49:08";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2441,6 +2441,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .b32-tag.run{background:#b91c1c;} .b32-tag.back{background:#2563eb;}
   .b32-grp:has(.b32-turn){white-space:normal;overflow:visible;line-height:1.5;}   /* 有轉下彎標籤的那列可以換行，窄欄（首頁 310px）才不會被切掉 */
   #ma20TurnBox .ck-table td,#ma20TurnBox .ck-table th{white-space:nowrap;}   /* 2026-11-24 均20 轉下彎提醒視窗：手機上欄位不要擠成直排 */
+  .b32-turn.up{background:#b91c1c;} .dyn-turnbar{margin:2px 0 6px;} .dyn-turnbar .b777-p{font-size:12px;}
   .b32-turn{display:inline-block;margin-left:5px;padding:0 4px;border-radius:4px;font-size:11px;font-weight:800;color:#fff;background:#0f766e;white-space:nowrap;}   /* 2026-11-24 5 分K 20MA 上揚轉下彎的時間 */
   .bot-line.bot-b32turn{padding:2px 0 4px;}
   /* 2026-10-19 使用者：刀劍空(32)、1️⃣2️⃣空(123)、空族群必殺(193) 都加「大戶力」（盤中大戶力％，跟訊號中心同一份）：
@@ -4441,7 +4442,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="alert-toggle" id="themeToggle" title="首頁換白底／黑底（記在這台瀏覽器）">☀️ 白底</button>  <!-- 2026-11-14 使用者：首頁試白底 -->
       <button class="alert-toggle alert-sub-top" data-alert-sub="mcl" aria-pressed="true" title="融資斷頭價・盤中提醒：關掉就不再跳出來（記在這台）">💥 斷頭價提醒 開</button>  <!-- 2026-11-23 使用者：這兩個盤中跳出來的提醒各自一個開關 -->
       <button class="alert-toggle alert-sub-top" data-alert-sub="sig" aria-pressed="true" title="落底訊號／回檔警示・盤中提醒：關掉就不再跳出來（記在這台）">📉 落底回檔提醒 開</button>
-      <button class="alert-toggle alert-sub-top" data-alert-sub="turn" aria-pressed="true" title="新刀劍空(32) 名單裡 5 分K 20MA 由上揚轉下彎・盤中提醒：關掉就不再跳出來（記在這台）">↘ 均20轉下彎提醒 開</button>  <!-- 2026-11-24 使用者 -->
+      <button class="alert-toggle alert-sub-top" data-alert-sub="turn" aria-pressed="true" title="32、123、99 賣超、260／270 弱勢的均20 轉下彎，260／270 強勢的均20 轉上彎・盤中提醒：關掉就不再跳出來（記在這台）">↘↗ 均20轉彎提醒 開</button>  <!-- 2026-11-24 使用者 -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
   </div>
@@ -10043,44 +10044,71 @@ function bladeGoneRowHtml(x){
 // 11/24 冠西電收盤算出來 387.13，跟老師一樣）。每根比前一根低＝下彎、高＝上揚、一樣就照前一根的方向；
 // 今天最後一次「上揚→下彎」那根 K 棒的結束時間＝轉下彎時間（老師寫「10:50轉下彎」）。現在還在下彎的才標；一開盤就一路下彎、今天沒上揚過的不算「轉」。
 // 5 分K：前幾天的用 /api/bars5range（30 分鐘抓一次）、今天的用 /api/bars（盤中 3 分鐘，跟首頁 905／1+2 同一份快取）。
-var b32TurnOnly = (() => { try { return localStorage.getItem('b32TurnOnly') === '1'; } catch (_){ return false; } })();
-function ma20TurnOf(code){
-  const today = twTodayStr();
-  const r5 = tdJ('m5r|' + code, '/api/bars5range/' + code, 1800e3);
-  const m5 = tdJ('m5|' + code, '/api/bars/' + code, twLiveSession() ? 180e3 : 1800e3);
+// 2026-11-24 使用者：777／123／193／999／99、260／270（動能選股）也要「只看均20轉下彎」（260／270 強勢那邊是「只看均20轉上彎」），每檔標時間；
+// 每個名單各自一個開關（key），記在這台。只算族群表裡的股票（後端本來就訂閱著、有 5 分K）；族群表外的不標
+// （抓它的 5 分K 會叫後端另外訂閱、還會向永豐抓歷史 K 線，可能把別的訂閱擠掉）。
+var GROUP_CODE_SET = new Set(ALL_CODES);
+var maTurnOnly = (() => { let o = {}; try { o = JSON.parse(localStorage.getItem('maTurnOnly') || '{}') || {}; if (!('32' in o) && localStorage.getItem('b32TurnOnly') === '1') o['32'] = true; } catch (_){} return o; })();
+function maTurnOn(key){ return !!maTurnOnly[key]; }
+function ma20Series(r5, m5, today){
   if (!r5 || r5.status !== 'ok') return null;
   const dOf = (b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10);
-  const prior = (r5.bars || []).filter((b) => dOf(b) < today).sort((a, b) => a.ts - b.ts).slice(-19);
+  const prior = (r5.bars || []).filter((b) => dOf(b) < today && Number.isFinite(b.close)).sort((a, b) => a.ts - b.ts).slice(-19);
   const src = m5 && m5.status === 'ok' && Array.isArray(m5.bars) && m5.bars.length ? m5.bars : (r5.bars || []);
   const todays = src.filter((b) => dOf(b) === today && Number.isFinite(b.close)).sort((a, b) => a.ts - b.ts);
   if (!todays.length) return null;
   const all = prior.concat(todays), first = prior.length;
-  const ma = (i) => { let s = 0; for (let k = i - 19; k <= i; k++) s += all[k].close; return s / 20; };
-  let dir = 0, turnI = -1;
+  const ma = (i) => { let sm = 0; for (let k = i - 19; k <= i; k++) sm += all[k].close; return sm / 20; };
+  let dir = 0, dnI = -1, upI = -1;
   for (let i = 20; i < all.length; i++){
     const d = ma(i) - ma(i - 1);
     const nd = d < -1e-9 ? -1 : d > 1e-9 ? 1 : dir;
-    if (nd < 0 && dir > 0 && i >= first) turnI = i;
+    if (i >= first){ if (nd < 0 && dir > 0) dnI = i; if (nd > 0 && dir < 0) upI = i; }
     dir = nd;
   }
-  const hm = (b) => new Date(b.ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16);
-  return { down: dir < 0, turn: dir < 0 && turnI >= 0 ? hm(all[turnI]) : null, ma: all.length >= 20 ? ma(all.length - 1) : null };
+  return { all, dir, dnI, upI, ma: all.length >= 20 ? ma(all.length - 1) : null, hm: (i) => new Date(all[i].ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16) };
 }
-function ma20TurnTagOf(code){
+function ma20TurnOf(code){
+  if (!GROUP_CODE_SET.has(code)) return { outside: true, down: false, up: false, turn: null, upTurn: null, ma: null };
+  const today = twTodayStr(), live = twLiveSession();
+  const r5 = tdJ('m5r|' + code, '/api/bars5range/' + code, 1800e3);
+  // 省請求數：盤中現價跟「下一根會移出 20 根窗口的那根收盤」比，跟現在均線方向同一邊（看起來不會轉彎）就 15 分鐘才重抓今天的 5 分K，
+  // 不同邊（可能要轉彎了）照舊 3 分鐘
+  let ttl = live ? 180e3 : 1800e3;
+  const c = tdJCache['m5|' + code], q = live ? getStockQuote(code) : null;
+  if (live && c && c.data && q && q.price > 0){
+    const s0 = ma20Series(r5, c.data, today);
+    if (s0 && s0.dir !== 0 && s0.all.length >= 21){
+      const side = (px) => (q.price > px ? 1 : q.price < px ? -1 : s0.dir);
+      if (side(s0.all[s0.all.length - 20].close) === s0.dir && side(s0.all[s0.all.length - 21].close) === s0.dir) ttl = 900e3;
+    }
+  }
+  const m5 = tdJ('m5|' + code, '/api/bars/' + code, ttl);
+  if (!r5) return null;   // 還在抓（null＝還沒好；抓不到或今天沒 K 棒回 none，不要讓提醒一直等）
+  const sr = ma20Series(r5, m5, today);
+  if (!sr) return { none: true, down: false, up: false, turn: null, upTurn: null, ma: null };
+  return { down: sr.dir < 0, up: sr.dir > 0, turn: sr.dir < 0 && sr.dnI >= 0 ? sr.hm(sr.dnI) : null, upTurn: sr.dir > 0 && sr.upI >= 0 ? sr.hm(sr.upI) : null, ma: sr.ma };
+}
+function ma20TurnTagOf(code, up){
   const t = ma20TurnOf(code);
-  return t && t.turn ? '<span class="b32-turn" title="5 分K 20MA 原本上揚、' + t.turn + ' 轉下彎（現在還在下彎）">↘均20 ' + t.turn + '</span>' : '';
+  if (!t) return '';
+  if (up) return t.upTurn ? '<span class="b32-turn up" title="5 分K 20MA 原本下彎、' + t.upTurn + ' 轉上彎（現在還在上彎）">↗均20 ' + t.upTurn + '</span>' : '';
+  return t.turn ? '<span class="b32-turn" title="5 分K 20MA 原本上揚、' + t.turn + ' 轉下彎（現在還在下彎）">↘均20 ' + t.turn + '</span>' : '';
 }
-function b32TurnBtnHtml(){
-  return '<button type="button" class="b777-p' + (b32TurnOnly ? ' on' : '') + '" data-b32-turn="1" title="只看 5 分K 20MA 原本上揚、轉下彎的（跑掉的不列；記在這台）">' + (b32TurnOnly ? '☑ ' : '☐ ') + '只看均20轉下彎</button>';
+function maTurnBtnHtml(key, up){
+  const on = maTurnOn(key);
+  return '<button type="button" class="b777-p' + (on ? ' on' : '') + '" data-ma-turn="' + key + '" title="只看 5 分K 20MA 原本' + (up ? '下彎、轉上彎' : '上揚、轉下彎') + '的（記在這台；族群表外的股票不算）">' + (on ? '☑ ' : '☐ ') + '只看均20轉' + (up ? '上彎' : '下彎') + '</button>';
 }
 document.addEventListener('click', (e) => {
-  const b = e.target.closest && e.target.closest('[data-b32-turn]');
+  const b = e.target.closest && e.target.closest('[data-ma-turn]');
   if (!b) return;
   e.stopPropagation(); e.preventDefault();
-  b32TurnOnly = !b32TurnOnly;
-  try { localStorage.setItem('b32TurnOnly', b32TurnOnly ? '1' : '0'); } catch (_){}
+  const k = b.dataset.maTurn;
+  maTurnOnly[k] = !maTurnOnly[k];
+  try { localStorage.setItem('maTurnOnly', JSON.stringify(maTurnOnly)); } catch (_){}
   try { render(); } catch (_){}
   try { botRerunCols(); } catch (_){}
+  try { dynRerender(); } catch (_){}
 }, true);
 function bladeBotListHtml(m, holderFilter, oldestFirst, opts){
   const bareHolder = !!(opts && opts.bareHolder);   // 2026-11-12 使用者：機器人 32 每列不要再寫「大戶力」三個字（整欄最上面寫一次），才不會擠到股票名稱
@@ -10097,7 +10125,7 @@ function bladeBotListHtml(m, holderFilter, oldestFirst, opts){
   const evT = (x) => (x.inNow ? (x.back || x.first) : (x.out || x.first));
   const bigOf = (x) => { const r = liveBy.get(x.code); return r && Number.isFinite(r.strengthPct) ? r.strengthPct : (Number.isFinite(x.row.big) ? x.row.big : null); };
   // 2026-11-24 使用者：只看 5 分K 20MA「原本上揚、轉下彎」的（標題下面的按鈕切換，記在這台）；跑掉的不列
-  const turnOnly = !!(opts && opts.teacherSections) && b32TurnOnly;
+  const turnOnly = !!(opts && opts.teacherSections) && maTurnOn('32');
   const passHolder = (x) => (!holderFilter || (x.inNow && bigOf(x) !== null && (holderFilter === 'up' ? bigOf(x) >= 10 : bigOf(x) <= -10)))
     && (!turnOnly || (x.inNow && !!ma20TurnTagOf(x.code)));
   const list = Array.from(tl.values()).filter(passHolder).sort((a, b) => (evT(a) > evT(b) ? -1 : evT(a) < evT(b) ? 1 : a.first > b.first ? -1 : a.first < b.first ? 1 : a.code < b.code ? -1 : 1));
@@ -19187,7 +19215,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-24 18:08:57';
+const BUILD_STAMP = '2026-11-24 21:49:08';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19313,7 +19341,7 @@ const ALERT_CTL_HTML = '<span class="pk-alert-ctl"><button type="button" class="
 // （視窗標題列一顆、最上排「提醒開啟」旁邊各一顆，同一個設定，記在這台）；關掉只是不再跳出來，其他提醒照舊，總開關「提醒開啟」關了一樣全部不跳
 const ALERT_SUB = { mcl: true, sig: true, turn: true };   // 2026-11-24 使用者：加「32 均20 轉下彎」盤中提醒（turn）
 const ALERT_SUB_KEY = { mcl: 'alertMclOn', sig: 'alertSigOn', turn: 'alertTurnOn' };
-const ALERT_SUB_NAME = { mcl: '💥 斷頭價提醒', sig: '📉 落底回檔提醒', turn: '↘ 均20轉下彎提醒' };
+const ALERT_SUB_NAME = { mcl: '💥 斷頭價提醒', sig: '📉 落底回檔提醒', turn: '↘↗ 均20轉彎提醒' };
 try { for (const k of Object.keys(ALERT_SUB)) ALERT_SUB[k] = localStorage.getItem(ALERT_SUB_KEY[k]) !== '0'; } catch (_){ /* 讀不到就預設開 */ }
 function alertSubBtnHtml(k){
   const on = ALERT_SUB[k];
@@ -27811,6 +27839,7 @@ function botAnswerRaw(raw){
       return { code: c, in32, in12, x32, x12, r: now32.get(c) || now12.get(c), r12: now12.get(c) || null, ev: e32 > e12 ? e32 : e12, first: f32 > f12 ? f32 : f12 };
     });
     items.sort((a, b) => (a.ev !== b.ev ? (b.ev > a.ev ? 1 : -1) : a.first !== b.first ? (b.first > a.first ? 1 : -1) : (a.r.pct ?? 0) - (b.r.pct ?? 0)));
+    if (maTurnOn('999')) items.splice(0, items.length, ...items.filter((it) => !!ma20TurnTagOf(it.code)));   // 2026-11-24 只看均20轉下彎
     const rows = items.map((it) => {
       const { code, r } = it;
       const q9 = getStockQuote(code);
@@ -27821,14 +27850,14 @@ function botAnswerRaw(raw){
       return '<div class="b32-row bh k12" data-bot-code="' + wlEsc(code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
         '<span class="b32-time">' + (it.ev || '--:--') + '</span>' +
         '<span class="b32-stk"><span class="bot-stk">' + wlEsc(code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + dtWarnHtml(code, true) + '</span>' +
-        '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + '</span>' +
+        '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + ma20TurnTagOf(code) + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(big, true, true) + '</span>' +
         '<span class="b32-lvrow b777-sigrow">' + (it.in32 ? sigHtml(it.x32, false) : '') + (it.in12 ? sigHtml(it.x12, true) : '') + overlap + (it.r12 ? stage12(it.r12) : '') + bot777FlagTags(code) + '</span></div>';
     });
     const n32 = items.filter((it) => it.in32).length, n12 = items.filter((it) => it.in12).length;
     const tN = '<span class="kk-blink">⚡空中空 ' + items.length + ' 檔（999）</span>';   // 2026-11-14 使用者：跟強中強一樣寫「空中空 N 檔（999）」
-    return wrap(tN, botLine('777・32・123 有兩份以上都有的（首頁閃綠的）；全部照時間排，最近發生的在上面；左邊時間＝最近一次發生（回的看回、其他看進榜）。其中刀劍空 ' + n32 + ' 檔、12空 ' + n12 + ' 檔', 'bot-dim') +
+    return wrap(tN, botLine(maTurnBtnHtml('999', false), 'bot-b32turn') + botLine('777・32・123 有兩份以上都有的（首頁閃綠的）；全部照時間排，最近發生的在上面；左邊時間＝最近一次發生（回的看回、其他看進榜）。其中刀劍空 ' + n32 + ' 檔、12空 ' + n12 + ' 檔', 'bot-dim') +
       (rows.join('') || botLine('目前沒有', 'bot-dim')));
   }
   if (q === '888'){
@@ -27854,11 +27883,14 @@ function botAnswerRaw(raw){
     const strong = side === 'strong';
     const holdLbl = strong ? '大戶力 ≥ +10%' : '大戶力 ≤ −10%';
     const sideBtns = '<div class="bot-line b777-params">' + [['strong', '強勢'], ['weak', '弱勢']].map(([k, l]) => '<button type="button" class="b777-p' + (side === k ? ' on' : '') + '" data-dyn-side="' + k + '">' + l + '</button>').join('') +
-      '<button type="button" class="b777-p' + (dynState.hold ? ' on' : '') + '" data-dyn-hold="1" title="只看大戶力夠' + (strong ? '強' : '弱') + '的（大戶力還沒有數字的先不列）">' + (dynState.hold ? '☑ ' : '☐ ') + holdLbl + '</button></div>';
+      '<button type="button" class="b777-p' + (dynState.hold ? ' on' : '') + '" data-dyn-hold="1" title="只看大戶力夠' + (strong ? '強' : '弱') + '的（大戶力還沒有數字的先不列）">' + (dynState.hold ? '☑ ' : '☐ ') + holdLbl + '</button>' + maTurnBtnHtml('dyn' + q + (strong ? 's' : 'w'), strong) + '</div>';
     const m = pulseModel();
     if (m.wait) return wrap(t, sideBtns + botLine(m.wait, 'bot-dim'));
     const list0 = (kind === 'day' ? m.day : m.week)[strong ? 'strong' : 'weak'];
-    const list = dynState.hold ? list0.filter((o) => { const hp = holderPctOf(o.code); return Number.isFinite(hp) && (strong ? hp >= 10 : hp <= -10); }) : list0;
+    // 2026-11-24 使用者：弱勢加「只看均20轉下彎」、強勢加「只看均20轉上彎」，每檔標時間（跟動能選股面板同一個開關）
+    const tKey = 'dyn' + q + (strong ? 's' : 'w');
+    const list1 = dynState.hold ? list0.filter((o) => { const hp = holderPctOf(o.code); return Number.isFinite(hp) && (strong ? hp >= 10 : hp <= -10); }) : list0;
+    const list = maTurnOn(tKey) ? list1.filter((o) => !!ma20TurnTagOf(o.code, strong)) : list1;
     const momOf = (o) => (kind === 'day' ? o.dNow : o.wNow), baseOf = (o) => (kind === 'day' ? o.dBase : o.wBase);
     const valOf = (o) => (kind === 'day' ? o.valNow : o.wvalNow), daysOf = (o) => (kind === 'day' ? o.dDays(strong) : o.wDays(strong));
     const rows = botSortRows(q, list, { px: (o) => o.px, chg: (o) => o.chgNow, score: (o) => o.score, mom: momOf, holder: (o) => holderPctOf(o.code) });
@@ -27868,7 +27900,7 @@ function botAnswerRaw(raw){
       const mv = momOf(o), bv = baseOf(o), dd = daysOf(o), gm = o.group ? m.gmom.get(o.group) : null, v = valOf(o);
       return botLine('<span class="t240-c1">' + (i + 1) + ' ' + (kind === 'day' ? botStkHot : botStk)(o.code, o.name, ' ' + (dd <= 1 ? '<span class="dyn-new">新</span>' : '<span class="bot-dim t240-days" style="font-size:11px">上榜 ' + dd + (kind === 'day' ? ' 天' : ' 週') + '</span>')) +
           '<br><span class="bot-dim" style="font-size:11px">' + wlEsc(o.group || (WL_GROUP_INDEX[o.code] && WL_GROUP_INDEX[o.code].group) || '—') + (Number.isFinite(gm) ? ' 族動能 <b class="' + (gm >= 0 ? 'up' : 'down') + '">' + gm.toFixed(1) + '</b>' : '') +
-          '・成交 ' + (Number.isFinite(v) ? v.toFixed(v >= 100 ? 0 : 1) : '—') + ' 億</span></span>' +
+          '・成交 ' + (Number.isFinite(v) ? v.toFixed(v >= 100 ? 0 : 1) : '—') + ' 億</span>' + ma20TurnTagOf(o.code, strong) + '</span>' +
         '<span class="t240-n"><b>' + fmtPx(o.px) + '</b></span>' +
         '<span class="t240-n ' + (Number.isFinite(o.chgNow) ? dirClass(o.chgNow) : 'bot-dim') + '">' + (Number.isFinite(o.chgNow) ? botPct(o.chgNow) : '—') + '</span>' +
         '<span class="t240-n t240-ma">' + (o.score ?? '—') + '</span>' +
@@ -28089,6 +28121,7 @@ function botAnswerRaw(raw){
     };
     rows32.forEach((r) => put(r, false));
     rows12.forEach((r) => put(r, true));
+    if (maTurnOn('777')) [...items.keys()].forEach((c) => { if (!ma20TurnTagOf(c)) items.delete(c); });   // 2026-11-24 只看均20轉下彎
     const itEv = (it) => { const a1 = it.r32 ? evOf(it.r32, false) : '', a2 = it.r12 ? evOf(it.r12, true) : ''; return a1 > a2 ? a1 : a2; };
     const baseOf = (it) => it.r32 || it.r12;
     const byG = new Map();
@@ -28110,7 +28143,7 @@ function botAnswerRaw(raw){
       return '<div class="b32-row bh k12 b777r" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
         '<span class="b32-time">' + (itEv(it) || '--:--') + '</span>' +
         '<span class="b32-stk b777-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name || '') + '</span>' + mk + dtWarnHtml(r.code, true) + (() => { const q7 = getStockQuote(r.code); const p7 = q7 && Number.isFinite(q7.price) ? q7.price : null; return '<span class="b777-px" title="即時成交價">' + (p7 === null ? '—' : p7 >= 1000 ? p7.toFixed(0) : p7 >= 100 ? p7.toFixed(1) : p7.toFixed(2)) + '</span>'; })() + '</span>' +   // 2026-11-14 使用者：777 股名右邊空的地方放即時成交價
-        '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + '</span>' +
+        '<span class="b32-grp">' + wlEsc(r.g || '') + (r.gr ? '・' + r.gr + zoneMk(r) : '') + ma20TurnTagOf(r.code) + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(r.pct) ? dirClass(r.pct) : '') + '">' + botPct(r.pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(big, true, true) + '</span>' +
         '<span class="b32-lvrow b777-sigrow">' + (it.r32 ? sigTag(it.r32, false) : '') + (it.r12 ? sigTag(it.r12, true) + stage12(it.r12) : '') + bot777FlagTags(r.code) + '</span></div>';
@@ -28121,7 +28154,7 @@ function botAnswerRaw(raw){
         ' <span class="bot-dim">命中 ' + g.list.length + ' / 族內 ' + (gg ? gg.stocks.length : '—') + (g.time ? '・最新 ' + g.time : '') + '</span>', 'bot-head');
     };
     const otc = live.otcLabel || '';
-    const body = bot777ParamsHtml() + botLine('<span></span><span class="b777-hh r">成交價</span><span class="b777-hh c">大戶力</span><span class="b777-hh r">漲跌幅</span>', 'b777-hhead') +
+    const body = bot777ParamsHtml() + botLine(maTurnBtnHtml('777', false), 'bot-b32turn') + botLine('<span></span><span class="b777-hh r">成交價</span><span class="b777-hh c">大戶力</span><span class="b777-hh r">漲跌幅</span>', 'b777-hhead') +
       botLine('🔪刀劍空 ' + rows32.length + ' 檔・🔵12空 ' + rows12.length + ' 檔・合計 ' + items.size + ' 檔／' + groups.length + ' 族', 'bot-sep') +
       (items.size ? groups.map((g) => grpHead(g) + g.list.map(rowHtml).join('')).join('') : botLine('目前沒有', 'bot-dim')) +
       (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail() + (live.otcPct !== null && live.otcPct !== undefined ? '　櫃買 ' + wlEsc(otc) + ' ' + botPct(live.otcPct) : ''), 'bot-warn') : '') +
@@ -28142,12 +28175,15 @@ function botAnswerRaw(raw){
     const backOf = (code) => { const x = tl193 ? tl193.get(code) : null; return x && x.inNow ? hm193(x.back) : ''; };
     const evOf = (code) => { const f = firstOf(code), b = backOf(code); return b > f ? b : f; };
     const tSpan = (t) => '<span class="b193-t' + (t ? '' : ' none') + '">' + (t || '--:--') + '</span>';
+    const t193 = maTurnOn('193');   // 2026-11-24 只看均20轉下彎：⚠️ 個股只留轉下彎的，族裡沒有剩的整族不列
+    const memOf = (r) => (t193 ? r.members.filter((x) => !!ma20TurnTagOf(x.code)) : r.members);
     const line = (r) => {
-      const gt = r.members.reduce((mx, x) => { const v = evOf(x.code); return v > mx ? v : mx; }, '');
-      return rankLineH({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark, pre: tSpan(gt) }) + (r.members.length ? botLine(r.members.slice().sort((a, b) => b.pct - a.pct || (a.code < b.code ? -1 : 1)).map((x) => '<span class="b193-m"><span class="b193-r1">' + tSpan(firstOf(x.code)) + '⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + (backOf(x.code) ? ' <span class="b193-back">回 ' + backOf(x.code) + '</span>' : '') + '</span>' + holderTagHtml(holderPctOf(x.code), false, true, x.code) + '</span>').join(''), 'bot-sub b193-wrap') : '');
+      if (t193 && !memOf(r).length) return '';
+      const gt = memOf(r).reduce((mx, x) => { const v = evOf(x.code); return v > mx ? v : mx; }, '');
+      return rankLineH({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark, pre: tSpan(gt) }) + (memOf(r).length ? botLine(memOf(r).slice().sort((a, b) => b.pct - a.pct || (a.code < b.code ? -1 : 1)).map((x) => '<span class="b193-m"><span class="b193-r1">' + tSpan(firstOf(x.code)) + '⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + (backOf(x.code) ? ' <span class="b193-back">回 ' + backOf(x.code) + '</span>' : '') + ma20TurnTagOf(x.code) + '</span>' + holderTagHtml(holderPctOf(x.code), false, true, x.code) + '</span>').join(''), 'bot-sub b193-wrap') : '');
     };
     const byRank = (l) => l.slice().sort((a, b) => a.rank - b.rank);
-    return wrap('空族群必殺(193)', botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + byRank(k.upper).map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + byRank(k.lower).map(line).join('') + botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + (kill193OtcTail() ? botLine(kill193OtcTail(), 'bot-sub') : ''));
+    return wrap('空族群必殺(193)', botLine(maTurnBtnHtml('193', false), 'bot-b32turn') + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + byRank(k.upper).map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + byRank(k.lower).map(line).join('') + botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + (kill193OtcTail() ? botLine(kill193OtcTail(), 'bot-sub') : ''));
   }
   if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\\+3$/.test(q)){
     let list = zone283List(h);
@@ -28189,7 +28225,7 @@ function botAnswerRaw(raw){
     const seq = tdTodaySeq(m);   // 跟功課廣播、機器人 32 同一份紀錄、同一個接法
     if (!seq) return wrap(title, botLine('讀取中…', 'bot-dim'));
     const live = { total: m.total };
-    const list = tdBroadcast(seq, 'k12');
+    const list = tdBroadcast(seq, 'k12').filter((x) => !maTurnOn('123') || (x.inNow && !!ma20TurnTagOf(x.code)));   // 2026-11-24 只看均20轉下彎（跑掉的不列）
     const stage = (row) => (!row || !Number.isFinite(row.h1) ? '' : '<span class="b32-lvrow">' + (!Number.isFinite(row.h2)
       ? '<span class="b32-lv s1" title="第一階段：剛跌破 20MA、20MA 下彎，還沒有反彈；1高＝破之前的最高，當停損價">① 剛轉弱（還沒反彈）</span><span class="b32-lv" title="1高＝破之前的最高，當停損價">1高 ' + tdK12Px(row.h1) + ' 停損</span>'
       : '<span class="b32-lv s2" title="第二階段：破了以後反彈出現「2」，沒過 1高（前高）就可以空">② 不過前高可空（反彈沒過 1高）</span><span class="b32-lv">2 ' + tdK12Px(row.h2) + '</span><span class="b32-lv" title="1高＝破之前的最高，當停損價">1高 ' + tdK12Px(row.h1) + ' 停損</span>') + '</span>');
@@ -28199,7 +28235,7 @@ function botAnswerRaw(raw){
       return '<div class="b32-row k12' + (gone ? ' gone' : '') + '" data-bot-code="' + wlEsc(x.code) + '" data-bot-name="' + wlEsc(r.name || '') + '">' +
         '<span class="b32-time">' + x.first + '</span>' +
         '<span class="b32-stk"><span class="bot-stk">' + wlEsc(x.code) + ' ' + wlEsc(r.name || '') + '</span>' + (/[🔪⚔️🔰]/u.test(r.mk || '') ? r.mk : '') + dtWarnHtml(x.code, true) + '</span>' +
-        '<span class="b32-grp">' + wlEsc(r.g || '12空') + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, live.total)) : '') + '</span>' +
+        '<span class="b32-grp">' + wlEsc(r.g || '12空') + (r.g && r.gr ? '・' + r.gr + (r.zone === 'harvest' ? '♣' : bladeRankMark(r.gr, live.total)) : '') + (gone ? '' : ma20TurnTagOf(x.code)) + '</span>' +
         '<span class="b32-pct ' + (Number.isFinite(pct) ? dirClass(pct) : '') + '">' + botPct(pct) + '</span>' +
         '<span class="b32-h">' + holderTagHtml(r.big !== null && r.big !== undefined ? r.big : holderPctOf(x.code), true) + '</span>' +
         (gone ? '<span class="b32-tag run">跑 ' + x.out + '</span>' : x.back ? '<span class="b32-tag back">回 ' + x.back + '</span>' : '') + k12LvWithFlags(stage(r), x.code) + '</div>';
@@ -28207,7 +28243,7 @@ function botAnswerRaw(raw){
     const inCnt = list.filter((x) => x.inNow).length, goneCnt = list.length - inCnt;
     const c = tdK12Counts(list.filter((x) => x.inNow).map((x) => x.row));
     const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
-    return wrap(title, (list.length ? botLine('<span class="b32-cnt s1">① 剛轉弱 ' + c.s1 + ' 檔（還沒反彈）</span><span class="b32-cnt s2">② 不過前高可空 ' + c.s2 + ' 檔（反彈沒過 1高）</span>', 'bot-dim') : '') +
+    return wrap(title, botLine(maTurnBtnHtml('123', false), 'bot-b32turn') + (list.length ? botLine('<span class="b32-cnt s1">① 剛轉弱 ' + c.s1 + ' 檔（還沒反彈）</span><span class="b32-cnt s2">② 不過前高可空 ' + c.s2 + ' 檔（反彈沒過 1高）</span>', 'bot-dim') : '') +
       (list.length ? list.map(rowHtml).join('') : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
       (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail(), 'bot-warn') : '') +   // 2026-11-13 使用者：照老師的 123，最後接櫃買那行
       (list.length ? botLine('跟「功課廣播 12空(123)」同一份・左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（劃掉）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・① 剛轉弱＝剛跌破 20MA、20MA 下彎、還沒反彈，1高＝破惡前最高當停損價・② 不過前高可空＝破了以後反彈沒過 1高' + tdParamsNote(), 'bot-dim') : ''),
@@ -28227,8 +28263,8 @@ function botAnswerRaw(raw){
     const bl = bladeBotListHtml(m, null, false, { bareHolder: true, teacherSections: true });
     const otcT = kill193OtcTail();
     // 2026-11-24 使用者：標題下面加「只看均20轉下彎」（5 分K 20MA 原本上揚、轉下彎的）
-    const turnBtn = botLine(b32TurnBtnHtml(), 'bot-b32turn');
-    return wrap('🔪⚔️新刀劍空(32)', turnBtn + (bl.html ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + bl.html : botLine(b32TurnOnly ? '目前沒有均20轉下彎的（5 分K 還在抓的會晚一點出來）' : '目前沒有', 'bot-dim')) +
+    const turnBtn = botLine(maTurnBtnHtml('32', false), 'bot-b32turn');
+    return wrap('🔪⚔️新刀劍空(32)', turnBtn + (bl.html ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + bl.html : botLine(maTurnOn('32') ? '目前沒有均20轉下彎的（5 分K 還在抓的會晚一點出來）' : '目前沒有', 'bot-dim')) +
       (otcT ? botLine('------↓(櫃買)↓------', 'bot-sep') + botLine(otcT, 'bot-warn') : '') + botLine(bladeLegend(bl) + tdParamsNote(), 'bot-dim'), stamp + '・' + bladeCountTxt(bl));
   }
   // 33 賽馬多、34 河流多（2026-10-17 使用者：照對方機器人格式）：第一名 👑、接著 1️⃣～🔟；33 漲 7% 以上那段下面畫「續抱不追」；
@@ -28311,9 +28347,11 @@ function botAnswerRaw(raw){
     const { d, buy, sell, pctOf } = L;
     const amt = inst99Amt;
     const row = (r, i, buySide) => { const pct = pctOf(r);
-      return botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' ' + amt(r, 'f', '外') + ' ' + amt(r, 't', '投') + ' <span class="' + (pct === null ? 'bot-dim' : dirClass(pct)) + '">' + (pct === null ? '—' : botPct(pct)) + '</span>' + inst99XqTag(r.code, buySide, 'bot-xq')) + '</span><span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true, r.code) + '</span>', 'bot-hrow'); };
+      return botLine('<span>' + (i + 1) + ' ' + botStk(r.code, r.name, ' ' + amt(r, 'f', '外') + ' ' + amt(r, 't', '投') + ' <span class="' + (pct === null ? 'bot-dim' : dirClass(pct)) + '">' + (pct === null ? '—' : botPct(pct)) + '</span>' + inst99XqTag(r.code, buySide, 'bot-xq')) + (buySide ? '' : ma20TurnTagOf(r.code)) + '</span><span class="bot-tail">' + holderTagHtml(holderPctOf(r.code), false, true, r.code) + '</span>', 'bot-hrow'); };
     const md = Number(d.date.slice(5, 7)) + '/' + Number(d.date.slice(8, 10));
-    return wrap(t, botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + botLine('外資投信同步賣超前十', 'bot-head') + (sell.map((r, i) => row(r, i, false)).join('') || botLine('這天沒有', 'bot-dim')) +
+    // 2026-11-24 使用者：同步賣超那段加「只看均20轉下彎」、每檔標轉下彎時間（買超那段不動）
+    const sell9 = maTurnOn('99') ? sell.filter((r) => !!ma20TurnTagOf(r.code)) : sell;
+    return wrap(t, botLine(maTurnBtnHtml('99', false), 'bot-b32turn') + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + botLine('外資投信同步賣超前十', 'bot-head') + (sell9.map((r, i) => row(r, i, false)).join('') || botLine(maTurnOn('99') ? '沒有均20轉下彎的' : '這天沒有', 'bot-dim')) +
       botLine('------↓(外資投信同步買超前十)↓------', 'bot-sep') + (buy.map((r, i) => row(r, i, true)).join('') || botLine('這天沒有', 'bot-dim')) +
       botLine((d.markets && d.markets.length < 2 ? '上櫃還沒公布，先列上市；' : '') + '同步＝外資、投信同一天都買超（或都賣超）；續強＝同步買超、前一個交易日收盤和今天的大戶力都 ≥ 0，續弱＝同步賣超、兩天都 < 0；排名照兩家合計金額（億元＝張數 × 收盤價，是概算，滑過去看張數）；上市＋上櫃；漲跌幅是即時；大戶力是盤中大戶力（不在大戶力排行範圍的顯示 —）', 'bot-dim') +
       // 2026-11-14 使用者：99 下面寫每天幾點更新
@@ -30435,18 +30473,46 @@ function patSigNotify(events){
     events.slice(0, 5).forEach((e) => { try { new Notification('📐 ' + e.x.name + '突破 ' + e.code + ' ' + (e.name || ''), { body: hm + ' 現價 ' + e.q.price + '（觸發價 ' + e.x.trigger + '）', tag: 'pat-' + e.key }); } catch (_){} });
   }
 }
-// ---- 新刀劍空(32) 均20 上揚轉下彎・盤中提醒（2026-11-24 使用者：均線（5 分K 20MA）原本向上、轉向下的時候盤中跳出訊號）----
-// 名單＝32 在榜的（多方打少／中間／強空積極／收割區），轉下彎的算法跟 32 每列的「↘均20 HH:MM」同一份（ma20TurnOf）。
-// 一檔一個轉下彎時間今天只跳一次（下彎後又上揚、再轉下彎，時間不同會再跳）；這台今天第一次算的時候已經轉下彎的只記下來不跳（開頁面不吵）。
-// 開關：最上排「↘ 均20轉下彎提醒」、視窗標題列的 🔔（跟斷頭價、落底回檔提醒一樣）。
+// ---- 均20 轉彎・盤中提醒（2026-11-24 使用者：均線（5 分K 20MA）原本向上、轉向下的時候盤中跳出訊號；
+// 又說 777、123、193、999、99、260／270 弱勢這些名單裡只要有均20 轉下彎就跳，260／270 強勢的均20 轉上彎也一樣要跳）----
+// 轉下彎：32（刀劍空，777／999／193 的 ⚠️ 都是從 32、123 來的）、123、99 同步賣超、260／270 弱勢；轉上彎：260／270 強勢。
+// 算法跟各名單每列的「↘均20／↗均20 HH:MM」同一份（ma20TurnOf，只算族群表裡的股票）。
+// 一檔一個方向一個轉彎時間今天只跳一次（轉下彎後又轉上彎、再轉下彎，時間不同會再跳）；這台今天第一次算的時候已經轉彎的只記下來不跳（開頁面不吵）。
+// 開關：最上排「↘ 均20轉彎提醒」、視窗標題列的 🔔（跟斷頭價、落底回檔提醒一樣）。
 const MA20T_SEEN_KEY = 'ma20TurnSeen';
 let ma20TurnLines = [];
+function ma20TurnSources(){
+  const down = new Map(), up = new Map();   // code → { code, name, group, rank, pct, src: [名單] }
+  const add = (map, r, src) => {
+    if (!r || !r.code) return;
+    const x = map.get(r.code) || { code: r.code, name: r.name || '', group: r.groupName || r.g || r.group || '', rank: r.groupRank || r.gr || null, pct: Number.isFinite(r.pct) ? r.pct : Number.isFinite(r.chgNow) ? r.chgNow : null, src: [] };
+    if (!x.src.includes(src)) x.src.push(src);
+    map.set(r.code, x);
+  };
+  let m = null;
+  try { m = race333Model(); } catch (_){ m = null; }
+  if (m) [].concat(m.bladeLower || [], m.bladeHarvest || [], m.bladeMiddle || [], m.bladeUpper || []).forEach((r) => add(down, r, '32'));
+  if (m){ try { const live = tdLiveSnap(m, 1); (live && live.k12 || []).forEach((r) => add(down, r, '123')); } catch (_){} }
+  try { const L = inst99Lists(10); if (L && L.sell) L.sell.forEach((r) => add(down, r, '99賣')); } catch (_){}
+  try {
+    const pm = pulseModel();
+    if (pm && !pm.wait){
+      (pm.day.weak || []).forEach((o) => add(down, o, '260弱')); (pm.week.weak || []).forEach((o) => add(down, o, '270弱'));
+      (pm.day.strong || []).forEach((o) => add(up, o, '260強')); (pm.week.strong || []).forEach((o) => add(up, o, '270強'));
+    }
+  } catch (_){}
+  return { down, up };
+}
 function ma20TurnSigNotify(events){
   if (!events.length) return;
   // 2026-11-24 手機太擠：族群放在股名下面一行（不另外一欄）
-  const rowHtml = (e) => '<tr><td>' + e.t.turn + '</td><td class="l" style="white-space:nowrap"><b class="alert-stk" data-alert-code="' + wlEsc(e.code) + '" data-alert-name="' + wlEsc(e.name || '') + '">' + wlEsc(e.code + ' ' + (e.name || '')) + '</b>' +
-    '<div class="dg-sub">' + wlEsc(e.group || '') + (e.rank ? '・' + e.rank : '') + '</div></td><td class="' + dirClass(e.pct) + '">' + (Number.isFinite(e.pct) ? (e.pct > 0 ? '+' : '') + e.pct.toFixed(2) + '%' : '—') + '</td>' +
-    '<td class="mt-hold" data-mt-hold="' + wlEsc(e.code) + '">' + holderTagHtml(holderPctOf(e.code), false, true, e.code) + '</td><td>' + (Number.isFinite(e.t.ma) ? ckPrice(e.t.ma) : '—') + '</td></tr>';
+  const rowHtml = (e) => {
+    const tm = e.dir === 'up' ? e.t.upTurn : e.t.turn;
+    return '<tr><td>' + tm + '<div class="dg-sub">' + (e.dir === 'up' ? '<b class="up">↗轉上彎</b>' : '<b class="down">↘轉下彎</b>') + '</div></td>' +
+      '<td class="l" style="white-space:nowrap"><b class="alert-stk" data-alert-code="' + wlEsc(e.code) + '" data-alert-name="' + wlEsc(e.name || '') + '">' + wlEsc(e.code + ' ' + (e.name || '')) + '</b>' +
+      '<div class="dg-sub">' + wlEsc(e.group || '') + (e.rank ? '・' + e.rank : '') + '・' + wlEsc(e.src.join('／')) + '</div></td><td class="' + dirClass(e.pct) + '">' + (Number.isFinite(e.pct) ? (e.pct > 0 ? '+' : '') + e.pct.toFixed(2) + '%' : '—') + '</td>' +
+      '<td class="mt-hold" data-mt-hold="' + wlEsc(e.code) + '">' + holderTagHtml(holderPctOf(e.code), false, true, e.code) + '</td><td>' + (Number.isFinite(e.t.ma) ? ckPrice(e.t.ma) : '—') + '</td></tr>';
+  };
   ma20TurnLines = events.map((e) => ({ html: rowHtml(e) })).concat(ma20TurnLines).slice(0, 200);
   let el = document.getElementById('ma20TurnBox');
   if (!el){
@@ -30457,14 +30523,14 @@ function ma20TurnSigNotify(events){
     makeAlertDraggable(el, '.pk-alert-head', 'ma20TurnPos');
     makeAlertWindow(el, 'ma20TurnPos');
   }
-  el.innerHTML = '<div class="pk-alert-head">↘ 均20 轉下彎・32（' + ma20TurnLines.length + ' 檔）' + alertSubBtnHtml('turn') + ALERT_CTL_HTML + '</div>' +
-    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>轉下彎</th><th class="l">股票<div class="dg-sub">族群・名次</div></th><th>漲跌幅</th><th>大戶力<div class="dg-sub">盤中即時</div></th><th>均20<div class="dg-sub">5 分K</div></th></tr></thead><tbody>' +
+  el.innerHTML = '<div class="pk-alert-head">↘↗ 均20 轉彎（' + ma20TurnLines.length + ' 檔）' + alertSubBtnHtml('turn') + ALERT_CTL_HTML + '</div>' +
+    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票<div class="dg-sub">族群・名次・名單</div></th><th>漲跌幅</th><th>大戶力<div class="dg-sub">盤中即時</div></th><th>均20<div class="dg-sub">5 分K</div></th></tr></thead><tbody>' +
     ma20TurnLines.map((x) => x.html).join('') + '</tbody></table></div>' +
-    '<div class="mt-foot">新刀劍空(32) 名單上的股票，5 分K 20MA（20 根收盤平均）原本上揚、轉成下彎就跳出來；時間＝轉下彎那根 5 分K 的結束時間。一檔一個轉下彎時間今天只跳一次。點股票開 K 線圖。</div>';
+    '<div class="mt-foot">5 分K 20MA（20 根收盤平均）轉彎就跳出來；時間＝轉彎那根 5 分K 的結束時間。轉下彎：32、123（777／999／193 的股票都在這兩份裡）、99 同步賣超、260／270 弱勢；轉上彎：260／270 強勢。一檔一個轉彎時間今天只跳一次。點股票開 K 線圖。</div>';
   syncAlertSubBtns();
   try { launchBeep(); } catch (_){}
   if ('Notification' in window && Notification.permission === 'granted'){
-    events.slice(0, 5).forEach((e) => { try { new Notification('↘ 均20 轉下彎 ' + e.code + ' ' + (e.name || ''), { body: e.t.turn + ' 轉下彎（新刀劍空 32）', tag: 'ma20t-' + e.code + '-' + e.t.turn }); } catch (_){} });
+    events.slice(0, 5).forEach((e) => { const tm = e.dir === 'up' ? e.t.upTurn : e.t.turn; try { new Notification((e.dir === 'up' ? '↗ 均20 轉上彎 ' : '↘ 均20 轉下彎 ') + e.code + ' ' + (e.name || ''), { body: tm + '（' + e.src.join('／') + '）', tag: 'ma20t-' + e.code + '-' + e.dir + '-' + tm }); } catch (_){} });
   }
 }
 function ma20TurnSigTick(opts){
@@ -30474,29 +30540,31 @@ function ma20TurnSigTick(opts){
   if (!ALERT_SUB.turn && !opts.force) return;
   const live = opts.live !== undefined ? opts.live : mclSessionLive();
   if (!live) return;
-  const m = race333Model();
-  if (!m) return;
+  const srcs = ma20TurnSources();
   const today = twTodayStr();
-  let st = { date: today, keys: [], primed: false };
+  let st = { date: today, keys: [], primed: false, since: Date.now() };
   try { const o = JSON.parse(localStorage.getItem(MA20T_SEEN_KEY) || 'null'); if (o && o.date === today) st = o; } catch (_){}
+  if (!st.since) st.since = Date.now();
   const seen = new Set(st.keys);
-  const fresh = [], done = new Set();
+  const fresh = [];
   let allLoaded = true;
-  [].concat(m.bladeLower || [], m.bladeHarvest || [], m.bladeMiddle || [], m.bladeUpper || []).forEach((r) => {
-    if (done.has(r.code)) return;
-    done.add(r.code);
-    const t = ma20TurnOf(r.code);
+  [['down', srcs.down], ['up', srcs.up]].forEach(([dir, map]) => map.forEach((x) => {
+    const t = ma20TurnOf(x.code);
     if (!t){ allLoaded = false; return; }
-    if (!t.turn) return;
-    const key = r.code + '|' + t.turn;
+    const tm = dir === 'up' ? t.upTurn : t.turn;
+    if (!tm) return;
+    const key = x.code + '|' + (dir === 'up' ? 'u' : 'd') + '|' + tm;
     if (seen.has(key)) return;
     seen.add(key);
-    fresh.push({ code: r.code, name: r.name, group: r.groupName, rank: r.groupRank, pct: r.pct, t });
-  });
+    fresh.push(Object.assign({}, x, { dir, t }));
+  }));
   const primed = !!st.primed || opts.force;
   if (!fresh.length && primed) return;
-  try { localStorage.setItem(MA20T_SEEN_KEY, JSON.stringify({ date: today, keys: Array.from(seen), primed: primed || allLoaded })); } catch (_){}
-  if (primed) ma20TurnSigNotify(fresh.sort((a, b) => (a.t.turn < b.t.turn ? 1 : a.t.turn > b.t.turn ? -1 : 0)));
+  // 第一次算：全部抓到了，或已經等了 2 分鐘（有幾檔一直抓不到也不要一直卡著不跳），之後新的才跳
+  const doneNow = primed || allLoaded || Date.now() - st.since > 120e3;
+  try { localStorage.setItem(MA20T_SEEN_KEY, JSON.stringify({ date: today, keys: Array.from(seen), primed: doneNow, since: st.since })); } catch (_){}
+  const tmOf = (e) => (e.dir === 'up' ? e.t.upTurn : e.t.turn);
+  if (primed) ma20TurnSigNotify(fresh.sort((a, b) => (tmOf(a) < tmOf(b) ? 1 : tmOf(a) > tmOf(b) ? -1 : 0)));
 }
 function patSigTick(opts){
   opts = opts || {};
@@ -31815,11 +31883,14 @@ function dynPulseHtml(kind){
   const sideBtns = '<div class="hw-tabs dyn-side">' + [['strong', '強勢'], ['weak', '弱勢']].map(([k, l]) => '<button type="button" class="chart-tab signal-tab' + (dynState.side === k ? ' active' : '') + '" data-dyn-side="' + k + '">' + l + '</button>').join('') + '</div>';
   if (m.wait) return sideBtns + '<div class="race-note">' + wlEsc(m.wait) + '</div>';
   const strong = dynState.side === 'strong';
-  const list = (kind === 'day' ? m.day : m.week)[strong ? 'strong' : 'weak'];
+  // 2026-11-24 使用者：弱勢「只看均20轉下彎」、強勢「只看均20轉上彎」，每檔標時間（跟機器人 260／270 同一個開關）
+  const tKey = 'dyn' + (kind === 'day' ? '260' : '270') + (strong ? 's' : 'w');
+  const list0 = (kind === 'day' ? m.day : m.week)[strong ? 'strong' : 'weak'];
+  const list = maTurnOn(tKey) ? list0.filter((o) => !!ma20TurnTagOf(o.code, strong)) : list0;
   const md = swMmdd(m.d.date);
   const momOf = (o) => (kind === 'day' ? o.dNow : o.wNow), baseOf = (o) => (kind === 'day' ? o.dBase : o.wBase);
   const valOf = (o) => (kind === 'day' ? o.valNow : o.wvalNow), daysOf = (o) => (kind === 'day' ? o.dDays(strong) : o.wDays(strong));
-  let h = sideBtns + '<div class="dyn-meta">' + (m.live ? '<b class="dyn-live">● 即時</b>（' + new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', hour12: false }) + '，用現價重算，' + (kind === 'week' ? (m.sameWeek ? '這週還沒過完' : '新的一週') + '，' : '') + '名單跟著行情換）' : md + ' 收盤') +
+  let h = sideBtns + '<div class="dyn-turnbar">' + maTurnBtnHtml(tKey, strong) + '</div><div class="dyn-meta">' + (m.live ? '<b class="dyn-live">● 即時</b>（' + new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', hour12: false }) + '，用現價重算，' + (kind === 'week' ? (m.sameWeek ? '這週還沒過完' : '新的一週') + '，' : '') + '名單跟著行情換）' : md + ' 收盤') +
     '・' + (strong ? '動能 ≥ +' : '動能 ≤ −') + m.MIN + '・照' + (kind === 'day' ? '今天' : '這週') + '成交金額排・<b>' + list.length + '</b> 檔</div>';
   if (!list.length) return h + '<div class="race-note">目前沒有</div>';
   const T = kind;
@@ -31831,7 +31902,7 @@ function dynPulseHtml(kind){
         '<td><b>' + dynPx(o.px) + '</b></td><td>' + dynPct(o.chgNow) + '</td><td class="dyn-ma">' + (o.score ?? '—') + '</td>' +   // 2026-11-14 使用者：日／週動能的均線放在動能左邊
         '<td><span class="dyn-mom ' + (mv >= 0 ? 'up' : 'down') + '">' + mv.toFixed(1) + '</span>' + (Number.isFinite(bv) ? '<div class="dyn-rk">' + (mv - bv >= 0 ? '+' : '') + (mv - bv).toFixed(2) + '</div>' : '') + '</td>' +
         '<td>' + (Number.isFinite(valOf(o)) ? valOf(o).toFixed(valOf(o) >= 100 ? 0 : 1) : '—') + '</td>' +
-        '<td class="l">' + dynGrp(o) + (gm !== null && gm !== undefined ? ' <span class="' + (gm >= 0 ? 'up' : 'down') + '">' + gm.toFixed(1) + '</span>' : '') + '</td><td>' + holderTagHtml(holderPctOf(o.code), false, true, o.code) + '</td></tr>';
+        '<td class="l">' + dynGrp(o) + (gm !== null && gm !== undefined ? ' <span class="' + (gm >= 0 ? 'up' : 'down') + '">' + gm.toFixed(1) + '</span>' : '') + ma20TurnTagOf(o.code, strong) + '</td><td>' + holderTagHtml(holderPctOf(o.code), false, true, o.code) + '</td></tr>';
     }).join('') + '</tbody></table></div>';
   return h + '<div class="dyn-foot">動能＝1.4 ×（價格 ÷ ' + (kind === 'day' ? '8 日' : '8 週') + '指數平均線 − 1）× 100（還原股價，本站算法；App 的動能沒公開，這是對過走勢最接近的）。' +
     '動能底下小字＝跟' + (kind === 'day' ? '前一天' : '上一週') + '比；上榜＝連續幾' + (kind === 'day' ? '天' : '週') + '都在名單上（新＝這' + (kind === 'day' ? '天' : '週') + '剛上）；族群動能＝同族群每檔動能的平均。' +
