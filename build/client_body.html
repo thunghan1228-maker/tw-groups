@@ -9241,7 +9241,14 @@ function k12Effective(k){
 const K12_MAX_PCT = 4;   // 2026-11-09 老師 13:30 列了凌群 +3.37%、東捷資訊 +3.28%、驊宏資 +2.45%（原本 10/20 照老師 13:00 只放到 1.55）、華經 +5.15% 沒列 → 放寬到 4；之後有新樣本再調
 // 2026-11-13 老師 13:30 的 123 列了創意 +9.54%、世芯-KY +9.39%（IP 第 2 名）、零壹 +5.34%、力新 +4.90%（資訊第 4 名）——都是族群前 10 名（🔺）；
 // 同一份沒列精測 +4.38%、中揚光 +4.24%、康全電訊 +5.78%（族群 17～31 名）。所以「現價漲超過 4% 不列」只管族群第 11 名以後的。
-const k12PctOk = (pct, groupRank, total) => !Number.isFinite(pct) || pct <= K12_MAX_PCT || bladeRankMark(groupRank, total) === '🔺';
+// 2026-11-24 老師 11:35 的 123 列了中華資安 +6.85%（資訊第 54 名）——那時櫃買 +8.2%（大盤 +9% 全面漲停那天）。
+// 上限改成「4% 和『櫃買漲幅 − 1』取大的」：11/09 櫃買 +5.9% → 4.9%（華經 +5.15% 照樣不列）、11/13 櫃買 +2% → 照舊 4%（精測 +4.38% 不列），以前的樣本都對得上
+const K12_OTC_GAP = 1;
+const k12MaxPct = () => {
+  const o = otcStrengthLatest && Number.isFinite(otcStrengthLatest.changePct) ? otcStrengthLatest.changePct : null;
+  return o !== null ? Math.max(K12_MAX_PCT, o - K12_OTC_GAP) : K12_MAX_PCT;
+};
+const k12PctOk = (pct, groupRank, total) => !Number.isFinite(pct) || pct <= k12MaxPct() || bladeRankMark(groupRank, total) === '🔺';
 const BLADE_PRIOR_RISE = 3;      // 刀劍空：昨天（🔪）或前天（⚔️）要漲這麼多以上，今天殺下來才算（2026-10-15 照老師）
 const FIRE_MIN_PCT = 2;       // 馬火多：今天至少漲這麼多才算有力道
 const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停鎖死）買不到，另列

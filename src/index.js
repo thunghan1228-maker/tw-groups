@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-24 09:39:48";
+const BUILD_STAMP = "2026-11-24 13:47:19";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -9330,7 +9330,14 @@ function k12Effective(k){
 const K12_MAX_PCT = 4;   // 2026-11-09 老師 13:30 列了凌群 +3.37%、東捷資訊 +3.28%、驊宏資 +2.45%（原本 10/20 照老師 13:00 只放到 1.55）、華經 +5.15% 沒列 → 放寬到 4；之後有新樣本再調
 // 2026-11-13 老師 13:30 的 123 列了創意 +9.54%、世芯-KY +9.39%（IP 第 2 名）、零壹 +5.34%、力新 +4.90%（資訊第 4 名）——都是族群前 10 名（🔺）；
 // 同一份沒列精測 +4.38%、中揚光 +4.24%、康全電訊 +5.78%（族群 17～31 名）。所以「現價漲超過 4% 不列」只管族群第 11 名以後的。
-const k12PctOk = (pct, groupRank, total) => !Number.isFinite(pct) || pct <= K12_MAX_PCT || bladeRankMark(groupRank, total) === '🔺';
+// 2026-11-24 老師 11:35 的 123 列了中華資安 +6.85%（資訊第 54 名）——那時櫃買 +8.2%（大盤 +9% 全面漲停那天）。
+// 上限改成「4% 和『櫃買漲幅 − 1』取大的」：11/09 櫃買 +5.9% → 4.9%（華經 +5.15% 照樣不列）、11/13 櫃買 +2% → 照舊 4%（精測 +4.38% 不列），以前的樣本都對得上
+const K12_OTC_GAP = 1;
+const k12MaxPct = () => {
+  const o = otcStrengthLatest && Number.isFinite(otcStrengthLatest.changePct) ? otcStrengthLatest.changePct : null;
+  return o !== null ? Math.max(K12_MAX_PCT, o - K12_OTC_GAP) : K12_MAX_PCT;
+};
+const k12PctOk = (pct, groupRank, total) => !Number.isFinite(pct) || pct <= k12MaxPct() || bladeRankMark(groupRank, total) === '🔺';
 const BLADE_PRIOR_RISE = 3;      // 刀劍空：昨天（🔪）或前天（⚔️）要漲這麼多以上，今天殺下來才算（2026-10-15 照老師）
 const FIRE_MIN_PCT = 2;       // 馬火多：今天至少漲這麼多才算有力道
 const FIRE_MAX_PCT = 9.5;     // 馬火多：漲到這裡以上（或已漲停鎖死）買不到，另列
@@ -19127,7 +19134,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-24 09:39:48';
+const BUILD_STAMP = '2026-11-24 13:47:19';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
