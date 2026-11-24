@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-24 18:00:13";
+const BUILD_STAMP = "2026-11-24 18:03:07";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4440,6 +4440,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="alert-toggle" id="themeToggle" title="首頁換白底／黑底（記在這台瀏覽器）">☀️ 白底</button>  <!-- 2026-11-14 使用者：首頁試白底 -->
       <button class="alert-toggle alert-sub-top" data-alert-sub="mcl" aria-pressed="true" title="融資斷頭價・盤中提醒：關掉就不再跳出來（記在這台）">💥 斷頭價提醒 開</button>  <!-- 2026-11-23 使用者：這兩個盤中跳出來的提醒各自一個開關 -->
       <button class="alert-toggle alert-sub-top" data-alert-sub="sig" aria-pressed="true" title="落底訊號／回檔警示・盤中提醒：關掉就不再跳出來（記在這台）">📉 落底回檔提醒 開</button>
+      <button class="alert-toggle alert-sub-top" data-alert-sub="turn" aria-pressed="true" title="新刀劍空(32) 名單裡 5 分K 20MA 由上揚轉下彎・盤中提醒：關掉就不再跳出來（記在這台）">↘ 均20轉下彎提醒 開</button>  <!-- 2026-11-24 使用者 -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
   </div>
@@ -19185,7 +19186,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-24 18:00:13';
+const BUILD_STAMP = '2026-11-24 18:03:07';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19309,9 +19310,9 @@ function makeAlertDraggable(el, headSel, key, opts){
 const ALERT_CTL_HTML = '<span class="pk-alert-ctl"><button type="button" class="pk-alert-min" title="隱藏（只留標題列，再按一次展開）">－</button><button type="button" class="pk-alert-max" title="放大（再按一次還原）">⛶</button><button type="button" class="pk-alert-close" aria-label="關閉">✕</button></span>';
 // 2026-11-23 使用者：融資斷頭價・盤中提醒、落底訊號／回檔警示・盤中提醒這兩個盤中跳出來的視窗，要各自可以關掉／打開
 // （視窗標題列一顆、最上排「提醒開啟」旁邊各一顆，同一個設定，記在這台）；關掉只是不再跳出來，其他提醒照舊，總開關「提醒開啟」關了一樣全部不跳
-const ALERT_SUB = { mcl: true, sig: true };
-const ALERT_SUB_KEY = { mcl: 'alertMclOn', sig: 'alertSigOn' };
-const ALERT_SUB_NAME = { mcl: '💥 斷頭價提醒', sig: '📉 落底回檔提醒' };
+const ALERT_SUB = { mcl: true, sig: true, turn: true };   // 2026-11-24 使用者：加「32 均20 轉下彎」盤中提醒（turn）
+const ALERT_SUB_KEY = { mcl: 'alertMclOn', sig: 'alertSigOn', turn: 'alertTurnOn' };
+const ALERT_SUB_NAME = { mcl: '💥 斷頭價提醒', sig: '📉 落底回檔提醒', turn: '↘ 均20轉下彎提醒' };
 try { for (const k of Object.keys(ALERT_SUB)) ALERT_SUB[k] = localStorage.getItem(ALERT_SUB_KEY[k]) !== '0'; } catch (_){ /* 讀不到就預設開 */ }
 function alertSubBtnHtml(k){
   const on = ALERT_SUB[k];
@@ -20280,6 +20281,7 @@ async function refresh(){
     try { mclSigTick(); } catch (e) { /* 落底／回檔提醒失敗不影響畫面 */ }
     try { dgLiveTick(); } catch (e) { /* 個股問診名單盤中更新失敗不影響畫面 */ }
     try { patSigTick(); } catch (e) { /* 形態突破提醒失敗不影響畫面 */ }
+    try { ma20TurnSigTick(); } catch (e) { /* 均20 轉下彎提醒失敗不影響畫面 */ }
     lastDataFetchedAt = new Date();
   } catch (e) {
     groupsLastError = e && e.name === 'AbortError' ? '等了 20 秒還沒回' : String((e && e.message) || e).slice(0, 80);
@@ -30431,6 +30433,68 @@ function patSigNotify(events){
   if ('Notification' in window && Notification.permission === 'granted'){
     events.slice(0, 5).forEach((e) => { try { new Notification('📐 ' + e.x.name + '突破 ' + e.code + ' ' + (e.name || ''), { body: hm + ' 現價 ' + e.q.price + '（觸發價 ' + e.x.trigger + '）', tag: 'pat-' + e.key }); } catch (_){} });
   }
+}
+// ---- 新刀劍空(32) 均20 上揚轉下彎・盤中提醒（2026-11-24 使用者：均線（5 分K 20MA）原本向上、轉向下的時候盤中跳出訊號）----
+// 名單＝32 在榜的（多方打少／中間／強空積極／收割區），轉下彎的算法跟 32 每列的「↘均20 HH:MM」同一份（ma20TurnOf）。
+// 一檔一個轉下彎時間今天只跳一次（下彎後又上揚、再轉下彎，時間不同會再跳）；這台今天第一次算的時候已經轉下彎的只記下來不跳（開頁面不吵）。
+// 開關：最上排「↘ 均20轉下彎提醒」、視窗標題列的 🔔（跟斷頭價、落底回檔提醒一樣）。
+const MA20T_SEEN_KEY = 'ma20TurnSeen';
+let ma20TurnLines = [];
+function ma20TurnSigNotify(events){
+  if (!events.length) return;
+  const rowHtml = (e) => '<tr><td>' + e.t.turn + '</td><td class="l" style="white-space:nowrap"><b class="alert-stk" data-alert-code="' + wlEsc(e.code) + '" data-alert-name="' + wlEsc(e.name || '') + '">' + wlEsc(e.code + ' ' + (e.name || '')) + '</b></td>' +
+    '<td class="l">' + wlEsc(e.group || '') + (e.rank ? '・' + e.rank : '') + '</td><td class="' + dirClass(e.pct) + '">' + (Number.isFinite(e.pct) ? (e.pct > 0 ? '+' : '') + e.pct.toFixed(2) + '%' : '—') + '</td>' +
+    '<td class="mt-hold" data-mt-hold="' + wlEsc(e.code) + '">' + holderTagHtml(holderPctOf(e.code), false, true, e.code) + '</td><td>' + (Number.isFinite(e.t.ma) ? ckPrice(e.t.ma) : '—') + '</td></tr>';
+  ma20TurnLines = events.map((e) => ({ html: rowHtml(e) })).concat(ma20TurnLines).slice(0, 200);
+  let el = document.getElementById('ma20TurnBox');
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'ma20TurnBox'; el.className = 'pk-alert mcl-touch-alert';
+    el.addEventListener('click', (ev) => { if (ev.target.closest('.pk-alert-close')){ el.remove(); ma20TurnLines = []; } });
+    document.body.appendChild(el);
+    makeAlertDraggable(el, '.pk-alert-head', 'ma20TurnPos');
+    makeAlertWindow(el, 'ma20TurnPos');
+  }
+  el.innerHTML = '<div class="pk-alert-head">↘ 新刀劍空(32) 均20 轉下彎・盤中提醒（' + ma20TurnLines.length + ' 檔）' + alertSubBtnHtml('turn') + ALERT_CTL_HTML + '</div>' +
+    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>轉下彎</th><th class="l">股票</th><th class="l">族群</th><th>漲跌幅</th><th>大戶力<div class="dg-sub">盤中即時</div></th><th>均20<div class="dg-sub">5 分K</div></th></tr></thead><tbody>' +
+    ma20TurnLines.map((x) => x.html).join('') + '</tbody></table></div>' +
+    '<div class="mt-foot">新刀劍空(32) 名單上的股票，5 分K 20MA（20 根收盤平均）原本上揚、轉成下彎就跳出來；時間＝轉下彎那根 5 分K 的結束時間。一檔一個轉下彎時間今天只跳一次。點股票開 K 線圖。</div>';
+  syncAlertSubBtns();
+  try { launchBeep(); } catch (_){}
+  if ('Notification' in window && Notification.permission === 'granted'){
+    events.slice(0, 5).forEach((e) => { try { new Notification('↘ 均20 轉下彎 ' + e.code + ' ' + (e.name || ''), { body: e.t.turn + ' 轉下彎（新刀劍空 32）', tag: 'ma20t-' + e.code + '-' + e.t.turn }); } catch (_){} });
+  }
+}
+function ma20TurnSigTick(opts){
+  opts = opts || {};
+  if (!opts.force && (CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || botWindowMode() || sgtWindowMode())) return;
+  if (!alertsEnabled && !opts.force) return;
+  if (!ALERT_SUB.turn && !opts.force) return;
+  const live = opts.live !== undefined ? opts.live : mclSessionLive();
+  if (!live) return;
+  const m = race333Model();
+  if (!m) return;
+  const today = twTodayStr();
+  let st = { date: today, keys: [], primed: false };
+  try { const o = JSON.parse(localStorage.getItem(MA20T_SEEN_KEY) || 'null'); if (o && o.date === today) st = o; } catch (_){}
+  const seen = new Set(st.keys);
+  const fresh = [], done = new Set();
+  let allLoaded = true;
+  [].concat(m.bladeLower || [], m.bladeHarvest || [], m.bladeMiddle || [], m.bladeUpper || []).forEach((r) => {
+    if (done.has(r.code)) return;
+    done.add(r.code);
+    const t = ma20TurnOf(r.code);
+    if (!t){ allLoaded = false; return; }
+    if (!t.turn) return;
+    const key = r.code + '|' + t.turn;
+    if (seen.has(key)) return;
+    seen.add(key);
+    fresh.push({ code: r.code, name: r.name, group: r.groupName, rank: r.groupRank, pct: r.pct, t });
+  });
+  const primed = !!st.primed || opts.force;
+  if (!fresh.length && primed) return;
+  try { localStorage.setItem(MA20T_SEEN_KEY, JSON.stringify({ date: today, keys: Array.from(seen), primed: primed || allLoaded })); } catch (_){}
+  if (primed) ma20TurnSigNotify(fresh.sort((a, b) => (a.t.turn < b.t.turn ? 1 : a.t.turn > b.t.turn ? -1 : 0)));
 }
 function patSigTick(opts){
   opts = opts || {};
