@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-24 21:59:14";
+const BUILD_STAMP = "2026-11-24 22:24:37";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2441,7 +2441,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .b32-tag.run{background:#b91c1c;} .b32-tag.back{background:#2563eb;}
   .b32-grp:has(.b32-turn){white-space:normal;overflow:visible;line-height:1.5;}   /* 有轉下彎標籤的那列可以換行，窄欄（首頁 310px）才不會被切掉 */
   #ma20TurnBox .ck-table td,#ma20TurnBox .ck-table th{white-space:nowrap;}   /* 2026-11-24 均20 轉下彎提醒視窗：手機上欄位不要擠成直排 */
-  .b32-turn.up{background:#b91c1c;} .dyn-turnbar{margin:2px 0 6px;} .dyn-turnbar .b777-p{font-size:12px;}
+  .b32-turn.up{background:#b91c1c;} .m200-back{font-size:10.5px;font-weight:800;color:#fff;background:#6b7280;border-radius:4px;padding:0 4px;margin-left:4px;} .dyn-turnbar{margin:2px 0 6px;} .dyn-turnbar .b777-p{font-size:12px;}
   .b32-turn{display:inline-block;margin-left:5px;padding:0 4px;border-radius:4px;font-size:11px;font-weight:800;color:#fff;background:#0f766e;white-space:nowrap;}   /* 2026-11-24 5 分K 20MA 上揚轉下彎的時間 */
   .bot-line.bot-b32turn{padding:2px 0 4px;}
   /* 2026-10-19 使用者：刀劍空(32)、1️⃣2️⃣空(123)、空族群必殺(193) 都加「大戶力」（盤中大戶力％，跟訊號中心同一份）：
@@ -4442,7 +4442,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <button class="alert-toggle" id="themeToggle" title="首頁換白底／黑底（記在這台瀏覽器）">☀️ 白底</button>  <!-- 2026-11-14 使用者：首頁試白底 -->
       <button class="alert-toggle alert-sub-top" data-alert-sub="mcl" aria-pressed="true" title="融資斷頭價・盤中提醒：關掉就不再跳出來（記在這台）">💥 斷頭價提醒 開</button>  <!-- 2026-11-23 使用者：這兩個盤中跳出來的提醒各自一個開關 -->
       <button class="alert-toggle alert-sub-top" data-alert-sub="sig" aria-pressed="true" title="落底訊號／回檔警示・盤中提醒：關掉就不再跳出來（記在這台）">📉 落底回檔提醒 開</button>
-      <button class="alert-toggle alert-sub-top" data-alert-sub="turn" aria-pressed="true" title="32、123、99 賣超、260／270 弱勢的均20 轉下彎，260／270 強勢的均20 轉上彎・盤中提醒：關掉就不再跳出來（記在這台）">↘↗ 均20轉彎提醒 開</button>  <!-- 2026-11-24 使用者 -->
+      <button class="alert-toggle alert-sub-top" data-alert-sub="turn" aria-pressed="true" title="32、123、99 賣超、260／270 弱勢的均20 轉下彎，260／270 強勢的均20 轉上彎・盤中提醒：關掉就不再跳出來（記在這台）">↘↗ 均20轉彎提醒 開</button>
+      <button class="alert-toggle alert-sub-top" data-alert-sub="m200" aria-pressed="true" title="機器人 200（全部族群股 5 分K 均20 轉彎，方向跟著機器人 200 選的）・盤中提醒：關掉就不再跳出來（記在這台）">📐 200 均20轉彎提醒 開</button>  <!-- 2026-11-24 使用者 -->  <!-- 2026-11-24 使用者 -->
       <button class="alert-toggle on" id="alertToggle" aria-pressed="true">提醒開啟</button>
     </div>
   </div>
@@ -19225,7 +19226,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-24 21:59:14';
+const BUILD_STAMP = '2026-11-24 22:24:37';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -19349,9 +19350,9 @@ function makeAlertDraggable(el, headSel, key, opts){
 const ALERT_CTL_HTML = '<span class="pk-alert-ctl"><button type="button" class="pk-alert-min" title="隱藏（只留標題列，再按一次展開）">－</button><button type="button" class="pk-alert-max" title="放大（再按一次還原）">⛶</button><button type="button" class="pk-alert-close" aria-label="關閉">✕</button></span>';
 // 2026-11-23 使用者：融資斷頭價・盤中提醒、落底訊號／回檔警示・盤中提醒這兩個盤中跳出來的視窗，要各自可以關掉／打開
 // （視窗標題列一顆、最上排「提醒開啟」旁邊各一顆，同一個設定，記在這台）；關掉只是不再跳出來，其他提醒照舊，總開關「提醒開啟」關了一樣全部不跳
-const ALERT_SUB = { mcl: true, sig: true, turn: true };   // 2026-11-24 使用者：加「32 均20 轉下彎」盤中提醒（turn）
-const ALERT_SUB_KEY = { mcl: 'alertMclOn', sig: 'alertSigOn', turn: 'alertTurnOn' };
-const ALERT_SUB_NAME = { mcl: '💥 斷頭價提醒', sig: '📉 落底回檔提醒', turn: '↘↗ 均20轉彎提醒' };
+const ALERT_SUB = { mcl: true, sig: true, turn: true, m200: true };   // 2026-11-24 使用者：機器人 200（均20 轉彎）的盤中提醒（m200）   // 2026-11-24 使用者：加「32 均20 轉下彎」盤中提醒（turn）
+const ALERT_SUB_KEY = { mcl: 'alertMclOn', sig: 'alertSigOn', turn: 'alertTurnOn', m200: 'alertM200On' };
+const ALERT_SUB_NAME = { mcl: '💥 斷頭價提醒', sig: '📉 落底回檔提醒', turn: '↘↗ 均20轉彎提醒', m200: '📐 200 均20轉彎提醒' };
 try { for (const k of Object.keys(ALERT_SUB)) ALERT_SUB[k] = localStorage.getItem(ALERT_SUB_KEY[k]) !== '0'; } catch (_){ /* 讀不到就預設開 */ }
 function alertSubBtnHtml(k){
   const on = ALERT_SUB[k];
@@ -20321,6 +20322,7 @@ async function refresh(){
     try { dgLiveTick(); } catch (e) { /* 個股問診名單盤中更新失敗不影響畫面 */ }
     try { patSigTick(); } catch (e) { /* 形態突破提醒失敗不影響畫面 */ }
     try { ma20TurnSigTick(); } catch (e) { /* 均20 轉下彎提醒失敗不影響畫面 */ }
+    try { m200SigTick(); } catch (e) { /* 機器人 200 提醒失敗不影響畫面 */ }
     lastDataFetchedAt = new Date();
   } catch (e) {
     groupsLastError = e && e.name === 'AbortError' ? '等了 20 秒還沒回' : String((e && e.message) || e).slice(0, 80);
@@ -26915,6 +26917,7 @@ const BOT_CODES = [
   ['44', '今天 1+2 多（突破黑馬）'], ['88', '開低站上 VWAP：今天開盤低於昨收、09:05 後 1 分K收盤高於 VWAP 1% 以上（偏多），跟訊號中心「開低VWAP上(88)」同一份'], ['87', '開高跌破 VWAP：今天開盤高於昨收、09:05 後 1 分K收盤低於 VWAP 1% 以上（偏空），跟訊號中心「開高VWAP下(87)」同一份'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖前兩日其中一日入榜黑龍：前兩個交易日上 811、今天收黑K，只看族群表裡的股票（含「其他」那組）（⭐＝兩週內又上榜幾次）'],
+  ['200', '↘↗均20 轉彎：全部族群股 5 分K 20MA 上揚轉下彎／下彎轉上揚（上面按鈕切換向下／向上），最近轉的在上面；盤中有新的轉彎會跳出提醒'],   // 2026-11-24 使用者
   ['240', '📈動能選股｜🔥熱門趨勢概念股（即時，代碼暫定）：照券商 App「動能選股→熱門趨勢概念股」——收盤（盤中用即時價）在 240 日最高收盤附近、240 日漲幅大的股票（還原股價，跟 App 同算法）；App 的新聞熱度我們沒有，用 5 日均成交值當門檻，格子上面三排按鈕可以調'], ['999', '⚡空中空：777、32、123 三份裡有兩份以上都有的股票（首頁閃綠的那些），全部照發生時間排（最近的在上面），每檔標刀劍空／12空、第一次進榜、跑、回的時間'], ['888', '💪強中強：強勢股觀察中(82)、強勢紅K、熱門趨勢概念股(240)、日動能(260) 四份名單重複兩份以上的股票（首頁 183 右邊那欄同一份）'], ['260', '📈動能選股｜⚡日動能（即時）：動能＝1.4×(價格÷8 日指數平均線−1)×100，強勢 ≥ +6／弱勢 ≤ −6，照今天成交金額排；盤中每 15 秒用現價重算、名單跟著換；均線、動能、大戶力都能點欄位排序'], ['270', '📈動能選股｜⚡週動能（即時）：同日動能算法換成週K（8 週指數平均線），照這週累計成交金額排、上榜幾週；盤中即時重算'], ['280', '📈動能選股｜🏛️法人動能：價量創新高／投信剛買準突破／投信動能連買／外資動能連買四張名單（外資、投信收盤後公布）'], ['250', '📈動能選股｜🚀動能排行（代碼暫定）：照券商 App「動能選股→動能排行」——本週、本月、本季、今年以來的漲幅都在全市場前 5%，而且收盤創 240 日新高的強勢股（還原股價，跟 App 同算法）；前幾 % 可以在格子上面點，也能列「差一個」的'], ['81', '隔日沖買超排序（每天六點後更新）'], ['83', '📡多觀察(等黑K買進)：首頁那欄的【1】黑K出現・黑龍系統符合【2】今天噴出【3】已噴在高檔【4】右肩打底【5】有點深，同一份、同族群排一起，每檔接大戶力'], ['82', '👁強勢股觀察中・等收黑：首頁第一欄最上面那份（跟創高黑龍選股（手動）→ 今天 → ② 強勢股觀察中・等收黑 同一份），照即時漲跌幅排、漲越多越上面，每檔接大戶力'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
   ['97', '外資買賣超前十大：賣超前十在上、買超前十在下（金額越大越靠上），每檔列買賣超金額（億元）、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：格式同 97'], ['99', '外資、投信同步買賣超前十大：同步賣超前十在上、同步買超前十在下（兩家合計金額越大越靠上），每檔列外資、投信各自的買賣超金額（億元）、漲跌幅、盤中大戶力'], ['777', '每日功課的族群卡（刀劍空(32)、12空(123)）條列：一族一段、族群和族裡每檔都照訊號時間排（最近的在上），每檔接大戶%'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
   ['2359', '股號或族群名：那族漲幅排行'], ['2359m', '那檔當天的隔日沖買賣超（2359m1＝前一天，最多 2359m9）'], ['235984', '那族的籌碼暴增排序（族群名＋84 也可以，例：低軌衛星84）'], ['2359g', '那檔過去五週籌碼增減%'], ['2359B2', '同族群漲 2% 以上的'], ['2359a', '族群前天／昨天／今天名次'], ['2359+3', '那族的終點戰法空'],
@@ -27580,6 +27583,7 @@ function botAnswerRaw(raw){
   const title = (t, sub) => '<div class="bot-title' + (bear && q !== '999' ? ' bot-title-bear' + (['32', '123', '193', '199'].includes(q) ? ' bot-title-navy' : '') : q === '177' ? ' bot-title-split' : '') + '">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
   const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + sessHm(lastData.quoteTime) : '';
   const wrap = (t, body, sub) => '<div class="bot-msg' + (bear ? ' bot-bear' : '') + '"><div class="bot-q">' + wlEsc(raw) + '</div>' + title(t, sub || stamp) + body + '</div>';
+  if (q === '200') return ma200BotHtml(wrap);   // 2026-11-24 使用者：均20 轉彎機器人（5 分K 20MA 上揚轉下彎／下彎轉上揚，可切換）
   // 不用首頁報價的：國際行情
   if (q === '70' || q === '71'){
     botWorldLoad();
@@ -30483,6 +30487,134 @@ function patSigNotify(events){
     events.slice(0, 5).forEach((e) => { try { new Notification('📐 ' + e.x.name + '突破 ' + e.code + ' ' + (e.name || ''), { body: hm + ' 現價 ' + e.q.price + '（觸發價 ' + e.x.trigger + '）', tag: 'pat-' + e.key }); } catch (_){} });
   }
 }
+// ---- 均20 轉彎(200)（2026-11-24 使用者：5 分K 20MA 原本往上、轉成向下，跟原本向下、轉成向上，做成一個機器人，可以切換向上／向下，盤中也要跳出來）----
+// 資料：後端盤中 5 分K 引擎對全部族群股發的「20MA轉下彎／20MA轉上彎」事件（/api/intraday-signals?kind=…，MA20 開盤接前一天的 5 分K，
+// 每根 5 分K 收完判斷；走平照前一根的方向）。每檔看今天最後一次轉彎：最後是轉下彎＝現在還在下彎，列在「向下」；最後是轉上彎列在「向上」。
+// 時間＝轉彎那根 5 分K 的結束時間（13:30 收盤那筆算 13:30）；「第 N 次」＝這檔今天第幾次往這個方向轉。
+const M200 = { dir: (() => { try { return localStorage.getItem('m200Dir') === 'up' ? 'up' : 'down'; } catch (_){ return 'down'; } })() };
+function m200Events(){
+  const today = twTodayStr(), ttl = twLiveSession() ? 60e3 : 1800e3;
+  const url = (k) => '/api/intraday-signals?trade_date=' + today + '&kind=' + k + '&limit=5000';
+  const dn = botFetchCache('m200d|' + today, url('ma20turnDown'), ttl), up = botFetchCache('m200u|' + today, url('ma20turnUp'), ttl);
+  if (!dn || !up) return null;
+  if (dn.status !== 'ok' || up.status !== 'ok') return { error: true };
+  const byCode = new Map();
+  [[dn, 'down'], [up, 'up']].forEach(([d, dir]) => (d.signals || []).forEach((e) => {
+    const code = e.ticker || e.code;
+    if (!code || !Number.isFinite(e.barTs)) return;
+    const x = byCode.get(code) || { code, name: e.name || '', group: e.groupName || '', ev: [] };
+    x.ev.push({ dir, ts: e.barTs, price: e.price });
+    byCode.set(code, x);
+  }));
+  const endHm = (ts) => { const v = new Date(ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16); return v > '13:30' ? '13:30' : v; };
+  // 2026-11-24 使用者：這個訊號一天只發生一次，盤中反覆的話不要再出現——每檔每個方向只留今天第一次（之後又轉回來、再轉，都不再列／不再跳）；
+  // cur＝現在的方向（最後一次轉彎），已經轉回去的在列表上標「已轉回」
+  const rows = [];
+  byCode.forEach((x) => {
+    x.ev.sort((a, b) => a.ts - b.ts);
+    const cur = x.ev[x.ev.length - 1].dir;
+    ['down', 'up'].forEach((dir) => {
+      const first = x.ev.find((e) => e.dir === dir);
+      if (first) rows.push({ code: x.code, name: x.name, group: x.group, dir, ts: first.ts, t: endHm(first.ts), cur, price: first.price });
+    });
+  });
+  return { rows, date: today };
+}
+function ma200BotHtml(wrap){
+  const t = M200.dir === 'down' ? '↘均20 轉下彎(200)' : '↗均20 轉上彎(200)';
+  const btns = '<div class="bot-line b777-params">' + [['down', '↘ 向下（上揚轉下彎）'], ['up', '↗ 向上（下彎轉上揚）']].map(([k, l]) =>
+    '<button type="button" class="b777-p' + (M200.dir === k ? ' on' : '') + '" data-m200-dir="' + k + '">' + l + '</button>').join('') + '</div>';
+  const ev = m200Events();
+  if (!ev) return wrap(t, btns + botLine('讀取中…', 'bot-dim'));
+  if (ev.error) return wrap(t, btns + botLine('後端暫時連不上，等一下再試', 'bot-dim'));
+  const h = homeRankRows();
+  const rankOf = new Map(h ? h.rows.map((r) => [r.name, r.rank]) : []);
+  const list = ev.rows.filter((r) => r.dir === M200.dir).sort((a, b) => b.ts - a.ts || (a.code < b.code ? -1 : 1));
+  const row = (r) => {
+    const q = getStockQuote(r.code), pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null, gr = rankOf.get(r.group);
+    return '<div class="b32-row bh" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name) + '">' +
+      '<span class="b32-time">' + r.t + '</span>' +
+      '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name) + '</span>' + dtWarnHtml(r.code, true) + '</span>' +
+      '<span class="b32-grp">' + wlEsc(r.group || '') + (gr ? '・' + gr : '') + (r.cur !== r.dir ? ' <span class="m200-back" title="之後又轉回' + (r.cur === 'up' ? '上揚' : '下彎') + '（一天只列一次，不再重複出現）">已轉回</span>' : '') + '</span>' +
+      '<span class="b32-pct ' + (pct !== null ? dirClass(pct) : '') + '">' + (pct !== null ? botPct(pct) : '—') + '</span>' +
+      '<span class="b32-h">' + holderTagHtml(holderPctOf(r.code), true, true, r.code) + '</span></div>';
+  };
+  const nD = ev.rows.filter((r) => r.dir === 'down').length, nU = ev.rows.length - nD;
+  return wrap(t, btns + botLine('今天轉下彎過 ' + nD + ' 檔・轉上彎過 ' + nU + ' 檔（族群股，一檔一個方向一天只算一次）', 'bot-dim') +
+    (list.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + list.map(row).join('') : botLine('目前沒有', 'bot-dim')) +
+    botLine('5 分K 20MA（20 根收盤平均，開盤接前一天的）' + (M200.dir === 'down' ? '原本上揚、轉成下彎' : '原本下彎、轉成上揚') +
+      '的族群股；一檔一天只列一次（今天第一次轉的時間），盤中反覆轉彎不再重複出現，之後又轉回去的標「已轉回」；最近轉的在上面。盤中跳出提醒跟著這裡選的方向（最上排「📐 200 均20轉彎提醒」可以單獨關）。', 'bot-dim'),
+    (lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') : '') + '・' + list.length + ' 檔');
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('[data-m200-dir]');
+  if (!b) return;
+  e.stopPropagation(); e.preventDefault();
+  M200.dir = b.dataset.m200Dir === 'up' ? 'up' : 'down';
+  try { localStorage.setItem('m200Dir', M200.dir); } catch (_){}
+  try { render(); } catch (_){}
+  try { botRerunCols(); } catch (_){}
+}, true);
+// 盤中提醒：跟著上面選的方向（向下＝新的轉下彎、向上＝新的轉上彎）；一檔一個方向一天只跳一次（反覆轉彎不再跳）；這台今天第一次讀到的先記下來不跳
+const M200_SEEN_KEY = 'm200Seen';
+let m200Lines = [];
+function m200SigNotify(events){
+  if (!events.length) return;
+  const h = homeRankRows();
+  const rankOf = new Map(h ? h.rows.map((r) => [r.name, r.rank]) : []);
+  const rowHtml = (e) => {
+    const q = getStockQuote(e.code), pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null, gr = rankOf.get(e.group);
+    return '<tr><td>' + e.t + '<div class="dg-sub">' + (e.dir === 'up' ? '<b class="up">↗轉上彎</b>' : '<b class="down">↘轉下彎</b>') + '</div></td>' +
+      '<td class="l" style="white-space:nowrap"><b class="alert-stk" data-alert-code="' + wlEsc(e.code) + '" data-alert-name="' + wlEsc(e.name || '') + '">' + wlEsc(e.code + ' ' + (e.name || '')) + '</b>' +
+      '<div class="dg-sub">' + wlEsc(e.group || '') + (gr ? '・' + gr : '') + '</div></td>' +
+      '<td class="' + (pct !== null ? dirClass(pct) : '') + '">' + (pct !== null ? (pct > 0 ? '+' : '') + pct.toFixed(2) + '%' : '—') + '</td>' +
+      '<td class="mt-hold" data-mt-hold="' + wlEsc(e.code) + '">' + holderTagHtml(holderPctOf(e.code), false, true, e.code) + '</td></tr>';
+  };
+  m200Lines = events.map((e) => ({ html: rowHtml(e) })).concat(m200Lines).slice(0, 300);
+  let el = document.getElementById('m200Box');
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'm200Box'; el.className = 'pk-alert mcl-touch-alert';
+    el.addEventListener('click', (ev) => { if (ev.target.closest('.pk-alert-close')){ el.remove(); m200Lines = []; } });
+    document.body.appendChild(el);
+    makeAlertDraggable(el, '.pk-alert-head', 'm200Pos');
+    makeAlertWindow(el, 'm200Pos');
+  }
+  el.innerHTML = '<div class="pk-alert-head">📐 均20 轉彎(200)（' + m200Lines.length + ' 檔）' + alertSubBtnHtml('m200') + ALERT_CTL_HTML + '</div>' +
+    '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票<div class="dg-sub">族群・名次</div></th><th>漲跌幅</th><th>大戶力<div class="dg-sub">盤中即時</div></th></tr></thead><tbody>' +
+    m200Lines.map((x) => x.html).join('') + '</tbody></table></div>' +
+    '<div class="mt-foot">機器人 200：族群股 5 分K 20MA ' + (M200.dir === 'down' ? '上揚轉下彎' : '下彎轉上揚') + '就跳出來（方向跟著機器人 200 選的）；時間＝轉彎那根 5 分K 的結束時間。一檔一天只跳一次，盤中反覆轉彎不再跳。點股票開 K 線圖。</div>';
+  syncAlertSubBtns();
+  try { launchBeep(); } catch (_){}
+  if ('Notification' in window && Notification.permission === 'granted'){
+    events.slice(0, 5).forEach((e) => { try { new Notification((e.dir === 'up' ? '↗ 均20 轉上彎 ' : '↘ 均20 轉下彎 ') + e.code + ' ' + (e.name || ''), { body: e.t + '（機器人 200）', tag: 'm200-' + e.code + '-' + e.dir }); } catch (_){} });
+  }
+}
+function m200SigTick(opts){
+  opts = opts || {};
+  if (!opts.force && (CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || botWindowMode() || sgtWindowMode())) return;
+  if (!alertsEnabled && !opts.force) return;
+  if (!ALERT_SUB.m200 && !opts.force) return;
+  const live = opts.live !== undefined ? opts.live : mclSessionLive();
+  if (!live) return;
+  const ev = m200Events();
+  if (!ev || ev.error) return;
+  const today = twTodayStr();
+  let st = { date: today, keys: [], primed: false };
+  try { const o = JSON.parse(localStorage.getItem(M200_SEEN_KEY) || 'null'); if (o && o.date === today) st = o; } catch (_){}
+  const seen = new Set(st.keys);
+  const fresh = [];
+  ev.rows.forEach((r) => {
+    const key = r.code + '|' + r.dir;   // 一檔一個方向一天只跳一次
+    if (seen.has(key)) return;
+    seen.add(key);
+    if (r.dir === M200.dir) fresh.push(r);
+  });
+  const primed = !!st.primed || opts.force;
+  if (!fresh.length && primed && seen.size === st.keys.length) return;
+  try { localStorage.setItem(M200_SEEN_KEY, JSON.stringify({ date: today, keys: Array.from(seen), primed: true })); } catch (_){}
+  if (primed) m200SigNotify(fresh.sort((a, b) => b.ts - a.ts));
+}
 // ---- 均20 轉彎・盤中提醒（2026-11-24 使用者：均線（5 分K 20MA）原本向上、轉向下的時候盤中跳出訊號；
 // 又說 777、123、193、999、99、260／270 弱勢這些名單裡只要有均20 轉下彎就跳，260／270 強勢的均20 轉上彎也一樣要跳）----
 // 轉下彎：32（刀劍空，777／999／193 的 ⚠️ 都是從 32、123 來的）、123、99 同步賣超、260／270 弱勢；轉上彎：260／270 強勢。
@@ -30536,7 +30668,7 @@ function ma20TurnSigNotify(events){
   el.innerHTML = '<div class="pk-alert-head">↘↗ 均20 轉彎（' + ma20TurnLines.length + ' 檔）' + alertSubBtnHtml('turn') + ALERT_CTL_HTML + '</div>' +
     '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票<div class="dg-sub">族群・名次・名單</div></th><th>漲跌幅</th><th>大戶力<div class="dg-sub">盤中即時</div></th><th>均20<div class="dg-sub">5 分K</div></th></tr></thead><tbody>' +
     ma20TurnLines.map((x) => x.html).join('') + '</tbody></table></div>' +
-    '<div class="mt-foot">5 分K 20MA（20 根收盤平均）轉彎就跳出來；時間＝轉彎那根 5 分K 的結束時間。轉下彎：32、123（777／999／193 的股票都在這兩份裡）、99 同步賣超、260／270 弱勢；轉上彎：260／270 強勢。一檔一個轉彎時間今天只跳一次。點股票開 K 線圖。</div>';
+    '<div class="mt-foot">5 分K 20MA（20 根收盤平均）轉彎就跳出來；時間＝轉彎那根 5 分K 的結束時間。轉下彎：32、123（777／999／193 的股票都在這兩份裡）、99 同步賣超、260／270 弱勢；轉上彎：260／270 強勢。一檔一個方向一天只跳一次，盤中反覆轉彎不再跳。點股票開 K 線圖。</div>';
   syncAlertSubBtns();
   try { launchBeep(); } catch (_){}
   if ('Notification' in window && Notification.permission === 'granted'){
@@ -30563,7 +30695,7 @@ function ma20TurnSigTick(opts){
     if (!t){ allLoaded = false; return; }
     const tm = dir === 'up' ? t.upTurn : t.turn;
     if (!tm) return;
-    const key = x.code + '|' + (dir === 'up' ? 'u' : 'd') + '|' + tm;
+    const key = x.code + '|' + (dir === 'up' ? 'u' : 'd');   // 2026-11-24 使用者：一天只跳一次，盤中反覆轉彎不再跳
     if (seen.has(key)) return;
     seen.add(key);
     fresh.push(Object.assign({}, x, { dir, t }));
@@ -34097,7 +34229,9 @@ const WORKER_ENTRY = {
     }
     if (url.pathname === "/api/intraday-signals") {
       try {
-        return await proxyHanstockBars("/api/hub/intraday-signals" + url.search, 0);
+        // 2026-11-24 機器人 200（均20 轉彎）一次撈一整天的 ma20turnDown／ma20turnUp，後端查一次要幾秒：這兩種共用快取 30 秒（其他訊號照舊不快取）
+        const k = url.searchParams.get("kind") || "";
+        return await proxyHanstockBars("/api/hub/intraday-signals" + url.search, k === "ma20turnDown" || k === "ma20turnUp" ? 30 : 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), signals: [] }, { status: 502 });
       }

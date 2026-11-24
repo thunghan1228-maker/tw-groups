@@ -1876,7 +1876,9 @@ const WORKER_ENTRY = {
     }
     if (url.pathname === "/api/intraday-signals") {
       try {
-        return await proxyHanstockBars("/api/hub/intraday-signals" + url.search, 0);
+        // 2026-11-24 機器人 200（均20 轉彎）一次撈一整天的 ma20turnDown／ma20turnUp，後端查一次要幾秒：這兩種共用快取 30 秒（其他訊號照舊不快取）
+        const k = url.searchParams.get("kind") || "";
+        return await proxyHanstockBars("/api/hub/intraday-signals" + url.search, k === "ma20turnDown" || k === "ma20turnUp" ? 30 : 0);
       } catch (err) {
         return Response.json({ status: "error", error: String(err), signals: [] }, { status: 502 });
       }
