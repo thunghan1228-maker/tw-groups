@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-24 21:49:08";
+const BUILD_STAMP = "2026-11-24 21:59:14";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4986,7 +4986,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
         <li><b>1+2多</b>：5 分K收盤同時站上「905 高」（開盤第一根 5 分K、09:00～09:05 的最高價）與昨日最高價時成立，一天一次，沒有時間限制。「訊號」右邊是那檔的盤中大戶力（大戶淨額 ÷ 近 5 日均成交值，老師算法：同秒併單 ≥7 張、開盤第一筆算賣）。</li>
         <li><b>創高黑龍</b>：09:00 開盤～13:30 收盤（2026-10-05 起，以前 11:00 後才算；第一根 5 分K 也算），5 分K最高價突破前 5 個交易日最高價（平高不算）、但這根收盤低於今天開盤價，且均線分數≥10（5/10/20/60/120/240 日線兩兩比較 15 組），一天一次。每列後面標 123 黑龍：收黑就是這一波第幾次進場（①②③）、區1（紅，可積極加碼）或區2（黃，等突破再加碼）；問診日線圖、K線圖日線也會在進場的那根K棒上畫同樣的圓圈。</li>
         <li><b>新刀劍空(32)</b>：（原名刀劍空，排法改成跟機器人代碼 32 一樣：一檔一列、時間在左、族群名次接在股名下面、右邊漲跌幅跟大戶%、跑／回標籤，最近發生的在上面）馬火多的鏡像，抓的是弱勢股。只看 199 的 23 族＋188 的 13 族，處置股不算，每族只看族內「空方段」（照漲跌幅排的後段，最多 5 檔，例如 4 檔的族群看後 2 檔、7 檔看後 4 檔、13 檔以上看後 5 檔），今天漲跌不限、成交量 10 張以上；而且要嘛是昨天漲 3% 以上（🔪 刀），要嘛是前天漲 3% 以上、現價已跌破前天收盤（⚔️ 劍）。族裡最弱 3 檔標 🔪／⚔️，空方段裡其他的標 🔰。照老師的格式分三段：多方打少（族群前 10 名）、中間段（11～25 名）、強空積極（族群第 26 名以後，不限檔數），再加收割區域（已跌 5% 以上，不追空，不分族群強弱，♣）；族群名次後面 🔺＝前 10 名、🔽＝11～25 名、🔰＝26 名以後。跟首頁的新刀劍空(32)、機器人代碼 32 是同一份名單：首頁照族群名次排，這個分頁跟機器人 32 一樣照「最近發生」的時間排（進榜、跑、回，新的在上面；今日即時空那一塊是顛倒的，最新的在最下面）。掉出名單的不刪：留在列表裡，紅色刪除線、標「跑 HH:MM」（轉強，要跑）；掉出去又回來的標「回 HH:MM」（照盤中每 5 分鐘的紀錄）。點股名可以開該檔的K線圖。</li>
-        <li><b>空族群必殺(193)</b>：找「名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票。只看固定的 23 個族群（資訊、鋼鐵、被動元件、光學鏡頭、航運、D電腦、面板、光電、二極體、矽光子、小電腦、散熱、低軌衛星、小電組、化學二、IP、矽晶圓、記憶體、玻璃基板、PA、台塑四寶、PCB、探針卡）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名，有掉就列。空方線以下＝第 36 名以後（空方線畫在第 35 名後面），這段排在最上面；空方線以上＝排名前半但名次往下掉的，接在「↓(多方漲)↓」下面。⚔️all／1.0／0.9…＝族裡現價不高於今天開盤價的股票比例（all＝全部）；🔪＝空方線以下、昨天名次在前 25 名的族群；另外還看 AI眼鏡、小光電。空方線以下跌幅大的在上面，最後一行是櫃買強弱（強多🚀🚀／強空⚔️⚔️）。⚠️＝族裡正在刀劍空(32) 名單上的股票（跌幅大的在前），點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
+        <li><b>空族群必殺(193)</b>：找「名次比昨天掉下來」的族群，再看族裡有哪些刀劍空的股票。只看固定的 23 個族群（資訊、鋼鐵、被動元件、光學鏡頭、航運、D電腦、面板、光電、二極體、矽光子、小電腦、散熱、低軌衛星、小電組、化學二、IP、矽晶圓、記憶體、玻璃基板、PA、台塑四寶、PCB、探針卡）。「族群-(N)🔽M」：N＝今天族群名次（平均漲跌幅，1 最強），M＝比昨天收盤的名次掉了幾名，有掉就列。空方線照老師畫在「第 32 個顯示的族」後面（小電機、散裝、金融股不算，名次照算；通常在第 32～35 名後面），這段排在最上面；空方線以上＝排名前半但名次往下掉的，接在「↓(多方漲)↓」下面。⚔️all／1.0／0.9…＝族裡現價不高於今天開盤價的股票比例（all＝全部）；🔪＝空方線以下、昨天名次在前 25 名的族群；另外還看 AI眼鏡、小光電。空方線以下跌幅大的在上面，最後一行是櫃買強弱（強多🚀🚀／強空⚔️⚔️）。⚠️＝族裡正在刀劍空(32) 名單上的股票（跌幅大的在前），點股票開K線圖；「📋 複製」可以把整份名單複製成文字。</li>
         <li><b>歷史查詢</b>：選擇日期查看當天的訊號紀錄。今日即時／四項精選強多／四項精選強空／1+2多／創高黑龍／主力翻多／主力翻空／盤中特大買單／盤中特大賣單這幾個分頁上方也有「今天／昨天／前天」可以直接切，看昨天、前天的訊號來檢查（成交價／漲跌幅是那一天的收盤值）。休市日、開盤前或停止交易（今天還沒有訊號）時，「今天」會沿用上一個交易日的訊號，按鈕寫「今天（mm/dd 收盤）」，跟大戶力分頁一樣。</li>
       </ul>
     </div>
@@ -10369,7 +10369,7 @@ function kill193Model(){
   const ranked = groups.slice().sort((a, b) => b.avgChange - a.avgChange);
   const daily = groupDailyChanges && groupDailyChanges.groups ? groupDailyChanges.groups : {};
   const blade = new Map([...m.bladeLower, ...m.bladeHarvest, ...m.bladeMiddle, ...m.bladeUpper].map((r) => [r.code, r]));
-  const half = zbHalf(groups.length);   // 空方線跟老師一樣畫在第 35 名後面（67 族）
+  const half = zbHalfRanked(ranked);   // 空方線照老師：第 32 個顯示的族後面（小電機、散裝、金融股不算）；原本固定畫在第 35 名後面
   const rows = ranked.map((g, i) => {
     const d = daily[g.name] || {};
     const prev = Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
@@ -10456,6 +10456,16 @@ function kill193Copy(){
 const HOME183_WARN_PCT = 5;   // 183 的 ⚠️：多方線以上的族群裡今天漲 5% 以上的股票，每族最多 3 檔（2026-10-21 使用者：先改 4%、又改回 5%，每族 2 檔→3 檔；原本 5%／2 檔是 2026-10-15 使用者確認、10-16 老師 09:57 小電組 8 檔漲 5% 以上只列富喬／台玻）
 // 老師 67 族的多空分界：177／188／193／199 的空方線都畫在第 35 名後面（第 36 名起算空方，2026-10-15 對他 10:50～10:52 四份）
 function zbHalf(total){ return Math.round(total * 35 / 67); }
+// 2026-11-24 使用者：多空線照老師改——老師 177 固定只顯示 64 族（小電機、散裝、金融股不顯示，但名次照算），
+// 線畫在「第 32 個顯示的族」後面（顯示的族數的一半）：11/18 線在第 32、33 名中間（藏的 45／54／60 都在下面）、
+// 11/19 在 34、36 中間（藏的 7、11 在上面）、11/23 在 32、33 中間、11/24 收盤在 32、36 中間（記憶體第 36 名在空方）——四份都對得上。
+// 回傳「線上面最後一名的名次」（名次 ≤ 它＝多方）；族群還沒排好就退回原本的固定比例。
+const ZB_HIDDEN = new Set(['小電機', '散裝', '金融股']);
+function zbHalfRanked(ranked){
+  const shown = ranked.map((g, i) => ({ name: g.name, rank: i + 1 })).filter((x) => !ZB_HIDDEN.has(x.name));
+  const n = Math.floor(shown.length / 2);
+  return n >= 1 && shown[n - 1] ? shown[n - 1].rank : zbHalf(ranked.length);
+}
 const RANK188_GROUPS = new Set(['光學鏡頭', '軍工', '被動元件', '面板', '二極體', '小電組', '石英', '記憶體', '玻璃基板', '矽晶圓', '聯電股', 'PCB', '台塑四寶']);   // 老師 10/15 09:56 那份 188 的 13 族
 // 新刀劍空(32)、1️⃣2️⃣空(123)、首頁 183 用同一批族群（2026-10-21 使用者：183 跟 32／123 完全同一批）：原本 199 的 23 族＋188 的 13 族（重複的合併），
 // 再加 AI眼鏡、太陽能、設備股，共 29 族；188 自己照舊只看原本 13 族（RANK188_GROUPS）
@@ -10490,7 +10500,7 @@ function homeRankRows(){
     const prev = Array.isArray(d.rank) && Number.isFinite(d.rank[0]) ? d.rank[0] : null;
     return { name: g.name, rank: i + 1, prev, drop: prev !== null ? i + 1 - prev : null, avg: g.avgChange };
   });
-  return { rows, half: zbHalf(ranked.length), total: ranked.length, hasDaily: rows.some((r) => r.prev !== null) };
+  return { rows, half: zbHalfRanked(ranked), total: ranked.length, hasDaily: rows.some((r) => r.prev !== null) };
 }
 // 首頁族群名稱的底色用：族群今天的平均漲跌（跟族群排名同一個數）；族群表沒有這個名字就回 null
 function homeGroupAvg(name){
@@ -11866,7 +11876,7 @@ function homeRank4Html(){
   // 10:33 加上光學鏡頭 ⚠️6209今國光（10:02 才 +3.9% 沒列、10:32 +7% 就列），大毅 +4.7%、台表科 +4.7% 都沒列；
   // 他 10:36 的馬火多(30) 沒有銘旺科、卻有大毅和台表科，所以不是 30 的名單，是「族裡漲 5% 以上」（刀劍空收割區跌 5% 的鏡像）。
   const groupByName = new Map(lastData.groups.map((g) => [g.name, g]));
-  const fireOf = (r) => home183WarnOf(r, h.half);
+  const fireOf = (r) => home183WarnOf(r, zbHalf(h.total));   // 2026-11-24 多空線改照老師後，⚠️ 照舊看第 35 名（老師 11/23 線下面的矽晶圓也列 ⚠️ 中美晶）
   const rows188 = h.rows.filter((r) => RANK188_GROUPS.has(r.name));
   const mk183 = rank183Marks();   // 2026-10-29 老師 183 往下掉的族群後面有 🔪⚔️
   const rows183 = h.rows.filter((r) => RANK183_GROUPS.has(r.name)).map((r) => Object.assign({}, r, { swordMark: r.drop !== null && r.drop > 0 ? (mk183.get(r.name) || '') : '' }));   // 2026-10-21 使用者：183 多加幾個族群
@@ -19215,7 +19225,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-24 21:49:08';
+const BUILD_STAMP = '2026-11-24 21:59:14';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -28072,7 +28082,7 @@ function botAnswerRaw(raw){
     h.rows.filter((r) => RANK183_GROUPS.has(r.name)).forEach((r) => {
       if (!sep && r.rank > h.half){ body += botLine('------↑(多方)↑------', 'bot-sep'); sep = true; }
       body += rankLine(Object.assign({}, r, { mk: mk.get(r.name) || '' }));
-      const warn = home183WarnOf(r, h.half);
+      const warn = home183WarnOf(r, zbHalf(h.total));   // ⚠️ 照舊看第 35 名（見首頁 fireOf）
       if (warn.length) body += botLine('⚠️' + warn.map((x) => botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>')).join(' '), 'bot-sub');
     });
     return wrap('多族群排名(183)', body || botLine('沒有資料', 'bot-dim'));
