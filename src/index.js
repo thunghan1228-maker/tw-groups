@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-24 22:24:37";
+const BUILD_STAMP = "2026-11-24 22:35:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -19226,7 +19226,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-24 22:24:37';
+const BUILD_STAMP = '2026-11-24 22:35:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -30491,7 +30491,14 @@ function patSigNotify(events){
 // 資料：後端盤中 5 分K 引擎對全部族群股發的「20MA轉下彎／20MA轉上彎」事件（/api/intraday-signals?kind=…，MA20 開盤接前一天的 5 分K，
 // 每根 5 分K 收完判斷；走平照前一根的方向）。每檔看今天最後一次轉彎：最後是轉下彎＝現在還在下彎，列在「向下」；最後是轉上彎列在「向上」。
 // 時間＝轉彎那根 5 分K 的結束時間（13:30 收盤那筆算 13:30）；「第 N 次」＝這檔今天第幾次往這個方向轉。
-const M200 = { dir: (() => { try { return localStorage.getItem('m200Dir') === 'up' ? 'up' : 'down'; } catch (_){ return 'down'; } })() };
+const M200 = { dir: (() => { try { return localStorage.getItem('m200Dir') === 'up' ? 'up' : 'down'; } catch (_){ return 'down'; } })(),
+  // 2026-11-24 使用者：最上面加「大戶力 ≤ −10%」「大戶力 ≥ +10%」兩個選項（只能選一個，再按一次取消）；列表跟盤中提醒一起套用
+  hold: (() => { try { const v = localStorage.getItem('m200Hold'); return v === 'neg' || v === 'pos' ? v : ''; } catch (_){ return ''; } })() };
+function m200HoldOk(code){
+  if (!M200.hold) return true;
+  const v = holderPctOf(code);
+  return Number.isFinite(v) && (M200.hold === 'neg' ? v <= -10 : v >= 10);   // 大戶力還沒有數字的先不列
+}
 function m200Events(){
   const today = twTodayStr(), ttl = twLiveSession() ? 60e3 : 1800e3;
   const url = (k) => '/api/intraday-signals?trade_date=' + today + '&kind=' + k + '&limit=5000';
@@ -30522,14 +30529,17 @@ function m200Events(){
 }
 function ma200BotHtml(wrap){
   const t = M200.dir === 'down' ? '↘均20 轉下彎(200)' : '↗均20 轉上彎(200)';
-  const btns = '<div class="bot-line b777-params">' + [['down', '↘ 向下（上揚轉下彎）'], ['up', '↗ 向上（下彎轉上揚）']].map(([k, l]) =>
+  const holdBtns = '<div class="bot-line b777-params">' + [['neg', '大戶力 ≤ −10%'], ['pos', '大戶力 ≥ +10%']].map(([k, l]) =>
+    '<button type="button" class="b777-p' + (M200.hold === k ? ' on' : '') + '" data-m200-hold="' + k + '" title="只看盤中大戶力' + (k === 'neg' ? ' ≤ −10%' : ' ≥ +10%') + '的（大戶力還沒有數字的先不列；再按一次取消；盤中提醒也一起套用）">' + (M200.hold === k ? '☑ ' : '☐ ') + l + '</button>').join('') + '</div>';
+  const btns = holdBtns + '<div class="bot-line b777-params">' + [['down', '↘ 向下（上揚轉下彎）'], ['up', '↗ 向上（下彎轉上揚）']].map(([k, l]) =>
     '<button type="button" class="b777-p' + (M200.dir === k ? ' on' : '') + '" data-m200-dir="' + k + '">' + l + '</button>').join('') + '</div>';
   const ev = m200Events();
   if (!ev) return wrap(t, btns + botLine('讀取中…', 'bot-dim'));
   if (ev.error) return wrap(t, btns + botLine('後端暫時連不上，等一下再試', 'bot-dim'));
   const h = homeRankRows();
   const rankOf = new Map(h ? h.rows.map((r) => [r.name, r.rank]) : []);
-  const list = ev.rows.filter((r) => r.dir === M200.dir).sort((a, b) => b.ts - a.ts || (a.code < b.code ? -1 : 1));
+  const list0 = ev.rows.filter((r) => r.dir === M200.dir);
+  const list = list0.filter((r) => m200HoldOk(r.code)).sort((a, b) => b.ts - a.ts || (a.code < b.code ? -1 : 1));
   const row = (r) => {
     const q = getStockQuote(r.code), pct = q && Number.isFinite(q.changePercent) ? q.changePercent : null, gr = rankOf.get(r.group);
     return '<div class="b32-row bh" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name) + '">' +
@@ -30544,14 +30554,20 @@ function ma200BotHtml(wrap){
     (list.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + list.map(row).join('') : botLine('目前沒有', 'bot-dim')) +
     botLine('5 分K 20MA（20 根收盤平均，開盤接前一天的）' + (M200.dir === 'down' ? '原本上揚、轉成下彎' : '原本下彎、轉成上揚') +
       '的族群股；一檔一天只列一次（今天第一次轉的時間），盤中反覆轉彎不再重複出現，之後又轉回去的標「已轉回」；最近轉的在上面。盤中跳出提醒跟著這裡選的方向（最上排「📐 200 均20轉彎提醒」可以單獨關）。', 'bot-dim'),
-    (lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') : '') + '・' + list.length + ' 檔');
+    (lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') : '') + '・' + list.length + ' 檔' + (M200.hold ? '（' + (M200.hold === 'neg' ? '大戶力 ≤ −10%' : '大戶力 ≥ +10%') + '，共 ' + list0.length + ' 檔）' : ''));
 }
 document.addEventListener('click', (e) => {
+  const hb = e.target.closest && e.target.closest('[data-m200-hold]');
   const b = e.target.closest && e.target.closest('[data-m200-dir]');
-  if (!b) return;
+  if (!b && !hb) return;
   e.stopPropagation(); e.preventDefault();
-  M200.dir = b.dataset.m200Dir === 'up' ? 'up' : 'down';
-  try { localStorage.setItem('m200Dir', M200.dir); } catch (_){}
+  if (hb){
+    M200.hold = M200.hold === hb.dataset.m200Hold ? '' : hb.dataset.m200Hold;
+    try { localStorage.setItem('m200Hold', M200.hold); } catch (_){}
+  } else {
+    M200.dir = b.dataset.m200Dir === 'up' ? 'up' : 'down';
+    try { localStorage.setItem('m200Dir', M200.dir); } catch (_){}
+  }
   try { render(); } catch (_){}
   try { botRerunCols(); } catch (_){}
 }, true);
@@ -30583,7 +30599,7 @@ function m200SigNotify(events){
   el.innerHTML = '<div class="pk-alert-head">📐 均20 轉彎(200)（' + m200Lines.length + ' 檔）' + alertSubBtnHtml('m200') + ALERT_CTL_HTML + '</div>' +
     '<div class="mt-scroll"><table class="ck-table dg-tbl"><thead><tr><th>時間</th><th class="l">股票<div class="dg-sub">族群・名次</div></th><th>漲跌幅</th><th>大戶力<div class="dg-sub">盤中即時</div></th></tr></thead><tbody>' +
     m200Lines.map((x) => x.html).join('') + '</tbody></table></div>' +
-    '<div class="mt-foot">機器人 200：族群股 5 分K 20MA ' + (M200.dir === 'down' ? '上揚轉下彎' : '下彎轉上揚') + '就跳出來（方向跟著機器人 200 選的）；時間＝轉彎那根 5 分K 的結束時間。一檔一天只跳一次，盤中反覆轉彎不再跳。點股票開 K 線圖。</div>';
+    '<div class="mt-foot">機器人 200：族群股 5 分K 20MA ' + (M200.dir === 'down' ? '上揚轉下彎' : '下彎轉上揚') + '就跳出來（方向、大戶力選項跟著機器人 200 選的）；時間＝轉彎那根 5 分K 的結束時間。一檔一天只跳一次，盤中反覆轉彎不再跳。點股票開 K 線圖。</div>';
   syncAlertSubBtns();
   try { launchBeep(); } catch (_){}
   if ('Notification' in window && Notification.permission === 'granted'){
@@ -30604,13 +30620,15 @@ function m200SigTick(opts){
   try { const o = JSON.parse(localStorage.getItem(M200_SEEN_KEY) || 'null'); if (o && o.date === today) st = o; } catch (_){}
   const seen = new Set(st.keys);
   const fresh = [];
+  const primed = !!st.primed || opts.force;
   ev.rows.forEach((r) => {
     const key = r.code + '|' + r.dir;   // 一檔一個方向一天只跳一次
     if (seen.has(key)) return;
+    // 大戶力選項：轉彎了但大戶力還不到的先不記，之後大戶力到了才跳（第一次讀到的照舊全部先記下來不跳）
+    if (primed && r.dir === M200.dir && !m200HoldOk(r.code)) return;
     seen.add(key);
     if (r.dir === M200.dir) fresh.push(r);
   });
-  const primed = !!st.primed || opts.force;
   if (!fresh.length && primed && seen.size === st.keys.length) return;
   try { localStorage.setItem(M200_SEEN_KEY, JSON.stringify({ date: today, keys: Array.from(seen), primed: true })); } catch (_){}
   if (primed) m200SigNotify(fresh.sort((a, b) => b.ts - a.ts));
