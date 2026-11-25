@@ -2354,6 +2354,20 @@
   .b32-tag.run{background:#b91c1c;} .b32-tag.back{background:#2563eb;}
   .b32-grp:has(.b32-turn){white-space:normal;overflow:visible;line-height:1.5;}   /* 有轉下彎標籤的那列可以換行，窄欄（首頁 310px）才不會被切掉 */
   #ma20TurnBox .ck-table td,#ma20TurnBox .ck-table th{white-space:nowrap;}   /* 2026-11-24 均20 轉下彎提醒視窗：手機上欄位不要擠成直排 */
+  /* 2026-11-25 📐角度（股號＋123） */
+  .ag-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin:2px 0 4px;} .ag-name{font-size:15px;} .ag-grp{font-size:12px;margin-top:2px;}
+  .ag-now{font-size:16px;font-weight:900;white-space:nowrap;} .ag-now.up{color:#dc2626;} .ag-now.down{color:#16a34a;}
+  .ag-legend{display:flex;gap:10px;font-size:11px;color:var(--muted);margin-bottom:2px;} .ag-lma{color:#d97706;} .ag-lang{color:#2563eb;}
+  .ag-svg{width:100%;height:auto;display:block;} .ag-svg .ag-ax{font-size:8px;fill:var(--muted);} .ag-svg .ag-tt{fill:#2563eb;font-weight:700;}
+  .ag-svg .ag-grid{stroke:var(--line);stroke-width:.5;} .ag-svg .ag-prev{stroke:var(--muted);stroke-width:.7;stroke-dasharray:3 3;}
+  .ag-svg .ag-up{stroke:#dc2626;stroke-width:.8;} .ag-svg .ag-dn{stroke:#16a34a;stroke-width:.8;} .ag-svg .ag-upf{fill:#dc2626;} .ag-svg .ag-dnf{fill:#16a34a;}
+  .ag-svg .ag-ma{fill:none;stroke:#d97706;stroke-width:1.6;} .ag-svg .ag-line{fill:none;stroke:#2563eb;stroke-width:1.8;}
+  .ag-svg .ag-b1{fill:rgba(220,38,38,.30);} .ag-svg .ag-b2{fill:rgba(220,38,38,.18);} .ag-svg .ag-b3{fill:rgba(220,38,38,.07);}
+  .ag-svg .ag-b4{fill:rgba(22,163,74,.08);} .ag-svg .ag-b5{fill:rgba(22,163,74,.18);} .ag-svg .ag-b6{fill:rgba(22,163,74,.30);}
+  .ag-svg .ag-zero{stroke:var(--muted);stroke-width:.8;} .ag-svg .ag-turn{stroke:#2563eb;stroke-width:.7;stroke-dasharray:3 3;} .ag-svg .ag-tri{fill:none;stroke:#2563eb;stroke-width:1.2;}
+  .ag-svg .ag-hi{fill:#dc2626;stroke:#fff;stroke-width:1;} .ag-svg .ag-curu{fill:#dc2626;stroke:#fff;stroke-width:1;} .ag-svg .ag-curd{fill:#16a34a;stroke:#fff;stroke-width:1;}
+  .ag-box{margin:8px 0 4px;padding:8px 10px;border:1.5px solid #d4a017;border-radius:8px;background:rgba(250,204,21,.10);font-size:13px;line-height:1.7;}
+  .ag-box .up{color:#dc2626;} .ag-box .down{color:#16a34a;} .bot-line.ag-row .up{color:#dc2626;} .bot-line.ag-row .down{color:#16a34a;} .ag-t{font-variant-numeric:tabular-nums;color:var(--muted);}
   .b32-turn.up{background:#b91c1c;} .m200-back{font-size:10.5px;font-weight:800;color:#fff;background:#6b7280;border-radius:4px;padding:0 4px;margin-left:4px;} .dyn-turnbar{margin:2px 0 6px;} .dyn-turnbar .b777-p{font-size:12px;}
   .b32-turn{display:inline-block;margin-left:5px;padding:0 4px;border-radius:4px;font-size:11px;font-weight:800;color:#fff;background:#0f766e;white-space:nowrap;}   /* 2026-11-24 5 分K 20MA 上揚轉下彎的時間 */
   .bot-line.bot-b32turn{padding:2px 0 4px;}
@@ -26828,6 +26842,7 @@ const BOT_CODES = [
   ['44', '今天 1+2 多（突破黑馬）'], ['88', '開低站上 VWAP：今天開盤低於昨收、09:05 後 1 分K收盤高於 VWAP 1% 以上（偏多），跟訊號中心「開低VWAP上(88)」同一份'], ['87', '開高跌破 VWAP：今天開盤高於昨收、09:05 後 1 分K收盤低於 VWAP 1% 以上（偏空），跟訊號中心「開高VWAP下(87)」同一份'], ['60', '處置中＋出獄股'], ['61', '即將出關'], ['62', '已出關（第幾天）'],
   ['70', '亞洲股市'], ['71', '美國股市'], ['72', '台指期'], ['75', '股期黑龍：有股票期貨、均線分數 ≥ 10、今天收黑K'],
   ['80', '隔日沖前兩日其中一日入榜黑龍：前兩個交易日上 811、今天收黑K，只看族群表裡的股票（含「其他」那組）（⭐＝兩週內又上榜幾次）'],
+  ['股號123', '📐角度：一檔股票 5 分K 20MA 的角度（噴出／攻擊／緩坡／緩跌／急殺／崩跌）、轉下彎時間、判讀偏多偏空，附 K 線＋均20 和角度走勢圖（例：6213123）'],   // 2026-11-25 使用者
   ['200', '↘↗均20 轉彎：全部族群股 5 分K 20MA 上揚轉下彎／下彎轉上揚（上面按鈕切換向下／向上），最近轉的在上面；盤中有新的轉彎會跳出提醒'],   // 2026-11-24 使用者
   ['240', '📈動能選股｜🔥熱門趨勢概念股（即時，代碼暫定）：照券商 App「動能選股→熱門趨勢概念股」——收盤（盤中用即時價）在 240 日最高收盤附近、240 日漲幅大的股票（還原股價，跟 App 同算法）；App 的新聞熱度我們沒有，用 5 日均成交值當門檻，格子上面三排按鈕可以調'], ['999', '⚡空中空：777、32、123 三份裡有兩份以上都有的股票（首頁閃綠的那些），全部照發生時間排（最近的在上面），每檔標刀劍空／12空、第一次進榜、跑、回的時間'], ['888', '💪強中強：強勢股觀察中(82)、強勢紅K、熱門趨勢概念股(240)、日動能(260) 四份名單重複兩份以上的股票（首頁 183 右邊那欄同一份）'], ['260', '📈動能選股｜⚡日動能（即時）：動能＝1.4×(價格÷8 日指數平均線−1)×100，強勢 ≥ +6／弱勢 ≤ −6，照今天成交金額排；盤中每 15 秒用現價重算、名單跟著換；均線、動能、大戶力都能點欄位排序'], ['270', '📈動能選股｜⚡週動能（即時）：同日動能算法換成週K（8 週指數平均線），照這週累計成交金額排、上榜幾週；盤中即時重算'], ['280', '📈動能選股｜🏛️法人動能：價量創新高／投信剛買準突破／投信動能連買／外資動能連買四張名單（外資、投信收盤後公布）'], ['250', '📈動能選股｜🚀動能排行（代碼暫定）：照券商 App「動能選股→動能排行」——本週、本月、本季、今年以來的漲幅都在全市場前 5%，而且收盤創 240 日新高的強勢股（還原股價，跟 App 同算法）；前幾 % 可以在格子上面點，也能列「差一個」的'], ['81', '隔日沖買超排序（每天六點後更新）'], ['83', '📡多觀察(等黑K買進)：首頁那欄的【1】黑K出現・黑龍系統符合【2】今天噴出【3】已噴在高檔【4】右肩打底【5】有點深，同一份、同族群排一起，每檔接大戶力'], ['82', '👁強勢股觀察中・等收黑：首頁第一欄最上面那份（跟創高黑龍選股（手動）→ 今天 → ② 強勢股觀察中・等收黑 同一份），照即時漲跌幅排、漲越多越上面，每檔接大戶力'], ['811', '隔日沖買超佔成交量（爆量計算），隔天容易出貨'], ['813', '隔日沖必殺：今天開盤量 ÷ 隔日沖手上張數（≥ 0.7）、現價低於開盤、跌 2.5～4%，比例越高越容易出貨'],
   ['97', '外資買賣超前十大：賣超前十在上、買超前十在下（金額越大越靠上），每檔列買賣超金額（億元）、漲跌幅、盤中大戶力（收盤後公布，盤中看到的是前一個交易日）'], ['98', '投信買賣超前十名：格式同 97'], ['99', '外資、投信同步買賣超前十大：同步賣超前十在上、同步買超前十在下（兩家合計金額越大越靠上），每檔列外資、投信各自的買賣超金額（億元）、漲跌幅、盤中大戶力'], ['777', '每日功課的族群卡（刀劍空(32)、12空(123)）條列：一族一段、族群和族裡每檔都照訊號時間排（最近的在上），每檔接大戶%'], ['84', '籌碼暴增排序：本週買超榜、賣超榜'], ['618', '處置股（籌碼暴增），後面是出關日'], ['628', '出獄股（籌碼暴增），近 60 天出獄，後面是出獄幾天'], ['17784', '族群籌碼暴增排名'],
@@ -27494,7 +27509,9 @@ function botAnswerRaw(raw){
   const title = (t, sub) => '<div class="bot-title' + (bear && q !== '999' ? ' bot-title-bear' + (['32', '123', '193', '199'].includes(q) ? ' bot-title-navy' : '') : q === '177' ? ' bot-title-split' : '') + '">' + t + (sub ? ' <small>' + sub + '</small>' : '') + '</div>';
   const stamp = lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') + ' ' + sessHm(lastData.quoteTime) : '';
   const wrap = (t, body, sub) => '<div class="bot-msg' + (bear ? ' bot-bear' : '') + '"><div class="bot-q">' + wlEsc(raw) + '</div>' + title(t, sub || stamp) + body + '</div>';
-  if (q === '200') return ma200BotHtml(wrap);   // 2026-11-24 使用者：均20 轉彎機器人（5 分K 20MA 上揚轉下彎／下彎轉上揚，可切換）
+  if (q === '200') return ma200BotHtml(wrap);
+  const mmAng = /^([0-9A-Z]{4,6})123$/.exec(q);   // 2026-11-25 使用者：📐角度（股號＋123，例如 6213123）
+  if (mmAng) return angBotHtml(mmAng[1], wrap);   // 2026-11-24 使用者：均20 轉彎機器人（5 分K 20MA 上揚轉下彎／下彎轉上揚，可切換）
   // 不用首頁報價的：國際行情
   if (q === '70' || q === '71'){
     botWorldLoad();
@@ -30397,6 +30414,132 @@ function patSigNotify(events){
   if ('Notification' in window && Notification.permission === 'granted'){
     events.slice(0, 5).forEach((e) => { try { new Notification('📐 ' + e.x.name + '突破 ' + e.code + ' ' + (e.name || ''), { body: hm + ' 現價 ' + e.q.price + '（觸發價 ' + e.x.trigger + '）', tag: 'pat-' + e.key }); } catch (_){} });
   }
+}
+// ---- 📐角度（股號＋123）（2026-11-25 使用者貼老師的角度機器人：6213 聯茂 11/25、2466 冠西電 11/24）----
+// 角度＝5 分K 20MA 的斜率換成角度：x＝20MA 跟 3 根前比漲跌幾 %，角度＝arctan(K × |x|^P)（正負照 x），K、P 用老師 6213 聯茂 11/25 那 13 個點調的
+// （平均差 1.7 度；最高 +44°(11:50)、轉下彎 09:35／13:05 都對得上）。20MA 開盤接前一天的 5 分K（收盤撮合那根併在 13:25）。
+// 分區照老師：≥60 噴出、30～60 攻擊、0～30 緩坡、0～−30 緩跌、−30～−60 急殺、≤−60 崩跌；角度由正轉負＝轉下彎（⚔️），由負轉正＝轉上彎。
+// 判讀：收盤（盤中現價）在 20MA 下、而且角度 < 0 ⇒ 偏空；在 20MA 上、角度 > 0 ⇒ 偏多；其他觀望。
+const ANG_K = 2.09, ANG_P = 1.22, ANG_LAG = 3;
+function angDeg(x){ return Math.sign(x) * Math.atan(ANG_K * Math.pow(Math.abs(x), ANG_P)) * 180 / Math.PI; }
+function angLabel(a){ return a >= 60 ? '噴出' : a >= 30 ? '攻擊' : a >= 0 ? '緩坡' : a > -30 ? '緩跌' : a > -60 ? '急殺' : '崩跌'; }
+function angModel(code){
+  const r5 = botFetchCache('ang5|' + code, '/api/bars5range/' + code, twLiveSession() ? 60e3 : 1800e3);
+  if (!r5) return null;
+  if (r5.status !== 'ok' || !Array.isArray(r5.bars) || !r5.bars.length) return { error: true };
+  const dOf = (b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10);
+  const all = r5.bars.filter((b) => Number.isFinite(b.close)).slice().sort((a, b) => a.ts - b.ts);
+  const day = dOf(all[all.length - 1]);
+  const first = all.findIndex((b) => dOf(b) === day);
+  const prevBars = all.slice(0, first);
+  const prevClose = prevBars.length ? prevBars[prevBars.length - 1].close : null;
+  const cl = all.map((b) => b.close);
+  const ma = (i) => { if (i < 19) return null; let sm = 0; for (let k = i - 19; k <= i; k++) sm += cl[k]; return sm / 20; };
+  const endHm = (b) => { const v = new Date(b.ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16); return v > '13:30' ? '13:30' : v; };
+  const pts = [];
+  for (let i = first; i < all.length; i++){
+    const m = ma(i), m0 = ma(i - ANG_LAG);
+    pts.push({ i: i - first, t: endHm(all[i]), bar: all[i], ma: m, ang: m !== null && m0 ? angDeg((m / m0 - 1) * 100) : null });
+  }
+  const valid = pts.filter((p) => p.ang !== null);
+  if (!valid.length) return { error: true, few: true };
+  const turns = [];
+  for (let k = 1; k < valid.length; k++){
+    const a = valid[k - 1].ang, b2 = valid[k].ang;
+    if (a >= 0 && b2 < 0) turns.push({ dir: 'down', p: valid[k] });
+    else if (a < 0 && b2 >= 0) turns.push({ dir: 'up', p: valid[k] });
+  }
+  const hiP = valid.reduce((x, y) => (y.ang > x.ang ? y : x)), loP = valid.reduce((x, y) => (y.ang < x.ang ? y : x));
+  const cur = valid[valid.length - 1], last = pts[pts.length - 1];
+  const close = last.bar.close, dayHigh = Math.max(...pts.map((p) => p.bar.high));
+  return { code, day, prevClose, pts, valid, turns, hiP, loP, cur, close, ma: last.ma, dayHigh, pct: prevClose ? (close / prevClose - 1) * 100 : null, live: twLiveSession() };
+}
+function angChartSvg(m){
+  const W = 360, L = 30, R = 300, n = 54, xw = (R - L) / n;
+  const x = (i) => L + xw * (i + 0.5);
+  const pts = m.pts;
+  // 上面：5 分K＋20MA＋昨收
+  const P0 = 8, P1 = 140;
+  const lows = pts.map((p) => p.bar.low).concat(pts.filter((p) => p.ma !== null).map((p) => p.ma)), highs = pts.map((p) => p.bar.high).concat(pts.filter((p) => p.ma !== null).map((p) => p.ma));
+  if (m.prevClose) { lows.push(m.prevClose); highs.push(m.prevClose); }
+  let lo = Math.min(...lows), hi = Math.max(...highs);
+  if (hi - lo < 1e-6) { hi += 1; lo -= 1; }
+  const pad = (hi - lo) * 0.06; lo -= pad; hi += pad;
+  const y = (v) => P0 + (hi - v) / (hi - lo) * (P1 - P0);
+  let g = '';
+  [0, 0.25, 0.5, 0.75, 1].forEach((f) => { const v = lo + (hi - lo) * (1 - f), yy = P0 + f * (P1 - P0);
+    g += '<line x1="' + L + '" x2="' + R + '" y1="' + yy.toFixed(1) + '" y2="' + yy.toFixed(1) + '" class="ag-grid"/><text x="' + (L - 3) + '" y="' + (yy + 3).toFixed(1) + '" class="ag-ax" text-anchor="end">' + (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + '</text>'; });
+  if (m.prevClose){ const yy = y(m.prevClose).toFixed(1); g += '<line x1="' + L + '" x2="' + R + '" y1="' + yy + '" y2="' + yy + '" class="ag-prev"/><text x="' + (R + 3) + '" y="' + (+yy + 3) + '" class="ag-ax">昨收 ' + (m.prevClose >= 100 ? m.prevClose.toFixed(0) : m.prevClose.toFixed(2)) + '</text>'; }
+  pts.forEach((p) => { const b = p.bar, up = b.close >= b.open, cx = x(p.i).toFixed(1), bw = Math.max(1.2, xw * 0.62);
+    const yo = y(b.open), yc = y(b.close);
+    g += '<line x1="' + cx + '" x2="' + cx + '" y1="' + y(b.high).toFixed(1) + '" y2="' + y(b.low).toFixed(1) + '" class="' + (up ? 'ag-up' : 'ag-dn') + '"/>' +
+      '<rect x="' + (x(p.i) - bw / 2).toFixed(1) + '" y="' + Math.min(yo, yc).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(0.8, Math.abs(yo - yc)).toFixed(1) + '" class="' + (up ? 'ag-upf' : 'ag-dnf') + '"/>'; });
+  const maPts = pts.filter((p) => p.ma !== null).map((p) => x(p.i).toFixed(1) + ',' + y(p.ma).toFixed(1)).join(' ');
+  if (maPts) g += '<polyline points="' + maPts + '" class="ag-ma"/>';
+  // 下面：均20 角度（分區底色）
+  const A0 = 160, A1 = 262, ay = (a) => A0 + (90 - Math.max(-90, Math.min(90, a))) / 180 * (A1 - A0);
+  [[90, 60, 'ag-b1', '噴出'], [60, 30, 'ag-b2', '攻擊'], [30, 0, 'ag-b3', '緩坡'], [0, -30, 'ag-b4', '緩跌'], [-30, -60, 'ag-b5', '急殺'], [-60, -90, 'ag-b6', '崩跌']].forEach(([a, b2, cls, lbl]) => {
+    g += '<rect x="' + L + '" y="' + ay(a).toFixed(1) + '" width="' + (R - L) + '" height="' + (ay(b2) - ay(a)).toFixed(1) + '" class="' + cls + '"/><text x="' + (R + 3) + '" y="' + ((ay(a) + ay(b2)) / 2 + 3).toFixed(1) + '" class="ag-ax">' + lbl + '</text>'; });
+  [60, 30, 0, -30, -60].forEach((a) => { g += '<text x="' + (L - 3) + '" y="' + (ay(a) + 3).toFixed(1) + '" class="ag-ax" text-anchor="end">' + a + '</text>'; });
+  g += '<line x1="' + L + '" x2="' + R + '" y1="' + ay(0).toFixed(1) + '" y2="' + ay(0).toFixed(1) + '" class="ag-zero"/>';
+  const aPts = m.valid.map((p) => x(p.i).toFixed(1) + ',' + ay(p.ang).toFixed(1)).join(' ');
+  g += '<polyline points="' + aPts + '" class="ag-line"/>';
+  m.turns.filter((t) => t.dir === 'down').forEach((t) => { const cx = x(t.p.i).toFixed(1);
+    g += '<line x1="' + cx + '" x2="' + cx + '" y1="' + P0 + '" y2="' + A1 + '" class="ag-turn"/><path d="M' + (x(t.p.i) - 4).toFixed(1) + ',' + (ay(t.p.ang) - 8).toFixed(1) + ' h8 l-4,7 z" class="ag-tri"/>' +
+      '<text x="' + cx + '" y="' + (A1 + 12) + '" class="ag-ax ag-tt" text-anchor="middle">' + t.p.t + '</text>'; });
+  g += '<circle cx="' + x(m.hiP.i).toFixed(1) + '" cy="' + ay(m.hiP.ang).toFixed(1) + '" r="3" class="ag-hi"/>';
+  g += '<circle cx="' + x(m.cur.i).toFixed(1) + '" cy="' + ay(m.cur.ang).toFixed(1) + '" r="3.5" class="' + (m.cur.ang >= 0 ? 'ag-curu' : 'ag-curd') + '"/>';
+  ['09:00', '10:00', '11:00', '12:00', '13:30'].forEach((t) => { const k = t === '13:30' ? n - 1 : (Number(t.slice(0, 2)) - 9) * 12; g += '<text x="' + x(k).toFixed(1) + '" y="' + (A1 + 24) + '" class="ag-ax" text-anchor="middle">' + t + '</text>'; });
+  return '<svg class="ag-svg" viewBox="0 0 ' + W + ' ' + (A1 + 28) + '" role="img" aria-label="5 分K、20MA 與均20 角度">' + g + '</svg>';
+}
+function angBotHtml(code, wrap){
+  const name = botNameOf(code) || code;
+  const t = '📐角度(' + code + '123)';
+  const m = angModel(code);
+  if (!m) return wrap(t, botLine('讀取中…', 'bot-dim'));
+  if (m.error) return wrap(t, botLine(m.few ? '今天的 5 分K 還不夠算角度（要 20MA 跟 3 根前比）' : '查不到 ' + code + ' 的 5 分K（族群表外的股票可能沒有）', 'bot-dim'));
+  const f = (a) => { const r = Math.round(a); return (r > 0 ? '+' : r === 0 && a < 0 ? '-' : '') + r + '°'; };   // −0.4 顯示「-0°」，看得出是往下
+  const below = m.ma !== null && m.close < m.ma, down = m.cur.ang < 0;
+  const verdict = below && down ? '偏空' : !below && m.cur.ang > 0 ? '偏多' : '觀望';
+  const vCls = verdict === '偏空' ? 'down' : verdict === '偏多' ? 'up' : '';
+  // 族群名次、族內名次
+  let grpLine = '';
+  try {
+    const g = lastData && lastData.groups ? lastData.groups.find((x) => x.stocks.some((s) => s.code === code)) : null;
+    if (g){
+      const h = homeRankRows(), gr = h ? (h.rows.find((r) => r.name === g.name) || {}).rank : null;
+      const srt = g.stocks.filter((s) => Number.isFinite(s.changePercent)).slice().sort((a, b) => b.changePercent - a.changePercent);
+      const pos = srt.findIndex((s) => s.code === code) + 1;
+      grpLine = '└' + wlEsc(g.name) + (gr ? ' 族群' + gr + '名' : '') + (pos ? '・族內' + pos + '/' + srt.length : '');
+    }
+  } catch (_){}
+  const downs = m.turns.filter((x) => x.dir === 'down');
+  const lastDown = downs.length ? downs[downs.length - 1] : null;
+  // 1️⃣2️⃣空：今天在 123 名單上的，標在進榜那根
+  let k12T = '';
+  try { const k = botState.cache.kill12 && botState.cache.kill12.data; const it = k && (k.items || []).find((x) => x.code === code); if (it && it.since) k12T = new Date(it.since + 8 * 3600e3).toISOString().slice(11, 16); } catch (_){}
+  // 角度走勢：09:15、09:30，之後每半小時，加上轉下彎（⚔️）、最高、現在
+  const rows = new Map();
+  const put = (p, tag) => { const r = rows.get(p.t) || { p, tags: [] }; if (tag && !r.tags.includes(tag)) r.tags.push(tag); rows.set(p.t, r); };
+  m.valid.forEach((p) => { if (p.t === '09:15' || p.t.slice(3) === '00' || p.t.slice(3) === '30') put(p); });
+  downs.forEach((x) => put(x.p, '⚔️'));
+  put(m.hiP, '最高');
+  if (k12T){ const p = m.valid.find((q2) => q2.t >= k12T); if (p) put(p, '1️⃣2️⃣空'); }
+  put(m.cur, '⬅現在');
+  const list = [...rows.values()].sort((a, b) => (a.p.t < b.p.t ? -1 : 1));
+  const stamp = m.day.slice(5).replace('-', '/') + ' ' + (m.live ? m.cur.t + ' 即時' : '13:30收');
+  const head = '<div class="ag-head"><div><b class="ag-name">' + wlEsc(code + ' ' + name) + '</b> <span class="' + (m.pct !== null ? dirClass(m.pct) : '') + '">' + (m.pct !== null ? botPct(m.pct) : '') + '</span>' +
+    (grpLine ? '<div class="bot-dim ag-grp">' + grpLine + '</div>' : '') + '</div>' +
+    '<div class="ag-now ' + (m.cur.ang >= 0 ? 'up' : 'down') + '">' + f(m.cur.ang) + ' ' + angLabel(m.cur.ang) + '</div></div>';
+  const box = '<div class="ag-box">' +
+    '<div>收 ' + m.close + ' ／ 均20 ' + (m.ma !== null ? m.ma.toFixed(2) : '—') + ' ' + (below ? '線下' : '線上') + '</div>' +
+    '<div>跌破均20 ' + (below ? '✅' : '❌') + '・均20 下彎 ' + (down ? '✅' : '❌') + ' ⇒ <b class="' + vCls + '">' + verdict + '</b>（現在 ' + f(m.cur.ang) + ' ' + angLabel(m.cur.ang) + '）</div>' +
+    '<div>最高 ' + f(m.hiP.ang) + ' ' + angLabel(m.hiP.ang) + '（' + m.hiP.t + '）・最低 ' + f(m.loP.ang) + ' ' + angLabel(m.loP.ang) + '（' + m.loP.t + '）</div>' +
+    (lastDown ? '<div>' + lastDown.p.t + ' 轉下彎（今天第 ' + downs.length + ' 次）</div>' : '<div class="bot-dim">今天還沒轉下彎</div>') + '</div>';
+  const chart = '<div class="bot-chart bc-show"><div class="ag-legend"><span>5 分K</span><span class="ag-lma">━ 均20</span><span class="ag-lang">━ 均20 角度</span><span>▽ 轉下彎</span></div>' + angChartSvg(m) + '</div>';
+  const trend = botLine('-----角度走勢-----', 'bot-sep') + list.map((r) => botLine('<span class="ag-t">' + r.p.t + '</span> <b class="' + (r.p.ang >= 0 ? 'up' : 'down') + '">' + f(r.p.ang) + '</b> ' + r.tags.join(' '), 'ag-row')).join('');
+  return wrap(t, head + chart + box + trend +
+    botLine('角度＝5 分K 20MA 的斜率（20MA 跟 3 根前比漲跌幾 %，換成角度；開盤接前一天的 5 分K）。≥60 噴出、30～60 攻擊、0～30 緩坡、0～−30 緩跌、−30～−60 急殺、≤−60 崩跌；角度由正轉負＝轉下彎（⚔️）。算法照老師 6213 聯茂 11/25 那份調的，之後有更多樣本再校正。', 'bot-dim'), stamp);
 }
 // ---- 均20 轉彎(200)（2026-11-24 使用者：5 分K 20MA 原本往上、轉成向下，跟原本向下、轉成向上，做成一個機器人，可以切換向上／向下，盤中也要跳出來）----
 // 資料：後端盤中 5 分K 引擎對全部族群股發的「20MA轉下彎／20MA轉上彎」事件（/api/intraday-signals?kind=…，MA20 開盤接前一天的 5 分K，
