@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-25 17:21:56";
+const BUILD_STAMP = "2026-11-25 18:05:02";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -2453,11 +2453,12 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .ag-svg .ag-ma{fill:none;stroke:#d97706;stroke-width:1.6;} .ag-svg .ag-line{fill:none;stroke:#2563eb;stroke-width:1.8;}
   .ag-svg .ag-b1{fill:rgba(220,38,38,.30);} .ag-svg .ag-b2{fill:rgba(220,38,38,.18);} .ag-svg .ag-b3{fill:rgba(220,38,38,.07);}
   .ag-svg .ag-b4{fill:rgba(22,163,74,.08);} .ag-svg .ag-b5{fill:rgba(22,163,74,.18);} .ag-svg .ag-b6{fill:rgba(22,163,74,.30);}
-  .ag-svg .ag-zero{stroke:var(--muted);stroke-width:.8;} .ag-svg .ag-turn{stroke:#2563eb;stroke-width:.7;stroke-dasharray:3 3;} .ag-svg .ag-tri{fill:none;stroke:#2563eb;stroke-width:1.2;}
+  .ag-svg .ag-zero{stroke:var(--muted);stroke-width:.8;} .ag-svg .ag-turn{stroke:#2563eb;stroke-width:.7;stroke-dasharray:3 3;} .ag-svg .ag-tri{fill:none;stroke:#2563eb;stroke-width:1.2;} .ag-svg .ag-tri.k12{fill:#2563eb;} .ag-svg .ag-lbl{font-weight:800;font-size:8.5px;fill:var(--text);}
   .ag-svg .ag-hi{fill:#dc2626;stroke:#fff;stroke-width:1;} .ag-svg .ag-curu{fill:#dc2626;stroke:#fff;stroke-width:1;} .ag-svg .ag-curd{fill:#16a34a;stroke:#fff;stroke-width:1;}
+  .ag-k12{display:inline-block;padding:0 6px;border-radius:6px;background:#2563eb;color:#fff;font-size:12px;font-weight:700;line-height:1.6;}   /* 2026-11-25 照老師：最後一次轉下彎同時是 12空 */
   .ag-box{margin:8px 0 4px;padding:8px 10px;border:1.5px solid #d4a017;border-radius:8px;background:rgba(250,204,21,.10);font-size:13px;line-height:1.7;}
   .ag-box .up{color:#dc2626;} .ag-box .down{color:#16a34a;} .bot-line.ag-row .up{color:#dc2626;} .bot-line.ag-row .down{color:#16a34a;} .ag-t{font-variant-numeric:tabular-nums;color:var(--muted);}
-  .b32-turn.up{background:#b91c1c;} .m200-back{font-size:10.5px;font-weight:800;color:#fff;background:#6b7280;border-radius:4px;padding:0 4px;margin-left:4px;} .dyn-turnbar{margin:2px 0 6px;} .dyn-turnbar .b777-p{font-size:12px;}
+  .b32-turn.up{background:#b91c1c;} .m200-back{font-size:10.5px;font-weight:800;color:#fff;background:#6b7280;border-radius:4px;padding:0 4px;margin-left:4px;white-space:nowrap;} .dyn-turnbar{margin:2px 0 6px;} .dyn-turnbar .b777-p{font-size:12px;}
   .b32-turn{display:inline-block;margin-left:5px;padding:0 4px;border-radius:4px;font-size:11px;font-weight:800;color:#fff;background:#0f766e;white-space:nowrap;}   /* 2026-11-24 5 分K 20MA 上揚轉下彎的時間 */
   .bot-line.bot-b32turn{padding:2px 0 4px;}
   /* 2026-10-19 使用者：刀劍空(32)、1️⃣2️⃣空(123)、空族群必殺(193) 都加「大戶力」（盤中大戶力％，跟訊號中心同一份）：
@@ -6664,6 +6665,7 @@ function chartAngSeries(bars){
     if (ok) ma[i] = sm / 20;
   }
   for (let i = MA20_TURN_LAG; i < n; i++){ const m = ma[i], m0 = ma[i - MA20_TURN_LAG]; if (m !== null && m0) ang[i] = angDeg((m / m0 - 1) * 100); }
+  ang.k12 = angK12Flags(bars, ma, ang);   // 轉下彎那根同時符合 12空（跟角度機器人同一套）
   currentChart.angCache = { bars, len: n, lastClose: last && last.close, ang };
   return ang;
 }
@@ -6708,13 +6710,17 @@ function drawAngPanel(){
   let started = false;
   ang.forEach((a, i) => { if (a === null){ started = false; return; } const x = xAt(i), y = yAt(a); if (!started){ ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y); });
   ctx.stroke();
-  // 轉彎：由正轉負＝轉下彎（綠▼，畫在線上方）、由負轉正＝轉上彎（紅▲，畫在線下方）；跟前一根比（畫面最左那根也跟畫面外的前一根比）
+  // 轉彎：由正轉負＝轉下彎（綠▼，畫在線上方；同時是 12空 實心、只有轉下彎空心，照老師）、由負轉正＝轉上彎（紅▲，畫在線下方）；
+  // 跟前一根比（畫面最左那根也跟畫面外的前一根比），每天開盤第一根（跟昨天比）不算，跟老師「今天第 N 次」一樣
+  const sameDayPrev = (gi) => gi > 0 && bars[gi - 1] && dayOf(bars[gi - 1]) === dayOf(bars[gi]);
   ang.forEach((a, i) => {
-    const p = angAll[vStart + i - 1];
-    if (a === null || p === null || p === undefined) return;
+    const gi = vStart + i, p = angAll[gi - 1];
+    if (a === null || p === null || p === undefined || !sameDayPrev(gi)) return;
     const x = xAt(i), y = yAt(a);
-    if (p >= 0 && a < 0){ ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.moveTo(x - 4, y - 9); ctx.lineTo(x + 4, y - 9); ctx.lineTo(x, y - 3); ctx.closePath(); ctx.fill(); }
-    else if (p < 0 && a >= 0){ ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(x - 4, y + 9); ctx.lineTo(x + 4, y + 9); ctx.lineTo(x, y + 3); ctx.closePath(); ctx.fill(); }
+    if (p >= 0 && a < 0){
+      ctx.beginPath(); ctx.moveTo(x - 4, y - 10); ctx.lineTo(x + 4, y - 10); ctx.lineTo(x, y - 3); ctx.closePath();
+      if (angAll.k12 && angAll.k12[gi]){ ctx.fillStyle = '#22c55e'; ctx.fill(); } else { ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 1.4; ctx.stroke(); }
+    } else if (p < 0 && a >= 0){ ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(x - 4, y + 9); ctx.lineTo(x + 4, y + 9); ctx.lineTo(x, y + 3); ctx.closePath(); ctx.fill(); }
   });
   const fmt = (a) => { const r = Math.round(a); return (r > 0 ? '+' : r === 0 && a < 0 ? '-' : '') + r + '°'; };
   const endHm = (b) => { const v = new Date(b.ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16); return v > '13:30' ? '13:30' : v; };
@@ -6729,10 +6735,10 @@ function drawAngPanel(){
   if (!hovering && txt){   // 沒滑的時候，順便寫最後一天最近一次轉彎
     const lastDay = dayOf(bars[bars.length - 1]);
     for (let i = angAll.length - 1; i > 0; i--){
-      if (dayOf(bars[i]) !== lastDay) break;
+      if (dayOf(bars[i - 1]) !== lastDay) break;   // 開盤第一根跟昨天比的不算
       const a = angAll[i], p = angAll[i - 1];
       if (a === null || p === null) continue;
-      if (p >= 0 && a < 0){ txt += '・' + endHm(bars[i]) + ' 轉下彎'; break; }
+      if (p >= 0 && a < 0){ txt += '・' + endHm(bars[i]) + ' 轉下彎' + (angAll.k12 && angAll.k12[i] ? '＋12空' : ''); break; }
       if (p < 0 && a >= 0){ txt += '・' + endHm(bars[i]) + ' 轉上彎'; break; }
     }
   }
@@ -10189,7 +10195,7 @@ function ma20Series(r5, m5, today){
   for (let i = 19 + MA20_TURN_LAG; i < all.length; i++){
     const d = ma(i) - ma(i - MA20_TURN_LAG);
     const nd = d < -1e-9 ? -1 : d > 1e-9 ? 1 : dir;
-    if (i >= first){ if (nd < 0 && dir > 0) dnI = i; if (nd > 0 && dir < 0) upI = i; }
+    if (i > first){ if (nd < 0 && dir > 0) dnI = i; if (nd > 0 && dir < 0) upI = i; }   // 開盤第一根（09:05 跟昨天比）不算轉彎：老師「今天第 N 次」、後端都從第二根起算
     dir = nd;
   }
   return { all, dir, dnI, upI, ma: all.length >= 20 ? ma(all.length - 1) : null, hm: (i) => new Date(all[i].ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16) };
@@ -19355,7 +19361,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-25 17:21:56';
+const BUILD_STAMP = '2026-11-25 18:05:02';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -30633,11 +30639,50 @@ function patSigNotify(events){
 // 分區照老師：≥60 噴出、30～60 攻擊、0～30 緩坡、0～−30 緩跌、−30～−60 急殺、≤−60 崩跌；角度由正轉負＝轉下彎（⚔️），由負轉正＝轉上彎。
 // 判讀：收盤（盤中現價）在 20MA 下、而且角度 < 0 ⇒ 偏空；在 20MA 上、角度 > 0 ⇒ 偏多；其他觀望。
 const ANG_K = 2.09, ANG_P = 1.22, ANG_LAG = MA20_TURN_LAG;
+// 2026-11-25 使用者貼老師 3189 景碩：轉下彎那根同時符合 12空 才標「⚔️1️⃣2️⃣空」（圖上實心▼），只轉下彎標「⚔️」（空心▽）。
+// 12空 條件跟後端機器人 123 同一套：今天最高曾衝高 ≥ 2.75%（比昨收）、今天從 20MA 上面收盤跌破（破惡）、之後反彈 2 不過 1高（破惡前 12 根的最高）、
+// 收在 20MA 下而且均20 下彎（角度 < 0）。對過老師 6213（今天沒衝高過昨收 ⇒ 09:35、13:05 只有 ⚔️）、3189（09:50、13:05 都是 ⚔️1️⃣2️⃣空）都對。
+const ANG_K12_RUSH = 2.75, ANG_K12_PRE = 12;
+function angK12Flags(bars, ma, ang){
+  const n = bars.length, out = new Array(n).fill(false);
+  const dOf = (b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10);
+  let day = null, ref = null, dayHi = -Infinity, highs = [], h1 = null, h2 = null;
+  for (let i = 0; i < n; i++){
+    const b = bars[i], d = dOf(b);
+    if (d !== day){ day = d; ref = i > 0 ? bars[i - 1].close : null; dayHi = -Infinity; highs = []; h1 = h2 = null; }
+    const hi = Number.isFinite(b.high) ? b.high : b.close;
+    dayHi = Math.max(dayHi, hi); highs.push(hi);
+    const m = ma[i], mp = i > 0 ? ma[i - 1] : null;
+    const wasAbove = i > 0 && mp !== null && bars[i - 1].close >= mp;
+    if (m === null || b.close >= m) h1 = h2 = null;                                   // 站回 20MA 上：這次破惡作廢
+    else if (h1 === null){ if (wasAbove){ h1 = Math.max(...highs.slice(-ANG_K12_PRE)); h2 = null; } }   // 從上面收盤跌破＝破惡，1高＝破惡前 12 根最高
+    else h2 = h2 === null ? hi : Math.max(h2, hi);
+    if (h1 !== null && h2 !== null && h2 > h1) h1 = h2 = null;                       // 反彈過了 1高：不算，要再跌破
+    const rushed = ref > 0 && (dayHi / ref - 1) * 100 >= ANG_K12_RUSH;
+    out[i] = !!(rushed && h1 !== null && m !== null && b.close < m && ang[i] !== null && ang[i] < 0);
+  }
+  return out;
+}
 function angDeg(x){ return Math.sign(x) * Math.atan(ANG_K * Math.pow(Math.abs(x), ANG_P)) * 180 / Math.PI; }
 function angLabel(a){ return a >= 60 ? '噴出' : a >= 30 ? '攻擊' : a >= 0 ? '緩坡' : a > -30 ? '緩跌' : a > -60 ? '急殺' : '崩跌'; }
+const ANG_PENDING = new Map();   // 代號 → 已經快速重抓幾次（後端歷史還在補）
 function angModel(code){
-  const r5 = botFetchCache('ang5|' + code, '/api/bars5range/' + code, twLiveSession() ? 60e3 : 1800e3);
+  const key = 'ang5|' + code, ttl = twLiveSession() ? 60e3 : 1800e3;
+  // 重抓時加 fresh=1：略過網頁本身「同網址 60 秒內用快取」那層，不然拿到的還是剛剛那份空的
+  const r5 = botFetchCache(key, '/api/bars5range/' + code + (ANG_PENDING.has(code) ? '?fresh=1' : ''), ttl);
   if (!r5) return null;
+  // 剛被追蹤的股票：後端歷史還在回補（history_ok=false、0 根），不能當成「查不到」快取 30 分鐘——5 秒後自動重抓，最多 12 次（2026-11-25 2466 第一次問就碰到）
+  if (r5.status === 'ok' && (!Array.isArray(r5.bars) || r5.bars.length < 24) && r5.bootstrap && r5.bootstrap.history_ok === false){
+    const e = botState.cache[key], tries = ANG_PENDING.get(code) || 0;
+    if (tries >= 12) return { pending: true, slow: true };
+    if (e && !e.loading && !e.retryT){
+      ANG_PENDING.set(code, tries + 1);
+      e.at = Date.now() - ttl + 5000;
+      e.retryT = setTimeout(() => { try { botRerunCols(); } catch (_){} try { render(); } catch (_){} }, 5500);
+    }
+    return { pending: true };
+  }
+  ANG_PENDING.delete(code);
   if (r5.status !== 'ok' || !Array.isArray(r5.bars) || !r5.bars.length) return { error: true };
   const dOf = (b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10);
   const all = r5.bars.filter((b) => Number.isFinite(b.close)).slice().sort((a, b) => a.ts - b.ts);
@@ -30648,11 +30693,11 @@ function angModel(code){
   const cl = all.map((b) => b.close);
   const ma = (i) => { if (i < 19) return null; let sm = 0; for (let k = i - 19; k <= i; k++) sm += cl[k]; return sm / 20; };
   const endHm = (b) => { const v = new Date(b.ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16); return v > '13:30' ? '13:30' : v; };
+  const maA = all.map((_, i) => ma(i));
+  const angA = maA.map((m, i) => { const m0 = i >= ANG_LAG ? maA[i - ANG_LAG] : null; return m !== null && m0 ? angDeg((m / m0 - 1) * 100) : null; });
+  const k12A = angK12Flags(all, maA, angA);
   const pts = [];
-  for (let i = first; i < all.length; i++){
-    const m = ma(i), m0 = ma(i - ANG_LAG);
-    pts.push({ i: i - first, t: endHm(all[i]), bar: all[i], ma: m, ang: m !== null && m0 ? angDeg((m / m0 - 1) * 100) : null });
-  }
+  for (let i = first; i < all.length; i++) pts.push({ i: i - first, t: endHm(all[i]), bar: all[i], ma: maA[i], ang: angA[i], k12: k12A[i] });
   const valid = pts.filter((p) => p.ang !== null);
   if (!valid.length) return { error: true, few: true };
   const turns = [];
@@ -30697,10 +30742,16 @@ function angChartSvg(m){
   const aPts = m.valid.map((p) => x(p.i).toFixed(1) + ',' + ay(p.ang).toFixed(1)).join(' ');
   g += '<polyline points="' + aPts + '" class="ag-line"/>';
   m.turns.filter((t) => t.dir === 'down').forEach((t) => { const cx = x(t.p.i).toFixed(1);
-    g += '<line x1="' + cx + '" x2="' + cx + '" y1="' + P0 + '" y2="' + A1 + '" class="ag-turn"/><path d="M' + (x(t.p.i) - 4).toFixed(1) + ',' + (ay(t.p.ang) - 8).toFixed(1) + ' h8 l-4,7 z" class="ag-tri"/>' +
+    g += '<line x1="' + cx + '" x2="' + cx + '" y1="' + P0 + '" y2="' + A1 + '" class="ag-turn"/><path d="M' + (x(t.p.i) - 4).toFixed(1) + ',' + (ay(t.p.ang) - 8).toFixed(1) + ' h8 l-4,7 z" class="ag-tri' + (t.p.k12 ? ' k12' : '') + '"/>' +
       '<text x="' + cx + '" y="' + (A1 + 12) + '" class="ag-ax ag-tt" text-anchor="middle">' + t.p.t + '</text>'; });
   g += '<circle cx="' + x(m.hiP.i).toFixed(1) + '" cy="' + ay(m.hiP.ang).toFixed(1) + '" r="3" class="ag-hi"/>';
   g += '<circle cx="' + x(m.cur.i).toFixed(1) + '" cy="' + ay(m.cur.ang).toFixed(1) + '" r="3.5" class="' + (m.cur.ang >= 0 ? 'ag-curu' : 'ag-curd') + '"/>';
+  // 照老師：最高那點、現在那點旁邊寫角度
+  const fa = (a) => { const r = Math.round(a); return (r > 0 ? '+' : r === 0 && a < 0 ? '-' : '') + r + '°'; };
+  const hx = Math.max(L + 28, Math.min(R - 28, x(m.hiP.i))), hy = ay(m.hiP.ang) + (m.hiP.ang > 60 ? 13 : -6);
+  if (m.hiP !== m.cur) g += '<text x="' + hx.toFixed(1) + '" y="' + hy.toFixed(1) + '" class="ag-ax ag-lbl" text-anchor="middle">最高 ' + fa(m.hiP.ang) + '</text>';
+  const cy = ay(m.cur.ang) + (m.cur.ang < -60 ? -7 : 13);
+  g += '<text x="' + (x(m.cur.i) - 4).toFixed(1) + '" y="' + cy.toFixed(1) + '" class="ag-ax ag-lbl" text-anchor="end">現在 ' + fa(m.cur.ang) + '</text>';
   ['09:00', '10:00', '11:00', '12:00', '13:30'].forEach((t) => { const k = t === '13:30' ? n - 1 : (Number(t.slice(0, 2)) - 9) * 12; g += '<text x="' + x(k).toFixed(1) + '" y="' + (A1 + 24) + '" class="ag-ax" text-anchor="middle">' + t + '</text>'; });
   return '<svg class="ag-svg" viewBox="0 0 ' + W + ' ' + (A1 + 28) + '" role="img" aria-label="5 分K、20MA 與均20 角度">' + g + '</svg>';
 }
@@ -30709,6 +30760,7 @@ function angBotHtml(code, wrap){
   const t = '📐角度(' + code + '123)';
   const m = angModel(code);
   if (!m) return wrap(t, botLine('讀取中…', 'bot-dim'));
+  if (m.pending) return wrap(t, botLine(m.slow ? '後端還在補 ' + code + ' 前幾天的 5 分K，等一下再問一次' : '後端正在補 ' + code + ' 前幾天的 5 分K，幾秒後自動重抓…', 'bot-dim'));
   if (m.error) return wrap(t, botLine(m.few ? '今天的 5 分K 還不夠算角度（要 20MA 跟 3 根前比）' : '查不到 ' + code + ' 的 5 分K（族群表外的股票可能沒有）', 'bot-dim'));
   const f = (a) => { const r = Math.round(a); return (r > 0 ? '+' : r === 0 && a < 0 ? '-' : '') + r + '°'; };   // −0.4 顯示「-0°」，看得出是往下
   const below = m.ma !== null && m.close < m.ma, down = m.cur.ang < 0;
@@ -30727,16 +30779,12 @@ function angBotHtml(code, wrap){
   } catch (_){}
   const downs = m.turns.filter((x) => x.dir === 'down');
   const lastDown = downs.length ? downs[downs.length - 1] : null;
-  // 1️⃣2️⃣空：今天在 123 名單上的，標在進榜那根
-  let k12T = '';
-  try { const k = botState.cache.kill12 && botState.cache.kill12.data; const it = k && (k.items || []).find((x) => x.code === code); if (it && it.since) k12T = new Date(it.since + 8 * 3600e3).toISOString().slice(11, 16); } catch (_){}
   // 角度走勢：09:15、09:30，之後每半小時，加上轉下彎（⚔️）、最高、現在
   const rows = new Map();
   const put = (p, tag) => { const r = rows.get(p.t) || { p, tags: [] }; if (tag && !r.tags.includes(tag)) r.tags.push(tag); rows.set(p.t, r); };
   m.valid.forEach((p) => { if (p.t === '09:15' || p.t.slice(3) === '00' || p.t.slice(3) === '30') put(p); });
-  downs.forEach((x) => put(x.p, '⚔️'));
+  downs.forEach((x) => put(x.p, x.p.k12 ? '⚔️1️⃣2️⃣空' : '⚔️'));   // 轉下彎同時符合 12空 ⇒ ⚔️1️⃣2️⃣空（照老師）
   put(m.hiP, '最高');
-  if (k12T){ const p = m.valid.find((q2) => q2.t >= k12T); if (p) put(p, '1️⃣2️⃣空'); }
   put(m.cur, '⬅現在');
   const list = [...rows.values()].sort((a, b) => (a.p.t < b.p.t ? -1 : 1));
   const stamp = m.day.slice(5).replace('-', '/') + ' ' + (m.live ? m.cur.t + ' 即時' : '13:30收');
@@ -30747,11 +30795,11 @@ function angBotHtml(code, wrap){
     '<div>收 ' + m.close + ' ／ 均20 ' + (m.ma !== null ? m.ma.toFixed(2) : '—') + ' ' + (below ? '線下' : '線上') + '</div>' +
     '<div>跌破均20 ' + (below ? '✅' : '❌') + '・均20 下彎 ' + (down ? '✅' : '❌') + ' ⇒ <b class="' + vCls + '">' + verdict + '</b>（現在 ' + f(m.cur.ang) + ' ' + angLabel(m.cur.ang) + '）</div>' +
     '<div>最高 ' + f(m.hiP.ang) + ' ' + angLabel(m.hiP.ang) + '（' + m.hiP.t + '）・最低 ' + f(m.loP.ang) + ' ' + angLabel(m.loP.ang) + '（' + m.loP.t + '）</div>' +
-    (lastDown ? '<div>' + lastDown.p.t + ' 轉下彎（今天第 ' + downs.length + ' 次）</div>' : '<div class="bot-dim">今天還沒轉下彎</div>') + '</div>';
-  const chart = '<div class="bot-chart bc-show"><div class="ag-legend"><span>5 分K</span><span class="ag-lma">━ 均20</span><span class="ag-lang">━ 均20 角度</span><span>▽ 轉下彎</span></div>' + angChartSvg(m) + '</div>';
+    (lastDown ? '<div>' + (lastDown.p.k12 ? '<span class="ag-k12">12空</span> ' : '') + lastDown.p.t + ' 轉下彎（今天第 ' + downs.length + ' 次）</div>' : '<div class="bot-dim">今天還沒轉下彎</div>') + '</div>';
+  const chart = '<div class="bot-chart bc-show"><div class="ag-legend"><span>5 分K</span><span class="ag-lma">━ 均20</span><span class="ag-lang">━ 均20 角度</span><span>▼ 轉下彎＋12空</span><span>▽ 轉下彎</span></div>' + angChartSvg(m) + '</div>';
   const trend = botLine('-----角度走勢-----', 'bot-sep') + list.map((r) => botLine('<span class="ag-t">' + r.p.t + '</span> <b class="' + (r.p.ang >= 0 ? 'up' : 'down') + '">' + f(r.p.ang) + '</b> ' + r.tags.join(' '), 'ag-row')).join('');
   return wrap(t, head + chart + box + trend +
-    botLine('角度＝5 分K 20MA 的斜率（20MA 跟 3 根前比漲跌幾 %，換成角度；開盤接前一天的 5 分K）。≥60 噴出、30～60 攻擊、0～30 緩坡、0～−30 緩跌、−30～−60 急殺、≤−60 崩跌；角度由正轉負＝轉下彎（⚔️）。算法照老師 6213 聯茂 11/25 那份調的，之後有更多樣本再校正。', 'bot-dim'), stamp);
+    botLine('角度＝5 分K 20MA 的斜率（20MA 跟 3 根前比漲跌幾 %，換成角度；開盤接前一天的 5 分K）。≥60 噴出、30～60 攻擊、0～30 緩坡、0～−30 緩跌、−30～−60 急殺、≤−60 崩跌；角度由正轉負＝轉下彎（⚔️，開盤第一根跟昨天比的不算），同時符合 12空（今天衝高過 2.75%、跌破 20MA、反彈不過 1高）標 ⚔️1️⃣2️⃣空。算法照老師 6213 聯茂、3189 景碩 11/25 兩份調的（平均差 1.5 度）。', 'bot-dim'), stamp);
 }
 // ---- 均20 轉彎(200)（2026-11-24 使用者：5 分K 20MA 原本往上、轉成向下，跟原本向下、轉成向上，做成一個機器人，可以切換向上／向下，盤中也要跳出來）----
 // 資料：後端盤中 5 分K 引擎對全部族群股發的「20MA轉下彎／20MA轉上彎」事件（/api/intraday-signals?kind=…，MA20 開盤接前一天的 5 分K，
@@ -30785,10 +30833,11 @@ function m200Events(){
   const rows = [];
   byCode.forEach((x) => {
     x.ev.sort((a, b) => a.ts - b.ts);
-    const cur = x.ev[x.ev.length - 1].dir;
+    const last = x.ev[x.ev.length - 1], cur = last.dir;
     ['down', 'up'].forEach((dir) => {
       const first = x.ev.find((e) => e.dir === dir);
-      if (first) rows.push({ code: x.code, name: x.name, group: x.group, dir, ts: first.ts, t: endHm(first.ts), cur, price: first.price });
+      // 2026-11-25 使用者：「已轉回」也要寫幾點轉回的——最後一次轉彎（轉回現在這個方向）那根的時間
+      if (first) rows.push({ code: x.code, name: x.name, group: x.group, dir, ts: first.ts, t: endHm(first.ts), cur, backT: cur !== dir ? endHm(last.ts) : null, price: first.price });
     });
   });
   return { rows, date: today };
@@ -30811,7 +30860,7 @@ function ma200BotHtml(wrap){
     return '<div class="b32-row bh" data-bot-code="' + wlEsc(r.code) + '" data-bot-name="' + wlEsc(r.name) + '">' +
       '<span class="b32-time">' + r.t + '</span>' +
       '<span class="b32-stk"><span class="bot-stk">' + wlEsc(r.code) + ' ' + wlEsc(r.name) + '</span>' + dtWarnHtml(r.code, true) + '</span>' +
-      '<span class="b32-grp">' + wlEsc(r.group || '') + (gr ? '・' + gr : '') + (r.cur !== r.dir ? ' <span class="m200-back" title="之後又轉回' + (r.cur === 'up' ? '上揚' : '下彎') + '（一天只列一次，不再重複出現）">已轉回</span>' : '') + '</span>' +
+      '<span class="b32-grp">' + wlEsc(r.group || '') + (gr ? '・' + gr : '') + (r.cur !== r.dir ? ' <span class="m200-back" title="' + (r.backT ? r.backT + ' ' : '之後') + '又轉回' + (r.cur === 'up' ? '上揚' : '下彎') + '（一天只列一次，不再重複出現）">' + (r.backT ? r.backT + ' ' : '') + '已轉回</span>' : '') + '</span>' +
       '<span class="b32-pct ' + (pct !== null ? dirClass(pct) : '') + '">' + (pct !== null ? botPct(pct) : '—') + '</span>' +
       '<span class="b32-h">' + holderTagHtml(holderPctOf(r.code), true, true, r.code) + '</span></div>';
   };
@@ -30819,7 +30868,7 @@ function ma200BotHtml(wrap){
   return wrap(t, btns + botLine('今天轉下彎過 ' + nD + ' 檔・轉上彎過 ' + nU + ' 檔（族群股，一檔一個方向一天只算一次）', 'bot-dim') +
     (list.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + list.map(row).join('') : botLine('目前沒有', 'bot-dim')) +
     botLine('5 分K 20MA（20 根收盤平均，開盤接前一天的；跟 3 根前比，照老師角度機器人：角度由正轉負＝轉下彎）' + (M200.dir === 'down' ? '原本上揚、轉成下彎' : '原本下彎、轉成上揚') +
-      '的族群股；一檔一天只列一次（今天第一次轉的時間），盤中反覆轉彎不再重複出現，之後又轉回去的標「已轉回」；最近轉的在上面。盤中跳出提醒跟著這裡選的方向（最上排「📐 200 均20轉彎提醒」可以單獨關）。', 'bot-dim'),
+      '的族群股；一檔一天只列一次（今天第一次轉的時間），盤中反覆轉彎不再重複出現，之後又轉回去的標「幾點已轉回」（最後一次轉回的時間）；最近轉的在上面。盤中跳出提醒跟著這裡選的方向（最上排「📐 200 均20轉彎提醒」可以單獨關）。', 'bot-dim'),
     (lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') : '') + '・' + list.length + ' 檔' + (M200.hold ? '（' + (M200.hold === 'neg' ? '大戶力 ≤ −10%' : '大戶力 ≥ +10%') + '，共 ' + list0.length + ' 檔）' : ''));
 }
 document.addEventListener('click', (e) => {
