@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-25 20:32:23";
+const BUILD_STAMP = "2026-11-25 20:48:09";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -10213,7 +10213,7 @@ function ma20Series(r5, m5, today){
 function ma20TurnOf(code){
   if (!GROUP_CODE_SET.has(code)) return { outside: true, down: false, up: false, turn: null, upTurn: null, ma: null };
   const today = twTodayStr(), live = twLiveSession();
-  const r5 = tdJ('m5r|' + code, '/api/bars5range/' + code, 1800e3);
+  const r5 = tdJ('m5r|' + code, '/api/bars5range/' + code, live ? 6 * 3600e3 : 1800e3);   // 盤中只用前幾天的（今天的用 /api/bars），不會變：6 小時才重抓
   // 省請求數：盤中現價跟「下一根會移出 20 根窗口的那根收盤」比，跟現在均線方向同一邊（看起來不會轉彎）就 15 分鐘才重抓今天的 5 分K，
   // 不同邊（可能要轉彎了）照舊 3 分鐘
   let ttl = live ? 180e3 : 1800e3;
@@ -11767,10 +11767,10 @@ function homeTrkColHtml(){
   const all = trkAllCodes();
   if (!all.size) return '<div class="hr-col">' + title() + '<div class="hr-note">自選股還沒有股票（下方導覽列「自選股」加）</div></div>';
   const live = twLiveSession();
-  if (live || !brewHistoryData){ try { refreshBrewHistory(false); } catch (_){} }
+  if (!brewHistoryData || (live && Date.now() - brewHistoryFetchedAt > 180e3)){ try { refreshBrewHistory(false); } catch (_){} }   // 盤中 3 分鐘補一次發動紀錄（省請求數）
   const sel = trkSelGroups(), codes = trkCodesInView(), muted = trkMutedSet();
   const tracked = new Set([...codes].filter((c) => !muted.has(c)));
-  if ([...tracked].some((c) => !WL_GROUP_INDEX[c]) && Date.now() - homeTrkExtraAt > (live ? 60e3 : 1800e3)){ homeTrkExtraAt = Date.now(); try { wlFetchExtra(true); } catch (_){} }
+  if ([...tracked].some((c) => !WL_GROUP_INDEX[c]) && Date.now() - homeTrkExtraAt > (live ? 180e3 : 6 * 3600e3)){ homeTrkExtraAt = Date.now(); try { wlFetchExtra(true); } catch (_){} }
   const grps = '<div class="htk-grps"><button type="button" class="b777-p' + (!sel.length ? ' on' : '') + '" data-htk-grp="*" title="全部自選股（清掉選的）">全部</button>' +
     wl.data.groups.map((g) => { const on = trk.groups.has(String(g.id)); return '<button type="button" class="b777-p' + (on ? ' on' : '') + '" data-htk-grp="' + wlEsc(g.id) + '" title="' + (on ? '再按一下拿掉這組' : '按一下加入這組（可以多選）') + '">' + (on ? '✓ ' : '') + wlEsc(g.name) + ' ' + g.items.length + '</button>'; }).join('') + '</div>';
   const quotes = wlQuoteMap(), holders = wlHolderMap();
@@ -19465,7 +19465,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-25 20:32:23';
+const BUILD_STAMP = '2026-11-25 20:48:09';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -22541,9 +22541,22 @@ function tdStopCodes(){ return Array.from(new Set(mineGroups().flatMap((g) => g.
 const tdSaveB905 = () => { try { localStorage.setItem('tdB905', JSON.stringify(tdB905)); } catch (_) { /* 存不了就算了 */ } };
 const tdJCache = {};
 let tdJTimer = 0, tdSigTimer = 0, tdHomeAsked = 0;
+// 2026-11-25 Cloudflare 一天 10 萬次又用完（錯誤 1027，晚上 8:45）：首頁 32／777／999／123／193／260／270 每列的「均20 轉彎」標籤每檔要抓 2 支 K 棒，
+// 收盤後資料已經不會變，卻每 30 分鐘全部重抓（一個開著的分頁一小時上千次）。改成：最近一次收盤校正（平日 14:30）之後抓到的，留到下一個盤中（08:25）才重抓。
+function tdSettleTs(){   // 最近一個平日 14:30（台灣時間）的時間戳，週末往前找到週五
+  const now = Date.now(), tw = new Date(now + 8 * 3600e3);
+  let t = Date.UTC(tw.getUTCFullYear(), tw.getUTCMonth(), tw.getUTCDate(), 14, 30) - 8 * 3600e3;
+  for (let i = 0; i < 7; i++){
+    const wd = new Date(t + 8 * 3600e3).getUTCDay();
+    if (t <= now && wd >= 1 && wd <= 5) return t;
+    t -= 86400e3;
+  }
+  return t;
+}
+function tdQuietFresh(e){ return !!(e && !e.loading && e.data && e.data.status === 'ok' && !twLiveSession() && e.at >= tdSettleTs()); }
 function tdJ(key, url, ttl){
   const e = tdJCache[key];
-  if (e && (e.loading || Date.now() - e.at < ttl)) return e.data;
+  if (e && (e.loading || Date.now() - e.at < ttl || tdQuietFresh(e))) return e.data;
   const fails = e && e.fails ? e.fails : 0;
   tdJCache[key] = { loading: true, at: Date.now(), data: e ? e.data : null, fails };
   // 讀失敗的 15 秒後再試，不要壓整個快取時間；2026-11-23 省請求數：一直失敗（一直回空的）就 15→30→60→120→240 秒、最多 5 分鐘再試
@@ -27330,6 +27343,9 @@ const dtWarnNote = (bear) => '<span class="dt-warn">' + dtWarnSvg(bear) + '</spa
 function botFetchCache(key, url, ttl){
   const c = botState.cache;
   const e = c[key];
+  // 2026-11-25 省請求數：不是盤中（08:25～13:40 以外）最少 30 分鐘才重抓（首頁幾個機器人欄原本收盤後還 15～60 秒抓一次，例如 12空 名單 15 秒）；
+  // 晚上才公布的資料（法人、融資）一樣抓得到，只是最晚慢 30 分鐘
+  if (!twLiveSession() && ttl < 1800e3) ttl = 1800e3;
   if (e && (e.loading || Date.now() - e.at < ttl)) return e.data;
   c[key] = { loading: true, at: Date.now(), data: e ? e.data : null };
   const done = () => { botRerunCols(); try { dynRerender(); } catch (_){} try { wgRerun(); } catch (_){} try { chartDaytradeTagRefresh(); } catch (_){} clearTimeout(dtRenderTimer); dtRenderTimer = setTimeout(() => { try { render(); } catch (_){} }, 400); };   // 首頁 813／80／75 欄也要重畫
