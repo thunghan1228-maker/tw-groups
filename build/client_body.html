@@ -20483,6 +20483,7 @@ function render(){
     '</div>';
   { const sc = document.querySelector('.home-rank-scroll'); if (sc && hxLeft) sc.scrollLeft = hxLeft;
     try { homeNowScrollRestore(hnowSaved); } catch (_){}
+    try { homePosTryRestore(); } catch (_){}   // 2026-11-25 打開網頁回到上次停的地方
     const qi = document.getElementById('hxQ'); if (qi){ qi.value = hxVal; if (hxFocus){ qi.focus(); try { qi.setSelectionRange(hxVal.length, hxVal.length); } catch (_){} } } }
   // #updatedAt文字由refresh()統一負責(要能反映抓資料成功/失敗、是否過期)，
   // 這裡不再重複覆蓋——舊版這裡不管資料是真的還是demo都硬寫死「模擬資料」，
@@ -20679,6 +20680,41 @@ document.getElementById('app').addEventListener('click', (e) => {
   const groupEl = e.target.closest('[data-group]');
   if (groupEl) openGroupDetail(groupEl.dataset.group);
 });
+// ---- 首頁停在哪裡記起來（2026-11-25 使用者：最後一次關掉時畫面停在哪，下次打開就回到那裡，不用再移）----
+// 記兩個：首頁那一排左右捲到哪（.home-rank-scroll scrollLeft）、整頁上下捲到哪（window.scrollY），存在這台瀏覽器（localStorage homePos）。
+// 打開網頁時欄位是陸續載入的（寬度、高度會變），所以前幾次重畫都試著放回去，放到了才算；放回去之前不記（免得還在載入時把 0 存進去）；
+// 使用者自己先動了（滾輪、拖、按鍵、點）就不再幫他放。浮動 K 線圖、機器人小視窗那些不做。
+const HOME_POS_KEY = 'homePos';
+const homePos = { restored: false, tries: 0, t0: Date.now(), saveT: 0,
+  saved: (() => { try { const v = JSON.parse(localStorage.getItem(HOME_POS_KEY) || 'null'); return v && Number.isFinite(v.x) && Number.isFinite(v.y) ? v : null; } catch (_){ return null; } })() };
+function homePosSkip(){ return CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || document.body.classList.contains('chart-window-mode') || botWindowMode() || sgtWindowMode(); }
+function homePosSave(){
+  if (!homePos.restored || homePosSkip()) return;
+  clearTimeout(homePos.saveT);
+  homePos.saveT = setTimeout(() => {
+    const sc = document.querySelector('.home-rank-scroll');
+    try { localStorage.setItem(HOME_POS_KEY, JSON.stringify({ x: sc ? Math.round(sc.scrollLeft) : 0, y: Math.round(window.scrollY) })); } catch (_){}
+  }, 300);
+}
+function homePosTryRestore(){   // render() 每次畫完首頁叫一次
+  if (homePos.restored) return;
+  if (homePosSkip()){ homePos.restored = true; return; }
+  const v = homePos.saved, sc = document.querySelector('.home-rank-scroll');
+  if (!v || (!v.x && !v.y)){ homePos.restored = true; return; }
+  if (!sc) return;
+  homePos.tries += 1;
+  if (v.x && sc.scrollWidth - sc.clientWidth >= v.x - 2) sc.scrollLeft = v.x;
+  const maxY = document.documentElement.scrollHeight - window.innerHeight;
+  if (v.y && maxY >= v.y - 2) window.scrollTo(0, v.y);
+  const okX = !v.x || Math.abs(sc.scrollLeft - v.x) < 3, okY = !v.y || Math.abs(window.scrollY - v.y) < 3;
+  if ((okX && okY) || homePos.tries > 40 || Date.now() - homePos.t0 > 60e3) homePos.restored = true;   // 放到了；或等了一分鐘還放不到（欄位變少了）就算了
+}
+// 使用者自己捲了（滾輪、手指滑、方向鍵／翻頁鍵、按住首頁那排拖）就不再幫他放；點別的（例如關掉早上自動跳的今日提醒）不算
+['wheel', 'touchmove'].forEach((ev) => window.addEventListener(ev, () => { homePos.restored = true; }, { capture: true, passive: true }));
+window.addEventListener('keydown', (e) => { if (/^(Arrow|Page|Home$|End$| $)/.test(e.key) && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) homePos.restored = true; }, true);
+window.addEventListener('pointerdown', (e) => { if (e.target && e.target.closest && e.target.closest('.home-rank-scroll')) homePos.restored = true; }, true);
+document.addEventListener('scroll', (e) => { if (e.target === document || (e.target && e.target.classList && e.target.classList.contains('home-rank-scroll'))) homePosSave(); }, true);
+window.addEventListener('pagehide', () => { if (homePos.restored && !homePosSkip()){ const sc = document.querySelector('.home-rank-scroll'); try { localStorage.setItem(HOME_POS_KEY, JSON.stringify({ x: sc ? Math.round(sc.scrollLeft) : 0, y: Math.round(window.scrollY) })); } catch (_){} } });
 // 首頁欄位左右拖（滑鼠按住拖，跟機器人格子一樣；拖超過 5px 這次放開不算點擊）
 let homePan = null, homePanSwallow = false;
 document.getElementById('app').addEventListener('pointerdown', (e) => {
