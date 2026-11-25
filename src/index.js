@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-25 21:07:20";
+const BUILD_STAMP = "2026-11-25 21:10:27";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -5133,10 +5133,11 @@ function getStockQuote(code){
 const DEFAULT_MA_COLORS = ['#1a7fe8', '#1fd83a', '#b48ee0', '#e0c458', '#6fd0c4'];
 // 2026-10-18 使用者（5分鐘截圖）：第一條均線（MA5）藍色 2px、第二條（MA20；1分鐘是 MA25）綠色 2.5px，VWAP 黃色 3px；日線、5分、1分都一樣
 const DEFAULT_MA_WIDTHS = [2, 2.5, 1.5, 1.5, 1.5];
+const MA10_COLOR = '#f08a24';   // 2026-11-25 日線加的 10MA：橘色（跟 5 藍、20 綠、60 紫、120 黃、240 青分得開）
 const VWAP_COLOR = '#f2c94c';
 const PAD = { left: 8, right: 54 };
 const TF_CONFIG = {
-  daily: { label: '日線', maPeriods: [5, 20, 60, 120, 240], bars: 180, vwap: false, force: true },
+  daily: { label: '日線', maPeriods: [5, 10, 20, 60, 120, 240], bars: 180, vwap: false, force: true },   // 2026-11-25 使用者：日線多一條 10MA
   m5:    { label: '5分鐘', maPeriods: [5, 20], bars: 120, vwap: true, force: true },
   m1:    { label: '1分鐘', maPeriods: [5, 25, 100], bars: 150, vwap: true, force: true },
 };
@@ -5724,7 +5725,7 @@ function updateChartInfoBar(bars, index){
 // 時間軸下方畫跟那條均線同色的向上三角形，均線標示那一列寫扣底值（那一根的收盤）。均線關掉就不畫。
 function chartDeductMarks(allBars){
   const n = allBars ? allBars.length : 0;
-  return currentChart.maLines.slice(0, 2).filter((ma) => ma.on).map((ma) => {
+  return currentChart.maLines.filter((ma) => !ma.noDeduct).slice(0, 2).filter((ma) => ma.on).map((ma) => {
     const idx = n - 1 - ma.period;
     return idx >= 0 ? { period: ma.period, color: ma.color, idx, close: allBars[idx].close } : null;
   }).filter(Boolean);
@@ -7415,9 +7416,12 @@ async function switchTimeframe(tf){
   currentChart.tf = tf;
   document.querySelectorAll('.chart-tab').forEach((btn) => btn.classList.toggle('active', btn.dataset.tf === tf));
   const cfg = TF_CONFIG[tf];
-  currentChart.maLines = cfg.maPeriods.map((p, idx) => ({
-    period: p, color: DEFAULT_MA_COLORS[idx % DEFAULT_MA_COLORS.length], width: DEFAULT_MA_WIDTHS[idx] || 1.5, on: true,
-  }));
+  currentChart.maLines = cfg.maPeriods.map((p, idx) => {
+    // 日線的 10MA 插在第二條：其他幾條照原本的顏色、粗細（20MA 一樣綠色 2.5px）；扣底照舊看 5MA、20MA，不算 10MA
+    if (tf === 'daily' && p === 10) return { period: 10, color: MA10_COLOR, width: 1.5, on: true, noDeduct: true };
+    const j = tf === 'daily' && idx > 1 ? idx - 1 : idx;
+    return { period: p, color: DEFAULT_MA_COLORS[j % DEFAULT_MA_COLORS.length], width: DEFAULT_MA_WIDTHS[j] || 1.5, on: true };
+  });
   currentChart.vwapOn = !!cfg.vwap;
   currentChart.vwapColor = VWAP_COLOR;
   currentChart.vwapWidth = 3;
@@ -19468,7 +19472,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-25 21:07:20';
+const BUILD_STAMP = '2026-11-25 21:10:27';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

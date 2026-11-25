@@ -5044,10 +5044,11 @@ function getStockQuote(code){
 const DEFAULT_MA_COLORS = ['#1a7fe8', '#1fd83a', '#b48ee0', '#e0c458', '#6fd0c4'];
 // 2026-10-18 使用者（5分鐘截圖）：第一條均線（MA5）藍色 2px、第二條（MA20；1分鐘是 MA25）綠色 2.5px，VWAP 黃色 3px；日線、5分、1分都一樣
 const DEFAULT_MA_WIDTHS = [2, 2.5, 1.5, 1.5, 1.5];
+const MA10_COLOR = '#f08a24';   // 2026-11-25 日線加的 10MA：橘色（跟 5 藍、20 綠、60 紫、120 黃、240 青分得開）
 const VWAP_COLOR = '#f2c94c';
 const PAD = { left: 8, right: 54 };
 const TF_CONFIG = {
-  daily: { label: '日線', maPeriods: [5, 20, 60, 120, 240], bars: 180, vwap: false, force: true },
+  daily: { label: '日線', maPeriods: [5, 10, 20, 60, 120, 240], bars: 180, vwap: false, force: true },   // 2026-11-25 使用者：日線多一條 10MA
   m5:    { label: '5分鐘', maPeriods: [5, 20], bars: 120, vwap: true, force: true },
   m1:    { label: '1分鐘', maPeriods: [5, 25, 100], bars: 150, vwap: true, force: true },
 };
@@ -5635,7 +5636,7 @@ function updateChartInfoBar(bars, index){
 // 時間軸下方畫跟那條均線同色的向上三角形，均線標示那一列寫扣底值（那一根的收盤）。均線關掉就不畫。
 function chartDeductMarks(allBars){
   const n = allBars ? allBars.length : 0;
-  return currentChart.maLines.slice(0, 2).filter((ma) => ma.on).map((ma) => {
+  return currentChart.maLines.filter((ma) => !ma.noDeduct).slice(0, 2).filter((ma) => ma.on).map((ma) => {
     const idx = n - 1 - ma.period;
     return idx >= 0 ? { period: ma.period, color: ma.color, idx, close: allBars[idx].close } : null;
   }).filter(Boolean);
@@ -7326,9 +7327,12 @@ async function switchTimeframe(tf){
   currentChart.tf = tf;
   document.querySelectorAll('.chart-tab').forEach((btn) => btn.classList.toggle('active', btn.dataset.tf === tf));
   const cfg = TF_CONFIG[tf];
-  currentChart.maLines = cfg.maPeriods.map((p, idx) => ({
-    period: p, color: DEFAULT_MA_COLORS[idx % DEFAULT_MA_COLORS.length], width: DEFAULT_MA_WIDTHS[idx] || 1.5, on: true,
-  }));
+  currentChart.maLines = cfg.maPeriods.map((p, idx) => {
+    // 日線的 10MA 插在第二條：其他幾條照原本的顏色、粗細（20MA 一樣綠色 2.5px）；扣底照舊看 5MA、20MA，不算 10MA
+    if (tf === 'daily' && p === 10) return { period: 10, color: MA10_COLOR, width: 1.5, on: true, noDeduct: true };
+    const j = tf === 'daily' && idx > 1 ? idx - 1 : idx;
+    return { period: p, color: DEFAULT_MA_COLORS[j % DEFAULT_MA_COLORS.length], width: DEFAULT_MA_WIDTHS[j] || 1.5, on: true };
+  });
   currentChart.vwapOn = !!cfg.vwap;
   currentChart.vwapColor = VWAP_COLOR;
   currentChart.vwapWidth = 3;
