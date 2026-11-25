@@ -11706,12 +11706,29 @@ function homeBearMergedHtml(m){
   const tpl = (html) => { const t = document.createElement('template'); t.innerHTML = html || ''; return t.content; };
   const hm = (v) => { const x = /(\d\d:\d\d)/.exec(v || ''); return x ? x[1] : ''; };
   const keyOf = (row) => { const run = row.querySelector('.b32-tag.run'), back = row.querySelector('.b32-tag.back'); return hm(run && run.textContent) || hm(back && back.textContent) || hm((row.querySelector('.b32-time') || {}).textContent); };
+  // 2026-11-25 使用者：13:30（收盤撮合那根）的「回」「跑」不要秀——只秀它第一次的時間（例：廣運 09:20 進、回 13:30 ⇒ 只寫 09:20、照 09:20 排，跑的也不劃掉）；
+  // 13:30 才第一次出現的這塊不列。只有首頁今日即時空這樣，其他地方照舊。
+  // 2026-11-25 使用者（又加）：有「跑」的不管幾點整列拿掉（這一份跑掉了；另一份還在榜的話用另一份那一列）；「回」只秀 13:15 以前的，13:15 以後的回不秀（照第一次的時間）
+  const CLOSE_HM = '13:30', BACK_MAX = '13:15';
+  const clean1330 = (row) => {   // 回傳 false＝這一列不要
+    if (row.classList.contains('gone') || row.querySelector('.b32-tag.run')) return false;
+    row.querySelectorAll('.b32-tag.back').forEach((tg) => { if (hm(tg.textContent) > BACK_MAX) tg.remove(); });
+    row.querySelectorAll('.b777-sig').forEach((sg) => { sg.textContent = sg.textContent.replace(/・回 (\d\d:\d\d)/g, (all, t) => (t > BACK_MAX ? '' : all)); });
+    const tEl = row.querySelector('.b32-time');
+    if (tEl && row.classList.contains('b777r')){   // 777 那一列的時間＝最新的（含回）：回被拿掉的話改回第一次的時間
+      const sigs = [...row.querySelectorAll('.b777-sig')].map((sg) => { const t = (sg.textContent.match(/\d\d:\d\d/g) || []); return t.length ? t[t.length - 1] : ''; }).filter(Boolean).sort();
+      if (sigs.length) tEl.textContent = sigs[sigs.length - 1];
+    }
+    return true;
+  };
   const items = new Map(), order = [];
   const take = (src, html, sel) => {
     tpl(html).querySelectorAll(sel).forEach((row) => {
       const code = row.dataset.botCode;
       if (!code) return;
+      if (!clean1330(row)) return;
       const t = hm((row.querySelector('.b32-time') || {}).textContent);
+      if (t === CLOSE_HM) return;   // 13:30 才第一次出現的不列
       let it = items.get(code);
       if (!it){ it = { code, key: keyOf(row), row, src: [], i: order.length }; items.set(code, it); order.push(it); }
       if (!it.src.some((x) => x.k === src)) it.src.push({ k: src, t });
@@ -11737,7 +11754,7 @@ function homeBearMergedHtml(m){
   }).join('');
   const cnt = (k) => list.filter((it) => it.src.some((x) => x.k === k)).length;
   return { n: list.length, html: '<div class="race-block now-bear-blade"><div class="race-head">🔪⚔️新刀劍空(32)＋12空(123)＋空族群必殺(193)＋777</div>' +
-    '<div class="race-sub">首頁才有：32、123、193、777 四份混在一起照發生時間排，早的在上面、最新發生的（進榜、跑、回）在最下面貼著兩條黑線；一檔只列一次，下面小字寫它在哪幾份、幾點。' +
+    '<div class="race-sub">首頁才有：32、123、193、777 四份混在一起照發生時間排，早的在上面、最新發生的在最下面貼著兩條黑線；一檔只列一次，下面小字寫它在哪幾份、幾點。跑掉的不列；「回」只秀 13:15 以前的；13:30 才出現的不列。' +
     '32 ' + cnt('32') + '・123 ' + cnt('123') + '・193 ' + cnt('193') + '・777 ' + cnt('777') + '，合計 ' + list.length + ' 檔。兩條黑線下面才是依發生時間排序的空方向訊號。</div>' +
     '<div class="b32-tabwrap">' + (rowsHtml || '<div class="race-note">目前沒有</div>') + (bl ? '<div class="race-note">' + bladeLegend(bl, true) + '</div>' : '') + '</div></div>' };
 }
@@ -11760,7 +11777,11 @@ function homeNowScrollSave(){
   });
   return out;
 }
-function homeNowRowKey(r){ return (r.dataset.code || r.dataset.botCode || '') + '|' + (r.textContent || '').replace(/\s+/g, ' ').slice(0, 60); }
+function homeNowRowKey(r){   // 認列用不會變的東西（代號＋時間＋訊號名稱），不用整列文字（漲跌幅、大戶力一直在變，重新打開就認不出來）
+  const tx = (sel) => { const e = r.querySelector(sel); return e ? e.textContent.replace(/\s+/g, '') : ''; };
+  if (r.dataset.botCode) return 'b|' + r.dataset.botCode;
+  return 's|' + (r.dataset.code || '') + '|' + tx('.sig-time') + '|' + tx('.sig-label').slice(0, 16);
+}
 function homeNowScrollRestore(saved, strict){   // strict：找不到上次那一列就不動（隔天內容不一樣，不要用像素硬放）
   document.querySelectorAll('.hnow-scroll[data-hnow]').forEach((box) => {
     const st = saved[box.dataset.hnow];
@@ -11776,6 +11797,26 @@ function homeNowScrollRestore(saved, strict){   // strict：找不到上次那�
     }
     if (!done && !strict) box.scrollTop = st.top;
   });
+}
+// 2026-11-25 使用者：今日即時空捲起來不順——首頁每次重畫都把框整個換掉，滾輪捲到一半的動畫被打斷、又被拉回原位。
+// 改成：框裡的內容跟上次一樣就沿用原本那個框（完全不動）；內容變了但使用者 2 秒內還在捲，也先沿用舊的，等停下來的下一次重畫才換。
+const homeNowLast = {}, homeNowScrollAt = {};
+document.addEventListener('scroll', (e) => { const b = e.target; if (b && b.classList && b.classList.contains('hnow-scroll')) homeNowScrollAt[b.dataset.hnow] = Date.now(); }, true);
+document.addEventListener('wheel', (e) => { const b = e.target && e.target.closest && e.target.closest('.hnow-scroll'); if (b) homeNowScrollAt[b.dataset.hnow] = Date.now(); }, { capture: true, passive: true });
+function homeNowKeepOld(){   // render() 把 #app 換掉以前叫：記住舊的框跟它捲到哪（框離開網頁再放回來，瀏覽器會把捲動歸零，要自己補回去）
+  const old = {};
+  document.querySelectorAll('.hnow-scroll[data-hnow]').forEach((b) => { old[b.dataset.hnow] = { el: b, top: b.scrollTop }; });
+  return old;
+}
+function homeNowSwapBack(old){   // render() 換完以後叫：能沿用的把舊框放回去；回傳有換新的那幾個
+  const fresh = [];
+  document.querySelectorAll('.hnow-scroll[data-hnow]').forEach((nb) => {
+    const side = nb.dataset.hnow, o = old[side], ob = o && o.el, html = homeNowLast[side];
+    const busy = Date.now() - (homeNowScrollAt[side] || 0) < 2000;
+    if (ob && (ob._h === html || busy)){ nb.replaceWith(ob); ob.scrollTop = o.top; return; }
+    nb._h = html; fresh.push(side);
+  });
+  return fresh;
 }
 function homeNowColHtml(side){
   const bull = side === 'bull';
@@ -11807,6 +11848,7 @@ function homeNowColHtml(side){
   } catch (err){
     inner = '<div class="hr-note">這一欄暫時畫不出來</div>';
   } finally { sigDayOffset = saved; }
+  homeNowLast[side] = inner;
   return '<div class="hr-col hnow-col ' + side + '"><div class="hr-title" title="跟盤中訊號中心「' + (bull ? '今日即時多' : '今日即時空') + '」同一份、排法一樣（只看今天）">' +
     '<span class="hnow-t ' + side + '">' + (bull ? '今日即時多' : '今日即時空') + '</span>' + (n ? ' <span class="hr-rk">' + n + ' 筆訊號</span>' : '') + '</div>' +
     '<div class="hnow-scroll" data-hnow="' + side + '">' + inner + '</div></div>';   // 2026-11-25 使用者：右邊要有捲軸（上下箭頭），滑到哪就停在哪
@@ -17915,7 +17957,11 @@ const TRK_KINDS = [
   { key: 'mainForceFlipBear', label: '主力翻空', bull: false },
   { key: 'blackDragon', label: '創高黑龍', bull: null },
   { key: 'combo12Bull', label: '1+2多', bull: true },
+  // 2026-11-25 使用者：5 分K 站上／跌破 VWAP 也要偵測（網頁自己用 5 分K 算，跟 K 線圖那條黃色虛線同一套）；提醒預設關（一天來回很多次），③提醒設定可以打開
+  { key: 'vwapUp', label: '站上VWAP', bull: true, alertDefault: false },
+  { key: 'vwapDown', label: '跌破VWAP', bull: false, alertDefault: false },
 ];
+const trkAlertOn = (kind) => trkSetting('trk_' + kind, (TRK_KINDS.find((k) => k.key === kind) || {}).alertDefault !== false) !== false;
 const TRK_KIND_LABEL = Object.fromEntries(TRK_KINDS.map((k) => [k.key, k.label]));
 const TRK_MAS = [5, 10, 20];
 // 2026-11-25 使用者：上面的分組可以多選（例：自選＋股票期貨＋小型股票期貨一起看），點一下加入、再點一下拿掉；「全部」＝清掉選的、看全部。記在這台瀏覽器。
@@ -17972,12 +18018,50 @@ function trkItemOf(code){
 }
 function trkEventKind(e){ return e.tabs && e.tabs.length ? e.tabs[e.tabs.length - 1] : ''; }
 function trkTime(ts){ return Number.isFinite(ts) && ts > 0 ? new Date(ts + 8 * 3600000).toISOString().slice(11, 16) : ''; }
+// 5 分K 站上／跌破 VWAP（2026-11-25 使用者）：只算個股訊號追蹤上面選的分組（沒選＝全部自選股）、關閉訊號的不算。
+// VWAP＝今天開盤累計 典型價（高＋低＋收）÷3 × 量 ÷ 累計量（跟 K 線圖 5 分K 的 VWAP 黃線同一套）；只看收完的 5 分K：
+// 收盤從 VWAP 下面（或剛好等於）到上面＝站上 VWAP、從上面到下面＝跌破 VWAP，時間＝那根 5 分K 收完的時間。
+// 5 分K 跟首頁均20 轉彎標籤同一份快取（m5|代號）：盤中 3 分鐘，現價跟上一根同一邊（看起來不會穿過）就 10 分鐘才重抓。
+function trkVwapEvents(){
+  const today = twTodayStr(), live = twLiveSession(), now = Date.now();
+  const muted = trkMutedSet();
+  const dOf = (b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10);
+  const endHm = (ts) => { const v = new Date(ts + 8 * 3600e3).toISOString().slice(11, 16); return v > '13:30' ? '13:30' : v; };
+  const out = [];
+  trkCodesInView().forEach((code) => {
+    if (muted.has(code)) return;
+    let ttl = live ? 180e3 : 1800e3;
+    const c = tdJCache['m5|' + code], q = live ? getStockQuote(code) : null;
+    if (live && c && c.vw && q && q.price > 0 && (q.price > c.vw.v) === c.vw.above) ttl = 600e3;
+    const d = tdJ('m5|' + code, '/api/bars/' + code, ttl);
+    if (!d || d.status !== 'ok' || !Array.isArray(d.bars)) return;
+    const bars = d.bars.filter((b) => dOf(b) === today && Number.isFinite(b.close) && Number.isFinite(b.high) && Number.isFinite(b.low) && Number.isFinite(b.volume) && (!live || b.ts + 300e3 <= now + 5e3)).sort((a, b) => a.ts - b.ts);
+    let pv = 0, vol = 0, side = 0, vw = null;
+    const name = wlNameOf(code, trkItemOf(code));
+    bars.forEach((b, i) => {
+      pv += (b.high + b.low + b.close) / 3 * b.volume; vol += b.volume;
+      vw = vol > 0 ? pv / vol : b.close;
+      const sg = b.close > vw + 1e-9 ? 1 : b.close < vw - 1e-9 ? -1 : 0;
+      if (i > 0 && sg !== 0 && side !== 0 && sg !== side){
+        const up = sg > 0, ts = b.ts + 300e3;
+        out.push({ tabs: [up ? 'vwapUp' : 'vwapDown'], ts, time: endHm(ts), code, name, label: up ? '站上VWAP' : '跌破VWAP', isBuy: up,
+          note: '5 分K 收 ' + num2(b.close) + '・VWAP ' + num2(vw) });
+      }
+      if (sg !== 0) side = sg;
+    });
+    const cc = tdJCache['m5|' + code];
+    if (cc && vw !== null && side !== 0) cc.vw = { v: vw, above: side > 0 };
+  });
+  return out;
+}
 function trkSignalEvents(){
   // 訊號中心同一份（休市日／開盤前沿用上一個交易日）；特大買賣單套用訊號中心那邊設的篩選
   const events = sigCurrentEvents() || [];
   // 特大買賣單只收標「特大」的（一般瞬間大單一天好幾百筆會洗版），再套訊號中心那邊設的篩選
   const big = new Set(filterLargeOrderEvents(events.filter((e) => (e.tabs.includes('bigBuy') || e.tabs.includes('bigSell')) && /特大/.test(e.label || ''))));
-  return events.filter((e) => TRK_KIND_LABEL[trkEventKind(e)] && ((trkEventKind(e) !== 'bigBuy' && trkEventKind(e) !== 'bigSell') || big.has(e)));
+  let vw = [];
+  try { vw = trkVwapEvents(); } catch (_){ vw = []; }
+  return events.filter((e) => TRK_KIND_LABEL[trkEventKind(e)] && ((trkEventKind(e) !== 'bigBuy' && trkEventKind(e) !== 'bigSell') || big.has(e))).concat(vw);
 }
 function trkLaunchRecords(){
   const day = brewSessionDate();
@@ -18027,7 +18111,8 @@ function trkCheck(){
       const kind = trkEventKind(e), key = 's|' + e.code + '|' + kind + '|' + e.ts + '|' + (e.label || '');
       if (st.seen.has(key)) continue;
       st.seen.add(key);
-      if (!st.sigCodes.has(e.code) || muted.has(e.code) || trkSetting('trk_' + kind, true) === false) continue;
+      if (!st.sigCodes.has(e.code) || muted.has(e.code) || !trkAlertOn(kind)) continue;
+      if ((kind === 'vwapUp' || kind === 'vwapDown') && Date.now() - Number(e.ts) > 10 * 60e3) continue;   // VWAP 是網頁陸續算出來的：只跳 10 分鐘內剛發生的，不要一次補跳早上的
       const kindBull = (TRK_KINDS.find((k) => k.key === kind) || {}).bull;   // 訊號本身有標多空就用它，沒有就看是哪一種訊號
       fresh.push({ code: e.code, name: e.name, text: (TRK_KIND_LABEL[kind] || e.label) + (e.label && e.label !== TRK_KIND_LABEL[kind] ? '（' + e.label + '）' : ''), time: trkTime(Number(e.ts)) || e.time,
         bull: kindBull === true || kindBull === false ? kindBull : e.isBuy });
@@ -18184,7 +18269,7 @@ function renderTrack(force){
       '</tbody></table></div>'
     : '<div class="race-note">' + (evDate !== today ? '今天還沒開盤，' : '') + '自選股' + (trk.kind === 'all' ? '' : '這類') + '目前沒有訊號。</div>';
   // 提醒設定
-  const kindToggles = TRK_KINDS.map((k) => '<label class="trk-chk"><input type="checkbox" data-tset="trk_' + k.key + '"' + (trkSetting('trk_' + k.key, true) !== false ? ' checked' : '') + '>' + k.label + '</label>').join('');
+  const kindToggles = TRK_KINDS.map((k) => '<label class="trk-chk"><input type="checkbox" data-tset="trk_' + k.key + '"' + (trkAlertOn(k.key) ? ' checked' : '') + '>' + k.label + '</label>').join('');
   const seen = new Set();
   const alertRows = [];
   for (const g of wl.data.groups) for (const it of g.items){
@@ -20472,7 +20557,13 @@ function setHomeTab(tab){
   document.getElementById('tabWeak').classList.toggle('active', tab === 'weak');
 }
 
+let homeRenderDeferT = 0;
 function render(){
+  // 2026-11-25 使用者：今日即時多／空用滾輪捲的時候不順——正在捲（1.2 秒內）就先不重畫首頁，停下來再畫，捲動不會被打斷
+  try {
+    const lastS = Math.max(homeNowScrollAt.bear || 0, homeNowScrollAt.bull || 0), ago = Date.now() - lastS;
+    if (ago < 1200){ clearTimeout(homeRenderDeferT); homeRenderDeferT = setTimeout(render, 1250 - ago); return; }
+  } catch (_){}
   const app = document.getElementById('app');
   if (!lastData) return;
 
@@ -20524,6 +20615,7 @@ function render(){
   if (top6El) top6El.innerHTML = '<div class="top6-label">' + leftTitle + '</div><div class="top6-grid">' + side6Html + otherHtml + '</div>';
   const hxOld = document.querySelector('.home-rank-scroll'), hxLeft = hxOld ? hxOld.scrollLeft : 0;
   const hnowSaved = homeNowScrollSave();   // 2026-11-25 今日即時多／空捲到的位置
+  const hnowOld = homeNowKeepOld();
   const hxIn = document.getElementById('hxQ'), hxVal = hxIn ? hxIn.value : '', hxFocus = !!(hxIn && document.activeElement === hxIn);
   app.innerHTML =
     '<div class="layout">' +
@@ -20533,7 +20625,7 @@ function render(){
       '</div>' +
     '</div>';
   { const sc = document.querySelector('.home-rank-scroll'); if (sc && hxLeft) sc.scrollLeft = hxLeft;
-    try { homeNowScrollRestore(hnowSaved); } catch (_){}
+    try { const fresh = homeNowSwapBack(hnowOld); if (fresh.length){ const sv = {}; fresh.forEach((k) => { sv[k] = hnowSaved[k]; }); homeNowScrollRestore(sv); } } catch (_){}   // 只對換新的框放回原位
     try { homePosTryRestore(); } catch (_){}   // 2026-11-25 打開網頁回到上次停的地方
     const qi = document.getElementById('hxQ'); if (qi){ qi.value = hxVal; if (hxFocus){ qi.focus(); try { qi.setSelectionRange(hxVal.length, hxVal.length); } catch (_){} } } }
   // #updatedAt文字由refresh()統一負責(要能反映抓資料成功/失敗、是否過期)，
