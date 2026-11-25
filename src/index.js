@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-25 21:42:37";
+const BUILD_STAMP = "2026-11-25 21:44:57";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -11850,7 +11850,7 @@ function homeNowScrollSave(){
   return out;
 }
 function homeNowRowKey(r){ return (r.dataset.code || r.dataset.botCode || '') + '|' + (r.textContent || '').replace(/\\s+/g, ' ').slice(0, 60); }
-function homeNowScrollRestore(saved){
+function homeNowScrollRestore(saved, strict){   // strict：找不到上次那一列就不動（隔天內容不一樣，不要用像素硬放）
   document.querySelectorAll('.hnow-scroll[data-hnow]').forEach((box) => {
     const st = saved[box.dataset.hnow];
     if (!st || !st.top) return;
@@ -11863,7 +11863,7 @@ function homeNowScrollRestore(saved){
         done = true; break;
       }
     }
-    if (!done) box.scrollTop = st.top;
+    if (!done && !strict) box.scrollTop = st.top;
   });
 }
 function homeNowColHtml(side){
@@ -19623,7 +19623,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-25 21:42:37';
+const BUILD_STAMP = '2026-11-25 21:44:57';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -20820,41 +20820,74 @@ document.getElementById('app').addEventListener('click', (e) => {
   const groupEl = e.target.closest('[data-group]');
   if (groupEl) openGroupDetail(groupEl.dataset.group);
 });
-// ---- 首頁停在哪裡記起來（2026-11-25 使用者：最後一次關掉時畫面停在哪，下次打開就回到那裡，不用再移）----
-// 記兩個：首頁那一排左右捲到哪（.home-rank-scroll scrollLeft）、整頁上下捲到哪（window.scrollY），存在這台瀏覽器（localStorage homePos）。
-// 打開網頁時欄位是陸續載入的（寬度、高度會變），所以前幾次重畫都試著放回去，放到了才算；放回去之前不記（免得還在載入時把 0 存進去）；
-// 使用者自己先動了（滾輪、拖、按鍵、點）就不再幫他放。浮動 K 線圖、機器人小視窗那些不做。
-const HOME_POS_KEY = 'homePos';
-const homePos = { restored: false, tries: 0, t0: Date.now(), saveT: 0,
-  saved: (() => { try { const v = JSON.parse(localStorage.getItem(HOME_POS_KEY) || 'null'); return v && Number.isFinite(v.x) && Number.isFinite(v.y) ? v : null; } catch (_){ return null; } })() };
+// ---- 首頁停在哪裡記起來（2026-11-25 使用者：最後一次關掉時畫面停在哪，下次打開就回到那裡，不用再移；又說：記得不準、會跳，要加強）----
+// 記的不是「捲了幾個像素」，而是「停在哪一欄、在那一欄裡的哪裡」（左右）、「離首頁欄位頂端多遠」（上下），加上今日即時多／空框裡捲到哪一列：
+// 自訂畫面收起的欄位是首頁畫完才套上的、上面的大盤／族群那幾塊是陸續載入的，用像素會偏；用欄位跟首頁頂端當錨點就不會。
+// 打開後前 45 秒（或到使用者自己捲動為止）每次畫面變動都重新對準，之後才開始記；使用者一捲就不再幫他對準。存在這台瀏覽器（localStorage homePos）。
+const HOME_POS_KEY = 'homePos', HOME_POS_STICK_MS = 45e3;
+const homePos = { phase: 'restoring', t0: Date.now(), saveT: 0, applying: false, lastY: null, timer: 0,
+  saved: (() => { try { const v = JSON.parse(localStorage.getItem(HOME_POS_KEY) || 'null'); return v && typeof v === 'object' ? v : null; } catch (_){ return null; } })() };
 function homePosSkip(){ return CHART_WINDOW_MODE || document.body.classList.contains('signal-window-mode') || document.body.classList.contains('chart-window-mode') || botWindowMode() || sgtWindowMode(); }
-function homePosSave(){
-  if (!homePos.restored || homePosSkip()) return;
-  clearTimeout(homePos.saveT);
-  homePos.saveT = setTimeout(() => {
-    const sc = document.querySelector('.home-rank-scroll');
-    try { localStorage.setItem(HOME_POS_KEY, JSON.stringify({ x: sc ? Math.round(sc.scrollLeft) : 0, y: Math.round(window.scrollY) })); } catch (_){}
-  }, 300);
+function homePosUnits(){ const root = document.querySelector('#app .home-rank4'); return root ? Array.from(root.children).filter((u) => !u.classList.contains('cz-unit-off') && u.offsetWidth > 0) : []; }
+function homePosUnitKey(u){
+  if (u.dataset.hxKey) return 'bot:' + u.dataset.hxKey;
+  const t = (u.querySelector('.hr-title, .hx-head') || u).textContent || '';
+  return 't:' + t.replace(/[\\s\\d.,:：・／/()（）%+\\-—–]/g, '').slice(0, 10);
 }
-function homePosTryRestore(){   // render() 每次畫完首頁叫一次
-  if (homePos.restored) return;
-  if (homePosSkip()){ homePos.restored = true; return; }
-  const v = homePos.saved, sc = document.querySelector('.home-rank-scroll');
-  if (!v || (!v.x && !v.y)){ homePos.restored = true; return; }
-  if (!sc) return;
-  homePos.tries += 1;
-  if (v.x && sc.scrollWidth - sc.clientWidth >= v.x - 2) sc.scrollLeft = v.x;
-  const maxY = document.documentElement.scrollHeight - window.innerHeight;
-  if (v.y && maxY >= v.y - 2) window.scrollTo(0, v.y);
-  const okX = !v.x || Math.abs(sc.scrollLeft - v.x) < 3, okY = !v.y || Math.abs(window.scrollY - v.y) < 3;
-  if ((okX && okY) || homePos.tries > 40 || Date.now() - homePos.t0 > 60e3) homePos.restored = true;   // 放到了；或等了一分鐘還放不到（欄位變少了）就算了
+function homePosSnapshot(){
+  const sc = document.querySelector('.home-rank-scroll'), root = document.querySelector('#app .home-rank4');
+  if (!sc || !root) return null;
+  const rl = root.getBoundingClientRect().left, x = sc.scrollLeft;
+  let key = null, dx = 0;
+  for (const u of homePosUnits()){ const l = u.getBoundingClientRect().left - rl; if (l + u.offsetWidth > x + 1){ key = homePosUnitKey(u); dx = x - l; break; } }
+  const homeTop = root.getBoundingClientRect().top + window.scrollY;
+  let hnow = null; try { hnow = homeNowScrollSave(); } catch (_){}
+  return { x: Math.round(x), y: Math.round(window.scrollY), key, dx: Math.round(dx), dy: Math.round(window.scrollY - homeTop), hnow };
 }
-// 使用者自己捲了（滾輪、手指滑、方向鍵／翻頁鍵、按住首頁那排拖）就不再幫他放；點別的（例如關掉早上自動跳的今日提醒）不算
-['wheel', 'touchmove'].forEach((ev) => window.addEventListener(ev, () => { homePos.restored = true; }, { capture: true, passive: true }));
-window.addEventListener('keydown', (e) => { if (/^(Arrow|Page|Home$|End$| $)/.test(e.key) && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) homePos.restored = true; }, true);
-window.addEventListener('pointerdown', (e) => { if (e.target && e.target.closest && e.target.closest('.home-rank-scroll')) homePos.restored = true; }, true);
-document.addEventListener('scroll', (e) => { if (e.target === document || (e.target && e.target.classList && e.target.classList.contains('home-rank-scroll'))) homePosSave(); }, true);
-window.addEventListener('pagehide', () => { if (homePos.restored && !homePosSkip()){ const sc = document.querySelector('.home-rank-scroll'); try { localStorage.setItem(HOME_POS_KEY, JSON.stringify({ x: sc ? Math.round(sc.scrollLeft) : 0, y: Math.round(window.scrollY) })); } catch (_){} } });
+function homePosWrite(){ if (homePos.phase !== 'free' || homePosSkip()) return; const v = homePosSnapshot(); if (v) try { localStorage.setItem(HOME_POS_KEY, JSON.stringify(v)); } catch (_){} }
+function homePosSave(){ if (homePos.phase !== 'free') return; clearTimeout(homePos.saveT); homePos.saveT = setTimeout(homePosWrite, 300); }
+function homePosFree(){ if (homePos.phase === 'free') return; homePos.phase = 'free'; clearInterval(homePos.timer); }
+function homePosApply(){
+  if (homePos.phase !== 'restoring') return;
+  if (homePosSkip() || !homePos.saved || Date.now() - homePos.t0 > HOME_POS_STICK_MS){ homePosFree(); return; }
+  const v = homePos.saved, sc = document.querySelector('.home-rank-scroll'), root = document.querySelector('#app .home-rank4');
+  if (!sc || !root) return;
+  homePos.applying = true;
+  try {
+    // 左右：找到上次停的那一欄，放回那一欄裡同一個位置；那一欄不見了才用像素
+    let x = Number.isFinite(v.x) ? v.x : 0;
+    if (v.key){ const rl = root.getBoundingClientRect().left; const u = homePosUnits().find((uu) => homePosUnitKey(uu) === v.key); if (u) x = u.getBoundingClientRect().left - rl + (v.dx || 0); }
+    if (Math.abs(sc.scrollLeft - x) > 1) sc.scrollLeft = x;
+    // 上下：首頁欄位頂端往下 dy
+    const homeTop = root.getBoundingClientRect().top + window.scrollY;
+    const y = Number.isFinite(v.dy) ? homeTop + v.dy : (v.y || 0);
+    if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, Math.max(0, y));
+    homePos.lastY = window.scrollY;
+    // 今日即時多／空框裡：上次停的那一列
+    if (v.hnow){ try { homeNowScrollRestore(v.hnow, true); } catch (_){} }
+  } finally { setTimeout(() => { homePos.applying = false; }, 0); }
+}
+function homePosTryRestore(){   // render() 每次畫完首頁叫一次：等自訂畫面收起欄位（MutationObserver）之後再對準
+  if (homePos.phase !== 'restoring') return;
+  requestAnimationFrame(() => { try { homePosApply(); } catch (_){} });
+}
+if (!homePos.saved) homePos.phase = 'free';
+else homePos.timer = setInterval(() => { try { homePosApply(); } catch (_){} }, 700);   // 中間陸續載入（沒有重畫首頁）也會變高，固定時間再對一次
+// 使用者自己捲了（滾輪、手指滑、方向鍵／翻頁鍵、按住首頁那排拖、拉整頁捲軸）就不再幫他對準、開始記；點別的（例如關掉早上自動跳的今日提醒）不算
+['wheel', 'touchmove'].forEach((ev) => window.addEventListener(ev, homePosFree, { capture: true, passive: true }));
+window.addEventListener('keydown', (e) => { if (/^(Arrow|Page|Home$|End$| $)/.test(e.key) && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) homePosFree(); }, true);
+window.addEventListener('pointerdown', (e) => { if (e.target && e.target.closest && e.target.closest('.home-rank-scroll')) homePosFree(); }, true);
+document.addEventListener('scroll', (e) => {
+  const doc = e.target === document, strip = !!(e.target && e.target.classList && (e.target.classList.contains('home-rank-scroll') || e.target.classList.contains('hnow-scroll')));
+  if (!doc && !strip) return;
+  if (homePos.phase === 'restoring'){
+    if (doc && !homePos.applying && homePos.lastY !== null && Math.abs(window.scrollY - homePos.lastY) > 60) homePosFree();   // 拉整頁捲軸（沒有滾輪事件）
+    return;
+  }
+  homePosSave();
+}, true);
+window.addEventListener('pagehide', homePosWrite);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') homePosWrite(); });
 // 首頁欄位左右拖（滑鼠按住拖，跟機器人格子一樣；拖超過 5px 這次放開不算點擊）
 let homePan = null, homePanSwallow = false;
 document.getElementById('app').addEventListener('pointerdown', (e) => {
