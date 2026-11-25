@@ -3930,7 +3930,9 @@
   .hnow-col.bear .srow-right{gap:4px;} .hnow-col.bear .srow-right .spct{width:62px;font-size:13px;} .hnow-col.bear .srow-right .schg{width:54px;font-size:12px;} .hnow-col.bear .srow-right .sprice{width:58px;font-size:12px;}
   .hnow-col.bear .signal-row .sig-note{padding-left:40px;}
   .hnow-col.bear .race-sub{font-size:11px;line-height:1.35;margin:2px 0 4px;} .hnow-col.bear .race-head{margin:2px 0;}
-  .hnow-col.bear .b32-tabwrap{max-width:420px;} .hnow-col.bear .b32-row{padding-top:3px;padding-bottom:3px;gap:0 6px;}
+  .hnow-col.bear .b32-tabwrap{max-width:440px;}
+  .hb-src{display:flex;flex-wrap:wrap;gap:2px 4px;} .hb-src-t{font-size:10.5px;font-weight:800;border-radius:4px;padding:0 5px;line-height:1.5;color:#fff;background:#6b7280;white-space:nowrap;}
+  .hb-src-t.s32{background:#b91c1c;} .hb-src-t.s123{background:#1d4ed8;} .hb-src-t.s193{background:#7c3aed;} .hb-src-t.s777{background:#0f766e;}   /* 32 紅、123 藍、193 紫、777 綠 */ .hnow-col.bear .b32-row{padding-top:3px;padding-bottom:3px;gap:0 6px;}
   /* 2026-11-25 首頁「個股訊號追蹤」：代號、名稱、漲跌幅、時間、訊號、狀態 */
   /* 2026-11-25 使用者：時間放最前面、訊號後面加大戶力、欄位間距縮小、整欄字放大 1.2 倍 */
   .htk-g{display:grid;grid-template-columns:46px 48px minmax(62px,.9fr) 68px minmax(118px,1.3fr) 64px minmax(0,1.5fr);column-gap:4px;align-items:center;}
@@ -11696,6 +11698,49 @@ try { twScope = localStorage.getItem('twScope') === 'market' ? 'market' : 'mine'
 // 今日即時空放空中空(999) 右邊、均20 轉彎(200) 左邊；今日即時多放個股訊號追蹤右邊、強中強左邊。
 // 內容直接用訊號中心同一套（今日即時多＝盤中大戶力多名單＋多方訊號依時間；今日即時空＝新刀劍空(32)＋空方訊號依時間），
 // 只看「今天」（不跟著訊號中心選的昨天／前天）；訊號中心上面設的大戶力篩選照樣套用。點股票開 K 線圖。
+// 2026-11-25 使用者：首頁的今日即時空，最上面那塊（兩條黑線上面）把 32、123、193、777 混在一起照發生時間排（早的在上面、最新的貼著黑線，跟原本 32 一樣），
+// 集中在一個地方看；只有首頁這樣，訊號中心的今日即時空照舊只有 32。
+// 一檔只列一次（777 本身就包含 32＋12空，193 的 ⚠️ 個股也都在 32 名單裡）：有 32 就用 32 那一列的樣子、沒有就用 123、再沒有用 777；
+// 排序時間照那一列原本的算法（進榜時間；掉出去又回來看「回」、跑掉看「跑」的時間）；每列下面小字寫它在哪幾份、幾點。
+function homeBearMergedHtml(m){
+  const tpl = (html) => { const t = document.createElement('template'); t.innerHTML = html || ''; return t.content; };
+  const hm = (v) => { const x = /(\d\d:\d\d)/.exec(v || ''); return x ? x[1] : ''; };
+  const keyOf = (row) => { const run = row.querySelector('.b32-tag.run'), back = row.querySelector('.b32-tag.back'); return hm(run && run.textContent) || hm(back && back.textContent) || hm((row.querySelector('.b32-time') || {}).textContent); };
+  const items = new Map(), order = [];
+  const take = (src, html, sel) => {
+    tpl(html).querySelectorAll(sel).forEach((row) => {
+      const code = row.dataset.botCode;
+      if (!code) return;
+      const t = hm((row.querySelector('.b32-time') || {}).textContent);
+      let it = items.get(code);
+      if (!it){ it = { code, key: keyOf(row), row, src: [], i: order.length }; items.set(code, it); order.push(it); }
+      if (!it.src.some((x) => x.k === src)) it.src.push({ k: src, t });
+    });
+  };
+  let bl = null;
+  try { bl = bladeBotListHtml(m, null, true); } catch (_){ bl = null; }
+  if (bl && bl.html) take('32', bl.html, '.b32-row[data-bot-code]');
+  try { take('123', botAnswer('123'), '.b32-row[data-bot-code]'); } catch (_){}
+  try { take('777', botAnswer('777'), '.b32-row.b777r[data-bot-code]'); } catch (_){}
+  try {   // 193：族群底下的 ⚠️ 個股（都在 32 名單裡），時間跟 32 一樣
+    const k = kill193Model();
+    if (k) [].concat(k.upper || [], k.lower || []).forEach((r) => (r.members || []).forEach((x) => { const it = items.get(x.code); if (it && !it.src.some((y) => y.k === '193')) it.src.push({ k: '193', t: (it.src[0] || {}).t || '', g: r.name }); }));
+  } catch (_){}
+  const list = order.slice().sort((a, b) => (a.key === b.key ? a.i - b.i : a.key < b.key ? -1 : 1));   // 早的在上面，同時間照原本順序
+  const tagsHtml = (it) => it.src.map((x) => '<span class="hb-src-t s' + x.k + '">' + x.k + (x.t ? ' ' + x.t : '') + (x.g ? '・' + wlEsc(x.g) : '') + '</span>').join('');
+  // 小字標籤放在那一列最下面那一行（b32-lvrow，佔滿寬度）：已經有那一行（股期、12空階段那些）就接在後面，沒有就加一行
+  const rowsHtml = list.map((it) => {
+    const r = it.row.cloneNode(true), lv = r.querySelector('.b32-lvrow');
+    if (lv) lv.insertAdjacentHTML('beforeend', '<span class="hb-src">' + tagsHtml(it) + '</span>');
+    else { r.classList.add('k12'); r.insertAdjacentHTML('beforeend', '<span class="b32-lvrow"><span class="hb-src">' + tagsHtml(it) + '</span></span>'); }
+    return r.outerHTML;
+  }).join('');
+  const cnt = (k) => list.filter((it) => it.src.some((x) => x.k === k)).length;
+  return { n: list.length, html: '<div class="race-block now-bear-blade"><div class="race-head">🔪⚔️新刀劍空(32)＋12空(123)＋空族群必殺(193)＋777</div>' +
+    '<div class="race-sub">首頁才有：32、123、193、777 四份混在一起照發生時間排，早的在上面、最新發生的（進榜、跑、回）在最下面貼著兩條黑線；一檔只列一次，下面小字寫它在哪幾份、幾點。' +
+    '32 ' + cnt('32') + '・123 ' + cnt('123') + '・193 ' + cnt('193') + '・777 ' + cnt('777') + '，合計 ' + list.length + ' 檔。兩條黑線下面才是依發生時間排序的空方向訊號。</div>' +
+    '<div class="b32-tabwrap">' + (rowsHtml || '<div class="race-note">目前沒有</div>') + (bl ? '<div class="race-note">' + bladeLegend(bl, true) + '</div>' : '') + '</div></div>' };
+}
 const HOME_NOW_MAX = 150;   // 首頁只畫最新 150 筆訊號（訊號中心照舊全部）：一天五百多筆全畫，首頁重畫多 0.1～0.2 秒、畫面元素多一倍
 // 首頁每次重畫（報價、訊號進來）都會整個換掉：先記住兩欄各捲到哪一列（畫面最上面那一列＋它離框頂多少），重畫後把那一列放回原位，
 // 新訊號插在最上面也不會把畫面推走；捲在最上面（0）就維持最上面，看得到最新的
@@ -11749,7 +11794,13 @@ function homeNowColHtml(side){
       n = evs.length;
       inner = nowBullHolderBlockHtml(view, rows) + nowTabRowsHtml(evs, [], view, HOME_NOW_MAX);
     } else {
-      inner = nowBearTabHtml(view, HOME_NOW_MAX);
+      // 2026-11-25 使用者：首頁的今日即時空最上面改成 32＋123＋193＋777 混在一起（訊號中心那頁照舊）
+      const ok = nowHfFilter(view, 'nowBear') || (() => true);
+      const evs = view.events.filter((e) => e.tabs.includes('nowBear')).concat(view.isPast ? [] : ghfSignalEvents(ghfTodayView(), 'down').concat(stSignalEvents('weak'))).filter((e) => ok(e.code));
+      const rows = view.rankingRows.filter((r) => !holderRowIsBull(r) && ok(r.code));
+      const m = race333Model();
+      const mg = m ? homeBearMergedHtml(m) : null;
+      inner = (mg ? mg.html : '<div class="race-note">族群行情還沒載入，名單稍後才會出現。</div>') + nowTabRowsHtml(evs, rows, view, HOME_NOW_MAX);
       n = view.events.filter((e) => e.tabs.includes('nowBear')).length;
     }
     inner = sigDayNoteHtml(view) + inner;
