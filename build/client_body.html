@@ -11632,10 +11632,11 @@ function homeXBarHtml(){
 }
 // 首頁固定的機器人欄位（跟加欄位一樣的畫法，但不能拿掉）
 var botCtxHome = false;   // 2026-11-20：正在畫首頁固定欄（不是機器人代碼那頁）
+const homeBotPass = { id: 0, html: {} };   // 2026-11-25：同一次首頁重畫裡機器人欄算好的結果（今日即時空合併區直接拿 123、777 來用，不重算）
 function homeFixedBotColHtml(c, wide, extra){   // extra＝疊在這欄下面的卡片（2026-11-19 使用者：123 下面放融資增加股票）
   let html = '';
   botCtxHome = true;   // 260／270 這類首頁跟機器人那頁設定分開的，看這個旗子
-  try { html = botAnswer(c) || ''; } catch (err){ html = '<div class="hr-note">這一欄暫時畫不出來</div>'; } finally { botCtxHome = false; }
+  try { html = botAnswer(c) || ''; homeBotPass.html[c] = { id: homeBotPass.id, html }; } catch (err){ html = '<div class="hr-note">這一欄暫時畫不出來</div>'; } finally { botCtxHome = false; }
   // 2026-11-14 使用者：空中空(999) 上面不要小字「🤖 999」（標題後面已經寫 999），標題才會跟右邊強中強對齊
   return '<div class="hr-stack home-xcol home-fixcol' + (wide ? ' hx-wide' : '') + '" data-hx-key="' + wlEsc(c) + '"><div class="home-botcol' + (c === '999' ? ' hx-nohead' : '') + '">' + (c === '999' ? '' : '<div class="hx-head"><span>🤖 ' + wlEsc(c) + '</span></div>') + html + '</div>' + (extra || '') + '</div>';
 }
@@ -11737,8 +11738,9 @@ function homeBearMergedHtml(m){
   let bl = null;
   try { bl = bladeBotListHtml(m, null, true); } catch (_){ bl = null; }
   if (bl && bl.html) take('32', bl.html, '.b32-row[data-bot-code]');
-  try { take('123', botAnswer('123'), '.b32-row[data-bot-code]'); } catch (_){}
-  try { take('777', botAnswer('777'), '.b32-row.b777r[data-bot-code]'); } catch (_){}
+  const passHtml = (q) => { const x = homeBotPass.html[q]; return x && x.id === homeBotPass.id ? x.html : botAnswer(q); };
+  try { take('123', passHtml('123'), '.b32-row[data-bot-code]'); } catch (_){}
+  try { take('777', passHtml('777'), '.b32-row.b777r[data-bot-code]'); } catch (_){}
   try {   // 193：族群底下的 ⚠️ 個股（都在 32 名單裡），時間跟 32 一樣
     const k = kill193Model();
     if (k) [].concat(k.upper || [], k.lower || []).forEach((r) => (r.members || []).forEach((x) => { const it = items.get(x.code); if (it && !it.src.some((y) => y.k === '193')) it.src.push({ k: '193', t: (it.src[0] || {}).t || '', g: r.name }); }));
@@ -11800,9 +11802,11 @@ function homeNowScrollRestore(saved, strict){   // strict：找不到上次那�
 }
 // 2026-11-25 使用者：今日即時空捲起來不順——首頁每次重畫都把框整個換掉，滾輪捲到一半的動畫被打斷、又被拉回原位。
 // 改成：框裡的內容跟上次一樣就沿用原本那個框（完全不動）；內容變了但使用者 2 秒內還在捲，也先沿用舊的，等停下來的下一次重畫才換。
-const homeNowLast = {}, homeNowScrollAt = {};
-document.addEventListener('scroll', (e) => { const b = e.target; if (b && b.classList && b.classList.contains('hnow-scroll')) homeNowScrollAt[b.dataset.hnow] = Date.now(); }, true);
-document.addEventListener('wheel', (e) => { const b = e.target && e.target.closest && e.target.closest('.hnow-scroll'); if (b) homeNowScrollAt[b.dataset.hnow] = Date.now(); }, { capture: true, passive: true });
+const homeNowLast = {}, homeNowScrollAt = {}, homeNowHold = {};
+// 只算使用者真的在捲（滾輪、手指滑、按住捲軸拖）；程式自己把位置放回去的不算（2026-11-25：原本連程式放回去都算，首頁重畫一直被往後延，大戶力按鈕按了要等好幾秒）
+['wheel', 'touchmove'].forEach((ev) => document.addEventListener(ev, (e) => { const b = e.target && e.target.closest && e.target.closest('.hnow-scroll'); if (b) homeNowScrollAt[b.dataset.hnow] = Date.now(); }, { capture: true, passive: true }));
+document.addEventListener('pointerdown', (e) => { const b = e.target && e.target.closest && e.target.closest('.hnow-scroll'); if (b){ homeNowHold[b.dataset.hnow] = true; homeNowScrollAt[b.dataset.hnow] = Date.now(); } }, true);
+window.addEventListener('pointerup', () => { Object.keys(homeNowHold).forEach((k) => { if (homeNowHold[k]){ homeNowHold[k] = false; homeNowScrollAt[k] = Date.now(); } }); }, true);
 function homeNowKeepOld(){   // render() 把 #app 換掉以前叫：記住舊的框跟它捲到哪（框離開網頁再放回來，瀏覽器會把捲動歸零，要自己補回去）
   const old = {};
   document.querySelectorAll('.hnow-scroll[data-hnow]').forEach((b) => { old[b.dataset.hnow] = { el: b, top: b.scrollTop }; });
@@ -11812,8 +11816,9 @@ function homeNowSwapBack(old){   // render() 換完以後叫：能沿用的把�
   const fresh = [];
   document.querySelectorAll('.hnow-scroll[data-hnow]').forEach((nb) => {
     const side = nb.dataset.hnow, o = old[side], ob = o && o.el, html = homeNowLast[side];
-    const busy = Date.now() - (homeNowScrollAt[side] || 0) < 2000;
-    if (ob && (ob._h === html || busy)){ nb.replaceWith(ob); ob.scrollTop = o.top; return; }
+    const busy = homeNowHold[side] || Date.now() - (homeNowScrollAt[side] || 0) < 2000;
+    if (ob && (ob._h === html || busy || nb.dataset.keep)){ nb.replaceWith(ob); ob.scrollTop = o.top; return; }
+    if (nb.dataset.keep){ nb.innerHTML = html; delete nb.dataset.keep; }   // 舊框不見了（不該發生）：補畫內容
     nb._h = html; fresh.push(side);
   });
   return fresh;
@@ -11849,9 +11854,12 @@ function homeNowColHtml(side){
     inner = '<div class="hr-note">這一欄暫時畫不出來</div>';
   } finally { sigDayOffset = saved; }
   homeNowLast[side] = inner;
+  // 跟畫面上現在那個框的內容一樣：這次不產生內容（省掉幾千個元素重建），重畫完直接把舊框放回去（homeNowSwapBack）
+  const cur = document.querySelector('.hnow-scroll[data-hnow="' + side + '"]');
+  const same = !!(cur && cur._h === inner);
   return '<div class="hr-col hnow-col ' + side + '"><div class="hr-title" title="跟盤中訊號中心「' + (bull ? '今日即時多' : '今日即時空') + '」同一份、排法一樣（只看今天）">' +
     '<span class="hnow-t ' + side + '">' + (bull ? '今日即時多' : '今日即時空') + '</span>' + (n ? ' <span class="hr-rk">' + n + ' 筆訊號</span>' : '') + '</div>' +
-    '<div class="hnow-scroll" data-hnow="' + side + '">' + inner + '</div></div>';   // 2026-11-25 使用者：右邊要有捲軸（上下箭頭），滑到哪就停在哪
+    '<div class="hnow-scroll" data-hnow="' + side + '"' + (same ? ' data-keep="1">' : '>' + inner) + '</div></div>';   // 2026-11-25 使用者：右邊要有捲軸（上下箭頭），滑到哪就停在哪
 }
 // ---- 首頁「🎯個股訊號追蹤」（2026-11-25 使用者）----
 // 個股訊號追蹤那頁的「① 現況」跟「② 今日訊號」合成一張，放強中強左邊：代號、名稱、漲跌幅、時間、訊號、狀態（漲停／跌停／刀劍空／盤中大戶力／醞釀／處置…）。
@@ -11859,6 +11867,15 @@ function homeNowColHtml(side){
 // 只列上面選的分組（跟個股訊號追蹤那頁同一份設定，可多選；這裡也能直接點）；沒選＝全部自選股。按了「關閉訊號」的不列。
 // 資料：訊號跟訊號中心同一份（首頁本來就在抓）；🚀 發動紀錄盤中每分鐘補一次；自選股裡族群表外的股票（例 0050）報價盤中每分鐘補一次。
 const HOME_TRK_MAX = 150;
+// 2026-11-25 使用者：大戶力按鈕按下去要等好幾秒——原本按一下就整個首頁重畫（0.5 秒以上，電腦慢一點就好幾秒）。改成只換這一欄
+function homeTrkRefresh(){
+  const el = document.querySelector('#app .htk-col');
+  if (!el){ render(); return; }
+  const t = document.createElement('template');
+  t.innerHTML = homeTrkColHtml();
+  const nu = t.content.firstElementChild;
+  if (nu) el.replaceWith(nu); else render();
+}
 let homeTrkExtraAt = 0;
 // 2026-11-25 使用者：分組那排後面加「大戶力 ≥ +10%」「大戶力 ≤ −10%」兩個篩選（只能選一個，再按一次取消；大戶力還沒有數字的先不列），記在這台瀏覽器
 let homeTrkHold = (() => { try { const v = localStorage.getItem('htkHold'); return v === 'pos' || v === 'neg' ? v : ''; } catch (_){ return ''; } })();
@@ -20559,10 +20576,11 @@ function setHomeTab(tab){
 
 let homeRenderDeferT = 0;
 function render(){
+  homeBotPass.id += 1;
   // 2026-11-25 使用者：今日即時多／空用滾輪捲的時候不順——正在捲（1.2 秒內）就先不重畫首頁，停下來再畫，捲動不會被打斷
   try {
     const lastS = Math.max(homeNowScrollAt.bear || 0, homeNowScrollAt.bull || 0), ago = Date.now() - lastS;
-    if (ago < 1200){ clearTimeout(homeRenderDeferT); homeRenderDeferT = setTimeout(render, 1250 - ago); return; }
+    if (homeNowHold.bear || homeNowHold.bull || ago < 1200){ clearTimeout(homeRenderDeferT); homeRenderDeferT = setTimeout(render, Math.max(200, 1250 - ago)); return; }
   } catch (_){}
   const app = document.getElementById('app');
   if (!lastData) return;
@@ -20788,10 +20806,10 @@ document.getElementById('app').addEventListener('click', (e) => {
   const bhg = t.closest('[data-htk-grp]'); if (bhg){   // 2026-11-25 首頁個股訊號追蹤：分組多選（跟個股訊號追蹤那頁同一份）
     const id = String(bhg.dataset.htkGrp);
     if (id === '*') trk.groups.clear(); else if (trk.groups.has(id)) trk.groups.delete(id); else trk.groups.add(id);
-    trkSaveGroups(); render(); try { renderTrack(); } catch (_){} return;
+    trkSaveGroups(); homeTrkRefresh(); try { renderTrack(); } catch (_){} return;
   }
   if (t.closest('[data-htk-open]')){ openTrackPanel(); return; }
-  const bhh = t.closest('[data-htk-hold]'); if (bhh){ homeTrkHold = homeTrkHold === bhh.dataset.htkHold ? '' : bhh.dataset.htkHold; try { localStorage.setItem('htkHold', homeTrkHold); } catch (_){} render(); return; }
+  const bhh = t.closest('[data-htk-hold]'); if (bhh){ homeTrkHold = homeTrkHold === bhh.dataset.htkHold ? '' : bhh.dataset.htkHold; try { localStorage.setItem('htkHold', homeTrkHold); } catch (_){} homeTrkRefresh(); return; }
   const bts = t.closest('[data-tw-scope]'); if (bts){ twScope = bts.dataset.twScope === 'market' ? 'market' : 'mine'; try { localStorage.setItem('twScope', twScope); } catch (_){} render(); return; }   // 2026-11-21 週轉率觀察「我的名單／全市場」
   const btw = t.closest('[data-tw-top]'); if (btw){ twTop = Number(btw.dataset.twTop) || 50; try { localStorage.setItem('twTop', String(twTop)); } catch (_){} render(); return; }   // 2026-11-21 週轉率觀察前 20／30／50
   const bsf = t.closest('[data-sf-tab]'); if (bsf){ const v = bsf.dataset.sfTab; sfTab = v === 'buy' || v === 'sell' ? v : 'vol'; try { localStorage.setItem('sfTab', sfTab); } catch (_){} render(); return; }   // 2026-11-22 股期 成交量／買進／賣出切換
@@ -20820,6 +20838,8 @@ document.getElementById('app').addEventListener('click', (e) => {
   }
   const row = e.target.closest('.stock-row[data-code], .hr-stk[data-code], .hnow-col .signal-row[data-code], .hnow-col .race-row[data-code], .hnow-col .combo-row[data-code]');   // 2026-11-25 首頁今日即時多／空的列
   if (row){ openStockChart(row.dataset.code, row.dataset.name); return; }
+  const brow = e.target.closest('.hnow-col [data-bot-code]');   // 2026-11-25 使用者：今日即時空最上面那塊（32＋123＋193＋777，機器人格式的列）點股名開不了 K 線圖
+  if (brow){ openStockChart(brow.dataset.botCode, brow.dataset.botName); return; }
   const groupEl = e.target.closest('[data-group]');
   if (groupEl) openGroupDetail(groupEl.dataset.group);
 });
