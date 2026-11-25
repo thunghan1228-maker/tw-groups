@@ -62,7 +62,7 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 300px 330px 400px 400px 300px 380px 190px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 360px 330px 400px 400px 380px 190px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -389,9 +389,9 @@
   /* 2026-11-14 使用者：183 右邊多兩欄：「強勢股觀察中・等收黑」（210px，原本在第一欄最上面）、「強勢紅K」＋下面疊創高黑龍（290px）；原本 10 欄寬度不變、整排變寬，往右拉看最右邊 */
   @media (min-width: 1701px){
     .home-rank-scroll{overflow-x:auto;padding-bottom:6px;}
-    .home-rank4{width:calc(100% + 7904px);}   /* 2026-11-22 最左邊加融資增加／大減 330px（＋間距 8） */   /* 2026-11-22 最左邊加股期成交量 400px（＋間距 8） */   /* 2026-11-22 第二欄加營收＋技術面 360px（＋間距 8） */   /* 2026-11-22 905 欄 190 → 380px（下面疊大戶＋投信） */   /* 2026-11-19 使用者：強中強(888)＋週轉率高／現股當沖那欄 310px → 400px（後面的法人、當沖占比被遮到），總寬 +90px */   /* 2026-11-19 使用者：777 360px → 420px（股名被遮到），總寬再 +60px */   /* 2026-11-20 使用者：加火多多(23) 一欄 400px，總寬再 +408px */   /* 2026-11-20 使用者：盤中大戶力搬到強勢股觀察中左邊、改固定 280px，總寬再 +288px */   /* 2026-11-21 使用者：第一欄加週轉率觀察 400px，總寬再 +408px */   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px）；2026-11-18 905／1+2 突破廣播（各 190px）、30加33加34（240px）、三落空（250px）搬到收盤觀察股右邊，改成固定寬 */
+    .home-rank4{width:calc(100% + 7656px);}   /* 2026-11-25 使用者：拿掉盤前空觀察、收盤觀察股（各 300px），空中空(999) 左邊改放機器人 200（360px）：7904 − 300 + 360 − 308 */   /* 2026-11-22 最左邊加融資增加／大減 330px（＋間距 8） */   /* 2026-11-22 最左邊加股期成交量 400px（＋間距 8） */   /* 2026-11-22 第二欄加營收＋技術面 360px（＋間距 8） */   /* 2026-11-22 905 欄 190 → 380px（下面疊大戶＋投信） */   /* 2026-11-19 使用者：強中強(888)＋週轉率高／現股當沖那欄 310px → 400px（後面的法人、當沖占比被遮到），總寬 +90px */   /* 2026-11-19 使用者：777 360px → 420px（股名被遮到），總寬再 +60px */   /* 2026-11-20 使用者：加火多多(23) 一欄 400px，總寬再 +408px */   /* 2026-11-20 使用者：盤中大戶力搬到強勢股觀察中左邊、改固定 280px，總寬再 +288px */   /* 2026-11-21 使用者：第一欄加週轉率觀察 400px，總寬再 +408px */   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px）；2026-11-18 905／1+2 突破廣播（各 190px）、30加33加34（240px）、三落空（250px）搬到收盤觀察股右邊，改成固定寬 */
     .home-rank-scroll{cursor:grab;} .home-rank-scroll .hr-stk,.home-rank-scroll button,.home-rank-scroll [data-bot-code],.home-rank-scroll [data-group],.home-rank-scroll [data-bot-group]{cursor:pointer;}
-    .home-rank4.hx{width:calc(100% + 7904px + var(--hx-w));grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 300px 330px 400px 400px 300px 380px 190px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
+    .home-rank4.hx{width:calc(100% + 7656px + var(--hx-w));grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 360px 330px 400px 400px 380px 190px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
   }
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2 .hr-code,.hot2 .hr-name{color:inherit!important;} .hr-pkw .l1 .hot2{display:inline-flex;gap:5px;min-width:0;overflow:hidden;} .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
@@ -618,6 +618,7 @@
   .chart-canvas-wrap.force-wrap{height:110px;}
   .chart-canvas-wrap.macd-wrap{height:100px;}
   .chart-canvas-wrap.kd-wrap{height:100px;}
+  .chart-canvas-wrap.ang-wrap{height:100px;}
   .chart-canvas-wrap.mcl-wrap{height:110px;}
   .chart-canvas-wrap.mg-wrap{height:130px;}
   .chart-modal.fullscreen .chart-canvas-wrap.price-wrap{height:56vh;}
@@ -625,9 +626,10 @@
   .chart-modal.fullscreen .chart-canvas-wrap.force-wrap{height:140px;}
   .chart-modal.fullscreen .chart-canvas-wrap.macd-wrap{height:130px;}
   .chart-modal.fullscreen .chart-canvas-wrap.kd-wrap{height:130px;}
+  .chart-modal.fullscreen .chart-canvas-wrap.ang-wrap{height:130px;}
   .chart-modal.fullscreen .chart-canvas-wrap.mcl-wrap{height:140px;}
   .chart-modal.fullscreen .chart-canvas-wrap.mg-wrap{height:160px;}
-  #klineCanvas,#volumeCanvas,#forceCanvas,#macdCanvas,#kdCanvas,#mclCanvas,#mgCanvas{display:block;width:100%;height:100%;touch-action:none;}
+  #klineCanvas,#volumeCanvas,#forceCanvas,#macdCanvas,#kdCanvas,#angCanvas,#mclCanvas,#mgCanvas{display:block;width:100%;height:100%;touch-action:none;}
 
   .ind-panel-block{margin-top:10px;}
   .cm-chip-sum{font-size:12px;font-weight:700;margin-left:6px;color:var(--muted);}
@@ -4785,6 +4787,13 @@
     <div class="chart-canvas-wrap price-wrap">
       <canvas id="klineCanvas"></canvas>
     </div>
+    <div class="ind-panel-block ang-panel-block" id="angPanelBlock" hidden>  <!-- 2026-11-25 使用者：老師角度機器人那張「均20 角度」圖放到 5 分K 下面第一欄 -->
+      <div class="ind-panel-head">
+        <span class="force-title">均20 角度（跟 3 根前比）<small class="cm-chip-sum" id="angPanelSum"></small></span>
+        <button class="macd-toggle on" id="angPanelToggle" aria-pressed="true">關閉</button>
+      </div>
+      <div class="chart-canvas-wrap ang-wrap" id="angPanelWrap"><canvas id="angCanvas"></canvas></div>
+    </div>
     <div class="force-panel" id="forcePanelWrap" hidden>
       <div class="force-panel-head">
         <span class="force-title">主力買賣力（大戶）</span>
@@ -6552,12 +6561,107 @@ function drawKdPanel(){
   }
 }
 
+// 2026-11-25 使用者：老師角度機器人那張「均20 角度」圖放到 5 分K 下面第一欄（只有 5 分K 有）。
+// 角度跟角度機器人（股號＋123）、均20 轉彎標籤／盤中提醒同一套：20MA 跟 3 根前比漲跌幾 % 換成角度（angDeg）；
+// 20MA 連著前幾天的 5 分K 算（K 線圖本來就是多日那份 bars5range）。底色分區：≥60 噴出、30～60 攻擊、0～30 緩坡、0～−30 緩跌、−30～−60 急殺、≤−60 崩跌；
+// 由正轉負＝轉下彎（綠▼）、由負轉正＝轉上彎（紅▲）。
+function chartAngSeries(bars){
+  const last = bars[bars.length - 1], c = currentChart.angCache;
+  if (c && c.bars === bars && c.len === bars.length && c.lastClose === (last && last.close)) return c.ang;
+  const n = bars.length, ma = new Array(n).fill(null), ang = new Array(n).fill(null);
+  for (let i = 19; i < n; i++){
+    let sm = 0, ok = true;
+    for (let k = i - 19; k <= i; k++){ const v = bars[k] && bars[k].close; if (!Number.isFinite(v)){ ok = false; break; } sm += v; }
+    if (ok) ma[i] = sm / 20;
+  }
+  for (let i = MA20_TURN_LAG; i < n; i++){ const m = ma[i], m0 = ma[i - MA20_TURN_LAG]; if (m !== null && m0) ang[i] = angDeg((m / m0 - 1) * 100); }
+  currentChart.angCache = { bars, len: n, lastClose: last && last.close, ang };
+  return ang;
+}
+function drawAngPanel(){
+  const blk = document.getElementById('angPanelBlock'), wrap = document.getElementById('angPanelWrap'), sum = document.getElementById('angPanelSum');
+  if (!blk) return;
+  const bars = currentChart.bars;
+  const show = currentChart.tf === 'm5' && Array.isArray(bars) && bars.length > 0;
+  blk.hidden = !show;
+  if (!show || currentChart.angOn === false){ wrap.hidden = true; if (sum) sum.textContent = ''; return; }
+  let angAll;
+  try { angAll = chartAngSeries(bars); } catch (_){ wrap.hidden = true; return; }   // 頁面還沒載完（角度常數還沒定義）就先不畫
+  wrap.hidden = false;
+  const canvas = document.getElementById('angCanvas');
+  const cssW = canvas.parentElement.clientWidth, cssH = canvas.parentElement.clientHeight;
+  const ctx = setupCanvas(canvas, cssW, cssH);
+  const { start: vStart, count: vCount } = visibleRange(angAll.length);
+  const ang = angAll.slice(vStart, vStart + vCount);
+  const padTop = 4, padBottom = 4;
+  const plotW = cssW - PAD.left - PAD.right, plotH = cssH - padTop - padBottom;
+  const xAt = (i) => PAD.left + plotW * (i + 0.5) / ang.length;
+  const yAt = (a) => padTop + plotH * (90 - Math.max(-90, Math.min(90, a))) / 180;
+  [[90, 60, 'rgba(230,103,95,0.30)', '噴出'], [60, 30, 'rgba(230,103,95,0.17)', '攻擊'], [30, 0, 'rgba(230,103,95,0.07)', '緩坡'],
+   [0, -30, 'rgba(95,174,111,0.08)', '緩跌'], [-30, -60, 'rgba(95,174,111,0.18)', '急殺'], [-60, -90, 'rgba(95,174,111,0.30)', '崩跌']].forEach(([a, b, color, lbl]) => {
+    ctx.fillStyle = color; ctx.fillRect(PAD.left, yAt(a), plotW, yAt(b) - yAt(a));
+    ctx.fillStyle = a > 0 ? '#e6675f' : '#5fae6f'; ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(lbl, cssW - PAD.right + 4, (yAt(a) + yAt(b)) / 2);
+  });
+  ctx.strokeStyle = 'rgba(241,236,230,0.45)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD.left, yAt(0)); ctx.lineTo(cssW - PAD.right, yAt(0)); ctx.stroke();
+  ctx.fillStyle = '#a89c8f'; ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.fillText('0°', cssW - 4, yAt(0));
+  // 換日的虛線（多日一起看時分得出哪天）
+  const dayOf = (b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10);
+  ctx.save(); ctx.strokeStyle = 'rgba(168,156,143,0.25)'; ctx.setLineDash([2, 3]);
+  for (let i = 1; i < ang.length; i++){
+    const b0 = bars[vStart + i - 1], b1 = bars[vStart + i];
+    if (b0 && b1 && Number.isFinite(b0.ts) && Number.isFinite(b1.ts) && dayOf(b0) !== dayOf(b1)){ const x = PAD.left + plotW * i / ang.length; ctx.beginPath(); ctx.moveTo(x, padTop); ctx.lineTo(x, cssH - padBottom); ctx.stroke(); }
+  }
+  ctx.restore();
+  ctx.strokeStyle = '#7fb3e0'; ctx.lineWidth = 1.6; ctx.beginPath();
+  let started = false;
+  ang.forEach((a, i) => { if (a === null){ started = false; return; } const x = xAt(i), y = yAt(a); if (!started){ ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y); });
+  ctx.stroke();
+  // 轉彎：由正轉負＝轉下彎（綠▼，畫在線上方）、由負轉正＝轉上彎（紅▲，畫在線下方）；跟前一根比（畫面最左那根也跟畫面外的前一根比）
+  ang.forEach((a, i) => {
+    const p = angAll[vStart + i - 1];
+    if (a === null || p === null || p === undefined) return;
+    const x = xAt(i), y = yAt(a);
+    if (p >= 0 && a < 0){ ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.moveTo(x - 4, y - 9); ctx.lineTo(x + 4, y - 9); ctx.lineTo(x, y - 3); ctx.closePath(); ctx.fill(); }
+    else if (p < 0 && a >= 0){ ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(x - 4, y + 9); ctx.lineTo(x + 4, y + 9); ctx.lineTo(x, y + 3); ctx.closePath(); ctx.fill(); }
+  });
+  const fmt = (a) => { const r = Math.round(a); return (r > 0 ? '+' : r === 0 && a < 0 ? '-' : '') + r + '°'; };
+  const endHm = (b) => { const v = new Date(b.ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16); return v > '13:30' ? '13:30' : v; };
+  const hovering = currentChart.hoverIndex != null;
+  const idx = hovering ? Math.max(0, Math.min(ang.length - 1, currentChart.hoverIndex)) : ang.length - 1;
+  const cur = ang[idx];
+  if (cur !== null && cur !== undefined){
+    ctx.fillStyle = cur >= 0 ? '#ef4444' : '#22c55e';
+    ctx.beginPath(); ctx.arc(xAt(idx), yAt(cur), 3, 0, Math.PI * 2); ctx.fill();
+  }
+  let txt = cur !== null && cur !== undefined ? fmt(cur) + '・' + angLabel(cur) : '';
+  if (!hovering && txt){   // 沒滑的時候，順便寫最後一天最近一次轉彎
+    const lastDay = dayOf(bars[bars.length - 1]);
+    for (let i = angAll.length - 1; i > 0; i--){
+      if (dayOf(bars[i]) !== lastDay) break;
+      const a = angAll[i], p = angAll[i - 1];
+      if (a === null || p === null) continue;
+      if (p >= 0 && a < 0){ txt += '・' + endHm(bars[i]) + ' 轉下彎'; break; }
+      if (p < 0 && a >= 0){ txt += '・' + endHm(bars[i]) + ' 轉上彎'; break; }
+    }
+  }
+  if (sum) sum.textContent = txt ? '　' + txt : '';
+  if (hovering){
+    const hx = xAt(idx);
+    ctx.save(); ctx.strokeStyle = 'rgba(241,236,230,0.35)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(hx, padTop); ctx.lineTo(hx, cssH - padBottom); ctx.stroke(); ctx.restore();
+  }
+}
+
 function redrawAll(){
   if (document.getElementById('chartModal').hidden) return;
   // 視窗剛顯示、還在等非同步bars資料回來時，ResizeObserver可能已經先觸發一次；
   // 這時currentChart.bars還是null，所有draw*函式都還不能執行。
   if (!currentChart.bars) return;
   drawChart();
+  drawAngPanel();
   drawVolumePanel();
   drawMclPanel();
   drawMgPanel();
@@ -6692,7 +6796,7 @@ function attachChartInteraction(){
   canvas.style.cursor = 'grab';
 
   // 滾輪縮放（桌機）：任一面板上滾都會一起縮放，維持時間軸對齊
-  const zoomPanels = ['klineCanvas', 'volumeCanvas', 'forceCanvas', 'macdCanvas', 'mclCanvas'];
+  const zoomPanels = ['klineCanvas', 'angCanvas', 'volumeCanvas', 'forceCanvas', 'macdCanvas', 'mclCanvas'];
   zoomPanels.forEach((id) => {
     const el = document.getElementById(id);
     el.onwheel = handleWheelZoom;
@@ -7268,6 +7372,9 @@ async function switchTimeframe(tf){
   currentChart.macd = computeMACD(bars);
   currentChart.kd = chartComputeKd(tf, bars);
   currentChart.kdOn = true;   // KD 內定開
+  currentChart.angOn = true;   // 均20 角度內定開（只有 5 分K 顯示）
+  const angBtn = document.getElementById('angPanelToggle');
+  angBtn.textContent = '關閉'; angBtn.classList.add('on'); angBtn.setAttribute('aria-pressed', 'true');
   currentChart.mgOn = !isIdxCode(currentChart.code);   // 融資副圖內定開（指數沒有融資）
   const mgBtn = document.getElementById('mgPanelToggle');
   mgBtn.textContent = '關閉'; mgBtn.classList.add('on'); mgBtn.setAttribute('aria-pressed', 'true');
@@ -11456,7 +11563,7 @@ function homeScrColHtml(kind){
 const HOME_X_MAX = 10, HOME_X_KEY = 'homeXCols';
 // 2026-11-14 使用者：預設（第一次打開、新的瀏覽器／手機／iPad、無痕）就是 13 欄＝原本 10 欄＋240、260、270；自己改過（含全部拿掉）就照自己的
 const HOME_X_DEFAULT = [];   // 2026-11-14 使用者：240、260、270、777 改成首頁固定欄位，加欄位預設就不用帶
-const HOME_X_FIXED = new Set(['240', '260', '270', '777', '32', '123', '999', '193', '23']);   // 2026-11-20 使用者：火多多(23) 放首頁（強中強右邊、收盤觀察股左邊）
+const HOME_X_FIXED = new Set(['240', '260', '270', '777', '32', '123', '999', '193', '23', '200']);   // 2026-11-25 使用者：機器人 200 放首頁空中空(999) 左邊   // 2026-11-20 使用者：火多多(23) 放首頁（強中強右邊、收盤觀察股左邊）
 let homeXCols = HOME_X_DEFAULT.slice();
 try { const raw = localStorage.getItem(HOME_X_KEY); if (raw !== null){ const v = JSON.parse(raw); if (Array.isArray(v)) homeXCols = v.filter((c) => typeof c === 'string' && c.trim() && !HOME_X_FIXED.has(botNorm(c))).map((c) => c.slice(0, 20)).slice(0, HOME_X_MAX); } } catch (_){}
 function homeXSave(){ try { localStorage.setItem(HOME_X_KEY, JSON.stringify(homeXCols)); } catch (_){} }
@@ -11832,13 +11939,13 @@ function homeRank4Html(){
     '<div class="hr-stack hx-wide">' + homeRedBox(homeRevTechColHtml()) + '</div>' +   // 2026-11-22 使用者：iPhone 上營收＋技術面代號名稱被遮 → iPad／手機佔兩格寬   // 2026-11-22 使用者：首頁第二欄加「營收＋技術面」綜合評分前 20   // 2026-11-21 使用者：首頁第一欄放週轉率觀察（自己報價組合那份股票）
     homeFixedBotColHtml('32', true) + homeFixedBotColHtml('123', true) + homeFixedBotColHtml('193', true) +
     homeFixedBotColHtml('777', true) +   // 功課卡片條列（777／32／123 兩份以上都有的閃綠）
-    '<div class="hr-stack">' + homeObsListColHtml('pre') + '</div>' +   // 2026-11-14 使用者：盤前空觀察（使用者每天給名單）放在空中空(999) 左邊
+    homeFixedBotColHtml('200', true) +   // 2026-11-25 使用者：首頁拿掉盤前空觀察，空中空(999) 左邊改放機器人 200（均20 轉下彎／轉上彎）
     homeFixedBotColHtml('999', true) +   // 2026-11-22 使用者：融資增加／融資大減搬到首頁最左邊第一欄、大盤融資維持率搬進融資簡報最前面（原本疊在空中空下面）
       // 2026-11-19 使用者：融資增加股票下面加融資大減股票
       // 2026-11-19 使用者：融資增加股票（盤後・前一天）疊在空中空下面   // 2026-11-14 使用者：空中空(999)＝777／32／123 重疊的，放在強中強(888) 左邊
     '<div class="hr-stack hx-wide">' + homeRedBox(homeSsColHtml()) + homeRedBox(homeTurnColHtml()) + '</div>' +   // 強中強（四份重複兩份以上；iPad／手機佔兩格寬）；2026-11-19 使用者：下面疊「週轉率高／現股當沖」（兩個按鈕切換）
     homeFixedBotColHtml('23', true) +   // 2026-11-20 使用者：火多多(23) 放強中強(888) 右邊、收盤觀察股左邊
-    '<div class="hr-stack">' + homeObsListColHtml('close') + '</div>' +   // 2026-11-14 使用者：收盤觀察股（使用者每天給名單）放在強中強(888) 右邊
+    // 2026-11-25 使用者：首頁拿掉收盤觀察股這欄（原本在火多多(23) 右邊）
     // 2026-11-18 使用者：905 突破廣播、1+2 突破廣播搬到收盤觀察股右邊（原本在發動右邊、183 前面；905 在左、1+2 在右不變）
     '<div class="hr-stack hx-wide">' + homeRedBox(home905BcastColHtml()) + homeRedBox(homeTrustBigColHtml()) + '</div>' +   // 2026-11-22 使用者：iPhone 上大戶＋投信那張被擠到看不到代號名稱 → iPad／手機佔兩格寬
       // 2026-11-22 使用者：大戶＋投信同買／同賣放 905 突破廣播下面（905 這欄 190px → 380px 才放得下）
@@ -20152,7 +20259,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">週轉率觀察・新刀劍空(32)・12空(123)・空族群必殺(193)・777・盤前空觀察・空中空(999)／融資增加股票・強中強(888)／週轉率高・現股當沖・火多多(23)・收盤觀察股・905 突破廣播・1+2 突破廣播・30加33加34／投信買超前15・188・三落空・盤中大戶力・強勢股觀察中・強勢紅K／創高黑龍・熱門趨勢概念股(240)・日動能(260)・週動能(270)・多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・發動／今日強勢股／外資買超前15・183／族群漲幅(12)／155</div></div>' +
+        '<div class="section-head"><div class="section-title">週轉率觀察・新刀劍空(32)・12空(123)・空族群必殺(193)・777・均20 轉彎(200)・空中空(999)／融資增加股票・強中強(888)／週轉率高・現股當沖・火多多(23)・905 突破廣播・1+2 突破廣播・30加33加34／投信買超前15・188・三落空・盤中大戶力・強勢股觀察中・強勢紅K／創高黑龍・熱門趨勢概念股(240)・日動能(260)・週動能(270)・多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・發動／今日強勢股／外資買超前15・183／族群漲幅(12)／155</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -20420,6 +20527,14 @@ document.getElementById('mgPanelToggle').addEventListener('click', () => {
   btn.classList.toggle('on', currentChart.mgOn);
   btn.setAttribute('aria-pressed', String(currentChart.mgOn));
   drawMgPanel();
+});
+document.getElementById('angPanelToggle').addEventListener('click', () => {
+  currentChart.angOn = currentChart.angOn === false;
+  const btn = document.getElementById('angPanelToggle');
+  btn.textContent = currentChart.angOn ? '關閉' : '開啟';
+  btn.classList.toggle('on', currentChart.angOn);
+  btn.setAttribute('aria-pressed', String(currentChart.angOn));
+  drawAngPanel();
 });
 document.getElementById('kdPanelToggle').addEventListener('click', () => {
   currentChart.kdOn = !currentChart.kdOn;
@@ -31622,14 +31737,14 @@ function czItems(){
 }
 // 首頁欄位：欄位是程式每 15 秒整個重畫的，所以每次畫完（MutationObserver）再依標題標記、收合；標題對不到的欄不管它
 // 2026-11-18 使用者：首頁每一欄右上角都要有打勾（原本只有底下那幾欄有）；前面這幾個先比（標題裡會帶到別欄名字的要排前面，例：強中強的說明有「強勢股觀察中」）
-const CZ_HOME_CARDS = [['hm:tw', '週轉率觀察'], ['hm:sf', '股期成交量'], ['hm:sf', '股期買進'], ['hm:sf', '股期賣出'], ['hm:rt', '營收＋技術面'], ['hm:tb', '大戶＋投信同'], ['hm:b32', '新刀劍空(32)'], ['hm:b123', '空(123)'], ['hm:b193', '空族群必殺(193)'], ['hm:mup', '融資增加股票'], ['hm:mdn', '融資大減股票'], ['hm:b777', '(777)'], ['hm:b999', '（999）'], ['hm:b240', '(240)'], ['hm:b260', '(260)'], ['hm:b270', '(270)'],
+const CZ_HOME_CARDS = [['hm:tw', '週轉率觀察'], ['hm:sf', '股期成交量'], ['hm:sf', '股期買進'], ['hm:sf', '股期賣出'], ['hm:rt', '營收＋技術面'], ['hm:tb', '大戶＋投信同'], ['hm:b32', '新刀劍空(32)'], ['hm:b123', '空(123)'], ['hm:b193', '空族群必殺(193)'], ['hm:mup', '融資增加股票'], ['hm:mdn', '融資大減股票'], ['hm:b777', '(777)'], ['hm:b999', '（999）'], ['hm:b200', '(200)'], ['hm:b240', '(240)'], ['hm:b260', '(260)'], ['hm:b270', '(270)'],
   ['hm:ss', '強中強'], ['hm:b23', '火多多(23)'], ['hm:turn', '週轉率高'], ['hm:turn', '現股當沖'], ['hm:pre', '盤前空觀察'], ['hm:close', '收盤觀察股'], ['hm:b905', '905突破廣播'], ['hm:b12', '1+2突破廣播'], ['hm:hup', '盤中大戶力≥'], ['hm:hdn', '盤中大戶力≤'],
   ['hm:s99', '外資投信同步'], ['hm:t15', '投信買超前15'], ['hm:f15', '外資買超前15'], ['hm:pick', '強勢股觀察中'], ['hm:red', '強勢紅K'], ['hm:dragon', '創高黑龍'],
   ['hm:mf', '疑似主力融資買進'], ['hm:both', '雙榜交集'], ['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:strong', '今日強勢股'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
   ['hm:r183', '多族群排名(183)'], ['hm:g12', '族群漲幅'], ['hm:r44', '1+2多'], ['hm:t3', '三落空'], ['hm:r155', '股票期貨排名(155)'], ['hm:r75', '股期黑龍']];
 const CZ_HOME_JAIL = [['hm:jin', '今日入獄'], ['hm:jsoon', '即將出關'], ['hm:jout', '已出關']];
 // 首頁每一欄原本的寬度（跟 CSS .home-rank4 的 grid-template-columns 同一份，順序＝欄的順序）；收掉幾欄時照這個排，不平分
-const HOME_TRACKS = ['330px', '400px', '400px', '360px', '310px', '310px', '360px', '420px', '300px', '330px', '400px', '400px', '300px', '380px', '190px', '240px', '250px', '280px', '210px', '330px', '420px', '400px', '400px',
+const HOME_TRACKS = ['330px', '400px', '400px', '360px', '310px', '310px', '360px', '420px', '360px', '330px', '400px', '400px', '380px', '190px', '240px', '250px', '280px', '210px', '330px', '420px', '400px', '400px',
   'minmax(0, 1.6fr)', 'minmax(0, 1.6fr)', 'minmax(0, 1.5fr)', 'minmax(0, 1.95fr)', 'minmax(0, 1.3fr)', 'minmax(0, 1.4fr)'];
 function czApplyHome(){
   const root = document.querySelector('#app .home-rank4');
