@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-25 18:09:00";
+const BUILD_STAMP = "2026-11-25 20:24:58";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -3899,6 +3899,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .wl-gtab{padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;}
   .wl-gtab.active{background:#f5b301;border-color:#f5b301;color:#1a1a1a;}
   .wl-gtab.add{border-style:dashed;color:var(--muted);}
+  .trk-gsel{align-self:center;font-size:12.5px;color:var(--muted);margin-left:4px;}   /* 2026-11-25 個股訊號追蹤分組多選 */
   .wl-gtab.drop-before{box-shadow:-3px 0 0 #f5b301;} .wl-gtab.drop-after{box-shadow:3px 0 0 #f5b301;}   /* 拖曳分組換順序：放開會插在這一格的前面／後面 */
   .wl-gops .wl-btn:disabled{opacity:.4;cursor:default;}
   .wl-add #wlImportFut,.wl-add #wlImportSmall{white-space:nowrap;}
@@ -16394,8 +16395,16 @@ let wl = { key: '', data: wlEmpty(), version: 0, active: 'g1', sort: 'manual', q
 function wlEsc(s){
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+// 2026-11-25 使用者問：個股訊號追蹤怎麼有兩個「📊雙榜交集」（3 檔、15 檔）？——設同步碼時「同名分組合併」（wlMergeInto）把這台的 ⏰／📊 自動分組
+// 複製成一般分組（id 變成 g5、g6…），系統之後又照固定 id（maboth、obs1…）建了一份真的：真的那份每天自動換，複製的那份停在設同步碼那天。
+// 這裡把複製品拿掉（名字是 ⏰／📊 開頭的自動分組名、id 卻不是系統的），同一個 id 重複的也只留第一個；下次存檔就會從雲端清掉。
+function wlIsStaleAutoCopy(g){
+  const nm = String(g && g.name || '');
+  return /^(\\u23F0|\\u{1F4CA})/u.test(nm) && !wlIsAuto(g) && MINE_AUTO_NAMES.includes(nm.replace(/[\\u23F0\\u{1F4CA}\\s]/gu, ''));
+}
 function wlNormalize(){
   if (!wl.data || !Array.isArray(wl.data.groups)) wl.data = wlEmpty();
+  { const ids = new Set(); wl.data.groups = wl.data.groups.filter((g) => { if (!g || wlIsStaleAutoCopy(g) || ids.has(g.id)) return false; ids.add(g.id); return true; }); }
   if (!wl.data.groups.length) wl.data.groups.push({ id: 'g1', name: '自選', items: [] });
   if (!wl.data.settings || typeof wl.data.settings !== 'object') wl.data.settings = {};
   for (const g of wl.data.groups) if (!Array.isArray(g.items)) g.items = [];
@@ -16501,7 +16510,7 @@ async function wlFlush(){
 function wlMergeInto(target, source){
   // 剛設同步碼、這台本來就有清單：同名分組合在一起，同一組裡同一檔不重複
   for (const sg of source.groups){
-    if (!sg.items.length) continue;
+    if (!sg.items.length || wlIsAuto(sg) || wlIsStaleAutoCopy(sg)) continue;   // ⏰／📊 自動分組不合併：系統會自己照固定 id 建，合併會多一份停住不動的複製品
     let tg = target.groups.find((g) => g.name === sg.name);
     if (!tg){ tg = { id: wlNewGroupId(target), name: sg.name, items: [] }; target.groups.push(tg); }
     for (const it of sg.items) if (!tg.items.some((x) => x.code === it.code)) tg.items.push(it);
@@ -17759,7 +17768,10 @@ const TRK_KINDS = [
 ];
 const TRK_KIND_LABEL = Object.fromEntries(TRK_KINDS.map((k) => [k.key, k.label]));
 const TRK_MAS = [5, 10, 20];
-let trk = { group: '*', kind: 'all', state: null };
+// 2026-11-25 使用者：上面的分組可以多選（例：自選＋股票期貨＋小型股票期貨一起看），點一下加入、再點一下拿掉；「全部」＝清掉選的、看全部。記在這台瀏覽器。
+let trk = { groups: (() => { try { const v = JSON.parse(localStorage.getItem('trkGroups') || '[]'); return new Set(Array.isArray(v) ? v.map(String) : []); } catch (_){ return new Set(); } })(), kind: 'all', state: null };
+function trkSaveGroups(){ try { localStorage.setItem('trkGroups', JSON.stringify([...trk.groups])); } catch (_){} }
+function trkSelGroups(){ return wl.data.groups.filter((g) => trk.groups.has(String(g.id))); }   // 選了、而且還存在的分組（分組被刪掉就自動不算）
 function trkLoadState(){
   const today = twTodayStr();
   let st = null;
@@ -17798,9 +17810,11 @@ function trkAllCodes(){
   return s;
 }
 function trkCodesInView(){
-  if (trk.group === '*') return trkAllCodes();
-  const g = wl.data.groups.find((x) => x.id === trk.group);
-  return new Set(g ? g.items.map((it) => it.code) : []);
+  const sel = trkSelGroups();
+  if (!sel.length) return trkAllCodes();
+  const s = new Set();
+  sel.forEach((g) => g.items.forEach((it) => s.add(it.code)));   // 多選：幾組合起來，同一檔只算一次
+  return s;
 }
 function trkItemOf(code){
   for (const g of wl.data.groups){ const it = g.items.find((x) => x.code === code); if (it) return it; }
@@ -17992,8 +18006,11 @@ function renderTrack(force){
   const liveLaunch = new Set(bm ? bm.launchBlocks.flatMap((b) => b.rows).map((r) => r.code) : []);
   let bladeCodes = new Set();
   try { const m = race333Model(); bladeCodes = new Set(m ? [].concat(m.bladeUpper, m.bladeMiddle, m.bladeLower, m.bladeHarvest).map((r) => r.code) : []); } catch (e) { /* 盤中333 算不出來就不標 */ }
-  const groupChips = '<button class="wl-gtab' + (trk.group === '*' ? ' active' : '') + '" data-tgroup="*">全部<span class="wl-gcount">' + all.size + '</span></button>' +
-    wl.data.groups.map((g) => '<button class="wl-gtab' + (trk.group === g.id ? ' active' : '') + '" data-tgroup="' + wlEsc(g.id) + '">' + wlEsc(g.name) + '<span class="wl-gcount">' + g.items.length + '</span></button>').join('');
+  const selN = trkSelGroups().length;
+  const groupChips = '<button class="wl-gtab' + (!selN ? ' active' : '') + '" data-tgroup="*" title="看全部分組（清掉選的）">全部<span class="wl-gcount">' + all.size + '</span></button>' +
+    wl.data.groups.map((g) => { const on = trk.groups.has(String(g.id));
+      return '<button class="wl-gtab' + (on ? ' active' : '') + '" data-tgroup="' + wlEsc(g.id) + '" aria-pressed="' + on + '" title="' + (on ? '再按一下拿掉這組' : '按一下加入這組（可以多選）') + '">' + (on ? '✓ ' : '') + wlEsc(g.name) + '<span class="wl-gcount">' + g.items.length + '</span></button>'; }).join('') +
+    '<span class="trk-gsel">' + (selN ? '已選 ' + selN + ' 組・共 ' + codes.size + ' 檔（重複的只算一次）' : '可以多選：按幾組就一起看') + '</span>';
   const kindChips = [['all', '全部'], ['bull', '多方'], ['bear', '空方']].concat(TRK_KINDS.map((k) => [k.key, k.label])).concat([['alert', '🔔 提醒']])
     .map((k) => '<button class="wl-sort' + (trk.kind === k[0] ? ' active' : '') + '" data-tkind="' + k[0] + '">' + k[1] + '</button>').join('');
   const statusRows = [...codes].map((code) => {
@@ -18063,7 +18080,13 @@ document.getElementById('trackBody').addEventListener('click', (e) => {
   const muteAll = e.target.closest('[data-tmute-all]');
   if (muteAll){ trkSetMuted([...trkCodesInView()], muteAll.dataset.tmuteAll === 'off'); renderTrack(true); return; }
   const g = e.target.closest('[data-tgroup]');
-  if (g){ trk.group = g.dataset.tgroup; renderTrack(); return; }
+  if (g){
+    const id = String(g.dataset.tgroup);
+    if (id === '*') trk.groups.clear();
+    else if (trk.groups.has(id)) trk.groups.delete(id);
+    else trk.groups.add(id);
+    trkSaveGroups(); renderTrack(); return;
+  }
   const k = e.target.closest('[data-tkind]');
   if (k){ trk.kind = k.dataset.tkind; renderTrack(); return; }
   const cell = e.target.closest('.wl-stock');
@@ -19361,7 +19384,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-25 18:09:00';
+const BUILD_STAMP = '2026-11-25 20:24:58';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
