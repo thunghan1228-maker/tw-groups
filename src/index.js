@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-25 15:41:19";
+const BUILD_STAMP = "2026-11-25 17:08:44";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -10056,7 +10056,7 @@ function bladeGoneRowHtml(x){
 // 每列照樣是 b32-row（左邊時間＝這台電腦第一次看到它進名單的時間），每段內時間近的排上面、早的在下面。回傳的 sectioned＝這種分段畫面。
 // ---- 5 分K 20MA 上揚轉下彎（2026-11-24 使用者：空名單裡顯示或另外挑出「均線原本上揚、轉下彎」的；均線＝5 分K 的 20MA）----
 // 20MA＝5 分K 收盤 20 根平均，開盤那段不夠 20 根用前一個交易日的補（跟老師角度機器人的「均20」同一算法，13:30 收盤那筆併在 13:25 那根：
-// 11/24 冠西電收盤算出來 387.13，跟老師一樣）。每根比前一根低＝下彎、高＝上揚、一樣就照前一根的方向；
+// 11/24 冠西電收盤算出來 387.13，跟老師一樣）。20MA 比 3 根前低＝下彎、高＝上揚、一樣就照前一根的方向（2026-11-25 改照老師角度機器人，原本跟前一根比）；
 // 今天最後一次「上揚→下彎」那根 K 棒的結束時間＝轉下彎時間（老師寫「10:50轉下彎」）。現在還在下彎的才標；一開盤就一路下彎、今天沒上揚過的不算「轉」。
 // 5 分K：前幾天的用 /api/bars5range（30 分鐘抓一次）、今天的用 /api/bars（盤中 3 分鐘，跟首頁 905／1+2 同一份快取）。
 // 2026-11-24 使用者：777／123／193／999／99、260／270（動能選股）也要「只看均20轉下彎」（260／270 強勢那邊是「只看均20轉上彎」），每檔標時間；
@@ -10065,18 +10065,22 @@ function bladeGoneRowHtml(x){
 var GROUP_CODE_SET = new Set(ALL_CODES);
 var maTurnOnly = (() => { let o = {}; try { o = JSON.parse(localStorage.getItem('maTurnOnly') || '{}') || {}; if (!('32' in o) && localStorage.getItem('b32TurnOnly') === '1') o['32'] = true; } catch (_){} return o; })();
 function maTurnOn(key){ return !!maTurnOnly[key]; }
+const MA20_TURN_LAG = 3;   // 2026-11-25 均20 轉彎跟 3 根前比（照老師角度機器人）；角度機器人 ANG_LAG 也用這個
 function ma20Series(r5, m5, today){
   if (!r5 || r5.status !== 'ok') return null;
   const dOf = (b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10);
-  const prior = (r5.bars || []).filter((b) => dOf(b) < today && Number.isFinite(b.close)).sort((a, b) => a.ts - b.ts).slice(-19);
-  const src = m5 && m5.status === 'ok' && Array.isArray(m5.bars) && m5.bars.length ? m5.bars : (r5.bars || []);
+  const prior = (r5.bars || []).filter((b) => dOf(b) < today && Number.isFinite(b.close)).sort((a, b) => a.ts - b.ts).slice(-(19 + MA20_TURN_LAG));   // 20MA＋跟 3 根前比
+  // 盤中用即時那份（比較新）；收盤後用多日那份（收盤後校正過、含 13:25 收盤撮合那根，跟角度機器人同一份）
+  const r5Today = (r5.bars || []).some((b) => dOf(b) === today);
+  const src = (twLiveSession() || !r5Today) && m5 && m5.status === 'ok' && Array.isArray(m5.bars) && m5.bars.length ? m5.bars : (r5.bars || []);
   const todays = src.filter((b) => dOf(b) === today && Number.isFinite(b.close)).sort((a, b) => a.ts - b.ts);
   if (!todays.length) return null;
   const all = prior.concat(todays), first = prior.length;
   const ma = (i) => { let sm = 0; for (let k = i - 19; k <= i; k++) sm += all[k].close; return sm / 20; };
   let dir = 0, dnI = -1, upI = -1;
-  for (let i = 20; i < all.length; i++){
-    const d = ma(i) - ma(i - 1);
+  // 2026-11-25 使用者：轉彎改照老師角度機器人——20MA 跟 3 根前比（角度由正轉負＝轉下彎、由負轉正＝轉上彎），原本跟前一根比
+  for (let i = 19 + MA20_TURN_LAG; i < all.length; i++){
+    const d = ma(i) - ma(i - MA20_TURN_LAG);
     const nd = d < -1e-9 ? -1 : d > 1e-9 ? 1 : dir;
     if (i >= first){ if (nd < 0 && dir > 0) dnI = i; if (nd > 0 && dir < 0) upI = i; }
     dir = nd;
@@ -10093,9 +10097,13 @@ function ma20TurnOf(code){
   const c = tdJCache['m5|' + code], q = live ? getStockQuote(code) : null;
   if (live && c && c.data && q && q.price > 0){
     const s0 = ma20Series(r5, c.data, today);
-    if (s0 && s0.dir !== 0 && s0.all.length >= 21){
-      const side = (px) => (q.price > px ? 1 : q.price < px ? -1 : s0.dir);
-      if (side(s0.all[s0.all.length - 20].close) === s0.dir && side(s0.all[s0.all.length - 21].close) === s0.dir) ttl = 900e3;
+    const a0 = s0 ? s0.all : [], n0 = a0.length;
+    if (s0 && s0.dir !== 0 && n0 >= 24){
+      // 20MA 跟 3 根前比的變化＝(最新 3 根收盤 − 20 根前那 3 根收盤)／20：用現價代最後一根（還在走）或當成新的一根，兩種都跟現在方向同一邊才放慢
+      const c = (k) => a0[k].close, sg = (v) => (v > 1e-9 ? 1 : v < -1e-9 ? -1 : s0.dir);
+      const asLast = q.price + c(n0 - 2) + c(n0 - 3) - c(n0 - 21) - c(n0 - 22) - c(n0 - 23);
+      const asNew = q.price + c(n0 - 1) + c(n0 - 2) - c(n0 - 20) - c(n0 - 21) - c(n0 - 22);
+      if (sg(asLast) === s0.dir && sg(asNew) === s0.dir) ttl = 900e3;
     }
   }
   const m5 = tdJ('m5|' + code, '/api/bars/' + code, ttl);
@@ -19240,7 +19248,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-25 15:41:19';
+const BUILD_STAMP = '2026-11-25 17:08:44';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -30509,7 +30517,7 @@ function patSigNotify(events){
 // （平均差 1.7 度；最高 +44°(11:50)、轉下彎 09:35／13:05 都對得上）。20MA 開盤接前一天的 5 分K（收盤撮合那根併在 13:25）。
 // 分區照老師：≥60 噴出、30～60 攻擊、0～30 緩坡、0～−30 緩跌、−30～−60 急殺、≤−60 崩跌；角度由正轉負＝轉下彎（⚔️），由負轉正＝轉上彎。
 // 判讀：收盤（盤中現價）在 20MA 下、而且角度 < 0 ⇒ 偏空；在 20MA 上、角度 > 0 ⇒ 偏多；其他觀望。
-const ANG_K = 2.09, ANG_P = 1.22, ANG_LAG = 3;
+const ANG_K = 2.09, ANG_P = 1.22, ANG_LAG = MA20_TURN_LAG;
 function angDeg(x){ return Math.sign(x) * Math.atan(ANG_K * Math.pow(Math.abs(x), ANG_P)) * 180 / Math.PI; }
 function angLabel(a){ return a >= 60 ? '噴出' : a >= 30 ? '攻擊' : a >= 0 ? '緩坡' : a > -30 ? '緩跌' : a > -60 ? '急殺' : '崩跌'; }
 function angModel(code){
@@ -30632,7 +30640,7 @@ function angBotHtml(code, wrap){
 }
 // ---- 均20 轉彎(200)（2026-11-24 使用者：5 分K 20MA 原本往上、轉成向下，跟原本向下、轉成向上，做成一個機器人，可以切換向上／向下，盤中也要跳出來）----
 // 資料：後端盤中 5 分K 引擎對全部族群股發的「20MA轉下彎／20MA轉上彎」事件（/api/intraday-signals?kind=…，MA20 開盤接前一天的 5 分K，
-// 每根 5 分K 收完判斷；走平照前一根的方向）。每檔看今天最後一次轉彎：最後是轉下彎＝現在還在下彎，列在「向下」；最後是轉上彎列在「向上」。
+// 每根 5 分K 收完判斷：20MA 跟 3 根前比，2026-11-25 起照老師角度機器人；走平照前一根的方向）。每檔看今天最後一次轉彎：最後是轉下彎＝現在還在下彎，列在「向下」；最後是轉上彎列在「向上」。
 // 時間＝轉彎那根 5 分K 的結束時間（13:30 收盤那筆算 13:30）；「第 N 次」＝這檔今天第幾次往這個方向轉。
 const M200 = { dir: (() => { try { return localStorage.getItem('m200Dir') === 'up' ? 'up' : 'down'; } catch (_){ return 'down'; } })(),
   // 2026-11-24 使用者：最上面加「大戶力 ≤ −10%」「大戶力 ≥ +10%」兩個選項（只能選一個，再按一次取消）；列表跟盤中提醒一起套用
@@ -30695,7 +30703,7 @@ function ma200BotHtml(wrap){
   const nD = ev.rows.filter((r) => r.dir === 'down').length, nU = ev.rows.length - nD;
   return wrap(t, btns + botLine('今天轉下彎過 ' + nD + ' 檔・轉上彎過 ' + nU + ' 檔（族群股，一檔一個方向一天只算一次）', 'bot-dim') +
     (list.length ? botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + list.map(row).join('') : botLine('目前沒有', 'bot-dim')) +
-    botLine('5 分K 20MA（20 根收盤平均，開盤接前一天的）' + (M200.dir === 'down' ? '原本上揚、轉成下彎' : '原本下彎、轉成上揚') +
+    botLine('5 分K 20MA（20 根收盤平均，開盤接前一天的；跟 3 根前比，照老師角度機器人：角度由正轉負＝轉下彎）' + (M200.dir === 'down' ? '原本上揚、轉成下彎' : '原本下彎、轉成上揚') +
       '的族群股；一檔一天只列一次（今天第一次轉的時間），盤中反覆轉彎不再重複出現，之後又轉回去的標「已轉回」；最近轉的在上面。盤中跳出提醒跟著這裡選的方向（最上排「📐 200 均20轉彎提醒」可以單獨關）。', 'bot-dim'),
     (lastData && lastData.quoteDate ? String(lastData.quoteDate).slice(5).replace('-', '/') : '') + '・' + list.length + ' 檔' + (M200.hold ? '（' + (M200.hold === 'neg' ? '大戶力 ≤ −10%' : '大戶力 ≥ +10%') + '，共 ' + list0.length + ' 檔）' : ''));
 }
