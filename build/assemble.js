@@ -1823,6 +1823,10 @@ const WORKER_ENTRY = {
       // 個股月營收圖（2026-11-23 使用者）：後端點開才抓 FinMind、存 6 小時，這裡快取 10 分鐘
       return await proxyHanstockBars("/api/hub/revenue-chart" + url.search, 600);
     }
+    if (url.pathname === "/api/stock-models") {
+      // 首頁選股模型（2026-11-26 使用者）：後端收盤後算好存快取，一天只變一次，快取 10 分鐘
+      return await proxyHanstockBars("/api/hub/stock-models", 600);
+    }
     if (url.pathname === "/api/revenue-tech") {
       // 首頁營收＋技術面（2026-11-22 使用者）：收盤後／營收公布才變，快取 5 分鐘
       return await proxyHanstockBars("/api/hub/revenue-tech" + url.search, 300);

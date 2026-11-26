@@ -195,6 +195,31 @@
   /* 首頁最下面的說明表格（2026-10-15 使用者：整段字太亂，改表格）：桌機一排 5 張，窄螢幕自動換行，手機一張一列 */
   .hr-help{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:8px;margin-top:10px;align-items:start;}
   .hr-help-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0;}
+  /* 2026-11-26 使用者：選股模型（十個＋近一年回測）放首頁下面那一區的第一格，佔兩格寬 */
+  .hr-models{grid-column:span 2;background:var(--panel);border:2px solid #7c3aed;border-radius:10px;min-width:0;padding:8px 10px;font-size:13px;color:var(--text);}
+  @media (max-width:699px){ .hr-models{grid-column:auto;} }
+  body:not(.cz-mode) .hr-models.cz-off{display:none;}
+  .hr-models .hr-title{font-size:15px;font-weight:800;}
+  .sm-cats{display:flex;flex-direction:column;gap:5px;margin:8px 0;}
+  .sm-cat{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+  .sm-cat > b{font-size:12px;color:var(--muted);min-width:58px;}
+  .sm-btn{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:3px 10px;font-size:13px;cursor:pointer;}
+  .sm-btn.on{background:#7c3aed;color:#fff;border-color:#7c3aed;}
+  .sm-btn i{font-style:normal;font-size:11px;margin-left:4px;background:#ef4444;color:#fff;border-radius:999px;padding:0 5px;}
+  .sm-idea{margin:4px 0 2px;font-weight:600;}
+  .sm-rules{margin:2px 0 6px 18px;padding:0;font-size:12px;color:var(--muted);line-height:1.5;}
+  .sm-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:6px 0;}
+  .sm-stat{background:rgba(124,58,237,.10);border-radius:6px;padding:4px 6px;text-align:center;min-width:0;}
+  .sm-stat b{display:block;font-size:15px;}
+  .sm-stat span{font-size:11px;color:var(--muted);}
+  .sm-svg{width:100%;height:130px;display:block;margin-top:4px;}
+  .sm-leg{font-size:11px;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px;}
+  .sm-leg i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:3px;}
+  .sm-sub{font-weight:800;margin:10px 0 2px;}
+  .sm-row{display:grid;grid-template-columns:auto auto 1fr auto;gap:6px;padding:5px 2px;border-top:1px solid var(--line);cursor:pointer;align-items:baseline;}
+  .sm-row .sm-d{color:#a78bfa;font-size:12px;}
+  .sm-why{grid-column:1 / -1;font-size:12px;color:var(--muted);}
+  .sm-note{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.55;}
   .hr-help-title{padding:6px 10px;background:#4a3d34;font-weight:800;font-size:13px;color:var(--text);}
   .hr-help-tbl{width:100%;border-collapse:collapse;font-size:12px;line-height:1.5;color:var(--muted);}
   .hr-help-tbl th{padding:4px 8px;text-align:left;font-weight:700;font-size:11px;color:var(--muted);background:rgba(255,255,255,0.03);white-space:nowrap;}
@@ -787,7 +812,7 @@
   /* 首頁那排欄位（當沖多、多觀察、續抱勿追高、30加33加34、發動、188、183、族群漲幅、1+2多、三落空、155、75）與下面的處置欄、說明卡片也能收：
      沒收的欄平分寬度（--cz-n＝還看得到幾欄）；整欄都收光的那一欄不佔位置；自訂模式下全部照常顯示（收起來的半透明）才點得到 */
   body:not(.cz-mode) .cz-box-off{display:none!important;} body.cz-mode .home-botcol.cz-off{display:block!important;}   /* 2026-11-18 機器人欄也能收、紅框裡兩塊都收就整個紅框收 */
-  body.cz-mode .hr-col.cz-off,body.cz-mode .hr-help-card.cz-off{display:block!important;} body.cz-mode .hr-redbox.cz-off,body.cz-mode .hr-jail-col.cz-off{display:flex!important;}
+  body.cz-mode .hr-col.cz-off,body.cz-mode .hr-help-card.cz-off,body.cz-mode .hr-models.cz-off{display:block!important;} body.cz-mode .hr-redbox.cz-off,body.cz-mode .hr-jail-col.cz-off{display:flex!important;}
   body:not(.cz-mode) .cz-unit-off{display:none!important;}
   body.cz-mode .home-rank4 [data-cz]::before,body.cz-mode .hr-help [data-cz]::before{left:auto;right:6px;top:6px;}
   body.cz-mode .home-rank4 [data-cz],body.cz-mode .hr-help [data-cz]{outline:1px dashed rgba(124,58,237,.7);outline-offset:-2px;}
@@ -11387,6 +11412,79 @@ function homeBcastFoot(f, total, unit, mode){
   if (total > HOME_BCAST_SCAN) bits.push('只看最近 ' + HOME_BCAST_SCAN + ' ' + unit);
   return bits.length ? '<div class="hr-note" style="font-size:11px">' + bits.join('・') + '</div>' : '';
 }
+// 首頁下面那一區第一格「選股模型」（2026-11-26 使用者：別家十大選股模型那種，十個都做、自己分類，回測一年；後端 /api/stock-models 收盤後算好）
+var smSel = (() => { try { return localStorage.getItem('smSel') || 'bigInst'; } catch (_){ return 'bigInst'; } })();
+function smWhyText(w, names){
+  if (!w) return '';
+  const p = (v) => (v > 0 ? '+' : '') + v;
+  const b = [];
+  if (w.bigUp !== undefined) b.push('大戶持股 ' + p(w.bigUp) + ' 個百分點');
+  if (w.kiloUp !== undefined) b.push('千張大戶 ' + p(w.kiloUp) + ' 個百分點');
+  if (w.holdersChg !== undefined) b.push('股東人數 ' + p(w.holdersChg) + '%');
+  if (w.inst5 !== undefined) b.push('外資＋投信 5 日 ' + p(w.inst5) + ' 張（' + w.buyDays + ' 天買）');
+  if (w.trust10 !== undefined) b.push('投信 10 日 ' + p(w.trust10) + ' 張（' + w.trustDays + ' 天買）');
+  if (w.foreign !== undefined) b.push('外資 ' + p(w.foreign) + '・投信 ' + p(w.trust) + ' 張');
+  if (w.instDays !== undefined) b.push('法人先買 ' + w.instDays + ' 天');
+  if (w.marginChg !== undefined) b.push('融資 5 日 ' + p(w.marginChg) + '%');
+  if (w.who !== undefined) b.push(w.who + '買 ' + w.lots + ' 張（佔量 ' + w.pctOfVol + '%）');
+  if (w.dayTrade !== undefined) b.push('當沖比 ' + w.dayTrade + '%');
+  if (w.revMonth !== undefined) b.push(Number(String(w.revMonth).slice(5)) + '月營收年增 ' + p(w.yoy) + '%' + (w.prevYoy !== undefined ? '（上月 ' + p(w.prevYoy) + '%）' : ''));
+  if (w.volX !== undefined) b.push('量 ' + w.volX + ' 倍');
+  if (w.pct !== undefined) b.push('漲 ' + w.pct + '%');
+  if (Array.isArray(w.models)) b.push('被選到：' + w.models.map((k) => names[k] || k).join('、'));
+  return b.join('・');
+}
+function smCurveSvg(st, idx){
+  const series = [['#a78bfa', st.curve || []], ['#ef4444', (idx && idx.taiex) || []], ['#3b82f6', (idx && idx.otc) || []]];
+  const days = Array.from(new Set(series.flatMap(([, pts]) => pts.map((x) => x[0])))).sort();
+  if (days.length < 2) return '';
+  const pos = new Map(days.map((d, k) => [d, k]));
+  const vals = series.flatMap(([, pts]) => pts.map((x) => x[1])).concat([0]);
+  const lo = Math.min(...vals), hi = Math.max(...vals), W = 600, H = 130, pad = 4;
+  const X = (d) => pad + pos.get(d) / (days.length - 1) * (W - 2 * pad), Y = (v) => H - pad - (v - lo) / ((hi - lo) || 1) * (H - 2 * pad);
+  const line = ([c, pts]) => pts.length ? '<polyline fill="none" stroke="' + c + '" stroke-width="2" points="' + pts.map((x) => X(x[0]).toFixed(1) + ',' + Y(x[1]).toFixed(1)).join(' ') + '"/>' : '';
+  return '<svg class="sm-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none"><line x1="0" x2="' + W + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="4 4"/>' + series.map(line).join('') + '</svg>' +
+    '<div class="sm-leg"><span><i style="background:#a78bfa"></i>這個模型（以最大資金需求為本金）</span><span><i style="background:#ef4444"></i>加權</span><span><i style="background:#3b82f6"></i>櫃買</span><span>' + days[0].slice(5).replace('-', '/') + '～' + days[days.length - 1].slice(5).replace('-', '/') + '</span></div>';
+}
+function homeModelsCardHtml(){
+  const d = botFetchCache('stockModels', '/api/stock-models', 10 * 60e3);
+  const md = (v) => (v ? Number(String(v).slice(5, 7)) + '/' + Number(String(v).slice(8, 10)) : '');
+  const ok = !!(d && d.status === 'ok' && Array.isArray(d.models) && d.models.length);
+  const title = '<div class="hr-title">🧠 選股模型・近一年回測' + (ok ? ' <span class="hr-rk">' + md(d.asOf) + ' 收盤算</span>' : '') + '</div>';
+  if (!ok) return '<div class="hr-models">' + title + '<div class="hr-note">' + (!d ? '讀取中…' : d.status === 'pending' ? wlEsc(d.reason || '第一次計算中') : '後端還在準備（要先回補一年的法人、融資、當沖、營收資料），稍後再看') + '</div></div>';
+  const sel = d.models.find((m) => m.key === smSel) || d.models[0];
+  const names = Object.fromEntries(d.models.map((m) => [m.key, m.name]));
+  const cats = (d.categories || []).map((c) => '<div class="sm-cat"><b>' + wlEsc(c.name) + '</b>' + d.models.filter((m) => m.cat === c.key).map((m) =>
+    '<button type="button" class="sm-btn' + (m.key === sel.key ? ' on' : '') + '" data-sm-key="' + wlEsc(m.key) + '" title="' + wlEsc(m.idea) + '">' + wlEsc(m.name) + (m.picks.length ? '<i>' + m.picks.length + '</i>' : '') + '</button>').join('') + '</div>').join('');
+  const st = sel.stats || {};
+  const pc = (v) => (v === null || v === undefined ? '—' : (v > 0 ? '+' : '') + v + '%');
+  const money = (v) => (!v ? '—' : v >= 1e8 ? (v / 1e8).toFixed(2) + ' 億' : Math.round(v / 1e4).toLocaleString() + ' 萬');
+  const stat = (lbl, val, tip) => '<div class="sm-stat"' + (tip ? ' title="' + wlEsc(tip) + '"' : '') + '><b>' + val + '</b><span>' + lbl + '</span></div>';
+  const stats = '<div class="sm-stats">' +
+    stat('交易筆數', (st.trades || 0) + (st.open ? '<small>＋持有 ' + st.open + '</small>' : ''), '已出場的筆數（持有中的不算勝率）') +
+    stat('勝率', st.winRate === null || st.winRate === undefined ? '—' : st.winRate + '%') +
+    stat('平均每筆', pc(st.avgRet), '扣掉手續費、證交稅以後') +
+    stat('盈虧比', st.payoff ?? '—', '平均賺的 ÷ 平均賠的') +
+    stat('報酬（最大資金）', pc(st.retOnCapital), '總損益 ÷ 最大資金需求（同時持有最多幾檔 × 10 萬）') +
+    stat('同期加權／櫃買', pc(d.index && d.index.taiexRet) + '／' + pc(d.index && d.index.otcRet)) +
+    stat('最大回撤', st.mdd === undefined ? '—' : '−' + st.mdd + '%', '權益從最高點往下掉最多幾 %') +
+    stat('最大資金需求', money(st.maxCapital), '同時最多持有 ' + (st.maxConcurrent || 0) + ' 檔 × 10 萬') + '</div>';
+  const liveP = (code) => { const q = getStockQuote(code); return q && Number.isFinite(q.changePercent) ? q.changePercent : null; };
+  const row = (x, when) => { const p = x.pct !== undefined && x.pct !== null && !when ? x.pct : liveP(x.code);
+    return '<div class="sm-row hr-stk" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(x.name || '') + '" tabindex="0" role="button"><span class="sm-d">' + (when ? md(when) : '今天') + '</span><span><span class="hr-code">' + wlEsc(x.code) + '</span> <span class="hr-name">' + wlEsc(x.name || '') + '</span></span><span></span>' +
+      '<span class="hr-avg ' + (p === null ? 'flat' : dirClass(p)) + '">' + (p === null ? '' : fmt(p) + '%') + '</span><div class="sm-why">' + wlEsc(smWhyText(x.why, names)) + '</div></div>'; };
+  const picks = sel.picks || [], recent = (sel.recent || []).slice(0, 6);
+  const trades = (sel.lastTrades || []).slice(0, 6).map((t) => '<div class="sm-row hr-stk" data-code="' + wlEsc(t.code) + '" data-name="' + wlEsc(t.name || '') + '" tabindex="0" role="button"><span class="sm-d">' + md(t.entryDate) + '→' + md(t.exitDate) + '</span><span><span class="hr-code">' + wlEsc(t.code) + '</span> <span class="hr-name">' + wlEsc(t.name || '') + '</span></span><span style="font-size:11px;color:var(--muted)">' + (t.reason === 'ma20' ? '破月線出' : '滿 10 天出') + '</span><span class="hr-avg ' + dirClass(t.ret) + '">' + fmt(t.ret) + '%</span></div>').join('');
+  const cov = d.coverage || {};
+  return '<div class="hr-models">' + title + '<div class="sm-cats">' + cats + '</div>' +
+    '<div class="sm-idea">' + wlEsc(sel.name) + '：' + wlEsc(sel.idea) + '</div><ul class="sm-rules">' + sel.rules.map((r) => '<li>' + wlEsc(r) + '</li>').join('') + '</ul>' +
+    stats + smCurveSvg(st, d.index) +
+    '<div class="sm-sub">今天入選（' + picks.length + ' 檔，明天開盤進場）</div>' + (picks.length ? picks.map((x) => row(x)).join('') : '<div class="hr-note">今天沒有新訊號</div>') +
+    (recent.length ? '<div class="sm-sub">前幾天的訊號</div>' + recent.map((x) => row(x, x.date)).join('') : '') +
+    (trades ? '<div class="sm-sub">回測最近出場</div>' + trades : '') +
+    '<div class="sm-note">共同條件：' + (d.commonRules || []).map(wlEsc).join('；') + '。<br>回測：' + (d.backtestRules || []).map(wlEsc).join('；') + '。<br>' +
+      '回測期間 ' + md(d.backtest && d.backtest.from) + '～' + md(d.backtest && d.backtest.to) + '（' + ((d.backtest && d.backtest.days) || 0) + ' 個交易日）；資料：法人 ' + (cov.instDays || 0) + ' 天、融資 ' + (cov.marginDays || 0) + ' 天、當沖 ' + (cov.daytradeDays || 0) + ' 天、集保 ' + (cov.tdccWeeks || 0) + ' 週。回測結果不代表未來，只是看這個條件過去一年的表現。</div></div>';
+}
 // 首頁「905 跌破廣播」（2026-11-26 使用者：905 突破廣播完全倒過來，放 905 突破廣播左邊）
 var homeBcastHoldDn = false;
 try { homeBcastHoldDn = localStorage.getItem('bcastHoldDn') === '1'; } catch (_){}
@@ -12384,7 +12482,7 @@ function homeRank4Html(){
     // 2026-10-21 使用者：最右邊一欄（個股漲 > 2%（22-5）＋隔日沖黑龍(80)）整欄拿掉；股期黑龍(75) 還在 188 下面
     homeXColsHtml() +   // 2026-11-14 使用者：加的機器人代碼欄位接在最右邊
     '</div></div>' +
-    '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
+    '<div class="hr-help">' + homeModelsCardHtml() + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }
 // 首頁最下面的說明（2026-10-15 使用者：一段一段字太亂，整理成表格）：族群排名欄、個股欄、強勢黑K選股、符號各一張
 const hrHelpTable = (title, head, rows, cls) => '<div class="hr-help-card' + (cls ? ' ' + cls : '') + '"><div class="hr-help-title">' + title + '</div><table class="hr-help-tbl">' +
@@ -20758,27 +20856,34 @@ function render(){
 // 2026-11-26 使用者：網頁變慢、滑鼠移動也卡——原本 render() 每次都把整個首頁（約 3 萬個元素、35 欄）換掉，瀏覽器每次都要整頁重排（一次約 0.5 秒），
 // 開網頁時 5 分K 一檔一檔回來又一直觸發重畫，前 30 秒幾乎一直在忙。改成：首頁外框沒變就只換內容有變的那幾欄，沒變的欄完全不動。
 // 回傳 true＝整個換掉（第一次、或外框變了）
+const HOME_DIFF_BOXES = ['.home-rank4', '.hr-help'];   // 這兩區一格一格比（下面那一區的即將出關有即時漲跌，不分開比的話盤中每次都整頁換）
 function homeApplyHtml(app, html){
   const t = document.createElement('template');
   t.innerHTML = html;
-  const nw = t.content.querySelector('.home-rank4');
-  const old = app.querySelector('.home-rank4');
-  if (!nw){ app.replaceChildren(t.content); app._homeSkel = null; return true; }
-  const kids = Array.from(nw.children);
-  const strs = kids.map((k) => k.outerHTML);
-  nw.replaceChildren();
+  const parts = HOME_DIFF_BOXES.map((sel) => {
+    const nw = t.content.querySelector(sel);
+    if (!nw) return null;
+    const kids = Array.from(nw.children);
+    const strs = kids.map((k) => k.outerHTML);
+    nw.replaceChildren();
+    return { sel, nw, kids, strs };
+  });
+  if (!parts[0]){ app.replaceChildren(t.content); app._homeSkel = null; return true; }
   const skel = t.innerHTML;
-  if (old && app._homeSkel === skel && old.children.length === kids.length){
-    const oldKids = Array.from(old.children);
-    for (let i = 0; i < kids.length; i++){
-      if (oldKids[i]._homeH === strs[i]) continue;
-      kids[i]._homeH = strs[i];
-      oldKids[i].replaceWith(kids[i]);
-    }
+  const olds = parts.map((pt) => (pt ? app.querySelector(pt.sel) : null));
+  if (app._homeSkel === skel && parts.every((pt, k) => !pt || (olds[k] && olds[k].children.length === pt.kids.length))){
+    parts.forEach((pt, k) => {
+      if (!pt) return;
+      const oldKids = Array.from(olds[k].children);
+      for (let i = 0; i < pt.kids.length; i++){
+        if (oldKids[i]._homeH === pt.strs[i]) continue;
+        pt.kids[i]._homeH = pt.strs[i];
+        oldKids[i].replaceWith(pt.kids[i]);
+      }
+    });
     return false;
   }
-  kids.forEach((k, i) => { k._homeH = strs[i]; });
-  nw.append(...kids);
+  parts.forEach((pt) => { if (!pt) return; pt.kids.forEach((kd, i) => { kd._homeH = pt.strs[i]; }); pt.nw.append(...pt.kids); });
   app.replaceChildren(t.content);
   app._homeSkel = skel;
   return true;
@@ -20948,6 +21053,7 @@ document.getElementById('app').addEventListener('click', (e) => {
   const bsf = t.closest('[data-sf-tab]'); if (bsf){ const v = bsf.dataset.sfTab; sfTab = v === 'buy' || v === 'sell' ? v : 'vol'; try { localStorage.setItem('sfTab', sfTab); } catch (_){} render(); return; }   // 2026-11-22 股期 成交量／買進／賣出切換
   const btb = t.closest('[data-tb-side]'); if (btb){ tbSide = btb.dataset.tbSide === 'sell' ? 'sell' : 'buy'; try { localStorage.setItem('tbSide', tbSide); } catch (_){} render(); return; }   // 2026-11-22 大戶＋投信 同買／同賣切換
   const btt = t.closest('[data-turn-tab]'); if (btt){ homeTurnTab = btt.dataset.turnTab === 'dt' ? 'dt' : 'turn'; try { localStorage.setItem('turnTab', homeTurnTab); } catch (_){} render(); return; }   // 2026-11-19 週轉率高／現股當沖切換
+  const smk = t.closest('[data-sm-key]'); if (smk){ smSel = smk.dataset.smKey; try { localStorage.setItem('smSel', smSel); } catch (_){} render(); return; }   // 2026-11-26 選股模型切換
   const bchd = t.closest('[data-bcast-hold-dn]'); if (bchd){ homeBcastHoldDn = !homeBcastHoldDn; try { localStorage.setItem('bcastHoldDn', homeBcastHoldDn ? '1' : '0'); } catch (_){} render(); return; }   // 2026-11-26 905 跌破廣播
   const bch = t.closest('[data-bcast-hold]'); if (bch){ homeBcastHold = !homeBcastHold; try { localStorage.setItem('bcastHold', homeBcastHold ? '1' : '0'); } catch (_){} render(); return; }   // 2026-11-18 905／1+2 突破廣播「大戶力 ≥ +10%」
   const hm = t.closest('[data-hx-move]'); if (hm){ const [i, d] = hm.dataset.hxMove.split(':').map(Number), j = i + d; if (j >= 0 && j < homeXCols.length){ [homeXCols[i], homeXCols[j]] = [homeXCols[j], homeXCols[i]]; homeXSave(); render(); } return; }
@@ -32574,6 +32680,7 @@ function czApplyHome(){
       const hit = CZ_HOME_JAIL.find(([, t]) => head.includes(t));
       if (hit){ el.dataset.cz = hit[0]; el.classList.toggle('cz-off', czHidden.has(hit[0])); }
     });
+    help.querySelectorAll(':scope > .hr-models').forEach((el) => { el.dataset.cz = 'hm:models'; el.classList.toggle('cz-off', czHidden.has('hm:models')); });
     const cards = Array.from(help.querySelectorAll(':scope > .hr-help-card'));
     cards.forEach((el, i) => {   // 說明卡片整組一起收：第一張有勾選框、其他跟著它
       el.classList.toggle('cz-off', czHidden.has('hm:help'));
