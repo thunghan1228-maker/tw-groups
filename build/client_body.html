@@ -62,7 +62,7 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 330px 756px 300px 360px 300px 680px 912px 380px 190px 400px 400px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 330px 756px 390px 360px 390px 680px 912px 380px 190px 400px 400px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -101,6 +101,7 @@
   .hr-b905r.hr-b905d:not(.hr-b905ok) .hr-ready{color:#4ade80;}   /* 2026-11-26 905 跌破廣播：「跌破」小字綠色 */
   .hr-b905r.hr-b905d.hr-b12back .hr-ready{color:#f87171;}   /* 1+2 跌破廣播：「站回」紅字 */
   .hr-redbox.hr-grnbox{outline-color:#22c55e;}   /* 2026-11-26 使用者：905／1+2 跌破廣播外框用綠色 */
+  .hr-dnbig > .hr-redbox > .hr-col{zoom:1.25;}   /* 2026-11-26 使用者：905／1+2 跌破廣播字放大 1.25 倍（欄寬 300 → 390px） */
   /* 2026-11-02 使用者：續抱勿追高、30加33加34 每列最前面的族群名次（5、9、12…）跟後面的代號貼在一起分不清楚 → 名次改白色亮一點、粗體、固定寬度靠右，右邊加一條細線跟代號隔開 */
   .hr-row > .hr-rk.hr-gr{color:#fff;font-weight:900;font-size:12px;min-width:1.7em;text-align:right;padding-right:5px;margin-right:2px;border-right:1px solid rgba(255,255,255,.45);flex-shrink:0;}
   .hr-hold{flex:0 0 auto;display:inline-block;margin-left:4px;min-width:3.3em;text-align:center;font-size:12px;font-weight:800;line-height:1.5;font-variant-numeric:tabular-nums;border-radius:5px;padding:0 4px;color:var(--muted);white-space:nowrap;}   /* 2026-10-22 使用者：首頁 30加33加34、183、12 三欄每檔後面的盤中大戶力；≥ +10% 紅底白字、≤ −10% 綠底白字 */
@@ -392,9 +393,9 @@
   /* 2026-11-14 使用者：183 右邊多兩欄：「強勢股觀察中・等收黑」（210px，原本在第一欄最上面）、「強勢紅K」＋下面疊創高黑龍（290px）；原本 10 欄寬度不變、整排變寬，往右拉看最右邊 */
   @media (min-width: 1701px){
     .home-rank-scroll{overflow-x:auto;padding-bottom:6px;}
-    .home-rank4{width:calc(100% + 10644px);}   /* 2026-11-26 加 905 跌破廣播、1+2 跌破廣播各 300px（＋間距 8） */   /* 2026-11-25 今日即時空 630→756、今日即時多 760→912（字放大 1.2 倍，欄寬跟著放大） */   /* 2026-11-25 今日即時空 760 → 630px（使用者：緊實一點） */   /* 2026-11-25 加今日即時空、今日即時多各 760px（＋間距 8）：8344 + 1536；窄了一列會擠成三行，跟訊號中心看起來不一樣 */   /* 2026-11-25 個股訊號追蹤 600 → 680px（字放大、多一欄大戶力） */   /* 2026-11-25 使用者：空中空(999) 右邊、強中強左邊加「個股訊號追蹤」600px（＋間距 8）：7656 + 608 */   /* 2026-11-25 使用者：拿掉盤前空觀察、收盤觀察股（各 300px），空中空(999) 左邊改放機器人 200（360px）：7904 − 300 + 360 − 308 */   /* 2026-11-22 最左邊加融資增加／大減 330px（＋間距 8） */   /* 2026-11-22 最左邊加股期成交量 400px（＋間距 8） */   /* 2026-11-22 第二欄加營收＋技術面 360px（＋間距 8） */   /* 2026-11-22 905 欄 190 → 380px（下面疊大戶＋投信） */   /* 2026-11-19 使用者：強中強(888)＋週轉率高／現股當沖那欄 310px → 400px（後面的法人、當沖占比被遮到），總寬 +90px */   /* 2026-11-19 使用者：777 360px → 420px（股名被遮到），總寬再 +60px */   /* 2026-11-20 使用者：加火多多(23) 一欄 400px，總寬再 +408px */   /* 2026-11-20 使用者：盤中大戶力搬到強勢股觀察中左邊、改固定 280px，總寬再 +288px */   /* 2026-11-21 使用者：第一欄加週轉率觀察 400px，總寬再 +408px */   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px）；2026-11-18 905／1+2 突破廣播（各 190px）、30加33加34（240px）、三落空（250px）搬到收盤觀察股右邊，改成固定寬 */
+    .home-rank4{width:calc(100% + 10824px);}   /* 2026-11-26 加 905 跌破廣播、1+2 跌破廣播各 390px（＋間距 8） */   /* 2026-11-25 今日即時空 630→756、今日即時多 760→912（字放大 1.2 倍，欄寬跟著放大） */   /* 2026-11-25 今日即時空 760 → 630px（使用者：緊實一點） */   /* 2026-11-25 加今日即時空、今日即時多各 760px（＋間距 8）：8344 + 1536；窄了一列會擠成三行，跟訊號中心看起來不一樣 */   /* 2026-11-25 個股訊號追蹤 600 → 680px（字放大、多一欄大戶力） */   /* 2026-11-25 使用者：空中空(999) 右邊、強中強左邊加「個股訊號追蹤」600px（＋間距 8）：7656 + 608 */   /* 2026-11-25 使用者：拿掉盤前空觀察、收盤觀察股（各 300px），空中空(999) 左邊改放機器人 200（360px）：7904 − 300 + 360 − 308 */   /* 2026-11-22 最左邊加融資增加／大減 330px（＋間距 8） */   /* 2026-11-22 最左邊加股期成交量 400px（＋間距 8） */   /* 2026-11-22 第二欄加營收＋技術面 360px（＋間距 8） */   /* 2026-11-22 905 欄 190 → 380px（下面疊大戶＋投信） */   /* 2026-11-19 使用者：強中強(888)＋週轉率高／現股當沖那欄 310px → 400px（後面的法人、當沖占比被遮到），總寬 +90px */   /* 2026-11-19 使用者：777 360px → 420px（股名被遮到），總寬再 +60px */   /* 2026-11-20 使用者：加火多多(23) 一欄 400px，總寬再 +408px */   /* 2026-11-20 使用者：盤中大戶力搬到強勢股觀察中左邊、改固定 280px，總寬再 +288px */   /* 2026-11-21 使用者：第一欄加週轉率觀察 400px，總寬再 +408px */   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px）；2026-11-18 905／1+2 突破廣播（各 190px）、30加33加34（240px）、三落空（250px）搬到收盤觀察股右邊，改成固定寬 */
     .home-rank-scroll{cursor:grab;} .home-rank-scroll .hr-stk,.home-rank-scroll button,.home-rank-scroll [data-bot-code],.home-rank-scroll [data-group],.home-rank-scroll [data-bot-group]{cursor:pointer;}
-    .home-rank4.hx{width:calc(100% + 10644px + var(--hx-w));grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 330px 756px 300px 360px 300px 680px 912px 380px 190px 400px 400px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
+    .home-rank4.hx{width:calc(100% + 10824px + var(--hx-w));grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 330px 756px 390px 360px 390px 680px 912px 380px 190px 400px 400px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
   }
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2 .hr-code,.hot2 .hr-name{color:inherit!important;} .hr-pkw .l1 .hot2{display:inline-flex;gap:5px;min-width:0;overflow:hidden;} .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
@@ -11903,6 +11904,7 @@ function homeNowSwapBack(old){   // render() 換完以後叫：能沿用的把�
   const fresh = [];
   document.querySelectorAll('.hnow-scroll[data-hnow]').forEach((nb) => {
     const side = nb.dataset.hnow, o = old[side], ob = o && o.el, html = homeNowLast[side];
+    if (ob && ob === nb) return;   // 這欄沒換（homeApplyHtml 沒動它）：框原封不動，捲的位置也沒變
     const busy = homeNowHold[side] || Date.now() - (homeNowScrollAt[side] || 0) < 2000;
     if (ob && (ob._h === html || busy || nb.dataset.keep)){ nb.replaceWith(ob); ob.scrollTop = o.top; return; }
     if (nb.dataset.keep){ nb.innerHTML = '<div class="hnow-in">' + html + '</div>'; delete nb.dataset.keep; }   // 舊框不見了（不該發生）：補畫內容
@@ -11961,6 +11963,7 @@ function homeTrkRefresh(){
   const t = document.createElement('template');
   t.innerHTML = homeTrkColHtml();
   const nu = t.content.firstElementChild;
+  const col = el.closest('.home-rank4 > *'); if (col) col._homeH = null;   // 跟 homeApplyHtml 記的內容不一樣了，下次重畫整欄換
   if (nu) el.replaceWith(nu); else render();
 }
 let homeTrkExtraAt = 0;
@@ -12309,9 +12312,9 @@ function homeRank4Html(){
     homeFixedBotColHtml('777', true) +   // 功課卡片條列（777／32／123 兩份以上都有的閃綠）
     homeFixedBotColHtml('999', true) +   // 2026-11-25 使用者：空中空(999) 跟均20 轉彎(200) 對調——777 右邊先空中空、再 200
     '<div class="hr-stack hx-wide">' + homeRedBox(homeNowColHtml('bear')) + '</div>' +   // 2026-11-25 使用者：訊號中心「今日即時空」搬到首頁，放均20 轉彎(200) 左邊
-    '<div class="hr-stack">' + homeGreenBox(home905dBcastColHtml()) + '</div>' +   // 2026-11-26 使用者：905 跌破廣播放今日即時空右邊（原本在 905 突破廣播左邊）
+    '<div class="hr-stack hr-dnbig">' + homeGreenBox(home905dBcastColHtml()) + '</div>' +   // 2026-11-26 使用者：905 跌破廣播放今日即時空右邊（原本在 905 突破廣播左邊）
     homeFixedBotColHtml('200', true) +   // 2026-11-25 使用者：首頁拿掉盤前空觀察，改放機器人 200（均20 轉下彎／轉上彎）
-    '<div class="hr-stack">' + homeGreenBox(home12dBcastColHtml()) + '</div>' +   // 2026-11-26 使用者：1+2 跌破廣播放個股訊號追蹤左邊
+    '<div class="hr-stack hr-dnbig">' + homeGreenBox(home12dBcastColHtml()) + '</div>' +   // 2026-11-26 使用者：1+2 跌破廣播放個股訊號追蹤左邊
     '<div class="hr-stack hx-wide">' + homeRedBox(homeTrkColHtml()) + '</div>' +   // 2026-11-25 使用者：個股訊號追蹤的「現況」＋「今日訊號」合成一張，放強中強左邊
     '<div class="hr-stack hx-wide">' + homeRedBox(homeNowColHtml('bull')) + '</div>' +   // 2026-11-25 使用者：訊號中心「今日即時多」搬到首頁，放強中強左邊
     // 2026-11-26 使用者：905 突破廣播（下面疊大戶＋投信）、1+2 突破廣播兩欄搬到今日即時多右邊、強中強左邊
@@ -20665,7 +20668,18 @@ function setHomeTab(tab){
 }
 
 let homeRenderDeferT = 0;
+// 2026-11-26 使用者：網頁慢、滑鼠移動卡——背景資料（報價、5 分K、大戶力…）一回來就各自叫 render()，開網頁前 30 秒重畫二十幾次。
+// 背景叫的最多 2 秒畫一次（多叫的併成一次，晚一點畫）；使用者 1 秒內有點擊／打字（按鈕、篩選）就馬上畫，不等。
+let renderLastAt = 0, renderThrottleT = 0, renderUserAt = 0;
+['pointerdown', 'keydown'].forEach((ev) => document.addEventListener(ev, () => { renderUserAt = Date.now(); }, { capture: true, passive: true }));
 function render(){
+  const rNow = Date.now();
+  if (rNow - renderUserAt > 1000 && rNow - renderLastAt < 2000){
+    if (!renderThrottleT) renderThrottleT = setTimeout(() => { renderThrottleT = 0; render(); }, 2000 - (rNow - renderLastAt));
+    return;
+  }
+  clearTimeout(renderThrottleT); renderThrottleT = 0;
+  renderLastAt = rNow;
   homeBotPass.id += 1;
   // 2026-11-25 使用者：今日即時多／空用滾輪捲的時候不順——正在捲（1.2 秒內）就先不重畫首頁，停下來再畫，捲動不會被打斷
   try {
@@ -20725,20 +20739,49 @@ function render(){
   const hnowSaved = homeNowScrollSave();   // 2026-11-25 今日即時多／空捲到的位置
   const hnowOld = homeNowKeepOld();
   const hxIn = document.getElementById('hxQ'), hxVal = hxIn ? hxIn.value : '', hxFocus = !!(hxIn && document.activeElement === hxIn);
-  app.innerHTML =
+  const homeFull = homeApplyHtml(app,
     '<div class="layout">' +
       '<div class="col-right">' +
         '<div class="section-head"><div class="section-title">週轉率觀察・新刀劍空(32)・12空(123)・空族群必殺(193)・777・空中空(999)・今日即時空・905 跌破廣播・均20 轉彎(200)・1+2 跌破廣播・個股訊號追蹤・今日即時多・905 突破廣播・1+2 突破廣播／融資增加股票・強中強(888)／週轉率高・現股當沖・火多多(23)・905 突破廣播・1+2 突破廣播・30加33加34／投信買超前15・188・三落空・盤中大戶力・強勢股觀察中・強勢紅K／創高黑龍・熱門趨勢概念股(240)・日動能(260)・週動能(270)・多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・發動／今日強勢股／外資買超前15・183／族群漲幅(12)／155</div></div>' +
         homeRank4Html() +
       '</div>' +
-    '</div>';
-  { const sc = document.querySelector('.home-rank-scroll'); if (sc && hxLeft) sc.scrollLeft = hxLeft;
+    '</div>');
+  { const sc = document.querySelector('.home-rank-scroll'); if (sc && hxLeft && homeFull) sc.scrollLeft = hxLeft;
     try { const fresh = homeNowSwapBack(hnowOld); if (fresh.length){ const sv = {}; fresh.forEach((k) => { sv[k] = hnowSaved[k]; }); homeNowScrollRestore(sv); } } catch (_){}   // 只對換新的框放回原位
     try { homePosTryRestore(); } catch (_){}   // 2026-11-25 打開網頁回到上次停的地方
     const qi = document.getElementById('hxQ'); if (qi){ qi.value = hxVal; if (hxFocus){ qi.focus(); try { qi.setSelectionRange(hxVal.length, hxVal.length); } catch (_){} } } }
   // #updatedAt文字由refresh()統一負責(要能反映抓資料成功/失敗、是否過期)，
   // 這裡不再重複覆蓋——舊版這裡不管資料是真的還是demo都硬寫死「模擬資料」，
   // 本身就是誤導。
+}
+
+// 2026-11-26 使用者：網頁變慢、滑鼠移動也卡——原本 render() 每次都把整個首頁（約 3 萬個元素、35 欄）換掉，瀏覽器每次都要整頁重排（一次約 0.5 秒），
+// 開網頁時 5 分K 一檔一檔回來又一直觸發重畫，前 30 秒幾乎一直在忙。改成：首頁外框沒變就只換內容有變的那幾欄，沒變的欄完全不動。
+// 回傳 true＝整個換掉（第一次、或外框變了）
+function homeApplyHtml(app, html){
+  const t = document.createElement('template');
+  t.innerHTML = html;
+  const nw = t.content.querySelector('.home-rank4');
+  const old = app.querySelector('.home-rank4');
+  if (!nw){ app.replaceChildren(t.content); app._homeSkel = null; return true; }
+  const kids = Array.from(nw.children);
+  const strs = kids.map((k) => k.outerHTML);
+  nw.replaceChildren();
+  const skel = t.innerHTML;
+  if (old && app._homeSkel === skel && old.children.length === kids.length){
+    const oldKids = Array.from(old.children);
+    for (let i = 0; i < kids.length; i++){
+      if (oldKids[i]._homeH === strs[i]) continue;
+      kids[i]._homeH = strs[i];
+      oldKids[i].replaceWith(kids[i]);
+    }
+    return false;
+  }
+  kids.forEach((k, i) => { k._homeH = strs[i]; });
+  nw.append(...kids);
+  app.replaceChildren(t.content);
+  app._homeSkel = skel;
+  return true;
 }
 
 let lastDataFetchedAt = null;
@@ -22900,6 +22943,18 @@ function tdSettleTs(){   // 最近一個平日 14:30（台灣時間）的時間�
   return t;
 }
 function tdQuietFresh(e){ return !!(e && !e.loading && e.data && e.data.status === 'ok' && !twLiveSession() && e.at >= tdSettleTs()); }
+// 2026-11-26 使用者：網頁開起來變慢——首頁 905／1+2 突破、跌破幾欄開網頁時一次丟三百多個 5 分K／日K 請求，後端排隊（每個要等 15 秒），
+// 族群、訊號那些主要資料也跟著慢 5～13 秒。改成同時最多 4 個，其他排隊。
+const TDJ_MAX = 4;
+let tdJBusy = 0;
+const tdJQueue = [];
+function tdJPump(){
+  while (tdJBusy < TDJ_MAX && tdJQueue.length){
+    const job = tdJQueue.shift();
+    tdJBusy += 1;
+    job().finally(() => { tdJBusy -= 1; tdJPump(); });
+  }
+}
 function tdJ(key, url, ttl){
   const e = tdJCache[key];
   if (e && (e.loading || Date.now() - e.at < ttl || tdQuietFresh(e))) return e.data;
@@ -22908,12 +22963,13 @@ function tdJ(key, url, ttl){
   // 讀失敗的 15 秒後再試，不要壓整個快取時間；2026-11-23 省請求數：一直失敗（一直回空的）就 15→30→60→120→240 秒、最多 5 分鐘再試
   // （原本每 15 秒一直問，首頁 905／1+2 那幾十檔回空的，一個分頁一小時就問好幾千次）
   const bad = (d) => ({ at: Date.now() - ttl + Math.min(15000 * Math.pow(2, fails), 300e3), fails: fails + 1, data: d || { status: 'error', bars: [] } });
-  fetch(url).then((r) => r.json().catch(() => null)).then((d) => { tdJCache[key] = d && d.status === 'ok' && !(Array.isArray(d.bars) && !d.bars.length) ? { at: Date.now(), data: d } : bad(d); })   // 後端第一次被問到沒訂閱的股票會先回空的（它同時去訂閱），15 秒後再問一次就有了
+  tdJQueue.push(() => fetch(url).then((r) => r.json().catch(() => null)).then((d) => { tdJCache[key] = d && d.status === 'ok' && !(Array.isArray(d.bars) && !d.bars.length) ? { at: Date.now(), data: d } : bad(d); })   // 後端第一次被問到沒訂閱的股票會先回空的（它同時去訂閱），15 秒後再問一次就有了
     .catch(() => { tdJCache[key] = bad(null); })
     .finally(() => {
       clearTimeout(tdJTimer); tdJTimer = setTimeout(() => { if (tdOpen()) renderHomework(); }, 200);
-      if (Date.now() - tdHomeAsked < 30e3){ clearTimeout(dtRenderTimer); dtRenderTimer = setTimeout(() => { try { render(); } catch (_) { /* 重畫失敗就等下一輪 */ } }, 600); }   // 首頁「1+2 突破廣播」欄的狀態抓到了，重畫首頁
-    });
+      if (Date.now() - tdHomeAsked < 30e3){ clearTimeout(dtRenderTimer); dtRenderTimer = setTimeout(() => { try { render(); } catch (_) { /* 重畫失敗就等下一輪 */ } }, 800); }   // 首頁「1+2 突破廣播」欄的狀態抓到了，重畫首頁
+    }));
+  tdJPump();
   return e ? e.data : null;
 }
 // 一檔股在某天（到某個時段為止）的 905 高、昨高、突破／跌破時間。kind：'c12'＝1+2（要同時過 905 高與昨高）、'c905'＝905（只過 905 高）
@@ -22931,10 +22987,17 @@ function tdB905Calc(code, kind, date, slot, ttl){
       const dn = kind === 'c905d' || kind === 'c12d', sameSide = dn ? (q.price < r0.thr) === r0.inside : (q.price > r0.thr) === r0.inside;
       if (r0.ev && sameSide && (r0.p2 || !(Number.isFinite(q.changePercent) && (dn ? q.changePercent <= -TD905_PCT : q.changePercent >= TD905_PCT)))) t5 = 600e3;
     }
+    // 2026-11-26：收盤後（13:40 以後）今天的 5 分K 先抓 bars5range（後端資料庫存好的）。/api/bars 每抓一檔都會叫後端去訂閱那檔（把別檔擠掉）、
+    // 永豐額度不夠時還會回空的；首頁幾欄一百多檔，收盤後沒必要
+    const d0 = tdDayMs(date), dayOf = (b) => b.ts >= d0 && b.ts < d0 + 86400e3;
+    if (!twLiveSession() && new Date(Date.now() + 8 * 3600e3).toISOString().slice(11, 16) >= '13:40'){
+      const mr0 = tdJ('m5r|' + code, '/api/bars5range/' + code, 1800e3);
+      if (!mr0) return { loading: true };
+      if (mr0.status === 'ok' && (mr0.bars || []).some(dayOf)) return tdB905From(d1, mr0, kind, date, slot);
+    }
     m5 = tdJ('m5|' + code, '/api/bars/' + code, t5);
     // 2026-11-26：後端重新部署後即時 5 分K 快取歸零、永豐額度又低於保留門檻時，/api/bars 會回空的（905／1+2 突破、跌破整欄變 0）；
     // 這時改抓 bars5range（後端資料庫存好的今天 5 分K）
-    const dayOf = (b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10) === date;
     if (m5 && m5.status === 'ok' && !(m5.bars || []).some(dayOf)){
       const mr = tdJ('m5r|' + code, '/api/bars5range/' + code, twLiveSession() ? 300e3 : 1800e3);
       if (mr && mr.status === 'ok' && (mr.bars || []).some(dayOf)) m5 = mr;
@@ -22942,10 +23005,22 @@ function tdB905Calc(code, kind, date, slot, ttl){
   } else m5 = tdJ('m5r|' + code, '/api/bars5range/' + code, 1800e3);
   return tdB905From(d1, m5, kind, date, slot);
 }
+// 2026-11-26 省時間：首頁每次重畫都要替兩百檔重算，同一份 5 分K／日K 算過就記住（資料換新的物件就自動重算）
+const tdB905Memo = new WeakMap();
 function tdB905From(d1, m5, kind, date, slot){
   if (!d1 || !m5) return { loading: true };
+  let mm = tdB905Memo.get(m5);
+  if (!mm || mm.d1 !== d1){ mm = { d1, map: new Map() }; tdB905Memo.set(m5, mm); }
+  const mk = kind + '|' + date + '|' + (slot || '');
+  let r = mm.map.get(mk);
+  if (!r){ r = tdB905FromRaw(d1, m5, kind, date, slot); mm.map.set(mk, r); }
+  return r;
+}
+function tdDayMs(date){ return Date.parse(date + 'T00:00:00+08:00'); }
+function tdB905FromRaw(d1, m5, kind, date, slot){
   if (d1.status !== 'ok' || m5.status !== 'ok') return { error: true };
-  const dayBars = (m5.bars || []).filter((b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10) === date).sort((a, b) => a.ts - b.ts);
+  const d0 = tdDayMs(date), d9 = d0 + 86400e3;
+  const dayBars = (m5.bars || []).filter((b) => b.ts >= d0 && b.ts < d9).sort((a, b) => a.ts - b.ts);
   if (!dayBars.length) return { empty: true };
   const endHm = (b) => new Date(b.ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16);
   const prev = (d1.bars || []).filter((b) => String(b.ts).slice(0, 10) < date);
@@ -32445,7 +32520,7 @@ const CZ_HOME_CARDS = [['hm:tw', '週轉率觀察'], ['hm:sf', '股期成交量'
   ['hm:r183', '多族群排名(183)'], ['hm:g12', '族群漲幅'], ['hm:r44', '1+2多'], ['hm:t3', '三落空'], ['hm:r155', '股票期貨排名(155)'], ['hm:r75', '股期黑龍']];
 const CZ_HOME_JAIL = [['hm:jin', '今日入獄'], ['hm:jsoon', '即將出關'], ['hm:jout', '已出關']];
 // 首頁每一欄原本的寬度（跟 CSS .home-rank4 的 grid-template-columns 同一份，順序＝欄的順序）；收掉幾欄時照這個排，不平分
-const HOME_TRACKS = ['330px', '400px', '400px', '360px', '310px', '310px', '360px', '420px', '330px', '756px', '300px', '360px', '300px', '680px', '912px', '380px', '190px', '400px', '400px', '240px', '250px', '280px', '210px', '330px', '420px', '400px', '400px',
+const HOME_TRACKS = ['330px', '400px', '400px', '360px', '310px', '310px', '360px', '420px', '330px', '756px', '390px', '360px', '390px', '680px', '912px', '380px', '190px', '400px', '400px', '240px', '250px', '280px', '210px', '330px', '420px', '400px', '400px',
   'minmax(0, 1.6fr)', 'minmax(0, 1.6fr)', 'minmax(0, 1.5fr)', 'minmax(0, 1.95fr)', 'minmax(0, 1.3fr)', 'minmax(0, 1.4fr)'];
 function czApplyHome(){
   const root = document.querySelector('#app .home-rank4');
