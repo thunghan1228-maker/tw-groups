@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-26 23:02:31";
+const BUILD_STAMP = "2026-11-26 23:17:48";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -11505,7 +11505,7 @@ function home905dBcastColHtml(){
 }
 // 首頁「1+2 跌破廣播」（2026-11-26 使用者：1+2 突破廣播倒過來，放個股訊號追蹤左邊）。名單＝後端 1+2空（5 分K 收盤同時跌破 905 低跟昨日低，一天一次）；
 // 跌破之後又站回的也要列出來：每檔先列「跌破」那筆，之後 5 分K 收盤站回（905 低／昨低較低那條之上）再列一筆「站回」，又跌下去列「再跌破」。照時間排（新的在上面）。
-var HOME12D_MAX = 60;   // 跌破＋站回＋再跌破一天大約 60 筆
+var HOME12D_MAX = 120;   // 跌破＋站回＋再跌破（11/26 一天約 90 筆，要看得到早上的跌破）
 function home12dBcastColHtml(){
   const date = sigCurrentDate();
   const sys = tdSysList(date, null, 'combo12Bear');
@@ -19815,7 +19815,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-26 23:02:31';
+const BUILD_STAMP = '2026-11-26 23:17:48';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -23021,6 +23021,13 @@ function tdB905Calc(code, kind, date, slot, ttl){
       if (r0.ev && sameSide && (r0.p2 || !(Number.isFinite(q.changePercent) && (dn ? q.changePercent <= -TD905_PCT : q.changePercent >= TD905_PCT)))) t5 = 600e3;
     }
     m5 = tdJ('m5|' + code, '/api/bars/' + code, t5);
+    // 2026-11-26：後端重新部署後即時 5 分K 快取歸零、永豐額度又低於保留門檻時，/api/bars 會回空的（905／1+2 突破、跌破整欄變 0）；
+    // 這時改抓 bars5range（後端資料庫存好的今天 5 分K）
+    const dayOf = (b) => new Date(b.ts + 8 * 3600e3).toISOString().slice(0, 10) === date;
+    if (m5 && m5.status === 'ok' && !(m5.bars || []).some(dayOf)){
+      const mr = tdJ('m5r|' + code, '/api/bars5range/' + code, twLiveSession() ? 300e3 : 1800e3);
+      if (mr && mr.status === 'ok' && (mr.bars || []).some(dayOf)) m5 = mr;
+    }
   } else m5 = tdJ('m5r|' + code, '/api/bars5range/' + code, 1800e3);
   return tdB905From(d1, m5, kind, date, slot);
 }
@@ -23209,10 +23216,22 @@ function td905Tick(){
 // ② 條件齊全＝再加上大戶力 ≤ −10%（四個條件：跌破 905 低、跌幅 ≤ −2%、大戶力 ≤ −10%、族群在空方區），時間取四個條件各自第一次成立裡最晚的那個。
 // 跟 905 突破一樣記在這台電腦（盤中開著網頁時記，時間用 5 分K 回頭算）；先不跳通知。
 let td905dCache = { date: '', seen: null };
+// 2026-11-26 使用者：905 跌破廣播當天收盤後才上線，今天的先補上（用收盤後 5 分K＋大戶力時間軸回頭算的結果）；這台電腦有記錄的照舊優先
+const TD905D_SEED = { '2026-11-26': {
+  '6657': { brk: '09:10', group: '生醫', grank: 54, pct: -2.61, big: -22.12, ready: { t: '09:30', last: '大戶力≤−10%', why: ['09:10', '09:15', '09:30'] } },
+  '6697': { brk: '09:10', group: '資訊', grank: 67, pct: -10, big: -9.24 },
+  '5202': { brk: '09:25', group: '資訊', grank: 67, pct: -4.55, big: -22.6, ready: { t: '09:30', last: '跌幅≤−2%', why: ['09:25', '09:30', '09:20'] } },
+  '6112': { brk: '09:30', group: '資訊', grank: 67, pct: -2.03, big: -12.12, ready: { t: '10:50', last: '大戶力≤−10%', why: ['09:30', '10:05', '10:50'] } },
+  '6148': { brk: '09:30', group: '資訊', grank: 67, pct: -5.69, big: -4.53 },
+  '2890': { brk: '09:55', group: '金融股', grank: 60, pct: -2.2, big: 51.35 },
+  '2886': { brk: '11:50', group: '金融股', grank: 60, pct: -2.92, big: 3.4 },
+} };
 function td905dSeen(date){
   if (td905dCache.date !== date){
     let o = {};
     try { o = JSON.parse(localStorage.getItem('td905dSeen:' + date) || '{}') || {}; } catch (_){ o = {}; }
+    const seed = TD905D_SEED[date];
+    if (seed) Object.keys(seed).forEach((code) => { if (!o[code]) o[code] = JSON.parse(JSON.stringify(seed[code])); });
     td905dCache = { date, seen: o };
   }
   return td905dCache.seen;
