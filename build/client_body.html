@@ -9575,7 +9575,7 @@ function race333Model(){
   // ③ 收割區不分族群強弱（他 11:01 收割區有族群第 13 名的華新）；多方打少＝族群排名前 horseLimit（20）名。
   const bladeCand = new Map();
   ranked.forEach((g, gi) => {
-    if (!BLADE_GROUPS.has(g.name) || BLADE32_SKIP.has(g.name)) return;
+    if (!blade32Group(g.name)) return;
     // 2026-10-15 照老師：處置股不列（他族群清單裡代號前面打「*」的都是處置股，例如聯一光、聯茂），而且是先排除處置股再取最弱 3 檔
     // （光學鏡頭排除聯一光後，最弱 3 檔輪到佳能；小電組排除聯茂、金居、德宏後輪到金像電，跟他的名單一樣）
     // 2026-10-16 改：老師族群明細的「空方」段（處置股也算在裡面），刀劍空從這一段裡挑（他矽光子一族就列了 4 檔、矽晶圓第 4 弱的漢磊也列）；處置股不列。
@@ -9916,7 +9916,7 @@ function fire23Model(){
   const upTo = Math.max(1, Math.round(total * 10 / 67)), shortFrom = Math.max(1, Math.round(total * 26 / 67)), skip = Math.max(1, Math.round(total * 5 / 67));
   const cand = new Map();
   ranked.forEach((g, gi) => {
-    if (!BLADE_GROUPS.has(g.name) || BLADE32_SKIP.has(g.name)) return;
+    if (!blade32Group(g.name)) return;
     const priced = g.stocks.filter((s) => s.price !== null && s.price !== undefined && Number.isFinite(s.changePercent)).slice().sort((a, b) => b.changePercent - a.changePercent);
     const zone = bladeZoneSize(priced.length);
     const gm = fire23Marks(g);
@@ -10445,7 +10445,7 @@ const KILL193_GROUPS = new Set(['資訊', '鋼鐵', '被動元件', '光學鏡�
   '低軌衛星', '小電組', '化學二', 'IP', '矽晶圓', '記憶體', '玻璃基板', 'PA', '台塑四寶', 'PCB', '探針卡']);   // 老師 199 的固定 23 族
 // 193 比 199 多看小光電（2026-10-16 老師 09:08、09:14、09:25、10:25 的 193 都有小光電，199 只有光電沒有小光電）
 // 2026-10-29 老師 193 全天 12 份（09:04～13:31）都有 AI眼鏡（199 的 23 族裡沒有它），也加進 193 的範圍
-const KILL193_ONLY_GROUPS = new Set([...KILL193_GROUPS, '小光電', 'AI眼鏡']);
+const KILL193_ONLY_GROUPS = new Set([...KILL193_GROUPS, '小光電', 'AI眼鏡', '工具機']);   // 2026-11-26 使用者：193 加工具機（老師 11/26 收盤有：工具機-(37)🔽5）
 // 2026-11-23 使用者：老師 11/23 收盤的 199 多了 AI眼鏡（24 族），199 也加（32／183／33 這些照舊用上面 23 族＋各自加的）
 const KILL199_GROUPS = new Set([...KILL193_GROUPS, 'AI眼鏡']);
 // 2026-10-29 老師 193 的族群 ⚔️ 比例：「all」＝族裡每一檔都符合、「1.0」＝95% 以上但不是全部、其餘四捨五入到 0.1（他寫過最小 0.4）。
@@ -10453,7 +10453,7 @@ const KILL199_GROUPS = new Set([...KILL193_GROUPS, 'AI眼鏡']);
 // 10/29 13:31 的 18 個值有 15 個差在 0.1 以內、10/15 有 7／13（舊算法「現價低於前天收盤」是 0／18、5／13）。他的比例整天變動很小，
 // 我們算出來偶爾差一檔（可能是成分股不同），其他跟「現價低於昨收」「低於 5 日線」「低於昨高」等條件都試過，這個最接近。
 // 顯示門檻 0.35（他列過 0.4）；名次只掉 1～4 名的族群要比例 0.55 以上才列（老師 10/16 資訊 🔽3 沒標不列、10/29 資訊 🔽3 ⚔️0.6 有列）。
-const KILL193_SWORD_SHOW = 0.35;
+const KILL193_SWORD_SHOW = 0.28;   // 2026-11-26 使用者：0.35 → 0.28（老師 11/26 小光電 0.29 標 ⚔️0.3、鋼鐵 0.25 沒標）
 const KILL193_SWORD_LIST = 0.55;
 function kill193Model(){
   const m = race333Model();
@@ -10476,7 +10476,8 @@ function kill193Model(){
     // 老師 10/18 對的「昨天名次前 25 名、今天殺下來」那條照舊；🐎：名次往上、族裡有股票從後面衝上來（groupRiseMarks，跟族群明細的 🔺 同一套）
     const sword = frac >= KILL193_SWORD_SHOW;
     const swordList = frac >= KILL193_SWORD_LIST;
-    const knife = g.avgChange < 0 && i + 1 > half && prev !== null && prev < Math.round(groups.length * 26 / 67);
+    // 2026-11-26 使用者：🔪 不再要求族群今天平均是跌的（老師 11/26 小光電 +2.56%、航運 +0.95% 都標 🔪），改成要有 ⚔️ 才配 🔪（鋼鐵、D電腦掉很多名但沒 ⚔️，老師沒標 🔪）
+    const knife = sword && i + 1 > half && prev !== null && prev < Math.round(groups.length * 26 / 67);
     const drop = prev !== null ? i + 1 - prev : null;
     const ratioTxt = frac >= 0.999 ? 'all' : frac >= 0.95 ? '1.0' : (Math.round(frac * 10) / 10).toFixed(1);
     const swordMark = (knife ? '🔪' : '') + (sword ? '⚔️' + ratioTxt : '');
@@ -10566,7 +10567,10 @@ const BLADE_GROUPS = new Set([...KILL193_GROUPS, ...RANK188_GROUPS, 'AI眼鏡', 
 // 2026-10-30 使用者貼老師今天 09:01～09:35 十幾份新刀劍空(32)：一次都沒列過太陽能、設備股的股票（萬潤 -9.9%、碩禾 -9.7% 這種大跌的也沒有，
 // 同一時段我們每一份都多列萬潤、志聖、碩禾）；AI眼鏡（騰輝、GIS-KY）老師有列。所以 32 的候選不含這兩族（183／123／33／34 照舊用上面那 29 族）
 const BLADE32_SKIP = new Set(['太陽能', '設備股']);
-const RANK183_GROUPS = BLADE_GROUPS;
+// 2026-11-26 使用者：老師 11/26 收盤的 32、193 都有工具機（第 37 名：健椿、瀧澤科、東台、百德），32 跟 193 加工具機（123、34 這些照舊）
+const BLADE32_EXTRA = new Set(['工具機']);
+const blade32Group = (name) => (BLADE_GROUPS.has(name) || BLADE32_EXTRA.has(name)) && !BLADE32_SKIP.has(name);
+const RANK183_GROUPS = RANK188_GROUPS;   // 2026-11-26 使用者：183 改成跟 188 一樣只看 13 族（老師 11/26 收盤的 183 跟 188 同一批族群；原本 10/21 跟 32／123 同一批 29 族）
 // 賽馬多(33)（連帶 30加33、33加34）的族群範圍（2026-10-21 使用者：33 也加 AI眼鏡、太陽能、設備股）：原本 199 的 23 族＋這三族，共 26 族；河流多(34) 用 BLADE_GROUPS（199 的 23 族＋188 的 13 族＋這三族，共 29 族）
 const HORSE_GROUPS = new Set([...KILL193_GROUPS, 'AI眼鏡', '太陽能', '設備股']);
 // 183（多族群排名）的 ⚠️ 個股：多方線以上的族群裡今天漲 HOME183_WARN_PCT% 以上的股票，每族最多 3 檔，漲最多的在前（首頁 183 欄、機器人 183 共用）
@@ -12315,7 +12319,7 @@ function homeRankFootHtml(total){
   hrHelpTable('📊 族群排名欄', ['欄位', '看哪些族群', '列什麼'], [
     ['多族群排名(188)', '固定 ' + RANK188_GROUPS.size + ' 族', '全部列出；放在 30加33加34 下面'],
     ['股票期貨排名(155)', '固定 ' + FUT155_GROUPS.length + ' 族（每族只算有股票期貨的成分股）', '疊在族群漲幅 > 2%(12) 下面、三落空上面；用股期近月的漲跌（開盤前就有）：名次＝它們平均漲跌在全部族群裡的排名，🔺🔽 跟昨天比，最右邊 %＝平均漲跌；空方線＝照名次比例畫（排在後半的在線下）；股期報價沒到時標「現股價」'],
-    ['多族群排名(183)', '固定 ' + RANK183_GROUPS.size + ' 族（跟新刀劍空(32)、1️⃣2️⃣空(123) 同一批：199 的 ' + KILL193_GROUPS.size + ' 族＋188 的 ' + RANK188_GROUPS.size + ' 族＋AI眼鏡、太陽能、設備股，重複的合併）', '放在最右邊最後一欄；多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 3 檔（漲最多的）'],
+    ['多族群排名(183)', '固定 ' + RANK183_GROUPS.size + ' 族（2026-11-26 起跟 188 同一批：' + Array.from(RANK183_GROUPS).join('、') + '）', '放在最右邊最後一欄；多方線以上的族群底下用 ⚠️ 列族裡今天漲 ' + HOME183_WARN_PCT + '% 以上的股票，每族最多 3 檔（漲最多的）'],
     ['族群漲幅 > 2%(12)', '今天平均漲幅超過 2% 的族群（已入選 183 的不再列）', '每族列漲幅前三大的股票（👑🥈🥉）；標題下面寫「排除入選183族群」'],
     ['空族群排名(199)', '固定 ' + KILL199_GROUPS.size + ' 族（首頁沒有這欄，機器人代碼 199 或訊號中心看）', '只列空方線以下的族群（疊在 193 下面）'],
     ['空族群必殺(193)', '固定 ' + KILL193_ONLY_GROUPS.size + ' 族（首頁沒有這欄，機器人代碼 193 或訊號中心看）', '199 的 ' + KILL193_GROUPS.size + ' 族＋小光電；名次比昨天掉 5 名以上的；掉 1～4 名要有 ⚔️（族裡六成以上股票低於前天收盤，數字＝比例）才列；🔪＝昨天族群名次前 25 名、今天平均下跌；族群底下 ⚠️＝族裡在刀劍空(32) 名單上的股票'],
