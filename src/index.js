@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-27 00:53:58";
+const BUILD_STAMP = "2026-11-27 01:06:21";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -1058,6 +1058,11 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   #chartTray button:hover{background:var(--accent);color:var(--bg);}
   /* K 線圖標題列下方：這檔的可交易條件與處置狀態 */
   .cm-flags{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 8px;}
+  .cm-scores{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;margin:0 0 8px;font-size:12px;}
+  .cm-scores .sc{border:1px solid var(--line);border-radius:8px;padding:2px 8px;text-align:center;line-height:1.25;cursor:help;}
+  .cm-scores .sc b{display:block;font-size:15px;}
+  .cm-scores .sc.tot{border-color:#7c3aed;}
+  .cm-scores .sc small{color:var(--muted);}
   .flag-pill{font-size:11px;border-radius:10px;padding:2px 9px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);white-space:nowrap;}
   .flag-pill.off{color:var(--muted);opacity:.7;}
   .gm-hmark{font-size:12px;font-weight:700;white-space:nowrap;color:#fbbf24;flex-shrink:0;}
@@ -4933,6 +4938,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
         </div>
         <!-- 2026-10-16 使用者：個股交易資訊（融資券、停資停券、現股當沖、股期、小型股期）放在右上角切換框下面，日線／5分／1分都看得到 -->
         <div class="cm-flags" id="cmFlags" hidden></div>
+        <div class="cm-scores" id="cmScores" hidden></div>   <!-- 2026-11-26 使用者：個股評分（總分／籌碼／基本／技術） -->
       </div>
     </div>
     <div class="chart-tabs" id="chartTabs">
@@ -4962,6 +4968,15 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
       <div class="chart-canvas-wrap force-wrap">
         <canvas id="forceCanvas"></canvas>
       </div>
+    </div>
+    <!-- 2026-11-26 使用者：個股頁加「散戶買賣超（近似）」副圖，放主力買賣力下面（只有日線） -->
+    <div class="ind-panel-block" id="retailPanelBlock" hidden>
+      <div class="ind-panel-head">
+        <span class="force-title">散戶買賣超（近似）<small class="cm-chip-sum" id="retailPanelSum"></small></span>
+        <button class="macd-toggle on" id="retailPanelToggle" aria-pressed="true">關閉</button>
+      </div>
+      <div class="force-note">近似值：外資＋投信買多少，其他人（多半是散戶）就賣多少，所以散戶＝－（外資＋投信淨買）。融資增減看下面的「融資」副圖。</div>
+      <div class="chart-canvas-wrap force-wrap" id="retailPanelWrap"><canvas id="retailCanvas"></canvas></div>
     </div>
     <!-- 2026-10-17 使用者：K線圖下面的順序＝主力買賣力 → MACD → 成交量 → KD → 籌碼暴增（放最下面） -->
     <div class="ind-panel-block">
@@ -5803,6 +5818,7 @@ function drawChart(){
 
   const maSeries = currentChart.maLines.map((ma) => computeMA(allBars, ma.period).slice(vStart, vStart + vCount));
   const vwapSeries = (cfg.vwap && currentChart.vwapOn) ? computeVWAP(allBars).slice(vStart, vStart + vCount) : null;
+  const costAll = chartCostSeries(allBars), costSeries = costAll ? costAll.slice(vStart, vStart + vCount) : null;
 
   let lo = Infinity, hi = -Infinity;
   bars.forEach((b) => { lo = Math.min(lo, b.low); hi = Math.max(hi, b.high); });
@@ -5811,6 +5827,7 @@ function drawChart(){
     maSeries[idx].forEach((v) => { if (v != null){ lo = Math.min(lo, v); hi = Math.max(hi, v); } });
   });
   if (vwapSeries) vwapSeries.forEach((v) => { lo = Math.min(lo, v); hi = Math.max(hi, v); });
+  if (costSeries) costSeries.forEach((v) => { if (v != null){ lo = Math.min(lo, v); hi = Math.max(hi, v); } });
   const defLines = (currentChart.tf === 'daily' && currentChart.defOn && vStart + vCount >= allBars.length) ? chartDefenseLines(allBars) : [];
   defLines.forEach((d) => { lo = Math.min(lo, d.v); hi = Math.max(hi, d.v); });
   chartMgLoad(currentChart.code);
@@ -6121,6 +6138,20 @@ function drawChart(){
     });
     ctx.stroke();
   });
+
+  if (costSeries){   // 主力成本線（估）：橘色虛線
+    ctx.save();
+    ctx.strokeStyle = COST_COLOR; ctx.lineWidth = 1.6; ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    let started = false;
+    costSeries.forEach((v, i) => {
+      if (v == null){ started = false; return; }
+      const x = xAt(i), y = yAt(v);
+      if (!started){ ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.restore();
+  }
 
   if (vwapSeries){
     ctx.save();
@@ -6739,6 +6770,44 @@ function chartAngSeries(bars){
   currentChart.angCache = { bars, len: n, lastClose: last && last.close, ang };
   return ang;
 }
+function drawRetailPanel(){
+  const blk = document.getElementById('retailPanelBlock'), wrap = document.getElementById('retailPanelWrap'), sum = document.getElementById('retailPanelSum');
+  if (!blk) return;
+  const allBars = currentChart.bars;
+  const show = currentChart.tf === 'daily' && Array.isArray(allBars) && allBars.some((b) => Number.isFinite(b.instNet));
+  blk.hidden = !show;
+  if (!show || currentChart.retailOn === false){ wrap.hidden = true; if (sum) sum.textContent = ''; return; }
+  wrap.hidden = false;
+  const canvas = document.getElementById('retailCanvas');
+  const cssW = canvas.parentElement.clientWidth, cssH = canvas.parentElement.clientHeight;
+  const ctx = setupCanvas(canvas, cssW, cssH);
+  const { start: vStart, count: vCount } = visibleRange(allBars.length);
+  const vals = allBars.slice(vStart, vStart + vCount).map((b) => (Number.isFinite(b.instNet) ? -b.instNet : null));
+  const padTop = 8, padBottom = 6;
+  const plotW = cssW - PAD.left - PAD.right, plotH = cssH - padTop - padBottom, zeroY = padTop + plotH / 2;
+  const xAt = (i) => PAD.left + plotW * (i + 0.5) / vals.length;
+  const maxAbs = Math.max(1, ...vals.map((v) => Math.abs(v || 0)));
+  ctx.strokeStyle = 'rgba(168,156,143,0.25)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD.left, zeroY); ctx.lineTo(cssW - PAD.right, zeroY); ctx.stroke();
+  const barW = Math.max(2, plotW / vals.length * 0.62);
+  vals.forEach((v, i) => {
+    if (v == null) return;
+    const h = Math.abs(v) / maxAbs * (plotH / 2 * 0.9);
+    ctx.fillStyle = v >= 0 ? '#e6675f' : '#5fae6f';
+    ctx.fillRect(xAt(i) - barW / 2, v >= 0 ? zeroY - h : zeroY, barW, h);
+  });
+  ctx.fillStyle = '#a89c8f'; ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('0', cssW - PAD.right + 6, zeroY);
+  const fmtL = (v) => (v >= 0 ? '+' : '') + Math.round(v).toLocaleString() + ' 張';
+  const hi = currentChart.hoverIndex != null ? Math.max(0, Math.min(vals.length - 1, currentChart.hoverIndex)) : null;
+  if (hi != null){
+    ctx.save(); ctx.strokeStyle = 'rgba(241,236,230,0.35)'; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(xAt(hi), padTop); ctx.lineTo(xAt(hi), cssH - padBottom); ctx.stroke(); ctx.restore();
+  }
+  const k = hi != null ? hi : vals.length - 1;
+  const last5 = vals.slice(Math.max(0, k - 4), k + 1).filter((v) => v != null);
+  if (sum) sum.textContent = vals[k] != null ? '　' + (allBars[vStart + k] ? allBars[vStart + k].label : '') + ' ' + fmtL(vals[k]) + (last5.length ? '・近 5 日 ' + fmtL(last5.reduce((a, b) => a + b, 0)) : '') : '';
+}
 function drawAngPanel(){
   const blk = document.getElementById('angPanelBlock'), wrap = document.getElementById('angPanelWrap'), sum = document.getElementById('angPanelSum');
   if (!blk) return;
@@ -6831,6 +6900,7 @@ function redrawAll(){
   drawMclPanel();
   drawMgPanel();
   drawForcePanel();
+  drawRetailPanel();
   drawMacdPanel();
   drawKdPanel();
   const allBars = currentChart.bars;
@@ -6883,7 +6953,8 @@ function updateMaLegend(absIndex){
   el.innerHTML = currentChart.maLines.filter((ma) => ma.on).map((ma) => {
     const v = computeMA(allBars, ma.period)[idx];
     return '<span class="ma-legend-item" style="color:' + ma.color + '">MA' + ma.period + (v != null ? ' ' + v.toFixed(2) : '') + '</span>';
-  }).join('') + chartDeductMarks(allBars).map((m) => '<span class="ma-legend-item" style="color:' + m.color + '" title="扣底：今天不算，往前數 ' + m.period + ' 根的收盤">▲' + m.period + '扣 ' + m.close.toFixed(2) + '</span>').join('') +
+  }).join('') + (() => { const cs = chartCostSeries(allBars), v = cs ? cs[idx] : null;
+    return v != null ? '<span class="ma-legend-item" style="color:' + COST_COLOR + '" title="估算：近 ' + COST_DAYS + ' 個交易日裡外資＋投信買超那幾天的收盤價，用買超張數加權平均（不是券商分點的真實成本）">主力成本(估) ' + v.toFixed(2) + '</span>' : ''; })() + chartDeductMarks(allBars).map((m) => '<span class="ma-legend-item" style="color:' + m.color + '" title="扣底：今天不算，往前數 ' + m.period + ' 根的收盤">▲' + m.period + '扣 ' + m.close.toFixed(2) + '</span>').join('') +
     (currentChart.tf === 'daily' && currentChart.defOn
     ? chartDefenseLines(allBars).map((d) => '<span class="ma-legend-item" style="color:#e6675f">明日' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('')
     : '') + chartMclLines(allBars).map((d) => '<span class="ma-legend-item" style="color:' + d.color + '">' + d.label + ' ' + d.v.toFixed(2) + '</span>').join('') + chartHolderLegendHtml() +
@@ -6961,7 +7032,7 @@ function attachChartInteraction(){
   canvas.style.cursor = 'grab';
 
   // 滾輪縮放（桌機）：任一面板上滾都會一起縮放，維持時間軸對齊
-  const zoomPanels = ['klineCanvas', 'angCanvas', 'volumeCanvas', 'forceCanvas', 'macdCanvas', 'mclCanvas'];
+  const zoomPanels = ['klineCanvas', 'angCanvas', 'volumeCanvas', 'forceCanvas', 'retailCanvas', 'macdCanvas', 'mclCanvas'];
   zoomPanels.forEach((id) => {
     const el = document.getElementById(id);
     el.onwheel = handleWheelZoom;
@@ -7275,7 +7346,24 @@ function dailyBarToBar(b){
   return {
     ts: b.ts, open: b.open, high: b.high, low: b.low, close: b.close, prevRef: Number.isFinite(b.ref) ? b.ref : null,
     volume: b.volume ?? 0, label, fullLabel, mainNet: b.mainNet ?? null, bigNet: b.bigNet ?? null,
+    instNet: b.instNet ?? null, marginBal: b.marginBal ?? null,   // 2026-11-26：外資＋投信淨買（張）、融資餘額（張），主力成本線、散戶副圖用
   };
+}
+// 2026-11-26 使用者：日線加「主力成本線（估）」＝近 20 個交易日裡外資＋投信買超那幾天的收盤價，用買超張數加權平均（買超至少 3 天才畫）
+const COST_COLOR = '#f59e0b', COST_DAYS = 20;
+function chartCostSeries(allBars){
+  if (currentChart.tf !== 'daily' || !Array.isArray(allBars)) return null;
+  const out = new Array(allBars.length).fill(null);
+  let any = false;
+  for (let i = 0; i < allBars.length; i++){
+    let w = 0, sum = 0, n = 0;
+    for (let j = Math.max(0, i - COST_DAYS + 1); j <= i; j++){
+      const v = allBars[j].instNet;
+      if (Number.isFinite(v) && v > 0){ w += v; sum += v * allBars[j].close; n += 1; }
+    }
+    if (n >= 3 && w > 0){ out[i] = sum / w; any = true; }
+  }
+  return any ? out : null;
 }
 
 async function fetchRealDailyBars(code){
@@ -7541,6 +7629,9 @@ async function switchTimeframe(tf){
   currentChart.kd = chartComputeKd(tf, bars);
   currentChart.kdOn = true;   // KD 內定開
   currentChart.angOn = true;   // 均20 角度內定開（只有 5 分K 顯示）
+  currentChart.retailOn = true;   // 散戶副圖內定開（只有日線顯示）
+  const rtBtn = document.getElementById('retailPanelToggle');
+  rtBtn.textContent = '關閉'; rtBtn.classList.add('on'); rtBtn.setAttribute('aria-pressed', 'true');
   const angBtn = document.getElementById('angPanelToggle');
   angBtn.textContent = '關閉'; angBtn.classList.add('on'); angBtn.setAttribute('aria-pressed', 'true');
   currentChart.mgOn = !isIdxCode(currentChart.code);   // 融資副圖內定開（指數沒有融資）
@@ -7866,6 +7957,7 @@ function openStockChart(code, name, tf, focusPat){   // focusPat：形態名稱�
   const cmStar = document.getElementById('cmStar');
   if (cmStar){ cmStar.dataset.code = isIdxCode(code) ? '' : code; cmStar.dataset.name = name || ''; cmStar.hidden = isIdxCode(code); wlRefreshStars(); }   // 指數不能加自選股
   renderChartFlags(code);
+  renderChartScores(code);
   if (!isIdxCode(code)){ try { cmChipLoad(code); } catch (_){} }   // 籌碼九週（2026-10-15）
   if (wasHidden){
     const panel = document.getElementById('chartModalInner');
@@ -9050,6 +9142,35 @@ async function refreshStockFlags(){
     // 抓不到就先不標；一次都還沒抓到就 20 秒後再試（不要等 5 分鐘）
     if (!Object.keys(stockFlags || {}).length) setTimeout(refreshStockFlags, 20000);
   }
+}
+// 2026-11-26 使用者：個股頁上面加評分：總分／籌碼／基本／技術（跟「持股健診」同一份分數，滿分 100 換成 10 分）
+const cmScoreCache = {};
+function renderChartScores(code){
+  const el = document.getElementById('cmScores');
+  if (!el) return;
+  if (!code || isIdxCode(code)){ el.hidden = true; el.innerHTML = ''; return; }
+  const c = cmScoreCache[code];
+  const paint = (row) => {
+    if (currentChart.code !== code) return;
+    const sc = row && row.scores;
+    if (!sc || ![sc.chip, sc.fund, sc.tech].some(Number.isFinite)){ el.hidden = true; el.innerHTML = ''; return; }
+    const ten = (v) => (Number.isFinite(v) ? Math.round(v / 10) : null);
+    const parts = [ten(sc.chip), ten(sc.fund), ten(sc.tech)];
+    const tot = parts.reduce((a, v) => a + (v || 0), 0);
+    const cell = (lbl, v, max, tip, cls) => '<span class="sc' + (cls ? ' ' + cls : '') + '" title="' + wlEsc(tip) + '"><b>' + (v === null ? '—' : v) + '<small>/' + max + '</small></b>' + lbl + '</span>';
+    el.innerHTML = cell('總分', tot, 30, '籌碼＋基本＋技術（' + (sc.overallLabel || '') + '）；' + (row.date || '') + ' 收盤算', 'tot') +
+      cell('籌碼', parts[0], 10, '集保大戶週變化＋法人與主力近 5 日（滿分 100 換成 10 分）') +
+      cell('基本', parts[1], 10, '月營收年增、月增＋本益比（滿分 100 換成 10 分）') +
+      cell('技術', parts[2], 10, '均線分數（站上 6 條均線、創新高、多頭排列，滿分 15）換算（滿分 100 換成 10 分）');
+    el.hidden = false;
+  };
+  if (c && Date.now() - c.at < 30 * 60e3){ paint(c.row); return; }
+  el.hidden = true;
+  fetch('/api/checkup?codes=' + encodeURIComponent(code)).then((r) => r.json()).then((d) => {
+    const row = d && Array.isArray(d.rows) ? d.rows.find((x) => x.code === code) : null;
+    cmScoreCache[code] = { at: Date.now(), row };
+    paint(row);
+  }).catch(() => {});
 }
 function renderChartFlags(code){
   // K 線圖標題列下方：這檔的可交易條件與處置狀態（資料同訊號中心的全族群旗標）。
@@ -19916,7 +20037,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-27 00:53:58';
+const BUILD_STAMP = '2026-11-27 01:06:21';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -21315,6 +21436,14 @@ document.getElementById('mgPanelToggle').addEventListener('click', () => {
   btn.classList.toggle('on', currentChart.mgOn);
   btn.setAttribute('aria-pressed', String(currentChart.mgOn));
   drawMgPanel();
+});
+document.getElementById('retailPanelToggle').addEventListener('click', () => {
+  currentChart.retailOn = currentChart.retailOn === false;
+  const btn = document.getElementById('retailPanelToggle');
+  btn.textContent = currentChart.retailOn ? '關閉' : '開啟';
+  btn.classList.toggle('on', currentChart.retailOn);
+  btn.setAttribute('aria-pressed', String(currentChart.retailOn));
+  drawRetailPanel();
 });
 document.getElementById('angPanelToggle').addEventListener('click', () => {
   currentChart.angOn = currentChart.angOn === false;
