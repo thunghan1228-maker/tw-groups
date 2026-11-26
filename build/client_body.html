@@ -22220,8 +22220,9 @@ function grAutoTick(){
   const inner = m.querySelector('.chips-inner'); if (inner) inner.scrollTop = 0;
   try { showToast('📡 ' + slot + ' 飆股雷達自動更新（名單有變動）'); } catch (_){}
 }
-setInterval(grAutoTick, 20000);
-setTimeout(grAutoTick, 8000);
+// 2026-11-26 使用者：飆股雷達盤中自動跳出來的功能取消（不要自己跳出來）；下方導覽列「飆股雷達」自己點照樣可以開
+// setInterval(grAutoTick, 20000);
+// setTimeout(grAutoTick, 8000);
 // ---- 每日功課（2026-10-10 使用者：照老師「空觀察／當沖多／多觀察功課」做自動版，不用貼清單）----
 // 老師的三頁是學員把 LINE 與機器人回的清單貼進去交叉比對；這些清單我們系統本來就算得出來，這裡直接自動交叉：
 // 空觀察＝刀劍空(32) ∩ 即將入獄（處置監獄嫌疑名單）∩ 今天出獄 ∩ 做空族群（昨天漲最多的族群）；
