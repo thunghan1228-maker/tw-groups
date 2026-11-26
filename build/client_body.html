@@ -10132,7 +10132,7 @@ function bladeGoneRowHtml(x){
 // （抓它的 5 分K 會叫後端另外訂閱、還會向永豐抓歷史 K 線，可能把別的訂閱擠掉）。
 var GROUP_CODE_SET = new Set(ALL_CODES);
 var maTurnOnly = (() => { let o = {}; try { o = JSON.parse(localStorage.getItem('maTurnOnly') || '{}') || {}; if (!('32' in o) && localStorage.getItem('b32TurnOnly') === '1') o['32'] = true; } catch (_){} return o; })();
-function maTurnOn(key){ return !!maTurnOnly[key]; }
+function maTurnOn(key){ return false; }   // 2026-11-26 使用者：均20 轉彎標籤（每列抓 5 分K）不要了——「只看均20轉下彎／上彎」篩選跟著拿掉
 const MA20_TURN_LAG = 3;   // 2026-11-25 均20 轉彎跟 3 根前比（照老師角度機器人）；角度機器人 ANG_LAG 也用這個
 function ma20Series(r5, m5, today){
   if (!r5 || r5.status !== 'ok') return null;
@@ -10181,12 +10181,14 @@ function ma20TurnOf(code){
   return { down: sr.dir < 0, up: sr.dir > 0, turn: sr.dir < 0 && sr.dnI >= 0 ? sr.hm(sr.dnI) : null, upTurn: sr.dir > 0 && sr.upI >= 0 ? sr.hm(sr.upI) : null, ma: sr.ma };
 }
 function ma20TurnTagOf(code, up){
+  return '';   // 2026-11-26 使用者：首頁每列的「↘均20 HH:MM」標籤不要了（每檔都要抓 5 分K，永豐歷史額度兩天都快用完）
   const t = ma20TurnOf(code);
   if (!t) return '';
   if (up) return t.upTurn ? '<span class="b32-turn up" title="5 分K 20MA 原本下彎、' + t.upTurn + ' 轉上彎（現在還在上彎）">↗均20 ' + t.upTurn + '</span>' : '';
   return t.turn ? '<span class="b32-turn" title="5 分K 20MA 原本上揚、' + t.turn + ' 轉下彎（現在還在下彎）">↘均20 ' + t.turn + '</span>' : '';
 }
 function maTurnBtnHtml(key, up){
+  return '';   // 2026-11-26 使用者：標籤拿掉，「只看均20轉下彎／上彎」按鈕也拿掉
   const on = maTurnOn(key);
   return '<button type="button" class="b777-p' + (on ? ' on' : '') + '" data-ma-turn="' + key + '" title="只看 5 分K 20MA 原本' + (up ? '下彎、轉上彎' : '上揚、轉下彎') + '的（記在這台；族群表外的股票不算）">' + (on ? '☑ ' : '☐ ') + '只看均20轉' + (up ? '上彎' : '下彎') + '</button>';
 }
@@ -31412,9 +31414,16 @@ function ma20TurnSigTick(opts){
   const seen = new Set(st.keys);
   const fresh = [];
   let allLoaded = true;
+  // 2026-11-26：改用後端盤中引擎算好的轉彎事件（機器人 200 那份），不再每檔抓 5 分K（省永豐歷史額度）；現在還在那個方向的才算
+  const ev = m200Events();
+  if (!ev || ev.error){ allLoaded = false; }
+  const evBy = new Map();
+  (ev && !ev.error ? ev.rows : []).forEach((r) => { if (r.cur === r.dir) evBy.set(r.code + '|' + r.dir, r); });
   [['down', srcs.down], ['up', srcs.up]].forEach(([dir, map]) => map.forEach((x) => {
-    const t = ma20TurnOf(x.code);
-    if (!t){ allLoaded = false; return; }
+    if (!ev || ev.error) return;
+    const r = evBy.get(x.code + '|' + dir);
+    const t = r ? { turn: dir === 'down' ? r.t : null, upTurn: dir === 'up' ? r.t : null, ma: null } : null;
+    if (!t) return;
     const tm = dir === 'up' ? t.upTurn : t.turn;
     if (!tm) return;
     const key = x.code + '|' + (dir === 'up' ? 'u' : 'd');   // 2026-11-24 使用者：一天只跳一次，盤中反覆轉彎不再跳
