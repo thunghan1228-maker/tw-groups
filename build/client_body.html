@@ -62,7 +62,7 @@
 
   /* 右側：族群排名四欄（2026-10-15 使用者：原本的各族群前三強／弱個股改成老師的 188、193、199、177） */
   /* 2026-10-20 使用者：當沖多的股名被擋住（玉晶…、禾…）→ 加寬；檔數太多分成兩欄（第 2、3 欄），今日弱勢股搬到股期黑龍(75) 下面（列距縮緊） */
-  .home-rank4{display:grid;grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 330px 756px 300px 360px 680px 912px 380px 190px 400px 400px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
+  .home-rank4{display:grid;grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 330px 756px 300px 360px 300px 680px 912px 380px 190px 400px 400px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr);gap:8px;align-items:start;}   /* 2026-11-09 使用者：當沖多1 放寬（股名被截掉）、第 3 欄（疑似主力融資買進＋當沖多2）縮窄——當沖多每列的「多／賽／河／群」名次搬到下面一行（.l3） */ /* 2026-11-04 使用者：第 4 欄（續抱勿追高／雙榜交集／股期黑龍）放寬，雙榜交集每列要接大戶力 */   /* 2026-10-28 使用者：多觀察、當沖多2、當沖多1 排前三欄；2026-10-21 原本是當沖多1、當沖多2、多觀察前三欄 */
   /* 2026-10-20 使用者：族群漲幅 > 2%(12) 每族前三大——圖示放在股名前面同一行（不要獨佔一行），第 4 欄跟續抱勿追高一起加寬、當沖多2 縮一點 */
   .hr-redbox{display:flex;flex-direction:column;gap:8px;min-width:0;outline:3px solid #ef4444;outline-offset:0;border-radius:10px;}   /* 用 outline 畫在外面，不佔欄寬、裡面的列不會被擠到截掉 */
   .hr-top3{display:flex;align-items:baseline;gap:4px;padding:2px 8px;line-height:1.5;white-space:nowrap;overflow:hidden;}
@@ -99,6 +99,8 @@
   .hr-b905r .hr-ready{flex:0 0 100%;font-size:11px;color:#a78bfa;font-weight:600;line-height:1.3;}
   .hr-b905r.hr-b905ok .hr-ready{color:#fbbf24;font-weight:800;}   /* 2026-11-04：條件齊全那一筆的小字亮金色，跟單純「突破」那筆分開 */
   .hr-b905r.hr-b905d:not(.hr-b905ok) .hr-ready{color:#4ade80;}   /* 2026-11-26 905 跌破廣播：「跌破」小字綠色 */
+  .hr-b905r.hr-b905d.hr-b12back .hr-ready{color:#f87171;}   /* 1+2 跌破廣播：「站回」紅字 */
+  .hr-redbox.hr-grnbox{outline-color:#22c55e;}   /* 2026-11-26 使用者：905／1+2 跌破廣播外框用綠色 */
   /* 2026-11-02 使用者：續抱勿追高、30加33加34 每列最前面的族群名次（5、9、12…）跟後面的代號貼在一起分不清楚 → 名次改白色亮一點、粗體、固定寬度靠右，右邊加一條細線跟代號隔開 */
   .hr-row > .hr-rk.hr-gr{color:#fff;font-weight:900;font-size:12px;min-width:1.7em;text-align:right;padding-right:5px;margin-right:2px;border-right:1px solid rgba(255,255,255,.45);flex-shrink:0;}
   .hr-hold{flex:0 0 auto;display:inline-block;margin-left:4px;min-width:3.3em;text-align:center;font-size:12px;font-weight:800;line-height:1.5;font-variant-numeric:tabular-nums;border-radius:5px;padding:0 4px;color:var(--muted);white-space:nowrap;}   /* 2026-10-22 使用者：首頁 30加33加34、183、12 三欄每檔後面的盤中大戶力；≥ +10% 紅底白字、≤ −10% 綠底白字 */
@@ -390,9 +392,9 @@
   /* 2026-11-14 使用者：183 右邊多兩欄：「強勢股觀察中・等收黑」（210px，原本在第一欄最上面）、「強勢紅K」＋下面疊創高黑龍（290px）；原本 10 欄寬度不變、整排變寬，往右拉看最右邊 */
   @media (min-width: 1701px){
     .home-rank-scroll{overflow-x:auto;padding-bottom:6px;}
-    .home-rank4{width:calc(100% + 10336px);}   /* 2026-11-26 加 905 跌破廣播 300px（＋間距 8） */   /* 2026-11-25 今日即時空 630→756、今日即時多 760→912（字放大 1.2 倍，欄寬跟著放大） */   /* 2026-11-25 今日即時空 760 → 630px（使用者：緊實一點） */   /* 2026-11-25 加今日即時空、今日即時多各 760px（＋間距 8）：8344 + 1536；窄了一列會擠成三行，跟訊號中心看起來不一樣 */   /* 2026-11-25 個股訊號追蹤 600 → 680px（字放大、多一欄大戶力） */   /* 2026-11-25 使用者：空中空(999) 右邊、強中強左邊加「個股訊號追蹤」600px（＋間距 8）：7656 + 608 */   /* 2026-11-25 使用者：拿掉盤前空觀察、收盤觀察股（各 300px），空中空(999) 左邊改放機器人 200（360px）：7904 − 300 + 360 − 308 */   /* 2026-11-22 最左邊加融資增加／大減 330px（＋間距 8） */   /* 2026-11-22 最左邊加股期成交量 400px（＋間距 8） */   /* 2026-11-22 第二欄加營收＋技術面 360px（＋間距 8） */   /* 2026-11-22 905 欄 190 → 380px（下面疊大戶＋投信） */   /* 2026-11-19 使用者：強中強(888)＋週轉率高／現股當沖那欄 310px → 400px（後面的法人、當沖占比被遮到），總寬 +90px */   /* 2026-11-19 使用者：777 360px → 420px（股名被遮到），總寬再 +60px */   /* 2026-11-20 使用者：加火多多(23) 一欄 400px，總寬再 +408px */   /* 2026-11-20 使用者：盤中大戶力搬到強勢股觀察中左邊、改固定 280px，總寬再 +288px */   /* 2026-11-21 使用者：第一欄加週轉率觀察 400px，總寬再 +408px */   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px）；2026-11-18 905／1+2 突破廣播（各 190px）、30加33加34（240px）、三落空（250px）搬到收盤觀察股右邊，改成固定寬 */
+    .home-rank4{width:calc(100% + 10644px);}   /* 2026-11-26 加 905 跌破廣播、1+2 跌破廣播各 300px（＋間距 8） */   /* 2026-11-25 今日即時空 630→756、今日即時多 760→912（字放大 1.2 倍，欄寬跟著放大） */   /* 2026-11-25 今日即時空 760 → 630px（使用者：緊實一點） */   /* 2026-11-25 加今日即時空、今日即時多各 760px（＋間距 8）：8344 + 1536；窄了一列會擠成三行，跟訊號中心看起來不一樣 */   /* 2026-11-25 個股訊號追蹤 600 → 680px（字放大、多一欄大戶力） */   /* 2026-11-25 使用者：空中空(999) 右邊、強中強左邊加「個股訊號追蹤」600px（＋間距 8）：7656 + 608 */   /* 2026-11-25 使用者：拿掉盤前空觀察、收盤觀察股（各 300px），空中空(999) 左邊改放機器人 200（360px）：7904 − 300 + 360 − 308 */   /* 2026-11-22 最左邊加融資增加／大減 330px（＋間距 8） */   /* 2026-11-22 最左邊加股期成交量 400px（＋間距 8） */   /* 2026-11-22 第二欄加營收＋技術面 360px（＋間距 8） */   /* 2026-11-22 905 欄 190 → 380px（下面疊大戶＋投信） */   /* 2026-11-19 使用者：強中強(888)＋週轉率高／現股當沖那欄 310px → 400px（後面的法人、當沖占比被遮到），總寬 +90px */   /* 2026-11-19 使用者：777 360px → 420px（股名被遮到），總寬再 +60px */   /* 2026-11-20 使用者：加火多多(23) 一欄 400px，總寬再 +408px */   /* 2026-11-20 使用者：盤中大戶力搬到強勢股觀察中左邊、改固定 280px，總寬再 +288px */   /* 2026-11-21 使用者：第一欄加週轉率觀察 400px，總寬再 +408px */   /* 2026-11-14 加 32、123 兩欄（各 360px＋間距 8px）；2026-11-18 905／1+2 突破廣播（各 190px）、30加33加34（240px）、三落空（250px）搬到收盤觀察股右邊，改成固定寬 */
     .home-rank-scroll{cursor:grab;} .home-rank-scroll .hr-stk,.home-rank-scroll button,.home-rank-scroll [data-bot-code],.home-rank-scroll [data-group],.home-rank-scroll [data-bot-group]{cursor:pointer;}
-    .home-rank4.hx{width:calc(100% + 10336px + var(--hx-w));grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 330px 756px 300px 360px 680px 912px 380px 190px 400px 400px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
+    .home-rank4.hx{width:calc(100% + 10644px + var(--hx-w));grid-template-columns:330px 400px 400px 360px 310px 310px 360px 420px 330px 756px 300px 360px 300px 680px 912px 380px 190px 400px 400px 240px 250px 280px 210px 330px 420px 400px 400px minmax(0, 1.6fr) minmax(0, 1.6fr) minmax(0, 1.5fr) minmax(0, 1.95fr) minmax(0, 1.3fr) minmax(0, 1.4fr) var(--hx-cols);}
   }
   @keyframes hot2blink{0%,100%{background:#facc15;color:#7f1d1d;box-shadow:0 0 0 2px #facc15;}50%{background:#dc2626;color:#fff;box-shadow:0 0 0 2px #dc2626;}}
   .hot2 .hr-code,.hot2 .hr-name{color:inherit!important;} .hr-pkw .l1 .hot2{display:inline-flex;gap:5px;min-width:0;overflow:hidden;} .hot2,#botBody .bot-stk.hot2,body.home-light .home-botcol .bot-stk.hot2,body.home-light .hsc-stk b.hot2,.dyn-table .dyn-stk b.hot2{animation:hot2blink 1s ease-in-out infinite;border-radius:4px;padding:0 3px;-webkit-text-stroke:0;}   /* 2026-11-14 強勢紅K／240／260 重複就閃 */
@@ -684,7 +686,7 @@
   body.home-light .hr-row > .hr-rk.hr-gr{color:#111;border-right-color:rgba(0,0,0,.25);}
   body.home-light .hr-lg-src .s4,body.home-light .hr-b905r.hr-b905ok .hr-ready{color:#b45309;}
   body.home-light .hr-lg-src .s1{color:#9333ea;} body.home-light .hr-lg-src .s2,body.home-light .hr-b905r .hr-ready{color:#7c3aed;}
-  body.home-light .hr-b905r.hr-b905d:not(.hr-b905ok) .hr-ready{color:#15803d;}
+  body.home-light .hr-b905r.hr-b905d:not(.hr-b905ok) .hr-ready{color:#15803d;} body.home-light .hr-b905r.hr-b905d.hr-b12back .hr-ready{color:#dc2626;}
   #themeToggle.on{background:#f59e0b;border-color:#f59e0b;color:#fff;}
   .alert-toggle.on{background:var(--accent);color:var(--bg);border-color:var(--accent);}
   /* 2026-10-15 使用者：個股震盪這塊縮小，不用那麼大 */
@@ -5481,6 +5483,7 @@ const KLINE_SIGNAL_INFO = {
   firstCross905High: { symbol: '⑨', color: '#ef4444', side: 'bull', desc: '首次過905高：當天第一次收盤突破早盤第一根K棒（905）高點，一天一次。' },
   crossUpPrevHigh: { symbol: '㊇', color: '#ef4444', side: 'bull', desc: '站上昨日高：收盤突破前一交易日最高價，可重複觸發。' },
   combo12Bull: { symbol: '1+2', color: '#ef4444', side: 'bull', desc: '1+2多：5分K收盤同時站上905高跟昨日高，一天一次。' },
+  combo12Bear: { symbol: '1+2', color: '#22c55e', side: 'bear', desc: '1+2空：5分K收盤同時跌破905低跟昨日低，一天一次（2026-11-26 1+2 跌破廣播）。' },
   crossUp20ma: { symbol: '⑳↑', color: '#ef4444', side: 'bull', desc: '站上20MA：股價由20MA下方重新站回上方，可重複觸發。' },
   firstCrossUp20ma: { symbol: '⑳↑★', color: '#ef4444', side: 'bull', desc: '首次站上20MA：當日第一次站上20MA。' },
   ma520Up: { symbol: '520↑', color: '#ef4444', side: 'bull', desc: '五二零上：收盤同時站上5MA與20MA，形成多方均線確認。' },
@@ -8280,7 +8283,7 @@ function mapLargeOrderSignal(s){
   // 瞬間大單/特大買賣單分頁(那樣分頁會被污染成跟大單一樣的數字)。
   const klineInfo = KLINE_SIGNAL_INFO[kind];
   const isFlip = kind === 'mainForceFlipBull' || kind === 'mainForceFlipBear';
-  const isGap = kind === 'gapDownAboveVwap' || kind === 'gapUpBelowVwap';   // 88／87（2026-11-02）：只進自己的分頁，不併進今日即時多／空
+  const isGap = kind === 'gapDownAboveVwap' || kind === 'gapUpBelowVwap' || kind === 'combo12Bear';   // 88／87（2026-11-02）：只進自己的分頁，不併進今日即時多／空；1+2空（2026-11-26）只給首頁 1+2 跌破廣播用
   const isBuy = klineInfo ? klineInfo.side === 'bull' : (kind === 'instantLargeBuy' || kind === 'fourGateBuy' || kind === 'mainForceFlipBull' || kind === 'gapDownAboveVwap');
   const backendName = s.name && s.name !== s.ticker ? s.name : null;
   return {
@@ -8320,7 +8323,7 @@ function parseRealSignals(data){
   // 不是這個家族的訊號、以及兩個獨立的「結構性」訊號(1+2多/創高黑龍)。
   const inScope = industryCodes();
   return data.signals
-    .filter((s) => !KLINE_SIGNAL_INFO[s.kind] || DEDICATED_KLINE_TABS.has(s.kind))
+    .filter((s) => !KLINE_SIGNAL_INFO[s.kind] || DEDICATED_KLINE_TABS.has(s.kind) || s.kind === 'combo12Bear')
     .filter((s) => !inScope || inScope.has(String(s.ticker || s.code || '').toUpperCase()))
     .map(mapLargeOrderSignal);
 }
@@ -11411,6 +11414,47 @@ function home905dBcastColHtml(){
     (shown.length ? shown.map(row).join('') : '<div class="hr-note">' + (events.length ? '現在沒有在之下' + (homeBcastHoldDn ? '、大戶力 ≤ −10%' : '') + '的' : '今天還沒有（跌破 905 低、跌幅 ≤ −2%、族群在空方就列「跌破」；再加大戶力 ≤ −10% 再列一筆「條件齊全」）') + '</div>') +
     homeBcastFoot(f, events.length, '筆', 'dn') + '</div>';
 }
+// 首頁「1+2 跌破廣播」（2026-11-26 使用者：1+2 突破廣播倒過來，放個股訊號追蹤左邊）。名單＝後端 1+2空（5 分K 收盤同時跌破 905 低跟昨日低，一天一次）；
+// 跌破之後又站回的也要列出來：每檔先列「跌破」那筆，之後 5 分K 收盤站回（905 低／昨低較低那條之上）再列一筆「站回」，又跌下去列「再跌破」。照時間排（新的在上面）。
+var HOME12D_MAX = 60;   // 跌破＋站回＋再跌破一天大約 60 筆
+function home12dBcastColHtml(){
+  const date = sigCurrentDate();
+  const sys = tdSysList(date, null, 'combo12Bear');
+  tdHomeAsked = Date.now();
+  const evs = [];
+  let loading = 0, weak = 0, nBelow = 0, nBack = 0;
+  sys.slice(0, HOME_BCAST_SCAN).forEach((x) => {
+    if (homeBcastHoldDn){ const hp = holderPctOf(x.code); if (!(Number.isFinite(hp) && hp <= -10)){ weak += 1; return; } }
+    const r = tdB905Calc(x.code, 'c12d', date, null, 180e3);
+    if (!r.ev){ if (r.loading) loading += 1; }
+    else if (r.inside) nBelow += 1; else nBack += 1;
+    evs.push({ x, r, t: x.t, type: 'brk' });
+    (r.ev || []).slice(1).forEach((e) => { if (!x.t || e.t >= x.t) evs.push({ x, r, t: e.t, type: e.type === 'up' ? 'back' : 'again', px: e.px }); });
+  });
+  evs.sort((a, b) => (a.t < b.t ? 1 : a.t > b.t ? -1 : a.x.code < b.x.code ? -1 : a.x.code > b.x.code ? 1 : 0));
+  const LBL = { brk: '跌破', back: '站回', again: '再跌破' };
+  const row = (e) => {
+    const x = e.x, r = e.r, code = x.code;
+    const q = getStockQuote(code);
+    const pct = q && Number.isFinite(q.changePercent) ? q.changePercent : r.pct;
+    const st = r.ev ? (r.inside ? '<span class="td-bk bk-below hr-bk">之下</span>' : '<span class="td-bk bk-above hr-bk">站回</span>') : '';
+    const tip = (r.ev ? '905低 ' + tdPx(r.l905) + '・昨低 ' + tdPx(r.yLow) + '・現 ' + tdPx(r.price) + (r.inside ? '・在 1+2 之下' : '・站回 1+2 之上') + '・' : '') +
+      (e.type === 'brk' ? '跌破＝第一次 5 分K 收盤同時跌破 905 低跟昨日低的時間' : e.type === 'back' ? '站回＝跌破之後 5 分K 收盤站回 905 低／昨低（較低那條）之上的時間' : '再跌破＝站回之後又收在 905 低／昨低之下');
+    return '<div class="hr-row hr-stk hr-wrapold hr-b905r hr-b905d' + (e.type === 'back' ? ' hr-b12back' : '') + '" data-code="' + wlEsc(code) + '" data-name="' + wlEsc(x.name || wlNameOf(code)) + '" tabindex="0" role="button" title="' + wlEsc(tip) + '">' +
+      '<span class="hr-rk" style="color:#a78bfa">' + wlEsc(e.t || '--:--') + '</span><span class="hr-code">' + wlEsc(code) + '</span><span class="hr-name">' + wlEsc(x.name || wlNameOf(code)) + '</span>' + st +
+      '<span class="hr-avg ' + (Number.isFinite(pct) ? dirClass(pct) : 'flat') + '">' + (Number.isFinite(pct) ? fmt(pct) + '%' : '') + '</span>' + homeHoldHtml(code) + '<span class="hr-ready">' + LBL[e.type] + '</span></div>';
+  };
+  const shown = evs.slice(0, HOME12D_MAX);
+  const foot = [];
+  if (loading) foot.push(loading + ' 檔 5 分K 還在抓，站回時間等一下會補上');
+  if (weak) foot.push('大戶力不到 −10% 的 ' + weak + ' 檔不列');
+  if (sys.length > HOME_BCAST_SCAN) foot.push('只看最新 ' + HOME_BCAST_SCAN + ' 檔');
+  return '<div class="hr-col"><div class="hr-title">🔻 1+2 跌破廣播 <span class="hr-rk">' + sys.length + ' 檔・之下 ' + nBelow + '・站回 ' + nBack + '</span></div>' +
+    '<div class="hr-bhold"><button type="button" class="b777-p' + (homeBcastHoldDn ? ' on' : '') + '" data-bcast-hold-dn="1" title="只看大戶力 ≤ −10% 的（跟 905 跌破廣播同一個開關；記在這台電腦）">' + (homeBcastHoldDn ? '☑ ' : '☐ ') + '大戶力 ≤ −10%</button></div>' +
+    (shown.length ? shown.map(row).join('') : '<div class="hr-note">' + (sys.length ? '現在沒有大戶力 ≤ −10% 的' : '今天還沒有（5 分K 收盤同時跌破 905 低跟昨日低就列「跌破」，之後站回再列「站回」）') + '</div>') +
+    (evs.length > HOME12D_MAX ? '<div class="hr-note">最新 ' + HOME12D_MAX + '／共 ' + evs.length + ' 筆</div>' : '') +
+    (foot.length ? '<div class="hr-note">' + foot.join('；') + '</div>' : '') + '</div>';
+}
 // 首頁「905 突破廣播」（2026-11-01 使用者：905 突破也拉一欄到首頁，放在 1+2 突破廣播旁邊）。名單＝每日功課「905 突破」同一份（2026-11-04 起：突破就列一筆、條件齊全再列一筆）：
 // 當天第一次站上 905 高＋大戶力 ≥ +10%＋漲幅 ≥ 2%＋族群在多方區，四個都成立才記（這台電腦盤中開著網頁時記，一天一次）；最近的在上面、最多 20 檔。
 // 2026-11-02 使用者：905 突破廣播只留 15 檔（不用那麼多）、每列高一點、距離拉開、每列最下面補「條件齊全」的時間
@@ -11439,6 +11483,7 @@ function home905BcastColHtml(){
 }
 // 2026-10-20 使用者（截圖框給我看）：首頁這幾塊要加粗紅框——續抱勿追高＋族群漲幅 > 2%(12)、馬火多(30)、30加33＋賽馬多(33)、發動＋今日強勢股、1+2多(44)
 const homeRedBox = (html) => '<div class="hr-redbox">' + html + '</div>';
+const homeGreenBox = (html) => '<div class="hr-redbox hr-grnbox">' + html + '</div>';   // 2026-11-26 使用者：跌破廣播用綠框
 function home12ColHtml(h){
   const byName = new Map(lastData.groups.map((g) => [g.name, g]));
   const rows = h.rows.filter((r) => r.avg > 2 && !RANK183_GROUPS.has(r.name));   // 2026-10-21 使用者：有入選 183 的族群這裡不再列
@@ -12264,8 +12309,9 @@ function homeRank4Html(){
     homeFixedBotColHtml('777', true) +   // 功課卡片條列（777／32／123 兩份以上都有的閃綠）
     homeFixedBotColHtml('999', true) +   // 2026-11-25 使用者：空中空(999) 跟均20 轉彎(200) 對調——777 右邊先空中空、再 200
     '<div class="hr-stack hx-wide">' + homeRedBox(homeNowColHtml('bear')) + '</div>' +   // 2026-11-25 使用者：訊號中心「今日即時空」搬到首頁，放均20 轉彎(200) 左邊
-    '<div class="hr-stack">' + homeRedBox(home905dBcastColHtml()) + '</div>' +   // 2026-11-26 使用者：905 跌破廣播放今日即時空右邊（原本在 905 突破廣播左邊）
+    '<div class="hr-stack">' + homeGreenBox(home905dBcastColHtml()) + '</div>' +   // 2026-11-26 使用者：905 跌破廣播放今日即時空右邊（原本在 905 突破廣播左邊）
     homeFixedBotColHtml('200', true) +   // 2026-11-25 使用者：首頁拿掉盤前空觀察，改放機器人 200（均20 轉下彎／轉上彎）
+    '<div class="hr-stack">' + homeGreenBox(home12dBcastColHtml()) + '</div>' +   // 2026-11-26 使用者：1+2 跌破廣播放個股訊號追蹤左邊
     '<div class="hr-stack hx-wide">' + homeRedBox(homeTrkColHtml()) + '</div>' +   // 2026-11-25 使用者：個股訊號追蹤的「現況」＋「今日訊號」合成一張，放強中強左邊
     '<div class="hr-stack hx-wide">' + homeRedBox(homeNowColHtml('bull')) + '</div>' +   // 2026-11-25 使用者：訊號中心「今日即時多」搬到首頁，放強中強左邊
     // 2026-11-26 使用者：905 突破廣播（下面疊大戶＋投信）、1+2 突破廣播兩欄搬到今日即時多右邊、強中強左邊
@@ -20682,7 +20728,7 @@ function render(){
   app.innerHTML =
     '<div class="layout">' +
       '<div class="col-right">' +
-        '<div class="section-head"><div class="section-title">週轉率觀察・新刀劍空(32)・12空(123)・空族群必殺(193)・777・空中空(999)・今日即時空・905 跌破廣播・均20 轉彎(200)・個股訊號追蹤・今日即時多・905 突破廣播・1+2 突破廣播／融資增加股票・強中強(888)／週轉率高・現股當沖・火多多(23)・905 突破廣播・1+2 突破廣播・30加33加34／投信買超前15・188・三落空・盤中大戶力・強勢股觀察中・強勢紅K／創高黑龍・熱門趨勢概念股(240)・日動能(260)・週動能(270)・多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・發動／今日強勢股／外資買超前15・183／族群漲幅(12)／155</div></div>' +
+        '<div class="section-head"><div class="section-title">週轉率觀察・新刀劍空(32)・12空(123)・空族群必殺(193)・777・空中空(999)・今日即時空・905 跌破廣播・均20 轉彎(200)・1+2 跌破廣播・個股訊號追蹤・今日即時多・905 突破廣播・1+2 突破廣播／融資增加股票・強中強(888)／週轉率高・現股當沖・火多多(23)・905 突破廣播・1+2 突破廣播・30加33加34／投信買超前15・188・三落空・盤中大戶力・強勢股觀察中・強勢紅K／創高黑龍・熱門趨勢概念股(240)・日動能(260)・週動能(270)・多觀察(等黑K買進)・當沖多1・疑似主力融資買進／當沖多2・雙榜交集／續抱勿追高／股期黑龍(75)・發動／今日強勢股／外資買超前15・183／族群漲幅(12)／155</div></div>' +
         homeRank4Html() +
       '</div>' +
     '</div>';
@@ -22882,7 +22928,7 @@ function tdB905Calc(code, kind, date, slot, ttl){
     const c = tdJCache['m5|' + code], q = getStockQuote(code);
     if (t5 < 600e3 && !slot && c && c.data && d1 && q && q.price > 0){
       const r0 = tdB905From(d1, c.data, kind, date, null);
-      const dn = kind === 'c905d', sameSide = dn ? (q.price < r0.thr) === r0.inside : (q.price > r0.thr) === r0.inside;
+      const dn = kind === 'c905d' || kind === 'c12d', sameSide = dn ? (q.price < r0.thr) === r0.inside : (q.price > r0.thr) === r0.inside;
       if (r0.ev && sameSide && (r0.p2 || !(Number.isFinite(q.changePercent) && (dn ? q.changePercent <= -TD905_PCT : q.changePercent >= TD905_PCT)))) t5 = 600e3;
     }
     m5 = tdJ('m5|' + code, '/api/bars/' + code, t5);
@@ -22896,11 +22942,12 @@ function tdB905From(d1, m5, kind, date, slot){
   if (!dayBars.length) return { empty: true };
   const endHm = (b) => new Date(b.ts + 8 * 3600e3 + 300e3).toISOString().slice(11, 16);
   const prev = (d1.bars || []).filter((b) => String(b.ts).slice(0, 10) < date);
-  const yHigh = prev.length ? prev[prev.length - 1].high : null, yClose = prev.length ? prev[prev.length - 1].close : null;
+  const yHigh = prev.length ? prev[prev.length - 1].high : null, yClose = prev.length ? prev[prev.length - 1].close : null, yLow = prev.length ? prev[prev.length - 1].low : null;
   const h905 = dayBars[0].high, l905 = dayBars[0].low;
   // 2026-11-26 使用者：905 跌破廣播（kind 'c905d'）＝905 突破倒過來：線＝905 低，inside＝現在收在 905 低之下，p2＝第一次跌幅 ≤ −2%
-  const down = kind === 'c905d';
-  const thr = down ? l905 : kind === 'c12' && Number.isFinite(yHigh) ? Math.max(h905, yHigh) : h905;
+  // 2026-11-26 使用者：1+2 跌破廣播（kind 'c12d'）＝線取 905 低跟昨日低比較低的那個，收盤跌破＝同時跌破兩條
+  const down = kind === 'c905d' || kind === 'c12d';
+  const thr = kind === 'c12d' ? (Number.isFinite(yLow) ? Math.min(l905, yLow) : l905) : down ? l905 : kind === 'c12' && Number.isFinite(yHigh) ? Math.max(h905, yHigh) : h905;
   const ev = [];
   let inside = false, last = null, p2 = '';
   dayBars.forEach((b) => {
@@ -22914,7 +22961,7 @@ function tdB905From(d1, m5, kind, date, slot){
     } else if (!inside && b.close > thr){ inside = true; ev.push({ t, type: 'up', px: b.close }); }
     else if (inside && b.close < thr){ inside = false; ev.push({ t, type: 'down', px: b.close }); }
   });
-  return { h905, l905, yHigh, yClose, thr, ev, inside, p2, price: last ? last.close : null, high: dayBars.filter((b) => !slot || endHm(b) <= slot).reduce((m, b) => Math.max(m, b.high), 0),
+  return { h905, l905, yHigh, yLow, yClose, thr, ev, inside, p2, price: last ? last.close : null, high: dayBars.filter((b) => !slot || endHm(b) <= slot).reduce((m, b) => Math.max(m, b.high), 0),
     pct: last && yClose ? (last.close / yClose - 1) * 100 : null, lastT: last ? endHm(last) : '' };
 }
 function tdSigEvents(date){
@@ -22969,11 +23016,12 @@ function tdStopCheck(snap){
   }
 }
 // 全市場今天第一次 1+2多（跟首頁小幫手 44 同一份）：[{code, name, t}]，最近的在前
-function tdSysList(date, slot){
+function tdSysList(date, slot, kind){
+  const k = kind || 'combo12Bull';   // 'combo12Bear'＝1+2空（1+2 跌破廣播）
   const sys = [];
   const seen = new Set();
   tdSigEvents(date).filter((e) => (!slot || String(e.time || '') <= slot)).forEach((e) => {
-    if (!(e.kind === 'combo12Bull' || (e.tabs || []).includes('combo12Bull')) || seen.has(e.code)) return;
+    if (!(e.kind === k || (e.tabs || []).includes(k)) || seen.has(e.code)) return;
     seen.add(e.code);
     sys.push({ code: e.code, name: e.name, t: String(e.time || '') });
   });
@@ -32372,13 +32420,13 @@ function czItems(){
 // 首頁欄位：欄位是程式每 15 秒整個重畫的，所以每次畫完（MutationObserver）再依標題標記、收合；標題對不到的欄不管它
 // 2026-11-18 使用者：首頁每一欄右上角都要有打勾（原本只有底下那幾欄有）；前面這幾個先比（標題裡會帶到別欄名字的要排前面，例：強中強的說明有「強勢股觀察中」）
 const CZ_HOME_CARDS = [['hm:tw', '週轉率觀察'], ['hm:sf', '股期成交量'], ['hm:sf', '股期買進'], ['hm:sf', '股期賣出'], ['hm:rt', '營收＋技術面'], ['hm:tb', '大戶＋投信同'], ['hm:b32', '新刀劍空(32)'], ['hm:b123', '空(123)'], ['hm:b193', '空族群必殺(193)'], ['hm:mup', '融資增加股票'], ['hm:mdn', '融資大減股票'], ['hm:b777', '(777)'], ['hm:b999', '（999）'], ['hm:b200', '(200)'], ['hm:trk', '個股訊號追蹤'], ['hm:nowb', '今日即時空'], ['hm:nowu', '今日即時多'], ['hm:b240', '(240)'], ['hm:b260', '(260)'], ['hm:b270', '(270)'],
-  ['hm:ss', '強中強'], ['hm:b23', '火多多(23)'], ['hm:turn', '週轉率高'], ['hm:turn', '現股當沖'], ['hm:pre', '盤前空觀察'], ['hm:close', '收盤觀察股'], ['hm:b905', '905突破廣播'], ['hm:b905d', '905跌破廣播'], ['hm:b12', '1+2突破廣播'], ['hm:hup', '盤中大戶力≥'], ['hm:hdn', '盤中大戶力≤'],
+  ['hm:ss', '強中強'], ['hm:b23', '火多多(23)'], ['hm:turn', '週轉率高'], ['hm:turn', '現股當沖'], ['hm:pre', '盤前空觀察'], ['hm:close', '收盤觀察股'], ['hm:b905', '905突破廣播'], ['hm:b905d', '905跌破廣播'], ['hm:b12d', '1+2跌破廣播'], ['hm:b12', '1+2突破廣播'], ['hm:hup', '盤中大戶力≥'], ['hm:hdn', '盤中大戶力≤'],
   ['hm:s99', '外資投信同步'], ['hm:t15', '投信買超前15'], ['hm:f15', '外資買超前15'], ['hm:pick', '強勢股觀察中'], ['hm:red', '強勢紅K'], ['hm:dragon', '創高黑龍'],
   ['hm:mf', '疑似主力融資買進'], ['hm:both', '雙榜交集'], ['hm:dt1', '當沖多1'], ['hm:dt2', '當沖多2'], ['hm:obs', '多觀察'], ['hm:strong', '今日強勢股'], ['hm:hold', '續抱勿追高'], ['hm:r30', '30加33加34'], ['hm:launch', '發動'], ['hm:r188', '多族群排名(188)'],
   ['hm:r183', '多族群排名(183)'], ['hm:g12', '族群漲幅'], ['hm:r44', '1+2多'], ['hm:t3', '三落空'], ['hm:r155', '股票期貨排名(155)'], ['hm:r75', '股期黑龍']];
 const CZ_HOME_JAIL = [['hm:jin', '今日入獄'], ['hm:jsoon', '即將出關'], ['hm:jout', '已出關']];
 // 首頁每一欄原本的寬度（跟 CSS .home-rank4 的 grid-template-columns 同一份，順序＝欄的順序）；收掉幾欄時照這個排，不平分
-const HOME_TRACKS = ['330px', '400px', '400px', '360px', '310px', '310px', '360px', '420px', '330px', '756px', '300px', '360px', '680px', '912px', '380px', '190px', '400px', '400px', '240px', '250px', '280px', '210px', '330px', '420px', '400px', '400px',
+const HOME_TRACKS = ['330px', '400px', '400px', '360px', '310px', '310px', '360px', '420px', '330px', '756px', '300px', '360px', '300px', '680px', '912px', '380px', '190px', '400px', '400px', '240px', '250px', '280px', '210px', '330px', '420px', '400px', '400px',
   'minmax(0, 1.6fr)', 'minmax(0, 1.6fr)', 'minmax(0, 1.5fr)', 'minmax(0, 1.95fr)', 'minmax(0, 1.3fr)', 'minmax(0, 1.4fr)'];
 function czApplyHome(){
   const root = document.querySelector('#app .home-rank4');
