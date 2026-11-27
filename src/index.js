@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-27 12:29:07";
+const BUILD_STAMP = "2026-11-27 13:35:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -12182,14 +12182,19 @@ const HOME_NOW_MAX = 150;   // 首頁只畫最新 150 筆訊號（訊號中心�
 function homeNowScrollSave(){
   const out = {};
   document.querySelectorAll('.hnow-scroll[data-hnow]').forEach((box) => {
-    const top = box.scrollTop, st = { top, key: null, delta: 0 };
+    // 2026-11-27 使用者：捲到哪停在哪、有新的也要更新 → 記畫面上看得到的前 10 列（不只第一列）：換新內容後找第一個還在的那列對回原位，
+    // 第一列剛好跑掉／換了時間被排到別的地方，也還有下面幾列可以對，不會退回用像素（新的列插在上面就會整個跳）
+    const top = box.scrollTop, st = { top, key: null, delta: 0, anchors: [] };
     if (top > 0){
       const rows = box.querySelectorAll('.signal-row[data-code], .b32-row[data-bot-code], .race-row[data-code]');
-      const bTop = box.getBoundingClientRect().top;
+      const bTop = box.getBoundingClientRect().top, bH = box.clientHeight;
       for (const r of rows){
         const y = r.getBoundingClientRect().top - bTop;
-        if (y >= -2){ st.key = homeNowRowKey(r); st.delta = y; break; }
+        if (y < -2) continue;
+        if (y > bH || st.anchors.length >= 10) break;
+        st.anchors.push({ key: homeNowRowKey(r), delta: y });
       }
+      if (st.anchors.length){ st.key = st.anchors[0].key; st.delta = st.anchors[0].delta; }
     }
     out[box.dataset.hnow] = st;
   });
@@ -12197,7 +12202,7 @@ function homeNowScrollSave(){
 }
 function homeNowRowKey(r){   // 認列用不會變的東西（代號＋時間＋訊號名稱），不用整列文字（漲跌幅、大戶力一直在變，重新打開就認不出來）
   const tx = (sel) => { const e = r.querySelector(sel); return e ? e.textContent.replace(/\\s+/g, '') : ''; };
-  if (r.dataset.botCode) return 'b|' + r.dataset.botCode;
+  if (r.dataset.botCode) return 'b|' + r.dataset.botCode + '|' + tx('.b32-time');
   return 's|' + (r.dataset.code || '') + '|' + tx('.sig-time') + '|' + tx('.sig-label').slice(0, 16);
 }
 function homeNowScrollRestore(saved, strict){   // strict：找不到上次那一列就不動（隔天內容不一樣，不要用像素硬放）
@@ -12205,11 +12210,15 @@ function homeNowScrollRestore(saved, strict){   // strict：找不到上次那�
     const st = saved[box.dataset.hnow];
     if (!st || !st.top) return;
     let done = false;
-    if (st.key){
+    const anchors = st.anchors && st.anchors.length ? st.anchors : (st.key ? [{ key: st.key, delta: st.delta }] : []);
+    if (anchors.length){
+      const byKey = new Map();
+      box.querySelectorAll('.signal-row[data-code], .b32-row[data-bot-code], .race-row[data-code]').forEach((r) => { const k = homeNowRowKey(r); if (!byKey.has(k)) byKey.set(k, r); });
       const bTop = box.getBoundingClientRect().top;
-      for (const r of box.querySelectorAll('.signal-row[data-code], .b32-row[data-bot-code], .race-row[data-code]')){
-        if (homeNowRowKey(r) !== st.key) continue;
-        box.scrollTop += (r.getBoundingClientRect().top - bTop) - st.delta;
+      for (const a of anchors){
+        const r = byKey.get(a.key);
+        if (!r) continue;
+        box.scrollTop += (r.getBoundingClientRect().top - bTop) - a.delta;
         done = true; break;
       }
     }
@@ -12234,10 +12243,9 @@ function homeNowSwapBack(old){   // render() 換完以後叫：能沿用的把�
     const side = nb.dataset.hnow, o = old[side], ob = o && o.el, html = homeNowLast[side];
     if (ob && ob === nb) return;   // 這欄沒換（homeApplyHtml 沒動它）：框原封不動，捲的位置也沒變
     const busy = homeNowHold[side] || Date.now() - (homeNowScrollAt[side] || 0) < 2000;
-    // 2026-11-27 使用者：今日即時多／空捲到哪就停在哪，有新訊號也不要跳——只要框沒有在最上面（使用者捲下去在看），內容就整個不換（舊框原封不動），
-    // 捲回最上面才換成最新的（2026-11-27 使用者：不要浮按鈕）。在最上面的時候照舊直接更新（新的出現在最上面）。
-    const scrolled = !!(o && o.top > 4);
-    if (ob && (ob._h === html || busy || nb.dataset.keep || scrolled)){
+    // 2026-11-27 使用者：今日即時多／空捲到哪就停在哪，有新訊號也要更新——正在捲（或按住捲軸）的時候先不換，停下來就換成最新的，
+    // 換完照畫面上記下來的那幾列對回原位（homeNowScrollRestore）；在最上面的時候直接停在最上面。
+    if (ob && (ob._h === html || busy || nb.dataset.keep)){
       nb.replaceWith(ob); ob.scrollTop = o.top;
       homeNowPill(ob, ob._h !== html && !!html);
       return;
@@ -12245,8 +12253,8 @@ function homeNowSwapBack(old){   // render() 換完以後叫：能沿用的把�
     if (nb.dataset.keep){ nb.innerHTML = '<div class="hnow-in">' + html + '</div>'; delete nb.dataset.keep; }   // 舊框不見了（不該發生）：補畫內容
     nb._h = html;
     homeNowPill(nb, false);
-    if (o) nb.scrollTop = 0;   // 原本就在最上面：新的框也停在最上面（新訊號出現在最上面），不用再對位置
-    else fresh.push(side);
+    if (o && o.top <= 4) nb.scrollTop = 0;   // 原本就在最上面：新的框也停在最上面，不用再對位置
+    else fresh.push(side);                  // 捲下去在看：換新內容後照記下來的那幾列對回原位（homeNowScrollRestore）
   });
   return fresh;
 }
@@ -12297,7 +12305,7 @@ function homeNowColHtml(side){
   const same = !!(cur && cur._h === inner);
   // 2026-11-27：框捲下去在看（或正在捲）而內容變了：這次也不產生內容，放「先不換」的佔位（跟內容一樣時的佔位不同字），
   // 捲回最上面那次才會輸出完整內容 → 這欄的字跟上次不一樣 → 整欄換新
-  const hold = !!(cur && !same && (cur.scrollTop > 4 || homeNowHold[side] || Date.now() - (homeNowScrollAt[side] || 0) < 2000));
+  const hold = !!(cur && !same && (homeNowHold[side] || Date.now() - (homeNowScrollAt[side] || 0) < 2000));   // 2026-11-27 使用者：捲下去也要更新 → 只有正在捲才先不換
   return '<div class="hr-col hnow-col ' + side + '"><div class="hr-title" title="跟盤中訊號中心「' + (bull ? '今日即時多' : '今日即時空') + '」同一份、排法一樣（只看今天）">' +
     '<span class="hnow-t ' + side + '">' + (bull ? '今日即時多' : '今日即時空') + '</span>' + (n ? ' <span class="hr-rk">' + n + ' 筆訊號</span>' : '') + '</div>' +
     '<div class="hnow-scroll" data-hnow="' + side + '"' + (same || hold ? ' data-keep="1"' + (hold ? ' data-pend="1"' : '') + '>' : '><div class="hnow-in">' + inner + '</div>') + '</div></div>';   // 2026-11-25 使用者：右邊要有捲軸（上下箭頭），滑到哪就停在哪
@@ -20111,7 +20119,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-27 12:29:07';
+const BUILD_STAMP = '2026-11-27 13:35:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
