@@ -29225,9 +29225,10 @@ function botAnswerRaw(raw){
     const otc = live.otcLabel || '';
     const body = bot777ParamsHtml() + botLine(maTurnBtnHtml('777', false), 'bot-b32turn') + botLine('<span></span><span class="b777-hh r">成交價</span><span class="b777-hh c">大戶力</span><span class="b777-hh r">漲跌幅</span>', 'b777-hhead') +
       botLine('🔪刀劍空 ' + rows32.length + ' 檔・🔵12空 ' + rows12.length + ' 檔・合計 ' + items.size + ' 檔／' + groups.length + ' 族', 'bot-sep') +
-      (items.size ? groups.map((g) => grpHead(g) + g.list.map(rowHtml).join('')).join('') : botLine('目前沒有', 'bot-dim')) +
+      // 2026-11-27 使用者：不分族群段落，整份照左邊的時間排（最新發生的在最上面、越早越下面）；族群名稱照樣標在每一列
+      (items.size ? [...items.values()].sort((x, y) => (itEv(y) > itEv(x) ? 1 : itEv(y) < itEv(x) ? -1 : (baseOf(x).pct ?? 0) - (baseOf(y).pct ?? 0))).map(rowHtml).join('') : botLine('目前沒有', 'bot-dim')) +
       (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail() + (live.otcPct !== null && live.otcPct !== undefined ? '　櫃買 ' + wlEsc(otc) + ' ' + botPct(live.otcPct) : ''), 'bot-warn') : '') +
-      botLine('跟每日功課下面的族群卡同一份（段位照功課面板勾的；上面那排勾選是 777 自己的，不影響每日功課）・刀劍空、12空 混在一起不分段：族群照族裡最新發生的訊號排（剛進榜或回榜的那一族跳到最上面），族裡每檔也照它最新的訊號排・左邊時間＝這檔最新發生的訊號時間，下面標是哪一種訊號（第一次出現的時間、回＝掉出去又回榜）・📈股期／📈小期＝有股票期貨／小型股期・⛔禁空＝停券又不可現股當沖、⛔停券＝不可融券・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
+      botLine('跟每日功課下面的族群卡同一份（段位照功課面板勾的；上面那排勾選是 777 自己的，不影響每日功課）・刀劍空、12空 混在一起、不分族群段落：整份照每檔最新發生的訊號時間排（最新的在最上面，越早越下面），族群名稱標在每一列・左邊時間＝這檔最新發生的訊號時間，下面標是哪一種訊號（第一次出現的時間、回＝掉出去又回榜）・📈股期／📈小期＝有股票期貨／小型股期・⛔禁空＝停券又不可現股當沖、⛔停券＝不可融券・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
     return wrap(t, body, tdMd(live.date) + ' ' + (live.slot || ''));
   }
   if (q === '193'){

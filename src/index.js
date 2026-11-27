@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-27 10:56:12";
+const BUILD_STAMP = "2026-11-27 11:11:34";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -20082,7 +20082,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-27 10:56:12';
+const BUILD_STAMP = '2026-11-27 11:11:34';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -29314,9 +29314,10 @@ function botAnswerRaw(raw){
     const otc = live.otcLabel || '';
     const body = bot777ParamsHtml() + botLine(maTurnBtnHtml('777', false), 'bot-b32turn') + botLine('<span></span><span class="b777-hh r">成交價</span><span class="b777-hh c">大戶力</span><span class="b777-hh r">漲跌幅</span>', 'b777-hhead') +
       botLine('🔪刀劍空 ' + rows32.length + ' 檔・🔵12空 ' + rows12.length + ' 檔・合計 ' + items.size + ' 檔／' + groups.length + ' 族', 'bot-sep') +
-      (items.size ? groups.map((g) => grpHead(g) + g.list.map(rowHtml).join('')).join('') : botLine('目前沒有', 'bot-dim')) +
+      // 2026-11-27 使用者：不分族群段落，整份照左邊的時間排（最新發生的在最上面、越早越下面）；族群名稱照樣標在每一列
+      (items.size ? [...items.values()].sort((x, y) => (itEv(y) > itEv(x) ? 1 : itEv(y) < itEv(x) ? -1 : (baseOf(x).pct ?? 0) - (baseOf(y).pct ?? 0))).map(rowHtml).join('') : botLine('目前沒有', 'bot-dim')) +
       (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail() + (live.otcPct !== null && live.otcPct !== undefined ? '　櫃買 ' + wlEsc(otc) + ' ' + botPct(live.otcPct) : ''), 'bot-warn') : '') +
-      botLine('跟每日功課下面的族群卡同一份（段位照功課面板勾的；上面那排勾選是 777 自己的，不影響每日功課）・刀劍空、12空 混在一起不分段：族群照族裡最新發生的訊號排（剛進榜或回榜的那一族跳到最上面），族裡每檔也照它最新的訊號排・左邊時間＝這檔最新發生的訊號時間，下面標是哪一種訊號（第一次出現的時間、回＝掉出去又回榜）・📈股期／📈小期＝有股票期貨／小型股期・⛔禁空＝停券又不可現股當沖、⛔停券＝不可融券・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
+      botLine('跟每日功課下面的族群卡同一份（段位照功課面板勾的；上面那排勾選是 777 自己的，不影響每日功課）・刀劍空、12空 混在一起、不分族群段落：整份照每檔最新發生的訊號時間排（最新的在最上面，越早越下面），族群名稱標在每一列・左邊時間＝這檔最新發生的訊號時間，下面標是哪一種訊號（第一次出現的時間、回＝掉出去又回榜）・📈股期／📈小期＝有股票期貨／小型股期・⛔禁空＝停券又不可現股當沖、⛔停券＝不可融券・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
     return wrap(t, body, tdMd(live.date) + ' ' + (live.slot || ''));
   }
   if (q === '193'){
