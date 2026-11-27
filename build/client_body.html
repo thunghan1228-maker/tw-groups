@@ -11624,6 +11624,7 @@ function homeModelsCardHtml(){
     (recent.length ? '<div class="sm-sub">前幾天的訊號</div>' + recent.map((x) => row(x, x.date)).join('') : '') +
     (trades ? '<div class="sm-sub">回測最近出場</div>' + trades : '') +
     '<div class="sm-note">共同條件：' + (d.commonRules || []).map(wlEsc).join('；') + '。<br>回測：' + (d.backtestRules || []).map(wlEsc).join('；') + '。<br>' +
+      (cov.perStock && cov.perStock.codes && cov.perStock.done < cov.perStock.codes ? '<b>一年資料補齊中：' + cov.perStock.done + '／' + cov.perStock.codes + ' 檔</b>（FinMind 免費帳號一檔一檔補，每小時大約補 140 檔；還沒補到的股票，要用法人、融資、當沖、營收的模型先不會選到它）。<br>' : '') +
       '回測期間 ' + md(d.backtest && d.backtest.from) + '～' + md(d.backtest && d.backtest.to) + '（' + ((d.backtest && d.backtest.days) || 0) + ' 個交易日）；資料：法人 ' + (cov.instDays || 0) + ' 天、融資 ' + (cov.marginDays || 0) + ' 天、當沖 ' + (cov.daytradeDays || 0) + ' 天、集保 ' + (cov.tdccWeeks || 0) + ' 週。回測結果不代表未來，只是看這個條件過去一年的表現。</div></div>';
 }
 // 首頁「905 跌破廣播」（2026-11-26 使用者：905 突破廣播完全倒過來，放 905 突破廣播左邊）
@@ -19942,6 +19943,7 @@ function renderModelsPanel(){
 let modelsWaitT = 0;
 function openModelsPanel(){
   document.getElementById('modelsModal').hidden = false;
+  try { const c = botFetchCache('stockModels', '/api/stock-models', 10 * 60e3); if (c && c.status !== 'ok') delete botState.cache.stockModels; } catch (_){}   // 上次拿到的是「計算中」：打開面板就重抓（不等 30 分鐘快取）
   renderModelsPanel();
   clearInterval(modelsWaitT);
   let n = 0;   // 資料還沒回來：每秒看一次，回來就重畫（最多 20 秒）

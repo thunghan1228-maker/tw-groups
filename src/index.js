@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-27 13:35:12";
+const BUILD_STAMP = "2026-11-27 13:53:46";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -11713,6 +11713,7 @@ function homeModelsCardHtml(){
     (recent.length ? '<div class="sm-sub">前幾天的訊號</div>' + recent.map((x) => row(x, x.date)).join('') : '') +
     (trades ? '<div class="sm-sub">回測最近出場</div>' + trades : '') +
     '<div class="sm-note">共同條件：' + (d.commonRules || []).map(wlEsc).join('；') + '。<br>回測：' + (d.backtestRules || []).map(wlEsc).join('；') + '。<br>' +
+      (cov.perStock && cov.perStock.codes && cov.perStock.done < cov.perStock.codes ? '<b>一年資料補齊中：' + cov.perStock.done + '／' + cov.perStock.codes + ' 檔</b>（FinMind 免費帳號一檔一檔補，每小時大約補 140 檔；還沒補到的股票，要用法人、融資、當沖、營收的模型先不會選到它）。<br>' : '') +
       '回測期間 ' + md(d.backtest && d.backtest.from) + '～' + md(d.backtest && d.backtest.to) + '（' + ((d.backtest && d.backtest.days) || 0) + ' 個交易日）；資料：法人 ' + (cov.instDays || 0) + ' 天、融資 ' + (cov.marginDays || 0) + ' 天、當沖 ' + (cov.daytradeDays || 0) + ' 天、集保 ' + (cov.tdccWeeks || 0) + ' 週。回測結果不代表未來，只是看這個條件過去一年的表現。</div></div>';
 }
 // 首頁「905 跌破廣播」（2026-11-26 使用者：905 突破廣播完全倒過來，放 905 突破廣播左邊）
@@ -20031,6 +20032,7 @@ function renderModelsPanel(){
 let modelsWaitT = 0;
 function openModelsPanel(){
   document.getElementById('modelsModal').hidden = false;
+  try { const c = botFetchCache('stockModels', '/api/stock-models', 10 * 60e3); if (c && c.status !== 'ok') delete botState.cache.stockModels; } catch (_){}   // 上次拿到的是「計算中」：打開面板就重抓（不等 30 分鐘快取）
   renderModelsPanel();
   clearInterval(modelsWaitT);
   let n = 0;   // 資料還沒回來：每秒看一次，回來就重畫（最多 20 秒）
@@ -20119,7 +20121,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-27 13:35:12';
+const BUILD_STAMP = '2026-11-27 13:53:46';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -35574,7 +35576,7 @@ const WORKER_ENTRY = {
     }
     if (url.pathname === "/api/stock-models") {
       // 首頁選股模型（2026-11-26 使用者）：後端收盤後算好存快取，一天只變一次，快取 10 分鐘
-      return await proxyHanstockBars("/api/hub/stock-models", 600);
+      return await proxyHanstockBars("/api/hub/stock-models", 120);   // 2026-11-27：快取 2 分鐘（「計算中」不要卡 10 分鐘）
     }
     if (url.pathname === "/api/revenue-tech") {
       // 首頁營收＋技術面（2026-11-22 使用者）：收盤後／營收公布才變，快取 5 分鐘
