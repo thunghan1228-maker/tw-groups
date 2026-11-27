@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-27 11:21:53";
+const BUILD_STAMP = "2026-11-27 11:30:23";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -426,6 +426,10 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .bot-help-code{cursor:pointer;color:#c4b5fd;} .bot-help-code:hover{text-decoration:underline;}
   .bot-line.bot-sep{color:var(--muted);text-align:left;}
   .bot-line.bot-sep.bot-sep-bear{color:#22c55e;font-weight:800;}
+  /* 2026-11-27 使用者：193 的「↓(空方)↓」那條放大、加粗、閃爍，比較顯眼 */
+  .bot-line.bot-sep.bot-sep-kong{font-size:20px;font-weight:900;letter-spacing:2px;line-height:1.5;padding:4px 0;color:#22c55e;animation:kongBlink 1s ease-in-out infinite;}
+  @keyframes kongBlink{0%,100%{opacity:1;text-shadow:0 0 8px rgba(34,197,94,.85);}50%{opacity:.2;text-shadow:none;}}
+  body.home-light .bot-line.bot-sep.bot-sep-kong{color:#15803d;}
   .bot-col .bot-line.bot-sep{white-space:nowrap;overflow:hidden;}   /* 格子窄時分隔線最後的 - 不要掉到第二行 */   /* 2026-10-18 使用者：空方那條（↓(空方)↓、↓(強空積極)↓、↓(空方・跌)↓）粗體綠字 */ .bot-line.bot-warn{color:#fb923c;} .bot-dim{color:var(--muted);}
   #remindInner{max-width:620px;}
   .rm-date{font-size:17px;font-weight:800;margin:2px 0 10px;}
@@ -20082,7 +20086,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-27 11:21:53';
+const BUILD_STAMP = '2026-11-27 11:30:23';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -29345,7 +29349,7 @@ function botAnswerRaw(raw){
     // 2026-11-27 使用者：族群照族裡最新發生的時間排（最新的那族在最上面；沒有時間的照名次排在後面），空方線上下兩段各自排
     const grpT = (r) => memOf(r).reduce((mx, x) => { const v = evOf(x.code); return v > mx ? v : mx; }, '');
     const byRank = (l) => l.slice().sort((a, b) => { const ta = grpT(a), tb = grpT(b); return tb > ta ? 1 : tb < ta ? -1 : a.rank - b.rank; });
-    return wrap('空族群必殺(193)', botLine(maTurnBtnHtml('193', false), 'bot-b32turn') + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + byRank(k.upper).map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + byRank(k.lower).map(line).join('') + botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + (kill193OtcTail() ? botLine(kill193OtcTail(), 'bot-sub') : ''));
+    return wrap('空族群必殺(193)', botLine(maTurnBtnHtml('193', false), 'bot-b32turn') + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + byRank(k.upper).map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear bot-sep-kong') + byRank(k.lower).map(line).join('') + botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + (kill193OtcTail() ? botLine(kill193OtcTail(), 'bot-sub') : ''));
   }
   if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\\+3$/.test(q)){
     let list = zone283List(h);

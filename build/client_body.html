@@ -339,6 +339,10 @@
   .bot-help-code{cursor:pointer;color:#c4b5fd;} .bot-help-code:hover{text-decoration:underline;}
   .bot-line.bot-sep{color:var(--muted);text-align:left;}
   .bot-line.bot-sep.bot-sep-bear{color:#22c55e;font-weight:800;}
+  /* 2026-11-27 使用者：193 的「↓(空方)↓」那條放大、加粗、閃爍，比較顯眼 */
+  .bot-line.bot-sep.bot-sep-kong{font-size:20px;font-weight:900;letter-spacing:2px;line-height:1.5;padding:4px 0;color:#22c55e;animation:kongBlink 1s ease-in-out infinite;}
+  @keyframes kongBlink{0%,100%{opacity:1;text-shadow:0 0 8px rgba(34,197,94,.85);}50%{opacity:.2;text-shadow:none;}}
+  body.home-light .bot-line.bot-sep.bot-sep-kong{color:#15803d;}
   .bot-col .bot-line.bot-sep{white-space:nowrap;overflow:hidden;}   /* 格子窄時分隔線最後的 - 不要掉到第二行 */   /* 2026-10-18 使用者：空方那條（↓(空方)↓、↓(強空積極)↓、↓(空方・跌)↓）粗體綠字 */ .bot-line.bot-warn{color:#fb923c;} .bot-dim{color:var(--muted);}
   #remindInner{max-width:620px;}
   .rm-date{font-size:17px;font-weight:800;margin:2px 0 10px;}
@@ -29256,7 +29260,7 @@ function botAnswerRaw(raw){
     // 2026-11-27 使用者：族群照族裡最新發生的時間排（最新的那族在最上面；沒有時間的照名次排在後面），空方線上下兩段各自排
     const grpT = (r) => memOf(r).reduce((mx, x) => { const v = evOf(x.code); return v > mx ? v : mx; }, '');
     const byRank = (l) => l.slice().sort((a, b) => { const ta = grpT(a), tb = grpT(b); return tb > ta ? 1 : tb < ta ? -1 : a.rank - b.rank; });
-    return wrap('空族群必殺(193)', botLine(maTurnBtnHtml('193', false), 'bot-b32turn') + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + byRank(k.upper).map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + byRank(k.lower).map(line).join('') + botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + (kill193OtcTail() ? botLine(kill193OtcTail(), 'bot-sub') : ''));
+    return wrap('空族群必殺(193)', botLine(maTurnBtnHtml('193', false), 'bot-b32turn') + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + byRank(k.upper).map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear bot-sep-kong') + byRank(k.lower).map(line).join('') + botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + (kill193OtcTail() ? botLine(kill193OtcTail(), 'bot-sub') : ''));
   }
   if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\+3$/.test(q)){
     let list = zone283List(h);
