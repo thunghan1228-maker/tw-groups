@@ -339,7 +339,7 @@
   .bot-help-code{cursor:pointer;color:#c4b5fd;} .bot-help-code:hover{text-decoration:underline;}
   .bot-line.bot-sep{color:var(--muted);text-align:left;}
   .bot-line.bot-sep.bot-sep-bear{color:#22c55e;font-weight:800;}
-  /* 2026-11-27 使用者：193 的「↓(空方)↓」那條放大、加粗、閃爍，比較顯眼 */
+  /* 2026-11-27 使用者：193、199 的「↓(空方)↓」那條放大、加粗、閃爍，比較顯眼 */
   .bot-line.bot-sep.bot-sep-kong{font-size:20px;font-weight:900;letter-spacing:2px;line-height:1.5;padding:4px 0;color:#22c55e;animation:kongBlink 1s ease-in-out infinite;}
   @keyframes kongBlink{0%,100%{opacity:1;text-shadow:0 0 8px rgba(34,197,94,.85);}50%{opacity:.2;text-shadow:none;}}
   body.home-light .bot-line.bot-sep.bot-sep-kong{color:#15803d;}
@@ -29160,7 +29160,7 @@ function botAnswerRaw(raw){
     const km = kill193Model(), mkOf = new Map(km ? km.rows.map((x) => [x.name, x.mark]) : []);
     const rows = h.rows.filter((r) => KILL199_GROUPS.has(r.name)).map((r) => ({ ...r, mk: mkOf.get(r.name) || '' }));
     const bear = rows.filter((r) => r.rank > h.half).sort((a, b) => a.avg - b.avg), rest = rows.filter((r) => r.rank <= h.half);   // 2026-10-19 使用者：空方那段跌幅大的排上面
-    return wrap('空族群排名(199)', (bear.length ? botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + bear.map(rankLineH).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') : '') + rest.map(rankLineH).join(''));
+    return wrap('空族群排名(199)', (bear.length ? botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear bot-sep-kong') + bear.map(rankLineH).join('') + botLine('------↓(多方漲)↓------', 'bot-sep') : '') + rest.map(rankLineH).join(''));
   }
   if (q === '777'){
     // 2026-11-13 使用者：每日功課下面那兩塊族群卡（刀劍空(32)、12空(123)）改成條列式——一族一段；
