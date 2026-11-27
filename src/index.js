@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-27 01:06:21";
+const BUILD_STAMP = "2026-11-27 10:56:12";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -286,6 +286,8 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .hr-models{grid-column:span 2;background:var(--panel);border:2px solid #7c3aed;border-radius:10px;min-width:0;padding:8px 10px;font-size:13px;color:var(--text);}
   @media (max-width:699px){ .hr-models{grid-column:auto;} }
   body:not(.cz-mode) .hr-models.cz-off{display:none;}
+  #modelsBody .hr-models{border:0;padding:4px 2px;font-size:14px;}
+  #modelsBody .sm-svg{height:170px;}
   .hr-models .hr-title{font-size:15px;font-weight:800;}
   .sm-cats{display:flex;flex-direction:column;gap:5px;margin:8px 0;}
   .sm-cat{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
@@ -4881,6 +4883,18 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
     <div id="diagBody"></div>
   </div>
 </div>
+<div class="chips-modal" id="modelsModal" hidden>
+  <div class="chips-inner" id="modelsInner">
+    <div class="chips-head">
+      <div>
+        <div class="chips-title">選股模型</div>
+        <div class="chips-sub">十個選股模型分四類（大戶籌碼、法人、營收成長、綜合），每個都附近一年回測；每個交易日收盤後重算。點股票開 K 線圖。</div>
+      </div>
+      <button class="cm-icon-btn" id="modelsClose" aria-label="關閉">✕</button>
+    </div>
+    <div id="modelsBody"></div>
+  </div>
+</div>
 <div class="chips-modal" id="screenerModal" hidden>
   <div class="chips-inner" id="screenerInner">
     <div class="chips-head">
@@ -5033,6 +5047,7 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
 </div>
 <div class="toolbar-bottom" id="toolbarBottom">
   <!-- 2026-10-12 使用者：每日功課、籌碼日報、每日持股健診、盤後籌碼排行放最前面四顆，第五顆自選股、第六顆飆股雷達（10/13 改名 K棒組合選股、移到選股・個股研究左邊），後面照原本順序 -->
+  <button class="tb-btn" data-label="選股模型"><span class="tb-icon">模</span>選股模型</button>  <!-- 2026-11-27 使用者：選股模型（十個＋近一年回測）放工具列第一顆 -->
   <button class="tb-btn" data-label="問診"><span class="tb-icon">問</span>個股問診</button>  <!-- 2026-10-23 使用者：個股問診排到最左邊第一顆（每日功課的左邊） -->
   <button class="tb-btn" data-label="每日功課"><span class="tb-icon">課</span>每日功課</button>  <!-- 2026-10-10 使用者：第 14 顆「每日功課」（空觀察／當沖多／多觀察自動版），放上排 → 上下各 7 顆 -->
   <button class="tb-btn" data-label="籌碼日報"><span class="tb-icon">日</span>籌碼日報</button>  <!-- 2026-10-10 使用者：下午報改名「籌碼日報」 -->
@@ -12692,7 +12707,7 @@ function homeRank4Html(){
     // 2026-10-21 使用者：最右邊一欄（個股漲 > 2%（22-5）＋隔日沖黑龍(80)）整欄拿掉；股期黑龍(75) 還在 188 下面
     homeXColsHtml() +   // 2026-11-14 使用者：加的機器人代碼欄位接在最右邊
     '</div></div>' +
-    '<div class="hr-help">' + homeModelsCardHtml() + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
+    '<div class="hr-help">' + homeJailHelpHtml() + homeRankFootHtml(h.total) + homeObsFootHtml() + '</div>';
 }
 // 首頁最下面的說明（2026-10-15 使用者：一段一段字太亂，整理成表格）：族群排名欄、個股欄、強勢黑K選股、符號各一張
 const hrHelpTable = (title, head, rows, cls) => '<div class="hr-help-card' + (cls ? ' ' + cls : '') + '"><div class="hr-help-title">' + title + '</div><table class="hr-help-tbl">' +
@@ -19968,6 +19983,36 @@ function openDiagPanel(code){
 }
 function closeDiagPanel(){ document.getElementById('diagModal').hidden = true; }
 // 2026-10-23 使用者：系統選股從個股問診拆成獨立面板（工具列最後一顆）；點名單任一列就關掉選股、開個股問診帶出那一檔
+// 2026-11-27 使用者：選股模型改成工具列第一顆，自己一個面板（原本放首頁最下面那一區，太下面看不到）
+function renderModelsPanel(){
+  const body = document.getElementById('modelsBody');
+  if (!body || document.getElementById('modelsModal').hidden) return;
+  const inner = document.getElementById('modelsInner'), top = inner ? inner.scrollTop : 0;
+  body.innerHTML = homeModelsCardHtml();
+  if (inner) inner.scrollTop = top;
+}
+let modelsWaitT = 0;
+function openModelsPanel(){
+  document.getElementById('modelsModal').hidden = false;
+  renderModelsPanel();
+  clearInterval(modelsWaitT);
+  let n = 0;   // 資料還沒回來：每秒看一次，回來就重畫（最多 20 秒）
+  modelsWaitT = setInterval(() => {
+    n += 1;
+    const d = botFetchCache('stockModels', '/api/stock-models', 10 * 60e3);
+    if (document.getElementById('modelsModal').hidden || n > 20 || (d && d.status === 'ok')){ clearInterval(modelsWaitT); }
+    renderModelsPanel();
+  }, 1000);
+}
+function closeModelsPanel(){ document.getElementById('modelsModal').hidden = true; clearInterval(modelsWaitT); }
+document.getElementById('modelsClose').addEventListener('click', closeModelsPanel);
+document.getElementById('modelsModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModelsPanel(); });
+document.getElementById('modelsBody').addEventListener('click', (e) => {
+  const k = e.target.closest('[data-sm-key]');
+  if (k){ smSel = k.dataset.smKey; try { localStorage.setItem('smSel', smSel); } catch (_){} renderModelsPanel(); return; }
+  const row = e.target.closest('[data-code]');
+  if (row) openStockChart(row.dataset.code, row.dataset.name || '');
+});
 function openScreenerPanel(){
   document.getElementById('screenerModal').hidden = false;
   renderScreener();
@@ -20037,7 +20082,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-27 01:06:21';
+const BUILD_STAMP = '2026-11-27 10:56:12';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -33422,6 +33467,7 @@ document.querySelectorAll('.toolbar-bottom .tb-btn').forEach((btn) => {
     if (btn.dataset.label === '創高黑選股'){ openPickerPanel(); return; } // 2026-10-04 使用者：創高黑選股
     if (btn.dataset.label === '健診'){ openCheckupPanel(); return; }    // 2026-09-28 使用者：每日持股健診
     if (btn.dataset.label === '問診'){ openDiagPanel(); return; }
+    if (btn.dataset.label === '選股模型'){ openModelsPanel(); return; }   // 2026-11-27 使用者：選股模型放工具列第一顆
     if (btn.dataset.label === '動能選股'){ openDynPanel(); return; }   // 2026-11-14 使用者：動能選股面板
     if (btn.dataset.label === '系統選股'){ openScreenerPanel(); return; }   // 2026-10-23 使用者：系統選股從個股問診拆出來       // 2026-09-28 使用者：個股問診
     showToast('「' + btn.dataset.label + '」功能開發中');
