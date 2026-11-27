@@ -339,7 +339,7 @@
   .bot-help-code{cursor:pointer;color:#c4b5fd;} .bot-help-code:hover{text-decoration:underline;}
   .bot-line.bot-sep{color:var(--muted);text-align:left;}
   .bot-line.bot-sep.bot-sep-bear{color:#22c55e;font-weight:800;}
-  /* 2026-11-27 使用者：193、199 的「↓(空方)↓」那條放大、加粗、閃爍，比較顯眼 */
+  /* 2026-11-27 使用者：193、199、族群明細的「↓(空方)↓」那條放大、加粗、閃爍，比較顯眼 */
   .bot-line.bot-sep.bot-sep-kong{font-size:20px;font-weight:900;letter-spacing:2px;line-height:1.5;padding:4px 0;color:#22c55e;animation:kongBlink 1s ease-in-out infinite;}
   @keyframes kongBlink{0%,100%{opacity:1;text-shadow:0 0 8px rgba(34,197,94,.85);}50%{opacity:.2;text-shadow:none;}}
   body.home-light .bot-line.bot-sep.bot-sep-kong{color:#15803d;}
@@ -28391,7 +28391,7 @@ function botGroupBlock(g, h, opts){
   const topZone = n >= 9 && n <= 12 ? Math.floor(n / 3) : zone, topEnd = Math.min(topZone, botStart);
   let html = head + list.slice(0, topEnd).map(line).join('');
   if (botStart > topEnd) html += botLine('------↑(多方)↑------', 'bot-sep') + list.slice(topEnd, botStart).map(line).join('');
-  if (botStart < n) html += botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + list.slice(botStart).map(line).join('');
+  if (botStart < n) html += botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear bot-sep-kong') + list.slice(botStart).map(line).join('');   // 2026-11-27 使用者：族群明細的空方線也放大、加粗、閃爍
   return html + botRankTrail(g, r);
 }
 // 族群明細最下面的「排名」（2026-10-17 對老師 10 個族群明細）：今天 09:05、09:30、10:00、10:30、11:00 的族群名次，第 6 格是 11:00 以後最新的一次
