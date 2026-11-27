@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-27 11:11:34";
+const BUILD_STAMP = "2026-11-27 11:21:53";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -20082,7 +20082,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-27 11:11:34';
+const BUILD_STAMP = '2026-11-27 11:21:53';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -29314,10 +29314,10 @@ function botAnswerRaw(raw){
     const otc = live.otcLabel || '';
     const body = bot777ParamsHtml() + botLine(maTurnBtnHtml('777', false), 'bot-b32turn') + botLine('<span></span><span class="b777-hh r">成交價</span><span class="b777-hh c">大戶力</span><span class="b777-hh r">漲跌幅</span>', 'b777-hhead') +
       botLine('🔪刀劍空 ' + rows32.length + ' 檔・🔵12空 ' + rows12.length + ' 檔・合計 ' + items.size + ' 檔／' + groups.length + ' 族', 'bot-sep') +
-      // 2026-11-27 使用者：不分族群段落，整份照左邊的時間排（最新發生的在最上面、越早越下面）；族群名稱照樣標在每一列
-      (items.size ? [...items.values()].sort((x, y) => (itEv(y) > itEv(x) ? 1 : itEv(y) < itEv(x) ? -1 : (baseOf(x).pct ?? 0) - (baseOf(y).pct ?? 0))).map(rowHtml).join('') : botLine('目前沒有', 'bot-dim')) +
+      // 2026-11-27 使用者：族群段落要留著——族群照族裡最新發生的時間排（最新的那族在最上面），族裡每檔也照時間（09:35 在 09:05 上面）
+      (items.size ? groups.map((g) => grpHead(g) + g.list.map(rowHtml).join('')).join('') : botLine('目前沒有', 'bot-dim')) +
       (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail() + (live.otcPct !== null && live.otcPct !== undefined ? '　櫃買 ' + wlEsc(otc) + ' ' + botPct(live.otcPct) : ''), 'bot-warn') : '') +
-      botLine('跟每日功課下面的族群卡同一份（段位照功課面板勾的；上面那排勾選是 777 自己的，不影響每日功課）・刀劍空、12空 混在一起、不分族群段落：整份照每檔最新發生的訊號時間排（最新的在最上面，越早越下面），族群名稱標在每一列・左邊時間＝這檔最新發生的訊號時間，下面標是哪一種訊號（第一次出現的時間、回＝掉出去又回榜）・📈股期／📈小期＝有股票期貨／小型股期・⛔禁空＝停券又不可現股當沖、⛔停券＝不可融券・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
+      botLine('跟每日功課下面的族群卡同一份（段位照功課面板勾的；上面那排勾選是 777 自己的，不影響每日功課）・刀劍空、12空 混在一起不分段：族群照族裡最新發生的訊號排（剛進榜或回榜的那一族跳到最上面，族名後面標「最新 HH:MM」），族裡每檔也照它最新的訊號排（新的在上面）・左邊時間＝這檔最新發生的訊號時間，下面標是哪一種訊號（第一次出現的時間、回＝掉出去又回榜）・📈股期／📈小期＝有股票期貨／小型股期・⛔禁空＝停券又不可現股當沖、⛔停券＝不可融券・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割', 'bot-dim');
     return wrap(t, body, tdMd(live.date) + ' ' + (live.slot || ''));
   }
   if (q === '193'){
@@ -29339,9 +29339,12 @@ function botAnswerRaw(raw){
     const line = (r) => {
       if (t193 && !memOf(r).length) return '';
       const gt = memOf(r).reduce((mx, x) => { const v = evOf(x.code); return v > mx ? v : mx; }, '');
-      return rankLineH({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark, pre: tSpan(gt) }) + (memOf(r).length ? botLine(memOf(r).slice().sort((a, b) => b.pct - a.pct || (a.code < b.code ? -1 : 1)).map((x) => '<span class="b193-m"><span class="b193-r1">' + tSpan(firstOf(x.code)) + '⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + (backOf(x.code) ? ' <span class="b193-back">回 ' + backOf(x.code) + '</span>' : '') + ma20TurnTagOf(x.code) + '</span>' + holderTagHtml(holderPctOf(x.code), false, true, x.code) + '</span>').join(''), 'bot-sub b193-wrap') : '');
+      // 2026-11-27 使用者：族裡 ⚠️ 個股照左邊那個時間排（例：探針卡 09:35 那檔在上面、09:05 在下面），一樣時間再看「回」的時間、再照原本（跌得少的在前）
+      return rankLineH({ name: r.name, rank: r.rank, drop: r.drop, avg: r.avg, mk: r.swordMark, pre: tSpan(gt) }) + (memOf(r).length ? botLine(memOf(r).slice().sort((a, b) => (firstOf(b.code) > firstOf(a.code) ? 1 : firstOf(b.code) < firstOf(a.code) ? -1 : backOf(b.code) > backOf(a.code) ? 1 : backOf(b.code) < backOf(a.code) ? -1 : b.pct - a.pct || (a.code < b.code ? -1 : 1))).map((x) => '<span class="b193-m"><span class="b193-r1">' + tSpan(firstOf(x.code)) + '⚠️' + botStk(x.code, x.name, ' <span class="' + dirClass(x.pct) + '">' + botPct(x.pct) + '</span>') + (backOf(x.code) ? ' <span class="b193-back">回 ' + backOf(x.code) + '</span>' : '') + ma20TurnTagOf(x.code) + '</span>' + holderTagHtml(holderPctOf(x.code), false, true, x.code) + '</span>').join(''), 'bot-sub b193-wrap') : '');
     };
-    const byRank = (l) => l.slice().sort((a, b) => a.rank - b.rank);
+    // 2026-11-27 使用者：族群照族裡最新發生的時間排（最新的那族在最上面；沒有時間的照名次排在後面），空方線上下兩段各自排
+    const grpT = (r) => memOf(r).reduce((mx, x) => { const v = evOf(x.code); return v > mx ? v : mx; }, '');
+    const byRank = (l) => l.slice().sort((a, b) => { const ta = grpT(a), tb = grpT(b); return tb > ta ? 1 : tb < ta ? -1 : a.rank - b.rank; });
     return wrap('空族群必殺(193)', botLine(maTurnBtnHtml('193', false), 'bot-b32turn') + botLine('<span class="hf-colhead">大戶力</span>', 'bot-hhead') + byRank(k.upper).map(line).join('') + botLine('------↓(空方)↓------', 'bot-sep bot-sep-bear') + byRank(k.lower).map(line).join('') + botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + (kill193OtcTail() ? botLine(kill193OtcTail(), 'bot-sub') : ''));
   }
   if (q === '283' || q === '284' || /^[0-9A-Z]{4,6}\\+3$/.test(q)){
@@ -29403,9 +29406,22 @@ function botAnswerRaw(raw){
     const c = tdK12Counts(list.filter((x) => x.inNow).map((x) => x.row));
     const when = k.lastBarTs ? new Date(k.lastBarTs + 8 * 3600e3).toISOString().slice(11, 16) : '';
     return wrap(title, botLine(maTurnBtnHtml('123', false), 'bot-b32turn') + (list.length ? botLine('<span class="b32-cnt s1">① 剛轉弱 ' + c.s1 + ' 檔（還沒反彈）</span><span class="b32-cnt s2">② 不過前高可空 ' + c.s2 + ' 檔（反彈沒過 1高）</span>', 'bot-dim') : '') +
-      (list.length ? list.map(rowHtml).join('') : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
+      // 2026-11-27 使用者：123 也分族群段落——族群照族裡最新發生的時間排（最新的那族在最上面，族名後面標「最新 HH:MM」），族裡每檔照時間（新的在上面）。
+      // list 本來就照「最近發生的在上面」排好了，所以照出現順序分組：每族第一次出現的位置就是它最新的時間。
+      (list.length ? (() => {
+        const evT = (x) => (!x.inNow && x.out ? x.out : x.back && x.back > x.first ? x.back : x.first);
+        const byG = new Map();
+        list.forEach((x) => { const g = (x.row && x.row.g) || '—'; if (!byG.has(g)) byG.set(g, []); byG.get(g).push(x); });
+        return [...byG.entries()].map(([name, xs]) => {
+          const r0 = xs[0].row || {}, gg = (lastData.groups || []).find((g) => g.name === name);
+          const t = xs.reduce((mx, x) => { const v = evT(x) || ''; return v > mx ? v : mx; }, '');
+          const head = botLine(botGrpPill(name, ' (' + (r0.gr ? r0.gr + (r0.zone === 'harvest' ? '♣' : bladeRankMark(r0.gr, live.total)) : '—') + ')', gg ? gg.avgChange : 0) +
+            ' <span class="bot-dim">' + xs.length + ' 檔' + (t ? '・最新 ' + t : '') + '</span>', 'bot-head');
+          return head + xs.map(rowHtml).join('');
+        }).join('');
+      })() : botLine('（32 名單無衝高後跌破 MA20 下彎股）', 'bot-dim')) +
       (kill193OtcTail() ? botLine('------↓(櫃買)↓------', 'bot-sep bot-sep-bear') + botLine(kill193OtcTail(), 'bot-warn') : '') +   // 2026-11-13 使用者：照老師的 123，最後接櫃買那行
-      (list.length ? botLine('跟「功課廣播 12空(123)」同一份・左邊時間＝最早進榜・排序＝最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（劃掉）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・① 剛轉弱＝剛跌破 20MA、20MA 下彎、還沒反彈，1高＝破惡前最高當停損價・② 不過前高可空＝破了以後反彈沒過 1高' + tdParamsNote(), 'bot-dim') : ''),
+      (list.length ? botLine('跟「功課廣播 12空(123)」同一份・左邊時間＝最早進榜・依族群分段：族群照族裡最近發生的排、族裡每檔也是最近發生的在上面（回、跑看標籤時間，其他看進榜時間）・跑＝消失（劃掉）・回＝掉出去又回榜・族群名次後 🔺前10 🔽11～25 🔰26後 ♣收割・① 剛轉弱＝剛跌破 20MA、20MA 下彎、還沒反彈，1高＝破惡前最高當停損價・② 不過前高可空＝破了以後反彈沒過 1高' + tdParamsNote(), 'bot-dim') : ''),
       (when ? '5 分K算到 ' + when + '・' : '') + '今天 ' + list.length + ' 檔，在榜 ' + inCnt + '、消失 ' + goneCnt);
   }
   if (q === '30' || q === '32'){
