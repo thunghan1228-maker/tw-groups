@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-27 14:24:19";
+const BUILD_STAMP = "2026-11-27 20:37:16";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -7217,10 +7217,13 @@ async function fetchIdxBars(code, tf){   // tf：'daily'｜'m5'｜'m1'
 }
 // 2026-11-02 使用者：1605 華新 5 分K 整張空白。後端等 Shioaji kbars 常常 30 秒才逾時，三個請求用 Promise.all 一起等，慢的那個卡住整張圖。
 // 圖表用的請求加逾時：歷史請求超過 12 秒就先用今天的 K 棒畫（標回補中，歷史晚點自動補）。
-function chartFetchT(url, ms){
+function chartFetchT(url, ms, noStore){
   const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const timer = ctl ? setTimeout(() => ctl.abort(), ms) : 0;
-  return fetch(url, ctl ? { signal: ctl.signal } : undefined).finally(() => clearTimeout(timer));
+  const init = {};
+  if (ctl) init.signal = ctl.signal;
+  if (noStore) init.cache = 'no-store';   // 不拿瀏覽器快取（等後端回補時的重抓）
+  return fetch(url, init).finally(() => clearTimeout(timer));
 }
 async function fetchRealBars(code, tf){
   if (isIdxCode(code)) return fetchIdxBars(code, tf);
@@ -7288,12 +7291,19 @@ function triggerMainForceBackfill(code, interval, bars){
   });
 }
 
-async function fetchRealBars5Range(code){
+// 分K 一根都拿不到時的錯誤。後端說「歷史回補處理中」（bootstrap.history_ok＝false）就標 pending：
+// 後端已經在背景回補（永豐 kbars → Yahoo，常要 30～60 秒），等一下再抓就有，見 switchTimeframe。
+function chartRangeError(name, res, data){
+  const err = new Error(name + ' ' + (res ? 'http ' + res.status : 'timeout') + (data ? ' empty' : ''));
+  err.pending = !!(data && data.bootstrap && data.bootstrap.history_ok === false);
+  return err;
+}
+async function fetchRealBars5Range(code, fresh){
   if (isIdxCode(code)) return fetchIdxBars(code, 'm5');
   // 5分K 補多天歷史：OHLC來自Shioaji kbars回補；主力淨量分兩層合併——
   // 永久保存的歷史逐日資料先墊底，今日即時Hub資料較新，覆蓋在最上層。
   const [rangeRes, historyForceByTs, todayBars] = await Promise.all([
-    chartFetchT('/api/bars5range/' + code, 12000).catch(() => null),
+    chartFetchT('/api/bars5range/' + code + (fresh ? '?fresh=1' : ''), 12000, fresh).catch(() => null),
     fetchMainForceRange('/api/force5range/' + code),
     fetchRealBars(code, 'm5').catch(() => []),
   ]);
@@ -7301,7 +7311,7 @@ async function fetchRealBars5Range(code){
   try { rangeData = rangeRes && rangeRes.ok ? await rangeRes.json() : null; } catch (e) { rangeData = null; }
   if (!rangeData || !Array.isArray(rangeData.bars) || !rangeData.bars.length){
     if (todayBars.length){ const only = todayBars.slice(); only.historyPending = true; return only; }   // 歷史請求逾時／空：先畫今天已經有的，歷史晚點自動補
-    throw new Error('bars5range ' + (rangeRes ? 'http ' + rangeRes.status : 'timeout'));
+    throw chartRangeError('bars5range', rangeRes, rangeData);
   }
   triggerMainForceBackfill(code, '5m', rangeData.bars);
   const todayByTs = new Map(todayBars.map((b) => [b.ts, b]));
@@ -7317,11 +7327,11 @@ async function fetchRealBars5Range(code){
   return out5;
 }
 
-async function fetchRealBars1Range(code){
+async function fetchRealBars1Range(code, fresh){
   if (isIdxCode(code)) return fetchIdxBars(code, 'm1');
   // 1分K 補多天歷史（至少3天，含今天），主力淨量合併邏輯跟5分K相同。
   const [rangeRes, historyForceByTs, todayBars] = await Promise.all([
-    chartFetchT('/api/bars1mrange/' + code, 12000).catch(() => null),
+    chartFetchT('/api/bars1mrange/' + code + (fresh ? '?fresh=1' : ''), 12000, fresh).catch(() => null),
     fetchMainForceRange('/api/force1range/' + code),
     fetchRealBars(code, 'm1').catch(() => []),
   ]);
@@ -7329,7 +7339,7 @@ async function fetchRealBars1Range(code){
   try { rangeData = rangeRes && rangeRes.ok ? await rangeRes.json() : null; } catch (e) { rangeData = null; }
   if (!rangeData || !Array.isArray(rangeData.bars) || !rangeData.bars.length){
     if (todayBars.length){ const only = todayBars.slice(); only.historyPending = true; return only; }
-    throw new Error('bars1mrange ' + (rangeRes ? 'http ' + rangeRes.status : 'timeout'));
+    throw chartRangeError('bars1mrange', rangeRes, rangeData);
   }
   triggerMainForceBackfill(code, '1m', rangeData.bars);
   const todayByTs = new Map(todayBars.map((b) => [b.ts, b]));
@@ -7351,7 +7361,8 @@ function chartScheduleHistoryRetry(code, tf, token, n){
   setTimeout(async () => {
     if (code !== currentChart.code || tf !== currentChart.tf || token !== currentChart.requestToken) return;
     let bars = null;
-    try { bars = tf === 'm5' ? await fetchRealBars5Range(code) : await fetchRealBars1Range(code); } catch (e) { bars = null; }
+    // fresh：收盤後網頁自己的快取同網址 60 秒內給同一份，不跳過的話這 10 次重抓拿到的都是剛剛那份（2026-11-27）
+    try { bars = tf === 'm5' ? await fetchRealBars5Range(code, true) : await fetchRealBars1Range(code, true); } catch (e) { bars = null; }
     if (code !== currentChart.code || tf !== currentChart.tf || token !== currentChart.requestToken) return;
     if (bars && bars.length > (currentChart.bars || []).length){
       const before = currentChart.bars.length;
@@ -7617,6 +7628,23 @@ async function switchTimeframe(tf){
     try { bars = await fetchRealDailyBars(currentChart.code); isReal = true; } catch (e) { bars = null; failErr = e; }
   }
   if (requestToken !== currentChart.requestToken) return; // 使用者已切到別的分頁/個股，這次結果作廢
+  if (!bars && tf !== 'daily' && failErr && failErr.pending){
+    // 2026-11-27 使用者：6782 視陽日線切 5 分鐘切不過去。不是族群股的，後端資料庫沒存它的 5 分K，要靠背景回補（永豐 → Yahoo，30～60 秒）；
+    // 第一次抓到空的就直接跳回日線、說「沒有 5 分K資料」，過一分鐘再按才有。改成後端說回補中就每 5 秒再抓、最多約 1 分半，補到就畫；真的沒有才回日線。
+    const label = tf === 'm1' ? '1' : '5';
+    const badge = document.getElementById('cmDataBadge');
+    showToast(label + ' 分K 資料回補中，約 30 秒～1 分鐘，請稍候…');
+    if (badge){ badge.hidden = false; badge.textContent = label + ' 分K 回補中…'; badge.classList.remove('nodata'); }
+    const fetchRange = tf === 'm1' ? fetchRealBars1Range : fetchRealBars5Range;
+    const gone = () => requestToken !== currentChart.requestToken || (!CHART_WINDOW_MODE && document.getElementById('chartModal').hidden);
+    for (let i = 0; i < 18 && !bars; i++){
+      await new Promise((r) => setTimeout(r, 5000));
+      if (gone()) return;
+      // fresh：跳過網頁自己的快取（收盤後同網址 60 秒內給同一份）、瀏覽器快取和 Cloudflare 快取，不然一直拿到剛剛那份空的
+      try { bars = await fetchRange(currentChart.code, true); isReal = true; } catch (e) { failErr = e; if (!e.pending) break; }
+      if (gone()) return;
+    }
+  }
   if (!bars && tf !== 'daily'){
     // 2026-11-05 使用者：K 線圖變示範資料。5 分K／1 分K 拿不到但日線有真資料，就改開日線，不要拿模擬的 K 棒給人看
     try {
@@ -20129,7 +20157,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-27 14:24:19';
+const BUILD_STAMP = '2026-11-27 20:37:16';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -34546,11 +34574,13 @@ async function proxyHanstockBars(pathname, cacheSeconds = 20) {
     cf: live ? { cacheTtl: 0, cacheEverything: false } : { cacheTtlByStatus: { "200-299": cacheSeconds, "300-599": 0 }, cacheEverything: true }
   });
   const body = await resp.text();
+  // 「歷史回補處理中」的空 K 棒不讓瀏覽器快取：後端幾十秒內就補好，快取住的話使用者再按也還是空的（2026-11-27 6782 切不到 5 分K）
+  const pendingEmpty = /"bars":s*[]/.test(body) && /"history_ok":s*false/.test(body);
   return new Response(body, {
     status: resp.status,
     headers: {
       "content-type": "application/json; charset=UTF-8",
-      "cache-control": live || !resp.ok ? "no-store" : "public, max-age=" + cacheSeconds
+      "cache-control": live || !resp.ok || pendingEmpty ? "no-store" : "public, max-age=" + cacheSeconds
     }
   });
 }
@@ -34825,7 +34855,8 @@ const WORKER_ENTRY = {
         try {
           // 5分K 多日歷史（今日以外的天沒有主力逐筆資料，前端會另外補今日主力數字）。
           const upstreamPath = "/api/hub/history5m/" + encodeURIComponent(code) + "?calendar_days=7";
-          return await proxyHanstockBars(upstreamPath);
+          // fresh=1：前端在等後端回補（歷史回補處理中）時的重抓，不走 Cloudflare 快取（2026-11-27 6782 切不到 5 分K）
+          return await proxyHanstockBars(upstreamPath, url.searchParams.get("fresh") === "1" ? 0 : 20);
         } catch (err) {
           return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
         }
@@ -34837,7 +34868,7 @@ const WORKER_ENTRY = {
         try {
           // 1分K 多日歷史（至少3天，含今天）。
           const upstreamPath = "/api/hub/history1m/" + encodeURIComponent(code) + "?calendar_days=5";
-          return await proxyHanstockBars(upstreamPath);
+          return await proxyHanstockBars(upstreamPath, url.searchParams.get("fresh") === "1" ? 0 : 20);
         } catch (err) {
           return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
         }

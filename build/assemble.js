@@ -787,11 +787,13 @@ async function proxyHanstockBars(pathname, cacheSeconds = 20) {
     cf: live ? { cacheTtl: 0, cacheEverything: false } : { cacheTtlByStatus: { "200-299": cacheSeconds, "300-599": 0 }, cacheEverything: true }
   });
   const body = await resp.text();
+  // 「歷史回補處理中」的空 K 棒不讓瀏覽器快取：後端幾十秒內就補好，快取住的話使用者再按也還是空的（2026-11-27 6782 切不到 5 分K）
+  const pendingEmpty = /"bars":\s*\[\]/.test(body) && /"history_ok":\s*false/.test(body);
   return new Response(body, {
     status: resp.status,
     headers: {
       "content-type": "application/json; charset=UTF-8",
-      "cache-control": live || !resp.ok ? "no-store" : "public, max-age=" + cacheSeconds
+      "cache-control": live || !resp.ok || pendingEmpty ? "no-store" : "public, max-age=" + cacheSeconds
     }
   });
 }
@@ -1066,7 +1068,8 @@ const WORKER_ENTRY = {
         try {
           // 5分K 多日歷史（今日以外的天沒有主力逐筆資料，前端會另外補今日主力數字）。
           const upstreamPath = "/api/hub/history5m/" + encodeURIComponent(code) + "?calendar_days=7";
-          return await proxyHanstockBars(upstreamPath);
+          // fresh=1：前端在等後端回補（歷史回補處理中）時的重抓，不走 Cloudflare 快取（2026-11-27 6782 切不到 5 分K）
+          return await proxyHanstockBars(upstreamPath, url.searchParams.get("fresh") === "1" ? 0 : 20);
         } catch (err) {
           return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
         }
@@ -1078,7 +1081,7 @@ const WORKER_ENTRY = {
         try {
           // 1分K 多日歷史（至少3天，含今天）。
           const upstreamPath = "/api/hub/history1m/" + encodeURIComponent(code) + "?calendar_days=5";
-          return await proxyHanstockBars(upstreamPath);
+          return await proxyHanstockBars(upstreamPath, url.searchParams.get("fresh") === "1" ? 0 : 20);
         } catch (err) {
           return Response.json({ status: "error", error: String(err), bars: [] }, { status: 502 });
         }
