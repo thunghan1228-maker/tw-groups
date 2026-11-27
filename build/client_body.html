@@ -3961,7 +3961,6 @@
   .hnow-t{display:inline-block;padding:1px 8px;border-radius:5px;font-weight:900;color:#fff;} .hnow-t.bull{background:#dc2626;} .hnow-t.bear{background:#16a34a;}
   .hnow-col .signal-row{cursor:pointer;}
   .hnow-col{position:relative;}
-  .hnow-newpill{position:absolute;left:50%;transform:translateX(-50%);z-index:3;border:0;border-radius:999px;background:#ef4444;color:#fff;font-size:13px;font-weight:700;padding:4px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35);white-space:nowrap;}
   .hnow-scroll{max-height:calc(100vh - 60px);min-height:500px;overflow-y:scroll;overscroll-behavior:contain;}   /* 2026-11-25 右邊固定有捲軸（上下箭頭），滑到哪停在哪；使用者：再加高一點 */
   /* 2026-11-25 使用者：今日即時多／空的字全部放大 1.2 倍（字、標籤、間距一起放大；欄寬也跟著加 1.2 倍）；黑字再深一點 */
   .hnow-in{zoom:1.2;}
@@ -12147,7 +12146,7 @@ function homeNowSwapBack(old){   // render() 換完以後叫：能沿用的把�
     if (ob && ob === nb) return;   // 這欄沒換（homeApplyHtml 沒動它）：框原封不動，捲的位置也沒變
     const busy = homeNowHold[side] || Date.now() - (homeNowScrollAt[side] || 0) < 2000;
     // 2026-11-27 使用者：今日即時多／空捲到哪就停在哪，有新訊號也不要跳——只要框沒有在最上面（使用者捲下去在看），內容就整個不換（舊框原封不動），
-    // 框上面浮一顆「↑ 有新訊號」；捲回最上面、或點那顆，才換成最新的。在最上面的時候照舊直接更新（新的出現在最上面）。
+    // 捲回最上面才換成最新的（2026-11-27 使用者：不要浮按鈕）。在最上面的時候照舊直接更新（新的出現在最上面）。
     const scrolled = !!(o && o.top > 4);
     if (ob && (ob._h === html || busy || nb.dataset.keep || scrolled)){
       nb.replaceWith(ob); ob.scrollTop = o.top;
@@ -12162,33 +12161,14 @@ function homeNowSwapBack(old){   // render() 換完以後叫：能沿用的把�
   });
   return fresh;
 }
-function homeNowPill(box, on){   // 框上面浮一顆「↑ 有新訊號」（不放進框裡，不會推動內容）
-  const host = box && box.parentElement;
-  if (!host) return;
-  let pill = host.querySelector(':scope > .hnow-newpill');
-  if (!on){ if (pill) pill.remove(); return; }
-  if (!pill){
-    pill = document.createElement('button');
-    pill.type = 'button'; pill.className = 'hnow-newpill'; pill.dataset.hnowSide = box.dataset.hnow;
-    pill.textContent = '↑ 有新訊號・點這裡回最上面看';
-    host.appendChild(pill);
-  }
-  pill.style.top = (box.offsetTop + 6) + 'px';
+function homeNowPill(box, on){   // 2026-11-27 使用者：不要浮那顆「↑ 有新訊號」按鈕，只記「有新的還沒換」，捲回最上面就換
+  if (box) box._pend = !!on;
 }
-document.addEventListener('click', (e) => {
-  const pill = e.target.closest && e.target.closest('.hnow-newpill');
-  if (!pill) return;
-  const side = pill.dataset.hnowSide, box = document.querySelector('.hnow-scroll[data-hnow="' + side + '"]');
-  if (box) box.scrollTop = 0;
-  homeNowScrollAt[side] = 0; homeNowHold[side] = false;
-  pill.remove();
-  render();
-});
 // 自己捲回最上面：停下來就換成最新的
 let homeNowTopT = 0;
 document.addEventListener('scroll', (e) => {
   const box = e.target && e.target.classList && e.target.classList.contains('hnow-scroll') ? e.target : null;
-  if (!box || box.scrollTop > 4 || !(box.parentElement && box.parentElement.querySelector(':scope > .hnow-newpill'))) return;
+  if (!box || box.scrollTop > 4 || !box._pend) return;
   clearTimeout(homeNowTopT);
   homeNowTopT = setTimeout(() => { try { render(); } catch (_){} }, 2100);
 }, true);

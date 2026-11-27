@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-27 11:55:19";
+const BUILD_STAMP = "2026-11-27 12:29:07";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -4048,7 +4048,6 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .hnow-t{display:inline-block;padding:1px 8px;border-radius:5px;font-weight:900;color:#fff;} .hnow-t.bull{background:#dc2626;} .hnow-t.bear{background:#16a34a;}
   .hnow-col .signal-row{cursor:pointer;}
   .hnow-col{position:relative;}
-  .hnow-newpill{position:absolute;left:50%;transform:translateX(-50%);z-index:3;border:0;border-radius:999px;background:#ef4444;color:#fff;font-size:13px;font-weight:700;padding:4px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35);white-space:nowrap;}
   .hnow-scroll{max-height:calc(100vh - 60px);min-height:500px;overflow-y:scroll;overscroll-behavior:contain;}   /* 2026-11-25 右邊固定有捲軸（上下箭頭），滑到哪停在哪；使用者：再加高一點 */
   /* 2026-11-25 使用者：今日即時多／空的字全部放大 1.2 倍（字、標籤、間距一起放大；欄寬也跟著加 1.2 倍）；黑字再深一點 */
   .hnow-in{zoom:1.2;}
@@ -12236,7 +12235,7 @@ function homeNowSwapBack(old){   // render() 換完以後叫：能沿用的把�
     if (ob && ob === nb) return;   // 這欄沒換（homeApplyHtml 沒動它）：框原封不動，捲的位置也沒變
     const busy = homeNowHold[side] || Date.now() - (homeNowScrollAt[side] || 0) < 2000;
     // 2026-11-27 使用者：今日即時多／空捲到哪就停在哪，有新訊號也不要跳——只要框沒有在最上面（使用者捲下去在看），內容就整個不換（舊框原封不動），
-    // 框上面浮一顆「↑ 有新訊號」；捲回最上面、或點那顆，才換成最新的。在最上面的時候照舊直接更新（新的出現在最上面）。
+    // 捲回最上面才換成最新的（2026-11-27 使用者：不要浮按鈕）。在最上面的時候照舊直接更新（新的出現在最上面）。
     const scrolled = !!(o && o.top > 4);
     if (ob && (ob._h === html || busy || nb.dataset.keep || scrolled)){
       nb.replaceWith(ob); ob.scrollTop = o.top;
@@ -12251,33 +12250,14 @@ function homeNowSwapBack(old){   // render() 換完以後叫：能沿用的把�
   });
   return fresh;
 }
-function homeNowPill(box, on){   // 框上面浮一顆「↑ 有新訊號」（不放進框裡，不會推動內容）
-  const host = box && box.parentElement;
-  if (!host) return;
-  let pill = host.querySelector(':scope > .hnow-newpill');
-  if (!on){ if (pill) pill.remove(); return; }
-  if (!pill){
-    pill = document.createElement('button');
-    pill.type = 'button'; pill.className = 'hnow-newpill'; pill.dataset.hnowSide = box.dataset.hnow;
-    pill.textContent = '↑ 有新訊號・點這裡回最上面看';
-    host.appendChild(pill);
-  }
-  pill.style.top = (box.offsetTop + 6) + 'px';
+function homeNowPill(box, on){   // 2026-11-27 使用者：不要浮那顆「↑ 有新訊號」按鈕，只記「有新的還沒換」，捲回最上面就換
+  if (box) box._pend = !!on;
 }
-document.addEventListener('click', (e) => {
-  const pill = e.target.closest && e.target.closest('.hnow-newpill');
-  if (!pill) return;
-  const side = pill.dataset.hnowSide, box = document.querySelector('.hnow-scroll[data-hnow="' + side + '"]');
-  if (box) box.scrollTop = 0;
-  homeNowScrollAt[side] = 0; homeNowHold[side] = false;
-  pill.remove();
-  render();
-});
 // 自己捲回最上面：停下來就換成最新的
 let homeNowTopT = 0;
 document.addEventListener('scroll', (e) => {
   const box = e.target && e.target.classList && e.target.classList.contains('hnow-scroll') ? e.target : null;
-  if (!box || box.scrollTop > 4 || !(box.parentElement && box.parentElement.querySelector(':scope > .hnow-newpill'))) return;
+  if (!box || box.scrollTop > 4 || !box._pend) return;
   clearTimeout(homeNowTopT);
   homeNowTopT = setTimeout(() => { try { render(); } catch (_){} }, 2100);
 }, true);
@@ -20131,7 +20111,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-27 11:55:19';
+const BUILD_STAMP = '2026-11-27 12:29:07';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
