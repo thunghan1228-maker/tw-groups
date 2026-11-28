@@ -11594,6 +11594,11 @@ var smSel = (() => { try { return localStorage.getItem('smSel') || 'bigInst'; } 
 function smWhyText(w, names){
   if (!w) return '';
   const p = (v) => (v > 0 ? '+' : '') + v;
+  if (w.shortBelow !== undefined){   // 弱勢族群當沖空（2026-11-28）：族群、營收、法人、券資比，加上隔天的空點
+    return [w.group ? '族群：' + w.group : '', Number(String(w.revMonth).slice(5)) + '月營收年增 ' + p(w.yoy) + '%',
+      '法人 10 日 ' + p(w.inst10) + ' 張（' + w.sellDays + ' 天賣）', w.shortRatio === null || w.shortRatio === undefined ? '' : '券資比 ' + w.shortRatio + '%',
+      '跌破 ' + w.shortBelow + ' 才空・停損 +4%・當天回補'].filter(Boolean).join('・');
+  }
   if (w.buyAbove !== undefined){   // 強勢族群拉回（2026-11-28）：族群、股本、營收、法人，加上隔天的買點和停損
     return [w.group ? '族群：' + w.group : '', '股本 ' + w.capital + ' 億', Number(String(w.revMonth).slice(5)) + '月營收年增 ' + p(w.yoy) + '%',
       '法人 10 日 ' + p(w.inst10) + ' 張（' + w.instDays + ' 天買）', '突破 ' + w.buyAbove + ' 才買・停損 ' + w.stopAt].filter(Boolean).join('・');
@@ -11655,8 +11660,9 @@ function homeModelsCardHtml(){
     return '<div class="sm-row hr-stk" data-code="' + wlEsc(x.code) + '" data-name="' + wlEsc(x.name || '') + '" tabindex="0" role="button"><span class="sm-d">' + (when ? md(when) : '今天') + '</span><span><span class="hr-code">' + wlEsc(x.code) + '</span> <span class="hr-name">' + wlEsc(x.name || '') + '</span></span><span></span>' +
       '<span class="hr-avg ' + (p === null ? 'flat' : dirClass(p)) + '">' + (p === null ? '' : fmt(p) + '%') + '</span><div class="sm-why">' + wlEsc(smWhyText(x.why, names)) + '</div></div>'; };
   const picks = sel.picks || [], recent = (sel.recent || []).slice(0, 6);
-  const isPull = sel.key === 'groupPullback';
+  const isPull = sel.key === 'groupPullback', isShort = sel.side === 'short';
   const why = (r) => { const base = String(r || '').split('+')[0];
+    if (isShort) return base === 'stop' ? '停損回補' : '收盤回補';
     return (({ ma20: '破月線出', stop: '停損出', ma5: '破5日線出' })[base] || ('滿 ' + (isPull ? 5 : 10) + ' 天出')) + (String(r || '').includes('+half') ? '（先賣一半）' : ''); };
   const trades = (sel.lastTrades || []).slice(0, 6).map((t) => '<div class="sm-row hr-stk" data-code="' + wlEsc(t.code) + '" data-name="' + wlEsc(t.name || '') + '" tabindex="0" role="button"><span class="sm-d">' + md(t.entryDate) + '→' + md(t.exitDate) + '</span><span><span class="hr-code">' + wlEsc(t.code) + '</span> <span class="hr-name">' + wlEsc(t.name || '') + '</span></span><span style="font-size:11px;color:var(--muted)">' + why(t.reason) + '</span><span class="hr-avg ' + dirClass(t.ret) + '">' + fmt(t.ret) + '%</span></div>').join('');
   // 強勢族群拉回的觀察名單：大盤在月線下時模型不選，但今天已經拉回到位的先列出來（大盤站回月線、隔天突破高點才買）
@@ -11665,7 +11671,7 @@ function homeModelsCardHtml(){
   return '<div class="hr-models">' + title + '<div class="sm-cats">' + cats + '</div>' +
     '<div class="sm-idea">' + wlEsc(sel.name) + '：' + wlEsc(sel.idea) + '</div><ul class="sm-rules">' + sel.rules.map((r) => '<li>' + wlEsc(r) + '</li>').join('') + '</ul>' +
     stats + smCurveSvg(st, d.index) +
-    '<div class="sm-sub">' + (isPull ? '今天拉回到位（' + picks.length + ' 檔，明天突破高點才買）' : '今天入選（' + picks.length + ' 檔，明天開盤進場）') + '</div>' + (picks.length ? picks.map((x) => row(x)).join('') : '<div class="hr-note">今天沒有新訊號' + (isPull && watch.length ? '（加權指數在月線下，先空手）' : '') + '</div>') +
+    '<div class="sm-sub">' + (isShort ? '明天當沖空名單（' + picks.length + ' 檔：盤中跌破昨天最低價才空，當天回補）' : isPull ? '今天拉回到位（' + picks.length + ' 檔，明天突破高點才買）' : '今天入選（' + picks.length + ' 檔，明天開盤進場）') + '</div>' + (picks.length ? picks.map((x) => row(x)).join('') : '<div class="hr-note">今天沒有新訊號' + (isPull && watch.length ? '（加權指數在月線下，先空手）' : '') + '</div>') +
     (watch.length ? '<div class="sm-sub">觀察名單（' + watch.length + ' 檔：大盤在月線下先不買；站回月線後，隔天突破高點才買）</div>' + watch.map((x) => row(x)).join('') : '') +
     (recent.length ? '<div class="sm-sub">前幾天的訊號</div>' + recent.map((x) => row(x, x.date)).join('') : '') +
     (trades ? '<div class="sm-sub">回測最近出場</div>' + trades : '') +
