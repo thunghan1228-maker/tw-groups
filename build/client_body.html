@@ -11597,7 +11597,7 @@ function smWhyText(w, names){
   if (w.shortBelow !== undefined){   // 弱勢族群當沖空（2026-11-28）：族群、營收、法人、券資比，加上隔天的空點
     return [w.group ? '族群：' + w.group : '', Number(String(w.revMonth).slice(5)) + '月營收年增 ' + p(w.yoy) + '%',
       '法人 10 日 ' + p(w.inst10) + ' 張（' + w.sellDays + ' 天賣）', w.shortRatio === null || w.shortRatio === undefined ? '' : '券資比 ' + w.shortRatio + '%',
-      '跌破 ' + w.shortBelow + ' 才空・停損 +4%・當天回補'].filter(Boolean).join('・');
+      '反彈到 ' + w.reboundAt + ' 附近過不去才空（開盤就在上面不空）・停損 +4%・當天回補'].filter(Boolean).join('・');
   }
   if (w.waitAt !== undefined){   // 強勢族群拉回的等拉回名單（2026-11-28）：條件都符合、還沒拉回
     return [w.group ? '族群：' + w.group : '', '股本 ' + w.capital + ' 億', Number(String(w.revMonth).slice(5)) + '月營收年增 ' + p(w.yoy) + '%',
@@ -11676,7 +11676,7 @@ function homeModelsCardHtml(){
   return '<div class="hr-models">' + title + '<div class="sm-cats">' + cats + '</div>' +
     '<div class="sm-idea">' + wlEsc(sel.name) + '：' + wlEsc(sel.idea) + '</div><ul class="sm-rules">' + sel.rules.map((r) => '<li>' + wlEsc(r) + '</li>').join('') + '</ul>' +
     stats + smCurveSvg(st, d.index) +
-    '<div class="sm-sub">' + (isShort ? '明天當沖空名單（' + picks.length + ' 檔：盤中跌破昨天最低價才空，當天回補）' : isPull ? '今天拉回到位（' + picks.length + ' 檔，明天突破高點才買）' : '今天入選（' + picks.length + ' 檔，明天開盤進場）') + '</div>' + (picks.length ? picks.map((x) => row(x)).join('') : '<div class="hr-note">今天沒有新訊號' + (isPull && watch.length ? '（加權指數在月線下，先空手）' : '') + '</div>') +
+    '<div class="sm-sub">' + (isShort ? '明天當沖空名單（' + picks.length + ' 檔：盤中反彈到昨收或 5 日線附近、過不去才空，當天回補）' : isPull ? '今天拉回到位（' + picks.length + ' 檔，明天突破高點才買）' : '今天入選（' + picks.length + ' 檔，明天開盤進場）') + '</div>' + (picks.length ? picks.map((x) => row(x)).join('') : '<div class="hr-note">今天沒有新訊號' + (isPull && watch.length ? '（加權指數在月線下，先空手）' : '') + '</div>') +
     (watch.length ? '<div class="sm-sub">觀察名單（' + watch.length + ' 檔：大盤在月線下先不買；站回月線後，隔天突破高點才買）</div>' + watch.map((x) => row(x)).join('') : '') +
     (isPull ? '<div class="sm-sub">等拉回名單（' + waitList.length + ' 檔：其他條件都符合、還沒拉回；拉回到 5 日線附近、量縮，隔天突破當天高點才買' + (waitList.length && !waitList[0].marketOk ? '；現在大盤在月線下，先盯著就好' : '') + '）</div>' +
       (waitList.length ? waitList.map((x) => row(x)).join('') : '<div class="hr-note">目前沒有符合的股票</div>') : '') +
