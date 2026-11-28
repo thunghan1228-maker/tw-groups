@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-28 21:56:09";
+const BUILD_STAMP = "2026-11-28 22:06:44";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -11688,6 +11688,10 @@ function smWhyText(w, names){
       '法人 10 日 ' + p(w.inst10) + ' 張（' + w.sellDays + ' 天賣）', w.shortRatio === null || w.shortRatio === undefined ? '' : '券資比 ' + w.shortRatio + '%',
       '跌破 ' + w.shortBelow + ' 才空・停損 +4%・當天回補'].filter(Boolean).join('・');
   }
+  if (w.waitAt !== undefined){   // 強勢族群拉回的等拉回名單（2026-11-28）：條件都符合、還沒拉回
+    return [w.group ? '族群：' + w.group : '', '股本 ' + w.capital + ' 億', Number(String(w.revMonth).slice(5)) + '月營收年增 ' + p(w.yoy) + '%',
+      '法人 10 日 ' + p(w.inst10) + ' 張（' + w.instDays + ' 天買）', '離 5 日線 ' + p(w.gapMa5) + '%・拉回到 ' + w.waitAt + ' 以下、量縮再看'].filter(Boolean).join('・');
+  }
   if (w.buyAbove !== undefined){   // 強勢族群拉回（2026-11-28）：族群、股本、營收、法人，加上隔天的買點和停損
     return [w.group ? '族群：' + w.group : '', '股本 ' + w.capital + ' 億', Number(String(w.revMonth).slice(5)) + '月營收年增 ' + p(w.yoy) + '%',
       '法人 10 日 ' + p(w.inst10) + ' 張（' + w.instDays + ' 天買）', '突破 ' + w.buyAbove + ' 才買・停損 ' + w.stopAt].filter(Boolean).join('・');
@@ -11756,12 +11760,15 @@ function homeModelsCardHtml(){
   const trades = (sel.lastTrades || []).slice(0, 6).map((t) => '<div class="sm-row hr-stk" data-code="' + wlEsc(t.code) + '" data-name="' + wlEsc(t.name || '') + '" tabindex="0" role="button"><span class="sm-d">' + md(t.entryDate) + '→' + md(t.exitDate) + '</span><span><span class="hr-code">' + wlEsc(t.code) + '</span> <span class="hr-name">' + wlEsc(t.name || '') + '</span></span><span style="font-size:11px;color:var(--muted)">' + why(t.reason) + '</span><span class="hr-avg ' + dirClass(t.ret) + '">' + fmt(t.ret) + '%</span></div>').join('');
   // 強勢族群拉回的觀察名單：大盤在月線下時模型不選，但今天已經拉回到位的先列出來（大盤站回月線、隔天突破高點才買）
   const watch = isPull && Array.isArray(sel.watch) && sel.watch.length && !sel.watch.every((w) => w.marketOk) ? sel.watch : [];
+  const waitList = isPull && Array.isArray(sel.candidates) ? sel.candidates : [];
   const cov = d.coverage || {};
   return '<div class="hr-models">' + title + '<div class="sm-cats">' + cats + '</div>' +
     '<div class="sm-idea">' + wlEsc(sel.name) + '：' + wlEsc(sel.idea) + '</div><ul class="sm-rules">' + sel.rules.map((r) => '<li>' + wlEsc(r) + '</li>').join('') + '</ul>' +
     stats + smCurveSvg(st, d.index) +
     '<div class="sm-sub">' + (isShort ? '明天當沖空名單（' + picks.length + ' 檔：盤中跌破昨天最低價才空，當天回補）' : isPull ? '今天拉回到位（' + picks.length + ' 檔，明天突破高點才買）' : '今天入選（' + picks.length + ' 檔，明天開盤進場）') + '</div>' + (picks.length ? picks.map((x) => row(x)).join('') : '<div class="hr-note">今天沒有新訊號' + (isPull && watch.length ? '（加權指數在月線下，先空手）' : '') + '</div>') +
     (watch.length ? '<div class="sm-sub">觀察名單（' + watch.length + ' 檔：大盤在月線下先不買；站回月線後，隔天突破高點才買）</div>' + watch.map((x) => row(x)).join('') : '') +
+    (isPull ? '<div class="sm-sub">等拉回名單（' + waitList.length + ' 檔：其他條件都符合、還沒拉回；拉回到 5 日線附近、量縮，隔天突破當天高點才買' + (waitList.length && !waitList[0].marketOk ? '；現在大盤在月線下，先盯著就好' : '') + '）</div>' +
+      (waitList.length ? waitList.map((x) => row(x)).join('') : '<div class="hr-note">目前沒有符合的股票</div>') : '') +
     (recent.length ? '<div class="sm-sub">前幾天的訊號</div>' + recent.map((x) => row(x, x.date)).join('') : '') +
     (trades ? '<div class="sm-sub">回測最近出場</div>' + trades : '') +
     '<div class="sm-note">共同條件：' + (d.commonRules || []).map(wlEsc).join('；') + '。<br>回測：' + (sel.backtestRules || d.backtestRules || []).map(wlEsc).join('；') + '。<br>' +
@@ -20173,7 +20180,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-28 21:56:09';
+const BUILD_STAMP = '2026-11-28 22:06:44';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {

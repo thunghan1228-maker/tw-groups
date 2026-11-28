@@ -11599,6 +11599,10 @@ function smWhyText(w, names){
       '法人 10 日 ' + p(w.inst10) + ' 張（' + w.sellDays + ' 天賣）', w.shortRatio === null || w.shortRatio === undefined ? '' : '券資比 ' + w.shortRatio + '%',
       '跌破 ' + w.shortBelow + ' 才空・停損 +4%・當天回補'].filter(Boolean).join('・');
   }
+  if (w.waitAt !== undefined){   // 強勢族群拉回的等拉回名單（2026-11-28）：條件都符合、還沒拉回
+    return [w.group ? '族群：' + w.group : '', '股本 ' + w.capital + ' 億', Number(String(w.revMonth).slice(5)) + '月營收年增 ' + p(w.yoy) + '%',
+      '法人 10 日 ' + p(w.inst10) + ' 張（' + w.instDays + ' 天買）', '離 5 日線 ' + p(w.gapMa5) + '%・拉回到 ' + w.waitAt + ' 以下、量縮再看'].filter(Boolean).join('・');
+  }
   if (w.buyAbove !== undefined){   // 強勢族群拉回（2026-11-28）：族群、股本、營收、法人，加上隔天的買點和停損
     return [w.group ? '族群：' + w.group : '', '股本 ' + w.capital + ' 億', Number(String(w.revMonth).slice(5)) + '月營收年增 ' + p(w.yoy) + '%',
       '法人 10 日 ' + p(w.inst10) + ' 張（' + w.instDays + ' 天買）', '突破 ' + w.buyAbove + ' 才買・停損 ' + w.stopAt].filter(Boolean).join('・');
@@ -11667,12 +11671,15 @@ function homeModelsCardHtml(){
   const trades = (sel.lastTrades || []).slice(0, 6).map((t) => '<div class="sm-row hr-stk" data-code="' + wlEsc(t.code) + '" data-name="' + wlEsc(t.name || '') + '" tabindex="0" role="button"><span class="sm-d">' + md(t.entryDate) + '→' + md(t.exitDate) + '</span><span><span class="hr-code">' + wlEsc(t.code) + '</span> <span class="hr-name">' + wlEsc(t.name || '') + '</span></span><span style="font-size:11px;color:var(--muted)">' + why(t.reason) + '</span><span class="hr-avg ' + dirClass(t.ret) + '">' + fmt(t.ret) + '%</span></div>').join('');
   // 強勢族群拉回的觀察名單：大盤在月線下時模型不選，但今天已經拉回到位的先列出來（大盤站回月線、隔天突破高點才買）
   const watch = isPull && Array.isArray(sel.watch) && sel.watch.length && !sel.watch.every((w) => w.marketOk) ? sel.watch : [];
+  const waitList = isPull && Array.isArray(sel.candidates) ? sel.candidates : [];
   const cov = d.coverage || {};
   return '<div class="hr-models">' + title + '<div class="sm-cats">' + cats + '</div>' +
     '<div class="sm-idea">' + wlEsc(sel.name) + '：' + wlEsc(sel.idea) + '</div><ul class="sm-rules">' + sel.rules.map((r) => '<li>' + wlEsc(r) + '</li>').join('') + '</ul>' +
     stats + smCurveSvg(st, d.index) +
     '<div class="sm-sub">' + (isShort ? '明天當沖空名單（' + picks.length + ' 檔：盤中跌破昨天最低價才空，當天回補）' : isPull ? '今天拉回到位（' + picks.length + ' 檔，明天突破高點才買）' : '今天入選（' + picks.length + ' 檔，明天開盤進場）') + '</div>' + (picks.length ? picks.map((x) => row(x)).join('') : '<div class="hr-note">今天沒有新訊號' + (isPull && watch.length ? '（加權指數在月線下，先空手）' : '') + '</div>') +
     (watch.length ? '<div class="sm-sub">觀察名單（' + watch.length + ' 檔：大盤在月線下先不買；站回月線後，隔天突破高點才買）</div>' + watch.map((x) => row(x)).join('') : '') +
+    (isPull ? '<div class="sm-sub">等拉回名單（' + waitList.length + ' 檔：其他條件都符合、還沒拉回；拉回到 5 日線附近、量縮，隔天突破當天高點才買' + (waitList.length && !waitList[0].marketOk ? '；現在大盤在月線下，先盯著就好' : '') + '）</div>' +
+      (waitList.length ? waitList.map((x) => row(x)).join('') : '<div class="hr-note">目前沒有符合的股票</div>') : '') +
     (recent.length ? '<div class="sm-sub">前幾天的訊號</div>' + recent.map((x) => row(x, x.date)).join('') : '') +
     (trades ? '<div class="sm-sub">回測最近出場</div>' + trades : '') +
     '<div class="sm-note">共同條件：' + (d.commonRules || []).map(wlEsc).join('；') + '。<br>回測：' + (sel.backtestRules || d.backtestRules || []).map(wlEsc).join('；') + '。<br>' +
