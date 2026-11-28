@@ -1,4 +1,4 @@
-const BUILD_STAMP = "2026-11-28 22:24:49";
+const BUILD_STAMP = "2026-11-28 23:03:52";
 const GROUPS = [
   {"name":"被動元件","stocks":[{"code":"6862","name":"三集瑞"},{"code":"6155","name":"鈞寶"},{"code":"3090","name":"日電貿"},{"code":"4760","name":"勤凱"},{"code":"6821","name":"聯寶"},{"code":"1595","name":"川寶"},{"code":"6449","name":"鈺邦"},{"code":"2478","name":"大毅"},{"code":"8043","name":"蜜望實"},{"code":"6175","name":"立敦"},{"code":"3236","name":"千如"},{"code":"2472","name":"立隆電"},{"code":"6834","name":"天二科技"},{"code":"6127","name":"九豪"},{"code":"8042","name":"金山電"},{"code":"2327","name":"國巨*"},{"code":"2375","name":"凱美"},{"code":"3026","name":"禾伸堂"},{"code":"2492","name":"華新科"},{"code":"5328","name":"華容"},{"code":"6173","name":"信昌電"},{"code":"3624","name":"光頡"}]},
   {"name":"記憶體","stocks":[{"code":"8271","name":"宇瞻"},{"code":"2344","name":"華邦電"},{"code":"4973","name":"廣穎電通"},{"code":"3260","name":"威剛"},{"code":"8088","name":"品安"},{"code":"3135","name":"凌航"},{"code":"4967","name":"十銓"},{"code":"2337","name":"旺宏"},{"code":"6265","name":"方土昶"},{"code":"2451","name":"創見"},{"code":"5289","name":"宜鼎"},{"code":"8110","name":"華東"},{"code":"5351","name":"鈺創"},{"code":"3006","name":"晶豪科"},{"code":"3060","name":"銘異"},{"code":"8299","name":"群聯"},{"code":"2408","name":"南亞科"},{"code":"8131","name":"福懋科"},{"code":"6770","name":"力積電"}]},
@@ -317,6 +317,10 @@ apply();window.addEventListener("orientationchange",function(){setTimeout(apply,
   .sm-row .sm-d{color:#a78bfa;font-size:12px;}
   .sm-why{grid-column:1 / -1;font-size:12px;color:var(--muted);}
   .sm-note{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.55;}
+  .sm-mchips{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 2px;}
+  .sm-mchip{font:inherit;font-size:12px;padding:2px 8px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--text);cursor:pointer;}
+  .sm-mchip.on{background:#7c3aed;color:#fff;border-color:#7c3aed;}
+  .sm-mchip small{margin-left:3px;}
   .hr-help-title{padding:6px 10px;background:#4a3d34;font-weight:800;font-size:13px;color:var(--text);}
   .hr-help-tbl{width:100%;border-collapse:collapse;font-size:12px;line-height:1.5;color:var(--muted);}
   .hr-help-tbl th{padding:4px 8px;text-align:left;font-weight:700;font-size:11px;color:var(--muted);background:rgba(255,255,255,0.03);white-space:nowrap;}
@@ -11680,6 +11684,7 @@ function homeBcastFoot(f, total, unit, mode){
 }
 // 首頁下面那一區第一格「選股模型」（2026-11-26 使用者：別家十大選股模型那種，十個都做、自己分類，回測一年；後端 /api/stock-models 收盤後算好）
 var smSel = (() => { try { return localStorage.getItem('smSel') || 'bigInst'; } catch (_){ return 'bigInst'; } })();
+var smTradeMonth = 'all';   // 2026-11-28 使用者：整年每一筆交易放到選股模型頁，按月份看
 function smWhyText(w, names){
   if (!w) return '';
   const p = (v) => (v > 0 ? '+' : '') + v;
@@ -11758,6 +11763,21 @@ function homeModelsCardHtml(){
     if (isShort) return base === 'stop' ? '停損回補' : '收盤回補';
     return (({ ma20: '破月線出', stop: '停損出', ma5: '破5日線出' })[base] || ('滿 ' + (isPull ? 5 : 10) + ' 天出')) + (String(r || '').includes('+half') ? '（先賣一半）' : ''); };
   const trades = (sel.lastTrades || []).slice(0, 6).map((t) => '<div class="sm-row hr-stk" data-code="' + wlEsc(t.code) + '" data-name="' + wlEsc(t.name || '') + '" tabindex="0" role="button"><span class="sm-d">' + md(t.entryDate) + '→' + md(t.exitDate) + '</span><span><span class="hr-code">' + wlEsc(t.code) + '</span> <span class="hr-name">' + wlEsc(t.name || '') + '</span></span><span style="font-size:11px;color:var(--muted)">' + why(t.reason) + '</span><span class="hr-avg ' + dirClass(t.ret) + '">' + fmt(t.ret) + '%</span></div>').join('');
+  // 2026-11-28 使用者：「整年每一筆交易放到選股模型頁面上」（強勢族群拉回、當沖空這兩個短線模型後端有給 trades），按月份看
+  let allTrades = '';
+  if (Array.isArray(sel.trades) && sel.trades.length){
+    const byMonth = new Map();
+    sel.trades.forEach((t) => { const m = String(t.signal).slice(0, 7); if (!byMonth.has(m)) byMonth.set(m, []); byMonth.get(m).push(t); });
+    const avg = (ts) => { const c = ts.filter((t) => !t.open); return c.length ? c.reduce((a, t) => a + t.ret, 0) / c.length : null; };
+    const chip = (key, label, ts) => { const a = avg(ts);
+      return '<button type="button" class="sm-mchip' + (smTradeMonth === key ? ' on' : '') + '" data-sm-month="' + key + '">' + label + '<small class="' + (a === null ? '' : dirClass(a)) + '">' + ts.length + ' 筆' + (a === null ? '' : ' ' + (a > 0 ? '+' : '') + a.toFixed(1) + '%') + '</small></button>'; };
+    const months = Array.from(byMonth.keys()).sort();
+    const shown = (smTradeMonth === 'all' ? sel.trades : (byMonth.get(smTradeMonth) || [])).slice().sort((a, b) => (a.signal < b.signal ? 1 : a.signal > b.signal ? -1 : 0));
+    allTrades = '<div class="sm-sub">回測整年每一筆交易（' + sel.trades.length + ' 筆，按月份看；括號是筆數、每筆平均報酬）</div><div class="sm-mchips">' + chip('all', '全部', sel.trades) +
+      months.map((m) => chip(m, m.replace('-', '/'), byMonth.get(m))).join('') + '</div>' +
+      shown.map((t) => '<div class="sm-row hr-stk" data-code="' + wlEsc(t.code) + '" data-name="' + wlEsc(t.name || '') + '" tabindex="0" role="button"><span class="sm-d">' + md(t.entryDate) + '→' + md(t.exitDate) + '</span><span><span class="hr-code">' + wlEsc(t.code) + '</span> <span class="hr-name">' + wlEsc(t.name || '') + '</span></span><span style="font-size:11px;color:var(--muted)">' + (t.open ? '持有中' : why(t.reason)) + '</span><span class="hr-avg ' + dirClass(t.ret) + '">' + fmt(t.ret) + '%</span>' +
+        '<div class="sm-why">' + (t.group ? '族群：' + wlEsc(t.group) + '・' : '') + (isShort ? '空 ' + t.entry + ' → 回補 ' + t.exit : '買 ' + t.entry + ' → 賣 ' + t.exit) + '</div></div>').join('');
+  }
   // 強勢族群拉回的觀察名單：大盤在月線下時模型不選，但今天已經拉回到位的先列出來（大盤站回月線、隔天突破高點才買）
   const watch = isPull && Array.isArray(sel.watch) && sel.watch.length && !sel.watch.every((w) => w.marketOk) ? sel.watch : [];
   const waitList = isPull && Array.isArray(sel.candidates) ? sel.candidates : [];
@@ -11770,7 +11790,7 @@ function homeModelsCardHtml(){
     (isPull ? '<div class="sm-sub">等拉回名單（' + waitList.length + ' 檔：其他條件都符合、還沒拉回；拉回到 5 日線附近、量縮，隔天突破當天高點才買' + (waitList.length && !waitList[0].marketOk ? '；現在大盤在月線下，先盯著就好' : '') + '）</div>' +
       (waitList.length ? waitList.map((x) => row(x)).join('') : '<div class="hr-note">目前沒有符合的股票</div>') : '') +
     (recent.length ? '<div class="sm-sub">前幾天的訊號</div>' + recent.map((x) => row(x, x.date)).join('') : '') +
-    (trades ? '<div class="sm-sub">回測最近出場</div>' + trades : '') +
+    (allTrades || (trades ? '<div class="sm-sub">回測最近出場</div>' + trades : '')) +
     '<div class="sm-note">共同條件：' + (d.commonRules || []).map(wlEsc).join('；') + '。<br>回測：' + (sel.backtestRules || d.backtestRules || []).map(wlEsc).join('；') + '。<br>' +
       (cov.perStock && cov.perStock.codes && cov.perStock.done < cov.perStock.codes ? '<b>一年資料補齊中：' + cov.perStock.done + '／' + cov.perStock.codes + ' 檔</b>（FinMind 免費帳號一檔一檔補，每小時大約補 140 檔；還沒補到的股票，要用法人、融資、當沖、營收的模型先不會選到它）。<br>' : '') +
       '回測期間 ' + md(d.backtest && d.backtest.from) + '～' + md(d.backtest && d.backtest.to) + '（' + ((d.backtest && d.backtest.days) || 0) + ' 個交易日）；資料：法人 ' + (cov.instDays || 0) + ' 天、融資 ' + (cov.marginDays || 0) + ' 天、當沖 ' + (cov.daytradeDays || 0) + ' 天、集保 ' + (cov.tdccWeeks || 0) + ' 週。回測結果不代表未來，只是看這個條件過去一年的表現。</div></div>';
@@ -20107,7 +20127,9 @@ document.getElementById('modelsClose').addEventListener('click', closeModelsPane
 document.getElementById('modelsModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModelsPanel(); });
 document.getElementById('modelsBody').addEventListener('click', (e) => {
   const k = e.target.closest('[data-sm-key]');
-  if (k){ smSel = k.dataset.smKey; try { localStorage.setItem('smSel', smSel); } catch (_){} renderModelsPanel(); return; }
+  if (k){ smSel = k.dataset.smKey; smTradeMonth = 'all'; try { localStorage.setItem('smSel', smSel); } catch (_){} renderModelsPanel(); return; }
+  const mon = e.target.closest('[data-sm-month]');
+  if (mon){ smTradeMonth = mon.dataset.smMonth; renderModelsPanel(); return; }
   const row = e.target.closest('[data-code]');
   if (row) openStockChart(row.dataset.code, row.dataset.name || '');
 });
@@ -20180,7 +20202,7 @@ document.getElementById('diagBody').addEventListener('keydown', (e) => {
 // 加到主畫面的網頁沒有重新整理鈕，切回來時還是原本那一頁。頁面重新顯示時問伺服器目前版本（/api/version），
 // 不一樣就重新載入（離開超過 1 分鐘才自動重載；剛切走就回來只顯示提示）；開著的時候每 5 分鐘檢查一次，
 // 有新版在上方顯示「網頁有新版本」，點一下才更新，不打斷正在看的畫面。內嵌圖表視窗跟著父頁走，不自己檢查。
-const BUILD_STAMP = '2026-11-28 22:24:49';
+const BUILD_STAMP = '2026-11-28 23:03:52';
 let buildHiddenSince = null;
 async function fetchServerBuild(){
   try {
@@ -21406,7 +21428,8 @@ document.getElementById('app').addEventListener('click', (e) => {
   const bsf = t.closest('[data-sf-tab]'); if (bsf){ const v = bsf.dataset.sfTab; sfTab = v === 'buy' || v === 'sell' ? v : 'vol'; try { localStorage.setItem('sfTab', sfTab); } catch (_){} render(); return; }   // 2026-11-22 股期 成交量／買進／賣出切換
   const btb = t.closest('[data-tb-side]'); if (btb){ tbSide = btb.dataset.tbSide === 'sell' ? 'sell' : 'buy'; try { localStorage.setItem('tbSide', tbSide); } catch (_){} render(); return; }   // 2026-11-22 大戶＋投信 同買／同賣切換
   const btt = t.closest('[data-turn-tab]'); if (btt){ homeTurnTab = btt.dataset.turnTab === 'dt' ? 'dt' : 'turn'; try { localStorage.setItem('turnTab', homeTurnTab); } catch (_){} render(); return; }   // 2026-11-19 週轉率高／現股當沖切換
-  const smk = t.closest('[data-sm-key]'); if (smk){ smSel = smk.dataset.smKey; try { localStorage.setItem('smSel', smSel); } catch (_){} render(); return; }   // 2026-11-26 選股模型切換
+  const smk = t.closest('[data-sm-key]'); if (smk){ smSel = smk.dataset.smKey; smTradeMonth = 'all'; try { localStorage.setItem('smSel', smSel); } catch (_){} render(); return; }   // 2026-11-26 選股模型切換
+  const smm = t.closest('[data-sm-month]'); if (smm){ smTradeMonth = smm.dataset.smMonth; render(); return; }
   const bchd = t.closest('[data-bcast-hold-dn]'); if (bchd){ homeBcastHoldDn = !homeBcastHoldDn; try { localStorage.setItem('bcastHoldDn', homeBcastHoldDn ? '1' : '0'); } catch (_){} render(); return; }   // 2026-11-26 905 跌破廣播
   const bch = t.closest('[data-bcast-hold]'); if (bch){ homeBcastHold = !homeBcastHold; try { localStorage.setItem('bcastHold', homeBcastHold ? '1' : '0'); } catch (_){} render(); return; }   // 2026-11-18 905／1+2 突破廣播「大戶力 ≥ +10%」
   const hm = t.closest('[data-hx-move]'); if (hm){ const [i, d] = hm.dataset.hxMove.split(':').map(Number), j = i + d; if (j >= 0 && j < homeXCols.length){ [homeXCols[i], homeXCols[j]] = [homeXCols[j], homeXCols[i]]; homeXSave(); render(); } return; }
